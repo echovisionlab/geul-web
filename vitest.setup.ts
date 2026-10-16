@@ -1,10 +1,4 @@
 import '@testing-library/jest-dom/vitest';
-import { vi } from 'vitest';
-
-vi.mock('next/server', async () => {
-  const actual = await vi.importActual<typeof import('next/server')>('next/server');
-  return { ...actual, connection: vi.fn(async () => undefined) };
-});
 
 // React test runs expect this flag in environments that drive state updates via act().
 // Some tests set it inline today; keep the default enabled for the entire suite
@@ -90,22 +84,6 @@ if (typeof Range !== 'undefined') {
       value: () => [document.body.getBoundingClientRect()],
     });
   }
-}
-
-// Server-side modules validate their runtime configuration even in isolated
-// unit tests. Keep the suite self-contained without weakening production env
-// validation or requiring a running Geul service stack.
-if (process.env.VITEST) {
-  process.env.OATHKEEPER_URL ??= 'http://oathkeeper.test';
-  process.env.ENCRYPTION_SECRET ??= 'vitest-encryption-secret';
-  process.env.KRATOS_URL ??= 'http://kratos.test';
-  process.env.KRATOS_ADMIN_URL ??= 'http://kratos-admin.test';
-  process.env.SESSION_COOKIE_NAME ??= 'site_session';
-  process.env.HYDRA_ADMIN_URL ??= 'http://hydra-admin.test';
-  process.env.SITE_ORIGIN ??= 'http://web.test';
-  process.env.MCP_OAUTH_ISSUER_URL ??= 'http://sso.test';
-  process.env.DRAFT_SECRET ??= 'vitest-draft-secret';
-  process.env.HOST ??= 'http://web.test';
 }
 
 if (typeof window !== 'undefined' && typeof window.matchMedia !== 'function') {

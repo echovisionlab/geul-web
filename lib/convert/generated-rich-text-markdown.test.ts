@@ -1,10 +1,11 @@
+// @vitest-environment jsdom
 import {
   siteVariableDocument,
   siteVariableManifest,
 } from '@/features/editor/tiptap/site-variables/site-variable.story-fixtures';
 import { siteVariableLink, contentSiteVariableHrefCases, siteVariableHrefBlock } from '@/test/site-variable-link';
 import { siteVariableContext } from '@/lib/site-variables';
-import { create, fromJson } from '@bufbuild/protobuf';
+import { create, fromJson, type JsonValue } from '@bufbuild/protobuf';
 import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
 import {
   RichTextDocumentSchema,
@@ -12,6 +13,9 @@ import {
   type RichTextDocument,
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { describe, expect, it } from 'vitest';
+import { getSchema } from '@tiptap/core';
+import { createTiptapWireExtensions } from '@/features/editor/tiptap/wire-schema';
+import { markdownBlocks } from '@/features/editor/tiptap/markdown-paste';
 import { generatedRichTextDocumentMarkdown } from './generated-rich-text-markdown';
 
 describe('generatedRichTextDocumentMarkdown', () => {
@@ -355,4 +359,83 @@ describe('generatedRichTextDocumentMarkdown', () => {
       '> ⚠️ Clear the rights first.\n> \n> Nested detail.\n',
     );
   });
+});
+
+it.each(['paragraph', 'heading', 'bulletListItem', 'numberedListItem', 'quote'])(
+  'exports explicit hard breaks and reimports %s',
+  (kind) => {
+    const id = '10000000-0000-4000-8000-000000000222';
+    const document = fromJson(RichTextDocumentSchema, {
+      blockCatalogFingerprint: contentBlockCatalogFingerprint,
+      profile: 'RICH_TEXT_PROFILE_POST',
+      sourceLocale: 'en',
+      base: {
+        nodes: [{ block: { id, [kind]: { props: kind === 'heading' ? { level: 1 } : {} } }, placement: { index: 0 } }],
+      },
+      localeOverlays: [
+        {
+          locale: 'en',
+          blocks: [
+            {
+              blockId: id,
+              [kind]: { props: {}, content: [{ text: { text: 'a' } }, { hardBreak: {} }, { text: { text: 'b' } }] },
+            },
+          ],
+        },
+      ],
+    });
+    const markdown = generatedRichTextDocumentMarkdown(document, 'post');
+    expect(markdown).toContain(kind === 'heading' ? 'a<br>b' : 'a  \n');
+    const blocks = markdownBlocks(markdown, getSchema(createTiptapWireExtensions()));
+    expect(blocks?.[0].content?.[0]).toMatchObject({
+      type: kind,
+      content: [{ type: 'text', text: 'a' }, { type: 'hardBreak' }, { type: 'text', text: 'b' }],
+    });
+  },
+);
+
+it.each(
+  [
+    [
+      { hardBreak: {} },
+      { text: { text: 'a' } },
+      { hardBreak: {} },
+      { hardBreak: {} },
+      { text: { text: 'b' } },
+      { hardBreak: {} },
+    ],
+    [{ hardBreak: {} }, { hardBreak: {} }],
+  ].map((content) => ({ content })),
+)('round trips edge and consecutive hard breaks without paragraph splitting: $content', ({ content }) => {
+  const id = '10000000-0000-4000-8000-000000000222';
+  const document = fromJson(RichTextDocumentSchema, {
+    blockCatalogFingerprint: contentBlockCatalogFingerprint,
+    profile: 'RICH_TEXT_PROFILE_POST',
+    sourceLocale: 'en',
+    base: { nodes: [{ block: { id, paragraph: { props: {} } }, placement: { index: 0 } }] },
+    localeOverlays: [
+      {
+        locale: 'en',
+        blocks: [
+          {
+            blockId: id,
+            paragraph: {
+              props: {},
+              content: content.map((item): JsonValue =>
+                item.text ? { text: { text: item.text.text } } : { hardBreak: {} },
+              ),
+            },
+          },
+        ],
+      },
+    ],
+  });
+  const blocks = markdownBlocks(
+    generatedRichTextDocumentMarkdown(document, 'post'),
+    getSchema(createTiptapWireExtensions()),
+  );
+  expect(blocks).toHaveLength(1);
+  expect(blocks?.[0].content?.[0].content).toEqual(
+    content.map((item) => ('hardBreak' in item ? { type: 'hardBreak' } : { type: 'text', text: item.text.text })),
+  );
 });

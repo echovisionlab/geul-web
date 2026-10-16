@@ -253,10 +253,17 @@ export function focusParagraphAfterSelectedBlock(editor: Editor, allowInsertion 
 export function insertHardBreakInCurrentTextBlock(editor: Editor): boolean {
   const selected = directTextBlockAtSelection(editor);
   const hardBreakType = editor.schema.nodes.hardBreak;
-  if (!selected || !hardBreakType) {
+  const { selection } = editor.state;
+  const tableParagraph =
+    editor.isEditable &&
+    selection instanceof TextSelection &&
+    selection.$from.sameParent(selection.$to) &&
+    selection.$from.parent.type.name === 'tableParagraph';
+  if ((!selected && !tableParagraph) || !hardBreakType) {
     return false;
   }
-  const transaction = editor.state.tr.replaceSelectionWith(hardBreakType.create());
+  const marks = editor.state.storedMarks ?? editor.state.selection.$from.marks();
+  const transaction = editor.state.tr.replaceSelectionWith(hardBreakType.create(), false).ensureMarks(marks);
   editor.view.dispatch(transaction.scrollIntoView());
   return true;
 }

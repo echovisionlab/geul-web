@@ -93,12 +93,12 @@ export function mergeBlockRoomDurabilityStates(
   };
 }
 
-function stateVectorCovers(actualBytes: Uint8Array, expectedBytes: Uint8Array): boolean {
+function stateVectorCovers(stateVectorBytes: Uint8Array, requiredStateVectorBytes: Uint8Array): boolean {
   try {
-    const actual = Y.decodeStateVector(actualBytes);
-    const expected = Y.decodeStateVector(expectedBytes);
-    for (const [client, clock] of expected) {
-      if ((actual.get(client) ?? 0) < clock) {
+    const stateVector = Y.decodeStateVector(stateVectorBytes);
+    const requiredStateVector = Y.decodeStateVector(requiredStateVectorBytes);
+    for (const [client, clock] of requiredStateVector) {
+      if ((stateVector.get(client) ?? 0) < clock) {
         return false;
       }
     }
@@ -109,15 +109,15 @@ function stateVectorCovers(actualBytes: Uint8Array, expectedBytes: Uint8Array): 
 }
 
 function deleteRangesCover(
-  actual: readonly BlockRoomDurabilityDeleteRange[],
-  expected: BlockRoomDurabilityDeleteRange,
+  deletedRanges: readonly BlockRoomDurabilityDeleteRange[],
+  requiredRange: BlockRoomDurabilityDeleteRange,
 ): boolean {
-  if (!validRange(expected)) {
+  if (!validRange(requiredRange)) {
     return false;
   }
-  const expectedEnd = expected.clock + expected.len;
-  const ranges = actual.filter(validRange).sort((left, right) => left.clock - right.clock);
-  let coveredUntil = expected.clock;
+  const requiredEnd = requiredRange.clock + requiredRange.len;
+  const ranges = deletedRanges.filter(validRange).sort((left, right) => left.clock - right.clock);
+  let coveredUntil = requiredRange.clock;
   for (const range of ranges) {
     const rangeEnd = range.clock + range.len;
     if (rangeEnd <= coveredUntil) {
@@ -127,24 +127,24 @@ function deleteRangesCover(
       return false;
     }
     coveredUntil = rangeEnd;
-    if (coveredUntil >= expectedEnd) {
+    if (coveredUntil >= requiredEnd) {
       return true;
     }
   }
-  return coveredUntil >= expectedEnd;
+  return coveredUntil >= requiredEnd;
 }
 
 /** Requires both inserted-clock coverage and exact coverage of every local deletion. */
 export function blockRoomDurabilityStateCovers(
-  actual: BlockRoomDurabilityState,
-  expected: BlockRoomDurabilityState,
+  state: BlockRoomDurabilityState,
+  requiredState: BlockRoomDurabilityState,
 ): boolean {
-  if (!stateVectorCovers(actual.stateVector, expected.stateVector)) {
+  if (!stateVectorCovers(state.stateVector, requiredState.stateVector)) {
     return false;
   }
-  return Object.entries(expected.deleted).every(([client, ranges]) => {
-    const actualRanges = actual.deleted[client] ?? [];
-    return ranges.every((range) => deleteRangesCover(actualRanges, range));
+  return Object.entries(requiredState.deleted).every(([client, ranges]) => {
+    const deletedRanges = state.deleted[client] ?? [];
+    return ranges.every((range) => deleteRangesCover(deletedRanges, range));
   });
 }
 

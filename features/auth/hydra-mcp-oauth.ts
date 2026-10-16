@@ -6,7 +6,7 @@ import {
   MCPDelegationMethod,
 } from '@echovisionlab/geul-proto/intra/gateway_authorization_pb.ts';
 import { z } from 'zod';
-import type { SessionWithUser } from '@/lib/auth';
+import type { SessionWithUser } from '@/lib/auth/types';
 import { getHydraAdminUrl, getMcpOAuthIssuerUrl, getSiteOrigin } from '@/lib/env';
 
 const MCP_SCOPE = 'mcp';
@@ -110,15 +110,15 @@ async function hydraAdminSubjectRequest(path: string, subject: string, init?: Re
   return response;
 }
 
-function exactStringSet(actual: string[], expected: string): boolean {
-  return actual.length === 1 && actual[0] === expected;
+function exactStringSet(values: string[], expected: string): boolean {
+  return values.length === 1 && values[0] === expected;
 }
 
-function isMcpScopeSet(actual: string[]): boolean {
-  if (actual.length === 1) {
-    return actual[0] === MCP_SCOPE;
+function isMcpScopeSet(scopes: string[]): boolean {
+  if (scopes.length === 1) {
+    return scopes[0] === MCP_SCOPE;
   }
-  return actual.length === 2 && actual.includes(MCP_SCOPE) && actual.includes(OFFLINE_ACCESS_SCOPE);
+  return scopes.length === 2 && scopes.includes(MCP_SCOPE) && scopes.includes(OFFLINE_ACCESS_SCOPE);
 }
 
 export function assertMcpConsentRequest(request: HydraConsentRequest, session: SessionWithUser): void {

@@ -1,6 +1,6 @@
 import { ClientService as PublicClientService } from '@echovisionlab/geul-proto/public/client_pb.ts';
 import { ManifestService } from '@echovisionlab/geul-proto/public/manifest_pb.ts';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { REQUEST_ID_HEADER } from '@/lib/observability/request-correlation';
 import {
   createCampaignClient,
@@ -42,9 +42,9 @@ vi.mock('next/headers', () => ({
 }));
 
 vi.mock('@connectrpc/connect', async () => {
-  const actual = await vi.importActual<typeof import('@connectrpc/connect')>('@connectrpc/connect');
+  const connectRpc = await vi.importActual<typeof import('@connectrpc/connect')>('@connectrpc/connect');
   return {
-    ...actual,
+    ...connectRpc,
     createClient: createClientMock,
   };
 });
@@ -79,6 +79,10 @@ beforeEach(() => {
   );
   fetchMock.mockReset();
   vi.stubGlobal('fetch', fetchMock);
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
 });
 
 describe('createPublicClientClientWithAuth', () => {

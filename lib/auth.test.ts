@@ -1,7 +1,7 @@
 import { Code, ConnectError } from '@connectrpc/connect';
 import { AuthorizationRole } from '@echovisionlab/geul-proto/policy/access_pb.ts';
 import { AccountStatus } from '@echovisionlab/geul-proto/secure/account_pb.ts';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getSessionFromCookie } from './auth';
 
 const mocks = vi.hoisted(() => ({
@@ -13,6 +13,10 @@ const mocks = vi.hoisted(() => ({
   getCurrentSession: vi.fn(),
   loggerError: vi.fn(),
 }));
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 vi.mock('next/headers', () => ({ cookies: mocks.cookies }));
 

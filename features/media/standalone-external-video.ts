@@ -181,13 +181,13 @@ export function resolveGeneratedStandaloneExternalVideoLink(
   for (const item of input.content) {
     switch (item.value.case) {
       case 'link':
-        if (link) {
+        if (link || item.value.value.content.some((run) => /[\r\n]/.test(run.text))) {
           return null;
         }
         link = item.value.value;
         break;
       case 'text':
-        if (item.value.value.text.trim()) {
+        if (/[\r\n]/.test(item.value.value.text) || item.value.value.text.trim()) {
           return null;
         }
         break;

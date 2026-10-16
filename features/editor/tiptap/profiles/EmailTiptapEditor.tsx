@@ -8,13 +8,46 @@ import { useLocale, useTranslations } from 'next-intl';
 import { IconButton } from '@/components/core/IconButton';
 import type { Awareness } from 'y-protocols/awareness';
 import { DropdownMenu } from '@/components/core/DropdownMenu';
-import { normalizeRichTextHtmlLinks } from '@echovisionlab/geul-common/editor/link-normalization';
 import { createBlockRoomPresenceExtension } from '../block-room-presence';
 import type { RichTextBlockRoomTiptapController } from '../block-room-tiptap-controller';
 import { TiptapAuthoringControls } from '../TiptapAuthoringControls';
 import { createTiptapWireExtensions } from '../wire-schema';
 import { createLiveTranslationStructureLock } from '../live-translation-structure-lock';
 import classes from '../TiptapEditor.module.css';
+import { useRegisterEditorAuthoringMode, type EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
+import { createAuthoringShortcutGuard } from '../integration/authoring-shortcuts';
+import { TiptapContextualMenuRouter } from '../integration/contextual-menu-router';
+import { useSelectionBubbleMenuLabels } from '../useSelectionBubbleMenuLabels';
+import { createMarkdownPasteExtension } from '../markdown-paste';
+import { tiptapDocumentToHtml } from './profile-html';
+import { normalizeEmailCampaignPreviewHtml, normalizeEmailCampaignVariable } from './email-preview';
+
+export { normalizeEmailCampaignPreviewHtml, normalizeEmailCampaignVariable } from './email-preview';
+
+const EMAIL_SLASH_ITEMS = [
+  'paragraph',
+  'heading',
+  'heading_2',
+  'heading_3',
+  'bullet_list',
+  'numbered_list',
+  'quote',
+  'divider',
+  'site-variable',
+];
+const EMAIL_CAPABILITIES = {
+  math: false,
+  table: false,
+  emoji: false,
+  map: false,
+  file: false,
+  externalVideo: false,
+  p5: false,
+  mermaid: false,
+  three: false,
+  shader: false,
+  ai: false,
+};
 
 /**
  * The only imperative surface email and campaign previews need.  Keep this
@@ -28,22 +61,10 @@ export interface EmailCampaignTiptapEditorHandle {
   focus: () => void;
 }
 
-export function normalizeEmailCampaignVariable(variable: string): string {
-  const trimmed = variable.trim();
-  if (!trimmed) {
-    return '';
-  }
-  return trimmed.startsWith('{{') && trimmed.endsWith('}}') ? trimmed : `{{${trimmed}}}`;
-}
-
-export function normalizeEmailCampaignPreviewHtml(html: string): string {
-  return normalizeRichTextHtmlLinks(html);
-}
-
 function createHandle(editor: Editor): EmailCampaignTiptapEditorHandle {
   return {
     getJSON: () => editor.getJSON(),
-    getHTML: () => normalizeEmailCampaignPreviewHtml(editor.getHTML()),
+    getHTML: () => normalizeEmailCampaignPreviewHtml(tiptapDocumentToHtml(editor.state.doc)),
     getText: () => editor.getText(),
     insertVariable: (variable) => {
       const value = normalizeEmailCampaignVariable(variable);
@@ -123,6 +144,27 @@ function EmailTiptapEditorRuntime({
   onContentChange,
 }: EmailTiptapEditorProps) {
   const interfaceLocale = useLocale();
+  const selectionLabels = useSelectionBubbleMenuLabels();
+  const authoringMode = useMemo<EditorAuthoringMode>(
+    () => ({
+      allowNeutralBlockEdits: editable && !structureLocked && blockRoomController.canChangeStructure,
+      allowLocalizedBlockEdits: editable,
+    }),
+    [blockRoomController, editable, structureLocked],
+  );
+  const authoringModeRef = useRef(authoringMode);
+  authoringModeRef.current = authoringMode;
+  const liveAuthoringMode = useMemo<EditorAuthoringMode>(
+    () => ({
+      get allowNeutralBlockEdits() {
+        return authoringModeRef.current.allowNeutralBlockEdits;
+      },
+      get allowLocalizedBlockEdits() {
+        return authoringModeRef.current.allowLocalizedBlockEdits;
+      },
+    }),
+    [],
+  );
   const labels = useTranslations('common.labels');
   const editorAttributes = useMemo(
     () => ({
@@ -145,12 +187,18 @@ function EmailTiptapEditorRuntime({
   localUserRef.current = { name: userName, color: userColor };
   const extensions = useMemo(
     () => [
-      ...createTiptapWireExtensions(),
+      ...createTiptapWireExtensions().filter(
+        // Campaigns materialize site variable atoms into email, so keep that node; drop only
+        // blocks email HTML cannot carry.
+        (extension) => !['externalVideo', 'file', 'math', 'mathInline', 'map'].includes(extension.name),
+      ),
+      createMarkdownPasteExtension(() => liveAuthoringMode.allowNeutralBlockEdits),
+      createAuthoringShortcutGuard(liveAuthoringMode),
       createLiveTranslationStructureLock(() => structureLockedRef.current),
       blockRoomController.extension,
       createBlockRoomPresenceExtension(awareness, localUserRef.current, () => localUserRef.current),
     ],
-    [awareness, blockRoomController],
+    [awareness, blockRoomController, liveAuthoringMode],
   );
   const editor = useEditor(
     {
@@ -167,6 +215,7 @@ function EmailTiptapEditorRuntime({
     },
     [extensions],
   );
+  useRegisterEditorAuthoringMode(editor, authoringMode);
   useEffect(() => {
     if (!editor) {
       return;
@@ -189,7 +238,17 @@ function EmailTiptapEditorRuntime({
   return (
     <div className={[classes.editor, 'tiptap-editor', className].filter(Boolean).join(' ')} data-editor-engine="tiptap">
       {editable ? <VariableInserter availableVariables={availableVariables} onInsert={handle.insertVariable} /> : null}
-      {editable && !structureLocked ? <TiptapAuthoringControls editor={editor} /> : null}
+      {authoringMode.allowNeutralBlockEdits ? (
+        <TiptapAuthoringControls editor={editor} capabilities={EMAIL_CAPABILITIES} allowedItems={EMAIL_SLASH_ITEMS} />
+      ) : null}
+      {editable ? (
+        <TiptapContextualMenuRouter
+          editor={editor}
+          selectionLabels={selectionLabels}
+          allowTableMenu={false}
+          formattingOnly
+        />
+      ) : null}
       <IsolatedEditorContent editor={editor} />
     </div>
   );

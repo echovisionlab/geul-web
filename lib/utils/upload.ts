@@ -112,12 +112,12 @@ export function formatSupportedUploadFormats(input: UploadType | readonly string
 
 export function buildUnsupportedUploadTypeMessage(
   uploadType: UploadType,
-  actualType?: string,
+  mediaType?: string,
   supportedMimeTypes: readonly string[] = getUploadSelectionMimeTypes(uploadType),
 ): string {
-  const actualLabel = actualType?.trim();
+  const label = mediaType?.trim();
   const supportedFormats = formatSupportedUploadFormats(supportedMimeTypes);
-  const prefix = actualLabel ? `Unsupported file type (${actualLabel}).` : 'Unsupported file type.';
+  const prefix = label ? `Unsupported file type (${label}).` : 'Unsupported file type.';
   return supportedFormats ? `${prefix} Supported formats: ${supportedFormats}.` : prefix;
 }
 
@@ -127,15 +127,15 @@ export function buildUnsupportedRemoteUploadTypeMessage(uploadType: UploadType):
   return supportedFormats ? `${prefix} Supported formats: ${supportedFormats}.` : prefix;
 }
 
-export function buildUnsupportedEditorMediaMessage(actualType?: string): string {
+export function buildUnsupportedEditorMediaMessage(mediaType?: string): string {
   const supportedFormats = formatSupportedUploadFormats([
     UploadType.EDITOR_IMAGE,
     UploadType.EDITOR_VIDEO,
     UploadType.EDITOR_AUDIO,
     UploadType.EDITOR_ATTACHMENT,
   ]);
-  const actualLabel = actualType?.trim();
-  const prefix = actualLabel ? `Unsupported editor media type (${actualLabel}).` : 'Unsupported editor media type.';
+  const label = mediaType?.trim();
+  const prefix = label ? `Unsupported editor media type (${label}).` : 'Unsupported editor media type.';
   return supportedFormats ? `${prefix} Supported formats: ${supportedFormats}.` : prefix;
 }
 

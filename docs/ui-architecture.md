@@ -58,6 +58,16 @@ Controllers and hooks outside `features/<domain>/ui/**` connect Feature UI to se
   notifications, routing, and session refresh.
 - Convert service models into the view models consumed by Feature UI.
 - Convert UI callbacks into service commands and expose pending/error state as props.
+- Server request entrypoints (`lib/auth.ts`, `lib/context.ts`, and
+  `lib/api/server-client.ts`) declare `server-only`. Shared session DTO consumers
+  import `lib/auth/types.ts` directly instead of traversing the server entrypoint.
+- Editor profile document policies live beside their adapters in
+  `features/editor/tiptap/profiles/policy-document.ts` and `email-preview.ts`.
+  Validation and serialization can run in Node without importing a client editor.
+- Editor callbacks expose disposal with `null`; owners clear imperative refs at
+  that boundary. Policy errors belong to their room controller. Asynchronous
+  media reads belong to the enabled identity session and are superseded by newer
+  reads or accepted lifecycle events.
 
 ## Page composition
 
@@ -67,6 +77,9 @@ with deterministic fixture data and local intent handlers. These previews do not
 modules, service controllers, authentication, or persistence.
 
 - Route modules should not invent a second visual implementation for a Core or Feature control.
+- The RPC route owns Next cookies and request/response adaptation. Its target,
+  retry, and forwarded-response-header policies belong to `lib/api/rpc-proxy.ts`
+  and have Node contracts independent of the route runtime.
 - A route-to-story inventory in `docs/design-system/generated-inventory.md` records every served page and its UI owner.
 - `docs/design-system/component-inventory.md` records component owners, consumers, importing stories and tests.
 - Page `external-video` sections own only the shared URL/aspect-ratio and localized caption wiring.

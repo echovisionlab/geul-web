@@ -27,8 +27,8 @@ function executableLanguage(block: Block): 'glsl' | 'javascript' | 'typescript' 
 }
 
 function exactKeys(value: Record<string, unknown>, keys: readonly string[]): boolean {
-  const actual = Object.keys(value).sort();
-  return actual.length === keys.length && actual.every((key, index) => key === [...keys].sort()[index]);
+  const objectKeys = Object.keys(value).sort();
+  return objectKeys.length === keys.length && objectKeys.every((key, index) => key === [...keys].sort()[index]);
 }
 
 function shaderSampler(value: unknown): ShaderSamplerOptions | null {

@@ -249,23 +249,23 @@ function styleMarks(styles: JsonObject): TiptapMark[] {
   return marks;
 }
 
-function styledText(value: JsonObject, extraMarks: readonly TiptapMark[] = []): JSONContent | null {
+function styledText(value: JsonObject, extraMarks: readonly TiptapMark[] = []): JSONContent[] {
   const text = typeof value.text === 'string' ? value.text : '';
-  if (!text) {
-    return null;
-  }
-  return {
-    type: 'text',
-    text,
-    marks: [...styleMarks(object(value.styles)), ...extraMarks],
-  };
+  const marks = [...styleMarks(object(value.styles)), ...extraMarks];
+  // Imported and collaborative text may contain literal newlines. Project them
+  // as explicit breaks so the editor's HTML matches its visible lines.
+  return text
+    .split(/\r\n|\r|\n/)
+    .flatMap((line, index) => [
+      ...(index > 0 ? [{ type: 'hardBreak' }] : []),
+      ...(line ? [{ type: 'text', text: line, marks }] : []),
+    ]);
 }
 
 function inlineToTiptap(value: JsonValue): readonly JSONContent[] {
   const inline = object(value);
   if (inline.text) {
-    const text = styledText(object(inline.text));
-    return text ? [text] : [];
+    return styledText(object(inline.text));
   }
   if (inline.siteVariable) {
     const variable = object(inline.siteVariable);
@@ -297,8 +297,7 @@ function inlineToTiptap(value: JsonValue): readonly JSONContent[] {
     const link = object(inline.link);
     const href = typeof link.href === 'string' ? link.href : '';
     return array(link.content).flatMap((text) => {
-      const styled = styledText(object(text), [{ type: 'link', attrs: { href } }]);
-      return styled ? [styled] : [];
+      return styledText(object(text), [{ type: 'link', attrs: { href } }]);
     });
   }
   throw new Error('Unsupported generated rich-text inline payload.');
@@ -553,9 +552,18 @@ function marksToStyles(marks: readonly TiptapMark[] | undefined): JsonObject {
 }
 
 function inlineFromTiptap(content: readonly JSONContent[]): JsonValue[] {
+  // JSON/Markdown imports and older editor clients can supply newline text.
+  // Canonicalize before link grouping so no stored run contains a line break.
+  const canonicalContent = content.flatMap((node) =>
+    node.type === 'text' && node.text
+      ? node.text
+          .split(/\r\n|\r|\n/)
+          .flatMap((text, index) => [...(index ? [{ type: 'hardBreak' }] : []), ...(text ? [{ ...node, text }] : [])])
+      : [node],
+  );
   const values: JsonValue[] = [];
-  for (let index = 0; index < content.length; index += 1) {
-    const node = content[index]!;
+  for (let index = 0; index < canonicalContent.length; index += 1) {
+    const node = canonicalContent[index]!;
     if (node.type === 'siteVariable') {
       const key = node.attrs?.key;
       if (!isSiteVariableKey(key) || (node.attrs?.linked === true && !canLinkSiteVariable(key))) {
@@ -604,6 +612,11 @@ function inlineFromTiptap(content: readonly JSONContent[]): JsonValue[] {
     values.push({ link: { href, content: [text] } });
   }
   return values;
+}
+
+/** Canonical wire content for defensive writes from low-level text clients. */
+export function canonicalInlineContent(content: readonly JsonValue[]): JsonValue[] {
+  return inlineFromTiptap(content.flatMap(inlineToTiptap));
 }
 
 export function inlineContentProjectionEqual(previous: readonly JsonValue[], next: readonly JsonValue[]): boolean {

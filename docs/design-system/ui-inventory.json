@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "7a3fe7f1267bdc061297320e6bdb865b005d51231de75997c8029cb3b990efa7",
+  "manifestHash": "40d44abad3d14526f864282358a4c2b5ac6850aa1a4b8ab90e14f2e60aa4627b",
   "counts": {
-    "sourceFiles": 3758,
-    "productionSourceFiles": 2280,
+    "sourceFiles": 3765,
+    "productionSourceFiles": 2284,
     "componentFiles": 901,
     "coreFamilies": 57,
     "featureDomains": 53,
     "storyFiles": 256,
-    "storyVariants": 1445,
+    "storyVariants": 1446,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -1471,6 +1471,7 @@
     "features/editor/tiptap/integration/shader-schema.test.ts",
     "features/editor/tiptap/integration/slash-workflows.test.ts",
     "features/editor/tiptap/integration/slash-workflows.ts",
+    "features/editor/tiptap/line-break-round-trip.test.ts",
     "features/editor/tiptap/live-node-view.tsx",
     "features/editor/tiptap/live-translation-structure-lock.ts",
     "features/editor/tiptap/map/TiptapMapNodeView.story-fixtures.test.ts",
@@ -1556,6 +1557,11 @@
     "features/editor/tiptap/profiles/PolicyTiptapEditor.test.tsx",
     "features/editor/tiptap/profiles/PolicyTiptapEditor.tsx",
     "features/editor/tiptap/profiles/editor-access-transitions.test.tsx",
+    "features/editor/tiptap/profiles/email-preview.test.ts",
+    "features/editor/tiptap/profiles/email-preview.ts",
+    "features/editor/tiptap/profiles/policy-document.test.ts",
+    "features/editor/tiptap/profiles/policy-document.ts",
+    "features/editor/tiptap/profiles/profile-html.ts",
     "features/editor/tiptap/public-block-comparison-fixtures.test.ts",
     "features/editor/tiptap/public-block-comparison-fixtures.ts",
     "features/editor/tiptap/shader/ShaderApiReference.tsx",
@@ -1607,6 +1613,7 @@
     "features/editor/tiptap/three/three-transpile.worker.ts",
     "features/editor/tiptap/useExactTiptapNodeSelection.test.ts",
     "features/editor/tiptap/useExactTiptapNodeSelection.ts",
+    "features/editor/tiptap/useSelectionBubbleMenuLabels.ts",
     "features/editor/tiptap/useTiptapEditorEditable.ts",
     "features/editor/tiptap/wire-schema.test.ts",
     "features/editor/tiptap/wire-schema.ts",
@@ -33912,6 +33919,7 @@
         "features/editor/tiptap/TiptapFileBlockNodeView.tsx",
         "features/editor/tiptap/menus/selection-bubble-commands.ts",
         "features/editor/tiptap/profiles/CompactTiptapEditor.tsx",
+        "features/editor/tiptap/profiles/EmailTiptapEditor.tsx",
         "features/editor/tiptap/profiles/PolicyTiptapEditor.tsx",
         "features/editor/toolbars/color-style-utils.ts",
         "features/translation/LocalizedCollaborativeRichTextEditor.tsx"
@@ -35749,6 +35757,11 @@
               "name": "capabilities",
               "optional": true,
               "type": "TiptapAuthoringCapabilities"
+            },
+            {
+              "name": "allowedItems",
+              "optional": true,
+              "type": "readonly string[]"
             }
           ]
         }
@@ -37222,7 +37235,10 @@
       "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
       "propsEvidence": [],
       "typeAliasEvidence": [],
-      "productionConsumers": ["features/editor/tiptap/TiptapEditor.tsx"],
+      "productionConsumers": [
+        "features/editor/tiptap/TiptapEditor.tsx",
+        "features/editor/tiptap/profiles/EmailTiptapEditor.tsx"
+      ],
       "catalogAdapters": [],
       "tests": ["features/editor/tiptap/integration/contextual-menu-router.test.tsx"],
       "stories": [],
@@ -37513,6 +37529,11 @@
               "name": "labels",
               "optional": false,
               "type": "SelectionBubbleMenuLabels"
+            },
+            {
+              "name": "formattingOnly",
+              "optional": true,
+              "type": "boolean"
             }
           ]
         }
@@ -38768,6 +38789,7 @@
       ],
       "catalogAdapters": [],
       "tests": [
+        "features/editor/tiptap/line-break-round-trip.test.ts",
         "features/editor/tiptap/profiles/CompactTiptapEditor.test.ts",
         "features/editor/tiptap/profiles/editor-access-transitions.test.tsx"
       ],
@@ -39027,6 +39049,7 @@
         "IconVariable",
         "IsolatedEditorContent",
         "TiptapAuthoringControls",
+        "TiptapContextualMenuRouter",
         "VariableInserter",
         "code",
         "div"
@@ -39043,17 +39066,6 @@
       ],
       "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
       "propsEvidence": [
-        {
-          "name": "PolicyHtmlOptions",
-          "extends": [],
-          "properties": [
-            {
-              "name": "headingParentLevel",
-              "optional": true,
-              "type": "DocumentHeadingParentLevel"
-            }
-          ]
-        },
         {
           "name": "PolicyTiptapEditorProps",
           "extends": [],
@@ -39091,7 +39103,7 @@
             {
               "name": "onEditorReady",
               "optional": true,
-              "type": "(editor: PolicyTiptapEditorInstance) => void"
+              "type": "(editor: PolicyTiptapEditorInstance | null) => void"
             },
             {
               "name": "onUnsupportedContent",
@@ -39107,13 +39119,13 @@
           "type": "Editor"
         }
       ],
-      "productionConsumers": ["features/policy/LegalPolicyEditor.tsx", "features/policy/PolicyEditor/PolicyEditor.tsx"],
+      "productionConsumers": ["features/policy/PolicyEditor/PolicyEditor.tsx"],
       "catalogAdapters": [],
       "tests": [
         "features/editor/tiptap/profiles/PolicyTiptapEditor.test.tsx",
         "features/editor/tiptap/profiles/editor-access-transitions.test.tsx"
       ],
-      "stories": ["stories/pages/LegalEditorsPage.stories.tsx"],
+      "stories": [],
       "composedJsx": ["EditorAuthoringModeProvider", "TiptapEditor", "div"]
     },
     {
@@ -62131,7 +62143,7 @@
             {
               "name": "onEditorReady",
               "optional": true,
-              "type": "(editor: PolicyEditorInstance) => void"
+              "type": "(editor: PolicyEditorInstance | null) => void"
             },
             {
               "name": "onUnsupportedContent",
@@ -75289,6 +75301,9 @@
         "features/editor/tiptap/profiles/ControlledTiptapEditor.tsx",
         "features/editor/tiptap/profiles/EmailTiptapEditor.tsx",
         "features/editor/tiptap/profiles/PolicyTiptapEditor.tsx",
+        "features/editor/tiptap/profiles/email-preview.ts",
+        "features/editor/tiptap/profiles/policy-document.ts",
+        "features/editor/tiptap/profiles/profile-html.ts",
         "features/editor/tiptap/public-block-comparison-fixtures.ts",
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
@@ -75323,6 +75338,7 @@
         "features/editor/tiptap/three/three-transpile.ts",
         "features/editor/tiptap/three/three-transpile.worker.ts",
         "features/editor/tiptap/useExactTiptapNodeSelection.ts",
+        "features/editor/tiptap/useSelectionBubbleMenuLabels.ts",
         "features/editor/tiptap/useTiptapEditorEditable.ts",
         "features/editor/tiptap/wire-schema.ts",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -75525,6 +75541,7 @@
         "features/editor/tiptap/integration/shader-menu.test.tsx",
         "features/editor/tiptap/integration/shader-schema.test.ts",
         "features/editor/tiptap/integration/slash-workflows.test.ts",
+        "features/editor/tiptap/line-break-round-trip.test.ts",
         "features/editor/tiptap/map/TiptapMapNodeView.story-fixtures.test.ts",
         "features/editor/tiptap/map/TiptapMapNodeView.test.tsx",
         "features/editor/tiptap/markdown-paste.test.ts",
@@ -75550,6 +75567,8 @@
         "features/editor/tiptap/profiles/EmailTiptapEditor.test.tsx",
         "features/editor/tiptap/profiles/PolicyTiptapEditor.test.tsx",
         "features/editor/tiptap/profiles/editor-access-transitions.test.tsx",
+        "features/editor/tiptap/profiles/email-preview.test.ts",
+        "features/editor/tiptap/profiles/policy-document.test.ts",
         "features/editor/tiptap/public-block-comparison-fixtures.test.ts",
         "features/editor/tiptap/shader/ShaderNode.test.tsx",
         "features/editor/tiptap/shader/shader-editor-api.test.ts",
@@ -85380,6 +85399,11 @@
           "preview": "http://localhost:6010/?path=/story/pages-admin-email-editors--template"
         },
         {
+          "name": "TemplateLineBreaks",
+          "args": "{ page: 'template', lineBreaks: true }",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-email-editors--template-line-breaks"
+        },
+        {
           "name": "LayoutPending",
           "args": "{ state: 'pending' }",
           "preview": "http://localhost:6010/?path=/story/pages-admin-email-editors--layout-pending"
@@ -86126,7 +86150,7 @@
       "importedSources": [
         "features/date-time/DateTime.tsx",
         "features/document-layout/ui/document-heading-level.ts",
-        "features/editor/tiptap/profiles/PolicyTiptapEditor.tsx",
+        "features/editor/tiptap/profiles/policy-document.ts",
         "features/policy/LegalPolicyEditor.tsx",
         "features/policy/PrivacyEditor.tsx",
         "features/policy/TermsEditor.tsx",
@@ -104333,6 +104357,46 @@
             {
               "exported": "buildP5SandboxDocument",
               "imported": "buildP5SandboxDocument",
+              "typeOnly": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "features/editor/tiptap/profiles/EmailTiptapEditor.tsx",
+      "reexports": [
+        {
+          "target": "features/editor/tiptap/profiles/email-preview.ts",
+          "symbols": [
+            {
+              "exported": "normalizeEmailCampaignPreviewHtml",
+              "imported": "normalizeEmailCampaignPreviewHtml",
+              "typeOnly": false
+            },
+            {
+              "exported": "normalizeEmailCampaignVariable",
+              "imported": "normalizeEmailCampaignVariable",
+              "typeOnly": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "features/editor/tiptap/profiles/PolicyTiptapEditor.tsx",
+      "reexports": [
+        {
+          "target": "features/editor/tiptap/profiles/policy-document.ts",
+          "symbols": [
+            {
+              "exported": "policyTiptapDocumentToHtml",
+              "imported": "policyTiptapDocumentToHtml",
+              "typeOnly": false
+            },
+            {
+              "exported": "validatePolicyTiptapDocument",
+              "imported": "validatePolicyTiptapDocument",
               "typeOnly": false
             }
           ]

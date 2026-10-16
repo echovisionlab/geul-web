@@ -17,7 +17,7 @@ interface PolicyEditorProps {
   userColor?: string;
   readOnly?: boolean;
   structureLocked?: boolean;
-  onEditorReady?: (editor: PolicyEditorInstance) => void;
+  onEditorReady?: (editor: PolicyEditorInstance | null) => void;
   onUnsupportedContent?: (message: string) => void;
 }
 

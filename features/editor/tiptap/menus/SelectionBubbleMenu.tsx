@@ -94,6 +94,7 @@ export interface SelectionBubbleMenuLabels {
 export interface SelectionBubbleMenuProps extends SelectionBubbleMenuCommandOptions {
   editor: Editor;
   labels: SelectionBubbleMenuLabels;
+  formattingOnly?: boolean;
 }
 
 export function createSelectionBubbleMenuLabels(
@@ -322,6 +323,7 @@ export function SelectionBubbleMenuView({
   onEscapeFocus,
   editorElement = null,
   navigationEnabled = false,
+  formattingOnly = false,
 }: {
   commands: SelectionBubbleMenuCommands;
   labels: SelectionBubbleMenuLabels;
@@ -329,6 +331,7 @@ export function SelectionBubbleMenuView({
   onEscapeFocus?: () => void;
   editorElement?: HTMLElement | null;
   navigationEnabled?: boolean;
+  formattingOnly?: boolean;
 }) {
   const navigation = useSelectionToolbarNavigation({ onEscape: onEscapeFocus });
   useSelectionToolbarEditorTabBridge(editorElement, navigation.focusFirstAction, navigationEnabled, onEscapeFocus);
@@ -350,7 +353,7 @@ export function SelectionBubbleMenuView({
         onFocusCapture={navigation.onToolbarFocusCapture}
       >
         <StandardFormattingButtons
-          textStyles={['bold', 'italic', 'underline']}
+          textStyles={formattingOnly ? ['bold', 'italic', 'underline', 'strike'] : ['bold', 'italic', 'underline']}
           labels={{
             bold: labels.formatting.bold,
             italic: labels.formatting.italic,
@@ -363,7 +366,7 @@ export function SelectionBubbleMenuView({
             alignment: labels.alignment.group,
           }}
           blockType={
-            commands.hasTextSelection
+            commands.hasTextSelection && !formattingOnly
               ? {
                   label: labels.blockType,
                   value: commands.blockType ?? '',
@@ -374,7 +377,7 @@ export function SelectionBubbleMenuView({
               : undefined
           }
           alignment={
-            commands.canAlign
+            commands.canAlign && !formattingOnly
               ? {
                   value: commands.alignment,
                   presentation: 'menu',
@@ -384,7 +387,7 @@ export function SelectionBubbleMenuView({
               : undefined
           }
           color={
-            commands.hasTextSelection
+            commands.hasTextSelection && !formattingOnly
               ? {
                   labels: {
                     button: labels.colors.button,
@@ -408,76 +411,78 @@ export function SelectionBubbleMenuView({
         />
         {hasFormattingControls && hasContextualControls ? <Separator orientation="vertical" aria-hidden /> : null}
         {hasLinkControls ? <LinkControls commands={commands} labels={labels} snapshot={linkSelection} /> : null}
-        <DropdownMenu placement="bottom-end" size="compact">
-          <EditorToolbarDropdownTarget label={labels.more ?? labels.menu} focusHint={false}>
-            {(targetRef) => (
-              <IconButton
-                ref={targetRef}
-                label={labels.more ?? labels.menu}
-                data-selection-toolbar-action=""
-                data-testid="tiptap-selection-more"
-                onMouseDown={preserveSelection}
-              >
-                <IconDots size={16} />
-              </IconButton>
-            )}
-          </EditorToolbarDropdownTarget>
-          <DropdownMenu.Dropdown>
-            {commands.linkHref ? (
-              <>
-                <DropdownMenu.Item icon={<IconExternalLink size={16} />} onClick={commands.openLink}>
-                  {labels.link.open}
-                </DropdownMenu.Item>
-                <DropdownMenu.Item icon={<IconLinkOff size={16} />} onClick={commands.removeLink}>
-                  {labels.link.remove}
-                </DropdownMenu.Item>
-              </>
-            ) : null}
-            {commands.hasTextSelection ? (
-              <>
-                <DropdownMenu.Item
-                  selected={commands.activeTextStyles.has('strike')}
-                  disabled={!commands.canFormatText}
-                  icon={<IconStrikethrough size={16} />}
-                  onClick={() => commands.toggleTextStyle('strike')}
+        {!formattingOnly || commands.linkHref ? (
+          <DropdownMenu placement="bottom-end" size="compact">
+            <EditorToolbarDropdownTarget label={labels.more ?? labels.menu} focusHint={false}>
+              {(targetRef) => (
+                <IconButton
+                  ref={targetRef}
+                  label={labels.more ?? labels.menu}
+                  data-selection-toolbar-action=""
+                  data-testid="tiptap-selection-more"
+                  onMouseDown={preserveSelection}
                 >
-                  {labels.formatting.strike}
+                  <IconDots size={16} />
+                </IconButton>
+              )}
+            </EditorToolbarDropdownTarget>
+            <DropdownMenu.Dropdown>
+              {commands.linkHref ? (
+                <>
+                  <DropdownMenu.Item icon={<IconExternalLink size={16} />} onClick={commands.openLink}>
+                    {labels.link.open}
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item icon={<IconLinkOff size={16} />} onClick={commands.removeLink}>
+                    {labels.link.remove}
+                  </DropdownMenu.Item>
+                </>
+              ) : null}
+              {commands.hasTextSelection && !formattingOnly ? (
+                <>
+                  <DropdownMenu.Item
+                    selected={commands.activeTextStyles.has('strike')}
+                    disabled={!commands.canFormatText}
+                    icon={<IconStrikethrough size={16} />}
+                    onClick={() => commands.toggleTextStyle('strike')}
+                  >
+                    {labels.formatting.strike}
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item
+                    selected={commands.activeTextStyles.has('code')}
+                    disabled={!commands.canFormatText}
+                    icon={<IconCode size={16} />}
+                    onClick={() => commands.toggleTextStyle('code')}
+                  >
+                    {labels.formatting.code}
+                  </DropdownMenu.Item>
+                </>
+              ) : null}
+              {!formattingOnly && commands.canNest ? (
+                <DropdownMenu.Item icon={<IconIndentIncrease size={16} />} onClick={commands.nest}>
+                  {labels.nest}
                 </DropdownMenu.Item>
-                <DropdownMenu.Item
-                  selected={commands.activeTextStyles.has('code')}
-                  disabled={!commands.canFormatText}
-                  icon={<IconCode size={16} />}
-                  onClick={() => commands.toggleTextStyle('code')}
-                >
-                  {labels.formatting.code}
+              ) : null}
+              {!formattingOnly && commands.canUnnest ? (
+                <DropdownMenu.Item icon={<IconIndentDecrease size={16} />} onClick={commands.unnest}>
+                  {labels.unnest}
                 </DropdownMenu.Item>
-              </>
-            ) : null}
-            {commands.canNest ? (
-              <DropdownMenu.Item icon={<IconIndentIncrease size={16} />} onClick={commands.nest}>
-                {labels.nest}
-              </DropdownMenu.Item>
-            ) : null}
-            {commands.canUnnest ? (
-              <DropdownMenu.Item icon={<IconIndentDecrease size={16} />} onClick={commands.unnest}>
-                {labels.unnest}
-              </DropdownMenu.Item>
-            ) : null}
-            {commands.canConvertToInlineMath ? (
-              <DropdownMenu.Item icon={<IconMathFunction size={16} />} onClick={commands.convertToInlineMath}>
-                {labels.inlineMath}
-              </DropdownMenu.Item>
-            ) : null}
-            {commands.canOpenAI ? (
-              <DropdownMenu.Item icon={<IconSparkles size={16} />} onClick={commands.openAI}>
-                <LinkActions gap="md" justify="between">
-                  <span>{labels.ai}</span>
-                  <EditorToolbarShortcutText shortcut={EDITOR_TOOLBAR_SHORTCUTS.ai} />
-                </LinkActions>
-              </DropdownMenu.Item>
-            ) : null}
-          </DropdownMenu.Dropdown>
-        </DropdownMenu>
+              ) : null}
+              {!formattingOnly && commands.canConvertToInlineMath ? (
+                <DropdownMenu.Item icon={<IconMathFunction size={16} />} onClick={commands.convertToInlineMath}>
+                  {labels.inlineMath}
+                </DropdownMenu.Item>
+              ) : null}
+              {!formattingOnly && commands.canOpenAI ? (
+                <DropdownMenu.Item icon={<IconSparkles size={16} />} onClick={commands.openAI}>
+                  <LinkActions gap="md" justify="between">
+                    <span>{labels.ai}</span>
+                    <EditorToolbarShortcutText shortcut={EDITOR_TOOLBAR_SHORTCUTS.ai} />
+                  </LinkActions>
+                </DropdownMenu.Item>
+              ) : null}
+            </DropdownMenu.Dropdown>
+          </DropdownMenu>
+        ) : null}
       </ToolbarSurface>
     </div>
   );
@@ -510,7 +515,13 @@ export function updateSelectionBubbleMenuPosition(editor: Editor) {
 }
 
 /** Contextual selected-text controls; never rendered as a fixed editor toolbar. */
-export function TiptapSelectionBubbleMenu({ editor, labels, onAIActivate, onOpenLink }: SelectionBubbleMenuProps) {
+export function TiptapSelectionBubbleMenu({
+  editor,
+  labels,
+  onAIActivate,
+  onOpenLink,
+  formattingOnly,
+}: SelectionBubbleMenuProps) {
   const [revision, setRevision] = useState(0);
   const menu = useTiptapBubbleMenu(editor, SELECTION_BUBBLE_MENU_PLUGIN_KEY);
   useEffect(() => {
@@ -556,6 +567,7 @@ export function TiptapSelectionBubbleMenu({ editor, labels, onAIActivate, onOpen
     >
       <SelectionBubbleMenuView
         commands={commands}
+        formattingOnly={formattingOnly}
         labels={labels}
         selectionSnapshot={selectionSnapshot}
         onEscapeFocus={menu.hide}

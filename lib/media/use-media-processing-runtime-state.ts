@@ -131,6 +131,7 @@ export function useMediaProcessingRuntimeState<T>({
     value: T | null;
   }>(() => ({ identityKey, value: null }));
   const lastSequencesRef = useRef<Map<string, number>>(new Map());
+  const statusReadGenerationRef = useRef(0);
   const bootstrap = useEditorFileStatusBootstrap({
     fileId: identity.fileId,
     enabled: enabled && bootstrapEnabled && Boolean(identity.fileId),
@@ -141,6 +142,15 @@ export function useMediaProcessingRuntimeState<T>({
     setRuntimeState({ identityKey, value: null });
     lastSequencesRef.current.clear();
   }, [identityKey]);
+
+  useEffect(
+    () => () => {
+      // A read belongs to this enabled identity session, including when an
+      // identity switches away and back before an older request settles.
+      statusReadGenerationRef.current += 1;
+    },
+    [enabled, identityKey],
+  );
 
   const handleRuntimeEvent = useCallback(
     (event: EditorRuntimeEvent) => {
@@ -161,22 +171,22 @@ export function useMediaProcessingRuntimeState<T>({
         lastSequencesRef.current.set(key, event.sequence);
       }
 
+      // Every accepted lifecycle event supersedes earlier reads, even when
+      // the producer has no sequence or the next event uses another attempt.
+      const readGeneration = ++statusReadGenerationRef.current;
+
       if (event.payload.status === 'ready') {
-        const expectedSequence = event.sequence;
+        const isCurrentRead = () =>
+          currentIdentityKeyRef.current === identityKey && statusReadGenerationRef.current === readGeneration;
         void getEditorFileStatus(event.payload.fileId)
           .then((status) => {
-            if (
-              currentIdentityKeyRef.current !== identityKey ||
-              (typeof expectedSequence === 'number' &&
-                expectedSequence > 0 &&
-                lastSequencesRef.current.get(key) !== expectedSequence)
-            ) {
+            if (!isCurrentRead()) {
               return;
             }
             setRuntimeState({ identityKey, value: mapStatus(status) });
           })
           .catch(() => {
-            if (currentIdentityKeyRef.current === identityKey) {
+            if (isCurrentRead()) {
               setRuntimeState({ identityKey, value: mapStatus(snapshotFromRuntimePayload(event.payload)) });
             }
           });
@@ -203,9 +213,10 @@ export function useMediaProcessingRuntimeState<T>({
     if (!enabled || !statusFileId) {
       return;
     }
+    const readGeneration = ++statusReadGenerationRef.current;
     void getEditorFileStatus(statusFileId)
       .then((status) => {
-        if (currentIdentityKeyRef.current === identityKey) {
+        if (currentIdentityKeyRef.current === identityKey && statusReadGenerationRef.current === readGeneration) {
           setRuntimeState({ identityKey, value: mapStatus(status) });
         }
       })

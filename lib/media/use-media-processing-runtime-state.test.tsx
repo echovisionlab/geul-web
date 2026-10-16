@@ -7,6 +7,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getFileStatusAction } from '@/lib/actions/file';
 import { useMediaProcessingRuntimeState } from './use-media-processing-runtime-state';
+import type { EditorFileStatusSnapshot } from './editor-file-status-runtime';
 
 const runtimeEventMock = vi.hoisted(() => ({
   handler: null as ((event: EditorRuntimeEvent) => void) | null,
@@ -109,6 +110,39 @@ function getProbeNode(): HTMLDivElement {
   return node;
 }
 
+function processingSnapshot(): EditorFileStatusSnapshot {
+  return {
+    completed: false,
+    failed: false,
+    unavailable: false,
+    url: '',
+    originalUrl: '',
+    waveformUrl: '',
+    spectrogramUrl: '',
+    thumbnailUrl: '',
+    hlsUrl: '',
+    durationSeconds: 0,
+    processingStatus: MediaProcessingStatus.PROCESSING,
+    processingPercentage: 40,
+  };
+}
+
+function lifecycleEvent(status: 'ready' | 'failed', sequence: number): EditorRuntimeEvent {
+  return {
+    version: 1,
+    sequence,
+    kind: 'media.processing.lifecycle',
+    entityType: 'post',
+    entityId: 'post-1',
+    timestampMs: 1_700_000_000_000 + sequence,
+    payload: {
+      fileId: 'file-a',
+      status,
+      ...(status === 'ready' ? { outputs: { hlsGenerationId: 'generation-a' } } : {}),
+    },
+  };
+}
+
 afterEach(() => {
   act(() => {
     root?.unmount();
@@ -122,6 +156,57 @@ afterEach(() => {
 });
 
 describe('useMediaProcessingRuntimeState', () => {
+  it.each(['resolve', 'reject'] as const)(
+    'keeps a newer lifecycle event when an earlier ready lookup later %ss',
+    async (outcome) => {
+      const pendingRead = Promise.withResolvers<EditorFileStatusSnapshot>();
+      mockedGetFileStatusAction.mockReturnValueOnce(pendingRead.promise);
+      await renderProbe({ pendingUploadFileId: 'file-a' });
+      await emitRuntimeEvent(lifecycleEvent('ready', 2));
+      expect(mockedGetFileStatusAction).toHaveBeenCalledWith('file-a');
+
+      await emitRuntimeEvent(lifecycleEvent('failed', 3));
+      expect(getProbeNode().getAttribute('data-status')).toBe(String(MediaProcessingStatus.FAILED));
+
+      await act(async () => {
+        if (outcome === 'reject') {
+          pendingRead.reject(new Error('status lookup failed'));
+        } else {
+          pendingRead.resolve(processingSnapshot());
+        }
+      });
+
+      expect(getProbeNode().getAttribute('data-status')).toBe(String(MediaProcessingStatus.FAILED));
+    },
+  );
+
+  it('keeps a newer lifecycle event when an earlier resync finishes', async () => {
+    const pendingRead = Promise.withResolvers<EditorFileStatusSnapshot>();
+    mockedGetFileStatusAction.mockReturnValueOnce(pendingRead.promise);
+    await renderProbe({ pendingUploadFileId: 'file-a' });
+    await act(async () => runtimeEventMock.resync?.());
+    await flushEffects();
+    expect(mockedGetFileStatusAction).toHaveBeenCalledWith('file-a');
+
+    await emitRuntimeEvent(lifecycleEvent('failed', 3));
+    await act(async () => pendingRead.resolve(processingSnapshot()));
+
+    expect(getProbeNode().getAttribute('data-status')).toBe(String(MediaProcessingStatus.FAILED));
+  });
+
+  it('discards a pending ready lookup after the subscription is disabled', async () => {
+    const pendingRead = Promise.withResolvers<EditorFileStatusSnapshot>();
+    mockedGetFileStatusAction.mockReturnValueOnce(pendingRead.promise);
+    await renderProbe({ pendingUploadFileId: 'file-a' });
+    await emitRuntimeEvent(lifecycleEvent('ready', 1));
+    expect(mockedGetFileStatusAction).toHaveBeenCalledWith('file-a');
+
+    await renderProbe({ pendingUploadFileId: 'file-a', enabled: false });
+    await act(async () => pendingRead.reject(new Error('status lookup failed')));
+
+    expect(getProbeNode().getAttribute('data-status')).toBe('');
+  });
+
   it('reads the current status when runtime events could not be delivered (resync)', async () => {
     const processing = {
       completed: false,

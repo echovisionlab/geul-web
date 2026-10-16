@@ -148,11 +148,11 @@ function deleteSetRecord(deleteSet: TransactionDeleteSet): BlockRoomDeleteSet {
   );
 }
 
-function stateVectorCovers(actualBytes: Uint8Array, expectedBytes: Uint8Array): boolean {
-  const actual = Y.decodeStateVector(actualBytes);
+function stateVectorCovers(stateVectorBytes: Uint8Array, expectedBytes: Uint8Array): boolean {
+  const stateVector = Y.decodeStateVector(stateVectorBytes);
   const expected = Y.decodeStateVector(expectedBytes);
   for (const [client, clock] of expected) {
-    if ((actual.get(client) ?? 0) < clock) {
+    if ((stateVector.get(client) ?? 0) < clock) {
       return false;
     }
   }

@@ -70,9 +70,9 @@ function getGeneratedInlinePlainText(content: readonly RichTextInline[]): string
     .map((item) => {
       switch (item.value.case) {
         case 'text':
-          return item.value.value.text;
+          return item.value.value.text.replace(/\r\n|\r/g, '\n');
         case 'link':
-          return item.value.value.content.map((text) => text.text).join('');
+          return item.value.value.content.map((text) => text.text.replace(/\r\n|\r/g, '\n')).join('');
         case 'mathInline':
           return item.value.value.source;
         case 'hardBreak':

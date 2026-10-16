@@ -345,3 +345,33 @@ describe('GeneratedRichTextBlockView list nesting', () => {
     expect(item.querySelector(':scope > [data-document-children]')?.textContent).toContain('Child');
   });
 });
+
+it('renders canonical and legacy line breaks identically in public posts/pages, including styled link text', () => {
+  const text = (text: string) => ({ value: { case: 'text', value: { text, styles: { bold: true } } } });
+  const br = { value: { case: 'hardBreak', value: {} } };
+  const canonical = generatedParagraph([br, text('a'), br, br, text('b'), br]);
+  const legacy = generatedParagraph([text('\ra\r\n\nb\n')]);
+  // Styles wrap each legacy run, while its break positions remain identical.
+  const legacyHTML = renderToStaticMarkup(
+    <TestProviders>
+      <GeneratedRichTextBlockView block={legacy} />
+    </TestProviders>,
+  );
+  const canonicalHTML = renderToStaticMarkup(
+    <TestProviders>
+      <GeneratedRichTextBlockView block={canonical} />
+    </TestProviders>,
+  );
+  expect(legacyHTML.match(/<br\s*\/?\s*>/g)).toHaveLength(4);
+  const structure = (html: string) => html.replace(/<(?!br\b)[^>]+>/g, '');
+  expect(structure(legacyHTML)).toBe(structure(canonicalHTML));
+  const linked = generatedParagraph([
+    { value: { case: 'link', value: { href: '/example', content: [{ text: 'a\nb', styles: { italic: true } }] } } },
+  ]);
+  const html = renderToStaticMarkup(
+    <TestProviders>
+      <GeneratedRichTextBlockView block={linked} />
+    </TestProviders>,
+  );
+  expect(html).toContain('<em>a<br/>b</em>');
+});

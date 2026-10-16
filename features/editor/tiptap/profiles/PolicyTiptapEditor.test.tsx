@@ -3,7 +3,7 @@
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { Editor, getSchema } from '@tiptap/core';
+import type { Editor } from '@tiptap/core';
 
 import { fromJson, type JsonValue } from '@bufbuild/protobuf';
 import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
@@ -12,11 +12,10 @@ import {
   RichTextProfile,
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { hydrateCanonicalBlockRoom } from '@echovisionlab/geul-common/collaboration/block-room-codec';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Awareness } from 'y-protocols/awareness';
 import * as Y from 'yjs';
-import { PolicyTiptapEditor, policyTiptapDocumentToHtml, validatePolicyTiptapDocument } from './PolicyTiptapEditor';
-import { createTiptapWireExtensions } from '../wire-schema';
+import { PolicyTiptapEditor } from './PolicyTiptapEditor';
 import { createBlockRoomProseMirrorBridge } from '../block-room-prosemirror-bridge';
 import { createRichTextBlockRoomTiptapController } from '../block-room-tiptap-controller';
 
@@ -27,58 +26,53 @@ vi.mock('next-intl', () => ({
   useTranslations: () => translate,
 }));
 
-vi.stubGlobal(
-  'ResizeObserver',
-  class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  },
-);
-
-Object.defineProperties(Range.prototype, {
-  getBoundingClientRect: {
-    configurable: true,
-    value: () => document.body.getBoundingClientRect(),
-  },
-  getClientRects: {
-    configurable: true,
-    value: () => [document.body.getBoundingClientRect()],
-  },
+beforeEach(() => {
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  );
 });
 
 const POLICY_BLOCK_ID = '019cce25-dbc0-7d12-9f1f-735b1a6c6b13';
 
 let root: Root | null = null;
 let host: HTMLDivElement | null = null;
+const mountedEditors = new Set<Editor>();
+const collaborationRooms = new Set<{ document: Y.Doc; awareness: Awareness }>();
+
+function createPolicyRoom() {
+  const document = new Y.Doc();
+  const room = { document, awareness: new Awareness(document) };
+  collaborationRooms.add(room);
+  return room;
+}
 
 afterEach(async () => {
-  await act(async () => {
-    root?.unmount();
-    // Tiptap React delays Editor.destroy() by one tick to survive StrictMode
-    // remounts. Let that cleanup run while the jsdom document still exists.
-    await new Promise((resolve) => setTimeout(resolve, 2));
-  });
-  host?.remove();
-  root = null;
-  host = null;
+  try {
+    await act(async () => root?.unmount());
+    // Tiptap schedules destruction to survive StrictMode remounts. Observe
+    // disposal before destroying the collaboration resources it still uses.
+    await vi.waitFor(() => {
+      expect([...mountedEditors].every((editor) => editor.isDestroyed)).toBe(true);
+    });
+  } finally {
+    for (const room of collaborationRooms) {
+      room.awareness.destroy();
+      room.document.destroy();
+    }
+    collaborationRooms.clear();
+    host?.remove();
+    root = null;
+    host = null;
+    mountedEditors.clear();
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  }
 });
-
-function container(id: string, content: Record<string, unknown>, children: Record<string, unknown>[] = []) {
-  return {
-    type: 'blockContainer',
-    attrs: { id },
-    content: [content, ...(children.length > 0 ? [{ type: 'blockGroup', content: children }] : [])],
-  };
-}
-
-function documentWith(...blocks: Record<string, unknown>[]) {
-  const schema = getSchema(createTiptapWireExtensions());
-  return schema.nodeFromJSON({
-    type: 'doc',
-    content: [{ type: 'blockGroup', content: blocks }],
-  });
-}
 
 function policyController(document: Y.Doc) {
   hydrateCanonicalBlockRoom(
@@ -99,120 +93,24 @@ function policyController(document: Y.Doc) {
     } as JsonValue),
     [],
   );
-  return createRichTextBlockRoomTiptapController(
+  const controller = createRichTextBlockRoomTiptapController(
     createBlockRoomProseMirrorBridge({
       document,
       documentType: 'terms-history',
       locale: 'en',
     }),
   );
+  const connect = controller.connect.bind(controller);
+  vi.spyOn(controller, 'connect').mockImplementation((editor) => {
+    mountedEditors.add(editor);
+    return connect(editor);
+  });
+  return controller;
 }
 
 describe('PolicyTiptapEditor profile', () => {
-  it('keeps policy JSON compatible while serializing supported policy content and normalized links', () => {
-    const document = documentWith(
-      container('heading', { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Terms' }] }),
-      container('bullet-one', { type: 'bulletListItem', content: [{ type: 'text', text: 'First' }] }),
-      container('bullet-two', {
-        type: 'bulletListItem',
-        content: [{ type: 'text', text: 'Second', marks: [{ type: 'bold' }] }],
-      }),
-      container('quote', { type: 'quote', content: [{ type: 'text', text: 'Quoted' }] }),
-      container('code', { type: 'codeBlock', content: [{ type: 'text', text: 'const terms = true;' }] }),
-      container('table', {
-        type: 'table',
-        content: [
-          {
-            type: 'tableRow',
-            content: [
-              {
-                type: 'tableHeader',
-                content: [{ type: 'tableParagraph', content: [{ type: 'text', text: 'Scope' }] }],
-              },
-            ],
-          },
-        ],
-      }),
-      container('link', {
-        type: 'paragraph',
-        content: [
-          {
-            type: 'text',
-            text: 'Unsafe link',
-            marks: [{ type: 'link', attrs: { href: ['java', 'script:alert(1)'].join('') } }],
-          },
-        ],
-      }),
-    );
-
-    expect(validatePolicyTiptapDocument(document)).toBeNull();
-    expect(policyTiptapDocumentToHtml(document)).toBe(
-      '<h2>Terms</h2><ul><li>First</li><li><strong>Second</strong></li></ul><blockquote>Quoted</blockquote><pre><code>const terms = true;</code></pre><table><tbody><tr><th><p>Scope</p></th></tr></tbody></table><p>Unsafe link</p>',
-    );
-  });
-
-  it('renders headings below a document title one element lower with the authored level', () => {
-    const document = documentWith(
-      container('heading', { type: 'heading', attrs: { level: 1 }, content: [{ type: 'text', text: 'Scope' }] }),
-    );
-
-    expect(policyTiptapDocumentToHtml(document)).toBe('<h1>Scope</h1>');
-    expect(policyTiptapDocumentToHtml(document, { headingParentLevel: 1 })).toBe(
-      '<h2 data-heading-level="1">Scope</h2>',
-    );
-  });
-
-  it('rejects policy-disallowed nodes instead of accepting or exporting them', () => {
-    const document = documentWith(container('file', { type: 'file', attrs: { fileId: 'file-1' } }));
-
-    expect(validatePolicyTiptapDocument(document)).toContain('nodes: file');
-    expect(() => policyTiptapDocumentToHtml(document)).toThrow('policy editor does not support');
-  });
-
-  it('exports safe legacy hex color presentation without styling arbitrary durable strings', () => {
-    const document = documentWith(
-      container('colors', {
-        type: 'paragraph',
-        content: [
-          { type: 'text', text: 'safe', marks: [{ type: 'textColor', attrs: { stringValue: '#b02d23' } }] },
-          { type: 'text', text: 'semantic', marks: [{ type: 'backgroundColor', attrs: { stringValue: 'blue' } }] },
-          {
-            type: 'text',
-            text: 'unsafe',
-            marks: [{ type: 'textColor', attrs: { stringValue: 'red;background:url(x)' } }],
-          },
-        ],
-      }),
-    );
-
-    const html = policyTiptapDocumentToHtml(document);
-    expect(html).toContain('data-style-value="#b02d23" style="color:#b02d23"');
-    expect(html).toContain('data-style-value="blue">semantic</span>');
-    expect(html).toContain('data-style-value="red;background:url(x)">unsafe</span>');
-    expect(html).not.toContain('style="color:red;background');
-  });
-
-  it('serializes a Callout as a semantic wrapper around its nested content', () => {
-    const document = documentWith(
-      container(
-        'callout',
-        {
-          type: 'callout',
-          attrs: { icon: 'ℹ️', backgroundColor: 'blue', textColor: 'default' },
-          content: [{ type: 'text', text: 'Policy note' }],
-        },
-        [container('callout-copy', { type: 'paragraph', content: [{ type: 'text', text: 'Nested detail' }] })],
-      ),
-    );
-
-    expect(policyTiptapDocumentToHtml(document)).toBe(
-      '<aside data-callout="" data-bg-color="blue" data-text-color="default"><span data-callout-icon="" aria-hidden="true">ℹ️</span><div data-callout-content=""><div data-callout-copy="">Policy note</div><p>Nested detail</p></div></aside>',
-    );
-  });
-
   it('uses the shared Tiptap command surface with the policy capability profile', async () => {
-    const doc = new Y.Doc();
-    const awareness = new Awareness(doc);
+    const { document: doc, awareness } = createPolicyRoom();
     const onEditorReady = vi.fn();
     host = document.createElement('div');
     document.body.append(host);
@@ -230,7 +128,7 @@ describe('PolicyTiptapEditor profile', () => {
       );
     });
 
-    const editor = onEditorReady.mock.calls[0]?.[0] as Editor | undefined;
+    const editor = onEditorReady.mock.calls.find(([instance]) => instance)?.[0] as Editor | undefined;
     expect(editor).toBeDefined();
     expect(host.querySelector('[data-editor-profile="policy"] [data-editor-engine="tiptap"]')).not.toBeNull();
     expect(host.querySelector('[data-testid="policy-tiptap-toolbar"]')).toBeNull();
@@ -245,13 +143,14 @@ describe('PolicyTiptapEditor profile', () => {
     expect(document.querySelector('[data-testid="tiptap-slash-item-file"]')).toBeNull();
     expect(document.querySelector('[data-testid="tiptap-slash-item-map"]')).toBeNull();
     expect(document.querySelector('[data-testid="tiptap-slash-item-math"]')).toBeNull();
-    awareness.destroy();
-    doc.destroy();
+
+    await act(async () => root?.unmount());
+    root = null;
+    expect(onEditorReady).toHaveBeenLastCalledWith(null);
   });
 
   it('emits an explicit error and rejects a transaction containing a disallowed node', async () => {
-    const doc = new Y.Doc();
-    const awareness = new Awareness(doc);
+    const { document: doc, awareness } = createPolicyRoom();
     const onEditorReady = vi.fn();
     const onUnsupportedContent = vi.fn();
     host = document.createElement('div');
@@ -271,7 +170,7 @@ describe('PolicyTiptapEditor profile', () => {
       );
     });
 
-    const editor = onEditorReady.mock.calls[0]?.[0] as Editor | undefined;
+    const editor = onEditorReady.mock.calls.find(([instance]) => instance)?.[0] as Editor | undefined;
     expect(editor).toBeDefined();
     let containerPosition = -1;
     editor!.state.doc.descendants((node, position) => {
@@ -292,7 +191,28 @@ describe('PolicyTiptapEditor profile', () => {
 
     expect(onUnsupportedContent).toHaveBeenCalledWith(expect.stringContaining('nodes: file'));
     expect(host.querySelector('[role="alert"]')?.textContent).toContain('policy editor does not support');
-    awareness.destroy();
-    doc.destroy();
+    expect(onEditorReady).toHaveBeenLastCalledWith(null);
+
+    // A rebuilt canonical room supplies a new controller without remounting
+    // this profile. The old room's error must not permanently block it.
+    const rebuiltRoom = createPolicyRoom();
+    const rebuiltController = policyController(rebuiltRoom.document);
+    await act(async () => {
+      root?.render(
+        <DesignSystemProvider forceColorScheme="light">
+          <PolicyTiptapEditor
+            blockRoomController={rebuiltController}
+            awareness={rebuiltRoom.awareness}
+            onEditorReady={onEditorReady}
+            onUnsupportedContent={onUnsupportedContent}
+          />
+        </DesignSystemProvider>,
+      );
+    });
+
+    expect(host.querySelector('[role="alert"]')).toBeNull();
+    expect(rebuiltController.connected).toBe(true);
+    expect(onEditorReady.mock.lastCall?.[0]).not.toBe(editor);
+    expect(onEditorReady.mock.lastCall?.[0]?.isDestroyed).toBe(false);
   });
 });

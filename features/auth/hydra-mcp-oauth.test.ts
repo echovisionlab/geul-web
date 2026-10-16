@@ -4,7 +4,7 @@ import {
   MCPDelegationMethod,
 } from '@echovisionlab/geul-proto/intra/gateway_authorization_pb.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { SessionWithUser } from '@/lib/auth';
+import type { SessionWithUser } from '@/lib/auth/types';
 import {
   acceptHydraConsent,
   acceptHydraLogin,

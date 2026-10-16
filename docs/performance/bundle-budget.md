@@ -30,6 +30,35 @@ A route missing from the budget must fit the 75th-percentile route; add it with
 `pnpm perf:bundle:update` when it is intentionally larger. Regenerating the budget
 is a reviewed decision. Do not raise it to make an unexplained regression pass.
 
+## Email authoring measurement (2026-10-16)
+
+The email line-break change adds GitHub-style Markdown paste and a selection formatting
+menu to the email/campaign editor. Source tracing with `route-package-reach.mjs` confirms
+the new static path from `EmailTiptapEditor.tsx` through `markdown-paste.ts` to
+`react-markdown` and `remark-gfm`. The contextual selection menu is also a new static
+dependency of that profile. The existing full editor already uses these facilities.
+
+[PR #137 CI run 38870898175](https://github.com/echovisionlab/geul-web/actions/runs/38870898175)
+built commit `566764ffcbfafe6272b8c3d387dc212b43828c45` successfully, then reported
+these first-load JS values for build `D2Se--Khoh1JLRegkLilk`:
+
+| Route                         | Measured gzip | Previous budget | Updated budget |
+| ----------------------------- | ------------: | --------------: | -------------: |
+| `/(general)/campaigns/[id]`   |     907.9 KiB |       869.0 KiB |      936.0 KiB |
+| `/admin/campaigns/[id]`       |     878.0 KiB |       835.0 KiB |      905.0 KiB |
+| `/admin/email-templates/[id]` |     824.9 KiB |       781.0 KiB |      850.0 KiB |
+
+Only these three JS limits are updated for the additional authoring functionality.
+The limits retain the standard 3% headroom, rounded up to 1 KiB; using the upper edge
+of the CI report's 0.1 KiB rounding gives the same integer limits. Shared JS, CSS and
+all other route budgets remain unchanged. The budget's `measuredBuildId` still
+identifies the earlier whole-app baseline; this section records the scoped update.
+
+This source trace identifies the added dependency paths, not exact per-package gzip
+attribution. The CI run did not retain source maps. Loading the editor or parser on
+demand is a separate optimization that needs first-paste and selection interaction
+verification; the current change preserves synchronous authoring behavior.
+
 ## Finding the cause of a regression
 
 ```sh

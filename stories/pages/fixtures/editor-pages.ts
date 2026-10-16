@@ -78,7 +78,7 @@ export function localEditorQueryClient(entityType: string, entityId: string) {
   return client;
 }
 /** Actual canonical email block room and editor bridge; no WebSocket is opened. */
-export function localEmailRoom(entityType: 'campaign' | 'email_template') {
+export function localEmailRoom(entityType: 'campaign' | 'email_template', lineBreaks = false) {
   const document = new Y.Doc();
   hydrateCanonicalBlockRoom(
     document,
@@ -91,6 +91,14 @@ export function localEmailRoom(entityType: 'campaign' | 'email_template') {
       base: {
         nodes: [
           { block: { id: '20000000-0000-4000-8000-000000000001', paragraph: { props: {} } }, placement: { index: 0 } },
+          ...(lineBreaks
+            ? [
+                {
+                  block: { id: '20000000-0000-4000-8000-000000000002', paragraph: { props: {} } },
+                  placement: { index: 1 },
+                },
+              ]
+            : []),
         ],
       },
       localeOverlay: {
@@ -100,9 +108,23 @@ export function localEmailRoom(entityType: 'campaign' | 'email_template') {
             blockId: '20000000-0000-4000-8000-000000000001',
             paragraph: {
               props: {},
-              content: [{ text: { text: 'Listening room · October edition. Join us for an evening of music.' } }],
+              content: lineBreaks
+                ? [
+                    { text: { text: 'First line\nText newline' } },
+                    { hardBreak: {} },
+                    { text: { text: 'After hard break' } },
+                  ]
+                : [{ text: { text: 'Listening room · October edition. Join us for an evening of music.' } }],
             },
           },
+          ...(lineBreaks
+            ? [
+                {
+                  blockId: '20000000-0000-4000-8000-000000000002',
+                  paragraph: { props: {}, content: [{ text: { text: 'Second paragraph' } }] },
+                },
+              ]
+            : []),
         ],
       },
     }),

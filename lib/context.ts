@@ -1,3 +1,5 @@
+import 'server-only';
+
 import type { Context } from '@/lib/types/context/context';
 import { getRequestHeaders } from '@/lib/utils/header.server';
 import { getSession } from '@/lib/utils/session.server';

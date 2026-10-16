@@ -91,17 +91,17 @@ export function zonedDateTimePartsToInstant(desired: ZonedDateTimeParts, timeZon
   let candidate = new Date(desiredAsUtc);
 
   for (let attempt = 0; attempt < 3; attempt += 1) {
-    const actual = getZonedDateTimeParts(candidate, timeZone);
-    const actualAsUtc = Date.UTC(
-      actual.year,
-      actual.month - 1,
-      actual.day,
-      actual.hour,
-      actual.minute,
-      actual.second,
+    const zonedParts = getZonedDateTimeParts(candidate, timeZone);
+    const zonedPartsAsUtc = Date.UTC(
+      zonedParts.year,
+      zonedParts.month - 1,
+      zonedParts.day,
+      zonedParts.hour,
+      zonedParts.minute,
+      zonedParts.second,
       0,
     );
-    candidate = new Date(candidate.getTime() + desiredAsUtc - actualAsUtc);
+    candidate = new Date(candidate.getTime() + desiredAsUtc - zonedPartsAsUtc);
   }
 
   const resolved = getZonedDateTimeParts(candidate, timeZone);

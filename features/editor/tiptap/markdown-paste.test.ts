@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { Editor, getSchema } from '@tiptap/core';
+import { Editor, getSchema, type JSONContent } from '@tiptap/core';
 import { describe, expect, it } from 'vitest';
 import { createTiptapWireExtensions } from './wire-schema';
 import { createMarkdownPasteExtension, markdownBlocks } from './markdown-paste';
@@ -60,8 +60,12 @@ describe('markdown paste', () => {
     editor.destroy();
   });
   it('leaves ordinary text and escaped syntax alone and sanitizes links', () => {
-    expect(markdownBlocks('ordinary text', schema)).toBeNull();
-    expect(markdownBlocks('\\*literal\\*', schema)).toBeNull();
+    expect(markdownBlocks('ordinary text', schema)?.[0].content?.[0].content).toEqual([
+      { type: 'text', text: 'ordinary text' },
+    ]);
+    expect(markdownBlocks('\\*literal\\*', schema)?.[0].content?.[0].content).toEqual([
+      { type: 'text', text: '*literal*' },
+    ]);
     expect(JSON.stringify(markdownBlocks('[bad](javascript:alert%281%29)', schema))).not.toMatch(/javascript:/);
   });
 });
@@ -80,4 +84,121 @@ it('keeps loose-list paragraphs and nested fenced code as child blocks', () => {
 it.each(['- **a** **b**', '- [x] **a** **b**'])('preserves inline spacing in %s', (source) => {
   const blocks = markdownBlocks(source, schema)!;
   expect(blocks[0].content![0].content!.map((node) => node.text ?? '').join('')).toBe('a b');
+});
+
+it('imports soft Markdown line breaks as hardBreak nodes without losing styled text', () => {
+  const blocks = markdownBlocks('**a\nb**\n\nnext', schema);
+  expect(blocks?.[0]?.content?.[0]?.content).toEqual([
+    { type: 'text', text: 'a', marks: [{ type: 'bold' }] },
+    { type: 'hardBreak' },
+    { type: 'text', text: 'b', marks: [{ type: 'bold' }] },
+  ]);
+});
+
+const emptyContent = () => ({
+  type: 'doc',
+  content: [
+    {
+      type: 'blockGroup',
+      content: [{ type: 'blockContainer', attrs: { id: crypto.randomUUID() }, content: [{ type: 'paragraph' }] }],
+    },
+  ],
+});
+const pastedParagraphs = (editor: Editor) =>
+  (editor.getJSON() as JSONContent).content![0].content!.map((block) => block.content![0]);
+
+it.each(['a\nb\nc', 'a  \nb\nc', 'a\\\nb\nc', 'a\r\nb\r\nc'])('imports hard breaks once: %j', (text) => {
+  expect(markdownBlocks(text, schema)?.[0].content?.[0].content).toEqual([
+    { type: 'text', text: 'a' },
+    { type: 'hardBreak' },
+    { type: 'text', text: 'b' },
+    { type: 'hardBreak' },
+    { type: 'text', text: 'c' },
+  ]);
+});
+
+it.each(['clipboard', 'plain-parser'])('pastes ordinary newlines with the GitHub policy via %s', (path) => {
+  const editor = new Editor({
+    element: document.createElement('div'),
+    extensions: [...createTiptapWireExtensions(), createMarkdownPasteExtension(() => true)],
+    content: emptyContent(),
+  });
+  if (path === 'clipboard') {
+    editor.view.someProp('handlePaste', (handler) =>
+      handler(
+        editor.view,
+        { clipboardData: { getData: (type: string) => (type === 'text/plain' ? 'a\nb\n\nc' : '') } } as ClipboardEvent,
+        editor.state.doc.slice(0, 0),
+      ),
+    );
+  } else {
+    editor.view.pasteText('a\nb\n\nc', new Event('paste') as ClipboardEvent);
+  }
+  expect(pastedParagraphs(editor).map((node) => node.content)).toEqual([
+    [{ type: 'text', text: 'a' }, { type: 'hardBreak' }, { type: 'text', text: 'b' }],
+    [{ type: 'text', text: 'c' }],
+  ]);
+  editor.destroy();
+});
+
+it('inserts a single paragraph into existing text without splitting the block', () => {
+  const editor = new Editor({
+    element: document.createElement('div'),
+    extensions: [...createTiptapWireExtensions(), createMarkdownPasteExtension(() => true)],
+    content: emptyContent(),
+  });
+  editor.commands.insertContent('prefix suffix');
+  editor.commands.setTextSelection(10);
+  editor.view.pasteText('a\nb', new Event('paste') as ClipboardEvent);
+  expect(pastedParagraphs(editor)).toHaveLength(1);
+  expect(editor.state.doc.textContent).toBe('prefix a' + 'bsuffix');
+  expect(editor.getHTML()).toContain('a<br>b');
+  editor.destroy();
+});
+
+it('keeps the destination heading when pasting plain text into an empty heading', () => {
+  const content = emptyContent();
+  content.content[0].content[0].content[0].type = 'heading';
+  const editor = new Editor({
+    element: document.createElement('div'),
+    extensions: [...createTiptapWireExtensions(), createMarkdownPasteExtension(() => true)],
+    content,
+  });
+  editor.view.someProp('handlePaste', (handler) =>
+    handler(
+      editor.view,
+      { clipboardData: { getData: (type: string) => (type === 'text/plain' ? 'a\nb' : '') } } as ClipboardEvent,
+      editor.state.doc.slice(0, 0),
+    ),
+  );
+  expect(editor.state.doc.firstChild!.firstChild!.firstChild!.type.name).toBe('heading');
+  expect(editor.getHTML()).toContain('a<br>b');
+  editor.destroy();
+});
+
+it('keeps a pasted Markdown heading as a block inside an existing paragraph', () => {
+  const editor = new Editor({
+    element: document.createElement('div'),
+    extensions: [...createTiptapWireExtensions(), createMarkdownPasteExtension(() => true)],
+    content: emptyContent(),
+  });
+  editor.commands.insertContent('prefix suffix');
+  editor.commands.setTextSelection(10);
+  editor.view.someProp('handlePaste', (handler) =>
+    handler(
+      editor.view,
+      {
+        clipboardData: { getData: (type: string) => (type === 'text/plain' ? '# Heading\n\n- item' : '') },
+      } as ClipboardEvent,
+      editor.state.doc.slice(0, 0),
+    ),
+  );
+  expect(pastedParagraphs(editor).map((node) => node.type)).toEqual([
+    'paragraph',
+    'heading',
+    'bulletListItem',
+    'paragraph',
+  ]);
+  expect(pastedParagraphs(editor)[1].content).toEqual([{ type: 'text', text: 'Heading' }]);
+  editor.destroy();
 });

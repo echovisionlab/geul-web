@@ -115,20 +115,20 @@ function LayoutPreview({ state = 'ready' }: { state?: State }) {
     </QueryClientProvider>
   );
 }
-function TemplatePreview({ state = 'ready' }: { state?: State }) {
+function TemplatePreview({ state = 'ready', lineBreaks = false }: { state?: State; lineBreaks?: boolean }) {
   const editorRef = useRef<EmailCampaignTiptapEditorHandle | null>(null);
   const [previewHtml, setPreviewHtml] = useState('');
   const refreshPreview = () => setPreviewHtml(editorRef.current?.getHTML() ?? '');
   const [client] = useState(() => localEditorQueryClient('email_template', 'local-template'));
   const [room, setRoom] = useState<ReturnType<typeof localEmailRoom> | null>(null);
   useEffect(() => {
-    const current = localEmailRoom('email_template');
+    const current = localEmailRoom('email_template', lineBreaks);
     setRoom(current);
     return () => {
       current.awareness.destroy();
       current.document.destroy();
     };
-  }, []);
+  }, [lineBreaks]);
   const router = useRouter(),
     currentLocale = useLocale();
   const tCommonNotifications = useTranslations('common.notifications'),
@@ -241,14 +241,26 @@ function TemplatePreview({ state = 'ready' }: { state?: State }) {
     </QueryClientProvider>
   );
 }
-function Preview({ page = 'layout', state = 'ready' }: { page?: 'layout' | 'template'; state?: State }) {
-  return page === 'layout' ? <LayoutPreview state={state} /> : <TemplatePreview state={state} />;
+function Preview({
+  page = 'layout',
+  state = 'ready',
+  lineBreaks = false,
+}: {
+  page?: 'layout' | 'template';
+  state?: State;
+  lineBreaks?: boolean;
+}) {
+  return page === 'layout' ? (
+    <LayoutPreview state={state} />
+  ) : (
+    <TemplatePreview state={state} lineBreaks={lineBreaks} />
+  );
 }
 const meta = {
   title: 'Pages/Admin/Email Editors',
   component: Preview,
   args: { page: 'layout', state: 'ready' },
-  render: (args) => <Preview key={`${args.page}-${args.state}`} {...args} />,
+  render: (args) => <Preview key={`${args.page}-${args.state}-${args.lineBreaks}`} {...args} />,
   parameters: {
     layout: 'fullscreen',
     nextjs: { appDirectory: true },
@@ -264,6 +276,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 export const Layout: Story = {};
 export const Template: Story = { args: { page: 'template' } };
+export const TemplateLineBreaks: Story = { args: { page: 'template', lineBreaks: true } };
 export const LayoutPending: Story = { args: { state: 'pending' } };
 export const TemplatePending: Story = { args: { page: 'template', state: 'pending' } };
 export const LayoutFailed: Story = { args: { state: 'failed' } };

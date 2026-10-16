@@ -23,7 +23,7 @@ describe('resolveGeneratedStandaloneExternalVideoLink', () => {
       resolveGeneratedStandaloneExternalVideoLink(
         {
           content: [
-            { value: { case: 'text', value: { text: ' \n' } } } as RichTextInline,
+            { value: { case: 'text', value: { text: ' \t' } } } as RichTextInline,
             generatedLink,
             { value: { case: 'text', value: { text: '\t' } } } as RichTextInline,
           ],
@@ -53,3 +53,24 @@ describe('resolveGeneratedStandaloneExternalVideoLink', () => {
     expect(resolveGeneratedStandaloneExternalVideoLink({ content, hasChildren })).toBeNull();
   });
 });
+
+it.each(['\n', '\r\n', '\r'])(
+  'keeps authored %j breaks visible instead of promoting the paragraph to a video',
+  (newline) => {
+    const link = {
+      value: {
+        case: 'link',
+        value: { href: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', content: [{ text: 'Recording' }] },
+      },
+    } as RichTextInline;
+    const text = { value: { case: 'text', value: { text: newline } } } as RichTextInline;
+    expect(resolveGeneratedStandaloneExternalVideoLink({ content: [text, link], hasChildren: false })).toBeNull();
+    const linkedBreak = {
+      value: {
+        case: 'link',
+        value: { href: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', content: [{ text: `Recording${newline}label` }] },
+      },
+    } as RichTextInline;
+    expect(resolveGeneratedStandaloneExternalVideoLink({ content: [linkedBreak], hasChildren: false })).toBeNull();
+  },
+);

@@ -52,7 +52,9 @@ const GeneratedMermaidBlockView = dynamic<{ block: GeneratedRichTextBlock<'merma
 );
 
 function styledText(item: Pick<RichTextStyledText, 'text' | 'styles'>, key: string): ReactNode {
-  let value: ReactNode = item.text;
+  let value: ReactNode = item.text
+    .split(/\r\n|\r|\n/)
+    .flatMap((line, index) => [...(index ? [<br key={`${key}-break-${index}`} />] : []), line]);
   const styles = item.styles;
   if (styles?.bold) {
     value = <strong>{value}</strong>;

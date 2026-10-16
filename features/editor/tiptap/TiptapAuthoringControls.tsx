@@ -480,11 +480,13 @@ function MathBubbleMenu({ editor }: { editor: Editor }) {
 export interface TiptapAuthoringControlsProps extends TiptapAuthoringControlsCallbacks {
   editor: Editor;
   capabilities?: TiptapAuthoringCapabilities;
+  allowedItems?: readonly string[];
 }
 
 export function TiptapAuthoringControls({
   editor,
   capabilities = {},
+  allowedItems,
   onMathActivate,
   onTableActivate,
   onMapActivate,
@@ -703,8 +705,12 @@ export function TiptapAuthoringControls({
       },
       callbacks,
     });
-    return catalog.filter((item) => item.capability === undefined || capabilities[item.capability] !== false);
-  }, [callbacks, capabilities, messages, siteVariableAvailable]);
+    return catalog.filter(
+      (item) =>
+        (!allowedItems || allowedItems.includes(item.key)) &&
+        (item.capability === undefined || capabilities[item.capability] !== false),
+    );
+  }, [allowedItems, callbacks, capabilities, messages, siteVariableAvailable]);
   const menuId = useId();
 
   const [, setRevision] = useState(0);

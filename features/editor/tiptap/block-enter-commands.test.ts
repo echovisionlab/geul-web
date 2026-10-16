@@ -281,22 +281,35 @@ describe('Tiptap text-block Enter commands', () => {
       content: controller.initialContent,
     });
     const disconnect = controller.connect(editor);
-    placeCursorAtEnd(editor, 'heading', 'Location');
+    try {
+      placeCursorAtEnd(editor, 'heading', 'Location');
 
-    const enter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
-    editor.view.dom.dispatchEvent(enter);
+      const enter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+      editor.view.dom.dispatchEvent(enter);
 
-    const materialized = materializeCanonicalBlockRoom(room, 'post');
-    if (materialized.$typeName !== 'api.content.v1.LocalizedRichTextDocument') {
-      throw new Error('Expected Post document.');
+      const materialized = materializeCanonicalBlockRoom(room, 'post');
+      if (materialized.$typeName !== 'api.content.v1.LocalizedRichTextDocument') {
+        throw new Error('Expected Post document.');
+      }
+      // Materialized storage arrays are keyed by ID; placement owns document order.
+      const orderedNodes = [...(materialized.base?.nodes ?? [])].sort(
+        (left, right) => (left.placement?.index ?? 0) - (right.placement?.index ?? 0),
+      );
+      expect(orderedNodes.map((node) => node.block?.value.case)).toEqual(['heading', 'paragraph']);
+      expect(orderedNodes.map((node) => node.placement?.index)).toEqual([0, 1]);
+      expect(orderedNodes[0]?.block?.id).toBe(LOCATION_BLOCK_ID);
+      expect(orderedNodes[1]?.block?.id).not.toBe(LOCATION_BLOCK_ID);
+      const overlaysById = new Map(materialized.localeOverlay?.blocks.map((block) => [block.blockId, block]));
+      expect(overlaysById.size).toBe(2);
+      expect(orderedNodes.map((node) => overlaysById.get(node.block!.id)?.value.case)).toEqual([
+        'heading',
+        'paragraph',
+      ]);
+    } finally {
+      disconnect();
+      editor.destroy();
+      room.destroy();
     }
-    expect(materialized.base?.nodes.map((node) => node.block?.value.case)).toEqual(['heading', 'paragraph']);
-    expect(materialized.base?.nodes[0]?.block?.id).toBe(LOCATION_BLOCK_ID);
-    expect(materialized.base?.nodes[1]?.block?.id).not.toBe(LOCATION_BLOCK_ID);
-    expect(materialized.localeOverlay?.blocks.map((block) => block.value.case)).toEqual(['heading', 'paragraph']);
-    disconnect();
-    editor.destroy();
-    room.destroy();
   });
 
   it('deletes the empty Paragraph after a heading from the Block-room document with one Backspace', () => {
@@ -841,4 +854,31 @@ describe('Tiptap text-block Enter commands', () => {
     expect(group?.child(1).childCount).toBe(1);
     mounted.destroy();
   });
+});
+
+it('inserts Shift+Enter inside a table paragraph without creating another block', () => {
+  const mounted = mount(
+    documentWith(
+      container(LOCATION_BLOCK_ID, {
+        type: 'table',
+        content: [
+          {
+            type: 'tableRow',
+            content: [
+              { type: 'tableCell', content: [{ type: 'tableParagraph', content: [{ type: 'text', text: 'ab' }] }] },
+            ],
+          },
+        ],
+      }),
+    ),
+  );
+  mounted.editor.commands.setTextSelection(nodePosition(mounted.editor, 'tableParagraph') + 2);
+  const event = new KeyboardEvent('keydown', { key: 'Enter', shiftKey: true, bubbles: true, cancelable: true });
+  mounted.editor.view.dom.dispatchEvent(event);
+  expect(event.defaultPrevented).toBe(true);
+  const paragraph = mounted.editor.state.doc.firstChild!.firstChild!.firstChild!.firstChild!.firstChild!.firstChild!;
+  expect(paragraph.type.name).toBe('tableParagraph');
+  expect(paragraph.content.content.map((node) => node.type.name)).toEqual(['text', 'hardBreak', 'text']);
+  expect(mounted.editor.state.doc.firstChild!.childCount).toBe(1);
+  mounted.destroy();
 });
