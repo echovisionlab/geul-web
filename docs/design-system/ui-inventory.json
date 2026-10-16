@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "40d44abad3d14526f864282358a4c2b5ac6850aa1a4b8ab90e14f2e60aa4627b",
+  "manifestHash": "320b7f055849bee6029f2d870930deead394d7e8fb93a8eba0ce2a81812b8503",
   "counts": {
-    "sourceFiles": 3765,
+    "sourceFiles": 3778,
     "productionSourceFiles": 2284,
     "componentFiles": 901,
     "coreFamilies": 57,
     "featureDomains": 53,
     "storyFiles": 256,
-    "storyVariants": 1446,
+    "storyVariants": 1447,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -21,6 +21,8 @@
     ".storybook/StoryCanvas.tsx",
     ".storybook/TextControl.accessibility.test.tsx",
     ".storybook/core-fixture-aliases.ts",
+    ".storybook/document-locale.test.ts",
+    ".storybook/document-locale.ts",
     ".storybook/documentation-contract.test.ts",
     ".storybook/documentation-contract.ts",
     ".storybook/fixture-i18n.test.tsx",
@@ -29,8 +31,12 @@
     ".storybook/loaders/transpile-typescript.cjs",
     ".storybook/main.ts",
     ".storybook/manager.ts",
+    ".storybook/middleware.mjs",
     ".storybook/preview.tsx",
     ".storybook/runtime-config-fixture.ts",
+    ".storybook/test-environment.mjs",
+    ".storybook/test-environment.test.ts",
+    ".storybook/test-runner-jest.config.mjs",
     "app/(general)/[...slug]/PageContent.tsx",
     "app/(general)/[...slug]/PageContentWithToken.tsx",
     "app/(general)/[...slug]/PageJsonLd.tsx",
@@ -923,6 +929,7 @@
     "features/admin/dashboard/AdminDashboardPage.tsx",
     "features/admin/email-layout/EmailLayoutEditPage.tsx",
     "features/admin/email-layout/EmailLayoutEditor.tsx",
+    "features/admin/email-layout/EmailLayoutPreview.test.tsx",
     "features/admin/email-layout/EmailLayoutPreview.tsx",
     "features/admin/email-layout/EmailLayoutPreviewView.tsx",
     "features/admin/email-layout/EmailLayoutTargetEditor.test.tsx",
@@ -3737,6 +3744,9 @@
     "stories/pages/fixtures/document-editor-room.ts",
     "stories/pages/fixtures/editor-pages.ts",
     "stories/pages/fixtures/email-catalog.ts",
+    "stories/pages/fixtures/email-preview.test.ts",
+    "stories/pages/fixtures/email-preview.ts",
+    "stories/pages/fixtures/email-rich-formatting.ts",
     "stories/pages/fixtures/form-share-links.ts",
     "stories/pages/fixtures/form-translations.ts",
     "stories/pages/fixtures/local-actions.test.ts",
@@ -3746,10 +3756,13 @@
     "stories/pages/fixtures/operations-a11y.ts",
     "stories/pages/fixtures/paginated.ts",
     "stories/pages/fixtures/personal-access-tokens.ts",
+    "stories/pages/fixtures/room-access-scenario.test.ts",
+    "stories/pages/fixtures/room-access-scenario.ts",
     "stories/pages/fixtures/table-query.ts",
     "stories/pages/fixtures/translation-admin.ts",
     "stories/pages/fixtures/transport-query.ts",
     "stories/pages/fixtures/use-document-editor.tsx",
+    "stories/pages/fixtures/use-email-preview.ts",
     "stories/public/fixtures/PublicShellStoryHarness.tsx",
     "stories/public/fixtures/document-outline.ts",
     "stories/public/fixtures/long-rich-text.ts",
@@ -22295,18 +22308,7 @@
         {
           "name": "EmailLayoutPreviewBindings",
           "extends": [],
-          "properties": [
-            {
-              "name": "content",
-              "optional": false,
-              "type": "typeof previewEmailLayoutContentAction"
-            },
-            {
-              "name": "saved",
-              "optional": false,
-              "type": "typeof previewEmailLayout"
-            }
-          ]
+          "properties": []
         },
         {
           "name": "EmailLayoutPreviewProps",
@@ -22353,7 +22355,7 @@
       "typeAliasEvidence": [],
       "productionConsumers": ["features/admin/email-layout/EmailLayoutEditPage.tsx"],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["features/admin/email-layout/EmailLayoutPreview.test.tsx"],
       "stories": [],
       "composedJsx": ["EmailLayoutPreviewView"]
     },
@@ -74650,6 +74652,7 @@
         "features/admin/MapThemeEditor/useMapThemeEditorInterruption.test.tsx",
         "features/admin/artist/ArtistDeleteDialogView.test.tsx",
         "features/admin/cms-page/PageRowMenu.test.tsx",
+        "features/admin/email-layout/EmailLayoutPreview.test.tsx",
         "features/admin/email-layout/EmailLayoutTargetEditor.test.tsx",
         "features/admin/email-layout/action-error-message.test.ts",
         "features/admin/email-template/EmailTemplateEditPage.configuration.test.tsx",
@@ -85265,9 +85268,9 @@
         "features/campaign/CampaignEditPage.tsx",
         "features/site/PageLoader/index.ts",
         "lib/collab/schemas/campaign-fields.schema.ts",
-        "lib/email/preview-document.ts",
         "lib/i18n/locale.ts",
         "stories/pages/fixtures/editor-pages.ts",
+        "stories/pages/fixtures/use-email-preview.ts",
         "stories/shared/preview-navigation.ts"
       ]
     },
@@ -85404,6 +85407,11 @@
           "preview": "http://localhost:6010/?path=/story/pages-admin-email-editors--template-line-breaks"
         },
         {
+          "name": "TemplateRichFormatting",
+          "args": "{ page: 'template', richFormatting: true }",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-email-editors--template-rich-formatting"
+        },
+        {
           "name": "LayoutPending",
           "args": "{ state: 'pending' }",
           "preview": "http://localhost:6010/?path=/story/pages-admin-email-editors--layout-pending"
@@ -85446,8 +85454,10 @@
         "features/admin/email-layout/EmailLayoutEditPage.tsx",
         "features/admin/email-template/EmailTemplateEditPage.tsx",
         "features/site/PageLoader/index.ts",
-        "lib/email/preview-document.ts",
-        "stories/pages/fixtures/editor-pages.ts"
+        "stories/pages/fixtures/editor-pages.ts",
+        "stories/pages/fixtures/email-preview.ts",
+        "stories/pages/fixtures/email-rich-formatting.ts",
+        "stories/pages/fixtures/use-email-preview.ts"
       ]
     },
     {
@@ -86968,7 +86978,6 @@
         "features/post/PostEditor/PostEditor.tsx",
         "features/site/PageLoader/index.ts",
         "features/translation/TranslationServicesContext.tsx",
-        "lib/collab/provider-control-state.ts",
         "lib/contexts/PostMetaContext.tsx",
         "lib/i18n/locale.ts",
         "lib/providers/AppNotificationRegion.tsx",
@@ -86977,6 +86986,7 @@
         "stories/pages/fixtures/DocumentEditorFrame.tsx",
         "stories/pages/fixtures/author-media.ts",
         "stories/pages/fixtures/author-translations.ts",
+        "stories/pages/fixtures/room-access-scenario.ts",
         "stories/pages/fixtures/use-document-editor.tsx",
         "stories/shared/preview-navigation.ts"
       ]
