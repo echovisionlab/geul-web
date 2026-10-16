@@ -16,4 +16,4 @@ if [ ! -d .next/standalone ]; then
   exit 1
 fi
 
-echo "Build complete. Run 'docker build -t geul-web .' to build the container image."
+echo "Build complete. Run 'docker build --secret id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN -t geul-web .' to build the container image."

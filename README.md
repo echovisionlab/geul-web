@@ -1,10 +1,22 @@
 # geul-web
 
-The Geul web application, published as a standalone Next.js source repository.
+The Geul web application, maintained in a private Next.js source repository.
 
 ## Development
 
-Requirements: Node.js `24.21.0` and pnpm `11.22.0`.
+Requirements: Node.js `24.21.0` and pnpm `12.9.1`.
+
+The committed `.npmrc` routes `@echovisionlab` to private GitHub Packages and uses
+`//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}`. Export `NODE_AUTH_TOKEN`
+with a GitHub personal access token (classic) that has `read:packages`, access to
+the private packages, and `repo` for private sibling repositories (authorize org
+SSO if required). Keep the token in your shell or secret manager, never in the
+repository or `.env` (pnpm does not load `.env` for authentication). The same auth
+line can be used in `~/.npmrc` for other checkouts.
+
+`@echovisionlab/ionian` and `@echovisionlab/audio-transcoder` remain on public
+npmjs through explicit, versioned tarball dependencies in `package.json` and the
+lockfile. They do not need republishing to GitHub Packages. When upgrading them,
 
 ```sh
 cp .env.example .env
@@ -13,6 +25,17 @@ pnpm prepare:maplibre-worker
 pnpm prepare:p5-runtime
 pnpm dev
 ```
+
+Run the resolver before installing or fetching dependencies. GitHub Packages
+uses digest-bearing download URLs that cannot be derived from a version number.
+The resolver obtains those URLs for the locked `geul-*` packages, verifies the
+committed SHA-512 pins, and changes only their lockfile locations. It fails on
+missing access, unpublished versions, or changed artifacts; it never changes
+versions or pins. CI and Docker run it before their frozen installs too.
+
+For Go work in sibling repositories, set
+`GOPRIVATE=github.com/echovisionlab/*` and authenticate Git to GitHub using your
+credential manager or SSH. This web repository has no private Go module build.
 
 While working, check only what the working tree changed (typecheck, ESLint and
 Stylelint on changed files, `i18n:check` when messages changed, Vitest for related
@@ -41,7 +64,16 @@ Unreleased sibling contracts (`../geul-event-contracts`, `../geul-common`,
 sibling checkout with a pnpm `link:` override.
 
 The production image is published by the release workflow as
-`registry.rawsector.com/echovisionlab/geul-web:<tag>`.
+`registry.rawsector.com/echovisionlab/geul-web:<tag>`. Harbor requires authenticated
+pulls; see [Docker image builds and pulls](docs/deployment/docker-image-build.md).
+
+## Private packages
+
+`@echovisionlab` packages are installed from GitHub Packages (see `.npmrc`).
+Locally, export `NODE_AUTH_TOKEN` with a classic PAT that has `read:packages`
+(and `repo` for the private geul repositories). CI reads the repository secret
+`PRIVATE_DEPS_TOKEN` as `NODE_AUTH_TOKEN`; Docker builds receive it only as a
+BuildKit secret.
 
 This standalone repository uses Geul-namespaced browser, storage, runtime, and
 wire identifiers. Deployments provide their public and service URLs through the

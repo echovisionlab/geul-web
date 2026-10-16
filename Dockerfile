@@ -13,13 +13,15 @@ RUN pnpm config set store-dir ${PNPM_STORE_DIR}
 
 FROM base AS deps
 WORKDIR /app
-COPY --link pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+COPY --link pnpm-workspace.yaml package.json pnpm-lock.yaml .npmrc ./
 COPY --link patches ./patches
 COPY --link tooling/typescript-eslint ./tooling/typescript-eslint
 COPY --link tooling/typescript6 ./tooling/typescript6
 COPY --link scripts/prepare-client-media-codecs.mjs ./scripts/prepare-client-media-codecs.mjs
-RUN pnpm fetch
-RUN pnpm install --frozen-lockfile --offline
+RUN --mount=type=secret,id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN,required=true \
+    env "pnpm_config_//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" pnpm fetch
+RUN --mount=type=secret,id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN,required=true \
+    env "pnpm_config_//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" pnpm install --frozen-lockfile --offline
 
 FROM base AS builder
 ARG RELEASE_IMAGE_BUILD=false

@@ -144,8 +144,15 @@ jobs:
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .nvmrc
+          # Writes the user-level npmrc that reads NODE_AUTH_TOKEN; pnpm ignores
+          # environment-backed auth in the repository .npmrc.
+          registry-url: https://npm.pkg.github.com
+          scope: '@echovisionlab'
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.PRIVATE_DEPS_TOKEN }}
+        run: |
+          pnpm install --frozen-lockfile
       - name: Check Prettier formatting
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -213,8 +220,15 @@ jobs:
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .nvmrc
+          # Writes the user-level npmrc that reads NODE_AUTH_TOKEN; pnpm ignores
+          # environment-backed auth in the repository .npmrc.
+          registry-url: https://npm.pkg.github.com
+          scope: '@echovisionlab'
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.PRIVATE_DEPS_TOKEN }}
+        run: |
+          pnpm install --frozen-lockfile
       - name: Lint JavaScript and TypeScript
         env:
           # Type-aware lint of the whole app exceeds Node's default ~2 GB heap.
@@ -287,8 +301,15 @@ jobs:
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .nvmrc
+          # Writes the user-level npmrc that reads NODE_AUTH_TOKEN; pnpm ignores
+          # environment-backed auth in the repository .npmrc.
+          registry-url: https://npm.pkg.github.com
+          scope: '@echovisionlab'
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.PRIVATE_DEPS_TOKEN }}
+        run: |
+          pnpm install --frozen-lockfile
       - name: Run unit-test shard
         run: pnpm exec vitest run --fileParallelism --shard=${{ matrix.shard }}/2
 
