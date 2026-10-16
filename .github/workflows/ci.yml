@@ -166,6 +166,22 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
+      - name: Add swap to the hosted runner
+        # Private repositories run on 2-core/8 GB hosted runners. The Next build
+        # and type-aware lint outgrow that and the runner is OOM-killed mid-build.
+        run: |
+          set -euo pipefail
+          target=/mnt/ci-swapfile
+          mnt_free=$(df --output=avail -BG /mnt 2>/dev/null | tail -1 | tr -dc 0-9 || true)
+          if [ "${mnt_free:-0}" -lt 20 ]; then
+            target=/ci-swapfile
+          fi
+          sudo fallocate -l 12G "$target"
+          sudo chmod 600 "$target"
+          sudo mkswap "$target" >/dev/null
+          sudo swapon "$target"
+          free -h
+          df -h "$(dirname "$target")"
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
