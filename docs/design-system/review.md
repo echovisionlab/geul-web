@@ -92,7 +92,7 @@ Review actual tasks across ready, empty, error, loading, permission, editing, sa
 
 Each result records `Core export / source·build / story ID·args / viewport·surface width / pointer /
 theme·locale / state·query / expected·observed / evidence / defect owner / unresolved scope`.
-Use historical [consumer-view observations](app-comparison-review.md) only within their source/environment limits.
+Use the current rendered examples and executable interaction checks.
 
 | Stage                            | Required evidence                                                                      |
 | -------------------------------- | -------------------------------------------------------------------------------------- |

@@ -22,6 +22,10 @@ storybook-static/
 tests/.test-env.json
 
 # Local artifacts
+design/storybook/*-review.json
+design/storybook/actions-browser-observations*.json
+design/storybook/review-notes/
+design/storybook/review-results/
 tmp/
 .artifacts/
 public/providers/maplibre/

@@ -102,7 +102,6 @@ also distinguishes live area from touch clearance.
 
 The shared roles and owners define the spacing contract. Enlarge or optically adjust
 a glyph only with measurements and actual consumer evidence at the common owner.
-Browser observations belong in the [app comparison record](app-comparison-review.md).
 Record Storybook wrapper spacing separately from product padding/gaps, together
 with the actual CSS viewport and control box.
 

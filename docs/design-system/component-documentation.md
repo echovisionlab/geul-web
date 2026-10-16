@@ -27,7 +27,7 @@ Controls change args exposed by the actual story. Connect static enum/boolean ty
 | Related specifications | Repository-owned contracts and API reviews                                                                                    |
 | Token references       | Static variables in owned TS files and direct/local CSS imports, with reference locations, central definitions and conditions |
 
-[Usage Rules](./getting-started.md#documentation-structure) compares correct and incorrect compositions using actual Core components. Follow the [contribution process](./contribution.md) and record changes in the [Changelog](./changelog.md).
+[Usage Rules](./getting-started.md#documentation-structure) compares correct and incorrect compositions using actual Core components. Follow the [contribution process](./contribution.md) and update the affected regression tests.
 
 The adopted documentation model follows Storybook's [documentation guide](https://storybook.js.org/blog/how-to-document-your-design-system-best-practices-tools/), [structure guide](https://storybook.js.org/blog/structuring-your-storybook/) and [Docs approaches](https://storybook.js.org/blog/4-ways-to-document-your-design-system-with-storybook/): usage guidance, live examples and API references stay connected to implementation.
 

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "725e5cf3b8cc0fe27f2c01cd3d475eea88ee2b3c7e9867acd7592faae4e1deb0",
+  "manifestHash": "992f67a736d845fc48fa214b564e19f490411d369138d6b4fca63e1234601511",
   "counts": {
     "sourceFiles": 3774,
     "productionSourceFiles": 2281,
@@ -10,7 +10,7 @@
     "coreFamilies": 57,
     "featureDomains": 53,
     "storyFiles": 256,
-    "storyVariants": 1447,
+    "storyVariants": 1446,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -83764,11 +83764,6 @@
           "name": "Contribution",
           "args": "{ initialDocument: 'docs/design-system/contribution.md' }",
           "preview": "http://localhost:6010/?path=/story/design-system-handbook--contribution"
-        },
-        {
-          "name": "Changelog",
-          "args": "{ initialDocument: 'docs/design-system/changelog.md' }",
-          "preview": "http://localhost:6010/?path=/story/design-system-handbook--changelog"
         },
         {
           "name": "Reference",

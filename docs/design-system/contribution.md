@@ -62,7 +62,7 @@ When public props, supported combinations, defaults or token meanings change, de
 For breaking changes, provide consumer migration examples and the order of migration.
 The repository currently does not version the design system as a separate published package.
 Implementation and documentation are identified by the same Git change; application release records establish deployment status.
-Record the date, change, owners, verification and migration in the [changelog](./changelog.md).
+Keep the affected contract examples and regression tests current.
 Do not label work before deployment as released.
 
 References: [Storybook documentation guidance](https://storybook.js.org/blog/how-to-document-your-design-system-best-practices-tools/), [Storybook structure guidance](https://storybook.js.org/blog/structuring-your-storybook/).
