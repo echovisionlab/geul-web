@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import type { SessionWithUser } from '@/lib/auth';
+import type { SessionWithUser } from '@/lib/auth/types';
 import { toSessionData } from './session-data';
 
 it('keeps the OAuth account identity out of browser session JSON', () => {

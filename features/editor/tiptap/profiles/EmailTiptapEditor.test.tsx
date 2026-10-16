@@ -13,7 +13,7 @@ import {
   RichTextProfile,
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { hydrateCanonicalBlockRoom } from '@echovisionlab/geul-common/collaboration/block-room-codec';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Awareness } from 'y-protocols/awareness';
 import * as Y from 'yjs';
 import { createBlockRoomProseMirrorBridge } from '../block-room-prosemirror-bridge';
@@ -21,11 +21,7 @@ import {
   createRichTextBlockRoomTiptapController,
   type RichTextBlockRoomTiptapController,
 } from '../block-room-tiptap-controller';
-import {
-  EmailTiptapEditor,
-  normalizeEmailCampaignPreviewHtml,
-  normalizeEmailCampaignVariable,
-} from './EmailTiptapEditor';
+import { EmailTiptapEditor } from './EmailTiptapEditor';
 
 const EMAIL_PARAGRAPH_ID = '019cce25-dbc0-7d12-9f1f-735b1a6c6b21';
 
@@ -36,38 +32,43 @@ vi.mock('next-intl', () => ({
   useTranslations: () => translate,
 }));
 
-vi.stubGlobal(
-  'ResizeObserver',
-  class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  },
-);
-
-Object.defineProperties(Range.prototype, {
-  getBoundingClientRect: { configurable: true, value: () => document.body.getBoundingClientRect() },
-  getClientRects: { configurable: true, value: () => [document.body.getBoundingClientRect()] },
+beforeEach(() => {
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  );
 });
 
 let root: Root | null = null;
 let host: HTMLDivElement | null = null;
 let yDocument: Y.Doc | null = null;
 let awareness: Awareness | null = null;
+const mountedEditors = new Set<Editor>();
 
 afterEach(async () => {
-  await act(async () => {
-    root?.unmount();
-    // Tiptap React delays Editor.destroy() by one tick to survive StrictMode remounts.
-    await new Promise((resolve) => setTimeout(resolve, 2));
-  });
-  awareness?.destroy();
-  yDocument?.destroy();
-  host?.remove();
-  root = null;
-  host = null;
-  awareness = null;
-  yDocument = null;
+  try {
+    await act(async () => root?.unmount());
+    // Tiptap schedules destruction to survive StrictMode remounts. Observe
+    // disposal before destroying the collaboration resources it still uses.
+    await vi.waitFor(() => {
+      expect([...mountedEditors].every((editor) => editor.isDestroyed)).toBe(true);
+    });
+  } finally {
+    awareness?.destroy();
+    yDocument?.destroy();
+    host?.remove();
+    root = null;
+    host = null;
+    awareness = null;
+    yDocument = null;
+    mountedEditors.clear();
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  }
 });
 
 function emailController(yDocument: Y.Doc): RichTextBlockRoomTiptapController {
@@ -94,9 +95,15 @@ function emailController(yDocument: Y.Doc): RichTextBlockRoomTiptapController {
     } as JsonValue),
     [],
   );
-  return createRichTextBlockRoomTiptapController(
+  const controller = createRichTextBlockRoomTiptapController(
     createBlockRoomProseMirrorBridge({ document: yDocument, documentType: 'email-template', locale: 'en' }),
   );
+  const connect = controller.connect.bind(controller);
+  vi.spyOn(controller, 'connect').mockImplementation((editor) => {
+    mountedEditors.add(editor);
+    return connect(editor);
+  });
+  return controller;
 }
 
 describe('EmailTiptapEditor profile', () => {
@@ -127,9 +134,7 @@ describe('EmailTiptapEditor profile', () => {
         </DesignSystemProvider>,
       );
     await act(async () => render(false));
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 2));
-    });
+    await vi.waitFor(() => expect(onEditorReady).toHaveBeenCalledOnce());
 
     const handle = onEditorReady.mock.calls[0]?.[0];
     expect(handle).toBeDefined();
@@ -184,9 +189,7 @@ describe('EmailTiptapEditor profile', () => {
         </DesignSystemProvider>,
       );
     await act(async () => render());
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 2));
-    });
+    await vi.waitFor(() => expect(ready).toHaveBeenCalledOnce());
     const editor: Editor = connect.mock.calls[0][0];
     const source = editor.state.doc.firstChild!.firstChild!.firstChild!;
     await act(async () => {
@@ -263,14 +266,5 @@ describe('EmailTiptapEditor profile', () => {
     expect(commands.canFormatText).toBe(false);
     expect(host.querySelector('[data-testid="tiptap-slash-menu"]')).toBeNull();
     expect(document.querySelector('[data-testid="tiptap-selection-menu"]')).toBeNull();
-  });
-
-  it('formats variables and preserves placeholder links for email previews', () => {
-    expect(normalizeEmailCampaignVariable('recipient_name')).toBe('{{recipient_name}}');
-    expect(normalizeEmailCampaignVariable('{{site_name}}')).toBe('{{site_name}}');
-    expect(normalizeEmailCampaignVariable('   ')).toBe('');
-    expect(normalizeEmailCampaignPreviewHtml('<a href="https://{{verification_url}}">Verify</a>')).toBe(
-      '<a href="{{verification_url}}">Verify</a>',
-    );
   });
 });

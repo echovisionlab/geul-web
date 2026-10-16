@@ -37,7 +37,7 @@ import { DocumentHeadingScope } from '@/features/document-layout/ui/DocumentHead
 import { LegalTranslationNotice } from '@/features/policy/LegalTranslationNotice';
 import { materializeLocalizedRichTextTree } from '@/features/editor/contract/localized-rich-text';
 import { PolicyEditor, type PolicyEditorInstance } from '@/features/policy/PolicyEditor/PolicyEditor';
-import { policyTiptapDocumentToHtml } from '@/features/editor/tiptap/profiles/PolicyTiptapEditor';
+import { policyTiptapDocumentToHtml } from '@/features/editor/tiptap/profiles/policy-document';
 import { useLegalPolicyCommands } from '@/features/policy/useLegalPolicyCommands';
 import type { LegalPolicyEditorData, LegalPolicyEditorStrategy } from '@/features/policy/legal-policy-types';
 import { ShareLinkSection } from '@/features/share/ShareLinkSection';
@@ -236,13 +236,16 @@ function useLegalPolicyEditorViewModel({
     ],
   );
 
-  const handleEditorReady = useCallback((editor: PolicyEditorInstance) => {
+  const handleEditorReady = useCallback((editor: PolicyEditorInstance | null) => {
     editorRef.current = editor;
+    if (editor) {
+      setPolicyEditorError(null);
+    }
   }, []);
 
   const handleViewModeChange = (value: string) => {
     setViewMode(value);
-    if (value === 'preview' && editorRef.current && !policyEditorError) {
+    if (value === 'preview' && editorRef.current && !editorRef.current.isDestroyed && !policyEditorError) {
       // The preview renders the body below its title heading (the preview's h1).
       setPreviewHtml(
         policyTiptapDocumentToHtml(editorRef.current.state.doc, { headingParentLevel: DOCUMENT_TITLE_HEADING_LEVEL }),

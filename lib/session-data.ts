@@ -1,4 +1,4 @@
-import type { SessionUser, SessionWithUser } from '@/lib/auth';
+import type { SessionUser, SessionWithUser } from '@/lib/auth/types';
 export interface SessionData {
   user: SessionUser;
   onboarded: boolean;

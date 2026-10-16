@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GET, POST } from './route';
 const mocks = vi.hoisted(() => ({
   fetch: vi.fn(),
@@ -17,6 +17,10 @@ beforeEach(() => {
   vi.resetAllMocks();
   mocks.publicApiUrl = 'https://api.example';
   vi.stubGlobal('fetch', mocks.fetch);
+});
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
 });
 describe('RPC proxy transport failures', () => {
   it('rejects an unreadable request before calling upstream', async () => {

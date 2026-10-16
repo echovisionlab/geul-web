@@ -3,7 +3,7 @@ import { useTranslations } from 'next-intl';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 import { LegalPolicyEditorView, type LegalPolicyEditorViewModel } from '@/features/policy/LegalPolicyEditor';
 import type { PolicyEditorInstance } from '@/features/policy/PolicyEditor/PolicyEditor';
-import { policyTiptapDocumentToHtml } from '@/features/editor/tiptap/profiles/PolicyTiptapEditor';
+import { policyTiptapDocumentToHtml } from '@/features/editor/tiptap/profiles/policy-document';
 import { DOCUMENT_TITLE_HEADING_LEVEL } from '@/features/document-layout/ui/document-heading-level';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
 import { TERMS_EDITOR_STRATEGY } from '@/features/policy/TermsEditor';
@@ -79,7 +79,7 @@ export function LegalEditorPreview({
     regenerateHtmlMutation: {
       isPending: false,
       mutate: () => {
-        if (editorRef.current) {
+        if (editorRef.current && !editorRef.current.isDestroyed) {
           setPreviewHtml(
             policyTiptapDocumentToHtml(editorRef.current.state.doc, {
               headingParentLevel: DOCUMENT_TITLE_HEADING_LEVEL,
@@ -98,7 +98,7 @@ export function LegalEditorPreview({
     isEditingTranslation: local.locale !== 'ko',
     viewMode,
     handleViewModeChange: (value) => {
-      if (editorRef.current) {
+      if (editorRef.current && !editorRef.current.isDestroyed) {
         setPreviewHtml(
           policyTiptapDocumentToHtml(editorRef.current.state.doc, { headingParentLevel: DOCUMENT_TITLE_HEADING_LEVEL }),
         );
@@ -110,6 +110,9 @@ export function LegalEditorPreview({
     canEditCurrentLocale: local.canEdit,
     handleEditorReady: (editor) => {
       editorRef.current = editor;
+      if (editor) {
+        setPolicyEditorError(null);
+      }
     },
     setPolicyEditorError,
     tCommonStates,

@@ -8,7 +8,6 @@ import { useLocale, useTranslations } from 'next-intl';
 import { IconButton } from '@/components/core/IconButton';
 import type { Awareness } from 'y-protocols/awareness';
 import { DropdownMenu } from '@/components/core/DropdownMenu';
-import { normalizeRichTextHtmlLinks } from '@echovisionlab/geul-common/editor/link-normalization';
 import { createBlockRoomPresenceExtension } from '../block-room-presence';
 import type { RichTextBlockRoomTiptapController } from '../block-room-tiptap-controller';
 import { TiptapAuthoringControls } from '../TiptapAuthoringControls';
@@ -21,6 +20,9 @@ import { TiptapContextualMenuRouter } from '../integration/contextual-menu-route
 import { useSelectionBubbleMenuLabels } from '../useSelectionBubbleMenuLabels';
 import { createMarkdownPasteExtension } from '../markdown-paste';
 import { tiptapDocumentToHtml } from './profile-html';
+import { normalizeEmailCampaignPreviewHtml, normalizeEmailCampaignVariable } from './email-preview';
+
+export { normalizeEmailCampaignPreviewHtml, normalizeEmailCampaignVariable } from './email-preview';
 
 const EMAIL_SLASH_ITEMS = [
   'paragraph',
@@ -57,18 +59,6 @@ export interface EmailCampaignTiptapEditorHandle {
   getText: () => string;
   insertVariable: (variable: string) => void;
   focus: () => void;
-}
-
-export function normalizeEmailCampaignVariable(variable: string): string {
-  const trimmed = variable.trim();
-  if (!trimmed) {
-    return '';
-  }
-  return trimmed.startsWith('{{') && trimmed.endsWith('}}') ? trimmed : `{{${trimmed}}}`;
-}
-
-export function normalizeEmailCampaignPreviewHtml(html: string): string {
-  return normalizeRichTextHtmlLinks(html);
 }
 
 function createHandle(editor: Editor): EmailCampaignTiptapEditorHandle {

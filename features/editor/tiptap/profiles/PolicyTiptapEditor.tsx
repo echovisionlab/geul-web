@@ -4,76 +4,16 @@ import { DEFAULT_SITE_BRAND_COLOR } from '@/lib/theme/site-brand';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { Extension, type Editor } from '@tiptap/core';
 import { Plugin } from '@tiptap/pm/state';
-import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
 import type { Awareness } from 'y-protocols/awareness';
 import type { RichTextBlockRoomTiptapController } from '../block-room-tiptap-controller';
 import { EditorAuthoringModeProvider, type EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
-import { tiptapDocumentToHtml, type TiptapHtmlOptions } from './profile-html';
+import { validatePolicyTiptapDocument } from './policy-document';
 import { TiptapEditor } from '@/features/editor/tiptap/TiptapEditor';
 import type { TiptapAuthoringCapabilities } from '@/features/editor/tiptap/TiptapAuthoringControls';
 
+export { policyTiptapDocumentToHtml, validatePolicyTiptapDocument } from './policy-document';
+
 export type PolicyTiptapEditorInstance = Editor;
-
-const POLICY_NODE_NAMES = new Set([
-  'doc',
-  'blockGroup',
-  'blockContainer',
-  'paragraph',
-  'heading',
-  'bulletListItem',
-  'numberedListItem',
-  'checkListItem',
-  'quote',
-  'callout',
-  'codeBlock',
-  'divider',
-  'table',
-  'tableRow',
-  'tableCell',
-  'tableHeader',
-  'tableParagraph',
-  'text',
-  'hardBreak',
-  'siteVariable',
-]);
-
-const POLICY_MARK_NAMES = new Set([
-  'bold',
-  'italic',
-  'underline',
-  'strike',
-  'code',
-  'link',
-  'textColor',
-  'backgroundColor',
-]);
-
-/** Returns a user-safe error instead of silently dropping policy content. */
-export function validatePolicyTiptapDocument(document: ProseMirrorNode): string | null {
-  const unsupportedNodes = new Set<string>();
-  const unsupportedMarks = new Set<string>();
-
-  document.descendants((node) => {
-    if (!POLICY_NODE_NAMES.has(node.type.name)) {
-      unsupportedNodes.add(node.type.name);
-    }
-    for (const mark of node.marks) {
-      if (!POLICY_MARK_NAMES.has(mark.type.name)) {
-        unsupportedMarks.add(mark.type.name);
-      }
-    }
-  });
-
-  if (unsupportedNodes.size === 0 && unsupportedMarks.size === 0) {
-    return null;
-  }
-
-  const details = [
-    ...(unsupportedNodes.size > 0 ? [`nodes: ${[...unsupportedNodes].sort().join(', ')}`] : []),
-    ...(unsupportedMarks.size > 0 ? [`styles: ${[...unsupportedMarks].sort().join(', ')}`] : []),
-  ];
-  return `This policy contains content that the policy editor does not support (${details.join('; ')}). Remove or migrate it before editing.`;
-}
 
 function createPolicyContentGuard(report: (message: string) => void) {
   return Extension.create({
@@ -96,15 +36,6 @@ function createPolicyContentGuard(report: (message: string) => void) {
   });
 }
 
-/** Serializes the durable policy JSON to public policy HTML. */
-export function policyTiptapDocumentToHtml(document: ProseMirrorNode, options: TiptapHtmlOptions = {}): string {
-  const error = validatePolicyTiptapDocument(document);
-  if (error) {
-    throw new Error(error);
-  }
-  return tiptapDocumentToHtml(document, options);
-}
-
 const POLICY_AUTHORING_CAPABILITIES = {
   ai: false,
   externalVideo: false,
@@ -124,7 +55,7 @@ export interface PolicyTiptapEditorProps {
   structureLocked?: boolean;
   userName?: string;
   userColor?: string;
-  onEditorReady?: (editor: PolicyTiptapEditorInstance) => void;
+  onEditorReady?: (editor: PolicyTiptapEditorInstance | null) => void;
   onUnsupportedContent?: (message: string) => void;
 }
 
@@ -139,12 +70,18 @@ export function PolicyTiptapEditor({
   onUnsupportedContent,
 }: PolicyTiptapEditorProps) {
   const onUnsupportedContentRef = useRef(onUnsupportedContent);
-  const [unsupportedContent, setUnsupportedContent] = useState<string | null>(null);
+  const [unsupportedContent, setUnsupportedContent] = useState<{
+    controller: RichTextBlockRoomTiptapController;
+    message: string;
+  } | null>(null);
   onUnsupportedContentRef.current = onUnsupportedContent;
-  const reportUnsupported = useCallback((message: string) => {
-    setUnsupportedContent(message);
-    onUnsupportedContentRef.current?.(message);
-  }, []);
+  const reportUnsupported = useCallback(
+    (message: string) => {
+      setUnsupportedContent({ controller: blockRoomController, message });
+      onUnsupportedContentRef.current?.(message);
+    },
+    [blockRoomController],
+  );
   const authoringMode = useMemo<EditorAuthoringMode>(
     () => ({
       allowNeutralBlockEdits: editable && !structureLocked,
@@ -160,10 +97,12 @@ export function PolicyTiptapEditor({
   const handleEditorReady = useCallback(
     (editor: Editor | null) => {
       if (!editor) {
+        onEditorReady?.(null);
         return;
       }
       const error = validatePolicyTiptapDocument(editor.state.doc);
       if (error) {
+        onEditorReady?.(null);
         reportUnsupported(error);
         return;
       }
@@ -172,10 +111,10 @@ export function PolicyTiptapEditor({
     [onEditorReady, reportUnsupported],
   );
 
-  if (unsupportedContent) {
+  if (unsupportedContent?.controller === blockRoomController) {
     return (
       <div role="alert" data-testid="policy-tiptap-unsupported-content">
-        {unsupportedContent}
+        {unsupportedContent.message}
       </div>
     );
   }

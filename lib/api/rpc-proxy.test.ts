@@ -1,12 +1,43 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildRpcResponseHeaders,
   isOpenApiPath,
+  normalizeRpcTargets,
   shouldExpireSessionCookies,
   shouldRetryOpenApiWithoutSession,
   shouldRetryWithNextTarget,
 } from './rpc-proxy';
 
 describe('rpc-proxy helpers', () => {
+  it('normalizes fallback targets without changing their priority', () => {
+    expect(normalizeRpcTargets('https://private.test///', 'https://public.test/', 'https://private.test')).toEqual([
+      'https://private.test',
+      'https://public.test',
+    ]);
+  });
+
+  it('forwards RPC metadata while dropping upstream transport and encoded-body headers', () => {
+    const upstream = new Headers({
+      'Content-Type': 'application/connect+proto',
+      'Connect-Protocol-Version': '1',
+      'Cache-Control': 'no-store',
+      'X-Request-Id': 'request-1',
+      Connection: 'keep-alive',
+      'Keep-Alive': 'timeout=5',
+      'Transfer-Encoding': 'chunked',
+      'Content-Encoding': 'gzip',
+      'Content-Length': '123',
+    });
+
+    expect(Object.fromEntries(buildRpcResponseHeaders(upstream))).toEqual({
+      'content-type': 'application/connect+proto',
+      'connect-protocol-version': '1',
+      'cache-control': 'no-store',
+      'x-request-id': 'request-1',
+    });
+    expect(upstream.get('Content-Encoding')).toBe('gzip');
+  });
+
   describe('isOpenApiPath', () => {
     it('returns true for open API paths', () => {
       expect(isOpenApiPath('api.open.v1.TermsService/Get')).toBe(true);

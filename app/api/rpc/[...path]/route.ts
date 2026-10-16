@@ -1,6 +1,8 @@
 import { cookies } from 'next/headers';
 import { buildRpcForwardHeaders } from '@/lib/api/rpc-forward-headers';
 import {
+  buildRpcResponseHeaders,
+  normalizeRpcTargets,
   shouldExpireSessionCookies,
   shouldRetryOpenApiWithoutSession,
   shouldRetryWithNextTarget,
@@ -16,27 +18,6 @@ import { getServerPublicRuntimeConfig } from '@/lib/public-runtime-config.server
 import { createLogger } from '@/lib/utils/logger';
 
 const logger = createLogger('rpc-proxy-api');
-
-const HOP_BY_HOP_HEADERS = new Set([
-  'connection',
-  'keep-alive',
-  'proxy-authenticate',
-  'proxy-authorization',
-  'te',
-  'trailer',
-  'transfer-encoding',
-  'upgrade',
-]);
-
-const RESPONSE_HEADERS_TO_STRIP = new Set(['content-length', 'content-encoding']);
-function buildApiTargets(): string[] {
-  const targets = [getApiUrl(), getServerPublicRuntimeConfig().apiUrl].map((url) => url.replace(/\/+$/, ''));
-  return [...new Set(targets)];
-}
-
-function buildForwardUrl(baseUrl: string, pathString: string): string {
-  return `${baseUrl}/${pathString}`;
-}
 
 async function forwardRpcRequest(request: Request, { params }: { params: Promise<{ path: string[] }> }) {
   const cookieStore = await cookies();
@@ -56,14 +37,14 @@ async function forwardRpcRequest(request: Request, { params }: { params: Promise
   }
   const forwardHeaders = buildRpcForwardHeaders(request.headers, cookieHeader);
   const anonymousForwardHeaders = buildRpcForwardHeaders(request.headers, '');
-  const apiTargets = buildApiTargets();
+  const apiTargets = normalizeRpcTargets(getApiUrl(), getServerPublicRuntimeConfig().apiUrl);
   const hasSessionCookie = hasCookieNamed(cookieHeader, sessionCookieNames);
 
   let response: Response | null = null;
   let lastError: unknown = null;
   let clearedInvalidSessionCookies = false;
   for (let i = 0; i < apiTargets.length; i += 1) {
-    const targetUrl = buildForwardUrl(apiTargets[i], pathString);
+    const targetUrl = `${apiTargets[i]}/${pathString}`;
     try {
       let candidate = await fetch(targetUrl, {
         method: request.method,
@@ -135,14 +116,7 @@ async function forwardRpcRequest(request: Request, { params }: { params: Promise
     });
   }
 
-  // Forward response headers (excluding hop-by-hop headers)
-  const responseHeaders = new Headers();
-  response.headers.forEach((value, key) => {
-    const lowerKey = key.toLowerCase();
-    if (!HOP_BY_HOP_HEADERS.has(lowerKey) && !RESPONSE_HEADERS_TO_STRIP.has(lowerKey)) {
-      responseHeaders.append(key, value);
-    }
-  });
+  const responseHeaders = buildRpcResponseHeaders(response.headers);
   if (shouldClearSessionCookies) {
     appendExpiredSessionCookies(responseHeaders, {
       requestUrl: request.url,

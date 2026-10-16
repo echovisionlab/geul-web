@@ -6,7 +6,7 @@ import {
   MCPDelegationMethod,
 } from '@echovisionlab/geul-proto/intra/gateway_authorization_pb.ts';
 import { z } from 'zod';
-import type { SessionWithUser } from '@/lib/auth';
+import type { SessionWithUser } from '@/lib/auth/types';
 import { getHydraAdminUrl, getMcpOAuthIssuerUrl, getSiteOrigin } from '@/lib/env';
 
 const MCP_SCOPE = 'mcp';
