@@ -125,6 +125,9 @@ packageExtensions:
       typescript: workspace:*
 
 patchedDependencies:
+  # Published React declarations refer to a private namespace without Editor.
+  # Use the imported core Editor type in both ESM/CJS declarations; no runtime changes.
+  '@tiptap/react@3.30.5': patches/@tiptap__react@3.30.5.patch
   '@testing-library/jest-dom@7.0.1': patches/@testing-library__jest-dom@7.0.1.patch
   '@dnd-kit/core@6.3.1': patches/@dnd-kit__core@6.3.1.patch
   '@dnd-kit/sortable@10.0.0': patches/@dnd-kit__sortable@10.0.0.patch

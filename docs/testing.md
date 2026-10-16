@@ -148,8 +148,9 @@ existing server. Test files, output and Jest cache live under a unique
 the Storybook build produced earlier in that same workspace as read-only input.
 At the end of `Tests`, two review artifacts are uploaded: `storybook-build`
 contains the site, Linux helper and renderer revision; `storybook-ci` contains
-browser results and context evidence. Both use `!cancelled()`, preserving any
-available evidence after failure while skipping uploads for cancelled runs.
+browser results and context evidence. Both use the default successful-step
+condition. A failed or cancelled step skips later test/build/upload steps; the
+final Validate job still reports failed prerequisites.
 
 Workflow concurrency groups PR and dispatch runs by workflow and branch
 (`${{ github.workflow }}-${{ github.head_ref || github.ref_name }}`) and sets

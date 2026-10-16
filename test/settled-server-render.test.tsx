@@ -48,7 +48,7 @@ describe('settled server hydration fixtures', () => {
     const observedImport = expect(rejectedImport).rejects.toThrow('reader import failed');
     await expect(renderSettledServerHtml(<p>Content</p>, pending)).rejects.toThrow('reader import failed');
     await observedImport;
-    function Broken() {
+    function Broken(): never {
       throw new Error('reader render failed');
     }
     await expect(renderSettledServerHtml(<Broken />, [])).rejects.toThrow('reader render failed');

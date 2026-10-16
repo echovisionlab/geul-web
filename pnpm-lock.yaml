@@ -220,6 +220,7 @@ patchedDependencies:
   '@monaco-editor/react@4.7.0': c090a8f38590d6ecfda94e2ad89d1d87d7888bdc45a1e28428d227f724fe8812
   '@storybook/addon-docs@10.5.8': 089b933d8377238ffcfa50792208c3bb13eeb7afaa90852f418dd09e69d87917
   '@testing-library/jest-dom@7.0.1': 07da0753e18c9b18770b19bb91cd7a77fb09e629de25e888393bbe4874336d5c
+  '@tiptap/react@3.30.5': c60cf9483f9d77c6da08c6dd88a67ac5a18b518fe7cf3596afb2bc747c76aae4
   '@types/dom-webcodecs@0.1.13': 515def00b47b46578b49043120b8a0828f64345f53cb085dc3594624872e0590
   ast-types@0.16.1: fb67e3798a74e742467ecc2b3d06ce2d1a0153b446804bcc8cf0ead419334c17
   react-aria@3.53.1: adf6fa13734064b2be434e08faf306627091c2ee248dfd4be32bac11ee35de37
@@ -324,7 +325,7 @@ importers:
         version: 3.30.5
       '@tiptap/react':
         specifier: 3.30.5
-        version: 3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        version: 3.30.5(patch_hash=c60cf9483f9d77c6da08c6dd88a67ac5a18b518fe7cf3596afb2bc747c76aae4)(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@tiptap/suggestion':
         specifier: 3.30.5
         version: 3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)
@@ -11793,7 +11794,7 @@ snapshots:
       prosemirror-transform: 1.12.0
       prosemirror-view: 1.41.9
 
-  '@tiptap/react@3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
+  '@tiptap/react@3.30.5(patch_hash=c60cf9483f9d77c6da08c6dd88a67ac5a18b518fe7cf3596afb2bc747c76aae4)(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
     dependencies:
       '@tiptap/core': 3.30.5(@tiptap/pm@3.30.5)
       '@tiptap/pm': 3.30.5
