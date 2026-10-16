@@ -356,35 +356,3 @@ integrated build (first-load JS, gzip): `/campaigns/[id]` 888.2 → 817.0, `/adm
 `/admin/email-templates/[id]` 804.5 → 732.7, admin form settings 785.1 → 711.7, builder 746.8 → 674.7,
 `/editor-lab-local` 990.3 → 918.0 kB. The collab server configures the English zod locale at startup
 (geul-editor-collab 0.4.1).
-
-## Review fixes (2026-10-13)
-
-Four P2 defects from the review of the work above, each fixed at its owner with a regression test that fails on
-the previous code.
-
-- **Scope by the real route table (item 8).** `resolveClientMessageScope` classified by first path segment, so CMS
-  Pages under a route-group prefix got the wrong catalogue: `/forms/team/about` (served by `(general)/[...slug]`)
-  got `forms` without `shell`, and `/oauth/help?edit=true` got `auth` without `pageEditor`. `pnpm i18n:scopes` now
-  also writes `lib/i18n/client-message-routes.generated.ts` (every page pattern per scope, plus the patterns that
-  render an editor for `?edit=true`); `lib/i18n/client-message-route-match.ts` matches with App Router precedence
-  (static, dynamic, catch-all, with fallback). Unmatched paths are the CMS catch-all (`public`, `editor` for
-  `?edit=true`); `?edit=true` on a route without an editor (`/posts`) keeps its scope. The `editor` catalogue also
-  carries `public` (as before, editors return to the public view without a catalogue load). The generator and the
-  guard test compare the resolver with Next's own route sorting/regexes for every pattern, its neighbours and
-  `AMBIGUOUS_ROUTE_PROBES`; the previous resolver fails that check. Cost: the route table and matcher in the
-  shared first load (221.1 kB gzip after, `pnpm perf:bundle` passes for all 116 routes without a budget change);
-  the inlined catalogues are unchanged except `editor` ⊇ `public`.
-- **Runtime events survive a failed parser chunk.** `subscribeToProviderRuntimeEvents` discarded queued events
-  when the parser import failed. It now keeps the queue and retries (1, 3, 10 s; at once on `online`); after the
-  last retry it drops the superseded queue and calls the new `onResync` subscription option, and the next event
-  starts another round. `EditorRuntimeProvider` fans `onResync` out to its subscribers; media processing re-reads
-  the file status, translation lifecycle refetches as on reconnect, OG re-reads the latest generation. Upload
-  progress has no resync (the upload request itself reports completion).
-- **On-demand hosts retry on new requests.** `useOnDemandModule(module, needed, request?)` restarts the retry
-  round when `request` changes or the browser comes back online; `NotificationHost` and `ConfirmDialogHost` pass
-  their queue snapshot, so a new notice/dialog after the retries were exhausted loads the renderer.
-- **Pending opens are cancellable.** `OnDemandDropdownMenu` cancels an open request made before the surface loads
-  on Escape on the trigger, focus moving elsewhere or a press outside the trigger, so the menu no longer opens and
-  takes focus later. `OnDemandDrawer` treats Escape before load as a dismissal (`onClose`, dismissible drawers);
-  closing it before load already kept it closed. `OnDemandTooltip` needed no change (its trigger state already
-  closes when focus/hover ends; tested).
