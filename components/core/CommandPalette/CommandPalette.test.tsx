@@ -50,23 +50,26 @@ describe('Command palette navigation', () => {
     const input = document.querySelector<HTMLInputElement>('input[placeholder="Search posts"]')!;
     expect(document.activeElement).toBe(input);
     await act(async () => {
-      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
-      input.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowDown', bubbles: true }));
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+      input.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowDown', bubbles: true, cancelable: true }));
     });
     expect(document.activeElement).toBe(input);
     expect(input.getAttribute('aria-activedescendant')).toBeTruthy();
     await act(async () => {
-      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-      input.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+      input.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true, cancelable: true }));
     });
-    expect(navigate).toHaveBeenCalled();
+    expect(navigate).toHaveBeenCalledOnce();
+    expect(navigate.mock.calls[0][0]).toBe('/posts/one');
     expect(close).toHaveBeenCalledOnce();
   });
   it('renders the empty async collection and closes on Escape', async () => {
     const { close } = await render([]);
     expect(document.body.textContent).toContain('No results');
     const input = document.querySelector<HTMLInputElement>('input[placeholder="Search posts"]')!;
-    await act(async () => input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
+    await act(async () =>
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })),
+    );
     expect(close).toHaveBeenCalledOnce();
   });
 });
