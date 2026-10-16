@@ -164,7 +164,13 @@ jobs:
     needs: [scope, format]
     if: needs.scope.outputs.run_full == 'true'
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    # The 2-core private runner builds the app and Storybook far slower than the
+    # 4-core public one did.
+    timeout-minutes: 45
+    env:
+      # Node sizes its default heap from runner memory (8 GB here), which is too
+      # small for type-aware lint, the Next build and the Storybook build.
+      NODE_OPTIONS: --max-old-space-size=6144
     steps:
       - name: Add swap to the hosted runner
         # Private repositories run on 2-core/8 GB hosted runners with a small disk.
@@ -262,7 +268,7 @@ jobs:
       matrix:
         shard: [1, 2]
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
