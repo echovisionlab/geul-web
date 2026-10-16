@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "fc6f33c7fd91992bb96128621f664cdbf233a2e04860243d385be48b03e1ca62",
+  "manifestHash": "7a3fe7f1267bdc061297320e6bdb865b005d51231de75997c8029cb3b990efa7",
   "counts": {
     "sourceFiles": 3758,
     "productionSourceFiles": 2280,
@@ -69050,7 +69050,7 @@
             {
               "name": "height",
               "optional": true,
-              "type": "number"
+              "type": "number | 'intrinsic'"
             },
             {
               "name": "style",
@@ -69309,6 +69309,11 @@
               "type": "string | null"
             },
             {
+              "name": "darkSrc",
+              "optional": true,
+              "type": "string | null"
+            },
+            {
               "name": "alt",
               "optional": false,
               "type": "string"
@@ -69321,7 +69326,7 @@
             {
               "name": "height",
               "optional": true,
-              "type": "number"
+              "type": "number | 'intrinsic'"
             },
             {
               "name": "fallbackText",
