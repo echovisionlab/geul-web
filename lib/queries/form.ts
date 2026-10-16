@@ -1,3 +1,4 @@
+import { logServerFailure } from '@/lib/logging/logger';
 import { throwQueryError } from '@/lib/api/query-error';
 import { Code } from '@connectrpc/connect';
 import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
@@ -64,10 +65,11 @@ export async function getFormSettingsMeta(formId: string): Promise<FormSettingsM
     };
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound)) {
+      logServerFailure('form', 'getFormSettingsMeta', err);
       return null;
     }
     if (isConnectError(err)) {
-      logger.error('GetFormSettingsMeta RPC error', { error: err.message });
+      logger.error('GetFormSettingsMeta RPC error', { error: err });
     }
     throwQueryError(err);
   }
@@ -88,10 +90,11 @@ export async function getFormEditorInitialFields(formId: string): Promise<Partia
     };
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound)) {
+      logServerFailure('form', 'getFormEditorInitialFields', err);
       return null;
     }
     if (isConnectError(err)) {
-      logger.error('GetFormEditorInitialFields RPC error', { error: err.message });
+      logger.error('GetFormEditorInitialFields RPC error', { error: err });
     }
     throwQueryError(err);
   }
@@ -127,10 +130,11 @@ export async function getFormSubmissionWithSchema(submissionId: string) {
     };
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound)) {
+      logServerFailure('form', 'getFormSubmissionWithSchema', err);
       return null;
     }
     if (isConnectError(err)) {
-      logger.error('GetFormSubmissionWithSchema RPC error', { error: err.message });
+      logger.error('GetFormSubmissionWithSchema RPC error', { error: err });
     }
     throwQueryError(err);
   }

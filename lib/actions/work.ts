@@ -1,4 +1,6 @@
 'use server';
+
+import { logServerFailure } from '@/lib/logging/logger';
 import { queryResult, unwrapQueryResult } from '@/lib/api/query-result';
 
 import { connectErrorCode, isConnectErrorCode } from '@/lib/api/connect-error';
@@ -263,6 +265,7 @@ export async function createWorkAction(data: {
     revalidatePath('/admin/works');
     return { data: { id: work.id } };
   } catch (err) {
+    logServerFailure('work-actions', 'createWorkAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -277,6 +280,7 @@ export async function deleteWorkAction(id: string): Promise<{ success?: boolean;
     revalidateWorkAfterCommit('/admin/works');
     return { success: true };
   } catch (err) {
+    logServerFailure('work-actions', 'deleteWorkAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -297,6 +301,7 @@ export async function publishWorkAction(
     revalidatePath(`/works/${id}`);
     return { success: true };
   } catch (err) {
+    logServerFailure('work-actions', 'publishWorkAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -318,6 +323,7 @@ export async function unpublishWorkAction(
     revalidatePath(`/works/${id}`);
     return { success: true };
   } catch (err) {
+    logServerFailure('work-actions', 'unpublishWorkAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -352,6 +358,7 @@ export async function getWorkConfigurationAction(id: string) {
       },
     };
   } catch (error) {
+    logServerFailure('work-actions', 'getWorkConfigurationAction', error);
     return { error: error instanceof Error ? error.message : 'Failed to load work settings' };
   }
 }
@@ -369,6 +376,7 @@ export async function updateWorkSlugAction(
     });
     return { success: true, slug };
   } catch (err) {
+    logServerFailure('work-actions', 'updateWorkSlugAction', err);
     if (isConnectErrorCode(err, Code.PermissionDenied)) {
       return { error: 'No permission to edit this work' };
     }
@@ -393,6 +401,7 @@ export async function updateWorkAction(
     revalidateWorkAfterCommit(`/works/${id}`);
     return { success: true };
   } catch (err) {
+    logServerFailure('work-actions', 'updateWorkAction', err);
     if (isConnectErrorCode(err, Code.PermissionDenied)) {
       return { error: 'No permission to edit this work' };
     }
@@ -450,6 +459,7 @@ export async function updateWorkFieldsAction(
       ...(response.clients ? { clients: response.clients.map((client) => client.id) } : {}),
     };
   } catch (error) {
+    logServerFailure('work-actions', 'updateWorkFieldsAction', error);
     // The code lets the editor's save queue tell a refused change from a transient failure.
     return {
       error: error instanceof Error ? error.message : 'Failed to update work fields',
@@ -473,6 +483,7 @@ export async function setWorkFeaturedImageAction(
     };
     return response.ogGenerationRunId ? { ...result, ogGenerationRunId: response.ogGenerationRunId } : result;
   } catch (err) {
+    logServerFailure('work-actions', 'setWorkFeaturedImageAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -496,6 +507,7 @@ export async function removeWorkFeaturedImageAction(
       ? { success: true, ogGenerationRunId: result.ogGenerationRunId }
       : { success: true };
   } catch (err) {
+    logServerFailure('work-actions', 'removeWorkFeaturedImageAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -574,6 +586,7 @@ export async function moveWorkCreditItemAction(
       })),
     };
   } catch (err) {
+    logServerFailure('work-actions', 'moveWorkCreditItemAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -610,6 +623,7 @@ export async function addWorkCreditAction(
     });
     return { success: true, creditId: credit.id };
   } catch (err) {
+    logServerFailure('work-actions', 'addWorkCreditAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -634,6 +648,7 @@ export async function updateWorkCreditAction(
     });
     return { success: true };
   } catch (err) {
+    logServerFailure('work-actions', 'updateWorkCreditAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -653,6 +668,7 @@ export async function removeWorkCreditAction(
     await client.deleteWorkCredit({ creditId });
     return { success: true };
   } catch (err) {
+    logServerFailure('work-actions', 'removeWorkCreditAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -699,6 +715,7 @@ export async function createWorkCreditGroupAction(
       },
     };
   } catch (err) {
+    logServerFailure('work-actions', 'createWorkCreditGroupAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -725,6 +742,7 @@ export async function updateWorkCreditGroupAction(
     });
     return { success: true };
   } catch (err) {
+    logServerFailure('work-actions', 'updateWorkCreditGroupAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -747,6 +765,7 @@ export async function deleteWorkCreditGroupAction(
     await client.deleteWorkCreditGroup({ groupId });
     return { success: true };
   } catch (err) {
+    logServerFailure('work-actions', 'deleteWorkCreditGroupAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }

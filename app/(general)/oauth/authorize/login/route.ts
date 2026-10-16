@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
   try {
     return NextResponse.redirect(await acceptHydraLogin(challenge, session));
   } catch (error) {
-    logger.error('Failed to accept Hydra MCP login', { error });
+    logger.error('Failed to accept Hydra MCP login', { error, privateValues: [challenge] });
     return new NextResponse(null, { status: 502 });
   }
 }

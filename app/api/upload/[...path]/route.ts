@@ -1,3 +1,4 @@
+import { logServerFailure } from '@/lib/logging/logger';
 import { cookies } from 'next/headers';
 import { getApiUrl } from '@/lib/env';
 import {
@@ -52,7 +53,8 @@ async function proxyUpload(request: Request, { params }: { params: Promise<{ pat
   let response: Response;
   try {
     response = await fetch(upstreamUrl, init);
-  } catch {
+  } catch (error) {
+    logServerFailure('upload-proxy-api', 'proxyUpload', error);
     return new Response('Bad Gateway', { status: 502 });
   }
 

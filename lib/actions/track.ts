@@ -1,4 +1,6 @@
 'use server';
+
+import { logServerFailure } from '@/lib/logging/logger';
 import { queryResult, type QueryResult, unwrapQueryResult } from '@/lib/api/query-result';
 
 import { isConnectErrorCode } from '@/lib/api/connect-error';
@@ -67,6 +69,7 @@ export async function createTrackAction(
     revalidatePath(`/releases/${data.release_id}`);
     return { data: mapTrack(result) };
   } catch (err) {
+    logServerFailure('track-actions', 'createTrackAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -134,6 +137,7 @@ export async function updateTrackAction(
     });
     return { success: true };
   } catch (err) {
+    logServerFailure('track-actions', 'updateTrackAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -153,6 +157,7 @@ export async function deleteTrackAction(
     await client.deleteTrack({ id });
     return { success: true };
   } catch (err) {
+    logServerFailure('track-actions', 'deleteTrackAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -181,6 +186,7 @@ export async function setTrackCreditsAction(
     });
     return { success: true };
   } catch (err) {
+    logServerFailure('track-actions', 'setTrackCreditsAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -200,6 +206,7 @@ export async function reorderTracksAction(
     await client.reorderTracks({ trackIds });
     return { success: true };
   } catch (err) {
+    logServerFailure('track-actions', 'reorderTracksAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }

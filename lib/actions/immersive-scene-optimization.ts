@@ -1,5 +1,7 @@
 'use server';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
 import { Code } from '@connectrpc/connect';
 import {
@@ -190,7 +192,12 @@ export async function isImmersiveSceneMeshOptimizationApiAvailableAction(): Prom
   try {
     await createFileClient();
     return true;
-  } catch {
+  } catch (error) {
+    logServerFailure(
+      'immersive-scene-optimization-actions',
+      'isImmersiveSceneMeshOptimizationApiAvailableAction',
+      error,
+    );
     return false;
   }
 }
@@ -206,6 +213,11 @@ export async function listImmersiveSceneMeshOptimizationCandidatesAction(
     });
     return { candidates: normalizeCandidateList(response.candidates) };
   } catch (error) {
+    logServerFailure(
+      'immersive-scene-optimization-actions',
+      'listImmersiveSceneMeshOptimizationCandidatesAction',
+      error,
+    );
     if (isStaleSourceFileNotFoundError(error)) {
       return { candidates: [] };
     }
@@ -227,6 +239,11 @@ export async function generateImmersiveSceneMeshOptimizationCandidateAction(
     });
     return { candidate: normalizeCandidateResponse(response.candidate) };
   } catch (error) {
+    logServerFailure(
+      'immersive-scene-optimization-actions',
+      'generateImmersiveSceneMeshOptimizationCandidateAction',
+      error,
+    );
     return { error: actionErrorMessage(error) };
   }
 }
@@ -244,6 +261,7 @@ export async function useImmersiveSceneMeshOptimizationCandidateAction(
     });
     return { candidate: normalizeCandidateResponse(response.candidate) };
   } catch (error) {
+    logServerFailure('immersive-scene-optimization-actions', 'useImmersiveSceneMeshOptimizationCandidateAction', error);
     return { error: actionErrorMessage(error) };
   }
 }
@@ -260,6 +278,11 @@ export async function clearImmersiveSceneMeshOptimizationCandidatesAction(
     });
     return { success: response.success };
   } catch (error) {
+    logServerFailure(
+      'immersive-scene-optimization-actions',
+      'clearImmersiveSceneMeshOptimizationCandidatesAction',
+      error,
+    );
     return { error: actionErrorMessage(error) };
   }
 }

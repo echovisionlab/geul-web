@@ -1,4 +1,6 @@
 'use server';
+
+import { logServerFailure } from '@/lib/logging/logger';
 import { queryResult } from '@/lib/api/query-result';
 
 import { isConnectError } from '@/lib/api/connect-error';
@@ -77,6 +79,7 @@ export async function createStyleAction(
       },
     };
   } catch (err) {
+    logServerFailure('style-actions', 'createStyleAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -98,6 +101,7 @@ export async function updateStyleAction(
     revalidatePath('/admin/styles');
     return { success: true };
   } catch (err) {
+    logServerFailure('style-actions', 'updateStyleAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -112,6 +116,7 @@ export async function deleteStyleAction(id: string): Promise<{ success?: boolean
     revalidatePath('/admin/styles');
     return { success: true };
   } catch (err) {
+    logServerFailure('style-actions', 'deleteStyleAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }

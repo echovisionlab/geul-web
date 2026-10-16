@@ -1,5 +1,7 @@
 'use server';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { isConnectError } from '@/lib/api/connect-error';
 import { create } from '@bufbuild/protobuf';
 import { Code } from '@connectrpc/connect';
@@ -62,6 +64,7 @@ export async function listMailAdaptersAction(
     const response = await client.listMailAdaptersAdmin(request);
     return { adapters: response.adapters.map(toPlainAdapter) };
   } catch (err) {
+    logServerFailure('mail-adapter-actions', 'listMailAdaptersAction', err);
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
         return { error: 'Unauthorized' };
@@ -140,6 +143,16 @@ export async function createMailAdapterAction(
     const response = await client.create(request);
     return { adapter: response.adapter ? toPlainAdapter(response.adapter) : undefined };
   } catch (err) {
+    logServerFailure('mail-adapter-actions', 'createMailAdapterAction', err, [
+      input?.sesConfig?.accessKeyId,
+      input?.sesConfig?.secretAccessKey,
+      input?.sesConfig?.fromEmail,
+      input?.sesConfig?.fromName,
+      input?.smtpConfig?.user,
+      input?.smtpConfig?.password,
+      input?.smtpConfig?.fromEmail,
+      input?.smtpConfig?.fromName,
+    ]);
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
         return { error: 'Unauthorized' };
@@ -220,6 +233,16 @@ export async function updateMailAdapterAction(
     const response = await client.update(request);
     return { adapter: response.adapter ? toPlainAdapter(response.adapter) : undefined };
   } catch (err) {
+    logServerFailure('mail-adapter-actions', 'updateMailAdapterAction', err, [
+      input?.sesConfig?.accessKeyId,
+      input?.sesConfig?.secretAccessKey,
+      input?.sesConfig?.fromEmail,
+      input?.sesConfig?.fromName,
+      input?.smtpConfig?.user,
+      input?.smtpConfig?.password,
+      input?.smtpConfig?.fromEmail,
+      input?.smtpConfig?.fromName,
+    ]);
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
         return { error: 'Unauthorized' };
@@ -243,6 +266,7 @@ export async function deleteMailAdapterAction(id: string): Promise<{ success?: b
     await client.delete(request);
     return { success: true };
   } catch (err) {
+    logServerFailure('mail-adapter-actions', 'deleteMailAdapterAction', err);
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
         return { error: 'Unauthorized' };
@@ -267,12 +291,22 @@ export async function testMailAdapterAction(
     const client = await createMailAdapterClient();
     const request = create(TestMailAdapterRequestSchema, { id, testEmail });
     const response = await client.test(request);
+    if (!response.success) {
+      logServerFailure(
+        'mail-adapter-actions',
+        'testMailAdapterAction',
+        response.error || 'Mail adapter test failed',
+        [testEmail],
+        { adapter_id: id, message_id: response.messageId },
+      );
+    }
     return {
       success: response.success,
       error: response.error,
       messageId: response.messageId,
     };
   } catch (err) {
+    logServerFailure('mail-adapter-actions', 'testMailAdapterAction', err, [testEmail], { adapter_id: id });
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
         return { error: 'Unauthorized' };
@@ -313,6 +347,17 @@ export interface TestMailAdapterConfigInput {
 export async function testMailAdapterConfigAction(
   input: TestMailAdapterConfigInput,
 ): Promise<{ success?: boolean; error?: string; messageId?: string }> {
+  const privateValues = [
+    input?.sesConfig?.accessKeyId,
+    input?.sesConfig?.secretAccessKey,
+    input?.sesConfig?.fromEmail,
+    input?.sesConfig?.fromName,
+    input?.smtpConfig?.user,
+    input?.smtpConfig?.password,
+    input?.smtpConfig?.fromEmail,
+    input?.smtpConfig?.fromName,
+    input?.testEmail,
+  ];
   try {
     const client = await createMailAdapterClient();
     const request = create(TestMailAdapterConfigRequestSchema, {
@@ -347,12 +392,27 @@ export async function testMailAdapterConfigAction(
     }
 
     const response = await client.testConfig(request);
+    if (!response.success) {
+      logServerFailure(
+        'mail-adapter-actions',
+        'testMailAdapterConfigAction',
+        response.error || 'Mail adapter test failed',
+        privateValues,
+        {
+          adapter_type: input?.type,
+          message_id: response.messageId,
+        },
+      );
+    }
     return {
       success: response.success,
       error: response.error,
       messageId: response.messageId,
     };
   } catch (err) {
+    logServerFailure('mail-adapter-actions', 'testMailAdapterConfigAction', err, privateValues, {
+      adapter_type: input?.type,
+    });
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
         return { error: 'Unauthorized' };

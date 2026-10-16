@@ -55,6 +55,7 @@ describe('getSessionFromCookie', () => {
     vi.clearAllMocks();
     mocks.cookies.mockResolvedValue({
       has: mocks.cookieHas,
+      get: () => ({ value: 'private-session-cookie' }),
       delete: mocks.cookieDelete,
       set: mocks.cookieSet,
     });
@@ -169,6 +170,7 @@ describe('getSessionFromCookie', () => {
 
     expect(mocks.loggerError).toHaveBeenCalledWith('GetCurrentSession failed', {
       error,
+      privateValues: ['private-session-cookie'],
       data: { rpc_code: Code.Unavailable },
     });
   });

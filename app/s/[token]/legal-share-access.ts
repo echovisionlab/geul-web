@@ -1,6 +1,7 @@
 'use server';
 
 import type { LegalShareDocument } from '@/features/policy/LegalShareDocumentView';
+import { logServerFailure } from '@/lib/logging/logger';
 import { getLegalShareDocument } from './legal-share-query';
 
 export type { LegalShareDocument } from '@/features/policy/LegalShareDocumentView';
@@ -31,7 +32,8 @@ export async function accessLegalShareAction(
     return {
       document,
     };
-  } catch {
+  } catch (error) {
+    logServerFailure('legal-share-access', 'accessLegalShareAction', error, [token, password]);
     return { error: 'not_found' };
   }
 }

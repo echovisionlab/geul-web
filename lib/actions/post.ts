@@ -1,5 +1,7 @@
 'use server';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { getSettings } from '@/lib/queries/manifest';
 import { siteVariableContext } from '@/lib/site-variables';
 import { unwrapQueryResult } from '@/lib/api/query-result';
@@ -61,6 +63,7 @@ export async function createPostAction(): Promise<ActionResult<{ data: { id: str
     revalidatePath('/admin/posts');
     return actionSuccess({ data: { id: response.id } });
   } catch (err) {
+    logServerFailure('post-actions', 'createPostAction', err);
     return postActionFailure(err, 'Failed to create post', 'POST_CREATE_FAILED');
   }
 }
@@ -72,6 +75,7 @@ export async function deletePostAdminAction(id: string): Promise<ActionResult<{ 
     revalidatePostAfterCommit('/admin/posts');
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('post-actions', 'deletePostAdminAction', err);
     return postActionFailure(err, 'Failed to delete post', 'POST_DELETE_FAILED', [
       Code.Unauthenticated,
       Code.PermissionDenied,
@@ -118,6 +122,7 @@ export async function updatePostAction(
     const configuration = postConfigurationSnapshot(response);
     return actionSuccess({ success: true, configurationRevision: configuration.configurationRevision, configuration });
   } catch (err) {
+    logServerFailure('post-actions', 'updatePostAction', err);
     return postActionFailure(err, 'Failed to update post', 'POST_UPDATE_FAILED');
   }
 }
@@ -130,6 +135,7 @@ export async function getPostConfigurationAction(
     const response = await client.getPost({ id: postId });
     return actionSuccess({ configuration: postConfigurationSnapshot(response) });
   } catch (err) {
+    logServerFailure('post-actions', 'getPostConfigurationAction', err);
     return postActionFailure(err, 'Failed to load Post settings', 'POST_UPDATE_FAILED');
   }
 }
@@ -157,6 +163,7 @@ export async function deletePostAction(postId: string): Promise<ActionResult<{ s
     revalidatePostAfterCommit('/admin/posts');
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('post-actions', 'deletePostAction', err);
     return postActionFailure(err, 'Failed to delete post', 'POST_DELETE_FAILED');
   }
 }
@@ -170,6 +177,7 @@ export async function publishPostAction(
     await client.publishPost({ id: postId });
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('post-actions', 'publishPostAction', err);
     return postActionFailure(err, 'Failed to publish post', 'POST_PUBLISH_FAILED');
   }
 }
@@ -183,6 +191,7 @@ export async function unpublishPostAction(
     await client.unpublishPost({ id: postId });
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('post-actions', 'unpublishPostAction', err);
     return postActionFailure(err, 'Failed to unpublish post', 'POST_UNPUBLISH_FAILED');
   }
 }
@@ -196,6 +205,7 @@ export async function archivePostAction(
     await client.archivePost({ id: postId });
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('post-actions', 'archivePostAction', err);
     return postActionFailure(err, 'Failed to archive post', 'POST_ARCHIVE_FAILED');
   }
 }
@@ -215,6 +225,7 @@ export async function schedulePostAction(
     });
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('post-actions', 'schedulePostAction', err);
     return postActionFailure(err, 'Failed to schedule post', 'POST_SCHEDULE_FAILED');
   }
 }
@@ -228,6 +239,7 @@ export async function cancelPostScheduleAction(
     await client.cancelPostSchedule({ id: postId });
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('post-actions', 'cancelPostScheduleAction', err);
     return postActionFailure(err, 'Failed to cancel post schedule', 'POST_CANCEL_SCHEDULE_FAILED');
   }
 }
@@ -241,6 +253,7 @@ export async function republishPostAction(
     await client.republishPost({ id: postId });
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('post-actions', 'republishPostAction', err);
     return postActionFailure(err, 'Failed to republish post', 'POST_REPUBLISH_FAILED');
   }
 }
@@ -257,6 +270,7 @@ export async function setPostFeaturedImageAction(
       result.ogGenerationRunId ? { ...response, ogGenerationRunId: result.ogGenerationRunId } : response,
     );
   } catch (err) {
+    logServerFailure('post-actions', 'setPostFeaturedImageAction', err);
     return postActionFailure(err, 'Failed to set featured image', 'POST_SET_FEATURED_IMAGE_FAILED');
   }
 }
@@ -271,6 +285,7 @@ export async function removePostFeaturedImageAction(
       result.ogGenerationRunId ? { success: true, ogGenerationRunId: result.ogGenerationRunId } : { success: true },
     );
   } catch (err) {
+    logServerFailure('post-actions', 'removePostFeaturedImageAction', err);
     return postActionFailure(err, 'Failed to remove featured image', 'POST_REMOVE_FEATURED_IMAGE_FAILED');
   }
 }
@@ -283,6 +298,7 @@ export async function addPostAuthorAction(postId: string, memberId: string): Pro
     await client.addPostAuthor({ postId, memberId });
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('post-actions', 'addPostAuthorAction', err);
     return postActionFailure(err, 'Failed to add author', 'POST_ADD_AUTHOR_FAILED');
   }
 }
@@ -296,6 +312,7 @@ export async function removePostAuthorAction(
     await client.removePostAuthor({ postId, memberId });
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('post-actions', 'removePostAuthorAction', err);
     return postActionFailure(err, 'Failed to remove author', 'POST_REMOVE_AUTHOR_FAILED');
   }
 }
@@ -309,6 +326,7 @@ export async function addPostCollaboratorAction(
     await client.addPostCollaborator({ postId, memberId });
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('post-actions', 'addPostCollaboratorAction', err);
     return postActionFailure(err, 'Failed to add collaborator', 'POST_ADD_COLLABORATOR_FAILED');
   }
 }
@@ -322,6 +340,7 @@ export async function removePostCollaboratorAction(
     await client.removePostCollaborator({ postId, memberId });
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('post-actions', 'removePostCollaboratorAction', err);
     return postActionFailure(err, 'Failed to remove collaborator', 'POST_REMOVE_COLLABORATOR_FAILED');
   }
 }
@@ -389,6 +408,7 @@ export async function getPostMarkdownAction(
   try {
     return actionSuccess(await getGeneratedPostMarkdown(postId));
   } catch (err) {
+    logServerFailure('post-actions', 'getPostMarkdownAction', err);
     return postActionFailure(err, 'Failed to get markdown', 'POST_GET_MARKDOWN_FAILED', []);
   }
 }
@@ -398,6 +418,7 @@ export async function exportPostMarkdownAction(postId: string): Promise<ActionRe
     const result = await getGeneratedPostMarkdown(postId);
     return actionSuccess({ markdown: result.markdown });
   } catch (err) {
+    logServerFailure('post-actions', 'exportPostMarkdownAction', err);
     return postActionFailure(err, 'Failed to export markdown', 'POST_EXPORT_MARKDOWN_FAILED', []);
   }
 }

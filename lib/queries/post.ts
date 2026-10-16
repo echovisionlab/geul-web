@@ -1,3 +1,4 @@
+import { logServerFailure } from '@/lib/logging/logger';
 import { postSnapshotContent } from './editor-snapshot';
 import type { EditorSnapshot } from '@/features/editor/editor-snapshot';
 import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
@@ -225,6 +226,7 @@ export async function listPostsAdmin(input: PostListInput) {
       totalPages: Math.ceil((response.pagination?.total || 0) / (input.pageSize || 20)),
     };
   } catch (err) {
+    logServerFailure('post-queries', 'listPostsAdmin', err);
     if (isConnectErrorCode(err, Code.PermissionDenied)) {
       return { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 };
     }
@@ -364,6 +366,7 @@ export async function getPostView(
     return mapPublicPostResponse(post, response.blockMedia);
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound)) {
+      logServerFailure('post', 'getPostView', err);
       return null;
     }
     logger.error('GetPostView failed', { error: err });
@@ -393,9 +396,10 @@ export async function getPostViewWithToken(
     return mapPublicPostResponse(post, response.blockMedia);
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound)) {
+      logServerFailure('post', 'getPostViewWithToken', err, [token, sharePassword]);
       return null;
     }
-    logger.error('GetPostViewWithToken failed', { error: err });
+    logger.error('GetPostViewWithToken failed', { error: err, privateValues: [token, sharePassword] });
     throw err;
   }
 }
@@ -449,6 +453,7 @@ export async function getPostForEdit(idOrSlug: string) {
     };
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound, Code.PermissionDenied)) {
+      logServerFailure('post', 'getPostForEdit', err);
       return null;
     }
     logger.error('GetPostForEdit failed', { error: err });
@@ -466,6 +471,7 @@ export async function getPostAllowedActions(postId: string): Promise<PostAction[
     const post = await client.getPost({ id: postId });
     return [...post.allowedActions];
   } catch (err) {
+    logServerFailure('post-queries', 'getPostAllowedActions', err);
     if (
       isConnectError(err) &&
       (err.code === Code.Unauthenticated || err.code === Code.PermissionDenied || err.code === Code.NotFound)
@@ -494,6 +500,7 @@ export async function getPostEditorSnapshot(postId: string, locale: string): Pro
       content: response.document ? postSnapshotContent(response.document) : undefined,
     };
   } catch (error) {
+    logServerFailure('post-queries', 'getPostEditorSnapshot', error);
     if (isConnectErrorCode(error, Code.NotFound, Code.PermissionDenied)) {
       return null;
     }

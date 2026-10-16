@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { cookies } from 'next/headers';
 import Negotiator from 'negotiator';
 import {
@@ -24,7 +26,13 @@ export async function getRequestLocaleContext(
   const headersList = await getRequestHeaders();
   const acceptLanguage = headersList.get('accept-language');
   const cookieStore = await cookies();
-  const session = input.userPreferenceLocale === undefined ? await getSession().catch(() => null) : null;
+  const session =
+    input.userPreferenceLocale === undefined
+      ? await getSession().catch((error: unknown) => {
+          logServerFailure('request-locale', 'getSession', error);
+          return null;
+        })
+      : null;
   const userPreferenceLocale =
     input.userPreferenceLocale === undefined ? (session?.user?.preferred_locale ?? null) : input.userPreferenceLocale;
 

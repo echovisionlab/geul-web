@@ -1,4 +1,6 @@
 'use server';
+
+import { logServerFailure } from '@/lib/logging/logger';
 import { queryResult, type QueryResult } from '@/lib/api/query-result';
 
 import { isConnectError } from '@/lib/api/connect-error';
@@ -115,6 +117,7 @@ export async function createUserTagAction(name: string): Promise<{ data?: { id: 
     revalidatePath('/admin/user-tags');
     return { data: { id: tag.id } };
   } catch (err) {
+    logServerFailure('user-tag-actions', 'createUserTagAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -139,6 +142,7 @@ export async function deleteUserTagAction(id: string): Promise<{ success?: boole
     revalidatePath('/admin/user-tags');
     return { success: true };
   } catch (err) {
+    logServerFailure('user-tag-actions', 'deleteUserTagAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }

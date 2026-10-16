@@ -59,7 +59,8 @@ export function resolveTrustedLogoutUrl(value: unknown, kratosUrl: string): stri
     // Keep the browser on the Web origin. The gateway owns this exact auth
     // path and forwards the one-time logout token to Kratos.
     return `/api/auth/self-service/logout?token=${encodeURIComponent(candidate.searchParams.get('token') as string)}`;
-  } catch {
+  } catch (error) {
+    void logger.warn('Kratos logout URL validation failed', { error });
     return null;
   }
 }

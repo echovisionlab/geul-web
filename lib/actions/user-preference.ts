@@ -1,5 +1,7 @@
 'use server';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { isConnectError } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
@@ -36,6 +38,7 @@ export async function updatePreferredLocaleAction(
       preferred_locale: savedLocale,
     };
   } catch (err) {
+    logServerFailure('user-preference-actions', 'updatePreferredLocaleAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }

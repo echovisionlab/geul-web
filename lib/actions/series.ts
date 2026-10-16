@@ -1,5 +1,7 @@
 'use server';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { isConnectError } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { Code } from '@connectrpc/connect';
@@ -42,6 +44,7 @@ export async function createSeriesAction(data: {
     revalidatePath('/my/series');
     return { data: { id: series.id } };
   } catch (err) {
+    logServerFailure('series-actions', 'createSeriesAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -57,6 +60,7 @@ export async function deleteSeriesAction(id: string): Promise<{ success?: boolea
     revalidateSeriesAfterCommit('/my/series');
     return { success: true };
   } catch (err) {
+    logServerFailure('series-actions', 'deleteSeriesAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -88,6 +92,7 @@ export async function updateSeriesAction(
     revalidateSeriesAfterCommit(`/my/series/${id}`);
     return { success: true };
   } catch (err) {
+    logServerFailure('series-actions', 'updateSeriesAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -106,6 +111,7 @@ export async function addSeriesManagerAction(
     revalidatePath(`/admin/series/${seriesId}`);
     return { success: true };
   } catch (err) {
+    logServerFailure('series-actions', 'addSeriesManagerAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -124,6 +130,7 @@ export async function removeSeriesManagerAction(
     revalidatePath(`/admin/series/${seriesId}`);
     return { success: true };
   } catch (err) {
+    logServerFailure('series-actions', 'removeSeriesManagerAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -139,6 +146,7 @@ export async function assignPostToSeriesAction(seriesId: string, postId: string)
     revalidatePath(`/my/series/${seriesId}`);
     return { success: true };
   } catch (err) {
+    logServerFailure('series-actions', 'assignPostToSeriesAction', err);
     return mapSeriesPostMutationError(err);
   }
 }
@@ -154,6 +162,7 @@ export async function unassignPostFromSeriesAction(
     revalidatePath(`/my/series/${seriesId}`);
     return { success: true };
   } catch (err) {
+    logServerFailure('series-actions', 'unassignPostFromSeriesAction', err);
     return mapSeriesPostMutationError(err);
   }
 }
@@ -166,6 +175,7 @@ export async function reorderSeriesPostsAction(seriesId: string, postIds: string
     revalidatePath(`/my/series/${seriesId}`);
     return { success: true };
   } catch (err) {
+    logServerFailure('series-actions', 'reorderSeriesPostsAction', err);
     return mapSeriesPostMutationError(err);
   }
 }
@@ -182,6 +192,7 @@ export async function setSeriesFeaturedImageAction(
     const response = { imageUrl: result.imageAsset?.url };
     return result.ogGenerationRunId ? { ...response, ogGenerationRunId: result.ogGenerationRunId } : response;
   } catch (err) {
+    logServerFailure('series-actions', 'setSeriesFeaturedImageAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -201,6 +212,7 @@ export async function removeSeriesFeaturedImageAction(
       ? { success: true, ogGenerationRunId: result.ogGenerationRunId }
       : { success: true };
   } catch (err) {
+    logServerFailure('series-actions', 'removeSeriesFeaturedImageAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }

@@ -1,3 +1,4 @@
+import { logServerFailure } from '@/lib/logging/logger';
 import { pageSnapshotSections } from './editor-snapshot';
 import type { EditorSnapshot } from '@/features/editor/editor-snapshot';
 import { throwQueryError } from '@/lib/api/query-error';
@@ -138,7 +139,7 @@ export async function listPagesAdmin(input: PageListInput): Promise<PageListResu
     };
   } catch (err) {
     if (isConnectError(err)) {
-      logger.error('ListPages RPC error', { error: err.message });
+      logger.error('ListPages RPC error', { error: err });
     }
     throwQueryError(err);
   }
@@ -170,10 +171,11 @@ export async function getPage(idOrSlug: string) {
     };
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound)) {
+      logServerFailure('page', 'getPage', err);
       return null;
     }
     if (isConnectError(err)) {
-      logger.error('GetPage RPC error', { error: err.message });
+      logger.error('GetPage RPC error', { error: err });
     }
     throwQueryError(err);
   }
@@ -214,6 +216,7 @@ export async function getPageAccessView(
     };
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound)) {
+      logServerFailure('page', 'getPageAccessView', err);
       return null;
     }
     logger.error('GetPageView failed', { error: err });
@@ -253,9 +256,10 @@ export async function getPageAccessViewWithToken(
     };
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound)) {
+      logServerFailure('page', 'getPageAccessViewWithToken', err, [token, sharePassword]);
       return null;
     }
-    logger.error('GetPageViewWithToken RPC error', { error: err });
+    logger.error('GetPageViewWithToken RPC error', { error: err, privateValues: [token, sharePassword] });
     throw err;
   }
 }
@@ -313,6 +317,7 @@ export async function getPageEditorSnapshot(pageId: string, locale: string) {
     };
     return { snapshot, documentLayout: mapProtoDocumentLayout(response.documentLayout) };
   } catch (error) {
+    logServerFailure('page-queries', 'getPageEditorSnapshot', error);
     if (isConnectErrorCode(error, Code.NotFound, Code.PermissionDenied)) {
       return null;
     }

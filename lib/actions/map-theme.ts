@@ -1,4 +1,6 @@
 'use server';
+
+import { logServerFailure } from '@/lib/logging/logger';
 import { throwQueryError } from '@/lib/api/query-error';
 
 import { isConnectErrorCode } from '@/lib/api/connect-error';
@@ -180,6 +182,7 @@ export async function getMapThemeByIdAction(id: string): Promise<MapTheme | null
     const client = await createMapThemeClient();
     return mapTheme(await client.getMapTheme({ id }));
   } catch (error) {
+    logServerFailure('map-theme-actions', 'getMapThemeByIdAction', error);
     if (isConnectErrorCode(error, Code.NotFound, Code.Unauthenticated)) {
       return null;
     }
@@ -238,6 +241,7 @@ export async function copyMapThemeAction(id: string, name: string): Promise<{ da
     revalidatePath('/admin/map/themes');
     return { data: { id: result.id } };
   } catch (error) {
+    logServerFailure('map-theme-actions', 'copyMapThemeAction', error);
     if (isConnectErrorCode(error, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -255,6 +259,7 @@ export async function deleteMapThemeAction(id: string): Promise<{ success?: bool
     revalidatePath('/admin/map/themes');
     return { success: true };
   } catch (error) {
+    logServerFailure('map-theme-actions', 'deleteMapThemeAction', error);
     if (isConnectErrorCode(error, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -277,6 +282,7 @@ export async function setDefaultMapThemeAction(
     revalidatePath('/admin/map/themes');
     return { data: { defaultMapThemeId: result.defaultMapThemeId } };
   } catch (error) {
+    logServerFailure('map-theme-actions', 'setDefaultMapThemeAction', error);
     if (isConnectErrorCode(error, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -309,6 +315,7 @@ export async function createMapThemeAction(
     revalidatePath('/admin/map/themes');
     return { data: { id: result.id } };
   } catch (error) {
+    logServerFailure('map-theme-actions', 'createMapThemeAction', error);
     if (isConnectErrorCode(error, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }

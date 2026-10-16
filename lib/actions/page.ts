@@ -1,4 +1,6 @@
 'use server';
+
+import { logServerFailure } from '@/lib/logging/logger';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { connectActionErrorCode, isConnectError } from '@/lib/api/connect-error';
@@ -55,6 +57,7 @@ export async function createPageAction(): Promise<ActionResult<{ data: { id: str
     revalidatePath('/admin/pages');
     return actionSuccess({ data: { id: page.id, slug: page.slug ?? null } });
   } catch (err) {
+    logServerFailure('page-actions', 'createPageAction', err);
     return pageActionFailure(err, 'Failed to create page', 'PAGE_CREATE_FAILED');
   }
 }
@@ -66,6 +69,7 @@ export async function deletePageAdminAction(id: string): Promise<ActionResult<{ 
     revalidatePageAfterCommit('/admin/pages');
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('page-actions', 'deletePageAdminAction', err);
     return pageActionFailure(err, 'Failed to delete page', 'PAGE_DELETE_FAILED');
   }
 }
@@ -90,6 +94,7 @@ export async function getPageNeutralConfigurationAction(id: string): Promise<
       accessPolicy: fromProtoPageAccessPolicy(page.accessPolicy),
     });
   } catch (err) {
+    logServerFailure('page-actions', 'getPageNeutralConfigurationAction', err);
     return actionFailure(
       err instanceof Error ? err.message : 'Failed to load page editor configuration',
       isConnectError(err) ? err.code : Code.Internal,
@@ -111,6 +116,7 @@ export async function updatePageAccessPolicyAction(
     revalidatePageAfterCommit(`/${page.slug || id}`);
     return actionSuccess({ accessPolicy: canonical });
   } catch (err) {
+    logServerFailure('page-actions', 'updatePageAccessPolicyAction', err);
     return actionFailure(
       err instanceof Error ? err.message : 'Failed to update page access settings',
       isConnectError(err) ? err.code : Code.Internal,
@@ -134,6 +140,7 @@ export async function getPageAccessTagOptionsAction(): Promise<
     } while (hasMore);
     return actionSuccess({ tagOptions });
   } catch (err) {
+    logServerFailure('page-actions', 'getPageAccessTagOptionsAction', err);
     return actionFailure(
       err instanceof Error ? err.message : 'Failed to load member tags',
       isConnectError(err) ? err.code : Code.Internal,
@@ -151,6 +158,7 @@ export async function publishPageAction(
     revalidatePath('/admin/pages');
     return actionSuccess({ success: true, status: pageLifecycleStatus(response.status) });
   } catch (err) {
+    logServerFailure('page-actions', 'publishPageAction', err);
     return pageActionFailure(err, 'Failed to publish page', 'PAGE_PUBLISH_FAILED');
   }
 }
@@ -165,6 +173,7 @@ export async function unpublishPageAction(
     revalidatePath('/admin/pages');
     return actionSuccess({ success: true, status: pageLifecycleStatus(response.status) });
   } catch (err) {
+    logServerFailure('page-actions', 'unpublishPageAction', err);
     return pageActionFailure(err, 'Failed to unpublish page', 'PAGE_UNPUBLISH_FAILED');
   }
 }
@@ -179,6 +188,7 @@ export async function updatePageShowTitleAction(
     const response = await client.updatePage({ id, showTitle });
     return actionSuccess({ success: true, showTitle: response.showTitle });
   } catch (err) {
+    logServerFailure('page-actions', 'updatePageShowTitleAction', err);
     return pageActionFailure(err, 'Failed to update page show title', 'PAGE_UPDATE_SHOW_TITLE_FAILED');
   }
 }
@@ -201,6 +211,7 @@ export async function updatePageSlugAction(
     const canonicalSlug = response.slug ?? requestedSlug;
     return actionSuccess({ success: true, slug: canonicalSlug || null });
   } catch (err) {
+    logServerFailure('page-actions', 'updatePageSlugAction', err);
     if (isConnectError(err)) {
       const reason =
         err.code === Code.AlreadyExists
@@ -275,6 +286,7 @@ export async function setPageFeaturedImageAction(
       result.ogGenerationRunId ? { ...response, ogGenerationRunId: result.ogGenerationRunId } : response,
     );
   } catch (err) {
+    logServerFailure('page-actions', 'setPageFeaturedImageAction', err);
     return pageActionFailure(err, 'Failed to set featured image', 'PAGE_SET_FEATURED_IMAGE_FAILED');
   }
 }
@@ -289,6 +301,7 @@ export async function removePageFeaturedImageAction(
       result.ogGenerationRunId ? { success: true, ogGenerationRunId: result.ogGenerationRunId } : { success: true },
     );
   } catch (err) {
+    logServerFailure('page-actions', 'removePageFeaturedImageAction', err);
     return pageActionFailure(err, 'Failed to remove featured image', 'PAGE_REMOVE_FEATURED_IMAGE_FAILED');
   }
 }

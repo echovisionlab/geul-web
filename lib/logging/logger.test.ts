@@ -56,6 +56,7 @@ describe('createLogger', () => {
           operation: 'cache_write',
           job_id: 'job-1',
           error_type: 'error',
+          failure_cause: '[redacted-email] was rejected',
         }),
       }),
     );
@@ -71,6 +72,18 @@ describe('createLogger', () => {
     expect(record.attributes).not.toHaveProperty('recipient');
     expect(record.attributes).not.toHaveProperty('nested');
     expect(JSON.stringify(record)).not.toContain('person@example.com');
+  });
+
+  it('preserves a nested cause supplied through the legacy data.error convention', async () => {
+    const { createLogger } = await import('./logger');
+    await createLogger('logger-test').error('upstream failed', {
+      data: { error: new Error('request failed', { cause: new Error('connection refused') }) },
+    });
+    expect(mocks.emit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attributes: expect.objectContaining({ failure_cause: 'request failed <- connection refused' }),
+      }),
+    );
   });
 
   it('adds the active canonical trace correlation', async () => {

@@ -12,7 +12,7 @@ vi.mock('@/lib/queries/page', () => ({ getPageView: queries.page, getPageViewWit
 vi.mock('@/lib/queries/post', () => ({ getPostView: queries.post, getPostViewWithToken: queries.post }));
 vi.mock('@/lib/queries/work', () => ({ getWorkView: queries.work, getWorkViewWithShareToken: queries.work }));
 vi.mock('@/lib/queries/release', () => ({ getReleasePublic: queries.release }));
-vi.mock('@/lib/utils/logger', () => ({ createLogger: () => ({ error: vi.fn() }) }));
+vi.mock('@/lib/utils/logger', () => ({ createLogger: () => ({ error: vi.fn(), warn: vi.fn() }) }));
 beforeEach(() => vi.resetAllMocks());
 
 for (const [name, handler, query] of [

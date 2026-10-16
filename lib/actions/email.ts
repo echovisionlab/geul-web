@@ -1,5 +1,7 @@
 'use server';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { isConnectError } from '@/lib/api/connect-error';
 import { Code, ConnectError } from '@connectrpc/connect';
 import { createAccountClient } from '@/lib/api/server-client';
@@ -31,6 +33,7 @@ export async function requestEmailChangeAction(newEmail: string): Promise<Action
       message: response.message,
     };
   } catch (err) {
+    logServerFailure('email-actions', 'requestEmailChangeAction', err, [newEmail]);
     if (isConnectError(err)) {
       return connectActionFailure(err);
     }

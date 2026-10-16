@@ -1,5 +1,7 @@
 'use server';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { queryResult } from '@/lib/api/query-result';
 import { isConnectError } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
@@ -69,6 +71,7 @@ export async function createCategoryAction(data: {
       },
     };
   } catch (err) {
+    logServerFailure('category-actions', 'createCategoryAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -90,6 +93,7 @@ export async function updateCategoryAction(
     revalidatePath('/admin/categories');
     return { success: true };
   } catch (err) {
+    logServerFailure('category-actions', 'updateCategoryAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -104,6 +108,7 @@ export async function deleteCategoryAction(id: string): Promise<{ success?: bool
     revalidatePath('/admin/categories');
     return { success: true };
   } catch (err) {
+    logServerFailure('category-actions', 'deleteCategoryAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }

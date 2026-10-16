@@ -1,3 +1,4 @@
+import { logServerFailure } from '@/lib/logging/logger';
 import { throwQueryError } from '@/lib/api/query-error';
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { create } from '@bufbuild/protobuf';
@@ -132,6 +133,7 @@ export async function getWorkView(
       })),
     };
   } catch (err) {
+    logServerFailure('work-queries', 'getWorkView', err);
     if (isConnectErrorCode(err, Code.NotFound)) {
       return null;
     }
@@ -199,6 +201,7 @@ export async function getWorkViewWithShareToken(
       })),
     };
   } catch (err) {
+    logServerFailure('work-queries', 'getWorkViewWithShareToken', err, [shareToken, sharePassword]);
     if (isConnectErrorCode(err, Code.NotFound)) {
       return null;
     }
@@ -256,6 +259,7 @@ export async function getWorkForEdit(idOrSlug: string) {
       })),
     };
   } catch (err) {
+    logServerFailure('work-queries', 'getWorkForEdit', err);
     if (isConnectErrorCode(err, Code.NotFound)) {
       return null;
     }

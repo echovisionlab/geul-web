@@ -1,4 +1,6 @@
 'use server';
+
+import { logServerFailure } from '@/lib/logging/logger';
 import { queryResult } from '@/lib/api/query-result';
 
 import { isConnectError } from '@/lib/api/connect-error';
@@ -75,6 +77,7 @@ export async function createFormatAction(
       },
     };
   } catch (err) {
+    logServerFailure('format-actions', 'createFormatAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -95,6 +98,7 @@ export async function updateFormatAction(
     revalidatePath('/admin/formats');
     return { success: true };
   } catch (err) {
+    logServerFailure('format-actions', 'updateFormatAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -109,6 +113,7 @@ export async function deleteFormatAction(id: string): Promise<{ success?: boolea
     revalidatePath('/admin/formats');
     return { success: true };
   } catch (err) {
+    logServerFailure('format-actions', 'deleteFormatAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }

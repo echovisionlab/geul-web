@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({ emitSystemRecord: vi.fn(), loggerInfo: vi.fn()
 
 vi.mock('@/lib/logging/system-record', () => ({ emitSystemRecord: mocks.emitSystemRecord }));
 vi.mock('@/lib/utils/logger', () => ({
-  createLogger: () => ({ info: mocks.loggerInfo }),
+  createLogger: () => ({ info: mocks.loggerInfo, warn: vi.fn() }),
 }));
 
 import { POST } from './route';

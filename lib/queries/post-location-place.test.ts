@@ -15,6 +15,7 @@ vi.mock('@/lib/utils/session.server', () => ({
 }));
 
 vi.mock('@/lib/logging/logger', () => ({
+  logServerFailure: vi.fn(),
   createLogger: () => ({
     debug: vi.fn(),
     error: vi.fn(),

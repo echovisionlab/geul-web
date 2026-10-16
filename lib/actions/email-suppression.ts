@@ -1,4 +1,6 @@
 'use server';
+
+import { logServerFailure } from '@/lib/logging/logger';
 import { queryResult, type QueryResult } from '@/lib/api/query-result';
 
 import { timestampDate, type Timestamp } from '@bufbuild/protobuf/wkt';
@@ -54,7 +56,7 @@ export async function getEmailSuppressionAction(email: string): Promise<QueryRes
       const response = await client.getEmailSuppression({ email });
       return response.suppression ? mapSuppression(response.suppression) : null;
     } catch (err) {
-      logger.error('Failed to get email suppression', { error: err });
+      logger.error('Failed to get email suppression', { error: err, privateValues: [email] });
       throw err;
     }
   });
@@ -73,6 +75,7 @@ export async function releaseEmailSuppressionAction(email: string): Promise<{ su
     }
     return { success: response.success };
   } catch (err) {
+    logServerFailure('email-suppression-actions', 'releaseEmailSuppressionAction', err, [email]);
     return { error: err instanceof Error ? err.message : 'Failed to release email suppression' };
   }
 }

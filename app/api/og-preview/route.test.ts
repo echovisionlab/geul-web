@@ -6,7 +6,7 @@ import { POST } from './route';
 const mocks = vi.hoisted(() => ({ session: vi.fn(), settings: vi.fn(), home: vi.fn(), content: vi.fn() }));
 vi.mock('@/lib/auth', () => ({ getSessionFromCookie: mocks.session }));
 vi.mock('@/lib/queries/manifest', () => ({ getSettings: mocks.settings }));
-vi.mock('@/lib/utils/logger', () => ({ createLogger: () => ({ error: vi.fn() }) }));
+vi.mock('@/lib/utils/logger', () => ({ createLogger: () => ({ error: vi.fn(), warn: vi.fn() }) }));
 vi.mock('@/lib/utils/og-image', async () => ({
   ...(await import('@/lib/utils/og-config')),
   generateHomeOgImage: mocks.home,

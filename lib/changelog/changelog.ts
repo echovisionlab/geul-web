@@ -1,6 +1,7 @@
 import { cache } from 'react';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { createLogger } from '@/lib/utils/logger';
 import { APP_VERSION } from '@/lib/site-version';
 
 export interface ChangelogInlineText {
@@ -166,7 +167,10 @@ async function readChangelogMarkdown(): Promise<string> {
   const deployedMarkdown = await readFile(
     path.join(/*turbopackIgnore: true*/ process.cwd(), 'CHANGELOG.md'),
     'utf8',
-  ).catch(() => null);
+  ).catch((error: unknown) => {
+    void createLogger('changelog').warn('Deployed changelog read failed; using bundled fallback', { error });
+    return null;
+  });
   if (deployedMarkdown) {
     return deployedMarkdown;
   }

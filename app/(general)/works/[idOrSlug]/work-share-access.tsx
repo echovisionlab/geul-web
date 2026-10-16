@@ -1,6 +1,7 @@
 'use server';
 
 import type { ReactNode } from 'react';
+import { logServerFailure } from '@/lib/logging/logger';
 import { WorkContentWithToken } from './WorkContentWithToken';
 
 export interface WorkShareAccessState {
@@ -31,7 +32,8 @@ export async function accessWorkShareAction(
         query: { share: token },
       }),
     };
-  } catch {
+  } catch (error) {
+    logServerFailure('work-share-access', 'accessWorkShareAction', error, [token, password]);
     return { error: 'incorrect_password' };
   }
 }

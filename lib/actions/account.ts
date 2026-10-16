@@ -1,5 +1,7 @@
 'use server';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { isConnectError } from '@/lib/api/connect-error';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
@@ -26,6 +28,7 @@ export async function requestAccountDeletionAction(): Promise<ActionResult> {
       message: response.message,
     };
   } catch (err) {
+    logServerFailure('account-actions', 'requestAccountDeletionAction', err);
     if (isConnectError(err)) {
       if (err.code === Code.FailedPrecondition && err.message.toLowerCase().includes('reauthenticate')) {
         return { success: false, message: err.message, error: 'reauth_required' };
@@ -54,6 +57,7 @@ export async function confirmAccountDeletionAction(token: string): Promise<Actio
       scheduledAt: response.scheduledAt ? timestampDate(response.scheduledAt) : undefined,
     };
   } catch (err) {
+    logServerFailure('account-actions', 'confirmAccountDeletionAction', err, [token]);
     if (isConnectError(err)) {
       return { success: false, message: err.message };
     }
@@ -78,6 +82,7 @@ export async function cancelAccountDeletionAction(token: string): Promise<Action
       message: response.message,
     };
   } catch (err) {
+    logServerFailure('account-actions', 'cancelAccountDeletionAction', err, [token]);
     if (isConnectError(err)) {
       return { success: false, message: err.message };
     }
@@ -118,6 +123,7 @@ export async function requestAccountRecoveryFormAction(
       submitted: true,
     };
   } catch (err) {
+    logServerFailure('account-actions', 'requestAccountRecoveryFormAction', err, [email]);
     if (isConnectError(err)) {
       return { success: false, message: err.message, submitted: true };
     }
@@ -143,6 +149,7 @@ export async function confirmAccountRecoveryAction(token: string): Promise<Actio
       message: response.message,
     };
   } catch (err) {
+    logServerFailure('account-actions', 'confirmAccountRecoveryAction', err, [token]);
     if (isConnectError(err)) {
       return { success: false, message: err.message };
     }

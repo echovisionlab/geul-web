@@ -1,9 +1,30 @@
 import { Code, ConnectError } from '@connectrpc/connect';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { queryResult, unwrapQueryResult } from './query-result';
 import { resolveErrorStatus } from '@/features/application-error/error-status';
 
+const logger = vi.hoisted(() => ({ error: vi.fn(), warn: vi.fn() }));
+vi.mock('@/lib/utils/logger', () => ({ createLogger: () => logger }));
+beforeEach(() => vi.clearAllMocks());
+
 describe('Server Action query failures', () => {
+  it.each([
+    [Code.Internal, 'error'],
+    [Code.Unauthenticated, 'warn'],
+  ] as const)('logs the original code %s failure before serializing it', async (code, level) => {
+    const error = new ConnectError('upstream failed', code, undefined, undefined, new Error('connection refused'));
+    const result = await queryResult(async () => {
+      throw error;
+    }, ['private-token']);
+    expect(result.ok).toBe(false);
+    expect(logger[level]).toHaveBeenCalledWith('Server Action query failed', {
+      error,
+      privateValues: ['private-token'],
+    });
+    logger[level].mockClear();
+    await queryResult(async () => unwrapQueryResult(result));
+    expect(logger[level]).not.toHaveBeenCalled();
+  });
   it.each([
     [Code.Unauthenticated, 401],
     [Code.PermissionDenied, 403],

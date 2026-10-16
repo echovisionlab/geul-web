@@ -110,7 +110,8 @@ function isAllowedFaviconSource(sourceUrl: string, allowedCdnUrl: string): boole
       source.hash === '' &&
       CANONICAL_ICO_ASSET_PATH.test(source.pathname)
     );
-  } catch {
+  } catch (error) {
+    void logger.error('Favicon source URL validation failed', { error });
     return false;
   }
 }
@@ -167,10 +168,7 @@ export async function proxyFaviconRequest({
     });
   } catch (err) {
     logger.error('Favicon proxy upstream fetch failed', {
-      data: {
-        sourceUrl,
-        error: err instanceof Error ? err.message : String(err),
-      },
+      error: err,
     });
     return new Response('Bad Gateway', {
       status: 502,

@@ -47,7 +47,8 @@ function serializeConsent(
   if (consent.updatedAt) {
     try {
       updatedAt = timestampDate(consent.updatedAt as Parameters<typeof timestampDate>[0]).toISOString();
-    } catch {
+    } catch (error) {
+      void logger.error('Cookie consent timestamp conversion failed', { error });
       updatedAt = null;
     }
   }
@@ -74,6 +75,7 @@ export async function GET() {
     });
   } catch (err) {
     if (isAuthenticationConnectError(err)) {
+      await logger.warn('Cookie consent authentication rejected', { error: err });
       // Anonymous users have browser-only consent.
       return NextResponse.json({ success: true, persisted: false, consent: null });
     }
@@ -88,7 +90,8 @@ export async function POST(request: Request) {
   let payload: unknown;
   try {
     payload = await request.json();
-  } catch {
+  } catch (error) {
+    await logger.warn('Request JSON parsing failed', { error });
     return NextResponse.json({ success: false, error: 'Invalid JSON body' }, { status: 400 });
   }
 
@@ -120,6 +123,7 @@ export async function POST(request: Request) {
     });
   } catch (err) {
     if (isAuthenticationConnectError(err)) {
+      await logger.warn('Cookie consent authentication rejected', { error: err });
       // Anonymous users are expected to rely on browser-cookie consent.
       return NextResponse.json({ success: true, persisted: false });
     }

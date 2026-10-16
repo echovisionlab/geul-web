@@ -1,5 +1,7 @@
 'use server';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
@@ -23,6 +25,7 @@ export async function createPrivacyVersionAction(): Promise<{
     revalidatePath('/admin/privacy');
     return { data: { id: result.id } };
   } catch (err) {
+    logServerFailure('privacy-actions', 'createPrivacyVersionAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -40,6 +43,7 @@ export async function deletePrivacyVersionAction(
     revalidatePrivacyAfterCommit('/admin/privacy');
     return { success: true };
   } catch (err) {
+    logServerFailure('privacy-actions', 'deletePrivacyVersionAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -65,6 +69,7 @@ export async function schedulePrivacyAction(
     revalidatePath('/admin/privacy');
     return { success: true };
   } catch (err) {
+    logServerFailure('privacy-actions', 'schedulePrivacyAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -85,6 +90,7 @@ export async function cancelPrivacyScheduleAction(id: string): Promise<{ success
     revalidatePath('/admin/privacy');
     return { success: true };
   } catch (err) {
+    logServerFailure('privacy-actions', 'cancelPrivacyScheduleAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -105,6 +111,7 @@ export async function activatePrivacyNowAction(
     revalidatePath('/admin/privacy');
     return { success: true };
   } catch (err) {
+    logServerFailure('privacy-actions', 'activatePrivacyNowAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -129,6 +136,7 @@ export async function regeneratePrivacyHtmlAction(id: string): Promise<{ success
     revalidatePath('/admin/privacy');
     return { success: true };
   } catch (err) {
+    logServerFailure('privacy-actions', 'regeneratePrivacyHtmlAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }

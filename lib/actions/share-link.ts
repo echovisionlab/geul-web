@@ -93,7 +93,7 @@ export async function createShareLinkAction(
     }
     return actionSuccess({ shareLink: prependHost(response.shareLink) });
   } catch (err) {
-    logger.error('Failed to create share link', { error: err });
+    logger.error('Failed to create share link', { error: err, privateValues: [options?.password] });
     return shareLinkFailure(err, 'Failed to create share link', 'SHARE_LINK_CREATE_FAILED', {
       [Code.Unauthenticated]: 'Unauthorized',
       [Code.NotFound]: 'Entity not found',

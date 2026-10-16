@@ -1,4 +1,6 @@
 'use server';
+
+import { logServerFailure } from '@/lib/logging/logger';
 import { throwQueryError } from '@/lib/api/query-error';
 
 import { connectActionErrorCode, connectActionErrorMessage, isConnectErrorCode } from '@/lib/api/connect-error';
@@ -58,6 +60,7 @@ export async function createReleaseAction(data: {
     revalidatePath('/admin/releases');
     return actionSuccess({ data: { id: release.id } });
   } catch (err) {
+    logServerFailure('release-actions', 'createReleaseAction', err);
     return releaseActionFailure(err, 'Failed to create release', 'RELEASE_CREATE_FAILED');
   }
 }
@@ -69,6 +72,7 @@ export async function deleteReleaseAction(id: string): Promise<ActionResult<{ su
     revalidatePath('/admin/releases');
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('release-actions', 'deleteReleaseAction', err);
     return releaseActionFailure(err, 'Failed to delete release', 'RELEASE_DELETE_FAILED');
   }
 }
@@ -96,6 +100,7 @@ export async function getReleaseAdminAction(id: string) {
       updatedAt: release.updatedAt ? timestampDate(release.updatedAt) : null,
     };
   } catch (err) {
+    logServerFailure('release-actions', 'getReleaseAdminAction', err);
     if (isConnectErrorCode(err, Code.NotFound, Code.PermissionDenied)) {
       return null;
     }
@@ -152,6 +157,7 @@ export async function getReleaseEditorRelationsAction(releaseId: string): Promis
       })),
     };
   } catch (err) {
+    logServerFailure('release-actions', 'getReleaseEditorRelationsAction', err);
     if (isConnectErrorCode(err, Code.NotFound, Code.PermissionDenied)) {
       return null;
     }
@@ -169,6 +175,7 @@ export async function publishReleaseAction(
     revalidatePath('/admin/releases');
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('release-actions', 'publishReleaseAction', err);
     return releaseEditorFailure(err, 'Failed to publish release', 'RELEASE_PUBLISH_FAILED');
   }
 }
@@ -183,6 +190,7 @@ export async function unpublishReleaseAction(
     revalidatePath('/admin/releases');
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('release-actions', 'unpublishReleaseAction', err);
     return releaseEditorFailure(err, 'Failed to unpublish release', 'RELEASE_UNPUBLISH_FAILED');
   }
 }
@@ -200,6 +208,7 @@ export async function updateReleaseSlugAction(
     });
     return actionSuccess({ success: true, slug });
   } catch (err) {
+    logServerFailure('release-actions', 'updateReleaseSlugAction', err);
     return releaseEditorFailure(err, 'Failed to update slug', 'RELEASE_UPDATE_SLUG_FAILED');
   }
 }
@@ -235,6 +244,7 @@ export async function updateReleaseFieldsAction(
     revalidatePath(`/releases/${id}`);
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('release-actions', 'updateReleaseFieldsAction', err);
     return releaseEditorFailure(err, 'Failed to update release fields', 'RELEASE_UPDATE_FIELDS_FAILED');
   }
 }
@@ -251,6 +261,7 @@ export async function setReleaseArtworkAction(
     const response = await client.setReleaseArtwork({ releaseId, fileId });
     return actionSuccess({ url: response.artworkAsset?.url });
   } catch (err) {
+    logServerFailure('release-actions', 'setReleaseArtworkAction', err);
     return releaseActionFailure(err, 'Failed to set artwork', 'RELEASE_SET_ARTWORK_FAILED', {
       [Code.NotFound]: 'Release or file not found',
       [Code.PermissionDenied]: 'No permission to edit this release',
@@ -267,6 +278,7 @@ export async function deleteReleaseArtworkAction(
     await client.deleteReleaseArtwork({ releaseId });
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('release-actions', 'deleteReleaseArtworkAction', err);
     return releaseEditorFailure(err, 'Failed to delete artwork', 'RELEASE_DELETE_ARTWORK_FAILED');
   }
 }
@@ -304,6 +316,7 @@ export async function setReleaseLabelsAction(
     });
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('release-actions', 'setReleaseLabelsAction', err);
     return releaseEditorFailure(err, 'Failed to update labels', 'RELEASE_UPDATE_LABELS_FAILED');
   }
 }
@@ -326,6 +339,7 @@ export async function setReleaseGenresAction(
     });
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('release-actions', 'setReleaseGenresAction', err);
     return releaseEditorFailure(err, 'Failed to update genres', 'RELEASE_UPDATE_GENRES_FAILED');
   }
 }
@@ -358,6 +372,7 @@ export async function setReleaseArtistsAction(
     });
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('release-actions', 'setReleaseArtistsAction', err);
     return releaseEditorFailure(err, 'Failed to update artists', 'RELEASE_UPDATE_ARTISTS_FAILED');
   }
 }
@@ -380,6 +395,7 @@ export async function setReleaseCategoriesAction(
     });
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('release-actions', 'setReleaseCategoriesAction', err);
     return releaseEditorFailure(err, 'Failed to update categories', 'RELEASE_UPDATE_CATEGORIES_FAILED');
   }
 }
@@ -402,6 +418,7 @@ export async function setReleaseStylesAction(
     });
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('release-actions', 'setReleaseStylesAction', err);
     return releaseEditorFailure(err, 'Failed to update styles', 'RELEASE_UPDATE_STYLES_FAILED');
   }
 }
@@ -432,6 +449,7 @@ export async function setReleaseFormatsAction(
     });
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('release-actions', 'setReleaseFormatsAction', err);
     return releaseEditorFailure(err, 'Failed to update formats', 'RELEASE_UPDATE_FORMATS_FAILED');
   }
 }
@@ -486,6 +504,7 @@ export async function setReleaseCreditsAction(
     });
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('release-actions', 'setReleaseCreditsAction', err);
     return releaseEditorFailure(err, 'Failed to update credits', 'RELEASE_UPDATE_CREDITS_FAILED');
   }
 }

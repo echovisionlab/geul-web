@@ -1,5 +1,7 @@
 'use server';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { isConnectError } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { fromJson, type JsonObject, type JsonValue } from '@bufbuild/protobuf';
@@ -158,6 +160,7 @@ export async function updateSiteSettingsAction(
 
     return withOgGenerationRun({ success: true }, response.ogGenerationRunId);
   } catch (err) {
+    logServerFailure('site-setting-actions', 'updateSiteSettingsAction', err);
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
         return { error: 'Unauthorized' };
@@ -182,6 +185,7 @@ export async function updateHomeOgConfigAction(
     });
     return withOgGenerationRun({ success: true }, response.ogGenerationRunId);
   } catch (err) {
+    logServerFailure('site-setting-actions', 'updateHomeOgConfigAction', err);
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
         return { error: 'Unauthorized' };
@@ -211,6 +215,7 @@ export async function getSiteOgStatusAction(): Promise<{
       },
     };
   } catch (err) {
+    logServerFailure('site-setting-actions', 'getSiteOgStatusAction', err);
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
         return { error: 'Unauthorized' };
@@ -271,6 +276,7 @@ export async function getLegalOgImageAction(
       },
     };
   } catch (err) {
+    logServerFailure('site-setting-actions', 'getLegalOgImageAction', err);
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
         return { error: 'Unauthorized' };
@@ -312,6 +318,7 @@ export async function updateContentOgConfigAction(
     });
     return withOgGenerationRun({ success: true }, response.ogGenerationRunId);
   } catch (err) {
+    logServerFailure('site-setting-actions', 'updateContentOgConfigAction', err);
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
         return { error: 'Unauthorized' };
@@ -337,6 +344,7 @@ export async function regenerateAllOgImagesAction(): Promise<{
     const response = await adminClient.regenerateAllOgImages({});
     return { success: true, runId: response.runId, generationCount: response.generationCount };
   } catch (err) {
+    logServerFailure('site-setting-actions', 'regenerateAllOgImagesAction', err);
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
         return { error: 'Unauthorized' };
@@ -383,6 +391,7 @@ export async function setSiteAssetAction(
     const result = withOgGenerationRun({ success: true as const }, settingResponse.ogGenerationRunId);
     return warning ? { ...result, warning } : result;
   } catch (err) {
+    logServerFailure('site-setting-actions', 'setSiteAssetAction', err);
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
         return { error: 'Unauthorized' };
@@ -426,6 +435,7 @@ export async function deleteSiteAssetAction(
     const result = withOgGenerationRun({ success: true as const, assetUrl: null }, settingResponse.ogGenerationRunId);
     return warning ? { ...result, warning } : result;
   } catch (err) {
+    logServerFailure('site-setting-actions', 'deleteSiteAssetAction', err);
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
         return { error: 'Unauthorized' };
@@ -446,6 +456,7 @@ export async function addSiteLoaderAssetAction(fileId: string): Promise<{ succes
     revalidatePath('/', 'layout');
     return { success: true };
   } catch (err) {
+    logServerFailure('site-setting-actions', 'addSiteLoaderAssetAction', err);
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
         return { error: 'Unauthorized' };
@@ -468,6 +479,7 @@ export async function removeSiteLoaderAssetAction(
     revalidatePath('/', 'layout');
     return { success: true };
   } catch (err) {
+    logServerFailure('site-setting-actions', 'removeSiteLoaderAssetAction', err);
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
         return { error: 'Unauthorized' };

@@ -1,4 +1,6 @@
 'use server';
+
+import { logServerFailure } from '@/lib/logging/logger';
 import { throwQueryError } from '@/lib/api/query-error';
 
 import { isConnectErrorCode } from '@/lib/api/connect-error';
@@ -182,6 +184,7 @@ export async function getEmailTemplateAction(id: string): Promise<EmailTemplate 
     const response = await client.getEmailTemplate({ id });
     return mapTemplate(response);
   } catch (err) {
+    logServerFailure('email-template-actions', 'getEmailTemplateAction', err);
     if (isConnectErrorCode(err, Code.NotFound)) {
       return null;
     }
@@ -209,6 +212,7 @@ export async function createEmailTemplateAction(data: {
     revalidateEmailTemplateAfterCommit('/admin/email-templates');
     return { data: { id: result.id } };
   } catch (err) {
+    logServerFailure('email-template-actions', 'createEmailTemplateAction', err, [data?.subject, data?.description]);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -234,6 +238,7 @@ export async function updateEmailTemplateLayoutAction(
     revalidateEmailTemplateAfterCommit('/admin/campaigns');
     return { success: true };
   } catch (err) {
+    logServerFailure('email-template-actions', 'updateEmailTemplateLayoutAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -256,6 +261,7 @@ export async function deleteEmailTemplateAction(
     revalidateEmailTemplateAfterCommit('/admin/campaigns');
     return { success: true };
   } catch (err) {
+    logServerFailure('email-template-actions', 'deleteEmailTemplateAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized', errorCode: 'UNAUTHORIZED' };
     }
@@ -285,6 +291,7 @@ export async function updateEmailTemplateEventMappingAction(
     revalidateEmailTemplateAfterCommit('/admin/email-templates');
     return { success: true };
   } catch (err) {
+    logServerFailure('email-template-actions', 'updateEmailTemplateEventMappingAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -308,6 +315,7 @@ export async function sendTestEmailTemplateAction(
     await client.sendTestEmail({ id, email, locale: locale ?? undefined });
     return { success: true };
   } catch (err) {
+    logServerFailure('email-template-actions', 'sendTestEmailTemplateAction', err, [email], { template_id: id });
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -339,6 +347,7 @@ export async function previewEmailTemplateAction(data: {
       html: response.html,
     };
   } catch (err) {
+    logServerFailure('email-template-actions', 'previewEmailTemplateAction', err, [data?.subject]);
     if (isConnectErrorCode(err, Code.NotFound)) {
       return null;
     }

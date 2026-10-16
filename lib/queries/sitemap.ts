@@ -25,7 +25,7 @@ export async function getSitemapDocument(kind: SitemapDocumentKind): Promise<Sit
     };
   } catch (err) {
     if (isConnectError(err)) {
-      logger.error('GetSitemapDocument RPC error', { error: err.message });
+      logger.error('GetSitemapDocument RPC error', { error: err });
     } else {
       logger.error('GetSitemapDocument error', { error: err });
     }

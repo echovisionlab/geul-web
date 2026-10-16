@@ -1,4 +1,6 @@
 'use server';
+
+import { logServerFailure } from '@/lib/logging/logger';
 import { throwQueryError } from '@/lib/api/query-error';
 import { queryResult } from '@/lib/api/query-result';
 
@@ -113,6 +115,7 @@ export async function deleteMapPlaceAction(id: string): Promise<{ success?: bool
     revalidatePath('/admin/map/places');
     return { success: true };
   } catch (err) {
+    logServerFailure('map-place-actions', 'deleteMapPlaceAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -153,6 +156,7 @@ export async function getMapPlaceAction(id: string) {
       updatedAt: response.updatedAt ? timestampDate(response.updatedAt) : new Date(),
     };
   } catch (err) {
+    logServerFailure('map-place-actions', 'getMapPlaceAction', err);
     if (isConnectErrorCode(err, Code.NotFound)) {
       return null;
     }
@@ -193,6 +197,7 @@ export async function updateMapPlaceAction(
     revalidatePath('/admin/map/places');
     return { success: true };
   } catch (err) {
+    logServerFailure('map-place-actions', 'updateMapPlaceAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }

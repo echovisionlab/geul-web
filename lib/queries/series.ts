@@ -1,3 +1,4 @@
+import { logServerFailure } from '@/lib/logging/logger';
 import { throwQueryError } from '@/lib/api/query-error';
 import { getPublicSeriesResponse } from '@/lib/queries/detail-public.server';
 import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
@@ -76,7 +77,7 @@ export async function listSeriesAdmin(input: SeriesListInput) {
     };
   } catch (err) {
     if (isConnectError(err)) {
-      logger.error('ListSeriesAdmin RPC error', { error: err.message });
+      logger.error('ListSeriesAdmin RPC error', { error: err });
     }
     throw err;
   }
@@ -94,7 +95,7 @@ export async function listSeriesSimple() {
     }));
   } catch (err) {
     if (isConnectError(err)) {
-      logger.error('ListSeriesSimple RPC error', { error: err.message });
+      logger.error('ListSeriesSimple RPC error', { error: err });
     }
     throwQueryError(err);
   }
@@ -150,7 +151,7 @@ export async function listPublicSeriesOptions() {
     throw new Error('List public Series pagination repeated an offset');
   } catch (err) {
     if (isConnectError(err)) {
-      logger.error('ListPublicSeriesOptions RPC error', { error: err.message });
+      logger.error('ListPublicSeriesOptions RPC error', { error: err });
     }
     throw err;
   }
@@ -175,6 +176,7 @@ export async function getPublicSeries(idOrSlug: string, options?: { requestedLoc
       localizationInfo: mapPublicLocalizationInfo(series.localizationInfo),
     };
   } catch (error) {
+    logServerFailure('series-queries', 'getPublicSeries', error);
     if (isConnectErrorCode(error, Code.NotFound)) {
       return null;
     }
@@ -210,6 +212,7 @@ export async function getSeriesWithManagers(id: string) {
       })),
     };
   } catch (err) {
+    logServerFailure('series-queries', 'getSeriesWithManagers', err);
     if (isConnectErrorCode(err, Code.NotFound)) {
       return null;
     }
@@ -272,7 +275,7 @@ export async function listMySeries() {
     throw new Error('ListMySeries pagination repeated an offset');
   } catch (err) {
     if (isConnectError(err)) {
-      logger.error('ListMySeries RPC error', { error: err.message });
+      logger.error('ListMySeries RPC error', { error: err });
     }
     throw err;
   }

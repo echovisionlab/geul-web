@@ -29,13 +29,20 @@ export async function getSessionFromCookie(options?: { throwOnError?: boolean })
     }
     return session;
   } catch (error) {
+    const privateValues = [cookieStore.get(getSessionCookieName())?.value];
     if (isConnectErrorCode(error, Code.Unauthenticated)) {
+      await logger.warn('GetCurrentSession rejected', {
+        error,
+        privateValues,
+        data: { rpc_code: Code.Unauthenticated },
+      });
       await clearInvalidSessionCookie();
       return null;
     }
     const rpcCode = connectErrorCode(error);
     logger.error('GetCurrentSession failed', {
       error,
+      privateValues,
       data: rpcCode === undefined ? undefined : { rpc_code: rpcCode },
     });
     if (options?.throwOnError) {

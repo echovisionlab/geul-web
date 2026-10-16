@@ -1,3 +1,4 @@
+import { logServerFailure } from '@/lib/logging/logger';
 import { getPublicSettings } from '@/lib/queries/manifest';
 import { siteVariableContext } from '@/lib/site-variables';
 import { throwQueryError } from '@/lib/api/query-error';
@@ -142,6 +143,7 @@ export async function getLabelAdmin(id: string) {
       allowedActions: response.allowedActions,
     };
   } catch (err) {
+    logServerFailure('label-queries', 'getLabelAdmin', err);
     if (isConnectErrorCode(err, Code.NotFound)) {
       return null;
     }
@@ -168,6 +170,7 @@ export async function getLabelForEdit(idOrSlug: string) {
 
     return getLabelAdmin(label.id);
   } catch (err) {
+    logServerFailure('label-queries', 'getLabelForEdit', err);
     if (isConnectErrorCode(err, Code.NotFound, Code.PermissionDenied)) {
       return null;
     }
@@ -223,6 +226,7 @@ export async function getLabelPublic(
         if (!(error instanceof URIError)) {
           throw error;
         }
+        void logger.warn('Label slug decoding failed; using original slug', { error });
         // Retain the previous body-reader behavior for malformed escape sequences.
       }
     }
@@ -306,10 +310,11 @@ export async function getLabelPublic(
     };
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound, Code.PermissionDenied)) {
+      logServerFailure('label', 'getLabelPublic', err, [shareToken, options?.sharePassword]);
       return null;
     }
     if (isConnectError(err)) {
-      logger.error('GetLabelPublic RPC error', { error: err.message });
+      logger.error('GetLabelPublic RPC error', { error: err, privateValues: [shareToken, options?.sharePassword] });
     }
     throwQueryError(err);
   }

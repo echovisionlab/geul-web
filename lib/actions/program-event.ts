@@ -1,4 +1,6 @@
 'use server';
+
+import { logServerFailure } from '@/lib/logging/logger';
 import { queryResult } from '@/lib/api/query-result';
 
 import { isConnectError } from '@/lib/api/connect-error';
@@ -288,6 +290,7 @@ export async function createProgramEventAction(timezone = 'UTC'): Promise<{
     revalidatePath('/admin/events');
     return { data: { id: event.id } };
   } catch (err) {
+    logServerFailure('program-event-actions', 'createProgramEventAction', err);
     return actionError(err, 'Failed to create program event');
   }
 }
@@ -369,6 +372,7 @@ export async function updateProgramEventAction(
     revalidatePath(`/events/${id}`);
     return { success: true };
   } catch (err) {
+    logServerFailure('program-event-actions', 'updateProgramEventAction', err);
     return actionError(err, 'Failed to update program event');
   }
 }
@@ -419,6 +423,7 @@ export async function getProgramEventNeutralConfigurationAction(
       if (!isConnectError(error) || error.code !== Code.PermissionDenied) {
         throw error;
       }
+      logServerFailure('program-event-actions', 'getProgramEventNeutralConfigurationAction', error);
     }
     return {
       ok: true,
@@ -455,6 +460,7 @@ export async function getProgramEventNeutralConfigurationAction(
       },
     };
   } catch (error) {
+    logServerFailure('program-event-actions', 'getProgramEventNeutralConfigurationAction', error);
     return { ok: false, error: actionError(error, 'Failed to load program event settings').error };
   }
 }
@@ -467,6 +473,7 @@ export async function publishProgramEventAction(id: string, editorOrigin?: strin
     revalidatePath(`/events/${id}`);
     return { success: true };
   } catch (err) {
+    logServerFailure('program-event-actions', 'publishProgramEventAction', err);
     return actionError(err, 'Failed to publish program event');
   }
 }
@@ -479,6 +486,7 @@ export async function archiveProgramEventAction(id: string, editorOrigin?: strin
     revalidatePath(`/events/${id}`);
     return { success: true };
   } catch (err) {
+    logServerFailure('program-event-actions', 'archiveProgramEventAction', err);
     return actionError(err, 'Failed to archive program event');
   }
 }
@@ -490,6 +498,7 @@ export async function deleteProgramEventAction(id: string) {
     revalidatePath('/admin/events');
     return { success: true };
   } catch (err) {
+    logServerFailure('program-event-actions', 'deleteProgramEventAction', err);
     return actionError(err, 'Failed to delete program event');
   }
 }
@@ -515,6 +524,7 @@ export async function addProgramEventPosterAction(
     revalidatePath(`/events/${eventId}`);
     return { media, imageUrl: primaryPosterUrl(media) };
   } catch (err) {
+    logServerFailure('program-event-actions', 'addProgramEventPosterAction', err);
     return actionError(err, 'Failed to add program event poster');
   }
 }
@@ -532,6 +542,7 @@ export async function deleteProgramEventPosterAction(
     revalidatePath(`/events/${eventId}`);
     return { media, imageUrl: primaryPosterUrl(media) };
   } catch (err) {
+    logServerFailure('program-event-actions', 'deleteProgramEventPosterAction', err);
     return actionError(err, 'Failed to delete program event poster');
   }
 }
@@ -553,6 +564,7 @@ export async function reorderProgramEventPosterMediaAction(
     revalidatePath(`/events/${eventId}`);
     return { media, imageUrl: primaryPosterUrl(media) };
   } catch (err) {
+    logServerFailure('program-event-actions', 'reorderProgramEventPosterMediaAction', err);
     return actionError(err, 'Failed to reorder program event posters');
   }
 }
@@ -583,6 +595,7 @@ export async function addProgramEventCreditAction(
     revalidatePath(`/events/${eventId}`);
     return { credit: programEventCreditToItem(credit) };
   } catch (err) {
+    logServerFailure('program-event-actions', 'addProgramEventCreditAction', err);
     return actionError(err, 'Failed to add program event credit');
   }
 }
@@ -605,6 +618,7 @@ export async function updateProgramEventCreditAction(
     revalidatePath(`/events/${eventId}`);
     return { credit: programEventCreditToItem(credit) };
   } catch (err) {
+    logServerFailure('program-event-actions', 'updateProgramEventCreditAction', err);
     return actionError(err, 'Failed to update program event credit');
   }
 }
@@ -620,6 +634,7 @@ export async function deleteProgramEventCreditAction(
     revalidatePath(`/events/${eventId}`);
     return { success: true };
   } catch (err) {
+    logServerFailure('program-event-actions', 'deleteProgramEventCreditAction', err);
     return actionError(err, 'Failed to delete program event credit');
   }
 }
@@ -635,6 +650,7 @@ export async function reorderProgramEventCreditsAction(
     revalidatePath(`/events/${eventId}`);
     return { success: true };
   } catch (err) {
+    logServerFailure('program-event-actions', 'reorderProgramEventCreditsAction', err);
     return actionError(err, 'Failed to reorder program event credits');
   }
 }
@@ -689,6 +705,7 @@ export async function createProgramEventTypeAction(input?: {
     revalidatePath('/admin/events');
     return { data: { id: created.id, name, slug } };
   } catch (err) {
+    logServerFailure('program-event-actions', 'createProgramEventTypeAction', err);
     return actionError(err, 'Failed to create program event type');
   }
 }
@@ -722,6 +739,7 @@ export async function updateProgramEventTypeAction(
     revalidatePath('/admin/events');
     return { success: true };
   } catch (err) {
+    logServerFailure('program-event-actions', 'updateProgramEventTypeAction', err);
     return actionError(err, 'Failed to update program event type');
   }
 }
@@ -733,6 +751,7 @@ export async function deleteProgramEventTypeAction(id: string) {
     revalidatePath('/admin/events');
     return { success: true };
   } catch (err) {
+    logServerFailure('program-event-actions', 'deleteProgramEventTypeAction', err);
     return actionError(err, 'Failed to delete program event type');
   }
 }
@@ -752,6 +771,7 @@ export async function createProgramEventSeriesAction(): Promise<{
     revalidatePath('/admin/event-series');
     return { data: { id: created.id } };
   } catch (err) {
+    logServerFailure('program-event-actions', 'createProgramEventSeriesAction', err);
     return actionError(err, 'Failed to create program event series');
   }
 }
@@ -764,6 +784,7 @@ export async function deleteProgramEventSeriesAction(id: string) {
     revalidatePath('/admin/event-series');
     return { success: true };
   } catch (err) {
+    logServerFailure('program-event-actions', 'deleteProgramEventSeriesAction', err);
     return actionError(err, 'Failed to delete program event series');
   }
 }
@@ -795,6 +816,7 @@ export async function updateProgramEventSeriesAction(
     revalidatePath(`/event-series/${id}`);
     return { success: true };
   } catch (err) {
+    logServerFailure('program-event-actions', 'updateProgramEventSeriesAction', err);
     return actionError(err, 'Failed to update program event series');
   }
 }
@@ -814,6 +836,7 @@ export async function setProgramEventSeriesPosterAction(
       imageUrl: file.delivery?.thumbnail?.url || file.delivery?.asset?.url || file.delivery?.inline?.url || null,
     };
   } catch (err) {
+    logServerFailure('program-event-actions', 'setProgramEventSeriesPosterAction', err);
     return actionError(err, 'Failed to set event series image');
   }
 }
