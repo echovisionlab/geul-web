@@ -44,7 +44,7 @@
       "cssGzip": 45056
     },
     "/(general)/campaigns/[id]": {
-      "jsGzip": 889856,
+      "jsGzip": 958464,
       "cssGzip": 45056
     },
     "/(general)/category/[slug]": {
@@ -232,7 +232,7 @@
       "cssGzip": 45056
     },
     "/admin/campaigns/[id]": {
-      "jsGzip": 855040,
+      "jsGzip": 926720,
       "cssGzip": 44032
     },
     "/admin/campaigns": {
@@ -260,7 +260,7 @@
       "cssGzip": 44032
     },
     "/admin/email-templates/[id]": {
-      "jsGzip": 799744,
+      "jsGzip": 870400,
       "cssGzip": 44032
     },
     "/admin/email-templates": {
