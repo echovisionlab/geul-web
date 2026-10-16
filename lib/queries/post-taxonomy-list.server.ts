@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { createPublicPostClientWithAuth } from '@/lib/api/server-client';
 import {
   listPublishedPostsByTaxonomyWith,
@@ -19,7 +21,8 @@ export async function getPublishedPostsByTaxonomyFirstPage(
   try {
     const result = await listPublishedPostsByTaxonomyWith(await createPublicPostClientWithAuth(), input);
     return { result, updatedAt: Date.now() };
-  } catch {
+  } catch (error) {
+    logServerFailure('post-taxonomy-list', 'getPublishedPostsByTaxonomyFirstPage', error);
     return undefined;
   }
 }

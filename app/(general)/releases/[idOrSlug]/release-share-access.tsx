@@ -1,6 +1,7 @@
 'use server';
 
 import type { ReactNode } from 'react';
+import { logServerFailure } from '@/lib/logging/logger';
 import { getReleasePublic } from '@/lib/queries/release';
 import { ReleasePublicContent } from './ReleasePublicContent';
 
@@ -41,7 +42,8 @@ export async function accessReleaseShareAction(
         sharePassword: password,
       }),
     };
-  } catch {
+  } catch (error) {
+    logServerFailure('release-share-access', 'accessReleaseShareAction', error, [token, password]);
     return { error: 'incorrect_password' };
   }
 }

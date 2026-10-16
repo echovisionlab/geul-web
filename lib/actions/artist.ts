@@ -1,4 +1,6 @@
 'use server';
+
+import { logServerFailure } from '@/lib/logging/logger';
 import { throwQueryError } from '@/lib/api/query-error';
 import { queryResult } from '@/lib/api/query-result';
 
@@ -69,6 +71,7 @@ export async function createArtistDraftAction(): Promise<{
     revalidatePath('/admin/artists');
     return { data: { id: artist.id } };
   } catch (err) {
+    logServerFailure('artist-actions', 'createArtistDraftAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -93,6 +96,7 @@ export async function previewDeleteArtistAction(id: string) {
       },
     };
   } catch (err) {
+    logServerFailure('artist-actions', 'previewDeleteArtistAction', err);
     return { error: err instanceof Error ? err.message : 'Failed to preview artist deletion' };
   }
 }
@@ -107,6 +111,7 @@ export async function deleteArtistAction(
     revalidatePath('/admin/artists');
     return { success: true };
   } catch (err) {
+    logServerFailure('artist-actions', 'deleteArtistAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -122,6 +127,7 @@ export async function publishArtistAction(id: string): Promise<{ success?: boole
     revalidatePath(`/artists/${id}`);
     return { success: true };
   } catch (err) {
+    logServerFailure('artist-actions', 'publishArtistAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -137,6 +143,7 @@ export async function unpublishArtistAction(id: string): Promise<{ success?: boo
     revalidatePath(`/artists/${id}`);
     return { success: true };
   } catch (err) {
+    logServerFailure('artist-actions', 'unpublishArtistAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -199,6 +206,7 @@ export async function listArtistsAdminAction(input: ArtistListInput) {
       totalPages: Math.ceil(total / limit),
     };
   } catch (err) {
+    logServerFailure('artist-actions', 'listArtistsAdminAction', err);
     return {
       data: [],
       total: 0,
@@ -257,6 +265,7 @@ export async function getArtistAdminAction(idOrSlug: string) {
       allowedActions: response.allowedActions ?? [],
     };
   } catch (err) {
+    logServerFailure('artist-actions', 'getArtistAdminAction', err);
     if (isConnectErrorCode(err, Code.NotFound)) {
       return null;
     }
@@ -288,6 +297,7 @@ export async function deleteArtistAvatarAction(artistId: string): Promise<{ succ
     await client.deleteArtistImage({ artistId });
     return { success: true };
   } catch (err) {
+    logServerFailure('artist-actions', 'deleteArtistAvatarAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -304,6 +314,7 @@ export async function setArtistImageAction(
     const response = await client.setArtistImage({ artistId, fileId });
     return { url: response.imageAsset?.url };
   } catch (err) {
+    logServerFailure('artist-actions', 'setArtistImageAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -343,6 +354,7 @@ export async function setArtistImagesAction(
       },
     };
   } catch (err) {
+    logServerFailure('artist-actions', 'setArtistImagesAction', err);
     return { error: err instanceof Error ? err.message : 'Failed to update artist images' };
   }
 }
@@ -464,6 +476,7 @@ export async function setArtistParticipantAction(
     await client.setArtistParticipant({ artistId, memberId, role });
     return { success: true };
   } catch (err) {
+    logServerFailure('artist-actions', 'setArtistParticipantAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -486,6 +499,7 @@ export async function removeArtistParticipantAction(
     await client.removeArtistParticipant({ artistId, memberId });
     return { success: true };
   } catch (err) {
+    logServerFailure('artist-actions', 'removeArtistParticipantAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }

@@ -1,5 +1,7 @@
 'use server';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { connectActionErrorCode, isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
 import {
   actionFailure,
@@ -196,6 +198,7 @@ export async function regenerateOgImageAction(input: {
     });
     return actionSuccess({ runId: response.runId, generationIds: [...response.generationIds] });
   } catch (error) {
+    logServerFailure('og-generation-actions', 'regenerateOgImageAction', error);
     return ogActionFailure(error, 'Failed to regenerate OG image', 'OG_REGENERATE_FAILED');
   }
 }
@@ -211,6 +214,7 @@ export async function getOgGenerationAction(
     }
     return actionSuccess({ generation: toGenerationState(response.generation) });
   } catch (error) {
+    logServerFailure('og-generation-actions', 'getOgGenerationAction', error);
     return ogActionFailure(error, 'Failed to load OG generation', 'OG_GENERATION_LOAD_FAILED');
   }
 }
@@ -246,6 +250,7 @@ export async function getLatestOgGenerationAction(input: {
     }
     return actionSuccess({ generation: toGenerationState(response.generation) });
   } catch (error) {
+    logServerFailure('og-generation-actions', 'getLatestOgGenerationAction', error);
     if (isConnectErrorCode(error, Code.NotFound)) {
       return actionSuccess<{}>({});
     }
@@ -291,6 +296,7 @@ export async function getOgGenerationRunAction(runId: string): Promise<ActionRes
       },
     });
   } catch (error) {
+    logServerFailure('og-generation-actions', 'getOgGenerationRunAction', error);
     return ogActionFailure(error, 'Failed to load OG generation run', 'OG_GENERATION_RUN_LOAD_FAILED');
   }
 }

@@ -1,4 +1,6 @@
 'use server';
+
+import { logServerFailure } from '@/lib/logging/logger';
 import { queryResult, type QueryResult } from '@/lib/api/query-result';
 
 import { isConnectError } from '@/lib/api/connect-error';
@@ -180,9 +182,11 @@ export async function createCommentAction(
   } catch (err) {
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
+        logServerFailure('comment', 'createCommentAction', err);
         return { error: 'Please log in to comment' };
       }
       if (err.code === Code.FailedPrecondition) {
+        logServerFailure('comment', 'createCommentAction', err);
         return { error: err.message };
       }
     }
@@ -205,12 +209,15 @@ export async function updateCommentAction(
   } catch (err) {
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
+        logServerFailure('comment', 'updateCommentAction', err);
         return { error: 'Please log in' };
       }
       if (err.code === Code.PermissionDenied) {
+        logServerFailure('comment', 'updateCommentAction', err);
         return { error: 'You do not have permission to edit this comment' };
       }
       if (err.code === Code.NotFound) {
+        logServerFailure('comment', 'updateCommentAction', err);
         return { error: 'Comment not found' };
       }
     }
@@ -227,12 +234,15 @@ export async function deleteCommentAction(commentId: string): Promise<{ success?
   } catch (err) {
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
+        logServerFailure('comment', 'deleteCommentAction', err);
         return { error: 'Please log in' };
       }
       if (err.code === Code.PermissionDenied) {
+        logServerFailure('comment', 'deleteCommentAction', err);
         return { error: 'You do not have permission to delete this comment' };
       }
       if (err.code === Code.NotFound) {
+        logServerFailure('comment', 'deleteCommentAction', err);
         return { error: 'Comment not found' };
       }
     }

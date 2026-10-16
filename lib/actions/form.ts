@@ -1,4 +1,6 @@
 'use server';
+
+import { logServerFailure } from '@/lib/logging/logger';
 import { queryResult, type QueryResult, unwrapQueryResult } from '@/lib/api/query-result';
 
 import { connectActionErrorCode, isConnectError } from '@/lib/api/connect-error';
@@ -106,6 +108,7 @@ export async function createFormAction(title: string): Promise<ActionResult<{ da
     revalidatePath('/admin/forms');
     return actionSuccess({ data: { id: form.id } });
   } catch (err) {
+    logServerFailure('form-actions', 'createFormAction', err);
     return formActionFailure(err, 'Failed to create form', 'FORM_CREATE_FAILED');
   }
 }
@@ -117,6 +120,7 @@ export async function deleteFormAction(id: string): Promise<ActionResult<{ succe
     revalidateFormAfterCommit('/admin/forms');
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('form-actions', 'deleteFormAction', err);
     return formActionFailure(err, 'Failed to delete form', 'FORM_DELETE_FAILED');
   }
 }
@@ -163,6 +167,7 @@ export async function updateFormAction(id: string, data: UpdateFormInput): Promi
     revalidateFormAfterCommit(`${basePath}/${id}`);
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('form-actions', 'updateFormAction', err, [data?.password]);
     return formActionFailure(err, 'Failed to update form', 'FORM_UPDATE_FAILED');
   }
 }
@@ -181,6 +186,7 @@ export async function setFormFeaturedImageAction(
       result.ogGenerationRunId ? { ...response, ogGenerationRunId: result.ogGenerationRunId } : response,
     );
   } catch (err) {
+    logServerFailure('form-actions', 'setFormFeaturedImageAction', err);
     return formActionFailure(err, 'Failed to set featured image', 'FORM_SET_FEATURED_IMAGE_FAILED');
   }
 }
@@ -197,6 +203,7 @@ export async function removeFormFeaturedImageAction(
       result.ogGenerationRunId ? { success: true, ogGenerationRunId: result.ogGenerationRunId } : { success: true },
     );
   } catch (err) {
+    logServerFailure('form-actions', 'removeFormFeaturedImageAction', err);
     return formActionFailure(err, 'Failed to remove featured image', 'FORM_REMOVE_FEATURED_IMAGE_FAILED');
   }
 }
@@ -295,9 +302,7 @@ export async function listFormSubmissionsAction(
       },
     });
   } catch (err) {
-    if (isConnectError(err)) {
-      logger.error('ListFormSubmissions RPC error', { error: err.message });
-    }
+    logger.error('ListFormSubmissions RPC error', { error: err });
     return actionFailure('Failed to list form submissions', connectActionErrorCode(err, 'LIST_SUBMISSIONS_FAILED'), {
       code: 'LIST_SUBMISSIONS_FAILED' as const,
     });
@@ -310,6 +315,7 @@ export async function deleteFormSubmissionAction(id: string): Promise<ActionResu
     await client.deleteFormSubmission({ id });
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('form-actions', 'deleteFormSubmissionAction', err);
     return formActionFailure(err, 'Failed to delete submission', 'FORM_DELETE_SUBMISSION_FAILED');
   }
 }
@@ -333,6 +339,7 @@ export async function submitFormAction(
 
     return actionSuccess({ success: true });
   } catch (err) {
+    logServerFailure('form-actions', 'submitFormAction', err, [password, data]);
     return formActionFailure(err, 'Failed to submit form', 'FORM_SUBMIT_FAILED');
   }
 }
@@ -353,7 +360,7 @@ export async function verifyFormPasswordAction(
       sharePassword: sharePassword?.trim() ? sharePassword : undefined,
     });
     return { valid: response.valid };
-  });
+  }, [password, shareToken, sharePassword]);
 }
 
 // Share links - uses generic ShareLinkService
@@ -507,16 +514,34 @@ export async function checkFormAccessAction(input: CheckFormAccessInput): Promis
   } catch (err) {
     if (isConnectError(err)) {
       if (err.code === Code.NotFound) {
+        logServerFailure('form', 'checkFormAccessAction', err, [
+          input?.shareToken,
+          input?.sharePassword,
+          input?.password,
+        ]);
         return { accessible: false, reason: 'form_not_found', form: null };
       }
       if (err.code === Code.Unauthenticated) {
+        logServerFailure('form', 'checkFormAccessAction', err, [
+          input?.shareToken,
+          input?.sharePassword,
+          input?.password,
+        ]);
         return { accessible: false, reason: 'auth_required', form: null };
       }
       if (err.code === Code.PermissionDenied) {
+        logServerFailure('form', 'checkFormAccessAction', err, [
+          input?.shareToken,
+          input?.sharePassword,
+          input?.password,
+        ]);
         return { accessible: false, reason: 'role_not_allowed', form: null };
       }
-      logger.error('CheckFormAccessibility RPC error', { error: err.message });
     }
+    logger.error('CheckFormAccessibility RPC error', {
+      error: err,
+      privateValues: [input?.shareToken, input?.sharePassword, input?.password],
+    });
     return { accessible: false, reason: 'server_error', form: null };
   }
 }
@@ -590,7 +615,7 @@ export async function getFormDashboardByShareAction(input: {
       submissionsThisMonth: dashboard.submissionsThisMonth,
       fieldStats,
     };
-  });
+  }, [input?.shareToken, input?.sharePassword]);
 }
 
 // Public: Get form submission stats for dashboard

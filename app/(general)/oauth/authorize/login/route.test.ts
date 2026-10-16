@@ -92,6 +92,9 @@ describe('MCP OAuth login route', () => {
     );
 
     expect(response.status).toBe(502);
-    expect(mocks.loggerError).toHaveBeenCalledWith('Failed to accept Hydra MCP login', { error });
+    expect(mocks.loggerError).toHaveBeenCalledWith('Failed to accept Hydra MCP login', {
+      error,
+      privateValues: ['challenge-1'],
+    });
   });
 });

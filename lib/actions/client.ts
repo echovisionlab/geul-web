@@ -1,4 +1,6 @@
 'use server';
+
+import { logServerFailure } from '@/lib/logging/logger';
 import { queryResult } from '@/lib/api/query-result';
 
 import { isConnectErrorCode } from '@/lib/api/connect-error';
@@ -75,6 +77,7 @@ export async function getClientsForBlockByIdsAction(input: { ids: string[]; requ
             };
           } catch (err) {
             if (isConnectErrorCode(err, Code.NotFound)) {
+              logServerFailure('client-actions', 'getClientsForBlockByIdsAction', err);
               return null;
             }
             throw err;
@@ -100,6 +103,7 @@ export async function createClientAction(
     revalidatePath('/admin/clients');
     return { data: { id: created.id } };
   } catch (err) {
+    logServerFailure('client-actions', 'createClientAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -114,6 +118,7 @@ export async function deleteClientAction(id: string): Promise<{ success?: boolea
     revalidatePath('/admin/clients');
     return { success: true };
   } catch (err) {
+    logServerFailure('client-actions', 'deleteClientAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -138,6 +143,7 @@ export async function updateClientAction(
     revalidatePath('/admin/clients');
     return { success: true };
   } catch (err) {
+    logServerFailure('client-actions', 'updateClientAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -162,6 +168,7 @@ export async function setClientLogoAction(
     const url = protoVariant === ThemeAssetVariant.DARK ? response.logoDarkAsset?.url : response.logoLightAsset?.url;
     return { url };
   } catch (err) {
+    logServerFailure('client-actions', 'setClientLogoAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -181,6 +188,7 @@ export async function deleteClientLogoAction(
     await client.deleteClientLogo({ clientId, variant: themeAssetVariantFromName(variant) });
     return { success: true };
   } catch (err) {
+    logServerFailure('client-actions', 'deleteClientLogoAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }

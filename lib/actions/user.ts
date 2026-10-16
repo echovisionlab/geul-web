@@ -1,4 +1,6 @@
 'use server';
+
+import { logServerFailure } from '@/lib/logging/logger';
 import { queryResult } from '@/lib/api/query-result';
 
 import { isConnectError } from '@/lib/api/connect-error';
@@ -201,6 +203,7 @@ export async function updateUserAction(
     revalidatePath('/admin/users');
     return { success: true };
   } catch (err) {
+    logServerFailure('user-actions', 'updateUserAction', err, [data?.nickname]);
     return {
       error: err instanceof Error ? err.message : 'Failed to update user',
       ...(nicknameErrorCode(err) && { errorCode: nicknameErrorCode(err) }),
@@ -225,6 +228,7 @@ export async function banUserAction(
     revalidatePath('/admin/users');
     return { success: true };
   } catch (err) {
+    logServerFailure('user-actions', 'banUserAction', err);
     return { error: err instanceof Error ? err.message : 'Failed to ban user' };
   }
 }
@@ -240,6 +244,7 @@ export async function unbanUserAction(id: string): Promise<{ success?: boolean; 
     revalidatePath('/admin/users');
     return { success: true };
   } catch (err) {
+    logServerFailure('user-actions', 'unbanUserAction', err);
     return { error: err instanceof Error ? err.message : 'Failed to unban user' };
   }
 }
@@ -255,6 +260,7 @@ export async function setUserCanonicalEmailAction(
     revalidatePath(`/admin/users/${id}`);
     return { success: true };
   } catch (err) {
+    logServerFailure('user-actions', 'setUserCanonicalEmailAction', err, [email]);
     return { error: err instanceof Error ? err.message : 'Failed to update canonical account email' };
   }
 }
@@ -271,6 +277,7 @@ export async function removeUserSsoProviderAction(
     revalidatePath(`/admin/users/${id}`);
     return { success: true };
   } catch (err) {
+    logServerFailure('user-actions', 'removeUserSsoProviderAction', err);
     return { error: err instanceof Error ? err.message : 'Failed to remove SSO provider' };
   }
 }
@@ -282,6 +289,7 @@ export async function deleteUserAction(id: string): Promise<{ success?: boolean;
     revalidatePath('/admin/users');
     return { success: true };
   } catch (err) {
+    logServerFailure('user-actions', 'deleteUserAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -415,6 +423,7 @@ export async function updateProfileAction(data: {
 
     return { member: mapMemberSummary(response.member) };
   } catch (err) {
+    logServerFailure('user-actions', 'updateProfileAction', err, [data?.nickname]);
     return {
       error: err instanceof Error ? err.message : 'Failed to update profile',
       ...(nicknameErrorCode(err) && { errorCode: nicknameErrorCode(err) }),
@@ -445,6 +454,7 @@ export async function checkNicknameAvailabilityAction(
     const response = await memberClient.checkNicknameAvailability({ nickname: nickname.trim() });
     return { available: response.available };
   } catch (err) {
+    logServerFailure('user-actions', 'checkNicknameAvailabilityAction', err, [nickname]);
     return { error: err instanceof Error ? err.message : 'Failed to check nickname availability' };
   }
 }
@@ -464,6 +474,7 @@ export async function completeMyOnboardingAction(nickname: string): Promise<{
     }
     return { member, onboarded: true };
   } catch (err) {
+    logServerFailure('user-actions', 'completeMyOnboardingAction', err, [nickname]);
     return {
       error: err instanceof Error ? err.message : 'Failed to complete onboarding',
       ...(nicknameErrorCode(err) && { errorCode: nicknameErrorCode(err) }),
@@ -505,6 +516,7 @@ export async function setAvatarAction(fileId: string): Promise<{ member?: Member
 
     return { member: mapMemberSummary(response.member) };
   } catch (err) {
+    logServerFailure('user-actions', 'setAvatarAction', err);
     return { error: err instanceof Error ? err.message : 'Failed to set avatar' };
   }
 }
@@ -523,6 +535,7 @@ export async function setAvatarForMemberAction(
 
     return { url: response.member?.avatarAsset?.url };
   } catch (err) {
+    logServerFailure('user-actions', 'setAvatarForMemberAction', err);
     return { error: err instanceof Error ? err.message : 'Failed to set avatar' };
   }
 }
@@ -535,6 +548,7 @@ export async function deleteAvatarAction(): Promise<{ member?: MemberSummaryResu
 
     return { member: mapMemberSummary(response.member) };
   } catch (err) {
+    logServerFailure('user-actions', 'deleteAvatarAction', err);
     return { error: err instanceof Error ? err.message : 'Failed to delete avatar' };
   }
 }
@@ -549,6 +563,7 @@ export async function deleteAvatarForMemberAction(memberId: string): Promise<{ s
 
     return { success: true };
   } catch (err) {
+    logServerFailure('user-actions', 'deleteAvatarForMemberAction', err);
     return { error: err instanceof Error ? err.message : 'Failed to delete avatar' };
   }
 }

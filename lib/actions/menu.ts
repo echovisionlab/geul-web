@@ -1,5 +1,7 @@
 'use server';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { queryResult, unwrapQueryResult, type QueryResult } from '@/lib/api/query-result';
 import { isConnectError } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
@@ -154,6 +156,7 @@ export async function updateMenuAction(
     revalidatePath('/admin/menus');
     return { success: true };
   } catch (err) {
+    logServerFailure('menu-actions', 'updateMenuAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -171,6 +174,7 @@ export async function createMenuAction(name: string): Promise<{ data?: { id: str
     revalidatePath('/admin/menus');
     return { data: { id: menu.id } };
   } catch (err) {
+    logServerFailure('menu-actions', 'createMenuAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -185,6 +189,7 @@ export async function deleteMenuAction(id: string): Promise<{ success?: boolean;
     revalidatePath('/admin/menus');
     return { success: true };
   } catch (err) {
+    logServerFailure('menu-actions', 'deleteMenuAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }

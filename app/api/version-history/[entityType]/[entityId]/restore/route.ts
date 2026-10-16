@@ -1,3 +1,5 @@
+import { createLogger } from '@/lib/utils/logger';
+import { logServerFailure } from '@/lib/logging/logger';
 import { NextResponse } from 'next/server';
 import { parseVersionEntityType, restoreVersion, toVersionErrorResult } from '@/lib/server/version-history';
 
@@ -10,6 +12,8 @@ interface Params {
   }>;
 }
 
+const logger = createLogger('version-history-api');
+
 export async function POST(request: Request, { params }: Params) {
   const { entityType, entityId } = await params;
   const parsedEntityType = parseVersionEntityType(entityType);
@@ -18,7 +22,10 @@ export async function POST(request: Request, { params }: Params) {
     return NextResponse.json({ error: 'Invalid entity type' }, { status: 400 });
   }
 
-  const body = (await request.json().catch(() => null)) as { versionId?: string } | null;
+  const body = (await request.json().catch((error: unknown) => {
+    void logger.warn('Request JSON parsing failed', { error });
+    return null;
+  })) as { versionId?: string } | null;
   if (typeof body?.versionId !== 'string' || !body.versionId.trim()) {
     return NextResponse.json({ error: 'Missing version id' }, { status: 400 });
   }
@@ -27,6 +34,7 @@ export async function POST(request: Request, { params }: Params) {
     const result = await restoreVersion(parsedEntityType, entityId, body.versionId);
     return NextResponse.json(result);
   } catch (err) {
+    logServerFailure('version-history-api', 'restoreVersion', err);
     const { status, error } = toVersionErrorResult(err, 'Failed to restore version');
     return NextResponse.json({ error }, { status });
   }

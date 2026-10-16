@@ -1,3 +1,4 @@
+import { logServerFailure } from '@/lib/logging/logger';
 import { throwQueryError } from '@/lib/api/query-error';
 import { Code } from '@connectrpc/connect';
 import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
@@ -81,10 +82,11 @@ export async function getUserProfileView(
     };
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound)) {
+      logServerFailure('user', 'getUserProfileView', err);
       return null;
     }
     if (isConnectError(err)) {
-      logger.error('Public user profile RPC error', { error: err.message });
+      logger.error('Public user profile RPC error', { error: err });
     }
     throwQueryError(err);
   }
@@ -111,7 +113,7 @@ export async function getUserPublishedPosts(memberId: string, requestedLocale?: 
     }));
   } catch (err) {
     if (isConnectError(err)) {
-      logger.error('GetUserPublishedPosts RPC error', { error: err.message });
+      logger.error('GetUserPublishedPosts RPC error', { error: err });
     }
     throwQueryError(err);
   }
@@ -161,7 +163,7 @@ export async function listAuthors(limit: number = 12, memberIds: string[] = []) 
     }));
   } catch (err) {
     if (isConnectError(err)) {
-      logger.error('ListAuthors RPC error', { error: err.message });
+      logger.error('ListAuthors RPC error', { error: err });
     }
     throwQueryError(err);
   }

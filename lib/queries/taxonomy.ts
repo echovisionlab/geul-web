@@ -1,3 +1,4 @@
+import { logServerFailure } from '@/lib/logging/logger';
 import { throwQueryError } from '@/lib/api/query-error';
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { Code } from '@connectrpc/connect';
@@ -93,6 +94,7 @@ export async function getPublicCategoryBySlug(slug: string): Promise<PublicCateg
     const categories = await listAllPublicCategories();
     return categories.find((c) => c.slug === slug) ?? null;
   } catch (err) {
+    logServerFailure('taxonomy-queries', 'getPublicCategoryBySlug', err);
     if (isConnectErrorCode(err, Code.NotFound)) {
       return null;
     }
@@ -105,6 +107,7 @@ export async function getPublicTagBySlug(slug: string): Promise<PublicTagTaxonom
     const tags = await listAllPublicTags();
     return tags.find((t) => t.slug === slug) ?? null;
   } catch (err) {
+    logServerFailure('taxonomy-queries', 'getPublicTagBySlug', err);
     if (isConnectErrorCode(err, Code.NotFound)) {
       return null;
     }

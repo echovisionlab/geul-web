@@ -1,4 +1,6 @@
 'use server';
+
+import { logServerFailure } from '@/lib/logging/logger';
 import { queryResult } from '@/lib/api/query-result';
 
 import { isConnectError } from '@/lib/api/connect-error';
@@ -126,6 +128,7 @@ export async function createSegmentAction(input: {
     revalidateAudienceAfterCommit('/admin/campaigns');
     return { data: { id: segment.id } };
   } catch (err) {
+    logServerFailure('audience-actions', 'createSegmentAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -141,6 +144,7 @@ export async function archiveSegmentAction(id: string): Promise<{ success?: bool
     revalidateAudienceAfterCommit('/admin/campaigns');
     return { success: true };
   } catch (err) {
+    logServerFailure('audience-actions', 'archiveSegmentAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -156,6 +160,7 @@ export async function restoreSegmentAction(id: string): Promise<{ success?: bool
     revalidateAudienceAfterCommit('/admin/campaigns');
     return { success: true };
   } catch (err) {
+    logServerFailure('audience-actions', 'restoreSegmentAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -201,7 +206,7 @@ export async function listActiveSegmentsAction(): Promise<{ id: string; name: st
     return Array.from(segmentsById.values());
   } catch (err) {
     logger.error('Failed to load active Audience options', {
-      error: err instanceof Error ? err.message : String(err),
+      error: err,
     });
     throw new Error('Unable to load active Audience options');
   }
@@ -252,6 +257,7 @@ export async function getSegmentAction(id: string): Promise<{
       },
     };
   } catch (err) {
+    logServerFailure('audience-actions', 'getSegmentAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -303,6 +309,7 @@ export async function updateSegmentAction(input: {
     revalidateAudienceAfterCommit('/admin/campaigns');
     return { data: mapUpdatedSegment(segment) };
   } catch (err) {
+    logServerFailure('audience-actions', 'updateSegmentAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -346,6 +353,7 @@ export async function estimateSegmentCountAction(input: {
     });
     return { count: response.count };
   } catch (err) {
+    logServerFailure('audience-actions', 'estimateSegmentCountAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }

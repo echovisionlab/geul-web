@@ -53,7 +53,8 @@ function isSameOriginBrowserRequest(request: NextRequest): boolean {
       allowedOrigins.add(configuredHost.includes('://') ? new URL(configuredHost).origin : `https://${configuredHost}`);
     }
     return allowedOrigins.has(requestedOrigin);
-  } catch {
+  } catch (error) {
+    void logger.warn('Client render failure origin validation failed', { error });
     return false;
   }
 }
@@ -75,7 +76,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   let body: string;
   try {
     body = await request.text();
-  } catch {
+  } catch (error) {
+    await logger.warn('Client render failure report decoding failed', { error });
     return emptyResponse(400);
   }
   if (new TextEncoder().encode(body).byteLength > CLIENT_RENDER_FAILURE_MAX_BODY_BYTES) {
@@ -85,7 +87,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   let decoded: unknown;
   try {
     decoded = JSON.parse(body);
-  } catch {
+  } catch (error) {
+    await logger.warn('Client render failure report decoding failed', { error });
     return emptyResponse(400);
   }
   const payload = parseClientRenderFailurePayload(decoded);

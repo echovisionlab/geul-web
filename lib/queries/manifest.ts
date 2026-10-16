@@ -219,9 +219,7 @@ export async function getPublicSettings(options?: ManifestQueryOptions): Promise
     const response = await client.get({});
     return fromProtoSettings(response.settings);
   } catch (err) {
-    if (isConnectError(err)) {
-      logger.error('GetPublicSettings RPC error', { error: err.message });
-    }
+    logger.error('GetPublicSettings RPC error', { error: err });
     return DEFAULT_MANIFEST.settings;
   }
 }
@@ -232,9 +230,7 @@ export async function getManageSiteContext(): Promise<SiteContext> {
     const response = await client.get({});
     return toSiteContext(fromProtoSettings(response.settings));
   } catch (err) {
-    if (isConnectError(err)) {
-      logger.error('GetManageSiteContext RPC error', { error: err.message });
-    }
+    logger.error('GetManageSiteContext RPC error', { error: err });
     throw err;
   }
 }
@@ -257,6 +253,7 @@ const getManifestSnapshotCached = cache(async (requestedLocale: string | null): 
     };
   } catch (err) {
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
+      void logger.warn('GetManifest session rejected; retrying anonymously', { error: err });
       try {
         const client = createPublicManifestClient(requestedLocale);
         const response = await client.get({});
@@ -268,15 +265,11 @@ const getManifestSnapshotCached = cache(async (requestedLocale: string | null): 
           hasSettings: response.settings !== undefined,
         };
       } catch (fallbackErr) {
-        if (isConnectError(fallbackErr)) {
-          logger.error('GetManifest public fallback RPC error', { error: fallbackErr.message });
-        }
+        logger.error('GetManifest public fallback RPC error', { error: fallbackErr });
         return { manifest: DEFAULT_MANIFEST, hasSettings: false };
       }
     }
-    if (isConnectError(err)) {
-      logger.error('GetManifest RPC error', { error: err.message });
-    }
+    logger.error('GetManifest RPC error', { error: err });
     return { manifest: DEFAULT_MANIFEST, hasSettings: false };
   }
 });
@@ -338,11 +331,10 @@ const getPublicPageCached = cache(
       };
     } catch (err) {
       if (isConnectError(err) && err.code === Code.NotFound) {
+        void logger.warn('GetPublicPage not found', { error: err });
         return null;
       }
-      if (isConnectError(err)) {
-        logger.error('GetPublicPage RPC error', { error: err.message });
-      }
+      logger.error('GetPublicPage RPC error', { error: err });
       throw err;
     }
   },

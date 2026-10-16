@@ -1,5 +1,7 @@
 'use server';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { isConnectError } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { createAccountClient, createPublicNewsletterClient } from '@/lib/api/server-client';
@@ -20,6 +22,7 @@ export async function unsubscribeNewsletterAction(token: string): Promise<Newsle
     await client.unsubscribe({ token: normalizedToken });
     return { success: true, message: 'You have been successfully unsubscribed.' };
   } catch (error) {
+    logServerFailure('newsletter-actions', 'unsubscribeNewsletterAction', error, [normalizedToken]);
     return {
       success: false,
       message: isConnectError(error) || error instanceof Error ? error.message : 'Failed to unsubscribe',
@@ -39,6 +42,7 @@ export async function setCurrentUserNewsletterSubscriptionAction(
       message: subscribed ? 'You are subscribed to the newsletter.' : 'You have been unsubscribed from the newsletter.',
     };
   } catch (error) {
+    logServerFailure('newsletter-actions', 'setCurrentUserNewsletterSubscriptionAction', error);
     return {
       success: false,
       message: isConnectError(error) || error instanceof Error ? error.message : 'Failed to update subscription',
@@ -59,6 +63,7 @@ export async function unsubscribeUserFromNewsletterAction(memberId: string): Pro
     revalidatePath(`/admin/users/${normalizedMemberId}`);
     return { success: true, message: 'The user has been unsubscribed from the newsletter.' };
   } catch (error) {
+    logServerFailure('newsletter-actions', 'unsubscribeUserFromNewsletterAction', error);
     return {
       success: false,
       message: isConnectError(error) || error instanceof Error ? error.message : 'Failed to unsubscribe user',

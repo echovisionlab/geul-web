@@ -1,5 +1,7 @@
 'use server';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { Code } from '@connectrpc/connect';
 import { createEmailLayoutClient } from '@/lib/api/server-client';
@@ -35,6 +37,7 @@ export async function createEmailLayoutAction(data: {
     revalidateEmailLayoutAfterCommit('/admin/campaigns');
     return { data: { id: result.id } };
   } catch (err) {
+    logServerFailure('email-layout-actions', 'createEmailLayoutAction', err, [data?.htmlContent]);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized', errorCode: 'UNAUTHORIZED' };
     }
@@ -71,6 +74,7 @@ export async function updateEmailLayoutAction(
     revalidateEmailLayoutAfterCommit('/admin/campaigns');
     return { success: true };
   } catch (err) {
+    logServerFailure('email-layout-actions', 'updateEmailLayoutAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized', errorCode: 'UNAUTHORIZED' };
     }
@@ -99,6 +103,7 @@ export async function deleteEmailLayoutAction(id: string): Promise<{ success?: b
     revalidateEmailLayoutAfterCommit('/admin/campaigns');
     return { success: true };
   } catch (err) {
+    logServerFailure('email-layout-actions', 'deleteEmailLayoutAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized', errorCode: 'UNAUTHORIZED' };
     }
@@ -144,6 +149,7 @@ export async function previewEmailLayoutContentAction(
       })),
     };
   } catch (err) {
+    logServerFailure('email-layout-actions', 'previewEmailLayoutContentAction', err, [htmlContent, sampleContent]);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return {
         valid: false,

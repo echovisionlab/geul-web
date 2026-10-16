@@ -2,6 +2,7 @@
 
 import { listMcpOAuthGrants, revokeMcpOAuthGrant, type McpOAuthGrant } from '@/features/auth/hydra-mcp-oauth';
 import { getSessionFromCookie } from '@/lib/auth';
+import { logServerFailure } from '@/lib/logging/logger';
 
 export interface McpOAuthGrantListResult {
   grants: McpOAuthGrant[];
@@ -18,7 +19,8 @@ export async function listMyMcpOAuthGrants(): Promise<McpOAuthGrantListResult> {
   }
   try {
     return { grants: await listMcpOAuthGrants(session) };
-  } catch {
+  } catch (error) {
+    logServerFailure('mcp-oauth-grant-actions', 'listMyMcpOAuthGrants', error);
     return { grants: [], error: 'request_failed' };
   }
 }
@@ -34,7 +36,8 @@ export async function revokeMyMcpOAuthGrant(grantId: string): Promise<{ success?
   try {
     await revokeMcpOAuthGrant(session, grantId);
     return { success: true };
-  } catch {
+  } catch (error) {
+    logServerFailure('mcp-oauth-grant-actions', 'revokeMyMcpOAuthGrant', error);
     return { error: 'request_failed' };
   }
 }

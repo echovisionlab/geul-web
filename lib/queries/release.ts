@@ -1,8 +1,9 @@
+import { logServerFailure } from '@/lib/logging/logger';
 import { getPublicSettings } from '@/lib/queries/manifest';
 import { siteVariableContext } from '@/lib/site-variables';
 import { throwQueryError } from '@/lib/api/query-error';
 import { getPublicReleaseResponse } from '@/lib/queries/detail-public.server';
-import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
+import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { create } from '@bufbuild/protobuf';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
@@ -507,9 +508,7 @@ export async function getReleasePublic(
       })),
     };
   } catch (err) {
-    if (isConnectError(err)) {
-      logger.error('GetReleasePublic RPC error', { error: err.message });
-    }
+    logServerFailure('release-queries', 'getReleasePublic', err, [shareToken, options?.sharePassword]);
     if (isConnectErrorCode(err, Code.NotFound, Code.PermissionDenied)) {
       return null;
     }
@@ -524,6 +523,7 @@ export async function resolveReleaseIdForEdit(idOrSlug: string): Promise<string 
     const response = await client.get({ slug: decodeURIComponent(idOrSlug) });
     return response.release?.id ?? null;
   } catch (err) {
+    logServerFailure('release-queries', 'resolveReleaseIdForEdit', err);
     if (isConnectErrorCode(err, Code.NotFound, Code.PermissionDenied)) {
       return null;
     }

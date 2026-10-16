@@ -1,5 +1,7 @@
 'use server';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { queryResult } from '@/lib/api/query-result';
 import { isConnectError } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
@@ -63,6 +65,7 @@ export async function createTagAction(
       },
     };
   } catch (err) {
+    logServerFailure('tag-actions', 'createTagAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -77,6 +80,7 @@ export async function updateTagAction(id: string, name: string): Promise<{ succe
     revalidatePath('/admin/tags');
     return { success: true };
   } catch (err) {
+    logServerFailure('tag-actions', 'updateTagAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -91,6 +95,7 @@ export async function deleteTagAction(id: string): Promise<{ success?: boolean; 
     revalidatePath('/admin/tags');
     return { success: true };
   } catch (err) {
+    logServerFailure('tag-actions', 'deleteTagAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }

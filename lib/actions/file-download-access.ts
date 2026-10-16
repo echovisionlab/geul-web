@@ -1,5 +1,7 @@
 'use server';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { create } from '@bufbuild/protobuf';
 import { Code, ConnectError } from '@connectrpc/connect';
 import { FilterOp, FilterSpecSchema, PaginationRequestSchema } from '@echovisionlab/geul-proto/common/common_pb.ts';
@@ -155,7 +157,8 @@ export async function getFileDownloadPolicyAction(
       return { errorCode: 'missingResponse' };
     }
     return { data: mapPolicy(response.policy) };
-  } catch {
+  } catch (error) {
+    logServerFailure('file-download-access-actions', 'getFileDownloadPolicyAction', error);
     return { errorCode: 'loadFailed' };
   }
 }
@@ -197,6 +200,7 @@ export async function updateFileDownloadPolicyAction(
     }
     return { data: mapPolicy(response.policy) };
   } catch (error) {
+    logServerFailure('file-download-access-actions', 'updateFileDownloadPolicyAction', error);
     if (ConnectError.from(error).code === Code.FailedPrecondition) {
       return { errorCode: 'staleTarget' };
     }
@@ -225,7 +229,8 @@ export async function listAudienceSegmentsForAuthenticatedAccessAction(
     return {
       data: mapPage(response.segments.map(mapAudienceSegment), response.pagination, page, pageSize),
     };
-  } catch {
+  } catch (error) {
+    logServerFailure('file-download-access-actions', 'listAudienceSegmentsForAuthenticatedAccessAction', error);
     return { errorCode: 'loadFailed' };
   }
 }

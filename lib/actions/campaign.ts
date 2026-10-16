@@ -1,4 +1,6 @@
 'use server';
+
+import { logServerFailure } from '@/lib/logging/logger';
 import { queryResult, type QueryResult } from '@/lib/api/query-result';
 
 import { connectErrorCode, isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
@@ -272,6 +274,7 @@ export async function createCampaignAction(
     return { data: { id: response.campaign.id } };
   } catch (err) {
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
+      logServerFailure('campaign', 'createCampaignAction', err);
       return { error: 'Unauthorized' };
     }
     logger.error('Failed to create campaign', { error: err });
@@ -294,6 +297,7 @@ export async function updateCampaignNameAction(
     // The code lets the editor's save queue tell a refused name from a transient failure.
     const errorCode = connectErrorCode(err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
+      logServerFailure('campaign', 'updateCampaignNameAction', err);
       return { error: 'Unauthorized', errorCode };
     }
     logger.error('Failed to update campaign name', { error: err });
@@ -363,9 +367,11 @@ export async function deleteCampaignAction(id: string): Promise<{ success?: bool
   } catch (err) {
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
+        logServerFailure('campaign', 'deleteCampaignAction', err);
         return { error: 'Unauthorized' };
       }
       if (err.code === Code.FailedPrecondition) {
+        logServerFailure('campaign', 'deleteCampaignAction', err);
         return { error: err.message };
       }
     }
@@ -391,9 +397,11 @@ export async function sendCampaignNowAction(
   } catch (err) {
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
+        logServerFailure('campaign', 'sendCampaignNowAction', err);
         return { error: 'Unauthorized' };
       }
       if (err.code === Code.FailedPrecondition) {
+        logServerFailure('campaign', 'sendCampaignNowAction', err);
         return { error: err.message };
       }
     }
@@ -447,9 +455,10 @@ export async function sendTestCampaignAction(
     return { success: response.success };
   } catch (err) {
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
+      logServerFailure('campaign', 'sendTestCampaignAction', err, [email]);
       return { error: 'Unauthorized' };
     }
-    logger.error('Failed to send test campaign', { error: err });
+    logger.error('Failed to send test campaign', { error: err, privateValues: [email] });
     return { error: err instanceof Error ? err.message : 'Failed to send test email' };
   }
 }
@@ -471,9 +480,11 @@ export async function scheduleCampaignAction(
   } catch (err) {
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
+        logServerFailure('campaign', 'scheduleCampaignAction', err);
         return { error: 'Unauthorized' };
       }
       if (err.code === Code.FailedPrecondition) {
+        logServerFailure('campaign', 'scheduleCampaignAction', err);
         return { error: err.message };
       }
     }
@@ -491,9 +502,11 @@ export async function cancelCampaignAction(id: string): Promise<{ changed?: bool
   } catch (err) {
     if (isConnectError(err)) {
       if (err.code === Code.Unauthenticated) {
+        logServerFailure('campaign', 'cancelCampaignAction', err);
         return { error: 'Unauthorized' };
       }
       if (err.code === Code.FailedPrecondition) {
+        logServerFailure('campaign', 'cancelCampaignAction', err);
         return { error: err.message };
       }
     }

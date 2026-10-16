@@ -5,6 +5,7 @@ import { getTranslations } from 'next-intl/server';
 import { localizedRichTextPlainText } from '@/features/editor/contract/localized-rich-text-text';
 import { getPublicPrivacyPage, getPublicTermsPage } from '@/lib/queries/legal-public.server';
 import { getSiteMetadataDocument } from '@/lib/queries/metadata';
+import { logServerFailure } from '@/lib/logging/logger';
 import { truncateForDescription } from '@/lib/utils/og';
 
 // Keep the metadata, structured data, and initial document tied to the same version.
@@ -14,7 +15,10 @@ export const getPublicLegalPagePresentation = cache(async (kind: 'privacy' | 'te
     getTranslations('common.entities'),
     getSiteMetadataDocument(),
     (kind === 'privacy' ? getPublicPrivacyPage(requestedLocale) : getPublicTermsPage(requestedLocale)).catch(
-      () => null,
+      (error: unknown) => {
+        logServerFailure('public-legal-page', `getPolicy ${kind}`, error);
+        return null;
+      },
     ),
   ]);
   const content = snapshot?.data.active?.content;

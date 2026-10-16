@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { cache } from 'react';
 import { Code } from '@connectrpc/connect';
 import { isConnectErrorCode } from '@/lib/api/connect-error';
@@ -12,6 +14,7 @@ export const getPublicPrivacyPage = cache(async (requestedLocale: string) => {
   const client = await createPublicPrivacyClientWithAuth(requestedLocale);
   const response = await client.get({}).catch((error: unknown) => {
     if (isConnectErrorCode(error, Code.NotFound)) {
+      logServerFailure('legal-public', 'getPolicy', error);
       return null;
     }
     throw error;
@@ -28,6 +31,7 @@ export const getPublicTermsPage = cache(async (requestedLocale: string) => {
   const client = await createPublicTermsClientWithAuth(requestedLocale);
   const response = await client.get({}).catch((error: unknown) => {
     if (isConnectErrorCode(error, Code.NotFound)) {
+      logServerFailure('legal-public', 'getPolicy', error);
       return null;
     }
     throw error;

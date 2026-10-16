@@ -1,4 +1,6 @@
 'use server';
+
+import { logServerFailure } from '@/lib/logging/logger';
 import { queryResult } from '@/lib/api/query-result';
 
 import { isConnectError } from '@/lib/api/connect-error';
@@ -80,6 +82,7 @@ export async function createGenreAction(
       },
     };
   } catch (err) {
+    logServerFailure('genre-actions', 'createGenreAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -101,6 +104,7 @@ export async function updateGenreAction(
     revalidatePath('/admin/genres');
     return { success: true };
   } catch (err) {
+    logServerFailure('genre-actions', 'updateGenreAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }
@@ -115,6 +119,7 @@ export async function deleteGenreAction(id: string): Promise<{ success?: boolean
     revalidatePath('/admin/genres');
     return { success: true };
   } catch (err) {
+    logServerFailure('genre-actions', 'deleteGenreAction', err);
     if (isConnectError(err)) {
       return { error: err.message };
     }

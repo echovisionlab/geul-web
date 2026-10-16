@@ -1,5 +1,7 @@
 'use server';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
@@ -19,6 +21,7 @@ export async function createTermsVersionAction(): Promise<{
     revalidatePath('/admin/terms');
     return { data: { id: result.id } };
   } catch (err) {
+    logServerFailure('terms-actions', 'createTermsVersionAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -36,6 +39,7 @@ export async function deleteTermsVersionAction(
     revalidateTermsAfterCommit('/admin/terms');
     return { success: true };
   } catch (err) {
+    logServerFailure('terms-actions', 'deleteTermsVersionAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -61,6 +65,7 @@ export async function scheduleTermsAction(
     revalidatePath('/admin/terms');
     return { success: true };
   } catch (err) {
+    logServerFailure('terms-actions', 'scheduleTermsAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -81,6 +86,7 @@ export async function cancelTermsScheduleAction(id: string): Promise<{ success?:
     revalidatePath('/admin/terms');
     return { success: true };
   } catch (err) {
+    logServerFailure('terms-actions', 'cancelTermsScheduleAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -101,6 +107,7 @@ export async function activateTermsNowAction(
     revalidatePath('/admin/terms');
     return { success: true };
   } catch (err) {
+    logServerFailure('terms-actions', 'activateTermsNowAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -125,6 +132,7 @@ export async function regenerateTermsHtmlAction(id: string): Promise<{ success?:
     revalidatePath('/admin/terms');
     return { success: true };
   } catch (err) {
+    logServerFailure('terms-actions', 'regenerateTermsHtmlAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }

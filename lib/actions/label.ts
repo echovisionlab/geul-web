@@ -1,4 +1,6 @@
 'use server';
+
+import { logServerFailure } from '@/lib/logging/logger';
 import { queryResult } from '@/lib/api/query-result';
 
 import { isConnectErrorCode } from '@/lib/api/connect-error';
@@ -40,6 +42,7 @@ export async function createLabelDraftAction(): Promise<{
     revalidatePath('/admin/labels');
     return { data: { id: label.id } };
   } catch (err) {
+    logServerFailure('label-actions', 'createLabelDraftAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -57,6 +60,7 @@ export async function deleteLabelAction(
     revalidatePath('/admin/labels');
     return { success: true };
   } catch (err) {
+    logServerFailure('label-actions', 'deleteLabelAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -107,6 +111,7 @@ export async function setLabelParticipantAction(
     await client.setLabelParticipant({ labelId, memberId, role });
     return { success: true };
   } catch (err) {
+    logServerFailure('label-actions', 'setLabelParticipantAction', err);
     return { error: err instanceof Error ? err.message : 'Failed to update participant' };
   }
 }
@@ -120,6 +125,7 @@ export async function removeLabelParticipantAction(
     await client.removeLabelParticipant({ labelId, memberId });
     return { success: true };
   } catch (err) {
+    logServerFailure('label-actions', 'removeLabelParticipantAction', err);
     return { error: err instanceof Error ? err.message : 'Failed to remove participant' };
   }
 }
@@ -131,6 +137,7 @@ export async function publishLabelAction(id: string): Promise<{ success?: boolea
     revalidatePath('/admin/labels');
     return { success: true };
   } catch (err) {
+    logServerFailure('label-actions', 'publishLabelAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -148,6 +155,7 @@ export async function unpublishLabelAction(id: string): Promise<{ success?: bool
     revalidatePath('/admin/labels');
     return { success: true };
   } catch (err) {
+    logServerFailure('label-actions', 'unpublishLabelAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -172,6 +180,7 @@ export async function setLabelLogoAction(
     const url = protoVariant === ThemeAssetVariant.DARK ? response.imageDarkAsset?.url : response.imageLightAsset?.url;
     return { url };
   } catch (err) {
+    logServerFailure('label-actions', 'setLabelLogoAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }
@@ -194,6 +203,7 @@ export async function deleteLabelLogoAction(
     await client.deleteLabelImage({ labelId, variant: themeAssetVariantFromName(variant) });
     return { success: true };
   } catch (err) {
+    logServerFailure('label-actions', 'deleteLabelLogoAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }

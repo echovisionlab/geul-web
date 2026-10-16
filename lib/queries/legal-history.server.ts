@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { cache } from 'react';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
@@ -11,9 +13,14 @@ import type { PublicLegalHistoryDetailInitialData, PublicLegalHistoryInitialData
 type Kind = 'privacy' | 'terms';
 
 async function createClient(kind: Kind, requestedLocale: string) {
-  return kind === 'privacy'
-    ? createPublicPrivacyClientWithAuth(requestedLocale)
-    : createPublicTermsClientWithAuth(requestedLocale);
+  try {
+    return await (kind === 'privacy'
+      ? createPublicPrivacyClientWithAuth(requestedLocale)
+      : createPublicTermsClientWithAuth(requestedLocale));
+  } catch (error) {
+    logServerFailure('legal-history', `createClient ${kind}`, error);
+    throw error;
+  }
 }
 
 function policy(response: Awaited<ReturnType<Awaited<ReturnType<typeof createClient>>['get']>>) {
@@ -26,13 +33,17 @@ export const getPublicLegalHistory = cache(
     const client = await createClient(kind, requestedLocale);
     const [current, archived] = await Promise.all([
       client.get({}).catch((error: unknown) => {
+        logServerFailure('legal-history', `get ${kind}`, error);
         if (isConnectErrorCode(error, Code.NotFound)) {
           return null;
         }
         throw error;
       }),
       // Match the existing public list's empty-on-failure behavior.
-      client.list({ limit: 100, offset: 0 }).catch(() => ({ items: [] })),
+      client.list({ limit: 100, offset: 0 }).catch((error: unknown) => {
+        logServerFailure('legal-history', `list ${kind}`, error);
+        return { items: [] };
+      }),
     ]);
     const active = current ? policy(current) : null;
     return {
@@ -80,6 +91,7 @@ export const getPublicLegalHistoryDetail = cache(
         },
       };
     } catch (error) {
+      logServerFailure('legal-history-queries', 'getPublicLegalHistoryDetail', error);
       if (isConnectErrorCode(error, Code.NotFound)) {
         return { id, requestedLocale, updatedAt: Date.now(), data: null };
       }

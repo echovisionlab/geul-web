@@ -4,7 +4,7 @@ import { GET, POST } from './route';
 
 const mocks = vi.hoisted(() => ({ get: vi.fn(), update: vi.fn(), client: vi.fn() }));
 vi.mock('@/lib/api/server-client', () => ({ createMemberClient: mocks.client }));
-vi.mock('@/lib/utils/logger', () => ({ createLogger: () => ({ error: vi.fn() }) }));
+vi.mock('@/lib/utils/logger', () => ({ createLogger: () => ({ error: vi.fn(), warn: vi.fn() }) }));
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.client.mockResolvedValue({ getMySettings: mocks.get, updateMyPreferences: mocks.update });

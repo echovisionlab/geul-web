@@ -1,3 +1,4 @@
+import { logServerFailure } from '@/lib/logging/logger';
 import { NextResponse } from 'next/server';
 import { listVersions, parseVersionEntityType, toVersionErrorResult } from '@/lib/server/version-history';
 
@@ -38,6 +39,7 @@ export async function GET(request: Request, { params }: Params) {
     const result = await listVersions(parsedEntityType, entityId, page, pageSize);
     return NextResponse.json(result);
   } catch (err) {
+    logServerFailure('version-history-api', 'listVersions', err);
     const { status, error } = toVersionErrorResult(err, 'Failed to fetch versions');
     return NextResponse.json({ error }, { status });
   }

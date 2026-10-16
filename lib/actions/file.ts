@@ -1,5 +1,7 @@
 'use server';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
 import type { Timestamp } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
@@ -145,6 +147,7 @@ export async function initiateUploadAction(input: {
       attemptId: response.ingestAttemptId || '',
     };
   } catch (err) {
+    logServerFailure('file-actions', 'initiateUploadAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       throw new Error('Unauthorized');
     }
@@ -206,6 +209,7 @@ export async function findMultipartUploadCandidateAction(input: {
       clientMediaBundleId: response.clientMediaBundleId,
     };
   } catch (err) {
+    logServerFailure('file-actions', 'findMultipartUploadCandidateAction', err);
     const definitiveError = completionError(err, 'candidate');
     if (definitiveError) {
       throw definitiveError;
@@ -249,6 +253,7 @@ export async function prepareClientMediaUploadAction(input: {
     }
     return actionSuccess({ bundleId: response.bundleId });
   } catch (err) {
+    logServerFailure('file-actions', 'prepareClientMediaUploadAction', err);
     return actionFailure(
       isConnectErrorCode(err, Code.Unauthenticated) ? 'Unauthorized' : UPLOAD_FAILED_MESSAGE,
       isConnectError(err) ? err.code : Code.Unknown,
@@ -299,6 +304,7 @@ export async function completeUploadAction(input: CompletionInput): Promise<Comp
 
     return { url: uploadDeliveryUrl(response.delivery, input.uploadType), fileId: response.fileId };
   } catch (err) {
+    logServerFailure('file-actions', 'completeUploadAction', err);
     if (
       input.clientMediaBundleId &&
       isConnectErrorCode(err, Code.Unavailable) &&
@@ -337,7 +343,8 @@ export async function recoverCompletedUploadAction(input: CompletionInput): Prom
         if (bundleReady(input, clientMediaBundleId, delivery)) {
           return { url: uploadDeliveryUrl(delivery, input.uploadType), fileId: input.fileId };
         }
-      } catch {
+      } catch (error) {
+        logServerFailure('file-actions', 'recoverCompletedUploadAction', error);
         // Preserve the ambiguous completion error when readiness cannot be verified.
       }
     }
@@ -391,6 +398,7 @@ export async function abortUploadAction(input: { fileId: string; uploadId: strin
     });
     return { success: true };
   } catch (err) {
+    logServerFailure('file-actions', 'abortUploadAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       throw new Error('Unauthorized');
     }
@@ -404,6 +412,7 @@ export async function deleteFileAction(fileId: string): Promise<{ success?: bool
     await client.deleteFile({ fileId });
     return { success: true };
   } catch (err) {
+    logServerFailure('file-actions', 'deleteFileAction', err);
     if (isConnectError(err)) {
       if (err.code === Code.NotFound) {
         return { success: true };
@@ -654,6 +663,7 @@ export async function listFileManagerItemsAction(input: {
       pageSize: directoryLimit,
     });
   } catch (error) {
+    logServerFailure('file-actions', 'listFileManagerItemsAction', error);
     if (isConnectErrorCode(error, Code.NotFound) && input.folderId) {
       return { items: [], total: 0, folderNotFound: true };
     }
@@ -752,6 +762,7 @@ export async function getManagedFileAction(fileId: string) {
       domainUsageSummary: response.domainUsageSummary.map(fileManagerUsageView),
     };
   } catch (error) {
+    logServerFailure('file-actions', 'getManagedFileAction', error);
     return { success: false as const, errorCode: fileManagerActionErrorCode(error, 'loadFile') };
   }
 }
@@ -772,6 +783,7 @@ export async function listManagedFileUsagesAction(input: { fileId: string; pageS
       total: Number(response.total),
     };
   } catch (error) {
+    logServerFailure('file-actions', 'listManagedFileUsagesAction', error);
     return { success: false as const, errorCode: fileManagerActionErrorCode(error, 'loadUsages') };
   }
 }
@@ -781,6 +793,7 @@ export async function createFileFolderAction(input: { parentId?: string; name: s
     const response = await (await createFileClient()).createFileFolder(input);
     return { success: true as const, folderId: response.folder?.id };
   } catch (error) {
+    logServerFailure('file-actions', 'createFileFolderAction', error);
     return { success: false as const, errorCode: fileManagerActionErrorCode(error, 'createFolder') };
   }
 }
@@ -790,6 +803,7 @@ export async function renameFileFolderAction(input: { folderId: string; name: st
     await (await createFileClient()).renameFileFolder(input);
     return { success: true as const };
   } catch (error) {
+    logServerFailure('file-actions', 'renameFileFolderAction', error);
     return { success: false as const, errorCode: fileManagerActionErrorCode(error, 'renameFolder') };
   }
 }
@@ -799,6 +813,7 @@ export async function moveFileFolderAction(input: { folderId: string; parentId?:
     await (await createFileClient()).moveFileFolder(input);
     return { success: true as const };
   } catch (error) {
+    logServerFailure('file-actions', 'moveFileFolderAction', error);
     return { success: false as const, errorCode: fileManagerActionErrorCode(error, 'moveFolder') };
   }
 }
@@ -808,6 +823,7 @@ export async function deleteFileFolderAction(folderId: string) {
     const response = await (await createFileClient()).deleteFileFolder({ folderId });
     return { success: true as const, acceptedFileIds: response.acceptedFileIds };
   } catch (error) {
+    logServerFailure('file-actions', 'deleteFileFolderAction', error);
     return { success: false as const, errorCode: fileManagerActionErrorCode(error, 'deleteFolder') };
   }
 }
@@ -817,6 +833,7 @@ export async function renameManagedFileAction(input: { fileId: string; fileName:
     await (await createFileClient()).renameFile(input);
     return { success: true as const };
   } catch (error) {
+    logServerFailure('file-actions', 'renameManagedFileAction', error);
     return { success: false as const, errorCode: fileManagerActionErrorCode(error, 'renameFile') };
   }
 }
@@ -826,6 +843,7 @@ export async function moveManagedFilesAction(input: { fileIds: string[]; folderI
     await (await createFileClient()).moveFiles(input);
     return { success: true as const };
   } catch (error) {
+    logServerFailure('file-actions', 'moveManagedFilesAction', error);
     return { success: false as const, errorCode: fileManagerActionErrorCode(error, 'moveFiles') };
   }
 }
@@ -835,6 +853,7 @@ export async function getFileDeletionImpactAction(fileIds: string[]) {
     const response = await (await createFileClient()).getFileDeletionImpact({ fileIds });
     return { success: true as const, impacts: response.impacts.map(fileDeletionImpactView) };
   } catch (error) {
+    logServerFailure('file-actions', 'getFileDeletionImpactAction', error);
     return { success: false as const, errorCode: fileManagerActionErrorCode(error, 'inspectUsage') };
   }
 }
@@ -848,6 +867,7 @@ export async function deleteManagedFilesAction(fileIds: string[]) {
       rejectedFiles: response.rejectedFiles.map(fileDeletionImpactView),
     };
   } catch (error) {
+    logServerFailure('file-actions', 'deleteManagedFilesAction', error);
     return { success: false as const, errorCode: fileManagerActionErrorCode(error, 'deleteFiles') };
   }
 }
@@ -880,6 +900,7 @@ export async function downloadFromUrlAction(input: {
       attemptId: response.ingestAttemptId || '',
     };
   } catch (err) {
+    logServerFailure('file-actions', 'downloadFromUrlAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       throw new Error('Unauthorized');
     }
@@ -893,6 +914,7 @@ export async function getFileStatusAction(fileId: string): Promise<EditorFileSta
     const response = await client.getMediaDelivery({ fileId });
     return fileStatusFromDelivery(response.delivery);
   } catch (err) {
+    logServerFailure('file-actions', 'getFileStatusAction', err);
     if (isConnectErrorCode(err, Code.NotFound)) {
       return missingFileStatus();
     }
@@ -921,7 +943,8 @@ export async function getFileStatusesAction(fileIds: string[]): Promise<Record<s
         return [fileId, entry ? fileStatusFromDelivery(entry.delivery) : missingFileStatus()];
       }),
     );
-  } catch {
+  } catch (error) {
+    logServerFailure('file-actions', 'getFileStatusesAction', error);
     // A batch transport failure is transient for every requested file.
     return Object.fromEntries(uniqueFileIds.map((fileId) => [fileId, unavailableFileStatus()]));
   }

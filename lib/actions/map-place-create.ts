@@ -1,5 +1,7 @@
 'use server';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { Code } from '@connectrpc/connect';
@@ -54,6 +56,7 @@ export async function createMapPlaceAction(
     revalidatePath('/admin/map/places');
     return { data: { id: result.id } };
   } catch (err) {
+    logServerFailure('map-place-create-actions', 'createMapPlaceAction', err);
     if (isConnectErrorCode(err, Code.Unauthenticated)) {
       return { error: 'Unauthorized' };
     }

@@ -23,13 +23,15 @@ async function fetchImageAsDataUrl(url: string): Promise<string | undefined> {
   try {
     const response = await fetch(url);
     if (!response.ok) {
+      await logger.error('OG preview image fetch failed', { data: { status: response.status } });
       return undefined;
     }
     const contentType = response.headers.get('content-type') || 'image/png';
     const arrayBuffer = await response.arrayBuffer();
     const base64 = Buffer.from(arrayBuffer).toString('base64');
     return `data:${contentType};base64,${base64}`;
-  } catch {
+  } catch (error) {
+    await logger.error('OG preview image fetch failed', { error });
     return undefined;
   }
 }
@@ -55,7 +57,8 @@ export async function POST(request: NextRequest) {
   let decoded: unknown;
   try {
     decoded = await request.json();
-  } catch {
+  } catch (error) {
+    await logger.warn('Request JSON parsing failed', { error });
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
   const parsed = ogPreviewInput.safeParse(decoded);

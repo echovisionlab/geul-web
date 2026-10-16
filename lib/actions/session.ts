@@ -20,6 +20,7 @@ interface SessionActionResult {
 
 function mapError(err: unknown, fallback: string): SessionActionResult {
   if (isConnectErrorCode(err, Code.Unauthenticated, Code.PermissionDenied)) {
+    void logger.warn(fallback, { error: err });
     return { error: err.message, errorCode: 'UNAUTHORIZED' };
   }
   logger.error(fallback, { error: err });

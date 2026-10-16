@@ -1,3 +1,4 @@
+import { logServerFailure } from '@/lib/logging/logger';
 import { throwQueryError } from '@/lib/api/query-error';
 import { getPublicArtistResponse } from '@/lib/queries/detail-public.server';
 import { isConnectErrorCode } from '@/lib/api/connect-error';
@@ -104,9 +105,13 @@ export async function getArtistView(
     };
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound)) {
+      logServerFailure('artist', 'getArtistView', err, [options?.shareToken, options?.sharePassword]);
       return null;
     }
-    logger.error('Failed to get artist view', { error: err });
+    logger.error('Failed to get artist view', {
+      error: err,
+      privateValues: [options?.shareToken, options?.sharePassword],
+    });
     throwQueryError(err);
   }
 }

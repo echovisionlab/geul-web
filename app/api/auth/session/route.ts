@@ -1,3 +1,4 @@
+import { logServerFailure } from '@/lib/logging/logger';
 import { NextResponse } from 'next/server';
 import { getSessionFromCookie } from '@/lib/auth';
 import { USER_DISPLAY_COOKIE_NAME } from '@/lib/auth/user-display-cookie';
@@ -11,6 +12,7 @@ export async function GET() {
   try {
     sessionData = await getSessionFromCookie({ throwOnError: true });
   } catch (err) {
+    logServerFailure('auth-session-api', 'getSession', err);
     const { status, error } = toHttpErrorResult(err, 'Failed to fetch session');
     return NextResponse.json({ error }, { status });
   }

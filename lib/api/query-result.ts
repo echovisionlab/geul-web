@@ -1,3 +1,4 @@
+import { createLogger } from '@/lib/utils/logger';
 import { markQueryError } from './query-error';
 import { toHttpErrorResult } from './http-error';
 
@@ -16,14 +17,22 @@ class QueryFailureError extends Error {
 }
 
 /** Server Actions must serialize failure categories instead of throwing diagnostics across the boundary. */
-export async function queryResult<T>(read: () => Promise<T>): Promise<QueryResult<T>> {
+export async function queryResult<T>(
+  read: () => Promise<T>,
+  privateValues?: readonly unknown[],
+): Promise<QueryResult<T>> {
   try {
     return { ok: true, value: await read() };
   } catch (error) {
     if (error instanceof QueryFailureError) {
       return { ok: false, status: error.status, error: error.message };
     }
-    return { ok: false, ...toHttpErrorResult(error, 'Failed to load data') };
+    const result = toHttpErrorResult(error, 'Failed to load data');
+    if (typeof window === 'undefined') {
+      const logger = createLogger('query-result');
+      await logger[result.status < 500 ? 'warn' : 'error']('Server Action query failed', { error, privateValues });
+    }
+    return { ok: false, ...result };
   }
 }
 

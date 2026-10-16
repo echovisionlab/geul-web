@@ -1,3 +1,4 @@
+import { logServerFailure } from '@/lib/logging/logger';
 import { throwQueryError } from '@/lib/api/query-error';
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
@@ -66,6 +67,7 @@ export async function getTermsVersion(id: string) {
       updatedAt: terms.updatedAt ? timestampDate(terms.updatedAt) : null,
     };
   } catch (err) {
+    logServerFailure('terms-queries', 'getTermsVersion', err);
     if (isConnectErrorCode(err, Code.NotFound)) {
       return null;
     }

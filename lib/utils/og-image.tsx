@@ -1,3 +1,4 @@
+import { logServerFailure } from '@/lib/logging/logger';
 import type { ReactNode } from 'react';
 import { readFileSync } from 'fs';
 import { join } from 'path';
@@ -66,7 +67,8 @@ function loadFonts(): Font[] {
         style: 'normal',
         data,
       });
-    } catch {
+    } catch (error) {
+      logServerFailure('og-image', `loadFont ${config.name} ${config.weight}`, error);
       // Font loading failed - continue with other fonts
     }
   }

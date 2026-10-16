@@ -1,5 +1,7 @@
 'use server';
 
+import { logServerFailure } from '@/lib/logging/logger';
+
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { createMemberClient } from '@/lib/api/server-client';
 import { isAuthenticationConnectError, isConnectError } from '@/lib/api/connect-error';
@@ -58,6 +60,7 @@ export async function persistCurrentUserCookieConsentAction(
       },
     };
   } catch (err) {
+    logServerFailure('cookie-consent-actions', 'persistCurrentUserCookieConsentAction', err);
     if (isAuthenticationConnectError(err)) {
       // Anonymous users rely on browser-cookie consent only.
       return { success: true, persisted: false };

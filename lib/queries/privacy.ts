@@ -1,3 +1,4 @@
+import { logServerFailure } from '@/lib/logging/logger';
 import { throwQueryError } from '@/lib/api/query-error';
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
@@ -66,6 +67,7 @@ export async function getPrivacyVersion(id: string) {
       updatedAt: privacy.updatedAt ? timestampDate(privacy.updatedAt) : null,
     };
   } catch (err) {
+    logServerFailure('privacy-queries', 'getPrivacyVersion', err);
     if (isConnectErrorCode(err, Code.NotFound)) {
       return null;
     }

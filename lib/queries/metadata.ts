@@ -1,3 +1,4 @@
+import { logServerFailure } from '@/lib/logging/logger';
 import { type SiteVariableContext } from '@echovisionlab/geul-common/site-variables';
 import { siteVariableContext } from '@/lib/site-variables';
 import { throwQueryError } from '@/lib/api/query-error';
@@ -313,7 +314,7 @@ const getSiteMetadataDocumentCached = cache(async (requestedLocale: string | nul
     };
   } catch (err) {
     if (isConnectError(err)) {
-      logger.error('GetSiteMetadataDocument RPC error', { error: err.message });
+      logger.error('GetSiteMetadataDocument RPC error', { error: err });
     }
 
     throw err;
@@ -329,6 +330,7 @@ const getHomeMetadataDocumentCached = cache(async (requestedLocale: string | nul
     getSiteMetadataDocument({ requestedLocale }),
     getPublicPageResponse('/', requestedLocale).catch((err) => {
       if (isConnectErrorCode(err, Code.NotFound)) {
+        logServerFailure('metadata', 'getHomeMetadataDocument', err);
         return null;
       }
       throw err;
@@ -443,6 +445,7 @@ const getPostMetadataDocumentCached = cache(
       };
     } catch (err) {
       if (isConnectErrorCode(err, Code.NotFound)) {
+        logServerFailure('metadata', 'getPostMetadataDocumentCached', err);
         return null;
       }
       logger.error('GetPostMetadataDocument error', { error: err });
@@ -508,6 +511,7 @@ const getPageMetadataDocumentCached = cache(
       };
     } catch (err) {
       if (isConnectErrorCode(err, Code.NotFound)) {
+        logServerFailure('metadata', 'getPageMetadataDocumentCached', err);
         return null;
       }
       logger.error('GetPageMetadataDocument error', { error: err });
@@ -604,6 +608,7 @@ const getWorkMetadataDocumentCached = cache(
       };
     } catch (err) {
       if (isConnectErrorCode(err, Code.NotFound)) {
+        logServerFailure('metadata', 'getWorkMetadataDocumentCached', err);
         return null;
       }
       logger.error('GetWorkMetadataDocument error', { error: err });
@@ -672,6 +677,7 @@ const getArtistMetadataDocumentCached = cache(
       };
     } catch (err) {
       if (isConnectErrorCode(err, Code.NotFound)) {
+        logServerFailure('metadata', 'getArtistMetadataDocumentCached', err);
         return null;
       }
       logger.error('GetArtistMetadataDocument error', { error: err });
@@ -792,6 +798,7 @@ const getLabelMetadataDocumentCached = cache(
       };
     } catch (err) {
       if (isConnectErrorCode(err, Code.NotFound)) {
+        logServerFailure('metadata', 'getLabelMetadataDocumentCached', err);
         return null;
       }
       logger.error('GetLabelMetadataDocument error', { error: err });
@@ -859,6 +866,7 @@ const getReleaseMetadataDocumentCached = cache(
       };
     } catch (err) {
       if (isConnectErrorCode(err, Code.NotFound)) {
+        logServerFailure('metadata', 'getReleaseMetadataDocumentCached', err);
         return null;
       }
       logger.error('GetReleaseMetadataDocument error', { error: err });
@@ -952,6 +960,7 @@ async function getFormMetadata(
   } catch (err) {
     if (isConnectError(err)) {
       if (err.code === Code.NotFound || err.code === Code.Unauthenticated || err.code === Code.PermissionDenied) {
+        logServerFailure('metadata', 'getFormMetadata', err);
         return null;
       }
     }
@@ -978,6 +987,7 @@ async function getMemberMetadata(memberId: string): Promise<MemberMetadata | nul
     };
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound)) {
+      logServerFailure('metadata', 'getMemberMetadata', err);
       return null;
     }
     logger.error('GetMemberMetadata error', { error: err });

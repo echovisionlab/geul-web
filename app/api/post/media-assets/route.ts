@@ -8,7 +8,10 @@ const logger = createLogger('post-media-assets-api');
 
 export async function POST(request: Request) {
   await connection();
-  const body = (await request.json().catch(() => null)) as {
+  const body = (await request.json().catch((error: unknown) => {
+    void logger.warn('Request JSON parsing failed', { error });
+    return null;
+  })) as {
     idOrSlug?: unknown;
     requestedLocale?: unknown;
     shareToken?: unknown;
@@ -39,7 +42,7 @@ export async function POST(request: Request) {
     }
     return NextResponse.json({ media }, { headers: { 'Cache-Control': 'private, no-store, max-age=0' } });
   } catch (error) {
-    logger.error('Failed to fetch media', { error });
+    logger.error('Failed to fetch media', { error, privateValues: [shareToken, sharePassword] });
     const result = toHttpErrorResult(error, 'Failed to fetch media');
     return NextResponse.json({ error: result.error }, { status: result.status });
   }

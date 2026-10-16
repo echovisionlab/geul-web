@@ -22,7 +22,7 @@ vi.mock('@/lib/utils/session.server', () => ({
 }));
 
 vi.mock('@/lib/utils/logger', () => ({
-  createLogger: () => ({ error: mocks.loggerError }),
+  createLogger: () => ({ error: mocks.loggerError, warn: vi.fn() }),
 }));
 
 const currentSession = {

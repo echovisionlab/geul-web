@@ -45,6 +45,7 @@ vi.mock('@/lib/api/server-client', () => ({
 }));
 
 vi.mock('@/lib/logging/logger', () => ({
+  logServerFailure: vi.fn(),
   createLogger: () => ({
     error: vi.fn(),
     warn: vi.fn(),

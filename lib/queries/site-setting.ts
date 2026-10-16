@@ -25,7 +25,7 @@ export async function getAllSiteSettings(): Promise<SiteSettingsView | null> {
     return fromProtoAllSettings(response.settings);
   } catch (err) {
     if (isConnectError(err)) {
-      logger.error('GetSettings RPC error', { error: err.message });
+      logger.error('GetSettings RPC error', { error: err });
     }
     throwQueryError(err);
   }

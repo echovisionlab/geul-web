@@ -1,3 +1,4 @@
+import { logServerFailure } from '@/lib/logging/logger';
 import { throwQueryError } from '@/lib/api/query-error';
 import { getPublicProgramEventResponse, getPublicProgramEventSeriesResponse } from '@/lib/queries/detail-public.server';
 import { isConnectErrorCode } from '@/lib/api/connect-error';
@@ -234,7 +235,8 @@ async function resolveFileUrl(fileId: string | null | undefined): Promise<string
     const client = await createFileClient();
     const response = await client.getMediaDelivery({ fileId });
     return response.delivery?.thumbnail?.url || response.delivery?.asset?.url || response.delivery?.inline?.url || null;
-  } catch {
+  } catch (error) {
+    logServerFailure('program-event-queries', 'resolveFileUrl', error);
     return null;
   }
 }
@@ -256,7 +258,8 @@ async function resolveBulkFileUrls(fileIds: string[]): Promise<Record<string, st
       result[fileId] = delivery?.thumbnail?.url || delivery?.asset?.url || delivery?.inline?.url || null;
     }
     return result;
-  } catch {
+  } catch (error) {
+    logServerFailure('program-event-queries', 'resolveBulkFileUrls', error);
     return Object.fromEntries(uniqueFileIds.map((fileId) => [fileId, null]));
   }
 }
@@ -330,6 +333,7 @@ export async function getProgramEventAdmin(idOrSlug: string) {
     }
     event = await client.getProgramEvent({ id: eventId });
   } catch (error) {
+    logServerFailure('program-event-queries', 'getProgramEventAdmin', error);
     if (isConnectErrorCode(error, Code.NotFound, Code.PermissionDenied)) {
       return null;
     }
@@ -656,6 +660,7 @@ export async function getProgramEventView(
       fetchWithLocale: (locale) => getPublicProgramEventResponse(slug, locale),
     });
   } catch (err) {
+    logServerFailure('program-event-queries', 'getProgramEventView', err);
     if (isConnectErrorCode(err, Code.NotFound)) {
       return null;
     }
@@ -779,6 +784,7 @@ export async function getProgramEventSeriesView(idOrSlug: string): Promise<Publi
       posterUrl: series.posterAsset?.url ?? null,
     };
   } catch (err) {
+    logServerFailure('program-event-queries', 'getProgramEventSeriesView', err);
     if (isConnectErrorCode(err, Code.NotFound, Code.PermissionDenied)) {
       return null;
     }

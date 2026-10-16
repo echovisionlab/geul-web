@@ -6,6 +6,9 @@ import {
   unsubscribeUserFromNewsletterAction,
 } from './newsletter';
 
+const logFailure = vi.hoisted(() => vi.fn());
+vi.mock('@/lib/logging/logger', () => ({ logServerFailure: logFailure }));
+
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
 vi.mock('@/lib/api/server-client', () => ({
   createPublicNewsletterClient: vi.fn(),
@@ -14,6 +17,20 @@ vi.mock('@/lib/api/server-client', () => ({
 
 describe('newsletter actions', () => {
   beforeEach(() => vi.clearAllMocks());
+
+  it('logs the original unsubscribe failure before returning the same result', async () => {
+    const error = new Error('upstream unavailable', { cause: new Error('connection refused') });
+    vi.mocked(createPublicNewsletterClient).mockReturnValue({
+      unsubscribe: vi.fn().mockRejectedValue(error),
+    } as never);
+    await expect(unsubscribeNewsletterAction('signed-token')).resolves.toEqual({
+      success: false,
+      message: 'upstream unavailable',
+    });
+    expect(logFailure).toHaveBeenCalledWith('newsletter-actions', 'unsubscribeNewsletterAction', error, [
+      'signed-token',
+    ]);
+  });
 
   it('uses only the signed token for public unsubscribe', async () => {
     const unsubscribe = vi.fn().mockResolvedValue({});
