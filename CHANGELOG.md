@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.14.2](https://github.com/echovisionlab/geul-web/compare/v0.14.1...v0.14.2) (2026-10-16)
+
+
+### Bug Fixes
+
+* align contact settings, email previews and parallel tests ([#136](https://github.com/echovisionlab/geul-web/issues/136)) ([e192bad](https://github.com/echovisionlab/geul-web/commit/e192badb2521fe636c89d9e7ea0ed2a809987dc2))
+* preserve email line breaks and isolate editor policies and test projects ([#137](https://github.com/echovisionlab/geul-web/issues/137)) ([abf3b7a](https://github.com/echovisionlab/geul-web/commit/abf3b7ad2ca2b396824576f281c105db2b77ed07))
+
 ## [0.14.1](https://github.com/echovisionlab/geul-web/compare/v0.14.0...v0.14.1) (2026-10-16)
 
 
