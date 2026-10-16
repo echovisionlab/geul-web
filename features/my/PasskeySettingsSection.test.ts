@@ -286,9 +286,9 @@ describe('getPasskeyItems', () => {
       });
       await flush();
     };
-    await renderSite('DSUB');
+    await renderSite('rawsector');
     const createData = document.querySelector<HTMLInputElement>('input[name="passkey_create_data"]');
-    expect(JSON.parse(createData!.value).publicKey.rp).toEqual({ id: 'site.example', name: 'DSUB' });
+    expect(JSON.parse(createData!.value).publicKey.rp).toEqual({ id: 'site.example', name: 'rawsector' });
     await renderSite('Example Studio');
     expect(JSON.parse(createData!.value).publicKey.rp.name).toBe('Example Studio');
 

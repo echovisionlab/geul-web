@@ -30,7 +30,12 @@ import {
   createPostBlockRoomTiptapController,
   createRichTextBlockRoomTiptapController,
 } from './block-room-tiptap-controller';
-import { blockRoomUndoDepth, redoBlockRoom, undoBlockRoom } from '@/lib/collab/interactive-mutation-undo';
+import {
+  stopCapturingBlockRoomUndo,
+  blockRoomUndoDepth,
+  redoBlockRoom,
+  undoBlockRoom,
+} from '@/lib/collab/interactive-mutation-undo';
 import { createTiptapWireExtensions } from './wire-schema';
 import { SHADER_STAGE_DEFINITIONS } from './shader/shader-program';
 import { createTiptapPlaygroundRoom } from './TiptapPlayground.story-fixtures';
@@ -1183,6 +1188,46 @@ function performanceBoundaryFixture(nested = false) {
 }
 
 describe('incremental Block-room input boundaries', () => {
+  it('deletes one selected variable atom and restores it through the production room undo', async () => {
+    const fixture = performanceBoundaryFixture();
+    try {
+      const at = fixture.position(fixture.ids[1]!);
+      fixture.editor.view.dispatch(
+        fixture.editor.state.tr.insert(
+          at,
+          fixture.editor.schema.nodes.siteVariable!.create({ key: 'contact.supportEmail', linked: true }),
+        ),
+      );
+      stopCapturingBlockRoomUndo(fixture.room);
+      fixture.editor.commands.setNodeSelection(at);
+      expect(fixture.editor.state.selection).toBeInstanceOf(NodeSelection);
+      expect(fixture.editor.commands.keyboardShortcut('Backspace')).toBe(true);
+      expect(fixture.editor.state.doc.nodeAt(at)?.type.name).toBe('text');
+      expect(undoBlockRoom(fixture.room)).toBe(true);
+      await Promise.resolve();
+      expect(fixture.editor.state.doc.nodeAt(at)?.type.name).toBe('siteVariable');
+      expect(fixture.editor.state.doc.nodeAt(at)?.attrs).toMatchObject({ key: 'contact.supportEmail', linked: true });
+      fixture.editor.storage.siteVariable.context = {
+        siteTitle: 'rawsector',
+        siteUrl: '',
+        companyName: '',
+        legalEmail: '',
+        supportEmail: 'help@example.com',
+        privacyEmail: '',
+      };
+      expect(fixture.editor.getText()).toContain('help@example.com');
+      fixture.editor.commands.setNodeSelection(at);
+      const copied = fixture.editor.view.someProp('clipboardTextSerializer', (serialize) =>
+        serialize(fixture.editor.state.selection.content(), fixture.editor.view),
+      );
+      expect(copied).toBe('help@example.com');
+      expect(fixture.editor.getHTML()).toContain('data-site-variable="contact.supportEmail"');
+      expect(fixture.editor.getHTML()).toContain('href="mailto:help@example.com"');
+    } finally {
+      fixture.cleanup();
+    }
+  });
+
   it.each([false, true])(
     'writes only the changed payload with nested topology=%s and retains undo/redo',
     async (nested) => {

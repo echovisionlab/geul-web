@@ -12,6 +12,10 @@ import { PostAction, PostStatus } from '@echovisionlab/geul-proto/secure/post_pb
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { assetRefFixture } from '@/tests/helpers/asset-ref';
 import * as queries from './post';
+import { getPublicSettings } from './manifest';
+import { siteVariableManifest } from '@/features/editor/tiptap/site-variables/site-variable.story-fixtures';
+
+vi.mock('@/lib/queries/manifest', () => ({ getPublicSettings: vi.fn() }));
 
 const mocks = vi.hoisted(() => ({
   createPostClient: vi.fn(),
@@ -263,9 +267,18 @@ describe('post server queries', () => {
     });
   });
 
-  it('uses the same public Post projection for public and share-token fetches', async () => {
+  it('preserves API-resolved summaries for public and share-token fetches', async () => {
+    vi.mocked(getPublicSettings).mockResolvedValue({
+      ...siteVariableManifest.settings,
+      company_name: '{{site.title}}',
+    });
+    const summary = 'About {{site.title}}'; // API expanded {{site.companyName}} once.
+    publicPostClient.get.mockResolvedValue({ post: publicPost({ summary }), blockMedia: [] });
     const publicView = await queries.getPostView('post');
     const tokenView = await queries.getPostViewWithToken('post', 'share-token');
+    expect(publicView?.summary).toBe(summary);
+    expect(tokenView?.summary).toBe(summary);
+    expect(getPublicSettings).not.toHaveBeenCalled();
 
     expect(tokenView).toEqual(publicView);
     expect(publicPostClient.get).toHaveBeenNthCalledWith(1, { slug: 'post' });

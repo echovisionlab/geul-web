@@ -3876,6 +3876,12 @@
             "subtext": "Maak een diagram van tekst",
             "aliases": "mermaid\ndiagram\nflowchart\nsequence\ndiagram\nstroomdiagram\nsequentie",
             "group": "Insluitingen"
+          },
+          "siteVariable": {
+            "title": "Websitevariabele",
+            "subtext": "Een waarde uit de website-instellingen invoegen",
+            "group": "Inline",
+            "aliases": "site\nvariable\nWebsitevariabele"
           }
         }
       },
@@ -4053,6 +4059,25 @@
       },
       "media": {
         "importFromUrl": "Importeren via URL"
+      },
+      "siteVariables": {
+        "title": "Websitevariabele",
+        "description": "Een waarde uit de website-instellingen invoegen",
+        "search": "Websitevariabelen zoeken",
+        "site": "Website",
+        "contact": "Contact",
+        "change": "Variabele wijzigen",
+        "linked": "Naar deze waarde linken",
+        "convert": "Omzetten naar tekst",
+        "unset": "Niet ingesteld",
+        "source": "Uit de website-instellingen",
+        "inspect": "Variabele inspecteren",
+        "siteTitle": "Websitenaam",
+        "siteUrl": "Website-URL",
+        "companyName": "Bedrijfsnaam",
+        "legalEmail": "Juridisch e-mailadres",
+        "supportEmail": "Support-e-mailadres",
+        "privacyEmail": "Privacy-e-mailadres"
       }
     },
     "accessDowngraded": {

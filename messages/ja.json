@@ -3876,6 +3876,12 @@
             "subtext": "テキストから図を作成",
             "aliases": "mermaid\ndiagram\nflowchart\nsequence\n図\nダイアグラム\nフローチャート\nシーケンス",
             "group": "埋め込み"
+          },
+          "siteVariable": {
+            "title": "サイト変数",
+            "subtext": "サイト設定の値を挿入します",
+            "group": "インライン",
+            "aliases": "site\nvariable\nサイト変数"
           }
         }
       },
@@ -4053,6 +4059,25 @@
       },
       "media": {
         "importFromUrl": "URLからインポート"
+      },
+      "siteVariables": {
+        "title": "サイト変数",
+        "description": "サイト設定の値を挿入します",
+        "search": "サイト変数を検索",
+        "site": "サイト",
+        "contact": "連絡先",
+        "change": "変数を変更",
+        "linked": "この値にリンクする",
+        "convert": "テキストに変換",
+        "unset": "未設定",
+        "source": "サイト設定から取得",
+        "inspect": "変数を確認",
+        "siteTitle": "サイト名",
+        "siteUrl": "サイトURL",
+        "companyName": "会社名",
+        "legalEmail": "法務メールアドレス",
+        "supportEmail": "サポートメールアドレス",
+        "privacyEmail": "プライバシーメールアドレス"
       }
     },
     "accessDowngraded": {

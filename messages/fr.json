@@ -3876,6 +3876,12 @@
             "subtext": "Créer un diagramme à partir de texte",
             "aliases": "mermaid\ndiagram\nflowchart\nsequence\ndiagramme\norganigramme\nséquence",
             "group": "Intégrations"
+          },
+          "siteVariable": {
+            "title": "Variable du site",
+            "subtext": "Insérer une valeur des paramètres du site",
+            "group": "En ligne",
+            "aliases": "site\nvariable\nVariable du site"
           }
         }
       },
@@ -4053,6 +4059,25 @@
       },
       "media": {
         "importFromUrl": "Importer depuis une URL"
+      },
+      "siteVariables": {
+        "title": "Variable du site",
+        "description": "Insérer une valeur des paramètres du site",
+        "search": "Rechercher des variables du site",
+        "site": "Site",
+        "contact": "Contact",
+        "change": "Changer de variable",
+        "linked": "Créer un lien vers cette valeur",
+        "convert": "Convertir en texte",
+        "unset": "Non défini",
+        "source": "Depuis les paramètres du site",
+        "inspect": "Inspecter la variable",
+        "siteTitle": "Nom du site",
+        "siteUrl": "URL du site",
+        "companyName": "Nom de l’entreprise",
+        "legalEmail": "E-mail juridique",
+        "supportEmail": "E-mail d’assistance",
+        "privacyEmail": "E-mail de confidentialité"
       }
     },
     "accessDowngraded": {

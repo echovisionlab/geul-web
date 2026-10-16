@@ -1,5 +1,19 @@
 import type { ReactNode } from 'react';
+import { useSiteSettings } from '@/lib/contexts/ManifestContext';
+import { resolveSiteVariableHref, siteVariableContext } from '@/lib/site-variables';
 import { NavigationLink as Anchor } from '@/components/core/Navigation';
+
+function MarkdownLink({ href, children }: { href: string; children: ReactNode }) {
+  const { settings } = useSiteSettings();
+  const resolved = resolveSiteVariableHref(href, siteVariableContext(settings));
+  return resolved ? (
+    <Anchor href={resolved} target="_blank" rel="noopener noreferrer" tone="inherit">
+      {children}
+    </Anchor>
+  ) : (
+    <span>{children}</span>
+  );
+}
 
 /**
  * Parse markdown-style formatting in text and return ReactNode
@@ -18,9 +32,9 @@ export function parseMarkdown(text: string): ReactNode {
     {
       regex: /\[([^\]]+)\]\(([^)]+)\)/,
       render: (key, match) => (
-        <Anchor key={key} href={match[2]} target="_blank" rel="noopener noreferrer" tone="inherit">
+        <MarkdownLink key={key} href={match[2]}>
           {parseMarkdown(match[1])}
-        </Anchor>
+        </MarkdownLink>
       ),
     },
     // Bold: **text**

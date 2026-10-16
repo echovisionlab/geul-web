@@ -68,6 +68,7 @@ export interface PublicWorkTableRow {
 }
 
 // === View Queries (Public) ===
+// Public Work.Get/List already resolve summary tokens, including share-token reads.
 
 export async function getWorkView(
   idOrSlug: string,

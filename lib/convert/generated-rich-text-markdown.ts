@@ -1,4 +1,9 @@
-import { materializeLocalizedRichTextDocument } from '@echovisionlab/geul-proto/content/block_catalog.ts';
+import { resolveSiteVariable, type SiteVariableContext } from '@echovisionlab/geul-common/site-variables';
+import { resolveSiteVariableHref, resolveSiteVariableTokens, siteVariableHref } from '@/lib/site-variables';
+import {
+  isSiteVariableKey,
+  materializeLocalizedRichTextDocument,
+} from '@echovisionlab/geul-proto/content/block_catalog.ts';
 import {
   CodeBlockProps_Language,
   ShaderProps_StagesItem_Kind,
@@ -11,7 +16,7 @@ import {
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { buildContentScopedFileUrl } from '@/lib/media/content-scoped-file-url';
 
-function styledText(value: RichTextStyledText): string {
+function styledText(value: Pick<RichTextStyledText, 'text' | 'styles'>): string {
   let text = value.text;
   const styles = value.styles;
   if (styles?.bold) {
@@ -29,17 +34,40 @@ function styledText(value: RichTextStyledText): string {
   return text;
 }
 
-function inlineMarkdown(values: readonly RichTextInline[]): string {
+function inlineMarkdown(values: readonly RichTextInline[], context?: SiteVariableContext): string {
   return values
     .map((item) => {
       switch (item.value.case) {
         case 'text':
           return styledText(item.value.value);
+        case 'siteVariable': {
+          if (!context) {
+            throw new Error('Site variable context is required for Markdown output.');
+          }
+          const variable = item.value.value;
+          if (!isSiteVariableKey(variable.key)) {
+            throw new Error('Unknown site variable.');
+          }
+          const value = resolveSiteVariable(variable.key, context);
+          const escaped = value.replace(/[\\`*_[\]<>|&#~]/gu, '\\$&');
+          const label = styledText({ text: escaped, styles: variable.styles });
+          const href = variable.linked ? siteVariableHref(variable.key, value) : undefined;
+          return href ? `[${label}](${href.replaceAll('(', '%28').replaceAll(')', '%29')})` : label;
+        }
         case 'hardBreak':
           return '\n';
         case 'link': {
-          const label = item.value.value.content.map(styledText).join('');
-          return label === item.value.value.href ? item.value.value.href : `[${label}](${item.value.value.href})`;
+          const label = item.value.value.content
+            .map((text) => {
+              const resolved = resolveSiteVariableTokens(text.text, context);
+              return styledText({
+                ...text,
+                text: resolved === text.text ? resolved : resolved.replace(/[\\`*_[\]<>|&#~]/gu, '\\$&'),
+              });
+            })
+            .join('');
+          const href = resolveSiteVariableHref(item.value.value.href, context);
+          return !href || label === href ? label : `[${label}](${href.replaceAll('(', '%28').replaceAll(')', '%29')})`;
         }
         case 'mathInline':
           return `$${item.value.value.source}$`;
@@ -100,33 +128,38 @@ function localeValue<TCase extends LocaleValue['case']>(pair: Pair, kind: TCase)
   return pair.locale.value.value as unknown as LocaleValueByCase[TCase];
 }
 
-function blockMarkdown(pair: Pair, descendants: readonly string[], entityId: string): string {
+function blockMarkdown(
+  pair: Pair,
+  descendants: readonly string[],
+  entityId: string,
+  context?: SiteVariableContext,
+): string {
   if (pair.block.value.case !== pair.locale.value.case) {
     throw new Error(`Localized Block ${pair.block.id} kind does not match its base Block.`);
   }
   let markdown: string;
   switch (pair.block.value.case) {
     case 'paragraph':
-      markdown = inlineMarkdown(localeValue(pair, 'paragraph').content);
+      markdown = inlineMarkdown(localeValue(pair, 'paragraph').content, context);
       break;
     case 'heading':
-      markdown = `${'#'.repeat(pair.block.value.value.props?.level || 1)} ${inlineMarkdown(localeValue(pair, 'heading').content)}`;
+      markdown = `${'#'.repeat(pair.block.value.value.props?.level || 1)} ${inlineMarkdown(localeValue(pair, 'heading').content, context)}`;
       break;
     case 'bulletListItem':
-      markdown = `- ${inlineMarkdown(localeValue(pair, 'bulletListItem').content)}`;
+      markdown = `- ${inlineMarkdown(localeValue(pair, 'bulletListItem').content, context)}`;
       break;
     case 'numberedListItem':
-      markdown = `${pair.block.value.value.props?.start || 1}. ${inlineMarkdown(localeValue(pair, 'numberedListItem').content)}`;
+      markdown = `${pair.block.value.value.props?.start || 1}. ${inlineMarkdown(localeValue(pair, 'numberedListItem').content, context)}`;
       break;
     case 'checkListItem':
-      markdown = `- [${pair.block.value.value.props?.checked ? 'x' : ' '}] ${inlineMarkdown(localeValue(pair, 'checkListItem').content)}`;
+      markdown = `- [${pair.block.value.value.props?.checked ? 'x' : ' '}] ${inlineMarkdown(localeValue(pair, 'checkListItem').content, context)}`;
       break;
     case 'quote':
-      markdown = `> ${inlineMarkdown(localeValue(pair, 'quote').content)}`;
+      markdown = `> ${inlineMarkdown(localeValue(pair, 'quote').content, context)}`;
       break;
     case 'callout': {
       const icon = pair.block.value.value.props?.icon ?? '💡';
-      const own = inlineMarkdown(localeValue(pair, 'callout').content);
+      const own = inlineMarkdown(localeValue(pair, 'callout').content, context);
       const content = [own, ...descendants].filter(Boolean).join('\n\n');
       return [`> ${icon}${content ? ` ${content.replaceAll('\n', '\n> ')}` : ''}`].filter(Boolean).join('\n');
     }
@@ -145,9 +178,11 @@ function blockMarkdown(pair: Pair, descendants: readonly string[], entityId: str
         rows.length === 0
           ? ''
           : [
-              `| ${rows[0]!.cells.map((cell) => inlineMarkdown(cell.content)).join(' | ')} |`,
+              `| ${rows[0]!.cells.map((cell) => inlineMarkdown(cell.content, context)).join(' | ')} |`,
               `| ${rows[0]!.cells.map(() => '---').join(' | ')} |`,
-              ...rows.slice(1).map((row) => `| ${row.cells.map((cell) => inlineMarkdown(cell.content)).join(' | ')} |`),
+              ...rows
+                .slice(1)
+                .map((row) => `| ${row.cells.map((cell) => inlineMarkdown(cell.content, context)).join(' | ')} |`),
             ].join('\n');
       break;
     }
@@ -201,7 +236,11 @@ function blockMarkdown(pair: Pair, descendants: readonly string[], entityId: str
   return [markdown, ...descendants].filter(Boolean).join('\n\n');
 }
 
-export function generatedRichTextDocumentMarkdown(document: RichTextDocument, entityId: string): string {
+export function generatedRichTextDocumentMarkdown(
+  document: RichTextDocument,
+  entityId: string,
+  context?: SiteVariableContext,
+): string {
   const localized = materializeLocalizedRichTextDocument(document, document.sourceLocale);
   const localeById = new Map(localized.localeOverlay?.blocks.map((block) => [block.blockId, block]));
   const pairs = (localized.base?.nodes ?? []).map((node): Pair => {
@@ -229,6 +268,7 @@ export function generatedRichTextDocumentMarkdown(document: RichTextDocument, en
     siblings.sort((left, right) => left.index - right.index);
   }
 
-  const render = (pair: Pair): string => blockMarkdown(pair, (byParent.get(pair.block.id) ?? []).map(render), entityId);
+  const render = (pair: Pair): string =>
+    blockMarkdown(pair, (byParent.get(pair.block.id) ?? []).map(render), entityId, context);
   return (byParent.get(null) ?? []).map(render).filter(Boolean).join('\n\n') + (pairs.length ? '\n' : '');
 }

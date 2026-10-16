@@ -1,6 +1,8 @@
+import { canLinkSiteVariable } from '@/lib/site-variables';
 import type { JSONContent } from '@tiptap/core';
 import { fromJson, type JsonValue } from '@bufbuild/protobuf';
 import {
+  isSiteVariableKey,
   richTextBlockFieldOwnership,
   richTextBlockKindByProtoCase,
   richTextBlockCatalog,
@@ -264,6 +266,23 @@ function inlineToTiptap(value: JsonValue): readonly JSONContent[] {
   if (inline.text) {
     const text = styledText(object(inline.text));
     return text ? [text] : [];
+  }
+  if (inline.siteVariable) {
+    const variable = object(inline.siteVariable);
+    if (
+      typeof variable.key !== 'string' ||
+      !isSiteVariableKey(variable.key) ||
+      (variable.linked === true && !canLinkSiteVariable(variable.key))
+    ) {
+      throw new Error('Invalid site variable.');
+    }
+    return [
+      {
+        type: 'siteVariable',
+        attrs: { key: variable.key, linked: variable.linked === true },
+        marks: styleMarks(object(variable.styles)),
+      },
+    ];
   }
   if (inline.hardBreak) {
     return [{ type: 'hardBreak' }];
@@ -537,6 +556,14 @@ function inlineFromTiptap(content: readonly JSONContent[]): JsonValue[] {
   const values: JsonValue[] = [];
   for (let index = 0; index < content.length; index += 1) {
     const node = content[index]!;
+    if (node.type === 'siteVariable') {
+      const key = node.attrs?.key;
+      if (!isSiteVariableKey(key) || (node.attrs?.linked === true && !canLinkSiteVariable(key))) {
+        throw new Error('Invalid site variable.');
+      }
+      values.push({ siteVariable: { key, linked: node.attrs?.linked === true, styles: marksToStyles(node.marks) } });
+      continue;
+    }
     if (node.type === 'hardBreak') {
       values.push({ hardBreak: {} });
       continue;

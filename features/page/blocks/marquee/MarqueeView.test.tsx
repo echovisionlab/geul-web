@@ -1,5 +1,8 @@
 // @vitest-environment jsdom
 
+import { ManifestProvider } from '@/lib/contexts/ManifestContext';
+import { siteVariableManifest } from '@/features/editor/tiptap/site-variables/site-variable.story-fixtures';
+import { siteVariableHrefCases } from '@/test/site-variable-link';
 import { TestProviders } from '@/test/TestProviders';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
@@ -331,5 +334,25 @@ describe('Marquee motion control', () => {
     expect(container!.querySelectorAll('[data-marquee-static-items] a')).toHaveLength(items.length);
     const semanticLinks = [...container!.querySelectorAll('a')].filter((link) => !link.closest('[aria-hidden="true"]'));
     expect(semanticLinks).toHaveLength(items.length);
+  });
+});
+
+describe('authored marquee destinations', () => {
+  it.each(siteVariableHrefCases)('resolves href once: $name', ({ source, expected, settings }) => {
+    const html = renderToStaticMarkup(
+      <TestProviders>
+        <ManifestProvider
+          manifest={{ ...siteVariableManifest, settings: { ...siteVariableManifest.settings, ...settings } }}
+        >
+          <MarqueeView items={[{ id: 'contact', text: 'Contact', href: source }]} options={baseOptions} />
+        </ManifestProvider>
+      </TestProviders>,
+    );
+    expect(html).toContain('Contact');
+    if (expected) {
+      expect(html).toContain(`href="${expected}"`);
+    } else {
+      expect(html).not.toContain('<a ');
+    }
   });
 });

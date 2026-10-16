@@ -3876,6 +3876,12 @@
             "subtext": "สร้างไดอะแกรมจากข้อความ",
             "aliases": "mermaid\ndiagram\nflowchart\nsequence\nแผนภาพ\nผังงาน\nลำดับ",
             "group": "ฝัง"
+          },
+          "siteVariable": {
+            "title": "ตัวแปรเว็บไซต์",
+            "subtext": "แทรกค่าจากการตั้งค่าเว็บไซต์",
+            "group": "แบบอินไลน์",
+            "aliases": "site\nvariable\nตัวแปรเว็บไซต์"
           }
         }
       },
@@ -4053,6 +4059,25 @@
       },
       "media": {
         "importFromUrl": "นำเข้าจาก URL"
+      },
+      "siteVariables": {
+        "title": "ตัวแปรเว็บไซต์",
+        "description": "แทรกค่าจากการตั้งค่าเว็บไซต์",
+        "search": "ค้นหาตัวแปรเว็บไซต์",
+        "site": "เว็บไซต์",
+        "contact": "ข้อมูลติดต่อ",
+        "change": "เปลี่ยนตัวแปร",
+        "linked": "เชื่อมโยงไปยังค่านี้",
+        "convert": "แปลงเป็นข้อความ",
+        "unset": "ยังไม่ได้ตั้งค่า",
+        "source": "จากการตั้งค่าเว็บไซต์",
+        "inspect": "ตรวจสอบตัวแปร",
+        "siteTitle": "ชื่อเว็บไซต์",
+        "siteUrl": "URL เว็บไซต์",
+        "companyName": "ชื่อบริษัท",
+        "legalEmail": "อีเมลฝ่ายกฎหมาย",
+        "supportEmail": "อีเมลฝ่ายสนับสนุน",
+        "privacyEmail": "อีเมลด้านความเป็นส่วนตัว"
       }
     },
     "accessDowngraded": {

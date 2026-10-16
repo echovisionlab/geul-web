@@ -3876,6 +3876,12 @@
             "subtext": "Create a diagram from text",
             "aliases": "mermaid\ndiagram\nflowchart\nsequence",
             "group": "Embeds"
+          },
+          "siteVariable": {
+            "title": "Site variable",
+            "subtext": "Insert a value from Site settings",
+            "group": "Inline",
+            "aliases": "site\nvariable\nSite variable"
           }
         }
       },
@@ -4053,6 +4059,25 @@
       },
       "media": {
         "importFromUrl": "Import from URL"
+      },
+      "siteVariables": {
+        "title": "Site variable",
+        "description": "Insert a value from Site settings",
+        "search": "Search site variables",
+        "site": "Site",
+        "contact": "Contact",
+        "change": "Change variable",
+        "linked": "Link to this value",
+        "convert": "Convert to text",
+        "unset": "Unset",
+        "source": "From Site settings",
+        "inspect": "Inspect variable",
+        "siteTitle": "Site name",
+        "siteUrl": "Site URL",
+        "companyName": "Company name",
+        "legalEmail": "Legal email",
+        "supportEmail": "Support email",
+        "privacyEmail": "Privacy email"
       }
     },
     "accessDowngraded": {

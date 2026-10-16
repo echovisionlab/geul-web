@@ -1,3 +1,5 @@
+import { getPublicSettings } from '@/lib/queries/manifest';
+import { siteVariableContext } from '@/lib/site-variables';
 import { throwQueryError } from '@/lib/api/query-error';
 import { getPublicReleaseResponse } from '@/lib/queries/detail-public.server';
 import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
@@ -413,7 +415,12 @@ export async function getReleasePublic(
       title: release.title,
       slug: release.slug ?? null,
       type: publicReleaseTypeToString(release.type),
-      descriptionText: content ? localizedRichTextPlainText(content) || null : null,
+      descriptionText: content
+        ? localizedRichTextPlainText(
+            content,
+            siteVariableContext(await getPublicSettings({ requestedLocale: options?.requestedLocale })),
+          ) || null
+        : null,
       content,
       artworkUrl: release.artworkAsset?.url ?? null,
       catalogNumber: release.catalogNumber ?? null,

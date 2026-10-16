@@ -13,6 +13,10 @@ import {
 import { WorkStatus, WorkType } from '@echovisionlab/geul-proto/secure/work_pb.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as queries from './work';
+import { getPublicSettings } from './manifest';
+import { siteVariableManifest } from '@/features/editor/tiptap/site-variables/site-variable.story-fixtures';
+
+vi.mock('@/lib/queries/manifest', () => ({ getPublicSettings: vi.fn() }));
 
 const mocks = vi.hoisted(() => ({
   createPublicWorkClient: vi.fn(),
@@ -171,6 +175,18 @@ describe('work queries', () => {
       ],
     });
     workClient.getWork.mockResolvedValue(adminWork());
+  });
+
+  it('preserves API-resolved summaries for public and share-token fetches', async () => {
+    vi.mocked(getPublicSettings).mockResolvedValue({
+      ...siteVariableManifest.settings,
+      company_name: '{{site.title}}',
+    });
+    const summary = 'About {{site.title}}'; // API expanded {{site.companyName}} once.
+    publicWorkClient.get.mockResolvedValue({ work: publicWork({ summary }), blockMedia: [] });
+    expect((await queries.getWorkView('work-1'))?.summary).toBe(summary);
+    expect((await queries.getWorkViewWithShareToken('work-1', 'token'))?.summary).toBe(summary);
+    expect(getPublicSettings).not.toHaveBeenCalled();
   });
 
   it('maps public work detail and share-token detail', async () => {

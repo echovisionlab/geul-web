@@ -344,6 +344,7 @@ describe('Tiptap wire schema', () => {
       tableRow: { group: '', content: '(tableCell | tableHeader)+', attrs: { id: null } },
       text: { group: 'inline', content: '', attrs: {} },
       hardBreak: { group: 'inline', content: '', attrs: {} },
+      siteVariable: { group: 'inline', content: '', attrs: { key: 'site.title', linked: false } },
       mathInline: { group: 'inline', content: 'text*', attrs: {} },
       emoji: { group: 'inline', content: '', attrs: { name: null } },
       externalVideo: {

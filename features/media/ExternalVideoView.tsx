@@ -1,5 +1,8 @@
+'use client';
+
 import type { CSSProperties } from 'react';
-import { normalizeRichTextHref } from '@echovisionlab/geul-common/editor/link-normalization';
+import { useSiteSettings } from '@/lib/contexts/ManifestContext';
+import { resolveSiteVariableHref, siteVariableContext } from '@/lib/site-variables';
 import { resolveExternalVideo, type ExternalVideoAspectRatio } from '@/lib/media/external-video';
 import { ExternalVideoPlayerView } from './ui/ExternalVideoView';
 
@@ -20,19 +23,20 @@ export function ExternalVideoView({
   className,
   style,
 }: ExternalVideoViewProps) {
-  const video = resolveExternalVideo(url);
-  if (!video) {
-    const normalizedHref = normalizeRichTextHref(url);
-    if (normalizedHref) {
-      return <a href={normalizedHref}>{title}</a>;
-    }
+  const { settings } = useSiteSettings();
+  const href = resolveSiteVariableHref(url, siteVariableContext(settings));
+  if (!href) {
     return <span>{title}</span>;
+  }
+  const video = resolveExternalVideo(href);
+  if (!video) {
+    return <a href={href}>{title}</a>;
   }
 
   return (
     <ExternalVideoPlayerView
       embedUrl={video.embedUrl}
-      originalUrl={url}
+      originalUrl={href}
       provider={video.provider}
       title={title}
       caption={caption}

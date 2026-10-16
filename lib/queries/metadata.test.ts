@@ -1,3 +1,11 @@
+import { buildPageJsonLd } from '@/lib/utils/json-ld';
+import { buildPageOgMetadata } from '@/lib/utils/og';
+import { fromJson } from '@bufbuild/protobuf';
+import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
+import {
+  LocalizedRichTextDocumentSchema,
+  RichTextProfile,
+} from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { FormStatus } from '@echovisionlab/geul-proto/public/form_pb.ts';
 import { PageStatus } from '@echovisionlab/geul-proto/public/page_pb.ts';
 import { PostStatus } from '@echovisionlab/geul-proto/public/post_pb.ts';
@@ -5,6 +13,8 @@ import { WorkStatus } from '@echovisionlab/geul-proto/public/work_pb.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   createManifestClient,
+  createPublicArtistClientWithAuth,
+  createPublicLabelClientWithAuth,
   createPublicFormClientWithAuth,
   createPublicMemberClient,
   createPublicPageClientWithAuth,
@@ -425,6 +435,141 @@ describe('getHomeMetadataDocument', () => {
       },
     });
   });
+
+  it.each(['page', 'post', 'work', 'home-source', 'home-target'] as const)(
+    'preserves the single API expansion in %s metadata',
+    async (kind) => {
+      getManifestRpcMock.mockResolvedValue({
+        settings: {
+          siteTitle: 'rawsector',
+          companyName: '{{site.title}}',
+          siteOrigin: 'https://www.rawsector.com',
+          socialLinks: {},
+        },
+      });
+      // The API already expanded "Visit {{site.companyName}}" once.
+      const summary = 'Visit {{site.title}}';
+      const pageResponse = {
+        id: 'variables-page',
+        status: PageStatus.PUBLISHED,
+        slug: 'variables',
+        title: 'Variables',
+        summary,
+        showTitle: true,
+        localizationInfo:
+          kind === 'home-target'
+            ? { requestedLocale: 'en', displayedLocale: 'en', sourceLocale: 'ko', availableLocales: ['ko', 'en'] }
+            : undefined,
+      };
+      getPublicPageRpcMock.mockResolvedValue({ page: pageResponse });
+      getPublicPostRpcMock.mockResolvedValue({ post: { ...pageResponse, status: PostStatus.PUBLISHED } });
+      getPublicWorkRpcMock.mockResolvedValue({ work: { ...pageResponse, status: WorkStatus.PUBLISHED } });
+      vi.mocked(createPublicWorkClientWithAuth).mockResolvedValue({
+        get: getPublicWorkRpcMock,
+      } as unknown as Awaited<ReturnType<typeof createPublicWorkClientWithAuth>>);
+
+      const { getPageMetadataDocument, getPostMetadataDocument, getWorkMetadataDocument, getHomeMetadataDocument } =
+        await import('./metadata');
+      const document = await (kind === 'page'
+        ? getPageMetadataDocument('variables', { requestedLocale: 'en' })
+        : kind === 'post'
+          ? getPostMetadataDocument('variables', { requestedLocale: 'en' })
+          : kind === 'work'
+            ? getWorkMetadataDocument('variables', { requestedLocale: 'en' })
+            : getHomeMetadataDocument({ requestedLocale: 'en' }));
+      expect(document?.summary).toBe(summary);
+      expect(document).not.toBeNull();
+      expect(
+        buildPageOgMetadata({
+          canonicalOrigin: document!.site.canonicalOrigin,
+          routePath: document!.routePath,
+          title: document!.title,
+          summary: document!.summary,
+        }).description,
+      ).toBe(summary);
+      if (kind === 'page') {
+        const page = await getPageMetadataDocument('variables', { requestedLocale: 'en' });
+        expect(buildPageJsonLd(page!)[0]?.description).toBe(summary);
+      }
+    },
+  );
+
+  it('preserves API-resolved manifest text in site and home metadata', async () => {
+    getManifestRpcMock.mockResolvedValue({
+      settings: {
+        siteTitle: 'rawsector',
+        companyName: '{{site.title}}',
+        metaDescription: 'Visit {{site.title}}', // API expanded {{site.companyName}} once.
+        siteOrigin: 'https://www.rawsector.com',
+        socialLinks: {},
+      },
+    });
+    getPublicPageRpcMock.mockResolvedValue({ page: { status: PageStatus.PUBLISHED, title: 'Home' } });
+    const { getHomeMetadataDocument } = await import('./metadata');
+    await expect(getHomeMetadataDocument({ requestedLocale: 'en' })).resolves.toMatchObject({
+      summary: 'Visit {{site.title}}',
+      site: { siteDescription: 'Visit {{site.title}}' },
+    });
+  });
+
+  it.each(['artist', 'label', 'release'] as const)(
+    'expands the raw %s document exactly once for metadata',
+    async (kind) => {
+      getManifestRpcMock.mockResolvedValue({
+        settings: {
+          siteTitle: 'rawsector',
+          companyName: '{{site.title}}',
+          siteOrigin: 'https://www.rawsector.com',
+          socialLinks: {},
+        },
+      });
+      const blockId = '019cd13a-3716-79af-8490-dbd124708824';
+      const document = fromJson(LocalizedRichTextDocumentSchema, {
+        blockCatalogFingerprint: contentBlockCatalogFingerprint,
+        profile: RichTextProfile.COMPACT,
+        locale: 'en',
+        base: { nodes: [{ block: { id: blockId, paragraph: { props: {} } }, placement: { index: 0 } }] },
+        localeOverlay: {
+          locale: 'en',
+          blocks: [
+            {
+              blockId,
+              paragraph: {
+                props: {},
+                content: [
+                  { siteVariable: { key: 'site.companyName' } },
+                  { text: { text: ' / ' } },
+                  { link: { href: '/about', content: [{ text: '{{site.companyName}}' }] } },
+                ],
+              },
+            },
+          ],
+        },
+      });
+      const get = vi
+        .fn()
+        .mockResolvedValue({ [kind]: { id: 'variables', name: 'Variables', title: 'Variables', document } });
+      vi.mocked(createPublicArtistClientWithAuth).mockResolvedValue({ get } as unknown as Awaited<
+        ReturnType<typeof createPublicArtistClientWithAuth>
+      >);
+      vi.mocked(createPublicLabelClientWithAuth).mockResolvedValue({ get } as unknown as Awaited<
+        ReturnType<typeof createPublicLabelClientWithAuth>
+      >);
+      vi.mocked(createPublicReleaseClientWithAuth).mockResolvedValue({ get } as unknown as Awaited<
+        ReturnType<typeof createPublicReleaseClientWithAuth>
+      >);
+      const { getArtistMetadataDocument, getLabelMetadataDocument, getReleaseMetadataDocument } =
+        await import('./metadata');
+      const metadata = await (kind === 'artist'
+        ? getArtistMetadataDocument('variables', { requestedLocale: 'en' })
+        : kind === 'label'
+          ? getLabelMetadataDocument('variables', { requestedLocale: 'en' })
+          : getReleaseMetadataDocument('variables', { requestedLocale: 'en' }));
+      expect(metadata).toMatchObject({
+        [kind === 'artist' ? 'bio' : 'description']: '{{site.title}} / {{site.title}}',
+      });
+    },
+  );
 
   it('maps Page metadata from the entity-scoped featured image delivery', async () => {
     const { getPageMetadataDocument } = await import('./metadata');

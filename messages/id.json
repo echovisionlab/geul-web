@@ -3876,6 +3876,12 @@
             "subtext": "Buat diagram dari teks",
             "aliases": "mermaid\ndiagram\nflowchart\nsequence\ndiagram alur\nbagan alur\nurutan",
             "group": "Sematan"
+          },
+          "siteVariable": {
+            "title": "Variabel situs",
+            "subtext": "Sisipkan nilai dari pengaturan situs",
+            "group": "Sebaris",
+            "aliases": "site\nvariable\nVariabel situs"
           }
         }
       },
@@ -4053,6 +4059,25 @@
       },
       "media": {
         "importFromUrl": "Impor dari URL"
+      },
+      "siteVariables": {
+        "title": "Variabel situs",
+        "description": "Sisipkan nilai dari pengaturan situs",
+        "search": "Cari variabel situs",
+        "site": "Situs",
+        "contact": "Kontak",
+        "change": "Ubah variabel",
+        "linked": "Tautkan nilai ini",
+        "convert": "Ubah menjadi teks",
+        "unset": "Belum diatur",
+        "source": "Dari pengaturan situs",
+        "inspect": "Periksa variabel",
+        "siteTitle": "Nama situs",
+        "siteUrl": "URL situs",
+        "companyName": "Nama perusahaan",
+        "legalEmail": "Email hukum",
+        "supportEmail": "Email dukungan",
+        "privacyEmail": "Email privasi"
       }
     },
     "accessDowngraded": {

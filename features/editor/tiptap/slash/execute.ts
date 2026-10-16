@@ -1,3 +1,4 @@
+import { isSiteVariableKey } from '@echovisionlab/geul-proto/content/block_catalog.ts';
 import type { Editor } from '@tiptap/core';
 import { Fragment, type Node as ProseMirrorNode } from '@tiptap/pm/model';
 import { NodeSelection, TextSelection, type Transaction } from '@tiptap/pm/state';
@@ -262,9 +263,23 @@ export function applyTiptapSlashContent(
   return insertedContentPosition;
 }
 
-/** Applies a delayed Emoji extension result at the captured Slash query. */
+/** Inline workflows preserve the paragraph and replace only the captured trigger. */
 export function applyTiptapSlashEmoji(editor: Editor, context: TiptapSlashActionContext, name: string): boolean {
-  const emoji = editor.schema.nodes.emoji?.create({ name });
+  return applyTiptapSlashInlineNode(editor, context, editor.schema.nodes.emoji?.create({ name }));
+}
+
+export function applyTiptapSlashSiteVariable(editor: Editor, context: TiptapSlashActionContext, key: string): boolean {
+  if (!isSiteVariableKey(key) || editor.isActive('codeBlock')) {
+    return false;
+  }
+  return applyTiptapSlashInlineNode(editor, context, editor.schema.nodes.siteVariable?.create({ key, linked: false }));
+}
+
+function applyTiptapSlashInlineNode(
+  editor: Editor,
+  context: TiptapSlashActionContext,
+  emoji: ProseMirrorNode | undefined,
+): boolean {
   if (!editor.isEditable || !emoji) {
     return false;
   }

@@ -3876,6 +3876,12 @@
             "subtext": "Metinden diyagram oluştur",
             "aliases": "mermaid\ndiagram\nflowchart\nsequence\ndiyagram\nakış şeması\nsıralama",
             "group": "Gömülenler"
+          },
+          "siteVariable": {
+            "title": "Site değişkeni",
+            "subtext": "Site ayarlarından bir değer ekle",
+            "group": "Satır içi",
+            "aliases": "site\nvariable\nSite değişkeni"
           }
         }
       },
@@ -4053,6 +4059,25 @@
       },
       "media": {
         "importFromUrl": "URL'den içe aktar"
+      },
+      "siteVariables": {
+        "title": "Site değişkeni",
+        "description": "Site ayarlarından bir değer ekle",
+        "search": "Site değişkenlerinde ara",
+        "site": "Site",
+        "contact": "İletişim",
+        "change": "Değişkeni değiştir",
+        "linked": "Bu değere bağlantı ver",
+        "convert": "Metne dönüştür",
+        "unset": "Ayarlanmamış",
+        "source": "Site ayarlarından",
+        "inspect": "Değişkeni incele",
+        "siteTitle": "Site adı",
+        "siteUrl": "Site URL’si",
+        "companyName": "Şirket adı",
+        "legalEmail": "Hukuk e-postası",
+        "supportEmail": "Destek e-postası",
+        "privacyEmail": "Gizlilik e-postası"
       }
     },
     "accessDowngraded": {

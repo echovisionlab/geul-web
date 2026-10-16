@@ -50,6 +50,7 @@ function mapPublicPageResponse(page: PublicPage, blockMedia: PublicPageResponse[
     id: page.id,
     slug: page.slug ?? null,
     title: page.title,
+    // Public Page.Get resolves summary tokens, including authenticated/share-token reads.
     summary: page.summary ?? null,
     featuredImageUrl: resolveFeaturedImageDeliveryUrl(page.featuredImageDelivery),
     showTitle: page.showTitle,
@@ -207,7 +208,10 @@ export async function getPageAccessView(
       return null;
     }
 
-    return { reason: 'allowed' as const, page: mapPublicPageResponse(page, response.blockMedia) };
+    return {
+      reason: 'allowed' as const,
+      page: mapPublicPageResponse(page, response.blockMedia),
+    };
   } catch (err) {
     if (isConnectErrorCode(err, Code.NotFound)) {
       return null;

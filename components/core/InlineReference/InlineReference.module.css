@@ -1,0 +1,38 @@
+.reference {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--geul-spacing-xxs);
+  max-inline-size: 100%;
+  padding: 0 var(--geul-spacing-xxs);
+  border: var(--geul-border-thin) solid var(--geul-border-default);
+  border-radius: var(--geul-radius-square);
+  background: var(--geul-surface-muted);
+  color: var(--geul-text-primary);
+  font: inherit;
+  line-height: inherit;
+  vertical-align: baseline;
+  cursor: pointer;
+}
+
+.reference:hover {
+  background: var(--geul-surface-hover);
+}
+
+.reference[data-selected] {
+  background: var(--geul-surface-active);
+}
+
+.reference:focus-visible {
+  outline: var(--geul-border-focus) solid var(--geul-focus);
+  outline-offset: var(--geul-spacing-xxs);
+}
+
+.reference[data-unset] {
+  color: var(--geul-status-warning);
+}
+
+.value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

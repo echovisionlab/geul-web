@@ -1,9 +1,15 @@
+'use client';
+
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import { normalizeRichTextHref } from '@echovisionlab/geul-common/editor/link-normalization';
 import Markdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
 import classes from './DescriptionView.module.css';
+import { useSiteSettings } from '@/lib/contexts/ManifestContext';
+import { resolveSiteVariableHref, siteVariableContext } from '@/lib/site-variables';
+import type { SiteVariableContext } from '@echovisionlab/geul-common/site-variables';
+type MarkdownNode = { type: string; url?: string; children?: MarkdownNode[] };
 
 interface ImmersiveSceneDescriptionViewProps {
   children: string;
@@ -38,15 +44,30 @@ function DescriptionHeading({ level, children }: { level: 3 | 4 | 5; children: R
   return <h5>{children}</h5>;
 }
 
+function siteVariableLinks(context: SiteVariableContext) {
+  return () => (tree: MarkdownNode) => {
+    const visit = (node: MarkdownNode) => {
+      if (node.type === 'link' || node.type === 'definition') {
+        node.url = resolveSiteVariableHref(node.url ?? '', context) ?? '';
+      }
+      if (node.children) {
+        node.children.forEach(visit);
+      }
+    };
+    visit(tree);
+  };
+}
+
 export function ImmersiveSceneDescriptionView({
   children,
   variant = 'description',
 }: ImmersiveSceneDescriptionViewProps) {
+  const { settings } = useSiteSettings();
   return (
     <div className={classes.root} data-immersive-scene-description data-variant={variant}>
       <Markdown
         skipHtml
-        remarkPlugins={[remarkBreaks, remarkGfm]}
+        remarkPlugins={[remarkBreaks, remarkGfm, siteVariableLinks(siteVariableContext(settings))]}
         urlTransform={(url) => normalizeRichTextHref(url)}
         components={{
           a: DescriptionLink,

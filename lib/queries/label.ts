@@ -1,3 +1,5 @@
+import { getPublicSettings } from '@/lib/queries/manifest';
+import { siteVariableContext } from '@/lib/site-variables';
 import { throwQueryError } from '@/lib/api/query-error';
 import { getPublicLabelResponse } from '@/lib/queries/detail-public.server';
 import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
@@ -249,7 +251,12 @@ export async function getLabelPublic(
       id: label.id,
       name: label.name,
       slug: label.slug ?? null,
-      descriptionText: content ? localizedRichTextPlainText(content) || null : null,
+      descriptionText: content
+        ? localizedRichTextPlainText(
+            content,
+            siteVariableContext(await getPublicSettings({ requestedLocale: options?.requestedLocale })),
+          ) || null
+        : null,
       content,
       ogImageUrl: label.ogAsset?.url ?? null,
       imageUrl: themedAssetRefUrl(label.imageLightAsset, label.imageDarkAsset),

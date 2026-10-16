@@ -21,6 +21,7 @@ import {
   IconMoodSmile,
   IconSparkles,
   IconTable,
+  IconVariable,
   type Icon,
 } from '@tabler/icons-react';
 import type {
@@ -194,6 +195,15 @@ export function createTiptapSlashCatalog(
       unavailableReason: messages.unavailable,
     }),
     workflowItem({
+      key: 'site-variable',
+      translation: itemCopy(messages.items.siteVariable, messages.groups.inline),
+      icon: IconVariable,
+      workflow: 'siteVariable',
+      capabilities,
+      callbacks,
+      unavailableReason: messages.unavailable,
+    }),
+    workflowItem({
       key: 'emoji',
       translation: itemCopy(messages.items.emoji, messages.groups.others),
       icon: IconMoodSmile,
@@ -309,6 +319,7 @@ export function createTiptapSlashCatalog(
     'table',
     'math',
     'inline-math',
+    'site-variable',
     'file',
     'map',
     'external-video',

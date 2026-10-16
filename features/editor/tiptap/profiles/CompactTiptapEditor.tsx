@@ -32,6 +32,7 @@ import {
   WireTextColor,
   WireUnderline,
 } from '../wire-schema';
+import { SiteVariable } from '../site-variables/SiteVariable';
 import editorClasses from '../TiptapEditor.module.css';
 import classes from './CompactTiptapEditor.module.css';
 
@@ -56,6 +57,7 @@ export function createCompactTiptapExtensions(
     WireDivider,
     WireText,
     WireHardBreak,
+    SiteVariable,
     WireBold,
     WireItalic,
     WireUnderline,

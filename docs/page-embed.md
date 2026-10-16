@@ -48,12 +48,12 @@ The four tools now live in `geul-tools`, with one Vite/React app, Node process,
 container image and independent HTTPS origin per tool. They share the Web theme,
 20 locales, client bootstrap, dependency versions and static HTTP implementation.
 
-| Page URL               | Tool origin                           |
-| ---------------------- | ------------------------------------- |
-| `/tools/transcode`     | `https://tools-transcode.dsub.io`     |
-| `/tools/youtube-audio` | `https://tools-youtube-audio.dsub.io` |
-| `/tools/hwp`           | `https://tools-hwp.dsub.io`           |
-| `/tools/portadj`       | `https://tools-portadj.dsub.io`       |
+| Page URL               | Tool origin                                 |
+| ---------------------- | ------------------------------------------- |
+| `/tools/transcode`     | `https://tools-transcode.rawsector.com`     |
+| `/tools/youtube-audio` | `https://tools-youtube-audio.rawsector.com` |
+| `/tools/hwp`           | `https://tools-hwp.rawsector.com`           |
+| `/tools/portadj`       | `https://tools-portadj.rawsector.com`       |
 
 These Web URLs are available to CMS Pages containing generic Embed blocks; the
 four tool-specific Web routes and bundled implementations have been removed.
@@ -70,7 +70,7 @@ The tool's HTML response must permit the intended parent with an HTTP header,
 for example:
 
 ```http
-Content-Security-Policy: frame-ancestors 'self' https://www.dsub.io
+Content-Security-Policy: frame-ancestors 'self' https://www.rawsector.com
 ```
 
 Use the actual parent origin, including the scheme and port. Include other site
@@ -84,7 +84,7 @@ embedding response, including rules added by its reverse proxy. CORS is not
 needed just to display an iframe.
 
 YouTube Audio deliberately sends credentialed requests from its tool origin to
-`https://www.dsub.io/api/tools/youtube-audio`. The WWW Ingress routes that prefix
+`https://www.rawsector.com/api/tools/youtube-audio`. The WWW Ingress routes that prefix
 directly to the YouTube Node server. The browser's existing host-only WWW session
 cookie is validated on every request through Oathkeeper's authenticated
 `MemberService/GetCurrentSession` RPC. Only an active, onboarded member is
@@ -113,7 +113,7 @@ With origin preservation disabled, the sandbox uses an opaque origin, so automat
 height and initialization are unavailable; use a fixed or viewport height.
 
 ```js
-const siteOrigin = 'https://www.dsub.io';
+const siteOrigin = 'https://www.rawsector.com';
 const content = document.querySelector('main');
 
 new ResizeObserver(() => {

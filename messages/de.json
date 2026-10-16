@@ -4306,6 +4306,12 @@
             "subtext": "Diagramm aus Text erstellen",
             "aliases": "mermaid\ndiagram\nflowchart\nsequence\ndiagramm\nflussdiagramm\nsequenzdiagramm",
             "group": "Einbettungen"
+          },
+          "siteVariable": {
+            "title": "Website-Variable",
+            "subtext": "Wert aus den Website-Einstellungen einfügen",
+            "group": "Inline",
+            "aliases": "site\nvariable\nWebsite-Variable"
           }
         }
       },
@@ -4483,6 +4489,25 @@
       },
       "media": {
         "importFromUrl": "Von URL importieren"
+      },
+      "siteVariables": {
+        "title": "Website-Variable",
+        "description": "Wert aus den Website-Einstellungen einfügen",
+        "search": "Website-Variablen suchen",
+        "site": "Website",
+        "contact": "Kontakt",
+        "change": "Variable ändern",
+        "linked": "Wert verlinken",
+        "convert": "In Text umwandeln",
+        "unset": "Nicht festgelegt",
+        "source": "Aus den Website-Einstellungen",
+        "inspect": "Variable prüfen",
+        "siteTitle": "Website-Name",
+        "siteUrl": "Website-URL",
+        "companyName": "Firmenname",
+        "legalEmail": "E-Mail für Rechtsfragen",
+        "supportEmail": "Support-E-Mail",
+        "privacyEmail": "Datenschutz-E-Mail"
       }
     },
     "accessDowngraded": {

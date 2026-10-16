@@ -3876,6 +3876,12 @@
             "subtext": "Crear un diagrama a partir de texto",
             "aliases": "mermaid\ndiagram\nflowchart\nsequence\ndiagrama\ndiagrama de flujo\nsecuencia",
             "group": "Incrustaciones"
+          },
+          "siteVariable": {
+            "title": "Variable del sitio",
+            "subtext": "Insertar un valor de la configuración del sitio",
+            "group": "En línea",
+            "aliases": "site\nvariable\nVariable del sitio"
           }
         }
       },
@@ -4053,6 +4059,25 @@
       },
       "media": {
         "importFromUrl": "Importar desde URL"
+      },
+      "siteVariables": {
+        "title": "Variable del sitio",
+        "description": "Insertar un valor de la configuración del sitio",
+        "search": "Buscar variables del sitio",
+        "site": "Sitio",
+        "contact": "Contacto",
+        "change": "Cambiar variable",
+        "linked": "Enlazar este valor",
+        "convert": "Convertir en texto",
+        "unset": "Sin definir",
+        "source": "De la configuración del sitio",
+        "inspect": "Inspeccionar variable",
+        "siteTitle": "Nombre del sitio",
+        "siteUrl": "URL del sitio",
+        "companyName": "Nombre de la empresa",
+        "legalEmail": "Correo legal",
+        "supportEmail": "Correo de soporte",
+        "privacyEmail": "Correo de privacidad"
       }
     },
     "accessDowngraded": {

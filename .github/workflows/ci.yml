@@ -216,6 +216,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Lint JavaScript and TypeScript
+        env:
+          # Type-aware lint of the whole app exceeds Node's default ~2 GB heap.
+          NODE_OPTIONS: --max-old-space-size=6144
         run: pnpm lint
       - name: Check translation catalogues against English and client message scopes
         run: pnpm i18n:check

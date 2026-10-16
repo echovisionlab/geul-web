@@ -13,8 +13,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  REGISTRY: registry.dsub.io
-  IMAGE_NAME: registry.dsub.io/echovisionlab/geul-web
+  REGISTRY: registry.rawsector.com
+  IMAGE_NAME: registry.rawsector.com/echovisionlab/geul-web
   SERVICE_NAME: geul-web
   PLATFORMS: linux/amd64
 

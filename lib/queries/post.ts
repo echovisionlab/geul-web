@@ -58,6 +58,7 @@ function mapPublicPostResponse(post: PublicPost, blockMedia: PublicPostResponse[
     id: post.id,
     title: post.title,
     slug: post.slug,
+    // Public Post.Get/List already resolve summary tokens; setting values stay literal.
     summary: post.summary,
     content,
     blockMedia,

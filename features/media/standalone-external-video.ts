@@ -193,6 +193,7 @@ export function resolveGeneratedStandaloneExternalVideoLink(
         break;
       case 'hardBreak':
       case 'mathInline':
+      case 'siteVariable':
       case undefined:
         return null;
     }

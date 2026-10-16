@@ -3598,6 +3598,12 @@
             "subtext": "إنشاء مخطط من النص",
             "aliases": "mermaid\ndiagram\nflowchart\nsequence\nمخطط\nمخطط انسيابي\nتسلسل",
             "group": "التضمينات"
+          },
+          "siteVariable": {
+            "title": "متغير الموقع",
+            "subtext": "إدراج قيمة من إعدادات الموقع",
+            "group": "مضمن",
+            "aliases": "site\nvariable\nمتغير الموقع"
           }
         }
       },
@@ -3775,6 +3781,25 @@
       },
       "media": {
         "importFromUrl": "استيراد من رابط"
+      },
+      "siteVariables": {
+        "title": "متغير الموقع",
+        "description": "إدراج قيمة من إعدادات الموقع",
+        "search": "البحث في متغيرات الموقع",
+        "site": "الموقع",
+        "contact": "التواصل",
+        "change": "تغيير المتغير",
+        "linked": "ربط بهذه القيمة",
+        "convert": "تحويل إلى نص",
+        "unset": "غير محدد",
+        "source": "من إعدادات الموقع",
+        "inspect": "فحص المتغير",
+        "siteTitle": "اسم الموقع",
+        "siteUrl": "رابط الموقع",
+        "companyName": "اسم الشركة",
+        "legalEmail": "البريد القانوني",
+        "supportEmail": "بريد الدعم",
+        "privacyEmail": "بريد الخصوصية"
       }
     },
     "accessDowngraded": {

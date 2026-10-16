@@ -1,4 +1,6 @@
 'use client';
+import { useSiteSettings } from '@/lib/contexts/ManifestContext';
+import { resolveSiteVariableHref, siteVariableContext } from '@/lib/site-variables';
 import { Button } from '@/components/core/Button';
 import Link from '@/components/core/Navigation';
 import { LayoutInline, LayoutStack } from '@/components/core/Layout';
@@ -188,9 +190,11 @@ function MarqueeItemGroup({
   );
 }
 function MarqueeItem({ item, options }: { item: MarqueeResolvedItem; options: MarqueeViewOptions }) {
+  const { settings } = useSiteSettings();
+  const href = resolveSiteVariableHref(item.href ?? '', siteVariableContext(settings));
   const hasLogo = Boolean(item.logoUrl || item.logoLightUrl || item.logoDarkUrl);
   const content = hasLogo ? <MarqueeLogoImage item={item} /> : <span className={classes.text}>{item.text}</span>;
-  if (!item.href) {
+  if (!href) {
     return <span className={classes.item}>{content}</span>;
   }
   const target = options.linkTarget === 'new-tab' ? '_blank' : undefined;
@@ -198,7 +202,7 @@ function MarqueeItem({ item, options }: { item: MarqueeResolvedItem; options: Ma
   return (
     <span className={classes.item}>
       <Link
-        href={item.href}
+        href={href}
         target={target}
         rel={rel}
         appearance={hasLogo ? 'graphic' : 'quiet'}

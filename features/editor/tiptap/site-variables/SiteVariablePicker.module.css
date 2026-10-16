@@ -1,0 +1,5 @@
+.anchor {
+  position: absolute;
+  z-index: var(--geul-layer-popup);
+  max-inline-size: calc(100% - var(--geul-spacing-sm));
+}

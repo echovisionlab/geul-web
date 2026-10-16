@@ -100,7 +100,7 @@ const titles = {
     'The Independent Archive for Music, Art and Moving Images',
     '기록실',
     'Example Studio',
-    'DSUB',
+    'rawsector',
     'Room Service',
   ],
   authors: [

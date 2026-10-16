@@ -71,7 +71,7 @@ vi.mock('next-intl/server', () => ({
 }));
 vi.mock('@/lib/utils/language.server', () => ({ getRequestLocaleContext: async () => ({ locale: 'en' }) }));
 vi.mock('@/lib/queries/manifest', () => ({
-  getManifest: async () => ({
+  getManifest: vi.fn(async () => ({
     settings: {
       site_title: 'Example Studio',
       company_name: 'Example Company',
@@ -86,7 +86,7 @@ vi.mock('@/lib/queries/manifest', () => ({
       footer: [{ id: 'privacy', label: 'Privacy', url: '/privacy', openInNewTab: true, children: [] }],
       avatarDropdown: [{ id: 'profile', label: 'Profile', url: '/my/profile', children: [] }],
     },
-  }),
+  })),
 }));
 vi.mock('@/lib/utils/menu', () => ({
   isMenuUrlActive: (pathname: string, href: string) => pathname === href,
@@ -101,6 +101,9 @@ vi.mock('@/features/social-links/ServerSocialLinksDisplay', () => ({ ServerSocia
 import { useShellState } from './ui/Shell/shell-state';
 import { ShellLayout } from './ui/Shell/ShellLayout';
 import { Shell } from './Shell';
+import { getManifest } from '@/lib/queries/manifest';
+import { siteVariableManifest } from '@/features/editor/tiptap/site-variables/site-variable.story-fixtures';
+import { siteVariableHrefCases } from '@/test/site-variable-link';
 import { ShellRuntime } from './ShellRuntime';
 
 const labels = {
@@ -291,5 +294,29 @@ describe('Shell server composition', () => {
     expect((layout.props.slots.socialLinks as ReactElement<{ links: unknown }>).props.links).toEqual([
       { platform: 'instagram', url: 'https://instagram.com/example' },
     ]);
+  });
+});
+
+describe('authored shell destinations', () => {
+  it.each(siteVariableHrefCases)('projects every menu href once: $name', async ({ source, expected, settings }) => {
+    const manifest = { ...siteVariableManifest, settings: { ...siteVariableManifest.settings, ...settings } };
+    const item = { id: 'contact', label: 'Contact', url: source, children: [] };
+    const parent = { ...item, id: 'parent', url: '/', children: [item] };
+    vi.mocked(getManifest).mockResolvedValueOnce({
+      ...manifest,
+      menus: {
+        ...manifest.menus,
+        header: [parent],
+        secondary: [item],
+        footer: [item],
+        avatarDropdown: [item],
+      },
+    } as unknown as Awaited<ReturnType<typeof getManifest>>);
+    const element = (await Shell({ children: null })) as ReactElement<{ children: ReactElement<ShellLayoutProps> }>;
+    const layout = element.props.children.props;
+    expect(layout.headerItems[0].children[0].href).toBe(expected ?? '');
+    expect(layout.secondaryItems[0].href).toBe(expected ?? '');
+    expect(layout.footerItems[0].href).toBe(expected ?? '');
+    expect(layout.accountItems[0].href).toBe(expected ?? '');
   });
 });

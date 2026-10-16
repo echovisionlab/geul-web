@@ -28,6 +28,9 @@ export function ShellMobileNavigation({
   const { isItemActive, events } = useShellState();
   const renderLink = (item: ShellViewNavigationItem, nested = false) => {
     const active = isItemActive(item);
+    if (!item.href) {
+      return <span key={item.id}>{item.label}</span>;
+    }
     return (
       <TextButton
         key={item.id}
