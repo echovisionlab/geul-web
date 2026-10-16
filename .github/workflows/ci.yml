@@ -1,4 +1,5 @@
 name: CI
+run-name: "CI · ${{ github.event_name == 'pull_request' && format('PR #{0}', github.event.pull_request.number) || github.ref_name }}"
 
 on:
   workflow_dispatch:
@@ -278,6 +279,14 @@ jobs:
           workers=$(node --input-type=module -e "import { availableParallelism } from 'node:os'; console.log(availableParallelism())")
           echo "CI_TEST_WORKERS=$workers" >> "$GITHUB_ENV"
           echo "CI test worker count: $workers (node:os.availableParallelism)"
+      - name: Prepare a private SWC native binding cache
+        # The runner home has shared writable ancestors. Use a private directory
+        # under the sticky-protected system temp root; keep SWC's trust checks.
+        run: |
+          set -euo pipefail
+          cache=$(mktemp -d /tmp/geul-web-swc.XXXXXX)
+          chmod 700 "$cache"
+          echo "SWC_NATIVE_BINDING_CACHE=$cache" >> "$GITHUB_ENV"
       - name: Install dependencies
         id: dependencies
         env:

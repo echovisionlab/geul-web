@@ -25,23 +25,30 @@ async function render(node: ReactNode) {
   await act(async () => {
     root.render(<I18nProvider locale="en-US">{node}</I18nProvider>);
   });
+  await flushFocusFrames();
+}
+async function flushFocusFrames() {
+  // React Aria restores a FocusScope on one frame; virtual-cursor focusSafely
+  // waits for the following frame before moving focus to the saved opener.
+  for (let frame = 0; frame < 2; frame += 1) {
+    await act(async () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+  }
 }
 async function key(node: Element, value: string) {
   await act(async () => {
     node.dispatchEvent(new KeyboardEvent('keydown', { key: value, bubbles: true }));
   });
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 35));
-  });
+  await flushFocusFrames();
 }
 async function click(node: HTMLElement) {
   await act(async () => {
     node.focus();
+  });
+  expect(document.activeElement).toBe(node);
+  await act(async () => {
     node.click();
   });
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 35));
-  });
+  await flushFocusFrames();
 }
 
 describe('Core React Aria overlay interactions', () => {
@@ -167,10 +174,11 @@ describe('Core React Aria overlay interactions', () => {
       (x) => x.textContent === 'Open inner',
     )!;
     await click(innerTrigger);
-    const top = document.querySelector<HTMLElement>('[role="dialog"][aria-labelledby]')!;
+    expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(2);
     const inner = [...document.querySelectorAll<HTMLElement>('[role="dialog"]')].find((x) =>
       x.textContent?.includes('Inside inner'),
     )!;
+    expect(inner).toHaveAccessibleName('Inner');
     await key(inner, 'Escape');
     expect(document.body.textContent).toContain('Outer');
     expect(document.body.textContent).not.toContain('Inside inner');
@@ -178,7 +186,6 @@ describe('Core React Aria overlay interactions', () => {
     await key(document.querySelector('[role="dialog"]')!, 'Escape');
     expect(document.querySelector('[role="dialog"]')).toBeNull();
     expect(document.activeElement).toBe(outerTrigger);
-    expect(top).toBeTruthy();
   });
   it('locks escape and outside press while pending without executing close', async () => {
     const close = vi.fn();

@@ -7,6 +7,7 @@ import { buildForm } from '@/lib/form/build';
 import type { FormSchema } from '@/lib/types/form/schema';
 import { TestProviders } from '@/test/TestProviders';
 import { FormRenderer } from './FormRenderer';
+import { loadPhoneField } from './FormField/load-phone-field';
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -188,6 +189,11 @@ async function flushUpdates() {
 
 // PhoneField (with libphonenumber-js) is loaded on demand.
 async function waitForPhoneInput() {
+  // Await the real lazy module, including a cold transform, before observing
+  // Next's loadable subscriber commit. A microtask alone cannot load the chunk.
+  await act(async () => {
+    await loadPhoneField();
+  });
   await vi.waitFor(async () => {
     await act(async () => {
       await Promise.resolve();
