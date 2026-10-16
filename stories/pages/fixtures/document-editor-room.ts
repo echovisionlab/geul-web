@@ -107,31 +107,43 @@ export function localDocumentRoom(
   let disposed = false;
   let persisted: BlockRoomDurabilityState = { stateVector: Y.encodeStateVector(document), deleted: {} };
   const acknowledge = () => {
-    if (disposed) return;
+    if (disposed) {
+      return;
+    }
     while (!disposed && provider.hasUnsyncedChanges) {
       provider.decrementUnsyncedChanges();
     }
   };
   provider.forceSync = acknowledge;
   provider.sendStateless = (payload) => {
-    if (disposed) return;
+    if (disposed) {
+      return;
+    }
     const parsed = parseClientMessage(payload);
     if (parsed.ok && parsed.message.kind === 'room.flush') {
       const request = parsed.message;
       queueMicrotask(() => {
-        if (disposed) return;
+        if (disposed) {
+          return;
+        }
         acknowledge();
-        if (disposed) return;
+        if (disposed) {
+          return;
+        }
         provider.acknowledgePersist(request.requestId);
         for (const listener of listeners) {
-          if (disposed) break;
+          if (disposed) {
+            break;
+          }
           listener(persisted);
         }
       });
     }
   };
   const afterTransaction = (transaction: Y.Transaction) => {
-    if (disposed) return;
+    if (disposed) {
+      return;
+    }
     const next = captureBlockRoomDurabilityState(document, transaction);
     persisted = mergeBlockRoomDurabilityStates(persisted, next);
     queueMicrotask(acknowledge);
@@ -139,7 +151,9 @@ export function localDocumentRoom(
   document.on('afterTransaction', afterTransaction);
   const protocol: BlockRoomDurabilityProtocol = {
     subscribePersisted(listener) {
-      if (disposed) return () => {};
+      if (disposed) {
+        return () => {};
+      }
       listeners.add(listener);
       listener(persisted);
       return () => {
@@ -157,7 +171,9 @@ export function localDocumentRoom(
     protocol,
     controller,
     destroy() {
-      if (disposed) return;
+      if (disposed) {
+        return;
+      }
       disposed = true;
       document.off('afterTransaction', afterTransaction);
       listeners.clear();

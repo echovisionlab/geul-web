@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "320b7f055849bee6029f2d870930deead394d7e8fb93a8eba0ce2a81812b8503",
+  "manifestHash": "5e940a7fe0295ee6437397d0d30e4f52095ca3414d79a8cd315d691290af4584",
   "counts": {
     "sourceFiles": 3778,
     "productionSourceFiles": 2284,
@@ -22308,7 +22308,18 @@
         {
           "name": "EmailLayoutPreviewBindings",
           "extends": [],
-          "properties": []
+          "properties": [
+            {
+              "name": "content",
+              "optional": false,
+              "type": "( html: string, sampleContent?: string, locale?: string, signal?: AbortSignal, ) => ReturnType<typeof previewEmailLayoutContentAction>"
+            },
+            {
+              "name": "saved",
+              "optional": false,
+              "type": "( layoutId: string, sampleContent?: string, locale?: string, signal?: AbortSignal, ) => ReturnType<typeof previewEmailLayout>"
+            }
+          ]
         },
         {
           "name": "EmailLayoutPreviewProps",

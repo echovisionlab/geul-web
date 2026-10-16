@@ -24,9 +24,13 @@ export async function insertLocalPreviewFiles({
   onDelivered?: (fileId: string, file: File, url: string) => void;
 }) {
   const isActive = () => !signal.aborted && !editor.isDestroyed;
-  if (!isActive()) return;
+  if (!isActive()) {
+    return;
+  }
   const requireActiveOwner = () => {
-    if (!isActive()) throw new Error(UPLOAD_ABORTED_MESSAGE);
+    if (!isActive()) {
+      throw new Error(UPLOAD_ABORTED_MESSAGE);
+    }
   };
   const port = createTiptapEditorMediaCommandPort(editor, { runtimeStore });
   await insertMediaFilesAtPosition(
@@ -64,7 +68,9 @@ export async function insertLocalPreviewFiles({
           url,
           processingStatus: 'ready',
         });
-        if (isActive()) onDelivered?.(fileId, file, url);
+        if (isActive()) {
+          onDelivered?.(fileId, file, url);
+        }
         return { fileId, url };
       },
       insertBlockAtPosition: (block, position) =>
@@ -73,7 +79,9 @@ export async function insertLocalPreviewFiles({
       onUploadProgress() {},
       onUploadEnd() {},
       onUploadError: (fileName, message) => {
-        if (isActive()) onError(fileName, message);
+        if (isActive()) {
+          onError(fileName, message);
+        }
       },
     },
     captureInsertPosition(port),

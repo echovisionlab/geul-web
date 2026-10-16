@@ -327,16 +327,18 @@ export const TemplateRichFormatting: Story = {
       { timeout: 15_000 },
     );
     await expect(editor).toHaveTextContent('quote');
-    const iframe = await waitFor(
+    const { iframe, document, quote } = await waitFor(
       () => {
-        const frame = canvasElement.querySelector('iframe');
-        expect(frame?.contentDocument?.querySelector('blockquote')).not.toBeNull();
-        return frame!;
+        const iframe = canvasElement.querySelector<HTMLIFrameElement>('iframe');
+        const document = iframe?.contentDocument;
+        const quote = document?.querySelector('blockquote');
+        if (!iframe || !document || !quote || !iframe.contentWindow) {
+          throw new Error('Waiting for the rendered email iframe and quote');
+        }
+        return { iframe, document, quote };
       },
       { timeout: 20_000 },
     );
-    const document = iframe.contentDocument!;
-    const quote = document.querySelector('blockquote')!;
     const quoteStyle = iframe.contentWindow!.getComputedStyle(quote);
     await expect(quote).toHaveTextContent('quote');
     await expect(Number.parseFloat(quoteStyle.borderLeftWidth)).toBeGreaterThan(0);
@@ -355,8 +357,13 @@ export const TemplateRichFormatting: Story = {
     await userEvent.click(editor);
     await userEvent.keyboard(' Updated preview');
     await waitFor(
-      () => {
-        expect(iframe.contentDocument?.body).toHaveTextContent('Updated preview');
+      async () => {
+        const frame = canvasElement.querySelector<HTMLIFrameElement>('iframe');
+        const body = frame?.contentDocument?.body;
+        if (!body) {
+          throw new Error('Waiting for the updated email iframe');
+        }
+        await expect(body).toHaveTextContent('Updated preview');
       },
       { timeout: 20_000 },
     );

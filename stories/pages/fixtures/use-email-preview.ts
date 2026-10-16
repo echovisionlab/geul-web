@@ -18,7 +18,9 @@ export function useLocalEmailPreview(
   const [revision, setRevision] = useState(0);
   const refresh = useCallback(() => setRevision((value) => value + 1), []);
   useEffect(() => {
-    if (!room) return;
+    if (!room) {
+      return;
+    }
     let pending: ReturnType<typeof setTimeout> | undefined;
     let request: AbortController | undefined;
     const render = () => {
@@ -41,15 +43,18 @@ export function useLocalEmailPreview(
               },
               controller.signal,
             );
-            if (!controller.signal.aborted) setPreview({ ...result, isLoading: false, error: '' });
+            if (!controller.signal.aborted) {
+              setPreview({ ...result, isLoading: false, error: '' });
+            }
           } catch (error) {
-            if (!controller.signal.aborted)
+            if (!controller.signal.aborted) {
               setPreview({
                 html: '',
                 subject: '',
                 isLoading: false,
                 error: error instanceof Error ? error.message : 'Email preview failed',
               });
+            }
           }
         })();
       }, 150);

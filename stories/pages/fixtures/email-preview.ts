@@ -28,6 +28,8 @@ export async function renderLocalEmailPreview(
     }),
   });
   const result = await response.json();
-  if (!response.ok) throw new Error(typeof result.error === 'string' ? result.error : 'Email preview failed');
+  if (!response.ok) {
+    throw new Error(typeof result.error === 'string' ? result.error : 'Email preview failed');
+  }
   return result;
 }

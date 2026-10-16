@@ -41,7 +41,9 @@ function renderPreview(context: TestContext, overrides: Partial<ComponentProps<t
   const root = createRoot(container);
   let mounted = true;
   const unmount = () => {
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
     act(() => root.unmount());
     mounted = false;
   };

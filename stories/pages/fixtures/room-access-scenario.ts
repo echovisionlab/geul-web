@@ -19,6 +19,8 @@ export function bindRoomAccessScenario(owner: HTMLElement, provider: object): ()
 export function changeCanvasRoomAccess(canvas: HTMLElement, access: 'view' | 'edit'): boolean {
   const owner = canvas.querySelector<HTMLElement>(ownerSelector);
   const CustomEvent = owner?.ownerDocument.defaultView?.CustomEvent;
-  if (!owner || !CustomEvent) return false;
+  if (!owner || !CustomEvent) {
+    return false;
+  }
   return !owner.dispatchEvent(new CustomEvent(changeAccessEvent, { detail: access, cancelable: true }));
 }

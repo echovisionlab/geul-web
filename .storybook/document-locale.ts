@@ -53,7 +53,9 @@ export function applyStorybookDocumentLocale(document: Document, locale: Support
   projectLocale(document, state);
   let released = false;
   return () => {
-    if (released) return;
+    if (released) {
+      return;
+    }
     released = true;
     state.owners = state.owners.filter((owner) => owner.id !== id);
     projectLocale(document, state);

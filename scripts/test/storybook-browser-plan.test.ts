@@ -52,6 +52,22 @@ describe('Storybook browser execution plan', () => {
     expect(parallelism).toHaveBeenCalledOnce();
   });
 
+  it('combines exactly the existing CI suites once, without broadening to all test-tagged stories', () => {
+    const expected = [
+      ...new Set(
+        ['a11y', 'author', 'email-rendering'].flatMap((suite) =>
+          selectBrowserStories(index, suite).map((entry) => entry.id),
+        ),
+      ),
+    ].sort();
+    const selected = selectBrowserStories(index, 'ci').map((entry) => entry.id);
+    expect(selected).toEqual(expected);
+    expect(selected).toHaveLength(4);
+    expect(selected).not.toContain('core-interaction-accessibility--untagged');
+    expect(selected).not.toContain('core-other--keyboard');
+    expect(selected).not.toContain('pages-editors-work--keyboard-authoring');
+  });
+
   it('retains the local limit when only CI=true was set for local tooling', () => {
     expect(isStorybookCI({ CI: 'true' })).toBe(false);
     expect(isStorybookCI({ GITHUB_ACTIONS: 'true', CI: 'false' })).toBe(false);

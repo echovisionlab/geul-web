@@ -1,8 +1,11 @@
 # Test projects
 
-`pnpm test` runs every Vitest project. CI runs the same complete collection as
-independent project jobs, with two shards for components. Every applicable job
-still gates `Validate`; project selection is not a changed-file-only CI shortcut.
+`pnpm test` runs every Vitest project. CI runs the same complete collection in
+one `Tests` job with one Vitest invocation across all four projects. The project
+boundaries select runtime setup; they do not create separate CI processes.
+The same job then runs the Storybook CI scope in one Jest test invocation.
+Every applicable job still gates `Validate`; no changed-file selection narrows
+these test collections.
 
 | Project              | Boundary                                                                  | Command                |
 | -------------------- | ------------------------------------------------------------------------- | ---------------------- |
@@ -65,39 +68,68 @@ For a focused check across the new boundaries:
 pnpm exec vitest run scripts/test/vitest-projects.test.ts test/node-isolation.test.ts features/editor/tiptap/profiles/email-preview.test.ts features/editor/tiptap/profiles/policy-document.test.ts features/editor/tiptap/profiles/EmailTiptapEditor.test.tsx features/editor/tiptap/profiles/PolicyTiptapEditor.test.tsx lib/auth.test.ts lib/api/server-client.test.ts lib/api/rpc-proxy.test.ts lib/media/use-media-processing-runtime-state.test.tsx lib/session-data.test.ts features/auth/hydra-mcp-oauth.test.ts 'app/api/rpc/[...path]/route.test.ts' stories/pages/TranslationAdmin.test.tsx
 ```
 
-Use CI's per-project durations to measure any speed change. Vitest's phase
-percentages can include parallel or overlapping work; they are not an additive
-breakdown of elapsed wall time. Project separation does not measure or eliminate
-the separate Next/Storybook build and browser-smoke costs.
+The `Tests` job obtains its worker limit from `node:os.availableParallelism()`
+and runs `pnpm exec vitest run --fileParallelism --maxWorkers "$CI_TEST_WORKERS"`
+once, without a project filter or shard. This includes every discovered file,
+including the light/dark theme contrast contracts. Forks and file isolation stay
+enabled; files run in parallel while individual tests retain their declared
+concurrency behavior. Design-system Node contracts also use the measured CPU
+limit. Vitest and Storybook run as sequential steps, so their worker pools do not
+compete with each other in that job.
+
+The workflow targets the repository-scoped ARC label `geul-web-mini` on node
+`mini`, with zero idle runners and at most one active runner. Its pod requests
+and limits eight CPUs and has a 12 GiB memory budget; the node's reported capacity
+is eight CPUs and about 15.5 GiB RAM. Deployment PR 372 was merged and Flux
+reported `InstallSucceeded`; scale set `geul-web-mini` is registered with ID 1
+and phase `Running`, and the listener controller is Ready with a 100m CPU request.
+Zero runner pods at the configured idle minimum of zero is expected. These
+control-plane checks do not yet establish an executed eight-worker test run or
+cancellation behavior; those still require job logs and browser artifacts.
+
+Measure changes using the complete `Tests` job and its individual step durations.
+Vitest phase percentages can include parallel or overlapping work and are not an
+additive wall-time breakdown. The `Tests` job includes Storybook preparation and
+build time; the separate hosted `quality` job includes the Next build.
 
 ## Storybook browser isolation and CI parallelism
 
-Storybook browser checks run separately from the Vitest projects. CI builds
-Storybook once in `storybook-build`, alongside the Next/static `quality` job,
-and shares the build with five browser jobs: two Core accessibility shards,
-two post-authoring shards, and one email-rendering contract. `Validate` requires
-the Storybook build and every browser shard as well as the other applicable checks.
-These are configured gates; execution evidence belongs to the tested commit and CI run.
+The single `Tests` job depends on `scope` and `format` and starts alongside the
+hosted `quality` job. On `geul-web-mini`, it runs design-system Node contracts and
+the full Vitest collection, then Storybook typechecking, MapLibre/p5 preparation,
+one Storybook build, one pinned Linux Go-helper compilation, Chromium setup and
+the `ci` browser suite. All steps use the same job workspace. There is no separate
+Storybook build job or intermediate artifact download.
+
+`Validate` requires `scope`, `format`, `quality` and `test` and runs only when the
+workflow has not been cancelled. Storybook build/browser failures remain failures
+of `Tests`. These describe configured gates; execution evidence belongs to the
+tested commit and CI run.
 
 The installed `@storybook/test-runner` 0.26.0 groups generated Jest files by CSF
 title. Each former smoke command selected one title, so workers or Jest shards
 alone could not distribute its stories. `scripts/test/storybook-browser.mjs`
 uses the runner's exported `testPrefixer` and a Babel emitter to create one Jest
 file per story. The official play function, pre/post hooks, error handling and
-navigation retry remain in use. Selection preserves the existing intersections:
-`a11y-smoke` with `core-interaction-accessibility`, and `a11y-author` with
-`pages-editors-post`; the email suite selects `email-rendering`.
+navigation retry remain in use. The `ci` suite is the deduplicated union of the
+former selections: `a11y-smoke` with `core-interaction-accessibility`,
+`a11y-author` with `pages-editors-post`, and `email-rendering`. It neither removes
+those cases nor broadens CI to every catalog story.
 
-Selection sorts story IDs before assigning positions modulo the shard count.
-A regression checks disjoint assignments and full selected-scope coverage.
-Jest receives no second shard option: hashing files beneath independently random
-run directories could assign overlapping or missing stories.
+Selection sorts story IDs before per-story file generation. CI assigns the
+complete union to `1/1`, so one Jest invocation schedules every selected story.
+The adapter retains deterministic modulo sharding for focused commands, with a
+regression for disjoint assignments and full selected-scope coverage. Jest
+receives no second shard option; random run directories never affect membership.
 
-The CI invocation is, for example:
+The browser test invocation is:
 
 ```sh
-pnpm storybook:test:ci --suite a11y --shard 1/2 --static-dir .artifacts/storybook-build/site
+pnpm storybook:test:ci --suite ci --shard 1/1 --static-dir .artifacts/storybook-build/site
 ```
+
+The adapter also queries Jest once with `--showConfig` before the test invocation;
+that configuration query does not run a second test collection.
 
 Only `GITHUB_ACTIONS=true` together with `CI=true` or `CI=1` queries
 `node:os.availableParallelism()` and passes the full result as Jest's explicit
@@ -111,20 +143,35 @@ limit of two. `storybook:test:changed` retains four and transitive-dependent sel
 Each run owns a loopback static server bound to port zero, uses the port returned
 by that listener, and closes it in `finally`. It never probes or reuses an
 existing server. Test files, output and Jest cache live under a unique
-`.artifacts/storybook/<suite>-<shard>-<run>/` directory. Browser jobs consume the
-same read-only build artifact and do not rebuild Storybook.
+`.artifacts/storybook/<suite>-<shard>-<run>/` directory. The browser step serves
+the Storybook build produced earlier in that same workspace as read-only input.
+At the end of `Tests`, two review artifacts are uploaded: `storybook-build`
+contains the site, Linux helper and renderer revision; `storybook-ci` contains
+browser results and context evidence. Both use `!cancelled()`, preserving any
+available evidence after failure while skipping uploads for cancelled runs.
+
+Workflow concurrency groups PR and dispatch runs by workflow and branch
+(`${{ github.workflow }}-${{ github.head_ref || github.ref_name }}`) and sets
+`cancel-in-progress: true`. A newer run on that branch cancels its predecessor;
+different branches retain their own runs. There is no global test-job group
+that cancels unrelated PRs. On cancellation or final cleanup, the browser adapter
+sends SIGTERM to its detached Jest/worker/Chromium process group, waits up to two
+seconds for exit, then sends SIGKILL if the group remains. `finally` awaits this
+cleanup and closes the owned preview server. Per-story contexts also close on
+success or failure. This is the implemented cancellation contract; cancellation
+on the deployed runner still needs execution evidence.
 
 The artifact also contains the Go `cmd/email-preview-fixture` helper built from
 API revision `7155b62b9be580753f2187ec85fb2b8eed9dcd94`. The workflow requires a
 40-character immutable SHA, checks the renderer checkout's HEAD, and records it
-in `api-revision.txt`. Using that checkout's `go.mod` toolchain, CI builds
-`CGO_ENABLED=0` Linux/amd64 and Darwin/arm64 binaries from the same revision.
-Browser jobs restore the Linux binary's executable bit and set
-`EMAIL_PREVIEW_FIXTURE_BINARY` for the same-origin fixture handler. For local
-visual review, restore the downloaded Mac binary's executable bit and set that
-variable before starting the normal Storybook preview. No local maximum-worker
-run or local Go build is required. See [email rendering](design-system/email-preview-rendering.md)
-for renderer parity and quote ownership.
+in `api-revision.txt`. Using that checkout's `go.mod` toolchain, `Tests` compiles
+one `CGO_ENABLED=0` Linux/amd64 binary and passes its path through
+`EMAIL_PREVIEW_FIXTURE_BINARY` to the same-origin fixture handler. The current
+workflow does not cross-compile a Mac helper. The local visual review used the
+Darwin/arm64 helper already obtained from the earlier hosted run; that is
+historical review evidence, not a current CI build target. See
+[email rendering](design-system/email-preview-rendering.md) for renderer parity
+and quote ownership.
 
 `.storybook/test-environment.mjs` gives each story a fresh Playwright
 BrowserContext and Page and closes them after success or failure. The first case
@@ -152,14 +199,25 @@ storage-sentinel status and blocked requests; `execution.json` aggregates them.
 After an otherwise successful run, missing case evidence, reused context IDs,
 missing disposal or storage evidence fail the adapter. CI also fails when at
 least two CPUs and two completed cases produce only one Jest worker ID. Failed
-stories save screenshots, and CI uploads results even when a run fails.
+stories save screenshots. CI preserves available results after failure and skips
+artifact uploads after cancellation.
 
 Focused fixture contracts cover scope preservation, per-story emission, the
 CI-only CPU query, success/failure context disposal, and independent static
 server ports, data and shutdown. Their presence describes regression coverage;
 actual CI scheduling and browser success require the artifacts from a completed
-run. No timing improvement, current-snapshot browser pass, or production visual
-acceptance is established by this document. Release and deployment remain on
-hold at the user's request; producing test artifacts does not publish a site or
-Docker image. Production, Storybook and delivered-email visual reviews retain
+run. The earlier hosted [run 38884609657](https://github.com/echovisionlab/geul-web/actions/runs/38884609657)
+recorded passes for its five Vitest jobs, Storybook build and four Core/Post
+browser jobs. Its email browser stage exposed an iframe-readiness failure;
+the subsequent fix and this consolidated workflow need their own run evidence.
+That older run does not establish a pass, scheduling behavior, or timing change
+for the new setup. Local visual review inspected `TemplateRichFormatting` with
+the production editor component and CI-built Mac Go helper, including the quote
+rule and live editor/iframe update; [email rendering](design-system/email-preview-rendering.md#quote-ownership-and-parity-evidence)
+records that scope. Deployed application and mail-client acceptance remain
+separate checks.
+
+Application release and deployment remain on hold at the user's request;
+producing test artifacts does not publish a site or Docker image.
+Production, Storybook and delivered-email visual reviews retain
 separate evidence.

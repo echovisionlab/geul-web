@@ -19,22 +19,26 @@ SMTP or running API service and sends no message.
 CI pins the helper source to API commit
 `7155b62b9be580753f2187ec85fb2b8eed9dcd94`. The workflow requires an immutable
 40-character SHA, verifies the renderer checkout's HEAD, and records the revision
-in `api-revision.txt` beside the Storybook build. It builds Linux/amd64 for browser
-jobs and Darwin/arm64 for local review from that same source using the API's
-`go.mod` toolchain, with `CGO_ENABLED=0`. Updating the renderer pin requires
-reviewing the shared rendering contract and rerunning parity checks.
+in `api-revision.txt` beside the Storybook build. The single `Tests` job builds
+Storybook and then compiles one Linux/amd64 helper in the same workspace using
+the API's `go.mod` toolchain, with `CGO_ENABLED=0`. It then installs Chromium and
+runs the browser suite against those local build outputs. Updating the renderer
+pin requires reviewing the shared rendering contract and rerunning parity checks.
+There is no separate build job, intermediate artifact download or current Mac
+cross-compilation step.
 
 Set `EMAIL_PREVIEW_FIXTURE_BINARY` to the absolute executable path before
 `pnpm storybook` or `pnpm storybook:preview`. A downloaded helper needs its
-executable bit restored (`chmod +x <path>`). Browser jobs reuse the built Linux
-helper; local Mac review can use the artifact's Darwin/arm64 helper without a
-Go build. The fixture route is part of these review servers. A missing or
-unavailable executable produces a preview error; there is no local TypeScript
-rendering fallback.
+executable bit restored (`chmod +x <path>`). `Tests` uses the Linux helper it
+just compiled. At job completion, `storybook-build` preserves the site, Linux
+helper and pin, while `storybook-ci` preserves browser results. Uploads retain
+available evidence on failure and skip cancelled runs. The fixture route is part
+of these review servers. A missing or unavailable executable produces a preview
+error; there is no local TypeScript rendering fallback.
 
 The pin establishes which production rendering code the fixture runs. It does
 not establish that this revision has been deployed or that a live mail client
-has displayed the output. Release and deployment remain on hold at the user's
+has displayed the output. Application release and deployment remain on hold at the user's
 request; the fixture and CI artifact do not send mail or publish an image.
 
 ## Request and process lifetime
@@ -65,10 +69,27 @@ The browser adds no quote-only CSS to make a preview look different from mail.
 `TemplateRichFormatting` has the `email-rendering` browser-test tag. Its play
 asserts a nonzero rendered quote border, heading/list/hard-break markup, exact
 Go-response/iframe `srcdoc` equality for the same fixture input, and a preview
-refresh after typing. These assertions cover the review server and iframe at
-the pinned renderer revision; they are not an SMTP delivery or mail-client test.
+refresh after typing. The consolidated `ci` suite includes this story together
+with the existing Core accessibility and Post authoring scopes in one Jest test
+invocation. Storybook and the Linux helper are built once earlier in the same
+job and supplied directly to the browser step; no email is sent. These assertions cover the
+review server and iframe at the pinned renderer revision; they are not an SMTP
+delivery or mail-client test.
 
 The supplied screenshot identified the missing preview quote rule and was
-inspected before implementation. The current snapshot's CI browser evidence and
-implementation/production visual review are still to be recorded. Source
-inspection and written assertions alone do not establish that those checks passed.
+inspected before implementation. Local visual review on 2026-10-16 inspected
+`TemplateRichFormatting` at port 6012 with the production email editor component
+and the Darwin/arm64 Go helper from the earlier hosted run 38884609657, built
+from the API pin above. That older review artifact is not rebuilt for Mac by the
+current workflow. Scrolling the iframe exposed
+the quote's gray left rule, inset and muted text; the play's `Updated preview`
+edit was visible in both editor and iframe. This verifies that Storybook rendering
+and interaction at the reviewed local snapshot. It does not verify a deployed
+application route, SMTP delivery or a mail client's rendering.
+
+The ARC deployment and scale-set registration have been observed, but the
+consolidated single-job workflow still needs eight-worker runtime and
+cancellation evidence. The earlier hosted run's email play failed on iframe
+readiness; its subsequent fix and the local visual check do not establish that
+the revised CI run has passed. See [testing](../testing.md#storybook-browser-isolation-and-ci-parallelism)
+for scope, worker and browser-context evidence.

@@ -28,7 +28,9 @@ function previewEditor(context: TestContext) {
     },
   });
   context.onTestFinished(() => {
-    if (!editor.isDestroyed) editor.destroy();
+    if (!editor.isDestroyed) {
+      editor.destroy();
+    }
     element.remove();
   });
   return editor;
@@ -42,10 +44,16 @@ function previewObjectUrls(context: TestContext) {
   Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: createObjectURL });
   Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: revokeObjectURL });
   context.onTestFinished(() => {
-    if (create) Object.defineProperty(URL, 'createObjectURL', create);
-    else Reflect.deleteProperty(URL, 'createObjectURL');
-    if (revoke) Object.defineProperty(URL, 'revokeObjectURL', revoke);
-    else Reflect.deleteProperty(URL, 'revokeObjectURL');
+    if (create) {
+      Object.defineProperty(URL, 'createObjectURL', create);
+    } else {
+      Reflect.deleteProperty(URL, 'createObjectURL');
+    }
+    if (revoke) {
+      Object.defineProperty(URL, 'revokeObjectURL', revoke);
+    } else {
+      Reflect.deleteProperty(URL, 'revokeObjectURL');
+    }
   });
   return { createObjectURL, revokeObjectURL };
 }
@@ -58,7 +66,9 @@ describe('local file insertion preview', () => {
     const retained: string[] = [];
     const release = () => {
       lifetime.abort();
-      for (const url of retained.splice(0)) URL.revokeObjectURL(url);
+      for (const url of retained.splice(0)) {
+        URL.revokeObjectURL(url);
+      }
     };
     context.onTestFinished(release);
     const runtimeStore = createEditorMediaRuntimeStore();
@@ -124,8 +134,11 @@ describe('local file insertion preview', () => {
         onDelivered,
       });
       await readStarted;
-      if (endOwner === 'abort') lifetime.abort();
-      else editor.destroy();
+      if (endOwner === 'abort') {
+        lifetime.abort();
+      } else {
+        editor.destroy();
+      }
       finishRead(new ArrayBuffer(0));
       await insertion;
       expect(createObjectURL).not.toHaveBeenCalled();
@@ -178,7 +191,9 @@ describe('local file insertion preview', () => {
     lifetime.signal.addEventListener(
       'abort',
       () => {
-        for (const url of retained.splice(0)) URL.revokeObjectURL(url);
+        for (const url of retained.splice(0)) {
+          URL.revokeObjectURL(url);
+        }
       },
       { once: true },
     );

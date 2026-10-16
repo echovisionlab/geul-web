@@ -24,7 +24,8 @@ const option = (name, fallback) => {
   return args[index + 1];
 };
 const suite = option('--suite', 'all');
-if (!['all', 'a11y', 'author', 'email-rendering'].includes(suite)) throw new Error(`Unknown Storybook suite: ${suite}`);
+if (!['all', 'a11y', 'author', 'email-rendering', 'ci'].includes(suite))
+  throw new Error(`Unknown Storybook suite: ${suite}`);
 const shard = option('--shard', '1/1');
 if (!/^[1-9]\d*\/[1-9]\d*$/.test(shard)) throw new Error('Expected --shard index/count');
 const [shardIndex, shardCount] = shard.split('/').map(Number);
@@ -41,16 +42,34 @@ await mkdir(contexts);
 let preview;
 let child;
 let stopping = false;
+let shutdown;
 const stopChild = () => {
   stopping = true;
-  if (child?.pid && child.exitCode === null && child.signalCode === null) {
+  if (shutdown) return shutdown;
+  if (!child?.pid) return Promise.resolve();
+  const target = child;
+  const signalGroup = (signal) => {
+    if (process.platform === 'win32' && (target.exitCode !== null || target.signalCode !== null)) return false;
     try {
-      if (process.platform === 'win32') child.kill('SIGTERM');
-      else process.kill(-child.pid, 'SIGTERM');
+      if (process.platform === 'win32') return target.kill(signal);
+      process.kill(-target.pid, signal);
+      return true;
     } catch (error) {
       if (error.code !== 'ESRCH') throw error;
+      return false;
     }
-  }
+  };
+  shutdown = (async () => {
+    // The detached group includes Jest workers and Chromium, even if Jest exited.
+    if (!signalGroup('SIGTERM')) return;
+    const deadline = Date.now() + 2000;
+    while (Date.now() < deadline) {
+      await new Promise((resolveDelay) => setTimeout(resolveDelay, 100));
+      if (!signalGroup(0)) return;
+    }
+    signalGroup('SIGKILL');
+  })();
+  return shutdown;
 };
 process.once('SIGINT', stopChild);
 process.once('SIGTERM', stopChild);
@@ -94,7 +113,7 @@ try {
     fileURLToPath(new URL('../../.storybook/test-runner-jest.config.mjs', import.meta.url)),
     '--maxWorkers',
     String(workers),
-    ...(suite === 'email-rendering' ? ['--testTimeout', '60000'] : []),
+    ...(['email-rendering', 'ci'].includes(suite) ? ['--testTimeout', '60000'] : []),
     '--cacheDirectory',
     join(output, 'cache'),
     ...(ci ? ['--ci'] : []),
@@ -189,7 +208,7 @@ try {
   }
 } finally {
   try {
-    stopChild();
+    await stopChild();
   } finally {
     try {
       await preview?.close();

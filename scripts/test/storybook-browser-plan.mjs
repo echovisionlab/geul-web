@@ -9,13 +9,17 @@ const suites = {
 
 /** Preserve the former tag/file-filter intersection, then isolate individual stories. */
 export function selectBrowserStories(index, suite) {
-  const selection = suites[suite];
-  if (!selection) throw new Error(`Unknown Storybook suite: ${suite}`);
+  const selections = suite === 'ci' ? [suites.a11y, suites.author, suites['email-rendering']] : [suites[suite]];
+  if (selections.some((selection) => !selection)) throw new Error(`Unknown Storybook suite: ${suite}`);
   if (index.v !== 5) throw new Error(`Expected Storybook index v5, received ${index.v}`);
   const stories = Object.values(index.entries)
     .filter((story) => story.type === 'story')
-    .filter((story) => story.tags?.includes(selection.tag))
-    .filter((story) => !selection.titleId || story.id.startsWith(`${selection.titleId}--`))
+    .filter((story) =>
+      selections.some(
+        (selection) =>
+          story.tags?.includes(selection.tag) && (!selection.titleId || story.id.startsWith(`${selection.titleId}--`)),
+      ),
+    )
     .sort((left, right) => left.id.localeCompare(right.id, 'en'));
   const ids = stories.map((story) => story.id);
   if (new Set(ids).size !== ids.length) throw new Error('Duplicate story IDs in browser test index');

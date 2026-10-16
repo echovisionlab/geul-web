@@ -10,18 +10,18 @@ import type { EmailLayoutValidationError } from '@/lib/types/email-layout/valida
 import { EmailLayoutPreviewView } from './EmailLayoutPreviewView';
 
 export interface EmailLayoutPreviewBindings {
-  content(
+  content: (
     html: string,
     sampleContent?: string,
     locale?: string,
     signal?: AbortSignal,
-  ): ReturnType<typeof previewEmailLayoutContentAction>;
-  saved(
+  ) => ReturnType<typeof previewEmailLayoutContentAction>;
+  saved: (
     layoutId: string,
     sampleContent?: string,
     locale?: string,
     signal?: AbortSignal,
-  ): ReturnType<typeof previewEmailLayout>;
+  ) => ReturnType<typeof previewEmailLayout>;
 }
 const defaultBindings: EmailLayoutPreviewBindings = {
   // Next server actions cannot accept an AbortSignal. Keep their serialized
@@ -79,22 +79,30 @@ export function EmailLayoutPreview({
       try {
         if (useSavedLocalizedLayout && layoutId) {
           const result = await bindings.saved(layoutId, sampleContent, requestedPreviewLocale, controller.signal);
-          if (controller.signal.aborted) return;
+          if (controller.signal.aborted) {
+            return;
+          }
           setPreviewHtml(result?.html ?? '');
           setErrors(result ? [] : [{ code: 'UNKNOWN_ERROR', message: '' }]);
           return;
         }
 
         const result = await bindings.content(debouncedHtml, sampleContent, requestedPreviewLocale, controller.signal);
-        if (controller.signal.aborted) return;
+        if (controller.signal.aborted) {
+          return;
+        }
         setPreviewHtml(result.html);
         setErrors(result.errors);
       } catch {
-        if (controller.signal.aborted) return;
+        if (controller.signal.aborted) {
+          return;
+        }
         setPreviewHtml('');
         setErrors([{ code: 'UNKNOWN_ERROR', message: '' }]);
       } finally {
-        if (!controller.signal.aborted) setIsLoading(false);
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
       }
     };
     void fetchPreview();

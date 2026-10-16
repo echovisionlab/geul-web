@@ -114,7 +114,9 @@ function ResidentPlayground({
     setRoom(current);
     return () => {
       lifetime.abort();
-      if (uploadLifetime.current === lifetime) uploadLifetime.current = null;
+      if (uploadLifetime.current === lifetime) {
+        uploadLifetime.current = null;
+      }
       current.awareness.destroy();
       current.document.destroy();
       queryClient.clear();
