@@ -65,3 +65,29 @@ describe('SiteLogoView fallback', () => {
     expect(host.querySelector('img')).toBeNull();
   });
 });
+
+describe('SiteLogoView theme variants', () => {
+  it('renders both theme marks so the document theme picks one before hydration', () => {
+    render(<SiteLogoView src="/logo-light.svg" darkSrc="/logo-dark.svg" alt="Site logo" height="intrinsic" />);
+    const images = [...host.querySelectorAll('img')];
+    expect(images.map((image) => [image.getAttribute('data-logo-scheme'), image.getAttribute('src')])).toEqual([
+      ['light', '/logo-light.svg'],
+      ['dark', '/logo-dark.svg'],
+    ]);
+    expect(images[0]?.style.height).toBe('auto');
+  });
+
+  it('renders a single mark when there is no separate dark logo', () => {
+    render(<SiteLogoView src="/logo-light.svg" darkSrc={null} alt="Site logo" />);
+    const images = host.querySelectorAll('img');
+    expect(images).toHaveLength(1);
+    expect(images[0]).not.toHaveAttribute('data-logo-scheme');
+  });
+
+  it('uses the dark mark alone when only a dark logo exists', () => {
+    render(<SiteLogoView src={null} darkSrc="/logo-dark.svg" alt="Site logo" />);
+    const images = host.querySelectorAll('img');
+    expect(images).toHaveLength(1);
+    expect(images[0]).toHaveAttribute('src', '/logo-dark.svg');
+  });
+});

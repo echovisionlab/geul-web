@@ -1,0 +1,35 @@
+/*
+ * Light and dark logo files are both rendered and switched with the theme attribute the
+ * head script sets before first paint, so the correct mark shows without waiting for
+ * hydration. A nested light subtree inside a dark page shows the light mark again.
+ */
+.image {
+  display: inline-flex;
+  width: auto;
+  object-fit: contain;
+  border: 0;
+}
+
+.themed[data-logo-scheme='dark'] {
+  display: none;
+}
+
+:global([data-geul-theme='dark']) .themed[data-logo-scheme='light'],
+:global([data-geul-theme='dark'] [data-geul-theme='light']) .themed[data-logo-scheme='dark'] {
+  display: none;
+}
+
+:global([data-geul-theme='dark']) .themed[data-logo-scheme='dark'],
+:global([data-geul-theme='dark'] [data-geul-theme='light']) .themed[data-logo-scheme='light'] {
+  display: inline-flex;
+}
+
+@media (prefers-color-scheme: dark) {
+  :global(html:not([data-geul-theme])) .themed[data-logo-scheme='light'] {
+    display: none;
+  }
+
+  :global(html:not([data-geul-theme])) .themed[data-logo-scheme='dark'] {
+    display: inline-flex;
+  }
+}

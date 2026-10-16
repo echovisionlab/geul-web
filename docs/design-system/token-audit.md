@@ -4,7 +4,7 @@ This report is generated from production source by `node scripts/design-system/c
 
 ## Current measured scope
 
-- 2410 production CSS/TS/TSX files scanned under app, components, features and lib, plus the central theme.ts.
+- 2411 production CSS/TS/TSX files scanned under app, components, features and lib, plus the central theme.ts.
 - 211 known semantic and font tokens in shared CSS definition files.
 - 0 remaining interface/runtime literal color occurrences in 0 files, excluding central definitions and the authored-color exceptions below.
 - 0 remaining authored editor palette literals in legacy variables.css. Their exact document colors belong to the shared authored palette source.
