@@ -204,6 +204,7 @@ describe('EmailTiptapEditor profile', () => {
       'tiptap-slash-item-numbered_list',
       'tiptap-slash-item-quote',
       'tiptap-slash-item-divider',
+      'tiptap-slash-item-site-variable',
     ]);
     await act(async () => {
       editor.view.dom.dispatchEvent(
