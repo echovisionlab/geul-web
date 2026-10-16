@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { mockBrowserNavigation } from '../testing/browser-navigation';
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { I18nProvider, RouterProvider } from 'react-aria-components';
@@ -9,6 +10,8 @@ import { IconButton } from '../IconButton';
 import { DropdownMenu } from './DropdownMenu';
 import { NavigationIntentProvider } from '../Navigation';
 
+const browserNavigation = mockBrowserNavigation();
+
 let container: HTMLDivElement;
 let root: Root;
 
@@ -16,6 +19,7 @@ beforeEach(() => {
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
+  browserNavigation.attach(container);
 });
 
 afterEach(() => {
@@ -43,6 +47,7 @@ function renderDropdownMenu(node: ReactNode) {
   act(() => {
     root.render(<I18nProvider locale="en-US">{node}</I18nProvider>);
   });
+  browserNavigation.attach(container.firstElementChild as HTMLElement);
 }
 
 describe('DropdownMenu', () => {
@@ -101,7 +106,9 @@ describe('DropdownMenu', () => {
     act(() => document.querySelector<HTMLAnchorElement>('[role="menuitem"]')!.dispatchEvent(modifiedClick));
     expect(guard).not.toHaveBeenCalled();
     expect(navigate).not.toHaveBeenCalled();
-    expect(modifiedClick.defaultPrevented).toBe(false);
+    expect(browserNavigation.navigate).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ href: 'http://localhost:3000/documents', ctrlKey: true }),
+    );
   });
 
   it('opens from the keyboard, skips disabled commands and restores the trigger after Escape', async () => {

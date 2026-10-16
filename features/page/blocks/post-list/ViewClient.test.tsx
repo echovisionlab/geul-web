@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { mockBrowserNavigation } from '@/components/core/testing/browser-navigation';
 import enMessages from '@/messages/en.json';
 import { breakpointQuery } from '@/components/core/Layout/breakpoints';
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
@@ -10,6 +11,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { parsePostListProps } from './schema';
 import { PostListViewClient } from './ViewClientRuntime';
+
+const browserNavigation = mockBrowserNavigation();
 
 vi.mock('next/link', () => ({
   default: ({ href, children, onClick, ...props }: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
@@ -163,6 +166,7 @@ function render(node: ReactNode) {
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
+  browserNavigation.attach(container);
 
   act(() => {
     root?.render(

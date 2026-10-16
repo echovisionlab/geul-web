@@ -93,7 +93,9 @@ function renderNavigation(overrides: Partial<SideNavigationProps> = {}) {
   act(() => {
     root.render(
       <I18nProvider locale="en">
-        <SideNavigation {...props} />
+        <RouterProvider navigate={vi.fn()}>
+          <SideNavigation {...props} />
+        </RouterProvider>
       </I18nProvider>,
     );
   });

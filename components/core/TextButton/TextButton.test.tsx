@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { mockBrowserNavigation } from '../testing/browser-navigation';
 import { I18nProvider as DesignSystemProvider } from 'react-aria-components';
 import '@testing-library/jest-dom/vitest';
 import { act, createRef, type ReactNode } from 'react';
@@ -9,6 +10,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DropdownMenu } from '../DropdownMenu';
 import { TextButton } from './TextButton';
 
+const browserNavigation = mockBrowserNavigation();
+
 let container: HTMLDivElement;
 let root: Root;
 
@@ -16,6 +19,7 @@ beforeEach(() => {
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
+  browserNavigation.attach(container);
 });
 
 afterEach(() => {

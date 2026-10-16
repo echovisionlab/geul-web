@@ -15,6 +15,19 @@ if (typeof document !== 'undefined' && !document.fonts) {
   });
 }
 
+// jsdom has no 2D drawing backend. Font probes observe an unavailable context;
+// rendering and font support remain covered by the real-browser Storybook suite.
+if (typeof HTMLCanvasElement !== 'undefined' && typeof CanvasRenderingContext2D === 'undefined') {
+  const getContext = HTMLCanvasElement.prototype.getContext;
+  Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
+    configurable: true,
+    writable: true,
+    value(this: HTMLCanvasElement, contextId: string, options?: unknown) {
+      return contextId === '2d' ? null : getContext.call(this, contextId, options);
+    },
+  });
+}
+
 function createMemoryStorage(): Storage {
   const items = new Map<string, string>();
 

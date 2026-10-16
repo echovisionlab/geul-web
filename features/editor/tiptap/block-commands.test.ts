@@ -20,6 +20,8 @@ import {
 import { createTiptapWireExtensions } from './wire-schema';
 import { createTiptapTableExtensions } from './table';
 
+const tableNodeNames = new Set(['table', 'tableRow', 'tableCell', 'tableHeader']);
+
 const defaultContent: JSONContent = {
   type: 'doc',
   content: [
@@ -58,7 +60,11 @@ function createEditor(content: JSONContent = defaultContent, extraExtensions: Ex
   document.body.append(element);
   const editor = new Editor({
     element,
-    extensions: [...createTiptapWireExtensions(), ...createTiptapTableExtensions(), ...extraExtensions],
+    extensions: [
+      ...createTiptapWireExtensions().filter((extension) => !tableNodeNames.has(extension.name)),
+      ...createTiptapTableExtensions(),
+      ...extraExtensions,
+    ],
     content,
   });
   return {

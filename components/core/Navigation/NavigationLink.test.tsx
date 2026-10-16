@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { mockBrowserNavigation } from '../testing/browser-navigation';
 import { act, createRef, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -7,12 +8,15 @@ import { NavigationIntentProvider } from './NavigationIntentProvider';
 import { NavigationPrefetchContext } from './navigation-prefetch';
 import { NavigationLink } from './NavigationLink';
 
+const browserNavigation = mockBrowserNavigation();
+
 let host: HTMLDivElement;
 let root: Root;
 beforeEach(() => {
   host = document.createElement('div');
   document.body.appendChild(host);
   root = createRoot(host);
+  browserNavigation.attach(host);
 });
 afterEach(() => {
   act(() => root.unmount());
@@ -103,10 +107,17 @@ describe('NavigationLink', () => {
       </NavigationIntentProvider>,
     );
     const links = host.querySelectorAll('a');
-    act(() => links[0].dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true })));
+    act(() => links[0].dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, ctrlKey: true })));
     act(() => links[1].click());
     act(() => links[2].click());
     expect(guard).not.toHaveBeenCalled();
+    expect(browserNavigation.navigate.mock.calls.map(([intent]) => intent.href)).toEqual([
+      'http://localhost:3000/normal',
+      'http://localhost:3000/file',
+      'https://example.com/',
+    ]);
+    expect(browserNavigation.navigate.mock.calls[0][0].ctrlKey).toBe(true);
+    expect(browserNavigation.navigate.mock.calls[1][0].download).toBe('');
   });
   it('prefetches ordinary same-origin navigation on focus and honors opt-outs and browser-only navigation', () => {
     const prefetch = vi.fn();

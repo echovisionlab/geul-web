@@ -1,14 +1,16 @@
 // @vitest-environment jsdom
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestProviders } from '@/test/TestProviders';
+import { navigatePreview } from '../shared/preview-navigation';
 import { MailAdaptersPreview } from './MailAdapters.stories';
 import { CampaignAnalyticsPreview } from './CampaignAnalytics.stories';
 import { CommunicationListsPreview } from './AdminCommunicationLists.stories';
 import { AdminUserEditPreview } from './AdminUserEdit.stories';
 import { OgImageSettingsPreview } from './OgImageSettings.stories';
 import { ProgramEventListsPreview } from './ProgramEventLists.stories';
+vi.mock('../shared/preview-navigation', () => ({ navigatePreview: vi.fn(() => true) }));
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
   usePathname: () => '/preview',
@@ -46,6 +48,7 @@ function button(text: string) {
   return [...host.querySelectorAll<HTMLButtonElement>('button')].find((b) => b.textContent?.includes(text));
 }
 describe('complete production page preview controllers', () => {
+  beforeEach(() => vi.mocked(navigatePreview).mockClear());
   it('shows a failed OG preview response as a retryable error instead of indefinite loading', async () => {
     const fetchPreview = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(null, { status: 500 }));
     await render(<OgImageSettingsPreview />);
@@ -114,6 +117,7 @@ describe('complete production page preview controllers', () => {
       await act(async () => create.click());
       await flush();
       expect(host.querySelectorAll('tbody tr').length).toBe(before + 1);
+      expect(navigatePreview).toHaveBeenCalledOnce();
     },
   );
   it('creates a programme event through its actual production button', async () => {
@@ -124,5 +128,6 @@ describe('complete production page preview controllers', () => {
     await act(async () => create.click());
     await flush();
     expect(host.querySelectorAll('tbody tr').length).toBe(before + 1);
+    expect(navigatePreview).toHaveBeenCalledOnce();
   });
 });

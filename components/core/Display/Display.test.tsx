@@ -1,16 +1,20 @@
 // @vitest-environment jsdom
+import { mockBrowserNavigation } from '../testing/browser-navigation';
 import { act, type ComponentProps, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { beforeEach, afterEach, expect, describe, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { Avatar, ScrollArea, Separator, Skeleton, Spinner, Table, type AvatarProps } from './Display';
 import { Pagination, type PaginationLabels } from './Pagination';
+
+const browserNavigation = mockBrowserNavigation();
 let container: HTMLDivElement;
 let root: Root;
 beforeEach(() => {
   container = document.createElement('div');
   document.body.append(container);
   root = createRoot(container);
+  browserNavigation.attach(container);
 });
 afterEach(() => {
   act(() => root.unmount());
@@ -252,11 +256,14 @@ describe('native Core Display contracts', () => {
       const modified = new MouseEvent('click', { bubbles: true, cancelable: true, metaKey: true });
       act(() => next.dispatchEvent(modified));
       expect(navigate).not.toHaveBeenCalled();
-      expect(modified.defaultPrevented).toBe(false);
+      expect(browserNavigation.navigate).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({ href: next.href, metaKey: true }),
+      );
       const plain = new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 });
       act(() => container.querySelector('a[aria-label="Page 4"]')!.dispatchEvent(plain));
       expect(navigate).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ page: 4, href: '/list?page=4' }));
       expect(plain.defaultPrevented).toBe(true);
+      expect(browserNavigation.navigate).toHaveBeenCalledTimes(1);
     });
 
     it('server-renders plain anchors without client state', () => {

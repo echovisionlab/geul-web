@@ -14,6 +14,8 @@ import {
   resolveSelectionBubbleMenuState,
 } from './selection-bubble-commands';
 
+const tableNodeNames = new Set(['table', 'tableRow', 'tableCell', 'tableHeader']);
+
 const paragraph = (text: string) => ({
   type: 'paragraph',
   attrs: { backgroundColor: 'default', textColor: 'default', textAlignment: 'left' },
@@ -360,7 +362,10 @@ describe('Tiptap selection BubbleMenu command authority', () => {
     document.body.append(tableElement);
     const tableEditor = new Editor({
       element: tableElement,
-      extensions: [...createTiptapWireExtensions(), ...createTiptapTableExtensions()],
+      extensions: [
+        ...createTiptapWireExtensions().filter((extension) => !tableNodeNames.has(extension.name)),
+        ...createTiptapTableExtensions(),
+      ],
       content: {
         type: 'doc',
         content: [

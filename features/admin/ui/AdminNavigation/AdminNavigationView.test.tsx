@@ -1,11 +1,14 @@
 // @vitest-environment jsdom
 
+import { mockBrowserNavigation } from '@/components/core/testing/browser-navigation';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { IconDashboard, IconSettings, IconUsers } from '@tabler/icons-react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestProviders } from '@/test/TestProviders';
 import { AdminNavigationView, type AdminNavigationViewProps } from './AdminNavigationView';
+
+const browserNavigation = mockBrowserNavigation();
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -55,6 +58,7 @@ beforeEach(() => {
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
+  browserNavigation.attach(container);
 });
 
 afterEach(() => {
