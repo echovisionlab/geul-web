@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.14.0](https://github.com/echovisionlab/geul-web/compare/v0.13.0...v0.14.0) (2026-10-16)
+
+
+### Features
+
+* site variables for brand and contact values ([#127](https://github.com/echovisionlab/geul-web/issues/127)) ([5238ad9](https://github.com/echovisionlab/geul-web/commit/5238ad91f0a3b24e62c7072d1f5b3d1a65e376d0))
+
+
+### Bug Fixes
+
+* **logging:** log failure causes on web server paths ([#132](https://github.com/echovisionlab/geul-web/issues/132)) ([0b23dfe](https://github.com/echovisionlab/geul-web/commit/0b23dfe26a2cdbccb7b3fc834becc09f11434a16))
+
 ## [0.13.0](https://github.com/echovisionlab/geul-web/compare/v0.12.0...v0.13.0) (2026-10-15)
 
 
