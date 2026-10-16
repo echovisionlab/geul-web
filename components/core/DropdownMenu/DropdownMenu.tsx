@@ -34,6 +34,7 @@ import {
   SubmenuTrigger,
 } from 'react-aria-components';
 import type { AriaMenuOptions } from 'react-aria/useMenu';
+import { useInteractOutside } from 'react-aria/useInteractOutside';
 import type { RootMenuTriggerState } from 'react-stately/useMenuTriggerState';
 import { overlayDataAttributes, type OverlayPresentationProps } from '../overlay-contract';
 import { OverlayHintContext } from '../overlay-hint-context';
@@ -295,11 +296,28 @@ function menuSections(nodes: ReactNode): ReactNode[] {
 const DropdownMenuDropdown = forwardRef<HTMLDivElement, DropdownMenuDropdownProps>(
   ({ children, onClick, onMouseDown, ...props }, ref) => {
     const value = useContext(MenuPresentation);
+    const triggerState = useContext(RootMenuTriggerStateContext);
+    const popoverRef = useRef<HTMLElement>(null);
+    // Non-modal popovers keep hover menus usable but do not dismiss themselves on outside
+    // interaction, so close the menu when the pointer goes down outside both it and its trigger.
+    useInteractOutside({
+      ref: popoverRef,
+      isDisabled: !triggerState?.isOpen,
+      onInteractOutside: (event) => {
+        const target = event.target instanceof Element ? event.target : null;
+        // The trigger toggles the menu itself; submenus render in their own popovers.
+        if (target && (value?.container?.contains(target) || target.closest('[role="menu"]'))) {
+          return;
+        }
+        triggerState?.close();
+      },
+    });
     if (!value) {
       throw new Error('DropdownMenu.Dropdown requires DropdownMenu');
     }
     return (
       <Popover
+        ref={popoverRef}
         isNonModal
         className={dropdownClassName}
         placement={value.placement.replace('-', ' ') as 'bottom start'}

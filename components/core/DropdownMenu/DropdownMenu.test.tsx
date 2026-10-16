@@ -371,3 +371,56 @@ it('keeps actions distinct across sibling fragments and nested fragment lists', 
   expect(first).not.toHaveBeenCalled();
   expect(second).not.toHaveBeenCalled();
 });
+
+describe('DropdownMenu outside interaction', () => {
+  function pointerDownUp(target: Element) {
+    for (const type of ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click']) {
+      const event = type.startsWith('pointer')
+        ? new PointerEvent(type, { bubbles: true, cancelable: true, pointerId: 1, pointerType: 'mouse', button: 0 })
+        : new MouseEvent(type, { bubbles: true, cancelable: true, button: 0 });
+      act(() => {
+        target.dispatchEvent(event);
+      });
+    }
+  }
+
+  it('closes a click-triggered menu when the pointer goes down outside it', () => {
+    const onClose = vi.fn();
+    const outside = document.createElement('button');
+    document.body.appendChild(outside);
+    renderDropdownMenu(
+      <DropdownMenu defaultOpened onClose={onClose}>
+        <DropdownMenu.Target>
+          <button type="button">Variables</button>
+        </DropdownMenu.Target>
+        <DropdownMenu.Dropdown>
+          <DropdownMenu.Item>{'{{site_name}}'}</DropdownMenu.Item>
+        </DropdownMenu.Dropdown>
+      </DropdownMenu>,
+    );
+    expect(document.querySelector('[role="menu"]')).not.toBeNull();
+    pointerDownUp(outside);
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(document.querySelector('[role="menu"]')).toBeNull();
+    outside.remove();
+  });
+
+  it('keeps the menu open while interacting inside it', () => {
+    const onClose = vi.fn();
+    renderDropdownMenu(
+      <DropdownMenu defaultOpened onClose={onClose} closeOnItemClick={false}>
+        <DropdownMenu.Target>
+          <button type="button">Variables</button>
+        </DropdownMenu.Target>
+        <DropdownMenu.Dropdown>
+          <DropdownMenu.Item>{'{{site_name}}'}</DropdownMenu.Item>
+        </DropdownMenu.Dropdown>
+      </DropdownMenu>,
+    );
+    const item = document.querySelector('[role="menuitem"]');
+    expect(item).not.toBeNull();
+    pointerDownUp(item!);
+    expect(onClose).not.toHaveBeenCalled();
+    expect(document.querySelector('[role="menu"]')).not.toBeNull();
+  });
+});
