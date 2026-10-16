@@ -523,9 +523,13 @@ describe('ProgramEventEditor relation saves and navigation', () => {
       container.querySelector<HTMLButtonElement>('[data-testid="relation-artists-latest"]')?.click(),
     );
     await act(async () => container.querySelector<HTMLButtonElement>('[data-testid="relation-labels"]')?.click());
-    await act(async () => container.querySelector<HTMLButtonElement>('[data-testid="back"]')?.click());
-
-    await vi.waitFor(() => expect(mocks.updateEvent).toHaveBeenCalledOnce());
+    await act(async () => {
+      container.querySelector<HTMLButtonElement>('[data-testid="back"]')?.click();
+      await vi.waitFor(() => {
+        expect(mocks.updateEvent).toHaveBeenCalledOnce();
+        expect(mocks.back).toHaveBeenCalledOnce();
+      });
+    });
     expect(mocks.updateEvent).toHaveBeenCalledWith(
       eventId,
       {

@@ -45,7 +45,9 @@ vi.mock('@/features/editor/EditorHeader', () => ({
   },
 }));
 vi.mock('@/components/core/MediaPreviewGrid', () => ({ MediaPreviewGrid: 'div' }));
-vi.mock('@/components/core/Section', () => ({ SectionCard: 'div' }));
+vi.mock('@/components/core/Section', () => ({
+  SectionCard: ({ children }: { children: React.ReactNode }) => <section>{children}</section>,
+}));
 vi.mock('@/features/metadata/OgImagePreview', () => ({ OgImagePreview: () => null }));
 vi.mock('@/features/site/PageLoader', () => ({ PageLoader: () => null }));
 vi.mock('@/features/share/ShareLinkSection', () => ({ ShareLinkSection: () => null }));

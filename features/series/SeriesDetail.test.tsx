@@ -28,8 +28,13 @@ vi.mock('next/navigation', () => ({ useRouter: () => ({ push: mocks.routerPush }
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
 vi.mock('@/components/core/Notification', () => ({ notifications: { show: mocks.notification } }));
 vi.mock('@/components/core/Button', () => ({
-  Button: ({ children, ...props }: ButtonHTMLAttributes<HTMLButtonElement>) => (
-    <button type="button" {...props}>
+  Button: ({
+    children,
+    loading,
+    disabled,
+    ...props
+  }: ButtonHTMLAttributes<HTMLButtonElement> & { loading?: boolean }) => (
+    <button type="button" disabled={disabled || loading} aria-busy={loading || undefined} {...props}>
       {children}
     </button>
   ),

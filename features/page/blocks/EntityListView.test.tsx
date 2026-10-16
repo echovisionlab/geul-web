@@ -30,10 +30,12 @@ vi.mock('next/image', () => ({
     src,
     alt,
     unoptimized,
+    fill: _fill,
     ...props
   }: Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> & {
     src: string | { src: string };
     unoptimized?: boolean;
+    fill?: boolean;
   }) => (
     <img
       src={typeof src === 'string' ? src : src.src}
@@ -56,10 +58,14 @@ vi.mock('@/components/core/Carousel', () => {
     children,
     withControls,
     withIndicators,
+    slideSize: _slideSize,
+    slideGap: _slideGap,
     ...props
   }: HTMLAttributes<HTMLDivElement> & {
     withControls?: boolean;
     withIndicators?: boolean;
+    slideSize?: unknown;
+    slideGap?: unknown;
   }) => (
     <div
       data-with-controls={String(Boolean(withControls))}
