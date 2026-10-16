@@ -41,7 +41,7 @@ Unreleased sibling contracts (`../geul-event-contracts`, `../geul-common`,
 sibling checkout with a pnpm `link:` override.
 
 The production image is published by the release workflow as
-`registry.dsub.io/echovisionlab/geul-web:<tag>`.
+`registry.rawsector.com/echovisionlab/geul-web:<tag>`.
 
 This standalone repository uses Geul-namespaced browser, storage, runtime, and
 wire identifiers. Deployments provide their public and service URLs through the
