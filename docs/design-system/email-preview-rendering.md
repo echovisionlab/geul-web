@@ -62,7 +62,10 @@ signal escalation rather than proving that all descendants have exited.
 Playwright 1.64 starts Chromium in a separate process group; normal Playwright
 parent cleanup and context teardown own its shutdown. Deletion of the ARC
 ephemeral runner pod is the final boundary that removes remaining browser and
-renderer processes. Actual cancellation and pod-removal evidence remain pending.
+renderer processes. [Testing](../testing.md#storybook-browser-isolation-and-ci-parallelism)
+records the observed automatic run cancellation and runner-pod deletion, with no
+manual cancel or delete action. These establish that cleanup boundary; browser
+teardown details belong to the corresponding run's execution records.
 
 ## Quote ownership and parity evidence
 
@@ -87,17 +90,17 @@ delivery or mail-client test.
 The supplied screenshot identified the missing preview quote rule and was
 inspected before implementation. Local visual review on 2026-10-16 inspected
 `TemplateRichFormatting` at port 6012 with the production email editor component
-and the Darwin/arm64 Go helper from the earlier hosted run 38884609657, built
-from the API pin above. That older review artifact is not rebuilt for Mac by the
+and the Darwin/arm64 Go helper from the earlier hosted
+[run 38884609657](https://github.com/echovisionlab/geul-web/actions/runs/38884609657),
+built from the API pin above. That older review artifact is not rebuilt for Mac by the
 current workflow. Scrolling the iframe exposed
 the quote's gray left rule, inset and muted text; the play's `Updated preview`
 edit was visible in both editor and iframe. This verifies that Storybook rendering
 and interaction at the reviewed local snapshot. It does not verify a deployed
 application route, SMTP delivery or a mail client's rendering.
 
-The ARC deployment and scale-set registration have been observed, but the
-consolidated single-job workflow still needs eight-worker runtime and
-cancellation evidence. The earlier hosted run's email play failed on iframe
-readiness; its subsequent fix and the local visual check do not establish that
-the revised CI run has passed. See [testing](../testing.md#storybook-browser-isolation-and-ci-parallelism)
-for scope, worker and browser-context evidence.
+The runner's eight-CPU Node probe, automatic cancellation and pod cleanup are
+recorded in [testing](../testing.md#storybook-browser-isolation-and-ci-parallelism).
+Each completed CI run's artifacts establish browser and parity results for its
+tested commit. The local visual review and runner lifecycle checks do not imply
+a full-suite CI pass.

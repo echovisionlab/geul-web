@@ -83,9 +83,10 @@ and limits eight CPUs and has a 12 GiB memory budget; the node's reported capaci
 is eight CPUs and about 15.5 GiB RAM. Deployment PR 372 was merged and Flux
 reported `InstallSucceeded`; scale set `geul-web-mini` is registered with ID 1
 and phase `Running`, and the listener controller is Ready with a 100m CPU request.
-Zero runner pods at the configured idle minimum of zero is expected. These
-control-plane checks do not yet establish an executed eight-worker test run or
-cancellation behavior; those still require job logs and browser artifacts.
+Zero runner pods at the configured idle minimum of zero is expected. The active
+runner pod was observed with eight CPUs, 12 GiB memory and `Guaranteed` QoS, and
+its Node probe returned `os.availableParallelism() === 8`. Worker scheduling and
+individual test results are recorded separately by each run's logs and artifacts.
 
 Measure changes using the complete `Tests` job and its individual step durations.
 Vitest phase percentages can include parallel or overlapping work and are not an
@@ -169,9 +170,17 @@ Playwright 1.64 launches Chromium in a separate detached process group, so the
 Jest group signals do not cover Chromium. Normal Playwright parent cleanup and
 per-story context teardown own browser shutdown. The ARC ephemeral runner pod's
 deletion is the final containment boundary that terminates remaining job
-processes, including browsers. Cancellation evidence must distinguish group
-signal escalation, browser/context teardown and runner-pod removal. Those
-runtime observations remain to be recorded for the deployed runner.
+processes, including browsers. Group signal escalation, browser/context teardown
+and runner-pod removal are separate lifecycle boundaries.
+
+Automatic cancellation was observed on 2026-10-16: pushing `994418e` completed
+[run 38886951188](https://github.com/echovisionlab/geul-web/actions/runs/38886951188)
+for `4eeb2dc` as `cancelled` at 10:27:12 UTC. A direct watch saw its runner pod
+`geul-web-mini-7q8cg-runner-jzhl8` move through `Succeeded` to `DELETED`, and
+[replacement run 38887252101](https://github.com/echovisionlab/geul-web/actions/runs/38887252101)
+started automatically. No manual cancellation or pod deletion was used. This
+records workflow cancellation and the final pod cleanup boundary; test outcomes
+and browser teardown details remain attributable to their own execution records.
 
 The artifact also contains the Go `cmd/email-preview-fixture` helper built from
 API revision `7155b62b9be580753f2187ec85fb2b8eed9dcd94`. The workflow requires a
@@ -216,15 +225,13 @@ artifact uploads after cancellation.
 
 Focused fixture contracts cover scope preservation, per-story emission, the
 CI-only CPU query, success/failure context disposal, and independent static
-server ports, data and shutdown. Their presence describes regression coverage;
-actual CI scheduling and browser success require the artifacts from a completed
-run. The earlier hosted [run 38884609657](https://github.com/echovisionlab/geul-web/actions/runs/38884609657)
-recorded passes for its five Vitest jobs, Storybook build and four Core/Post
-browser jobs. Its email browser stage exposed an iframe-readiness failure;
-the subsequent fix and this consolidated workflow need their own run evidence.
-That older run does not establish a pass, scheduling behavior, or timing change
-for the new setup. Local visual review inspected `TemplateRichFormatting` with
-the production editor component and CI-built Mac Go helper, including the quote
+server ports, data and shutdown. Each completed CI run's logs and artifacts
+identify its tested commit, worker scheduling, scope and results. The CPU probe,
+cancellation observation and local visual review are separate evidence from a
+full-suite pass.
+
+Local visual review inspected `TemplateRichFormatting` with the production
+editor component and the earlier CI-built Mac Go helper, including the quote
 rule and live editor/iframe update; [email rendering](design-system/email-preview-rendering.md#quote-ownership-and-parity-evidence)
 records that scope. Deployed application and mail-client acceptance remain
 separate checks.
