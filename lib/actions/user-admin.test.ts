@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
   listAuthorOptions: vi.fn(),
   listAuthors: vi.fn(),
   loggerError: vi.fn(),
+  loggerWarn: vi.fn(),
   revalidatePath: vi.fn(),
 }));
 
@@ -53,7 +54,7 @@ vi.mock('@/lib/queries/user', () => ({
 }));
 
 vi.mock('@/lib/utils/logger', () => ({
-  createLogger: () => ({ error: mocks.loggerError }),
+  createLogger: () => ({ error: mocks.loggerError, warn: mocks.loggerWarn }),
 }));
 
 const memberSummary = (id: string, nickname: string, avatarUrl?: string) => ({
