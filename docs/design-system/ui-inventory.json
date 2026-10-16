@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "a5930235a012ea9c25c8f50127f86d54e8eb3f60c2353f9dcaf3793f38d964c4",
+  "manifestHash": "cef8380b87fbb428aa76f09304dd5ec669e93a01c6db2a582915d496af9e173c",
   "counts": {
-    "sourceFiles": 3758,
-    "productionSourceFiles": 2280,
+    "sourceFiles": 3761,
+    "productionSourceFiles": 2282,
     "componentFiles": 901,
     "coreFamilies": 57,
     "featureDomains": 53,
@@ -1471,6 +1471,7 @@
     "features/editor/tiptap/integration/shader-schema.test.ts",
     "features/editor/tiptap/integration/slash-workflows.test.ts",
     "features/editor/tiptap/integration/slash-workflows.ts",
+    "features/editor/tiptap/line-break-round-trip.test.ts",
     "features/editor/tiptap/live-node-view.tsx",
     "features/editor/tiptap/live-translation-structure-lock.ts",
     "features/editor/tiptap/map/TiptapMapNodeView.story-fixtures.test.ts",
@@ -1556,6 +1557,7 @@
     "features/editor/tiptap/profiles/PolicyTiptapEditor.test.tsx",
     "features/editor/tiptap/profiles/PolicyTiptapEditor.tsx",
     "features/editor/tiptap/profiles/editor-access-transitions.test.tsx",
+    "features/editor/tiptap/profiles/profile-html.ts",
     "features/editor/tiptap/public-block-comparison-fixtures.test.ts",
     "features/editor/tiptap/public-block-comparison-fixtures.ts",
     "features/editor/tiptap/shader/ShaderApiReference.tsx",
@@ -1607,6 +1609,7 @@
     "features/editor/tiptap/three/three-transpile.worker.ts",
     "features/editor/tiptap/useExactTiptapNodeSelection.test.ts",
     "features/editor/tiptap/useExactTiptapNodeSelection.ts",
+    "features/editor/tiptap/useSelectionBubbleMenuLabels.ts",
     "features/editor/tiptap/useTiptapEditorEditable.ts",
     "features/editor/tiptap/wire-schema.test.ts",
     "features/editor/tiptap/wire-schema.ts",
@@ -33912,6 +33915,7 @@
         "features/editor/tiptap/TiptapFileBlockNodeView.tsx",
         "features/editor/tiptap/menus/selection-bubble-commands.ts",
         "features/editor/tiptap/profiles/CompactTiptapEditor.tsx",
+        "features/editor/tiptap/profiles/EmailTiptapEditor.tsx",
         "features/editor/tiptap/profiles/PolicyTiptapEditor.tsx",
         "features/editor/toolbars/color-style-utils.ts",
         "features/translation/LocalizedCollaborativeRichTextEditor.tsx"
@@ -35749,6 +35753,11 @@
               "name": "capabilities",
               "optional": true,
               "type": "TiptapAuthoringCapabilities"
+            },
+            {
+              "name": "allowedItems",
+              "optional": true,
+              "type": "readonly string[]"
             }
           ]
         }
@@ -37222,7 +37231,10 @@
       "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
       "propsEvidence": [],
       "typeAliasEvidence": [],
-      "productionConsumers": ["features/editor/tiptap/TiptapEditor.tsx"],
+      "productionConsumers": [
+        "features/editor/tiptap/TiptapEditor.tsx",
+        "features/editor/tiptap/profiles/EmailTiptapEditor.tsx"
+      ],
       "catalogAdapters": [],
       "tests": ["features/editor/tiptap/integration/contextual-menu-router.test.tsx"],
       "stories": [],
@@ -37513,6 +37525,11 @@
               "name": "labels",
               "optional": false,
               "type": "SelectionBubbleMenuLabels"
+            },
+            {
+              "name": "formattingOnly",
+              "optional": true,
+              "type": "boolean"
             }
           ]
         }
@@ -38768,6 +38785,7 @@
       ],
       "catalogAdapters": [],
       "tests": [
+        "features/editor/tiptap/line-break-round-trip.test.ts",
         "features/editor/tiptap/profiles/CompactTiptapEditor.test.ts",
         "features/editor/tiptap/profiles/editor-access-transitions.test.tsx"
       ],
@@ -39027,6 +39045,7 @@
         "IconVariable",
         "IsolatedEditorContent",
         "TiptapAuthoringControls",
+        "TiptapContextualMenuRouter",
         "VariableInserter",
         "code",
         "div"
@@ -39043,17 +39062,6 @@
       ],
       "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
       "propsEvidence": [
-        {
-          "name": "PolicyHtmlOptions",
-          "extends": [],
-          "properties": [
-            {
-              "name": "headingParentLevel",
-              "optional": true,
-              "type": "DocumentHeadingParentLevel"
-            }
-          ]
-        },
         {
           "name": "PolicyTiptapEditorProps",
           "extends": [],
@@ -75289,6 +75297,7 @@
         "features/editor/tiptap/profiles/ControlledTiptapEditor.tsx",
         "features/editor/tiptap/profiles/EmailTiptapEditor.tsx",
         "features/editor/tiptap/profiles/PolicyTiptapEditor.tsx",
+        "features/editor/tiptap/profiles/profile-html.ts",
         "features/editor/tiptap/public-block-comparison-fixtures.ts",
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
         "features/editor/tiptap/shader/ShaderNode.tsx",
@@ -75323,6 +75332,7 @@
         "features/editor/tiptap/three/three-transpile.ts",
         "features/editor/tiptap/three/three-transpile.worker.ts",
         "features/editor/tiptap/useExactTiptapNodeSelection.ts",
+        "features/editor/tiptap/useSelectionBubbleMenuLabels.ts",
         "features/editor/tiptap/useTiptapEditorEditable.ts",
         "features/editor/tiptap/wire-schema.ts",
         "features/editor/toolbars/BlockAlignButton.tsx",
@@ -75525,6 +75535,7 @@
         "features/editor/tiptap/integration/shader-menu.test.tsx",
         "features/editor/tiptap/integration/shader-schema.test.ts",
         "features/editor/tiptap/integration/slash-workflows.test.ts",
+        "features/editor/tiptap/line-break-round-trip.test.ts",
         "features/editor/tiptap/map/TiptapMapNodeView.story-fixtures.test.ts",
         "features/editor/tiptap/map/TiptapMapNodeView.test.tsx",
         "features/editor/tiptap/markdown-paste.test.ts",
