@@ -2,15 +2,29 @@
 
 This record describes design system changes in the repository.
 The system is managed with the application source and has no separate package release.
-The current application package version is `0.11.2`; that value alone does not establish deployment of the changes below.
-Git changes and application release records identify deployment.
+The application package version alone does not establish deployment of the changes below.
+Git changes and application release records identify deployment. The current changes remain
+under review; release and deployment are on hold at the user's request.
+
+## 2026-10-16 · Isolated Storybook browser execution
+
+- CI builds one Storybook artifact for two Core accessibility shards, two post-authoring shards and one email-rendering job. Sorted story IDs determine disjoint shard membership; each assigned story gets its own generated Jest file and BrowserContext.
+- The CI adapter uses `availableParallelism()` only in GitHub Actions CI and checks Jest's resolved worker limit. Local adapter and existing smoke commands keep two workers; the changed-story command retains four. Per-run ports, files, cache, context/storage-sentinel records and worker evidence are described in [testing](../testing.md#storybook-browser-isolation-and-ci-parallelism).
+- Mounted preview resources now have explicit owners: locale attributes restore on exit, access plays address their canvas, pending local file reads cannot deliver after disposal, and destroyed rooms discard queued acknowledgements. Manual preview navigation/password storage and notification queues retain their normal behavior.
+- These are source and test-contract changes. The current snapshot's CI execution artifacts and browser/production visual acceptance remain to be recorded; no speedup or deployment is asserted.
+
+## 2026-10-16 · Email preview uses delivery HTML
+
+- Email template, campaign and layout previews display renderer HTML unchanged. The web preview no longer injects Noto fonts, `!important` font rules or a body reset that can differ from delivered mail.
+- Email editor stories submit canonical localized snapshots through a Storybook-only endpoint to the Go helper pinned at API commit `7155b62b9be580753f2187ec85fb2b8eed9dcd94`. The shared preview/delivery normalizer supplies inline quote defaults while preserving author overrides. Local layout and sample variables remain fixtures; no email is sent. Configure `EMAIL_PREVIEW_FIXTURE_BINARY` when running the review server.
+- `TemplateRichFormatting` covers quote, heading, list and hard-break rendering, exact Go-result/iframe equality and live editing. See [the rendering contract](email-preview-rendering.md) for the process boundary and verification scope. The supplied screenshot was inspected; implementation browser and production visual checks remain pending.
 
 ## 2026-10-14 · Durable editor save state
 
 - Core `EditorHeaderProps` adds `saveState: saved | saving | offline | error | reload` (optional for transport-only consumers). Core `CollabSyncStatusIndicator` adds a mutually exclusive `state` input and retains its required `label`, tooltip and fixed token size. No new visual tokens or layout variants.
 - Migration: block-room consumers use the authoring header, which supplies the durable model automatically from the runtime entity and save registry. Direct Core consumers pass `saveState` and matching `labels.syncStatus`; direct indicators pass `state` and `label`. Legacy `isConnected`/`isSynced` remains available for document rooms without durable ACKs and must not be mixed with indicator `state`.
 - `saved` requires no unacknowledged local edits; reconnect synchronization is `saving`, local offline editing is `offline`, persistence retry is `error`, and a canonical rebuild is `reload`. Core stories cover each state; labels originate in English with English fallbacks in translation bundles.
-- Verification: targeted automated coverage covers state priority, durable ACK/delete coverage, retry feedback, journal recovery and ownership, and retained editor sessions. Browser visual verification remains pending where Storybook cannot bind a local port. The existing Post screenshot was inspected for header geometry; it is not evidence for the changed stories.
+- Verification: targeted automated coverage covers state priority, durable ACK/delete coverage, retry feedback, journal recovery and ownership, and retained editor sessions. Browser visual verification remains a separate, snapshot-specific check. The existing Post screenshot was inspected for header geometry; it is not evidence for the changed stories.
 
 ## 2026-10-13 · Korean line breaking and review fixes
 
@@ -53,7 +67,6 @@ Git changes and application release records identify deployment.
 - **Nested outline UX:** the outline precedes the document in reading and focus order; column rows meet the 44px minimum on coarse pointers (tablets reach `lg`); titles keep their authored direction in a `<bdi>` isolate while rows keep the interface alignment; while scrubbing, the highlighted row is scrolled level with the finger instead of collecting at the list's lower edge.
 - **`LayoutContainer size="reading"` is a screen measure:** it drops its maximum on paper, matching the post reading column. `PostViewContent` uses it (and `ContentChrome measure="reading"`) instead of its own reading-column CSS.
 - **CMS page sections gain a `reading` width** (schema, renderer, editor labels in all locales; `features/page/section-style.module.css`): the reading measure bounds the section's text box, the section centers like `container`/`narrow`, screen only. Existing values and the `full` default are unchanged. The editor offers it once the installed wire contract carries `PageSectionSettings.MaxWidth.MAX_WIDTH_READING` (`PAGE_SECTION_READING_WIDTH_AVAILABLE`); geul-proto 0.5.0 does not yet, and the API decodes page documents strictly. The section settings field now shows `full` for an unset width (what the renderer draws) instead of `container`.
-- Open decision: authored Heading 1 in published rich text renders `h1` next to the document title (`Heading scale="title"`, the intended single h1). Demoting published authored headings one semantic level (visual size kept) is recommended but changes rendered markup, document CSS selectors and print rules owned by the type scale; it is not part of this change. Review fixtures now author sections from level 2 without skips.
 - Stories: `Pages/Public/Documents` PostHeroLongDocument, PageLongDocumentUntitled, PageReadingSections; `Pages/Legal/Public Document` TermsLongDocument; `Pages/Public/Utilities` ChangelogLongDocument; `Pages/Public/Entity Detail` WorkLongDocument, EventLongDocument. Core TableOfContents examples all render the reserved layout (Narrow removed). Tooling: `story-screenshot-compare.mjs` gains `scroll`, `tab`, `move`, `drag` (mouse or real touch points), `touch` and `measure` (bounding boxes into `summary.json`). Contract: [table of contents](table-of-contents.md).
 
 ## 2026-10-13 · No text below 12px

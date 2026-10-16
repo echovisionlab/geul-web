@@ -1,5 +1,5 @@
 import { downloadMarkdown } from '@/lib/utils/export';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createTranslator, useTranslations } from 'next-intl';
 import { DEFAULT_LOCALE, normalizeLocale } from '@/lib/i18n/locale';
 import { goBackPreview } from '../shared/preview-navigation';
@@ -11,7 +11,7 @@ import { EditorMediaServicesProvider } from '@/features/editor/contexts/EditorMe
 import { AppNotificationRegion } from '@/lib/providers/AppNotificationRegion';
 import { EditorNavigationProvider } from '@/lib/providers/EditorNavigationProvider';
 import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
-import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
+import { bindRoomAccessScenario, changeCanvasRoomAccess } from './fixtures/room-access-scenario';
 import { authorTranslationFixture, type AuthorTranslationState } from './fixtures/author-translations';
 import { authorMediaFixture, type AuthorMediaState } from './fixtures/author-media';
 import { PostEditorView, type PostEditorViewModel } from '@/features/post/PostEditor/PostEditor';
@@ -19,8 +19,6 @@ import { PostMetaStateProvider, type PostMetaContextValue } from '@/lib/contexts
 import { PageLoader } from '@/features/site/PageLoader';
 import { DocumentEditorFrame, editorPageParameters, editorStateArgTypes } from './fixtures/DocumentEditorFrame';
 import { useDocumentEditor, noop, pending, type EditorPreviewState } from './fixtures/use-document-editor';
-// The room provider of the access scenario stories, for their play functions.
-let accessScenarioProvider: object | null = null;
 const previewOgImage = `data:image/svg+xml;charset=utf-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"><rect width="1200" height="630" fill="#202020"/><text x="80" y="330" fill="white" font-family="sans-serif" font-size="72">Post editor preview</text><text x="800" y="560" fill="#b02d23" font-family="sans-serif" font-weight="bold" font-size="64">rawsector</text></svg>')}`;
 function Preview({
   state = 'ready',
@@ -42,9 +40,13 @@ function Preview({
     t = useTranslations('postEditor');
   const roomAccess = useEditorAccessLevel(local.room?.provider);
   const canEdit = local.canEdit && (!followRoomAccess || roomAccess === 'edit');
+  const accessScenarioOwner = useRef<HTMLSpanElement>(null);
   useEffect(() => {
-    accessScenarioProvider = followRoomAccess ? (local.room?.provider ?? null) : null;
-  }, [followRoomAccess, local.room?.provider]);
+    const owner = accessScenarioOwner.current;
+    if (followRoomAccess && owner && local.room?.provider) {
+      return bindRoomAccessScenario(owner, local.room.provider);
+    }
+  }, [followRoomAccess, local.room?.provider, local.deleted]);
   const translation = useMemo(() => authorTranslationFixture(translationState), [translationState]);
   const media = useMemo(() => authorMediaFixture(mediaState), [mediaState]);
   useEffect(() => translation.seed(local.client), [translation, local.client]);
@@ -199,6 +201,7 @@ function Preview({
   };
   return (
     <DocumentEditorFrame client={local.client} completed={local.deleted}>
+      {followRoomAccess ? <span hidden ref={accessScenarioOwner} data-room-access-scenario /> : null}
       <AuthoringExtensionsProvider
         available={{ sharing: false, translations: true, relations: false, uploads: false, generation: false }}
       >
@@ -353,12 +356,8 @@ export const ReadOnly: Story = {
     });
   },
 };
-async function changeRoomAccess(access: 'view' | 'edit') {
-  const provider = await waitFor(() => {
-    expect(accessScenarioProvider).not.toBeNull();
-    return accessScenarioProvider!;
-  });
-  setProviderAccessLevel(provider, access);
+async function changeRoomAccess(canvas: HTMLElement, access: 'view' | 'edit') {
+  await waitFor(() => expect(changeCanvasRoomAccess(canvas, access)).toBe(true));
 }
 /** Downgraded to view while open: the body turns read-only in place and a notice explains why. */
 export const DowngradedInPlace: Story = {
@@ -368,7 +367,7 @@ export const DowngradedInPlace: Story = {
     const page = within(canvasElement.ownerDocument.body);
     const t = await scenarioTranslations(globals);
     await canvas.findByRole('textbox', { name: t('common.labels.body') });
-    await step('The room reports view access', () => changeRoomAccess('view'));
+    await step('The room reports view access', () => changeRoomAccess(canvasElement, 'view'));
     await expect(await page.findByText(t('editorCommon.accessDowngraded.message'))).toBeInTheDocument();
     const body = await canvas.findByRole('document', { name: t('common.labels.body') });
     await expect(body).toHaveAttribute('contenteditable', 'false');
@@ -382,9 +381,9 @@ export const UpgradedInPlace: Story = {
     const page = within(canvasElement.ownerDocument.body);
     const t = await scenarioTranslations(globals);
     await canvas.findByRole('textbox', { name: t('common.labels.body') });
-    await step('The room reports view access', () => changeRoomAccess('view'));
+    await step('The room reports view access', () => changeRoomAccess(canvasElement, 'view'));
     await canvas.findByRole('document', { name: t('common.labels.body') });
-    await step('The room reports edit access again', () => changeRoomAccess('edit'));
+    await step('The room reports edit access again', () => changeRoomAccess(canvasElement, 'edit'));
     await expect(await page.findByText(t('editorCommon.accessUpgraded.message'))).toBeInTheDocument();
     const body = await canvas.findByRole('textbox', { name: t('common.labels.body') });
     await expect(body).toHaveAttribute('contenteditable', 'true');

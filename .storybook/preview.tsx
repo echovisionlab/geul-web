@@ -7,7 +7,15 @@ import '../lib/styles/print.css';
 import '../lib/styles/font-assignment.css';
 import './preview-fonts.css';
 
-import { useEffect, useLayoutEffect, useState, type ReactNode, type PropsWithChildren } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useState,
+  type ReactNode,
+  type PropsWithChildren,
+} from 'react';
 import { DocsContainer, type DocsContainerProps } from '@storybook/addon-docs/blocks';
 import { GLOBALS_UPDATED } from 'storybook/internal/core-events';
 import { create, themes } from 'storybook/theming';
@@ -57,6 +65,7 @@ import { PreviewNavigation } from './PreviewNavigation';
 import { localizeFixtureArgs, useStorybookText } from './fixture-i18n';
 import { DesignSystemDocs } from './DesignSystemDocs';
 import { enhanceCoreArgTypes } from './documentation-contract';
+import { applyStorybookDocumentLocale } from './document-locale';
 
 const localeMessages = {
   ar: arMessages,
@@ -90,21 +99,21 @@ function LocalizedStory({ renderStory, context }: { renderStory: any; context: a
   return renderStory({ args });
 }
 
+const StorybookLocaleDepth = createContext(0);
+
 function StorybookLocaleDocument({ locale, children }: { locale: SupportedLocale; children: ReactNode }) {
+  const depth = useContext(StorybookLocaleDepth);
   const direction = getLocaleDirection(locale);
   const fontProfile = getLocaleFontProfile(locale);
 
-  useLayoutEffect(() => {
-    const root = document.documentElement;
-    root.lang = locale;
-    root.dir = direction;
-    root.dataset.fontProfile = fontProfile;
-  }, [direction, fontProfile, locale]);
+  useLayoutEffect(() => applyStorybookDocumentLocale(document, locale, depth), [depth, locale]);
 
   return (
-    <div lang={locale} dir={direction} data-font-profile={fontProfile}>
-      {children}
-    </div>
+    <StorybookLocaleDepth.Provider value={depth + 1}>
+      <div lang={locale} dir={direction} data-font-profile={fontProfile}>
+        {children}
+      </div>
+    </StorybookLocaleDepth.Provider>
   );
 }
 

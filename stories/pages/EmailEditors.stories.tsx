@@ -1,6 +1,5 @@
-import type { EmailCampaignTiptapEditorHandle } from '@/features/editor/tiptap/profiles/EmailTiptapEditor';
-import { useEffect, useRef, useState } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useEffect, useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -21,7 +20,10 @@ import type { EmailLayoutPreviewBindings } from '@/features/admin/email-layout/E
 import { PageLoader } from '@/features/site/PageLoader';
 import { Alert } from '@/components/core/Alert';
 import { notifications } from '@/components/core/Notification';
-import { buildEmailPreviewSrcDoc } from '@/lib/email/preview-document';
+import { renderLocalEmailPreview } from './fixtures/email-preview';
+import { LOCAL_EMAIL_VARIABLES, useLocalEmailPreview } from './fixtures/use-email-preview';
+import { expect, userEvent, waitFor } from 'storybook/test';
+import { localRichFormattingEmailDocument } from './fixtures/email-rich-formatting';
 import { localEditLocale, localEmailRoom, localEditorQueryClient } from './fixtures/editor-pages';
 type State = 'ready' | 'pending' | 'failed' | 'disconnected' | 'action-failed';
 type Mode = 'split' | 'code' | 'preview';
@@ -45,14 +47,36 @@ function LayoutPreview({ state = 'ready' }: { state?: State }) {
     [viewMode, setViewMode] = useState<Mode>('split'),
     [variablesExpanded, setVariablesExpanded] = useState(true),
     [htmlContent, setHtmlContent] = useState(initialHtml);
-  const previewBindings: EmailLayoutPreviewBindings = {
-    content: async (content, sample) => ({
-      html: content.replace('{{subject}}', 'Listening room').replace('{{content}}', sample ?? ''),
-      errors: [],
-      valid: true,
+  const previewBindings = useMemo<EmailLayoutPreviewBindings>(
+    () => ({
+      content: async (layoutHtml, contentHtml, requestedLocale, signal) => ({
+        ...(await renderLocalEmailPreview(
+          {
+            layoutHtml,
+            contentHtml: contentHtml ?? '',
+            locale: requestedLocale ?? locale,
+            subject: 'Listening room',
+            variables: LOCAL_EMAIL_VARIABLES,
+          },
+          signal,
+        )),
+        errors: [],
+        valid: true,
+      }),
+      saved: async (_layoutId, contentHtml, requestedLocale, signal) =>
+        renderLocalEmailPreview(
+          {
+            layoutHtml: initialHtml,
+            contentHtml: contentHtml ?? '',
+            locale: requestedLocale ?? locale,
+            subject: 'Listening room',
+            variables: LOCAL_EMAIL_VARIABLES,
+          },
+          signal,
+        ),
     }),
-    saved: async () => ({ html: '<h1>Listening room</h1><p>October edition</p>' }),
-  };
+    [locale],
+  );
   if (state === 'pending' || !doc) {
     return <PageLoader />;
   }
@@ -115,22 +139,26 @@ function LayoutPreview({ state = 'ready' }: { state?: State }) {
     </QueryClientProvider>
   );
 }
-function TemplatePreview({ state = 'ready', lineBreaks = false }: { state?: State; lineBreaks?: boolean }) {
-  const editorRef = useRef<EmailCampaignTiptapEditorHandle | null>(null);
-  const [previewHtml, setPreviewHtml] = useState('');
-  const refreshPreview = () => setPreviewHtml(editorRef.current?.getHTML() ?? '');
+function TemplatePreview({
+  state = 'ready',
+  lineBreaks = false,
+  richFormatting = false,
+}: {
+  state?: State;
+  lineBreaks?: boolean;
+  richFormatting?: boolean;
+}) {
   const [client] = useState(() => localEditorQueryClient('email_template', 'local-template'));
   const [room, setRoom] = useState<ReturnType<typeof localEmailRoom> | null>(null);
   useEffect(() => {
-    const current = localEmailRoom('email_template', lineBreaks);
+    const current = localEmailRoom('email_template', lineBreaks, richFormatting);
     setRoom(current);
     return () => {
       current.awareness.destroy();
       current.document.destroy();
     };
-  }, [lineBreaks]);
-  const router = useRouter(),
-    currentLocale = useLocale();
+  }, [lineBreaks, richFormatting]);
+  const router = useRouter();
   const tCommonNotifications = useTranslations('common.notifications'),
     tEmailTemplates = useTranslations('adminList.emailTemplates'),
     tCommonActions = useTranslations('common.actions'),
@@ -146,6 +174,11 @@ function TemplatePreview({ state = 'ready', lineBreaks = false }: { state?: Stat
     [testModalOpened, setTestModal] = useState(false),
     [testEmail, setTestEmail] = useState(''),
     [testLocale, setTestLocale] = useState('ko');
+  const preview = useLocalEmailPreview(
+    state === 'pending' || state === 'failed' ? null : room,
+    currentSubject,
+    layoutId ? initialHtml : null,
+  );
   if (state === 'pending' || !room) {
     return <PageLoader />;
   }
@@ -204,15 +237,12 @@ function TemplatePreview({ state = 'ready', lineBreaks = false }: { state?: Stat
     showEditor: viewMode !== 'preview',
     editorSession: { provider: room.provider, controller: room.controller },
     variableNames: ['recipient_name', 'confirm_url'],
-    handleEditorReady: (editor) => {
-      editorRef.current = editor;
-      refreshPreview();
-    },
-    handleEditorContentChange: refreshPreview,
+    handleEditorReady: preview.refresh,
+    handleEditorContentChange: preview.refresh,
     showPreview: viewMode !== 'code',
-    isPreviewLoading: false,
-    previewSubject: currentSubject,
-    previewSrcDoc: buildEmailPreviewSrcDoc(previewHtml, currentLocale),
+    isPreviewLoading: preview.isLoading,
+    previewSubject: preview.subject,
+    previewSrcDoc: preview.html,
     sendTest: { isPending: false },
     testModalOpened,
     closeTestModal: () => setTestModal(false),
@@ -236,6 +266,11 @@ function TemplatePreview({ state = 'ready', lineBreaks = false }: { state?: Stat
   return (
     <QueryClientProvider client={client}>
       <LayoutContainer size="wide" inset="md">
+        {preview.error ? (
+          <Alert role="alert" tone="danger">
+            {preview.error}
+          </Alert>
+        ) : null}
         <EmailTemplateEditPageView model={model} />
       </LayoutContainer>
     </QueryClientProvider>
@@ -245,29 +280,31 @@ function Preview({
   page = 'layout',
   state = 'ready',
   lineBreaks = false,
+  richFormatting = false,
 }: {
   page?: 'layout' | 'template';
   state?: State;
   lineBreaks?: boolean;
+  richFormatting?: boolean;
 }) {
   return page === 'layout' ? (
     <LayoutPreview state={state} />
   ) : (
-    <TemplatePreview state={state} lineBreaks={lineBreaks} />
+    <TemplatePreview state={state} lineBreaks={lineBreaks} richFormatting={richFormatting} />
   );
 }
 const meta = {
   title: 'Pages/Admin/Email Editors',
   component: Preview,
   args: { page: 'layout', state: 'ready' },
-  render: (args) => <Preview key={`${args.page}-${args.state}-${args.lineBreaks}`} {...args} />,
+  render: (args) => <Preview key={`${args.page}-${args.state}-${args.lineBreaks}-${args.richFormatting}`} {...args} />,
   parameters: {
     layout: 'fullscreen',
     nextjs: { appDirectory: true },
     docs: {
       description: {
         component:
-          'Production email layout/template views with local code or rich text edits, live preview, view modes and test dialogs. Service-backed translation panels are omitted. No email is delivered.',
+          'Production email layout/template views with local code or rich text edits, live preview, view modes and test dialogs. Canonical email snapshots and local layout/variables are rendered by the production Go renderer through a Storybook-only endpoint. Service-backed translation panels are omitted. Configure EMAIL_PREVIEW_FIXTURE_BINARY; no email is delivered.',
       },
     },
   },
@@ -277,6 +314,54 @@ type Story = StoryObj<typeof meta>;
 export const Layout: Story = {};
 export const Template: Story = { args: { page: 'template' } };
 export const TemplateLineBreaks: Story = { args: { page: 'template', lineBreaks: true } };
+export const TemplateRichFormatting: Story = {
+  args: { page: 'template', richFormatting: true },
+  tags: ['email-rendering'],
+  play: async ({ canvasElement }) => {
+    const editor = await waitFor(
+      () => {
+        const editable = canvasElement.querySelector('[contenteditable="true"]');
+        expect(editable).not.toBeNull();
+        return editable!;
+      },
+      { timeout: 15_000 },
+    );
+    await expect(editor).toHaveTextContent('quote');
+    const iframe = await waitFor(
+      () => {
+        const frame = canvasElement.querySelector('iframe');
+        expect(frame?.contentDocument?.querySelector('blockquote')).not.toBeNull();
+        return frame!;
+      },
+      { timeout: 20_000 },
+    );
+    const document = iframe.contentDocument!;
+    const quote = document.querySelector('blockquote')!;
+    const quoteStyle = iframe.contentWindow!.getComputedStyle(quote);
+    await expect(quote).toHaveTextContent('quote');
+    await expect(Number.parseFloat(quoteStyle.borderLeftWidth)).toBeGreaterThan(0);
+    await expect(quoteStyle.borderLeftStyle).not.toBe('none');
+    await expect(document.querySelector('h2')).toHaveTextContent('Email heading');
+    await expect(document.querySelectorAll('ul li')).toHaveLength(2);
+    await expect(document.querySelector('p br')).not.toBeNull();
+    const rendered = await renderLocalEmailPreview({
+      document: localRichFormattingEmailDocument(),
+      locale: 'ko',
+      subject: 'Night Signals · October',
+      layoutHtml: initialHtml,
+      variables: LOCAL_EMAIL_VARIABLES,
+    });
+    await expect(iframe.srcdoc).toBe(rendered.html);
+    await userEvent.click(editor);
+    await userEvent.keyboard(' Updated preview');
+    await waitFor(
+      () => {
+        expect(iframe.contentDocument?.body).toHaveTextContent('Updated preview');
+      },
+      { timeout: 20_000 },
+    );
+  },
+};
 export const LayoutPending: Story = { args: { state: 'pending' } };
 export const TemplatePending: Story = { args: { page: 'template', state: 'pending' } };
 export const LayoutFailed: Story = { args: { state: 'failed' } };

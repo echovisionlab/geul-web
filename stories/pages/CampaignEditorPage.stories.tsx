@@ -1,5 +1,4 @@
-import type { EmailCampaignTiptapEditorHandle } from '@/features/editor/tiptap/profiles/EmailTiptapEditor';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { goBackPreview } from '../shared/preview-navigation';
@@ -16,12 +15,9 @@ import type { CampaignEditorConfiguration } from '@/features/campaign/useCampaig
 import type { CampaignViewMode } from '@/features/campaign/useCampaignPreview';
 import type { DateTimeValue } from '@/components/core/Input/DateTimeInput';
 import { normalizeLocale } from '@/lib/i18n/locale';
-import { buildEmailPreviewSrcDoc } from '@/lib/email/preview-document';
+import { LOCAL_EMAIL_LAYOUT, useLocalEmailPreview } from './fixtures/use-email-preview';
 import { localEmailRoom, localEditorQueryClient, localEditLocale, readyQuery } from './fixtures/editor-pages';
 function Preview({ state = 'ready' }: { state?: 'ready' | 'pending' | 'failed' | 'disconnected' | 'action-failed' }) {
-  const editorRef = useRef<EmailCampaignTiptapEditorHandle | null>(null);
-  const [previewHtml, setPreviewHtml] = useState('');
-  const refreshPreview = () => setPreviewHtml(editorRef.current?.getHTML() ?? '');
   const [client] = useState(() => localEditorQueryClient('campaign', 'local-campaign'));
   const [room, setRoom] = useState<ReturnType<typeof localEmailRoom> | null>(null);
   useEffect(() => {
@@ -57,6 +53,11 @@ function Preview({ state = 'ready' }: { state?: 'ready' | 'pending' | 'failed' |
     [testEmail, setTestEmail] = useState(''),
     [testLocale, setTestLocale] = useState<string>('ko'),
     [scheduleDate, setScheduleDate] = useState<DateTimeValue>({ date: null, time: '' });
+  const preview = useLocalEmailPreview(
+    state === 'pending' || state === 'failed' ? null : room,
+    currentSubject,
+    fields.layoutId ? LOCAL_EMAIL_LAYOUT : null,
+  );
   const feedback = (close: () => void) => {
     if (state === 'action-failed') {
       notifications.show({ tone: 'danger', message: 'Local command failed' });
@@ -129,13 +130,15 @@ function Preview({ state = 'ready' }: { state?: 'ready' | 'pending' | 'failed' |
       },
       showEditor: viewMode !== 'preview',
       showPreview: viewMode !== 'edit',
-      editorReady: (editor) => {
-        editorRef.current = editor;
-        refreshPreview();
+      editorReady: preview.refresh,
+      editorContentChanged: preview.refresh,
+      query: {
+        ...readyQuery,
+        isError: Boolean(preview.error),
+        error: preview.error ? new Error(preview.error) : null,
+        isFetching: preview.isLoading,
       },
-      editorContentChanged: refreshPreview,
-      query: readyQuery,
-      previewSrcDoc: buildEmailPreviewSrcDoc(previewHtml, currentLocale),
+      previewSrcDoc: preview.html,
     },
     viewModeOptions: [
       { value: 'split', tooltip: tModes('split'), icon: <IconColumns2 /> },
@@ -205,7 +208,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Production campaign editor with a local rich text room, live preview, audience/layout controls and test/send/schedule dialogs. Send and schedule change local lifecycle state; no email is delivered. Service-backed translation panels are omitted.',
+          'Production campaign editor with a local rich text room, live preview, audience/layout controls and test/send/schedule dialogs. Send and schedule change local lifecycle state; no email is delivered. Canonical snapshots use the production Go email renderer with local layout/variables through a Storybook-only endpoint. Configure EMAIL_PREVIEW_FIXTURE_BINARY. Service-backed translation panels are omitted.',
       },
     },
   },

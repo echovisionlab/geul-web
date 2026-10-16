@@ -1,33 +1,17 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { buildEmailPreviewSrcDoc } from './preview-document';
 
-vi.mock('@/lib/public-runtime-config', () => ({
-  getPublicCdnUrl: () => 'https://cdn.example.test',
-}));
-
 describe('buildEmailPreviewSrcDoc', () => {
-  it('wraps fragment html with a localized noto preview document', () => {
-    const result = buildEmailPreviewSrcDoc('<p>Hello</p>', 'ko');
-
-    expect(result).toContain('<!DOCTYPE html>');
-    expect(result).toContain('<html lang="ko" dir="ltr">');
-    expect(result).toContain("font-family: 'Noto Sans KR', 'Noto Sans', 'Noto Color Emoji', sans-serif !important;");
-    expect(result).toContain('https://cdn.example.test/fonts/css2?');
-    expect(result).toContain('&display=swap&v=4" data-geul-email-preview-fonts="true"');
-    expect(result).toContain('<body><p>Hello</p></body>');
+  it.each(['ko', 'ja', 'ar', null, undefined])('preserves delivery HTML exactly for locale %s', (locale) => {
+    const html =
+      '<!DOCTYPE html><html lang="en" dir="ltr"><head><style>body{margin:24px;font-family:serif}</style></head><body><blockquote style="border-left:3px solid #aaa">Quote</blockquote></body></html>';
+    expect(buildEmailPreviewSrcDoc(html, locale)).toBe(html);
   });
 
-  it('injects font assets into full html documents', () => {
-    const result = buildEmailPreviewSrcDoc(
-      '<html><head><title>Preview</title></head><body><p>Hello</p></body></html>',
-      'ja',
-    );
-
-    expect(result).toContain('<!DOCTYPE html>');
-    expect(result).toContain('<html lang="ja" dir="ltr">');
-    expect(result).toContain('<head><meta name="viewport" content="width=device-width, initial-scale=1" />');
-    expect(result).toContain('&display=swap&v=4" data-geul-email-preview-fonts="true"');
-    expect(result).toContain("font-family: 'Noto Sans JP', 'Noto Sans', 'Noto Color Emoji', sans-serif !important;");
-    expect(result).toContain('<body><p>Hello</p></body>');
-  });
+  it.each(['', '  <p>Fragment with intentional whitespace</p>\n'])(
+    'does not wrap or normalize renderer output',
+    (html) => {
+      expect(buildEmailPreviewSrcDoc(html, 'ko')).toBe(html);
+    },
+  );
 });

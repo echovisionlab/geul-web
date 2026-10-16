@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import { encodeMessage } from '@echovisionlab/geul-common/collaboration/protocol';
 import { createBlockRoomPageSectionsController } from '@/features/page/PageEditor/block-room-page-sections';
 import { createDefaultSection } from '@/features/page/PageEditor/types';
 import { createCollaborativeDocumentSaveTracker } from '@/lib/editor/collaborative-document-save';
@@ -38,6 +39,35 @@ describe('canonical editor page fixtures', () => {
       expect(controller.read()).toHaveLength(1);
     } finally {
       unregister();
+      room.destroy();
+    }
+  });
+  it('discards queued flush acknowledgements and subscribers when the owning room is destroyed', async () => {
+    const room = localDocumentRoom('post', 'ko');
+    const persisted = vi.fn();
+    room.protocol.subscribePersisted(persisted);
+    persisted.mockClear();
+    const acknowledge = vi.spyOn(room.provider, 'acknowledgePersist');
+    const decrement = vi.spyOn(room.provider, 'decrementUnsyncedChanges');
+    try {
+      room.document.getMap('lifetime-test').set('pending', true);
+      room.provider.sendStateless(
+        encodeMessage({ kind: 'room.flush', requestId: '30000000-0000-4000-8000-000000000002' }),
+      );
+      room.destroy();
+      decrement.mockClear();
+      await Promise.resolve();
+      expect(acknowledge).not.toHaveBeenCalled();
+      expect(decrement).not.toHaveBeenCalled();
+      expect(persisted).not.toHaveBeenCalled();
+      room.protocol.subscribePersisted(persisted);
+      room.provider.forceSync();
+      expect(persisted).not.toHaveBeenCalled();
+      expect(decrement).not.toHaveBeenCalled();
+      expect(() => room.destroy()).not.toThrow();
+    } finally {
+      acknowledge.mockRestore();
+      decrement.mockRestore();
       room.destroy();
     }
   });

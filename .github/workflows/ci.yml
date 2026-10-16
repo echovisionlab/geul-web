@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - main
@@ -49,15 +50,14 @@ jobs:
         id: classify
         shell: bash
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          HEAD_REF: ${{ github.head_ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || 'origin/main' }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          HEAD_REF: ${{ github.head_ref || github.ref_name }}
         run: |
           set -euo pipefail
           run_full=true
 
-          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ] &&
-             [[ "${HEAD_REF}" = release-please--* ]] &&
+          if [[ "${HEAD_REF}" = release-please--* ]] &&
              [ -n "${BASE_SHA}" ] &&
              [ -n "${HEAD_SHA}" ]; then
             changed_files="$(git diff --name-only "${BASE_SHA}...${HEAD_SHA}")"
@@ -155,8 +155,8 @@ jobs:
           pnpm install --frozen-lockfile
       - name: Check Prettier formatting
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || 'origin/main' }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
           mapfile -d '' changed_files < <(
@@ -171,12 +171,11 @@ jobs:
     needs: [scope, format]
     if: needs.scope.outputs.run_full == 'true'
     runs-on: ubuntu-24.04
-    # The 2-core private runner builds the app and Storybook far slower than the
-    # 4-core public one did.
+    # Keep the app build and static checks independent of the shared Storybook build.
     timeout-minutes: 45
     env:
       # Node sizes its default heap from runner memory (8 GB here), which is too
-      # small for type-aware lint, the Next build and the Storybook build.
+      # small for type-aware lint and the Next build.
       NODE_OPTIONS: --max-old-space-size=6144
     steps:
       - name: Add swap to the hosted runner
@@ -254,27 +253,162 @@ jobs:
         run: pnpm build
       - name: Check per-route first-load client bundle budget
         run: pnpm perf:bundle
-      - name: Build Storybook catalog
-        run: pnpm storybook:build
+
+  storybook-build:
+    name: Build Storybook
+    needs: [scope, format]
+    if: needs.scope.outputs.run_full == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      NODE_OPTIONS: --max-old-space-size=6144
+      # Reviewed renderer source, pinned to the merged API main commit.
+      EMAIL_PREVIEW_API_REVISION: 7155b62b9be580753f2187ec85fb2b8eed9dcd94
+    steps:
+      - name: Require an immutable API renderer revision
+        shell: bash
+        run: '[[ "$EMAIL_PREVIEW_API_REVISION" =~ ^[0-9a-f]{40}$ ]]'
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          clean: true
+          persist-credentials: false
+      - name: Set up pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          registry-url: https://npm.pkg.github.com
+          scope: '@echovisionlab'
+      - name: Install dependencies
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.PRIVATE_DEPS_TOKEN }}
+        run: pnpm install --frozen-lockfile
       - name: Typecheck interactive preview sources
         run: pnpm storybook:typecheck
-      - name: Install Chromium for Storybook accessibility tests
-        run: pnpm exec playwright install --with-deps chromium
-      - name: Check accessibility and keyboard behavior of Core controls and post authoring
+      - name: Prepare MapLibre worker
+        run: pnpm prepare:maplibre-worker
+      - name: Prepare p5 runtime
+        run: pnpm prepare:p5-runtime
+      - name: Build Storybook catalog once
+        run: pnpm storybook:build --output-dir .artifacts/storybook-build/site
+      - name: Checkout the reviewed email renderer source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: echovisionlab/geul-api
+          ref: ${{ env.EMAIL_PREVIEW_API_REVISION }}
+          path: .artifacts/email-preview-api
+          token: ${{ secrets.PRIVATE_DEPS_TOKEN }}
+          persist-credentials: false
+      - name: Set up the API's Go toolchain
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: .artifacts/email-preview-api/go.mod
+          cache: true
+          cache-dependency-path: .artifacts/email-preview-api/go.sum
+      - name: Build the production email preview helpers once per target
+        working-directory: .artifacts/email-preview-api
+        env:
+          TOKEN: ${{ secrets.PRIVATE_DEPS_TOKEN }}
+          GOWORK: 'off'
+          GOPRIVATE: github.com/echovisionlab/*
         run: |
-          pnpm storybook:preview > /tmp/geul-storybook-preview.log 2>&1 &
-          preview_pid=$!
-          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
-          for _ in {1..30}; do
-            if curl --fail --silent http://127.0.0.1:6010/index.json > /dev/null; then
-              pnpm storybook:test:a11y --ci
-              pnpm storybook:test:author --ci
-              exit $?
-            fi
-            sleep 1
-          done
-          cat /tmp/geul-storybook-preview.log
-          exit 1
+          set -euo pipefail
+          : "${TOKEN:?Set the PRIVATE_DEPS_TOKEN repository secret}"
+          config=$(mktemp "$RUNNER_TEMP/geul-storybook-email-deps.XXXXXX")
+          trap 'rm -f "$config"' EXIT
+          git config --file "$config" url."https://x-access-token:${TOKEN}@github.com/".insteadOf "https://github.com/"
+          export GIT_CONFIG_GLOBAL="$config"
+          [ "$(git rev-parse HEAD)" = "$EMAIL_PREVIEW_API_REVISION" ]
+          mkdir -p "$GITHUB_WORKSPACE/.artifacts/storybook-build/bin"
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -o "$GITHUB_WORKSPACE/.artifacts/storybook-build/bin/email-preview-fixture" ./cmd/email-preview-fixture
+          CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -trimpath -o "$GITHUB_WORKSPACE/.artifacts/storybook-build/bin/email-preview-fixture-darwin-arm64" ./cmd/email-preview-fixture
+          printf '%s\n' "$EMAIL_PREVIEW_API_REVISION" > "$GITHUB_WORKSPACE/.artifacts/storybook-build/api-revision.txt"
+      - name: Share immutable browser-test build
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: storybook-build
+          path: .artifacts/storybook-build/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 1
+
+  storybook-browser:
+    name: Storybook (${{ matrix.suite }} ${{ matrix.index }}/${{ matrix.count }})
+    needs: [scope, storybook-build]
+    if: needs.scope.outputs.run_full == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - suite: a11y
+            index: 1
+            count: 2
+          - suite: a11y
+            index: 2
+            count: 2
+          - suite: author
+            index: 1
+            count: 2
+          - suite: author
+            index: 2
+            count: 2
+          - suite: email-rendering
+            index: 1
+            count: 1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          clean: true
+          persist-credentials: false
+      - name: Set up pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          registry-url: https://npm.pkg.github.com
+          scope: '@echovisionlab'
+      - name: Install dependencies
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.PRIVATE_DEPS_TOKEN }}
+        run: pnpm install --frozen-lockfile
+      - name: Download the shared Storybook build
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: storybook-build
+          path: .artifacts/storybook-build
+      - name: Restore the shared helper's executable permission
+        run: chmod +x .artifacts/storybook-build/bin/email-preview-fixture
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Run isolated stories on all available CI CPUs
+        env:
+          EMAIL_PREVIEW_FIXTURE_BINARY: ${{ github.workspace }}/.artifacts/storybook-build/bin/email-preview-fixture
+        run: pnpm storybook:test:ci --suite ${{ matrix.suite }} --shard ${{ matrix.index }}/${{ matrix.count }} --static-dir .artifacts/storybook-build/site
+      - name: Save browser results and context disposal evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: storybook-${{ matrix.suite }}-${{ matrix.index }}
+          path: |
+            .artifacts/storybook/**
+            !.artifacts/storybook/**/cache/**
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 1
 
   unit:
     name: Tests (${{ matrix.project }} ${{ matrix.shard }})
@@ -326,7 +460,7 @@ jobs:
   validate:
     name: Validate
     if: always()
-    needs: [scope, format, quality, unit]
+    needs: [scope, format, quality, unit, storybook-build, storybook-browser]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     env:
@@ -335,6 +469,8 @@ jobs:
       FORMAT_RESULT: ${{ needs.format.result }}
       QUALITY_RESULT: ${{ needs.quality.result }}
       UNIT_RESULT: ${{ needs.unit.result }}
+      STORYBOOK_BUILD_RESULT: ${{ needs.storybook-build.result }}
+      STORYBOOK_BROWSER_RESULT: ${{ needs.storybook-browser.result }}
     steps:
       - name: Require every applicable check
         shell: bash
@@ -345,8 +481,12 @@ jobs:
             [ "${FORMAT_RESULT}" = "success" ]
             [ "${QUALITY_RESULT}" = "success" ]
             [ "${UNIT_RESULT}" = "success" ]
+            [ "${STORYBOOK_BUILD_RESULT}" = "success" ]
+            [ "${STORYBOOK_BROWSER_RESULT}" = "success" ]
           else
             [ "${FORMAT_RESULT}" = "skipped" ]
             [ "${QUALITY_RESULT}" = "skipped" ]
             [ "${UNIT_RESULT}" = "skipped" ]
+            [ "${STORYBOOK_BUILD_RESULT}" = "skipped" ]
+            [ "${STORYBOOK_BROWSER_RESULT}" = "skipped" ]
           fi

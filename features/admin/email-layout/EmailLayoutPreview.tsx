@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useDebouncedValue } from '@mantine/hooks';
 import { previewEmailLayoutContentAction } from '@/lib/actions/email-layout';
@@ -10,12 +10,24 @@ import type { EmailLayoutValidationError } from '@/lib/types/email-layout/valida
 import { EmailLayoutPreviewView } from './EmailLayoutPreviewView';
 
 export interface EmailLayoutPreviewBindings {
-  content: typeof previewEmailLayoutContentAction;
-  saved: typeof previewEmailLayout;
+  content(
+    html: string,
+    sampleContent?: string,
+    locale?: string,
+    signal?: AbortSignal,
+  ): ReturnType<typeof previewEmailLayoutContentAction>;
+  saved(
+    layoutId: string,
+    sampleContent?: string,
+    locale?: string,
+    signal?: AbortSignal,
+  ): ReturnType<typeof previewEmailLayout>;
 }
 const defaultBindings: EmailLayoutPreviewBindings = {
-  content: previewEmailLayoutContentAction,
-  saved: previewEmailLayout,
+  // Next server actions cannot accept an AbortSignal. Keep their serialized
+  // arguments unchanged; the effect also fences responses after cancellation.
+  content: (html, sampleContent, locale) => previewEmailLayoutContentAction(html, sampleContent, locale),
+  saved: (layoutId, sampleContent, locale) => previewEmailLayout(layoutId, sampleContent, locale),
 };
 
 interface EmailLayoutPreviewProps {
@@ -43,52 +55,51 @@ export function EmailLayoutPreview({
   const [previewHtml, setPreviewHtml] = useState('');
   const [errors, setErrors] = useState<EmailLayoutValidationError[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const abortControllerRef = useRef<AbortController | null>(null);
   const sampleContent = useMemo(
     () =>
       `<h1>${tPreviewSample('headline')}</h1><p>${tPreviewSample('bodyPrimary')}</p><p>${tPreviewSample('bodySecondary')}</p>`,
     [tPreviewSample],
   );
 
-  const fetchPreview = useCallback(
-    async (content: string) => {
+  useEffect(() => {
+    const controller = new AbortController();
+    const fetchPreview = async () => {
       const requestedPreviewLocale = normalizeLocale(locale) ?? 'en';
       const normalizedSourceLocale = normalizeLocale(sourceLocale) ?? 'en';
       const useSavedLocalizedLayout = Boolean(layoutId) && requestedPreviewLocale !== normalizedSourceLocale;
 
-      if (!useSavedLocalizedLayout && !content.trim()) {
+      if (!useSavedLocalizedLayout && !debouncedHtml.trim()) {
         setPreviewHtml('');
         setErrors([]);
+        setIsLoading(false);
         return;
       }
 
-      abortControllerRef.current?.abort();
-      abortControllerRef.current = new AbortController();
       setIsLoading(true);
       try {
         if (useSavedLocalizedLayout && layoutId) {
-          const result = await bindings.saved(layoutId, sampleContent, requestedPreviewLocale);
+          const result = await bindings.saved(layoutId, sampleContent, requestedPreviewLocale, controller.signal);
+          if (controller.signal.aborted) return;
           setPreviewHtml(result?.html ?? '');
           setErrors(result ? [] : [{ code: 'UNKNOWN_ERROR', message: '' }]);
           return;
         }
 
-        const result = await bindings.content(content, sampleContent, requestedPreviewLocale);
+        const result = await bindings.content(debouncedHtml, sampleContent, requestedPreviewLocale, controller.signal);
+        if (controller.signal.aborted) return;
         setPreviewHtml(result.html);
         setErrors(result.errors);
       } catch {
+        if (controller.signal.aborted) return;
         setPreviewHtml('');
         setErrors([{ code: 'UNKNOWN_ERROR', message: '' }]);
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) setIsLoading(false);
       }
-    },
-    [bindings, layoutId, locale, sampleContent, sourceLocale],
-  );
-
-  useEffect(() => {
-    void fetchPreview(debouncedHtml);
-  }, [debouncedHtml, debouncedRefreshKey, fetchPreview]);
+    };
+    void fetchPreview();
+    return () => controller.abort();
+  }, [bindings, debouncedHtml, debouncedRefreshKey, layoutId, locale, sampleContent, sourceLocale]);
 
   return <EmailLayoutPreviewView previewHtml={previewHtml} errors={errors} isLoading={isLoading} locale={locale} />;
 }

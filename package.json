@@ -51,6 +51,7 @@
     "storybook": "storybook dev -p 6010",
     "storybook:build": "storybook build",
     "storybook:preview": "node scripts/design-system/serve-kit.mjs",
+    "storybook:test:ci": "node scripts/test/storybook-browser.mjs",
     "storybook:test": "test-storybook --index-json --url http://127.0.0.1:6010 --maxWorkers 2",
     "storybook:test:a11y": "test-storybook --index-json --url http://127.0.0.1:6010 --maxWorkers 2 --includeTags a11y-smoke -- --testPathPatterns core-interaction-accessibility",
     "storybook:test:author": "test-storybook --index-json --url http://127.0.0.1:6010 --maxWorkers 2 --includeTags a11y-author -- --testPathPatterns pages-editors-post",

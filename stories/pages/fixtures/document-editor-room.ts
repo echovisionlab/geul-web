@@ -104,31 +104,42 @@ export function localDocumentRoom(
     flushDelay: 50,
   });
   const listeners = new Set<(state: BlockRoomDurabilityState) => void>();
+  let disposed = false;
   let persisted: BlockRoomDurabilityState = { stateVector: Y.encodeStateVector(document), deleted: {} };
   const acknowledge = () => {
-    while (provider.hasUnsyncedChanges) {
+    if (disposed) return;
+    while (!disposed && provider.hasUnsyncedChanges) {
       provider.decrementUnsyncedChanges();
     }
   };
   provider.forceSync = acknowledge;
   provider.sendStateless = (payload) => {
+    if (disposed) return;
     const parsed = parseClientMessage(payload);
     if (parsed.ok && parsed.message.kind === 'room.flush') {
       const request = parsed.message;
       queueMicrotask(() => {
+        if (disposed) return;
         acknowledge();
+        if (disposed) return;
         provider.acknowledgePersist(request.requestId);
-        listeners.forEach((listener) => listener(persisted));
+        for (const listener of listeners) {
+          if (disposed) break;
+          listener(persisted);
+        }
       });
     }
   };
-  document.on('afterTransaction', (transaction) => {
+  const afterTransaction = (transaction: Y.Transaction) => {
+    if (disposed) return;
     const next = captureBlockRoomDurabilityState(document, transaction);
     persisted = mergeBlockRoomDurabilityStates(persisted, next);
     queueMicrotask(acknowledge);
-  });
+  };
+  document.on('afterTransaction', afterTransaction);
   const protocol: BlockRoomDurabilityProtocol = {
     subscribePersisted(listener) {
+      if (disposed) return () => {};
       listeners.add(listener);
       listener(persisted);
       return () => {
@@ -146,6 +157,10 @@ export function localDocumentRoom(
     protocol,
     controller,
     destroy() {
+      if (disposed) return;
+      disposed = true;
+      document.off('afterTransaction', afterTransaction);
+      listeners.clear();
       provider.destroy();
       websocket.destroy();
       document.destroy();
