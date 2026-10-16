@@ -12,7 +12,7 @@ import { selectThemeAssetUrl } from '@/lib/utils/theme-asset';
 
 export interface SiteLogoProps {
   size?: SiteLogoSize;
-  height?: number;
+  height?: number | 'intrinsic';
   style?: CSSProperties;
 }
 

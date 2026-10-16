@@ -11,8 +11,11 @@ export interface SiteLogoViewProps {
   alt: string;
   /** Named typography role for the wordmark and the default image height. */
   size?: SiteLogoSize;
-  /** Explicit authored image geometry remains supported. */
-  height?: number;
+  /**
+   * Explicit authored image geometry remains supported. `'intrinsic'` renders the
+   * uploaded image at its own size, so the uploaded file decides how large it is.
+   */
+  height?: number | 'intrinsic';
   fallbackText?: string | null;
   style?: CSSProperties;
 }
@@ -34,7 +37,8 @@ export function SiteLogoView({ src, alt, size = 'md', height, fallbackText, styl
       alt={alt}
       onError={() => setFailedSrc(src)}
       style={{
-        height: height ?? primitiveTokens.fontSize[size],
+        height: height === 'intrinsic' ? 'auto' : (height ?? primitiveTokens.fontSize[size]),
+        maxWidth: height === 'intrinsic' ? '100%' : undefined,
         display: 'inline-flex',
         width: 'auto',
         objectFit: 'contain',
