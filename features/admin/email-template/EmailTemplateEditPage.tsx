@@ -798,7 +798,7 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
                     {tCommonLabels('content')}
                   </DsText>
                 </DsLayoutInset>
-                <DsSectionCard padding="none" border="none" appearance="plain" grow clip>
+                <DsSectionCard padding="none" border="none" appearance="plain" grow>
                   {editorSession ? (
                     <EmailTemplateEditor
                       accessibleLabel={tCommonLabels('content')}

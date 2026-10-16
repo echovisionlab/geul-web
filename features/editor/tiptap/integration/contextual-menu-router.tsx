@@ -13,11 +13,13 @@ export function TiptapContextualMenuRouter({
   selectionLabels,
   onAIActivate,
   allowTableMenu = true,
+  formattingOnly = false,
 }: {
   editor: Editor;
   selectionLabels: SelectionBubbleMenuLabels;
   onAIActivate?: (context: TiptapAIContext) => void;
   allowTableMenu?: boolean;
+  formattingOnly?: boolean;
 }) {
   const [, setRevision] = useState(0);
   useEffect(() => {
@@ -32,5 +34,12 @@ export function TiptapContextualMenuRouter({
   if (editor.state.selection instanceof CellSelection) {
     return allowTableMenu ? <TiptapTableMenu editor={editor} /> : null;
   }
-  return <TiptapSelectionBubbleMenu editor={editor} labels={selectionLabels} onAIActivate={onAIActivate} />;
+  return (
+    <TiptapSelectionBubbleMenu
+      formattingOnly={formattingOnly}
+      editor={editor}
+      labels={selectionLabels}
+      onAIActivate={onAIActivate}
+    />
+  );
 }

@@ -5,7 +5,7 @@ import { resolveSiteVariableTokens } from '@/lib/site-variables';
 import type { LocalizedRichTextBlock } from './localized-rich-text';
 
 function styled(values: readonly RichTextStyledText[], context?: SiteVariableContext): string {
-  return values.map((value) => resolveSiteVariableTokens(value.text, context)).join('');
+  return values.map((value) => resolveSiteVariableTokens(value.text, context).replace(/\r\n|\r/g, '\n')).join('');
 }
 
 export function localizedRichTextInlinePlainText(
@@ -16,7 +16,7 @@ export function localizedRichTextInlinePlainText(
     .map((value) => {
       switch (value.value.case) {
         case 'text':
-          return value.value.value.text;
+          return value.value.value.text.replace(/\r\n|\r/g, '\n');
         case 'siteVariable':
           if (!context) {
             throw new Error('Site variable context is required for plain-text output.');

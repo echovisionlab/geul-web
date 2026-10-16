@@ -41,6 +41,7 @@ import {
 } from '@echovisionlab/geul-common/collaboration/block-room-codec';
 import * as Y from 'yjs';
 import { projectRoomPayload } from './block-room-payload-projection';
+import { canonicalInlineContent } from './block-room-tiptap-codec';
 import { createBlockId, isBlockId } from '@/lib/editor/block-id';
 import {
   blockRoomSnapshotNodeRoute,
@@ -487,12 +488,34 @@ export class BlockRoomProseMirrorBridge {
       if (edit.insert) {
         text.insert(edit.from, edit.insert);
       }
+      this.#normalizeInlineTextBreaks(edit, text);
     });
   }
 
   replaceCollaborativeTextValue(target: BlockRoomPayloadTarget, value: string): void {
     this.#assertPayloadMutationAuthority(target);
     replaceBlockRoomCollaborativeText(this.#document, this.#payloadRef(target), value, { origin: this.#origin });
+  }
+
+  #normalizeInlineTextBreaks(target: BlockRoomPayloadTarget, text: Y.Text): void {
+    const path = target.path.match(
+      /^(content(?:\.rows\[\d+\]\.cells\[\d+\]\.content)?)\[\d+\]\.(?:text\.text|link\.content\[\d+\]\.text)$/,
+    )?.[1];
+    if (target.scope !== 'locale' || !path || !/[\r\n]/.test(text.toString())) {
+      return;
+    }
+    let parent: Y.AbstractType<unknown> | null = text.parent;
+    let content: Y.Array<unknown> | null = null;
+    while (parent) {
+      if (parent instanceof Y.Array && parent.parent instanceof Y.Map && parent.parent.get('content') === parent) {
+        content = parent;
+      }
+      parent = parent.parent;
+    }
+    if (content) {
+      const previous = projectRoomPayload(content) as JsonValue[];
+      this.reconcileInlineContent({ ...target, path }, previous, canonicalInlineContent(previous));
+    }
   }
 
   getAtomicValue(target: BlockRoomPayloadTarget): BlockRoomAtomicValue {

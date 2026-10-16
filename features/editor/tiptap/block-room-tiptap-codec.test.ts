@@ -98,6 +98,56 @@ function paragraphPositionByText(editor: Editor, text: string): number {
 }
 
 describe('Block-room Tiptap codec', () => {
+  it('keeps paragraphs, explicit hard breaks and text newlines in email HTML and text', () => {
+    const editor = new Editor({
+      extensions: createTiptapWireExtensions(),
+      content: documentToTiptap([
+        descriptor(
+          'paragraph',
+          '10000000-0000-4000-8000-000000000501',
+          { props: {} },
+          {
+            props: {},
+            content: [
+              { text: { text: 'First\r\nline', styles: { bold: true } } },
+              { hardBreak: {} },
+              { text: { text: 'After break', styles: {} } },
+            ],
+          },
+        ),
+        descriptor(
+          'paragraph',
+          '10000000-0000-4000-8000-000000000502',
+          { props: {} },
+          {
+            props: {},
+            content: [{ text: { text: 'Second paragraph', styles: {} } }],
+          },
+        ),
+      ]),
+    });
+    try {
+      const rendered = document.createElement('div');
+      rendered.innerHTML = editor.getHTML();
+      expect([...rendered.querySelectorAll('p')].map((paragraph) => paragraph.innerHTML)).toEqual([
+        '<strong>First</strong><br><strong>line</strong><br>After break',
+        'Second paragraph',
+      ]);
+      expect(editor.getText()).toContain('First\nline\nAfter break');
+      expect(editor.getText()).toContain('\n\nSecond paragraph');
+      const roundTrip = splitPayload(parseDocument(editor.getJSON())[0]!).locale.content;
+      expect(roundTrip).toEqual([
+        { text: { text: 'First', styles: { bold: true } } },
+        { hardBreak: {} },
+        { text: { text: 'line', styles: { bold: true } } },
+        { hardBreak: {} },
+        { text: { text: 'After break', styles: {} } },
+      ]);
+    } finally {
+      editor.destroy();
+    }
+  });
+
   it.each(['mailto:{{contact.legalEmail}}', '{{site.url}}/about'])(
     'keeps authored token hrefs through Tiptap: %s',
     (href) => {

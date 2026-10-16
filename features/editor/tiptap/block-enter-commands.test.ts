@@ -842,3 +842,30 @@ describe('Tiptap text-block Enter commands', () => {
     mounted.destroy();
   });
 });
+
+it('inserts Shift+Enter inside a table paragraph without creating another block', () => {
+  const mounted = mount(
+    documentWith(
+      container(LOCATION_BLOCK_ID, {
+        type: 'table',
+        content: [
+          {
+            type: 'tableRow',
+            content: [
+              { type: 'tableCell', content: [{ type: 'tableParagraph', content: [{ type: 'text', text: 'ab' }] }] },
+            ],
+          },
+        ],
+      }),
+    ),
+  );
+  mounted.editor.commands.setTextSelection(nodePosition(mounted.editor, 'tableParagraph') + 2);
+  const event = new KeyboardEvent('keydown', { key: 'Enter', shiftKey: true, bubbles: true, cancelable: true });
+  mounted.editor.view.dom.dispatchEvent(event);
+  expect(event.defaultPrevented).toBe(true);
+  const paragraph = mounted.editor.state.doc.firstChild!.firstChild!.firstChild!.firstChild!.firstChild!.firstChild!;
+  expect(paragraph.type.name).toBe('tableParagraph');
+  expect(paragraph.content.content.map((node) => node.type.name)).toEqual(['text', 'hardBreak', 'text']);
+  expect(mounted.editor.state.doc.firstChild!.childCount).toBe(1);
+  mounted.destroy();
+});

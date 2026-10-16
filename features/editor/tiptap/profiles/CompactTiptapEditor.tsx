@@ -10,6 +10,7 @@ import { EditorContent, useEditor } from '@tiptap/react';
 import { useLocale, useTranslations } from 'next-intl';
 import type { Awareness } from 'y-protocols/awareness';
 import { useRegisterEditorAuthoringMode, type EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
+import { createMarkdownPasteExtension } from '../markdown-paste';
 import { createLiveTranslationStructureLock } from '../live-translation-structure-lock';
 import type { RichTextBlockRoomTiptapController } from '../block-room-tiptap-controller';
 import { createBlockRoomPresenceExtension } from '../block-room-presence';
@@ -68,6 +69,7 @@ export function createCompactTiptapExtensions(
     WireLink,
     TiptapKeyboardShortcuts,
     createCompactPlaceholderExtension(placeholder),
+    createMarkdownPasteExtension(() => !(typeof structureLocked === 'function' ? structureLocked() : structureLocked)),
     createLiveTranslationStructureLock(typeof structureLocked === 'function' ? structureLocked : () => structureLocked),
   ];
 }

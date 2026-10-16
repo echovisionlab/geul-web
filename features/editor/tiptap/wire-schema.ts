@@ -8,7 +8,8 @@ import {
   type Extensions,
 } from '@tiptap/core';
 import { Dropcursor, Gapcursor } from '@tiptap/extensions';
-import type { DOMOutputSpec } from '@tiptap/pm/model';
+import { Fragment, type DOMOutputSpec, type Node as ProseMirrorNode } from '@tiptap/pm/model';
+import { Plugin } from '@tiptap/pm/state';
 import { primitiveTokens, tokenVar } from '@/components/core/design-tokens';
 import { resolveCodeBlockLanguage } from '@/lib/editor/code-block-options';
 import { fileBlockPropSchema } from '@/lib/media/block-schemas';
@@ -393,6 +394,47 @@ export const WireHardBreak = TiptapNode.create({
   selectable: false,
   parseHTML: () => [{ tag: 'br' }],
   renderHTML: () => ['br'],
+  renderText: () => '\n',
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        appendTransaction(transactions, previous, current) {
+          if (!transactions.some((transaction) => transaction.docChanged)) {
+            return null;
+          }
+          const start = previous.doc.content.findDiffStart(current.doc.content);
+          const end = previous.doc.content.findDiffEnd(current.doc.content);
+          if (start === null || end === null) {
+            return null;
+          }
+          const replacements: { from: number; to: number; nodes: ProseMirrorNode[] }[] = [];
+          // Restrict normalization to the changed range. Source/code text uses
+          // text*, while paragraph-like content (including table cells) uses inline*.
+          current.doc.nodesBetween(start, Math.max(start, end.b), (node, position, parent) => {
+            if (node.type.name === 'hardBreak' && node.marks.length) {
+              replacements.push({ from: position, to: position + node.nodeSize, nodes: [node.mark([])] });
+            } else if (node.isText && parent?.type.spec.content === 'inline*' && /[\r\n]/.test(node.text!)) {
+              const nodes = node
+                .text!.split(/\r\n|\r|\n/)
+                .flatMap((text, index) => [
+                  ...(index ? [current.schema.nodes.hardBreak!.create()] : []),
+                  ...(text ? [current.schema.text(text, node.marks)] : []),
+                ]);
+              replacements.push({ from: position, to: position + node.nodeSize, nodes });
+            }
+          });
+          if (!replacements.length) {
+            return null;
+          }
+          const transaction = current.tr;
+          for (const replacement of replacements.reverse()) {
+            transaction.replaceWith(replacement.from, replacement.to, Fragment.fromArray(replacement.nodes));
+          }
+          return transaction;
+        },
+      }),
+    ];
+  },
 });
 export const WireMathInline = TiptapNode.create({
   name: 'mathInline',

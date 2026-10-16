@@ -10,6 +10,7 @@ import {
   type RichTextBlockLocaleData,
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import {
+  getBlockRoomCollaborativeText,
   hydrateCanonicalBlockRoom,
   materializeCanonicalBlockRoom,
 } from '@echovisionlab/geul-common/collaboration/block-room-codec';
@@ -297,4 +298,31 @@ describe('BlockRoomProseMirrorBridge', () => {
       'locale does not match',
     );
   });
+});
+
+it('canonicalizes newlines from incremental inline text writers while preserving marks', () => {
+  const subject = bridge({ text: 'ab' });
+  const text = getBlockRoomCollaborativeText(subject.room, {
+    id: BLOCK_ID,
+    family: 'rich_text',
+    locale: true,
+    path: 'content[0].text.text',
+  });
+  text.format(0, 2, { bold: true });
+  subject.bridge.replaceCollaborativeText({
+    blockId: BLOCK_ID,
+    scope: 'locale',
+    path: 'content[0].text.text',
+    from: 1,
+    to: 1,
+    insert: '\r\n\n',
+  });
+  const content = subject.bridge.readBlocks()[0]!.localePayload!.content;
+  expect(content).toEqual([
+    { text: { text: 'a', styles: { bold: true } } },
+    { hardBreak: {} },
+    { hardBreak: {} },
+    { text: { text: 'b', styles: { bold: true } } },
+  ]);
+  subject.room.destroy();
 });

@@ -296,3 +296,23 @@ describe('PolicyTiptapEditor profile', () => {
     doc.destroy();
   });
 });
+
+it('preserves hard breaks, including inside styled links, in public policy HTML', () => {
+  const document = documentWith(
+    container('paragraph', {
+      type: 'paragraph',
+      content: [
+        {
+          type: 'text',
+          text: 'a',
+          marks: [{ type: 'bold' }, { type: 'link', attrs: { href: 'https://example.com' } }],
+        },
+        { type: 'hardBreak' },
+        { type: 'text', text: 'b' },
+      ],
+    }),
+  );
+  expect(policyTiptapDocumentToHtml(document)).toBe(
+    '<p><strong><a href="https://example.com">a</a></strong><br />b</p>',
+  );
+});

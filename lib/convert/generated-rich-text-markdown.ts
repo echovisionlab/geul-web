@@ -17,7 +17,7 @@ import {
 import { buildContentScopedFileUrl } from '@/lib/media/content-scoped-file-url';
 
 function styledText(value: Pick<RichTextStyledText, 'text' | 'styles'>): string {
-  let text = value.text;
+  let text = value.text.replace(/\r\n|\r/g, '\n').replaceAll('\n', '<br>');
   const styles = value.styles;
   if (styles?.bold) {
     text = `**${text}**`;
@@ -36,7 +36,7 @@ function styledText(value: Pick<RichTextStyledText, 'text' | 'styles'>): string 
 
 function inlineMarkdown(values: readonly RichTextInline[], context?: SiteVariableContext): string {
   return values
-    .map((item) => {
+    .map((item, index) => {
       switch (item.value.case) {
         case 'text':
           return styledText(item.value.value);
@@ -55,7 +55,14 @@ function inlineMarkdown(values: readonly RichTextInline[], context?: SiteVariabl
           return href ? `[${label}](${href.replaceAll('(', '%28').replaceAll(')', '%29')})` : label;
         }
         case 'hardBreak':
-          return '\n';
+          // A blank Markdown line is a paragraph boundary. Use inline tags for
+          // edge/consecutive breaks so they cannot turn into extra paragraphs.
+          return index === 0 ||
+            index === values.length - 1 ||
+            values[index - 1]?.value.case === 'hardBreak' ||
+            values[index + 1]?.value.case === 'hardBreak'
+            ? '<br>'
+            : '  \n';
         case 'link': {
           const label = item.value.value.content
             .map((text) => {
@@ -143,19 +150,27 @@ function blockMarkdown(
       markdown = inlineMarkdown(localeValue(pair, 'paragraph').content, context);
       break;
     case 'heading':
-      markdown = `${'#'.repeat(pair.block.value.value.props?.level || 1)} ${inlineMarkdown(localeValue(pair, 'heading').content, context)}`;
+      markdown = `${'#'.repeat(pair.block.value.value.props?.level || 1)} ${inlineMarkdown(localeValue(pair, 'heading').content, context).replaceAll('  \n', '<br>')}`;
       break;
     case 'bulletListItem':
-      markdown = `- ${inlineMarkdown(localeValue(pair, 'bulletListItem').content, context)}`;
+      markdown = `- ${inlineMarkdown(localeValue(pair, 'bulletListItem').content, context).replaceAll('\n', '\n  ')}`;
       break;
     case 'numberedListItem':
-      markdown = `${pair.block.value.value.props?.start || 1}. ${inlineMarkdown(localeValue(pair, 'numberedListItem').content, context)}`;
+      {
+        const marker = `${pair.block.value.value.props?.start || 1}. `;
+        markdown =
+          marker +
+          inlineMarkdown(localeValue(pair, 'numberedListItem').content, context).replaceAll(
+            '\n',
+            `\n${' '.repeat(marker.length)}`,
+          );
+      }
       break;
     case 'checkListItem':
-      markdown = `- [${pair.block.value.value.props?.checked ? 'x' : ' '}] ${inlineMarkdown(localeValue(pair, 'checkListItem').content, context)}`;
+      markdown = `- [${pair.block.value.value.props?.checked ? 'x' : ' '}] ${inlineMarkdown(localeValue(pair, 'checkListItem').content, context).replaceAll('\n', '\n  ')}`;
       break;
     case 'quote':
-      markdown = `> ${inlineMarkdown(localeValue(pair, 'quote').content, context)}`;
+      markdown = `> ${inlineMarkdown(localeValue(pair, 'quote').content, context).replaceAll('\n', '\n> ')}`;
       break;
     case 'callout': {
       const icon = pair.block.value.value.props?.icon ?? '💡';
@@ -178,11 +193,14 @@ function blockMarkdown(
         rows.length === 0
           ? ''
           : [
-              `| ${rows[0]!.cells.map((cell) => inlineMarkdown(cell.content, context)).join(' | ')} |`,
+              `| ${rows[0]!.cells.map((cell) => inlineMarkdown(cell.content, context).replaceAll('  \n', '<br>')).join(' | ')} |`,
               `| ${rows[0]!.cells.map(() => '---').join(' | ')} |`,
               ...rows
                 .slice(1)
-                .map((row) => `| ${row.cells.map((cell) => inlineMarkdown(cell.content, context)).join(' | ')} |`),
+                .map(
+                  (row) =>
+                    `| ${row.cells.map((cell) => inlineMarkdown(cell.content, context).replaceAll('  \n', '<br>')).join(' | ')} |`,
+                ),
             ].join('\n');
       break;
     }

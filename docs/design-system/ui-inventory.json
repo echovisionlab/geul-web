@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "7a3fe7f1267bdc061297320e6bdb865b005d51231de75997c8029cb3b990efa7",
+  "manifestHash": "a5930235a012ea9c25c8f50127f86d54e8eb3f60c2353f9dcaf3793f38d964c4",
   "counts": {
     "sourceFiles": 3758,
     "productionSourceFiles": 2280,
@@ -10,7 +10,7 @@
     "coreFamilies": 57,
     "featureDomains": 53,
     "storyFiles": 256,
-    "storyVariants": 1445,
+    "storyVariants": 1446,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -85378,6 +85378,11 @@
           "name": "Template",
           "args": "{ page: 'template' }",
           "preview": "http://localhost:6010/?path=/story/pages-admin-email-editors--template"
+        },
+        {
+          "name": "TemplateLineBreaks",
+          "args": "{ page: 'template', lineBreaks: true }",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-email-editors--template-line-breaks"
         },
         {
           "name": "LayoutPending",
