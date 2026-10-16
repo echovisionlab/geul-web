@@ -72,6 +72,7 @@ function ResidentPlayground({
   const [mediaOpened, setMediaOpened] = useState(initialScenario === 'file');
   const [runtimeStore] = useState(createEditorMediaRuntimeStore);
   const localUrls = useRef<string[]>([]);
+  const uploadLifetime = useRef<AbortController | null>(null);
   const appliedScenario = useRef(false);
   const [libraryFiles, setLibraryFiles] = useState<FileManagerFileRow[]>([]);
   const locale = useLocale();
@@ -87,6 +88,8 @@ function ResidentPlayground({
   const editorCopy = useTranslations('editorCommon.editor');
   const editorReady = useCallback((value: TiptapEditorInstance | null) => setEditor(value), []);
   useEffect(() => {
+    const lifetime = new AbortController();
+    uploadLifetime.current = lifetime;
     const current = createTiptapPlaygroundRoom(
       initialScenario
         ? fromJson(LocalizedRichTextDocumentSchema, {
@@ -110,6 +113,10 @@ function ResidentPlayground({
     );
     setRoom(current);
     return () => {
+      lifetime.abort();
+      if (uploadLifetime.current === lifetime) {
+        uploadLifetime.current = null;
+      }
       current.awareness.destroy();
       current.document.destroy();
       queryClient.clear();
@@ -355,7 +362,8 @@ function ResidentPlayground({
           onClose={() => setMediaOpened(false)}
           libraryDataSource={libraryDataSource}
           onUploadFiles={async (files) => {
-            if (!editor) {
+            const lifetime = uploadLifetime.current;
+            if (!editor || !lifetime || lifetime.signal.aborted) {
               return;
             }
             setFileError('');
@@ -363,6 +371,7 @@ function ResidentPlayground({
             await insertLocalPreviewFiles({
               editor,
               runtimeStore,
+              signal: lifetime.signal,
               files,
               retainUrl: (url) => localUrls.current.push(url),
               onError: (name, message) => setFileError(`${name}: ${message}`),
@@ -386,7 +395,9 @@ function ResidentPlayground({
                 ]);
               },
             });
-            setSelectedFiles(files.map((file) => ({ name: file.name, type: file.type, size: file.size })));
+            if (!lifetime.signal.aborted && !editor.isDestroyed) {
+              setSelectedFiles(files.map((file) => ({ name: file.name, type: file.type, size: file.size })));
+            }
           }}
           onSelectLibraryFiles={(files) => {
             editor?.chain().focus('end').run();

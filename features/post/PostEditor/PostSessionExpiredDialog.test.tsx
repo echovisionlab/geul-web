@@ -31,16 +31,22 @@ beforeEach(() => {
   root = createRoot(container);
 });
 
-afterEach(() => {
-  act(() => root.unmount());
+afterEach(async () => {
+  await act(async () => root.unmount());
   container.remove();
   vi.restoreAllMocks();
+  vi.useRealTimers();
 });
 
 describe('PostSessionExpiredDialog', () => {
   it('starts login with the exact editor URL as return target', async () => {
-    const navigate = vi.fn();
-    act(() => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    let completed!: () => void;
+    const confirmation = new Promise<void>((resolve) => {
+      completed = resolve;
+    });
+    const navigate = vi.fn(() => completed());
+    await act(async () => {
       root.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
           <DesignSystemProvider locale="en" forceColorScheme="light">
@@ -50,12 +56,12 @@ describe('PostSessionExpiredDialog', () => {
       );
     });
 
-    act(() => {
+    await act(async () => {
       document.body.querySelector<HTMLButtonElement>('[role="alertdialog"] button')?.click();
+      await confirmation;
+      vi.advanceTimersByTime(2_000);
     });
 
-    await vi.waitFor(() =>
-      expect(navigate).toHaveBeenCalledWith('/login?redirect=%2Fposts%2Fpost-1%3Fedit%3Dtrue%26locale%3Dko%23body'),
-    );
+    expect(navigate).toHaveBeenCalledWith('/login?redirect=%2Fposts%2Fpost-1%3Fedit%3Dtrue%26locale%3Dko%23body');
   });
 });

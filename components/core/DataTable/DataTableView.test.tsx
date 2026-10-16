@@ -41,8 +41,8 @@ beforeEach(() => {
   root = createRoot(host);
 });
 
-afterEach(() => {
-  act(() => {
+afterEach(async () => {
+  await act(async () => {
     root?.unmount();
   });
   host?.remove();
@@ -479,7 +479,7 @@ describe('DataTableView', () => {
     expect(document.querySelector<HTMLElement>('[data-datatable-empty]')?.style.minHeight).toBe('164px');
   });
 
-  it('renders mapped cells and emits row, selection, and sort intent', () => {
+  it('renders mapped cells and emits row, selection, and sort intent', async () => {
     const onRowActivate = vi.fn();
     const onSelectedRowKeysChange = vi.fn();
     const onSort = vi.fn();
@@ -539,19 +539,21 @@ describe('DataTableView', () => {
     expect(sortButton?.closest('th')?.getAttribute('aria-sort')).toBe('descending');
     expect(sortButton?.getAttribute('data-appearance')).toBe('default');
     expect(sortButton?.hasAttribute('data-full-width')).toBe(true);
-    sortButton?.click();
+    await act(async () => sortButton!.click());
     expect(onSort).toHaveBeenCalledTimes(1);
 
-    document.querySelector<HTMLInputElement>('input[aria-label="Select Alpha"]')?.click();
+    await act(async () => document.querySelector<HTMLInputElement>('input[aria-label="Select Alpha"]')!.click());
     expect(onSelectedRowKeysChange).toHaveBeenCalledWith([]);
 
-    document.querySelector<HTMLInputElement>('input[aria-label="Select all records"]')?.click();
+    await act(async () => document.querySelector<HTMLInputElement>('input[aria-label="Select all records"]')!.click());
     expect(onSelectedRowKeysChange).toHaveBeenCalledWith(['row-1', 'row-2']);
     expect(onRowActivate).not.toHaveBeenCalled();
 
     const actionCells = document.querySelectorAll<HTMLElement>('[data-datatable-action-cell]');
-    actionCells[0]?.click();
-    actionCells[2]?.click();
+    await act(async () => {
+      actionCells[0]!.click();
+      actionCells[2]!.click();
+    });
     expect(onRowActivate).not.toHaveBeenCalled();
 
     const desktopRow = document.querySelector<HTMLTableRowElement>('[data-datatable-desktop-row="row-1"]');
@@ -574,28 +576,28 @@ describe('DataTableView', () => {
       expect(control.classList.contains(classes.rowActionControl)).toBe(true);
     }
 
-    act(() => activationControls[0]?.focus());
+    await act(async () => activationControls[0]!.focus());
     expect(document.activeElement).toBe(activationControls[0]);
 
-    desktopRow?.click();
+    await act(async () => desktopRow!.click());
     expect(onRowActivate).toHaveBeenLastCalledWith(rows[0]);
 
     onRowActivate.mockClear();
-    act(() => {
+    await act(async () => {
       desktopRow?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, metaKey: true }));
     });
     expect(onRowActivate).toHaveBeenCalledTimes(1);
     expect(onRowActivate).toHaveBeenLastCalledWith(rows[0]);
 
     onRowActivate.mockClear();
-    act(() => {
+    await act(async () => {
       mobileRow?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, ctrlKey: true }));
     });
     expect(onRowActivate).toHaveBeenCalledTimes(1);
     expect(onRowActivate).toHaveBeenLastCalledWith(rows[0]);
 
     onRowActivate.mockClear();
-    act(() => {
+    await act(async () => {
       activationControls[0]?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
       activationControls[0]?.click();
     });
@@ -613,7 +615,7 @@ describe('DataTableView', () => {
       },
       { once: true },
     );
-    act(() => activationControls[0]?.dispatchEvent(modifiedClick));
+    await act(async () => activationControls[0]!.dispatchEvent(modifiedClick));
     expect(onRowActivate).not.toHaveBeenCalled();
     expect(preventedByRowAction).toBe(false);
   });
@@ -673,7 +675,7 @@ describe('DataTableView', () => {
     expect(onKeyDown).toHaveBeenCalledWith(expect.anything(), row, 0);
   });
 
-  it('keeps disabled rows visible while suppressing activation and selection', () => {
+  it('keeps disabled rows visible while suppressing activation and selection', async () => {
     const onClick = vi.fn();
     const onDoubleClick = vi.fn();
     const onKeyDown = vi.fn();
@@ -707,20 +709,22 @@ describe('DataTableView', () => {
       expect(renderedRow?.getAttribute('aria-disabled')).toBe('true');
       expect(renderedRow?.hasAttribute('data-disabled')).toBe(true);
       expect(renderedRow?.hasAttribute('data-disabled')).toBe(true);
-      renderedRow?.click();
-      renderedRow?.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
-      renderedRow?.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }));
+      await act(async () => {
+        renderedRow!.click();
+        renderedRow!.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+        renderedRow!.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }));
+      });
     }
     expect(onClick).not.toHaveBeenCalled();
     expect(onDoubleClick).not.toHaveBeenCalled();
     expect(onKeyDown).not.toHaveBeenCalled();
     expect(document.querySelector<HTMLInputElement>('input[aria-label="Select Disabled"]')?.disabled).toBe(true);
 
-    document.querySelector<HTMLInputElement>('input[aria-label="Select all rows"]')?.click();
+    await act(async () => document.querySelector<HTMLInputElement>('input[aria-label="Select all rows"]')!.click());
     expect(onSelectedRowKeysChange).toHaveBeenCalledWith(['enabled']);
   });
 
-  it('keeps non-selectable navigation rows interactive while excluding them from checkbox selection', () => {
+  it('keeps non-selectable navigation rows interactive while excluding them from checkbox selection', async () => {
     const onClick = vi.fn();
     const onSelectedRowKeysChange = vi.fn();
     const rows: Row[] = [
@@ -744,10 +748,12 @@ describe('DataTableView', () => {
 
     expect(document.querySelector('input[aria-label="Select Folder"]')).toBeNull();
     expect(document.querySelector<HTMLInputElement>('input[aria-label="Select File"]')?.disabled).toBe(false);
-    document.querySelector<HTMLTableRowElement>('[data-datatable-desktop-row="folder"]')?.click();
+    await act(async () =>
+      document.querySelector<HTMLTableRowElement>('[data-datatable-desktop-row="folder"]')!.click(),
+    );
     expect(onClick).toHaveBeenCalledWith(expect.anything(), rows[0], 0);
 
-    document.querySelector<HTMLInputElement>('input[aria-label="Select all files"]')?.click();
+    await act(async () => document.querySelector<HTMLInputElement>('input[aria-label="Select all files"]')!.click());
     expect(onSelectedRowKeysChange).toHaveBeenCalledWith(['file']);
   });
 

@@ -62,7 +62,11 @@ vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
 
 vi.mock('@mantine/hooks', () => ({ useDisclosure: () => [false, { open: openPlacesModal, close: vi.fn() }] }));
 vi.mock('@/components/core/Input', () => ({
-  TextInput: ({ classNames, ...props }: HTMLAttributes<HTMLInputElement> & { classNames?: { input?: string } }) => (
+  TextInput: ({
+    classNames,
+    textRole: _textRole,
+    ...props
+  }: HTMLAttributes<HTMLInputElement> & { classNames?: { input?: string }; textRole?: string }) => (
     <input className={classNames?.input} {...props} />
   ),
 }));

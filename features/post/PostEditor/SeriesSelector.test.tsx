@@ -3,7 +3,7 @@
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { notifyManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SeriesSelector } from './SeriesSelector';
@@ -45,6 +45,7 @@ const nextSeries = { id: 'series-next', title: 'Next series', slug: 'next-series
 
 let container: HTMLDivElement;
 let root: Root;
+let queryClient: QueryClient;
 
 async function renderSelector(options: {
   available?: (typeof oldSeries)[];
@@ -53,9 +54,6 @@ async function renderSelector(options: {
   initialOrder?: number;
   posts?: { id: string; title: string; slug: string; status: 'draft'; seriesOrder: number }[];
 }) {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
-  });
   if (options.loadError) {
     mocks.listMySeries.mockRejectedValue(options.loadError);
     mocks.listSeriesSimple.mockRejectedValue(options.loadError);
@@ -97,16 +95,16 @@ function seriesField() {
 }
 
 /** Core Select opens its listbox from the field's popup button; the field input is the named trigger. */
-function openSeriesOptions() {
+async function openSeriesOptions() {
   const opener = seriesField()
     .closest('[data-geul-input]')
     ?.querySelector<HTMLButtonElement>('button[aria-haspopup="listbox"]');
   expect(opener).toBeDefined();
-  act(() => opener?.click());
+  await act(async () => opener?.click());
 }
 
 async function selectNextSeries() {
-  openSeriesOptions();
+  await openSeriesOptions();
   await vi.waitFor(() => {
     const option = Array.from(document.querySelectorAll<HTMLElement>('[role="option"]')).find(
       (item) => item.textContent === nextSeries.title,
@@ -116,11 +114,15 @@ async function selectNextSeries() {
   const option = Array.from(document.querySelectorAll<HTMLElement>('[role="option"]')).find(
     (item) => item.textContent === nextSeries.title,
   );
-  act(() => option?.click());
+  await act(async () => option?.click());
 }
 
 describe('SeriesSelector authority boundary', () => {
   beforeEach(() => {
+    notifyManager.setNotifyFunction((callback) => act(callback));
+    queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
     vi.clearAllMocks();
     mocks.assign.mockResolvedValue({ success: true });
     mocks.create.mockResolvedValue({ data: { id: 'series-new' } });
@@ -131,8 +133,13 @@ describe('SeriesSelector authority boundary', () => {
     root = createRoot(container);
   });
 
-  afterEach(() => {
-    act(() => root.unmount());
+  afterEach(async () => {
+    await act(async () => {
+      root.unmount();
+      await queryClient.cancelQueries();
+      queryClient.clear();
+    });
+    notifyManager.setNotifyFunction((callback) => callback());
     container.remove();
   });
 
@@ -151,7 +158,7 @@ describe('SeriesSelector authority boundary', () => {
     await renderSelector({ loadError: new Error('network down') });
     await vi.waitFor(() => expect(mocks.listMySeries).toHaveBeenCalled());
 
-    openSeriesOptions();
+    await openSeriesOptions();
 
     await vi.waitFor(() =>
       expect(mocks.notification).toHaveBeenCalledWith({ message: 'updateFailed', tone: 'danger' }),

@@ -4076,8 +4076,7 @@
         "siteUrl": "URL เว็บไซต์",
         "companyName": "ชื่อบริษัท",
         "legalEmail": "อีเมลฝ่ายกฎหมาย",
-        "supportEmail": "อีเมลฝ่ายสนับสนุน",
-        "privacyEmail": "อีเมลด้านความเป็นส่วนตัว"
+        "contactEmail": "อีเมลติดต่อ"
       }
     },
     "accessDowngraded": {
@@ -4713,15 +4712,10 @@
           "description": "สำหรับการสอบถามทางกฎหมาย (ข้อกำหนด ความเป็นส่วนตัว ฯลฯ)",
           "placeholder": "legal@example.com"
         },
-        "supportEmail": {
-          "label": "อีเมลสนับสนุน",
-          "description": "สำหรับการสนับสนุนลูกค้า",
-          "placeholder": "support@example.com"
-        },
-        "privacyEmail": {
-          "label": "อีเมลความเป็นส่วนตัว",
-          "description": "สำหรับคำขอที่เกี่ยวข้องกับความเป็นส่วนตัว (GDPR, การลบข้อมูล ฯลฯ )",
-          "placeholder": "Privacy@example.com"
+        "contactEmail": {
+          "label": "อีเมลติดต่อ",
+          "description": "สำหรับคำถามทั่วไป การสนับสนุน และคำขอเกี่ยวกับความเป็นส่วนตัว",
+          "placeholder": "contact@example.com"
         },
         "primaryColor": {
           "label": "สีแบรนด์",

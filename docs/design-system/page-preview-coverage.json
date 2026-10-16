@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "methodology": "All App Router visual entry files indexed by TypeScript imports/JSX; exact reviewed route/boundary maps count separately from mere Feature story overlap. Unmapped entrypoints remain explicit gaps. Static source census is not a browser pass.",
-  "sourceManifestHash": "0ecb244383ac378b3b2b84a96bc9a61a75c9596891a4684ca2124cc525c55cff",
+  "sourceManifestHash": "214a64a51df95b90e1c23d68790a164f24cdfa72900a7bdeddf22649366f06db",
   "counts": {
     "queryEditorBranches": 12,
     "editorBranchPreviews": 12,
@@ -6709,6 +6709,7 @@
         "features/editor/toolbars/FormattingButtons.tsx",
         "features/editor/ui/EditorMediaBlockShell.tsx",
         "features/editor/ui/FileBlockMetadataFields.tsx",
+        "features/email/EmailPreviewFrame.tsx",
         "features/executable/ExecutableRuntimeControls.tsx",
         "features/file-manager/ui/FileBrowserGridView.tsx",
         "features/file-manager/ui/FileBrowserListView.tsx",
@@ -7217,6 +7218,7 @@
         "features/editor/useEditorAccessLevel.ts",
         "features/editor/useEditorNavigation.ts",
         "features/editor/useEditorPermissionRevocation.ts",
+        "features/email/EmailPreviewFrame.tsx",
         "features/executable/ExecutableRuntimeControls.tsx",
         "features/file-manager/file-browser-presentation.ts",
         "features/file-manager/sort.ts",
@@ -33062,6 +33064,7 @@
         "features/editor/toolbars/EditorToolbarAction.tsx",
         "features/editor/toolbars/EditorToolbarTooltip.tsx",
         "features/editor/toolbars/FormattingButtons.tsx",
+        "features/email/EmailPreviewFrame.tsx",
         "features/site/PageLoader/PageLoader.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
         "features/translation/TranslationLocaleControl.tsx",
@@ -33175,6 +33178,7 @@
         "features/editor/toolbars/FormattingButtons.tsx",
         "features/editor/useEditorAccessLevel.ts",
         "features/editor/useEditorPermissionRevocation.ts",
+        "features/email/EmailPreviewFrame.tsx",
         "features/site/PageLoader/PageLoader.tsx",
         "features/site/PageLoader/index.ts",
         "features/site/PageLoader/loader-image.ts",
@@ -34155,6 +34159,7 @@
         "features/date-time/DateTime.tsx",
         "features/editor/tiptap/code-editor/MonacoSourceEditor.tsx",
         "features/editor/tiptap/code-editor/MonacoSourceEditorRuntime.tsx",
+        "features/email/EmailPreviewFrame.tsx",
         "features/site/PageLoader/PageLoader.tsx",
         "features/translation/EmailEntityTranslationsPanel.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -34196,6 +34201,7 @@
         "features/editor/tiptap/code-editor/source-editor-boundary.ts",
         "features/editor/tiptap/code-editor/source-editor-presentation.ts",
         "features/editor/useEditorAccessLevel.ts",
+        "features/email/EmailPreviewFrame.tsx",
         "features/site/PageLoader/PageLoader.tsx",
         "features/site/PageLoader/index.ts",
         "features/site/PageLoader/loader-image.ts",
@@ -34252,6 +34258,10 @@
             {
               "variant": "TemplateLineBreaks",
               "preview": "http://localhost:6010/?path=/story/pages-admin-email-editors--template-line-breaks"
+            },
+            {
+              "variant": "TemplateRichFormatting",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-email-editors--template-rich-formatting"
             },
             {
               "variant": "LayoutPending",
@@ -34364,6 +34374,7 @@
         "features/data-table/MultiSortView.tsx",
         "features/data-table/TableFocusRecovery.tsx",
         "features/date-time/DateTime.tsx",
+        "features/email/EmailPreviewFrame.tsx",
         "features/site/PageLoader/PageLoader.tsx"
       ],
       "dependencyGraph": [
@@ -34395,6 +34406,7 @@
         "features/data-table/multi-filter-model.ts",
         "features/data-table/selection-label.ts",
         "features/date-time/DateTime.tsx",
+        "features/email/EmailPreviewFrame.tsx",
         "features/email/deletion-policy.ts",
         "features/site/PageLoader/PageLoader.tsx",
         "features/site/PageLoader/index.ts",
@@ -34533,6 +34545,7 @@
         "features/editor/toolbars/EditorToolbarAction.tsx",
         "features/editor/toolbars/EditorToolbarTooltip.tsx",
         "features/editor/toolbars/FormattingButtons.tsx",
+        "features/email/EmailPreviewFrame.tsx",
         "features/email/EmailTemplateEditor/EmailTemplateEditor.tsx",
         "features/site/PageLoader/PageLoader.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -34636,6 +34649,7 @@
         "features/editor/toolbars/EditorToolbarTooltip.tsx",
         "features/editor/toolbars/FormattingButtons.tsx",
         "features/editor/useEditorAccessLevel.ts",
+        "features/email/EmailPreviewFrame.tsx",
         "features/email/EmailTemplateEditor/EmailTemplateEditor.tsx",
         "features/site/PageLoader/PageLoader.tsx",
         "features/site/PageLoader/index.ts",
@@ -34693,6 +34707,10 @@
             {
               "variant": "TemplateLineBreaks",
               "preview": "http://localhost:6010/?path=/story/pages-admin-email-editors--template-line-breaks"
+            },
+            {
+              "variant": "TemplateRichFormatting",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-email-editors--template-rich-formatting"
             },
             {
               "variant": "LayoutPending",

@@ -29,7 +29,6 @@ afterEach(() => {
   room?.destroy();
   queryClient?.clear();
   host?.remove();
-  document.body.innerHTML = '';
 });
 async function renderSections(count: number) {
   room = localDocumentRoom('page', 'en');
@@ -74,8 +73,10 @@ describe('Page section structural accessibility', () => {
     const initial = sectionNodes().map((node) => node.dataset.pageSectionId!);
     const remove = (index: number) => {
       const button = sectionNodes()[index]!.querySelector<HTMLButtonElement>('button[aria-label^="Delete"]')!;
-      button.focus();
-      act(() => button.click());
+      act(() => {
+        button.focus();
+        button.click();
+      });
     };
     remove(0);
     await settleFocus();

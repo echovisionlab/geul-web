@@ -4076,8 +4076,7 @@
         "siteUrl": "Website-URL",
         "companyName": "Bedrijfsnaam",
         "legalEmail": "Juridisch e-mailadres",
-        "supportEmail": "Support-e-mailadres",
-        "privacyEmail": "Privacy-e-mailadres"
+        "contactEmail": "Contact-e-mailadres"
       }
     },
     "accessDowngraded": {
@@ -4713,15 +4712,10 @@
           "description": "Voor juridische vragen (Servicevoorwaarden, Privacybeleid, enz.)",
           "placeholder": "legal@example.com"
         },
-        "supportEmail": {
-          "label": "Supporte-mail",
-          "description": "Voor klantondersteuning",
-          "placeholder": "support@example.com"
-        },
-        "privacyEmail": {
-          "label": "Privacy-e-mail",
-          "description": "Voor privacygerelateerde verzoeken (AVG, gegevensverwijdering, enz.)",
-          "placeholder": "privacy@example.com"
+        "contactEmail": {
+          "label": "Contact-e-mailadres",
+          "description": "Voor algemene vragen, ondersteuning en privacyverzoeken",
+          "placeholder": "contact@example.com"
         },
         "primaryColor": {
           "label": "Merkkleur",

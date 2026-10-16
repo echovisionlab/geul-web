@@ -89,7 +89,7 @@ async function start(element: ReactNode) {
       <head />
       <body>
         {/* The app layout provides client messages; the page body now includes the client outline. */}
-        <NextIntlClientProvider locale="ko" messages={koMessages}>
+        <NextIntlClientProvider locale="ko" messages={koMessages} timeZone="UTC">
           <DesignSystemProvider forceColorScheme="light">
             <Suspense fallback={<span>outer pending</span>}>{element}</Suspense>
           </DesignSystemProvider>

@@ -29,6 +29,7 @@
     ]
   },
   "include": [
+    "**/*.mts",
     "**/*.ts",
     "**/*.tsx",
     ".storybook/main.ts",

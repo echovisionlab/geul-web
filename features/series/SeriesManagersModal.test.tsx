@@ -2,7 +2,7 @@
 
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { notifyManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SeriesManagersModal } from './SeriesManagersModal';
@@ -36,11 +36,9 @@ vi.mock('@/lib/queries/series-browser', () => ({
 
 let container: HTMLDivElement;
 let root: Root;
+let queryClient: QueryClient;
 
 async function renderModal(canManageManagers: boolean) {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
-  });
   await act(async () => {
     root.render(
       <QueryClientProvider client={queryClient}>
@@ -54,6 +52,10 @@ async function renderModal(canManageManagers: boolean) {
 
 describe('SeriesManagersModal', () => {
   beforeEach(() => {
+    notifyManager.setNotifyFunction((callback) => act(callback));
+    queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
     vi.clearAllMocks();
     mocks.list.mockResolvedValue([{ memberId: 'member-1', nickname: 'Onboarded member', avatarUrl: null }]);
     mocks.search.mockResolvedValue([]);
@@ -64,8 +66,13 @@ describe('SeriesManagersModal', () => {
     root = createRoot(container);
   });
 
-  afterEach(() => {
-    act(() => root.unmount());
+  afterEach(async () => {
+    await act(async () => {
+      root.unmount();
+      await queryClient.cancelQueries();
+      queryClient.clear();
+    });
+    notifyManager.setNotifyFunction((callback) => callback());
     container.remove();
   });
 
@@ -82,7 +89,7 @@ describe('SeriesManagersModal', () => {
     await renderModal(true);
     await vi.waitFor(() => expect(document.querySelector('[aria-label="remove"]')).not.toBeNull());
 
-    act(() => document.querySelector<HTMLButtonElement>('[aria-label="remove"]')?.click());
+    await act(async () => document.querySelector<HTMLButtonElement>('[aria-label="remove"]')?.click());
 
     await vi.waitFor(() =>
       expect(mocks.notification).toHaveBeenCalledWith({

@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "40d44abad3d14526f864282358a4c2b5ac6850aa1a4b8ab90e14f2e60aa4627b",
+  "manifestHash": "8d072dabe43aad96115edf02a1ab5dedb14c0c4be3965974fc2342c28c19c77f",
   "counts": {
-    "sourceFiles": 3765,
-    "productionSourceFiles": 2284,
-    "componentFiles": 901,
+    "sourceFiles": 3775,
+    "productionSourceFiles": 2282,
+    "componentFiles": 900,
     "coreFamilies": 57,
     "featureDomains": 53,
     "storyFiles": 256,
@@ -21,6 +21,8 @@
     ".storybook/StoryCanvas.tsx",
     ".storybook/TextControl.accessibility.test.tsx",
     ".storybook/core-fixture-aliases.ts",
+    ".storybook/document-locale.test.ts",
+    ".storybook/document-locale.ts",
     ".storybook/documentation-contract.test.ts",
     ".storybook/documentation-contract.ts",
     ".storybook/fixture-i18n.test.tsx",
@@ -29,8 +31,12 @@
     ".storybook/loaders/transpile-typescript.cjs",
     ".storybook/main.ts",
     ".storybook/manager.ts",
+    ".storybook/middleware.mjs",
     ".storybook/preview.tsx",
     ".storybook/runtime-config-fixture.ts",
+    ".storybook/test-environment.mjs",
+    ".storybook/test-environment.test.ts",
+    ".storybook/test-runner-jest.config.mjs",
     "app/(general)/[...slug]/PageContent.tsx",
     "app/(general)/[...slug]/PageContentWithToken.tsx",
     "app/(general)/[...slug]/PageJsonLd.tsx",
@@ -849,6 +855,7 @@
     "components/core/overlay-target-context.ts",
     "components/core/presentation-contract.ts",
     "components/core/presentation-contract.type-test.tsx",
+    "components/core/testing/browser-navigation.ts",
     "components/core/type-test-env.d.ts",
     "components/core/typography-scale.test.ts",
     "components/core/visual-contract.ts",
@@ -923,6 +930,7 @@
     "features/admin/dashboard/AdminDashboardPage.tsx",
     "features/admin/email-layout/EmailLayoutEditPage.tsx",
     "features/admin/email-layout/EmailLayoutEditor.tsx",
+    "features/admin/email-layout/EmailLayoutPreview.test.tsx",
     "features/admin/email-layout/EmailLayoutPreview.tsx",
     "features/admin/email-layout/EmailLayoutPreviewView.tsx",
     "features/admin/email-layout/EmailLayoutTargetEditor.test.tsx",
@@ -1273,7 +1281,6 @@
     "features/editor/blocks/FileBlock/FileBlockView.tsx",
     "features/editor/blocks/FileBlock/index.ts",
     "features/editor/components/ConnectedMediaDownloadPolicyPanel.tsx",
-    "features/editor/components/ConnectedMediaFilePanel.tsx",
     "features/editor/components/EditorFileInsert.stories.tsx",
     "features/editor/components/EditorFileInsertPanel.test.tsx",
     "features/editor/components/EditorFileInsertPanel.tsx",
@@ -1313,8 +1320,6 @@
     "features/editor/editorInterruptionSignal.ts",
     "features/editor/extensions/KeyboardShortcutsExtension.test.ts",
     "features/editor/extensions/KeyboardShortcutsExtension.ts",
-    "features/editor/extensions/map/MapBlock.test.tsx",
-    "features/editor/extensions/map/MapBlock.tsx",
     "features/editor/extensions/math/MathInputRuleExtension.ts",
     "features/editor/extensions/math/math-normalization.test.ts",
     "features/editor/extensions/math/math-normalization.ts",
@@ -1647,6 +1652,8 @@
     "features/editor/useEditorPermissionRevocation.ts",
     "features/email/AdminEmailAuthoringDetailPages.test.tsx",
     "features/email/AdminEmailDeletionPages.test.tsx",
+    "features/email/EmailPreviewFrame.test.tsx",
+    "features/email/EmailPreviewFrame.tsx",
     "features/email/EmailTemplateEditor/EmailTemplateEditor.test.tsx",
     "features/email/EmailTemplateEditor/EmailTemplateEditor.tsx",
     "features/email/EmailTemplateEditor/email-placeholder-links.test.ts",
@@ -2819,7 +2826,6 @@
     "lib/ai/extract.ts",
     "lib/ai/summary-proposal.test.ts",
     "lib/ai/summary-proposal.ts",
-    "lib/api/browser-client.ts",
     "lib/api/browser/module-boundaries.test.ts",
     "lib/api/browser/public-file.ts",
     "lib/api/browser/public-post.ts",
@@ -3031,8 +3037,6 @@
     "lib/editor/usePendingEditorUnload.test.tsx",
     "lib/editor/usePendingEditorUnload.ts",
     "lib/editor/useRejectedEditorSaves.ts",
-    "lib/email/preview-document.test.ts",
-    "lib/email/preview-document.ts",
     "lib/env.test.ts",
     "lib/env.ts",
     "lib/form/build.test.ts",
@@ -3737,6 +3741,9 @@
     "stories/pages/fixtures/document-editor-room.ts",
     "stories/pages/fixtures/editor-pages.ts",
     "stories/pages/fixtures/email-catalog.ts",
+    "stories/pages/fixtures/email-preview.test.ts",
+    "stories/pages/fixtures/email-preview.ts",
+    "stories/pages/fixtures/email-rich-formatting.ts",
     "stories/pages/fixtures/form-share-links.ts",
     "stories/pages/fixtures/form-translations.ts",
     "stories/pages/fixtures/local-actions.test.ts",
@@ -3746,10 +3753,13 @@
     "stories/pages/fixtures/operations-a11y.ts",
     "stories/pages/fixtures/paginated.ts",
     "stories/pages/fixtures/personal-access-tokens.ts",
+    "stories/pages/fixtures/room-access-scenario.test.ts",
+    "stories/pages/fixtures/room-access-scenario.ts",
     "stories/pages/fixtures/table-query.ts",
     "stories/pages/fixtures/translation-admin.ts",
     "stories/pages/fixtures/transport-query.ts",
     "stories/pages/fixtures/use-document-editor.tsx",
+    "stories/pages/fixtures/use-email-preview.ts",
     "stories/public/fixtures/PublicShellStoryHarness.tsx",
     "stories/public/fixtures/document-outline.ts",
     "stories/public/fixtures/long-rich-text.ts",
@@ -22299,12 +22309,12 @@
             {
               "name": "content",
               "optional": false,
-              "type": "typeof previewEmailLayoutContentAction"
+              "type": "( html: string, sampleContent?: string, locale?: string, signal?: AbortSignal, ) => ReturnType<typeof previewEmailLayoutContentAction>"
             },
             {
               "name": "saved",
               "optional": false,
-              "type": "typeof previewEmailLayout"
+              "type": "( layoutId: string, sampleContent?: string, locale?: string, signal?: AbortSignal, ) => ReturnType<typeof previewEmailLayout>"
             }
           ]
         },
@@ -22353,7 +22363,7 @@
       "typeAliasEvidence": [],
       "productionConsumers": ["features/admin/email-layout/EmailLayoutEditPage.tsx"],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["features/admin/email-layout/EmailLayoutPreview.test.tsx"],
       "stories": [],
       "composedJsx": ["EmailLayoutPreviewView"]
     },
@@ -22386,11 +22396,6 @@
               "name": "isLoading",
               "optional": true,
               "type": "boolean"
-            },
-            {
-              "name": "locale",
-              "optional": true,
-              "type": "string"
             }
           ]
         }
@@ -22406,14 +22411,14 @@
         "DsLayoutInset",
         "DsLayoutStack",
         "DsText",
+        "EmailPreviewFrame",
         "IconAlertTriangle",
         "LayoutInset",
         "Loader",
         "SectionCard",
         "SupportingText",
         "Tooltip",
-        "div",
-        "iframe"
+        "div"
       ]
     },
     {
@@ -22529,6 +22534,7 @@
         "DsLayoutInset",
         "DsLayoutStack",
         "DsText",
+        "EmailPreviewFrame",
         "EmptyState",
         "FormModal",
         "IconEdit",
@@ -22540,8 +22546,7 @@
         "TextButton",
         "TextInput",
         "Textarea",
-        "div",
-        "iframe"
+        "div"
       ]
     },
     {
@@ -22603,6 +22608,7 @@
         "DsText",
         "EditorHeader",
         "EditorRuntimeProvider",
+        "EmailPreviewFrame",
         "EmailTemplateEditPageView",
         "EmailTemplateEditor",
         "EntityTranslationsPanel",
@@ -22620,8 +22626,7 @@
         "SupportingText",
         "TextInput",
         "TranslationLocaleControl",
-        "div",
-        "iframe"
+        "div"
       ]
     },
     {
@@ -30747,6 +30752,7 @@
         "EditorPermissionRevokedDialog",
         "EditorRuntimeProvider",
         "EditorSessionExpiredDialog",
+        "EmailPreviewFrame",
         "EntityTranslationsPanel",
         "IconCalendar",
         "IconChartBar",
@@ -30763,8 +30769,7 @@
         "SupportingText",
         "TextInput",
         "TranslationLocaleControl",
-        "div",
-        "iframe"
+        "div"
       ]
     },
     {
@@ -34393,24 +34398,6 @@
       "composedJsx": ["MediaDownloadPolicyAdapterContext.Provider", "MediaDownloadPolicyPanel"]
     },
     {
-      "file": "features/editor/components/ConnectedMediaFilePanel.tsx",
-      "owner": "Feature/editor",
-      "exports": [
-        {
-          "name": "ConnectedMediaFilePanel",
-          "kind": "function"
-        }
-      ],
-      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [],
-      "typeAliasEvidence": [],
-      "productionConsumers": [],
-      "catalogAdapters": [],
-      "tests": [],
-      "stories": [],
-      "composedJsx": ["MediaFilePanel"]
-    },
-    {
       "file": "features/editor/components/EditorFileInsertPanel.tsx",
       "owner": "Feature/editor",
       "exports": [
@@ -35157,10 +35144,7 @@
         }
       ],
       "typeAliasEvidence": [],
-      "productionConsumers": [
-        "features/editor/components/ConnectedMediaFilePanel.tsx",
-        "features/translation/LocalizedCollaborativeRichTextEditor.tsx"
-      ],
+      "productionConsumers": ["features/translation/LocalizedCollaborativeRichTextEditor.tsx"],
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
@@ -35657,24 +35641,6 @@
       "tests": [],
       "stories": ["stories/pages/PostEditorPage.stories.tsx"],
       "composedJsx": ["EditorMediaServicesContext.Provider"]
-    },
-    {
-      "file": "features/editor/extensions/map/MapBlock.tsx",
-      "owner": "Feature/editor",
-      "exports": [
-        {
-          "name": "MapBlock",
-          "kind": "value"
-        }
-      ],
-      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [],
-      "typeAliasEvidence": [],
-      "productionConsumers": [],
-      "catalogAdapters": [],
-      "tests": ["features/editor/extensions/map/MapBlock.test.tsx"],
-      "stories": [],
-      "composedJsx": []
     },
     {
       "file": "features/editor/tiptap/TiptapAuthoringControls.tsx",
@@ -37382,12 +37348,9 @@
           "type": "Record<string, string>"
         }
       ],
-      "productionConsumers": ["features/editor/extensions/map/MapBlock.tsx", "features/editor/tiptap/TiptapEditor.tsx"],
+      "productionConsumers": ["features/editor/tiptap/TiptapEditor.tsx"],
       "catalogAdapters": [],
-      "tests": [
-        "features/editor/extensions/map/MapBlock.test.tsx",
-        "features/editor/tiptap/map/TiptapMapNodeView.test.tsx"
-      ],
+      "tests": ["features/editor/tiptap/map/TiptapMapNodeView.test.tsx"],
       "stories": [],
       "composedJsx": [
         "EditorDsText",
@@ -40848,6 +40811,46 @@
       "tests": ["features/editor/ui/FileBlockMetadataFields.test.tsx"],
       "stories": [],
       "composedJsx": ["TextInput", "Textarea", "div"]
+    },
+    {
+      "file": "features/email/EmailPreviewFrame.tsx",
+      "owner": "Feature/email",
+      "exports": [
+        {
+          "name": "EmailPreviewFrame",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "EmailPreviewFrameProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "srcDoc",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "title",
+              "optional": false,
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": [
+        "features/admin/email-layout/EmailLayoutPreviewView.tsx",
+        "features/admin/email-layout/EmailLayoutsPage.tsx",
+        "features/admin/email-template/EmailTemplateEditPage.tsx",
+        "features/campaign/CampaignEditPage.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": ["features/email/EmailPreviewFrame.test.tsx"],
+      "stories": [],
+      "composedJsx": ["iframe"]
     },
     {
       "file": "features/email/EmailTemplateEditor/EmailTemplateEditor.tsx",
@@ -74650,6 +74653,7 @@
         "features/admin/MapThemeEditor/useMapThemeEditorInterruption.test.tsx",
         "features/admin/artist/ArtistDeleteDialogView.test.tsx",
         "features/admin/cms-page/PageRowMenu.test.tsx",
+        "features/admin/email-layout/EmailLayoutPreview.test.tsx",
         "features/admin/email-layout/EmailLayoutTargetEditor.test.tsx",
         "features/admin/email-layout/action-error-message.test.ts",
         "features/admin/email-template/EmailTemplateEditPage.configuration.test.tsx",
@@ -75131,7 +75135,6 @@
         "features/editor/blocks/FileBlock/FileBlockView.tsx",
         "features/editor/blocks/FileBlock/index.ts",
         "features/editor/components/ConnectedMediaDownloadPolicyPanel.tsx",
-        "features/editor/components/ConnectedMediaFilePanel.tsx",
         "features/editor/components/EditorFileInsertPanel.tsx",
         "features/editor/components/EditorFileInsertView.tsx",
         "features/editor/components/EditorFileLibraryPicker.tsx",
@@ -75154,7 +75157,6 @@
         "features/editor/editor-snapshot.ts",
         "features/editor/editorInterruptionSignal.ts",
         "features/editor/extensions/KeyboardShortcutsExtension.ts",
-        "features/editor/extensions/map/MapBlock.tsx",
         "features/editor/extensions/math/MathInputRuleExtension.ts",
         "features/editor/extensions/math/math-normalization.ts",
         "features/editor/external-video-insert.ts",
@@ -75368,7 +75370,6 @@
         "features/editor/MapInsertModal.tsx",
         "features/editor/blocks/FileBlock/FileBlockView.tsx",
         "features/editor/components/ConnectedMediaDownloadPolicyPanel.tsx",
-        "features/editor/components/ConnectedMediaFilePanel.tsx",
         "features/editor/components/EditorFileInsertPanel.tsx",
         "features/editor/components/EditorFileInsertView.tsx",
         "features/editor/components/EditorFileLibraryPicker.tsx",
@@ -75381,7 +75382,6 @@
         "features/editor/components/UnifiedFileAttachmentPagePreview.tsx",
         "features/editor/contexts/EditorMediaIngestContext.tsx",
         "features/editor/contexts/EditorMediaServicesContext.tsx",
-        "features/editor/extensions/map/MapBlock.tsx",
         "features/editor/tiptap/TiptapAuthoringControls.tsx",
         "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
         "features/editor/tiptap/TiptapBlockMenu.tsx",
@@ -75478,7 +75478,6 @@
         "features/editor/contract/localized-rich-text.test.ts",
         "features/editor/editor-color-theme.test.ts",
         "features/editor/extensions/KeyboardShortcutsExtension.test.ts",
-        "features/editor/extensions/map/MapBlock.test.tsx",
         "features/editor/extensions/math/math-normalization.test.ts",
         "features/editor/external-video-insert.test.ts",
         "features/editor/hooks/useBlockResize.test.tsx",
@@ -75605,15 +75604,20 @@
       "domain": "email",
       "category": "distribution",
       "sourceFiles": [
+        "features/email/EmailPreviewFrame.tsx",
         "features/email/EmailTemplateEditor/EmailTemplateEditor.tsx",
         "features/email/EmailTemplateEditor/email-placeholder-links.ts",
         "features/email/deletion-policy.ts"
       ],
-      "components": ["features/email/EmailTemplateEditor/EmailTemplateEditor.tsx"],
+      "components": [
+        "features/email/EmailPreviewFrame.tsx",
+        "features/email/EmailTemplateEditor/EmailTemplateEditor.tsx"
+      ],
       "stories": [],
       "tests": [
         "features/email/AdminEmailAuthoringDetailPages.test.tsx",
         "features/email/AdminEmailDeletionPages.test.tsx",
+        "features/email/EmailPreviewFrame.test.tsx",
         "features/email/EmailTemplateEditor/EmailTemplateEditor.test.tsx",
         "features/email/EmailTemplateEditor/email-placeholder-links.test.ts",
         "features/email/deletion-policy.test.ts"
@@ -83763,11 +83767,6 @@
           "preview": "http://localhost:6010/?path=/story/design-system-handbook--contribution"
         },
         {
-          "name": "Changelog",
-          "args": "{ initialDocument: 'docs/design-system/changelog.md' }",
-          "preview": "http://localhost:6010/?path=/story/design-system-handbook--changelog"
-        },
-        {
           "name": "Reference",
           "args": null,
           "preview": "http://localhost:6010/?path=/story/design-system-handbook--reference"
@@ -85265,9 +85264,9 @@
         "features/campaign/CampaignEditPage.tsx",
         "features/site/PageLoader/index.ts",
         "lib/collab/schemas/campaign-fields.schema.ts",
-        "lib/email/preview-document.ts",
         "lib/i18n/locale.ts",
         "stories/pages/fixtures/editor-pages.ts",
+        "stories/pages/fixtures/use-email-preview.ts",
         "stories/shared/preview-navigation.ts"
       ]
     },
@@ -85404,6 +85403,11 @@
           "preview": "http://localhost:6010/?path=/story/pages-admin-email-editors--template-line-breaks"
         },
         {
+          "name": "TemplateRichFormatting",
+          "args": "{ page: 'template', richFormatting: true }",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-email-editors--template-rich-formatting"
+        },
+        {
           "name": "LayoutPending",
           "args": "{ state: 'pending' }",
           "preview": "http://localhost:6010/?path=/story/pages-admin-email-editors--layout-pending"
@@ -85446,8 +85450,10 @@
         "features/admin/email-layout/EmailLayoutEditPage.tsx",
         "features/admin/email-template/EmailTemplateEditPage.tsx",
         "features/site/PageLoader/index.ts",
-        "lib/email/preview-document.ts",
-        "stories/pages/fixtures/editor-pages.ts"
+        "stories/pages/fixtures/editor-pages.ts",
+        "stories/pages/fixtures/email-preview.ts",
+        "stories/pages/fixtures/email-rich-formatting.ts",
+        "stories/pages/fixtures/use-email-preview.ts"
       ]
     },
     {
@@ -86968,7 +86974,6 @@
         "features/post/PostEditor/PostEditor.tsx",
         "features/site/PageLoader/index.ts",
         "features/translation/TranslationServicesContext.tsx",
-        "lib/collab/provider-control-state.ts",
         "lib/contexts/PostMetaContext.tsx",
         "lib/i18n/locale.ts",
         "lib/providers/AppNotificationRegion.tsx",
@@ -86977,6 +86982,7 @@
         "stories/pages/fixtures/DocumentEditorFrame.tsx",
         "stories/pages/fixtures/author-media.ts",
         "stories/pages/fixtures/author-translations.ts",
+        "stories/pages/fixtures/room-access-scenario.ts",
         "stories/pages/fixtures/use-document-editor.tsx",
         "stories/shared/preview-navigation.ts"
       ]
@@ -103334,31 +103340,6 @@
       ]
     },
     {
-      "file": "features/editor/extensions/map/MapBlock.tsx",
-      "reexports": [
-        {
-          "target": "features/editor/tiptap/map/index.ts",
-          "symbols": [
-            {
-              "exported": "createTiptapMapNode",
-              "imported": "createTiptapMapNode",
-              "typeOnly": false
-            },
-            {
-              "exported": "TiptapMapNodeView",
-              "imported": "TiptapMapNodeView",
-              "typeOnly": false
-            },
-            {
-              "exported": "TiptapMapNodeOptions",
-              "imported": "TiptapMapNodeOptions",
-              "typeOnly": true
-            }
-          ]
-        }
-      ]
-    },
-    {
       "file": "features/editor/extensions/math/MathInputRuleExtension.ts",
       "reexports": [
         {
@@ -104357,46 +104338,6 @@
             {
               "exported": "buildP5SandboxDocument",
               "imported": "buildP5SandboxDocument",
-              "typeOnly": false
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "file": "features/editor/tiptap/profiles/EmailTiptapEditor.tsx",
-      "reexports": [
-        {
-          "target": "features/editor/tiptap/profiles/email-preview.ts",
-          "symbols": [
-            {
-              "exported": "normalizeEmailCampaignPreviewHtml",
-              "imported": "normalizeEmailCampaignPreviewHtml",
-              "typeOnly": false
-            },
-            {
-              "exported": "normalizeEmailCampaignVariable",
-              "imported": "normalizeEmailCampaignVariable",
-              "typeOnly": false
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "file": "features/editor/tiptap/profiles/PolicyTiptapEditor.tsx",
-      "reexports": [
-        {
-          "target": "features/editor/tiptap/profiles/policy-document.ts",
-          "symbols": [
-            {
-              "exported": "policyTiptapDocumentToHtml",
-              "imported": "policyTiptapDocumentToHtml",
-              "typeOnly": false
-            },
-            {
-              "exported": "validatePolicyTiptapDocument",
-              "imported": "validatePolicyTiptapDocument",
               "typeOnly": false
             }
           ]
@@ -105447,21 +105388,6 @@
             {
               "exported": "FileTypeIcon",
               "imported": "FileTypeIcon",
-              "typeOnly": false
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "file": "features/media/content-block-media-runtime.ts",
-      "reexports": [
-        {
-          "target": "features/media/content-block-media-runtime-index.ts",
-          "symbols": [
-            {
-              "exported": "ContentBlockMediaRuntimeIndex",
-              "imported": "ContentBlockMediaRuntimeIndex",
               "typeOnly": false
             }
           ]
@@ -106695,296 +106621,6 @@
               "exported": "OidcProvider",
               "imported": "OidcProvider",
               "typeOnly": true
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "file": "lib/api/browser-client.ts",
-      "reexports": [
-        {
-          "target": "lib/api/browser/secure-admin.ts",
-          "symbols": [
-            {
-              "exported": "createAdminClient",
-              "imported": "createAdminClient",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/secure-ai.ts",
-          "symbols": [
-            {
-              "exported": "createAIClient",
-              "imported": "createAIClient",
-              "typeOnly": false
-            },
-            {
-              "exported": "createAIDocumentClient",
-              "imported": "createAIDocumentClient",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/secure-artist.ts",
-          "symbols": [
-            {
-              "exported": "createArtistClient",
-              "imported": "createArtistClient",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/secure-client.ts",
-          "symbols": [
-            {
-              "exported": "createClientClient",
-              "imported": "createClientClient",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/secure-email-layout.ts",
-          "symbols": [
-            {
-              "exported": "createEmailLayoutClient",
-              "imported": "createEmailLayoutClient",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/secure-file.ts",
-          "symbols": [
-            {
-              "exported": "createFileClient",
-              "imported": "createFileClient",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/secure-form.ts",
-          "symbols": [
-            {
-              "exported": "createFormClient",
-              "imported": "createFormClient",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/secure-label.ts",
-          "symbols": [
-            {
-              "exported": "createLabelClient",
-              "imported": "createLabelClient",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/secure-menu.ts",
-          "symbols": [
-            {
-              "exported": "createMenuClient",
-              "imported": "createMenuClient",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/secure-series.ts",
-          "symbols": [
-            {
-              "exported": "createSeriesClient",
-              "imported": "createSeriesClient",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/secure-site-setting.ts",
-          "symbols": [
-            {
-              "exported": "createSiteSettingClient",
-              "imported": "createSiteSettingClient",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/secure-post.ts",
-          "symbols": [
-            {
-              "exported": "createPostClient",
-              "imported": "createPostClient",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/secure-page.ts",
-          "symbols": [
-            {
-              "exported": "createPageClient",
-              "imported": "createPageClient",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/secure-release.ts",
-          "symbols": [
-            {
-              "exported": "createReleaseClient",
-              "imported": "createReleaseClient",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/secure-work.ts",
-          "symbols": [
-            {
-              "exported": "createWorkClient",
-              "imported": "createWorkClient",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/secure-member.ts",
-          "symbols": [
-            {
-              "exported": "createMemberClient",
-              "imported": "createMemberClient",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/secure-account.ts",
-          "symbols": [
-            {
-              "exported": "createAccountClient",
-              "imported": "createAccountClient",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/secure-translation.ts",
-          "symbols": [
-            {
-              "exported": "createTranslationClient",
-              "imported": "createTranslationClient",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/public-privacy.ts",
-          "symbols": [
-            {
-              "exported": "createPublicPrivacyClient",
-              "imported": "createPublicPrivacyClient",
-              "typeOnly": false
-            },
-            {
-              "exported": "createPublicPrivacyClientWithLocale",
-              "imported": "createPublicPrivacyClientWithLocale",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/public-file.ts",
-          "symbols": [
-            {
-              "exported": "createPublicFileClient",
-              "imported": "createPublicFileClient",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/public-terms.ts",
-          "symbols": [
-            {
-              "exported": "createPublicTermsClient",
-              "imported": "createPublicTermsClient",
-              "typeOnly": false
-            },
-            {
-              "exported": "createPublicTermsClientWithLocale",
-              "imported": "createPublicTermsClientWithLocale",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/public-post.ts",
-          "symbols": [
-            {
-              "exported": "createPublicPostClient",
-              "imported": "createPublicPostClient",
-              "typeOnly": false
-            },
-            {
-              "exported": "createPublicPostClientWithLocale",
-              "imported": "createPublicPostClientWithLocale",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/public-program-event.ts",
-          "symbols": [
-            {
-              "exported": "createPublicProgramEventClientWithLocale",
-              "imported": "createPublicProgramEventClientWithLocale",
-              "typeOnly": false
-            },
-            {
-              "exported": "createPublicProgramEventSeriesClientWithLocale",
-              "imported": "createPublicProgramEventSeriesClientWithLocale",
-              "typeOnly": false
-            },
-            {
-              "exported": "createPublicProgramEventTypeClientWithLocale",
-              "imported": "createPublicProgramEventTypeClientWithLocale",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/public-release.ts",
-          "symbols": [
-            {
-              "exported": "createPublicReleaseClient",
-              "imported": "createPublicReleaseClient",
-              "typeOnly": false
-            }
-          ]
-        },
-        {
-          "target": "lib/api/browser/public-work.ts",
-          "symbols": [
-            {
-              "exported": "createPublicWorkClient",
-              "imported": "createPublicWorkClient",
-              "typeOnly": false
-            },
-            {
-              "exported": "createPublicWorkClientWithLocale",
-              "imported": "createPublicWorkClientWithLocale",
-              "typeOnly": false
             }
           ]
         }

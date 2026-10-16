@@ -31,10 +31,11 @@ beforeEach(() => {
   root = createRoot(container);
 });
 
-afterEach(() => {
-  act(() => root.unmount());
+afterEach(async () => {
+  await act(async () => root.unmount());
   container.remove();
   vi.restoreAllMocks();
+  vi.useRealTimers();
 });
 
 describe('EditorSessionExpiredDialog', () => {
@@ -53,8 +54,13 @@ describe('EditorSessionExpiredDialog', () => {
   });
 
   it('renders a localized non-dismissible login action', async () => {
-    const onConfirm = vi.fn();
-    act(() => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    let completed!: () => void;
+    const confirmation = new Promise<void>((resolve) => {
+      completed = resolve;
+    });
+    const onConfirm = vi.fn(() => completed());
+    await act(async () => {
       root.render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
           <DesignSystemProvider locale="en" forceColorScheme="light">
@@ -69,8 +75,13 @@ describe('EditorSessionExpiredDialog', () => {
     expect(dialog?.textContent).toContain('Log in');
     expect(dialog?.querySelectorAll('button')).toHaveLength(1);
 
-    act(() => dialog?.querySelector<HTMLButtonElement>('button')?.click());
-    // Unsaved edits are written to this device before leaving for sign-in.
-    await vi.waitFor(() => expect(onConfirm).toHaveBeenCalledOnce());
+    await act(async () => {
+      dialog?.querySelector<HTMLButtonElement>('button')?.click();
+      // Wait for the real durable-edit preparation and resulting navigation.
+      await confirmation;
+      // This test's navigation spy keeps the page open; settle its resume timer.
+      vi.advanceTimersByTime(2_000);
+    });
+    expect(onConfirm).toHaveBeenCalledOnce();
   });
 });

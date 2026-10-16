@@ -1,3 +1,4 @@
+import { localRichFormattingEmailDocument } from './email-rich-formatting';
 import { create, fromJson } from '@bufbuild/protobuf';
 import { QueryClient } from '@tanstack/react-query';
 import {
@@ -78,56 +79,61 @@ export function localEditorQueryClient(entityType: string, entityId: string) {
   return client;
 }
 /** Actual canonical email block room and editor bridge; no WebSocket is opened. */
-export function localEmailRoom(entityType: 'campaign' | 'email_template', lineBreaks = false) {
+export function localEmailRoom(entityType: 'campaign' | 'email_template', lineBreaks = false, richFormatting = false) {
   const document = new Y.Doc();
   hydrateCanonicalBlockRoom(
     document,
     entityType === 'email_template' ? 'email-template' : entityType,
     'ko',
-    fromJson(LocalizedRichTextDocumentSchema, {
-      blockCatalogFingerprint: contentBlockCatalogFingerprint,
-      profile: RichTextProfile.EMAIL,
-      locale: 'ko',
-      base: {
-        nodes: [
-          { block: { id: '20000000-0000-4000-8000-000000000001', paragraph: { props: {} } }, placement: { index: 0 } },
-          ...(lineBreaks
-            ? [
-                {
-                  block: { id: '20000000-0000-4000-8000-000000000002', paragraph: { props: {} } },
-                  placement: { index: 1 },
-                },
-              ]
-            : []),
-        ],
-      },
-      localeOverlay: {
-        locale: 'ko',
-        blocks: [
-          {
-            blockId: '20000000-0000-4000-8000-000000000001',
-            paragraph: {
-              props: {},
-              content: lineBreaks
+    richFormatting
+      ? localRichFormattingEmailDocument()
+      : fromJson(LocalizedRichTextDocumentSchema, {
+          blockCatalogFingerprint: contentBlockCatalogFingerprint,
+          profile: RichTextProfile.EMAIL,
+          locale: 'ko',
+          base: {
+            nodes: [
+              {
+                block: { id: '20000000-0000-4000-8000-000000000001', paragraph: { props: {} } },
+                placement: { index: 0 },
+              },
+              ...(lineBreaks
                 ? [
-                    { text: { text: 'First line\nText newline' } },
-                    { hardBreak: {} },
-                    { text: { text: 'After hard break' } },
+                    {
+                      block: { id: '20000000-0000-4000-8000-000000000002', paragraph: { props: {} } },
+                      placement: { index: 1 },
+                    },
                   ]
-                : [{ text: { text: 'Listening room · October edition. Join us for an evening of music.' } }],
-            },
+                : []),
+            ],
           },
-          ...(lineBreaks
-            ? [
-                {
-                  blockId: '20000000-0000-4000-8000-000000000002',
-                  paragraph: { props: {}, content: [{ text: { text: 'Second paragraph' } }] },
+          localeOverlay: {
+            locale: 'ko',
+            blocks: [
+              {
+                blockId: '20000000-0000-4000-8000-000000000001',
+                paragraph: {
+                  props: {},
+                  content: lineBreaks
+                    ? [
+                        { text: { text: 'First line\nText newline' } },
+                        { hardBreak: {} },
+                        { text: { text: 'After hard break' } },
+                      ]
+                    : [{ text: { text: 'Listening room · October edition. Join us for an evening of music.' } }],
                 },
-              ]
-            : []),
-        ],
-      },
-    }),
+              },
+              ...(lineBreaks
+                ? [
+                    {
+                      blockId: '20000000-0000-4000-8000-000000000002',
+                      paragraph: { props: {}, content: [{ text: { text: 'Second paragraph' } }] },
+                    },
+                  ]
+                : []),
+            ],
+          },
+        }),
     [],
   );
   const awareness = new Awareness(document);

@@ -3,9 +3,9 @@ import { RichTextInlineSchema } from '@echovisionlab/geul-proto/content/block_co
 import type { LocalizedRichTextBlock } from '@/features/editor/contract/localized-rich-text';
 
 export const siteVariableLinkLabel =
-  '{{site.title}} | {{site.url}}/tools/hwp | {{site.companyName}} | {{contact.legalEmail}} | {{contact.supportEmail}} | {{contact.privacyEmail}} | {{Site.title}} {{site.unknown}} {{ site.title }} {site.title}';
+  '{{site.title}} | {{site.url}}/tools/hwp | {{site.companyName}} | {{contact.legalEmail}} | {{contact.email}} | {{Site.title}} {{site.unknown}} {{ site.title }} {site.title}';
 export const resolvedSiteVariableLinkLabel =
-  'rawsector | https://www.rawsector.com/tools/hwp | Example Studio Ltd. | legal@example.com | support@example.com | privacy@example.com | {{Site.title}} {{site.unknown}} {{ site.title }} {site.title}';
+  'rawsector | https://www.rawsector.com/tools/hwp | Example Studio Ltd. | legal@example.com | contact@example.com | {{Site.title}} {{site.unknown}} {{ site.title }} {site.title}';
 export const siteVariableLink = create(RichTextInlineSchema, {
   value: {
     case: 'link',
@@ -20,29 +20,18 @@ export const siteVariableLinkBlock: LocalizedRichTextBlock = {
   children: [],
 } as unknown as LocalizedRichTextBlock;
 
-/** Shared output-boundary cases also exercise lazy SSR and the legacy reader. */
+/** Shared output-boundary cases also exercise lazy SSR and public readers. */
 export const siteVariableHrefCases = [
+  { name: 'contact email', source: 'mailto:{{contact.email}}', expected: 'mailto:contact@example.com', settings: {} },
   { name: 'legal email', source: 'mailto:{{contact.legalEmail}}', expected: 'mailto:legal@example.com', settings: {} },
-  {
-    name: 'support email',
-    source: 'mailto:{{contact.supportEmail}}',
-    expected: 'mailto:support@example.com',
-    settings: {},
-  },
-  {
-    name: 'privacy email',
-    source: 'mailto:{{contact.privacyEmail}}',
-    expected: 'mailto:privacy@example.com',
-    settings: {},
-  },
   { name: 'empty email', source: 'mailto:{{contact.legalEmail}}', expected: undefined, settings: { legal_email: '' } },
   { name: 'site path', source: '{{site.url}}/about', expected: 'https://www.rawsector.com/about', settings: {} },
   { name: 'unknown token', source: 'mailto:{{contact.unknown}}', expected: 'mailto:{{contact.unknown}}', settings: {} },
   {
     name: 'one pass',
     source: 'mailto:{{contact.legalEmail}}',
-    expected: 'mailto:{{contact.supportEmail}}',
-    settings: { legal_email: '{{contact.supportEmail}}' },
+    expected: 'mailto:{{contact.email}}',
+    settings: { legal_email: '{{contact.email}}' },
   },
   {
     name: 'unsafe scheme',

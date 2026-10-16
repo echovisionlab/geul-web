@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Runs the Storybook test-runner only for stories whose files changed, or whose story files
-// import a changed module (one level), against the running dev server.
+// transitively import a changed module, against the running dev server.
 //
 //   node scripts/test/storybook-changed.mjs [--base <git-ref>] [--url http://127.0.0.1:6010] [--workers 4] [--dry-run]
 //

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { mockBrowserNavigation } from '@/components/core/testing/browser-navigation';
 import enMessages from '@/messages/en.json';
 import { breakpointQuery } from '@/components/core/Layout/breakpoints';
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
@@ -10,6 +11,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { parsePostListProps } from './schema';
 import { PostListViewClient } from './ViewClientRuntime';
+
+const browserNavigation = mockBrowserNavigation();
 
 vi.mock('next/link', () => ({
   default: ({ href, children, onClick, ...props }: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
@@ -30,10 +33,14 @@ vi.mock('next/image', () => ({
   default: ({
     src,
     alt,
+    fill: _fill,
+    unoptimized: _unoptimized,
     ...props
-  }: Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> & { src: string | { src: string } }) => (
-    <img src={typeof src === 'string' ? src : src.src} alt={alt} {...props} />
-  ),
+  }: Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> & {
+    src: string | { src: string };
+    fill?: boolean;
+    unoptimized?: boolean;
+  }) => <img src={typeof src === 'string' ? src : src.src} alt={alt} {...props} />,
 }));
 
 // These synchronous layout tests exercise the runtime's unchanged slide markup.
@@ -48,10 +55,14 @@ vi.mock('@/components/core/Carousel', () => {
     children,
     withControls,
     withIndicators,
+    slideSize: _slideSize,
+    slideGap: _slideGap,
     ...props
   }: HTMLAttributes<HTMLDivElement> & {
     withControls?: boolean;
     withIndicators?: boolean;
+    slideSize?: unknown;
+    slideGap?: unknown;
   }) => (
     <div
       data-with-controls={String(Boolean(withControls))}
@@ -155,6 +166,7 @@ function render(node: ReactNode) {
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
+  browserNavigation.attach(container);
 
   act(() => {
     root?.render(

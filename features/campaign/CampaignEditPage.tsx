@@ -1,5 +1,7 @@
 'use client';
 
+import { EmailPreviewFrame } from '@/features/email/EmailPreviewFrame';
+
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
 import { SupportingText } from '@/components/core/Typography';
 import { SectionCard as DsSectionCard } from '@/components/core/Section';
@@ -953,13 +955,7 @@ export function CampaignEditPageView({ model }: { model: CampaignEditPageViewMod
           </DsLayoutInline>
         </DsLayoutInline>
 
-        <DsLayoutGrid
-          columns={preview.viewMode === 'split' ? { base: 1, sm: 2 } : 1}
-          gap="md"
-          rows="stretch"
-          fill="both"
-          flexible
-        >
+        <DsLayoutGrid columns={preview.viewMode === 'split' ? { base: 1, sm: 2 } : 1} gap="md">
           {preview.showEditor &&
             (editorSession ? (
               <CampaignEditor
@@ -985,17 +981,8 @@ export function CampaignEditPageView({ model }: { model: CampaignEditPageViewMod
             <DsLayoutInset space="none" flexible>
               <QueryErrorAlert queries={[preview.query]} />
               {preview.previewSrcDoc ? (
-                <DsSectionCard padding="none" withBorder appearance="paper" clip stretch>
-                  <iframe
-                    srcDoc={preview.previewSrcDoc}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      minHeight: 500,
-                      border: 0,
-                    }}
-                    title={t('preview.frameTitle')}
-                  />
+                <DsSectionCard padding="none" withBorder appearance="paper" clip>
+                  <EmailPreviewFrame srcDoc={preview.previewSrcDoc} title={t('preview.frameTitle')} />
                 </DsSectionCard>
               ) : (
                 <DsLayoutInset block="xl">

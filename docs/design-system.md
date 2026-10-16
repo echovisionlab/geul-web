@@ -5,8 +5,6 @@ It contains foundations, component contracts, reusable compositions and page doc
 with executable examples. Adopted definitions remain in the repository's tokens, theme and Core.
 Read the [Storybook guide](./ui-kit.md), [component documentation](./design-system/component-documentation.md)
 and [page documentation](./design-system/page-documentation.md) for the required structure.
-The [current review evidence](./design-system/storybook-review.md) records the tested source,
-theme and locale checks, responsive observations and application integration boundaries.
 The [compact product interface contract](./design-system/compact-interface-contract.md) connects
 loading, dialogs, metadata, link forms and automatic pagination to their shared Core owners.
 
@@ -165,7 +163,7 @@ The icon has an accessible name, while a single shared notification announces fa
 recovery of local edits. Avoid a live announcement for every keystroke. Stories under
 `Core/Layout/EditorHeader` exercise every state and its tooltip. Post, Page, Work, Artist,
 Label, Release, Program Event, Campaign, legal policy and email-template editors consume the
-same authoring adapter. See the [save-state migration](design-system/changelog.md#2026-10-14--durable-editor-save-state).
+same authoring adapter.
 
 Core `CollabSyncStatusIndicator` uses the same `chrome-icon-size` as command glyphs.
 Its wrapper owns inline-flex centering and a zero line-height; glyph baselines do not decide
@@ -349,7 +347,7 @@ remain visible. Input error underlines retain the danger role alongside the neut
 
 Start with the [getting started guide](./design-system/getting-started.md).
 The [contribution model](./design-system/contribution.md) defines proposals, acceptance, review roles and compatibility.
-Record source changes and migrations in the [changelog](./design-system/changelog.md).
+Verify source changes with the affected tests and CI checks.
 
 1. Find the production owner and consumers in the component index before adding a component.
 2. Reuse or add a role in the token source. Add a role to both themes with the same meaning; use an

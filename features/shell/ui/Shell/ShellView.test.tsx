@@ -2,12 +2,17 @@
 
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
+import { RouterProvider } from 'react-aria-components';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TextButton } from '@/components/core/TextButton';
 import { preloadOnDemandOverlays } from '@/components/core/on-demand-overlays';
 import { TestProviders } from '@/test/TestProviders';
 import { preloadShellNavigation } from './ShellIslands';
 import { ShellView, type ShellViewNavigationItem, type ShellViewProps, type ShellViewUser } from './ShellView';
+
+// Production supplies AppDesignSystemRouter. Here a local router records the same
+// client transitions without asking jsdom to navigate to a different document.
+const navigateClientRoute = vi.fn();
 
 const events = {
   onToggleNavigation: vi.fn(),
@@ -122,15 +127,18 @@ afterEach(() => {
   act(() => root.unmount());
   container.remove();
   Object.values(events).forEach((event) => event.mockReset());
+  navigateClientRoute.mockReset();
 });
 
 function renderView(overrides: Partial<ShellViewProps> = {}, children?: ReactNode) {
   act(() => {
     root.render(
       <TestProviders>
-        <ShellView {...defaultProps} {...overrides}>
-          {children ?? defaultProps.children}
-        </ShellView>
+        <RouterProvider navigate={navigateClientRoute}>
+          <ShellView {...defaultProps} {...overrides}>
+            {children ?? defaultProps.children}
+          </ShellView>
+        </RouterProvider>
       </TestProviders>,
     );
   });
@@ -160,10 +168,11 @@ describe('ShellView', () => {
     const home = container.querySelector<HTMLAnchorElement>('header a[href="/"][data-appearance="block"]');
     expect(home).toHaveAccessibleName(defaultProps.footer.siteTitle);
     expect(home?.textContent).toBe('');
-    home?.focus();
+    act(() => home?.focus());
     expect(home).toHaveFocus();
     act(() => home?.click());
     expect(events.onNavigate).toHaveBeenCalledWith('/');
+    expect(navigateClientRoute.mock.calls.map(([href]) => href)).toEqual(['/']);
   });
 
   it('renders the public header, active navigation, print slots, page content, and semantic footer', () => {
@@ -280,6 +289,11 @@ describe('ShellView', () => {
     expect(events.onNavigate).toHaveBeenCalledWith('/my/profile');
     expect(events.onNavigate).toHaveBeenCalledWith('/privacy');
     expect(events.onNavigate).toHaveBeenCalledWith('/login?intent=newsletter');
+    expect(navigateClientRoute.mock.calls.map(([href]) => href)).toEqual([
+      '/my/profile',
+      '/privacy',
+      '/login?intent=newsletter',
+    ]);
     expect(privacyLink?.getAttribute('data-control-kind')).toBe('text');
     expect(events.onSignOut).toHaveBeenCalledOnce();
   });

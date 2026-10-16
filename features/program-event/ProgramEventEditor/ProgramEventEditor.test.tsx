@@ -4,7 +4,7 @@ import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { notifyManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -267,6 +267,7 @@ function setInputValue(element: HTMLInputElement | HTMLTextAreaElement, value: s
 }
 
 beforeEach(() => {
+  notifyManager.setNotifyFunction((callback) => act(callback));
   setProviderAccessLevel(mocks.provider, 'edit');
   vi.clearAllMocks();
   queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
@@ -308,10 +309,14 @@ beforeEach(() => {
   root = createRoot(container);
 });
 
-afterEach(() => {
+afterEach(async () => {
   vi.useRealTimers();
-  act(() => root.unmount());
-  queryClient.clear();
+  await act(async () => {
+    root.unmount();
+    await queryClient.cancelQueries();
+    queryClient.clear();
+  });
+  notifyManager.setNotifyFunction((callback) => callback());
   container.remove();
   clearEditorSaveRecovery(`program_event:${eventId}`);
   clearEditorSaveRecovery(`program_event:${eventId}:en`);
@@ -326,13 +331,13 @@ describe('ProgramEventEditor relation saves and navigation', () => {
     const title = container.querySelector('[data-testid="event-title-input"]') as HTMLInputElement;
     const summary = container.querySelector('[data-testid="event-summary"]');
     expect(title.disabled).toBe(true);
-    act(() => setProviderAccessLevel(mocks.provider, 'edit'));
+    await act(async () => setProviderAccessLevel(mocks.provider, 'edit'));
     expect(title.disabled).toBe(true);
     await act(async () => renderEditor(['edit', 'publish', 'delete']));
     expect(title.disabled).toBe(false);
     expect(container.querySelector('[data-testid="publish"]')).not.toBeNull();
     expect(container.querySelector('[data-testid="event-summary"]')).toBe(summary);
-    act(() => setProviderAccessLevel(mocks.provider, 'view'));
+    await act(async () => setProviderAccessLevel(mocks.provider, 'view'));
     expect(title.disabled).toBe(true);
     expect(container.querySelector('[data-testid="event-summary"]')).toBe(summary);
     expect(container.querySelector('[data-testid="publish"]')).toBeNull();
@@ -342,7 +347,7 @@ describe('ProgramEventEditor relation saves and navigation', () => {
     await act(async () => renderEditor());
     await vi.waitFor(() => expect(mocks.subscribeMetadata).toHaveBeenCalledOnce());
 
-    act(() => {
+    await act(async () => {
       mocks.metadataListener?.({
         operation: 'locale',
         values: { title: 'Peer event title', summary: 'Peer event summary' },
@@ -363,7 +368,7 @@ describe('ProgramEventEditor relation saves and navigation', () => {
     if (!input) {
       throw new Error('The Program Event title input is unavailable');
     }
-    act(() => {
+    await act(async () => {
       setInputValue(input, 'Pending local title');
     });
     expect(getPendingEditorPatch(`program_event:${eventId}`)).toMatchObject({
@@ -388,7 +393,7 @@ describe('ProgramEventEditor relation saves and navigation', () => {
     if (!input) {
       throw new Error('The Program Event summary input is unavailable');
     }
-    act(() => {
+    await act(async () => {
       setInputValue(input, 'Pending local summary');
     });
     expect(getPendingEditorPatch(`program_event:${eventId}`)).toMatchObject({
@@ -439,7 +444,7 @@ describe('ProgramEventEditor relation saves and navigation', () => {
     if (!title || !summary) {
       throw new Error('The Program Event metadata inputs are unavailable');
     }
-    act(() => {
+    await act(async () => {
       setInputValue(title, 'French draft title');
       setInputValue(summary, 'French draft summary');
     });
@@ -468,8 +473,8 @@ describe('ProgramEventEditor relation saves and navigation', () => {
     );
     await act(async () => renderEditor());
 
-    act(() => container.querySelector<HTMLButtonElement>('[data-testid="relation-artists"]')?.click());
-    act(() => container.querySelector<HTMLButtonElement>('[data-testid="back"]')?.click());
+    await act(async () => container.querySelector<HTMLButtonElement>('[data-testid="relation-artists"]')?.click());
+    await act(async () => container.querySelector<HTMLButtonElement>('[data-testid="back"]')?.click());
     await vi.waitFor(() =>
       expect(mocks.updateEvent).toHaveBeenCalledWith(
         eventId,
@@ -497,8 +502,8 @@ describe('ProgramEventEditor relation saves and navigation', () => {
     );
     await act(async () => renderEditor());
 
-    act(() => container.querySelector<HTMLButtonElement>('[data-testid="slug-change"]')?.click());
-    act(() => container.querySelector<HTMLButtonElement>('[data-testid="back"]')?.click());
+    await act(async () => container.querySelector<HTMLButtonElement>('[data-testid="slug-change"]')?.click());
+    await act(async () => container.querySelector<HTMLButtonElement>('[data-testid="back"]')?.click());
     await vi.waitFor(() =>
       expect(mocks.updateEvent).toHaveBeenCalledWith(eventId, { slug: 'next-slug' }, expect.any(String)),
     );
@@ -513,12 +518,18 @@ describe('ProgramEventEditor relation saves and navigation', () => {
   it('coalesces relation edits to latest desired values while retaining the first observed baseline', async () => {
     await act(async () => renderEditor());
 
-    act(() => container.querySelector<HTMLButtonElement>('[data-testid="relation-artists"]')?.click());
-    act(() => container.querySelector<HTMLButtonElement>('[data-testid="relation-artists-latest"]')?.click());
-    act(() => container.querySelector<HTMLButtonElement>('[data-testid="relation-labels"]')?.click());
-    act(() => container.querySelector<HTMLButtonElement>('[data-testid="back"]')?.click());
-
-    await vi.waitFor(() => expect(mocks.updateEvent).toHaveBeenCalledOnce());
+    await act(async () => container.querySelector<HTMLButtonElement>('[data-testid="relation-artists"]')?.click());
+    await act(async () =>
+      container.querySelector<HTMLButtonElement>('[data-testid="relation-artists-latest"]')?.click(),
+    );
+    await act(async () => container.querySelector<HTMLButtonElement>('[data-testid="relation-labels"]')?.click());
+    await act(async () => {
+      container.querySelector<HTMLButtonElement>('[data-testid="back"]')?.click();
+      await vi.waitFor(() => {
+        expect(mocks.updateEvent).toHaveBeenCalledOnce();
+        expect(mocks.back).toHaveBeenCalledOnce();
+      });
+    });
     expect(mocks.updateEvent).toHaveBeenCalledWith(
       eventId,
       {
@@ -538,12 +549,12 @@ describe('ProgramEventEditor relation saves and navigation', () => {
     mocks.updateEvent.mockResolvedValue({ error: 'save failed' });
     await act(async () => renderEditor());
 
-    act(() => container.querySelector<HTMLButtonElement>('[data-testid="relation-labels"]')?.click());
-    act(() => container.querySelector<HTMLButtonElement>('[data-testid="back"]')?.click());
-    await act(async () => {
-      await vi.waitFor(() => expect(mocks.updateEvent).toHaveBeenCalled());
-      await vi.waitFor(() => expect(mocks.back).not.toHaveBeenCalled());
-    });
-    expect(mocks.notification).toHaveBeenCalledWith({ message: 'notifications.saveFailed', tone: 'danger' });
+    await act(async () => container.querySelector<HTMLButtonElement>('[data-testid="relation-labels"]')?.click());
+    await act(async () => container.querySelector<HTMLButtonElement>('[data-testid="back"]')?.click());
+    await vi.waitFor(() =>
+      expect(mocks.notification).toHaveBeenCalledWith({ message: 'notifications.saveFailed', tone: 'danger' }),
+    );
+    expect(mocks.updateEvent).toHaveBeenCalled();
+    expect(mocks.back).not.toHaveBeenCalled();
   });
 });

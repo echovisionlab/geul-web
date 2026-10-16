@@ -50,7 +50,7 @@ describe('account security control targets', () => {
     );
     const logout = host.querySelector<HTMLButtonElement>('[data-testid=security-revoke-other-sessions]')!;
     expect(logout).toHaveAccessibleName(sessionStory.args.labels.logOutOthers);
-    logout.focus();
+    act(() => logout.focus());
     act(() => logout.click());
     expect(host.querySelectorAll('[role=group]')).toHaveLength(1);
     expect(host.textContent).toContain(sessionStory.args.labels.thisDevice);
@@ -71,7 +71,7 @@ describe('account security control targets', () => {
     expect(phone.getAttribute('aria-label')).toBe(sessionStory.args.labels.revoke);
     expect(describedBy(phone)).toContain('203.0.113.*');
     expect(describedBy(desktop)).toContain('2001:db8:abcd:*');
-    phone.focus();
+    act(() => phone.focus());
     act(() => phone.click());
     expect(document.activeElement).toBe(desktop);
     act(() => desktop.click());

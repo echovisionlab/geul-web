@@ -1,0 +1,68 @@
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -402,7 +402,7 @@
+  */
+ type TiptapContextType = {
+   /** The Tiptap editor instance. */
+-  editor: index_d_exports.Editor;
++  editor: Editor;
+ };
+ /**
+  * React context that stores the current editor instance.
+@@ -459,18 +459,18 @@
+  * }
+  * ```
+  */
+-declare function useTiptapState<TSelectorResult>(selector: (context: EditorStateSnapshot<index_d_exports.Editor>) => TSelectorResult, equalityFn?: (a: TSelectorResult, b: TSelectorResult | null) => boolean): TSelectorResult;
++declare function useTiptapState<TSelectorResult>(selector: (context: EditorStateSnapshot<Editor>) => TSelectorResult, equalityFn?: (a: TSelectorResult, b: TSelectorResult | null) => boolean): TSelectorResult;
+ type TiptapWrapperEditorInstanceProps = {
+   /**
+    * The editor instance to provide to child components.
+    * Use `useEditor()` to create this instance.
+    */
+-  editor: index_d_exports.Editor;
++  editor: Editor;
+ } | {
+   /**
+    * @deprecated Use `editor` instead. Will be removed in the next major version.
+    */
+-  instance: index_d_exports.Editor;
++  instance: Editor;
+ };
+ /**
+  * Props for the `Tiptap` root/provider component.
+diff --git a/dist/index.d.cts b/dist/index.d.cts
+--- a/dist/index.d.cts
++++ b/dist/index.d.cts
+@@ -402,7 +402,7 @@
+  */
+ type TiptapContextType = {
+   /** The Tiptap editor instance. */
+-  editor: index_d_exports.Editor;
++  editor: Editor;
+ };
+ /**
+  * React context that stores the current editor instance.
+@@ -459,18 +459,18 @@
+  * }
+  * ```
+  */
+-declare function useTiptapState<TSelectorResult>(selector: (context: EditorStateSnapshot<index_d_exports.Editor>) => TSelectorResult, equalityFn?: (a: TSelectorResult, b: TSelectorResult | null) => boolean): TSelectorResult;
++declare function useTiptapState<TSelectorResult>(selector: (context: EditorStateSnapshot<Editor>) => TSelectorResult, equalityFn?: (a: TSelectorResult, b: TSelectorResult | null) => boolean): TSelectorResult;
+ type TiptapWrapperEditorInstanceProps = {
+   /**
+    * The editor instance to provide to child components.
+    * Use `useEditor()` to create this instance.
+    */
+-  editor: index_d_exports.Editor;
++  editor: Editor;
+ } | {
+   /**
+    * @deprecated Use `editor` instead. Will be removed in the next major version.
+    */
+-  instance: index_d_exports.Editor;
++  instance: Editor;
+ };
+ /**
+  * Props for the `Tiptap` root/provider component.

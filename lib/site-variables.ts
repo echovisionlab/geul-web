@@ -8,16 +8,14 @@ export function siteVariableContext(settings: {
   site_origin: string;
   company_name: string;
   legal_email: string;
-  support_email: string;
-  privacy_email: string;
+  contact_email: string;
 }): SiteVariableContext {
   return {
     siteTitle: settings.site_title ?? '',
     siteUrl: settings.site_origin ?? '',
     companyName: settings.company_name ?? '',
     legalEmail: settings.legal_email ?? '',
-    supportEmail: settings.support_email ?? '',
-    privacyEmail: settings.privacy_email ?? '',
+    contactEmail: settings.contact_email,
   };
 }
 
@@ -91,6 +89,5 @@ export const siteVariableLabelKeys = {
   'site.url': 'siteUrl',
   'site.companyName': 'companyName',
   'contact.legalEmail': 'legalEmail',
-  'contact.supportEmail': 'supportEmail',
-  'contact.privacyEmail': 'privacyEmail',
+  'contact.email': 'contactEmail',
 } as const satisfies Record<SiteVariableKey, string>;

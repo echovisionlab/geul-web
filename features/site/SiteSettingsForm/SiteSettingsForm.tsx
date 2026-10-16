@@ -54,13 +54,7 @@ export function SiteSettingsForm({
         }
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? null : tPage('validation.invalidEmail');
       },
-      support_email: (value) => {
-        if (!value) {
-          return null;
-        }
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? null : tPage('validation.invalidEmail');
-      },
-      privacy_email: (value) => {
+      contact_email: (value) => {
         if (!value) {
           return null;
         }
@@ -104,7 +98,7 @@ export function SiteSettingsForm({
     'data-lpignore': 'true',
   };
 
-  const getEmailFieldProps = (field: 'legal_email' | 'support_email' | 'privacy_email') => ({
+  const getEmailFieldProps = (field: 'legal_email' | 'contact_email') => ({
     value: form.values[field] ?? '',
     error: form.errors[field],
     onChange: (event: ChangeEvent<HTMLInputElement>) => {
@@ -180,19 +174,11 @@ export function SiteSettingsForm({
               />
               <TextInput
                 {...baseEmailInputProps}
-                label={tPage('fields.supportEmail.label')}
-                description={tPage('fields.supportEmail.description')}
-                placeholder={tPage('fields.supportEmail.placeholder')}
-                name="support_contact_email"
-                {...fieldBindings(getEmailFieldProps('support_email'))}
-              />
-              <TextInput
-                {...baseEmailInputProps}
-                label={tPage('fields.privacyEmail.label')}
-                description={tPage('fields.privacyEmail.description')}
-                placeholder={tPage('fields.privacyEmail.placeholder')}
-                name="privacy_contact_email"
-                {...fieldBindings(getEmailFieldProps('privacy_email'))}
+                label={tPage('fields.contactEmail.label')}
+                description={tPage('fields.contactEmail.description')}
+                placeholder={tPage('fields.contactEmail.placeholder')}
+                name="contact_email"
+                {...fieldBindings(getEmailFieldProps('contact_email'))}
               />
             </DsLayoutStack>
             <DsLayoutStack gap="md">

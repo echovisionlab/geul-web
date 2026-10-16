@@ -4076,8 +4076,7 @@
         "siteUrl": "站点 URL",
         "companyName": "公司名称",
         "legalEmail": "法律事务邮箱",
-        "supportEmail": "支持邮箱",
-        "privacyEmail": "隐私事务邮箱"
+        "contactEmail": "联系邮箱"
       }
     },
     "accessDowngraded": {
@@ -4713,15 +4712,10 @@
           "description": "用于法律咨询（条款、隐私等）",
           "placeholder": "legal@example.com"
         },
-        "supportEmail": {
-          "label": "支持邮箱",
-          "description": "用于客户支持",
-          "placeholder": "support@example.com"
-        },
-        "privacyEmail": {
-          "label": "隐私邮箱",
-          "description": "用于隐私相关请求（GDPR、数据删除等）",
-          "placeholder": "隐私@example.com"
+        "contactEmail": {
+          "label": "联系邮箱",
+          "description": "用于一般咨询、客户支持和隐私请求",
+          "placeholder": "contact@example.com"
         },
         "primaryColor": {
           "label": "品牌颜色",

@@ -312,7 +312,7 @@ describe.each(variants)('$name persist-before-lifecycle boundary', (variant) => 
           localeOverlay: { locale: 'en', blocks: [] },
         }),
     });
-    setProviderAccessLevel(mocks.provider, 'view');
+    act(() => setProviderAccessLevel(mocks.provider, 'view'));
     // Mount the room body even while its preview is visible.
     const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
     await act(async () =>

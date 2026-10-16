@@ -11,8 +11,6 @@ import { validatePolicyTiptapDocument } from './policy-document';
 import { TiptapEditor } from '@/features/editor/tiptap/TiptapEditor';
 import type { TiptapAuthoringCapabilities } from '@/features/editor/tiptap/TiptapAuthoringControls';
 
-export { policyTiptapDocumentToHtml, validatePolicyTiptapDocument } from './policy-document';
-
 export type PolicyTiptapEditorInstance = Editor;
 
 function createPolicyContentGuard(report: (message: string) => void) {

@@ -5,7 +5,7 @@ import { Code, ConnectError } from '@connectrpc/connect';
 import type { EditorRuntimeEvent } from '@echovisionlab/geul-common/collaboration/runtime-events';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { UploadSessionStatus } from '@echovisionlab/geul-proto/secure/file_pb.ts';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { notifyManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
@@ -284,6 +284,8 @@ describe('useFileUpload', () => {
   const originalFetch = globalThis.fetch;
 
   beforeEach(() => {
+    // Keep mutation notifications asynchronous and deliver their timers inside act.
+    notifyManager.setScheduler((callback) => setTimeout(() => act(callback), 0));
     vi.mocked(completeClientMediaUploadAction).mockImplementation(async (input) => {
       try {
         return { ok: true, ...(await completeUploadAction(input)) };
@@ -327,7 +329,9 @@ describe('useFileUpload', () => {
   });
 
   afterEach(async () => {
-    await disposePreparedSession('file-1');
+    await act(async () => {
+      await disposePreparedSession('file-1');
+    });
     forgetUploadSession('file-1');
     localStorage.clear();
     act(() => {
@@ -345,6 +349,7 @@ describe('useFileUpload', () => {
     MockXMLHttpRequest.sendHandler = null;
     vi.useRealTimers();
     vi.clearAllMocks();
+    notifyManager.setScheduler((callback) => setTimeout(callback, 0));
   });
 
   it.each([
@@ -383,6 +388,7 @@ describe('useFileUpload', () => {
 
     await act(async () => {
       document.querySelector<HTMLButtonElement>('#start-download')?.click();
+      await expect.poll(() => dispose.mock.calls.length).toBe(1);
     });
 
     await expect.poll(() => vi.mocked(completeUploadAction).mock.calls.length).toBe(1);
@@ -956,7 +962,7 @@ describe('useFileUpload', () => {
       .map((update) => update.percentage);
     expect(serverPercentages).toEqual([40, 40]);
 
-    act(() => {
+    await act(async () => {
       if (!pendingRequest) {
         return;
       }
@@ -964,6 +970,7 @@ describe('useFileUpload', () => {
       pendingRequest.status = 200;
       pendingRequest.responseText = JSON.stringify({ etag: 'etag-1' });
       pendingRequest.onload?.();
+      await expect.poll(() => resolved).toBe(true);
     });
     await expect.poll(() => resolved).toBe(true);
   });
@@ -1487,12 +1494,13 @@ describe('useFileUpload', () => {
       document.querySelector<HTMLButtonElement>('#start-upload')?.click();
     });
     await expect.poll(() => artifactSignal != null).toBe(true);
-    act(() => {
+    await act(async () => {
       expect(
         cancelUploadSurface(
           buildUploadSurfaceKey({ uploadType: UploadType.TRACK_AUDIO, entityId: 'track-1', attemptId: 'attempt-1' }),
         ),
       ).toBe(true);
+      await expect.poll(() => rejected.mock.calls.length).toBe(1);
     });
     await expect.poll(() => rejected.mock.calls.length).toBe(1);
     expect(artifactSignal?.aborted).toBe(true);

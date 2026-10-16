@@ -41,6 +41,18 @@ import { SHADER_STAGE_DEFINITIONS } from './shader/shader-program';
 import { createTiptapPlaygroundRoom } from './TiptapPlayground.story-fixtures';
 import { setShaderNodeMode } from './shader/ShaderNode';
 
+// These controller cases exercise Unicode text directly, without Emoji node lookups.
+// Keep the real editor and lazy loader; official Emoji data has its own tests.
+vi.mock('./emoji/emoji-data', () => ({
+  createTiptapEmojiData: () =>
+    ({
+      items: [],
+      find: () => undefined,
+      shortcodeFor: () => undefined,
+      regex: () => /(?!)/g,
+    }) satisfies import('./emoji/emoji-runtime').TiptapEmojiData,
+}));
+
 vi.mock('@/lib/collab/persist-now', () => ({
   persistCollaborativeDocumentNow: vi.fn().mockResolvedValue(undefined),
 }));
@@ -1195,7 +1207,7 @@ describe('incremental Block-room input boundaries', () => {
       fixture.editor.view.dispatch(
         fixture.editor.state.tr.insert(
           at,
-          fixture.editor.schema.nodes.siteVariable!.create({ key: 'contact.supportEmail', linked: true }),
+          fixture.editor.schema.nodes.siteVariable!.create({ key: 'contact.email', linked: true }),
         ),
       );
       stopCapturingBlockRoomUndo(fixture.room);
@@ -1206,14 +1218,13 @@ describe('incremental Block-room input boundaries', () => {
       expect(undoBlockRoom(fixture.room)).toBe(true);
       await Promise.resolve();
       expect(fixture.editor.state.doc.nodeAt(at)?.type.name).toBe('siteVariable');
-      expect(fixture.editor.state.doc.nodeAt(at)?.attrs).toMatchObject({ key: 'contact.supportEmail', linked: true });
+      expect(fixture.editor.state.doc.nodeAt(at)?.attrs).toMatchObject({ key: 'contact.email', linked: true });
       fixture.editor.storage.siteVariable.context = {
         siteTitle: 'rawsector',
         siteUrl: '',
         companyName: '',
         legalEmail: '',
-        supportEmail: 'help@example.com',
-        privacyEmail: '',
+        contactEmail: 'help@example.com',
       };
       expect(fixture.editor.getText()).toContain('help@example.com');
       fixture.editor.commands.setNodeSelection(at);
@@ -1221,7 +1232,7 @@ describe('incremental Block-room input boundaries', () => {
         serialize(fixture.editor.state.selection.content(), fixture.editor.view),
       );
       expect(copied).toBe('help@example.com');
-      expect(fixture.editor.getHTML()).toContain('data-site-variable="contact.supportEmail"');
+      expect(fixture.editor.getHTML()).toContain('data-site-variable="contact.email"');
       expect(fixture.editor.getHTML()).toContain('href="mailto:help@example.com"');
     } finally {
       fixture.cleanup();

@@ -454,25 +454,28 @@ describe('getMessagesForLocale', () => {
     }
   });
 
-  it('preserves English placeholder sets across every supported locale', () => {
-    const englishValues = new Map(collectStringEntries(RAW_LOCALE_MESSAGES.en));
-    const englishPlaceholders = new Map([...englishValues].map(([key, value]) => [key, collectPlaceholderSet(value)]));
+  const englishArguments = new Map(
+    collectStringEntries(RAW_LOCALE_MESSAGES.en).map(([key, value]) => [
+      key,
+      { placeholders: collectPlaceholderSet(value), numbers: collectNumberArgumentSet(value) },
+    ]),
+  );
 
-    for (const locale of SUPPORTED_LOCALES.filter((candidate) => candidate !== 'en')) {
+  it.each(SUPPORTED_LOCALES.filter((locale) => locale !== 'en'))(
+    'preserves English placeholder sets in %s',
+    (locale) => {
       for (const [key, value] of collectStringEntries(RAW_LOCALE_MESSAGES[locale])) {
-        const englishPlaceholderSet = englishPlaceholders.get(key);
+        const english = englishArguments.get(key);
 
-        if (englishPlaceholderSet === undefined) {
+        if (english === undefined) {
           continue;
         }
 
-        expect(collectPlaceholderSet(value), `${locale}:${key}`).toBe(englishPlaceholderSet);
-        expect(collectNumberArgumentSet(value), `${locale}:${key} number arguments`).toBe(
-          collectNumberArgumentSet(englishValues.get(key)!),
-        );
+        expect(collectPlaceholderSet(value), `${locale}:${key}`).toBe(english.placeholders);
+        expect(collectNumberArgumentSet(value), `${locale}:${key} number arguments`).toBe(english.numbers);
       }
-    }
-  });
+    },
+  );
 
   it('keeps authentication and automatic-mail copy complete in every raw locale bundle', () => {
     for (const root of AUTH_AND_MAIL_TRANSLATION_ROOTS) {

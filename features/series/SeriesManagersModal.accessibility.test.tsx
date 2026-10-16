@@ -2,8 +2,8 @@
 import '@testing-library/jest-dom/vitest';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { notifyManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestProviders } from '@/test/TestProviders';
 import { SeriesManagersModal, type SeriesManagerBindings } from './SeriesManagersModal';
 vi.mock('@/lib/actions/series', () => ({ addSeriesManagerAction: vi.fn(), removeSeriesManagerAction: vi.fn() }));
@@ -15,9 +15,16 @@ vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn(
 let host: HTMLDivElement;
 let root: Root;
 let client: QueryClient;
-afterEach(() => {
-  act(() => root?.unmount());
-  client?.clear();
+beforeEach(() => {
+  notifyManager.setNotifyFunction((callback) => act(callback));
+});
+afterEach(async () => {
+  await act(async () => {
+    root?.unmount();
+    await client?.cancelQueries();
+    client?.clear();
+  });
+  notifyManager.setNotifyFunction((callback) => callback());
   host?.remove();
 });
 describe('series manager local service interaction', () => {

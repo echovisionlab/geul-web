@@ -309,6 +309,12 @@ afterEach(() => {
   container.remove();
 });
 
+function registerPendingSave(...args: Parameters<typeof registerEditorSave>) {
+  act(() => {
+    unregisterPendingSave = registerEditorSave(...args);
+  });
+}
+
 function renderArtist() {
   act(() => root.render(<ArtistDetailEditor id="artist-1" artist={artist} baseUrl="https://example.test" />));
 }
@@ -414,7 +420,7 @@ describe('Artist and Label peer metadata adoption', () => {
     });
     expect(mocks.writes).toContainEqual({ labelIds: ['label-local-next'], observed: { labelIds: ['label-local'] } });
 
-    unregisterPendingSave = registerEditorSave('artist:artist-1', {
+    registerPendingSave('artist:artist-1', {
       flush: async () => true,
       hasPending: () => true,
       getPendingPatch: () => ({ website: true, socialLinks: true, labelIds: true }),
@@ -476,7 +482,7 @@ describe('Artist and Label peer metadata adoption', () => {
       observed: { socialLinks: { instagram: 'canonical' } },
     });
     const writesBeforePeer = mocks.writes.length;
-    unregisterPendingSave = registerEditorSave('label:label-1', {
+    registerPendingSave('label:label-1', {
       flush: async () => true,
       hasPending: () => true,
       getPendingPatch: () => ({ socialLinks: true }),
@@ -507,7 +513,7 @@ describe('Artist and Label save barriers', () => {
   it('waits for registered Artist saves before navigating back', async () => {
     let resolveFlush: ((result: boolean) => void) | undefined;
     let pending = true;
-    unregisterPendingSave = registerEditorSave('artist:artist-1', {
+    registerPendingSave('artist:artist-1', {
       flush: () => new Promise((resolve) => (resolveFlush = resolve)),
       hasPending: () => pending,
       getPendingPatch: () => ({ website: 'https://local.example' }),
@@ -529,7 +535,7 @@ describe('Artist and Label save barriers', () => {
   });
 
   it('keeps the Label editor open and blocks status changes when pending saves fail', async () => {
-    unregisterPendingSave = registerEditorSave('label:label-1', {
+    registerPendingSave('label:label-1', {
       flush: async () => false,
       hasPending: () => true,
       getPendingPatch: () => ({ socialLinks: { instagram: 'local' } }),
@@ -552,7 +558,7 @@ describe('Artist and Label save barriers', () => {
   });
 
   it('does not open the Artist delete confirmation when pending saves fail', async () => {
-    unregisterPendingSave = registerEditorSave('artist:artist-1', {
+    registerPendingSave('artist:artist-1', {
       flush: async () => false,
       hasPending: () => true,
       getPendingPatch: () => ({ socialLinks: { instagram: 'local' } }),

@@ -4076,8 +4076,7 @@
         "siteUrl": "Site URL’si",
         "companyName": "Şirket adı",
         "legalEmail": "Hukuk e-postası",
-        "supportEmail": "Destek e-postası",
-        "privacyEmail": "Gizlilik e-postası"
+        "contactEmail": "İletişim e-postası"
       }
     },
     "accessDowngraded": {
@@ -4713,15 +4712,10 @@
           "description": "Yasal sorularınız için (Şartlar, Gizlilik vb.)",
           "placeholder": "yasal@example.com"
         },
-        "supportEmail": {
-          "label": "Destek E-postası",
-          "description": "Müşteri desteği için",
-          "placeholder": "destek@example.com"
-        },
-        "privacyEmail": {
-          "label": "Gizlilik E-postası",
-          "description": "Gizlilikle ilgili talepler için (GDPR, veri silme vb.)",
-          "placeholder": "gizlilik@example.com"
+        "contactEmail": {
+          "label": "İletişim e-postası",
+          "description": "Genel sorular, destek ve gizlilik talepleri için",
+          "placeholder": "contact@example.com"
         },
         "primaryColor": {
           "label": "Marka rengi",

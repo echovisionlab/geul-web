@@ -39,8 +39,7 @@ export interface ManifestSettings {
   company_address: string;
   tax_id: string;
   legal_email: string;
-  support_email: string;
-  privacy_email: string;
+  contact_email: string;
   social_links: SocialLinks;
   default_comments_enabled: boolean;
 }
@@ -98,8 +97,7 @@ const DEFAULT_MANIFEST: Manifest = {
     company_address: '',
     tax_id: '',
     legal_email: '',
-    support_email: '',
-    privacy_email: '',
+    contact_email: '',
     social_links: {},
     default_comments_enabled: true,
   },
@@ -177,8 +175,7 @@ function fromProtoSettings(settings: ProtoSiteSettings | undefined): ManifestSet
     company_address: settings.companyAddress,
     tax_id: settings.taxId,
     legal_email: settings.legalEmail,
-    support_email: settings.supportEmail,
-    privacy_email: settings.privacyEmail,
+    contact_email: settings.contactEmail,
     social_links: (settings.socialLinks ?? {}) as SocialLinks,
     default_comments_enabled: settings.defaultCommentsEnabled,
   };

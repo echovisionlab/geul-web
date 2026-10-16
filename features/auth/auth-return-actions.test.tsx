@@ -39,7 +39,7 @@ describe('authentication return actions', () => {
       const back = host.querySelector<HTMLAnchorElement>('a[href="/login"]')!;
       expect(back).toHaveAccessibleName(enMessages.common.actions.backToLogin);
       expect(back.querySelector('svg')).toBeNull();
-      back.focus();
+      act(() => back.focus());
       expect(back).toHaveFocus();
       expect(host.querySelector('a[href="/"]')).not.toBeNull();
       if (error?.id === 'account_pending_deletion') {
@@ -60,7 +60,7 @@ describe('authentication return actions', () => {
     expect(back).toHaveAccessibleName('Back to login');
     expect(back.querySelector('svg')).toBeNull();
     expect(host.querySelector('[role="alert"]')).toHaveTextContent('Please sign in again');
-    back.focus();
+    act(() => back.focus());
     expect(back).toHaveFocus();
   });
 });

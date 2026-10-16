@@ -129,7 +129,9 @@ it.each([
     expect(blockRoomUndoDepth(room)).toBe(depth);
     expect(first!.view.dom).toHaveAttribute('aria-label', 'Changed content');
     expect(first!.view.dom).not.toHaveAttribute('aria-keyshortcuts');
-    expect(first!.commands.insertMermaid()).toBe(false);
+    await act(async () => {
+      expect(first!.commands.insertMermaid()).toBe(false);
+    });
     await act(async () => {
       first!.view.dom.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
     });
@@ -145,7 +147,9 @@ it.each([
     expect(current).toBe(first);
     expect(first!.isEditable).toBe(true);
     expect(first!.view.dom).toHaveAttribute('aria-keyshortcuts');
-    expect(first!.can().insertMermaid()).toBe(true);
+    await act(async () => {
+      expect(first!.can().insertMermaid()).toBe(true);
+    });
   } finally {
     await act(async () => root.unmount());
     host.remove();

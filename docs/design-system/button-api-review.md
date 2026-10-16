@@ -90,7 +90,7 @@ The default `tsc --noEmit --incremental false` failed on duplicate `.next/types`
 
 A browser reviewer observed the duplicated name at `localhost:6012`, Button Loading / Dark EN.
 The saved post-correction Dark EN observation (2026-10-11 17:12:49.698 UTC) records one action name `Saving`, a separate ProgressBar name `Saving`, and action aria-busy=true.
-Evidence: [consumer comparison record](./app-comparison-review.md), [browser-13 in the portable report](../../design/storybook/carbon-browser-review.json), and [pending screenshot](../../design/storybook/previews/carbon-review/button-pending.jpg).
+Check the current Button stories and exact accessible-name regressions in `Button.test.tsx`.
 No complete AX tree is attached. The observation lacks a source SHA, so its identity with current source is unverified.
 The 1425×891px image differs from the recorded 1440×900px DOM viewport and is not a complete viewport visual pass.
 The reviewing agent organized saved evidence and did not operate a browser.

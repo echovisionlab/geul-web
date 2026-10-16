@@ -56,7 +56,7 @@ export function PrivacyEditor({ initialPrivacy, siteSettings, canEdit }: Props) 
       initialPolicy={initialPrivacy}
       siteSettings={siteSettings}
       ogBackgroundUrl={siteSettings?.privacy_og_background_url ?? null}
-      contactEmail={siteSettings?.privacy_email ?? null}
+      contactEmail={siteSettings?.contact_email ?? null}
       strategy={PRIVACY_EDITOR_STRATEGY}
       canEdit={canEdit}
     />

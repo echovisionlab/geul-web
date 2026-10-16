@@ -7,6 +7,7 @@ import { TestProviders } from '@/test/TestProviders';
 import type { FormFieldSchema } from '@/lib/types/form/schema';
 import { FormField } from './FormField';
 import { NumberField } from './fields/NumberField';
+import { loadPhoneField } from './load-phone-field';
 
 let root: Root | undefined;
 let container: HTMLDivElement | undefined;
@@ -20,15 +21,17 @@ Object.defineProperty(window, 'ResizeObserver', {
     disconnect() {}
   },
 });
-function render(node: ReactNode) {
+async function render(node: ReactNode) {
   container = document.createElement('div');
   document.body.append(container);
   root = createRoot(container);
-  act(() => root?.render(node));
+  await act(async () => root?.render(node));
 }
-afterEach(() => {
-  act(() => root?.unmount());
+afterEach(async () => {
+  await act(async () => root?.unmount());
   container?.remove();
+  root = undefined;
+  container = undefined;
 });
 const base = { id: 'field-contract', key: 'answer', label: 'Response label', description: 'Field explanation' };
 const fields: FormFieldSchema[] = [
@@ -45,7 +48,12 @@ const fields: FormFieldSchema[] = [
 ];
 describe('production form field semantics', () => {
   it.each(fields)('names and relates the $type control without changing its label', async (field) => {
-    render(
+    // Await the real chunk before mounting the dynamic control so cold module
+    // work cannot resolve between the render and assertion act boundaries.
+    if (field.type === 'tel') {
+      await loadPhoneField();
+    }
+    await render(
       <TestProviders>
         <FormField field={field} value={undefined} onChange={() => {}} onValidityChange={() => {}} />
       </TestProviders>,
@@ -83,7 +91,7 @@ describe('production form field semantics', () => {
   });
 
   it('exposes required switch validation without adding visible words or required marks', async () => {
-    render(
+    await render(
       <TestProviders>
         <FormField
           field={{
@@ -103,10 +111,8 @@ describe('production form field semantics', () => {
     );
     const control = screen.getByRole('switch', { name: 'Response label' });
     expect(control.getAttribute('aria-required')).toBe('true');
-    act(() => {
-      control.focus();
-      control.blur();
-    });
+    await act(async () => control.focus());
+    await act(async () => control.blur());
     await waitFor(() => expect(control.getAttribute('aria-invalid')).toBe('true'));
     const descriptions = control
       .getAttribute('aria-describedby')
@@ -116,9 +122,9 @@ describe('production form field semantics', () => {
     expect(descriptions).toContain('This answer is required');
   });
 
-  it('clears the submitted number when its displayed input is cleared', () => {
+  it('clears the submitted number when its displayed input is cleared', async () => {
     const onChange = vi.fn();
-    render(
+    await render(
       <TestProviders>
         <NumberField
           field={{ ...base, type: 'number' }}
@@ -130,7 +136,7 @@ describe('production form field semantics', () => {
         />
       </TestProviders>,
     );
-    act(() => {
+    await act(async () => {
       fireEvent.change(screen.getByRole('textbox', { name: 'Response label' }), { target: { value: '' } });
     });
     expect(onChange).toHaveBeenLastCalledWith(undefined);

@@ -12,7 +12,6 @@ Detailed reviews dated 2026-10-12: [Button family](button-api-review.md), [Field
 [IconButton and TextButton](icon-text-button-api-review.md),
 [navigation, overlays and pagination](navigation-overlay-pagination-api-review.md),
 [Toolbar](toolbar-api-review.md), [DataTable](table-api-review.md) and [Dialog](dialog-api-review.md).
-Actual Storybook observations and remaining scope are recorded in the [consumer-view review](app-comparison-review.md).
 
 ## Shared specifications
 
@@ -532,6 +531,6 @@ not new consumer APIs. Do not calculate complete support or verification from ex
 | Consumer adoption                               | [Generated inventory](generated-inventory.md) | Owner change → actual consumer → accepted/rejected types → related Storybook review           |
 
 Storybook previews and actual routes differ in authentication, server, shell and external-service scope.
-Record those boundaries in [page coverage](page-preview-coverage.md) and the [consumer-view review](app-comparison-review.md).
+Check those boundaries against [page coverage](page-preview-coverage.md) and the actual routes.
 Assign gaps to the Core or consumer owner. Do not fill missing states with arbitrary Feature CSS or describe a subset of examples
 as the complete contract. Record provider/hook behavior under its code contract.

@@ -1103,7 +1103,7 @@ describe('LoginContent', () => {
     const socialButtons = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="provider"]'))
       .map((input) => input.form?.querySelector<HTMLButtonElement>('button'))
       .filter((button): button is HTMLButtonElement => Boolean(button));
-    setInputValue(emailInput as HTMLInputElement, 'johndoe@example.com');
+    act(() => setInputValue(emailInput as HTMLInputElement, 'johndoe@example.com'));
     await act(async () => {
       emailButton?.click();
       await Promise.resolve();
@@ -1115,7 +1115,10 @@ describe('LoginContent', () => {
     expect(passkeyButton?.hasAttribute('data-loading')).toBe(false);
     expect(socialButtons.every((button) => button.disabled)).toBe(true);
 
-    resolveSubmission(jsonResponse(codeFlow));
+    await act(async () => {
+      resolveSubmission(jsonResponse(codeFlow));
+      await pendingSubmission;
+    });
     await flush();
   });
 
@@ -1184,7 +1187,7 @@ describe('LoginContent', () => {
     const emailButton = document.querySelector<HTMLButtonElement>('#login-email-code-submit');
     expect(emailButton?.disabled).toBe(false);
     expect(emailButton?.getAttribute('data-emphasis')).toBe('strong');
-    emailButton?.click();
+    act(() => emailButton?.click());
     await flush();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });

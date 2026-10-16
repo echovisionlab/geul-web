@@ -1,17 +1,14 @@
 name: CI
+run-name: "CI · ${{ github.event_name == 'pull_request' && format('PR #{0}', github.event.pull_request.number) || github.ref_name }}"
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - main
-    paths-ignore:
-      - '.github/**'
-      - '.release-please-manifest.json'
-      - 'CHANGELOG.md'
-      - 'release-please-config.json'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 permissions:
@@ -45,19 +42,18 @@ jobs:
           clean: true
           fetch-depth: 0
           persist-credentials: false
-      - name: Classify pull request changes
+      - name: Change scope
         id: classify
         shell: bash
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          HEAD_REF: ${{ github.head_ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || 'origin/main' }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          HEAD_REF: ${{ github.head_ref || github.ref_name }}
         run: |
           set -euo pipefail
           run_full=true
 
-          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ] &&
-             [[ "${HEAD_REF}" = release-please--* ]] &&
+          if [[ "${HEAD_REF}" = release-please--* ]] &&
              [ -n "${BASE_SHA}" ] &&
              [ -n "${HEAD_SHA}" ]; then
             changed_files="$(git diff --name-only "${BASE_SHA}...${HEAD_SHA}")"
@@ -153,10 +149,11 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.PRIVATE_DEPS_TOKEN }}
         run: |
           pnpm install --frozen-lockfile
-      - name: Check Prettier formatting
+          echo 'NPM_CONFIG_USERCONFIG=/dev/null' >> "$GITHUB_ENV"
+      - name: Prettier
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || 'origin/main' }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
           mapfile -d '' changed_files < <(
@@ -171,15 +168,14 @@ jobs:
     needs: [scope, format]
     if: needs.scope.outputs.run_full == 'true'
     runs-on: ubuntu-24.04
-    # The 2-core private runner builds the app and Storybook far slower than the
-    # 4-core public one did.
+    # Keep the app build and static checks independent of the shared Storybook build.
     timeout-minutes: 45
     env:
       # Node sizes its default heap from runner memory (8 GB here), which is too
-      # small for type-aware lint, the Next build and the Storybook build.
+      # small for type-aware lint and the Next build.
       NODE_OPTIONS: --max-old-space-size=6144
     steps:
-      - name: Add swap to the hosted runner
+      - name: Runner swap
         # Private repositories run on 2-core/8 GB hosted runners with a small disk.
         # The Next build and type-aware lint outgrow 8 GB and the runner is
         # OOM-killed mid-build, so drop preinstalled SDKs this job never uses and
@@ -229,73 +225,39 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.PRIVATE_DEPS_TOKEN }}
         run: |
           pnpm install --frozen-lockfile
-      - name: Lint JavaScript and TypeScript
+          echo 'NPM_CONFIG_USERCONFIG=/dev/null' >> "$GITHUB_ENV"
+      - name: ESLint
         env:
           # Type-aware lint of the whole app exceeds Node's default ~2 GB heap.
           NODE_OPTIONS: --max-old-space-size=6144
         run: pnpm lint
-      - name: Check translation catalogues against English and client message scopes
+      - name: Translations
         run: pnpm i18n:check
-      - name: Lint stylesheets
+      - name: Stylelint
         run: pnpm lint:styles
-      - name: Check design tokens and inventory freshness
+      - name: Design system
         run: pnpm design-system:check
-      - name: Test design-system enforcement
-        run: pnpm design-system:test
-      - name: Verify accepted and rejected Core presentation contracts
+      - name: Core contracts
         run: pnpm design-system:typecheck
-      - name: Check light and dark color contrast contracts
-        run: pnpm design-system:test:contrast
       - name: Prepare MapLibre worker
         run: pnpm prepare:maplibre-worker
       - name: Prepare p5 runtime
         run: pnpm prepare:p5-runtime
-      - name: Build with TypeScript 7
+      - name: Next.js build
         run: pnpm build
-      - name: Check per-route first-load client bundle budget
+      - name: Bundle budget
         run: pnpm perf:bundle
-      - name: Build Storybook catalog
-        run: pnpm storybook:build
-      - name: Typecheck interactive preview sources
-        run: pnpm storybook:typecheck
-      - name: Install Chromium for Storybook accessibility tests
-        run: pnpm exec playwright install --with-deps chromium
-      - name: Check accessibility and keyboard behavior of Core controls and post authoring
-        run: |
-          pnpm storybook:preview > /tmp/geul-storybook-preview.log 2>&1 &
-          preview_pid=$!
-          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
-          for _ in {1..30}; do
-            if curl --fail --silent http://127.0.0.1:6010/index.json > /dev/null; then
-              pnpm storybook:test:a11y --ci
-              pnpm storybook:test:author --ci
-              exit $?
-            fi
-            sleep 1
-          done
-          cat /tmp/geul-storybook-preview.log
-          exit 1
 
-  unit:
-    name: Tests (${{ matrix.project }} ${{ matrix.shard }})
-    needs: [scope, format]
+  test:
+    name: Tests
+    needs: [scope, format, quality]
     if: needs.scope.outputs.run_full == 'true'
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - project: node-unit
-            shard: '1/1'
-          - project: component
-            shard: '1/2'
-          - project: component
-            shard: '2/2'
-          - project: server-contract
-            shard: '1/1'
-          - project: editor-integration
-            shard: '1/1'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    # Repo-scoped ARC scale set: one 8-CPU pod on mini (172.16.71.79).
+    runs-on: geul-web-mini
+    timeout-minutes: 45
+    env:
+      # Reviewed renderer source, pinned to the merged API main commit.
+      EMAIL_PREVIEW_API_REVISION: d65f5f5105f36a01eb1866b493194be30648ec28
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -311,22 +273,119 @@ jobs:
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-          # Writes the user-level npmrc that reads NODE_AUTH_TOKEN; pnpm ignores
-          # environment-backed auth in the repository .npmrc.
           registry-url: https://npm.pkg.github.com
           scope: '@echovisionlab'
+      - name: CPU count
+        run: |
+          set -euo pipefail
+          workers=$(node --input-type=module -e "import { availableParallelism } from 'node:os'; console.log(availableParallelism())")
+          echo "CI_TEST_WORKERS=$workers" >> "$GITHUB_ENV"
+          echo "CI test worker count: $workers (node:os.availableParallelism)"
+      - name: SWC cache
+        # The runner home has shared writable ancestors. Use a private directory
+        # under the sticky-protected system temp root; keep SWC's trust checks.
+        run: |
+          set -euo pipefail
+          cache=$(mktemp -d /tmp/geul-web-swc.XXXXXX)
+          chmod 700 "$cache"
+          echo "SWC_NATIVE_BINDING_CACHE=$cache" >> "$GITHUB_ENV"
       - name: Install dependencies
+        id: dependencies
         env:
           NODE_AUTH_TOKEN: ${{ secrets.PRIVATE_DEPS_TOKEN }}
+        # Later commands use installed packages and need no registry credentials.
         run: |
           pnpm install --frozen-lockfile
-      - name: Run test project shard
-        run: pnpm exec vitest run --fileParallelism --project=${{ matrix.project }} --shard=${{ matrix.shard }}
+          echo 'NPM_CONFIG_USERCONFIG=/dev/null' >> "$GITHUB_ENV"
+      - name: Design system tests
+        run: node --test --test-concurrency="$CI_TEST_WORKERS" scripts/design-system/*.test.mjs
+      - name: Vitest
+        # Includes node-unit, both former component shards, server-contract,
+        # editor-integration, and theme.test.ts's light/dark contrast contracts.
+        run: pnpm exec vitest run --fileParallelism --maxWorkers "$CI_TEST_WORKERS"
+      - name: Storybook types
+        run: pnpm storybook:typecheck
+      - name: Prepare MapLibre worker
+        id: maplibre
+        run: pnpm prepare:maplibre-worker
+      - name: Prepare p5 runtime
+        id: p5
+        run: pnpm prepare:p5-runtime
+      - name: Storybook build
+        id: storybook-build
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+        run: pnpm storybook:build --output-dir .artifacts/storybook-build/site
+      - name: Renderer revision
+        id: renderer-revision
+        shell: bash
+        run: '[[ "$EMAIL_PREVIEW_API_REVISION" =~ ^[0-9a-f]{40}$ ]]'
+      - name: Checkout renderer
+        id: renderer-source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: echovisionlab/geul-api
+          ref: ${{ env.EMAIL_PREVIEW_API_REVISION }}
+          path: .artifacts/email-preview-api
+          token: ${{ secrets.PRIVATE_DEPS_TOKEN }}
+          persist-credentials: false
+      - name: Set up Go
+        id: go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: .artifacts/email-preview-api/go.mod
+          cache: true
+          cache-dependency-path: .artifacts/email-preview-api/go.sum
+      - name: Email renderer
+        id: renderer
+        working-directory: .artifacts/email-preview-api
+        env:
+          TOKEN: ${{ secrets.PRIVATE_DEPS_TOKEN }}
+          GOWORK: 'off'
+          GOPRIVATE: github.com/echovisionlab/*
+        run: |
+          set -euo pipefail
+          : "${TOKEN:?Set the PRIVATE_DEPS_TOKEN repository secret}"
+          config=$(mktemp "$RUNNER_TEMP/geul-storybook-email-deps.XXXXXX")
+          trap 'rm -f "$config"' EXIT
+          git config --file "$config" url."https://x-access-token:${TOKEN}@github.com/".insteadOf "https://github.com/"
+          export GIT_CONFIG_GLOBAL="$config"
+          [ "$(git rev-parse HEAD)" = "$EMAIL_PREVIEW_API_REVISION" ]
+          mkdir -p "$GITHUB_WORKSPACE/.artifacts/storybook-build/bin"
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -o "$GITHUB_WORKSPACE/.artifacts/storybook-build/bin/email-preview-fixture" ./cmd/email-preview-fixture
+          printf '%s\n' "$EMAIL_PREVIEW_API_REVISION" > "$GITHUB_WORKSPACE/.artifacts/storybook-build/api-revision.txt"
+      - name: Install Chromium
+        id: browser-runtime
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Storybook tests
+        env:
+          EMAIL_PREVIEW_FIXTURE_BINARY: ${{ github.workspace }}/.artifacts/storybook-build/bin/email-preview-fixture
+        run: pnpm storybook:test:ci --suite ci --shard 1/1 --static-dir .artifacts/storybook-build/site
+      - name: Upload Storybook
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: storybook-build
+          path: .artifacts/storybook-build/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 1
+          compression-level: 1
+      - name: Upload test results
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: storybook-ci
+          path: |
+            .artifacts/storybook/**
+            !.artifacts/storybook/**/cache/**
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 1
 
   validate:
     name: Validate
-    if: always()
-    needs: [scope, format, quality, unit]
+    if: ${{ !cancelled() }}
+    needs: [scope, format, quality, test]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     env:
@@ -334,9 +393,9 @@ jobs:
       SCOPE_RESULT: ${{ needs.scope.result }}
       FORMAT_RESULT: ${{ needs.format.result }}
       QUALITY_RESULT: ${{ needs.quality.result }}
-      UNIT_RESULT: ${{ needs.unit.result }}
+      TEST_RESULT: ${{ needs.test.result }}
     steps:
-      - name: Require every applicable check
+      - name: Check results
         shell: bash
         run: |
           set -euo pipefail
@@ -344,9 +403,9 @@ jobs:
           if [ "${RUN_FULL}" = "true" ]; then
             [ "${FORMAT_RESULT}" = "success" ]
             [ "${QUALITY_RESULT}" = "success" ]
-            [ "${UNIT_RESULT}" = "success" ]
+            [ "${TEST_RESULT}" = "success" ]
           else
             [ "${FORMAT_RESULT}" = "skipped" ]
             [ "${QUALITY_RESULT}" = "skipped" ]
-            [ "${UNIT_RESULT}" = "skipped" ]
+            [ "${TEST_RESULT}" = "skipped" ]
           fi

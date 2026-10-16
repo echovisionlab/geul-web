@@ -452,19 +452,10 @@ export function EmailLayoutEditPageView({
 
         <div
           style={{
-            flex: 1,
-            minHeight: 0,
             minWidth: 0,
-            height: '100%',
           }}
         >
-          <DsLayoutGrid
-            columns={viewMode === 'split' ? { base: 1, sm: 2 } : 1}
-            gap="md"
-            fill="both"
-            flexible
-            rows="stretch"
-          >
+          <DsLayoutGrid columns={viewMode === 'split' ? { base: 1, sm: 2 } : 1} gap="md">
             {showEditor && (
               <DsLayoutStack gap="none" fill="block">
                 <DsLayoutInset blockEnd="xxs">
@@ -501,7 +492,7 @@ export function EmailLayoutEditPageView({
             )}
 
             {showPreview && (
-              <div style={{ minHeight: 0, minWidth: 0, height: '100%' }}>
+              <div style={{ minWidth: 0 }}>
                 <EmailLayoutPreview
                   layoutId={layoutId}
                   bindings={previewBindings}

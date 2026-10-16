@@ -23,19 +23,20 @@ describe('public site variable projection', () => {
     },
   );
 
-  it('resolves the six exact tokens once and preserves ordinary braces and unknown names', () => {
+  it('resolves the five canonical tokens once and preserves ordinary braces and unknown names', () => {
     expect(
       resolveSiteVariableTokens(
-        '{{site.title}} | {{site.url}} | {{site.companyName}} | {{contact.legalEmail}} | {{contact.supportEmail}} | {{contact.privacyEmail}}',
+        '{{site.title}} | {{site.url}} | {{site.companyName}} | {{contact.legalEmail}} | {{contact.email}}',
         context,
       ),
-    ).toBe(
-      'rawsector | https://www.rawsector.com | Example Studio Ltd. | legal@example.com | support@example.com | privacy@example.com',
-    );
+    ).toBe('rawsector | https://www.rawsector.com | Example Studio Ltd. | legal@example.com | contact@example.com');
     expect(
       resolveSiteVariableTokens('{{site.title}} {{Site.title}} {{other}}', { ...context, siteTitle: '{{site.url}}' }),
     ).toBe('{{site.url}} {{Site.title}} {{other}}');
     expect(resolveSiteVariableTokens('A{{site.title}}B', { ...context, siteTitle: '' })).toBe('AB');
+  });
+  it('keeps an explicitly cleared contact empty', () => {
+    expect(resolveSiteVariableTokens('{{contact.email}}', { ...context, contactEmail: '' })).toBe('');
   });
   it('requires a context only when an exact token needs resolving', () => {
     expect(resolveSiteVariableTokens('{{site.unknown}} {{Site.title}}')).toBe('{{site.unknown}} {{Site.title}}');
@@ -44,7 +45,7 @@ describe('public site variable projection', () => {
   it('links only a nonempty site URL or contact value and rejects unsafe output targets', () => {
     expect(canLinkSiteVariable('site.title')).toBe(false);
     expect(canLinkSiteVariable('site.companyName')).toBe(false);
-    expect(siteVariableHref('contact.supportEmail', 'support@example.com')).toBe('mailto:support@example.com');
+    expect(siteVariableHref('contact.email', 'contact@example.com')).toBe('mailto:contact@example.com');
     expect(siteVariableHref('site.url', context.siteUrl)).toBe(context.siteUrl);
     expect(siteVariableHref('contact.legalEmail', '')).toBeUndefined();
     expect(siteVariableHref('contact.legalEmail', 'legal@example.com\nBcc:x@example.com')).toBeUndefined();

@@ -3,7 +3,7 @@
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
-import { renderToReadableStream } from 'react-dom/server.browser';
+import { renderSettledServerHtml } from '@/test/settled-server-render';
 
 import { create } from '@bufbuild/protobuf';
 import {
@@ -23,14 +23,23 @@ const mocks = vi.hoisted(() => ({
   getScheduled: vi.fn(),
   getPreview: vi.fn(),
 }));
+const serverLoads = vi.hoisted(() => ({ pending: [] as Promise<unknown>[] }));
 
-// App Router uses lazy SSR, which must finish through a streaming server renderer.
-// Exercise the actual Next implementation rather than replacing the rich-text body.
+// Keep the actual App Router lazy component and reader. Hydration fixtures wait
+// for its requested imports using the secondary server renderer context slot.
 vi.mock('next/dynamic', async () => {
-  const { default: dynamic } = await vi.importActual<{ default: typeof import('next/dynamic').default }>(
+  const { default: dynamic } = await vi.importActual<typeof import('next/dist/shared/lib/app-dynamic.js')>(
     'next/dist/shared/lib/app-dynamic.js',
   );
-  return { default: dynamic };
+  const { trackServerLoader } = await import('@/test/settled-server-render');
+  return {
+    default: function trackedDynamic<P = object>(
+      loader: import('next/dist/shared/lib/app-dynamic.js').Loader<P>,
+      options?: import('next/dist/shared/lib/app-dynamic.js').DynamicOptions<P>,
+    ) {
+      return dynamic(trackServerLoader(loader, serverLoads.pending), options);
+    },
+  };
 });
 
 vi.mock('next/navigation', () => ({ useSearchParams: () => mocks.query }));
@@ -104,9 +113,7 @@ function screen(kind: 'privacy' | 'terms', initialData?: PublicLegalPageInitialD
 }
 
 async function renderServerScreen(content: ReactNode): Promise<string> {
-  const stream = await renderToReadableStream(content);
-  await stream.allReady;
-  return new Response(stream).text();
+  return renderSettledServerHtml(content, serverLoads.pending);
 }
 
 async function waitForPublishedBody(container: HTMLElement) {

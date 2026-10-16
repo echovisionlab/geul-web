@@ -14,6 +14,12 @@ let container: HTMLDivElement | null = null;
 let root: Root | null = null;
 
 beforeEach(() => {
+  // Scheduling owns zone conversion; rendering the OS's entire zone catalog is
+  // outside these cases. Keep Intl's real date/DST behavior with bounded inputs.
+  const supportedValuesOf = Intl.supportedValuesOf;
+  vi.spyOn(Intl, 'supportedValuesOf').mockImplementation((key) =>
+    key === 'timeZone' ? ['America/New_York', 'Asia/Seoul'] : supportedValuesOf(key),
+  );
   vi.spyOn(Date, 'now').mockReturnValue(new Date('2026-10-11T00:00:00.000Z').getTime());
   vi.stubGlobal(
     'ResizeObserver',

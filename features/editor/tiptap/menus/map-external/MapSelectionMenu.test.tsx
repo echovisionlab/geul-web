@@ -100,7 +100,7 @@ describe('MapSelectionMenu', () => {
     expect(onRemovePlace).toHaveBeenCalledWith('place-1');
   });
 
-  it('uses the shared toolbar navigation contract and preserves the editor selection on pointer input', () => {
+  it('uses the shared toolbar navigation contract and preserves the editor selection on pointer input', async () => {
     const onEscape = vi.fn();
     act(() => {
       root.render(
@@ -161,7 +161,9 @@ describe('MapSelectionMenu', () => {
 
     const pointerDown = new Event('pointerdown', { bubbles: true, cancelable: true });
     const mouseDown = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
-    expect(toolbar?.dispatchEvent(pointerDown)).toBe(false);
-    expect(toolbar?.dispatchEvent(mouseDown)).toBe(false);
+    await act(async () => {
+      expect(toolbar?.dispatchEvent(pointerDown)).toBe(false);
+      expect(toolbar?.dispatchEvent(mouseDown)).toBe(false);
+    });
   });
 });

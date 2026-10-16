@@ -299,12 +299,18 @@ describe('SelectionBubbleMenuView keyboard navigation', () => {
         menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })),
       );
       expect(document.querySelector('[role="menu"]')).toBeNull();
-      await vi.waitFor(() => expect(document.activeElement).toBe(trigger));
+      await act(async () => {
+        // React Aria restores the trigger in the frame after the popup unmounts.
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      });
+      expect(document.activeElement).toBe(trigger);
       expect(onEscapeFocus).not.toHaveBeenCalled();
       expect(editor.state.selection.eq(selection)).toBe(true);
     } finally {
-      editor.destroy();
-      editorElement.remove();
+      await act(async () => {
+        editor.destroy();
+        editorElement.remove();
+      });
     }
   });
 

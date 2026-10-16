@@ -175,9 +175,6 @@
     "docs/design-system.md",
     "docs/design-system",
     "package.json",
-    "design/storybook/review-results/compact-first-build-identity.json",
-    "design/storybook/review-results/compact-second-build-identity.json",
-    "design/storybook/review-results/compact-third-build-identity.json",
     "pnpm-lock.yaml",
     ".storybook/main.ts",
     "README.md",
@@ -215,11 +212,7 @@
     "design/storybook/previews/compact-product/version-history-end-ocean-dark-ko.png",
     "design/storybook/previews/compact-product/bubble-more-detail-ocean-light-ko.png"
   ],
-  "priorRuns": [
-    "design/storybook/review-results/compact-before-play-corrections.json",
-    "design/storybook/review-results/compact-before-keyboard-fixes.json",
-    "design/storybook/review-results/compact-before-lazy-list-readiness.json"
-  ],
+  "priorRuns": [],
   "boundaries": [
     "Representative manual observations use production Views with fixture services and fine pointer. No physical touch/native VoiceOver or Orca acceptance is implied.",
     "No live backend upload/restore, analytics account synchronization, remote map routing or GIF asset motion was accepted.",

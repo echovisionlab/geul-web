@@ -65,8 +65,8 @@ function render(options: Partial<NearEndLoaderProps>) {
     ),
   );
 }
-function enter() {
-  act(() => observers.filter((observer) => !observer.disconnected).forEach((observer) => observer.enter()));
+async function enter() {
+  await act(async () => observers.filter((observer) => !observer.disconnected).forEach((observer) => observer.enter()));
 }
 
 beforeEach(() => {
@@ -76,8 +76,8 @@ beforeEach(() => {
   document.body.append(host);
   root = createRoot(host);
 });
-afterEach(() => {
-  act(() => root.unmount());
+afterEach(async () => {
+  await act(async () => root.unmount());
   host.remove();
   vi.unstubAllGlobals();
 });
@@ -92,15 +92,15 @@ describe('NearEndLoader', () => {
     render({ rootRef, onLoad });
     expect(observers.at(-1)?.root).toBe(host);
     expect(observers.at(-1)?.rootMargin).toBe('240px 0px');
-    enter();
-    enter();
+    await enter();
+    await enter();
     expect(onLoad).toHaveBeenCalledTimes(1);
     expect(host.querySelector('[role="status"]')?.textContent).toBe('Loading');
     await act(async () => pending.resolve());
-    enter();
+    await enter();
     expect(onLoad).toHaveBeenCalledTimes(1);
     render({ rootRef, onLoad, pageKey: 'page-3' });
-    enter();
+    await enter();
     expect(onLoad).toHaveBeenCalledTimes(2);
   });
 
@@ -111,12 +111,12 @@ describe('NearEndLoader', () => {
       .mockRejectedValueOnce(new Error('Offline'))
       .mockImplementationOnce(() => pending.promise);
     render({ onLoad });
-    enter();
+    await enter();
     await act(async () => {
       await Promise.resolve();
     });
     expect(host.querySelector('[role="alert"]')?.textContent).toBe('Load failed');
-    enter();
+    await enter();
     expect(onLoad).toHaveBeenCalledTimes(1);
     const retry = host.querySelector<HTMLButtonElement>('button')!;
     expect(retry.textContent).toBe('Try again');
@@ -129,7 +129,7 @@ describe('NearEndLoader', () => {
     expect(retry.getAttribute('aria-disabled')).toBe('true');
     await act(async () => pending.resolve());
     expect(document.activeElement).toBe(retry);
-    enter();
+    await enter();
     expect(onLoad).toHaveBeenCalledTimes(2);
   });
 
@@ -141,15 +141,15 @@ describe('NearEndLoader', () => {
       .mockImplementationOnce(() => old.promise)
       .mockImplementationOnce(() => current.promise);
     render({ onLoad });
-    enter();
+    await enter();
     render({ onLoad, resetKey: 'query-b' });
-    enter();
+    await enter();
     expect(onLoad).toHaveBeenCalledTimes(2);
     await act(async () => old.resolve());
     expect(host.querySelector('[role="status"]')?.textContent).toBe('Loading');
     await act(async () => current.resolve());
     render({ onLoad, resetKey: 'query-b', pageKey: null });
-    enter();
+    await enter();
     expect(host.querySelector('[role="status"]')?.textContent).toBe('End of results');
     expect(host.querySelector('button')).toBeNull();
     expect(onLoad).toHaveBeenCalledTimes(2);

@@ -80,7 +80,7 @@ run('vitest --changed', 'pnpm', [
   'exec',
   'vitest',
   'run',
-  ...(localContracts ? ['--config', 'vitest.local-contracts.config.ts'] : []),
+  ...(localContracts ? ['--config', 'vitest.local-contracts.config.mts'] : []),
   '--changed',
   ...(base ? [base] : []),
 ]);

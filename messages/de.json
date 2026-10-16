@@ -1994,15 +1994,10 @@
           "description": "Für rechtliche Anfragen (AGB, Datenschutz usw.)",
           "placeholder": "legal@example.com"
         },
-        "supportEmail": {
-          "label": "Support-E-Mail",
-          "description": "Für Kundensupport",
-          "placeholder": "support@example.com"
-        },
-        "privacyEmail": {
-          "label": "Datenschutz-E-Mail",
-          "description": "Für datenschutzbezogene Anfragen (DSGVO, Datenlöschung usw.)",
-          "placeholder": "privacy@example.com"
+        "contactEmail": {
+          "label": "Kontakt-E-Mail",
+          "description": "Für allgemeine Anfragen, Support und Datenschutzanfragen",
+          "placeholder": "contact@example.com"
         },
         "primaryColor": {
           "label": "Markenfarbe",
@@ -4506,8 +4501,7 @@
         "siteUrl": "Website-URL",
         "companyName": "Firmenname",
         "legalEmail": "E-Mail für Rechtsfragen",
-        "supportEmail": "Support-E-Mail",
-        "privacyEmail": "Datenschutz-E-Mail"
+        "contactEmail": "Kontakt-E-Mail"
       }
     },
     "accessDowngraded": {

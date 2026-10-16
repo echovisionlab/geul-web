@@ -6,6 +6,7 @@ import { createRoot } from 'react-dom/client';
 import { Editor, type NodeType, type TextType } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
 import { EditorContent, useEditor } from '@tiptap/react';
+import type { MonacoSourceEditorProps } from '../code-editor';
 
 import { createTiptapWireExtensions } from '../wire-schema';
 import { executableBlockIdForPosition } from '../executable-source';
@@ -32,6 +33,15 @@ import {
   normalizeShaderError,
   validateShaderSource,
 } from './shader-source';
+
+// NodeView/preview ownership is exercised below with the real editor. Monaco's
+// engine, workers and model lifecycle are covered by code-editor tests and the
+// browser stories; loading that engine adds no coverage to this DOM boundary.
+vi.mock('../code-editor/MonacoSourceEditorRuntime', () => ({
+  MonacoSourceEditorRuntime: ({ ariaLabel, value }: MonacoSourceEditorProps) => (
+    <textarea aria-label={ariaLabel} value={value} readOnly />
+  ),
+}));
 
 beforeAll(() => {
   vi.stubGlobal(
@@ -307,7 +317,9 @@ describe('Shader Monaco authoring boundary', () => {
     editor.destroy();
   });
 
-  it('shows live source and preview together in edit mode without feeding preview chrome into ProseMirror', async () => {
+  it('shows live source and preview together in edit mode without feeding preview chrome into ProseMirror', async ({
+    onTestFinished,
+  }) => {
     const run = vi.fn();
     const runtimeFactory: ShaderPreviewRuntimeFactory = (_canvas, events) => ({
       run: (source) => {
@@ -321,39 +333,37 @@ describe('Shader Monaco authoring boundary', () => {
       resize: () => undefined,
     });
     let transactionCount = 0;
-    let editorInstance: Editor | null = null;
-    function AuthoringShader() {
-      const editor = useEditor({
-        immediatelyRender: false,
-        editable: true,
-        extensions: [
-          ...createTiptapWireExtensions(),
-          createShaderExtension({
-            runtimeFactory,
-            authoringMode: { allowNeutralBlockEdits: true, allowLocalizedBlockEdits: true },
-          }),
-        ],
-        content: documentWithShader(DEFAULT_SHADER_FRAGMENT_SOURCE, 'edit'),
-        onTransaction: () => {
-          transactionCount += 1;
-        },
-      });
-      useEffect(() => {
-        editorInstance = editor;
-        return () => editor?.destroy();
-      }, [editor]);
-      return editor ? <EditorContent editor={editor} /> : null;
-    }
+    const editorInstance = new Editor({
+      editable: true,
+      extensions: [
+        ...createTiptapWireExtensions(),
+        createShaderExtension({
+          runtimeFactory,
+          authoringMode: { allowNeutralBlockEdits: true, allowLocalizedBlockEdits: true },
+        }),
+      ],
+      content: documentWithShader(DEFAULT_SHADER_FRAGMENT_SOURCE, 'edit'),
+      onTransaction: () => {
+        transactionCount += 1;
+      },
+    });
     const element = document.createElement('div');
     document.body.append(element);
     const root = createRoot(element);
+    onTestFinished(async () => {
+      try {
+        await act(async () => root.unmount());
+      } finally {
+        editorInstance.destroy();
+        element.remove();
+      }
+    });
     await act(async () => {
       root.render(
         <DesignSystemProvider forceColorScheme="light">
-          <AuthoringShader />
+          <EditorContent editor={editorInstance} />
         </DesignSystemProvider>,
       );
-      await new Promise((resolve) => setTimeout(resolve, 50));
     });
     expect(run).toHaveBeenCalledOnce();
     expect(element.querySelector('[data-testid="tiptap-monaco-source-editor"]')).not.toBeNull();
@@ -372,7 +382,7 @@ describe('Shader Monaco authoring boundary', () => {
     await act(async () => {
       referenceTrigger?.dispatchEvent(referenceMouseDown);
     });
-    expect((editorInstance as Editor | null)?.state.selection).not.toBeInstanceOf(NodeSelection);
+    expect(editorInstance.state.selection).not.toBeInstanceOf(NodeSelection);
     await act(async () => referenceTrigger?.click());
     expect(referenceTrigger?.getAttribute('aria-expanded')).toBe('true');
     expect(
@@ -392,6 +402,7 @@ describe('Shader Monaco authoring boundary', () => {
     expect(document.getElementById(sourcePanel.getAttribute('aria-labelledby')!)).toBe(selectedStage);
     expect(selectedStage.textContent).toBe('frag.glsl');
     expect(sourcePanel.contains(sourceEditor)).toBe(true);
+    expect(sourceEditor.querySelector('textarea')?.value).toBe(DEFAULT_SHADER_FRAGMENT_SOURCE);
     expect(sourcePanel.contains(availableInputs)).toBe(true);
     expect(resultPane.compareDocumentPosition(sourceEditor) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect([...element.querySelectorAll('button')].some((button) => button.getAttribute('aria-label') === 'Stop')).toBe(
@@ -405,22 +416,26 @@ describe('Shader Monaco authoring boundary', () => {
     await act(async () => {
       expect(
         replaceShaderStageChannels({
-          editor: editorInstance!,
+          editor: editorInstance,
           getPos: () => 2,
           stage: 'image',
           channels: [{ kind: 'buffer', buffer: 'A' }, { kind: 'none' }, { kind: 'none' }, { kind: 'none' }],
           canEditNeutral: true,
         }),
       ).toBe(true);
-      await new Promise((resolve) => setTimeout(resolve, 300));
     });
     expect(run).toHaveBeenCalledTimes(2);
     expect(run.mock.calls[1]?.[0].sources.image).toBe(sourceBeforeChannelChange);
     expect(run.mock.calls[1]?.[0].channels.image?.[0]).toEqual({ kind: 'buffer', buffer: 'A' });
+    expect(shader(editorInstance)?.content?.[8]).toMatchObject({
+      type: 'shaderImage',
+      content: [{ type: 'text', text: sourceBeforeChannelChange }],
+    });
     const canvasAfterChannelChange = element.querySelector<HTMLCanvasElement>('[data-testid="shader-preview"] canvas');
-    window.dispatchEvent(new Event('scroll'));
-    document.dispatchEvent(new Event('scroll'));
-    await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
+    await act(async () => {
+      window.dispatchEvent(new Event('scroll'));
+      document.dispatchEvent(new Event('scroll'));
+    });
     expect(run).toHaveBeenCalledTimes(2);
     expect(element.querySelector<HTMLCanvasElement>('[data-testid="shader-preview"] canvas')).toBe(
       canvasAfterChannelChange,
@@ -434,7 +449,6 @@ describe('Shader Monaco authoring boundary', () => {
     expect(element.querySelector('[data-testid="shader-preview"]')).not.toBeNull();
     await act(async () => {
       sourceButton?.click();
-      await new Promise((resolve) => setTimeout(resolve, 0));
     });
     expect(element.querySelector('[data-testid="tiptap-monaco-source-editor"]')).not.toBeNull();
     const restoredPanel = element.querySelector<HTMLElement>('[role="tabpanel"]')!;
@@ -443,8 +457,6 @@ describe('Shader Monaco authoring boundary', () => {
     expect(document.getElementById(restoredSelected.getAttribute('aria-controls')!)).toBe(restoredPanel);
     expect(document.getElementById(restoredPanel.getAttribute('aria-labelledby')!)).toBe(restoredSelected);
     expect(element.querySelector('[data-testid="shader-preview"]')?.getAttribute('data-status')).toBe('running');
-    await act(async () => root.unmount());
-    element.remove();
   });
 
   it('debounces an edit-mode source correction and recovers a terminal preview error', async () => {

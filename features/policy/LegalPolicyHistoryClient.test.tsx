@@ -8,7 +8,7 @@ import {
   ParagraphBlockLocaleSchema,
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { hydrateRoot, type Root } from 'react-dom/client';
-import { renderToReadableStream } from 'react-dom/server.browser';
+import { renderSettledServerHtml } from '@/test/settled-server-render';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -18,9 +18,21 @@ import { TermsHistoryDetailClient } from '@/app/(general)/terms/history/[id]/Ter
 import type { PublicLegalHistoryDetailInitialData } from '@/lib/queries/legal-history';
 
 const mocks = vi.hoisted(() => ({ get: vi.fn(), query: new URLSearchParams('lang=ko') }));
-vi.mock('next/dynamic', async () => ({
-  default: (await vi.importActual<{ default: unknown }>('next/dist/shared/lib/app-dynamic.js')).default,
-}));
+const serverLoads = vi.hoisted(() => ({ pending: [] as Promise<unknown>[] }));
+vi.mock('next/dynamic', async () => {
+  const { default: dynamic } = await vi.importActual<typeof import('next/dist/shared/lib/app-dynamic.js')>(
+    'next/dist/shared/lib/app-dynamic.js',
+  );
+  const { trackServerLoader } = await import('@/test/settled-server-render');
+  return {
+    default: function trackedDynamic<P = object>(
+      loader: import('next/dist/shared/lib/app-dynamic.js').Loader<P>,
+      options?: import('next/dist/shared/lib/app-dynamic.js').DynamicOptions<P>,
+    ) {
+      return dynamic(trackServerLoader(loader, serverLoads.pending), options);
+    },
+  };
+});
 vi.mock('next/navigation', () => ({ useSearchParams: () => mocks.query }));
 vi.mock('next-intl', () => ({
   useLocale: () => 'en',
@@ -72,9 +84,7 @@ function wrapper(content: ReactNode, client: QueryClient) {
   );
 }
 async function ssrAndHydrate(content: ReactNode, client: QueryClient) {
-  const stream = await renderToReadableStream(wrapper(content, client));
-  await stream.allReady;
-  const html = await new Response(stream).text();
+  const html = await renderSettledServerHtml(wrapper(content, client), serverLoads.pending);
   container = document.createElement('div');
   container.innerHTML = html;
   document.body.appendChild(container);

@@ -178,13 +178,17 @@ it('keeps arrow/Enter result selection and returns focus after selecting a post'
   await tick(300);
   expect(document.querySelector('[role="menuitem"]')?.textContent).toContain('Post');
   await act(async () =>
-    input().dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', code: 'ArrowDown', bubbles: true })),
+    input().dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', code: 'ArrowDown', bubbles: true, cancelable: true }),
+    ),
   );
   const active = document.querySelector<HTMLElement>('[role="menuitem"][data-focused]');
   expect(active?.textContent).toBe('Post');
   expect(input().getAttribute('aria-activedescendant')).toBe(active?.id);
   await act(async () =>
-    input().dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', bubbles: true })),
+    input().dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', bubbles: true, cancelable: true }),
+    ),
   );
   expect(probes.push).toHaveBeenCalledOnce();
   expect(new URL(probes.push.mock.lastCall?.[0], window.location.href).pathname).toBe('/posts/post-slug');

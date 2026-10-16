@@ -52,9 +52,10 @@ globalThis.ResizeObserver = TestResizeObserver;
 let container: HTMLDivElement;
 let root: Root;
 let queryClient: QueryClient;
+const scheduledNotifications = new Set<ReturnType<typeof setTimeout>>();
 
-function render() {
-  act(() => {
+async function render() {
+  await act(async () => {
     root.render(
       <DesignSystemProvider forceColorScheme="light">
         <QueryClientProvider client={queryClient}>
@@ -67,7 +68,13 @@ function render() {
 
 beforeEach(() => {
   // Keep query notifications asynchronous and prove assertions await rendering.
-  notifyManager.setScheduler((callback) => setTimeout(callback, 25));
+  notifyManager.setScheduler((callback) => {
+    const timer = setTimeout(() => {
+      scheduledNotifications.delete(timer);
+      act(callback);
+    }, 25);
+    scheduledNotifications.add(timer);
+  });
   mocks.listSubmissions.mockReset();
   mocks.deleteSubmission.mockReset().mockResolvedValue({ success: true });
   container = document.createElement('div');
@@ -76,10 +83,17 @@ beforeEach(() => {
   queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 });
 
-afterEach(() => {
+afterEach(async () => {
+  await act(async () => {
+    await queryClient.cancelQueries();
+    root.unmount();
+    queryClient.clear();
+  });
+  for (const timer of scheduledNotifications) {
+    clearTimeout(timer);
+  }
+  scheduledNotifications.clear();
   notifyManager.setScheduler((callback) => setTimeout(callback, 0));
-  act(() => root.unmount());
-  queryClient.clear();
   container.remove();
 });
 
@@ -90,7 +104,7 @@ describe('AdminFormSubmissionsPage loading failures', () => {
       data: { submissions: [], total: 0, page: 1, limit: 20, totalPages: 0 },
     });
 
-    render();
+    await render();
     await vi.waitFor(
       async () => {
         await act(async () => {
@@ -104,7 +118,7 @@ describe('AdminFormSubmissionsPage loading failures', () => {
     expect(container.textContent).not.toContain('formAdmin.submissions.empty');
     expect(container.textContent).toContain('common.actions.tryAgain');
 
-    act(() => {
+    await act(async () => {
       container.querySelector('button')?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
 

@@ -28,11 +28,13 @@ vi.mock('next-intl', async () => {
   };
 });
 
-const mountedRoots: Array<{ root: ReturnType<typeof createRoot>; container: HTMLElement }> = [];
+const mountedRoots: Array<{ root: ReturnType<typeof createRoot>; container: HTMLElement | Document }> = [];
 
-async function renderBoundary(element: React.ReactNode) {
-  const container = document.createElement('div');
-  document.body.append(container);
+async function renderBoundary(element: React.ReactNode, wholeDocument = false) {
+  const container = wholeDocument ? document.implementation.createHTMLDocument('') : document.createElement('div');
+  if (container instanceof HTMLElement) {
+    document.body.append(container);
+  }
   const root = createRoot(container);
   mountedRoots.push({ root, container });
   await act(async () => root.render(element));
@@ -43,7 +45,9 @@ describe('application error boundary reporting', () => {
     while (mountedRoots.length > 0) {
       const mounted = mountedRoots.pop()!;
       await act(async () => mounted.root.unmount());
-      mounted.container.remove();
+      if (mounted.container instanceof HTMLElement) {
+        mounted.container.remove();
+      }
     }
     mocks.report.mockReset();
   });
@@ -80,7 +84,7 @@ describe('application error boundary reporting', () => {
 
   it('classifies the root error surface', async () => {
     const error = new Error('global');
-    await renderBoundary(<GlobalError error={error} reset={vi.fn()} />);
+    await renderBoundary(<GlobalError error={error} reset={vi.fn()} />, true);
 
     expect(mocks.report).toHaveBeenCalledWith('global', error);
   });

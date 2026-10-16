@@ -1,6 +1,6 @@
 'use client';
 
-import { lazy, Suspense, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
 import type { Monaco } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import classes from './MonacoSourceEditor.module.css';
@@ -69,9 +69,14 @@ const MonacoSourceEditorRuntime = lazy(async () => {
 });
 
 export function MonacoSourceEditor(props: MonacoSourceEditorProps) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const { ariaLabel, bordered = true, className, height = 320, language, loading } = props;
   const rootClassName = bordered ? classes.root : `${classes.root} ${classes.unframed}`;
   const wrapperClassName = className ? `${rootClassName} ${className}` : rootClassName;
+  const placeholder = loading ?? <div className={classes.loading}>{ariaLabel}</div>;
   return (
     <div
       className={wrapperClassName}
@@ -82,8 +87,9 @@ export function MonacoSourceEditor(props: MonacoSourceEditorProps) {
       data-density={props.density ?? 'standard'}
       style={{ height }}
     >
-      <Suspense fallback={loading ?? <div className={classes.loading}>{ariaLabel}</div>}>
-        <MonacoSourceEditorRuntime {...props} className={undefined} />
+      <Suspense fallback={placeholder}>
+        {/* SSR and the initial hydration pass keep the same surface without importing the browser engine. */}
+        {mounted ? <MonacoSourceEditorRuntime {...props} className={undefined} /> : placeholder}
       </Suspense>
     </div>
   );

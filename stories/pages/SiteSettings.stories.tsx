@@ -14,7 +14,8 @@ function fixture(state: 'ready' | 'failed' | 'pending' | 'action-failed'): SiteS
     site_title: 'Listening room',
     site_origin: 'https://preview.example.com',
     company_name: 'Studio',
-    support_email: 'hello@example.com',
+    contact_email: 'contact@example.com',
+    legal_email: 'legal@example.com',
   };
   const files = new Map<string, string>();
   const upload: SiteAssetBindings['upload'] = async (blob) => {
@@ -143,15 +144,26 @@ export const KeyboardSettingsSave: Story = {
     const t = await operationsLabels(globals);
     const form = await canvas.findByRole('form', { name: t.site('title') });
     const title = within(form).getByRole('textbox', { name: t.site('fields.siteTitle.label') });
+    const contact = within(form).getByRole('textbox', { name: t.site('fields.contactEmail.label') });
+    const legal = within(form).getByRole('textbox', { name: t.site('fields.legalEmail.label') });
+    await expect(contact).toHaveValue('contact@example.com');
+    await expect(legal).toHaveValue('legal@example.com');
+    await expect(form.querySelectorAll('input[inputmode="email"]')).toHaveLength(2);
+    await expect(form.querySelector('[name="support_contact_email"]')).toBeNull();
+    await expect(form.querySelector('[name="privacy_contact_email"]')).toBeNull();
     const save = within(form).getByRole('button', { name: t.common('actions.saveChanges') });
     await expect(save).toBeDisabled();
     await userEvent.clear(title);
     await userEvent.type(title, 'Listening room · Studio');
+    await userEvent.clear(contact);
+    await userEvent.type(contact, 'hello@example.com');
     await expect(save).toBeEnabled();
     save.focus();
     await userEvent.keyboard('{Enter}');
     await waitFor(() => expect(save).toBeDisabled());
     await expect(title).toHaveValue('Listening room · Studio');
+    await expect(contact).toHaveValue('hello@example.com');
+    await expect(legal).toHaveValue('legal@example.com');
     await expect(form).toHaveAttribute('aria-busy', 'false');
   },
 };

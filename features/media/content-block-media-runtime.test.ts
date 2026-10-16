@@ -6,11 +6,7 @@ import {
   MissingAttachmentMediaKind,
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { describe, expect, it } from 'vitest';
-import {
-  ContentBlockMediaRuntimeIndex as CodecFacadeIndex,
-  parseContentBlockMediaItems,
-  serializeContentBlockMediaItems,
-} from './content-block-media-runtime';
+import { parseContentBlockMediaItems, serializeContentBlockMediaItems } from './content-block-media-runtime';
 import { ContentBlockMediaRuntimeIndex } from './content-block-media-runtime-index';
 
 const blockId = '01b3db42-75f1-4bf1-8cb9-9b3baf57e795';
@@ -33,10 +29,6 @@ function activeItem() {
 }
 
 describe('ContentBlockMediaRuntimeIndex', () => {
-  it('keeps the codec facade and schema-free runtime constructor identical', () => {
-    expect(CodecFacadeIndex).toBe(ContentBlockMediaRuntimeIndex);
-  });
-
   it('indexes exact Block usage separately from File metadata', () => {
     const item = activeItem();
     const index = new ContentBlockMediaRuntimeIndex([item]);

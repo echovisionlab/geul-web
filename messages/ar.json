@@ -1994,15 +1994,10 @@
           "description": "للاستفسارات القانونية (الشروط، الخصوصية، إلخ)",
           "placeholder": "legal@example.com"
         },
-        "supportEmail": {
-          "label": "بريد الدعم",
-          "description": "لدعم العملاء",
-          "placeholder": "support@example.com"
-        },
-        "privacyEmail": {
-          "label": "بريد الخصوصية",
-          "description": "للطلبات المتعلقة بالخصوصية (GDPR وحذف البيانات، إلخ)",
-          "placeholder": "privacy@example.com"
+        "contactEmail": {
+          "label": "البريد الإلكتروني للتواصل",
+          "description": "للاستفسارات العامة والدعم وطلبات الخصوصية",
+          "placeholder": "contact@example.com"
         },
         "primaryColor": {
           "label": "لون العلامة التجارية",
@@ -3798,8 +3793,7 @@
         "siteUrl": "رابط الموقع",
         "companyName": "اسم الشركة",
         "legalEmail": "البريد القانوني",
-        "supportEmail": "بريد الدعم",
-        "privacyEmail": "بريد الخصوصية"
+        "contactEmail": "البريد الإلكتروني للتواصل"
       }
     },
     "accessDowngraded": {

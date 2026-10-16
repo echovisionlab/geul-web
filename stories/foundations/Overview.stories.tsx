@@ -88,7 +88,6 @@ function Overview() {
         <StoryLink id="design-system-handbook--reference">System handbook and source documents</StoryLink>
         <StoryLink id="design-system-handbook--getting-started">Get started</StoryLink>
         <StoryLink id="design-system-handbook--contribution">Propose and review a change</StoryLink>
-        <StoryLink id="design-system-handbook--changelog">Changelog</StoryLink>
         <StoryLink id="design-system-usage-rules--action-emphasis">Correct and incorrect usage</StoryLink>
         <DocTable
           caption="What each view tells you"

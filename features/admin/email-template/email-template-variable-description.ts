@@ -4,8 +4,8 @@ interface CatalogTranslator {
 }
 
 /**
- * Describes an email template variable from the shared catalogue. `confirm_link` is the legacy alias of
- * `confirm_url`; names outside the catalogue (custom data) have no description.
+ * Describes an email template variable from the shared catalogue.
+ * Names outside the catalogue (custom data) have no description.
  */
 export function describeEmailTemplateVariable(
   variableName: string,
@@ -22,6 +22,6 @@ export function describeEmailTemplateVariable(
   if (normalizedName === 'logo_email_url') {
     return translators.logoEmailUrl();
   }
-  const lookupKey = (normalizedName === 'confirm_link' ? 'confirm_url' : normalizedName) as never;
+  const lookupKey = normalizedName as never;
   return translators.catalog.has(lookupKey) ? translators.catalog(lookupKey) : null;
 }

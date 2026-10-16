@@ -98,8 +98,7 @@ describe('getManifest', () => {
         siteTitle: 'Example Studio',
         siteOrigin: 'https://studio.example.com',
         legalEmail: 'legal@example.com',
-        supportEmail: 'support@example.com',
-        privacyEmail: 'privacy@example.com',
+        contactEmail: 'contact@example.com',
         socialLinks: {},
       },
     });
@@ -111,8 +110,7 @@ describe('getManifest', () => {
     expect(settings.site_title).toBe('Example Studio');
     expect(settings.site_origin).toBe('https://studio.example.com');
     expect(settings.legal_email).toBe('legal@example.com');
-    expect(settings.support_email).toBe('support@example.com');
-    expect(settings.privacy_email).toBe('privacy@example.com');
+    expect(settings.contact_email).toBe('contact@example.com');
     expect(settings).not.toHaveProperty('site_url');
   });
 

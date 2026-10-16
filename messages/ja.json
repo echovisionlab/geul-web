@@ -4076,8 +4076,7 @@
         "siteUrl": "サイトURL",
         "companyName": "会社名",
         "legalEmail": "法務メールアドレス",
-        "supportEmail": "サポートメールアドレス",
-        "privacyEmail": "プライバシーメールアドレス"
+        "contactEmail": "連絡先メールアドレス"
       }
     },
     "accessDowngraded": {
@@ -4713,15 +4712,10 @@
           "description": "法務関連のお問い合わせ用（利用規約、プライバシーなど）",
           "placeholder": "legal@example.com"
         },
-        "supportEmail": {
-          "label": "サポートメール",
-          "description": "カスタマーサポート用",
-          "placeholder": "support@example.com"
-        },
-        "privacyEmail": {
-          "label": "プライバシーメール",
-          "description": "プライバシー関連の依頼用（GDPR、データ削除など）",
-          "placeholder": "privacy@example.com"
+        "contactEmail": {
+          "label": "連絡先メールアドレス",
+          "description": "一般的なお問い合わせ、サポート、プライバシーに関するご相談",
+          "placeholder": "contact@example.com"
         },
         "primaryColor": {
           "label": "ブランドカラー",

@@ -40,8 +40,10 @@ vi.mock('@/components/core/Input', () => ({
     data,
     value,
     onChange,
+    searchable: _searchable,
     ...props
   }: {
+    searchable?: boolean;
     data: readonly { value: string; label: string }[];
     value: string | null;
     onChange: (value: string | null) => void;

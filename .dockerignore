@@ -31,8 +31,8 @@ tests
 **/*.test.*
 **/*.spec.*
 *.stories.*
-vitest.config.ts
-vitest.local-contracts.config.ts
+vitest.config.mts
+vitest.local-contracts.config.mts
 vitest.setup.ts
 eslint.config.mjs
 .stylelintrc.json

@@ -11,7 +11,6 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 export const GettingStarted: Story = { args: { initialDocument: 'docs/design-system/getting-started.md' } };
 export const Contribution: Story = { args: { initialDocument: 'docs/design-system/contribution.md' } };
-export const Changelog: Story = { args: { initialDocument: 'docs/design-system/changelog.md' } };
 export const Reference: Story = {};
 export const CoreSpecification: Story = { args: { initialDocument: 'docs/design-system/core-specifications.md' } };
 export const SpacingAndIcons: Story = { args: { initialDocument: 'docs/design-system/spacing-icon-contract.md' } };

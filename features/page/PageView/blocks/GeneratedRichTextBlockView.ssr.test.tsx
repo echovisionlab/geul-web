@@ -24,6 +24,13 @@ import {
 import enMessages from '@/messages/en.json';
 import { GeneratedRichTextBlockView } from './GeneratedRichTextBlockView';
 
+const browserEditorImports = vi.hoisted(() => vi.fn());
+
+vi.mock('@/features/editor/tiptap/code-editor/MonacoSourceEditorRuntime', () => {
+  browserEditorImports();
+  return { MonacoSourceEditorRuntime: () => null };
+});
+
 // App Router's real lazy SSR implementation preserves nested heavy-block loading.
 vi.mock('next/dynamic', async () => {
   const { default: dynamic } = await vi.importActual<{ default: typeof import('next/dynamic').default }>(
@@ -94,7 +101,7 @@ describe('GeneratedRichTextBlockView lazy SSR', () => {
           props: {},
           content: [
             { value: { case: 'siteVariable', value: { key: 'site.title', styles: { bold: true } } } },
-            { value: { case: 'siteVariable', value: { key: 'contact.supportEmail', linked: true } } },
+            { value: { case: 'siteVariable', value: { key: 'contact.email', linked: true } } },
             { value: { case: 'siteVariable', value: { key: 'contact.legalEmail', linked: true } } },
           ],
         },
@@ -106,7 +113,7 @@ describe('GeneratedRichTextBlockView lazy SSR', () => {
       },
     );
     expect(html).toContain('<strong>Raw &amp; &lt;sector&gt;</strong>');
-    expect(html).toContain('href="mailto:support@example.com"');
+    expect(html).toContain('href="mailto:contact@example.com"');
     expect(html).not.toContain('mailto:legal');
     expect(html).not.toContain('data-site-variable');
     expect(html).not.toContain('{{');
@@ -164,7 +171,9 @@ describe('GeneratedRichTextBlockView lazy SSR', () => {
     } as unknown as LocalizedRichTextBlock);
 
     expect(html).toContain('data-code-block-print-source');
-    expect(html).toContain('const answer = 42;');
+    expect(html).toMatch(/<pre[^>]*><code>const answer = 42;<\/code><\/pre>/u);
+    expect(html).toContain('data-source-editor="monaco"');
+    expect(browserEditorImports).not.toHaveBeenCalled();
   });
 
   it('keeps deleted generated media and its caption server-rendered', async () => {

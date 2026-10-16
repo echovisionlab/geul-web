@@ -49,8 +49,12 @@
       "command": ["node", "node_modules/stylelint/bin/stylelint.mjs", "components/core/Input/Input.module.css"]
     }
   ],
-  "build": { "minify": false },
-  "storybook": { "url": "http://127.0.0.1:6010" },
+  "build": {
+    "minify": false
+  },
+  "storybook": {
+    "url": "http://127.0.0.1:6010"
+  },
   "criticalPaths": [
     "components/core/Input",
     "components/core/Modal",

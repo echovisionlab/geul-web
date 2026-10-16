@@ -59,9 +59,23 @@ describe('site settings form boundary', () => {
 
   it('accepts only defined writable settings from a SetMany patch', () => {
     expect(isSiteSettingsPatch({ site_title: 'Allowed' })).toBe(true);
+    expect(isSiteSettingsPatch({ contact_email: 'contact@example.com', legal_email: 'legal@example.com' })).toBe(true);
+    expect(isSiteSettingsPatch({ support_email: 'old@example.com' })).toBe(false);
+    expect(isSiteSettingsPatch({ privacy_email: 'old@example.com' })).toBe(false);
     expect(isSiteSettingsPatch({ future_setting: 'not-writable' })).toBe(false);
     expect(isSiteSettingsPatch({ site_title: undefined })).toBe(false);
     expect(isSiteSettingsPatch(null)).toBe(false);
     expect(isSiteSettingsPatch([])).toBe(false);
+  });
+
+  it('writes the contact and legal fields from the settings read model', () => {
+    const snapshot = settings({
+      contact_email: 'contact@example.com',
+      legal_email: 'legal@example.com',
+    });
+    expect(toSiteSettingsFormValues(snapshot)).toMatchObject({
+      contact_email: 'contact@example.com',
+      legal_email: 'legal@example.com',
+    });
   });
 });

@@ -1,5 +1,5 @@
 import type { MediaDelivery } from '@echovisionlab/geul-proto/common/media_pb.ts';
-import type { ContentBlockMediaRuntimeIndex } from '@/features/media/content-block-media-runtime';
+import type { ContentBlockMediaRuntimeIndex } from '@/features/media/content-block-media-runtime-index';
 import { hydrateImmersiveSceneAssetProps, parseImmersiveSceneUnitsJson } from '@/lib/media/immersive-scene-hydration';
 
 interface RuntimeAssetField {

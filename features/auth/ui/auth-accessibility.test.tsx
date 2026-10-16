@@ -44,7 +44,7 @@ describe('authentication accessibility without changing display copy', () => {
     expect(button).toHaveAccessibleName(verificationStory.args.labels.back);
     expect(button.querySelector('svg')).toBeNull();
     expect(button.type).toBe('button');
-    button.focus();
+    act(() => button.focus());
     act(() => button.click());
     expect(back).toHaveBeenCalledOnce();
     expect(requestCode).not.toHaveBeenCalled();

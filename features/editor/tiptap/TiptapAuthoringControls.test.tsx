@@ -115,6 +115,7 @@ async function renderControls(
   editor: Editor,
   onFileActivate?: (blockId: string, context?: TiptapSlashActionContext) => void,
   onMapActivate?: (context: TiptapSlashActionContext) => void,
+  allowedItems?: readonly string[],
 ) {
   const container = document.createElement('div');
   document.body.append(container);
@@ -124,6 +125,7 @@ async function renderControls(
       <DesignSystemProvider forceColorScheme="light">
         <TiptapAuthoringControls
           editor={editor}
+          allowedItems={allowedItems}
           capabilities={{ file: Boolean(onFileActivate), map: Boolean(onMapActivate) }}
           onFileActivate={onFileActivate}
           onMapActivate={onMapActivate}
@@ -442,28 +444,52 @@ describe('Tiptap authoring controls', () => {
     mounted.destroy();
   });
 
-  it('scrolls the active slash option into view through keyboard navigation and wrap', async () => {
+  it('scrolls the active slash option into view through keyboard navigation and wrap', async ({ onTestFinished }) => {
     const scrollIntoView = vi.fn(() => ({ instrumented: true }));
-    const originalScrollIntoView = HTMLElement.prototype.scrollIntoView;
+    const originalScrollIntoView = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'scrollIntoView');
     Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
       configurable: true,
       value: scrollIntoView,
     });
     const mounted = createEditor('/');
+    const controlsOwner: { controls?: Awaited<ReturnType<typeof renderControls>> } = {};
+    onTestFinished(async () => {
+      try {
+        await controlsOwner.controls?.destroy();
+      } finally {
+        mounted.destroy();
+        if (originalScrollIntoView) {
+          Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', originalScrollIntoView);
+        } else {
+          Reflect.deleteProperty(HTMLElement.prototype, 'scrollIntoView');
+        }
+      }
+    });
     mounted.editor.commands.setTextSelection(4);
-    await act(async () => mounted.editor.view.focus());
-    const controls = await renderControls(mounted.editor, vi.fn());
+    act(() => mounted.editor.view.focus());
+    // Three enabled options plus an unavailable table retain disabled skipping,
+    // scrolling, active descendants and both wrap directions without rendering
+    // the entire slash catalog for every preceding item.
+    controlsOwner.controls = await renderControls(mounted.editor, vi.fn(), undefined, [
+      'paragraph',
+      'heading',
+      'table',
+      'file',
+    ]);
     scrollIntoView.mockClear();
 
     const selectableOptions = Array.from(
       document.querySelectorAll<HTMLButtonElement>('[role="option"]:not([aria-disabled="true"])'),
     );
+    expect(selectableOptions).toHaveLength(3);
+    const tableOption = document.querySelector<HTMLElement>('[data-testid="tiptap-slash-item-table"]');
+    expect(tableOption).toHaveAttribute('aria-disabled', 'true');
     const fileIndex = selectableOptions.findIndex((option) => option.dataset.testid === 'tiptap-slash-item-file');
     if (fileIndex < 0) {
       throw new Error('Unified file option is missing');
     }
     for (let index = 0; index < fileIndex; index += 1) {
-      await act(async () => {
+      act(() => {
         mounted.editor.view.dom.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
       });
     }
@@ -471,52 +497,47 @@ describe('Tiptap authoring controls', () => {
     const menu = document.querySelector<HTMLElement>('[data-testid="tiptap-slash-menu"]');
     const fileOption = document.querySelector<HTMLElement>('[data-testid="tiptap-slash-item-file"]');
     expect(menu).not.toBeNull();
+    // ArrowDown passed the unavailable table to select file instead.
+    expect(tableOption).not.toHaveAttribute('aria-selected', 'true');
     expect(fileOption?.getAttribute('aria-selected')).toBe('true');
     expect(mounted.editor.view.dom.getAttribute('aria-controls')).toBe(menu?.id);
     expect(mounted.editor.view.dom.getAttribute('aria-activedescendant')).toBe(fileOption?.id);
     expect(scrollIntoView).toHaveBeenLastCalledWith({ block: 'nearest' });
     expect(document.activeElement).toBe(mounted.editor.view.dom);
 
-    await act(async () => {
+    act(() => {
       mounted.editor.view.dom.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
     });
     const nextOption = selectableOptions[(fileIndex + 1) % selectableOptions.length];
     expect(nextOption?.getAttribute('aria-selected')).toBe('true');
     expect(mounted.editor.view.dom.getAttribute('aria-activedescendant')).toBe(nextOption?.id);
 
-    await act(async () => {
+    act(() => {
       mounted.editor.view.dom.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
     });
     expect(fileOption?.getAttribute('aria-selected')).toBe('true');
     expect(scrollIntoView).toHaveBeenLastCalledWith({ block: 'nearest' });
 
-    await act(async () => {
+    act(() => {
       mounted.editor.view.dom.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
     });
     const firstOption = document.querySelector<HTMLElement>('[data-testid="tiptap-slash-item-paragraph"]');
     expect(firstOption?.getAttribute('aria-selected')).toBe('true');
-    await act(async () => {
+    act(() => {
       mounted.editor.view.dom.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
     });
     expect(selectableOptions.at(-1)?.getAttribute('aria-selected')).toBe('true');
 
     const beforeEscapeDocument = mounted.editor.getJSON();
-    await act(async () => {
+    act(() => {
       mounted.editor.view.dom.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     });
     expect(document.querySelector('[data-testid="tiptap-slash-menu"]')).toBeNull();
     expect(mounted.editor.getJSON()).toEqual(beforeEscapeDocument);
     expect(document.activeElement).toBe(mounted.editor.view.dom);
 
-    await act(async () => mounted.editor.commands.insertContent('h'));
+    act(() => mounted.editor.commands.insertContent('h'));
     expect(document.querySelector('[data-testid="tiptap-slash-menu"]')).not.toBeNull();
-
-    await controls.destroy();
-    mounted.destroy();
-    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
-      configurable: true,
-      value: originalScrollIntoView,
-    });
   });
 
   it('does not intercept IME composition keys while the slash menu is open', async () => {

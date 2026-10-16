@@ -1,9 +1,12 @@
 // @vitest-environment jsdom
+import { mockBrowserNavigation } from '@/components/core/testing/browser-navigation';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { TestProviders } from '@/test/TestProviders';
 import { ServerDataTablePaginationView } from './ServerDataTablePaginationView';
+
+const browserNavigation = mockBrowserNavigation();
 let host: HTMLDivElement;
 let root: Root;
 afterEach(() => {
@@ -18,6 +21,7 @@ describe('server table page navigation', () => {
       host = document.createElement('div');
       document.body.append(host);
       root = createRoot(host);
+      browserNavigation.attach(host);
       act(() =>
         root.render(
           <TestProviders>
@@ -42,10 +46,13 @@ describe('server table page navigation', () => {
       const click = new MouseEvent('click', { bubbles: true, cancelable: true, [modifier]: true });
       act(() => next.dispatchEvent(click));
       expect(navigate).not.toHaveBeenCalled();
-      expect(click.defaultPrevented).toBe(false);
+      expect(browserNavigation.navigate).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({ href: next.href, [modifier]: true }),
+      );
       expect(next.getAttribute('href')).toBe('/admin/posts?page=4');
       act(() => next.click());
       expect(navigate).toHaveBeenCalledExactlyOnceWith('/admin/posts?page=4');
+      expect(browserNavigation.navigate).toHaveBeenCalledTimes(1);
     },
   );
 
@@ -54,6 +61,7 @@ describe('server table page navigation', () => {
     host = document.createElement('div');
     document.body.append(host);
     root = createRoot(host);
+    browserNavigation.attach(host);
     act(() =>
       root.render(
         <TestProviders>
@@ -89,6 +97,7 @@ describe('server table page navigation', () => {
     host = document.createElement('div');
     document.body.append(host);
     root = createRoot(host);
+    browserNavigation.attach(host);
     act(() =>
       root.render(
         <TestProviders>
@@ -127,6 +136,7 @@ describe('server table page navigation', () => {
     host = document.createElement('div');
     document.body.append(host);
     root = createRoot(host);
+    browserNavigation.attach(host);
     const labels = {
       firstPage: 'First page',
       previousPage: 'Previous page',

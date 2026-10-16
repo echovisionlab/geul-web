@@ -5,62 +5,77 @@ import { createRoot } from 'react-dom/client';
 import { Editor } from '@tiptap/core';
 import { EditorContent } from '@tiptap/react';
 import { NextIntlClientProvider } from 'next-intl';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { ManifestProvider } from '@/lib/contexts/ManifestContext';
 import en from '@/messages/en.json';
 import { createTiptapWireExtensions } from '../wire-schema';
 import { siteVariableManifest } from './site-variable.story-fixtures';
 
+function editorFixture(key = 'site.title') {
+  const host = document.createElement('div');
+  document.body.append(host);
+  const root = createRoot(host);
+  const editor = new Editor({
+    extensions: createTiptapWireExtensions(),
+    content: {
+      type: 'doc',
+      content: [
+        {
+          type: 'blockGroup',
+          content: [
+            {
+              type: 'blockContainer',
+              attrs: { id: '10000000-0000-4000-8000-000000000401' },
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    { type: 'text', text: 'Hello ' },
+                    { type: 'siteVariable', attrs: { key, linked: false } },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  });
+  const render = async (title = 'rawsector') => {
+    await act(async () =>
+      root.render(
+        <NextIntlClientProvider locale="en" messages={en} timeZone="UTC">
+          <DesignSystemProvider locale="en" forceColorScheme="light">
+            <ManifestProvider
+              manifest={{
+                ...siteVariableManifest,
+                settings: { ...siteVariableManifest.settings, site_title: title },
+              }}
+            >
+              <EditorContent editor={editor} />
+            </ManifestProvider>
+          </DesignSystemProvider>
+        </NextIntlClientProvider>,
+      ),
+    );
+  };
+  return {
+    host,
+    editor,
+    render,
+    async dispose() {
+      await act(async () => root.unmount());
+      editor.destroy();
+      host.remove();
+    },
+  };
+}
+
 describe('siteVariable editor adapter', () => {
   it('refreshes a resolved chip without editing the document, then converts it to literal text', async () => {
-    const host = document.createElement('div');
-    document.body.append(host);
-    const root = createRoot(host);
-    const editor = new Editor({
-      extensions: createTiptapWireExtensions(),
-      content: {
-        type: 'doc',
-        content: [
-          {
-            type: 'blockGroup',
-            content: [
-              {
-                type: 'blockContainer',
-                attrs: { id: '10000000-0000-4000-8000-000000000401' },
-                content: [
-                  {
-                    type: 'paragraph',
-                    content: [
-                      { type: 'text', text: 'Hello ' },
-                      { type: 'siteVariable', attrs: { key: 'site.title', linked: false } },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    });
-    const render = async (title: string) => {
-      await act(async () =>
-        root.render(
-          <NextIntlClientProvider locale="en" messages={en} timeZone="UTC">
-            <DesignSystemProvider locale="en" forceColorScheme="light">
-              <ManifestProvider
-                manifest={{
-                  ...siteVariableManifest,
-                  settings: { ...siteVariableManifest.settings, site_title: title },
-                }}
-              >
-                <EditorContent editor={editor} />
-              </ManifestProvider>
-            </DesignSystemProvider>
-          </NextIntlClientProvider>,
-        ),
-      );
-    };
+    const fixture = editorFixture();
+    const { host, editor, render } = fixture;
     try {
       await render('rawsector');
       const authored = editor.getJSON();
@@ -81,9 +96,34 @@ describe('siteVariable editor adapter', () => {
       expect(editor.getText()).toContain('Hello Updated site');
       expect(JSON.stringify(editor.getJSON())).not.toContain('siteVariable');
     } finally {
-      await act(async () => root.unmount());
-      editor.destroy();
-      host.remove();
+      await fixture.dispose();
+    }
+  });
+
+  it('offers the five canonical variables when inspecting the contact atom', async () => {
+    const fixture = editorFixture('contact.email');
+    try {
+      await fixture.render();
+      const authored = fixture.editor.getJSON();
+      const chip = fixture.host.querySelector<HTMLButtonElement>(
+        'button[aria-label="Contact email: contact@example.com"]',
+      );
+      expect(chip).not.toBeNull();
+      await act(async () => chip!.click());
+      const dialog = document.querySelector('[role="dialog"][aria-label="Inspect variable"]');
+      const field = dialog?.querySelector<HTMLInputElement>('input[role="combobox"]');
+      expect(field?.value).toBe('Contact email');
+      const opener = field
+        ?.closest('[data-geul-input]')
+        ?.querySelector<HTMLButtonElement>('button[aria-haspopup="listbox"]');
+      expect(opener).not.toBeNull();
+      await act(async () => opener!.click());
+      await vi.waitFor(() => expect(document.querySelectorAll('[role="option"]')).toHaveLength(5));
+      const labels = Array.from(document.querySelectorAll('[role="option"]')).map((option) => option.textContent);
+      expect(labels).toEqual(['Site name', 'Site URL', 'Company name', 'Legal email', 'Contact email']);
+      expect(fixture.editor.getJSON()).toEqual(authored);
+    } finally {
+      await fixture.dispose();
     }
   });
 });
