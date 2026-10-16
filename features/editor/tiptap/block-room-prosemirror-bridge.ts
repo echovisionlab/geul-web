@@ -140,8 +140,8 @@ function localeSet(value: Readonly<Record<string, unknown>>): readonly string[] 
   return Object.keys(value).sort();
 }
 
-function assertExactLocaleSet(expected: readonly string[], actual: readonly string[]): void {
-  if (expected.length !== actual.length || expected.some((locale, index) => locale !== actual[index])) {
+function assertExactLocaleSet(expected: readonly string[], roomLocales: readonly string[]): void {
+  if (expected.length !== roomLocales.length || expected.some((locale, index) => locale !== roomLocales[index])) {
     throw new Error('Rich-text Block locale set does not match the resident room.');
   }
 }
