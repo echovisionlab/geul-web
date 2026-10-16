@@ -19,9 +19,9 @@ COPY --link tooling/typescript-eslint ./tooling/typescript-eslint
 COPY --link tooling/typescript6 ./tooling/typescript6
 COPY --link scripts/prepare-client-media-codecs.mjs ./scripts/prepare-client-media-codecs.mjs
 RUN --mount=type=secret,id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN,required=true \
-    pnpm fetch
+    env "pnpm_config_//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" pnpm fetch
 RUN --mount=type=secret,id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN,required=true \
-    pnpm install --frozen-lockfile --offline
+    env "pnpm_config_//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" pnpm install --frozen-lockfile --offline
 
 FROM base AS builder
 ARG RELEASE_IMAGE_BUILD=false
