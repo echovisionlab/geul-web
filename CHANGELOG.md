@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.1](https://github.com/echovisionlab/geul-web/compare/v0.14.0...v0.14.1) (2026-10-16)
+
+
+### Bug Fixes
+
+* map height, font cache, and responsive site logo ([#134](https://github.com/echovisionlab/geul-web/issues/134)) ([17eb8af](https://github.com/echovisionlab/geul-web/commit/17eb8afacf5d2dc68c62f24e7b3829f8af5b0e03))
+
 ## [0.14.0](https://github.com/echovisionlab/geul-web/compare/v0.13.0...v0.14.0) (2026-10-16)
 
 
