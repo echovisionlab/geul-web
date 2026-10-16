@@ -41,13 +41,13 @@ beforeEach(() => {
   document.body.append(state.host);
   root = createRoot(state.host);
 });
-afterEach(() => {
-  act(() => root.unmount());
+afterEach(async () => {
+  await act(async () => root.unmount());
   state.host!.remove();
   vi.clearAllMocks();
 });
-function render(locale = 'en-US') {
-  act(() =>
+async function render(locale = 'en-US') {
+  await act(async () =>
     root.render(
       <I18nProvider locale={locale}>
         <Carousel
@@ -63,13 +63,13 @@ function render(locale = 'en-US') {
   );
 }
 describe('Carousel accessible slide transitions', () => {
-  it('keeps offscreen slide contents mounted but inert and hidden to assistive technology', () => {
-    render();
+  it('keeps offscreen slide contents mounted but inert and hidden to assistive technology', async () => {
+    await render();
     const slides = state.host!.querySelectorAll<HTMLElement>('[data-geul-carousel-slide]');
     expect(slides[0].hasAttribute('inert')).toBe(false);
     expect(slides[1].getAttribute('aria-hidden')).toBe('true');
     expect(slides[1].hasAttribute('inert')).toBe(true);
-    act(() => {
+    await act(async () => {
       state.selected = 1;
       state.visible = [1, 2];
       state.handlers.get('slidesInView')!();
@@ -81,29 +81,31 @@ describe('Carousel accessible slide transitions', () => {
     expect(selected.getAttribute('aria-label')).toBe('Photo 2');
     expect(document.getElementById(selected.getAttribute('aria-controls')!)).not.toBeNull();
   });
-  it('returns focus to the carousel viewport only when its focused slide leaves view', () => {
-    render();
-    act(() => state.host!.querySelector<HTMLAnchorElement>('a')!.focus());
-    act(() => {
+  it('returns focus to the carousel viewport only when its focused slide leaves view', async () => {
+    await render();
+    await act(async () => state.host!.querySelector<HTMLAnchorElement>('a')!.focus());
+    await act(async () => {
       state.selected = 1;
       state.visible = [1];
       state.handlers.get('select')!();
     });
     expect(document.activeElement).toBe(api.rootNode());
     const next = state.host!.querySelector<HTMLButtonElement>('[aria-label="Next"]')!;
-    act(() => next.focus());
-    act(() => {
+    await act(async () => next.focus());
+    await act(async () => {
       state.selected = 2;
       state.visible = [2];
       state.handlers.get('select')!();
     });
     expect(document.activeElement).toBe(next);
   });
-  it('supports viewport arrow navigation in RTL without intercepting child control keys', () => {
-    render('ar');
-    act(() => api.rootNode().dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })));
+  it('supports viewport arrow navigation in RTL without intercepting child control keys', async () => {
+    await render('ar');
+    await act(async () =>
+      api.rootNode().dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })),
+    );
     expect(api.scrollPrev).toHaveBeenCalledOnce();
-    act(() =>
+    await act(async () =>
       state.host!.querySelector('a')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })),
     );
     expect(api.scrollPrev).toHaveBeenCalledOnce();

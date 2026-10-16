@@ -4076,8 +4076,7 @@
         "siteUrl": "URL trang web",
         "companyName": "Tên công ty",
         "legalEmail": "Email pháp lý",
-        "supportEmail": "Email hỗ trợ",
-        "privacyEmail": "Email quyền riêng tư"
+        "contactEmail": "Email liên hệ"
       }
     },
     "accessDowngraded": {
@@ -4713,15 +4712,10 @@
           "description": "Đối với các yêu cầu pháp lý (Điều khoản, Quyền riêng tư, v.v.)",
           "placeholder": "legal@example.com"
         },
-        "supportEmail": {
-          "label": "Email hỗ trợ",
-          "description": "Để được hỗ trợ khách hàng",
-          "placeholder": "support@example.com"
-        },
-        "privacyEmail": {
-          "label": "Email riêng tư",
-          "description": "Đối với các yêu cầu liên quan đến quyền riêng tư (GDPR, xóa dữ liệu, v.v.)",
-          "placeholder": "quyền riêng tư@example.com"
+        "contactEmail": {
+          "label": "Email liên hệ",
+          "description": "Dành cho câu hỏi chung, hỗ trợ và yêu cầu về quyền riêng tư",
+          "placeholder": "contact@example.com"
         },
         "primaryColor": {
           "label": "Màu thương hiệu",

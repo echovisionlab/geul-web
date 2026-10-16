@@ -194,7 +194,7 @@ pnpm storybook:preview
 Historical observations used Geul 6012 with default dependency resolution.
 `LOCAL_CONTRACTS=1` requires sibling geul-common/src, geul-event-contracts packages/event/src and packages/proto/gen/api,
 and geul-telemetry/src. It failed in the observed environment because these sibling sources were absent.
-Commands below also use the default config. Use `--config vitest.local-contracts.config.ts` only when those sources are available.
+Commands below also use the default config. Use `--config vitest.local-contracts.config.mts` only when those sources are available.
 Static root defaults to storybook-static; `UI_KIT_ROOT` selects another build.
 App `pnpm dev` reads `.env` and starts port 3000, but starting a server does not create the required authentication,
 Hydra requests or backend data for the routes above.
@@ -228,7 +228,7 @@ Jsdom is not evidence for CSS layout, font measurement, native focus containment
 Interaction/a11y rule passes are not design approval, actual server-route verification or VoiceOver/Orca acceptance.
 
 Command sources: [package scripts](../../package.json), [Storybook config](../../.storybook/main.ts),
-[static server](../../scripts/design-system/serve-kit.mjs), [local test config](../../vitest.local-contracts.config.ts).
+[static server](../../scripts/design-system/serve-kit.mjs), [local test config](../../vitest.local-contracts.config.mts).
 Existing tests: [AdminContent](../../stories/pages/AdminContent.test.tsx),
 [ProfileFormView](../../features/my/ui/ProfileForm/ProfileFormView.test.tsx),
 [OAuth rendering](../../stories/pages/PageExpansions.test.tsx),

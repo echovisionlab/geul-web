@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "sourceManifestHash": "5e940a7fe0295ee6437397d0d30e4f52095ca3414d79a8cd315d691290af4584",
+  "sourceManifestHash": "256a39f9ae89acfd3de5ee2aac472e3c42bd8a4cbb9df056d2230a853d92be6f",
   "methodology": "All inventoried Feature component candidates. Direct value imports, literal lazy imports and transitive source relationships through production owners/local adapters are indexed separately. A dependency can be unused or render conditionally; neither relationship proves rendered states, route parity or design compliance. Empty JSX records include runtime/lazy/controller boundaries and must be inspected before treating them as visual gaps.",
-  "counts": { "domains": 53, "componentFiles": 763, "jsxWithoutStoryRelationship": 47 },
+  "counts": { "domains": 53, "componentFiles": 762, "jsxWithoutStoryRelationship": 46 },
   "domains": [
     {
       "domain": "account",
@@ -2223,12 +2223,6 @@
           ]
         },
         {
-          "file": "features/editor/components/ConnectedMediaFilePanel.tsx",
-          "hasJsx": true,
-          "directStories": [],
-          "relatedStories": []
-        },
-        {
           "file": "features/editor/components/EditorFileInsertPanel.tsx",
           "hasJsx": true,
           "directStories": [],
@@ -2391,12 +2385,6 @@
             "Pages/Editors/Program Events",
             "Pages/Editors/Work"
           ]
-        },
-        {
-          "file": "features/editor/extensions/map/MapBlock.tsx",
-          "hasJsx": false,
-          "directStories": [],
-          "relatedStories": []
         },
         {
           "file": "features/editor/tiptap/TiptapAuthoringControls.tsx",
@@ -3445,7 +3433,6 @@
         }
       ],
       "jsxWithoutStoryRelationship": [
-        "features/editor/components/ConnectedMediaFilePanel.tsx",
         "features/editor/components/UnifiedFileAttachmentPagePreview.tsx",
         "features/editor/tiptap/ai/TiptapAIAssistant.tsx",
         "features/editor/tiptap/p5/P5CapabilityStoryPreview.tsx",
@@ -3457,6 +3444,12 @@
       "domain": "email",
       "category": "distribution",
       "components": [
+        {
+          "file": "features/email/EmailPreviewFrame.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": ["Pages/Editors/Campaign", "Pages/Admin/Email Catalog", "Pages/Admin/Email Editors"]
+        },
         {
           "file": "features/email/EmailTemplateEditor/EmailTemplateEditor.tsx",
           "hasJsx": true,

@@ -42,7 +42,7 @@ jobs:
           clean: true
           fetch-depth: 0
           persist-credentials: false
-      - name: Classify pull request changes
+      - name: Change scope
         id: classify
         shell: bash
         env:
@@ -149,7 +149,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.PRIVATE_DEPS_TOKEN }}
         run: |
           pnpm install --frozen-lockfile
-      - name: Check Prettier formatting
+      - name: Prettier
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || 'origin/main' }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -174,7 +174,7 @@ jobs:
       # small for type-aware lint and the Next build.
       NODE_OPTIONS: --max-old-space-size=6144
     steps:
-      - name: Add swap to the hosted runner
+      - name: Runner swap
         # Private repositories run on 2-core/8 GB hosted runners with a small disk.
         # The Next build and type-aware lint outgrow 8 GB and the runner is
         # OOM-killed mid-build, so drop preinstalled SDKs this job never uses and
@@ -224,38 +224,38 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.PRIVATE_DEPS_TOKEN }}
         run: |
           pnpm install --frozen-lockfile
-      - name: Lint JavaScript and TypeScript
+      - name: ESLint
         env:
           # Type-aware lint of the whole app exceeds Node's default ~2 GB heap.
           NODE_OPTIONS: --max-old-space-size=6144
         run: pnpm lint
-      - name: Check translation catalogues against English and client message scopes
+      - name: Translations
         run: pnpm i18n:check
-      - name: Lint stylesheets
+      - name: Stylelint
         run: pnpm lint:styles
-      - name: Check design tokens and inventory freshness
+      - name: Design system
         run: pnpm design-system:check
-      - name: Verify accepted and rejected Core presentation contracts
+      - name: Core contracts
         run: pnpm design-system:typecheck
       - name: Prepare MapLibre worker
         run: pnpm prepare:maplibre-worker
       - name: Prepare p5 runtime
         run: pnpm prepare:p5-runtime
-      - name: Build with TypeScript 7
+      - name: Next.js build
         run: pnpm build
-      - name: Check per-route first-load client bundle budget
+      - name: Bundle budget
         run: pnpm perf:bundle
 
   test:
     name: Tests
-    needs: [scope, format]
+    needs: [scope, format, quality]
     if: needs.scope.outputs.run_full == 'true'
     # Repo-scoped ARC scale set: one 8-CPU pod on mini (172.16.71.79).
     runs-on: geul-web-mini
     timeout-minutes: 45
     env:
       # Reviewed renderer source, pinned to the merged API main commit.
-      EMAIL_PREVIEW_API_REVISION: 7155b62b9be580753f2187ec85fb2b8eed9dcd94
+      EMAIL_PREVIEW_API_REVISION: d65f5f5105f36a01eb1866b493194be30648ec28
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -273,13 +273,13 @@ jobs:
           node-version-file: .nvmrc
           registry-url: https://npm.pkg.github.com
           scope: '@echovisionlab'
-      - name: Resolve the CI runner's available CPUs
+      - name: CPU count
         run: |
           set -euo pipefail
           workers=$(node --input-type=module -e "import { availableParallelism } from 'node:os'; console.log(availableParallelism())")
           echo "CI_TEST_WORKERS=$workers" >> "$GITHUB_ENV"
           echo "CI test worker count: $workers (node:os.availableParallelism)"
-      - name: Prepare a private SWC native binding cache
+      - name: SWC cache
         # The runner home has shared writable ancestors. Use a private directory
         # under the sticky-protected system temp root; keep SWC's trust checks.
         run: |
@@ -292,39 +292,31 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.PRIVATE_DEPS_TOKEN }}
         run: pnpm install --frozen-lockfile
-      - name: Test design-system enforcement
-        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+      - name: Design system tests
         run: node --test --test-concurrency="$CI_TEST_WORKERS" scripts/design-system/*.test.mjs
-      - name: Run every Vitest project on all available CI CPUs
-        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+      - name: Vitest
         # Includes node-unit, both former component shards, server-contract,
         # editor-integration, and theme.test.ts's light/dark contrast contracts.
         run: pnpm exec vitest run --fileParallelism --maxWorkers "$CI_TEST_WORKERS"
-      - name: Typecheck interactive preview sources
-        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+      - name: Storybook types
         run: pnpm storybook:typecheck
       - name: Prepare MapLibre worker
         id: maplibre
-        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
         run: pnpm prepare:maplibre-worker
       - name: Prepare p5 runtime
         id: p5
-        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
         run: pnpm prepare:p5-runtime
-      - name: Build Storybook catalog once
+      - name: Storybook build
         id: storybook-build
-        if: ${{ !cancelled() && steps.maplibre.outcome == 'success' && steps.p5.outcome == 'success' }}
         env:
           NODE_OPTIONS: --max-old-space-size=6144
         run: pnpm storybook:build --output-dir .artifacts/storybook-build/site
-      - name: Require an immutable API renderer revision
+      - name: Renderer revision
         id: renderer-revision
-        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
         shell: bash
         run: '[[ "$EMAIL_PREVIEW_API_REVISION" =~ ^[0-9a-f]{40}$ ]]'
-      - name: Checkout the reviewed email renderer source
+      - name: Checkout renderer
         id: renderer-source
-        if: ${{ !cancelled() && steps.renderer-revision.outcome == 'success' }}
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: echovisionlab/geul-api
@@ -332,17 +324,15 @@ jobs:
           path: .artifacts/email-preview-api
           token: ${{ secrets.PRIVATE_DEPS_TOKEN }}
           persist-credentials: false
-      - name: Set up the API's Go toolchain
+      - name: Set up Go
         id: go
-        if: ${{ !cancelled() && steps.renderer-source.outcome == 'success' }}
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: .artifacts/email-preview-api/go.mod
           cache: true
           cache-dependency-path: .artifacts/email-preview-api/go.sum
-      - name: Build the production email preview helper once
+      - name: Email renderer
         id: renderer
-        if: ${{ !cancelled() && steps.go.outcome == 'success' }}
         working-directory: .artifacts/email-preview-api
         env:
           TOKEN: ${{ secrets.PRIVATE_DEPS_TOKEN }}
@@ -361,15 +351,12 @@ jobs:
           printf '%s\n' "$EMAIL_PREVIEW_API_REVISION" > "$GITHUB_WORKSPACE/.artifacts/storybook-build/api-revision.txt"
       - name: Install Chromium
         id: browser-runtime
-        if: ${{ !cancelled() && steps.storybook-build.outcome == 'success' && steps.renderer.outcome == 'success' }}
         run: pnpm exec playwright install --with-deps chromium
-      - name: Run the exact Storybook CI suite union on all available CPUs
-        if: ${{ !cancelled() && steps.browser-runtime.outcome == 'success' }}
+      - name: Storybook tests
         env:
           EMAIL_PREVIEW_FIXTURE_BINARY: ${{ github.workspace }}/.artifacts/storybook-build/bin/email-preview-fixture
         run: pnpm storybook:test:ci --suite ci --shard 1/1 --static-dir .artifacts/storybook-build/site
-      - name: Save the reviewable Storybook build and renderer
-        if: ${{ !cancelled() }}
+      - name: Upload Storybook
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: storybook-build
@@ -378,8 +365,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 1
           compression-level: 1
-      - name: Save browser results and context disposal evidence
-        if: ${{ !cancelled() }}
+      - name: Upload test results
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: storybook-ci
@@ -404,7 +390,7 @@ jobs:
       QUALITY_RESULT: ${{ needs.quality.result }}
       TEST_RESULT: ${{ needs.test.result }}
     steps:
-      - name: Require every applicable check
+      - name: Check results
         shell: bash
         run: |
           set -euo pipefail

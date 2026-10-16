@@ -94,7 +94,10 @@ describe('responsive social platform picker', () => {
     await act(async () => userEvent.click(option));
     expect(props.onPlatformChange).toHaveBeenCalledWith('bandcamp');
     expect(dialog).not.toBeInTheDocument();
-    await waitFor(() => expect(trigger).toHaveFocus());
+    // React Aria restores trigger focus on the next animation frame.
+    await act(async () => {
+      await waitFor(() => expect(trigger).toHaveFocus());
+    });
     expect(host.querySelector('#social-url')).toHaveValue('https://github.com/monome');
   });
   it('dismisses nested search before the picker and keeps permission changes effective', async () => {
@@ -108,9 +111,16 @@ describe('responsive social platform picker', () => {
     expect(within(document.body).getByRole('dialog', { name: 'Platform: GitHub' })).toBeInTheDocument();
     await act(async () => userEvent.keyboard('{Escape}'));
     expect(within(document.body).queryByRole('dialog')).not.toBeInTheDocument();
-    await waitFor(() => expect(trigger).toHaveFocus());
+    // The focus restoration also updates the trigger's React Aria focus state.
+    await act(async () => {
+      await waitFor(() => expect(trigger).toHaveFocus());
+    });
     await act(async () => userEvent.click(trigger));
     render({ disabled: true });
+    // Closing the picker restores focus on the next frame.
+    await act(async () => {
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    });
     expect(within(document.body).queryByRole('dialog')).not.toBeInTheDocument();
     expect(trigger).toBeDisabled();
     expect(host.querySelector('#social-url')).toBeDisabled();
@@ -126,7 +136,10 @@ describe('responsive social platform picker', () => {
     compactWrapper.style.display = 'none';
     act(() => observer.callback([], observer.instance));
     expect(within(document.body).queryByRole('dialog')).not.toBeInTheDocument();
-    await waitFor(() => expect(host.querySelector('#social-platform')).toHaveFocus());
+    // The responsive focus hand-off is scheduled with requestAnimationFrame.
+    await act(async () => {
+      await waitFor(() => expect(host.querySelector('#social-platform')).toHaveFocus());
+    });
     expect(host.querySelector('#social-url')).toHaveValue('https://github.com/monome');
   });
 });

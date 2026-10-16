@@ -36,6 +36,6 @@ describe('localized rich-text plain-text output', () => {
       legalEmail: '',
     });
     expect(result).toContain('<b>& {{site.url}} | https://www.rawsector.com/tools/hwp');
-    expect(result).toContain('Example Studio Ltd. |  | support@example.com');
+    expect(result).toContain('Example Studio Ltd. |  | contact@example.com');
   });
 });

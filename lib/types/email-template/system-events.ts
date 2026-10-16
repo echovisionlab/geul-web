@@ -144,51 +144,6 @@ export type SystemEmailEvent = keyof typeof SYSTEM_EMAIL_EVENTS;
 export const SYSTEM_EMAIL_EVENT_KEYS = Object.keys(SYSTEM_EMAIL_EVENTS) as SystemEmailEvent[];
 
 /**
- * Variable descriptions for UI display
- */
-export const VARIABLE_DESCRIPTIONS: Record<string, string> = {
-  // Common
-  name: 'Name',
-  site_name: 'Site name',
-  site_origin: 'Runtime site origin',
-  logo_email_url: 'Email-specific logo URL from site settings (if set)',
-  recipient_name: "Recipient's name (may be empty)",
-  recipient_email: 'Recipient email address',
-
-  // Account Management
-  confirm_url: 'Confirmation link',
-  confirm_link: 'Confirmation link',
-  expires_in: 'Link expiration time (e.g., "24 hours")',
-  expires_in_hours: 'Link expiration time in hours',
-  recover_url: 'Account recovery link',
-  cancel_url: 'Cancellation link',
-  scheduled_date: 'Scheduled deletion date',
-  grace_period: 'Days until permanent deletion',
-  login_url: 'Login page link',
-  old_email: 'Previous email address',
-  new_email: 'New email address',
-  email: 'Email address',
-  provider: 'Social sign-in provider',
-  verify_url: 'Subscription confirmation link',
-
-  // Terms & Policy
-  preview_url: 'Link to preview updated document',
-  effective_date: 'Date when the update takes effect',
-  terms_url: 'Link to view current Terms of Service',
-  privacy_url: 'Link to view current Privacy Policy',
-
-  // Authentication
-  verification_url: 'Email verification link',
-  verification_code: '6-digit verification code',
-  expires_in_minutes: 'Code expiration time in minutes',
-  login_code: '6-digit login code',
-  registration_code: '6-digit registration code',
-  to: 'Email recipient address',
-  identity_email: 'Account email address',
-  identity_name: 'Account name',
-};
-
-/**
  * Common variables available to all events
  */
 const COMMON_VARIABLES = ['site_name', 'site_origin', 'recipient_name'];

@@ -123,7 +123,7 @@ export const PickerOpen: Story = {
     );
     const options = await waitFor(() => {
       const found = document.querySelectorAll<HTMLElement>('[role="option"]');
-      expect(found).toHaveLength(6);
+      expect(found).toHaveLength(5);
       return found;
     });
     // Choosing a value closes the picker and inserts the variable at the caret.
@@ -142,7 +142,7 @@ export const Inspector: Story = {
 export const LinkedContact: Story = {
   play: async ({ canvasElement, globals }) => {
     const t = await storyTranslator(globals);
-    await userEvent.click(await chip(canvasElement, 'contact.supportEmail'));
+    await userEvent.click(await chip(canvasElement, 'contact.email'));
     const dialog = await within(document.body).findByRole('dialog', { name: t('inspect') });
     expect(within(dialog).getByRole('checkbox', { name: t('linked') })).toBeChecked();
   },
@@ -150,8 +150,8 @@ export const LinkedContact: Story = {
 export const PublicReader: Story = {
   args: { reader: true },
   play: async ({ canvasElement }) => {
-    const link = await within(canvasElement).findByRole('link', { name: 'support@example.com' });
-    expect(link).toHaveAttribute('href', 'mailto:support@example.com');
+    const link = await within(canvasElement).findByRole('link', { name: 'contact@example.com' });
+    expect(link).toHaveAttribute('href', 'mailto:contact@example.com');
     expect(canvasElement).toHaveTextContent('Welcome to rawsector.');
     expect(canvasElement.querySelector('[data-site-variable]')).toBeNull();
   },

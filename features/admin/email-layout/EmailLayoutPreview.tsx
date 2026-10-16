@@ -109,5 +109,5 @@ export function EmailLayoutPreview({
     return () => controller.abort();
   }, [bindings, debouncedHtml, debouncedRefreshKey, layoutId, locale, sampleContent, sourceLocale]);
 
-  return <EmailLayoutPreviewView previewHtml={previewHtml} errors={errors} isLoading={isLoading} locale={locale} />;
+  return <EmailLayoutPreviewView previewHtml={previewHtml} errors={errors} isLoading={isLoading} />;
 }

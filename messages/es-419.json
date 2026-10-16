@@ -4076,8 +4076,7 @@
         "siteUrl": "URL del sitio",
         "companyName": "Nombre de la empresa",
         "legalEmail": "Correo legal",
-        "supportEmail": "Correo de soporte",
-        "privacyEmail": "Correo de privacidad"
+        "contactEmail": "Correo de contacto"
       }
     },
     "accessDowngraded": {
@@ -4713,15 +4712,10 @@
           "description": "Para consultas legales (Términos, Privacidad, etc.)",
           "placeholder": "legal@ejemplo.com"
         },
-        "supportEmail": {
-          "label": "Correo electrónico de soporte",
-          "description": "Para atención al cliente",
-          "placeholder": "soporte@ejemplo.com"
-        },
-        "privacyEmail": {
-          "label": "Correo electrónico de privacidad",
-          "description": "Para solicitudes relacionadas con la privacidad (GDPR, eliminación de datos, etc.)",
-          "placeholder": "privacidad@ejemplo.com"
+        "contactEmail": {
+          "label": "Correo de contacto",
+          "description": "Para consultas generales, soporte y solicitudes de privacidad",
+          "placeholder": "contact@example.com"
         },
         "primaryColor": {
           "label": "Color de marca",

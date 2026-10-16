@@ -354,16 +354,25 @@ export const TemplateRichFormatting: Story = {
       variables: LOCAL_EMAIL_VARIABLES,
     });
     await expect(iframe.srcdoc).toBe(rendered.html);
+    await waitFor(async () => {
+      await expect(iframe.clientHeight).toBeGreaterThanOrEqual(
+        Math.max(document.documentElement.scrollHeight, document.body.scrollHeight),
+      );
+      await expect(iframe.getAttribute('scrolling')).toBe('no');
+    });
     await userEvent.click(editor);
     await userEvent.keyboard(' Updated preview');
     await waitFor(
       async () => {
         const frame = canvasElement.querySelector<HTMLIFrameElement>('iframe');
         const body = frame?.contentDocument?.body;
-        if (!body) {
+        if (!frame || !body) {
           throw new Error('Waiting for the updated email iframe');
         }
         await expect(body).toHaveTextContent('Updated preview');
+        await expect(frame.clientHeight).toBeGreaterThanOrEqual(
+          Math.max(frame.contentDocument!.documentElement.scrollHeight, body.scrollHeight),
+        );
       },
       { timeout: 20_000 },
     );

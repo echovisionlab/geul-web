@@ -34,7 +34,7 @@ describe('artist works search', () => {
     expect(collection).toHaveTextContent('Works');
     expect(collection).toHaveAttribute('role', 'heading');
     expect(collection).toHaveAttribute('aria-level', '2');
-    input.focus();
+    act(() => input.focus());
     await act(async () => {
       Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set?.call(input, 'Night');
       input.dispatchEvent(new Event('input', { bubbles: true }));

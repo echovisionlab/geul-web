@@ -4076,8 +4076,7 @@
         "siteUrl": "Adres URL witryny",
         "companyName": "Nazwa firmy",
         "legalEmail": "E-mail do spraw prawnych",
-        "supportEmail": "E-mail pomocy technicznej",
-        "privacyEmail": "E-mail do spraw prywatności"
+        "contactEmail": "Kontaktowy adres e-mail"
       }
     },
     "accessDowngraded": {
@@ -4713,15 +4712,10 @@
           "description": "W przypadku zapytań prawnych (warunki, prywatność itp.)",
           "placeholder": "legal@example.com"
         },
-        "supportEmail": {
-          "label": "Wsparcie e-mailowe",
-          "description": "Do obsługi klienta",
-          "placeholder": "wsparcie@example.com"
-        },
-        "privacyEmail": {
-          "label": "E-mail dotyczący prywatności",
-          "description": "W przypadku żądań związanych z prywatnością (RODO, usunięcie danych itp.)",
-          "placeholder": "prywatność@example.com"
+        "contactEmail": {
+          "label": "Kontaktowy adres e-mail",
+          "description": "Do ogólnych zapytań, pomocy technicznej i wniosków dotyczących prywatności",
+          "placeholder": "contact@example.com"
         },
         "primaryColor": {
           "label": "Kolor marki",

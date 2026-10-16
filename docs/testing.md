@@ -19,7 +19,7 @@ replaces all collaborators. For example, a codec can use real in-memory Yjs data
 without a service process. CRDT convergence, keyboard commands, profile guards,
 and live structure locks retain their real editor integration tests.
 
-`scripts/test/vitest-projects.ts` discovers the existing `.test.ts` and `.test.tsx`
+`scripts/test/vitest-projects.mts` discovers the existing `.test.ts` and `.test.tsx`
 files once when Vitest starts and assigns each to one project. Existing
 `@vitest-environment` directives remain authoritative: SSR stays in Node and DOM
 tests keep jsdom. Tiptap jsdom tests and editor `*.integration.test.*` files enter
@@ -38,7 +38,7 @@ keep working. This inventory contract requires a Git checkout.
 Node logic loads only a small transport fixture. Unmocked `fetch` rejects before
 network access, and `vi.stubGlobal` replacements are restored after each case.
 DOM and Next fixtures are not imported into that project. All projects use fixed
-test-only runtime URLs from `test/runtime-env.ts`; shell variables cannot select
+test-only runtime URLs from `test/runtime-env.mts`; shell variables cannot select
 a running service stack. Stubbed environment variables restore between cases.
 Forks, file parallelism, and Vitest file isolation remain enabled.
 
@@ -183,7 +183,7 @@ records workflow cancellation and the final pod cleanup boundary; test outcomes
 and browser teardown details remain attributable to their own execution records.
 
 The artifact also contains the Go `cmd/email-preview-fixture` helper built from
-API revision `7155b62b9be580753f2187ec85fb2b8eed9dcd94`. The workflow requires a
+API revision `d65f5f5105f36a01eb1866b493194be30648ec28`. The workflow requires a
 40-character immutable SHA, checks the renderer checkout's HEAD, and records it
 in `api-revision.txt`. Using that checkout's `go.mod` toolchain, `Tests` compiles
 one `CGO_ENABLED=0` Linux/amd64 binary and passes its path through

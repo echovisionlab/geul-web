@@ -6,7 +6,6 @@ import { previewCampaignAction } from '@/lib/actions/campaign';
 import { useCampaignPreview } from './useCampaignPreview';
 
 vi.mock('@/lib/actions/campaign', () => ({ previewCampaignAction: vi.fn() }));
-vi.mock('@/lib/email/preview-document', () => ({ buildEmailPreviewSrcDoc: (html: string) => html }));
 vi.mock('@mantine/hooks', () => ({
   useDebouncedCallback: () => useCallback(() => undefined, []),
 }));
@@ -91,4 +90,19 @@ it('ignores a late failed response after a newer preview succeeds', async () => 
   expect(preview.previewSrcDoc).toBe('<p>new</p>');
   expect(preview.query.isError).toBe(false);
   expect(preview.query.isFetching).toBe(false);
+});
+
+it.each([
+  '<!doctype html><html lang="en" dir="ltr"><head><style>blockquote{border-left:2px solid}</style></head><body><blockquote>Quoted text</blockquote></body></html>',
+  '  <p>Intentional whitespace</p>\n',
+])('passes the renderer document unchanged to srcDoc despite a different editor locale', async (htmlContent) => {
+  vi.mocked(previewCampaignAction).mockResolvedValueOnce({
+    ok: true,
+    value: { htmlContent, subject: 'draft', textContent: 'draft' },
+  });
+  await act(async () => {
+    await preview.refresh();
+  });
+  expect(preview.previewSrcDoc).toBe(htmlContent);
+  expect(previewCampaignAction).toHaveBeenLastCalledWith('campaign', expect.objectContaining({ locale: 'ko' }));
 });

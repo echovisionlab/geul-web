@@ -22,8 +22,6 @@ export function resolveMediaDisplayName(input: { name?: string; fallback: string
   return input.fallback;
 }
 
-const MEDIA_NAME_ATTRIBUTE = 'data-media-name';
-
 const MIME_DOWNLOAD_EXTENSIONS: Record<string, string> = {
   'application/epub+zip': 'epub',
   'application/gzip': 'gz',
@@ -102,14 +100,6 @@ export function resolveMediaDownloadName(input: {
     readUrlDownloadExtension(normalizeHydrationUrl(input.url)) || MIME_DOWNLOAD_EXTENSIONS[mimeType] || '';
 
   return extension ? `${baseName}.${extension}` : baseName;
-}
-
-export function readCanonicalMediaName(element: Element, legacyTitleSelector: string): string {
-  if (element.hasAttribute(MEDIA_NAME_ATTRIBUTE)) {
-    return element.getAttribute(MEDIA_NAME_ATTRIBUTE) || '';
-  }
-
-  return element.querySelector(legacyTitleSelector)?.textContent || '';
 }
 
 export function formatMediaSize(value: string | number | undefined | null): string {

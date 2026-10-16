@@ -229,7 +229,7 @@ describe('IconButton', () => {
 
   it.each(['action', 'drag-handle'] as const)(
     'replaces glyph and decorative count with separately named progress while pending: %s',
-    (interaction) => {
+    async (interaction) => {
       const onClick = vi.fn();
       const glyph = (
         <svg aria-hidden data-testid="pending-glyph">
@@ -252,7 +252,7 @@ describe('IconButton', () => {
       expect(initial.querySelector('[data-testid="pending-glyph"]')).not.toBeNull();
       expect(initial.querySelector(`.${classes.counter}`)).toHaveTextContent('9');
       if (interaction === 'action') {
-        initial.focus();
+        await act(async () => initial.focus());
       }
       const pending = renderIconButton(example(true));
       expect(pending).toBe(initial);

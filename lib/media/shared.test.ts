@@ -3,7 +3,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   mediaStyleToString,
-  readCanonicalMediaName,
   resolveMediaContainerStyle,
   resolveMediaDisplayName,
   resolveMediaDownloadName,
@@ -57,16 +56,6 @@ describe('media shared helpers', () => {
         mimeType: 'application/pdf',
       }),
     ).toBe('Field notes.pdf');
-  });
-
-  it('reads canonical blank names without importing presentation fallbacks', () => {
-    const element = document.createElement('div');
-    element.setAttribute('data-media-name', '');
-    element.innerHTML = '<span class="media-title">Untitled audio</span>';
-
-    expect(readCanonicalMediaName(element, '.media-title')).toBe('');
-    element.removeAttribute('data-media-name');
-    expect(readCanonicalMediaName(element, '.media-title')).toBe('Untitled audio');
   });
 
   it('resolves aligned container styles for partial-width media blocks', () => {

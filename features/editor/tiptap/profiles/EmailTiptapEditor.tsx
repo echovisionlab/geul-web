@@ -22,8 +22,6 @@ import { createMarkdownPasteExtension } from '../markdown-paste';
 import { tiptapDocumentToHtml } from './profile-html';
 import { normalizeEmailCampaignPreviewHtml, normalizeEmailCampaignVariable } from './email-preview';
 
-export { normalizeEmailCampaignPreviewHtml, normalizeEmailCampaignVariable } from './email-preview';
-
 const EMAIL_SLASH_ITEMS = [
   'paragraph',
   'heading',

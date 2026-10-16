@@ -1,11 +1,14 @@
 // @vitest-environment jsdom
 
-import { Editor, getSchema, Node, type Extensions } from '@tiptap/core';
+import { Editor, getSchema, Node, type Extensions, type JSONContent } from '@tiptap/core';
 import Emoji from '@tiptap/extension-emoji';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { geulTiptapEmojis } from './emoji-data';
 import { GeulTiptapEmoji } from './emoji-extension';
 import { getTiptapEmojiData, loadTiptapEmojiData } from './emoji-runtime';
+import { documentToTiptap, parseDocument, splitPayload } from '../block-room-tiptap-codec';
+import { richTextProseMirrorAdapterForProtoCase } from '../block-room-prosemirror-registry';
+import { createTiptapWireExtensions } from '../wire-schema';
 
 const TestDocument = Node.create({ name: 'doc', topNode: true, content: 'paragraph+' });
 const TestParagraph = Node.create({
@@ -118,5 +121,39 @@ describe('GeulTiptapEmoji', () => {
     expect(JSON.stringify(results[0]!.json)).toContain('"name":"party"');
     expect(JSON.stringify(results[0]!.json)).toContain('"name":"heart"');
     expect(results[0]).toEqual(results[1]);
+  });
+
+  it('stores the official Tiptap Emoji node as locale Unicode text', async () => {
+    await loadTiptapEmojiData();
+    const smile = geulTiptapEmojis.find((item) => item.shortcodes.includes('smile'));
+    if (!smile?.emoji) {
+      throw new Error('Official Emoji data is missing :smile:.');
+    }
+    const input = documentToTiptap([
+      {
+        id: '10000000-0000-4000-8000-000000000223',
+        adapter: richTextProseMirrorAdapterForProtoCase('paragraph'),
+        basePayload: { props: {} },
+        localePayload: { props: {}, content: [] },
+        children: [],
+      },
+    ]);
+    const paragraph = input.content?.[0]?.content?.[0]?.content?.[0];
+    if (!paragraph) {
+      throw new Error('Expected Emoji paragraph fixture.');
+    }
+    paragraph.content = [{ type: 'emoji', attrs: { name: smile.name } }];
+    const editor = new Editor({
+      element: document.createElement('div'),
+      extensions: createTiptapWireExtensions(),
+      content: input,
+    });
+
+    try {
+      const parsed = parseDocument(editor.getJSON() as JSONContent);
+      expect(splitPayload(parsed[0]!).locale.content).toEqual([{ text: { text: smile.emoji, styles: {} } }]);
+    } finally {
+      editor.destroy();
+    }
   });
 });

@@ -67,7 +67,7 @@ describe('shared contextual toolbar contract', () => {
       (button) => !['Inert', 'Nested command'].includes(button.getAttribute('aria-label')!),
     );
     const toolbar = element.querySelector<HTMLElement>('[role="toolbar"]')!;
-    buttons[0].focus();
+    await act(async () => buttons[0].focus());
     await act(async () => buttons[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })));
     expect(document.activeElement).toBe(buttons[2]);
     await act(async () => buttons[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true })));
@@ -105,7 +105,7 @@ describe('shared contextual toolbar contract', () => {
     );
     element.querySelector<HTMLElement>('[data-css-hidden]')!.style.display = 'none';
     const start = element.querySelector<HTMLElement>('[aria-label="Start"]')!;
-    start.focus();
+    await act(async () => start.focus());
     await act(async () =>
       start.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true })),
     );
@@ -137,13 +137,13 @@ describe('shared contextual toolbar contract', () => {
       ),
     );
     const input = element.querySelector('input')!;
-    input.focus();
+    await act(async () => input.focus());
     const key = new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true });
     await act(async () => input.dispatchEvent(key));
     expect(key.defaultPrevented).toBe(false);
     expect(document.activeElement).toBe(input);
     const start = element.querySelector<HTMLElement>('[aria-label="Start"]')!;
-    start.focus();
+    await act(async () => start.focus());
     await act(async () =>
       start.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true })),
     );
@@ -175,7 +175,7 @@ describe('shared contextual toolbar contract', () => {
     const start = element.querySelector<HTMLElement>('[aria-label="Inner start"]')!;
     expect(outer.dataset.controlSize).toBe('compact');
     expect(start.dataset.controlSize).toBe('sm');
-    start.focus();
+    await act(async () => start.focus());
     await act(async () =>
       start.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true })),
     );

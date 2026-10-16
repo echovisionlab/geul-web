@@ -5,7 +5,7 @@ import '@testing-library/jest-dom/vitest';
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { notifyManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { registerEditorSave } from '@/lib/editor/editor-save-registry';
@@ -140,6 +140,7 @@ const posts = [
 
 let container: HTMLDivElement;
 let root: Root;
+let queryClient: QueryClient;
 let unregisterSaves: Array<() => void>;
 
 function renderedPostTitles() {
@@ -150,6 +151,10 @@ function renderedPostTitles() {
 
 describe('SeriesDetail post ordering', () => {
   beforeEach(() => {
+    notifyManager.setNotifyFunction((callback) => act(callback));
+    queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
     vi.clearAllMocks();
     unregisterSaves = [];
     mocks.useLocaleDocumentSession.mockReturnValue({
@@ -188,8 +193,13 @@ describe('SeriesDetail post ordering', () => {
     root = createRoot(container);
   });
 
-  afterEach(() => {
-    act(() => root.unmount());
+  afterEach(async () => {
+    await act(async () => {
+      root.unmount();
+      await queryClient.cancelQueries();
+      queryClient.clear();
+    });
+    notifyManager.setNotifyFunction((callback) => callback());
     for (const unregister of unregisterSaves) {
       unregister();
     }
@@ -197,9 +207,6 @@ describe('SeriesDetail post ordering', () => {
   });
 
   async function renderSeries() {
-    const queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
-    });
     await act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
@@ -249,11 +256,11 @@ describe('SeriesDetail post ordering', () => {
     const panel = container.querySelector('[data-testid="series-translations-panel"]');
     const titleBefore = mocks.editorHeader.mock.lastCall?.[0];
     expect(titleBefore.titleDisabled).toBe(true);
-    act(() => setProviderAccessLevel(provider, 'edit'));
+    await act(async () => setProviderAccessLevel(provider, 'edit'));
     expect(mocks.editorHeader.mock.lastCall?.[0].titleDisabled).toBe(false);
     expect(mocks.editorHeader.mock.lastCall?.[0].onStatusChange).toBeTypeOf('function');
     expect(container.querySelector('[data-testid="series-translations-panel"]')).toBe(panel);
-    act(() => setProviderAccessLevel(provider, 'view'));
+    await act(async () => setProviderAccessLevel(provider, 'view'));
     const header = mocks.editorHeader.mock.lastCall?.[0];
     expect(header.titleDisabled).toBe(true);
     expect(header.onStatusChange).toBeUndefined();
@@ -319,9 +326,6 @@ describe('SeriesDetail post ordering', () => {
         resolveReorder = resolve;
       }),
     );
-    const queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
-    });
 
     await act(async () => {
       root.render(
@@ -368,7 +372,7 @@ describe('SeriesDetail post ordering', () => {
     const firstRow = Array.from(container.querySelectorAll('tbody tr')).find((row) =>
       row.textContent?.includes('First post'),
     );
-    act(() => firstRow?.querySelector<HTMLButtonElement>('[aria-label="posts.actions.moveDown"]')?.click());
+    await act(async () => firstRow?.querySelector<HTMLButtonElement>('[aria-label="posts.actions.moveDown"]')?.click());
     await vi.waitFor(() => expect(renderedPostTitles()).toEqual(['Second post/second', 'First post/first']));
     expect(container.querySelector('[role="status"]')).toHaveTextContent('First post: posts.columns.order #2');
 
@@ -382,10 +386,6 @@ describe('SeriesDetail post ordering', () => {
   });
 
   it('keeps Manager source editing enabled without admin translation generation controls', async () => {
-    const queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
-    });
-
     await act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
@@ -419,9 +419,6 @@ describe('SeriesDetail post ordering', () => {
   });
 
   it('edits an existing target through its exact collaboration room and keeps a missing target read-only', async () => {
-    const queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
-    });
     const activeEditLocale = {
       activeLocale: 'ko',
       activeLocaleLabel: '한국어',
@@ -476,7 +473,7 @@ describe('SeriesDetail post ordering', () => {
       onTitleChange: (value: string) => void;
     };
     expect(targetHeader).toMatchObject({ title: '협업 제목', titleDisabled: false });
-    act(() => targetHeader.onTitleChange('수정 제목'));
+    await act(async () => targetHeader.onTitleChange('수정 제목'));
     expect(mocks.setCollaborationField).toHaveBeenCalledWith('title', '수정 제목');
     expect(
       Array.from(container.querySelectorAll('button')).some((button) => button.textContent === 'saveChanges'),

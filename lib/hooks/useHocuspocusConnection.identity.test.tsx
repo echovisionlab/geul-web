@@ -137,7 +137,7 @@ function seedMenuRoom(document: Y.Doc, locale: string, items: MenuCollaborationI
   marker.set(DOCUMENT_ROOM_SNAPSHOT_KEYS.localeExists, true);
   marker.set(DOCUMENT_ROOM_SNAPSHOT_KEYS.targetRevision, targetRevision);
   const update = Y.encodeStateAsUpdate(canonical);
-  Y.applyUpdate(document, update, 'server-seed');
+  act(() => Y.applyUpdate(document, update, 'server-seed'));
   canonical.destroy();
 }
 
@@ -167,7 +167,7 @@ function seedFormRoom(
   if (locale !== 'en') {
     marker.set(DOCUMENT_ROOM_SNAPSHOT_KEYS.targetRevision, targetRevision);
   }
-  Y.applyUpdate(document, Y.encodeStateAsUpdate(canonical), 'server-seed');
+  act(() => Y.applyUpdate(document, Y.encodeStateAsUpdate(canonical), 'server-seed'));
   canonical.destroy();
 }
 
@@ -268,7 +268,9 @@ describe('useHocuspocusConnection request identity', () => {
       isConnected: false,
       isSynced: false,
     });
-    expect(snapshots.at(-1)?.connection.reloadCanonical()).toBe(true);
+    act(() => {
+      expect(snapshots.at(-1)?.connection.reloadCanonical()).toBe(true);
+    });
   });
 
   it('replays a pending Form title over a canonical schema change and clears it after durable persistence', async () => {
@@ -313,8 +315,8 @@ describe('useHocuspocusConnection request identity', () => {
     expect(second.configuration.document.getMap<string>(FORM_FIELDS_MAP_NAME).get('title')).toBe('Local title');
     expect(hasPendingEditorSaves(`form:${entityId}`)).toBe(true);
 
-    acknowledgePersistence();
     await act(async () => {
+      acknowledgePersistence();
       expect(await flushing).toBe(true);
     });
 

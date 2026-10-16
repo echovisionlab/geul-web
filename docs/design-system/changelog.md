@@ -15,8 +15,10 @@ under review; release and deployment are on hold at the user's request.
 
 ## 2026-10-16 · Email preview uses delivery HTML
 
+- Template, campaign and layout previews now share a document-sized frame. Late loads and resizes update its height without altering mail HTML; scrolling stays with the parent page or modal. The production baseline was inspected; post-change visual review is pending.
+
 - Email template, campaign and layout previews display renderer HTML unchanged. The web preview no longer injects Noto fonts, `!important` font rules or a body reset that can differ from delivered mail.
-- Email editor stories submit canonical localized snapshots through a Storybook-only endpoint to the Go helper pinned at API commit `7155b62b9be580753f2187ec85fb2b8eed9dcd94`. The shared preview/delivery normalizer supplies inline quote defaults while preserving author overrides. Local layout and sample variables remain fixtures; no email is sent. Configure `EMAIL_PREVIEW_FIXTURE_BINARY` when running the review server.
+- Email editor stories submit canonical localized snapshots through a Storybook-only endpoint to the Go helper pinned at API commit `d65f5f5105f36a01eb1866b493194be30648ec28`. The shared preview/delivery normalizer supplies inline quote defaults while preserving author overrides. Local layout and sample variables remain fixtures; no email is sent. Configure `EMAIL_PREVIEW_FIXTURE_BINARY` when running the review server.
 - `TemplateRichFormatting` covers quote, heading, list and hard-break rendering, exact Go-result/iframe equality and live editing. See [the rendering contract](email-preview-rendering.md) for the process boundary and verification scope. The supplied screenshot was inspected; implementation browser and production visual checks remain pending.
 
 ## 2026-10-14 · Durable editor save state

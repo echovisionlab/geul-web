@@ -1,16 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { getLocalizedEmailVariableDescription } from '@/lib/i18n/email-template';
-import { VARIABLE_DESCRIPTIONS } from '@/lib/types/email-template/system-events';
+import { resolveSystemEmailEventKey } from './email-template';
 
-describe('getLocalizedEmailVariableDescription', () => {
-  it('aliases confirm_link to confirm_url', () => {
-    const t = (key: string) => key;
+describe('resolveSystemEmailEventKey', () => {
+  it.each(['account_deletion_confirm', 'login_code', 'terms_effective'])(
+    'recognizes the canonical %s event',
+    (eventKey) => {
+      expect(resolveSystemEmailEventKey(eventKey)).toBe(eventKey);
+    },
+  );
 
-    expect(getLocalizedEmailVariableDescription(t, 'confirm_url')).toBe('confirm_url');
-    expect(getLocalizedEmailVariableDescription(t, 'confirm_link')).toBe('confirm_url');
-  });
-
-  it('includes logo_email_url in the fallback variable catalog', () => {
-    expect(VARIABLE_DESCRIPTIONS.logo_email_url).toBe('Email-specific logo URL from site settings (if set)');
-  });
+  it.each([undefined, null, '', 'account_deletion', ' Account_deletion_confirm ', 'custom_event'])(
+    'rejects an unknown or missing event %s',
+    (eventKey) => {
+      expect(resolveSystemEmailEventKey(eventKey)).toBeNull();
+    },
+  );
 });

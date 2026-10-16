@@ -18,6 +18,18 @@ import {
   type TiptapExternalVideoLabels,
 } from './ExternalVideoTiptapExtension';
 
+// Focus still runs the real editor and lazy loader. Emoji lookup data is a separate
+// contract, covered by emoji-extension tests and the browser; these cases use no emoji.
+vi.mock('../emoji/emoji-data', () => ({
+  createTiptapEmojiData: () =>
+    ({
+      items: [],
+      find: () => undefined,
+      shortcodeFor: () => undefined,
+      regex: () => /(?!)/g,
+    }) satisfies import('../emoji/emoji-runtime').TiptapEmojiData,
+}));
+
 const youtubeUrl = 'https://youtu.be/dQw4w9WgXcQ?t=1m';
 const externalVideoLabels = {
   editLink: '링크 수정',
@@ -402,17 +414,19 @@ describe('Tiptap external-video atom', () => {
       paragraph('notes', { type: 'text', text: 'Notes' }),
     ]);
     const before = getTiptapStandaloneExternalVideos(mounted.editor.view)[0];
-    mounted.editor.view.dispatch(
-      mounted.editor.state.tr.setSelection(NodeSelection.create(mounted.editor.state.doc, before.blockPosition)),
-    );
+    await act(async () => {
+      mounted.editor.view.dispatch(
+        mounted.editor.state.tr.setSelection(NodeSelection.create(mounted.editor.state.doc, before.blockPosition)),
+      );
 
-    expect(
-      updateTiptapExternalVideoLayout(mounted.editor, {
-        previewWidth: '44',
-        textAlignment: 'right',
-        aspectRatio: '1:1',
-      }),
-    ).toBe(true);
+      expect(
+        updateTiptapExternalVideoLayout(mounted.editor, {
+          previewWidth: '44',
+          textAlignment: 'right',
+          aspectRatio: '1:1',
+        }),
+      ).toBe(true);
+    });
     expect(getTiptapStandaloneExternalVideos(mounted.editor.view)[0]).toMatchObject({
       url: youtubeUrl,
       title: 'Source label',
@@ -421,16 +435,20 @@ describe('Tiptap external-video atom', () => {
       aspectRatio: '1:1',
     });
 
-    mounted.editor.setEditable(false);
-    expect(updateTiptapExternalVideoSource(mounted.editor, { url: youtubeUrl, label: 'No change' }, 'video')).toBe(
-      false,
-    );
-    expect(updateTiptapExternalVideoLayout(mounted.editor, { previewWidth: '70' }, 'video')).toBe(false);
-    const [notesPosition] = paragraphPositions(mounted.editor);
-    mounted.editor.commands.setTextSelection(notesPosition + 1);
+    await act(async () => {
+      mounted.editor.setEditable(false);
+      expect(updateTiptapExternalVideoSource(mounted.editor, { url: youtubeUrl, label: 'No change' }, 'video')).toBe(
+        false,
+      );
+      expect(updateTiptapExternalVideoLayout(mounted.editor, { previewWidth: '70' }, 'video')).toBe(false);
+      const [notesPosition] = paragraphPositions(mounted.editor);
+      mounted.editor.commands.setTextSelection(notesPosition + 1);
+    });
     await flushEditor();
     const readOnlyPointer = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
-    mounted.element.querySelector('[data-external-video-editor-preview]')?.dispatchEvent(readOnlyPointer);
+    await act(async () => {
+      mounted.element.querySelector('[data-external-video-editor-preview]')?.dispatchEvent(readOnlyPointer);
+    });
     expect(readOnlyPointer.defaultPrevented).toBe(false);
     expect(mounted.editor.state.selection).toBeInstanceOf(TextSelection);
 

@@ -3,7 +3,7 @@
 import { Editor, Node, type JSONContent } from '@tiptap/core';
 import type { JsonValue } from '@bufbuild/protobuf';
 import { MissingAttachmentMediaKind } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { ProseMirrorBlockDescriptor } from './block-room-prosemirror-bridge';
 import {
   documentToTiptap,
@@ -16,12 +16,18 @@ import {
 import { richTextProseMirrorAdapterForProtoCase } from './block-room-prosemirror-registry';
 import { SHADER_STAGE_DEFINITIONS } from './shader/shader-program';
 import { createTiptapWireExtensions } from './wire-schema';
-import { geulTiptapEmojis } from './emoji/emoji-data';
-import { loadTiptapEmojiData } from './emoji/emoji-runtime';
 
-beforeAll(async () => {
-  await loadTiptapEmojiData();
-});
+// Official Emoji data and Emoji-to-Unicode codec coverage live in emoji-extension.test.ts.
+// These non-Emoji cases keep the real editor and lazy loader without OS glyph probing.
+vi.mock('./emoji/emoji-data', () => ({
+  createTiptapEmojiData: () =>
+    ({
+      items: [],
+      find: () => undefined,
+      shortcodeFor: () => undefined,
+      regex: () => /(?!)/g,
+    }) satisfies import('./emoji/emoji-runtime').TiptapEmojiData,
+}));
 
 function executableWireExtensions() {
   const stages = SHADER_STAGE_DEFINITIONS.map(([, name]) =>
@@ -172,7 +178,7 @@ describe('Block-room Tiptap codec', () => {
       { text: { text: 'Hello ', styles: {} } },
       { siteVariable: { key: 'site.title', linked: false, styles: { bold: true } } },
       { siteVariable: { key: 'site.title', linked: false, styles: {} } },
-      { siteVariable: { key: 'contact.supportEmail', linked: true, styles: { italic: true } } },
+      { siteVariable: { key: 'contact.email', linked: true, styles: { italic: true } } },
     ];
     const input = documentToTiptap([
       descriptor('paragraph', '10000000-0000-4000-8000-000000000401', { props: {} }, { props: {}, content }),
@@ -567,30 +573,6 @@ describe('Block-room Tiptap codec', () => {
         ),
       ]),
     ).toThrow('missing or duplicate durable cell ID');
-  });
-
-  it('stores the official Tiptap Emoji node as locale Unicode text', () => {
-    const smile = geulTiptapEmojis.find((item) => item.shortcodes.includes('smile'));
-    if (!smile?.emoji) {
-      throw new Error('Official Emoji data is missing :smile:.');
-    }
-    const input = documentToTiptap([
-      descriptor('paragraph', '10000000-0000-4000-8000-000000000223', { props: {} }, { props: {}, content: [] }),
-    ]);
-    const paragraph = input.content?.[0]?.content?.[0]?.content?.[0];
-    if (!paragraph) {
-      throw new Error('Expected Emoji paragraph fixture.');
-    }
-    paragraph.content = [{ type: 'emoji', attrs: { name: smile.name } }];
-    const editor = new Editor({
-      element: document.createElement('div'),
-      extensions: createTiptapWireExtensions(),
-      content: input,
-    });
-
-    const parsed = parseDocument(editor.getJSON() as JSONContent);
-    expect(splitPayload(parsed[0]!).locale.content).toEqual([{ text: { text: smile.emoji, styles: {} } }]);
-    editor.destroy();
   });
 });
 

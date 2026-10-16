@@ -5,7 +5,7 @@ import { existsSync, mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { classifyTest, discoverTestProjects, literalTestGlob } from './vitest-projects';
+import { classifyTest, discoverTestProjects, literalTestGlob } from './vitest-projects.mts';
 
 let fixture: string | undefined;
 afterEach(() => {

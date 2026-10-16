@@ -26,8 +26,7 @@ const emptyContext: SiteVariableContext = {
   siteUrl: '',
   companyName: '',
   legalEmail: '',
-  supportEmail: '',
-  privacyEmail: '',
+  contactEmail: '',
 };
 
 declare module '@tiptap/core' {

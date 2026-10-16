@@ -4076,8 +4076,7 @@
         "siteUrl": "網站 URL",
         "companyName": "公司名稱",
         "legalEmail": "法律事務信箱",
-        "supportEmail": "支援信箱",
-        "privacyEmail": "隱私事務信箱"
+        "contactEmail": "聯絡信箱"
       }
     },
     "accessDowngraded": {
@@ -4713,15 +4712,10 @@
           "description": "法律查詢（條款、隱私權等）",
           "placeholder": "legal@example.com"
         },
-        "supportEmail": {
-          "label": "支援電子郵件",
-          "description": "為了客戶支援",
-          "placeholder": "support@example.com"
-        },
-        "privacyEmail": {
-          "label": "隱私權電子郵件",
-          "description": "對於與隱私相關的請求（GDPR、資料刪除等）",
-          "placeholder": "隱私@example.com"
+        "contactEmail": {
+          "label": "聯絡信箱",
+          "description": "供一般諮詢、客戶支援及隱私相關請求使用",
+          "placeholder": "contact@example.com"
         },
         "primaryColor": {
           "label": "品牌顏色",

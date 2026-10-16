@@ -4076,8 +4076,7 @@
         "siteUrl": "URL situs",
         "companyName": "Nama perusahaan",
         "legalEmail": "Email hukum",
-        "supportEmail": "Email dukungan",
-        "privacyEmail": "Email privasi"
+        "contactEmail": "Email kontak"
       }
     },
     "accessDowngraded": {
@@ -4713,15 +4712,10 @@
           "description": "Untuk pertanyaan hukum (Syarat, Privasi, dll.)",
           "placeholder": "legal@example.com"
         },
-        "supportEmail": {
-          "label": "Email Dukungan",
-          "description": "Untuk dukungan pelanggan",
-          "placeholder": "dukungan@example.com"
-        },
-        "privacyEmail": {
-          "label": "Email Privasi",
-          "description": "Untuk permintaan terkait privasi (GDPR, penghapusan data, dll.)",
-          "placeholder": "privasi@example.com"
+        "contactEmail": {
+          "label": "Email kontak",
+          "description": "Untuk pertanyaan umum, dukungan, dan permintaan privasi",
+          "placeholder": "contact@example.com"
         },
         "primaryColor": {
           "label": "Warna merek",

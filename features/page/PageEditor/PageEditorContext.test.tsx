@@ -268,7 +268,7 @@ describe('typed resident Page editor context', () => {
     expect(context().addSection('rich-text')).toBeNull();
     expect(context().sections).toBe(sections);
     expect(context().controller).toBe(controller);
-    setProviderAccessLevel(provider, 'edit');
+    act(() => setProviderAccessLevel(provider, 'edit'));
   });
   it('inserts shared structure and the exact locale overlay into one resident source room', async () => {
     render();

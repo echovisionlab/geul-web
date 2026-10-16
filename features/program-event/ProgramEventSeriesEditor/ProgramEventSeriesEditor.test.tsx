@@ -3,7 +3,7 @@
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { notifyManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -88,9 +88,14 @@ import { clearEditorSaveRecovery } from '@/lib/editor/editor-save-recovery';
 
 let container: HTMLDivElement;
 let root: Root;
+let queryClient: QueryClient;
 
 describe('ProgramEventSeriesEditor status transition', () => {
   beforeEach(() => {
+    notifyManager.setNotifyFunction((callback) => act(callback));
+    queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
     vi.clearAllMocks();
     mocks.updateProgramEventSeriesAction.mockResolvedValue({ success: true });
     container = document.createElement('div');
@@ -98,8 +103,13 @@ describe('ProgramEventSeriesEditor status transition', () => {
     root = createRoot(container);
   });
 
-  afterEach(() => {
-    act(() => root.unmount());
+  afterEach(async () => {
+    await act(async () => {
+      root.unmount();
+      await queryClient.cancelQueries();
+      queryClient.clear();
+    });
+    notifyManager.setNotifyFunction((callback) => callback());
     container.remove();
     clearEditorSaveRecovery('program_event_series:series-1');
     window.sessionStorage.clear();
@@ -112,9 +122,6 @@ describe('ProgramEventSeriesEditor status transition', () => {
         resolveUpdate = resolve;
       }),
     );
-    const queryClient = new QueryClient({
-      defaultOptions: { mutations: { retry: false } },
-    });
 
     await act(async () => {
       root.render(
@@ -139,11 +146,10 @@ describe('ProgramEventSeriesEditor status transition', () => {
 
     await act(async () => {
       container.querySelector<HTMLButtonElement>('[data-testid="change-status"]')?.click();
-      await vi.waitFor(() =>
-        expect(container.querySelector('[data-testid="series-status"]')?.textContent).toBe('published'),
-      );
     });
-    expect(container.querySelector('[data-testid="series-status"]')?.textContent).toBe('published');
+    await vi.waitFor(() =>
+      expect(container.querySelector('[data-testid="series-status"]')?.textContent).toBe('published'),
+    );
 
     await act(async () => resolveUpdate?.({ error: 'transition failed' }));
     await vi.waitFor(() => expect(container.querySelector('[data-testid="series-status"]')?.textContent).toBe('draft'));
@@ -157,7 +163,6 @@ describe('ProgramEventSeriesEditor status transition', () => {
         resolveUpdate = resolve;
       }),
     );
-    const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
 
     await act(async () => {
       root.render(
@@ -180,8 +185,8 @@ describe('ProgramEventSeriesEditor status transition', () => {
       );
     });
 
-    act(() => container.querySelector<HTMLButtonElement>('[data-testid="edit-title"]')?.click());
-    act(() => container.querySelector<HTMLButtonElement>('[data-testid="back"]')?.click());
+    await act(async () => container.querySelector<HTMLButtonElement>('[data-testid="edit-title"]')?.click());
+    await act(async () => container.querySelector<HTMLButtonElement>('[data-testid="back"]')?.click());
     await vi.waitFor(() =>
       expect(mocks.updateProgramEventSeriesAction).toHaveBeenCalledWith('series-1', { title: 'Edited series' }),
     );
@@ -193,7 +198,6 @@ describe('ProgramEventSeriesEditor status transition', () => {
 
   it('keeps the editor open when flushing a pending title edit fails', async () => {
     mocks.updateProgramEventSeriesAction.mockResolvedValue({ error: 'save failed' });
-    const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
 
     await act(async () => {
       root.render(
@@ -216,12 +220,12 @@ describe('ProgramEventSeriesEditor status transition', () => {
       );
     });
 
-    act(() => container.querySelector<HTMLButtonElement>('[data-testid="edit-title"]')?.click());
-    act(() => container.querySelector<HTMLButtonElement>('[data-testid="back"]')?.click());
+    await act(async () => container.querySelector<HTMLButtonElement>('[data-testid="edit-title"]')?.click());
+    await act(async () => container.querySelector<HTMLButtonElement>('[data-testid="back"]')?.click());
     await vi.waitFor(() =>
       expect(mocks.updateProgramEventSeriesAction).toHaveBeenCalledWith('series-1', { title: 'Edited series' }),
     );
-    await vi.waitFor(() => expect(mocks.routerPush).not.toHaveBeenCalled());
-    expect(mocks.notification).toHaveBeenCalledWith({ message: 'saveFailed', tone: 'danger' });
+    await vi.waitFor(() => expect(mocks.notification).toHaveBeenCalledWith({ message: 'saveFailed', tone: 'danger' }));
+    expect(mocks.routerPush).not.toHaveBeenCalled();
   });
 });

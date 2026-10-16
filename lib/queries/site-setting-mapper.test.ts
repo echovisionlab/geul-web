@@ -7,6 +7,8 @@ describe('fromProtoAllSettings', () => {
     const result = fromProtoAllSettings({
       public: {
         siteTitle: 'Example Studio',
+        contactEmail: 'contact@example.com',
+        legalEmail: 'legal@example.com',
         primaryColor: '#123456',
         defaultCommentsEnabled: true,
         loaderAssets: [
@@ -26,6 +28,8 @@ describe('fromProtoAllSettings', () => {
     } as unknown as AllSettings);
 
     expect(result.site_title).toBe('Example Studio');
+    expect(result.contact_email).toBe('contact@example.com');
+    expect(result.legal_email).toBe('legal@example.com');
     expect(result.site_origin).toBe('https://example.com');
     expect(result).not.toHaveProperty('site_url');
     expect(result.logo_light_url).toBe('https://cdn.example.com/logo-light.svg');

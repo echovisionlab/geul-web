@@ -15,20 +15,20 @@ beforeEach(() => {
   document.body.append(host);
   root = createRoot(host);
 });
-afterEach(() => {
-  act(() => root.unmount());
+afterEach(async () => {
+  await act(async () => root.unmount());
   host.remove();
 });
-function render(node: ReactNode) {
-  act(() => root.render(<I18nProvider locale="en-US">{node}</I18nProvider>));
+async function render(node: ReactNode) {
+  await act(async () => root.render(<I18nProvider locale="en-US">{node}</I18nProvider>));
 }
 const controls = [TextInput, PasswordInput, NumberInput, Select] as const;
 const names = ['TextInput', 'PasswordInput', 'NumberInput', 'Select'] as const;
 describe('input contracts in TextInput → PasswordInput → NumberInput → Select order', () => {
   it.each(controls.map((Control, index) => [names[index], Control] as const))(
     '%s relates visible label, helper, error and external description to the actual input',
-    (_, Control) => {
-      render(
+    async (_, Control) => {
+      await render(
         <>
           <p id="external-help">External constraint</p>
           <Control
@@ -56,20 +56,20 @@ describe('input contracts in TextInput → PasswordInput → NumberInput → Sel
       expect(description).toContain('External constraint');
       expect(description).toContain('Expected format');
       expect(description).toContain('Correct this value');
-      act(() => input.focus());
+      await act(async () => input.focus());
       expect(document.activeElement).toBe(input);
     },
   );
   it.each(controls.map((Control, index) => [names[index], Control] as const))(
     '%s preserves read-only focus separately from native disabled',
-    (_, Control) => {
-      render(<Control label="Value" readOnly />);
+    async (_, Control) => {
+      await render(<Control label="Value" readOnly />);
       let input = host.querySelector<HTMLInputElement>('input')!;
       expect(input.readOnly).toBe(true);
       expect(input.disabled).toBe(false);
-      act(() => input.focus());
+      await act(async () => input.focus());
       expect(document.activeElement).toBe(input);
-      render(<Control label="Value" disabled />);
+      await render(<Control label="Value" disabled />);
       input = host.querySelector<HTMLInputElement>('input')!;
       expect(input.disabled).toBe(true);
       expect(Array.from(host.querySelectorAll<HTMLButtonElement>('button')).every((button) => button.disabled)).toBe(
@@ -77,16 +77,18 @@ describe('input contracts in TextInput → PasswordInput → NumberInput → Sel
       );
     },
   );
-  it('PasswordInput keeps controlled visibility and allows read-only inspection without editing the value', () => {
+  it('PasswordInput keeps controlled visibility and allows read-only inspection without editing the value', async () => {
     const change = vi.fn();
-    render(<PasswordInput label="Password" value="secret" visible={false} readOnly onVisibilityChange={change} />);
+    await render(
+      <PasswordInput label="Password" value="secret" visible={false} readOnly onVisibilityChange={change} />,
+    );
     const toggle = host.querySelector<HTMLButtonElement>('button')!;
     expect(toggle.disabled).toBe(false);
     expect(toggle.type).toBe('button');
-    act(() => toggle.click());
+    await act(async () => toggle.click());
     expect(change).toHaveBeenCalledExactlyOnceWith(true);
     expect(host.querySelector<HTMLInputElement>('input')?.type).toBe('password');
-    render(<PasswordInput label="Password" value="secret" visible readOnly onVisibilityChange={change} />);
+    await render(<PasswordInput label="Password" value="secret" visible readOnly onVisibilityChange={change} />);
     expect(host.querySelector<HTMLInputElement>('input')?.value).toBe('secret');
     expect(host.querySelector<HTMLInputElement>('input')?.type).toBe('text');
     expect(host.querySelector('button')?.getAttribute('aria-pressed')).toBe('true');
@@ -95,11 +97,11 @@ describe('input contracts in TextInput → PasswordInput → NumberInput → Sel
   it.each([
     ['Enter', 'Enter'],
     [' ', 'Space'],
-  ] as const)('PasswordInput visibility command operates once with %s', (key, code) => {
+  ] as const)('PasswordInput visibility command operates once with %s', async (key, code) => {
     const change = vi.fn();
-    render(<PasswordInput label="Password" defaultValue="sample" onVisibilityChange={change} />);
+    await render(<PasswordInput label="Password" defaultValue="sample" onVisibilityChange={change} />);
     const toggle = host.querySelector<HTMLButtonElement>('button')!;
-    act(() => {
+    await act(async () => {
       toggle.focus();
       toggle.dispatchEvent(new KeyboardEvent('keydown', { key, code, bubbles: true }));
       toggle.dispatchEvent(new KeyboardEvent('keyup', { key, code, bubbles: true }));
@@ -109,8 +111,8 @@ describe('input contracts in TextInput → PasswordInput → NumberInput → Sel
     expect(host.querySelector<HTMLInputElement>('input')?.value).toBe('sample');
     expect(document.activeElement).toBe(toggle);
   });
-  it('TextInput preserves external naming and its own help/error relationships together', () => {
-    render(
+  it('TextInput preserves external naming and its own help/error relationships together', async () => {
+    await render(
       <>
         <span id="account-label">Account name</span>
         <TextInput aria-labelledby="account-label" description="Use your public name" error="Name is required" />
@@ -125,16 +127,16 @@ describe('input contracts in TextInput → PasswordInput → NumberInput → Sel
     expect(descriptions).toContain('Use your public name');
     expect(descriptions).toContain('Name is required');
   });
-  it('NumberInput keyboard increments follow limits and read-only disables both stepper commands', () => {
+  it('NumberInput keyboard increments follow limits and read-only disables both stepper commands', async () => {
     const change = vi.fn();
-    render(<NumberInput label="Order" defaultValue={1} min={1} max={3} step={2} onChange={change} />);
+    await render(<NumberInput label="Order" defaultValue={1} min={1} max={3} step={2} onChange={change} />);
     const input = host.querySelector<HTMLInputElement>('input')!;
     expect(input.type).toBe('text');
     expect(input.getAttribute('aria-roledescription')).toBe('Number field');
     const buttons = host.querySelectorAll<HTMLButtonElement>('button');
     expect(buttons[0].disabled).toBe(true);
     expect(buttons[0].getAttribute('tabindex')).toBe('-1');
-    act(() => {
+    await act(async () => {
       input.focus();
       input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
     });
@@ -142,8 +144,8 @@ describe('input contracts in TextInput → PasswordInput → NumberInput → Sel
     expect(input.value).toBe('3');
     expect(buttons[1].disabled).toBe(true);
     change.mockClear();
-    render(<NumberInput label="Order" value={1} readOnly onChange={change} />);
-    act(() =>
+    await render(<NumberInput label="Order" value={1} readOnly onChange={change} />);
+    await act(async () =>
       host.querySelector('input')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true })),
     );
     expect(change).not.toHaveBeenCalled();
@@ -155,7 +157,7 @@ describe('input contracts in TextInput → PasswordInput → NumberInput → Sel
     'Select %s blocks controlled opening and clear commands while retaining its selected label',
     async (state) => {
       const change = vi.fn();
-      render(
+      await render(
         <Select
           label="Status"
           data={['Draft', 'Published']}
@@ -176,7 +178,7 @@ describe('input contracts in TextInput → PasswordInput → NumberInput → Sel
   );
   it('Select allows deselecting the currently selected option only when the API requests it', async () => {
     const change = vi.fn();
-    render(
+    await render(
       <Select label="Status" data={['Draft', 'Published']} defaultValue="Draft" allowDeselect onChange={change} />,
     );
     await act(async () => host.querySelector<HTMLButtonElement>('button')!.click());
@@ -190,12 +192,12 @@ describe('input contracts in TextInput → PasswordInput → NumberInput → Sel
   it.each([
     ['NumberInput', NumberInput],
     ['Select', Select],
-  ] as const)('%s forwards its promised native input events with an actual input target', (_, Control) => {
+  ] as const)('%s forwards its promised native input events with an actual input target', async (_, Control) => {
     const click = vi.fn();
     const keyUp = vi.fn();
     const compositionStart = vi.fn();
     const compositionEnd = vi.fn();
-    render(
+    await render(
       <Control
         label="Value"
         onClick={click}
@@ -205,7 +207,7 @@ describe('input contracts in TextInput → PasswordInput → NumberInput → Sel
       />,
     );
     const input = host.querySelector<HTMLInputElement>('input')!;
-    act(() => {
+    await act(async () => {
       input.click();
       input.dispatchEvent(new KeyboardEvent('keyup', { key: 'a', bubbles: true }));
       input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));

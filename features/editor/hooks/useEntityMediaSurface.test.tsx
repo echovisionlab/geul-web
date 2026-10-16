@@ -89,9 +89,12 @@ describe('useEntityMediaSurface', () => {
     });
     await render();
 
-    const task = latestSurface?.dropFilesAtBlock(harness.editor, anchorBlockId, [
-      new File(['audio'], 'Field Take.wav', { type: 'audio/wav' }),
-    ]);
+    let task: ReturnType<NonNullable<typeof latestSurface>['dropFilesAtBlock']> | undefined;
+    act(() => {
+      task = latestSurface?.dropFilesAtBlock(harness.editor, anchorBlockId, [
+        new File(['audio'], 'Field Take.wav', { type: 'audio/wav' }),
+      ]);
+    });
     await act(async () => {
       await Promise.resolve();
     });
@@ -101,8 +104,8 @@ describe('useEntityMediaSurface', () => {
 
     const fileId = randomTestUuid();
     harness.markVerified();
-    resolveUpload?.({ fileId, url: `https://cdn.example.test/${fileId}.wav` });
     await act(async () => {
+      resolveUpload?.({ fileId, url: `https://cdn.example.test/${fileId}.wav` });
       await task;
     });
 

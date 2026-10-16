@@ -17,7 +17,7 @@ SMTP or running API service and sends no message.
 ## Pinned renderer and local review
 
 CI pins the helper source to API commit
-`7155b62b9be580753f2187ec85fb2b8eed9dcd94`. The workflow requires an immutable
+`d65f5f5105f36a01eb1866b493194be30648ec28`. The workflow requires an immutable
 40-character SHA, verifies the renderer checkout's HEAD, and records the revision
 in `api-revision.txt` beside the Storybook build. The single `Tests` job builds
 Storybook and then compiles one Linux/amd64 helper in the same workspace using
@@ -38,8 +38,9 @@ error; there is no local TypeScript rendering fallback.
 
 The pin establishes which production rendering code the fixture runs. It does
 not establish that this revision has been deployed or that a live mail client
-has displayed the output. Application release and deployment remain on hold at the user's
-request; the fixture and CI artifact do not send mail or publish an image.
+has displayed the output. Application release and deployment are proceeding under the user's approval.
+The fixture and CI artifact do not send mail or publish an image, and do not
+establish deployment completion.
 
 ## Request and process lifetime
 
@@ -79,8 +80,8 @@ The browser adds no quote-only CSS to make a preview look different from mail.
 
 `TemplateRichFormatting` has the `email-rendering` browser-test tag. Its play
 asserts a nonzero rendered quote border, heading/list/hard-break markup, exact
-Go-response/iframe `srcdoc` equality for the same fixture input, and a preview
-refresh after typing. The consolidated `ci` suite includes this story together
+Go-response/iframe `srcdoc` equality for the same fixture input, a preview
+refresh after typing, and a frame tall enough for the complete rendered document. The consolidated `ci` suite includes this story together
 with the existing Core accessibility and Post authoring scopes in one Jest test
 invocation. Storybook and the Linux helper are built once earlier in the same
 job and supplied directly to the browser step; no email is sent. These assertions cover the
@@ -104,3 +105,18 @@ recorded in [testing](../testing.md#storybook-browser-isolation-and-ci-paralleli
 Each completed CI run's artifacts establish browser and parity results for its
 tested commit. The local visual review and runner lifecycle checks do not imply
 a full-suite CI pass.
+
+## Preview geometry
+
+Template, campaign, layout editor and layout-list previews share
+`features/email/EmailPreviewFrame.tsx`. The frame follows the rendered document's
+natural height, including late image/font loading and responsive text wrapping.
+Scrolling belongs to the containing page or modal. Load and resize subscriptions
+are released when the document is replaced or the preview unmounts. Measurement
+changes only the iframe element's height; renderer HTML, body margins, fonts and
+other email styles remain unchanged.
+
+The 2026-10-16 production Login Code Email baseline was viewed directly: the
+right preview had its own scrollbar and clipped the mail card/footer. The height
+change addresses that behavior. Post-change production and Storybook visual
+review is pending; the existing quote review above predates this geometry change.

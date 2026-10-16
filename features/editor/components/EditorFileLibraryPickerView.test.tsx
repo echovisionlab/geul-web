@@ -462,7 +462,7 @@ describe('EditorFileLibraryPickerView', () => {
     expect(dialog?.querySelector('[data-file-preview="story-file-image"]')).not.toBeNull();
   });
 
-  it('requests the next search page when the result sentinel approaches the viewport', () => {
+  it('requests the next search page when the result sentinel approaches the viewport', async () => {
     const onLoadMore = vi.fn();
     let intersectionCallback: IntersectionObserverCallback | undefined;
     let intersectionObserver: TestIntersectionObserver | undefined;
@@ -523,7 +523,7 @@ describe('EditorFileLibraryPickerView', () => {
       target,
       time: 0,
     };
-    act(() => {
+    await act(async () => {
       callback([entry], intersectionObserver!);
     });
 

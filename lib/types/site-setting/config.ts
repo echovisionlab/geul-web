@@ -57,8 +57,7 @@ export interface SiteSettingsFormValues {
   company_address: string;
   tax_id: string;
   legal_email: string;
-  support_email: string;
-  privacy_email: string;
+  contact_email: string;
   social_links: SocialLinks;
 
   // Branding
@@ -112,8 +111,7 @@ export const SITE_SETTINGS_FORM_KEYS = [
   'company_address',
   'tax_id',
   'legal_email',
-  'support_email',
-  'privacy_email',
+  'contact_email',
   'social_links',
   'primary_color',
   'default_comments_enabled',
@@ -141,8 +139,7 @@ export const DEFAULT_SITE_SETTINGS_FORM_VALUES: SiteSettingsFormValues = {
   company_address: '',
   tax_id: '',
   legal_email: '',
-  support_email: '',
-  privacy_email: '',
+  contact_email: '',
   social_links: {},
 
   // Branding
@@ -188,8 +185,7 @@ export type PublicSettingKey =
   | 'tax_id'
   | 'site_origin'
   | 'legal_email'
-  | 'support_email'
-  | 'privacy_email'
+  | 'contact_email'
   | 'social_links'
   | 'logo_url'
   | 'logo_light_url'
@@ -219,8 +215,7 @@ export const DEFAULT_PUBLIC_SETTINGS: PublicSettings = {
   tax_id: DEFAULT_SITE_SETTINGS_VIEW.tax_id,
   site_origin: DEFAULT_SITE_SETTINGS_VIEW.site_origin,
   legal_email: DEFAULT_SITE_SETTINGS_VIEW.legal_email,
-  support_email: DEFAULT_SITE_SETTINGS_VIEW.support_email,
-  privacy_email: DEFAULT_SITE_SETTINGS_VIEW.privacy_email,
+  contact_email: DEFAULT_SITE_SETTINGS_VIEW.contact_email,
   social_links: DEFAULT_SITE_SETTINGS_VIEW.social_links,
   logo_url: DEFAULT_SITE_SETTINGS_VIEW.logo_url,
   logo_light_url: DEFAULT_SITE_SETTINGS_VIEW.logo_light_url,

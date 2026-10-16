@@ -42,8 +42,8 @@ Object.defineProperty(window.HTMLElement.prototype, 'scrollIntoView', {
 let container: HTMLDivElement | null = null;
 let root: Root | null = null;
 
-afterEach(() => {
-  act(() => {
+afterEach(async () => {
+  await act(async () => {
     root?.unmount();
   });
   container?.remove();
@@ -51,7 +51,7 @@ afterEach(() => {
   container = null;
 });
 
-function renderPhoneRequiredForm(requiredMessage: string) {
+async function renderPhoneRequiredForm(requiredMessage: string) {
   const schema: FormSchema = {
     id: 'phone-required-form',
     steps: [
@@ -84,16 +84,17 @@ function renderPhoneRequiredForm(requiredMessage: string) {
   document.body.appendChild(container);
   root = createRoot(container);
 
-  act(() => {
+  await act(async () => {
     root?.render(
       <TestProviders>
         <FormRenderer form={buildForm(schema)} />
       </TestProviders>,
     );
+    await loadPhoneField();
   });
 }
 
-function renderPhoneDefaultCountryForm(phoneDefaultCountry: string) {
+async function renderPhoneDefaultCountryForm(phoneDefaultCountry: string) {
   const schema: FormSchema = {
     id: 'phone-default-country-form',
     steps: [
@@ -116,12 +117,13 @@ function renderPhoneDefaultCountryForm(phoneDefaultCountry: string) {
   document.body.appendChild(container);
   root = createRoot(container);
 
-  act(() => {
+  await act(async () => {
     root?.render(
       <TestProviders>
         <FormRenderer form={buildForm(schema)} phoneDefaultCountry={phoneDefaultCountry} />
       </TestProviders>,
     );
+    await loadPhoneField();
   });
 }
 
@@ -206,16 +208,15 @@ describe('FormRenderer', () => {
   it('renders the phone required error once after blur', async () => {
     const requiredMessage = 'Phone is required exactly once';
 
-    renderPhoneRequiredForm(requiredMessage);
+    await renderPhoneRequiredForm(requiredMessage);
     await waitForPhoneInput();
 
     const phoneInput = container?.querySelector('input[type="tel"]') as HTMLInputElement | null;
     expect(phoneInput).not.toBeNull();
 
-    act(() => {
-      phoneInput?.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
-      phoneInput?.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
-    });
+    await act(async () => phoneInput!.focus());
+    expect(document.activeElement).toBe(phoneInput);
+    await act(async () => phoneInput!.blur());
     await flushUpdates();
 
     const textContent = container?.textContent ?? '';
@@ -225,7 +226,7 @@ describe('FormRenderer', () => {
   });
 
   it('passes the resolved phone default country to phone fields', async () => {
-    renderPhoneDefaultCountryForm('JP');
+    await renderPhoneDefaultCountryForm('JP');
     await waitForPhoneInput();
 
     expect(container?.querySelector('input[role="combobox"]')?.getAttribute('value')).toContain('+81');

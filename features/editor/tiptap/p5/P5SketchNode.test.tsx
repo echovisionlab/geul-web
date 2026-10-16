@@ -6,6 +6,7 @@ import { createRoot } from 'react-dom/client';
 import { Editor, type NodeType, type TextType } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
 import { EditorContent, useEditor } from '@tiptap/react';
+import type { TestContext } from 'vitest';
 
 import type { EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
 import { createTiptapWireExtensions } from '../wire-schema';
@@ -15,6 +16,18 @@ import { createP5PreviewRuntime, type P5PreviewRuntimeFactory } from './p5-previ
 import { buildP5SandboxDocument } from './p5-preview-document';
 import type { P5Capability } from './p5-capabilities';
 import { DEFAULT_P5_SKETCH_SOURCE, normalizeP5SketchError, validateP5SketchSource } from './p5-source';
+
+// Focus still runs the real editor and lazy loader. Emoji lookup data is a separate
+// contract, covered by emoji-extension tests and the browser; these cases use no emoji.
+vi.mock('../emoji/emoji-data', () => ({
+  createTiptapEmojiData: () =>
+    ({
+      items: [],
+      find: () => undefined,
+      shortcodeFor: () => undefined,
+      regex: () => /(?!)/g,
+    }) satisfies import('../emoji/emoji-runtime').TiptapEmojiData,
+}));
 
 vi.mock('../code-editor', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../code-editor')>()),
@@ -112,18 +125,23 @@ function sketchNode(editor: Editor): NodeType | undefined {
   return blockContainer ? firstChildNode(blockContainer) : undefined;
 }
 
-function mountReact(node: ReactNode) {
+async function mountReact(context: TestContext, node: ReactNode) {
   const container = document.createElement('div');
   document.body.append(container);
   const root = createRoot(container);
-  act(() => root.render(<DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>));
-  return {
-    container,
-    unmount() {
-      act(() => root.unmount());
+  let disposed = false;
+  const unmount = async () => {
+    if (disposed) return;
+    disposed = true;
+    try {
+      await act(async () => root.unmount());
+    } finally {
       container.remove();
-    },
+    }
   };
+  context.onTestFinished(unmount);
+  await act(async () => root.render(<DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>));
+  return { container, unmount };
 }
 
 describe('p5.js sketch source policy', () => {
@@ -419,7 +437,7 @@ function AuthoringSketch({
 }
 
 describe('authoring p5.js sketch resize', () => {
-  it('persists device capabilities and waits for an explicit run', async () => {
+  it('persists device capabilities and waits for an explicit run', async (context) => {
     const run = vi.fn();
     const runtimeFactory: P5PreviewRuntimeFactory = (_mount, events) => ({
       run: (source, options) => {
@@ -430,7 +448,8 @@ describe('authoring p5.js sketch resize', () => {
       dispose: () => undefined,
     });
     let editor: Editor | null = null;
-    const mounted = mountReact(
+    const mounted = await mountReact(
+      context,
       <AuthoringSketch
         previewWidth="60"
         capabilities={['microphone']}
@@ -447,7 +466,7 @@ describe('authoring p5.js sketch resize', () => {
     const capabilityTrigger = [...mounted.container.querySelectorAll<HTMLButtonElement>('button')].find((button) =>
       button.hasAttribute('data-p5-capability-trigger'),
     );
-    act(() => capabilityTrigger?.click());
+    await act(async () => capabilityTrigger?.click());
     const microphone = document.querySelector<HTMLInputElement>(
       `input[aria-label="${KOREAN_P5_SKETCH_LABELS.capabilityLabels.microphone}"]`,
     )!;
@@ -457,10 +476,10 @@ describe('authoring p5.js sketch resize', () => {
     const microphoneRow = capabilityPanel.querySelector('[data-p5-capability="microphone"]')!;
     expect(microphoneRow.getAttribute('data-selected')).toBe('true');
     const microphoneAction = microphoneRow.querySelector<HTMLButtonElement>('button')!;
-    act(() => microphoneAction.click());
+    await act(async () => microphoneAction.click());
     await vi.waitFor(() => expect(sketchNode(editor!)?.attrs?.capabilities).toBe(''));
     expect(microphone.checked).toBe(false);
-    act(() => microphoneAction.click());
+    await act(async () => microphoneAction.click());
     await vi.waitFor(() => expect(sketchNode(editor!)?.attrs?.capabilities).toBe('microphone'));
     expect(microphone.checked).toBe(true);
     expect(
@@ -476,16 +495,16 @@ describe('authoring p5.js sketch resize', () => {
     const runButton = [...mounted.container.querySelectorAll<HTMLButtonElement>('button')].find(
       (button) => button.getAttribute('aria-label') === KOREAN_P5_SKETCH_LABELS.run,
     );
-    act(() => runButton?.click());
+    await act(async () => runButton?.click());
     await vi.waitFor(() =>
       expect(run).toHaveBeenCalledWith(DEFAULT_P5_SKETCH_SOURCE, { capabilities: ['microphone'] }),
     );
-    act(() => microphone?.click());
+    await act(async () => microphone?.click());
     await vi.waitFor(() => expect(sketchNode(editor!)?.attrs?.capabilities).toBe(''));
-    mounted.unmount();
+    await mounted.unmount();
   });
 
-  it('keeps Monaco edits draft-only until Apply updates source and preview', async () => {
+  it('keeps Monaco edits draft-only until Apply updates source and preview', async (context) => {
     const run = vi.fn();
     const runtimeFactory: P5PreviewRuntimeFactory = (_mount, events) => ({
       run: (source) => {
@@ -496,7 +515,8 @@ describe('authoring p5.js sketch resize', () => {
       dispose: () => undefined,
     });
     let editor: Editor | null = null;
-    const mounted = mountReact(
+    const mounted = await mountReact(
+      context,
       <AuthoringSketch
         previewWidth="60"
         runtimeFactory={runtimeFactory}
@@ -509,7 +529,7 @@ describe('authoring p5.js sketch resize', () => {
     const edit = [...mounted.container.querySelectorAll('button')].find(
       (button) => button.getAttribute('aria-label') === KOREAN_P5_SKETCH_LABELS.source,
     );
-    act(() => edit?.click());
+    await act(async () => edit?.click());
     const input = await vi.waitFor(() => {
       const element = mounted.container.querySelector<HTMLTextAreaElement>('textarea[aria-label="p5.js 소스"]');
       expect(element).not.toBeNull();
@@ -520,10 +540,10 @@ describe('authoring p5.js sketch resize', () => {
     expect(previewGroup?.getAttribute('aria-label')).toBe(KOREAN_P5_SKETCH_LABELS.preview);
     expect(previewGroup?.hasAttribute('aria-hidden')).toBe(false);
     const enter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
-    act(() => input.dispatchEvent(enter));
+    await act(async () => input.dispatchEvent(enter));
     expect(enter.defaultPrevented).toBe(false);
     const nextSource = 'function setup() {\n  createCanvas(200, 120);\n}';
-    act(() => {
+    await act(async () => {
       const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')?.set;
       setter?.call(input, nextSource);
       input.dispatchEvent(new Event('input', { bubbles: true }));
@@ -534,15 +554,16 @@ describe('authoring p5.js sketch resize', () => {
       (button) => button.getAttribute('aria-label') === KOREAN_P5_SKETCH_LABELS.apply,
     );
     expect(apply?.disabled).toBe(false);
-    act(() => apply?.click());
+    await act(async () => apply?.click());
     await vi.waitFor(() => expect(run).toHaveBeenLastCalledWith(nextSource), { timeout: 1_000 });
     expect(sketchNode(editor!)?.content?.[0]).toEqual({ type: 'text', text: nextSource });
-    mounted.unmount();
+    await mounted.unmount();
   });
 
-  it('exits Monaco to the exact sketch NodeSelection without changing source or mode', async () => {
+  it('exits Monaco to the exact sketch NodeSelection without changing source or mode', async (context) => {
     let editor: Editor | null = null;
-    const mounted = mountReact(
+    const mounted = await mountReact(
+      context,
       <AuthoringSketch
         previewWidth="60"
         onEditor={(value) => {
@@ -555,14 +576,14 @@ describe('authoring p5.js sketch resize', () => {
     const edit = [...mounted.container.querySelectorAll('button')].find(
       (button) => button.getAttribute('aria-label') === KOREAN_P5_SKETCH_LABELS.source,
     );
-    act(() => edit?.click());
+    await act(async () => edit?.click());
     const input = await vi.waitFor(() => {
       const element = mounted.container.querySelector<HTMLTextAreaElement>('textarea[aria-label="p5.js 소스"]');
       expect(element).not.toBeNull();
       return element!;
     });
     const before = sketchNode(editor!);
-    act(() => {
+    await act(async () => {
       editor!.view.dispatch(editor!.state.tr.setSelection(NodeSelection.create(editor!.state.doc, 1)));
       input.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', metaKey: true, bubbles: true }));
       input.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', metaKey: true, shiftKey: true, bubbles: true }));
@@ -577,12 +598,13 @@ describe('authoring p5.js sketch resize', () => {
       attrs: { mode: 'edit' },
       content: before?.content,
     });
-    mounted.unmount();
+    await mounted.unmount();
   });
 
-  it('exposes accessible handles and persists keyboard width changes as strings', async () => {
+  it('exposes accessible handles and persists keyboard width changes as strings', async (context) => {
     let editor: Editor | null = null;
-    const mounted = mountReact(
+    const mounted = await mountReact(
+      context,
       <AuthoringSketch
         previewWidth="60"
         onEditor={(value) => {
@@ -597,35 +619,35 @@ describe('authoring p5.js sketch resize', () => {
     expect(handles[0]?.getAttribute('aria-label')).toBe(KOREAN_P5_SKETCH_LABELS.resizeLeft);
     expect(handles[0]?.getAttribute('aria-valuenow')).toBe('60');
 
-    act(() => handles[0]?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true })));
+    await act(async () => handles[0]?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true })));
     await vi.waitFor(() => {
       expect(sketchNode(editor!)?.attrs?.previewWidth).toBe('55');
     });
-    act(() => handles[0]?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
+    await act(async () => handles[0]?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
     await vi.waitFor(() => {
       expect(sketchNode(editor!)?.attrs?.previewWidth).toBe('60');
     });
 
-    act(() => {
+    await act(async () => {
       handles[0]?.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
       handles[0]?.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
     });
     await vi.waitFor(() => {
       expect(sketchNode(editor!)?.attrs?.previewWidth).toBe('100');
     });
-    act(() => editor!.setEditable(false));
+    await act(async () => editor!.setEditable(false));
     await vi.waitFor(() => {
       expect(mounted.container.querySelectorAll('[role="slider"]')).toHaveLength(0);
       expect(mounted.container.querySelector('[data-content-type="p5Sketch"]')?.hasAttribute('data-selected')).toBe(
         false,
       );
     });
-    mounted.unmount();
+    await mounted.unmount();
   });
 });
 
 describe('p5.js neutral authoring authority', () => {
-  it('fails closed for a target-locale editor', async () => {
+  it('fails closed for a target-locale editor', async (context) => {
     let editor: Editor | null = null;
     function TargetLocaleSketch() {
       const instance = useEditor({
@@ -650,7 +672,7 @@ describe('p5.js neutral authoring authority', () => {
       return instance ? <EditorContent editor={instance} /> : null;
     }
 
-    const mounted = mountReact(<TargetLocaleSketch />);
+    const mounted = await mountReact(context, <TargetLocaleSketch />);
     await vi.waitFor(() => expect(editor).not.toBeNull());
     const before = editor!.getJSON();
     expect(mounted.container.querySelectorAll('[role="slider"]')).toHaveLength(0);
@@ -660,14 +682,16 @@ describe('p5.js neutral authoring authority', () => {
       ),
     ).toBe(false);
     expect(mounted.container.querySelector('input[aria-label="p5.js 스케치"]')).not.toBeNull();
-    expect(editor!.commands.insertP5Sketch()).toBe(false);
+    await act(async () => {
+      expect(editor!.commands.insertP5Sketch()).toBe(false);
+    });
     expect(editor!.getJSON()).toEqual(before);
-    mounted.unmount();
+    await mounted.unmount();
   });
 });
 
 describe('public p5.js sketch interaction', () => {
-  it('auto-runs and keeps temporary edits out of the durable document', async () => {
+  it('auto-runs and keeps temporary edits out of the durable document', async (context) => {
     const run = vi.fn();
     const dispose = vi.fn();
     const runtimeFactory: P5PreviewRuntimeFactory = (_mount, events) => ({
@@ -679,7 +703,8 @@ describe('public p5.js sketch interaction', () => {
       dispose,
     });
     let editor: Editor | null = null;
-    const mounted = mountReact(
+    const mounted = await mountReact(
+      context,
       <PublicSketch
         runtimeFactory={runtimeFactory}
         onEditor={(value) => {
@@ -691,7 +716,7 @@ describe('public p5.js sketch interaction', () => {
     const previewGroup = mounted.container.querySelector('[data-testid="p5-preview"] [role="group"]');
     expect(previewGroup?.getAttribute('aria-label')).toBe(KOREAN_P5_SKETCH_LABELS.preview);
     expect(previewGroup?.hasAttribute('aria-hidden')).toBe(false);
-    act(() => {
+    await act(async () => {
       editor!.view.dispatch(editor!.state.tr.setSelection(NodeSelection.create(editor!.state.doc, 2)));
     });
     await vi.waitFor(() => {
@@ -704,10 +729,10 @@ describe('public p5.js sketch interaction', () => {
     const edit = [...mounted.container.querySelectorAll('button')].find(
       (button) => button.getAttribute('aria-label') === KOREAN_P5_SKETCH_LABELS.source,
     );
-    act(() => edit?.click());
+    await act(async () => edit?.click());
     const input = mounted.container.querySelector<HTMLTextAreaElement>('textarea[aria-label="p5.js 소스"]');
     expect(input).not.toBeNull();
-    act(() => {
+    await act(async () => {
       const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')?.set;
       setter?.call(input, 'function draw() { circle(9, 9, 9); }');
       input?.dispatchEvent(new Event('input', { bubbles: true }));
@@ -715,7 +740,7 @@ describe('public p5.js sketch interaction', () => {
     const apply = [...mounted.container.querySelectorAll('button')].find(
       (candidate) => candidate.getAttribute('aria-label') === KOREAN_P5_SKETCH_LABELS.apply,
     );
-    act(() => apply?.click());
+    await act(async () => apply?.click());
     await vi.waitFor(() => expect(run).toHaveBeenLastCalledWith('function draw() { circle(9, 9, 9); }'), {
       timeout: 1_000,
     });
@@ -725,13 +750,13 @@ describe('public p5.js sketch interaction', () => {
     const reset = [...mounted.container.querySelectorAll('button')].find(
       (button) => button.getAttribute('aria-label') === KOREAN_P5_SKETCH_LABELS.resetOriginal,
     );
-    act(() => reset?.click());
+    await act(async () => reset?.click());
     expect(input?.value).toBe('function draw() { circle(4, 4, 4); }');
-    mounted.unmount();
+    await mounted.unmount();
     expect(dispose).toHaveBeenCalled();
   });
 
-  it('runs a device-capable temporary edit without changing the durable document', async () => {
+  it('runs a device-capable temporary edit without changing the durable document', async (context) => {
     const run = vi.fn();
     const runtimeFactory: P5PreviewRuntimeFactory = (_mount, events) => ({
       run: (source, options) => {
@@ -742,7 +767,8 @@ describe('public p5.js sketch interaction', () => {
       dispose: () => undefined,
     });
     let editor: Editor | null = null;
-    const mounted = mountReact(
+    const mounted = await mountReact(
+      context,
       <PublicSketch
         capabilities={['microphone']}
         runtimeFactory={runtimeFactory}
@@ -757,10 +783,10 @@ describe('public p5.js sketch interaction', () => {
     const sourceButton = [...mounted.container.querySelectorAll('button')].find(
       (button) => button.getAttribute('aria-label') === KOREAN_P5_SKETCH_LABELS.source,
     );
-    act(() => sourceButton?.click());
+    await act(async () => sourceButton?.click());
     const input = mounted.container.querySelector<HTMLTextAreaElement>('textarea[aria-label="p5.js 소스"]');
     const temporarySource = 'function setup() { createCanvas(10, 10); createCapture(AUDIO); }';
-    act(() => {
+    await act(async () => {
       const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')?.set;
       setter?.call(input, temporarySource);
       input?.dispatchEvent(new Event('input', { bubbles: true }));
@@ -768,16 +794,16 @@ describe('public p5.js sketch interaction', () => {
     const apply = [...mounted.container.querySelectorAll('button')].find(
       (button) => button.getAttribute('aria-label') === KOREAN_P5_SKETCH_LABELS.apply,
     );
-    act(() => apply?.click());
+    await act(async () => apply?.click());
     expect(run).not.toHaveBeenCalled();
     const runButton = [...mounted.container.querySelectorAll('button')].find(
       (button) => button.getAttribute('aria-label') === KOREAN_P5_SKETCH_LABELS.run,
     );
-    act(() => runButton?.click());
+    await act(async () => runButton?.click());
 
     await vi.waitFor(() => expect(run).toHaveBeenCalledWith(temporarySource, { capabilities: ['microphone'] }));
     expect(JSON.stringify(editor!.getJSON())).toContain('circle(4, 4, 4)');
     expect(JSON.stringify(editor!.getJSON())).not.toContain('createCapture');
-    mounted.unmount();
+    await mounted.unmount();
   });
 });

@@ -46,7 +46,7 @@ describe('generatedRichTextDocumentMarkdown', () => {
     ).toBe(expected ? `[**Contact**](${expected})\n` : '**Contact**\n');
   });
 
-  it('resolves the six exact migrated link-label tokens, preserving styles and href', () => {
+  it('resolves the canonical link-label tokens, preserving styles and href', () => {
     const localized = siteVariableDocument();
     const paragraph = localized.localeOverlay!.blocks[0]!.value;
     if (paragraph.case !== 'paragraph') {
@@ -62,7 +62,7 @@ describe('generatedRichTextDocumentMarkdown', () => {
     });
     const context = siteVariableContext(siteVariableManifest.settings);
     expect(generatedRichTextDocumentMarkdown(document, 'post', context)).toBe(
-      '[**rawsector \\| https://www.rawsector.com/tools/hwp \\| Example Studio Ltd. \\| legal@example.com \\| support@example.com \\| privacy@example.com \\| {{Site.title}} {{site.unknown}} {{ site.title }} {site.title}**](/tools/hwp)\n',
+      '[**rawsector \\| https://www.rawsector.com/tools/hwp \\| Example Studio Ltd. \\| legal@example.com \\| contact@example.com \\| {{Site.title}} {{site.unknown}} {{ site.title }} {site.title}**](/tools/hwp)\n',
     );
     expect(
       generatedRichTextDocumentMarkdown(document, 'post', {
@@ -72,7 +72,7 @@ describe('generatedRichTextDocumentMarkdown', () => {
       }),
     ).toContain('\\[unsafe\\] \\*title\\* \\&copy; {{site.url}}');
     expect(generatedRichTextDocumentMarkdown(document, 'post', { ...context, legalEmail: '' })).toContain(
-      'Example Studio Ltd. \\|  \\| support@example.com',
+      'Example Studio Ltd. \\|  \\| contact@example.com',
     );
     expect(() => generatedRichTextDocumentMarkdown(document, 'post')).toThrow('Site variable context is required');
   });
@@ -88,7 +88,7 @@ describe('generatedRichTextDocumentMarkdown', () => {
     });
     expect(
       generatedRichTextDocumentMarkdown(document, 'post', siteVariableContext(siteVariableManifest.settings)),
-    ).toBe('Welcome to rawsector. For help, write to [support@example.com](mailto:support@example.com).\n');
+    ).toBe('Welcome to rawsector. For help, write to [contact@example.com](mailto:contact@example.com).\n');
     expect(
       generatedRichTextDocumentMarkdown(document, 'post', {
         ...siteVariableContext(siteVariableManifest.settings),

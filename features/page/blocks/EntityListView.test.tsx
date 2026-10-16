@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
+import enMessages from '@/messages/en.json';
 import { act, type AnchorHTMLAttributes, type HTMLAttributes, type ImgHTMLAttributes, type ReactNode } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { createRoot, type Root } from 'react-dom/client';
@@ -130,7 +131,7 @@ describe('EntityListView', () => {
       act(() => {
         root?.render(
           <DesignSystemProvider forceColorScheme="light">
-            <NextIntlClientProvider locale="en" messages={{ common: { actions: { view: 'View' } } }}>
+            <NextIntlClientProvider locale="en" messages={enMessages} timeZone="UTC">
               <EntityListView
                 items={[{ id: 'one', href: '/one', title: 'One', imageUrl: 'https://example.com/landscape.jpg' }]}
                 className="ratio-test"
@@ -165,7 +166,7 @@ describe('EntityListView', () => {
       act(() => {
         root?.render(
           <DesignSystemProvider forceColorScheme="light">
-            <NextIntlClientProvider locale="en" messages={{ common: { actions: { view: 'View' } } }}>
+            <NextIntlClientProvider locale="en" messages={enMessages} timeZone="UTC">
               <EntityListView
                 items={items}
                 className="ratio-test"
@@ -208,7 +209,7 @@ describe('EntityListView', () => {
     act(() => {
       root?.render(
         <DesignSystemProvider forceColorScheme="light">
-          <NextIntlClientProvider locale="en" messages={{ common: { actions: { view: 'View' } } }}>
+          <NextIntlClientProvider locale="en" messages={enMessages} timeZone="UTC">
             <EntityListView
               items={items}
               className="artist-list-block"
@@ -233,7 +234,7 @@ describe('EntityListView', () => {
     act(() => {
       root?.render(
         <DesignSystemProvider forceColorScheme="light">
-          <NextIntlClientProvider locale="en" messages={{ common: { actions: { view: 'View' } } }}>
+          <NextIntlClientProvider locale="en" messages={enMessages} timeZone="UTC">
             <EntityListView
               items={[
                 { id: 'one', href: '/one', title: 'One', imageUrl: 'https://example.com/one.jpg' },
@@ -271,7 +272,7 @@ describe('EntityListView', () => {
     act(() => {
       root?.render(
         <DesignSystemProvider forceColorScheme="light">
-          <NextIntlClientProvider locale="en" messages={{ common: { actions: { view: 'View' } } }}>
+          <NextIntlClientProvider locale="en" messages={enMessages} timeZone="UTC">
             <EntityListView
               items={items}
               className="artist-list-block"
@@ -313,7 +314,7 @@ describe('EntityListView', () => {
       act(() => {
         root?.render(
           <DesignSystemProvider forceColorScheme="light">
-            <NextIntlClientProvider locale="en" messages={{ common: { actions: { view: 'View' } } }}>
+            <NextIntlClientProvider locale="en" messages={enMessages} timeZone="UTC">
               <EntityListView
                 items={items}
                 className="label-list-block"
@@ -356,7 +357,7 @@ describe('EntityListView', () => {
       act(() => {
         root?.render(
           <DesignSystemProvider forceColorScheme="light">
-            <NextIntlClientProvider locale="en" messages={{ common: { actions: { view: 'View' } } }}>
+            <NextIntlClientProvider locale="en" messages={enMessages} timeZone="UTC">
               <EntityListView
                 items={items}
                 className="label-list-block"

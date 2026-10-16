@@ -74,7 +74,7 @@ describe('translation page preview controllers', () => {
     expect(host.querySelector('table[aria-label="Translation Jobs"]')).not.toBeNull();
     expect(cancel.getAttribute('aria-label')).toContain('night-signals');
     expect(cancel.getAttribute('aria-label')).toContain('KO');
-    cancel.focus();
+    act(() => cancel.focus());
     await act(async () => cancel.click());
     await expectEventually(() => expect(host.textContent).not.toContain('night-signals'));
     expect(host.querySelector('[role="status"]')?.textContent).toBe('No translation jobs yet.');

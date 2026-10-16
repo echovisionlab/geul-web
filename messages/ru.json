@@ -4076,8 +4076,7 @@
         "siteUrl": "URL сайта",
         "companyName": "Название компании",
         "legalEmail": "Юридическая почта",
-        "supportEmail": "Почта поддержки",
-        "privacyEmail": "Почта по вопросам конфиденциальности"
+        "contactEmail": "Контактная почта"
       }
     },
     "accessDowngraded": {
@@ -4713,15 +4712,10 @@
           "description": "По юридическим вопросам (Условия, Конфиденциальность и т. д.)",
           "placeholder": "Legal@example.com"
         },
-        "supportEmail": {
-          "label": "Электронная почта поддержки",
-          "description": "Для поддержки клиентов",
-          "placeholder": "support@example.com"
-        },
-        "privacyEmail": {
-          "label": "Электронная почта конфиденциальности",
-          "description": "Для запросов, связанных с конфиденциальностью (GDPR, удаление данных и т. д.)",
-          "placeholder": "Privacy@example.com"
+        "contactEmail": {
+          "label": "Контактная почта",
+          "description": "Для общих вопросов, поддержки и запросов о конфиденциальности",
+          "placeholder": "contact@example.com"
         },
         "primaryColor": {
           "label": "Цвет бренда",

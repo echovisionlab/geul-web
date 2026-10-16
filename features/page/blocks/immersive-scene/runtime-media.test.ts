@@ -1,7 +1,7 @@
 import { create } from '@bufbuild/protobuf';
 import { ContentBlockMediaItemSchema } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { describe, expect, it } from 'vitest';
-import { ContentBlockMediaRuntimeIndex } from '@/features/media/content-block-media-runtime';
+import { ContentBlockMediaRuntimeIndex } from '@/features/media/content-block-media-runtime-index';
 import { parseImmersiveSceneUnitsJson } from '@/lib/media/immersive-scene-hydration';
 import { hydrateImmersiveSceneRuntimeProps } from './runtime-media';
 

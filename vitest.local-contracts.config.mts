@@ -1,11 +1,13 @@
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { mergeConfig } from 'vitest/config';
-import baseConfig from './vitest.config';
+import baseConfig from './vitest.config.mts';
 
-const contractRoot = resolve(__dirname, '../geul-event-contracts/packages/proto/gen/api');
-const eventRoot = resolve(__dirname, '../geul-event-contracts/packages/event/src');
-const commonRoot = resolve(__dirname, '../geul-common/src');
-const telemetryRoot = resolve(__dirname, '../geul-telemetry/src');
+const projectRoot = fileURLToPath(new URL('.', import.meta.url));
+const contractRoot = resolve(projectRoot, '../geul-event-contracts/packages/proto/gen/api');
+const eventRoot = resolve(projectRoot, '../geul-event-contracts/packages/event/src');
+const commonRoot = resolve(projectRoot, '../geul-common/src');
+const telemetryRoot = resolve(projectRoot, '../geul-telemetry/src');
 
 export default mergeConfig(baseConfig, {
   resolve: {

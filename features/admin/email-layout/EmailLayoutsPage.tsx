@@ -1,4 +1,6 @@
 'use client';
+
+import { EmailPreviewFrame } from '@/features/email/EmailPreviewFrame';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 import { ConfirmationDialog } from '@/features/confirmation';
 
@@ -32,7 +34,6 @@ import {
   deleteEmailLayoutAction,
   type EmailLayoutActionErrorCode,
 } from '@/lib/actions/email-layout';
-import { buildEmailPreviewSrcDoc } from '@/lib/email/preview-document';
 import { DEFAULT_LOCALE, normalizeLocale } from '@/lib/i18n/locale';
 import { listEmailLayouts, previewEmailLayout, type EmailLayout } from '@/lib/queries/email-layout';
 import type { ColumnDef } from '@/lib/types/common/data-table';
@@ -117,7 +118,6 @@ export default function AdminEmailLayoutsPage({
   const [previewModalOpened, { open: openPreviewModal, close: closePreviewModal }] = useDisclosure(false);
   const [selectedLayout, setSelectedLayout] = useState<EmailLayout | null>(null);
   const [previewHtml, setPreviewHtml] = useState<string>('');
-  const previewSrcDoc = useMemo(() => buildEmailPreviewSrcDoc(previewHtml, null), [previewHtml]);
   // New email defaults serialize invariant paper roles: email clients cannot consume app CSS variables.
   const defaultHtmlContent = useMemo(
     () => `<!DOCTYPE html>
@@ -437,11 +437,7 @@ export default function AdminEmailLayoutsPage({
             backgroundColor: tokenVar('paper-background'),
           }}
         >
-          <iframe
-            srcDoc={previewSrcDoc}
-            style={{ width: '100%', height: 500, border: 'none' }}
-            title={tCommonLabels('emailPreview')}
-          />
+          <EmailPreviewFrame srcDoc={previewHtml} title={tCommonLabels('emailPreview')} />
         </div>
       </ContentModal>
     </>

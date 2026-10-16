@@ -1,4 +1,6 @@
 'use client';
+
+import { EmailPreviewFrame } from '@/features/email/EmailPreviewFrame';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
 import {
@@ -8,21 +10,18 @@ import {
   LayoutInset,
 } from '@/components/core/Layout';
 
-import { useMemo } from 'react';
 import { IconAlertTriangle } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { SectionCard } from '@/components/core/Section';
 import { Spinner as Loader } from '@/components/core/Display';
 import { Alert } from '@/components/core/Alert';
 import { Tooltip } from '@/components/core/Tooltip';
-import { buildEmailPreviewSrcDoc } from '@/lib/email/preview-document';
 import type { EmailLayoutValidationError } from '@/lib/types/email-layout/validation';
 
 export interface EmailLayoutPreviewViewProps {
   previewHtml: string;
   errors?: EmailLayoutValidationError[];
   isLoading?: boolean;
-  locale?: string;
 }
 
 const LAYOUT_ERROR_MESSAGE_KEYS = {
@@ -35,19 +34,13 @@ const LAYOUT_ERROR_MESSAGE_KEYS = {
   UNKNOWN_ERROR: 'preview.validationErrors.UNKNOWN_ERROR',
 } as const;
 
-export function EmailLayoutPreviewView({
-  previewHtml,
-  errors = [],
-  isLoading = false,
-  locale,
-}: EmailLayoutPreviewViewProps) {
+export function EmailLayoutPreviewView({ previewHtml, errors = [], isLoading = false }: EmailLayoutPreviewViewProps) {
   const t = useTranslations('adminList.emailLayouts.detail');
   const tCommonLabels = useTranslations('common.labels');
   const tCommonStates = useTranslations('common.states');
-  const previewSrcDoc = useMemo(() => buildEmailPreviewSrcDoc(previewHtml, locale), [locale, previewHtml]);
 
   return (
-    <DsLayoutStack gap="none" fill="block" role="region" aria-label={tCommonLabels('preview')} aria-busy={isLoading}>
+    <DsLayoutStack gap="none" role="region" aria-label={tCommonLabels('preview')} aria-busy={isLoading}>
       <DsLayoutInset blockEnd="xxs">
         <DsLayoutInline justify="between">
           <DsLayoutInline gap="xs">
@@ -88,12 +81,8 @@ export function EmailLayoutPreviewView({
       ) : null}
 
       <SectionCard padding="none" appearance="paper" clip grow>
-        {previewSrcDoc ? (
-          <iframe
-            srcDoc={previewSrcDoc}
-            style={{ width: '100%', height: '100%', border: 'none' }}
-            title={t('preview.iframeTitle')}
-          />
+        {previewHtml ? (
+          <EmailPreviewFrame srcDoc={previewHtml} title={t('preview.iframeTitle')} />
         ) : (
           <DsLayoutStack align="center" justify="center" fill="block">
             <SupportingText tone="secondary">

@@ -31,7 +31,7 @@ describe('ToolbarLayout', () => {
     ).toBe(true);
     expect(host.querySelector('button[data-control-size]')?.getAttribute('data-control-size')).toBe('compact');
     const search = host.querySelector<HTMLInputElement>('input[aria-label="Search"]')!;
-    search.focus();
+    await act(async () => search.focus());
     const key = new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true });
     await act(async () => search.dispatchEvent(key));
     expect(key.defaultPrevented).toBe(false);

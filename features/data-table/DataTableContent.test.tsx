@@ -56,8 +56,8 @@ beforeEach(() => {
   root = createRoot(host);
 });
 
-afterEach(() => {
-  act(() => {
+afterEach(async () => {
+  await act(async () => {
     root?.unmount();
   });
   host?.remove();
@@ -162,17 +162,17 @@ describe('DataTableContent', () => {
     );
 
     const alphaCheckbox = document.querySelector<HTMLInputElement>('input[aria-label="Select Alpha"]');
-    alphaCheckbox?.click();
+    await act(async () => alphaCheckbox!.click());
     expect(onSelectedRowKeysChange).toHaveBeenCalledWith([]);
 
     const selectAll = document.querySelector<HTMLInputElement>('input[aria-label="aria.selectAllRows"]');
-    selectAll?.click();
+    await act(async () => selectAll!.click());
     expect(onSelectedRowKeysChange).toHaveBeenCalledWith(['row-1', 'row-2']);
 
-    document.querySelector<HTMLTableRowElement>('tbody tr')?.click();
+    await act(async () => document.querySelector<HTMLTableRowElement>('tbody tr')!.click());
     expect(onRowActivate).toHaveBeenCalledWith(rows[0]);
 
-    document.querySelector<HTMLButtonElement>('button[aria-label="aria.sortBy:Name"]')?.click();
+    await act(async () => document.querySelector<HTMLButtonElement>('button[aria-label="aria.sortBy:Name"]')!.click());
     expect(onQueryChange).toHaveBeenCalledWith({
       page: 1,
       sorts: [{ field: 'display_name', direction: 'asc' }],

@@ -1,5 +1,7 @@
 'use client';
 
+import { EmailPreviewFrame } from '@/features/email/EmailPreviewFrame';
+
 import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
 
 import { describeEmailTemplateVariable } from './email-template-variable-description';
@@ -56,7 +58,6 @@ import { publishEditorEntityChange, useEditorEntityChanges } from '@/lib/editor/
 import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
 import { useAuthoritativeConfiguration } from '@/lib/editor/useAuthoritativeConfiguration';
 import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
-import { buildEmailPreviewSrcDoc } from '@/lib/email/preview-document';
 import { resolveSystemEmailEventKey } from '@/lib/i18n/email-template';
 import { getSupportedLocaleOptions, normalizeLocale } from '@/lib/i18n/locale';
 import { listEmailLayoutsSimple } from '@/lib/queries/email-layout';
@@ -198,10 +199,6 @@ function useEmailTemplateEditPageModel() {
     currentProvider && blockRoomController ? { provider: currentProvider, controller: blockRoomController } : null;
   const activeEditorLocale =
     normalizeLocale(activeEditLocale.activeLocale) ?? normalizeLocale(activeEditLocale.sourceLocale) ?? 'en';
-  const previewSrcDoc = useMemo(
-    () => buildEmailPreviewSrcDoc(previewHtml, activeEditorLocale),
-    [activeEditorLocale, previewHtml],
-  );
   const [residentSubject, setResidentSubject] = useState('');
   useEffect(() => {
     setResidentSubject(
@@ -565,7 +562,7 @@ function useEmailTemplateEditPageModel() {
     showPreview,
     isPreviewLoading,
     previewSubject,
-    previewSrcDoc,
+    previewSrcDoc: previewHtml,
     sendTest,
     testModalOpened,
     closeTestModal,
@@ -779,18 +776,10 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
 
         <div
           style={{
-            flex: 1,
-            minHeight: 0,
-            height: '100%',
+            minWidth: 0,
           }}
         >
-          <DsLayoutGrid
-            columns={viewMode === 'split' ? { base: 1, sm: 2 } : 1}
-            gap="md"
-            fill="both"
-            flexible
-            rows="stretch"
-          >
+          <DsLayoutGrid columns={viewMode === 'split' ? { base: 1, sm: 2 } : 1} gap="md">
             {showEditor && (
               <DsLayoutStack gap="none" fill="block">
                 <DsLayoutInset blockEnd="xxs">
@@ -827,7 +816,7 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
             )}
 
             {showPreview && (
-              <DsLayoutStack gap="none" fill="block">
+              <DsLayoutStack gap="none">
                 <DsLayoutInset blockEnd="xxs">
                   <DsLayoutInline justify="between">
                     <DsText size="xs" tone="secondary">
@@ -850,15 +839,7 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
                 </DsLayoutInset>
                 <DsSectionCard padding="none" appearance="paper" grow clip>
                   {previewSrcDoc ? (
-                    <iframe
-                      srcDoc={previewSrcDoc}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        border: 'none',
-                      }}
-                      title={tCommonLabels('emailPreview')}
-                    />
+                    <EmailPreviewFrame srcDoc={previewSrcDoc} title={tCommonLabels('emailPreview')} />
                   ) : (
                     <DsLayoutStack align="center" justify="center" fill="block">
                       <SupportingText tone="secondary">

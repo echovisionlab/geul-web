@@ -99,7 +99,7 @@ function render() {
 
 beforeEach(() => {
   // Keep query notifications asynchronous and prove assertions await rendering.
-  notifyManager.setScheduler((callback) => setTimeout(callback, 25));
+  notifyManager.setScheduler((callback) => setTimeout(() => act(callback), 25));
   mocks.listEvents.mockReset();
   mocks.listTypes.mockReset().mockResolvedValue([]);
   container = document.createElement('div');

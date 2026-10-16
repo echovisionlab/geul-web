@@ -94,7 +94,7 @@ describe('content list accessibility states', () => {
       const canvas = within(host);
       const name = domain === 'posts' ? 'Listening Notes' : 'Listening Room';
       const trigger = canvas.getAllByRole('button', { name: `Actions for ${name}` })[0];
-      trigger.focus();
+      act(() => trigger.focus());
       await act(async () => {
         await userEvent.click(trigger);
       });

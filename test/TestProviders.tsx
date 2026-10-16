@@ -15,7 +15,7 @@ interface TestProvidersProps extends PropsWithChildren {
 
 export function TestProviders({ children, locale = 'en', messages = enMessages }: TestProvidersProps) {
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
+    <NextIntlClientProvider locale={locale} messages={messages} timeZone="UTC">
       <DesignSystemProvider locale={normalizeLocale(locale) ?? DEFAULT_LOCALE} forceColorScheme="light">
         {children}
       </DesignSystemProvider>

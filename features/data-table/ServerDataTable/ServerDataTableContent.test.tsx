@@ -73,8 +73,8 @@ beforeEach(() => {
   root = createRoot(host);
 });
 
-afterEach(() => {
-  act(() => {
+afterEach(async () => {
+  await act(async () => {
     root?.unmount();
   });
   host?.remove();
@@ -135,8 +135,8 @@ describe('ServerDataTableContent', () => {
 
     expect(document.body.textContent).toContain('Nothing found');
 
-    host?.setAttribute('data-pending', 'true');
-    act(() => {
+    await act(async () => {
+      host?.setAttribute('data-pending', 'true');
       root?.render(
         <DesignSystemProvider forceColorScheme="light">
           <ServerDataTableContent
@@ -161,10 +161,10 @@ describe('ServerDataTableContent', () => {
     expect(loader?.parentElement?.style.minHeight).toBe('164px');
   });
 
-  it('renders rows, toggles current-page selection, and pushes sort URLs', () => {
+  it('renders rows, toggles current-page selection, and pushes sort URLs', async () => {
     const onSelectedRowKeysChange = vi.fn();
 
-    act(() => {
+    await act(async () => {
       root?.render(
         <DesignSystemProvider forceColorScheme="light">
           <ServerDataTableContent
@@ -193,13 +193,19 @@ describe('ServerDataTableContent', () => {
     expect(document.body.textContent).toContain('Alpha');
     expect(document.body.textContent).toContain('↓');
 
-    document.querySelector<HTMLInputElement>('input[aria-label="Select Beta"]')?.click();
+    await act(async () => {
+      document.querySelector<HTMLInputElement>('input[aria-label="Select Beta"]')!.click();
+    });
     expect(onSelectedRowKeysChange).toHaveBeenCalledWith(['row-1', 'row-2']);
 
-    document.querySelector<HTMLInputElement>('input[aria-label="aria.selectAllRows"]')?.click();
+    await act(async () => {
+      document.querySelector<HTMLInputElement>('input[aria-label="aria.selectAllRows"]')!.click();
+    });
     expect(onSelectedRowKeysChange).toHaveBeenCalledWith(['row-1', 'row-2']);
 
-    document.querySelector<HTMLButtonElement>('button[aria-label="aria.sortBy:Title"]')?.click();
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('button[aria-label="aria.sortBy:Title"]')!.click();
+    });
     expect(mocks.buildSortUrl).toHaveBeenCalledWith(
       'things',
       mocks.searchParams,

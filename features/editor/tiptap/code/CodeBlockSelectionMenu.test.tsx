@@ -12,6 +12,18 @@ import { createTiptapWireExtensions } from '../wire-schema';
 import { canShowSelectionBubbleMenu } from '../menus/selection-bubble-commands';
 import { CodeBlockSelectionMenu, type CodeBlockSelectionMenuLabels } from './CodeBlockSelectionMenu';
 
+// Focus still runs the real editor and lazy loader. Emoji lookup data is a separate
+// contract, covered by emoji-extension tests and the browser; these cases use no emoji.
+vi.mock('../emoji/emoji-data', () => ({
+  createTiptapEmojiData: () =>
+    ({
+      items: [],
+      find: () => undefined,
+      shortcodeFor: () => undefined,
+      regex: () => /(?!)/g,
+    }) satisfies import('../emoji/emoji-runtime').TiptapEmojiData,
+}));
+
 Object.defineProperties(Range.prototype, {
   getBoundingClientRect: { configurable: true, value: () => document.body.getBoundingClientRect() },
   getClientRects: { configurable: true, value: () => [document.body.getBoundingClientRect()] },
@@ -150,7 +162,7 @@ describe('CodeBlockSelectionMenu', () => {
     expect(editor.state.selection).toBeInstanceOf(NodeSelection);
 
     const tab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
-    editor.view.dom.dispatchEvent(tab);
+    await act(async () => editor.view.dom.dispatchEvent(tab));
     expect(tab.defaultPrevented).toBe(true);
     expect(document.activeElement).toBe(actions[0]);
 

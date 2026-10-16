@@ -30,8 +30,9 @@ describe('email template variable descriptions', () => {
     }
   });
 
-  it('normalizes names, resolves the legacy confirm_link alias and ignores custom data', () => {
-    expect(describeVariable(' Confirm_Link ')).toBe(describeVariable('confirm_url'));
+  it('normalizes canonical names and ignores names outside the catalogue', () => {
+    expect(describeVariable(' Confirm_Url ')).toBe(describeVariable('confirm_url'));
+    expect(describeVariable('confirm_link')).toBeNull();
     expect(describeVariable('site_origin')).toBe('Site origin');
     expect(describeVariable('logo_email_url')).toBe('Logo URL');
     expect(describeVariable('custom_campaign_field')).toBeNull();

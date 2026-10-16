@@ -1,13 +1,12 @@
 'use client';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDebouncedCallback } from '@mantine/hooks';
 import type { EmailCampaignTiptapEditorHandle } from '@/features/editor/tiptap/profiles/EmailTiptapEditor';
 import type { RichTextBlockRoomTiptapController } from '@/features/editor/tiptap/block-room-tiptap-controller';
 import type { LocalizedRichTextDocument } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { previewCampaignAction } from '@/lib/actions/campaign';
-import { buildEmailPreviewSrcDoc } from '@/lib/email/preview-document';
 
 export type CampaignViewMode = 'split' | 'edit' | 'preview';
 
@@ -40,7 +39,6 @@ export function useCampaignPreview({
   const requestIdRef = useRef(0);
   const showEditor = viewMode === 'split' || viewMode === 'edit';
   const showPreview = viewMode === 'split' || viewMode === 'preview';
-  const previewSrcDoc = useMemo(() => buildEmailPreviewSrcDoc(previewHtml, locale), [locale, previewHtml]);
 
   const getDocumentSnapshot = useCallback(() => {
     if (!blockRoomController || !editorSynced) {
@@ -111,7 +109,7 @@ export function useCampaignPreview({
     viewMode,
     showEditor,
     showPreview,
-    previewSrcDoc,
+    previewSrcDoc: previewHtml,
     query: {
       isError: previewError !== null,
       error: previewError,

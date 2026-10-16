@@ -371,7 +371,9 @@ describe('client save failures', () => {
     expect(notifications.show).toHaveBeenCalledWith(
       expect.objectContaining({ message: 'permission denied', tone: 'danger' }),
     );
-    await expect(flushEditorSaves(`work:${workId}`)).resolves.toBe(true);
+    await act(async () => {
+      await expect(flushEditorSaves(`work:${workId}`)).resolves.toBe(true);
+    });
     expect(latest?.clients).toEqual(['unsaved']);
     expect(hasPendingEditorSaves(`work:${workId}`)).toBe(false);
     expect(updateWorkFieldsAction).toHaveBeenCalledTimes(2);
