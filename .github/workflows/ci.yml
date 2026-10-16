@@ -167,21 +167,32 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Add swap to the hosted runner
-        # Private repositories run on 2-core/8 GB hosted runners. The Next build
-        # and type-aware lint outgrow that and the runner is OOM-killed mid-build.
+        # Private repositories run on 2-core/8 GB hosted runners with a small disk.
+        # The Next build and type-aware lint outgrow 8 GB and the runner is
+        # OOM-killed mid-build, so drop preinstalled SDKs this job never uses and
+        # size the swapfile to the space that leaves (keeping room for the build).
         run: |
           set -euo pipefail
-          target=/mnt/ci-swapfile
-          mnt_free=$(df --output=avail -BG /mnt 2>/dev/null | tail -1 | tr -dc 0-9 || true)
-          if [ "${mnt_free:-0}" -lt 20 ]; then
-            target=/ci-swapfile
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+          free_gb() { df --output=avail -BG "$1" 2>/dev/null | tail -1 | tr -dc 0-9 || true; }
+          target=/ci-swapfile
+          avail=$(free_gb /)
+          if [ -d /mnt ] && [ "$(free_gb /mnt)" -gt "${avail:-0}" ]; then
+            target=/mnt/ci-swapfile
+            avail=$(free_gb /mnt)
           fi
-          sudo fallocate -l 12G "$target"
-          sudo chmod 600 "$target"
-          sudo mkswap "$target" >/dev/null
-          sudo swapon "$target"
+          size=$(( ${avail:-0} - 12 ))
+          [ "$size" -gt 10 ] && size=10
+          if [ "$size" -ge 2 ]; then
+            sudo fallocate -l "${size}G" "$target"
+            sudo chmod 600 "$target"
+            sudo mkswap "$target" >/dev/null
+            sudo swapon "$target"
+          else
+            echo "::warning::not enough disk for extra swap (${avail:-0}G free)"
+          fi
           free -h
-          df -h "$(dirname "$target")"
+          df -h /
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
