@@ -89,7 +89,9 @@ afterEach(async () => {
     root.unmount();
     queryClient.clear();
   });
-  for (const timer of scheduledNotifications) clearTimeout(timer);
+  for (const timer of scheduledNotifications) {
+    clearTimeout(timer);
+  }
   scheduledNotifications.clear();
   notifyManager.setScheduler((callback) => setTimeout(callback, 0));
   container.remove();

@@ -131,7 +131,9 @@ async function mountReact(context: TestContext, node: ReactNode) {
   const root = createRoot(container);
   let disposed = false;
   const unmount = async () => {
-    if (disposed) return;
+    if (disposed) {
+      return;
+    }
     disposed = true;
     try {
       await act(async () => root.unmount());

@@ -28,7 +28,9 @@ export async function renderSettledServerHtml(content: ReactNode, pending: Promi
     }
     const loading = pending.splice(0);
     if (loading.length === 0) {
-      if (failure !== undefined) throw failure;
+      if (failure !== undefined) {
+        throw failure;
+      }
       return html!;
     }
     await Promise.all(loading);

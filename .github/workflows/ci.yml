@@ -149,6 +149,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.PRIVATE_DEPS_TOKEN }}
         run: |
           pnpm install --frozen-lockfile
+          echo 'NPM_CONFIG_USERCONFIG=/dev/null' >> "$GITHUB_ENV"
       - name: Prettier
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || 'origin/main' }}
@@ -224,6 +225,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.PRIVATE_DEPS_TOKEN }}
         run: |
           pnpm install --frozen-lockfile
+          echo 'NPM_CONFIG_USERCONFIG=/dev/null' >> "$GITHUB_ENV"
       - name: ESLint
         env:
           # Type-aware lint of the whole app exceeds Node's default ~2 GB heap.
@@ -291,7 +293,10 @@ jobs:
         id: dependencies
         env:
           NODE_AUTH_TOKEN: ${{ secrets.PRIVATE_DEPS_TOKEN }}
-        run: pnpm install --frozen-lockfile
+        # Later commands use installed packages and need no registry credentials.
+        run: |
+          pnpm install --frozen-lockfile
+          echo 'NPM_CONFIG_USERCONFIG=/dev/null' >> "$GITHUB_ENV"
       - name: Design system tests
         run: node --test --test-concurrency="$CI_TEST_WORKERS" scripts/design-system/*.test.mjs
       - name: Vitest

@@ -50,7 +50,9 @@ describe('production form field semantics', () => {
   it.each(fields)('names and relates the $type control without changing its label', async (field) => {
     // Await the real chunk before mounting the dynamic control so cold module
     // work cannot resolve between the render and assertion act boundaries.
-    if (field.type === 'tel') await loadPhoneField();
+    if (field.type === 'tel') {
+      await loadPhoneField();
+    }
     await render(
       <TestProviders>
         <FormField field={field} value={undefined} onChange={() => {}} onValidityChange={() => {}} />

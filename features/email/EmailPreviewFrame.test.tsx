@@ -40,7 +40,9 @@ function mountPreview(context: TestContext) {
   vi.stubGlobal('ResizeObserver', PreviewResizeObserver);
   let mounted = true;
   const unmount = () => {
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
     mounted = false;
     act(() => root.unmount());
     container.remove();
@@ -59,7 +61,9 @@ function mountPreview(context: TestContext) {
       act(() => {
         const pending = [...frames.values()];
         frames.clear();
-        for (const callback of pending) callback(0);
+        for (const callback of pending) {
+          callback(0);
+        }
       });
     },
     observers,

@@ -13,9 +13,13 @@ export function EmailPreviewFrame({ srcDoc, title }: EmailPreviewFrameProps) {
 
   useEffect(() => {
     const frame = frameRef.current;
-    if (!frame) return;
+    if (!frame) {
+      return;
+    }
     const hostWindow = frame.ownerDocument.defaultView;
-    if (!hostWindow) return;
+    if (!hostWindow) {
+      return;
+    }
 
     let disposed = false;
     let pendingFrame: number | undefined;
@@ -23,15 +27,21 @@ export function EmailPreviewFrame({ srcDoc, title }: EmailPreviewFrameProps) {
 
     const watchDocument = () => {
       documentCleanup?.();
-      if (pendingFrame !== undefined) hostWindow.cancelAnimationFrame(pendingFrame);
+      if (pendingFrame !== undefined) {
+        hostWindow.cancelAnimationFrame(pendingFrame);
+      }
       pendingFrame = undefined;
       const document = frame.contentDocument;
-      if (!document?.body) return;
+      if (!document?.body) {
+        return;
+      }
       let current = true;
 
       const measure = () => {
         pendingFrame = undefined;
-        if (disposed || !current || frame.contentDocument !== document) return;
+        if (disposed || !current || frame.contentDocument !== document) {
+          return;
+        }
         // Remove the previous viewport height before measuring, so a shorter email can shrink.
         // This changes the outer iframe only, never the renderer's HTML or document styles.
         frame.style.height = '0px';
@@ -45,7 +55,9 @@ export function EmailPreviewFrame({ srcDoc, title }: EmailPreviewFrameProps) {
         frame.style.height = `${Math.ceil(height)}px`;
       };
       const scheduleMeasurement = () => {
-        if (disposed || !current || pendingFrame !== undefined) return;
+        if (disposed || !current || pendingFrame !== undefined) {
+          return;
+        }
         pendingFrame = hostWindow.requestAnimationFrame(measure);
       };
       const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(scheduleMeasurement);
@@ -69,7 +81,9 @@ export function EmailPreviewFrame({ srcDoc, title }: EmailPreviewFrameProps) {
       disposed = true;
       frame.removeEventListener('load', watchDocument);
       documentCleanup?.();
-      if (pendingFrame !== undefined) hostWindow.cancelAnimationFrame(pendingFrame);
+      if (pendingFrame !== undefined) {
+        hostWindow.cancelAnimationFrame(pendingFrame);
+      }
     };
   }, [srcDoc]);
 
