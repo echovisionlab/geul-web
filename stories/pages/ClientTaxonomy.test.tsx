@@ -5,7 +5,7 @@ import { afterEach, describe, it, expect, vi } from 'vitest';
 import { TestProviders } from '@/test/TestProviders';
 import { ClientEditorPreview } from './ClientEditor.stories';
 import { PostTaxonomyPreview } from './PostTaxonomy.stories';
-import { waitInAct } from '@/test/act-wait';
+import { settleInAct, waitInAct, wrapQueryNotificationsInAct } from '@/test/act-wait';
 
 // Full production page renders: a loaded CI worker needs more than the default 5s per test.
 vi.setConfig({ testTimeout: 20_000 });
@@ -28,7 +28,9 @@ class ResizeObserverMock {
 }
 vi.stubGlobal('ResizeObserver', ResizeObserverMock);
 let host: HTMLDivElement, root: Root;
-afterEach(() => {
+wrapQueryNotificationsInAct();
+afterEach(async () => {
+  await settleInAct();
   act(() => root?.unmount());
   host?.remove();
 });

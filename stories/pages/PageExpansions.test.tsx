@@ -7,7 +7,7 @@ import { AdminEntityPagePreview } from './AdminEntities.stories';
 import { MyListsPagePreview } from './MyLists.stories';
 import { OnboardingPagePreview } from './Onboarding.stories';
 import { OAuthConsentPagePreview } from './OAuth.stories';
-import { waitInAct } from '@/test/act-wait';
+import { settleInAct, waitInAct, wrapQueryNotificationsInAct } from '@/test/act-wait';
 
 // Full production page renders: a loaded CI worker needs more than the default 5s per test.
 vi.setConfig({ testTimeout: 20_000 });
@@ -42,7 +42,9 @@ class ResizeObserverMock {
 vi.stubGlobal('ResizeObserver', ResizeObserverMock);
 let host: HTMLDivElement;
 let root: Root;
-afterEach(() => {
+wrapQueryNotificationsInAct();
+afterEach(async () => {
+  await settleInAct();
   act(() => root?.unmount());
   host?.remove();
   vi.useRealTimers();
