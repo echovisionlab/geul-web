@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "sourceManifestHash": "67fb87693379e06636a8140863335d00adefdee74df9cbf3f0e4e6f2ee501d3c",
+  "sourceManifestHash": "adef60ee2e4ff0052de32add7eb8e70493114eac89d11a89b7c8848c1e7bda1a",
   "methodology": "All inventoried Feature component candidates. Direct value imports, literal lazy imports and transitive source relationships through production owners/local adapters are indexed separately. A dependency can be unused or render conditionally; neither relationship proves rendered states, route parity or design compliance. Empty JSX records include runtime/lazy/controller boundaries and must be inspected before treating them as visual gaps.",
-  "counts": { "domains": 53, "componentFiles": 762, "jsxWithoutStoryRelationship": 46 },
+  "counts": { "domains": 53, "componentFiles": 762, "jsxWithoutStoryRelationship": 45 },
   "domains": [
     {
       "domain": "account",
@@ -7255,7 +7255,12 @@
       "domain": "shell",
       "category": "shell",
       "components": [
-        { "file": "features/shell/LanguageMenu.tsx", "hasJsx": true, "directStories": [], "relatedStories": [] },
+        {
+          "file": "features/shell/LanguageMenu.tsx",
+          "hasJsx": true,
+          "directStories": ["Pages/Application/Frames"],
+          "relatedStories": ["Pages/Application/Frames"]
+        },
         {
           "file": "features/shell/PrintHeader/PrintHeader.tsx",
           "hasJsx": true,
@@ -7338,7 +7343,6 @@
         }
       ],
       "jsxWithoutStoryRelationship": [
-        "features/shell/LanguageMenu.tsx",
         "features/shell/PrintHeader/PrintHeader.tsx",
         "features/shell/Shell.tsx",
         "features/shell/ShellRuntime.tsx"

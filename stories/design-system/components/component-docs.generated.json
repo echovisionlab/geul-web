@@ -42166,7 +42166,7 @@
           "name": "--geul-chrome-font-size",
           "registered": true,
           "sources": [
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 144, "property": "font-size" }
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 150, "property": "font-size" }
           ],
           "definitions": [
             {
@@ -42186,8 +42186,8 @@
               "line": 6,
               "property": "--_disclosure-chevron-track"
             },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 107, "property": "width" },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 108, "property": "height" }
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 113, "property": "width" },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 114, "property": "height" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 143, "value": "1rem", "context": ":root" }]
         },
@@ -42200,9 +42200,9 @@
               "line": 98,
               "property": "--_disclosure-chevron-track"
             },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 141, "property": "min-height" },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 156, "property": "width" },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 157, "property": "height" }
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 147, "property": "min-height" },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 162, "property": "width" },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 163, "property": "height" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 106, "value": "1.75rem", "context": ":root" }
@@ -42291,9 +42291,9 @@
               "line": 98,
               "property": "--_disclosure-chevron-track"
             },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 141, "property": "min-height" },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 156, "property": "width" },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 157, "property": "height" }
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 147, "property": "min-height" },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 162, "property": "width" },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 163, "property": "height" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 113, "value": "0px", "context": ":root" },
@@ -42309,7 +42309,7 @@
           "name": "--geul-motion-easing",
           "registered": true,
           "sources": [
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 109, "property": "transition" }
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 115, "property": "transition" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 137, "value": "ease-out", "context": ":root" }
@@ -42319,7 +42319,7 @@
           "name": "--geul-motion-fast",
           "registered": true,
           "sources": [
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 109, "property": "transition" }
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 115, "property": "transition" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 133, "value": "100ms", "context": ":root" }]
         },
@@ -42340,7 +42340,7 @@
               "line": 2,
               "property": "--_disclosure-inline-inset"
             },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 133, "property": "padding" }
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 139, "property": "padding" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 60, "value": "0.75rem", "context": ":root" }
@@ -42355,7 +42355,7 @@
               "line": 3,
               "property": "--_disclosure-control-gap"
             },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 133, "property": "padding" }
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 139, "property": "padding" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 59, "value": "0.625rem", "context": ":root" }
@@ -42376,8 +42376,13 @@
               "line": 91,
               "property": "--_disclosure-control-gap"
             },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 174, "property": "padding" },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 255, "property": "gap" }
+            {
+              "file": "components/core/Disclosure/Disclosure.module.css",
+              "line": 104,
+              "property": "--_disclosure-inline-inset"
+            },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 180, "property": "padding" },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 261, "property": "gap" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 58, "value": "0.5rem", "context": ":root" }]
         },
@@ -42396,9 +42401,9 @@
               "line": 96,
               "property": "--_disclosure-control-gap"
             },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 174, "property": "padding" },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 178, "property": "padding-block" },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 185, "property": "column-gap" }
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 180, "property": "padding" },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 184, "property": "padding-block" },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 191, "property": "column-gap" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 57, "value": "0.25rem", "context": ":root" }
@@ -42593,7 +42598,12 @@
         { "name": "children", "type": "ReactNode", "required": false },
         { "name": "contentIndent", "type": "'label' | 'none' | 'small'", "required": false, "defaultValue": "'label'" },
         { "name": "defaultOpened", "type": "boolean", "required": false, "defaultValue": "false" },
-        { "name": "density", "type": "'standard' | 'compact'", "required": false, "defaultValue": "'standard'" },
+        {
+          "name": "density",
+          "type": "'standard' | 'compact' | 'chrome'",
+          "required": false,
+          "defaultValue": "'standard'"
+        },
         { "name": "disabled", "type": "boolean", "required": false, "defaultValue": "false" },
         { "name": "headingLevel", "type": "2 | 3 | 4 | 5 | 6", "required": false },
         { "name": "id", "type": "string", "required": false },
@@ -42666,11 +42676,13 @@
         { "id": "core-interaction-disclosure--hovered", "name": "Hovered" },
         { "id": "core-interaction-disclosure--leading-chevron", "name": "Hierarchy Leading Chevron" },
         { "id": "core-interaction-disclosure--nested-details", "name": "Nested Details" },
+        { "id": "core-interaction-disclosure--navigation-group", "name": "Navigation Group" },
         { "id": "core-interaction-disclosure--label-aligned-hierarchy", "name": "Label Aligned Hierarchy" }
       ],
       "usage": [
         "Place drag handles outside the trigger in leadingActions. Keep the chevron at the default end position. Connect nested/opened values to the actual hierarchy.",
         "Consumer: components/core/ParameterPanel/ParameterPanel.tsx",
+        "Consumer: components/core/SideNavigation/SideNavigation.tsx",
         "Consumer: features/admin/email-layout/EmailLayoutEditPage.tsx",
         "Consumer: features/admin/email-template/EmailTemplateEditPage.tsx",
         "Consumer: features/editor/tiptap/shader/ShaderApiReference.tsx",
@@ -42770,7 +42782,7 @@
           "name": "--geul-chrome-font-size",
           "registered": true,
           "sources": [
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 144, "property": "font-size" }
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 150, "property": "font-size" }
           ],
           "definitions": [
             {
@@ -42790,8 +42802,8 @@
               "line": 6,
               "property": "--_disclosure-chevron-track"
             },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 107, "property": "width" },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 108, "property": "height" }
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 113, "property": "width" },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 114, "property": "height" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 143, "value": "1rem", "context": ":root" }]
         },
@@ -42804,9 +42816,9 @@
               "line": 98,
               "property": "--_disclosure-chevron-track"
             },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 141, "property": "min-height" },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 156, "property": "width" },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 157, "property": "height" }
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 147, "property": "min-height" },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 162, "property": "width" },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 163, "property": "height" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 106, "value": "1.75rem", "context": ":root" }
@@ -42895,9 +42907,9 @@
               "line": 98,
               "property": "--_disclosure-chevron-track"
             },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 141, "property": "min-height" },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 156, "property": "width" },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 157, "property": "height" }
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 147, "property": "min-height" },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 162, "property": "width" },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 163, "property": "height" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 113, "value": "0px", "context": ":root" },
@@ -42913,7 +42925,7 @@
           "name": "--geul-motion-easing",
           "registered": true,
           "sources": [
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 109, "property": "transition" }
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 115, "property": "transition" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 137, "value": "ease-out", "context": ":root" }
@@ -42923,7 +42935,7 @@
           "name": "--geul-motion-fast",
           "registered": true,
           "sources": [
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 109, "property": "transition" }
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 115, "property": "transition" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 133, "value": "100ms", "context": ":root" }]
         },
@@ -42944,7 +42956,7 @@
               "line": 2,
               "property": "--_disclosure-inline-inset"
             },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 133, "property": "padding" }
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 139, "property": "padding" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 60, "value": "0.75rem", "context": ":root" }
@@ -42959,7 +42971,7 @@
               "line": 3,
               "property": "--_disclosure-control-gap"
             },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 133, "property": "padding" }
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 139, "property": "padding" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 59, "value": "0.625rem", "context": ":root" }
@@ -42980,8 +42992,13 @@
               "line": 91,
               "property": "--_disclosure-control-gap"
             },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 174, "property": "padding" },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 255, "property": "gap" }
+            {
+              "file": "components/core/Disclosure/Disclosure.module.css",
+              "line": 104,
+              "property": "--_disclosure-inline-inset"
+            },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 180, "property": "padding" },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 261, "property": "gap" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 58, "value": "0.5rem", "context": ":root" }]
         },
@@ -43000,9 +43017,9 @@
               "line": 96,
               "property": "--_disclosure-control-gap"
             },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 174, "property": "padding" },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 178, "property": "padding-block" },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 185, "property": "column-gap" }
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 180, "property": "padding" },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 184, "property": "padding-block" },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 191, "property": "column-gap" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 57, "value": "0.25rem", "context": ":root" }
@@ -45398,7 +45415,7 @@
           "name": "--geul-action-primary",
           "registered": true,
           "sources": [
-            { "file": "components/core/ApplicationFrame/ApplicationFrame.module.css", "line": 82, "property": "color" }
+            { "file": "components/core/ApplicationFrame/ApplicationFrame.module.css", "line": 143, "property": "color" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 166, "value": "#242622", "context": ":root" },
@@ -45434,17 +45451,7 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 21,
-              "property": "background"
-            },
-            {
-              "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 46,
-              "property": "background"
-            },
-            {
-              "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 91,
+              "line": 82,
               "property": "background"
             },
             {
@@ -45454,7 +45461,17 @@
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 123,
+              "line": 152,
+              "property": "background"
+            },
+            {
+              "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
+              "line": 168,
+              "property": "background"
+            },
+            {
+              "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
+              "line": 184,
               "property": "background"
             }
           ],
@@ -45492,18 +45509,22 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 20,
+              "line": 81,
               "property": "border-block-end"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 45,
+              "line": 106,
               "property": "border-inline-end"
             },
-            { "file": "components/core/ApplicationFrame/ApplicationFrame.module.css", "line": 68, "property": "color" },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 93,
+              "line": 129,
+              "property": "color"
+            },
+            {
+              "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
+              "line": 154,
               "property": "border-block-start"
             }
           ],
@@ -45541,12 +45562,12 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 86,
+              "line": 147,
               "property": "outline"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 87,
+              "line": 148,
               "property": "outline-offset"
             }
           ],
@@ -45558,18 +45579,22 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 20,
+              "line": 81,
               "property": "border-block-end"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 45,
+              "line": 106,
               "property": "border-inline-end"
             },
-            { "file": "components/core/ApplicationFrame/ApplicationFrame.module.css", "line": 76, "property": "width" },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 93,
+              "line": 137,
+              "property": "width"
+            },
+            {
+              "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
+              "line": 154,
               "property": "border-block-start"
             }
           ],
@@ -45581,12 +45606,12 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 18,
+              "line": 79,
               "property": "height"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 33,
+              "line": 94,
               "property": "padding-block-start"
             }
           ],
@@ -45600,12 +45625,12 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 115,
+              "line": 176,
               "property": "height"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 119,
+              "line": 180,
               "property": "padding-block-start"
             }
           ],
@@ -45617,7 +45642,7 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 10,
+              "line": 71,
               "property": "--_frame-navigation-width"
             }
           ],
@@ -45629,10 +45654,10 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 63,
+              "line": 124,
               "property": "inset-inline-end"
             },
-            { "file": "components/core/ApplicationFrame/ApplicationFrame.module.css", "line": 64, "property": "width" }
+            { "file": "components/core/ApplicationFrame/ApplicationFrame.module.css", "line": 125, "property": "width" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 108, "value": "1.875rem", "context": ":root" }
@@ -45644,7 +45669,7 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 86,
+              "line": 147,
               "property": "outline"
             }
           ],
@@ -45682,12 +45707,12 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 15,
+              "line": 76,
               "property": "z-index"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 38,
+              "line": 99,
               "property": "z-index"
             }
           ],
@@ -45699,12 +45724,12 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 47,
+              "line": 108,
               "property": "transition"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 57,
+              "line": 118,
               "property": "transition"
             }
           ],
@@ -45718,12 +45743,12 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 47,
+              "line": 108,
               "property": "transition"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 57,
+              "line": 118,
               "property": "transition"
             }
           ],
@@ -45735,12 +45760,12 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 92,
+              "line": 153,
               "property": "padding"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 124,
+              "line": 185,
               "property": "padding-inline"
             }
           ],
@@ -45752,22 +45777,22 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 29,
+              "line": 90,
               "property": "padding"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 33,
+              "line": 94,
               "property": "padding-block-start"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 92,
+              "line": 153,
               "property": "padding"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 119,
+              "line": 180,
               "property": "padding-block-start"
             }
           ],
@@ -45776,12 +45801,33 @@
           ]
         },
         {
-          "name": "--geul-spacing-xs",
+          "name": "--geul-spacing-sm",
           "registered": true,
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
+              "line": 9,
+              "property": "padding-inline"
+            }
+          ],
+          "definitions": [
+            { "file": "lib/styles/design-tokens.css", "line": 59, "value": "0.625rem", "context": ":root" }
+          ]
+        },
+        {
+          "name": "--geul-spacing-xs",
+          "registered": true,
+          "sources": [
+            { "file": "components/core/ApplicationFrame/ApplicationFrame.module.css", "line": 8, "property": "gap" },
+            { "file": "components/core/ApplicationFrame/ApplicationFrame.module.css", "line": 16, "property": "gap" },
+            {
+              "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
               "line": 44,
+              "property": "padding-inline"
+            },
+            {
+              "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
+              "line": 105,
               "property": "padding"
             }
           ],
@@ -45791,9 +45837,10 @@
           "name": "--geul-spacing-xxs",
           "registered": true,
           "sources": [
+            { "file": "components/core/ApplicationFrame/ApplicationFrame.module.css", "line": 43, "property": "gap" },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 51,
+              "line": 112,
               "property": "padding"
             }
           ],
@@ -45805,7 +45852,7 @@
           "name": "--geul-text-primary",
           "registered": true,
           "sources": [
-            { "file": "components/core/ApplicationFrame/ApplicationFrame.module.css", "line": 6, "property": "color" }
+            { "file": "components/core/ApplicationFrame/ApplicationFrame.module.css", "line": 67, "property": "color" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 158, "value": "#242622", "context": ":root" },
@@ -45899,6 +45946,12 @@
           "type": "boolean",
           "required": false,
           "description": "Allowed combinations vary by union branch. Check the complete action/link, name and geometry contracts."
+        },
+        {
+          "name": "navigationTitle",
+          "type": "ReactNode",
+          "required": false,
+          "description": "Visible drawer heading; branded content must retain the navigation accessible name. Allowed combinations vary by union branch. Check the complete action/link, name and geometry contracts."
         },
         {
           "name": "navigationToggle",
@@ -54158,7 +54211,7 @@
           "sources": [
             {
               "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 42,
+              "line": 47,
               "property": "border-block-start"
             }
           ],
@@ -54204,21 +54257,15 @@
               "line": 25,
               "property": "--_navigation-item-start"
             },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 76, "property": "outline" },
             {
               "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 77,
-              "property": "outline-offset"
-            },
-            {
-              "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 125,
+              "line": 76,
               "property": "border-inline-start"
             },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 146, "property": "outline" },
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 97, "property": "outline" },
             {
               "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 147,
+              "line": 98,
               "property": "outline-offset"
             }
           ],
@@ -54230,7 +54277,7 @@
           "sources": [
             {
               "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 42,
+              "line": 47,
               "property": "border-block-start"
             }
           ],
@@ -54244,18 +54291,18 @@
             { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 34, "property": "min-width" },
             { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 35, "property": "max-width" },
             { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 36, "property": "flex" },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 194, "property": "width" },
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 145, "property": "width" },
             {
               "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 195,
+              "line": 146,
               "property": "min-width"
             },
             {
               "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 196,
+              "line": 147,
               "property": "max-width"
             },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 197, "property": "height" }
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 148, "property": "height" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 144, "value": "2.5rem", "context": ":root" }
@@ -54265,7 +54312,7 @@
           "name": "--geul-chrome-font-size",
           "registered": true,
           "sources": [
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 129, "property": "font-size" }
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 80, "property": "font-size" }
           ],
           "definitions": [
             {
@@ -54287,47 +54334,40 @@
             },
             {
               "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 55,
+              "line": 70,
               "property": "grid-template-columns"
             },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 93, "property": "width" },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 94, "property": "height" },
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 110, "property": "width" },
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 111, "property": "height" },
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 117, "property": "width" },
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 118, "property": "height" },
             {
               "file": "components/core/SideNavigation/SideNavigation.module.css",
               "line": 119,
-              "property": "grid-template-columns"
-            },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 159, "property": "width" },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 160, "property": "height" },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 166, "property": "width" },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 167, "property": "height" },
-            {
-              "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 168,
               "property": "max-width"
             },
             {
               "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 169,
+              "line": 120,
               "property": "max-height"
             },
             {
               "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 198,
+              "line": 149,
               "property": "grid-template-columns"
             },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 205, "property": "width" },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 206, "property": "height" },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 210, "property": "width" },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 211, "property": "height" },
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 156, "property": "width" },
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 157, "property": "height" },
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 161, "property": "width" },
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 162, "property": "height" },
             {
               "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 212,
+              "line": 163,
               "property": "max-width"
             },
             {
               "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 213,
+              "line": 164,
               "property": "max-height"
             }
           ],
@@ -54337,7 +54377,7 @@
           "name": "--geul-chrome-row-height",
           "registered": true,
           "sources": [
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 118, "property": "height" }
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 69, "property": "height" }
           ],
           "definitions": [
             {
@@ -54349,39 +54389,13 @@
           ]
         },
         {
-          "name": "--geul-chrome-section-font-size",
-          "registered": true,
-          "sources": [
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 83, "property": "font-size" }
-          ],
-          "definitions": [
-            { "file": "lib/styles/design-tokens.css", "line": 139, "value": "0.75rem", "context": ":root" }
-          ]
-        },
-        {
-          "name": "--geul-chrome-section-row-height",
-          "registered": true,
-          "sources": [
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 54, "property": "height" }
-          ],
-          "definitions": [
-            {
-              "file": "lib/styles/design-tokens.css",
-              "line": 141,
-              "value": "var(--geul-control-height-compact)",
-              "context": ":root"
-            }
-          ]
-        },
-        {
           "name": "--geul-focus",
           "registered": true,
           "sources": [
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 76, "property": "outline" },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 146, "property": "outline" },
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 97, "property": "outline" },
             {
               "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 152,
+              "line": 103,
               "property": "border-inline-start-color"
             }
           ],
@@ -54419,12 +54433,7 @@
           "sources": [
             {
               "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 84,
-              "property": "font-weight"
-            },
-            {
-              "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 130,
+              "line": 81,
               "property": "font-weight"
             }
           ],
@@ -54436,7 +54445,7 @@
           "sources": [
             {
               "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 154,
+              "line": 105,
               "property": "font-weight"
             }
           ],
@@ -54469,18 +54478,18 @@
             { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 34, "property": "min-width" },
             { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 35, "property": "max-width" },
             { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 36, "property": "flex" },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 194, "property": "width" },
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 145, "property": "width" },
             {
               "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 195,
+              "line": 146,
               "property": "min-width"
             },
             {
               "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 196,
+              "line": 147,
               "property": "max-width"
             },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 197, "property": "height" }
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 148, "property": "height" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 113, "value": "0px", "context": ":root" },
@@ -54493,29 +54502,12 @@
           ]
         },
         {
-          "name": "--geul-letter-spacing-caps",
-          "registered": true,
-          "sources": [
-            {
-              "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 85,
-              "property": "letter-spacing"
-            }
-          ],
-          "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 91, "value": "0.04em", "context": ":root" }]
-        },
-        {
           "name": "--geul-line-height-xs",
           "registered": true,
           "sources": [
             {
               "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 86,
-              "property": "line-height"
-            },
-            {
-              "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 131,
+              "line": 82,
               "property": "line-height"
             }
           ],
@@ -54525,21 +54517,7 @@
           "name": "--geul-motion-easing",
           "registered": true,
           "sources": [
-            {
-              "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 66,
-              "property": "transition"
-            },
-            {
-              "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 96,
-              "property": "transition"
-            },
-            {
-              "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 133,
-              "property": "transition"
-            }
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 84, "property": "transition" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 137, "value": "ease-out", "context": ":root" }
@@ -54549,21 +54527,7 @@
           "name": "--geul-motion-normal",
           "registered": true,
           "sources": [
-            {
-              "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 66,
-              "property": "transition"
-            },
-            {
-              "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 96,
-              "property": "transition"
-            },
-            {
-              "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 133,
-              "property": "transition"
-            }
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 84, "property": "transition" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 134, "value": "140ms", "context": ":root" }]
         },
@@ -54573,7 +54537,7 @@
           "sources": [
             {
               "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 126,
+              "line": 77,
               "property": "border-radius"
             }
           ],
@@ -54583,8 +54547,8 @@
           "name": "--geul-spacing-sm",
           "registered": true,
           "sources": [
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 122, "property": "padding" },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 201, "property": "padding" }
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 73, "property": "padding" },
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 152, "property": "padding" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 59, "value": "0.625rem", "context": ":root" }
@@ -54609,9 +54573,7 @@
               "line": 24,
               "property": "--_navigation-label-start"
             },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 57, "property": "gap" },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 58, "property": "padding" },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 121, "property": "gap" }
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 72, "property": "gap" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 58, "value": "0.5rem", "context": ":root" }]
         },
@@ -54635,7 +54597,7 @@
           "sources": [
             {
               "file": "components/core/SideNavigation/SideNavigation.module.css",
-              "line": 141,
+              "line": 92,
               "property": "background-color"
             }
           ],
@@ -54668,48 +54630,12 @@
           ]
         },
         {
-          "name": "--geul-text-muted",
-          "registered": true,
-          "sources": [
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 62, "property": "color" },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 95, "property": "color" }
-          ],
-          "definitions": [
-            { "file": "lib/styles/design-tokens.css", "line": 160, "value": "#5c594f", "context": ":root" },
-            {
-              "file": "lib/styles/design-tokens.css",
-              "line": 250,
-              "value": "#b4bcb0",
-              "context": "@media (prefers-color-scheme: dark) → html:not([data-geul-theme='light'])"
-            },
-            {
-              "file": "lib/styles/design-tokens.css",
-              "line": 334,
-              "value": "#5c594f",
-              "context": "[data-geul-theme='light']"
-            },
-            {
-              "file": "lib/styles/design-tokens.css",
-              "line": 417,
-              "value": "#b4bcb0",
-              "context": "[data-geul-theme='dark']"
-            },
-            {
-              "file": "lib/styles/design-tokens.css",
-              "line": 502,
-              "value": "#5c594f",
-              "context": "@media print → :root,\n  [data-geul-theme]"
-            }
-          ]
-        },
-        {
           "name": "--geul-text-primary",
           "registered": true,
           "sources": [
             { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 7, "property": "color" },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 72, "property": "color" },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 140, "property": "color" },
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 153, "property": "color" }
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 91, "property": "color" },
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 104, "property": "color" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 158, "value": "#242622", "context": ":root" },
@@ -54743,7 +54669,7 @@
           "name": "--geul-text-secondary",
           "registered": true,
           "sources": [
-            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 128, "property": "color" }
+            { "file": "components/core/SideNavigation/SideNavigation.module.css", "line": 79, "property": "color" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 159, "value": "#45443d", "context": ":root" },
@@ -61518,6 +61444,7 @@
         "Consumer: features/series/SeriesManagersModal.tsx",
         "Consumer: features/series/SeriesPublicView.tsx",
         "Consumer: features/share/ui/ShareLinkSectionView.tsx",
+        "Consumer: features/shell/LanguageMenu.tsx",
         "Consumer: features/shell/ui/PrintHeader/PrintHeaderView.tsx",
         "Consumer: features/shell/ui/Shell/ShellIslands.tsx",
         "Consumer: features/shell/ui/Shell/ShellLayout.tsx",
@@ -62026,6 +61953,7 @@
       ],
       "usage": [
         "Use ordered lists when order matters. Check Code wrapping/scrolling with long code. Reserve VisuallyHidden for necessary descriptions.",
+        "Consumer: components/core/ApplicationFrame/ApplicationFrame.tsx",
         "Consumer: components/core/CopyButton/CopyButton.tsx",
         "Consumer: components/core/DataTable/DataTableView.tsx",
         "Consumer: components/core/SelectionSurface/SelectionSurface.tsx",

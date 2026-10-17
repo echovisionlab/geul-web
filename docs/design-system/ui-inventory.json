@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "67fb87693379e06636a8140863335d00adefdee74df9cbf3f0e4e6f2ee501d3c",
+  "manifestHash": "adef60ee2e4ff0052de32add7eb8e70493114eac89d11a89b7c8848c1e7bda1a",
   "counts": {
-    "sourceFiles": 3775,
-    "productionSourceFiles": 2282,
-    "componentFiles": 900,
+    "sourceFiles": 3776,
+    "productionSourceFiles": 2283,
+    "componentFiles": 901,
     "coreFamilies": 57,
     "featureDomains": 53,
     "storyFiles": 256,
-    "storyVariants": 1446,
+    "storyVariants": 1451,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -335,6 +335,7 @@
     "components/core/ApplicationFrame/ApplicationFrame.stories.tsx",
     "components/core/ApplicationFrame/ApplicationFrame.tsx",
     "components/core/ApplicationFrame/ApplicationFrame.type-test.tsx",
+    "components/core/ApplicationFrame/SiteHeader.tsx",
     "components/core/ApplicationFrame/index.ts",
     "components/core/Badge/Badge.test.tsx",
     "components/core/Badge/LabelBadge.stories.tsx",
@@ -3998,6 +3999,11 @@
               "type": "string"
             },
             {
+              "name": "navigationTitle",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
               "name": "closeLabel",
               "optional": false,
               "type": "string"
@@ -4044,7 +4050,67 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": ["components/core/ApplicationFrame/ApplicationFrame.stories.tsx"],
-      "composedJsx": ["AriaButton", "OnDemandDrawer", "aside", "div", "footer", "header", "main"]
+      "composedJsx": [
+        "AriaButton",
+        "OnDemandDrawer",
+        "VisuallyHidden",
+        "aside",
+        "div",
+        "footer",
+        "header",
+        "main",
+        "span"
+      ]
+    },
+    {
+      "file": "components/core/ApplicationFrame/SiteHeader.tsx",
+      "owner": "Core/ApplicationFrame",
+      "exports": [
+        {
+          "name": "SiteHeader",
+          "kind": "function"
+        }
+      ],
+      "classification": "core",
+      "propsEvidence": [
+        {
+          "name": "SiteHeaderProps",
+          "extends": ["extends ClosedVisualProps"],
+          "properties": [
+            {
+              "name": "logo",
+              "optional": false,
+              "type": "ReactNode"
+            },
+            {
+              "name": "navigationToggle",
+              "optional": false,
+              "type": "ReactNode"
+            },
+            {
+              "name": "mobileLeadingActions",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
+              "name": "mobileActions",
+              "optional": false,
+              "type": "ReactNode"
+            },
+            {
+              "name": "desktopActions",
+              "optional": false,
+              "type": "ReactNode"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["features/shell/ui/Shell/ShellLayout.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": ["components/core/ApplicationFrame/ApplicationFrame.stories.tsx"],
+      "composedJsx": ["LayoutVisibility", "div"]
     },
     {
       "file": "components/core/Badge/LabelBadge.tsx",
@@ -5949,7 +6015,7 @@
         },
         {
           "name": "DisclosureDensity",
-          "type": "'standard' | 'compact'"
+          "type": "'standard' | 'compact' | 'chrome'"
         },
         {
           "name": "DisclosureShape",
@@ -5970,6 +6036,7 @@
       ],
       "productionConsumers": [
         "components/core/ParameterPanel/ParameterPanel.tsx",
+        "components/core/SideNavigation/SideNavigation.tsx",
         "features/admin/email-layout/EmailLayoutEditPage.tsx",
         "features/admin/email-template/EmailTemplateEditPage.tsx",
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
@@ -7256,6 +7323,22 @@
               "type": "ReactNode"
             }
           ]
+        },
+        {
+          "name": "DropdownMenuAnchorProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "x",
+              "optional": false,
+              "type": "number"
+            },
+            {
+              "name": "y",
+              "optional": false,
+              "type": "number"
+            }
+          ]
         }
       ],
       "typeAliasEvidence": [],
@@ -7305,6 +7388,7 @@
       ],
       "composedJsx": [
         "DocumentColorPreview",
+        "DropdownMenuAnchor",
         "Header",
         "IconCheck",
         "IconChevronRight",
@@ -7400,6 +7484,10 @@
         {
           "name": "DropdownMenuTarget",
           "kind": "value"
+        },
+        {
+          "name": "DropdownMenuAnchor",
+          "kind": "function"
         }
       ],
       "classification": "core",
@@ -7562,7 +7650,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": ["OverlayTriggerTarget"]
+      "composedJsx": ["OverlayTriggerTarget", "span"]
     },
     {
       "file": "components/core/EditorHeader/CollabSyncStatusIndicator.tsx",
@@ -13601,6 +13689,7 @@
       ],
       "typeAliasEvidence": [],
       "productionConsumers": [
+        "components/core/ApplicationFrame/SiteHeader.tsx",
         "components/core/DataTable/DataTableView.tsx",
         "features/location/LocationPlaceMetadataRows.tsx",
         "features/shell/ui/Shell/ShellLayout.tsx"
@@ -17301,12 +17390,12 @@
       "composedJsx": [
         "AriaButton",
         "AriaLink",
+        "Disclosure",
         "DropdownMenu",
         "DropdownMenu.Dropdown",
         "DropdownMenu.Item",
         "DropdownMenu.Label",
         "DropdownMenu.Target",
-        "IconChevronRight",
         "NavigationItem",
         "Tooltip",
         "div",
@@ -18523,6 +18612,7 @@
         "features/shell/ui/Shell/ShellView.test.tsx"
       ],
       "stories": [
+        "components/core/Disclosure/Disclosure.stories.tsx",
         "components/core/Hierarchy/Hierarchy.stories.tsx",
         "components/core/TextButton/TextButton.stories.tsx",
         "stories/compositions/SizeDensity.stories.tsx",
@@ -18903,6 +18993,7 @@
       ],
       "typeAliasEvidence": [],
       "productionConsumers": [
+        "components/core/ApplicationFrame/ApplicationFrame.tsx",
         "components/core/CopyButton/CopyButton.tsx",
         "components/core/DataTable/DataTableView.tsx",
         "components/core/SelectionSurface/SelectionSurface.tsx",
@@ -19540,6 +19631,7 @@
         "features/series/SeriesManagersModal.tsx",
         "features/series/SeriesPublicView.tsx",
         "features/share/ui/ShareLinkSectionView.tsx",
+        "features/shell/LanguageMenu.tsx",
         "features/shell/ui/PrintHeader/PrintHeaderView.tsx",
         "features/shell/ui/Shell/ShellIslands.tsx",
         "features/shell/ui/Shell/ShellLayout.tsx",
@@ -35020,9 +35112,9 @@
         "Button",
         "ContentModal",
         "DropdownMenu",
+        "DropdownMenu.Anchor",
         "DropdownMenu.Dropdown",
         "DropdownMenu.Item",
-        "DropdownMenu.Target",
         "DsLayoutInline",
         "DsLayoutInset",
         "DsLayoutStack",
@@ -41681,6 +41773,7 @@
         "DateTime",
         "DialogActions",
         "DropdownMenu",
+        "DropdownMenu.Anchor",
         "DropdownMenu.Divider",
         "DropdownMenu.Dropdown",
         "DropdownMenu.Item",
@@ -66941,6 +67034,37 @@
               "type": "'default' | 'status-only' | 'button-only'"
             }
           ]
+        },
+        {
+          "name": "TrackAudioStatusIconProps",
+          "extends": ["extends Omit<TextProps, 'children' | 'id' | 'role' | 'tone' | 'size' | 'as'>"],
+          "properties": [
+            {
+              "name": "id",
+              "optional": true,
+              "type": "string"
+            },
+            {
+              "name": "kind",
+              "optional": false,
+              "type": "'idle' | 'warning' | 'processing' | 'ready' | 'failed'"
+            },
+            {
+              "name": "tone",
+              "optional": false,
+              "type": "StatusBadgeTone"
+            },
+            {
+              "name": "label",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "compact",
+              "optional": false,
+              "type": "boolean"
+            }
+          ]
         }
       ],
       "typeAliasEvidence": [
@@ -66965,8 +67089,7 @@
         "Loader",
         "Tooltip",
         "TrackAudioStatusIcon",
-        "div",
-        "span"
+        "div"
       ]
     },
     {
@@ -68053,7 +68176,7 @@
             {
               "name": "variant",
               "optional": true,
-              "type": "'icon' | 'text'"
+              "type": "'icon' | 'text' | 'navigation'"
             },
             {
               "name": "size",
@@ -68072,7 +68195,7 @@
       "productionConsumers": ["features/shell/Shell.tsx"],
       "catalogAdapters": [],
       "tests": ["features/shell/LanguageMenu.test.tsx"],
-      "stories": [],
+      "stories": ["stories/pages/Frames.stories.tsx"],
       "composedJsx": [
         "DropdownMenu",
         "DropdownMenu.Dropdown",
@@ -68080,6 +68203,7 @@
         "DropdownMenu.Target",
         "IconButton",
         "IconLanguage",
+        "Text",
         "TextButton",
         "VisuallyHidden"
       ]
@@ -68451,7 +68575,6 @@
         "DsText",
         "Footer",
         "LayoutGrid",
-        "LayoutInline",
         "LayoutVisibility",
         "Separator",
         "ShellAccountDesktop",
@@ -68465,6 +68588,7 @@
         "ShellNavigationToggle",
         "ShellSearchAction",
         "ShellThemeToggle",
+        "SiteHeader",
         "VisuallyHidden",
         "div"
       ]
@@ -73719,7 +73843,10 @@
     },
     {
       "owner": "Core/ApplicationFrame",
-      "components": ["components/core/ApplicationFrame/ApplicationFrame.tsx"],
+      "components": [
+        "components/core/ApplicationFrame/ApplicationFrame.tsx",
+        "components/core/ApplicationFrame/SiteHeader.tsx"
+      ],
       "stories": ["components/core/ApplicationFrame/ApplicationFrame.stories.tsx"]
     },
     {
@@ -77587,6 +77714,7 @@
       "importedSources": [
         ".storybook/fixture-i18n.tsx",
         "components/core/ApplicationFrame/ApplicationFrame.tsx",
+        "components/core/ApplicationFrame/SiteHeader.tsx",
         "components/core/Layout/index.ts",
         "components/core/MenuToggle/index.ts",
         "components/core/Navigation/index.ts",
@@ -78042,6 +78170,11 @@
           "preview": "http://localhost:6010/?path=/story/core-interaction-disclosure--nested-details"
         },
         {
+          "name": "NavigationGroup",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/core-interaction-disclosure--navigation-group"
+        },
+        {
           "name": "LabelAlignedHierarchy",
           "args": null,
           "preview": "http://localhost:6010/?path=/story/core-interaction-disclosure--label-aligned-hierarchy"
@@ -78051,6 +78184,7 @@
         ".storybook/fixture-i18n.tsx",
         "components/core/Disclosure/Disclosure.tsx",
         "components/core/Layout/index.ts",
+        "components/core/TextButton/index.ts",
         "components/core/Typography/index.ts"
       ]
     },
@@ -85886,6 +86020,26 @@
           "name": "NavigationHierarchy",
           "args": "{ signedIn: true, nestedNavigation: true }",
           "preview": "http://localhost:6010/?path=/story/pages-application-frames--navigation-hierarchy"
+        },
+        {
+          "name": "StackedBrand",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/pages-application-frames--stacked-brand"
+        },
+        {
+          "name": "StackedBrandSignedIn",
+          "args": "{ signedIn: true }",
+          "preview": "http://localhost:6010/?path=/story/pages-application-frames--stacked-brand-signed-in"
+        },
+        {
+          "name": "StackedBrandAdmin",
+          "args": "{ kind: 'admin' }",
+          "preview": "http://localhost:6010/?path=/story/pages-application-frames--stacked-brand-admin"
+        },
+        {
+          "name": "StackedBrandAdminCompact",
+          "args": "{ kind: 'admin', mode: 'compact' }",
+          "preview": "http://localhost:6010/?path=/story/pages-application-frames--stacked-brand-admin-compact"
         }
       ],
       "importedSources": [
@@ -85898,10 +86052,14 @@
         "components/core/TextButton/index.ts",
         "components/core/Typography/index.ts",
         "features/admin/ui/AdminShell/AdminShellView.tsx",
+        "features/shell/LanguageMenu.tsx",
         "features/shell/ui/Shell/ShellView.tsx",
         "features/site/SiteLogo/index.ts",
         "features/user/ui/UserShell/UserShellView.tsx",
+        "lib/contexts/ManifestContext.tsx",
         "lib/providers/DesignSystemProvider.tsx",
+        "lib/providers/SessionProvider.tsx",
+        "lib/types/site-setting/config.ts",
         "stories/shared/preview-navigation.ts"
       ]
     },
@@ -94772,6 +94930,26 @@
               "typeOnly": true
             }
           ]
+        },
+        {
+          "target": "components/core/ApplicationFrame/SiteHeader.tsx",
+          "symbols": [
+            {
+              "exported": "SiteHeader",
+              "imported": "SiteHeader",
+              "typeOnly": false
+            }
+          ]
+        },
+        {
+          "target": "components/core/ApplicationFrame/SiteHeader.tsx",
+          "symbols": [
+            {
+              "exported": "SiteHeaderProps",
+              "imported": "SiteHeaderProps",
+              "typeOnly": true
+            }
+          ]
         }
       ]
     },
@@ -95800,6 +95978,11 @@
         {
           "target": "components/core/DropdownMenu/DropdownMenu.tsx",
           "symbols": [
+            {
+              "exported": "DropdownMenuAnchorProps",
+              "imported": "DropdownMenuAnchorProps",
+              "typeOnly": true
+            },
             {
               "exported": "DropdownMenuDividerProps",
               "imported": "DropdownMenuDividerProps",

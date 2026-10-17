@@ -51,7 +51,7 @@ All inventoried Feature component candidates. Direct value imports, literal lazy
 | [search](../../features/search)                       |                 1 |                                  0 |
 | [series](../../features/series)                       |                 3 |                                  0 |
 | [share](../../features/share)                         |                 5 |                                  1 |
-| [shell](../../features/shell)                         |                10 |                                  4 |
+| [shell](../../features/shell)                         |                10 |                                  3 |
 | [site](../../features/site)                           |                11 |                                  0 |
 | [social-links](../../features/social-links)           |                 6 |                                  2 |
 | [translation](../../features/translation)             |                18 |                                  0 |
@@ -983,7 +983,7 @@ Direct and transitive imports are source evidence, not visual approval. No compo
 
 | Production candidate                                                                 | Direct story imports      | Transitive story relationships                                                                                                                 |
 | ------------------------------------------------------------------------------------ | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| [LanguageMenu.tsx](../../features/shell/LanguageMenu.tsx)                            | None                      | **Missing relationship**                                                                                                                       |
+| [LanguageMenu.tsx](../../features/shell/LanguageMenu.tsx)                            | Pages/Application/Frames  | Pages/Application/Frames                                                                                                                       |
 | [PrintHeader.tsx](../../features/shell/PrintHeader/PrintHeader.tsx)                  | None                      | **Missing relationship**                                                                                                                       |
 | [Shell.tsx](../../features/shell/Shell.tsx)                                          | None                      | **Missing relationship**                                                                                                                       |
 | [ShellRuntime.tsx](../../features/shell/ShellRuntime.tsx)                            | None                      | **Missing relationship**                                                                                                                       |

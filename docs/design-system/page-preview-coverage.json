@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "methodology": "All App Router visual entry files indexed by TypeScript imports/JSX; exact reviewed route/boundary maps count separately from mere Feature story overlap. Unmapped entrypoints remain explicit gaps. Static source census is not a browser pass.",
-  "sourceManifestHash": "6b480c0378aaa945fdc91172521f86d0593f66b9c1f3bea8cef3c47301a28db9",
+  "sourceManifestHash": "fef138815c115006692555b48b06e8284cda222aa5209bf4db00fe7999df9b83",
   "counts": {
     "queryEditorBranches": 12,
     "editorBranchPreviews": 12,
@@ -16066,6 +16066,22 @@
             {
               "variant": "NavigationHierarchy",
               "preview": "http://localhost:6010/?path=/story/pages-application-frames--navigation-hierarchy"
+            },
+            {
+              "variant": "StackedBrand",
+              "preview": "http://localhost:6010/?path=/story/pages-application-frames--stacked-brand"
+            },
+            {
+              "variant": "StackedBrandSignedIn",
+              "preview": "http://localhost:6010/?path=/story/pages-application-frames--stacked-brand-signed-in"
+            },
+            {
+              "variant": "StackedBrandAdmin",
+              "preview": "http://localhost:6010/?path=/story/pages-application-frames--stacked-brand-admin"
+            },
+            {
+              "variant": "StackedBrandAdminCompact",
+              "preview": "http://localhost:6010/?path=/story/pages-application-frames--stacked-brand-admin-compact"
             }
           ]
         }
@@ -16090,6 +16106,11 @@
           "file": "stories/features/EditorAccessEnded.stories.tsx",
           "title": "Feature/Editor/Access Ended",
           "matchingOwners": ["features/confirmation/confirmation-dialogs.ts"]
+        },
+        {
+          "file": "stories/pages/Frames.stories.tsx",
+          "title": "Pages/Application/Frames",
+          "matchingOwners": ["features/shell/LanguageMenu.tsx", "features/site/SiteLogo/index.ts"]
         },
         {
           "file": "stories/pages/PublicCatalogEntities.stories.tsx",
@@ -16546,6 +16567,22 @@
             {
               "variant": "NavigationHierarchy",
               "preview": "http://localhost:6010/?path=/story/pages-application-frames--navigation-hierarchy"
+            },
+            {
+              "variant": "StackedBrand",
+              "preview": "http://localhost:6010/?path=/story/pages-application-frames--stacked-brand"
+            },
+            {
+              "variant": "StackedBrandSignedIn",
+              "preview": "http://localhost:6010/?path=/story/pages-application-frames--stacked-brand-signed-in"
+            },
+            {
+              "variant": "StackedBrandAdmin",
+              "preview": "http://localhost:6010/?path=/story/pages-application-frames--stacked-brand-admin"
+            },
+            {
+              "variant": "StackedBrandAdminCompact",
+              "preview": "http://localhost:6010/?path=/story/pages-application-frames--stacked-brand-admin-compact"
             }
           ]
         }
@@ -37315,6 +37352,22 @@
             {
               "variant": "NavigationHierarchy",
               "preview": "http://localhost:6010/?path=/story/pages-application-frames--navigation-hierarchy"
+            },
+            {
+              "variant": "StackedBrand",
+              "preview": "http://localhost:6010/?path=/story/pages-application-frames--stacked-brand"
+            },
+            {
+              "variant": "StackedBrandSignedIn",
+              "preview": "http://localhost:6010/?path=/story/pages-application-frames--stacked-brand-signed-in"
+            },
+            {
+              "variant": "StackedBrandAdmin",
+              "preview": "http://localhost:6010/?path=/story/pages-application-frames--stacked-brand-admin"
+            },
+            {
+              "variant": "StackedBrandAdminCompact",
+              "preview": "http://localhost:6010/?path=/story/pages-application-frames--stacked-brand-admin-compact"
             }
           ]
         }

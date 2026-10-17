@@ -705,3 +705,7 @@ The coordinated local-backup/download-policy change is uncommitted. Its validati
 screenshot plan live in `.artifacts/design-system/reviews/local-backups/`. Storybook, production
 visual inspection and the Notion Local Backups reference could not be inspected in the restricted
 execution environment; this is pending visual review, not design approval.
+
+## Site header and branding
+
+Core `ApplicationFrame/SiteHeader` owns responsive public header placement. See the [site branding contract](design-system/site-branding.md) and [change record](design-system/changelog.md).

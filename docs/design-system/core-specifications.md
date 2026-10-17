@@ -330,7 +330,9 @@ Disabled is a child state, not a Field variant. The control owner decides invali
 Inline controls align to the end, with content width and max-width=100%.
 Review long labels/actions/control-width combinations. Consumers choose whether their Layout switches to stack at narrow widths.
 
-**Interaction and accessibility.** Preserve or generate the single child's ID.
+**Interaction and accessibility.** Preserve or generate the single child's ID. The label carries `<id>-label` and is
+added to the child's aria-labelledby (merged with the child's own; skipped when the child has aria-label), because
+React Aria fields do not observe a native `<label for>`.
 Verify label activation, merged existing/new description/error IDs and contenteditable focus delegation in code.
 
 **Storybook review.** Check stack/inline with native inputs, contenteditable adapters, actions and long labels.
@@ -373,7 +375,8 @@ Review List names, panel/externalPanel relationships, grow/wrap/inset, keepMount
 Sources: [SideNavigation.tsx](../../components/core/SideNavigation/SideNavigation.tsx),
 [CSS](../../components/core/SideNavigation/SideNavigation.module.css), [stories](../../components/core/SideNavigation/SideNavigation.stories.tsx).
 
-**Purpose and anatomy.** Provides page links within sections. Expanded has sectionHeader(label, trailing chevron) and items.
+**Purpose and anatomy.** Provides page links within sections. Expanded labeled sections are Core Disclosure
+(appearance=plain, density=chrome, contentIndent=none, no divider) holding the items; unlabeled sections are items only.
 Compact labeled sections use a menu trigger and DropdownMenu; unlabeled sections use individual links.
 
 **API and defaults.** ariaLabel/sections/mode/openSectionKeys/onToggleSection/onSelectItem are required.
@@ -382,7 +385,9 @@ There is no item disabled prop. The component does not choose mode automatically
 
 **Geometry and states.** Expanded items use chrome-row-height 32px, icon=16px, gap=xs 8px; item icons (or labels without icons) start on the section label's xs 8px edge, the 2px active boundary inside that inset; without icons, section children step in by one hierarchy step;
 chrome text 12px/medium. Compact items are 40px square or at least 44px for touch.
-SectionHeader=28px; label=12px/medium muted, uppercase with `letter-spacing-caps` (the same label voice as DropdownMenu groups).
+Group headings follow the Disclosure nested-list spec shared by the form editor and the public mobile drawer:
+28px, sentence-case 12px primary label, trailing chevron that turns over when open, hover fill, no rules between
+expanded groups (the compact rail keeps rules). The label starts on the same xs 8px edge as the items.
 Hover uses surface-hover/primary; active is unfilled primary/strong with a leading 2px focus boundary.
 Focus uses an inner outline. Active+hover preserves the leading selection indicator.
 
@@ -393,7 +398,7 @@ Hierarchy tokens align the reading start under section labels. Compact hides ite
 The consumer controls section expansion. Prefetch=false disables hover/focus prefetch.
 Verify compact menu and section-toggle keyboard behavior and focus restoration in code.
 
-**Storybook review.** Check expanded/compact, sectionHeader, labeled compact menus, icon presence and long labels.
+**Storybook review.** Check expanded/compact, group headings, labeled compact menus, icon presence and long labels.
 Review active+focus/hover, hierarchy, aria-current, expanded/controls, menu restoration and modifier navigation in consumers.
 
 ## LabelBadge / StatusBadge
