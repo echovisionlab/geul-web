@@ -27,6 +27,7 @@ export class AuthoritativeConfiguration<T extends object> {
   readonly scope = Symbol('configuration-scope');
   private canonical: T;
   private visible: T;
+  private snapshot: { source: T; value: T } | null = null;
   private intents = new Map<keyof T, { sequence: number; value: unknown }>();
   private pending = new Map<keyof T, Set<symbol>>();
   private sequence = 0;
@@ -47,10 +48,16 @@ export class AuthoritativeConfiguration<T extends object> {
 
   getCanonical = (): T => this.canonical;
   getConfiguration = (): T => {
+    if (this.snapshot?.source === this.visible) {
+      return this.snapshot.value;
+    }
     const next = { ...this.visible };
     for (const [field, intent] of this.intents) {
       next[field] = intent.value as T[keyof T];
     }
+    // Consumers synchronize this projection into editor state. Unchanged settings
+    // must retain their identity rather than retriggering that synchronization.
+    this.snapshot = { source: this.visible, value: next };
     return next;
   };
   isDraft = (field: keyof T): boolean => this.intents.has(field);
