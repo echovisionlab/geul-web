@@ -1433,7 +1433,7 @@
     "details": {
       "parent": "Pai",
       "stats": "Estatísticas",
-      "statsValue": "{releases, plural, one {# lançamento} other {# lançamentos}}, {artists, plural, one {# artista} other {# artistas}}"
+      "statsValue": "{releases, plural, one {# lançamento} many {# lançamentos} other {# lançamentos}}, {artists, plural, one {# artista} many {# artistas} other {# artistas}}"
     },
     "sections": {
       "releases": "Lançamentos ({count})",

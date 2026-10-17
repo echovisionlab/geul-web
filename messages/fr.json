@@ -1433,7 +1433,7 @@
     "details": {
       "parent": "Parent",
       "stats": "Statistiques",
-      "statsValue": "{releases, plural, one {# sortie} other {# sorties}}, {artists, plural, one {# artiste} other {# artistes}}"
+      "statsValue": "{releases, plural, one {# sortie} many {# sorties} other {# sorties}}, {artists, plural, one {# artiste} many {# artistes} other {# artistes}}"
     },
     "sections": {
       "releases": "Sorties ({count})",

@@ -1433,7 +1433,7 @@
     "details": {
       "parent": "Roślina mateczna",
       "stats": "Statystyki",
-      "statsValue": "wydawnictwa: {releases}, artyści: {artists}"
+      "statsValue": "{releases, plural, one {# wydawnictwo} few {# wydawnictwa} many {# wydawnictw} other {# wydawnictwa}}, {artists, plural, one {# artysta} few {# artystów} many {# artystów} other {# artysty}}"
     },
     "sections": {
       "releases": "Wydania ({count})",

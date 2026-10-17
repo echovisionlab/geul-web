@@ -1433,7 +1433,7 @@
     "details": {
       "parent": "Etichetta madre",
       "stats": "Statistiche",
-      "statsValue": "{releases, plural, one {# uscita} other {# uscite}}, {artists, plural, one {# artista} other {# artisti}}"
+      "statsValue": "{releases, plural, one {# uscita} many {# uscite} other {# uscite}}, {artists, plural, one {# artista} many {# artisti} other {# artisti}}"
     },
     "sections": {
       "releases": "Uscite ({count})",

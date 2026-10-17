@@ -2881,7 +2881,7 @@
     "details": {
       "parent": "الأصل",
       "stats": "الإحصائيات",
-      "statsValue": "الإصدارات: {releases}، الفنانون: {artists}"
+      "statsValue": "{releases, plural, zero {لا إصدارات} one {إصدار واحد} two {إصداران} few {# إصدارات} many {# إصدارًا} other {# إصدار}}، {artists, plural, zero {لا فنانين} one {فنان واحد} two {فنانان} few {# فنانين} many {# فنانًا} other {# فنان}}"
     },
     "sections": {
       "releases": "الإصدارات ({count})",

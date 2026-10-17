@@ -1433,7 +1433,7 @@
     "details": {
       "parent": "Родитель",
       "stats": "Статистика",
-      "statsValue": "Релизы: {releases}, исполнители: {artists}"
+      "statsValue": "{releases, plural, one {# релиз} few {# релиза} many {# релизов} other {# релиза}}, {artists, plural, one {# исполнитель} few {# исполнителя} many {# исполнителей} other {# исполнителя}}"
     },
     "sections": {
       "releases": "Релизы ({count})",

@@ -1433,7 +1433,7 @@
     "details": {
       "parent": "Ebeveyn",
       "stats": "İstatistikler",
-      "statsValue": "{releases} albüm, {artists} sanatçı"
+      "statsValue": "{releases, plural, one {# albüm} other {# albüm}}, {artists, plural, one {# sanatçı} other {# sanatçı}}"
     },
     "sections": {
       "releases": "Sürümler ({count})",
