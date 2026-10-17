@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, describe, it, expect, vi } from 'vitest';
+import { afterEach, describe, it, expect, onTestFinished, vi } from 'vitest';
 import { TestProviders } from '@/test/TestProviders';
 import { FormOperationsPreview } from './FormOperations.stories';
 vi.mock('next/navigation', () => ({ useRouter: () => ({ replace: vi.fn(), push: vi.fn(), prefetch: vi.fn() }) }));
@@ -62,6 +62,9 @@ describe('actual form operations page previews', () => {
     expect(document.body.querySelector('[role=dialog]')).not.toBeNull();
   });
   it('runs dashboard access then real data/chart composition', async () => {
+    // jsdom has no layout; give the chart plot the size its CSS supplies in a browser.
+    const measure = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 400, 300));
+    onTestFinished(() => measure.mockRestore());
     render('dashboard');
     await flush();
     await flush();

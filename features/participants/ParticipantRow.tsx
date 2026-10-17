@@ -62,7 +62,8 @@ export function ParticipantRow({
       </LayoutInline>
       <LayoutInline gap="xs" wrap="nowrap" justify="end" fill="inline" data-participant-actions>
         <Tooltip label={roleLabel}>
-          <span className={classes.role} data-participant-role-badge>
+          {/* Named like the inactive status beside it, so the truncation tooltip has a valid target. */}
+          <span className={classes.role} role="img" aria-label={roleLabel} data-participant-role-badge>
             <LabelBadge tone={principal ? 'accent' : 'neutral'} size="sm">
               <Text id={roleId} as="span" size="sm" truncate>
                 {roleLabel}

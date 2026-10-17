@@ -20,11 +20,14 @@ beforeEach(() => {
       unobserve() {}
     },
   );
+  // jsdom has no layout; give the chart plot the size its CSS supplies in a browser.
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 400, 300));
 });
 afterEach(() => {
   act(() => root.unmount());
   container.remove();
   vi.unstubAllGlobals();
+  vi.restoreAllMocks();
 });
 function render(stat: Parameters<typeof FieldStatsChart>[0]['fieldStat'], locale = 'en') {
   act(() =>

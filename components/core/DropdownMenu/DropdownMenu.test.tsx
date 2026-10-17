@@ -274,8 +274,32 @@ describe('DropdownMenu', () => {
     expect(document.querySelector('[role=menu]')).not.toBeNull();
     expect(document.querySelector('[role=tooltip]')).toBeNull();
   });
+  it('opens a programmatic menu from a hidden point anchor without a pressable trigger', () => {
+    const warn = vi.spyOn(console, 'warn');
+    const error = vi.spyOn(console, 'error');
+    renderDropdownMenu(
+      <DropdownMenu opened portal={false}>
+        <DropdownMenu.Anchor x={120} y={80} />
+        <DropdownMenu.Dropdown>
+          <DropdownMenu.Item>Preview</DropdownMenu.Item>
+        </DropdownMenu.Dropdown>
+      </DropdownMenu>,
+    );
+    const anchor = container.querySelector<HTMLElement>('[data-dropdown-menu-anchor]');
+    expect(anchor?.getAttribute('aria-hidden')).toBe('true');
+    expect(anchor?.hasAttribute('tabindex')).toBe(false);
+    expect(anchor?.style.left).toBe('120px');
+    expect(anchor?.style.top).toBe('80px');
+    expect(container.querySelector('[role=menuitem]')?.textContent).toBe('Preview');
+    const reported = [...warn.mock.calls, ...error.mock.calls].map((call) => String(call[0]));
+    expect(reported.filter((message) => /Pressable|PressResponder|Focusable/.test(message))).toEqual([]);
+    warn.mockRestore();
+    error.mockRestore();
+  });
+
   it('exposes the required compound API', () => {
     expect(DropdownMenu.Target).toBeDefined();
+    expect(DropdownMenu.Anchor).toBeDefined();
     expect(DropdownMenu.Dropdown).toBeDefined();
     expect(DropdownMenu.Item).toBeDefined();
     expect(DropdownMenu.Label).toBeDefined();

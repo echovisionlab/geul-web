@@ -46,6 +46,7 @@ import { DocumentColorPreview, type DocumentColor } from '../DocumentColorPrevie
 import { useNavigationClick } from '../Navigation/navigation-events';
 import {
   DROPDOWN_MENU_LABEL,
+  DropdownMenuAnchor,
   DropdownMenuTarget,
   isDropdownMenuLabelType,
   MenuPresentation,
@@ -416,8 +417,18 @@ const DropdownMenuSub = Object.assign(DropdownMenuSubRoot, {
   Target: DropdownMenuSubTarget,
   Dropdown: DropdownMenuSubDropdown,
 });
+function DropdownMenuPointAnchor({ x, y }: DropdownMenuAnchorProps) {
+  return <DropdownMenuAnchor x={x} y={y} className={classes.anchor} />;
+}
+DropdownMenuPointAnchor.displayName = 'DropdownMenu.Anchor';
+export interface DropdownMenuAnchorProps {
+  /** Viewport coordinates, e.g. a contextmenu event's clientX/clientY. */
+  x: number;
+  y: number;
+}
 export const DropdownMenu = Object.assign(DropdownMenuRoot, {
   Target: DropdownMenuTarget,
+  Anchor: DropdownMenuPointAnchor,
   Dropdown: DropdownMenuDropdown,
   Item: DropdownMenuItem,
   Label: DropdownMenuLabel,

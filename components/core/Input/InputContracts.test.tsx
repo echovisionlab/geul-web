@@ -144,7 +144,8 @@ describe('input contracts in TextInput → PasswordInput → NumberInput → Sel
     expect(input.value).toBe('3');
     expect(buttons[1].disabled).toBe(true);
     change.mockClear();
-    await render(<NumberInput label="Order" value={1} readOnly onChange={change} />);
+    // A separate controlled field, not the uncontrolled one above switching modes.
+    await render(<NumberInput key="read-only" label="Order" value={1} readOnly onChange={change} />);
     await act(async () =>
       host.querySelector('input')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true })),
     );

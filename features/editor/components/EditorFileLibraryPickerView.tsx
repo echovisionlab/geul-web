@@ -605,9 +605,7 @@ export function EditorFileLibraryPickerView(props: EditorFileLibraryPickerViewPr
           }}
           placement="bottom-start"
         >
-          <DropdownMenu.Target>
-            <div className={classes.contextTarget} style={{ left: contextMenu.x, top: contextMenu.y }} aria-hidden />
-          </DropdownMenu.Target>
+          <DropdownMenu.Anchor x={contextMenu.x} y={contextMenu.y} />
           <DropdownMenu.Dropdown>
             {contextMenu.row.kind === 'folder' ? (
               <DropdownMenu.Item

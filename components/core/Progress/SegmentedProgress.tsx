@@ -43,6 +43,8 @@ export function SegmentedProgress({ label, segments, density = 'labelled' }: Seg
                 // Focusable status text makes each tooltip available to keyboard users.
                 // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
                 tabIndex={0}
+                // A labelled graphic segment; the role also names it as a valid tooltip target.
+                role="img"
                 className={classes.segment}
                 data-tone={segment.tone ?? 'neutral'}
                 style={{ width: `${segment.value * scale}%` }}

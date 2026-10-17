@@ -46,6 +46,7 @@ export function FormPasswordContent({
   const t = useTranslations('formPasswordPage');
   const tCommonActions = useTranslations('common.actions');
   const tCommonPlaceholders = useTranslations('common.placeholders');
+  const tCommonLabels = useTranslations('common.labels');
   const router = useRouter();
   const [password, setPassword] = useState('');
   const [storedPassword, setStoredPassword] = useState<string | undefined>(undefined);
@@ -182,6 +183,7 @@ export function FormPasswordContent({
 
                         <div style={{ width: '100%' }}>
                           <PasswordInput
+                            aria-label={tCommonLabels('password')}
                             placeholder={tCommonPlaceholders('password')}
                             value={password}
                             onChange={(e) => setPassword(e.currentTarget.value)}

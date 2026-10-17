@@ -38,9 +38,3 @@
   place-items: center;
 }
 
-.contextTarget {
-  position: fixed;
-  width: 1px;
-  height: 1px;
-  pointer-events: none;
-}

@@ -2,9 +2,9 @@
 
 import type { StatusBadgeTone } from '@/components/core/Badge';
 
-import { Text as DsText } from '@/components/core/Typography';
+import { Text as DsText, type TextProps } from '@/components/core/Typography';
 import { LayoutInline as DsLayoutInline, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { UploadSessionStatus } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { IconCheck, IconPlayerStop, IconTriangle, IconUpload, IconX } from '@tabler/icons-react';
@@ -688,38 +688,27 @@ export function TrackAudioUploader({
       );
     }
 
-    return (
-      <Tooltip label={status.label}>
-        <DsText as="span">{statusIcon}</DsText>
-      </Tooltip>
-    );
+    return <Tooltip label={status.label}>{statusIcon}</Tooltip>;
   }
 
   const uploadButton = showUploadButton ? (
     <div id={uploadButtonWrapperId}>
-      <Tooltip label={resumeInstruction ?? t('uploadTooltip')}>
-        <span>
-          <FilePicker
-            id={inputId}
-            accept={ACCEPT_TRACK_AUDIO}
-            disabled={disabled || isBusy}
-            onChange={handleFileSelect}
-          >
-            {(onBrowse) => (
-              <IconButton
-                id={uploadButtonId}
-                size={compact ? 'sm' : 'md'}
-                loading={isBusy}
-                disabled={disabled || isBusy}
-                onClick={onBrowse}
-                aria-label={t('uploadTooltip')}
-              >
-                <IconUpload size={14} />
-              </IconButton>
-            )}
-          </FilePicker>
-        </span>
-      </Tooltip>
+      <FilePicker id={inputId} accept={ACCEPT_TRACK_AUDIO} disabled={disabled || isBusy} onChange={handleFileSelect}>
+        {(onBrowse) => (
+          <Tooltip label={resumeInstruction ?? t('uploadTooltip')}>
+            <IconButton
+              id={uploadButtonId}
+              size={compact ? 'sm' : 'md'}
+              loading={isBusy}
+              disabled={disabled || isBusy}
+              onClick={onBrowse}
+              aria-label={t('uploadTooltip')}
+            >
+              <IconUpload size={14} />
+            </IconButton>
+          </Tooltip>
+        )}
+      </FilePicker>
     </div>
   ) : null;
 
@@ -777,43 +766,48 @@ export function TrackAudioUploader({
   );
 }
 
-function TrackAudioStatusIcon({
-  id,
-  kind,
-  tone,
-  label,
-  compact,
-}: {
+/** Focus/describedby props injected by the Core tooltip trigger pass through to the root. */
+interface TrackAudioStatusIconProps extends Omit<TextProps, 'children' | 'id' | 'role' | 'tone' | 'size' | 'as'> {
   id?: string;
   kind: 'idle' | 'warning' | 'processing' | 'ready' | 'failed';
   tone: StatusBadgeTone;
   label: string;
   compact: boolean;
-}) {
-  const iconSize = compact ? 14 : 16;
-  const stateIconId = id ? `${id}-${kind}` : undefined;
-
-  if (kind === 'idle') {
-    return (
-      <DsText id={id} size={compact ? 'sm' : 'md'} tone="secondary" aria-label={label} as="span">
-        -
-      </DsText>
-    );
-  }
-
-  if (kind === 'processing') {
-    return (
-      <DsText id={id} size={compact ? 'sm' : 'md'} as="span">
-        <Loader id={stateIconId} size="xs" tone={tone} aria-label={label} />
-      </DsText>
-    );
-  }
-
-  const Icon = kind === 'ready' ? IconCheck : kind === 'failed' ? IconX : IconTriangle;
-
-  return (
-    <DsText id={id} size={compact ? 'sm' : 'md'} tone={tone} aria-label={label} as="span">
-      <Icon id={stateIconId} size={iconSize} stroke={2.2} />
-    </DsText>
-  );
 }
+
+/**
+ * A labelled, non-interactive tooltip target: the root forwards its ref and carries the accessible
+ * role (`progressbar` while processing, otherwise `img`) so the tooltip describes it.
+ */
+const TrackAudioStatusIcon = forwardRef<HTMLElement, TrackAudioStatusIconProps>(
+  ({ id, kind, tone, label, compact, ...triggerProps }, ref) => {
+    const iconSize = compact ? 14 : 16;
+    const stateIconId = id ? `${id}-${kind}` : undefined;
+    const size = compact ? 'sm' : 'md';
+
+    if (kind === 'idle') {
+      return (
+        <DsText {...triggerProps} ref={ref} id={id} size={size} tone="secondary" role="img" aria-label={label} as="span">
+          -
+        </DsText>
+      );
+    }
+
+    if (kind === 'processing') {
+      return (
+        <DsText {...triggerProps} ref={ref} id={id} size={size} role="progressbar" aria-label={label} as="span">
+          <Loader id={stateIconId} size="xs" tone={tone} />
+        </DsText>
+      );
+    }
+
+    const Icon = kind === 'ready' ? IconCheck : kind === 'failed' ? IconX : IconTriangle;
+
+    return (
+      <DsText {...triggerProps} ref={ref} id={id} size={size} tone={tone} role="img" aria-label={label} as="span">
+        <Icon id={stateIconId} size={iconSize} stroke={2.2} aria-hidden />
+      </DsText>
+    );
+  },
+);
+TrackAudioStatusIcon.displayName = 'TrackAudioStatusIcon';

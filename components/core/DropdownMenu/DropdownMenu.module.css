@@ -136,3 +136,11 @@
     max-height: calc(50dvh - var(--geul-spacing-xl));
   }
 }
+
+/* DropdownMenu.Anchor: a 1px viewport point for programmatically opened (context) menus. */
+.anchor {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}

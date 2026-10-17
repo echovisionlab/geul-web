@@ -92,11 +92,13 @@ describe('Tooltip', () => {
     act(() =>
       root.render(
         <Tooltip label="Width" tabIndex={-1} events={{ focus: false }}>
-          <span role="status">64%</span>
+          <span role="img" aria-label="Width 64%">
+            64%
+          </span>
         </Tooltip>,
       ),
     );
-    const target = container.querySelector('[role="status"]') as HTMLElement;
+    const target = container.querySelector('[role="img"]') as HTMLElement;
     expect(target.tabIndex).toBe(-1);
     act(() => target.focus());
     expect(container.querySelector('[role="tooltip"]')).toBeNull();

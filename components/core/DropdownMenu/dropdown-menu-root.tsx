@@ -18,6 +18,7 @@ import {
   type ReactNode,
 } from 'react';
 import type { OverlayPresentationProps } from '../overlay-contract';
+import { usePress } from 'react-aria/usePress';
 import { OverlayTriggerTarget } from '../OverlayTriggerTarget';
 import { OverlayHintContext } from '../overlay-hint-context';
 import { primitiveTokens } from '../design-tokens';
@@ -144,6 +145,17 @@ export const DropdownMenuTarget = forwardRef<HTMLElement, { children: ReactEleme
   <OverlayTriggerTarget forwardedRef={ref}>{children}</OverlayTriggerTarget>
 ));
 DropdownMenuTarget.displayName = 'DropdownMenu.Target';
+
+/**
+ * Viewport point a programmatically opened menu (a context menu) is positioned from. It is not a
+ * control: it joins the menu trigger only as the positioning reference, outside the tab order and
+ * the accessibility tree. Focus moves into the menu when it opens.
+ */
+export function DropdownMenuAnchor({ x, y, className }: { x: number; y: number; className?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  usePress({ ref });
+  return <span ref={ref} className={className} style={{ left: x, top: y }} aria-hidden data-dropdown-menu-anchor />;
+}
 
 /** Marks a component that `DropdownMenu.Dropdown` treats as a section label. */
 export const DROPDOWN_MENU_LABEL = Symbol.for('core.dropdown-menu.label');

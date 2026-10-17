@@ -46,6 +46,10 @@ Owner: components/core/DropdownMenu/DropdownMenu.tsx.
 - Supports Section(label), Label, Divider, Sub(size/placement), Sub.Target(children/icon/disabled), Sub.Dropdown. Sub placement defaults right-start. Sub.Target with only compound nodes has no separate aria-label/textValue API; inspect naming/typeahead in actual submenu consumers.
 - Menu popup is isNonModal; open editor content is not hidden from AT. Command execution/dismissal and link navigation are separate. App guards canceling navigation do not remove existing Item onClick/dismissal behavior.
 
+`DropdownMenu.Anchor x y` positions a programmatically opened menu (a context menu) at a viewport point.
+It joins the menu trigger only as the positioning reference: hidden from assistive technology, outside the tab
+order, and not a Pressable. Do not wrap an aria-hidden element in `DropdownMenu.Target` for this purpose.
+
 ### Popover
 
 Owners: components/core/Popover/Popover.tsx and Popover.type-test.tsx.
