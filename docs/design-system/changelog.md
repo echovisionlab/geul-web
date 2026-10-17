@@ -22,6 +22,8 @@ no longer prints its own title.
 Core `LayoutGrid` adds `minColumnWidth` (`sm`/`md`/`lg`, responsive): a fluid grid of equal columns at least
 that wide. Page collection blocks size columns from the item size instead of the authored count, which now
 applies to carousels only (the editor shows "Slides to show" for carousels and no column control otherwise).
+Stacked page sections now share the `xl` rhythm on screen as on paper, so a heading block no longer sits
+flush against the collection before it; adjacent sections with a background colour stay joined.
 Core `TableOfContentsView` adds `outlinePresentation="rail"` for documents sharing the page width. Core
 `Pagination` and server table pagination render nothing for a single page. Collection blocks with pagination
 on continue in place (`InfiniteItems`, Load more / retry) instead of page links.

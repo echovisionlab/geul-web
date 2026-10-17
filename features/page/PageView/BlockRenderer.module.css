@@ -3,6 +3,19 @@
   min-width: 0;
 }
 
+/*
+ * Stacked sections share one rhythm (spacing-xl) on screen and paper alike, so a heading block never sits
+ * flush against the collection before it. Adjacent filled sections (a background colour) stay joined: their
+ * own padding separates their content.
+ */
+.section + .section {
+  margin-block-start: var(--geul-spacing-xl);
+}
+
+.section[data-section-surface='filled'] + .section[data-section-surface='filled'] {
+  margin-block-start: 0;
+}
+
 :global([data-footer-layout='pinned']) .sections {
   display: flex;
   flex: 1 1 auto;
@@ -26,11 +39,7 @@
     overflow: visible !important;
   }
 
-  /* Stacked sections and columns separate by the shared section relationship (spacing-xl). */
-  .section + .section {
-    margin-block-start: var(--geul-spacing-xl);
-  }
-
+  /* Columns separate by the shared section relationship (spacing-xl). */
   :global(.columns-section) {
     display: block !important;
   }

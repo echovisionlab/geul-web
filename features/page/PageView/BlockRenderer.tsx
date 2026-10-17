@@ -66,6 +66,7 @@ function SectionView({ section, query, requestedLocale }: SectionViewProps) {
       className={`page-section ${classes.section}`}
       data-section-id={section.id}
       data-section-type={section.type}
+      data-section-surface={settings?.backgroundColor ? 'filled' : undefined}
       style={style}
     >
       <SectionContent section={section} query={query} requestedLocale={requestedLocale} />
