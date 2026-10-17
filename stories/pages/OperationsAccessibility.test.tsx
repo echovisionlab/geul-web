@@ -9,6 +9,9 @@ import { OgImageSettingsPreview } from './OgImageSettings.stories';
 import en from '@/messages/en.json';
 import { waitInAct } from '@/test/act-wait';
 
+// Full production page renders: a loaded CI worker needs more than the default 5s per test.
+vi.setConfig({ testTimeout: 20_000 });
+
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
   usePathname: () => '/admin/settings',

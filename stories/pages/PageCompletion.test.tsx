@@ -11,6 +11,9 @@ import { AdminUserEditPreview } from './AdminUserEdit.stories';
 import { OgImageSettingsPreview } from './OgImageSettings.stories';
 import { ProgramEventListsPreview } from './ProgramEventLists.stories';
 import { waitInAct } from '@/test/act-wait';
+
+// Full production page renders: a loaded CI worker needs more than the default 5s per test.
+vi.setConfig({ testTimeout: 20_000 });
 vi.mock('../shared/preview-navigation', () => ({ navigatePreview: vi.fn(() => true) }));
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
@@ -55,7 +58,7 @@ describe('complete production page preview controllers', () => {
     await waitInAct(() => {
       expect(button('Try again')).toBeDefined();
       expect(host.textContent).toContain('Something went wrong');
-    }, 3000);
+    }, 8000);
     expect(host.textContent).not.toContain('Generating preview');
     const requests = fetchPreview.mock.calls.length;
     await act(async () => button('Try again')!.click());

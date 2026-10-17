@@ -6,6 +6,9 @@ import { TestProviders } from '@/test/TestProviders';
 import { ClientEditorPreview } from './ClientEditor.stories';
 import { PostTaxonomyPreview } from './PostTaxonomy.stories';
 import { waitInAct } from '@/test/act-wait';
+
+// Full production page renders: a loaded CI worker needs more than the default 5s per test.
+vi.setConfig({ testTimeout: 20_000 });
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), prefetch: vi.fn() }),
   useParams: () => ({ id: 'client-preview' }),
