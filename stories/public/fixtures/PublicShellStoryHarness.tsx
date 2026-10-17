@@ -72,7 +72,7 @@ function toNavigation(items: NavigationFixture[], pathname: string): ShellViewNa
     }));
 }
 
-function LanguageControl({ footer = false }: { footer?: boolean }) {
+function LanguageControl({ variant = 'icon' }: { variant?: 'icon' | 'footer' | 'navigation' }) {
   const locale = useLocale();
   const text = useStorybookText();
   const changeLocale = (value: string) => {
@@ -87,7 +87,18 @@ function LanguageControl({ footer = false }: { footer?: boolean }) {
   return (
     <DropdownMenu>
       <DropdownMenu.Target>
-        {footer ? (
+        {variant === 'navigation' ? (
+          <TextButton
+            density="chrome"
+            display="flex"
+            fullWidth
+            justify="start"
+            indicator="menu"
+            aria-label={text('Change language')}
+          >
+            <Text size="xs">{locale === 'ko' ? '한국어' : 'English'}</Text>
+          </TextButton>
+        ) : variant === 'footer' ? (
           <TextButton appearance="muted" size="xs" controlSize="xs" aria-label={text('Change language')}>
             {locale === 'ko' ? '한국어' : 'English'}
           </TextButton>
@@ -201,9 +212,9 @@ export function PublicShellStoryHarness({ children, initialPath }: PublicShellSt
         ),
         printWatermark: <SiteLogoView src={EXAMPLE_STUDIO_LOGO_STORY_URL} alt="Example Studio" height={24} />,
         languageDesktop: <LanguageControl />,
-        languageMobile: <LanguageControl />,
-        languageFooterDesktop: <LanguageControl footer />,
-        languageFooterMobile: <LanguageControl footer />,
+        languageNavigation: <LanguageControl variant="navigation" />,
+        languageFooterDesktop: <LanguageControl variant="footer" />,
+        languageFooterMobile: <LanguageControl variant="footer" />,
         socialLinks: (
           <DsLayoutInline gap="sm">
             <a href="https://instagram.com" aria-label="Instagram">

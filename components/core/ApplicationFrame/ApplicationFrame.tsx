@@ -1,6 +1,7 @@
 'use client';
 import type { ReactNode } from 'react';
 import { Button as AriaButton } from 'react-aria-components';
+import { VisuallyHidden } from '../Typography';
 import { OnDemandDrawer, preloadDrawer } from '../Drawer/OnDemandDrawer';
 import { presentationAttributes, type PresentationProps } from '../presentation-contract';
 import classes from './ApplicationFrame.module.css';
@@ -15,6 +16,8 @@ export interface SiteFrameProps extends FrameBaseProps {
   navigationOpened: boolean;
   onCloseNavigation: () => void;
   navigationLabel: string;
+  /** Visible drawer heading; branded content must retain the navigation accessible name. */
+  navigationTitle?: ReactNode;
   closeLabel: string;
   navigationId?: string;
 }
@@ -84,7 +87,16 @@ export function ApplicationFrame(props: ApplicationFrameProps) {
             placement="left"
             size="compact"
             visibility="mobile-only"
-            title={props.navigationLabel}
+            title={
+              props.navigationTitle != null ? (
+                <>
+                  <span aria-hidden="true">{props.navigationTitle}</span>
+                  <VisuallyHidden>{props.navigationLabel}</VisuallyHidden>
+                </>
+              ) : (
+                props.navigationLabel
+              )
+            }
             closeLabel={props.closeLabel}
           >
             {navigation}

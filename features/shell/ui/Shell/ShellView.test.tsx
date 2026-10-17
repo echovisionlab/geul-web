@@ -95,7 +95,7 @@ const defaultProps: ShellViewProps = {
     printHeader: <span data-testid="print-header">Print header</span>,
     printWatermark: <span data-testid="print-watermark">Print watermark</span>,
     languageDesktop: <button type="button">Language desktop</button>,
-    languageMobile: <button type="button">Language mobile</button>,
+    languageNavigation: <button type="button">Language navigation</button>,
     languageFooterDesktop: (
       <TextButton size="xs" controlSize="xs" onClick={vi.fn()}>
         English desktop
@@ -320,6 +320,26 @@ describe('ShellView', () => {
     expect(hydratedThemeButtons.map((button) => button.innerHTML)).toEqual(iconMarkup);
   });
 
+  it('shows the same brand in the mobile drawer while preserving its accessible heading', () => {
+    renderView({
+      navigationOpened: true,
+      slots: { ...defaultProps.slots, logo: <img src="/stacked.svg" alt="Example Studio" /> },
+    });
+    const drawer = document.getElementById('shell-mobile-navigation');
+    const title = document.getElementById(drawer?.getAttribute('aria-labelledby') ?? '');
+    expect(title?.querySelector('img')?.getAttribute('src')).toBe('/stacked.svg');
+    expect(title?.querySelector('img')?.closest('[aria-hidden="true"]')).not.toBeNull();
+    expect(title?.textContent).toBe(defaultProps.labels.navigation);
+  });
+
+  it('moves the language control from the phone header into the navigation drawer', () => {
+    renderView({ navigationOpened: true });
+    const header = container.querySelector('[data-site-header]');
+    const navigation = document.body.querySelector('[data-shell-mobile-navigation]');
+    expect(header?.textContent).not.toContain('Language navigation');
+    expect(navigation?.textContent).toContain('Language navigation');
+  });
+
   it('uses Core menu and disclosure controls for accessible mobile navigation', () => {
     renderView({ navigationOpened: true });
 
@@ -333,7 +353,7 @@ describe('ShellView', () => {
     expect(disclosure?.getAttribute('data-appearance')).toBe('plain');
     expect(disclosure?.getAttribute('data-divider')).toBe('none');
     expect(disclosure?.getAttribute('data-content-indent')).toBe('label');
-    expect(disclosure?.getAttribute('data-density')).toBe('compact');
+    expect(disclosure?.getAttribute('data-density')).toBe('chrome');
     expect(disclosureToggle?.textContent).toBe('Explore');
     expect(disclosureToggle?.getAttribute('aria-expanded')).toBe('false');
 

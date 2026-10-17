@@ -3,9 +3,9 @@
 // `ShellIslands`, which read open state, user, theme and route from the shell state context.
 
 import type { ReactNode } from 'react';
+import { SiteHeader } from '@/components/core/ApplicationFrame';
 import {
   LayoutGrid,
-  LayoutInline,
   LayoutInline as DsLayoutInline,
   LayoutInset as DsLayoutInset,
   LayoutStack as DsLayoutStack,
@@ -171,57 +171,46 @@ export function ShellLayout({
   return (
     <ShellFrame
       header={
-        <>
-          <DsLayoutInset inline="sm">
-            <DsLayoutInline fill="block" justify="between" wrap="nowrap">
-              <DsLayoutInline gap="xs" wrap="nowrap">
-                <ShellNavigationToggle label={labels.toggleNavigation} />
-                <ShellHomeLink label={footer.siteTitle}>
-                  <LayoutInline align="center" gap="none">
-                    {slots.logo}
-                  </LayoutInline>
-                </ShellHomeLink>
+        <SiteHeader
+          navigationToggle={<ShellNavigationToggle label={labels.toggleNavigation} />}
+          mobileLeadingActions={<ShellThemeToggle label={labels.toggleColorScheme} variant="mobile" />}
+          logo={<ShellHomeLink label={footer.siteTitle}>{slots.logo}</ShellHomeLink>}
+          desktopActions={
+            <DsLayoutStack gap="none" fill="block" justify="between">
+              <DsLayoutInline justify="end" gap="xs" wrap="nowrap">
+                {secondaryItems.map((item) => (
+                  <ShellLink
+                    key={item.id}
+                    href={item.href}
+                    density="chrome"
+                    size="xs"
+                    nowrap
+                    target={linkTarget(item)}
+                    rel={linkRel(item)}
+                  >
+                    {item.label}
+                  </ShellLink>
+                ))}
+                <ShellSearchAction label={labels.search} variant="desktop" />
+                {slots.languageDesktop}
+                <ShellThemeToggle label={labels.toggleColorScheme} variant="desktop" />
+                <ShellAccountDesktop items={accountItems} labels={accountLabels} />
               </DsLayoutInline>
-
-              <LayoutVisibility visibleFrom="sm">
-                <DsLayoutStack gap="none" fill="block" justify="between">
-                  <DsLayoutInline justify="end" gap="xs" wrap="nowrap">
-                    {secondaryItems.map((item) => (
-                      <ShellLink
-                        key={item.id}
-                        href={item.href}
-                        density="chrome"
-                        size="xs"
-                        nowrap
-                        target={linkTarget(item)}
-                        rel={linkRel(item)}
-                      >
-                        {item.label}
-                      </ShellLink>
-                    ))}
-                    <ShellSearchAction label={labels.search} variant="desktop" />
-                    {slots.languageDesktop}
-                    <ShellThemeToggle label={labels.toggleColorScheme} variant="desktop" />
-                    <ShellAccountDesktop items={accountItems} labels={accountLabels} />
-                  </DsLayoutInline>
-                  <DsLayoutInline gap="none" justify="start">
-                    <ShellDesktopNavigation items={headerItems} label={labels.navigation} />
-                  </DsLayoutInline>
-                </DsLayoutStack>
-              </LayoutVisibility>
-
-              <LayoutVisibility hiddenFrom="sm">
-                <DsLayoutInline gap="xs" wrap="nowrap">
-                  <ShellSearchAction label={labels.search} variant="mobile" />
-                  {slots.languageMobile}
-                  <ShellThemeToggle label={labels.toggleColorScheme} variant="mobile" />
-                  <ShellAccountMobile labels={accountLabels} />
-                </DsLayoutInline>
-              </LayoutVisibility>
-            </DsLayoutInline>
-          </DsLayoutInset>
-        </>
+              <DsLayoutInline gap="none" justify="start">
+                <ShellDesktopNavigation items={headerItems} label={labels.navigation} />
+              </DsLayoutInline>
+            </DsLayoutStack>
+          }
+          mobileActions={
+            <>
+              <ShellSearchAction label={labels.search} variant="mobile" />
+              <ShellAccountMobile labels={accountLabels} />
+            </>
+          }
+        />
       }
+      navigationTitle={slots.logo}
+      navigationFooter={slots.languageNavigation}
       headerItems={headerItems}
       secondaryItems={secondaryItems}
       footer={<Footer items={footerItems} footer={footer} labels={labels} slots={slots} />}

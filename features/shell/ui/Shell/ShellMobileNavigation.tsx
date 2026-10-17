@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 // Navigation list of the site navigation drawer. Loaded on demand with the drawer (ShellFrame).
 
 import { Disclosure } from '@/components/core/Disclosure';
@@ -21,9 +22,12 @@ function linkRel(item: ShellViewNavigationItem) {
 export function ShellMobileNavigation({
   headerItems,
   secondaryItems,
+  footer,
 }: {
   headerItems: ShellViewNavigationItem[];
   secondaryItems: ShellViewNavigationItem[];
+  /** Settings below the links, such as the language menu the phone header leaves out. */
+  footer?: ReactNode;
 }) {
   const { isItemActive, events } = useShellState();
   const renderLink = (item: ShellViewNavigationItem, nested = false) => {
@@ -59,7 +63,7 @@ export function ShellMobileNavigation({
             key={item.id}
             label={item.label}
             appearance="plain"
-            density="compact"
+            density="chrome"
             withDivider={false}
             shape="square"
             contentIndent="label"
@@ -74,6 +78,12 @@ export function ShellMobileNavigation({
         <>
           <Divider spaceBefore="xs" spaceAfter="xs" />
           {secondaryItems.map((item) => renderLink(item))}
+        </>
+      ) : null}
+      {footer != null ? (
+        <>
+          <Divider spaceBefore="xs" spaceAfter="xs" />
+          {footer}
         </>
       ) : null}
     </DsLayoutStack>

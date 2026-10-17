@@ -97,11 +97,11 @@ export async function Shell({ children, initialUserSnapshot }: ShellProps) {
           footerSocialMedia: tShell('footer.socialMedia'),
         }}
         slots={{
-          logo: <SiteLogo height="intrinsic" />,
+          logo: <SiteLogo height={34} />,
           printHeader: <PrintHeader />,
-          printWatermark: <SiteLogo height={24} />,
+          printWatermark: <SiteLogo height={17} />,
           languageDesktop: <LanguageMenu />,
-          languageMobile: <LanguageMenu />,
+          languageNavigation: <LanguageMenu variant="navigation" />,
           languageFooterDesktop: <LanguageMenu variant="text" textSize="xs" />,
           languageFooterMobile: <LanguageMenu variant="text" textSize="xs" />,
           socialLinks: <ServerSocialLinksDisplay links={settings.social_links} gap="sm" />,

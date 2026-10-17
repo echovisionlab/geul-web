@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 import { useStorybookText } from '@/.storybook/fixture-i18n';
+import { SiteHeader } from './SiteHeader';
 import { ApplicationFrame } from './ApplicationFrame';
 import { MenuToggle } from '../MenuToggle';
 import { LayoutInline, LayoutStack } from '../Layout';
@@ -9,6 +10,7 @@ import { Heading, Text } from '../Typography';
 const meta = {
   title: 'Core/Layout/ApplicationFrame',
   component: ApplicationFrame,
+  subcomponents: { SiteHeader },
   parameters: { canvasInset: 'none', layout: 'fullscreen' },
 } satisfies Meta<typeof ApplicationFrame>;
 export default meta;
@@ -20,15 +22,28 @@ function SitePreview() {
     <ApplicationFrame
       kind="site"
       header={
-        <LayoutInline align="center" fill="block">
-          <MenuToggle
-            opened={opened}
-            onClick={() => setOpened(!opened)}
-            label={text('Menu')}
-            controls="preview-site-nav"
-          />
-          <Text>Geul</Text>
-        </LayoutInline>
+        <SiteHeader
+          navigationToggle={
+            <MenuToggle
+              opened={opened}
+              onClick={() => setOpened(!opened)}
+              label={text('Menu')}
+              controls="preview-site-nav"
+              visibility="mobile-only"
+            />
+          }
+          logo={
+            <NavigationLink href="#content" appearance="graphic">
+              Geul
+            </NavigationLink>
+          }
+          desktopActions={
+            <LayoutInline justify="end">
+              <NavigationLink href="#content">{text('Home')}</NavigationLink>
+            </LayoutInline>
+          }
+          mobileActions={<NavigationLink href="#content">{text('Home')}</NavigationLink>}
+        />
       }
       navigation={
         <LayoutStack>

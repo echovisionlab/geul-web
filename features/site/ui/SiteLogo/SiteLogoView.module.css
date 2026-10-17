@@ -6,6 +6,7 @@
 .image {
   display: inline-flex;
   width: auto;
+  flex-shrink: 0;
   object-fit: contain;
   border: 0;
 }

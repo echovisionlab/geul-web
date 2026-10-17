@@ -265,8 +265,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
         onToggleColorScheme: toggleColorScheme,
         onNavigate: () => undefined,
       }}
-      logoSlot={<SiteLogo height={14} />}
-      compactLogoSlot={<SiteLogo height={12} />}
+      logoSlot={<SiteLogo height={56} />}
+      compactLogoSlot={<SiteLogo height={28} />}
     >
       {children}
     </AdminShellView>

@@ -1,7 +1,6 @@
 'use client';
 
 import { startTransition, useId, useMemo, useState } from 'react';
-import { VisuallyHidden } from '@/components/core/Typography';
 import { useRouter } from 'next/navigation';
 import { IconLanguage } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
@@ -9,6 +8,7 @@ import { notifications } from '@/components/core/Notification';
 import { IconButton, type IconButtonProps } from '@/components/core/IconButton';
 import { OnDemandDropdownMenu as DropdownMenu } from '@/components/core/DropdownMenu/OnDemandDropdownMenu';
 import { TextButton, type TextButtonSize } from '@/components/core/TextButton';
+import { Text, VisuallyHidden } from '@/components/core/Typography';
 import { updatePreferredLocaleAction } from '@/lib/actions/user-preference';
 import { useSession } from '@/lib/auth/client';
 import { getSupportedLocaleOptions, type SupportedLocale } from '@/lib/i18n/locale';
@@ -16,7 +16,8 @@ import { writeLocaleCookie } from '@/lib/i18n/locale-cookie';
 import { useLocale } from '@/lib/providers/LocaleProvider';
 
 interface LanguageMenuProps {
-  variant?: 'icon' | 'text';
+  /** `navigation` is a full-width row matching the navigation drawer's links. */
+  variant?: 'icon' | 'text' | 'navigation';
   size?: IconButtonProps['size'];
   textSize?: TextButtonSize;
 }
@@ -79,6 +80,30 @@ export function LanguageMenu({ variant = 'icon', size = 'chrome', textSize = 'xs
       ))}
     </DropdownMenu.Dropdown>
   );
+
+  if (variant === 'navigation') {
+    return (
+      <DropdownMenu size="wide" placement="bottom-start" portal>
+        <DropdownMenu.Target>
+          <TextButton
+            type="button"
+            density="chrome"
+            display="flex"
+            fullWidth
+            justify="start"
+            indicator="menu"
+            aria-label={currentLocaleLabel}
+            aria-describedby={descriptionId}
+            disabled={isPending || updatingLocale}
+          >
+            <Text size="xs">{currentLocaleLabel}</Text>
+            <VisuallyHidden id={descriptionId}>{tShell('actions.language')}</VisuallyHidden>
+          </TextButton>
+        </DropdownMenu.Target>
+        {dropdown}
+      </DropdownMenu>
+    );
+  }
 
   if (variant === 'text') {
     return (
