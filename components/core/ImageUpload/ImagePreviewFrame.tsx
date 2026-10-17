@@ -2,6 +2,7 @@
 import type { ClosedVisualProps } from '../visual-contract';
 import type { CSSProperties, ReactNode } from 'react';
 import classes from './ImageUpload.module.css';
+export type ImagePreviewSurface = 'default' | 'muted' | 'transparent' | 'theme-light' | 'theme-dark';
 export interface ImagePreviewFrameProps extends ClosedVisualProps {
   src?: string | null;
   alt: string;
@@ -14,7 +15,8 @@ export interface ImagePreviewFrameProps extends ClosedVisualProps {
   aspectRatio?: CSSProperties['aspectRatio'];
   fit?: 'contain' | 'cover';
   shape?: 'square' | 'circle';
-  surface?: 'default' | 'muted' | 'transparent';
+  /** theme-light/theme-dark show an asset on that theme's page background in either app theme. */
+  surface?: ImagePreviewSurface;
   withBorder?: boolean;
   dropActive?: boolean;
   empty?: ReactNode;

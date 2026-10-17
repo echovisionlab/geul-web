@@ -13,6 +13,15 @@ or information button. Crop geometry remains in the preview and dialog. Accessib
 instructions and selection descriptions remain available; failures and preparation status are still announced.
 Optional constraints supplied directly to the domain-free Core crop field remain supported for other tasks.
 
+## Preview and removal
+
+Hug previews (logos) size the preview box, and therefore the remove action's anchor, to the image itself.
+`surface` previews theme-specific artwork on its own background (`theme-light`, `theme-dark`) independent of
+the app theme. The default outside remove action is a corner badge: an opaque chip centred on the preview's
+top-end corner. `ImageUploadField` reserves half the control as a block-start/inline-end gutter whenever a
+remove action is offered, so the badge never covers the field label, description or neighbouring fields.
+`removeButtonPlacement="inside"` (avatars) keeps the action within the image.
+
 ## Source and prepared-file policy
 
 Managed raster sources accepted by their upload type are decoded and resized locally before entering the crop dialog.

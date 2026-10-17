@@ -16,6 +16,13 @@
   min-width: 0;
 }
 
+/* Room for the corner remove badge, which straddles the preview's top-end corner. */
+.removeGutter {
+  min-width: 0;
+  padding-block-start: calc(var(--geul-control-height-xs) / 2);
+  padding-inline-end: calc(var(--geul-control-height-xs) / 2);
+}
+
 .dropzone {
   min-width: 0;
   outline: none;
@@ -61,6 +68,15 @@
 
 .frame[data-surface='transparent'] {
   background: transparent;
+}
+
+/* Theme-specific assets (logos) preview on the theme they are drawn for. */
+.frame[data-surface='theme-light'] {
+  background: var(--geul-theme-light-background);
+}
+
+.frame[data-surface='theme-dark'] {
+  background: var(--geul-theme-dark-background);
 }
 
 .frame[data-border] {

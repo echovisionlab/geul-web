@@ -14,6 +14,8 @@
   --geul-text-inverse-primary: rgb(255 255 255 / 88%);
   --geul-canvas-dark: #101311;
   --geul-canvas-black: #000;
+  --geul-theme-light-background: #f2f1eb;
+  --geul-theme-dark-background: #161918;
   --geul-source-text: #24292f;
   --geul-source-background: #f6f8fa;
   --geul-paper-background: #fff;
