@@ -73,7 +73,17 @@ network access, and `vi.stubGlobal` replacements are restored after each case.
 DOM and Next fixtures are not imported into that project. All projects use fixed
 test-only runtime URLs from `test/runtime-env.mts`; shell variables cannot select
 a running service stack. Stubbed environment variables restore between cases.
-Forks, file parallelism, and Vitest file isolation remain enabled.
+Forks, file parallelism, and Vitest file isolation remain enabled for every file that is not shared (below).
+
+Files that cannot leak state run in a shared runtime: `node-unit-shared` and `component-shared` use
+threads without per-file isolation, so module loading and the DOM environment are set up once per worker
+instead of once per file. `sharesRuntime` in `scripts/test/vitest-projects.mts` decides from the source: no
+`vi.mock`/`vi.doMock`, global or environment stubs, spies, fake timers or global redefinitions, and DOM files
+must clean up what they render (Testing Library, or `unmount` in `afterEach`). A file whose module under
+test keeps state across imports declares `// @geul-test-isolate: <reason>` and stays isolated. The shared
+projects cut the local full run from 139s to 101s with the same 1,118 files; file-order shuffles
+(`--sequence.shuffle.files`) pass. `pnpm test:unit` and `pnpm test:components` include both halves of their
+tier.
 
 Keep per-test `vi.stubGlobal` fixtures in `beforeEach` with corresponding cleanup;
 avoid fixtures that are installed only at module load and then removed by a
