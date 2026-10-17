@@ -158,6 +158,21 @@ export default function AdminEmailLayoutsPage({
     .email-header {
       margin-bottom: 0;
     }
+    /* Mail apps that report dark mode (Apple Mail, Outlook.com) swap in the dark logo. */
+    @media (prefers-color-scheme: dark) {
+      .email-logo-light {
+        display: none !important;
+      }
+      .email-logo-dark {
+        display: block !important;
+      }
+    }
+    [data-ogsc] .email-logo-light {
+      display: none !important;
+    }
+    [data-ogsc] .email-logo-dark {
+      display: block !important;
+    }
     .email-divider {
       margin: 16px 0;
       border: 0;
@@ -177,7 +192,8 @@ export default function AdminEmailLayoutsPage({
   <div class="email-shell" style="max-width: 640px; margin: 0 auto; padding: 32px 16px 24px;">
     <header class="email-header" style="margin-bottom: 0;">
       <a href="{{site_origin}}" style="display: inline-block; text-decoration: none;">
-        <img src="{{logo_email_url}}" alt="{{site_name}}" width="50" style="display: block; border: 0; max-width: 100%; height: auto;">
+        <img class="email-logo-light" src="{{logo_email_url}}" alt="{{site_name}}" width="50" style="display: block; border: 0; max-width: 100%; height: auto;">
+        <!--[if !mso]><!--><img class="email-logo-dark" src="{{logo_email_dark_url}}" alt="{{site_name}}" width="50" style="display: none; border: 0; max-width: 100%; height: auto;"><!--<![endif]-->
       </a>
     </header>
     <hr class="email-divider" style="margin: 16px 0; border: 0; border-top: 1px solid ${invariantTokens['paper-border-subtle']};">

@@ -80,10 +80,13 @@ export interface SiteSettingsFormValues {
 
 /** Read-only asset projections returned by GetSettings. */
 export interface SiteSettingsAssetView {
-  logo_url: string | null;
-  logo_light_url: string | null;
-  logo_dark_url: string | null;
-  logo_email_url: string | null;
+  /** Stored logo slots exactly as configured; display fallbacks belong to the manifest. */
+  logo_full_light_url: string | null;
+  logo_full_dark_url: string | null;
+  logo_symbol_light_url: string | null;
+  logo_symbol_dark_url: string | null;
+  logo_email_light_url: string | null;
+  logo_email_dark_url: string | null;
   favicon_url: string | null;
   loader_urls: string[];
   loader_assets: SiteLoaderAsset[];
@@ -163,10 +166,12 @@ export const DEFAULT_SITE_SETTINGS_FORM_VALUES: SiteSettingsFormValues = {
 export const DEFAULT_SITE_SETTINGS_VIEW: SiteSettingsView = {
   ...DEFAULT_SITE_SETTINGS_FORM_VALUES,
   site_origin: '',
-  logo_url: null,
-  logo_light_url: null,
-  logo_dark_url: null,
-  logo_email_url: null,
+  logo_full_light_url: null,
+  logo_full_dark_url: null,
+  logo_symbol_light_url: null,
+  logo_symbol_dark_url: null,
+  logo_email_light_url: null,
+  logo_email_dark_url: null,
   favicon_url: null,
   loader_urls: [],
   loader_assets: [],
@@ -187,10 +192,12 @@ export type PublicSettingKey =
   | 'legal_email'
   | 'contact_email'
   | 'social_links'
-  | 'logo_url'
-  | 'logo_light_url'
-  | 'logo_dark_url'
-  | 'logo_email_url'
+  | 'logo_full_light_url'
+  | 'logo_full_dark_url'
+  | 'logo_symbol_light_url'
+  | 'logo_symbol_dark_url'
+  | 'logo_email_light_url'
+  | 'logo_email_dark_url'
   | 'favicon_url'
   | 'loader_urls'
   | 'site_og_background_url'
@@ -217,10 +224,12 @@ export const DEFAULT_PUBLIC_SETTINGS: PublicSettings = {
   legal_email: DEFAULT_SITE_SETTINGS_VIEW.legal_email,
   contact_email: DEFAULT_SITE_SETTINGS_VIEW.contact_email,
   social_links: DEFAULT_SITE_SETTINGS_VIEW.social_links,
-  logo_url: DEFAULT_SITE_SETTINGS_VIEW.logo_url,
-  logo_light_url: DEFAULT_SITE_SETTINGS_VIEW.logo_light_url,
-  logo_dark_url: DEFAULT_SITE_SETTINGS_VIEW.logo_dark_url,
-  logo_email_url: DEFAULT_SITE_SETTINGS_VIEW.logo_email_url,
+  logo_full_light_url: DEFAULT_SITE_SETTINGS_VIEW.logo_full_light_url,
+  logo_full_dark_url: DEFAULT_SITE_SETTINGS_VIEW.logo_full_dark_url,
+  logo_symbol_light_url: DEFAULT_SITE_SETTINGS_VIEW.logo_symbol_light_url,
+  logo_symbol_dark_url: DEFAULT_SITE_SETTINGS_VIEW.logo_symbol_dark_url,
+  logo_email_light_url: DEFAULT_SITE_SETTINGS_VIEW.logo_email_light_url,
+  logo_email_dark_url: DEFAULT_SITE_SETTINGS_VIEW.logo_email_dark_url,
   favicon_url: DEFAULT_SITE_SETTINGS_VIEW.favicon_url,
   loader_urls: DEFAULT_SITE_SETTINGS_VIEW.loader_urls,
   site_og_background_url: DEFAULT_SITE_SETTINGS_VIEW.site_og_background_url,

@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "adef60ee2e4ff0052de32add7eb8e70493114eac89d11a89b7c8848c1e7bda1a",
+  "manifestHash": "570939da2bd45a71d5f5c1271725ded0f6114683a218f8d61bc823d376b53cf4",
   "counts": {
-    "sourceFiles": 3776,
-    "productionSourceFiles": 2283,
-    "componentFiles": 901,
+    "sourceFiles": 3778,
+    "productionSourceFiles": 2285,
+    "componentFiles": 902,
     "coreFamilies": 57,
     "featureDomains": 53,
     "storyFiles": 256,
@@ -731,6 +731,7 @@
     "components/core/Section/SectionCard.tsx",
     "components/core/Section/SectionHeader.stories.tsx",
     "components/core/Section/SectionHeader.tsx",
+    "components/core/Section/SettingsSection.tsx",
     "components/core/Section/StatCard.stories.tsx",
     "components/core/Section/StatCard.test.tsx",
     "components/core/Section/StatCard.tsx",
@@ -2560,6 +2561,7 @@
     "features/site/SiteLogo/SiteLogo.test.tsx",
     "features/site/SiteLogo/SiteLogo.tsx",
     "features/site/SiteLogo/index.ts",
+    "features/site/SiteLogo/placements.ts",
     "features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader.test.tsx",
     "features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader.tsx",
     "features/site/SiteOgImagePanel/SiteOgImagePanel.test.tsx",
@@ -8427,6 +8429,7 @@
       ],
       "typeAliasEvidence": [],
       "productionConsumers": [
+        "features/admin/settings/OgImageSettingsPage.tsx",
         "features/form/FormField/fields/CheckboxField.tsx",
         "features/form/FormField/fields/PhoneField.tsx",
         "features/form/FormField/fields/SwitchField.tsx",
@@ -9015,7 +9018,7 @@
             {
               "name": "surface",
               "optional": true,
-              "type": "'default' | 'muted' | 'transparent'"
+              "type": "ImagePreviewSurface"
             },
             {
               "name": "withBorder",
@@ -9045,7 +9048,12 @@
           ]
         }
       ],
-      "typeAliasEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "ImagePreviewSurface",
+          "type": "'default' | 'muted' | 'transparent' | 'theme-light' | 'theme-dark'"
+        }
+      ],
       "productionConsumers": [
         "components/core/ImageUpload/ImageUploadField.tsx",
         "features/metadata/ui/OgImagePreviewView.tsx"
@@ -9418,7 +9426,7 @@
             {
               "name": "surface",
               "optional": true,
-              "type": "'default' | 'muted' | 'transparent'"
+              "type": "ImagePreviewSurface"
             },
             {
               "name": "withBorder",
@@ -9662,6 +9670,7 @@
         "IconX",
         "ImagePreviewFrame",
         "LayoutStack",
+        "RemoveGutter",
         "Text",
         "UploadPlaceholder",
         "div",
@@ -13121,6 +13130,7 @@
         "components/core/Progress/Progress.tsx",
         "components/core/PublicMetadata/PublicMetadata.tsx",
         "components/core/Section/SectionHeader.tsx",
+        "components/core/Section/SettingsSection.tsx",
         "components/core/Section/StatCard.tsx",
         "components/core/Typography/ImageChrome.tsx",
         "features/account-email/AccountEmailOption.tsx",
@@ -15426,11 +15436,13 @@
       ],
       "productionConsumers": [
         "features/admin/MapThemeEditor/MapThemeListPageView.tsx",
+        "features/admin/settings/OgImageSettingsPage.tsx",
         "features/admin/ui/AdminPageHeader/AdminPageHeader.tsx",
         "features/member/onboarding/NicknameOnboarding.tsx",
         "features/program-event/ProgramEventSeriesPublicView.tsx",
         "features/series/SeriesPublicView.tsx",
-        "features/share/SharePasswordView.tsx"
+        "features/share/SharePasswordView.tsx",
+        "features/site/SiteSettingsForm/SiteSettingsForm.tsx"
       ],
       "catalogAdapters": ["stories/shared/AccountPreview.tsx"],
       "tests": [
@@ -16495,7 +16507,6 @@
         "features/series/SeriesDetail.tsx",
         "features/share/ui/ShareLinkSectionView.tsx",
         "features/site/SiteLoaderAssetsUploader/SiteLoaderAssetsUploader.tsx",
-        "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
         "features/social-links/ui/SocialLinksEditorView.tsx",
         "features/translation/ActiveEditLocaleContentPreviewView.tsx",
         "features/translation/TranslationPanelSectionCard.tsx",
@@ -16548,6 +16559,11 @@
               "type": "'with-title' | 'below-row'"
             },
             {
+              "name": "level",
+              "optional": true,
+              "type": "SectionHeaderLevel"
+            },
+            {
               "name": "title",
               "optional": false,
               "type": "ReactNode"
@@ -16565,8 +16581,14 @@
           ]
         }
       ],
-      "typeAliasEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "SectionHeaderLevel",
+          "type": "2 | 3"
+        }
+      ],
       "productionConsumers": [
+        "components/core/Section/SettingsSection.tsx",
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/settings/OgImageSettingsPage.tsx",
         "features/admin/user/UserProfileFormSection.tsx",
@@ -16593,7 +16615,6 @@
         "features/release/ReleaseEditor/ReleaseTagsSection.tsx",
         "features/release/ReleaseEditor/ReleaseTracksSection.tsx",
         "features/share/ui/ShareLinkSectionView.tsx",
-        "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
         "features/translation/TranslationPanelSectionCard.tsx",
         "features/translation/settings/TranslationProviderModal.tsx",
         "features/work/WorkEditor/WorkClientsSection.tsx",
@@ -16605,7 +16626,65 @@
         "components/core/Section/SectionHeader.stories.tsx",
         "stories/design-system/components/Components.stories.tsx"
       ],
-      "composedJsx": ["LayoutInline", "LayoutStack", "SupportingText", "Text", "div"]
+      "composedJsx": ["Heading", "LayoutInline", "LayoutStack", "SupportingText", "Text", "div"]
+    },
+    {
+      "file": "components/core/Section/SettingsSection.tsx",
+      "owner": "Core/Section",
+      "exports": [
+        {
+          "name": "SettingsSection",
+          "kind": "function"
+        },
+        {
+          "name": "SettingsGroup",
+          "kind": "function"
+        }
+      ],
+      "classification": "core",
+      "propsEvidence": [
+        {
+          "name": "SettingsSectionProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "title",
+              "optional": false,
+              "type": "ReactNode"
+            },
+            {
+              "name": "description",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
+              "name": "actions",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
+              "name": "children",
+              "optional": false,
+              "type": "ReactNode"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [
+        {
+          "name": "SettingsGroupProps",
+          "type": "SettingsSectionProps"
+        }
+      ],
+      "productionConsumers": [
+        "features/admin/settings/OgImageSettingsPage.tsx",
+        "features/admin/settings/SiteSettingsPage.tsx",
+        "features/site/SiteSettingsForm/SiteSettingsForm.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["LayoutStack", "SectionHeader"]
     },
     {
       "file": "components/core/Section/StatCard.tsx",
@@ -19638,7 +19717,6 @@
         "features/shell/ui/Shell/ShellMobileNavigation.tsx",
         "features/site/SiteAssetUploader/ui/ImageDropzoneView.tsx",
         "features/site/SiteLoaderAssetsUploader/SiteLoaderAssetsUploader.tsx",
-        "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
         "features/site/ui/SiteLogo/SiteLogoView.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/social-links/ui/SocialLinksEditorView.tsx",
@@ -26028,6 +26106,16 @@
               "name": "getOgGenerationRunAction",
               "optional": false,
               "type": "typeof getOgGenerationRunAction"
+            },
+            {
+              "name": "getSettings",
+              "optional": true,
+              "type": "typeof getAllSiteSettings"
+            },
+            {
+              "name": "siteOg",
+              "optional": true,
+              "type": "SiteOgImageBindings"
             }
           ]
         },
@@ -26035,6 +26123,11 @@
           "name": "HomeSettingsPanelProps",
           "extends": [],
           "properties": [
+            {
+              "name": "sharingImage",
+              "optional": false,
+              "type": "ReactNode"
+            },
             {
               "name": "form",
               "optional": false,
@@ -26099,22 +26192,25 @@
         "Button",
         "ColorInput",
         "ContentSettingsPanel",
-        "DsHeading",
         "DsLayoutGrid",
         "DsLayoutGridItem",
         "DsLayoutInline",
-        "DsLayoutInset",
         "DsLayoutStack",
         "DsSectionCard",
         "DsText",
+        "Field",
         "HomeSettingsPanel",
         "Loader",
         "NumberInput",
         "OgGenerationRunProgress",
+        "PageHeader",
         "PageLoader",
         "QueryErrorAlert",
         "SectionCard",
         "SectionHeader",
+        "SettingsGroup",
+        "SettingsSection",
+        "SiteOgImagePanel",
         "Slider",
         "SupportingText",
         "Tabs",
@@ -26176,27 +26272,28 @@
               "name": "loader",
               "optional": true,
               "type": "import('@/features/site/SiteLoaderAssetsUploader/SiteLoaderAssetsUploader').SiteLoaderBindings"
-            },
-            {
-              "name": "og",
-              "optional": true,
-              "type": "import('@/features/site/SiteOgImagePanel/SiteOgImagePanel').SiteOgImageBindings"
             }
           ]
         }
       ],
-      "typeAliasEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "LogoSlot",
+          "type": "(typeof DISPLAY_LOGO_SLOTS)[number] | (typeof EMAIL_LOGO_SLOTS)[number]"
+        }
+      ],
       "productionConsumers": [],
       "catalogAdapters": [],
       "tests": [],
       "stories": ["stories/pages/SiteSettings.stories.tsx"],
       "composedJsx": [
-        "DsLayoutStack",
+        "DsLayoutGrid",
+        "LogoSlotGrid",
         "PageLoader",
         "QueryErrorAlert",
+        "SettingsGroup",
         "SiteAssetUploader",
         "SiteLoaderAssetsUploader",
-        "SiteOgImagePanel",
         "SiteSettingsForm"
       ]
     },
@@ -68902,6 +68999,11 @@
               "type": "number | 'auto'"
             },
             {
+              "name": "previewSurface",
+              "optional": true,
+              "type": "ImagePreviewSurface"
+            },
+            {
               "name": "label",
               "optional": false,
               "type": "string"
@@ -68913,7 +69015,7 @@
             },
             {
               "name": "uploadPrompt",
-              "optional": true,
+              "optional": false,
               "type": "string"
             },
             {
@@ -68955,6 +69057,27 @@
       ],
       "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
       "propsEvidence": [
+        {
+          "name": "SiteAssetPreview",
+          "extends": [],
+          "properties": [
+            {
+              "name": "height",
+              "optional": false,
+              "type": "number"
+            },
+            {
+              "name": "width",
+              "optional": false,
+              "type": "number | 'auto'"
+            },
+            {
+              "name": "surface",
+              "optional": true,
+              "type": "ImagePreviewSurface"
+            }
+          ]
+        },
         {
           "name": "SiteAssetUploaderProps",
           "extends": [],
@@ -69048,6 +69171,11 @@
               "name": "previewWidth",
               "optional": false,
               "type": "number | 'auto'"
+            },
+            {
+              "name": "previewSurface",
+              "optional": true,
+              "type": "ImagePreviewSurface"
             },
             {
               "name": "label",
@@ -69181,6 +69309,11 @@
           "name": "SiteLogoProps",
           "extends": [],
           "properties": [
+            {
+              "name": "form",
+              "optional": true,
+              "type": "'full' | 'symbol'"
+            },
             {
               "name": "size",
               "optional": true,
@@ -69331,7 +69464,7 @@
         }
       ],
       "typeAliasEvidence": [],
-      "productionConsumers": ["features/admin/settings/SiteSettingsPage.tsx"],
+      "productionConsumers": ["features/admin/settings/OgImageSettingsPage.tsx"],
       "catalogAdapters": [],
       "tests": ["features/site/SiteOgImagePanel/SiteOgImagePanel.test.tsx"],
       "stories": [],
@@ -69414,12 +69547,12 @@
       "composedJsx": [
         "Button",
         "ColorInput",
-        "DsHeading",
         "DsLayoutInline",
         "DsLayoutStack",
-        "SectionCard",
-        "SectionHeader",
+        "PageHeader",
         "Select",
+        "SettingsGroup",
+        "SettingsSection",
         "SocialLinksEditor",
         "Switch",
         "TextInput",
@@ -69587,6 +69720,11 @@
               "name": "label",
               "optional": true,
               "type": "string"
+            },
+            {
+              "name": "labelHidden",
+              "optional": true,
+              "type": "boolean"
             },
             {
               "name": "addButtonMode",
@@ -70003,6 +70141,11 @@
               "name": "label",
               "optional": true,
               "type": "string"
+            },
+            {
+              "name": "labelHidden",
+              "optional": true,
+              "type": "boolean"
             },
             {
               "name": "addButtonMode",
@@ -74222,6 +74365,7 @@
       "components": [
         "components/core/Section/SectionCard.tsx",
         "components/core/Section/SectionHeader.tsx",
+        "components/core/Section/SettingsSection.tsx",
         "components/core/Section/StatCard.tsx",
         "components/core/Section/ToolbarCommand.tsx",
         "components/core/Section/ToolbarLayout.tsx",
@@ -77341,6 +77485,7 @@
         "features/site/SiteLoaderAssetsUploader/SiteLoaderAssetsUploader.tsx",
         "features/site/SiteLogo/SiteLogo.tsx",
         "features/site/SiteLogo/index.ts",
+        "features/site/SiteLogo/placements.ts",
         "features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader.tsx",
         "features/site/SiteOgImagePanel/SiteOgImagePanel.tsx",
         "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
@@ -86055,6 +86200,7 @@
         "features/shell/LanguageMenu.tsx",
         "features/shell/ui/Shell/ShellView.tsx",
         "features/site/SiteLogo/index.ts",
+        "features/site/SiteLogo/placements.ts",
         "features/user/ui/UserShell/UserShellView.tsx",
         "lib/contexts/ManifestContext.tsx",
         "lib/providers/DesignSystemProvider.tsx",
@@ -86922,6 +87068,7 @@
         "components/core/Layout/index.ts",
         "features/admin/settings/OgImageSettingsPage.tsx",
         "lib/actions/action-result.ts",
+        "lib/types/site-setting/config.ts",
         "lib/utils/og-config.ts",
         "stories/pages/fixtures/operations-a11y.ts"
       ]
@@ -87760,7 +87907,6 @@
       "importedSources": [
         "components/core/Layout/index.ts",
         "features/admin/settings/SiteSettingsPage.tsx",
-        "lib/actions/action-result.ts",
         "lib/types/site-setting/config.ts",
         "stories/pages/fixtures/operations-a11y.ts"
       ]
@@ -96376,6 +96522,16 @@
           ]
         },
         {
+          "target": "components/core/ImageUpload/ImagePreviewFrame.tsx",
+          "symbols": [
+            {
+              "exported": "ImagePreviewSurface",
+              "imported": "ImagePreviewSurface",
+              "typeOnly": true
+            }
+          ]
+        },
+        {
           "target": "components/core/ImageUpload/ImagePreviewHeader.tsx",
           "symbols": [
             {
@@ -98369,8 +98525,43 @@
           "target": "components/core/Section/SectionHeader.tsx",
           "symbols": [
             {
+              "exported": "SectionHeaderLevel",
+              "imported": "SectionHeaderLevel",
+              "typeOnly": true
+            },
+            {
               "exported": "SectionHeaderProps",
               "imported": "SectionHeaderProps",
+              "typeOnly": true
+            }
+          ]
+        },
+        {
+          "target": "components/core/Section/SettingsSection.tsx",
+          "symbols": [
+            {
+              "exported": "SettingsGroup",
+              "imported": "SettingsGroup",
+              "typeOnly": false
+            },
+            {
+              "exported": "SettingsSection",
+              "imported": "SettingsSection",
+              "typeOnly": false
+            }
+          ]
+        },
+        {
+          "target": "components/core/Section/SettingsSection.tsx",
+          "symbols": [
+            {
+              "exported": "SettingsGroupProps",
+              "imported": "SettingsGroupProps",
+              "typeOnly": true
+            },
+            {
+              "exported": "SettingsSectionProps",
+              "imported": "SettingsSectionProps",
               "typeOnly": true
             }
           ]

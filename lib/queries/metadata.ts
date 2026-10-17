@@ -307,7 +307,7 @@ const getSiteMetadataDocumentCached = cache(async (requestedLocale: string | nul
       canonicalOrigin: normalizeCanonicalOrigin(settings.site_origin),
       siteOgImageUrl: normalizeOptionalString(settings.site_og_image_url),
       companyName: normalizeOptionalString(settings.company_name),
-      logoUrl: settings.logo_url,
+      logoUrl: settings.logo_full_light_url,
       socialLinks: Object.values(settings.social_links ?? {}).filter(
         (value): value is string => typeof value === 'string' && value.trim().length > 0,
       ),

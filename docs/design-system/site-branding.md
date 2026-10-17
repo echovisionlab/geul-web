@@ -23,19 +23,34 @@ Use `SiteHeader` in the `header` slot of `ApplicationFrame kind="site"`. Pass se
 and arbitrary inset/width overrides are rejected. Core buttons, icon buttons, navigation links and
 menus continue to own interaction geometry, focus and hover states. No new visual tokens are added.
 
-The public `SiteLogo` uses an authored 48px image height within the existing 52px/64px header.
-The admin controller supplies 80px expanded and 40px compact image heights instead of the previous
-14px/12px values. These are proportional image dimensions, separate from control/text sizes.
-`SiteLogoView` prevents image flex shrink; the admin navigation's header remains outside its shrinking,
-scrollable navigation list. The logo's own artwork proportions and clear space remain intact.
+## Logo slots
+
+Site settings store six logo slots, each with a light and a dark variant:
+
+| Slot | Artwork | Used by |
+| --- | --- | --- |
+| `logo_full_light` / `logo_full_dark` | Horizontal symbol + wordmark | Public header (all widths), navigation drawer, expanded admin navigation, forms, print, OG images |
+| `logo_symbol_light` / `logo_symbol_dark` | Symbol only | Compact admin navigation rail |
+| `logo_email_light` / `logo_email_dark` | PNG (SVG uploads are converted) | Email layouts (`{{logo_email_url}}`, `{{logo_email_dark_url}}`) |
+
+The API resolves display fallbacks once for every consumer: a missing theme uses the other theme of the
+same form, then the other form. `SiteLogo form="full" | "symbol"` reads the resolved manifest pair, so
+consumers never repeat the fallback. Email logos fall back across themes only. Admin settings show the
+stored slots without fallbacks, each previewed on the theme background it is drawn for
+(`ImagePreviewFrame surface="theme-light" | "theme-dark"`). Print and OG images always use the full
+light logo (paper and the OG renderer are light).
+
+`SITE_LOGO_HEIGHT` (`features/site/SiteLogo/placements.ts`) owns the authored image heights: header 28px,
+expanded admin navigation 36px, compact admin rail 28px, form pages 24px, print watermark 18px. These are
+proportional image dimensions, separate from control/text sizes. `SiteLogoView` prevents image flex shrink;
+the admin navigation's header remains outside its shrinking, scrollable navigation list.
 In expanded admin navigation the logo and subtitle start on the navigation labels' `xs` line. The
 image box is aligned, not the artwork: clear space inside an uploaded SVG's viewBox shifts the visible
 mark. Upload logos whose viewBox is trimmed to the artwork so the mark itself sits on that line.
 
-Rawsector uses the Illustrator media kit's stacked symbol-over-wordmark artwork for both themes.
-The editable authority remains `/Volumes/dev/names/branding/media-kit/rawsector.ai`. The SVG paths
-and 1024-square viewBox are unchanged; upload copies declare 48px intrinsic dimensions. The source
-vectors are not duplicated into the product repository. Brand stories reference published CDN assets.
+Rawsector's media kit (`/Volumes/dev/mediakit`) supplies the horizontal, symbol and stacked artwork for
+both themes. The source vectors are not duplicated into the product repository. Brand stories reference
+published CDN assets.
 
 Preview the actual Views at `Pages/Application/Frames`: `StackedBrand`, `StackedBrandAdmin` and
 `StackedBrandAdminCompact`. Review light/dark, 280/320/390/767/768/1280px, anonymous/authenticated,

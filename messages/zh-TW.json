@@ -385,6 +385,12 @@
       "status": {
         "preparingImage": "正在準備圖片",
         "uploading": "上傳中"
+      },
+      "removeLabel": "移除{label}",
+      "errors": {
+        "tooLarge": "檔案過大。上限 {maxSize}",
+        "tooSmall": "檔案過小。下限 {minSize}",
+        "invalidType": "不支援此檔案類型。"
       }
     },
     "states": {
@@ -704,7 +710,8 @@
             "subject": "呈現的電子郵件主旨",
             "siteName": "設定中的站點名稱",
             "siteOrigin": "執行階段設定的網站來源。",
-            "logoEmailUrl": "網站設定中的電子郵件特定標誌 URL（如果已設定）",
+            "logoEmailUrl": "網站設定中的淺色郵件標誌 URL；僅設定深色時使用深色標誌。",
+            "logoEmailDarkUrl": "深色模式郵件應用程式使用的深色郵件標誌 URL；僅設定淺色時使用淺色標誌。",
             "emailLang": "套用到已渲染郵件文件的語言代碼",
             "emailDirection": "已渲染郵件文件的文字方向",
             "emailFontFamily": "套用到已渲染郵件的 locale 感知 Noto 字體堆疊",
@@ -2648,14 +2655,16 @@
     },
     "home": {
       "sections": {
-        "logoSize": "標誌大小"
+        "logoSize": "標誌大小",
+        "currentImage": "目前圖片與背景"
       },
       "fields": {
         "backgroundColor": "背景顏色"
       },
       "helpers": {
         "logoCentered": "徽標將位於圖像的中心",
-        "previewDescription": "首頁 OG 圖片：標誌居中，無標題文本"
+        "previewDescription": "首頁 OG 圖片：標誌居中，無標題文本",
+        "currentImage": "已產生的首頁分享圖片及其選用背景。"
       }
     },
     "content": {
@@ -4661,6 +4670,7 @@
   "adminSettings": {
     "site": {
       "title": "站點設定",
+      "description": "設定整個網站的資訊、品牌、導覽和搜尋預設值。",
       "notifications": {
         "saved": "設定已儲存",
         "noChanges": "沒有要儲存的更改"
@@ -4678,7 +4688,12 @@
           "socialLinksDescription": "新增您的社群媒體資料。這些將顯示在網站頁面腳中"
         },
         "branding": {
-          "title": "品牌推廣"
+          "title": "品牌推廣",
+          "logos": "標誌",
+          "logosDescription": "完整標誌和圖形標誌，分別用於淺色和深色背景。未設定的項目會自動替代。",
+          "emailLogos": "郵件標誌",
+          "emailLogosDescription": "用於郵件版面的 PNG 標誌。深色模式的郵件應用程式使用深色標誌。",
+          "iconsAndLoader": "網站圖示與載入動畫"
         },
         "contentDisplay": {
           "title": "內容與展示",
@@ -4761,17 +4776,29 @@
         "errorMessage": "{label} 必須是 {mimeTypes}（最大 {maxSize}）",
         "uploaded": "{label} 已上傳",
         "removed": "{label} 已刪除",
-        "logo_light": {
-          "label": "淺色網站標誌",
-          "description": "用於淺色背景，並作為預設網站標誌。"
+        "logo_full_light": {
+          "label": "完整標誌 · 淺色",
+          "description": "用於淺色背景的圖形與文字標誌，用於網站頁首、選單、列印和分享圖片。"
         },
-        "logo_dark": {
-          "label": "深色網站標誌",
-          "description": "用於深色背景。留空時會使用淺色標誌。"
+        "logo_full_dark": {
+          "label": "完整標誌 · 深色",
+          "description": "用於深色背景。留空時使用淺色完整標誌。"
         },
-        "logo_email": {
-          "label": "電子郵件標誌",
-          "description": "用於電子郵件範本和佈局。為了客戶端相容性，建議使用 PNG"
+        "logo_symbol_light": {
+          "label": "圖形標誌 · 淺色",
+          "description": "僅圖形，用於收合的管理選單等狹小空間。留空時使用完整標誌。"
+        },
+        "logo_symbol_dark": {
+          "label": "圖形標誌 · 深色",
+          "description": "用於深色背景。留空時使用淺色圖形標誌。"
+        },
+        "logo_email_light": {
+          "label": "郵件標誌 · 淺色",
+          "description": "郵件中顯示的 PNG。留空時使用深色郵件標誌。"
+        },
+        "logo_email_dark": {
+          "label": "郵件標誌 · 深色",
+          "description": "郵件應用程式在深色模式下顯示的 PNG。留空時使用淺色郵件標誌。"
         },
         "favicon": {
           "label": "網站圖示",

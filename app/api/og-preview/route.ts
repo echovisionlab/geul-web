@@ -72,8 +72,8 @@ export async function POST(request: NextRequest) {
 
     // Get logo as PNG data URL if available
     let logoDataUrl: string | undefined;
-    if (settings.logo_url) {
-      logoDataUrl = await fetchImageAsDataUrl(settings.logo_url);
+    if (settings.logo_full_light_url) {
+      logoDataUrl = await fetchImageAsDataUrl(settings.logo_full_light_url);
     }
 
     const ogSettings = {

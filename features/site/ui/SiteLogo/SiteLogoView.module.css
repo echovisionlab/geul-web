@@ -34,3 +34,14 @@
     display: inline-flex;
   }
 }
+
+/* Paper is light: print the light mark whatever the screen theme. */
+@media print {
+  .themed[data-logo-scheme='light'] {
+    display: inline-flex !important;
+  }
+
+  .themed[data-logo-scheme='dark'] {
+    display: none !important;
+  }
+}

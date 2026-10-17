@@ -385,6 +385,12 @@
       "status": {
         "preparingImage": "Bild wird vorbereitet",
         "uploading": "Wird hochgeladen"
+      },
+      "removeLabel": "{label} entfernen",
+      "errors": {
+        "tooLarge": "Datei zu groß. Maximal {maxSize}",
+        "tooSmall": "Datei zu klein. Mindestens {minSize}",
+        "invalidType": "Dieser Dateityp wird nicht unterstützt."
       }
     },
     "states": {
@@ -1178,7 +1184,8 @@
             "subject": "Gerenderte Betreffzeile der E-Mail.",
             "siteName": "Name der Website aus den Einstellungen.",
             "siteOrigin": "Zur Laufzeit konfigurierte Website-Origin.",
-            "logoEmailUrl": "Spezielle Logo-URL für E-Mails aus den Website-Einstellungen (falls gesetzt).",
+            "logoEmailUrl": "URL des hellen E-Mail-Logos aus den Website-Einstellungen; das dunkle, wenn nur dieses gesetzt ist.",
+            "logoEmailDarkUrl": "URL des dunklen E-Mail-Logos für Mail-Apps im Dunkelmodus; das helle, wenn nur dieses gesetzt ist.",
             "emailLang": "Sprachcode, der auf das gerenderte E-Mail-Dokument angewendet wird.",
             "emailDirection": "Textrichtung für das gerenderte E-Mail-Dokument.",
             "emailFontFamily": "Lokalitätsabhängiger Noto-Font-Stack für die gerenderte E-Mail.",
@@ -1943,6 +1950,7 @@
   "adminSettings": {
     "site": {
       "title": "Website-Einstellungen",
+      "description": "Identität, Branding, Navigation und Suchvorgaben für die gesamte Website.",
       "notifications": {
         "saved": "Einstellungen gespeichert",
         "noChanges": "Keine Änderungen zum Speichern"
@@ -1960,7 +1968,12 @@
           "socialLinksDescription": "Fügen Sie Ihre Social-Media-Profile hinzu. Diese werden in der Website-Fußzeile angezeigt."
         },
         "branding": {
-          "title": "Branding"
+          "title": "Branding",
+          "logos": "Logos",
+          "logosDescription": "Das vollständige Logo und das Symbol, jeweils für helle und dunkle Hintergründe. Fehlende Varianten werden automatisch ersetzt.",
+          "emailLogos": "E-Mail-Logos",
+          "emailLogosDescription": "PNG-Logos für E-Mail-Layouts. Mail-Apps im Dunkelmodus verwenden das dunkle Logo.",
+          "iconsAndLoader": "Favicon und Ladeanimation"
         },
         "contentDisplay": {
           "title": "Inhalt & Anzeige",
@@ -2043,17 +2056,29 @@
         "errorMessage": "{label} muss {mimeTypes} sein (max. {maxSize})",
         "uploaded": "{label} hochgeladen",
         "removed": "{label} entfernt",
-        "logo_light": {
-          "label": "Helles Website-Logo",
-          "description": "Wird auf hellen Hintergründen angezeigt und als Standardlogo der Website verwendet."
+        "logo_full_light": {
+          "label": "Vollständiges Logo · hell",
+          "description": "Symbol mit Wortmarke für helle Hintergründe: Kopfzeile, Menüs, Druck und Vorschaubilder."
         },
-        "logo_dark": {
-          "label": "Dunkles Website-Logo",
-          "description": "Wird auf dunklen Hintergründen angezeigt. Fällt auf das helle Logo zurück, wenn leer."
+        "logo_full_dark": {
+          "label": "Vollständiges Logo · dunkel",
+          "description": "Für dunkle Hintergründe. Verwendet das helle vollständige Logo, wenn leer."
         },
-        "logo_email": {
-          "label": "E-Mail-Logo",
-          "description": "Wird in E-Mail-Vorlagen und -Layouts verwendet. PNG wird für die Kompatibilität mit Clients empfohlen."
+        "logo_symbol_light": {
+          "label": "Symbol · hell",
+          "description": "Nur das Symbol, für enge Bereiche wie das eingeklappte Admin-Menü. Verwendet das vollständige Logo, wenn leer."
+        },
+        "logo_symbol_dark": {
+          "label": "Symbol · dunkel",
+          "description": "Für dunkle Hintergründe. Verwendet das helle Symbol, wenn leer."
+        },
+        "logo_email_light": {
+          "label": "E-Mail-Logo · hell",
+          "description": "PNG, das in E-Mails angezeigt wird. Verwendet das dunkle E-Mail-Logo, wenn leer."
+        },
+        "logo_email_dark": {
+          "label": "E-Mail-Logo · dunkel",
+          "description": "PNG, das Mail-Apps im Dunkelmodus anzeigen. Verwendet das helle E-Mail-Logo, wenn leer."
         },
         "favicon": {
           "label": "Website-Favicon",
@@ -3158,14 +3183,16 @@
     },
     "home": {
       "sections": {
-        "logoSize": "Logogröße"
+        "logoSize": "Logogröße",
+        "currentImage": "Aktuelles Bild und Hintergrund"
       },
       "fields": {
         "backgroundColor": "Hintergrundfarbe"
       },
       "helpers": {
         "logoCentered": "Das Logo wird zentriert auf dem Bild angezeigt",
-        "previewDescription": "OG-Bild der Startseite: Logo zentriert, kein Titeltext"
+        "previewDescription": "OG-Bild der Startseite: Logo zentriert, kein Titeltext",
+        "currentImage": "Das erzeugte Vorschaubild der Startseite und der optionale Hintergrund darunter."
       }
     },
     "content": {

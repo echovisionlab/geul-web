@@ -385,6 +385,12 @@
       "status": {
         "preparingImage": "Preparing image",
         "uploading": "Uploading"
+      },
+      "removeLabel": "Remove {label}",
+      "errors": {
+        "tooLarge": "File too large. Maximum size: {maxSize}",
+        "tooSmall": "File too small. Minimum size: {minSize}",
+        "invalidType": "This file type is not supported."
       }
     },
     "states": {
@@ -704,7 +710,8 @@
             "subject": "Rendered email subject line.",
             "siteName": "Site name from settings.",
             "siteOrigin": "Runtime site origin.",
-            "logoEmailUrl": "Email-specific logo URL from site settings (if set).",
+            "logoEmailUrl": "Light email logo URL from site settings; the dark email logo when only that is set.",
+            "logoEmailDarkUrl": "Dark email logo URL for mail apps in dark mode; the light email logo when only that is set.",
             "emailLang": "Language code applied to the rendered email document.",
             "emailDirection": "Text direction for the rendered email document.",
             "emailFontFamily": "Locale-aware Noto font stack for the rendered email.",
@@ -2648,14 +2655,16 @@
     },
     "home": {
       "sections": {
-        "logoSize": "Logo Size"
+        "logoSize": "Logo Size",
+        "currentImage": "Current image and background"
       },
       "fields": {
         "backgroundColor": "Background Color"
       },
       "helpers": {
         "logoCentered": "Logo will be centered on the image",
-        "previewDescription": "Homepage OG image: Logo centered, no title text"
+        "previewDescription": "Homepage OG image: Logo centered, no title text",
+        "currentImage": "The generated home sharing image and the optional background it is drawn on."
       }
     },
     "content": {
@@ -4661,6 +4670,7 @@
   "adminSettings": {
     "site": {
       "title": "Site Settings",
+      "description": "Identity, branding, navigation and search defaults for the whole site.",
       "notifications": {
         "saved": "Settings saved",
         "noChanges": "No changes to save"
@@ -4678,7 +4688,12 @@
           "socialLinksDescription": "Add your social media profiles. These will be displayed in the site footer."
         },
         "branding": {
-          "title": "Branding"
+          "title": "Branding",
+          "logos": "Logos",
+          "logosDescription": "The full logo and the symbol, each for light and dark backgrounds. Missing variants fall back automatically.",
+          "emailLogos": "Email logos",
+          "emailLogosDescription": "PNG logos for email layouts. Mail apps in dark mode use the dark logo.",
+          "iconsAndLoader": "Favicon and loader"
         },
         "contentDisplay": {
           "title": "Content & Display",
@@ -4761,17 +4776,29 @@
         "errorMessage": "{label} must be {mimeTypes} (max {maxSize})",
         "uploaded": "{label} uploaded",
         "removed": "{label} removed",
-        "logo_light": {
-          "label": "Light Site Logo",
-          "description": "Displayed on light backgrounds and used as the default site logo."
+        "logo_full_light": {
+          "label": "Full logo · light",
+          "description": "Symbol with wordmark for light backgrounds: site header, menus, print and sharing images."
         },
-        "logo_dark": {
-          "label": "Dark Site Logo",
-          "description": "Displayed on dark backgrounds. Falls back to the light logo when empty."
+        "logo_full_dark": {
+          "label": "Full logo · dark",
+          "description": "For dark backgrounds. Uses the light full logo when empty."
         },
-        "logo_email": {
-          "label": "Email Logo",
-          "description": "Used in email templates and layouts. PNG is recommended for client compatibility."
+        "logo_symbol_light": {
+          "label": "Symbol · light",
+          "description": "Symbol only, for compact spaces such as the collapsed admin menu. Uses the full logo when empty."
+        },
+        "logo_symbol_dark": {
+          "label": "Symbol · dark",
+          "description": "For dark backgrounds. Uses the light symbol when empty."
+        },
+        "logo_email_light": {
+          "label": "Email logo · light",
+          "description": "PNG shown in emails. Uses the dark email logo when empty."
+        },
+        "logo_email_dark": {
+          "label": "Email logo · dark",
+          "description": "PNG that mail apps show in dark mode. Uses the light email logo when empty."
         },
         "favicon": {
           "label": "Site Favicon",

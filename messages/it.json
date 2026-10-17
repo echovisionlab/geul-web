@@ -385,6 +385,12 @@
       "status": {
         "preparingImage": "Preparazione immagine",
         "uploading": "Caricamento"
+      },
+      "removeLabel": "Rimuovi {label}",
+      "errors": {
+        "tooLarge": "File troppo grande. Dimensione massima: {maxSize}",
+        "tooSmall": "File troppo piccolo. Dimensione minima: {minSize}",
+        "invalidType": "Questo tipo di file non è supportato."
       }
     },
     "states": {
@@ -704,7 +710,8 @@
             "subject": "Riga dell'oggetto dell'e-mail visualizzata.",
             "siteName": "Nome del sito dalle impostazioni.",
             "siteOrigin": "Origine del sito configurata in fase di esecuzione.",
-            "logoEmailUrl": "Logo specifico per l'e-mail URL dalle impostazioni del sito (se impostato).",
+            "logoEmailUrl": "URL del logo e-mail chiaro dalle impostazioni del sito; quello scuro se è l’unico impostato.",
+            "logoEmailDarkUrl": "URL del logo e-mail scuro per le app in modalità scura; quello chiaro se è l’unico impostato.",
             "emailLang": "Codice lingua applicato al documento email renderizzato.",
             "emailDirection": "Direzione del testo del documento email renderizzato.",
             "emailFontFamily": "Stack di font Noto in base alla lingua per l'email renderizzata.",
@@ -2648,14 +2655,16 @@
     },
     "home": {
       "sections": {
-        "logoSize": "Dimensione logo"
+        "logoSize": "Dimensione logo",
+        "currentImage": "Immagine attuale e sfondo"
       },
       "fields": {
         "backgroundColor": "Colore di sfondo"
       },
       "helpers": {
         "logoCentered": "Il logo sarà centrato nell’immagine",
-        "previewDescription": "Immagine OG della homepage: logo centrato, senza testo del titolo"
+        "previewDescription": "Immagine OG della homepage: logo centrato, senza testo del titolo",
+        "currentImage": "L’immagine di condivisione generata per la home e lo sfondo facoltativo."
       }
     },
     "content": {
@@ -4661,6 +4670,7 @@
   "adminSettings": {
     "site": {
       "title": "Impostazioni del sito",
+      "description": "Identità, brand, navigazione e impostazioni di ricerca dell’intero sito.",
       "notifications": {
         "saved": "Impostazioni salvate",
         "noChanges": "Nessuna modifica da salvare"
@@ -4678,7 +4688,12 @@
           "socialLinksDescription": "Aggiungi i tuoi profili sui social media. Questi verranno visualizzati nel piè di pagina del sito."
         },
         "branding": {
-          "title": "Marchio"
+          "title": "Marchio",
+          "logos": "Loghi",
+          "logosDescription": "Il logo completo e il simbolo, per sfondi chiari e scuri. Le varianti mancanti vengono sostituite automaticamente.",
+          "emailLogos": "Loghi e-mail",
+          "emailLogosDescription": "Loghi PNG per i layout delle e-mail. Le app in modalità scura usano il logo scuro.",
+          "iconsAndLoader": "Favicon e caricamento"
         },
         "contentDisplay": {
           "title": "Contenuto e visualizzazione",
@@ -4761,17 +4776,29 @@
         "errorMessage": "{label} deve essere {mimeTypes} (max {maxSize})",
         "uploaded": "{label} caricato",
         "removed": "{label} rimosso",
-        "logo_light": {
-          "label": "Logo chiaro del sito",
-          "description": "Visualizzato su sfondi chiari e usato come logo predefinito del sito."
+        "logo_full_light": {
+          "label": "Logo completo · chiaro",
+          "description": "Simbolo con logotipo per sfondi chiari: intestazione, menu, stampa e immagini di condivisione."
         },
-        "logo_dark": {
-          "label": "Logo scuro del sito",
-          "description": "Visualizzato su sfondi scuri. Usa il logo chiaro se vuoto."
+        "logo_full_dark": {
+          "label": "Logo completo · scuro",
+          "description": "Per sfondi scuri. Se vuoto usa il logo completo chiaro."
         },
-        "logo_email": {
-          "label": "Logo e-mail",
-          "description": "Utilizzato nei modelli e nei layout di posta elettronica. PNG è consigliato per la compatibilità con il client."
+        "logo_symbol_light": {
+          "label": "Simbolo · chiaro",
+          "description": "Solo il simbolo, per spazi ridotti come il menu di amministrazione compresso. Se vuoto usa il logo completo."
+        },
+        "logo_symbol_dark": {
+          "label": "Simbolo · scuro",
+          "description": "Per sfondi scuri. Se vuoto usa il simbolo chiaro."
+        },
+        "logo_email_light": {
+          "label": "Logo e-mail · chiaro",
+          "description": "PNG mostrato nelle e-mail. Se vuoto usa il logo e-mail scuro."
+        },
+        "logo_email_dark": {
+          "label": "Logo e-mail · scuro",
+          "description": "PNG mostrato dalle app di posta in modalità scura. Se vuoto usa il logo e-mail chiaro."
         },
         "favicon": {
           "label": "Favicon del sito",

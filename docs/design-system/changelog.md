@@ -1,5 +1,22 @@
 # Design system changes
 
+## 2026-10-17 — settings hierarchy, logo slots and upload previews (unreleased)
+
+Core `SectionHeader` adds `level={2 | 3}`: real headings on one scale (page title → section → group →
+field label). Without a level it keeps the compact card/row label. New Core `SettingsSection` (level 2,
+`lg` rhythm) and `SettingsGroup` (level 3, `md` rhythm) compose settings pages; admin Site settings and
+OG image settings adopt them with Core `PageHeader`. Section-level fields precede groups.
+
+Core `ImagePreviewFrame` adds `surface="theme-light" | "theme-dark"`, backed by the new invariant tokens
+`theme-light-background` and `theme-dark-background`, so theme-specific artwork previews on its own
+background in either app theme. `ImageUploadField` hug previews size the remove action's box to the
+image, and the outside remove action is a corner badge: `IconButton placement="overlay-end"` centres an
+opaque chip on the media's top-end corner, and `ImageUploadField` reserves half the control as a gutter
+so the badge never covers adjacent text.
+
+Site logos become full/symbol/email slots with light and dark variants (see `site-branding.md`). The OG
+background moves from Site settings to OG image settings.
+
 ## 2026-10-17 — site header and brand placement (unreleased)
 
 Core `ApplicationFrame` exports `SiteHeader`, a closed slot composition that centers branding whenever

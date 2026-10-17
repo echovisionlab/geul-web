@@ -273,9 +273,12 @@ export function isUploadType(value: number): value is UploadType {
 
 /** Site asset type → upload type mapping */
 export type SiteAssetType =
-  | 'logo_light'
-  | 'logo_dark'
-  | 'logo_email'
+  | 'logo_full_light'
+  | 'logo_full_dark'
+  | 'logo_symbol_light'
+  | 'logo_symbol_dark'
+  | 'logo_email_light'
+  | 'logo_email_dark'
   | 'favicon'
   | 'loader'
   | 'site_og_background'
@@ -283,9 +286,12 @@ export type SiteAssetType =
   | 'terms_og_background';
 
 export const SITE_ASSET_TO_UPLOAD_TYPE: Record<SiteAssetType, UploadType> = {
-  logo_light: UploadType.SITE_LOGO,
-  logo_dark: UploadType.SITE_LOGO,
-  logo_email: UploadType.SITE_LOGO,
+  logo_full_light: UploadType.SITE_LOGO,
+  logo_full_dark: UploadType.SITE_LOGO,
+  logo_symbol_light: UploadType.SITE_LOGO,
+  logo_symbol_dark: UploadType.SITE_LOGO,
+  logo_email_light: UploadType.SITE_LOGO,
+  logo_email_dark: UploadType.SITE_LOGO,
   favicon: UploadType.SITE_FAVICON,
   loader: UploadType.SITE_LOADER,
   site_og_background: UploadType.SITE_OG_BACKGROUND,

@@ -7,6 +7,7 @@ import { ShellView } from '@/features/shell/ui/Shell/ShellView';
 import { AdminShellView } from '@/features/admin/ui/AdminShell/AdminShellView';
 import { UserShellView } from '@/features/user/ui/UserShell/UserShellView';
 import { SiteLogo } from '@/features/site/SiteLogo';
+import { SITE_LOGO_HEIGHT } from '@/features/site/SiteLogo/placements';
 import { SessionProvider } from '@/lib/providers/SessionProvider';
 import { LanguageMenu } from '@/features/shell/LanguageMenu';
 import { useSiteSettings, ManifestProvider } from '@/lib/contexts/ManifestContext';
@@ -133,8 +134,8 @@ export function FramesPreview({
           onToggleColorScheme: toggleColorScheme,
           onNavigate: navigatePreview,
         }}
-        logoSlot={<SiteLogo height={80} />}
-        compactLogoSlot={<SiteLogo height={40} />}
+        logoSlot={<SiteLogo height={SITE_LOGO_HEIGHT.adminExpanded} />}
+        compactLogoSlot={<SiteLogo form="symbol" height={SITE_LOGO_HEIGHT.adminCompact} />}
       >
         {children}
       </AdminShellView>
@@ -236,9 +237,9 @@ export function FramesPreview({
         onNavigate: navigatePreview,
       }}
       slots={{
-        logo: <SiteLogo height={48} />,
+        logo: <SiteLogo height={SITE_LOGO_HEIGHT.header} />,
         printHeader: null,
-        printWatermark: <SiteLogo height={24} />,
+        printWatermark: <SiteLogo height={SITE_LOGO_HEIGHT.printWatermark} />,
         languageDesktop: <LanguageMenu />,
         languageNavigation: <LanguageMenu variant="navigation" />,
         languageFooterDesktop: null,
@@ -336,8 +337,10 @@ const withStackedBrand: Decorator = (Story) => (
         site_title: 'rawsector',
         favicon_asset_set: null,
         site_og_image_url: null,
-        logo_light_url: 'https://cdn.rawsector.com/asset/b8cc8296-7f93-4704-b06d-657d39171ba9/image.svg',
-        logo_dark_url: 'https://cdn.rawsector.com/asset/62d7d08d-8a4e-4ff7-96a2-a7669a0183bc/image.svg',
+        logo_full_light_url: 'https://cdn.rawsector.com/asset/b8cc8296-7f93-4704-b06d-657d39171ba9/image.svg',
+        logo_full_dark_url: 'https://cdn.rawsector.com/asset/62d7d08d-8a4e-4ff7-96a2-a7669a0183bc/image.svg',
+        logo_symbol_light_url: 'https://cdn.rawsector.com/asset/b8cc8296-7f93-4704-b06d-657d39171ba9/image.svg',
+        logo_symbol_dark_url: 'https://cdn.rawsector.com/asset/62d7d08d-8a4e-4ff7-96a2-a7669a0183bc/image.svg',
       },
       menus: { $typeName: 'api.open.v1.Menus', header: [], secondary: [], footer: [], avatarDropdown: [] },
     }}

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceManifestHash": "adef60ee2e4ff0052de32add7eb8e70493114eac89d11a89b7c8848c1e7bda1a",
+  "sourceManifestHash": "570939da2bd45a71d5f5c1271725ded0f6114683a218f8d61bc823d376b53cf4",
   "methodology": "All inventoried Feature component candidates. Direct value imports, literal lazy imports and transitive source relationships through production owners/local adapters are indexed separately. A dependency can be unused or render conditionally; neither relationship proves rendered states, route parity or design compliance. Empty JSX records include runtime/lazy/controller boundaries and must be inspected before treating them as visual gaps.",
   "counts": { "domains": 53, "componentFiles": 762, "jsxWithoutStoryRelationship": 45 },
   "domains": [
@@ -1185,7 +1185,6 @@
             "Pages/Editors/Program Events",
             "Pages/Editors/Release",
             "Pages/Editors/Series",
-            "Pages/Admin/Site Settings",
             "Pages/Editors/Work"
           ]
         },
@@ -4926,10 +4925,10 @@
             "Pages/Editors/Form",
             "Pages/Admin/Legal Policies",
             "Pages/Editors/Legal",
+            "Pages/Admin/OG Image Settings",
             "Pages/Editors/Page",
             "Pages/Editors/Post",
             "Pages/Editors/Series",
-            "Pages/Admin/Site Settings",
             "Pages/Editors/Work"
           ]
         },
@@ -4980,10 +4979,10 @@
             "Pages/Editors/Form",
             "Pages/Admin/Legal Policies",
             "Pages/Editors/Legal",
+            "Pages/Admin/OG Image Settings",
             "Pages/Editors/Page",
             "Pages/Editors/Post",
             "Pages/Editors/Series",
-            "Pages/Admin/Site Settings",
             "Pages/Editors/Work"
           ]
         },
@@ -7460,13 +7459,13 @@
           "file": "features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader.tsx",
           "hasJsx": true,
           "directStories": [],
-          "relatedStories": ["Pages/Admin/Legal Policies", "Pages/Editors/Legal", "Pages/Admin/Site Settings"]
+          "relatedStories": ["Pages/Admin/Legal Policies", "Pages/Editors/Legal", "Pages/Admin/OG Image Settings"]
         },
         {
           "file": "features/site/SiteOgImagePanel/SiteOgImagePanel.tsx",
           "hasJsx": true,
           "directStories": [],
-          "relatedStories": ["Pages/Admin/Site Settings"]
+          "relatedStories": ["Pages/Admin/OG Image Settings"]
         },
         {
           "file": "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
@@ -7825,12 +7824,12 @@
             "Pages/Editors/Form",
             "Pages/Admin/Legal Policies",
             "Pages/Editors/Legal",
+            "Pages/Admin/OG Image Settings",
             "Pages/Editors/Page",
             "Pages/Editors/Post",
             "Pages/Editors/Program Events",
             "Pages/Editors/Release",
             "Pages/Editors/Series",
-            "Pages/Admin/Site Settings",
             "Pages/Editors/Work"
           ]
         }

@@ -385,6 +385,12 @@
       "status": {
         "preparingImage": "Mempersiapkan gambar",
         "uploading": "Mengunggah"
+      },
+      "removeLabel": "Hapus {label}",
+      "errors": {
+        "tooLarge": "File terlalu besar. Maksimum {maxSize}",
+        "tooSmall": "File terlalu kecil. Minimum {minSize}",
+        "invalidType": "Jenis file ini tidak didukung."
       }
     },
     "states": {
@@ -704,7 +710,8 @@
             "subject": "Baris subjek email yang diberikan.",
             "siteName": "Nama situs dari pengaturan.",
             "siteOrigin": "Asal situs runtime.",
-            "logoEmailUrl": "URL logo khusus email dari pengaturan situs (jika disetel).",
+            "logoEmailUrl": "URL logo email terang dari pengaturan situs; logo gelap jika hanya itu yang diatur.",
+            "logoEmailDarkUrl": "URL logo email gelap untuk aplikasi email dalam mode gelap; logo terang jika hanya itu yang diatur.",
             "emailLang": "Kode bahasa diterapkan pada dokumen email yang dirender.",
             "emailDirection": "Arah teks untuk dokumen email yang dirender.",
             "emailFontFamily": "Tumpukan font Noto yang sadar lokal untuk email yang dirender.",
@@ -2648,14 +2655,16 @@
     },
     "home": {
       "sections": {
-        "logoSize": "Ukuran Logo"
+        "logoSize": "Ukuran Logo",
+        "currentImage": "Gambar saat ini dan latar"
       },
       "fields": {
         "backgroundColor": "Warna Latar Belakang"
       },
       "helpers": {
         "logoCentered": "Logo akan berada di tengah gambar",
-        "previewDescription": "Gambar OG beranda: Logo terpusat, tanpa teks judul"
+        "previewDescription": "Gambar OG beranda: Logo terpusat, tanpa teks judul",
+        "currentImage": "Gambar berbagi beranda yang dibuat dan latar opsionalnya."
       }
     },
     "content": {
@@ -4661,6 +4670,7 @@
   "adminSettings": {
     "site": {
       "title": "Pengaturan Situs",
+      "description": "Identitas, merek, navigasi, dan bawaan pencarian untuk seluruh situs.",
       "notifications": {
         "saved": "Pengaturan disimpan",
         "noChanges": "Tidak ada perubahan untuk disimpan"
@@ -4678,7 +4688,12 @@
           "socialLinksDescription": "Tambahkan profil media sosial Anda. Ini akan ditampilkan di footer situs."
         },
         "branding": {
-          "title": "merek"
+          "title": "merek",
+          "logos": "Logo",
+          "logosDescription": "Logo lengkap dan simbol, untuk latar terang dan gelap. Varian yang kosong diganti otomatis.",
+          "emailLogos": "Logo email",
+          "emailLogosDescription": "Logo PNG untuk tata letak email. Aplikasi email dalam mode gelap memakai logo gelap.",
+          "iconsAndLoader": "Favicon dan animasi pemuatan"
         },
         "contentDisplay": {
           "title": "Konten & Tampilan",
@@ -4761,17 +4776,29 @@
         "errorMessage": "{label} harus {mimeTypes} (maks {maxSize})",
         "uploaded": "{label} diunggah",
         "removed": "{label} dihapus",
-        "logo_light": {
-          "label": "Logo Situs Ringan",
-          "description": "Ditampilkan pada latar belakang terang dan digunakan sebagai logo situs default."
+        "logo_full_light": {
+          "label": "Logo lengkap · terang",
+          "description": "Simbol dengan logotipe untuk latar terang: header situs, menu, cetak, dan gambar berbagi."
         },
-        "logo_dark": {
-          "label": "Logo Situs Gelap",
-          "description": "Ditampilkan pada latar belakang gelap. Kembali ke logo terang saat kosong."
+        "logo_full_dark": {
+          "label": "Logo lengkap · gelap",
+          "description": "Untuk latar gelap. Memakai logo lengkap terang jika kosong."
         },
-        "logo_email": {
-          "label": "Logo Surel",
-          "description": "Digunakan dalam templat dan tata letak email. PNG direkomendasikan untuk kompatibilitas klien."
+        "logo_symbol_light": {
+          "label": "Simbol · terang",
+          "description": "Hanya simbol, untuk ruang sempit seperti menu admin yang diciutkan. Memakai logo lengkap jika kosong."
+        },
+        "logo_symbol_dark": {
+          "label": "Simbol · gelap",
+          "description": "Untuk latar gelap. Memakai simbol terang jika kosong."
+        },
+        "logo_email_light": {
+          "label": "Logo email · terang",
+          "description": "PNG yang ditampilkan di email. Memakai logo email gelap jika kosong."
+        },
+        "logo_email_dark": {
+          "label": "Logo email · gelap",
+          "description": "PNG yang ditampilkan aplikasi email dalam mode gelap. Memakai logo email terang jika kosong."
         },
         "favicon": {
           "label": "Situs Favicon",

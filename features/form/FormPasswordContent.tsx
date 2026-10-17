@@ -21,6 +21,7 @@ import { Button } from '@/components/core/Button';
 import { PasswordInput } from '@/components/core/Input';
 import { PageLoader } from '@/features/site/PageLoader';
 import { SiteLogo } from '@/features/site/SiteLogo';
+import { SITE_LOGO_HEIGHT } from '@/features/site/SiteLogo/placements';
 import { checkFormAccessAction, verifyFormPasswordAction } from '@/lib/actions/form';
 
 interface FormPasswordContentProps {
@@ -156,7 +157,7 @@ export function FormPasswordContent({
             <DsLayoutContainer size="compact">
               <DsLayoutStack gap="md">
                 <DsLayoutInset textAlign="center" space="none">
-                  <SiteLogo height={24} />
+                  <SiteLogo height={SITE_LOGO_HEIGHT.form} />
                 </DsLayoutInset>
 
                 <DsLayoutStack align="center" justify="center">

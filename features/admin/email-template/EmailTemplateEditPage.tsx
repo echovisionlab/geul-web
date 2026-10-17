@@ -121,6 +121,7 @@ function useEmailTemplateEditPageModel() {
         catalog: tVariableCatalog,
         siteOrigin: () => tCommonLabels('siteOrigin'),
         logoEmailUrl: () => tEmailLayoutVariableItems('logoEmailUrl'),
+        logoEmailDarkUrl: () => tEmailLayoutVariableItems('logoEmailDarkUrl'),
       }),
     [tCommonLabels, tEmailLayoutVariableItems, tVariableCatalog],
   );

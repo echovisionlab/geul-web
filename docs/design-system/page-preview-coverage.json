@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "methodology": "All App Router visual entry files indexed by TypeScript imports/JSX; exact reviewed route/boundary maps count separately from mere Feature story overlap. Unmapped entrypoints remain explicit gaps. Static source census is not a browser pass.",
-  "sourceManifestHash": "fef138815c115006692555b48b06e8284cda222aa5209bf4db00fe7999df9b83",
+  "sourceManifestHash": "700b786a30586ddbc7b2f21e1fa96556c4d2d70b345ffb624796dc0e7ac88fe7",
   "counts": {
     "queryEditorBranches": 12,
     "editorBranchPreviews": 12,
@@ -16009,6 +16009,7 @@
         "features/shell/ui/Shell/shell-state.tsx",
         "features/site/SiteLogo/SiteLogo.tsx",
         "features/site/SiteLogo/index.ts",
+        "features/site/SiteLogo/placements.ts",
         "features/site/ui/SiteLogo/SiteLogoView.tsx",
         "features/site/ui/SiteLogo/index.ts",
         "features/social-links/ServerSocialLinksDisplay.tsx",
@@ -16110,7 +16111,11 @@
         {
           "file": "stories/pages/Frames.stories.tsx",
           "title": "Pages/Application/Frames",
-          "matchingOwners": ["features/shell/LanguageMenu.tsx", "features/site/SiteLogo/index.ts"]
+          "matchingOwners": [
+            "features/shell/LanguageMenu.tsx",
+            "features/site/SiteLogo/index.ts",
+            "features/site/SiteLogo/placements.ts"
+          ]
         },
         {
           "file": "stories/pages/PublicCatalogEntities.stories.tsx",
@@ -37289,6 +37294,7 @@
         "features/admin/ui/AdminShell/index.ts",
         "features/site/SiteLogo/SiteLogo.tsx",
         "features/site/SiteLogo/index.ts",
+        "features/site/SiteLogo/placements.ts",
         "features/site/ui/SiteLogo/SiteLogoView.tsx",
         "features/site/ui/SiteLogo/index.ts"
       ],
@@ -37376,7 +37382,11 @@
         {
           "file": "stories/pages/Frames.stories.tsx",
           "title": "Pages/Application/Frames",
-          "matchingOwners": ["features/admin/ui/AdminShell/AdminShellView.tsx", "features/site/SiteLogo/index.ts"]
+          "matchingOwners": [
+            "features/admin/ui/AdminShell/AdminShellView.tsx",
+            "features/site/SiteLogo/index.ts",
+            "features/site/SiteLogo/placements.ts"
+          ]
         }
       ],
       "scopeNote": "Source view coverage only. A named story or importing child does not establish complete route state, permission, controller, network, SSR or browser parity."
@@ -39677,8 +39687,13 @@
         "features/application-error/QueryErrorAlert.tsx",
         "features/authoring/AuthoringExtensionsContext.tsx",
         "features/metadata/OgGenerationRunProgress.tsx",
+        "features/metadata/OgImagePreview.tsx",
         "features/metadata/ui/OgGenerationRunProgressView.tsx",
-        "features/site/PageLoader/PageLoader.tsx"
+        "features/metadata/ui/OgImagePreviewView.tsx",
+        "features/site/PageLoader/PageLoader.tsx",
+        "features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader.tsx",
+        "features/site/SiteOgImagePanel/SiteOgImagePanel.tsx",
+        "features/upload/ImageUploadCropController/ImageUploadCropController.tsx"
       ],
       "dependencyGraph": [
         "app/admin/settings/og-image/page.tsx",
@@ -39688,11 +39703,18 @@
         "features/application-error/error-status.ts",
         "features/authoring/AuthoringExtensionsContext.tsx",
         "features/metadata/OgGenerationRunProgress.tsx",
+        "features/metadata/OgImagePreview.tsx",
         "features/metadata/ui/OgGenerationRunProgressView.tsx",
+        "features/metadata/ui/OgImagePreviewView.tsx",
         "features/metadata/useOgPreview.ts",
         "features/site/PageLoader/PageLoader.tsx",
         "features/site/PageLoader/index.ts",
-        "features/site/PageLoader/loader-image.ts"
+        "features/site/PageLoader/loader-image.ts",
+        "features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader.tsx",
+        "features/site/SiteOgImagePanel/SiteOgImagePanel.tsx",
+        "features/upload/ImageUploadCropController/ImageUploadCropController.tsx",
+        "features/upload/ImageUploadCropController/index.ts",
+        "features/upload/ImageUploadCropController/useImageUploadCrop.ts"
       ],
       "inheritedBoundaries": [
         "app/admin/error.tsx",
@@ -39748,6 +39770,11 @@
       ],
       "relatedFeatureStories": [
         {
+          "file": "features/upload/ImageUploadCropController/ImageUploadCropController.stories.tsx",
+          "title": "Feature/Upload/ImageUploadCropController",
+          "matchingOwners": ["features/upload/ImageUploadCropController/ImageUploadCropController.tsx"]
+        },
+        {
           "file": "stories/pages/FormEditorPage.stories.tsx",
           "title": "Pages/Editors/Form",
           "matchingOwners": ["features/authoring/AuthoringExtensionsContext.tsx"]
@@ -39779,21 +39806,15 @@
       "visualOwners": [
         "features/admin/settings/SiteSettingsPage.tsx",
         "features/application-error/QueryErrorAlert.tsx",
-        "features/authoring/AuthoringExtensionsContext.tsx",
-        "features/metadata/OgImagePreview.tsx",
-        "features/metadata/ui/OgImagePreviewView.tsx",
         "features/site/PageLoader/PageLoader.tsx",
         "features/site/SiteAssetUploader/ImageDropzone.tsx",
         "features/site/SiteAssetUploader/SiteAssetUploader.tsx",
         "features/site/SiteAssetUploader/ui/ImageDropzoneView.tsx",
         "features/site/SiteLoaderAssetsUploader/SiteLoaderAssetsUploader.tsx",
-        "features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader.tsx",
-        "features/site/SiteOgImagePanel/SiteOgImagePanel.tsx",
         "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
         "features/social-links/SocialLinksEditor.tsx",
         "features/social-links/ui/SocialLinkInputView.tsx",
-        "features/social-links/ui/SocialLinksEditorView.tsx",
-        "features/upload/ImageUploadCropController/ImageUploadCropController.tsx"
+        "features/social-links/ui/SocialLinksEditorView.tsx"
       ],
       "dependencyGraph": [
         "app/admin/settings/page.tsx",
@@ -39801,9 +39822,6 @@
         "features/application-error/QueryErrorAlert.tsx",
         "features/application-error/error-page-messages.ts",
         "features/application-error/error-status.ts",
-        "features/authoring/AuthoringExtensionsContext.tsx",
-        "features/metadata/OgImagePreview.tsx",
-        "features/metadata/ui/OgImagePreviewView.tsx",
         "features/site/PageLoader/PageLoader.tsx",
         "features/site/PageLoader/index.ts",
         "features/site/PageLoader/loader-image.ts",
@@ -39811,17 +39829,12 @@
         "features/site/SiteAssetUploader/SiteAssetUploader.tsx",
         "features/site/SiteAssetUploader/ui/ImageDropzoneView.tsx",
         "features/site/SiteLoaderAssetsUploader/SiteLoaderAssetsUploader.tsx",
-        "features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader.tsx",
-        "features/site/SiteOgImagePanel/SiteOgImagePanel.tsx",
         "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
         "features/social-links/SocialLinksEditor.tsx",
         "features/social-links/social-link-view-model.ts",
         "features/social-links/ui/SocialLinkInputView.tsx",
         "features/social-links/ui/SocialLinksEditorView.tsx",
-        "features/social-links/useSocialLinksEditor.ts",
-        "features/upload/ImageUploadCropController/ImageUploadCropController.tsx",
-        "features/upload/ImageUploadCropController/index.ts",
-        "features/upload/ImageUploadCropController/useImageUploadCrop.ts"
+        "features/social-links/useSocialLinksEditor.ts"
       ],
       "inheritedBoundaries": [
         "app/admin/error.tsx",
@@ -39876,21 +39889,6 @@
           "file": "features/social-links/ui/SocialLinksEditorView.stories.tsx",
           "title": "Feature/Social Links/Editor",
           "matchingOwners": ["features/social-links/SocialLinksEditor.tsx"]
-        },
-        {
-          "file": "features/upload/ImageUploadCropController/ImageUploadCropController.stories.tsx",
-          "title": "Feature/Upload/ImageUploadCropController",
-          "matchingOwners": ["features/upload/ImageUploadCropController/ImageUploadCropController.tsx"]
-        },
-        {
-          "file": "stories/pages/FormEditorPage.stories.tsx",
-          "title": "Pages/Editors/Form",
-          "matchingOwners": ["features/authoring/AuthoringExtensionsContext.tsx"]
-        },
-        {
-          "file": "stories/pages/PostEditorPage.stories.tsx",
-          "title": "Pages/Editors/Post",
-          "matchingOwners": ["features/authoring/AuthoringExtensionsContext.tsx", "features/site/PageLoader/index.ts"]
         },
         {
           "file": "stories/pages/SiteSettings.stories.tsx",
@@ -43288,6 +43286,7 @@
         "features/site/PageLoader/loader-image.ts",
         "features/site/SiteLogo/SiteLogo.tsx",
         "features/site/SiteLogo/index.ts",
+        "features/site/SiteLogo/placements.ts",
         "features/site/ui/SiteLogo/SiteLogoView.tsx",
         "features/site/ui/SiteLogo/index.ts",
         "features/social-links/prepare-social-links-display.ts",
@@ -44842,6 +44841,7 @@
         "features/site/PageLoader/loader-image.ts",
         "features/site/SiteLogo/SiteLogo.tsx",
         "features/site/SiteLogo/index.ts",
+        "features/site/SiteLogo/placements.ts",
         "features/site/ui/SiteLogo/SiteLogoView.tsx",
         "features/site/ui/SiteLogo/index.ts",
         "features/social-links/prepare-social-links-display.ts",
@@ -46373,6 +46373,7 @@
         "features/site/PageLoader/loader-image.ts",
         "features/site/SiteLogo/SiteLogo.tsx",
         "features/site/SiteLogo/index.ts",
+        "features/site/SiteLogo/placements.ts",
         "features/site/ui/SiteLogo/SiteLogoView.tsx",
         "features/site/ui/SiteLogo/index.ts",
         "features/social-links/prepare-social-links-display.ts",
@@ -47820,6 +47821,7 @@
         "features/site/PageLoader/loader-image.ts",
         "features/site/SiteLogo/SiteLogo.tsx",
         "features/site/SiteLogo/index.ts",
+        "features/site/SiteLogo/placements.ts",
         "features/site/ui/SiteLogo/SiteLogoView.tsx",
         "features/site/ui/SiteLogo/index.ts",
         "features/social-links/prepare-social-links-display.ts",
@@ -50553,6 +50555,7 @@
         "features/site/PageLoader/loader-image.ts",
         "features/site/SiteLogo/SiteLogo.tsx",
         "features/site/SiteLogo/index.ts",
+        "features/site/SiteLogo/placements.ts",
         "features/site/ui/SiteLogo/SiteLogoView.tsx",
         "features/site/ui/SiteLogo/index.ts",
         "features/social-links/prepare-social-links-display.ts",

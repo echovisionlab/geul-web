@@ -106,49 +106,51 @@ export function SiteLoaderAssetsUploader({ assets, onSuccess, bindings }: SiteLo
     }
   };
   return (
-    <div>
-      <DsLayoutInset blockEnd="xxs">
+    // Same stacked field rhythm as the logo uploaders: label and description form one block.
+    <DsLayoutStack gap="xxs">
+      <DsLayoutStack gap="none">
         <DsText size="sm" weight="medium">
           {label}
         </DsText>
-      </DsLayoutInset>
-      <DsLayoutInset blockEnd="xs">
         <DsText size="xs" tone="secondary">
           {description}
         </DsText>
-      </DsLayoutInset>
+      </DsLayoutStack>
 
       <DsLayoutStack gap="xs">
         {assets.length > 0 ? (
-          <DsLayoutInline gap="xs" align="center">
-            {assets.map((asset, index) => (
-              <div style={{ position: 'relative' }} key={asset.file_id}>
-                <div style={{ width: 48, height: 48, overflow: 'hidden' }}>
-                  <DsSectionCard padding="none" appearance="surface" border="all">
-                    <DsLayoutInline align="center" justify="center">
-                      <img
-                        src={asset.url}
-                        alt={label}
-                        style={{ display: 'block', maxWidth: '100%', maxHeight: '100%' }}
-                      />
-                    </DsLayoutInline>
-                  </DsSectionCard>
+          // Tiles leave room for their corner remove badges, which straddle each tile's corner.
+          <DsLayoutInset blockStart="md">
+            <DsLayoutInline gap="xl" align="center">
+              {assets.map((asset, index) => (
+                <div style={{ position: 'relative' }} key={asset.file_id}>
+                  <div style={{ width: 48, height: 48, overflow: 'hidden' }}>
+                    <DsSectionCard padding="none" appearance="surface" border="all">
+                      <DsLayoutInline align="center" justify="center">
+                        <img
+                          src={asset.url}
+                          alt={label}
+                          style={{ display: 'block', maxWidth: '100%', maxHeight: '100%' }}
+                        />
+                      </DsLayoutInline>
+                    </DsSectionCard>
+                  </div>
+                  <IconButton
+                    size="xs"
+                    shape="circle"
+                    tone="danger"
+                    emphasis="medium"
+                    placement="overlay-end"
+                    loading={removeLoader.isPending}
+                    aria-label={`${tCommon('actions.remove')} ${label} ${new Intl.NumberFormat(locale).format(index + 1)}`}
+                    onClick={() => removeLoader.mutate(asset.file_id)}
+                  >
+                    <IconTrash size={12} />
+                  </IconButton>
                 </div>
-                <IconButton
-                  size="xs"
-                  shape="circle"
-                  tone="danger"
-                  emphasis="medium"
-                  placement="overlay-end"
-                  loading={removeLoader.isPending}
-                  aria-label={`${tCommon('actions.remove')} ${label} ${new Intl.NumberFormat(locale).format(index + 1)}`}
-                  onClick={() => removeLoader.mutate(asset.file_id)}
-                >
-                  <IconTrash size={12} />
-                </IconButton>
-              </div>
-            ))}
-          </DsLayoutInline>
+              ))}
+            </DsLayoutInline>
+          </DsLayoutInset>
         ) : null}
 
         <ImageUploadField
@@ -158,7 +160,7 @@ export function SiteLoaderAssetsUploader({ assets, onSuccess, bindings }: SiteLo
           maxSize={config.maxSize}
           loading={uploading || isUploading || addLoader.isPending}
           loadingLabel={uploadPrompt}
-          emptyTitle={label}
+          dropzoneAriaLabel={label}
           emptyDescription={uploadPrompt}
           preview={{ mode: 'fixed', width: '100%', height: 96, fit: 'contain' }}
           placeholder={{ width: '100%', minHeight: 96, iconSize: 'md' }}
@@ -166,6 +168,6 @@ export function SiteLoaderAssetsUploader({ assets, onSuccess, bindings }: SiteLo
           onReject={() => notifications.show({ message: errorMessage, tone: 'danger' })}
         />
       </DsLayoutStack>
-    </div>
+    </DsLayoutStack>
   );
 }

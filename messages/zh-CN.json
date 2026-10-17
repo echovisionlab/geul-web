@@ -385,6 +385,12 @@
       "status": {
         "preparingImage": "正在准备图片",
         "uploading": "上传中"
+      },
+      "removeLabel": "移除{label}",
+      "errors": {
+        "tooLarge": "文件过大。最大 {maxSize}",
+        "tooSmall": "文件过小。最小 {minSize}",
+        "invalidType": "不支持此文件类型。"
       }
     },
     "states": {
@@ -704,7 +710,8 @@
             "subject": "呈现的电子邮件主题行",
             "siteName": "设置中的站点名称",
             "siteOrigin": "运行时配置的站点源地址。",
-            "logoEmailUrl": "站点设置中的电子邮件特定徽标 URL（如果已设置）",
+            "logoEmailUrl": "网站设置中的浅色邮件标志 URL；仅设置深色时使用深色标志。",
+            "logoEmailDarkUrl": "深色模式邮件应用使用的深色邮件标志 URL；仅设置浅色时使用浅色标志。",
             "emailLang": "应用到已渲染邮件文档的语言代码",
             "emailDirection": "已渲染邮件文档的文本方向",
             "emailFontFamily": "应用到已渲染邮件的 locale 感知 Noto 字体栈",
@@ -2648,14 +2655,16 @@
     },
     "home": {
       "sections": {
-        "logoSize": "标志尺寸"
+        "logoSize": "标志尺寸",
+        "currentImage": "当前图片与背景"
       },
       "fields": {
         "backgroundColor": "背景色"
       },
       "helpers": {
         "logoCentered": "徽标将位于图像的中心",
-        "previewDescription": "主页 OG 图片：徽标居中，无标题文本"
+        "previewDescription": "主页 OG 图片：徽标居中，无标题文本",
+        "currentImage": "已生成的首页分享图片及其可选背景。"
       }
     },
     "content": {
@@ -4661,6 +4670,7 @@
   "adminSettings": {
     "site": {
       "title": "站点设置",
+      "description": "设置整个网站的信息、品牌、导航和搜索默认值。",
       "notifications": {
         "saved": "设置已保存",
         "noChanges": "没有可保存的更改"
@@ -4678,7 +4688,12 @@
           "socialLinksDescription": "添加您的社交媒体资料，它们会显示在站点页脚中"
         },
         "branding": {
-          "title": "品牌"
+          "title": "品牌",
+          "logos": "标志",
+          "logosDescription": "完整标志和图形标志，分别用于浅色和深色背景。未设置的项会自动替代。",
+          "emailLogos": "邮件标志",
+          "emailLogosDescription": "用于邮件布局的 PNG 标志。深色模式的邮件应用使用深色标志。",
+          "iconsAndLoader": "网站图标与加载动画"
         },
         "contentDisplay": {
           "title": "内容与展示",
@@ -4761,17 +4776,29 @@
         "errorMessage": "{label} 必须是 {mimeTypes}（最大 {maxSize}）",
         "uploaded": "{label} 已上传",
         "removed": "{label} 已删除",
-        "logo_light": {
-          "label": "浅色站点标志",
-          "description": "用于浅色背景，并作为默认站点标志。"
+        "logo_full_light": {
+          "label": "完整标志 · 浅色",
+          "description": "用于浅色背景的图形与文字标志，用于网站页眉、菜单、打印和分享图片。"
         },
-        "logo_dark": {
-          "label": "深色站点标志",
-          "description": "用于深色背景。留空时回退到浅色标志。"
+        "logo_full_dark": {
+          "label": "完整标志 · 深色",
+          "description": "用于深色背景。留空时使用浅色完整标志。"
         },
-        "logo_email": {
-          "label": "邮件标志",
-          "description": "用于电子邮件模板和版式。建议使用 PNG 以兼容客户端"
+        "logo_symbol_light": {
+          "label": "图形标志 · 浅色",
+          "description": "仅图形，用于折叠的管理菜单等狭小空间。留空时使用完整标志。"
+        },
+        "logo_symbol_dark": {
+          "label": "图形标志 · 深色",
+          "description": "用于深色背景。留空时使用浅色图形标志。"
+        },
+        "logo_email_light": {
+          "label": "邮件标志 · 浅色",
+          "description": "邮件中显示的 PNG。留空时使用深色邮件标志。"
+        },
+        "logo_email_dark": {
+          "label": "邮件标志 · 深色",
+          "description": "邮件应用在深色模式下显示的 PNG。留空时使用浅色邮件标志。"
         },
         "favicon": {
           "label": "站点图标",

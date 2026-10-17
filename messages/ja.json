@@ -385,6 +385,12 @@
       "status": {
         "preparingImage": "画像を準備中",
         "uploading": "アップロード中"
+      },
+      "removeLabel": "{label}を削除",
+      "errors": {
+        "tooLarge": "ファイルが大きすぎます。最大 {maxSize}",
+        "tooSmall": "ファイルが小さすぎます。最小 {minSize}",
+        "invalidType": "このファイル形式には対応していません。"
       }
     },
     "states": {
@@ -704,7 +710,8 @@
             "subject": "レンダリング後のメール件名です",
             "siteName": "設定から取得したサイト名です",
             "siteOrigin": "ランタイムで設定されたサイトオリジンです。",
-            "logoEmailUrl": "サイト設定のメール専用ロゴ URL です（設定されている場合）",
+            "logoEmailUrl": "サイト設定のライト用メールロゴの URL。ダークのみ設定されている場合はダークのロゴ。",
+            "logoEmailDarkUrl": "ダークモードのメールアプリ向けダーク用メールロゴの URL。ライトのみ設定されている場合はライトのロゴ。",
             "emailLang": "レンダリングされるメール文書に適用される言語コードです",
             "emailDirection": "レンダリングされるメール文書の文字方向です",
             "emailFontFamily": "レンダリングされるメールに適用される locale 別の Noto フォントスタックです",
@@ -2648,14 +2655,16 @@
     },
     "home": {
       "sections": {
-        "logoSize": "ロゴサイズ"
+        "logoSize": "ロゴサイズ",
+        "currentImage": "現在の画像と背景"
       },
       "fields": {
         "backgroundColor": "背景色"
       },
       "helpers": {
         "logoCentered": "ロゴは画像の中央に配置されます",
-        "previewDescription": "ホームページ OG 画像: ロゴ中央配置、タイトル文字なし"
+        "previewDescription": "ホームページ OG 画像: ロゴ中央配置、タイトル文字なし",
+        "currentImage": "生成されたホームの共有画像と、その下に敷く背景（任意）です。"
       }
     },
     "content": {
@@ -4661,6 +4670,7 @@
   "adminSettings": {
     "site": {
       "title": "サイト設定",
+      "description": "サイト全体の情報、ブランディング、ナビゲーション、検索の既定値を設定します。",
       "notifications": {
         "saved": "設定を保存しました",
         "noChanges": "保存する変更はありません"
@@ -4678,7 +4688,12 @@
           "socialLinksDescription": "ソーシャルメディアのプロフィールを追加してください。サイトフッターに表示されます"
         },
         "branding": {
-          "title": "ブランディング"
+          "title": "ブランディング",
+          "logos": "ロゴ",
+          "logosDescription": "フルロゴとシンボルを、明るい背景用と暗い背景用にそれぞれ設定します。未設定の項目は自動で代替されます。",
+          "emailLogos": "メールロゴ",
+          "emailLogosDescription": "メールレイアウト用の PNG ロゴです。ダークモードのメールアプリはダーク用ロゴを使います。",
+          "iconsAndLoader": "ファビコンとローダー"
         },
         "contentDisplay": {
           "title": "コンテンツと表示",
@@ -4761,17 +4776,29 @@
         "errorMessage": "{label} は {mimeTypes} である必要があります（最大 {maxSize}）",
         "uploaded": "{label} をアップロードしました",
         "removed": "{label} を削除しました",
-        "logo_light": {
-          "label": "ライトサイトロゴ",
-          "description": "明るい背景で表示され、既定のサイトロゴとして使われます。"
+        "logo_full_light": {
+          "label": "フルロゴ・ライト",
+          "description": "明るい背景用のシンボルとワードマーク。サイトヘッダー、メニュー、印刷、共有画像に使われます。"
         },
-        "logo_dark": {
-          "label": "ダークサイトロゴ",
-          "description": "暗い背景で表示されます。未設定の場合はライトロゴを使います。"
+        "logo_full_dark": {
+          "label": "フルロゴ・ダーク",
+          "description": "暗い背景用です。未設定の場合はライトのフルロゴを使います。"
         },
-        "logo_email": {
-          "label": "メールロゴ",
-          "description": "メールテンプレートとレイアウトで使われます。クライアント互換性のため PNG を推奨します"
+        "logo_symbol_light": {
+          "label": "シンボル・ライト",
+          "description": "折りたたんだ管理メニューなど狭い場所に使うシンボルです。未設定の場合はフルロゴを使います。"
+        },
+        "logo_symbol_dark": {
+          "label": "シンボル・ダーク",
+          "description": "暗い背景用です。未設定の場合はライトのシンボルを使います。"
+        },
+        "logo_email_light": {
+          "label": "メールロゴ・ライト",
+          "description": "メールに表示される PNG です。未設定の場合はダークのメールロゴを使います。"
+        },
+        "logo_email_dark": {
+          "label": "メールロゴ・ダーク",
+          "description": "メールアプリがダークモードで表示する PNG です。未設定の場合はライトのメールロゴを使います。"
         },
         "favicon": {
           "label": "サイトファビコン",

@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { notifications } from '@/components/core/Notification';
 import { PublicFormView } from './PublicFormView';
+import { SITE_LOGO_HEIGHT } from '@/features/site/SiteLogo/placements';
 
 const pushMock = vi.fn();
 const submitFormActionMock = vi.fn();
@@ -211,7 +212,7 @@ describe('PublicFormView', () => {
     );
 
     await waitForAssertion(() => {
-      expect(document.querySelector('[data-testid="site-logo"]')?.getAttribute('data-height')).toBe('16');
+      expect(document.querySelector('[data-testid="site-logo"]')?.getAttribute('data-height')).toBe(String(SITE_LOGO_HEIGHT.form));
     });
   });
 

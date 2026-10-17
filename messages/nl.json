@@ -385,6 +385,12 @@
       "status": {
         "preparingImage": "Afbeelding voorbereiden",
         "uploading": "Uploaden"
+      },
+      "removeLabel": "{label} verwijderen",
+      "errors": {
+        "tooLarge": "Bestand te groot. Maximaal {maxSize}",
+        "tooSmall": "Bestand te klein. Minimaal {minSize}",
+        "invalidType": "Dit bestandstype wordt niet ondersteund."
       }
     },
     "states": {
@@ -704,7 +710,8 @@
             "subject": "Gerenderde e-mailonderwerpsregel.",
             "siteName": "Sitenaam uit instellingen.",
             "siteOrigin": "Tijdens runtime geconfigureerde site-oorsprong.",
-            "logoEmailUrl": "Specifieke logo-URL voor e-mail uit site-instellingen (indien ingesteld).",
+            "logoEmailUrl": "URL van het lichte e-maillogo uit de site-instellingen; het donkere als alleen dat is ingesteld.",
+            "logoEmailDarkUrl": "URL van het donkere e-maillogo voor mail-apps in de donkere modus; het lichte als alleen dat is ingesteld.",
             "emailLang": "Taalcode die wordt toegepast op het gerenderde e-maildocument.",
             "emailDirection": "Tekstrichting voor het gerenderde e-maildocument.",
             "emailFontFamily": "Locale-afhankelijke Noto-lettertypestack voor de gerenderde e-mail.",
@@ -2648,14 +2655,16 @@
     },
     "home": {
       "sections": {
-        "logoSize": "Logogrootte"
+        "logoSize": "Logogrootte",
+        "currentImage": "Huidige afbeelding en achtergrond"
       },
       "fields": {
         "backgroundColor": "Achtergrondkleur"
       },
       "helpers": {
         "logoCentered": "Logo wordt gecentreerd op de afbeelding",
-        "previewDescription": "Homepage-OG-afbeelding: logo gecentreerd, geen titeltekst"
+        "previewDescription": "Homepage-OG-afbeelding: logo gecentreerd, geen titeltekst",
+        "currentImage": "De gegenereerde deelafbeelding van de homepage en de optionele achtergrond."
       }
     },
     "content": {
@@ -4661,6 +4670,7 @@
   "adminSettings": {
     "site": {
       "title": "Site-instellingen",
+      "description": "Identiteit, huisstijl, navigatie en zoekinstellingen voor de hele site.",
       "notifications": {
         "saved": "Instellingen opgeslagen",
         "noChanges": "Geen wijzigingen om op te slaan"
@@ -4678,7 +4688,12 @@
           "socialLinksDescription": "Voeg je sociale-mediaprofielen toe. Deze worden weergegeven in de footer van de site."
         },
         "branding": {
-          "title": "Merkidentiteit"
+          "title": "Merkidentiteit",
+          "logos": "Logo’s",
+          "logosDescription": "Het volledige logo en het symbool, voor lichte en donkere achtergronden. Ontbrekende varianten worden automatisch vervangen.",
+          "emailLogos": "E-maillogo’s",
+          "emailLogosDescription": "PNG-logo’s voor e-mailindelingen. Mail-apps in de donkere modus gebruiken het donkere logo.",
+          "iconsAndLoader": "Favicon en laadanimatie"
         },
         "contentDisplay": {
           "title": "Inhoud en weergave",
@@ -4761,17 +4776,29 @@
         "errorMessage": "{label} moet {mimeTypes} zijn (max. {maxSize})",
         "uploaded": "{label} geüpload",
         "removed": "{label} verwijderd",
-        "logo_light": {
-          "label": "Licht sitelogo",
-          "description": "Wordt weergegeven op lichte achtergronden en gebruikt als standaard sitelogo."
+        "logo_full_light": {
+          "label": "Volledig logo · licht",
+          "description": "Symbool met woordmerk voor lichte achtergronden: kop, menu’s, afdrukken en deelafbeeldingen."
         },
-        "logo_dark": {
-          "label": "Donker sitelogo",
-          "description": "Wordt weergegeven op donkere achtergronden. Valt terug op het lichte logo wanneer leeg."
+        "logo_full_dark": {
+          "label": "Volledig logo · donker",
+          "description": "Voor donkere achtergronden. Gebruikt het lichte volledige logo als dit leeg is."
         },
-        "logo_email": {
-          "label": "E-maillogo",
-          "description": "Gebruikt in e-mailsjablonen en lay-outs. PNG wordt aanbevolen voor compatibiliteit met clients."
+        "logo_symbol_light": {
+          "label": "Symbool · licht",
+          "description": "Alleen het symbool, voor kleine ruimtes zoals het ingeklapte beheermenu. Gebruikt het volledige logo als dit leeg is."
+        },
+        "logo_symbol_dark": {
+          "label": "Symbool · donker",
+          "description": "Voor donkere achtergronden. Gebruikt het lichte symbool als dit leeg is."
+        },
+        "logo_email_light": {
+          "label": "E-maillogo · licht",
+          "description": "PNG dat in e-mails wordt getoond. Gebruikt het donkere e-maillogo als dit leeg is."
+        },
+        "logo_email_dark": {
+          "label": "E-maillogo · donker",
+          "description": "PNG dat mail-apps in de donkere modus tonen. Gebruikt het lichte e-maillogo als dit leeg is."
         },
         "favicon": {
           "label": "Site-favicon",

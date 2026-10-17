@@ -4,15 +4,15 @@ Run `node scripts/design-system/inventory.mjs` to regenerate; `--check` fails wh
 
 Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.
 
-Source manifest SHA-256: `adef60ee2e4ff0052de32add7eb8e70493114eac89d11a89b7c8848c1e7bda1a`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
+Source manifest SHA-256: `570939da2bd45a71d5f5c1271725ded0f6114683a218f8d61bc823d376b53cf4`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
 
 ## Counts
 
 | Metric                | Count |
 | --------------------- | ----: |
-| sourceFiles           |  3776 |
-| productionSourceFiles |  2283 |
-| componentFiles        |   901 |
+| sourceFiles           |  3778 |
+| productionSourceFiles |  2285 |
+| componentFiles        |   902 |
 | coreFamilies          |    57 |
 | featureDomains        |    53 |
 | storyFiles            |   256 |
@@ -81,7 +81,7 @@ Each family below names its ownership directory. The JSON lists every component 
 | [Core/Progress](../../components/core/Progress)                                 |               3 |           3 |
 | [Core/PublicMetadata](../../components/core/PublicMetadata)                     |               2 |           2 |
 | [Core/ResizeHandle](../../components/core/ResizeHandle)                         |               1 |           1 |
-| [Core/Section](../../components/core/Section)                                   |               6 |           6 |
+| [Core/Section](../../components/core/Section)                                   |               7 |           6 |
 | [Core/SelectionSurface](../../components/core/SelectionSurface)                 |               2 |           2 |
 | [Core/SideNavigation](../../components/core/SideNavigation)                     |               1 |           1 |
 | [Core/Social](../../components/core/Social)                                     |               3 |           1 |
@@ -163,7 +163,7 @@ Counts include every production JS/TS file in the domain; component files are Pa
 | [series](../../features/series)                       |      5 |          3 |       1 |     6 |             3 |
 | [share](../../features/share)                         |      6 |          5 |       2 |     3 |             0 |
 | [shell](../../features/shell)                         |     14 |         10 |       1 |     3 |             0 |
-| [site](../../features/site)                           |     16 |         11 |       1 |     9 |            10 |
+| [site](../../features/site)                           |     17 |         11 |       1 |     9 |            10 |
 | [social-links](../../features/social-links)           |     10 |          6 |       2 |     6 |             1 |
 | [translation](../../features/translation)             |     42 |         18 |       1 |    22 |             1 |
 | [upload](../../features/upload)                       |      5 |          1 |       1 |     3 |             0 |

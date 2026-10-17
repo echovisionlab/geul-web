@@ -7,7 +7,6 @@ import { LayoutContainer } from '@/components/core/Layout';
 import SiteSettingsPage, { type SiteSettingsPageBindings } from '@/features/admin/settings/SiteSettingsPage';
 import type { SiteAssetBindings } from '@/features/site/site-asset-bindings';
 import { DEFAULT_SITE_SETTINGS_VIEW } from '@/lib/types/site-setting/config';
-import { actionFailure, actionSuccess } from '@/lib/actions/action-result';
 function fixture(state: 'ready' | 'failed' | 'pending' | 'action-failed'): SiteSettingsPageBindings {
   let settings = {
     ...DEFAULT_SITE_SETTINGS_VIEW,
@@ -16,6 +15,9 @@ function fixture(state: 'ready' | 'failed' | 'pending' | 'action-failed'): SiteS
     company_name: 'Studio',
     contact_email: 'contact@example.com',
     legal_email: 'legal@example.com',
+    // Published brand assets; the remaining slots show their empty upload state.
+    logo_full_light_url: 'https://cdn.rawsector.com/asset/b8cc8296-7f93-4704-b06d-657d39171ba9/image.svg',
+    logo_full_dark_url: 'https://cdn.rawsector.com/asset/62d7d08d-8a4e-4ff7-96a2-a7669a0183bc/image.svg',
   };
   const files = new Map<string, string>();
   const upload: SiteAssetBindings['upload'] = async (blob) => {
@@ -91,15 +93,6 @@ function fixture(state: 'ready' | 'failed' | 'pending' | 'action-failed'): SiteS
       },
       uploadFile: upload,
     },
-    og: {
-      status: async () => ({ data: { assetId: null } }),
-      regenerate: async () => ({ error: 'Image generation is unavailable in this preview' }),
-      read: {
-        latest: async () => actionSuccess({ generation: undefined }),
-        generation: async () => actionFailure('No local generation', 'OG_GENERATION_NOT_FOUND'),
-      },
-      asset,
-    },
   };
 }
 function Preview({ state = 'ready' }: { state?: Parameters<typeof fixture>[0] }) {
@@ -124,7 +117,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Complete production site settings controller and form including logo/favicon/loader/OG branding owners. Typed local reads and saves; actual upload storage, image generation, authorization and persistence are outside. Selected upload bytes, loader entries and removal update local assets. Service-backed OG generation is omitted.',
+          'Complete production site settings controller and form including the full, symbol and email logos, favicon and loader owners. Typed local reads and saves; actual upload storage, image generation, authorization and persistence are outside. Selected upload bytes, loader entries and removal update local assets. Sharing images live on the OG Image Settings page.',
       },
     },
   },

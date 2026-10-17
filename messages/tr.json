@@ -385,6 +385,12 @@
       "status": {
         "preparingImage": "Resim hazırlanıyor",
         "uploading": "Yükleniyor"
+      },
+      "removeLabel": "{label} kaldır",
+      "errors": {
+        "tooLarge": "Dosya çok büyük. En fazla {maxSize}",
+        "tooSmall": "Dosya çok küçük. En az {minSize}",
+        "invalidType": "Bu dosya türü desteklenmiyor."
       }
     },
     "states": {
@@ -704,7 +710,8 @@
             "subject": "İşlenen e-posta konu satırı.",
             "siteName": "Ayarlardan site adı.",
             "siteOrigin": "Çalışma zamanı sitesi kaynağı.",
-            "logoEmailUrl": "Site ayarlarından (ayarlanmışsa) e-postaya özel logo URL'si.",
+            "logoEmailUrl": "Site ayarlarındaki açık e-posta logosunun URL’si; yalnızca koyu ayarlıysa koyu logo.",
+            "logoEmailDarkUrl": "Koyu moddaki e-posta uygulamaları için koyu e-posta logosunun URL’si; yalnızca açık ayarlıysa açık logo.",
             "emailLang": "İşlenen e-posta belgesine uygulanan dil kodu.",
             "emailDirection": "İşlenen e-posta belgesinin metin yönü.",
             "emailFontFamily": "İşlenen e-posta için yerel ayara duyarlı Noto yazı tipi yığını.",
@@ -2648,14 +2655,16 @@
     },
     "home": {
       "sections": {
-        "logoSize": "Logo Boyutu"
+        "logoSize": "Logo Boyutu",
+        "currentImage": "Geçerli görsel ve arka plan"
       },
       "fields": {
         "backgroundColor": "Arka Plan Rengi"
       },
       "helpers": {
         "logoCentered": "Logo görselin üzerinde ortalanacak",
-        "previewDescription": "Ana Sayfa OG görseli: Logo ortalanmış, başlık metni yok"
+        "previewDescription": "Ana Sayfa OG görseli: Logo ortalanmış, başlık metni yok",
+        "currentImage": "Ana sayfa için oluşturulan paylaşım görseli ve isteğe bağlı arka planı."
       }
     },
     "content": {
@@ -4661,6 +4670,7 @@
   "adminSettings": {
     "site": {
       "title": "Site Ayarları",
+      "description": "Sitenin tamamı için kimlik, marka, gezinme ve arama varsayılanları.",
       "notifications": {
         "saved": "Ayarlar kaydedildi",
         "noChanges": "Kaydedilecek değişiklik yok"
@@ -4678,7 +4688,12 @@
           "socialLinksDescription": "Sosyal medya profillerinizi ekleyin. Bunlar site altbilgisinde görüntülenecektir."
         },
         "branding": {
-          "title": "Markalaşma"
+          "title": "Markalaşma",
+          "logos": "Logolar",
+          "logosDescription": "Tam logo ve simge; açık ve koyu arka planlar için. Eksik varyantlar otomatik olarak yerine konur.",
+          "emailLogos": "E-posta logoları",
+          "emailLogosDescription": "E-posta düzenleri için PNG logolar. Koyu moddaki e-posta uygulamaları koyu logoyu kullanır.",
+          "iconsAndLoader": "Favicon ve yükleme animasyonu"
         },
         "contentDisplay": {
           "title": "İçerik ve Görüntüleme",
@@ -4761,17 +4776,29 @@
         "errorMessage": "{label}, {mimeTypes} olmalıdır (en fazla {maxSize})",
         "uploaded": "{label} yüklendi",
         "removed": "{label} kaldırıldı",
-        "logo_light": {
-          "label": "Işık Sitesi Logosu",
-          "description": "Açık renkli arka planda görüntülenir ve varsayılan site logosu olarak kullanılır."
+        "logo_full_light": {
+          "label": "Tam logo · açık",
+          "description": "Açık arka planlar için simge ve yazı logosu: site başlığı, menüler, baskı ve paylaşım görselleri."
         },
-        "logo_dark": {
-          "label": "Karanlık Site Logosu",
-          "description": "Koyu arka planlarda görüntülenir. Boşaldığında ışık logosuna geri döner."
+        "logo_full_dark": {
+          "label": "Tam logo · koyu",
+          "description": "Koyu arka planlar için. Boşsa açık tam logo kullanılır."
         },
-        "logo_email": {
-          "label": "E-posta Logosu",
-          "description": "E-posta şablonlarında ve düzenlerinde kullanılır. İstemci uyumluluğu için PNG önerilir."
+        "logo_symbol_light": {
+          "label": "Simge · açık",
+          "description": "Yalnızca simge; daraltılmış yönetim menüsü gibi dar alanlar için. Boşsa tam logo kullanılır."
+        },
+        "logo_symbol_dark": {
+          "label": "Simge · koyu",
+          "description": "Koyu arka planlar için. Boşsa açık simge kullanılır."
+        },
+        "logo_email_light": {
+          "label": "E-posta logosu · açık",
+          "description": "E-postalarda gösterilen PNG. Boşsa koyu e-posta logosu kullanılır."
+        },
+        "logo_email_dark": {
+          "label": "E-posta logosu · koyu",
+          "description": "E-posta uygulamalarının koyu modda gösterdiği PNG. Boşsa açık e-posta logosu kullanılır."
         },
         "favicon": {
           "label": "Site Simgesi",

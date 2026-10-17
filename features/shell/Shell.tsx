@@ -5,6 +5,7 @@ import { getTranslations } from 'next-intl/server';
 import type { MenuItem } from '@echovisionlab/geul-proto/public/manifest_pb.ts';
 import { PrintHeader } from '@/features/shell/PrintHeader';
 import { SiteLogo } from '@/features/site/SiteLogo';
+import { SITE_LOGO_HEIGHT } from '@/features/site/SiteLogo/placements';
 import { ServerSocialLinksDisplay } from '@/features/social-links/ServerSocialLinksDisplay';
 import type { UserDisplaySnapshot } from '@/lib/auth/user-display-cookie';
 import { getManifest } from '@/lib/queries/manifest';
@@ -97,9 +98,9 @@ export async function Shell({ children, initialUserSnapshot }: ShellProps) {
           footerSocialMedia: tShell('footer.socialMedia'),
         }}
         slots={{
-          logo: <SiteLogo height={34} />,
+          logo: <SiteLogo height={SITE_LOGO_HEIGHT.header} />,
           printHeader: <PrintHeader />,
-          printWatermark: <SiteLogo height={17} />,
+          printWatermark: <SiteLogo height={SITE_LOGO_HEIGHT.printWatermark} />,
           languageDesktop: <LanguageMenu />,
           languageNavigation: <LanguageMenu variant="navigation" />,
           languageFooterDesktop: <LanguageMenu variant="text" textSize="xs" />,
