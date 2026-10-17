@@ -1111,7 +1111,8 @@
       "labelLanguageTranslatedDescription": "공개 메뉴에서는 방문자 언어와 정확히 일치하는 current 번역만 표시하고, 그 외에는 원문 라벨을 표시합니다.",
       "labelLanguageFixedLocaleDescription": "방문자 언어와 관계없이 선택한 언어의 메뉴 라벨을 보여줍니다. 해당 언어에 공개 라벨이 없으면 원문 라벨을 사용합니다.",
       "translatedItemBadge": "방문자 언어별",
-      "fixedLocaleItemBadge": "{locale} 고정"
+      "fixedLocaleItemBadge": "{locale} 고정",
+      "description": "사이트에 표시되는 내비게이션 메뉴를 관리합니다. 메뉴를 선택하면 항목을 편집할 수 있습니다."
     },
     "emailEvents": {
       "title": "메일 전송",
@@ -1709,7 +1710,7 @@
     },
     "personalAccessTokens": {
       "title": "개인 액세스 토큰",
-      "description": "{siteName}에서 제공하는 여러 API 서비스에서 이 단일 개인 액세스 토큰을 사용합니다. 모든 요청에는 현재 계정 권한이 적용됩니다. Remote MCP에서는 이 토큰을 사용할 수 없습니다.",
+      "description": "{siteName}에서 제공하는 여러 API 서비스에서 이 단일 개인 액세스 토큰을 사용합니다. 모든 요청에는 현재 계정 권한이 적용됩니다.",
       "empty": "생성된 개인 액세스 토큰이 없습니다.",
       "regenerate": "재생성",
       "regenerateTitle": "개인 액세스 토큰 재생성",
@@ -4665,6 +4666,9 @@
     "emailVerification": {
       "verified": "이메일 인증됨",
       "unverified": "이메일 미인증"
+    },
+    "profile": {
+      "description": "이 섹션의 변경 사항은 저장 버튼으로 반영됩니다. 아래 섹션은 변경 즉시 적용됩니다."
     }
   },
   "adminSettings": {

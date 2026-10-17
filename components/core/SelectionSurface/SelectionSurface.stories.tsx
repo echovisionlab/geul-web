@@ -102,7 +102,7 @@ function CompactRowsPreview() {
 }
 export const CompactRows: Story = { render: () => <CompactRowsPreview /> };
 
-function PathPreview() {
+function PathPreview({ pageTitle = false }: { pageTitle?: boolean }) {
   const [path, setPath] = useState([
     { id: 'library', name: 'Library' },
     { id: 'recordings', name: 'Recordings' },
@@ -111,12 +111,19 @@ function PathPreview() {
   return (
     <LayoutStack gap="md">
       <LayoutInline justify="between" wrap="nowrap">
-        <SelectionPath items={path} parentLabel={text('Back')} onOpen={(index) => setPath(path.slice(0, index + 1))} />
+        <SelectionPath
+          items={path}
+          parentLabel={text('Back')}
+          onOpen={(index) => setPath(path.slice(0, index + 1))}
+          pageTitle={pageTitle}
+        />
       </LayoutInline>
     </LayoutStack>
   );
 }
 export const FolderNavigation: Story = { render: () => <PathPreview /> };
+/** A browser that is the whole page titles it with the current location (h1). */
+export const PageTitleLocation: Story = { render: () => <PathPreview pageTitle /> };
 
 function GridLayoutPreview({ columns = 'auto' }: { columns?: SelectionGridColumns }) {
   const text = useStorybookText();

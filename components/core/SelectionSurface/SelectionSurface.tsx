@@ -6,7 +6,7 @@ import { presentationAttributes, type PresentationProps } from '../presentation-
 import { MediaImage } from '../MediaImage';
 import { IconButton } from '../IconButton';
 import { TextButton } from '../TextButton';
-import { Text, VisuallyHidden } from '../Typography';
+import { Heading, Text, VisuallyHidden } from '../Typography';
 import {
   spaceValue,
   resolveResponsive,
@@ -286,10 +286,17 @@ export interface SelectionPathProps {
   label?: string;
   parentLabel?: string;
   onOpen: (index: number) => void;
+  /** The current location is the page title (h1), for a browser that is the whole page. */
+  pageTitle?: boolean;
 }
-export function SelectionPath({ items, label, parentLabel, onOpen }: SelectionPathProps) {
+export function SelectionPath({ items, label, parentLabel, onOpen, pageTitle = false }: SelectionPathProps) {
   return (
-    <nav className={classes.path} aria-label={label} title={items.map((item) => item.name).join(' / ')}>
+    <nav
+      className={classes.path}
+      aria-label={label}
+      title={items.map((item) => item.name).join(' / ')}
+      data-page-title={pageTitle || undefined}
+    >
       {parentLabel && items.length > 1 ? (
         <IconButton aria-label={parentLabel} title={parentLabel} onClick={() => onOpen(items.length - 2)}>
           <IconCornerLeftUp aria-hidden />
@@ -309,6 +316,10 @@ export function SelectionPath({ items, label, parentLabel, onOpen }: SelectionPa
                   {item.name}
                 </Text>
               </TextButton>
+            ) : pageTitle ? (
+              <Heading level={1} scale={{ base: 3, sm: 2 }} truncate title={item.name} aria-current="location">
+                {item.name}
+              </Heading>
             ) : (
               <Text as="span" size="sm" weight="strong" truncate title={item.name} aria-current="location">
                 {item.name}

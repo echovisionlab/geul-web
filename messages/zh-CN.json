@@ -1111,7 +1111,8 @@
       "labelLanguageTranslatedDescription": "公开菜单仅显示与访问者语言完全匹配的当前翻译；否则显示原文标签。",
       "labelLanguageFixedLocaleDescription": "公开菜单始终使用所选语言显示此项，不受访问者语言影响。如果该语言没有实时标签，则使用原文标签。",
       "translatedItemBadge": "访问者语言",
-      "fixedLocaleItemBadge": "固定：{locale}"
+      "fixedLocaleItemBadge": "固定：{locale}",
+      "description": "管理网站上显示的导航菜单。选择一个菜单即可编辑其项目。"
     },
     "emailEvents": {
       "title": "邮件投递",
@@ -1760,7 +1761,7 @@
     },
     "personalAccessTokens": {
       "title": "个人访问令牌",
-      "description": "使用这一个人访问令牌调用 {siteName} 提供的 API。每个请求都会使用您账户的当前权限。Remote MCP 不接受此令牌。",
+      "description": "使用这一个人访问令牌调用 {siteName} 提供的 API。每个请求都会使用您账户的当前权限。",
       "empty": "尚未创建个人访问令牌。",
       "regenerate": "重新生成",
       "regenerateTitle": "重新生成个人访问令牌",
@@ -4665,6 +4666,9 @@
     "emailVerification": {
       "verified": "邮箱已验证",
       "unverified": "邮箱未验证"
+    },
+    "profile": {
+      "description": "本部分的更改需点击保存后生效。下方各部分的更改会立即生效。"
     }
   },
   "adminSettings": {

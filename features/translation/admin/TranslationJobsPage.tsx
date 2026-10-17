@@ -3,7 +3,8 @@
 import { formatLocaleCode } from '@/components/core/Typography/locale-code';
 
 import { LocaleCode } from '@/components/core/Typography/LocaleCode';
-import { SupportingText, Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
+import { PageHeader } from '@/components/core/PageHeader';
 
 import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
 
@@ -102,31 +103,33 @@ export function TranslationJobsPage({ client }: { client?: TranslationJobsPageCl
 
   return (
     <DsLayoutStack gap="md">
-      <DsLayoutInline justify="between" align="start">
-        <DsHeading level={2}>{t('title')}</DsHeading>
-        <DsLayoutInline gap="sm">
-          <Button href="/admin/translations" tone="neutral" emphasis="medium">
-            {tCommonLabels('overview')}
-          </Button>
-          <Button
-            href="/admin/translations/settings"
-            tone="neutral"
-            emphasis="medium"
-            leftSection={<IconSettings2 size={16} />}
-          >
-            {tCommonLabels('settings')}
-          </Button>
-          <Button
-            emphasis="medium"
-            leftSection={<IconRefresh size={16} />}
-            ref={refreshRef}
-            onClick={() => queryClient.invalidateQueries({ queryKey: jobsQueryKey })}
-            loading={refreshButtonLoading}
-          >
-            {tCommonActions('refresh')}
-          </Button>
-        </DsLayoutInline>
-      </DsLayoutInline>
+      <PageHeader
+        title={t('title')}
+        actions={
+          <DsLayoutInline gap="sm">
+            <Button href="/admin/translations" tone="neutral" emphasis="medium">
+              {tCommonLabels('overview')}
+            </Button>
+            <Button
+              href="/admin/translations/settings"
+              tone="neutral"
+              emphasis="medium"
+              leftSection={<IconSettings2 size={16} />}
+            >
+              {tCommonLabels('settings')}
+            </Button>
+            <Button
+              emphasis="medium"
+              leftSection={<IconRefresh size={16} />}
+              ref={refreshRef}
+              onClick={() => queryClient.invalidateQueries({ queryKey: jobsQueryKey })}
+              loading={refreshButtonLoading}
+            >
+              {tCommonActions('refresh')}
+            </Button>
+          </DsLayoutInline>
+        }
+      />
 
       <DsLayoutInline gap="xxs">
         <LabelBadge tone="accent">{t('stats.active', { count: jobs.length })}</LabelBadge>

@@ -1111,7 +1111,8 @@
       "labelLanguageTranslatedDescription": "Menu công khai chỉ hiển thị bản dịch hiện tại khớp chính xác với ngôn ngữ của khách truy cập; nếu không sẽ hiển thị nhãn nguồn.",
       "labelLanguageFixedLocaleDescription": "Menu công khai luôn hiển thị mục này từ ngôn ngữ đã chọn, bất kể ngôn ngữ của khách truy cập. Nếu ngôn ngữ đó không có nhãn trực tiếp thì nhãn nguồn sẽ được sử dụng.",
       "translatedItemBadge": "Ngôn ngữ của khách truy cập",
-      "fixedLocaleItemBadge": "Đã sửa: {locale}"
+      "fixedLocaleItemBadge": "Đã sửa: {locale}",
+      "description": "Quản lý các menu điều hướng hiển thị trên trang. Chọn một menu để chỉnh sửa các mục."
     },
     "emailEvents": {
       "title": "Gửi email",
@@ -1709,7 +1710,7 @@
     },
     "personalAccessTokens": {
       "title": "Mã truy cập cá nhân",
-      "description": "Dùng một mã truy cập cá nhân này với các API do {siteName} cung cấp. Mỗi yêu cầu sử dụng quyền hiện tại của tài khoản. Remote MCP không chấp nhận mã này.",
+      "description": "Dùng một mã truy cập cá nhân này với các API do {siteName} cung cấp. Mỗi yêu cầu sử dụng quyền hiện tại của tài khoản.",
       "empty": "Chưa có mã truy cập cá nhân nào được tạo.",
       "regenerate": "Tạo lại",
       "regenerateTitle": "Tạo lại mã truy cập cá nhân",
@@ -4665,6 +4666,9 @@
     "emailVerification": {
       "verified": "Đã xác minh email",
       "unverified": "Email chưa được xác minh"
+    },
+    "profile": {
+      "description": "Nút Lưu áp dụng các thay đổi trong phần này. Các phần bên dưới áp dụng mỗi thay đổi ngay lập tức."
     }
   },
   "adminSettings": {

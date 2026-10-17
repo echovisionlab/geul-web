@@ -3,7 +3,7 @@
 import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
 
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
-import { SupportingText, Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
 import { ConfirmationDialog } from '@/features/confirmation';
 
 import {
@@ -39,7 +39,8 @@ import { IconButton } from '@/components/core/IconButton';
 import { Select, TextInput, Checkbox } from '@/components/core/Input';
 import { ContentModal, DialogActions } from '@/components/core/Modal';
 import { PageLoader } from '@/features/site/PageLoader';
-import { SectionCard, SectionHeader } from '@/components/core/Section';
+import { SettingsSection } from '@/components/core/Section';
+import { PageHeader } from '@/components/core/PageHeader';
 import { EntityTranslationsPanel } from '@/features/translation/EntityTranslationsPanel';
 import { TranslationLocaleControl } from '@/features/translation/TranslationLocaleControl';
 import { useLocaleDocumentSession } from '@/features/translation/useLocaleDocumentSession';
@@ -537,19 +538,20 @@ export function AdminMenusPageView({ model }: { model: AdminMenusPageViewModel }
   };
   return (
     <EditorRuntimeProvider provider={menuRoom.provider} entityType="menu" entityId={selectedMenuId ?? ''}>
-      <DsLayoutStack gap="xs">
+      <DsLayoutStack gap="lg">
         <QueryErrorAlert queries={[menusQuery, selectedMenuFailure, targetsQuery, selectedMenuQuery]} />
-        <DsLayoutInline justify="between">
-          <DsHeading level={2}>{tPage('title')}</DsHeading>
-          <Button tone="neutral" emphasis="medium" onClick={handleCreateMenu} leftSection={<IconPlus size={16} />}>
-            {tPage('createMenu')}
-          </Button>
-        </DsLayoutInline>
+        <PageHeader
+          title={tPage('title')}
+          description={tPage('description')}
+          actions={
+            <Button tone="neutral" emphasis="medium" onClick={handleCreateMenu} leftSection={<IconPlus size={16} />}>
+              {tPage('createMenu')}
+            </Button>
+          }
+        />
 
-        <DsLayoutStack gap="xs">
-          {/* Menu List */}
-          <SectionCard padding="xxs" border="none" appearance="plain" layout="stack">
-            <SectionHeader title={tCommon('entities.menus')} />
+        <DsLayoutStack gap="xl">
+          <SettingsSection title={tCommon('entities.menus')}>
             {menusQuery.isError ? null : menusLoading ? (
               <PageLoader />
             ) : !menus || menus.length === 0 ? (
@@ -604,95 +606,86 @@ export function AdminMenusPageView({ model }: { model: AdminMenusPageViewModel }
                 ))}
               </DsLayoutStack>
             )}
-          </SectionCard>
+          </SettingsSection>
 
-          {/* Menu Items Editor */}
-          <SectionCard padding="xxs" border="none" appearance="plain" layout="stack">
-            {selectedMenuFailure.isError ? null : !selectedMenuId ? (
-              <SupportingText tone="secondary">{tPage('selectPrompt')}</SupportingText>
-            ) : selectedMenuLoading ? (
-              <PageLoader />
-            ) : (
-              <DsLayoutStack gap="xs">
-                <SectionHeader
-                  title={roomState?.name ?? selectedMenu?.name ?? tPage('itemsTitle')}
-                  actions={
-                    <DsLayoutInline gap="xs">
-                      {activeEditLocale.isControlVisible ? (
-                        <TranslationLocaleControl
-                          variant="menu"
-                          buttonSize="compact"
-                          value={activeEditLocale.activeLocale}
-                          options={activeEditLocale.localeOptions}
-                          sourceLocale={effectiveSourceLocale}
-                          onChange={(value) => value && activeEditLocale.setActiveLocale(value)}
-                        />
-                      ) : null}
-                      {activeEditLocale.isSourceLocale ? (
-                        <Button
-                          tone="neutral"
-                          emphasis="medium"
-                          size="compact"
-                          onClick={() => openCreateItemModal()}
-                          leftSection={<IconPlus size={14} />}
-                          disabled={selectedMenuAuthoringLocked}
-                        >
-                          {tPage('addItem')}
-                        </Button>
-                      ) : null}
-                    </DsLayoutInline>
-                  }
+          {selectedMenuFailure.isError ? null : !selectedMenuId ? (
+            <SupportingText tone="secondary">{tPage('selectPrompt')}</SupportingText>
+          ) : selectedMenuLoading ? (
+            <PageLoader />
+          ) : (
+            <SettingsSection
+              title={roomState?.name ?? selectedMenu?.name ?? tPage('itemsTitle')}
+              actions={
+                <DsLayoutInline gap="xs">
+                  {activeEditLocale.isControlVisible ? (
+                    <TranslationLocaleControl
+                      variant="menu"
+                      buttonSize="compact"
+                      value={activeEditLocale.activeLocale}
+                      options={activeEditLocale.localeOptions}
+                      sourceLocale={effectiveSourceLocale}
+                      onChange={(value) => value && activeEditLocale.setActiveLocale(value)}
+                    />
+                  ) : null}
+                  {activeEditLocale.isSourceLocale ? (
+                    <Button
+                      tone="neutral"
+                      emphasis="medium"
+                      size="compact"
+                      onClick={() => openCreateItemModal()}
+                      leftSection={<IconPlus size={14} />}
+                      disabled={selectedMenuAuthoringLocked}
+                    >
+                      {tPage('addItem')}
+                    </Button>
+                  ) : null}
+                </DsLayoutInline>
+              }
+            >
+              {!activeEditLocale.isSourceLocale && roomState?.locale ? (
+                <MenuTargetItemsEditor
+                  items={menuItems}
+                  locale={roomState.locale}
+                  requestedLabels={roomState.requestedLabels}
+                  editable={canEditCurrentCopy}
+                  onChange={menuRoom.setLabel}
+                  onUseSource={menuRoom.useSourceLabel}
                 />
-
-                {!activeEditLocale.isSourceLocale && roomState?.locale ? (
-                  <MenuTargetItemsEditor
-                    items={menuItems}
-                    locale={roomState.locale}
-                    requestedLabels={roomState.requestedLabels}
-                    editable={canEditCurrentCopy}
-                    onChange={menuRoom.setLabel}
-                    onUseSource={menuRoom.useSourceLabel}
-                  />
-                ) : menuItems.length === 0 ? (
-                  <div style={{ textAlign: 'center' }}>
-                    <DsLayoutInset space="xs">
-                      <SupportingText tone="secondary">{tPage('noItems')}</SupportingText>
-                    </DsLayoutInset>
-                  </div>
-                ) : (
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={handleDragEnd}
-                    accessibility={reorderAccessibility}
-                  >
-                    <SortableContext items={menuItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
-                      <DsLayoutStack
-                        gap="none"
-                        role="group"
-                        aria-label={selectedMenu?.name ?? tCommon('entities.menus')}
-                      >
-                        {menuItems.map((item) => (
-                          <SortableMenuItem
-                            key={item.id}
-                            item={item}
-                            sourceLocale={effectiveSourceLocale}
-                            onUpdate={handleUpdateItem}
-                            onDelete={handleDeleteItem}
-                            onAddChild={openCreateItemModal}
-                            onUpdateChild={handleUpdateChild}
-                            onDeleteChild={handleDeleteChild}
-                            allowChildren
-                            editable={!selectedMenuAuthoringLocked}
-                          />
-                        ))}
-                      </DsLayoutStack>
-                    </SortableContext>
-                  </DndContext>
-                )}
-              </DsLayoutStack>
-            )}
-          </SectionCard>
+              ) : menuItems.length === 0 ? (
+                <div style={{ textAlign: 'center' }}>
+                  <DsLayoutInset space="xs">
+                    <SupportingText tone="secondary">{tPage('noItems')}</SupportingText>
+                  </DsLayoutInset>
+                </div>
+              ) : (
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                  accessibility={reorderAccessibility}
+                >
+                  <SortableContext items={menuItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+                    <DsLayoutStack gap="none" role="group" aria-label={selectedMenu?.name ?? tCommon('entities.menus')}>
+                      {menuItems.map((item) => (
+                        <SortableMenuItem
+                          key={item.id}
+                          item={item}
+                          sourceLocale={effectiveSourceLocale}
+                          onUpdate={handleUpdateItem}
+                          onDelete={handleDeleteItem}
+                          onAddChild={openCreateItemModal}
+                          onUpdateChild={handleUpdateChild}
+                          onDeleteChild={handleDeleteChild}
+                          allowChildren
+                          editable={!selectedMenuAuthoringLocked}
+                        />
+                      ))}
+                    </DsLayoutStack>
+                  </SortableContext>
+                </DndContext>
+              )}
+            </SettingsSection>
+          )}
 
           {selectedMenuId && selectedMenu ? (
             <AuthoringExtension kind="translations">

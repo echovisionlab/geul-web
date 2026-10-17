@@ -932,7 +932,7 @@
     },
     "personalAccessTokens": {
       "title": "Persönliches Zugriffstoken",
-      "description": "Verwende dieses eine persönliche Zugriffstoken für die von {siteName} bereitgestellten APIs. Für jede Anfrage gelten deine aktuellen Kontoberechtigungen. Remote MCP verwendet dieses Token nicht.",
+      "description": "Verwende dieses eine persönliche Zugriffstoken für die von {siteName} bereitgestellten APIs. Für jede Anfrage gelten deine aktuellen Kontoberechtigungen.",
       "empty": "Es wurden noch keine persönlichen Zugriffstoken erstellt.",
       "regenerate": "Neu erzeugen",
       "regenerateTitle": "Persönliches Zugriffstoken neu erzeugen",
@@ -1585,7 +1585,8 @@
       "labelLanguageTranslatedDescription": "Öffentliche Menüs zeigen nur eine aktuelle, exakt passende Übersetzung für die Besuchersprache; andernfalls wird die Quellbeschriftung angezeigt.",
       "labelLanguageFixedLocaleDescription": "Öffentliche Menüs zeigen diesen Eintrag immer in der ausgewählten Sprache, unabhängig von der Besuchersprache. Wenn diese Sprache keine Live-Beschriftung hat, wird die Quellbeschriftung verwendet.",
       "translatedItemBadge": "Besucher-Locale",
-      "fixedLocaleItemBadge": "Fixiert: {locale}"
+      "fixedLocaleItemBadge": "Fixiert: {locale}",
+      "description": "Verwalte die Navigationsmenüs der Website. Wähle ein Menü aus, um seine Einträge zu bearbeiten."
     },
     "emailEvents": {
       "title": "E-Mail-Zustellung",
@@ -1945,6 +1946,9 @@
     "emailVerification": {
       "verified": "E-Mail verifiziert",
       "unverified": "E-Mail nicht verifiziert"
+    },
+    "profile": {
+      "description": "Änderungen in diesem Abschnitt werden mit „Speichern“ übernommen. Die Abschnitte darunter übernehmen jede Änderung sofort."
     }
   },
   "adminSettings": {

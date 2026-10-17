@@ -4,7 +4,7 @@ import { PublicMetadataRows, PublicMetadataRow } from '@/components/core/PublicM
 
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { type ReactNode } from 'react';
-import { SectionHeader } from '@/components/core/Section';
+import { SettingsSection } from '@/components/core/Section';
 import { StatusBadge } from '@/components/core/Badge';
 import type { UserFull } from '@/lib/types/user/model';
 
@@ -24,10 +24,9 @@ export function InfoSection({
   children: ReactNode;
 }) {
   return (
-    <DsLayoutStack gap="md">
-      <SectionHeader title={title} description={description} actions={actions} />
+    <SettingsSection title={title} description={description} actions={actions}>
       <DsLayoutStack gap="xs">{children}</DsLayoutStack>
-    </DsLayoutStack>
+    </SettingsSection>
   );
 }
 

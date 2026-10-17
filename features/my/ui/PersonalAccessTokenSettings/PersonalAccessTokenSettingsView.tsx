@@ -10,7 +10,7 @@ import { IconCopy, IconKey, IconPlus, IconRefresh, IconTrash } from '@tabler/ico
 import { Alert } from '@/components/core/Alert';
 import { Button } from '@/components/core/Button';
 import { ContentModal, DialogActions } from '@/components/core/Modal';
-import { SectionCard, SectionHeader } from '@/components/core/Section';
+import { SectionCard, SectionHeader, type SectionHeaderLevel } from '@/components/core/Section';
 
 export interface PersonalAccessTokenViewModel {
   id: string;
@@ -54,6 +54,8 @@ interface PersonalAccessTokenSettingsViewProps {
   onDelete: (id: string) => Promise<boolean>;
   onCopySecret: (secret: string) => void;
   onCloseSecret: () => void;
+  /** Outline level when the section is part of a settings page outline; omitted keeps the compact title. */
+  headingLevel?: SectionHeaderLevel;
 }
 
 type Confirmation = 'regenerate' | 'delete' | null;
@@ -69,6 +71,7 @@ export function PersonalAccessTokenSettingsView({
   onDelete,
   onCopySecret,
   onCloseSecret,
+  headingLevel,
 }: PersonalAccessTokenSettingsViewProps) {
   const [confirmation, setConfirmation] = useState<Confirmation>(null);
 
@@ -87,10 +90,15 @@ export function PersonalAccessTokenSettingsView({
   return (
     <>
       <SectionHeader
+        level={headingLevel}
         title={
-          <span role="heading" aria-level={2}>
-            {labels.title}
-          </span>
+          headingLevel ? (
+            labels.title
+          ) : (
+            <span role="heading" aria-level={2}>
+              {labels.title}
+            </span>
+          )
         }
         description={labels.description}
         actions={

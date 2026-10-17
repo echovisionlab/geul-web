@@ -1111,7 +1111,8 @@
       "labelLanguageTranslatedDescription": "Les menus publics affichent uniquement une traduction actuelle correspondant exactement à la langue du visiteur ; sinon ils affichent le libellé source.",
       "labelLanguageFixedLocaleDescription": "Les menus publics affichent toujours cet élément dans la langue sélectionnée, quelle que soit la langue du visiteur. Si cette langue n'a pas de libellé actif, le libellé source est utilisé.",
       "translatedItemBadge": "Langue du visiteur",
-      "fixedLocaleItemBadge": "Fixe : {locale}"
+      "fixedLocaleItemBadge": "Fixe : {locale}",
+      "description": "Gérez les menus de navigation affichés sur le site. Sélectionnez un menu pour modifier ses éléments."
     },
     "emailEvents": {
       "title": "Livraison des e-mails",
@@ -1760,7 +1761,7 @@
     },
     "personalAccessTokens": {
       "title": "Jeton d’accès personnel",
-      "description": "Utilisez cet unique jeton d’accès personnel avec les API fournies par {siteName}. Chaque requête applique les autorisations actuelles de votre compte. Remote MCP n’accepte pas ce jeton.",
+      "description": "Utilisez cet unique jeton d’accès personnel avec les API fournies par {siteName}. Chaque requête applique les autorisations actuelles de votre compte.",
       "empty": "Aucun jeton d’accès personnel n’a été créé.",
       "regenerate": "Régénérer",
       "regenerateTitle": "Régénérer le jeton d’accès personnel",
@@ -4665,6 +4666,9 @@
     "emailVerification": {
       "verified": "E-mail vérifié",
       "unverified": "E-mail non vérifié"
+    },
+    "profile": {
+      "description": "Enregistrer applique les modifications de cette section. Les sections ci-dessous appliquent chaque modification immédiatement."
     }
   },
   "adminSettings": {

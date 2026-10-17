@@ -1111,7 +1111,8 @@
       "labelLanguageTranslatedDescription": "Public menus show only a current translation for the exact visitor locale; otherwise they show the source label.",
       "labelLanguageFixedLocaleDescription": "Public menus always show this item from the selected locale, regardless of the visitor locale. If that locale has no live label, the source label is used.",
       "translatedItemBadge": "Visitor locale",
-      "fixedLocaleItemBadge": "Fixed: {locale}"
+      "fixedLocaleItemBadge": "Fixed: {locale}",
+      "description": "Manage the navigation menus shown on the site. Select a menu to edit its items."
     },
     "emailEvents": {
       "title": "Email Delivery",
@@ -1709,7 +1710,7 @@
     },
     "personalAccessTokens": {
       "title": "Personal access token",
-      "description": "Use this single personal access token with APIs provided by {siteName}. Every request uses your current account permissions. Remote MCP does not accept this token.",
+      "description": "Use this single personal access token with APIs provided by {siteName}. Every request uses your current account permissions.",
       "empty": "No personal access tokens have been created.",
       "regenerate": "Regenerate",
       "regenerateTitle": "Regenerate personal access token",
@@ -4665,6 +4666,9 @@
     "emailVerification": {
       "verified": "Email verified",
       "unverified": "Email unverified"
+    },
+    "profile": {
+      "description": "Save applies changes in this section. The sections below apply each change immediately."
     }
   },
   "adminSettings": {

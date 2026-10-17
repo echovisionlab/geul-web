@@ -98,7 +98,7 @@ export function FileBrowserHeader({
         divider="none"
         data-file-browser-header
         description={labels.description}
-        location={<SelectionPath items={path} label={labels.root} parentLabel={labels.back} onOpen={onOpenPath} />}
+        location={<SelectionPath items={path} label={labels.root} parentLabel={labels.back} onOpen={onOpenPath} pageTitle />}
         search={
           <TextInput
             aria-label={labels.search}

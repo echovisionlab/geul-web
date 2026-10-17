@@ -1,5 +1,5 @@
 'use client';
-import { SupportingText, Text as DsText, Heading as DsHeading } from '@/components/core/Typography';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
 import { ConfirmationDialog } from '@/features/confirmation';
 
 import { fieldBindings } from '@/components/core/bindings';
@@ -27,7 +27,8 @@ import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import { PasswordInput, Select, TextInput, NumberInput, Switch } from '@/components/core/Input';
 
-import { SectionHeader } from '@/components/core/Section';
+import { SectionHeader, SettingsSection } from '@/components/core/Section';
+import { PageHeader } from '@/components/core/PageHeader';
 import { TextButton } from '@/components/core/TextButton';
 import {
   createMailAdapterAction,
@@ -634,21 +635,17 @@ export default function MailAdaptersPage({ bindings = defaultBindings }: { bindi
   return (
     <DsLayoutStack gap="lg">
       <QueryErrorAlert queries={[adaptersQuery]} />
-      <DsHeading level={2}>{tPage('title')}</DsHeading>
+      <PageHeader title={tPage('title')} description={tPage('description')} />
 
-      <SupportingText tone="secondary">{tPage('description')}</SupportingText>
-
-      <DsLayoutStack gap="md">
-        <SectionHeader
-          title={tPage('sections.adapters.title')}
-          description={tPage('sections.adapters.description')}
-          actions={
-            <Button emphasis="medium" leftSection={<IconPlus size={16} />} onClick={handleOpenCreate}>
-              {tPage('actions.addAdapter')}
-            </Button>
-          }
-        />
-
+      <SettingsSection
+        title={tPage('sections.adapters.title')}
+        description={tPage('sections.adapters.description')}
+        actions={
+          <Button emphasis="medium" leftSection={<IconPlus size={16} />} onClick={handleOpenCreate}>
+            {tPage('actions.addAdapter')}
+          </Button>
+        }
+      >
         {adaptersQuery.isError ? null : isLoading ? (
           <SupportingText role="status" tone="secondary">
             {tCommon('states.loading')}
@@ -763,7 +760,7 @@ export default function MailAdaptersPage({ bindings = defaultBindings }: { bindi
             ))}
           </DsLayoutStack>
         )}
-      </DsLayoutStack>
+      </SettingsSection>
 
       {renderFormModal(false)}
       {renderFormModal(true)}

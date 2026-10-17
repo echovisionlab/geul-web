@@ -145,6 +145,8 @@ Label and description are optional; an accessible name is required.
 Allowed values are size=xs/sm/md/lg/xl, density=comfortable/compact, appearance=underline/bare,
 and textRole=body/title/code/caption. Type allows text/email/tel/url/search/password/date/time/datetime-local.
 Distinguish controlled value from defaultValue. Pass required/disabled/readOnly/error through InputBaseProps.
+textRole=title stands in for a page title (EditorHeader): it has no inline padding, so its text starts where a
+read-only title would, and at size=xl it uses the page title scale (Heading scale 2); smaller sizes use h3.
 
 **Geometry.** Root gap=xxs 4px; input block padding=xxs 4px and inline padding=xs 8px.
 Height and font size follow named control-height/font-size. sm line height is 1.45.

@@ -1111,7 +1111,8 @@
       "labelLanguageTranslatedDescription": "Menu publik hanya menampilkan terjemahan terkini untuk locale pengunjung yang sama persis; jika tidak, label sumber ditampilkan.",
       "labelLanguageFixedLocaleDescription": "Menu publik selalu menampilkan item ini dari lokal yang dipilih, terlepas dari lokasi pengunjungnya. Jika lokal tersebut tidak memiliki label aktif, label sumber akan digunakan.",
       "translatedItemBadge": "Lokal pengunjung",
-      "fixedLocaleItemBadge": "Memperbaiki: {locale}"
+      "fixedLocaleItemBadge": "Memperbaiki: {locale}",
+      "description": "Kelola menu navigasi yang ditampilkan di situs. Pilih menu untuk mengedit itemnya."
     },
     "emailEvents": {
       "title": "Pengiriman Email",
@@ -1709,7 +1710,7 @@
     },
     "personalAccessTokens": {
       "title": "Token akses pribadi",
-      "description": "Gunakan satu token akses pribadi ini dengan API yang disediakan {siteName}. Setiap permintaan memakai izin akun Anda saat ini. Remote MCP tidak menerima token ini.",
+      "description": "Gunakan satu token akses pribadi ini dengan API yang disediakan {siteName}. Setiap permintaan memakai izin akun Anda saat ini.",
       "empty": "Belum ada token akses pribadi yang dibuat.",
       "regenerate": "Buat ulang",
       "regenerateTitle": "Buat ulang token akses pribadi",
@@ -4665,6 +4666,9 @@
     "emailVerification": {
       "verified": "Email terverifikasi",
       "unverified": "Email belum diverifikasi"
+    },
+    "profile": {
+      "description": "Simpan menerapkan perubahan di bagian ini. Bagian di bawah menerapkan setiap perubahan secara langsung."
     }
   },
   "adminSettings": {

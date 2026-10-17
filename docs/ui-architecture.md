@@ -21,8 +21,11 @@ component belongs to a named feature.
 - Owns visual tokens and semantic control APIs. Consumers use `tone`, `emphasis`, `appearance`,
   and `shape`; foreign `color`, `variant`, and `radius` APIs are not public styling escapes.
 - `PageHeader` owns the shared route-title scale and separates semantic `h1|h2` level from visual
-  size. `SectionHeader` remains the compact heading for controls grouped inside a page, while
-  content heroes and editor titles keep their dedicated Feature/Core owners.
+  size. A route has exactly one h1 (`PageHeader`, `EditorHeader`, or `SelectionPath pageTitle` for a
+  whole-page browser); its sections are `SettingsSection` (h2) and `SettingsGroup` (h3), separated by the
+  `xl` page gap, without cards. Cards hold repeated objects only. `SectionHeader` without a level remains
+  the compact heading for controls grouped inside a card, panel or modal, while content heroes and editor
+  titles keep their dedicated Feature/Core owners.
 - May use React, React Aria behavior, native semantic elements, browser interaction state, and local pure utilities.
 - Composition alone does not make a component feature-specific. A composed control belongs here
   when every displayed value, label, state, and event is supplied by props and its API has no

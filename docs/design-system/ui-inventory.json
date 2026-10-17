@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "751b920861c3eb0ddd3d95ec66ed40f06af2809994e2568de273430ab1e0406a",
+  "manifestHash": "4f2d45b34d25b047e171fca9069b4b44b91685d43d0bccbab543455f1fdffa1a",
   "counts": {
     "sourceFiles": 3778,
     "productionSourceFiles": 2285,
@@ -10,7 +10,7 @@
     "coreFamilies": 57,
     "featureDomains": 53,
     "storyFiles": 256,
-    "storyVariants": 1451,
+    "storyVariants": 1452,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -15436,13 +15436,19 @@
       ],
       "productionConsumers": [
         "features/admin/MapThemeEditor/MapThemeListPageView.tsx",
+        "features/admin/dashboard/AdminDashboardPage.tsx",
+        "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/settings/OgImageSettingsPage.tsx",
         "features/admin/ui/AdminPageHeader/AdminPageHeader.tsx",
         "features/member/onboarding/NicknameOnboarding.tsx",
+        "features/menu/AdminMenusPage.tsx",
         "features/program-event/ProgramEventSeriesPublicView.tsx",
         "features/series/SeriesPublicView.tsx",
         "features/share/SharePasswordView.tsx",
-        "features/site/SiteSettingsForm/SiteSettingsForm.tsx"
+        "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
+        "features/translation/admin/TranslationJobsPage.tsx",
+        "features/translation/admin/TranslationOverviewPage.tsx",
+        "features/translation/admin/TranslationSettingsPage.tsx"
       ],
       "catalogAdapters": ["stories/shared/AccountPreview.tsx"],
       "tests": [
@@ -16459,7 +16465,6 @@
         "features/form/PublicFormView.tsx",
         "features/map/BaseMap.tsx",
         "features/media/ui/AttachmentSurface.tsx",
-        "features/menu/AdminMenusPage.tsx",
         "features/metadata/MetadataPanel/MetadataPanel.tsx",
         "features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
         "features/metadata/ui/OgGenerationRunProgressView.tsx",
@@ -16591,9 +16596,6 @@
         "components/core/Section/SettingsSection.tsx",
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/settings/OgImageSettingsPage.tsx",
-        "features/admin/user/UserProfileFormSection.tsx",
-        "features/admin/user/auth/shared.tsx",
-        "features/menu/AdminMenusPage.tsx",
         "features/metadata/MetadataPanel/MetadataPanel.tsx",
         "features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
         "features/metadata/ui/UrlSectionView.tsx",
@@ -16677,9 +16679,14 @@
         }
       ],
       "productionConsumers": [
+        "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/settings/OgImageSettingsPage.tsx",
         "features/admin/settings/SiteSettingsPage.tsx",
-        "features/site/SiteSettingsForm/SiteSettingsForm.tsx"
+        "features/admin/user/UserProfileFormSection.tsx",
+        "features/admin/user/auth/shared.tsx",
+        "features/menu/AdminMenusPage.tsx",
+        "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
+        "features/translation/admin/TranslationSettingsPage.tsx"
       ],
       "catalogAdapters": [],
       "tests": [],
@@ -17217,6 +17224,11 @@
               "name": "onOpen",
               "optional": false,
               "type": "(index: number) => void"
+            },
+            {
+              "name": "pageTitle",
+              "optional": true,
+              "type": "boolean"
             }
           ]
         },
@@ -17325,6 +17337,7 @@
       ],
       "composedJsx": [
         "AriaButton",
+        "Heading",
         "IconButton",
         "IconCheck",
         "IconCornerLeftUp",
@@ -19484,7 +19497,6 @@
         "features/admin/client/ClientsTableContent.tsx",
         "features/admin/cms-page/PageModals.tsx",
         "features/admin/cms-page/PagesTableContent.tsx",
-        "features/admin/dashboard/AdminDashboardPage.tsx",
         "features/admin/email-layout/EmailLayoutEditPage.tsx",
         "features/admin/email-layout/EmailLayoutPreviewView.tsx",
         "features/admin/email-layout/EmailLayoutTargetEditor.tsx",
@@ -21717,6 +21729,7 @@
       "composedJsx": [
         "Button",
         "ClientLogoUploader",
+        "DsLayoutGrid",
         "DsLayoutInline",
         "DsLayoutInset",
         "DsLayoutStack",
@@ -22338,7 +22351,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": ["stories/pages/AdminDashboard.stories.tsx"],
-      "composedJsx": ["DsHeading", "DsLayoutGrid", "DsLayoutStack", "PageLoader", "QueryErrorAlert", "StatCard"]
+      "composedJsx": ["DsLayoutGrid", "DsLayoutStack", "PageHeader", "PageLoader", "QueryErrorAlert", "StatCard"]
     },
     {
       "file": "features/admin/email-layout/EmailLayoutEditPage.tsx",
@@ -24083,7 +24096,6 @@
         "ConfirmationDialog",
         "ContentModal",
         "DialogActions",
-        "DsHeading",
         "DsLayoutInline",
         "DsLayoutInset",
         "DsLayoutStack",
@@ -24097,10 +24109,12 @@
         "LabelBadge",
         "LayoutInset",
         "NumberInput",
+        "PageHeader",
         "PasswordInput",
         "QueryErrorAlert",
         "SectionHeader",
         "Select",
+        "SettingsSection",
         "SupportingText",
         "Switch",
         "TextButton",
@@ -27930,6 +27944,11 @@
               "name": "checkNickname",
               "optional": true,
               "type": "NicknameAvailabilityCheck"
+            },
+            {
+              "name": "footer",
+              "optional": true,
+              "type": "ReactNode"
             }
           ]
         }
@@ -27947,8 +27966,8 @@
         "DsText",
         "LabelBadge",
         "MultiSelect",
-        "SectionHeader",
         "Select",
+        "SettingsSection",
         "SocialLinksEditor",
         "StatusBadge",
         "TextInput",
@@ -28390,7 +28409,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": ["DsLayoutStack", "PublicMetadataRow", "PublicMetadataRows", "SectionHeader", "StatusBadge"]
+      "composedJsx": ["DsLayoutStack", "PublicMetadataRow", "PublicMetadataRows", "SettingsSection", "StatusBadge"]
     },
     {
       "file": "features/admin/work/WorksPageView.tsx",
@@ -48891,7 +48910,6 @@
         "ContentModal",
         "DialogActions",
         "DndContext",
-        "DsHeading",
         "DsLayoutInline",
         "DsLayoutInset",
         "DsLayoutStack",
@@ -48904,12 +48922,12 @@
         "IconTrash",
         "LabelBadge",
         "MenuTargetItemsEditor",
+        "PageHeader",
         "PageLoader",
         "QueryErrorAlert",
-        "SectionCard",
-        "SectionHeader",
         "Select",
         "SelectionRow",
+        "SettingsSection",
         "SortableContext",
         "SortableMenuItem",
         "SupportingText",
@@ -51883,6 +51901,11 @@
               "name": "onCloseSecret",
               "optional": false,
               "type": "() => void"
+            },
+            {
+              "name": "headingLevel",
+              "optional": true,
+              "type": "SectionHeaderLevel"
             }
           ]
         }
@@ -68813,6 +68836,11 @@
               "name": "onImageChange",
               "optional": false,
               "type": "(url: string | null) => Promise<void>"
+            },
+            {
+              "name": "previewSurface",
+              "optional": true,
+              "type": "ImagePreviewSurface"
             }
           ]
         }
@@ -71168,7 +71196,6 @@
       "stories": ["stories/pages/TranslationAdmin.stories.tsx"],
       "composedJsx": [
         "Button",
-        "DsHeading",
         "DsLayoutInline",
         "DsLayoutStack",
         "DsText",
@@ -71177,6 +71204,7 @@
         "IconSettings2",
         "LabelBadge",
         "LocaleCode",
+        "PageHeader",
         "PageLoader",
         "StatusBadge",
         "SupportingText",
@@ -71233,6 +71261,7 @@
         "IconSettings2",
         "LabelBadge",
         "LocaleCode",
+        "PageHeader",
         "PageLoader",
         "StatCard",
         "SupportingText",
@@ -71321,7 +71350,6 @@
       "composedJsx": [
         "Button",
         "ConfirmationDialog",
-        "DsHeading",
         "DsLayoutInline",
         "DsLayoutStack",
         "DsSectionCard",
@@ -71334,14 +71362,15 @@
         "IconSettings2",
         "IconTrash",
         "LabelBadge",
+        "PageHeader",
         "PageLoader",
         "Select",
+        "SettingsSection",
         "SupportingText",
         "Switch",
         "TagsInput",
         "TranslationProviderModal",
-        "TranslationSettingsPage",
-        "div"
+        "TranslationSettingsPage"
       ]
     },
     {
@@ -80991,6 +81020,11 @@
           "name": "FolderNavigation",
           "args": null,
           "preview": "http://localhost:6010/?path=/story/core-interaction-selectionsurface--folder-navigation"
+        },
+        {
+          "name": "PageTitleLocation",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/core-interaction-selectionsurface--page-title-location"
         },
         {
           "name": "GridColumns",

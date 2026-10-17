@@ -1111,7 +1111,8 @@
       "labelLanguageTranslatedDescription": "Openbare menu's tonen alleen een actuele vertaling voor exact de taal van de bezoeker; anders tonen ze het bronlabel.",
       "labelLanguageFixedLocaleDescription": "Openbare menu's tonen dit item altijd vanuit de geselecteerde taal, ongeacht de taal van de bezoeker. Als die taal geen live label heeft, wordt het bronlabel gebruikt.",
       "translatedItemBadge": "Bezoekerstaal",
-      "fixedLocaleItemBadge": "Vast: {locale}"
+      "fixedLocaleItemBadge": "Vast: {locale}",
+      "description": "Beheer de navigatiemenu’s op de site. Selecteer een menu om de items te bewerken."
     },
     "emailEvents": {
       "title": "E-mailbezorging",
@@ -1760,7 +1761,7 @@
     },
     "personalAccessTokens": {
       "title": "Persoonlijk toegangstoken",
-      "description": "Gebruik dit ene persoonlijke toegangstoken voor API’s van {siteName}. Elke aanvraag gebruikt je huidige accountrechten. Remote MCP accepteert dit token niet.",
+      "description": "Gebruik dit ene persoonlijke toegangstoken voor API’s van {siteName}. Elke aanvraag gebruikt je huidige accountrechten.",
       "empty": "Er zijn nog geen persoonlijke toegangstokens gemaakt.",
       "regenerate": "Opnieuw genereren",
       "regenerateTitle": "Persoonlijk toegangstoken opnieuw genereren",
@@ -4665,6 +4666,9 @@
     "emailVerification": {
       "verified": "E-mail geverifieerd",
       "unverified": "E-mail niet geverifieerd"
+    },
+    "profile": {
+      "description": "Opslaan past de wijzigingen in deze sectie toe. De secties hieronder passen elke wijziging direct toe."
     }
   },
   "adminSettings": {

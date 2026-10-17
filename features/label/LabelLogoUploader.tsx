@@ -133,6 +133,7 @@ export function LabelLogoUploader({
       onUpload={handleUpload}
       onDelete={handleDelete}
       onImageChange={handleImageChange}
+      previewSurface={variant === 'dark' ? 'theme-dark' : 'theme-light'}
     />
   );
 }

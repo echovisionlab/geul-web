@@ -55,13 +55,12 @@ async function render(surface: 'overview' | 'settings' | 'jobs', state: 'ready' 
   );
 }
 describe('translation page preview controllers', () => {
-  it('keeps overview sections after the page heading without changing their display scale', async () => {
+  it('outlines the overview as the page title followed by its sections', async () => {
     await render('overview');
-    await expectEventually(() => expect(host.querySelectorAll('h3')).toHaveLength(2));
-    const sections = Array.from(host.querySelectorAll('h3'));
-    expect(sections).toHaveLength(2);
+    await expectEventually(() => expect(host.querySelectorAll('h2')).toHaveLength(2));
+    const sections = Array.from(host.querySelectorAll('h2'));
     expect(sections.every((heading) => heading.getAttribute('data-level') === '4')).toBe(true);
-    expect(host.querySelector('h2')?.textContent).toBe('Translations');
+    expect(host.querySelector('h1')?.textContent).toBe('Translations');
     expect(createTranslationClient).not.toHaveBeenCalled();
   });
   it('cancels an active job through the local RPC and refreshes the production table', async () => {

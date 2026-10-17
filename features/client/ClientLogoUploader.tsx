@@ -117,6 +117,7 @@ export function ClientLogoUploader({
       onUpload={uploadAction ?? handleUpload}
       onDelete={deleteAction ?? handleDelete}
       onImageChange={handleImageChange}
+      previewSurface={variant === 'dark' ? 'theme-dark' : 'theme-light'}
     />
   );
 }

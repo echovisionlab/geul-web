@@ -239,6 +239,7 @@ function SubjectPersonalAccessTokenSettings({
         })
       }
       onCloseSecret={() => setSecret(null)}
+      headingLevel={mode === 'admin' ? 2 : undefined}
     />
   );
 }

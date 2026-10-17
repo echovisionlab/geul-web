@@ -182,7 +182,7 @@ then show submitted files and actual `FormData` file IDs on Submit. Only SingleS
 
 ## Navigation and authorization
 
-`SelectionPath.items[0]` is the accessible root. Only reachable ancestors belong in the supplied
+`SelectionPath pageTitle` renders the current location as the page's h1 (Heading scale 3 below `sm`, 2 above) for a browser that is the whole page; the admin file manager uses it, the editor library picker keeps the compact location. `SelectionPath.items[0]` is the accessible root. Only reachable ancestors belong in the supplied
 path. `parentLabel` enables the up action below that root; it is absent at the root. Never render
 a disabled parent action or reveal ancestors outside an authorized scope. Below the Core `sm` viewport or toolbar-container breakpoint, SelectionPath displays only the current folder name and the authorized parent button; ancestor names and separators are hidden. The current name receives the remaining width and uses trailing ellipsis if necessary. The full authorized path remains in the navigation title. Wider surfaces retain clickable authorized breadcrumbs. This is a Core path rule shared by both browsers, not a mobile consumer override. The parent action uses the curved `IconCornerLeftUp` glyph and the same default Core IconButton hit area, density and glyph size as the grid/list/settings actions. Do not assign a larger size to the parent action.
 

@@ -1111,7 +1111,8 @@
       "labelLanguageTranslatedDescription": "公開メニューでは、訪問者の言語と完全に一致する最新の翻訳だけを表示し、それ以外は原文ラベルを表示します。",
       "labelLanguageFixedLocaleDescription": "公開メニューでは、訪問者の言語に関係なく、選択した言語のラベルを常に表示します。その言語に公開ラベルがない場合は原文ラベルを使用します。",
       "translatedItemBadge": "訪問者言語",
-      "fixedLocaleItemBadge": "{locale} 固定"
+      "fixedLocaleItemBadge": "{locale} 固定",
+      "description": "サイトに表示されるナビゲーションメニューを管理します。メニューを選択すると項目を編集できます。"
     },
     "emailEvents": {
       "title": "メール配信",
@@ -1760,7 +1761,7 @@
     },
     "personalAccessTokens": {
       "title": "個人アクセストークン",
-      "description": "この1つの個人アクセストークンを{siteName}が提供するAPIで使用します。各リクエストには現在のアカウント権限が適用されます。Remote MCPではこのトークンを使用できません。",
+      "description": "この1つの個人アクセストークンを{siteName}が提供するAPIで使用します。各リクエストには現在のアカウント権限が適用されます。",
       "empty": "個人アクセストークンはまだ作成されていません。",
       "regenerate": "再生成",
       "regenerateTitle": "個人アクセストークンを再生成",
@@ -4665,6 +4666,9 @@
     "emailVerification": {
       "verified": "メール確認済み",
       "unverified": "メール未確認"
+    },
+    "profile": {
+      "description": "このセクションの変更は保存ボタンで反映されます。以下のセクションは変更がすぐに適用されます。"
     }
   },
   "adminSettings": {

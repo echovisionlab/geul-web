@@ -1111,7 +1111,8 @@
       "labelLanguageTranslatedDescription": "Menu publiczne pokazują tylko aktualne tłumaczenie dokładnie dla ustawień regionalnych odwiedzającego; w przeciwnym razie pokazują etykietę źródłową.",
       "labelLanguageFixedLocaleDescription": "Menu publiczne zawsze pokazują tę pozycję z wybranej lokalizacji, niezależnie od lokalizacji odwiedzającego. Jeśli te ustawienia regionalne nie mają aktywnej etykiety, używana jest etykieta źródłowa.",
       "translatedItemBadge": "Lokalizacja gościa",
-      "fixedLocaleItemBadge": "Naprawiono: {locale}"
+      "fixedLocaleItemBadge": "Naprawiono: {locale}",
+      "description": "Zarządzaj menu nawigacji wyświetlanymi w witrynie. Wybierz menu, aby edytować jego pozycje."
     },
     "emailEvents": {
       "title": "Dostawa e-mailem",
@@ -1709,7 +1710,7 @@
     },
     "personalAccessTokens": {
       "title": "Osobisty token dostępu",
-      "description": "Używaj tego jednego osobistego tokenu dostępu z interfejsami API udostępnianymi przez {siteName}. Każde żądanie korzysta z bieżących uprawnień konta. Remote MCP nie akceptuje tego tokenu.",
+      "description": "Używaj tego jednego osobistego tokenu dostępu z interfejsami API udostępnianymi przez {siteName}. Każde żądanie korzysta z bieżących uprawnień konta.",
       "empty": "Nie utworzono jeszcze żadnego osobistego tokenu dostępu.",
       "regenerate": "Wygeneruj ponownie",
       "regenerateTitle": "Wygeneruj ponownie osobisty token dostępu",
@@ -4665,6 +4666,9 @@
     "emailVerification": {
       "verified": "Adres e-mail zweryfikowany",
       "unverified": "E-mail niezweryfikowany"
+    },
+    "profile": {
+      "description": "Zapisz stosuje zmiany w tej sekcji. Sekcje poniżej stosują każdą zmianę natychmiast."
     }
   },
   "adminSettings": {

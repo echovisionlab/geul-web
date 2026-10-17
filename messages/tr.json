@@ -1111,7 +1111,8 @@
       "labelLanguageTranslatedDescription": "Genel menüler yalnızca ziyaretçinin tam yerel ayarına ait güncel çeviriyi gösterir; aksi durumda kaynak etiketi gösterilir.",
       "labelLanguageFixedLocaleDescription": "Genel menüler, ziyaretçinin yerel ayarına bakılmaksızın bu öğeyi her zaman seçilen yerel ayardan gösterir. Bu yerel ayarın canlı etiketi yoksa kaynak etiketi kullanılır.",
       "translatedItemBadge": "Ziyaretçi yerel ayarı",
-      "fixedLocaleItemBadge": "Düzeltildi: {locale}"
+      "fixedLocaleItemBadge": "Düzeltildi: {locale}",
+      "description": "Sitede gösterilen gezinme menülerini yönetin. Öğelerini düzenlemek için bir menü seçin."
     },
     "emailEvents": {
       "title": "E-posta Teslimatı",
@@ -1709,7 +1710,7 @@
     },
     "personalAccessTokens": {
       "title": "Kişisel erişim belirteci",
-      "description": "Bu tek kişisel erişim belirtecini {siteName} tarafından sunulan API’lerle kullanın. Her istek mevcut hesap izinlerinizi kullanır. Remote MCP bu belirteci kabul etmez.",
+      "description": "Bu tek kişisel erişim belirtecini {siteName} tarafından sunulan API’lerle kullanın. Her istek mevcut hesap izinlerinizi kullanır.",
       "empty": "Henüz kişisel erişim belirteci oluşturulmadı.",
       "regenerate": "Yeniden oluştur",
       "regenerateTitle": "Kişisel erişim belirtecini yeniden oluştur",
@@ -4665,6 +4666,9 @@
     "emailVerification": {
       "verified": "E-posta doğrulandı",
       "unverified": "E-posta doğrulanmadı"
+    },
+    "profile": {
+      "description": "Kaydet bu bölümdeki değişiklikleri uygular. Aşağıdaki bölümler her değişikliği hemen uygular."
     }
   },
   "adminSettings": {

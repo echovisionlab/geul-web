@@ -1111,7 +1111,8 @@
       "labelLanguageTranslatedDescription": "公開選單僅顯示與訪客語言完全相符的目前翻譯；否則顯示原文標籤。",
       "labelLanguageFixedLocaleDescription": "公開選單始終使用所選語言顯示此項，不受訪客語言影響。如果該語言沒有即時標籤，則使用原文標籤。",
       "translatedItemBadge": "訪客語言",
-      "fixedLocaleItemBadge": "固定：{locale}"
+      "fixedLocaleItemBadge": "固定：{locale}",
+      "description": "管理網站上顯示的導覽選單。選擇一個選單即可編輯其項目。"
     },
     "emailEvents": {
       "title": "郵件投遞",
@@ -1760,7 +1761,7 @@
     },
     "personalAccessTokens": {
       "title": "個人存取權杖",
-      "description": "使用這一個人存取權杖呼叫 {siteName} 提供的 API。每個請求都會使用您帳戶目前的權限。Remote MCP 不接受此權杖。",
+      "description": "使用這一個人存取權杖呼叫 {siteName} 提供的 API。每個請求都會使用您帳戶目前的權限。",
       "empty": "尚未建立個人存取權杖。",
       "regenerate": "重新產生",
       "regenerateTitle": "重新產生個人存取權杖",
@@ -4665,6 +4666,9 @@
     "emailVerification": {
       "verified": "電子郵件已驗證",
       "unverified": "電子郵件未驗證"
+    },
+    "profile": {
+      "description": "本區段的變更需按儲存後生效。下方各區段的變更會立即生效。"
     }
   },
   "adminSettings": {

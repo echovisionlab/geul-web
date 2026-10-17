@@ -4,6 +4,7 @@ import { formatLocaleCode } from '@/components/core/Typography/locale-code';
 
 import { LocaleCode } from '@/components/core/Typography/LocaleCode';
 import { SupportingText, Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
+import { PageHeader } from '@/components/core/PageHeader';
 
 import { SectionCard as DsSectionCard } from '@/components/core/Section/SectionCard';
 import {
@@ -104,35 +105,37 @@ export function TranslationOverviewPage({ client }: { client?: TranslationOvervi
 
   return (
     <DsLayoutStack gap="md">
-      <DsLayoutInline justify="between" align="start">
-        <DsHeading level={2}>{tCommonEntities('translations')}</DsHeading>
-        <DsLayoutInline gap="sm">
-          <Button
-            href="/admin/translations/jobs"
-            tone="neutral"
-            emphasis="medium"
-            leftSection={<IconChecklist size={16} />}
-          >
-            {t('actions.openJobs')}
-          </Button>
-          <Button
-            href="/admin/translations/settings"
-            tone="neutral"
-            emphasis="medium"
-            leftSection={<IconSettings2 size={16} />}
-          >
-            {t('actions.openSettings')}
-          </Button>
-          <Button
-            emphasis="medium"
-            leftSection={<IconRefresh size={16} />}
-            onClick={() => queryClient.invalidateQueries({ queryKey: overviewQueryKey })}
-            loading={overviewQuery.isFetching}
-          >
-            {tCommonActions('refresh')}
-          </Button>
-        </DsLayoutInline>
-      </DsLayoutInline>
+      <PageHeader
+        title={tCommonEntities('translations')}
+        actions={
+          <DsLayoutInline gap="sm">
+            <Button
+              href="/admin/translations/jobs"
+              tone="neutral"
+              emphasis="medium"
+              leftSection={<IconChecklist size={16} />}
+            >
+              {t('actions.openJobs')}
+            </Button>
+            <Button
+              href="/admin/translations/settings"
+              tone="neutral"
+              emphasis="medium"
+              leftSection={<IconSettings2 size={16} />}
+            >
+              {t('actions.openSettings')}
+            </Button>
+            <Button
+              emphasis="medium"
+              leftSection={<IconRefresh size={16} />}
+              onClick={() => queryClient.invalidateQueries({ queryKey: overviewQueryKey })}
+              loading={overviewQuery.isFetching}
+            >
+              {tCommonActions('refresh')}
+            </Button>
+          </DsLayoutInline>
+        }
+      />
 
       {overviewQuery.isLoading ? (
         <PageLoader />
@@ -167,7 +170,7 @@ export function TranslationOverviewPage({ client }: { client?: TranslationOvervi
 
           <DsSectionCard padding="md">
             <DsLayoutStack gap="sm">
-              <DsHeading level={3} scale={4}>
+              <DsHeading level={2} scale={4}>
                 {t('sections.localeHealthTitle')}
               </DsHeading>
               <Table.ScrollContainer
@@ -224,7 +227,7 @@ export function TranslationOverviewPage({ client }: { client?: TranslationOvervi
 
           <DsSectionCard padding="md">
             <DsLayoutStack gap="sm">
-              <DsHeading level={3} scale={4}>
+              <DsHeading level={2} scale={4}>
                 {t('sections.entityHealthTitle')}
               </DsHeading>
               {entityHealth.length === 0 ? (

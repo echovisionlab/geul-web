@@ -1,5 +1,21 @@
 # Design system changes
 
+## 2026-10-17 — admin page outline (unreleased)
+
+Every admin page now has exactly one h1 at the page title scale, followed by h2 sections. Mail adapters,
+Menus, Translation overview/jobs/settings and the dashboard move from hand-built `Heading level={2}` rows to
+Core `PageHeader`; settings-style sections use `SettingsSection` without cards, and cards remain only for
+repeated objects (mail adapters, translation providers). User edit renders Profile, SSO providers, primary
+email, ban state and the personal access token as h2 sections; the profile Save sits at the end of the
+Profile section, whose description states that the following sections apply immediately.
+
+Core `TextInput textRole="title"` drops its inline padding and uses the page title scale at `size="xl"`,
+so editable editor titles (post, page, email, map theme) match read-only titles. Core `SelectionPath`
+adds `pageTitle`, rendering the current location as the h1; the admin file manager uses it instead of a
+label-sized "Files". `LogoCropper` (client and label logos) no longer repeats its visible label inside the
+empty dropzone, previews each variant on its theme surface, and the light/dark pair sits side by side
+from `sm`.
+
 ## 2026-10-17 — settings hierarchy, logo slots and upload previews (unreleased)
 
 Core `SectionHeader` adds `level={2 | 3}`: real headings on one scale (page title → section → group →

@@ -1111,7 +1111,8 @@
       "labelLanguageTranslatedDescription": "I menu pubblici mostrano solo una traduzione corrente per la lingua esatta del visitatore; altrimenti mostrano l'etichetta sorgente.",
       "labelLanguageFixedLocaleDescription": "I menu pubblici mostrano sempre questo elemento nella lingua selezionata, indipendentemente dalla lingua del visitatore. Se quella lingua non ha un'etichetta attiva, viene usata l'etichetta sorgente.",
       "translatedItemBadge": "Lingua del visitatore",
-      "fixedLocaleItemBadge": "Fisso: {locale}"
+      "fixedLocaleItemBadge": "Fisso: {locale}",
+      "description": "Gestisci i menu di navigazione mostrati sul sito. Seleziona un menu per modificarne le voci."
     },
     "emailEvents": {
       "title": "Consegna e-mail",
@@ -1760,7 +1761,7 @@
     },
     "personalAccessTokens": {
       "title": "Token di accesso personale",
-      "description": "Usa questo unico token di accesso personale con le API fornite da {siteName}. Ogni richiesta applica le autorizzazioni correnti del tuo account. Remote MCP non accetta questo token.",
+      "description": "Usa questo unico token di accesso personale con le API fornite da {siteName}. Ogni richiesta applica le autorizzazioni correnti del tuo account.",
       "empty": "Non è stato creato alcun token di accesso personale.",
       "regenerate": "Rigenera",
       "regenerateTitle": "Rigenera token di accesso personale",
@@ -4665,6 +4666,9 @@
     "emailVerification": {
       "verified": "E-mail verificata",
       "unverified": "E-mail non verificata"
+    },
+    "profile": {
+      "description": "Salva applica le modifiche di questa sezione. Le sezioni sottostanti applicano ogni modifica immediatamente."
     }
   },
   "adminSettings": {
