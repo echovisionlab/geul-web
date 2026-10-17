@@ -1,12 +1,15 @@
 import { getPublicSettings } from '@/lib/queries/manifest';
 import { siteVariableManifest } from '@/features/editor/tiptap/site-variables/site-variable.story-fixtures';
 import { PageAccessReason } from '@echovisionlab/geul-proto/common/page_access_pb.ts';
-import { fromJson } from '@bufbuild/protobuf';
+import { create, fromJson } from '@bufbuild/protobuf';
 import { Code, ConnectError } from '@connectrpc/connect';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DocumentContentHeight, DocumentRegionPlacement } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
-import { LocalizedPageDocumentSchema } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
+import {
+  ContentBlockMediaItemSchema,
+  LocalizedPageDocumentSchema,
+} from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { PageStatus as PublicPageStatus } from '@echovisionlab/geul-proto/public/page_pb.ts';
 import { createPageClient, createPublicPageClientWithAuth } from '@/lib/api/server-client';
 import {
@@ -334,6 +337,17 @@ describe('public page queries', () => {
 });
 
 it('fetches an exact authorized Page snapshot with section bodies and document layout', async () => {
+  const blockMedia = [
+    create(ContentBlockMediaItemSchema, {
+      selector: { blockId: '019cd13a-3716-79af-8490-dbd124708825', referencePath: 'file' },
+      attachment: { state: { case: 'activeFileId', value: '019cd13a-3716-79af-8490-dbd124708826' } },
+      delivery: {
+        fileId: '019cd13a-3716-79af-8490-dbd124708826',
+        mimeType: 'audio/wav',
+        inline: { url: 'https://media.example/authorized-audio' },
+      },
+    }),
+  ];
   const rpc = vi.fn(async () => ({
     document: localizedPageDocument(),
     locale: 'ko',
@@ -341,7 +355,7 @@ it('fetches an exact authorized Page snapshot with section bodies and document l
     localeExists: true,
     documentRevision: 'revision-A',
     editable: false,
-    blockMedia: [],
+    blockMedia,
     documentLayout: protoDocumentLayout,
   }));
   vi.mocked(createPageClient).mockResolvedValue({ getPageEditorDocument: rpc } as unknown as Awaited<
@@ -354,7 +368,11 @@ it('fetches an exact authorized Page snapshot with section bodies and document l
     title: '',
     summary: '',
     documentRevision: 'revision-A',
+    locale: 'ko',
+    sourceLocale: 'ko',
+    blockMedia,
     sections: [{ id: sectionId, content: { type: 'doc' } }],
   });
+  expect(result?.snapshot.blockMedia).toBe(blockMedia);
   expect(result?.documentLayout.contentHeight).toBe('viewport');
 });
