@@ -5,6 +5,7 @@ import { afterEach, describe, it, expect, vi } from 'vitest';
 import { TestProviders } from '@/test/TestProviders';
 import { ClientEditorPreview } from './ClientEditor.stories';
 import { PostTaxonomyPreview } from './PostTaxonomy.stories';
+import { waitInAct } from '@/test/act-wait';
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), prefetch: vi.fn() }),
   useParams: () => ({ id: 'client-preview' }),
@@ -37,7 +38,7 @@ function render(node: React.ReactNode) {
 describe('actual detail and taxonomy page owners', () => {
   it('loads the real client edit query/baseline and both logo controls', async () => {
     render(<ClientEditorPreview />);
-    await vi.waitFor(() => expect(host.querySelector<HTMLInputElement>('input[required]')?.value).toBe('Quiet Signal'));
+    await waitInAct(() => expect(host.querySelector<HTMLInputElement>('input[required]')?.value).toBe('Quiet Signal'));
     expect(host.querySelectorAll('input[type=file]').length).toBe(2);
     const name = host.querySelector<HTMLInputElement>('input[required]')!;
     act(() => {
@@ -47,7 +48,7 @@ describe('actual detail and taxonomy page owners', () => {
     const save = Array.from(host.querySelectorAll('button')).find((node) => node.textContent === 'Save');
     expect(save).toBeDefined();
     await act(async () => save!.click());
-    await vi.waitFor(() => expect(host.querySelector('[role=alert]')?.textContent).toBe('Save'));
+    await waitInAct(() => expect(host.querySelector('[role=alert]')?.textContent).toBe('Save'));
   });
   it('keeps the actual create-client branch without logo upload controls', () => {
     render(<ClientEditorPreview state="new" />);
@@ -56,7 +57,7 @@ describe('actual detail and taxonomy page owners', () => {
   });
   it.each(['category', 'tag'] as const)('loads actual %s post-list columns/query owner', async (kind) => {
     render(<PostTaxonomyPreview kind={kind} />);
-    await vi.waitFor(() => expect(host.textContent).toContain('June Han'));
+    await waitInAct(() => expect(host.textContent).toContain('June Han'));
     expect(host.querySelector('a[href="/posts/listening-notes"]')).not.toBeNull();
     expect(host.querySelector('input[placeholder="Search posts..."]')).not.toBeNull();
   });

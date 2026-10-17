@@ -7,6 +7,7 @@ import { AdminEntityPagePreview } from './AdminEntities.stories';
 import { MyListsPagePreview } from './MyLists.stories';
 import { OnboardingPagePreview } from './Onboarding.stories';
 import { OAuthConsentPagePreview } from './OAuth.stories';
+import { waitInAct } from '@/test/act-wait';
 vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn(), back: vi.fn(), prefetch: vi.fn() }),
@@ -62,17 +63,17 @@ describe('expanded production page adapters', () => {
   );
   it('keeps actual entity empty state and table search UI', async () => {
     render(<AdminEntityPagePreview state="empty" />);
-    await vi.waitFor(() => expect(host.textContent).toContain('No artists'));
+    await waitInAct(() => expect(host.textContent).toContain('No artists'));
     expect(host.querySelector('input[placeholder*=artists]')).not.toBeNull();
   });
   it('runs the actual works query owner against local credited rows', async () => {
     render(<MyListsPagePreview domain="works" />);
-    await vi.waitFor(() => expect(host.textContent).toContain('Night Signals'));
+    await waitInAct(() => expect(host.textContent).toContain('Night Signals'));
     expect(host.textContent).toContain('Composer');
   });
   it('runs the actual posts query and create owner without service calls', async () => {
     render(<MyListsPagePreview domain="posts" />);
-    await vi.waitFor(() => expect(host.textContent).toContain('Listening notes'));
+    await waitInAct(() => expect(host.textContent).toContain('Listening notes'));
     const button = host.querySelector<HTMLButtonElement>('button[aria-label="New post"]');
     expect(button).not.toBeNull();
     await act(async () => button!.click());

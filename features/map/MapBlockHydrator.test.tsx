@@ -4,6 +4,7 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MapBlockHydrator } from './MapBlockHydrator';
+import { waitInAct } from '@/test/act-wait';
 
 const embeddedProps: Array<{ blockAlignment?: string }> = [];
 
@@ -115,9 +116,7 @@ describe('MapBlockHydrator', () => {
       renderMapMarkup(content!, 'Replacement Place');
     });
 
-    await vi.waitFor(() =>
-      expect(content?.querySelector('[data-map-hydrated]')?.textContent).toBe('Replacement Place'),
-    );
+    await waitInAct(() => expect(content?.querySelector('[data-map-hydrated]')?.textContent).toBe('Replacement Place'));
     expect(content.textContent).not.toContain('[Map: 1 place]');
     expect(embeddedProps.at(-1)?.blockAlignment).toBe('center');
   });

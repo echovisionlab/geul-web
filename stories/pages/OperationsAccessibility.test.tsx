@@ -7,6 +7,7 @@ import { AuthoringExtensionsProvider } from '@/features/authoring/AuthoringExten
 import { MailAdaptersPreview } from './MailAdapters.stories';
 import { OgImageSettingsPreview } from './OgImageSettings.stories';
 import en from '@/messages/en.json';
+import { waitInAct } from '@/test/act-wait';
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
@@ -46,7 +47,7 @@ describe('production operations accessibility with local services', () => {
   it('keeps each mail adapter command and value associated with its own provider', async () => {
     await render('mail');
     // Adapters arrive through the local query transport.
-    const group = await vi.waitFor(() => {
+    const group = await waitInAct(() => {
       const match = host.querySelector('[role="group"][aria-label="Studio SMTP"]');
       expect(match).not.toBeNull();
       return match!;
@@ -55,7 +56,7 @@ describe('production operations accessibility with local services', () => {
     expect(toggle.getAttribute('aria-label')).toBe(`${en.adminSettings.mail.row.enableAdapter} Studio SMTP`);
     expect(toggle.checked).toBe(false);
     await act(async () => toggle.click());
-    await vi.waitFor(() => expect(toggle.checked).toBe(true));
+    await waitInAct(() => expect(toggle.checked).toBe(true));
     expect(group.querySelector(`button[aria-label="${en.common.actions.edit} Studio SMTP"]`)).not.toBeNull();
     expect(group.querySelector(`button[aria-label="${en.common.actions.delete} Studio SMTP"]`)).not.toBeNull();
     expect(
@@ -65,7 +66,7 @@ describe('production operations accessibility with local services', () => {
 
   it('exposes OG settings tabs, named form and all three range values without adding visible labels', async () => {
     await render('og');
-    const tab = await vi.waitFor(() => {
+    const tab = await waitInAct(() => {
       const match = Array.from(host.querySelectorAll<HTMLButtonElement>('[role="tab"]')).find(
         (button) => button.textContent === en.ogImageSettings.tabs.content,
       );
@@ -73,7 +74,7 @@ describe('production operations accessibility with local services', () => {
       return match!;
     });
     await act(async () => tab.click());
-    const form = await vi.waitFor(() => {
+    const form = await waitInAct(() => {
       expect(tab.getAttribute('aria-selected')).toBe('true');
       const match = host.querySelector(
         `form[aria-label="${en.ogImageSettings.title} ${en.ogImageSettings.tabs.content}"]`,
