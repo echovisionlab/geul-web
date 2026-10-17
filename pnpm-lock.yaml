@@ -255,11 +255,11 @@ importers:
         specifier: 0.8.0
         version: 0.8.0(yjs@13.6.33)
       '@echovisionlab/geul-event':
-        specifier: 0.9.0
-        version: 0.9.0(@echovisionlab/geul-proto@0.9.0)
+        specifier: 0.10.0
+        version: 0.10.0(@echovisionlab/geul-proto@0.10.0)
       '@echovisionlab/geul-proto':
-        specifier: 0.9.0
-        version: 0.9.0
+        specifier: 0.10.0
+        version: 0.10.0
       '@echovisionlab/geul-telemetry':
         specifier: 0.2.1
         version: 0.2.1
@@ -1431,10 +1431,13 @@ packages:
     peerDependencies:
       yjs: ^13.6.33
 
-  '@echovisionlab/geul-event@0.9.0':
-    resolution: {integrity: sha512-q8yJ10yS2260AVdIPP+jTXcpC7aOxaUTCWfyDvHJaru8cOR0MA6V/6+LOEkWm/YS9dSIwjMLfrtlmXKnCDjI7w==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-event/0.9.0/2aa0bc1fffa054228fd2248df6b5cc16857d3028}
+  '@echovisionlab/geul-event@0.10.0':
+    resolution: {integrity: sha512-DMC/dq7xHuYJR4XetknZfryA9rSyEhnJO41whdyqcl6cZPz/Ll027iqxDjzLifvFjp9s6ggmb74Qj/R9rtWCjQ==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-event/0.10.0/8c9d8855c4a2fff9213c9331192fa42255ae84f1}
     peerDependencies:
-      '@echovisionlab/geul-proto': ^0.9.0
+      '@echovisionlab/geul-proto': ^0.10.0
+
+  '@echovisionlab/geul-proto@0.10.0':
+    resolution: {integrity: sha512-QsxGdS+c7nYT3W0eYFHBL/lvZdkBk+xyj6LX0AbXllG0SB0TeHHmSB+YhEBxO/kVBRpO2d7Iqb3xWoZZn2lTvw==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-proto/0.10.0/8610e5aee98ec0dde38d828de65ce4f7b6fc9f5d}
 
   '@echovisionlab/geul-proto@0.9.0':
     resolution: {integrity: sha512-tYPTCJ+G+VRD1/KfcJUOk0qweEGe23KiGVqwY69CV8yux6R5/I/kZ213LJTpOp4XBTIx4xN39mGm8XKl9dQc6g==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-proto/0.9.0/36c9634e5b384268be238a101972c34948c7e8f8}
@@ -10044,10 +10047,14 @@ snapshots:
       yjs: 13.6.33
       zod: 4.6.5
 
-  '@echovisionlab/geul-event@0.9.0(@echovisionlab/geul-proto@0.9.0)':
+  '@echovisionlab/geul-event@0.10.0(@echovisionlab/geul-proto@0.10.0)':
     dependencies:
       '@bufbuild/protobuf': 2.16.0
-      '@echovisionlab/geul-proto': 0.9.0
+      '@echovisionlab/geul-proto': 0.10.0
+
+  '@echovisionlab/geul-proto@0.10.0':
+    dependencies:
+      '@bufbuild/protobuf': 2.16.0
 
   '@echovisionlab/geul-proto@0.9.0':
     dependencies:
