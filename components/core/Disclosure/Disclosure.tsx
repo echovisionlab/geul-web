@@ -10,7 +10,8 @@ import { ToolbarDensityProvider } from '../control-context';
 import { useHierarchyStep } from '../Hierarchy';
 
 export type DisclosureAppearance = 'plain' | 'filled';
-export type DisclosureDensity = 'standard' | 'compact';
+/** `chrome` is compact geometry aligned to navigation chrome rows (`xs` label inset). */
+export type DisclosureDensity = 'standard' | 'compact' | 'chrome';
 export type DisclosureShape = 'square';
 export type DisclosureContentIndent = 'label' | 'none' | 'small';
 export type DisclosureChevronPosition = 'start' | 'end';
@@ -86,7 +87,7 @@ export const Disclosure = forwardRef<HTMLDivElement, DisclosureProps>(
             <div className={classes.header}>
               {leadingActions ? (
                 <div className={classes.leadingActions}>
-                  <ToolbarDensityProvider density={density === 'compact' ? 'compact' : 'comfortable'}>
+                  <ToolbarDensityProvider density={density === 'standard' ? 'comfortable' : 'compact'}>
                     {leadingActions}
                   </ToolbarDensityProvider>
                 </div>
@@ -110,7 +111,7 @@ export const Disclosure = forwardRef<HTMLDivElement, DisclosureProps>(
               )}
               {actions ? (
                 <div className={classes.actions}>
-                  <ToolbarDensityProvider density={density === 'compact' ? 'compact' : 'comfortable'}>
+                  <ToolbarDensityProvider density={density === 'standard' ? 'comfortable' : 'compact'}>
                     {actions}
                   </ToolbarDensityProvider>
                 </div>

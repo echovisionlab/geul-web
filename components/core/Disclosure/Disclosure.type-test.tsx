@@ -3,6 +3,9 @@ import { Disclosure, DisclosureRegion } from './Disclosure';
 <Disclosure label="Sortable section" chevronPosition="start" withDivider={false} />;
 <Disclosure label="Parent" contentIndent="label" leadingActions={<button type="button">Reorder</button>} />;
 <Disclosure label="Child" nested />;
+<Disclosure label="Navigation group" density="chrome" contentIndent="none" withDivider={false} />;
+// @ts-expect-error Density is a closed Core contract.
+<Disclosure label="Navigation group" density="dense" />;
 // @ts-expect-error Nested is a semantic state, not a pixel override.
 <Disclosure label="Child" nested="20px" />;
 // @ts-expect-error Content alignment is owned by the closed Core contract.
