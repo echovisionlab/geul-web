@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.3](https://github.com/echovisionlab/geul-web/compare/v0.14.2...v0.14.3) (2026-10-17)
+
+
+### Bug Fixes
+
+* stabilize editor configuration and preserve response metadata ([#141](https://github.com/echovisionlab/geul-web/issues/141)) ([b80d712](https://github.com/echovisionlab/geul-web/commit/b80d712da4af4657d053821ecdb38d7a05b80c48))
+
 ## [0.14.2](https://github.com/echovisionlab/geul-web/compare/v0.14.1...v0.14.2) (2026-10-16)
 
 
