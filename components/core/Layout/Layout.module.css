@@ -86,6 +86,16 @@
   column-gap: var(--_layout-column-gap-base);
 }
 
+/* Fluid grid: the attribute outranks every breakpoint's fixed `columns` track list. Each point's
+   named minimum width (`--_layout-min-column-*`) resolves to one of the track widths below. */
+.grid[data-geul-layout-min-column] {
+  --_layout-track-sm: 9rem;
+  --_layout-track-md: 14rem;
+  --_layout-track-lg: 20rem;
+
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--_layout-min-column-base)), 1fr));
+}
+
 .gridItem {
   grid-column: var(--_layout-start-base) / span var(--_layout-span-base);
 }
@@ -118,6 +128,10 @@
     grid-template-columns: repeat(var(--_layout-columns-xs), minmax(0, 1fr));
     row-gap: var(--_layout-row-gap-xs);
     column-gap: var(--_layout-column-gap-xs);
+  }
+
+  .grid[data-geul-layout-min-column] {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--_layout-min-column-xs)), 1fr));
   }
 
   .gridItem {
@@ -155,6 +169,10 @@
     column-gap: var(--_layout-column-gap-sm);
   }
 
+  .grid[data-geul-layout-min-column] {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--_layout-min-column-sm)), 1fr));
+  }
+
   .gridItem {
     grid-column: var(--_layout-start-sm) / span var(--_layout-span-sm);
   }
@@ -188,6 +206,10 @@
     grid-template-columns: repeat(var(--_layout-columns-md), minmax(0, 1fr));
     row-gap: var(--_layout-row-gap-md);
     column-gap: var(--_layout-column-gap-md);
+  }
+
+  .grid[data-geul-layout-min-column] {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--_layout-min-column-md)), 1fr));
   }
 
   .gridItem {
@@ -225,6 +247,10 @@
     column-gap: var(--_layout-column-gap-lg);
   }
 
+  .grid[data-geul-layout-min-column] {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--_layout-min-column-lg)), 1fr));
+  }
+
   .gridItem {
     grid-column: var(--_layout-start-lg) / span var(--_layout-span-lg);
   }
@@ -258,6 +284,10 @@
     grid-template-columns: repeat(var(--_layout-columns-xl), minmax(0, 1fr));
     row-gap: var(--_layout-row-gap-xl);
     column-gap: var(--_layout-column-gap-xl);
+  }
+
+  .grid[data-geul-layout-min-column] {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--_layout-min-column-xl)), 1fr));
   }
 
   .gridItem {

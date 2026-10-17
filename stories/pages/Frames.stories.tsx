@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/nextjs';
+import type { Decorator, Meta, StoryObj } from '@storybook/nextjs';
 import { useState } from 'react';
 import { useMediaQuery } from '@mantine/hooks';
 import { useTranslations } from 'next-intl';
@@ -7,6 +7,11 @@ import { ShellView } from '@/features/shell/ui/Shell/ShellView';
 import { AdminShellView } from '@/features/admin/ui/AdminShell/AdminShellView';
 import { UserShellView } from '@/features/user/ui/UserShell/UserShellView';
 import { SiteLogo } from '@/features/site/SiteLogo';
+import { SITE_LOGO_HEIGHT } from '@/features/site/SiteLogo/placements';
+import { SessionProvider } from '@/lib/providers/SessionProvider';
+import { LanguageMenu } from '@/features/shell/LanguageMenu';
+import { useSiteSettings, ManifestProvider } from '@/lib/contexts/ManifestContext';
+import { DEFAULT_SITE_SETTINGS_VIEW } from '@/lib/types/site-setting/config';
 import { navigatePreview } from '../shared/preview-navigation';
 import { ContentModal } from '@/components/core/Modal';
 import { FormModal } from '@/components/core/Modal/FormModal';
@@ -28,6 +33,8 @@ export function FramesPreview({
   signedIn?: boolean;
   nestedNavigation?: boolean;
 }) {
+  const { settings } = useSiteSettings();
+  const siteTitle = settings.site_title || 'Quiet Signal';
   const t = useTranslations('common'),
     shell = useTranslations('shell'),
     admin = useTranslations('adminShell'),
@@ -127,8 +134,8 @@ export function FramesPreview({
           onToggleColorScheme: toggleColorScheme,
           onNavigate: navigatePreview,
         }}
-        logoSlot={<SiteLogo height={14} />}
-        compactLogoSlot={<SiteLogo height={12} />}
+        logoSlot={<SiteLogo height={SITE_LOGO_HEIGHT.adminExpanded} />}
+        compactLogoSlot={<SiteLogo form="symbol" height={SITE_LOGO_HEIGHT.adminCompact} />}
       >
         {children}
       </AdminShellView>
@@ -187,7 +194,7 @@ export function FramesPreview({
         { id: 'account', label: t('labels.account'), href: '/my', active: false, openInNewTab: false, children: [] },
       ]}
       footer={{
-        siteTitle: 'Quiet Signal',
+        siteTitle,
         description: null,
         copyright: '© 2026 Quiet Signal',
         taxId: null,
@@ -196,7 +203,7 @@ export function FramesPreview({
         showChangelog: false,
       }}
       labels={{
-        navigation: 'Quiet Signal',
+        navigation: siteTitle,
         toggleNavigation: t('actions.toggleNavigation'),
         close: t('actions.close'),
         search: shell('actions.search'),
@@ -230,11 +237,11 @@ export function FramesPreview({
         onNavigate: navigatePreview,
       }}
       slots={{
-        logo: <SiteLogo height={16} />,
+        logo: <SiteLogo height={SITE_LOGO_HEIGHT.header} />,
         printHeader: null,
-        printWatermark: <SiteLogo height={24} />,
-        languageDesktop: null,
-        languageMobile: null,
+        printWatermark: <SiteLogo height={SITE_LOGO_HEIGHT.printWatermark} />,
+        languageDesktop: <LanguageMenu />,
+        languageNavigation: <LanguageMenu variant="navigation" />,
         languageFooterDesktop: null,
         languageFooterMobile: null,
         socialLinks: null,
@@ -285,6 +292,13 @@ const meta = {
   title: 'Pages/Application/Frames',
   excludeStories: ['FramesPreview'],
   component: FramesPreview,
+  decorators: [
+    (Story) => (
+      <SessionProvider initialData={null}>
+        <Story />
+      </SessionProvider>
+    ),
+  ],
   args: { kind: 'public', mode: 'expanded', signedIn: false },
   render: (args) => <FramesPreview key={`${args.kind}-${args.mode}-${args.signedIn}`} {...args} />,
   parameters: {
@@ -312,3 +326,33 @@ export const Account: Story = { args: { kind: 'account' } };
 export const Phone: Story = { globals: { viewport: { value: 'phone', isRotated: false } } };
 
 export const NavigationHierarchy: Story = { args: { signedIn: true, nestedNavigation: true } };
+
+/** Remote published brand assets; the editable vector authority remains the Illustrator media kit. */
+const withStackedBrand: Decorator = (Story) => (
+  <ManifestProvider
+    manifest={{
+      settings: {
+        ...DEFAULT_SITE_SETTINGS_VIEW,
+        site_origin: 'https://www.rawsector.com',
+        site_title: 'rawsector',
+        favicon_asset_set: null,
+        site_og_image_url: null,
+        logo_full_light_url: 'https://cdn.rawsector.com/asset/b8cc8296-7f93-4704-b06d-657d39171ba9/image.svg',
+        logo_full_dark_url: 'https://cdn.rawsector.com/asset/62d7d08d-8a4e-4ff7-96a2-a7669a0183bc/image.svg',
+        logo_symbol_light_url: 'https://cdn.rawsector.com/asset/b8cc8296-7f93-4704-b06d-657d39171ba9/image.svg',
+        logo_symbol_dark_url: 'https://cdn.rawsector.com/asset/62d7d08d-8a4e-4ff7-96a2-a7669a0183bc/image.svg',
+      },
+      menus: { $typeName: 'api.open.v1.Menus', header: [], secondary: [], footer: [], avatarDropdown: [] },
+    }}
+  >
+    <Story />
+  </ManifestProvider>
+);
+
+export const StackedBrand: Story = { decorators: [withStackedBrand] };
+export const StackedBrandSignedIn: Story = { args: { signedIn: true }, decorators: [withStackedBrand] };
+export const StackedBrandAdmin: Story = { args: { kind: 'admin' }, decorators: [withStackedBrand] };
+export const StackedBrandAdminCompact: Story = {
+  args: { kind: 'admin', mode: 'compact' },
+  decorators: [withStackedBrand],
+};

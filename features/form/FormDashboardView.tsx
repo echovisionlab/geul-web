@@ -15,6 +15,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { PageLoader } from '@/features/site/PageLoader';
 import { SiteLogo } from '@/features/site/SiteLogo';
+import { SITE_LOGO_HEIGHT } from '@/features/site/SiteLogo/placements';
 import { FormAccessBoundary } from '@/features/form/FormAccessBoundary';
 import { FieldStatsChart } from '@/features/form/FormDashboard/FieldStatsChart';
 import { checkFormAccessAction, getFormDashboardByShareAction } from '@/lib/actions/form';
@@ -135,7 +136,7 @@ export function FormDashboardView({
         <DsLayoutInset inline="xl" block="md">
           <DsLayoutInset space="none" as="header">
             <Link href={logoHref} appearance="graphic" aria-label={tPublicForm('logoLinkAria')}>
-              <SiteLogo height={24} />
+              <SiteLogo height={SITE_LOGO_HEIGHT.form} />
             </Link>
           </DsLayoutInset>
         </DsLayoutInset>

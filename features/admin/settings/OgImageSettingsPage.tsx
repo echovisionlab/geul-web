@@ -1,7 +1,7 @@
 'use client';
 
 import { AuthoringExtension, useAuthoringExtensionAvailable } from '@/features/authoring/AuthoringExtensionsContext';
-import { SupportingText, Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
 import { fieldBindings } from '@/components/core/bindings';
 import { SectionCard as DsSectionCard } from '@/components/core/Section/SectionCard';
@@ -10,12 +10,11 @@ import {
   LayoutInline as DsLayoutInline,
   LayoutGrid as DsLayoutGrid,
   LayoutGridItem as DsLayoutGridItem,
-  LayoutInset as DsLayoutInset,
 } from '@/components/core/Layout';
 
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
@@ -29,13 +28,16 @@ import { useOgPreview } from '@/features/metadata/useOgPreview';
 import { TextInput, ColorInput, NumberInput, Slider } from '@/components/core/Input';
 import { Tabs } from '@/components/core/Tabs';
 import { PageLoader } from '@/features/site/PageLoader';
-import { SectionCard, SectionHeader } from '@/components/core/Section';
+import { SectionCard, SectionHeader, SettingsGroup, SettingsSection } from '@/components/core/Section';
+import { Field } from '@/components/core/Field';
+import { PageHeader } from '@/components/core/PageHeader';
+import { SiteOgImagePanel, type SiteOgImageBindings } from '@/features/site/SiteOgImagePanel/SiteOgImagePanel';
 import {
   regenerateAllOgImagesAction,
   updateContentOgConfigAction,
   updateHomeOgConfigAction,
 } from '@/lib/actions/site-setting';
-import { getOgConfig } from '@/lib/queries/site-setting-browser';
+import { getAllSiteSettings, getOgConfig } from '@/lib/queries/site-setting-browser';
 import { useOgGenerationRun } from '@/lib/hooks/useOgGenerationRun';
 import type { ContentOgImageConfig, HomeOgImageConfig } from '@/lib/types/site-setting/config';
 import { DEFAULT_CONTENT_OG_CONFIG, DEFAULT_HOME_OG_CONFIG } from '@/lib/utils/og-config';
@@ -49,6 +51,8 @@ export interface OgImageSettingsPageBindings {
   updateContentOgConfigAction: typeof updateContentOgConfigAction;
   updateHomeOgConfigAction: typeof updateHomeOgConfigAction;
   getOgGenerationRunAction: typeof getOgGenerationRunAction;
+  getSettings?: typeof getAllSiteSettings;
+  siteOg?: SiteOgImageBindings;
 }
 const defaultBindings: OgImageSettingsPageBindings = {
   getOgConfig,
@@ -67,6 +71,11 @@ export default function OgImageSettingsPage({
     queryFn: bindings.getOgConfig,
   });
   const { data: savedConfig, isLoading } = savedConfigQuery;
+  // The home sharing image panel reads the site background from Site Settings.
+  const siteSettingsQuery = useQuery({
+    queryKey: ['siteSettings', 'all'],
+    queryFn: bindings.getSettings ?? getAllSiteSettings,
+  });
 
   const [activeTab, setActiveTab] = useState<TabValue>('home');
   const generationRun = useOgGenerationRun(bindings.getOgGenerationRunAction);
@@ -188,22 +197,22 @@ export default function OgImageSettingsPage({
   return (
     <DsLayoutStack gap="lg">
       <QueryErrorAlert queries={[savedConfigQuery]} />
-      <DsLayoutInline justify="between" align="start">
-        <div>
-          <DsHeading level={2}>{t('title')}</DsHeading>
-          <SupportingText tone="secondary">{t('description')}</SupportingText>
-        </div>
-        <AuthoringExtension kind="generation">
-          <Button
-            emphasis="medium"
-            tone="accent"
-            onClick={() => regenerateAll.mutate()}
-            loading={regenerateAll.isPending || generationRun.isActive}
-          >
-            {t('actions.regenerateAll')}
-          </Button>
-        </AuthoringExtension>
-      </DsLayoutInline>
+      <PageHeader
+        title={t('title')}
+        description={t('description')}
+        actions={
+          <AuthoringExtension kind="generation">
+            <Button
+              emphasis="medium"
+              tone="accent"
+              onClick={() => regenerateAll.mutate()}
+              loading={regenerateAll.isPending || generationRun.isActive}
+            >
+              {t('actions.regenerateAll')}
+            </Button>
+          </AuthoringExtension>
+        }
+      />
 
       <AuthoringExtension kind="generation">
         <OgGenerationRunProgress run={generationRun.run} error={generationRun.error} />
@@ -217,6 +226,12 @@ export default function OgImageSettingsPage({
 
         <Tabs.Panel value="home" paddingTop="md">
           <HomeSettingsPanel
+            sharingImage={
+              <SiteOgImagePanel
+                bindings={bindings.siteOg}
+                currentBackgroundUrl={siteSettingsQuery.data?.site_og_background_url ?? null}
+              />
+            }
             form={homeForm}
             onSubmit={(values) => updateHomeOgConfig.mutate(values)}
             onReset={handleHomeReset}
@@ -238,13 +253,14 @@ export default function OgImageSettingsPage({
 }
 
 interface HomeSettingsPanelProps {
+  sharingImage: ReactNode;
   form: ReturnType<typeof useForm<HomeOgImageConfig>>;
   onSubmit: (values: HomeOgImageConfig) => void;
   onReset: () => void;
   isLoading: boolean;
 }
 
-function HomeSettingsPanel({ form, onSubmit, onReset, isLoading }: HomeSettingsPanelProps) {
+function HomeSettingsPanel({ sharingImage, form, onSubmit, onReset, isLoading }: HomeSettingsPanelProps) {
   const t = useTranslations('ogImageSettings');
   const tCommonActions = useTranslations('common.actions');
   const tCommonLabels = useTranslations('common.labels');
@@ -257,53 +273,38 @@ function HomeSettingsPanel({ form, onSubmit, onReset, isLoading }: HomeSettingsP
     <form aria-label={`${t('title')} ${t('tabs.home')}`} aria-busy={isLoading} onSubmit={form.onSubmit(onSubmit)}>
       <DsLayoutGrid columns={12} gap="lg">
         <DsLayoutGridItem span={{ base: 12, lg: generationAvailable ? 5 : 12 }}>
-          <DsLayoutStack gap="md">
-            <DsLayoutInline justify="end">
-              <Button emphasis="medium" onClick={onReset}>
-                {t('actions.resetToDefaults')}
-              </Button>
-              <Button emphasis="medium" type="submit" loading={isLoading}>
-                {tCommonActions('save')}
-              </Button>
-            </DsLayoutInline>
+          <DsLayoutStack gap="xl">
+            <SettingsSection title={t('home.sections.currentImage')} description={t('home.helpers.currentImage')}>
+              {sharingImage}
+            </SettingsSection>
 
-            <SectionCard>
-              <DsLayoutStack gap="md">
-                <SectionHeader title={tCommonLabels('background')} />
-                <ColorInput
-                  label={t('home.fields.backgroundColor')}
-                  format="hex"
-                  {...fieldBindings(form.getInputProps('darkBackground'))}
+            <SettingsSection title={tCommonLabels('background')}>
+              <ColorInput
+                label={t('home.fields.backgroundColor')}
+                format="hex"
+                {...fieldBindings(form.getInputProps('darkBackground'))}
+              />
+            </SettingsSection>
+
+            <SettingsSection title={t('home.sections.logoSize')} description={t('home.helpers.logoCentered')}>
+              <DsLayoutInline grow>
+                <NumberInput
+                  label={tCommonLabels('width')}
+                  min={16}
+                  max={400}
+                  {...fieldBindings(form.getInputProps('logo.width'))}
                 />
-              </DsLayoutStack>
-            </SectionCard>
-
-            <SectionCard>
-              <DsLayoutStack gap="md">
-                <SectionHeader title={t('home.sections.logoSize')} description={t('home.helpers.logoCentered')} />
-                <DsLayoutInline grow>
-                  <NumberInput
-                    label={tCommonLabels('width')}
-                    min={16}
-                    max={400}
-                    {...fieldBindings(form.getInputProps('logo.width'))}
-                  />
-                  <NumberInput
-                    label={tCommonLabels('height')}
-                    min={16}
-                    max={400}
-                    {...fieldBindings(form.getInputProps('logo.height'))}
-                  />
-                </DsLayoutInline>
-              </DsLayoutStack>
-            </SectionCard>
-
-            <SectionCard>
-              <DsLayoutStack gap="md">
-                <SectionHeader
-                  title={t('shared.sections.siteTitle')}
-                  description={t('shared.helpers.siteTitleFallback')}
+                <NumberInput
+                  label={tCommonLabels('height')}
+                  min={16}
+                  max={400}
+                  {...fieldBindings(form.getInputProps('logo.height'))}
                 />
+              </DsLayoutInline>
+            </SettingsSection>
+
+            <SettingsSection title={t('shared.sections.siteTitle')} description={t('shared.helpers.siteTitleFallback')}>
+              <DsLayoutStack gap="md">
                 <NumberInput
                   label={tCommonLabels('fontSize')}
                   min={20}
@@ -323,7 +324,16 @@ function HomeSettingsPanel({ form, onSubmit, onReset, isLoading }: HomeSettingsP
                   {...fieldBindings(form.getInputProps('siteTitle.color'))}
                 />
               </DsLayoutStack>
-            </SectionCard>
+            </SettingsSection>
+
+            <DsLayoutInline justify="end" gap="xs">
+              <Button emphasis="low" onClick={onReset}>
+                {t('actions.resetToDefaults')}
+              </Button>
+              <Button emphasis="medium" type="submit" loading={isLoading}>
+                {tCommonActions('save')}
+              </Button>
+            </DsLayoutInline>
           </DsLayoutStack>
         </DsLayoutGridItem>
 
@@ -333,6 +343,7 @@ function HomeSettingsPanel({ form, onSubmit, onReset, isLoading }: HomeSettingsP
               <SectionCard>
                 <DsLayoutStack gap="md">
                   <SectionHeader
+                    level={2}
                     title={t('shared.sections.livePreview')}
                     description={t('home.helpers.previewDescription')}
                   />
@@ -419,19 +430,9 @@ function ContentSettingsPanel({ form, onSubmit, onReset, isLoading }: ContentSet
     <form aria-label={`${t('title')} ${t('tabs.content')}`} aria-busy={isLoading} onSubmit={form.onSubmit(onSubmit)}>
       <DsLayoutGrid columns={12} gap="lg">
         <DsLayoutGridItem span={{ base: 12, lg: generationAvailable ? 5 : 12 }}>
-          <DsLayoutStack gap="md">
-            <DsLayoutInline justify="end">
-              <Button emphasis="medium" onClick={onReset}>
-                {t('actions.resetToDefaults')}
-              </Button>
-              <Button emphasis="medium" type="submit" loading={isLoading}>
-                {tCommonActions('save')}
-              </Button>
-            </DsLayoutInline>
-
-            <SectionCard>
+          <DsLayoutStack gap="xl">
+            <SettingsSection title={tCommonLabels('background')}>
               <DsLayoutStack gap="md">
-                <SectionHeader title={tCommonLabels('background')} />
                 <ColorInput
                   label={t('content.fields.darkBackgroundColor')}
                   description={t('content.fields.darkBackgroundColorDescription')}
@@ -439,12 +440,10 @@ function ContentSettingsPanel({ form, onSubmit, onReset, isLoading }: ContentSet
                   {...fieldBindings(form.getInputProps('darkBackground'))}
                 />
               </DsLayoutStack>
-            </SectionCard>
+            </SettingsSection>
 
-            <SectionCard>
+            <SettingsSection title={tCommonLabels('title')}>
               <DsLayoutStack gap="md">
-                <SectionHeader title={tCommonLabels('title')} />
-
                 <ColorInput
                   label={t('content.fields.titleColor')}
                   format="hex"
@@ -459,17 +458,10 @@ function ContentSettingsPanel({ form, onSubmit, onReset, isLoading }: ContentSet
                   {...fieldBindings(form.getInputProps('title.maxLength'))}
                 />
 
-                <div>
-                  <DsLayoutInset blockEnd="xxs">
-                    <DsText size="sm" weight="medium">
-                      {t('content.fields.fontSizeThreshold')}
-                    </DsText>
-                  </DsLayoutInset>
-                  <DsLayoutInset blockEnd="xs">
-                    <DsText size="xs" tone="secondary">
-                      {t('content.fields.fontSizeThresholdDescription')}
-                    </DsText>
-                  </DsLayoutInset>
+                <Field
+                  label={t('content.fields.fontSizeThreshold')}
+                  description={t('content.fields.fontSizeThresholdDescription')}
+                >
                   <Slider
                     aria-label={t('content.fields.fontSizeThreshold')}
                     min={20}
@@ -481,7 +473,7 @@ function ContentSettingsPanel({ form, onSubmit, onReset, isLoading }: ContentSet
                     ]}
                     {...fieldBindings(form.getInputProps('title.fontSizeThreshold'))}
                   />
-                </div>
+                </Field>
 
                 <DsLayoutInline grow>
                   <NumberInput
@@ -508,12 +500,7 @@ function ContentSettingsPanel({ form, onSubmit, onReset, isLoading }: ContentSet
                   {...fieldBindings(form.getInputProps('title.fontWeight'))}
                 />
 
-                <div>
-                  <DsLayoutInset blockEnd="xxs">
-                    <DsText size="sm" weight="medium">
-                      {tCommonLabels('lineHeight')}
-                    </DsText>
-                  </DsLayoutInset>
+                <Field label={tCommonLabels('lineHeight')}>
                   <Slider
                     aria-label={tCommonLabels('lineHeight')}
                     min={1}
@@ -526,48 +513,43 @@ function ContentSettingsPanel({ form, onSubmit, onReset, isLoading }: ContentSet
                     ]}
                     {...fieldBindings(form.getInputProps('title.lineHeight'))}
                   />
-                </div>
+                </Field>
 
-                <DsLayoutInset blockStart="sm">
-                  <DsHeading level={3} scale={4}>
-                    {t('content.sections.padding')}
-                  </DsHeading>
-                </DsLayoutInset>
-                <DsLayoutInline grow>
-                  <NumberInput
-                    label={tCommonLabels('top')}
-                    min={0}
-                    max={200}
-                    {...fieldBindings(form.getInputProps('title.padding.top'))}
-                  />
-                  <NumberInput
-                    label={tCommonLabels('right')}
-                    min={0}
-                    max={200}
-                    {...fieldBindings(form.getInputProps('title.padding.right'))}
-                  />
-                </DsLayoutInline>
-                <DsLayoutInline grow>
-                  <NumberInput
-                    label={tCommonLabels('bottom')}
-                    min={0}
-                    max={200}
-                    {...fieldBindings(form.getInputProps('title.padding.bottom'))}
-                  />
-                  <NumberInput
-                    label={tCommonLabels('left')}
-                    min={0}
-                    max={200}
-                    {...fieldBindings(form.getInputProps('title.padding.left'))}
-                  />
-                </DsLayoutInline>
+                <SettingsGroup title={t('content.sections.padding')}>
+                  <DsLayoutInline grow>
+                    <NumberInput
+                      label={tCommonLabels('top')}
+                      min={0}
+                      max={200}
+                      {...fieldBindings(form.getInputProps('title.padding.top'))}
+                    />
+                    <NumberInput
+                      label={tCommonLabels('right')}
+                      min={0}
+                      max={200}
+                      {...fieldBindings(form.getInputProps('title.padding.right'))}
+                    />
+                  </DsLayoutInline>
+                  <DsLayoutInline grow>
+                    <NumberInput
+                      label={tCommonLabels('bottom')}
+                      min={0}
+                      max={200}
+                      {...fieldBindings(form.getInputProps('title.padding.bottom'))}
+                    />
+                    <NumberInput
+                      label={tCommonLabels('left')}
+                      min={0}
+                      max={200}
+                      {...fieldBindings(form.getInputProps('title.padding.left'))}
+                    />
+                  </DsLayoutInline>
+                </SettingsGroup>
               </DsLayoutStack>
-            </SectionCard>
+            </SettingsSection>
 
-            <SectionCard>
+            <SettingsSection title={tCommonLabels('logo')}>
               <DsLayoutStack gap="md">
-                <SectionHeader title={tCommonLabels('logo')} />
-
                 <DsLayoutInline grow>
                   <NumberInput
                     label={tCommonLabels('width')}
@@ -583,33 +565,27 @@ function ContentSettingsPanel({ form, onSubmit, onReset, isLoading }: ContentSet
                   />
                 </DsLayoutInline>
 
-                <DsHeading level={3} scale={4}>
-                  {t('content.sections.logoPosition')}
-                </DsHeading>
-                <DsLayoutInline grow>
-                  <NumberInput
-                    label={tCommonLabels('bottom')}
-                    min={0}
-                    max={200}
-                    {...fieldBindings(form.getInputProps('logo.position.bottom'))}
-                  />
-                  <NumberInput
-                    label={tCommonLabels('right')}
-                    min={0}
-                    max={200}
-                    {...fieldBindings(form.getInputProps('logo.position.right'))}
-                  />
-                </DsLayoutInline>
+                <SettingsGroup title={t('content.sections.logoPosition')}>
+                  <DsLayoutInline grow>
+                    <NumberInput
+                      label={tCommonLabels('bottom')}
+                      min={0}
+                      max={200}
+                      {...fieldBindings(form.getInputProps('logo.position.bottom'))}
+                    />
+                    <NumberInput
+                      label={tCommonLabels('right')}
+                      min={0}
+                      max={200}
+                      {...fieldBindings(form.getInputProps('logo.position.right'))}
+                    />
+                  </DsLayoutInline>
+                </SettingsGroup>
               </DsLayoutStack>
-            </SectionCard>
+            </SettingsSection>
 
-            <SectionCard>
+            <SettingsSection title={t('shared.sections.siteTitle')} description={t('shared.helpers.siteTitleFallback')}>
               <DsLayoutStack gap="md">
-                <SectionHeader
-                  title={t('shared.sections.siteTitle')}
-                  description={t('shared.helpers.siteTitleFallback')}
-                />
-
                 <NumberInput
                   label={tCommonLabels('fontSize')}
                   min={10}
@@ -631,12 +607,7 @@ function ContentSettingsPanel({ form, onSubmit, onReset, isLoading }: ContentSet
                   {...fieldBindings(form.getInputProps('siteTitle.color'))}
                 />
 
-                <div>
-                  <DsLayoutInset blockEnd="xxs">
-                    <DsText size="sm" weight="medium">
-                      {tCommonLabels('opacity')}
-                    </DsText>
-                  </DsLayoutInset>
+                <Field label={tCommonLabels('opacity')}>
                   <Slider
                     aria-label={tCommonLabels('opacity')}
                     min={0}
@@ -649,9 +620,17 @@ function ContentSettingsPanel({ form, onSubmit, onReset, isLoading }: ContentSet
                     ]}
                     {...fieldBindings(form.getInputProps('siteTitle.opacity'))}
                   />
-                </div>
+                </Field>
               </DsLayoutStack>
-            </SectionCard>
+            </SettingsSection>
+            <DsLayoutInline justify="end" gap="xs">
+              <Button emphasis="low" onClick={onReset}>
+                {t('actions.resetToDefaults')}
+              </Button>
+              <Button emphasis="medium" type="submit" loading={isLoading}>
+                {tCommonActions('save')}
+              </Button>
+            </DsLayoutInline>
           </DsLayoutStack>
         </DsLayoutGridItem>
 
@@ -661,6 +640,7 @@ function ContentSettingsPanel({ form, onSubmit, onReset, isLoading }: ContentSet
               <SectionCard>
                 <DsLayoutStack gap="md">
                   <SectionHeader
+                    level={2}
                     title={t('shared.sections.livePreview')}
                     description={t('content.preview.description')}
                   />

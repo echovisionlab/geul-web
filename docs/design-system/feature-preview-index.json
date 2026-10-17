@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "sourceManifestHash": "67fb87693379e06636a8140863335d00adefdee74df9cbf3f0e4e6f2ee501d3c",
+  "sourceManifestHash": "23420407f8a4d206264fe5cf4d44f6dfc958b3b255842860eca52c1da31b3315",
   "methodology": "All inventoried Feature component candidates. Direct value imports, literal lazy imports and transitive source relationships through production owners/local adapters are indexed separately. A dependency can be unused or render conditionally; neither relationship proves rendered states, route parity or design compliance. Empty JSX records include runtime/lazy/controller boundaries and must be inspected before treating them as visual gaps.",
-  "counts": { "domains": 53, "componentFiles": 762, "jsxWithoutStoryRelationship": 46 },
+  "counts": { "domains": 53, "componentFiles": 770, "jsxWithoutStoryRelationship": 45 },
   "domains": [
     {
       "domain": "account",
@@ -1185,7 +1185,6 @@
             "Pages/Editors/Program Events",
             "Pages/Editors/Release",
             "Pages/Editors/Series",
-            "Pages/Admin/Site Settings",
             "Pages/Editors/Work"
           ]
         },
@@ -1193,7 +1192,14 @@
           "file": "features/authoring/DocumentEditorPanels.tsx",
           "hasJsx": true,
           "directStories": [],
-          "relatedStories": ["Pages/Editors/Page", "Pages/Editors/Post", "Pages/Editors/Work"]
+          "relatedStories": [
+            "Pages/Editors/Page",
+            "Pages/Editors/Post",
+            "Pages/Editors/Program Events",
+            "Pages/Editors/Release",
+            "Pages/Editors/Series",
+            "Pages/Editors/Work"
+          ]
         },
         {
           "file": "features/authoring/EditorHeader/EditorHeader.tsx",
@@ -1236,6 +1242,19 @@
             "Pages/Editors/Legal",
             "Pages/Admin/Map Places",
             "Pages/Admin/Map Theme Editor",
+            "Pages/Editors/Page",
+            "Pages/Editors/Post",
+            "Pages/Editors/Program Events",
+            "Pages/Editors/Release",
+            "Pages/Editors/Series",
+            "Pages/Editors/Work"
+          ]
+        },
+        {
+          "file": "features/authoring/EditorSettingsSection.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": [
             "Pages/Editors/Page",
             "Pages/Editors/Post",
             "Pages/Editors/Program Events",
@@ -1914,6 +1933,7 @@
           "relatedStories": [
             "Pages/Public/Entities",
             "Feature/Page/Collection Blocks",
+            "Feature/Page/Infinite Collection",
             "Feature/Page/Embed",
             "Feature/Series/Public View",
             "Pages/Admin/Collections",
@@ -1986,7 +2006,6 @@
             "Pages/Legal/Public Document",
             "Pages/Legal/History Detail",
             "Pages/Public/Documents",
-            "Pages/Public/Entity Detail",
             "Pages/Public/Utilities"
           ]
         },
@@ -2005,7 +2024,6 @@
             "Pages/Legal/Public Document",
             "Pages/Legal/History Detail",
             "Pages/Public/Documents",
-            "Pages/Public/Entity Detail",
             "Pages/Public/Utilities"
           ]
         },
@@ -2033,6 +2051,21 @@
             "Pages/Public/Documents",
             "Pages/Public/Entity Detail",
             "Pages/Public/Utilities"
+          ]
+        },
+        {
+          "file": "features/document-layout/ui/EntityDetailLayout.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": [
+            "Pages/Public/Entities",
+            "Feature/Program Event/Event Series Public View",
+            "Feature/Series/Public View",
+            "Pages/Public/Event Series",
+            "Pages/Public/Catalog Entity Detail",
+            "Pages/Public/Entity Detail",
+            "Pages/Public/Series",
+            "Pages/Share/Password Gate"
           ]
         }
       ],
@@ -4926,10 +4959,10 @@
             "Pages/Editors/Form",
             "Pages/Admin/Legal Policies",
             "Pages/Editors/Legal",
+            "Pages/Admin/OG Image Settings",
             "Pages/Editors/Page",
             "Pages/Editors/Post",
             "Pages/Editors/Series",
-            "Pages/Admin/Site Settings",
             "Pages/Editors/Work"
           ]
         },
@@ -4980,10 +5013,10 @@
             "Pages/Editors/Form",
             "Pages/Admin/Legal Policies",
             "Pages/Editors/Legal",
+            "Pages/Admin/OG Image Settings",
             "Pages/Editors/Page",
             "Pages/Editors/Post",
             "Pages/Editors/Series",
-            "Pages/Admin/Site Settings",
             "Pages/Editors/Work"
           ]
         },
@@ -5717,6 +5750,7 @@
           "relatedStories": [
             "Pages/Public/Entities",
             "Feature/Page/Collection Blocks",
+            "Feature/Page/Infinite Collection",
             "Feature/Page/Embed",
             "Pages/Editors/Page",
             "Pages/Public/Catalog Entity Detail",
@@ -5742,6 +5776,7 @@
           "relatedStories": [
             "Pages/Public/Entities",
             "Feature/Page/Collection Blocks",
+            "Feature/Page/Infinite Collection",
             "Feature/Page/List Image Ratios",
             "Feature/Page/Embed",
             "Pages/Editors/Page",
@@ -5756,6 +5791,7 @@
           "relatedStories": [
             "Pages/Public/Entities",
             "Feature/Page/Collection Blocks",
+            "Feature/Page/Infinite Collection",
             "Feature/Page/List Image Ratios",
             "Feature/Page/Embed",
             "Pages/Editors/Page",
@@ -5780,6 +5816,12 @@
           "hasJsx": true,
           "directStories": [],
           "relatedStories": ["Pages/Editors/Page"]
+        },
+        {
+          "file": "features/page/blocks/artist-grid/InfiniteList.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": ["Feature/Page/Embed", "Pages/Editors/Page", "Pages/Public/Documents"]
         },
         {
           "file": "features/page/blocks/artist-grid/Skeleton.tsx",
@@ -6076,10 +6118,27 @@
           "relatedStories": ["Pages/Editors/Page"]
         },
         {
+          "file": "features/page/blocks/infinite-items.tsx",
+          "hasJsx": true,
+          "directStories": ["Feature/Page/Infinite Collection"],
+          "relatedStories": [
+            "Feature/Page/Infinite Collection",
+            "Feature/Page/Embed",
+            "Pages/Editors/Page",
+            "Pages/Public/Documents"
+          ]
+        },
+        {
           "file": "features/page/blocks/label-list/Editor.tsx",
           "hasJsx": true,
           "directStories": [],
           "relatedStories": ["Pages/Editors/Page"]
+        },
+        {
+          "file": "features/page/blocks/label-list/InfiniteList.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": ["Feature/Page/Embed", "Pages/Editors/Page", "Pages/Public/Documents"]
         },
         {
           "file": "features/page/blocks/label-list/Skeleton.tsx",
@@ -6232,6 +6291,12 @@
           "relatedStories": ["Pages/Editors/Page"]
         },
         {
+          "file": "features/page/blocks/post-list/InfiniteList.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": ["Feature/Page/Embed", "Pages/Editors/Page", "Pages/Public/Documents"]
+        },
+        {
           "file": "features/page/blocks/post-list/PostAuthorLinks.tsx",
           "hasJsx": true,
           "directStories": [],
@@ -6249,6 +6314,7 @@
           "relatedStories": [
             "Pages/Public/Entities",
             "Feature/Page/Collection Blocks",
+            "Feature/Page/Infinite Collection",
             "Feature/Page/Embed",
             "Pages/Editors/Page",
             "Pages/Public/Catalog Entity Detail",
@@ -6357,6 +6423,12 @@
           "relatedStories": ["Pages/Editors/Page"]
         },
         {
+          "file": "features/page/blocks/program-event-list/InfiniteList.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": ["Feature/Page/Embed", "Pages/Editors/Page", "Pages/Public/Documents"]
+        },
+        {
           "file": "features/page/blocks/program-event-list/Skeleton.tsx",
           "hasJsx": true,
           "directStories": [],
@@ -6398,6 +6470,12 @@
           "relatedStories": ["Pages/Editors/Page"]
         },
         {
+          "file": "features/page/blocks/releases-gallery/InfiniteList.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": ["Feature/Page/Embed", "Pages/Editors/Page", "Pages/Public/Documents"]
+        },
+        {
           "file": "features/page/blocks/releases-gallery/Skeleton.tsx",
           "hasJsx": true,
           "directStories": [],
@@ -6424,10 +6502,11 @@
         {
           "file": "features/page/blocks/releases-gallery/ViewClientRuntime.tsx",
           "hasJsx": true,
-          "directStories": ["Feature/Page/Collection Blocks"],
+          "directStories": ["Feature/Page/Collection Blocks", "Feature/Page/Infinite Collection"],
           "relatedStories": [
             "Pages/Public/Entities",
             "Feature/Page/Collection Blocks",
+            "Feature/Page/Infinite Collection",
             "Feature/Page/Embed",
             "Pages/Editors/Page",
             "Pages/Public/Catalog Entity Detail",
@@ -6528,6 +6607,12 @@
           "hasJsx": true,
           "directStories": [],
           "relatedStories": ["Pages/Editors/Page"]
+        },
+        {
+          "file": "features/page/blocks/works-gallery/InfiniteList.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": ["Feature/Page/Embed", "Pages/Editors/Page", "Pages/Public/Documents"]
         },
         {
           "file": "features/page/blocks/works-gallery/Skeleton.tsx",
@@ -7255,7 +7340,12 @@
       "domain": "shell",
       "category": "shell",
       "components": [
-        { "file": "features/shell/LanguageMenu.tsx", "hasJsx": true, "directStories": [], "relatedStories": [] },
+        {
+          "file": "features/shell/LanguageMenu.tsx",
+          "hasJsx": true,
+          "directStories": ["Pages/Application/Frames"],
+          "relatedStories": ["Pages/Application/Frames"]
+        },
         {
           "file": "features/shell/PrintHeader/PrintHeader.tsx",
           "hasJsx": true,
@@ -7338,7 +7428,6 @@
         }
       ],
       "jsxWithoutStoryRelationship": [
-        "features/shell/LanguageMenu.tsx",
         "features/shell/PrintHeader/PrintHeader.tsx",
         "features/shell/Shell.tsx",
         "features/shell/ShellRuntime.tsx"
@@ -7456,13 +7545,13 @@
           "file": "features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader.tsx",
           "hasJsx": true,
           "directStories": [],
-          "relatedStories": ["Pages/Admin/Legal Policies", "Pages/Editors/Legal", "Pages/Admin/Site Settings"]
+          "relatedStories": ["Pages/Admin/Legal Policies", "Pages/Editors/Legal", "Pages/Admin/OG Image Settings"]
         },
         {
           "file": "features/site/SiteOgImagePanel/SiteOgImagePanel.tsx",
           "hasJsx": true,
           "directStories": [],
-          "relatedStories": ["Pages/Admin/Site Settings"]
+          "relatedStories": ["Pages/Admin/OG Image Settings"]
         },
         {
           "file": "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
@@ -7821,12 +7910,12 @@
             "Pages/Editors/Form",
             "Pages/Admin/Legal Policies",
             "Pages/Editors/Legal",
+            "Pages/Admin/OG Image Settings",
             "Pages/Editors/Page",
             "Pages/Editors/Post",
             "Pages/Editors/Program Events",
             "Pages/Editors/Release",
             "Pages/Editors/Series",
-            "Pages/Admin/Site Settings",
             "Pages/Editors/Work"
           ]
         }
@@ -8021,12 +8110,6 @@
         },
         {
           "file": "features/work/WorkMediaDeliveryContext.tsx",
-          "hasJsx": true,
-          "directStories": [],
-          "relatedStories": ["Pages/Public/Entity Detail"]
-        },
-        {
-          "file": "features/work/WorkPublicHeaderLayout.tsx",
           "hasJsx": true,
           "directStories": [],
           "relatedStories": ["Pages/Public/Entity Detail"]

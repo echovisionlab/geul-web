@@ -1,15 +1,14 @@
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
-import {
-  LayoutInset as DsLayoutInset,
-  LayoutStack as DsLayoutStack,
-  LayoutGrid as DsLayoutGrid,
-  LayoutGridItem as DsLayoutGridItem,
-} from '@/components/core/Layout';
+import { LayoutInset as DsLayoutInset } from '@/components/core/Layout';
 import type { ReactNode } from 'react';
 import { Table } from '@/components/core/Display';
+import {
+  EntityDetailImage,
+  EntityDetailLayout,
+  EntityDetailSection,
+} from '@/features/document-layout/ui/EntityDetailLayout';
 import { DateTime } from '@/features/date-time/DateTime';
-import { PageHeader } from '@/components/core/PageHeader';
 import { TextButton } from '@/components/core/TextButton';
 import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
 
@@ -94,31 +93,20 @@ interface SeriesPublicViewProps {
 }
 
 export function SeriesPublicView({ title, featuredImageUrl, controls, postsLabel, children }: SeriesPublicViewProps) {
-  const details = <PageHeader title={title} actions={controls} />;
-
   return (
-    <DsLayoutStack gap="xl">
-      {featuredImageUrl ? (
-        <DsLayoutGrid columns={12} gap="xl" align="start">
-          <DsLayoutGridItem span={{ base: 12, md: 6 }}>
-            <div>
-              <img
-                src={buildManagedImageUrl(featuredImageUrl, MANAGED_IMAGE_PRESET.HEADER_IMAGE) ?? featuredImageUrl}
-                alt={title}
-                style={{ display: 'block', width: '100%', height: 'auto', maxHeight: 640, objectFit: 'contain' }}
-              />
-            </div>
-          </DsLayoutGridItem>
-          <DsLayoutGridItem span={{ base: 12, md: 6 }}>{details}</DsLayoutGridItem>
-        </DsLayoutGrid>
-      ) : (
-        details
-      )}
-
-      <DsLayoutStack gap="sm">
-        <PageHeader title={postsLabel} level={2} />
-        {children}
-      </DsLayoutStack>
-    </DsLayoutStack>
+    <EntityDetailLayout
+      media={
+        featuredImageUrl ? (
+          <EntityDetailImage
+            src={buildManagedImageUrl(featuredImageUrl, MANAGED_IMAGE_PRESET.HEADER_IMAGE) ?? featuredImageUrl}
+            alt={title}
+          />
+        ) : undefined
+      }
+      title={title}
+      actions={controls}
+    >
+      <EntityDetailSection title={postsLabel}>{children}</EntityDetailSection>
+    </EntityDetailLayout>
   );
 }

@@ -8,7 +8,7 @@ import { useImageCropAccessibility } from '@/lib/i18n/useImageCropAccessibility'
 
 import { notifications } from '@/components/core/Notification';
 import { ImageCropper } from '@/components/core/ImageCropper';
-import { ImageUploadField, type ImageUploadRejection } from '@/components/core/ImageUpload';
+import { ImageUploadField, type ImagePreviewSurface, type ImageUploadRejection } from '@/components/core/ImageUpload';
 import { getUploadSelectionMimeTypes, UPLOAD_CONFIGS } from '@/lib/constants/upload-config';
 import { formatFileSize, formatMimeTypes } from '@/lib/utils/upload';
 import { prepareImageFileForPreview } from '@/lib/utils/upload-pipeline';
@@ -24,6 +24,8 @@ export interface LogoCropperProps {
   onUpload: (data: Uint8Array<ArrayBuffer>, mimeType: string) => Promise<{ url: string }>;
   onDelete?: () => Promise<unknown>;
   onImageChange: (url: string | null) => Promise<void>;
+  /** Backdrop of the logo preview; theme variants preview on the theme they are made for. */
+  previewSurface?: ImagePreviewSurface;
 }
 
 /**
@@ -41,6 +43,7 @@ export function LogoCropper({
   onUpload,
   onDelete,
   onImageChange,
+  previewSurface,
 }: LogoCropperProps) {
   const tCommon = useTranslations('common');
   const config = UPLOAD_CONFIGS[UploadType.LABEL_IMAGE];
@@ -180,7 +183,7 @@ export function LogoCropper({
           uploadProgress <= 0 ? tCommon('uploadField.status.preparingImage') : tCommon('uploadField.status.uploading')
         }
         progress={uploadProgress <= 0 ? undefined : uploadProgress}
-        emptyTitle={uploadActionLabel}
+        emptyTitle={label ? undefined : uploadActionLabel}
         emptyDescription={uploadPrompt}
         changeHint={currentImage && size >= 80 ? tCommon('uploadField.changeHint') : undefined}
         removeButtonAriaLabel={`${tCommon('actions.remove')} ${name || resolvedLabel}`}
@@ -192,6 +195,7 @@ export function LogoCropper({
           maxWidth: `min(100%, ${previewMaxWidth}px)`,
           maxHeight: size,
           fit: 'contain',
+          surface: previewSurface,
         }}
         placeholder={{
           width: '100%',

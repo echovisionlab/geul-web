@@ -44,7 +44,7 @@
       "cssGzip": 45056
     },
     "/(general)/campaigns/[id]": {
-      "jsGzip": 958464,
+      "jsGzip": 988160,
       "cssGzip": 45056
     },
     "/(general)/category/[slug]": {
@@ -108,7 +108,7 @@
       "cssGzip": 44032
     },
     "/(general)/my/series/[id]": {
-      "jsGzip": 719872,
+      "jsGzip": 748544,
       "cssGzip": 45056
     },
     "/(general)/my/series": {
@@ -232,7 +232,7 @@
       "cssGzip": 45056
     },
     "/admin/campaigns/[id]": {
-      "jsGzip": 926720,
+      "jsGzip": 959488,
       "cssGzip": 44032
     },
     "/admin/campaigns": {
@@ -260,7 +260,7 @@
       "cssGzip": 44032
     },
     "/admin/email-templates/[id]": {
-      "jsGzip": 870400,
+      "jsGzip": 899072,
       "cssGzip": 44032
     },
     "/admin/email-templates": {
@@ -296,7 +296,7 @@
       "cssGzip": 44032
     },
     "/admin/forms/[id]/(edit)/settings": {
-      "jsGzip": 768000,
+      "jsGzip": 792576,
       "cssGzip": 45056
     },
     "/admin/forms/[id]/(edit)/translations": {
@@ -380,7 +380,7 @@
       "cssGzip": 44032
     },
     "/admin/series/[id]": {
-      "jsGzip": 707584,
+      "jsGzip": 734208,
       "cssGzip": 45056
     },
     "/admin/series": {
@@ -448,7 +448,7 @@
       "cssGzip": 44032
     },
     "/editor-lab-local": {
-      "jsGzip": 1032192,
+      "jsGzip": 1065984,
       "cssGzip": 57344
     },
     "/forms/[slug]/dashboard": {

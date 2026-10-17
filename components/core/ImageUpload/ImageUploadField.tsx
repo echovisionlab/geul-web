@@ -9,7 +9,7 @@ import { Text } from '../Typography';
 import { fileSelectionReason } from '../file-selection';
 import classes from './ImageUpload.module.css';
 import { IconButton } from '../IconButton';
-import { ImagePreviewFrame } from './ImagePreviewFrame';
+import { ImagePreviewFrame, type ImagePreviewSurface } from './ImagePreviewFrame';
 import { UploadPlaceholder } from './UploadPlaceholder';
 
 type ImageUploadPreviewMode = 'circle' | 'fixed' | 'hug';
@@ -39,7 +39,7 @@ interface ImageUploadPreviewConfig {
   aspectRatio?: CSSProperties['aspectRatio'];
   fit?: ImageUploadPreviewFit;
   shape?: 'square' | 'circle';
-  surface?: 'default' | 'muted' | 'transparent';
+  surface?: ImagePreviewSurface;
   withBorder?: boolean;
 }
 
@@ -141,10 +141,11 @@ export function ImageUploadField({
     }
   };
   const hasImage = Boolean(imageUrl);
+  // A hugging preview's box (and its corner remove action) is exactly the image's width.
+  const previewWidth =
+    preview.mode === 'hug' ? 'fit-content' : (preview.width ?? (preview.mode === 'fixed' ? '100%' : 'fit-content'));
   const geometry = {
-    width: hasImage
-      ? (preview.width ?? (preview.mode === 'fixed' ? '100%' : 'fit-content'))
-      : (placeholder?.width ?? preview.width ?? '100%'),
+    width: hasImage ? previewWidth : (placeholder?.width ?? preview.width ?? '100%'),
     maxWidth: hasImage ? (preview.maxWidth ?? '100%') : (placeholder?.maxWidth ?? '100%'),
   };
   const shape = placeholder?.shape ?? (preview.mode === 'circle' ? 'circle' : preview.shape);
@@ -205,6 +206,8 @@ export function ImageUploadField({
     />
   );
   const accessibleLabel = dropzoneAriaLabel ?? emptyTitle ?? label ?? alt;
+  // Reserved whether or not an image is present so uploading never shifts the layout.
+  const reservesRemoveGutter = Boolean(onRemove && removeButtonAriaLabel) && removeButtonPlacement !== 'inside';
   return (
     <LayoutStack gap="xxs">
       {label ? (
@@ -213,55 +216,57 @@ export function ImageUploadField({
         </Text>
       ) : null}
       {loading ? (
-        placeholderView()
+        <RemoveGutter reserved={reservesRemoveGutter}>{placeholderView()}</RemoveGutter>
       ) : (
-        <div id={dropzoneId} className={classes.wrapper} style={geometry}>
-          <DropZone
-            className={classes.dropzone}
-            style={geometry}
-            aria-label={accessibleLabel}
-            isDisabled={!interactive}
-            onDrop={async (event) =>
-              select(
-                await Promise.all(event.items.filter((item) => item.kind === 'file').map((item) => item.getFile())),
-              )
-            }
-          >
-            {({ isDropTarget }) => (
-              <FileTrigger
-                ref={(input) => {
-                  if (input) {
-                    if (inputId) {
-                      input.id = inputId;
-                    }
-                    input.setAttribute('aria-label', accessibleLabel);
-                  }
-                }}
-                acceptedFileTypes={acceptedTypes?.split(',')}
-                onSelect={(files) => select(Array.from(files ?? []))}
-              >
-                <AriaButton className={classes.trigger} aria-label={accessibleLabel} isDisabled={!interactive}>
-                  {hasImage ? previewView(isDropTarget) : placeholderView(isDropTarget)}
-                </AriaButton>
-              </FileTrigger>
-            )}
-          </DropZone>
-          {onRemove && hasImage && removeButtonAriaLabel ? (
-            <IconButton
-              size="xs"
-              shape="circle"
-              emphasis={removeButtonEmphasis === 'strong' ? 'strong' : 'medium'}
-              tone="danger"
-              placement={removeButtonPlacement === 'inside' ? 'overlay-end-inside' : 'overlay-end'}
-              onClick={() => void onRemove()}
-              loading={removeButtonLoading}
-              disabled={disabled || loading}
-              aria-label={removeButtonAriaLabel}
+        <RemoveGutter reserved={reservesRemoveGutter}>
+          <div id={dropzoneId} className={classes.wrapper} style={geometry}>
+            <DropZone
+              className={classes.dropzone}
+              style={geometry}
+              aria-label={accessibleLabel}
+              isDisabled={!interactive}
+              onDrop={async (event) =>
+                select(
+                  await Promise.all(event.items.filter((item) => item.kind === 'file').map((item) => item.getFile())),
+                )
+              }
             >
-              <IconX size="1em" />
-            </IconButton>
-          ) : null}
-        </div>
+              {({ isDropTarget }) => (
+                <FileTrigger
+                  ref={(input) => {
+                    if (input) {
+                      if (inputId) {
+                        input.id = inputId;
+                      }
+                      input.setAttribute('aria-label', accessibleLabel);
+                    }
+                  }}
+                  acceptedFileTypes={acceptedTypes?.split(',')}
+                  onSelect={(files) => select(Array.from(files ?? []))}
+                >
+                  <AriaButton className={classes.trigger} aria-label={accessibleLabel} isDisabled={!interactive}>
+                    {hasImage ? previewView(isDropTarget) : placeholderView(isDropTarget)}
+                  </AriaButton>
+                </FileTrigger>
+              )}
+            </DropZone>
+            {onRemove && hasImage && removeButtonAriaLabel ? (
+              <IconButton
+                size="xs"
+                shape="circle"
+                emphasis={removeButtonEmphasis === 'strong' ? 'strong' : 'medium'}
+                tone="danger"
+                placement={removeButtonPlacement === 'inside' ? 'overlay-end-inside' : 'overlay-end'}
+                onClick={() => void onRemove()}
+                loading={removeButtonLoading}
+                disabled={disabled || loading}
+                aria-label={removeButtonAriaLabel}
+              >
+                <IconX size="1em" />
+              </IconButton>
+            ) : null}
+          </div>
+        </RemoveGutter>
       )}
       {hasImage && changeHint ? (
         <Text size="xs" tone="muted">
@@ -270,4 +275,8 @@ export function ImageUploadField({
       ) : null}
     </LayoutStack>
   );
+}
+
+function RemoveGutter({ reserved, children }: { reserved: boolean; children: ReactNode }) {
+  return reserved ? <div className={classes.removeGutter}>{children}</div> : children;
 }

@@ -6,6 +6,7 @@ import { PageEditorSnapshot } from './PageEditorSnapshot';
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
 
 import { DocumentEditorPanels } from '@/features/authoring/DocumentEditorPanels';
+import { EditorSettingsSection } from '@/features/authoring/EditorSettingsSection';
 
 import { Text as DsText } from '@/components/core/Typography';
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
@@ -26,7 +27,7 @@ import { useEditorPermissionRevocation } from '@/features/editor/useEditorPermis
 import { MediaPreviewGrid } from '@/components/core/MediaPreviewGrid';
 import { OgImagePreview } from '@/features/metadata/OgImagePreview';
 import { Button } from '@/components/core/Button';
-import { SectionCard, SectionHeader } from '@/components/core/Section';
+import { SectionCard } from '@/components/core/Section';
 import { ShareLinkSection } from '@/features/share/ShareLinkSection';
 import { UrlSection } from '@/features/metadata/UrlSection';
 import { VersionHistoryDrawer } from '@/features/version-history';
@@ -787,54 +788,57 @@ export function PageEditorView({ model }: { model: PageEditorViewModel }) {
                 onBlur={slugMgmt.handleBlur}
               />
 
-              {/* Share Links */}
-              <AuthoringExtension kind="sharing">
-                <ShareLinkSection
-                  entityType="page"
-                  entityId={pageId}
-                  description={t('shareLinksDescription')}
-                  disabled={!canEditNeutral}
-                />
-              </AuthoringExtension>
-
-              <AuthoringExtension kind="translations">
-                <EntityTranslationsPanel
-                  entityType="page"
-                  entityId={pageId}
-                  canManage={canManageTranslations && canMutate}
-                  canAdministerTranslations={canManageTranslations && canMutate}
-                  canMutateTargets={canManageTranslations && canMutate}
-                />
-              </AuthoringExtension>
-
               {/* Options */}
-              <SectionCard padding={{ base: 'none', sm: 'md' }}>
-                <DsLayoutStack gap="md">
-                  <SectionHeader title={tCommonLabels('options')} />
-                  <Checkbox
-                    id={`page-${pageId}-show-title`}
-                    label={t('showTitleOnPage')}
-                    checked={showTitle}
-                    onChange={(e) => handleShowTitleChange(e.currentTarget.checked)}
-                    disabled={!canEditNeutral}
-                    size="sm"
-                  />
-                  <ContentLayoutField
-                    value={layout}
-                    onChange={handleLayoutChange}
-                    disabled={!canEditNeutral}
-                    labels={{
-                      contentHeight: tLayout('contentHeight'),
-                      content: tLayout('content'),
-                      viewport: tLayout('viewport'),
-                      pageChrome: tLayout('chrome'),
-                      footer: tLayout('footer'),
-                      flow: tLayout('flow'),
-                      pinned: tLayout('pinned'),
-                    }}
-                  />
-                </DsLayoutStack>
-              </SectionCard>
+              <EditorSettingsSection title={tCommonLabels('options')}>
+                <Checkbox
+                  id={`page-${pageId}-show-title`}
+                  label={t('showTitleOnPage')}
+                  checked={showTitle}
+                  onChange={(e) => handleShowTitleChange(e.currentTarget.checked)}
+                  disabled={!canEditNeutral}
+                  size="sm"
+                />
+                <ContentLayoutField
+                  value={layout}
+                  onChange={handleLayoutChange}
+                  disabled={!canEditNeutral}
+                  labels={{
+                    contentHeight: tLayout('contentHeight'),
+                    content: tLayout('content'),
+                    viewport: tLayout('viewport'),
+                    pageChrome: tLayout('chrome'),
+                    footer: tLayout('footer'),
+                    flow: tLayout('flow'),
+                    pinned: tLayout('pinned'),
+                  }}
+                />
+              </EditorSettingsSection>
+
+              <EditorSettingsSection title={t('access.title')}>
+                {accessTags.isError ? (
+                  <DsLayoutStack gap="xs">
+                    <DsText size="sm" tone="danger" role="alert">
+                      {t('access.tagsLoadError')}
+                    </DsText>
+                    <Button
+                      tone="neutral"
+                      emphasis="low"
+                      onClick={() => void accessTags.refetch()}
+                      disabled={!canEditNeutral}
+                    >
+                      {t('access.tagsRetry')}
+                    </Button>
+                  </DsLayoutStack>
+                ) : null}
+                <PageAccessSettings
+                  key={pageId}
+                  value={accessPolicy}
+                  tagOptions={accessTags.data ?? []}
+                  loadingTags={accessTags.isLoading || accessTags.isError}
+                  disabled={!canEditNeutral}
+                  onSave={handleAccessSave}
+                />
+              </EditorSettingsSection>
 
               <SummaryFieldCard
                 entityType="page"
@@ -853,47 +857,8 @@ export function PageEditorView({ model }: { model: PageEditorViewModel }) {
                 onSummaryChange={canEditLocaleDocument ? handleLocaleSummaryChange : undefined}
               />
 
-              <SectionCard padding={{ base: 'none', sm: 'md' }}>
-                <DsLayoutStack gap="md">
-                  <SectionHeader title={t('access.title')} />
-                  {accessTags.isError ? (
-                    <DsLayoutStack gap="xs">
-                      <DsText size="sm" tone="danger" role="alert">
-                        {t('access.tagsLoadError')}
-                      </DsText>
-                      <Button
-                        tone="neutral"
-                        emphasis="low"
-                        onClick={() => void accessTags.refetch()}
-                        disabled={!canEditNeutral}
-                      >
-                        {t('access.tagsRetry')}
-                      </Button>
-                    </DsLayoutStack>
-                  ) : null}
-                  <PageAccessSettings
-                    key={pageId}
-                    value={accessPolicy}
-                    tagOptions={accessTags.data ?? []}
-                    loadingTags={accessTags.isLoading || accessTags.isError}
-                    disabled={!canEditNeutral}
-                    onSave={handleAccessSave}
-                  />
-                </DsLayoutStack>
-              </SectionCard>
-
-              <MetadataPanel
-                title={displayedTitle}
-                summary={displayedSummary}
-                routePath={`/${slug || pageId}`}
-                canonicalOrigin={canonicalOrigin}
-                siteName={siteName}
-                defaultImageUrl={ogImage.src ?? featuredImageUrl ?? undefined}
-                defaultSchemaType="WebPage"
-              />
-
               {/* OG Image & Featured Image */}
-              <SectionCard padding={{ base: 'none', sm: 'md' }}>
+              <EditorSettingsSection title={tCommonLabels('images')}>
                 <MediaPreviewGrid>
                   <OgImagePreview
                     src={ogImage.src}
@@ -923,7 +888,36 @@ export function PageEditorView({ model }: { model: PageEditorViewModel }) {
                     />
                   </AuthoringExtension>
                 </MediaPreviewGrid>
-              </SectionCard>
+              </EditorSettingsSection>
+              <MetadataPanel
+                title={displayedTitle}
+                summary={displayedSummary}
+                routePath={`/${slug || pageId}`}
+                canonicalOrigin={canonicalOrigin}
+                siteName={siteName}
+                defaultImageUrl={ogImage.src ?? featuredImageUrl ?? undefined}
+                defaultSchemaType="WebPage"
+              />
+
+              {/* Share Links */}
+              <AuthoringExtension kind="sharing">
+                <ShareLinkSection
+                  entityType="page"
+                  entityId={pageId}
+                  description={t('shareLinksDescription')}
+                  disabled={!canEditNeutral}
+                />
+              </AuthoringExtension>
+
+              <AuthoringExtension kind="translations">
+                <EntityTranslationsPanel
+                  entityType="page"
+                  entityId={pageId}
+                  canManage={canManageTranslations && canMutate}
+                  canAdministerTranslations={canManageTranslations && canMutate}
+                  canMutateTargets={canManageTranslations && canMutate}
+                />
+              </AuthoringExtension>
             </>
           }
         >

@@ -533,6 +533,9 @@ export const invariantTokens = {
   'text-inverse-primary': 'rgb(255 255 255 / 88%)',
   'canvas-dark': colors.canvas,
   'canvas-black': colors.black,
+  /** Each theme's page background, for previewing theme-specific assets such as logos. */
+  'theme-light-background': colors.neutral[100],
+  'theme-dark-background': colors.ink,
   'source-text': colors.sourceText,
   'source-background': colors.sourceBackground,
   'paper-background': colors.white,

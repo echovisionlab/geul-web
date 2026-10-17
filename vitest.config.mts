@@ -2,7 +2,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 import { defineVitestCoverage } from './scripts/test/toolkit/vitestCoverage.mjs';
-import { discoverTestProjects, testProjectNames } from './scripts/test/vitest-projects.mts';
+import { discoverTestProjects, sharedRuntimeFiles, testProjectNames } from './scripts/test/vitest-projects.mts';
 import { testRuntimeEnv } from './test/runtime-env.mts';
 
 const projectRoot = fileURLToPath(new URL('.', import.meta.url));
@@ -23,21 +23,30 @@ export default defineConfig({
     isolate: true,
     env: testRuntimeEnv,
     unstubEnvs: true,
-    projects: testProjectNames.map((name) => ({
-      extends: true,
-      test: {
-        name,
-        include: testFiles[name],
-        // Source environment directives continue to select jsdom where required.
-        // Node logic imports no DOM matchers, polyfills, or Next mock.
-        setupFiles:
-          name === 'node-unit'
-            ? [resolve(projectRoot, 'test/node.setup.ts')]
-            : name === 'server-contract'
-              ? [resolve(projectRoot, 'test/next.setup.ts')]
-              : [resolve(projectRoot, 'vitest.setup.ts'), resolve(projectRoot, 'test/next.setup.ts')],
-      },
-    })),
+    // Each tier runs its isolated files in forks; files that cannot leak state share a thread runtime in a
+    // `<tier>-shared` project (see `sharesRuntime`), which skips per-file module and environment setup.
+    projects: testProjectNames.flatMap((name) => {
+      const { shared, isolated } = sharedRuntimeFiles(projectRoot, testFiles[name]);
+      // Source environment directives continue to select jsdom where required.
+      // Node logic imports no DOM matchers, polyfills, or Next mock.
+      const setupFiles =
+        name === 'node-unit'
+          ? [resolve(projectRoot, 'test/node.setup.ts')]
+          : name === 'server-contract'
+            ? [resolve(projectRoot, 'test/next.setup.ts')]
+            : [resolve(projectRoot, 'vitest.setup.ts'), resolve(projectRoot, 'test/next.setup.ts')];
+      return [
+        { extends: true, test: { name, include: isolated, setupFiles } },
+        ...(shared.length > 0
+          ? [
+              {
+                extends: true,
+                test: { name: `${name}-shared`, include: shared, setupFiles, pool: 'threads' as const, isolate: false },
+              },
+            ]
+          : []),
+      ];
+    }),
     coverage: defineVitestCoverage({
       html: true,
       include: ['components/**/*.ts', 'components/**/*.tsx', 'lib/**/*.ts', 'lib/**/*.tsx'],

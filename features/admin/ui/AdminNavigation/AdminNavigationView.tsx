@@ -107,9 +107,10 @@ export function AdminNavigationView({
       aria-label={compact ? labels.compactLabel : undefined}
       onClick={() => events.onNavigate('/admin')}
     >
-      <DsLayoutInset inline={compact ? 'none' : 'sm'}>{compact ? compactLogoSlot : logoSlot}</DsLayoutInset>
+      {/* Brand and subtitle start on the navigation labels' `xs` line. */}
+      <DsLayoutInset inline={compact ? 'none' : 'xs'}>{compact ? compactLogoSlot : logoSlot}</DsLayoutInset>
       {compact ? null : (
-        <DsLayoutInset blockStart="xxs">
+        <DsLayoutInset inline="xs" blockStart="xxs">
           <DsText size="xs" tone="secondary" weight="medium">
             {labels.subtitle}
           </DsText>

@@ -29,13 +29,15 @@ function PublicEntityPagePreview({
   entity = 'work',
   sparse = false,
   long = false,
+  media = false,
 }: {
   entity?: 'work' | 'event';
   sparse?: boolean;
   long?: boolean;
+  media?: boolean;
 }) {
   const locale = useLocale();
-  const view = <PublicEntityView entity={entity} sparse={sparse} long={long} locale={locale} />;
+  const view = <PublicEntityView entity={entity} sparse={sparse} long={long} media={media} locale={locale} />;
   // Long documents use the production frame: the route renders directly in the site shell's main region.
   return long ? (
     <PublicShellStoryHarness initialPath={entity === 'work' ? '/works/night-signals' : '/events/listening-room'}>
@@ -52,11 +54,13 @@ function PublicEntityView({
   entity,
   sparse,
   long,
+  media,
   locale,
 }: {
   entity: 'work' | 'event';
   sparse: boolean;
   long: boolean;
+  media: boolean;
   locale: string;
 }) {
   return (
@@ -74,7 +78,7 @@ function PublicEntityView({
             untilMonth: null,
             isPresent: true,
             summary: sparse ? null : 'A program of spatial sound and field recordings.',
-            featuredImageUrl: null,
+            featuredImageUrl: media ? '/storybook/media/video-poster.jpg' : null,
             metadata: {},
             content: long ? longContentFor(locale) : [],
             blockMedia: [],
@@ -124,7 +128,7 @@ function PublicEntityView({
             allDay: false,
             locationMode: sparse ? 'tba' : 'online',
             locationPlace: null,
-            posterUrl: null,
+            posterUrl: media ? '/storybook/media/event-poster.svg' : null,
             ticketUrl: sparse ? null : 'https://example.com/tickets',
             streamUrl: null,
             externalUrl: null,
@@ -160,11 +164,19 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 export const Work: Story = {};
+/** The featured image takes the start column; title, metadata and sections the rest of the width. */
+export const WorkWithImage: Story = { args: { media: true } };
 export const WorkSparse: Story = { args: { sparse: true } };
 /** A long work document in the production site shell: outline column, rail and reading measure. */
 export const WorkLongDocument: Story = { args: { long: true }, play: assertDocumentOutline };
 export const WorkPhone: Story = { globals: { viewport: { value: 'phone', isRotated: false } } };
 export const Event: Story = { args: { entity: 'event' } };
+/** The poster stays in view in the start column while the long description scrolls beside it. */
+export const EventWithPoster: Story = { args: { entity: 'event', media: true, long: true } };
+export const EventWithPosterPhone: Story = {
+  args: { entity: 'event', media: true },
+  globals: { viewport: { value: 'phone', isRotated: false } },
+};
 export const EventSparse: Story = { args: { entity: 'event', sparse: true } };
 /** A long event document in the production site shell: outline column, rail and reading measure. */
 export const EventLongDocument: Story = { args: { entity: 'event', long: true }, play: assertDocumentOutline };

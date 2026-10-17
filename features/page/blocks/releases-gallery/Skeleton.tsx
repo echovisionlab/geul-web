@@ -36,7 +36,7 @@ export function ReleaseListSkeleton({
       layout={layout}
       carouselLoop={carouselLoop}
       carouselIndicators={carouselIndicators}
-      gridCols={{ base: 2, sm: 3 }}
+      trackScale="compact"
     />
   );
 }

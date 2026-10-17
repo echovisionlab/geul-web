@@ -5,3 +5,8 @@
   flex: 1;
   flex-direction: column;
 }
+
+/* Keep the brand above the independently scrolling navigation list. */
+.root > header {
+  flex-shrink: 0;
+}

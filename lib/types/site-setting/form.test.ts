@@ -10,7 +10,7 @@ function settings(overrides: Partial<SiteSettingsView> = {}): SiteSettingsView {
   return {
     ...DEFAULT_SITE_SETTINGS_VIEW,
     site_title: 'Example Studio',
-    logo_light_url: 'https://cdn.example.com/logo-old.svg',
+    logo_full_light_url: 'https://cdn.example.com/logo-old.svg',
     loader_urls: ['https://cdn.example.com/loader-old.gif'],
     ...overrides,
   };
@@ -24,7 +24,7 @@ describe('site settings form boundary', () => {
       site_title: 'Example Studio',
       primary_color: '#b02d23',
     });
-    expect(values).not.toHaveProperty('logo_light_url');
+    expect(values).not.toHaveProperty('logo_full_light_url');
     expect(values).not.toHaveProperty('loader_urls');
     expect(values).not.toHaveProperty('loader_assets');
     expect(values).not.toHaveProperty('og_image_config');
@@ -35,7 +35,7 @@ describe('site settings form boundary', () => {
     const baseline = toSiteSettingsFormValues(initialView);
     const current = { ...baseline, site_title: 'Unsaved title' };
     const refreshedView = settings({
-      logo_light_url: 'https://cdn.example.com/logo-new.svg',
+      logo_full_light_url: 'https://cdn.example.com/logo-new.svg',
       loader_urls: ['https://cdn.example.com/loader-new.gif'],
     });
 

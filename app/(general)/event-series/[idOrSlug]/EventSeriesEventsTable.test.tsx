@@ -98,8 +98,10 @@ function render() {
 }
 
 beforeEach(() => {
-  // Keep query notifications asynchronous and prove assertions await rendering.
-  notifyManager.setScheduler((callback) => setTimeout(() => act(callback), 25));
+  // Query notifications stay on React Query's asynchronous scheduler; wrap the resulting renders in act.
+  notifyManager.setNotifyFunction((callback) => {
+    act(callback);
+  });
   mocks.listEvents.mockReset();
   mocks.listTypes.mockReset().mockResolvedValue([]);
   container = document.createElement('div');
@@ -111,7 +113,9 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  notifyManager.setScheduler((callback) => setTimeout(callback, 0));
+  notifyManager.setNotifyFunction((callback) => {
+    callback();
+  });
   act(() => root.unmount());
   queryClient.clear();
   container.remove();

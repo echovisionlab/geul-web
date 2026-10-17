@@ -1,7 +1,9 @@
 export { SectionCard } from './SectionCard';
 export type { SectionCardProps } from './SectionCard';
 export { SectionHeader } from './SectionHeader';
-export type { SectionHeaderProps } from './SectionHeader';
+export type { SectionHeaderLevel, SectionHeaderProps } from './SectionHeader';
+export { SettingsGroup, SettingsSection } from './SettingsSection';
+export type { SettingsGroupProps, SettingsSectionProps } from './SettingsSection';
 export { StatCard } from './StatCard';
 export type { StatCardProps } from './StatCard';
 export { ToolbarSurface } from './ToolbarSurface';

@@ -19,6 +19,7 @@ import { Alert } from '@/components/core/Alert';
 import { notifications } from '@/components/core/Notification';
 import { PageLoader } from '@/features/site/PageLoader';
 import { SiteLogo } from '@/features/site/SiteLogo';
+import { SITE_LOGO_HEIGHT } from '@/features/site/SiteLogo/placements';
 import { FormAccessBoundary } from '@/features/form/FormAccessBoundary';
 import { FormRenderer } from '@/features/form/FormRenderer';
 import { FormSubmissionPendingState } from '@/features/form/FormSubmissionState';
@@ -75,7 +76,7 @@ export function PublicFormView({
   const logoHref = resolveSiteHref(settings.site_origin);
   const logoHeader = (
     <Link href={logoHref} appearance="graphic" aria-label={t('logoLinkAria')}>
-      <SiteLogo height={16} />
+      <SiteLogo height={SITE_LOGO_HEIGHT.form} />
     </Link>
   );
   const renderWithHeader = (content: ReactNode) => (

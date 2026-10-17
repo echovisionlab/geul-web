@@ -312,7 +312,7 @@ describe('getHomeMetadataDocument', () => {
         siteOrigin: 'https://studio.example.com',
         siteOgAsset: assetRefFixture('https://cdn.example.test/asset/site-og-asset/og.webp'),
         companyName: 'Example Studio',
-        logoLightAsset: assetRefFixture('https://cdn.example.test/logo.webp'),
+        logoFullLightAsset: assetRefFixture('https://cdn.example.test/logo.webp'),
         socialLinks: {},
       },
     });
@@ -377,7 +377,7 @@ describe('getHomeMetadataDocument', () => {
         siteOrigin: 'https://studio.example.com',
         siteOgAsset: undefined,
         companyName: 'Example Studio',
-        logoLightAsset: assetRefFixture('https://cdn.example.test/logo.webp'),
+        logoFullLightAsset: assetRefFixture('https://cdn.example.test/logo.webp'),
         socialLinks: {},
       },
     });

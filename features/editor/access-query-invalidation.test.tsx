@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 
-import { act, useEffect } from 'react';
-import { createRoot } from 'react-dom/client';
+import { useEffect } from 'react';
 import { expect, it, vi } from 'vitest';
+import { act, render, screen, waitFor } from '@/test/render';
 import { ReactQueryProvider } from '@/lib/providers/ReactQueryProvider';
 import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 import { useEditorAccessLevel } from './useEditorAccessLevel';
@@ -52,37 +52,24 @@ it('refetches locale edit permissions on access invalidation despite the query f
     }, []);
     return <input aria-label="Locale title" disabled={access === 'view' || !latest.canEditActiveLocale} />;
   }
-  const host = document.createElement('div');
-  const root = createRoot(host);
-  try {
-    setProviderAccessLevel(provider, 'view');
-    await act(async () =>
-      root.render(
-        <ReactQueryProvider>
-          <Surface />
-        </ReactQueryProvider>,
-      ),
-    );
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 20));
-    });
-    const input = host.querySelector('input')!;
-    expect(input.disabled).toBe(true);
-    expect(latest!.canEditActiveLocale).toBe(false);
-    const reads = api.entries.mock.calls.length;
-    api.entries.mockResolvedValue({ sourceLocale: 'en', entries: [{ locale: 'ko', title: 'Editable translation' }] });
-    await act(async () => setProviderAccessLevel(provider, 'edit'));
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 20));
-    });
-    expect(api.entries.mock.calls.length).toBeGreaterThan(reads);
-    expect(latest!.canEditActiveLocale).toBe(true);
-    expect(input.disabled).toBe(false);
-    act(() => setProviderAccessLevel(provider, 'view'));
-    expect(input.disabled).toBe(true);
-    expect(host.querySelector('input')).toBe(input);
-    expect(mounts).toBe(1);
-  } finally {
-    act(() => root.unmount());
-  }
+  setProviderAccessLevel(provider, 'view');
+  render(
+    <ReactQueryProvider>
+      <Surface />
+    </ReactQueryProvider>,
+  );
+  await waitFor(() => expect(latest!.isLoading).toBe(false));
+  const input = screen.getByRole('textbox', { name: 'Locale title' });
+  expect(input).toBeDisabled();
+  expect(latest!.canEditActiveLocale).toBe(false);
+  const reads = api.entries.mock.calls.length;
+  api.entries.mockResolvedValue({ sourceLocale: 'en', entries: [{ locale: 'ko', title: 'Editable translation' }] });
+  await act(async () => setProviderAccessLevel(provider, 'edit'));
+  await waitFor(() => expect(input).toBeEnabled());
+  expect(api.entries.mock.calls.length).toBeGreaterThan(reads);
+  expect(latest!.canEditActiveLocale).toBe(true);
+  act(() => setProviderAccessLevel(provider, 'view'));
+  expect(input).toBeDisabled();
+  expect(screen.getByRole('textbox', { name: 'Locale title' })).toBe(input);
+  expect(mounts).toBe(1);
 });

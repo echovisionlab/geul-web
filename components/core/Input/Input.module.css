@@ -941,6 +941,13 @@
   font-size: var(--geul-heading-h3);
   font-weight: var(--geul-font-weight-strong);
   line-height: var(--geul-heading-line-height);
+  /* Title text starts where a read-only page title would. */
+  padding-inline: 0;
+}
+
+/* A title input at xl matches the page title (Heading scale 2) it stands in for. */
+.root[data-geul-input-text-role='title'][data-geul-input-size='xl'] .input {
+  font-size: var(--geul-heading-h2);
 }
 
 .root[data-geul-input-text-role='code'] .input {

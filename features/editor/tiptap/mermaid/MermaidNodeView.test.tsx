@@ -70,14 +70,13 @@ async function mountDiagram(editable: boolean) {
       }
     });
   });
+  const editor = reference.editor!;
   mounted.push(async () => {
-    await act(async () => {
-      root.unmount();
-      await new Promise((resolve) => setTimeout(resolve, 2));
-    });
+    await act(async () => root.unmount());
+    await vi.waitFor(() => expect(editor.isDestroyed).toBe(true));
     host.remove();
   });
-  return { host, editor: reference.editor! };
+  return { host, editor };
 }
 
 describe('Mermaid block accessibility', () => {

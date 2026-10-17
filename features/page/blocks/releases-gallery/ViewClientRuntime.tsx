@@ -45,7 +45,7 @@ export function ReleaseListViewClient({ releases, parsedProps: p }: ReleaseListV
       imageAspectRatio={imageAspectRatio}
       carouselLoop={carouselLoop}
       carouselIndicators={carouselIndicators}
-      gridCols={{ base: 2, sm: 3 }}
+      trackScale="compact"
       renderMeta={
         showMeta
           ? (release) => (

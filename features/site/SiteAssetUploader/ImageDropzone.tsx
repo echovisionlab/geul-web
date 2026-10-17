@@ -1,7 +1,9 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { notifications } from '@/components/core/Notification';
-import type { ImageUploadAccept, ImageUploadRejection } from '@/components/core/ImageUpload';
+import type { ImagePreviewSurface, ImageUploadAccept, ImageUploadRejection } from '@/components/core/ImageUpload';
+import { formatFileSize } from '@/lib/utils/upload';
 import { ImageDropzoneView } from './ui/ImageDropzoneView';
 
 export interface ImageDropzoneProps {
@@ -25,13 +27,15 @@ export interface ImageDropzoneProps {
   previewHeight: number;
   /** Preview image width in pixels or 'auto' */
   previewWidth: number | 'auto';
+  /** Background the preview is drawn on, e.g. the theme a logo is made for. */
+  previewSurface?: ImagePreviewSurface;
 
   /** Label text */
   label: string;
   /** Description text */
   description: string;
-  /** Upload prompt text (default: 'Drop or click to upload') */
-  uploadPrompt?: string;
+  /** Upload prompt text (instruction and accepted formats) */
+  uploadPrompt: string;
 
   /** Called when files are dropped */
   onDrop: (files: File[]) => void;
@@ -52,27 +56,24 @@ export function ImageDropzone({
   maxSize,
   previewHeight,
   previewWidth,
+  previewSurface,
   label,
   description,
-  uploadPrompt = 'Drop or click to upload',
+  uploadPrompt,
   onDrop,
   onDelete,
   errorMessage,
 }: ImageDropzoneProps) {
+  const t = useTranslations('common.uploadField');
   const handleFileSelect = (file: File) => {
     if (!file) {
       return;
     }
-
-    // Manual minSize validation (Mantine Dropzone doesn't support minSize)
+    // The dropzone validates type and maximum size; the minimum is checked here.
     if (minSize && file.size < minSize) {
-      notifications.show({
-        message: `File too small. Minimum size: ${formatBytes(minSize)}`,
-        tone: 'danger',
-      });
+      notifications.show({ message: t('errors.tooSmall', { minSize: formatFileSize(minSize) }), tone: 'danger' });
       return;
     }
-
     onDrop([file]);
   };
   const handleReject = (rejections: ImageUploadRejection[]) => {
@@ -80,15 +81,10 @@ export function ImageDropzone({
     if (!rejection) {
       return;
     }
-
-    let message = errorMessage || 'File rejected';
-
-    if (rejection.reason === 'too-large') {
-      message = `File too large. Maximum size: ${formatBytes(maxSize)}`;
-    } else if (rejection.reason === 'invalid-type') {
-      message = errorMessage || 'Invalid file type';
-    }
-
+    const message =
+      rejection.reason === 'too-large'
+        ? t('errors.tooLarge', { maxSize: formatFileSize(maxSize) })
+        : (errorMessage ?? t('errors.invalidType'));
     notifications.show({ message, tone: 'danger' });
   };
 
@@ -102,23 +98,14 @@ export function ImageDropzone({
       maxSize={maxSize}
       previewHeight={previewHeight}
       previewWidth={previewWidth}
+      previewSurface={previewSurface}
       label={label}
       description={description}
       uploadPrompt={uploadPrompt}
-      removeButtonAriaLabel={`Remove ${label}`}
+      removeButtonAriaLabel={t('removeLabel', { label })}
       onFileSelect={handleFileSelect}
       onReject={handleReject}
       onDelete={onDelete}
     />
   );
-}
-
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) {
-    return `${bytes} B`;
-  }
-  if (bytes < 1024 * 1024) {
-    return `${Math.round(bytes / 1024)} KB`;
-  }
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }

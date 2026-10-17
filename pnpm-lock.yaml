@@ -255,11 +255,11 @@ importers:
         specifier: 0.8.0
         version: 0.8.0(yjs@13.6.33)
       '@echovisionlab/geul-event':
-        specifier: 0.9.0
-        version: 0.9.0(@echovisionlab/geul-proto@0.9.0)
+        specifier: 0.10.0
+        version: 0.10.0(@echovisionlab/geul-proto@0.10.0)
       '@echovisionlab/geul-proto':
-        specifier: 0.9.0
-        version: 0.9.0
+        specifier: 0.10.0
+        version: 0.10.0
       '@echovisionlab/geul-telemetry':
         specifier: 0.2.1
         version: 0.2.1
@@ -486,9 +486,18 @@ importers:
       '@storybook/test-runner':
         specifier: 0.26.0
         version: 0.26.0(@swc/helpers@0.5.23)(@types/node@24.19.1)(debug@4.4.3(supports-color@10.2.2))(storybook@10.5.8(@types/react@19.3.0)(prettier@3.9.6)(react@19.3.0))(supports-color@10.2.2)
+      '@testing-library/dom':
+        specifier: ^10.4.2
+        version: 10.4.2
       '@testing-library/jest-dom':
         specifier: ^7.0.1
-        version: 7.0.1(patch_hash=07da0753e18c9b18770b19bb91cd7a77fb09e629de25e888393bbe4874336d5c)(@testing-library/dom@10.4.1)(vitest@5.0.3)
+        version: 7.0.1(patch_hash=07da0753e18c9b18770b19bb91cd7a77fb09e629de25e888393bbe4874336d5c)(@testing-library/dom@10.4.2)(vitest@5.0.3)
+      '@testing-library/react':
+        specifier: 16.3.3
+        version: 16.3.3(@testing-library/dom@10.4.2)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@testing-library/user-event':
+        specifier: 14.6.8
+        version: 14.6.8(@testing-library/dom@10.4.2)
       '@types/google.maps':
         specifier: ^3.65.5
         version: 3.65.5
@@ -537,6 +546,9 @@ importers:
       eslint-plugin-react:
         specifier: ^7.37.5
         version: 7.37.5(eslint@9.39.5(jiti@2.7.0)(supports-color@10.2.2))
+      eslint-plugin-testing-library:
+        specifier: 7.16.2
+        version: 7.16.2(eslint@9.39.5(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@7.0.2)
       playwright:
         specifier: 1.64.0
         version: 1.64.0
@@ -1431,10 +1443,13 @@ packages:
     peerDependencies:
       yjs: ^13.6.33
 
-  '@echovisionlab/geul-event@0.9.0':
-    resolution: {integrity: sha512-q8yJ10yS2260AVdIPP+jTXcpC7aOxaUTCWfyDvHJaru8cOR0MA6V/6+LOEkWm/YS9dSIwjMLfrtlmXKnCDjI7w==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-event/0.9.0/2aa0bc1fffa054228fd2248df6b5cc16857d3028}
+  '@echovisionlab/geul-event@0.10.0':
+    resolution: {integrity: sha512-DMC/dq7xHuYJR4XetknZfryA9rSyEhnJO41whdyqcl6cZPz/Ll027iqxDjzLifvFjp9s6ggmb74Qj/R9rtWCjQ==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-event/0.10.0/8c9d8855c4a2fff9213c9331192fa42255ae84f1}
     peerDependencies:
-      '@echovisionlab/geul-proto': ^0.9.0
+      '@echovisionlab/geul-proto': ^0.10.0
+
+  '@echovisionlab/geul-proto@0.10.0':
+    resolution: {integrity: sha512-QsxGdS+c7nYT3W0eYFHBL/lvZdkBk+xyj6LX0AbXllG0SB0TeHHmSB+YhEBxO/kVBRpO2d7Iqb3xWoZZn2lTvw==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-proto/0.10.0/8610e5aee98ec0dde38d828de65ce4f7b6fc9f5d}
 
   '@echovisionlab/geul-proto@0.9.0':
     resolution: {integrity: sha512-tYPTCJ+G+VRD1/KfcJUOk0qweEGe23KiGVqwY69CV8yux6R5/I/kZ213LJTpOp4XBTIx4xN39mGm8XKl9dQc6g==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-proto/0.9.0/36c9634e5b384268be238a101972c34948c7e8f8}
@@ -3258,8 +3273,8 @@ packages:
     peerDependencies:
       react: ^18 || ^19
 
-  '@testing-library/dom@10.4.1':
-    resolution: {integrity: sha512-o4PXJQidqJl82ckFaXUeoAW+XysPLauYI43Abki5hABd853iMhitooc6znOnczgbTYmEP6U6/y1ZyKAIsvMKGg==}
+  '@testing-library/dom@10.4.2':
+    resolution: {integrity: sha512-yzr2S9HyAIdhz2/6qHgbs665Q7PKVcDF05vsOlHPxG1mo36gKVesdYVeDLnXgfjJ03CrKRk08knc6+E/9m8v2Q==}
     engines: {node: '>=18'}
 
   '@testing-library/jest-dom@6.9.1':
@@ -3276,8 +3291,23 @@ packages:
       vitest:
         optional: true
 
-  '@testing-library/user-event@14.6.4':
-    resolution: {integrity: sha512-QCGwP6QrjypBLwyj5cuyfVamkaIEy/XGY+1VDehbtbQqOggYmTFpFOdWR5mPz14vX8vXLMVjDHlRNBcClyO9ew==}
+  '@testing-library/react@16.3.3':
+    resolution: {integrity: sha512-Uo193NgQbPMz6lrrhtRQQFcMC6Re/ELLFbbuVL30WDlZxlpZf9/lMHTAVxPRLw1q1iu9OJmR1c2BLiENRstdBg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@testing-library/dom': ^10.0.0
+      '@types/react': ^18.0.0 || ^19.0.0
+      '@types/react-dom': ^18.0.0 || ^19.0.0
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+
+  '@testing-library/user-event@14.6.8':
+    resolution: {integrity: sha512-vgSSqnANMnkcYR/vUNDbwS7aM3OErRLNUG8vCVVlj4oc6cKffUrccX7UAS5AmJQQNZTSibi9z5GvvRZ0aYgUCQ==}
     engines: {node: '>=12', npm: '>=6'}
     peerDependencies:
       '@testing-library/dom': '>=7.21.4'
@@ -5288,6 +5318,12 @@ packages:
     engines: {node: '>=4'}
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9.7
+
+  eslint-plugin-testing-library@7.16.2:
+    resolution: {integrity: sha512-8gleGnQXK2ZA3hHwjCwpYTZvM+9VsrJ+/9kDI8CjqAQGAdMQOdn/rJNu7ZySENuiWlGKQWyZJ4ZjEg2zamaRHw==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    peerDependencies:
+      eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
 
   eslint-scope@5.1.1:
     resolution: {integrity: sha512-2NxwbF/hZ0KpepYN0cNbo+FN6XoK7GaHlQhgx/hIZl6Va0bF45RQOOwhLIy8lQDbuCiadSLCBnH2CFYquit5bw==}
@@ -10044,10 +10080,14 @@ snapshots:
       yjs: 13.6.33
       zod: 4.6.5
 
-  '@echovisionlab/geul-event@0.9.0(@echovisionlab/geul-proto@0.9.0)':
+  '@echovisionlab/geul-event@0.10.0(@echovisionlab/geul-proto@0.10.0)':
     dependencies:
       '@bufbuild/protobuf': 2.16.0
-      '@echovisionlab/geul-proto': 0.9.0
+      '@echovisionlab/geul-proto': 0.10.0
+
+  '@echovisionlab/geul-proto@0.10.0':
+    dependencies:
+      '@bufbuild/protobuf': 2.16.0
 
   '@echovisionlab/geul-proto@0.9.0':
     dependencies:
@@ -11708,7 +11748,7 @@ snapshots:
       '@tanstack/query-core': 5.101.4
       react: 19.3.0
 
-  '@testing-library/dom@10.4.1':
+  '@testing-library/dom@10.4.2':
     dependencies:
       '@babel/code-frame': 7.29.7
       '@babel/runtime': 7.29.7
@@ -11728,10 +11768,10 @@ snapshots:
       picocolors: 1.1.1
       redent: 3.0.0
 
-  '@testing-library/jest-dom@7.0.1(patch_hash=07da0753e18c9b18770b19bb91cd7a77fb09e629de25e888393bbe4874336d5c)(@testing-library/dom@10.4.1)(vitest@5.0.3)':
+  '@testing-library/jest-dom@7.0.1(patch_hash=07da0753e18c9b18770b19bb91cd7a77fb09e629de25e888393bbe4874336d5c)(@testing-library/dom@10.4.2)(vitest@5.0.3)':
     dependencies:
       '@adobe/css-tools': 4.5.0
-      '@testing-library/dom': 10.4.1
+      '@testing-library/dom': 10.4.2
       aria-query: 5.3.2
       css.escape: 1.5.1
       dom-accessibility-api: 0.6.3
@@ -11740,9 +11780,19 @@ snapshots:
     optionalDependencies:
       vitest: 5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(@vitest/coverage-v8@5.0.3)(jsdom@30.0.1)(vite@8.3.3(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.7.0)(sugarss@5.0.1(postcss@8.5.26))(terser@5.50.0))
 
-  '@testing-library/user-event@14.6.4(@testing-library/dom@10.4.1)':
+  '@testing-library/react@16.3.3(@testing-library/dom@10.4.2)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
     dependencies:
-      '@testing-library/dom': 10.4.1
+      '@babel/runtime': 7.29.7
+      '@testing-library/dom': 10.4.2
+      react: 19.3.0
+      react-dom: 19.3.0(react@19.3.0)
+    optionalDependencies:
+      '@types/react': 19.3.0
+      '@types/react-dom': 19.3.0(@types/react@19.3.0)
+
+  '@testing-library/user-event@14.6.8(@testing-library/dom@10.4.2)':
+    dependencies:
+      '@testing-library/dom': 10.4.2
 
   '@tiptap/core@3.30.5(@tiptap/pm@3.30.5)':
     dependencies:
@@ -12129,6 +12179,15 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@typescript-eslint/project-service@8.66.0(supports-color@10.2.2)(typescript@7.0.2)':
+    dependencies:
+      '@typescript-eslint/tsconfig-utils': 8.66.0(typescript@7.0.2)
+      '@typescript-eslint/types': 8.66.0
+      debug: 4.4.3(supports-color@10.2.2)
+      typescript: 7.0.2
+    transitivePeerDependencies:
+      - supports-color
+
   '@typescript-eslint/scope-manager@8.66.0':
     dependencies:
       '@typescript-eslint/types': 8.66.0
@@ -12137,6 +12196,10 @@ snapshots:
   '@typescript-eslint/tsconfig-utils@8.66.0(@typescript/typescript6@6.0.2)':
     dependencies:
       typescript: '@typescript/typescript6@6.0.2'
+
+  '@typescript-eslint/tsconfig-utils@8.66.0(typescript@7.0.2)':
+    dependencies:
+      typescript: 7.0.2
 
   '@typescript-eslint/type-utils@8.66.0(@typescript/typescript6@6.0.2)(eslint@9.39.5(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)':
     dependencies:
@@ -12167,6 +12230,21 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@typescript-eslint/typescript-estree@8.66.0(supports-color@10.2.2)(typescript@7.0.2)':
+    dependencies:
+      '@typescript-eslint/project-service': 8.66.0(supports-color@10.2.2)(typescript@7.0.2)
+      '@typescript-eslint/tsconfig-utils': 8.66.0(typescript@7.0.2)
+      '@typescript-eslint/types': 8.66.0
+      '@typescript-eslint/visitor-keys': 8.66.0
+      debug: 4.4.3(supports-color@10.2.2)
+      minimatch: 10.2.6
+      semver: 7.8.5
+      tinyglobby: 0.2.17
+      ts-api-utils: 2.5.0(typescript@7.0.2)
+      typescript: 7.0.2
+    transitivePeerDependencies:
+      - supports-color
+
   '@typescript-eslint/utils@8.66.0(@typescript/typescript6@6.0.2)(eslint@9.39.5(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)':
     dependencies:
       '@eslint-community/eslint-utils': 4.10.1(eslint@9.39.5(jiti@2.7.0)(supports-color@10.2.2))
@@ -12175,6 +12253,17 @@ snapshots:
       '@typescript-eslint/typescript-estree': 8.66.0(@typescript/typescript6@6.0.2)(supports-color@10.2.2)
       eslint: 9.39.5(jiti@2.7.0)(supports-color@10.2.2)
       typescript: '@typescript/typescript6@6.0.2'
+    transitivePeerDependencies:
+      - supports-color
+
+  '@typescript-eslint/utils@8.66.0(eslint@9.39.5(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@7.0.2)':
+    dependencies:
+      '@eslint-community/eslint-utils': 4.10.1(eslint@9.39.5(jiti@2.7.0)(supports-color@10.2.2))
+      '@typescript-eslint/scope-manager': 8.66.0
+      '@typescript-eslint/types': 8.66.0
+      '@typescript-eslint/typescript-estree': 8.66.0(supports-color@10.2.2)(typescript@7.0.2)
+      eslint: 9.39.5(jiti@2.7.0)(supports-color@10.2.2)
+      typescript: 7.0.2
     transitivePeerDependencies:
       - supports-color
 
@@ -13967,6 +14056,15 @@ snapshots:
       semver: 6.3.1
       string.prototype.matchall: 4.0.12
       string.prototype.repeat: 1.0.0
+
+  eslint-plugin-testing-library@7.16.2(eslint@9.39.5(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@7.0.2):
+    dependencies:
+      '@typescript-eslint/scope-manager': 8.66.0
+      '@typescript-eslint/utils': 8.66.0(eslint@9.39.5(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@7.0.2)
+      eslint: 9.39.5(jiti@2.7.0)(supports-color@10.2.2)
+    transitivePeerDependencies:
+      - supports-color
+      - typescript
 
   eslint-scope@5.1.1:
     dependencies:
@@ -17535,9 +17633,9 @@ snapshots:
     dependencies:
       '@storybook/global': 5.0.0
       '@storybook/icons': 2.1.0(react@19.3.0)
-      '@testing-library/dom': 10.4.1
+      '@testing-library/dom': 10.4.2
       '@testing-library/jest-dom': 6.9.1
-      '@testing-library/user-event': 14.6.4(@testing-library/dom@10.4.1)
+      '@testing-library/user-event': 14.6.8(@testing-library/dom@10.4.2)
       '@vitest/expect': 3.2.4
       '@vitest/spy': 3.2.4
       '@webcontainer/env': 1.1.1
@@ -17949,6 +18047,10 @@ snapshots:
   ts-api-utils@2.5.0(@typescript/typescript6@6.0.2):
     dependencies:
       typescript: '@typescript/typescript6@6.0.2'
+
+  ts-api-utils@2.5.0(typescript@7.0.2):
+    dependencies:
+      typescript: 7.0.2
 
   ts-dedent@2.3.0: {}
 

@@ -103,11 +103,14 @@ document end the outline leaves with the document box like any sticky element.
 
 ### Placement
 
-`center` is for running text on the reading measure: posts, legal documents, the changelog and
-work/event details. The outline reserve is mirrored on both sides (from `sm`) so the reading column
-stays centered. `start` is for section-composed CMS pages: their title and sections keep the start
-edge and their authored widths, and only the inline end is reserved. One rule decides: the body is a
-reading column (`center`) or an authored section composition (`start`).
+`center` is for running text on the reading measure: posts, legal documents and the changelog. The
+outline reserve is mirrored on both sides (from `sm`) so the reading column stays centered. `start` is
+for section-composed bodies: CMS pages and entity details (work, event), whose title and sections keep
+the start edge, and only the inline end is reserved. One rule decides: the body is a reading column
+(`center`) or a section composition (`start`).
+
+`outlinePresentation="rail"` keeps the rail at every width for a body that shares the page width with
+another column: an entity detail with media. The persistent column needs a full-width body.
 
 ### Chrome outside the outline layout
 

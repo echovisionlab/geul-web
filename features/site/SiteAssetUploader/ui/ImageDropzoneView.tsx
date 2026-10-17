@@ -3,7 +3,12 @@
 import { Text as DsText } from '@/components/core/Typography';
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 
-import { ImageUploadField, type ImageUploadAccept, type ImageUploadRejection } from '@/components/core/ImageUpload';
+import {
+  ImageUploadField,
+  type ImagePreviewSurface,
+  type ImageUploadAccept,
+  type ImageUploadRejection,
+} from '@/components/core/ImageUpload';
 
 interface ImageDropzoneViewProps {
   currentUrl: string | null;
@@ -14,6 +19,7 @@ interface ImageDropzoneViewProps {
   maxSize: number;
   previewHeight: number;
   previewWidth: number | 'auto';
+  previewSurface?: ImagePreviewSurface;
   label: string;
   description: string;
   uploadPrompt: string;
@@ -32,6 +38,7 @@ export function ImageDropzoneView({
   maxSize,
   previewHeight,
   previewWidth,
+  previewSurface,
   label,
   description,
   uploadPrompt,
@@ -63,7 +70,7 @@ export function ImageDropzoneView({
         disabled={disabled || uploading}
         loading={uploading}
         loadingLabel={uploadPrompt}
-        emptyTitle={label}
+        dropzoneAriaLabel={label}
         emptyDescription={uploadPrompt}
         changeHint={currentUrl ? uploadPrompt : undefined}
         removeButtonAriaLabel={removeButtonAriaLabel}
@@ -75,6 +82,7 @@ export function ImageDropzoneView({
           maxWidth: previewMaxWidth,
           maxHeight: previewHeight,
           fit: 'contain',
+          surface: previewSurface,
         }}
         placeholder={{
           width: '100%',

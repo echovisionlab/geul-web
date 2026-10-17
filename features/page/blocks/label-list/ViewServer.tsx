@@ -1,56 +1,35 @@
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import { Suspense } from 'react';
-import { ServerDataTablePagination } from '@/features/data-table/ServerDataTable/ServerDataTablePagination';
 import { listLabelsForBlockAction } from '@/lib/actions/label';
 import { parseBooleanProp, parseIntegerProp } from '../list-shared';
-import { buildBlockTableNamespace, parseBlockTableQuery, queryRecordToSearchParams } from '../table-utils';
 import type { BlockViewProps } from '../types';
 import { parseLabelListProps } from './schema';
 import { LabelListSkeleton } from './Skeleton';
 import { LabelListViewClient } from './ViewClient';
+import { LabelInfiniteList } from './InfiniteList';
+import { toLabelListItem } from './transform';
 
-async function LabelListViewServer({ sectionId, props, query, requestedLocale }: BlockViewProps) {
+async function LabelListViewServer({ props, requestedLocale }: BlockViewProps) {
   const p = parseLabelListProps(props);
   const limit = parseIntegerProp(p.limit, 12);
+  // Pagination continues the list in place: the first page renders here, later pages on demand.
   const showPagination = parseBooleanProp(p.showPagination, false);
-  const namespace = buildBlockTableNamespace('labelList', sectionId);
-  const searchParams = queryRecordToSearchParams(query);
-  const tableQuery = showPagination
-    ? parseBlockTableQuery(searchParams, namespace, limit)
-    : { page: 1, pageSize: limit };
+  const query = { sortBy: p.sortBy, sortOrder: p.sortOrder, limit };
+  const { labels, pagination } = await listLabelsForBlockAction({ ...query, offset: 0, requestedLocale }).then(
+    unwrapQueryResult,
+  );
+  const items = labels.map(toLabelListItem);
 
-  const { labels, pagination } = await listLabelsForBlockAction({
-    sortBy: p.sortBy,
-    sortOrder: p.sortOrder,
-    limit: tableQuery.pageSize,
-    offset: ((tableQuery.page ?? 1) - 1) * (tableQuery.pageSize ?? limit),
-    requestedLocale,
-  }).then(unwrapQueryResult);
-
-  const transformedLabels = labels.map((label) => ({
-    id: label.id,
-    href: `/labels/${label.slug?.trim() || label.id}`,
-    title: label.name,
-    imageUrl: label.imageUrl ?? null,
-    imageAlt: label.name,
-    countryCode: label.countryCode,
-  }));
-
-  const result = {
-    data: transformedLabels,
-    total: pagination.total,
-    page: tableQuery.page ?? 1,
-    pageSize: tableQuery.pageSize ?? limit,
-    totalPages: Math.ceil(pagination.total / (tableQuery.pageSize ?? limit)),
-  };
-
-  return (
-    <>
-      <LabelListViewClient labels={transformedLabels} parsedProps={p} />
-      {showPagination ? (
-        <ServerDataTablePagination namespace={namespace} result={result} searchParams={searchParams} />
-      ) : null}
-    </>
+  return showPagination ? (
+    <LabelInfiniteList
+      initialLabels={items}
+      total={pagination.total}
+      query={query}
+      parsedProps={p}
+      locale={requestedLocale}
+    />
+  ) : (
+    <LabelListViewClient labels={items} parsedProps={p} />
   );
 }
 

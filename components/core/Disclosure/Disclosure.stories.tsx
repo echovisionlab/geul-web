@@ -1,4 +1,5 @@
 import { LayoutStack as StoryLayoutStack, LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { TextButton } from '@/components/core/TextButton';
 import { Text as DsText } from '@/components/core/Typography';
 
 import { localizedRender } from '@/.storybook/fixture-i18n';
@@ -72,6 +73,29 @@ export const NestedDetails: Story = {
         <DsText size="sm">Optional field settings</DsText>
       </Disclosure>
     </DisclosureExample>
+  )),
+};
+
+/** Navigation groups: label on the chrome rows' `xs` line, the same start as chrome links beside it. */
+export const NavigationGroup: Story = {
+  render: localizedRender(() => (
+    <div style={{ width: 280 }}>
+      <DsLayoutStack gap="none">
+        <Disclosure label="Posts" density="chrome" withDivider={false} defaultOpened>
+          <DsLayoutStack gap="none">
+            <TextButton nested href="#posts" density="chrome" display="flex" fullWidth justify="start">
+              <DsText size="xs">All posts</DsText>
+            </TextButton>
+            <TextButton nested href="#series" density="chrome" display="flex" fullWidth justify="start">
+              <DsText size="xs">Series</DsText>
+            </TextButton>
+          </DsLayoutStack>
+        </Disclosure>
+        <TextButton href="#works" density="chrome" display="flex" fullWidth justify="start">
+          <DsText size="xs">Works</DsText>
+        </TextButton>
+      </DsLayoutStack>
+    </div>
   )),
 };
 

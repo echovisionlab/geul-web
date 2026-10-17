@@ -137,7 +137,7 @@ describe('SiteAssetUploader', () => {
     root = createRoot(container);
 
     act(() => {
-      root?.render(<SiteAssetUploader type="logo_light" currentUrl={null} onSuccess={onSuccess} />);
+      root?.render(<SiteAssetUploader type="logo_full_light" currentUrl={null} onSuccess={onSuccess} />);
     });
 
     expect(dropHandler).toBeTruthy();
@@ -147,8 +147,8 @@ describe('SiteAssetUploader', () => {
     });
 
     expect(maybeConvertSvgMock).not.toHaveBeenCalled();
-    expect(uploadFileMock).toHaveBeenCalledWith(svgFile, { slotId: 'logo_light' });
-    expect(setSiteAssetActionMock).toHaveBeenCalledWith('logo_light', 'file-1');
+    expect(uploadFileMock).toHaveBeenCalledWith(svgFile, { slotId: 'logo_full_light' });
+    expect(setSiteAssetActionMock).toHaveBeenCalledWith('logo_full_light', 'file-1');
     expect(onSuccess).toHaveBeenCalledWith('site-logo-run');
   });
 
@@ -162,7 +162,7 @@ describe('SiteAssetUploader', () => {
     root = createRoot(container);
 
     act(() => {
-      root?.render(<SiteAssetUploader type="logo_email" currentUrl={null} />);
+      root?.render(<SiteAssetUploader type="logo_email_dark" currentUrl={null} />);
     });
 
     expect(dropHandler).toBeTruthy();
@@ -172,7 +172,7 @@ describe('SiteAssetUploader', () => {
     });
 
     expect(maybeConvertSvgMock).toHaveBeenCalledWith(svgFile);
-    expect(uploadFileMock).toHaveBeenCalledWith(pngFile, { slotId: 'logo_email' });
-    expect(setSiteAssetActionMock).toHaveBeenCalledWith('logo_email', 'file-1');
+    expect(uploadFileMock).toHaveBeenCalledWith(pngFile, { slotId: 'logo_email_dark' });
+    expect(setSiteAssetActionMock).toHaveBeenCalledWith('logo_email_dark', 'file-1');
   });
 });

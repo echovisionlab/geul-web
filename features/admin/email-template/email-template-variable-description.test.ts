@@ -13,6 +13,7 @@ const describeVariable = (name: string) =>
     catalog,
     siteOrigin: () => 'Site origin',
     logoEmailUrl: () => 'Logo URL',
+    logoEmailDarkUrl: () => 'Dark logo URL',
   });
 
 describe('email template variable descriptions', () => {
@@ -35,6 +36,7 @@ describe('email template variable descriptions', () => {
     expect(describeVariable('confirm_link')).toBeNull();
     expect(describeVariable('site_origin')).toBe('Site origin');
     expect(describeVariable('logo_email_url')).toBe('Logo URL');
+    expect(describeVariable('logo_email_dark_url')).toBe('Dark logo URL');
     expect(describeVariable('custom_campaign_field')).toBeNull();
   });
 });

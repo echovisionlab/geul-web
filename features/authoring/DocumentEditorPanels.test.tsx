@@ -55,11 +55,12 @@ describe('DocumentEditorPanels', () => {
     expect(host.querySelector('button')).toBe(draft);
     expect(draft?.textContent).toBe('Draft edits: 1');
   });
-  it('retains the settings/body flow on desktop', () => {
+  it('puts the writing surface first and the settings in a labelled column on wide screens', () => {
     screen.mobile = false;
     render();
     expect(host.querySelector('[role="tab"]')).toBeNull();
-    expect(host.textContent).toBe('Document settingsDraft edits: 0');
+    expect(host.textContent).toBe('Draft edits: 0Document settings');
+    expect(host.querySelector('aside')?.getAttribute('aria-label')).toBeTruthy();
   });
   it('shows only writing in focused mode', () => {
     render(true);

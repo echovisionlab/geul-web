@@ -39,6 +39,7 @@ import { useTranslations } from 'next-intl';
 
 import { useMediaQuery, useMounted } from '@mantine/hooks';
 import { SiteLogo } from '@/features/site/SiteLogo';
+import { SITE_LOGO_HEIGHT } from '@/features/site/SiteLogo/placements';
 import type { AdminNavigationSection } from '@/features/admin/ui/AdminNavigation';
 import { AdminShellView } from '@/features/admin/ui/AdminShell';
 
@@ -265,8 +266,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
         onToggleColorScheme: toggleColorScheme,
         onNavigate: () => undefined,
       }}
-      logoSlot={<SiteLogo height={14} />}
-      compactLogoSlot={<SiteLogo height={12} />}
+      logoSlot={<SiteLogo height={SITE_LOGO_HEIGHT.adminExpanded} />}
+      compactLogoSlot={<SiteLogo form="symbol" height={SITE_LOGO_HEIGHT.adminCompact} />}
     >
       {children}
     </AdminShellView>

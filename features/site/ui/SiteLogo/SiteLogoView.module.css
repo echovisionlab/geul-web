@@ -6,6 +6,7 @@
 .image {
   display: inline-flex;
   width: auto;
+  flex-shrink: 0;
   object-fit: contain;
   border: 0;
 }
@@ -31,5 +32,16 @@
 
   :global(html:not([data-geul-theme])) .themed[data-logo-scheme='dark'] {
     display: inline-flex;
+  }
+}
+
+/* Paper is light: print the light mark whatever the screen theme. */
+@media print {
+  .themed[data-logo-scheme='light'] {
+    display: inline-flex !important;
+  }
+
+  .themed[data-logo-scheme='dark'] {
+    display: none !important;
   }
 }

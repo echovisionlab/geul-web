@@ -7,6 +7,10 @@ import { AuthoringExtensionsProvider } from '@/features/authoring/AuthoringExten
 import { MailAdaptersPreview } from './MailAdapters.stories';
 import { OgImageSettingsPreview } from './OgImageSettings.stories';
 import en from '@/messages/en.json';
+import { waitInAct } from '@/test/act-wait';
+
+// Full production page renders: a loaded CI worker needs more than the default 5s per test.
+vi.setConfig({ testTimeout: 20_000 });
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
@@ -27,11 +31,6 @@ afterEach(() => {
   act(() => root?.unmount());
   host?.remove();
 });
-async function settle() {
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 40));
-  });
-}
 async function render(surface: 'mail' | 'og') {
   host = document.createElement('div');
   document.body.append(host);
@@ -45,20 +44,22 @@ async function render(surface: 'mail' | 'og') {
       </TestProviders>,
     ),
   );
-  await settle();
 }
 
 describe('production operations accessibility with local services', () => {
   it('keeps each mail adapter command and value associated with its own provider', async () => {
     await render('mail');
-    const group = host.querySelector('[role="group"][aria-label="Studio SMTP"]')!;
-    expect(group).not.toBeNull();
+    // Adapters arrive through the local query transport.
+    const group = await waitInAct(() => {
+      const match = host.querySelector('[role="group"][aria-label="Studio SMTP"]');
+      expect(match).not.toBeNull();
+      return match!;
+    });
     const toggle = group.querySelector<HTMLInputElement>('input[role="switch"]')!;
     expect(toggle.getAttribute('aria-label')).toBe(`${en.adminSettings.mail.row.enableAdapter} Studio SMTP`);
     expect(toggle.checked).toBe(false);
     await act(async () => toggle.click());
-    await settle();
-    expect(toggle.checked).toBe(true);
+    await waitInAct(() => expect(toggle.checked).toBe(true));
     expect(group.querySelector(`button[aria-label="${en.common.actions.edit} Studio SMTP"]`)).not.toBeNull();
     expect(group.querySelector(`button[aria-label="${en.common.actions.delete} Studio SMTP"]`)).not.toBeNull();
     expect(
@@ -68,16 +69,22 @@ describe('production operations accessibility with local services', () => {
 
   it('exposes OG settings tabs, named form and all three range values without adding visible labels', async () => {
     await render('og');
-    const tab = Array.from(host.querySelectorAll<HTMLButtonElement>('[role="tab"]')).find(
-      (button) => button.textContent === en.ogImageSettings.tabs.content,
-    )!;
-    expect(tab).toBeDefined();
+    const tab = await waitInAct(() => {
+      const match = Array.from(host.querySelectorAll<HTMLButtonElement>('[role="tab"]')).find(
+        (button) => button.textContent === en.ogImageSettings.tabs.content,
+      );
+      expect(match).toBeDefined();
+      return match!;
+    });
     await act(async () => tab.click());
-    await settle();
-    expect(tab.getAttribute('aria-selected')).toBe('true');
-    const form = host.querySelector(
-      `form[aria-label="${en.ogImageSettings.title} ${en.ogImageSettings.tabs.content}"]`,
-    )!;
+    const form = await waitInAct(() => {
+      expect(tab.getAttribute('aria-selected')).toBe('true');
+      const match = host.querySelector(
+        `form[aria-label="${en.ogImageSettings.title} ${en.ogImageSettings.tabs.content}"]`,
+      );
+      expect(match).not.toBeNull();
+      return match!;
+    });
     expect(form.getAttribute('aria-label')).toBe(`${en.ogImageSettings.title} ${en.ogImageSettings.tabs.content}`);
     const names = Array.from(form.querySelectorAll<HTMLInputElement>('input[type="range"]')).map((input) => {
       const label = document.getElementById(input.getAttribute('aria-labelledby')!);

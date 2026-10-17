@@ -6,6 +6,7 @@ import { designTokensPlugin } from './eslint-rules/design-tokens.mjs';
 import { frameworkOwnershipPlugin } from './eslint-rules/framework-ownership.mjs';
 import { layoutOwnershipPlugin } from './eslint-rules/layout-ownership.mjs';
 import { affordancePlacementPlugin } from './eslint-rules/affordance-placement.mjs';
+import testingLibrary from 'eslint-plugin-testing-library';
 
 const restrictedCoreImportPatterns = [
   '@/features',
@@ -95,6 +96,17 @@ export default defineConfig(
   {
     files: ['**/*.{story,stories}.tsx'],
     rules: { 'no-console': 'off' },
+  },
+  {
+    // Testing Library rules apply where tests use Testing Library (directly or through `@/test/render`):
+    // accessible queries, `findBy*` instead of waiting loops, no container/DOM traversal, no needless act.
+    files: ['**/*.test.{ts,tsx}'],
+    ...testingLibrary.configs['flat/react'],
+    settings: {
+      'testing-library/utils-module': 'test/render',
+      'testing-library/custom-renders': ['render'],
+      'testing-library/custom-queries': 'off',
+    },
   },
   {
     files: ['**/*.tsx', '**/*.ts'],

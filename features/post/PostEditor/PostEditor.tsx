@@ -5,9 +5,10 @@ import type { EditorSnapshot } from '@/features/editor/editor-snapshot';
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
 
 import { DocumentEditorPanels } from '@/features/authoring/DocumentEditorPanels';
-import { SectionCard, SectionHeader } from '@/components/core/Section';
+import { EditorSettingsSection } from '@/features/authoring/EditorSettingsSection';
+import { SectionCard } from '@/components/core/Section';
 
-import { LayoutStack as DsLayoutStack, LayoutGrid as DsLayoutGrid } from '@/components/core/Layout';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PostAction } from '@echovisionlab/geul-proto/secure/post_pb.ts';
@@ -821,127 +822,8 @@ export function PostEditorView({ model }: { model: PostEditorViewModel }) {
                         onBlur={slugMgmt.handleBlur}
                       />
                     )}
-
-                    {/* Share Links */}
-                    {showEditorChrome && canManageShareLinks && (
-                      <AuthoringExtension kind="sharing">
-                        <ShareLinkSection
-                          entityType="post"
-                          entityId={postId}
-                          description={t('shareLinksDescription')}
-                          disabled={!canManageShareLinks || !canMutateSourceDocument}
-                          initialData={shareLinks}
-                        />
-                      </AuthoringExtension>
-                    )}
-
                     {showEditorChrome && (
-                      <AuthoringExtension kind="translations">
-                        <EntityTranslationsPanel
-                          entityType="post"
-                          entityId={postId}
-                          canManage={canMutateContent}
-                          canAdministerTranslations={canMutateContent}
-                          canMutateTargets={canMutateContent}
-                        />
-                      </AuthoringExtension>
-                    )}
-
-                    {/* OG Image & Featured Image */}
-                    {showEditorChrome && (
-                      <SectionCard padding={{ base: 'none', sm: 'md' }}>
-                        <MediaPreviewGrid>
-                          <OgImagePreview
-                            src={ogImage.src}
-                            canRegenerate={
-                              canMutateContent && activeEditLocale.hasLiveRow && ogRegenerationLocale !== null
-                            }
-                            isRegenerating={regenerateOgImage.isPending || ogImage.isRegenerating}
-                            generationStatus={ogImage.status}
-                            generationError={ogImage.error}
-                            onRegenerate={() => {
-                              if (ogRegenerationLocale) {
-                                regenerateOgImage.mutate({
-                                  locale: ogRegenerationLocale,
-                                  targetKey: ogImage.targetKey,
-                                });
-                              }
-                            }}
-                          />
-                          <AuthoringExtension kind="uploads">
-                            <FeaturedImageUploader
-                              postId={postId}
-                              idPrefix={`post-${postId}-featured-image`}
-                              canEdit={canMutateSourceDocument}
-                              onOgGenerationRequested={() => void ogImage.trackLatest()}
-                            />
-                          </AuthoringExtension>
-                        </MediaPreviewGrid>
-                      </SectionCard>
-                    )}
-
-                    {/* Options */}
-                    {showEditorChrome && (
-                      <SectionCard padding={{ base: 'none', sm: 'md' }}>
-                        <DsLayoutStack gap="md">
-                          <SectionHeader title={tCommonLabels('options')} />
-                          <Checkbox
-                            id={`post-${postId}-comments-enabled`}
-                            label={t('allowComments')}
-                            checked={commentsEnabled}
-                            onChange={(e) => handleCommentsEnabledChange(e.currentTarget.checked)}
-                            disabled={!canMutateSourceDocument}
-                            size="sm"
-                          />
-                          <ContentLayoutField
-                            value={layout}
-                            onChange={handleLayoutChange}
-                            disabled={!canMutateSourceDocument}
-                            labels={{
-                              contentHeight: tLayout('contentHeight'),
-                              content: tLayout('content'),
-                              viewport: tLayout('viewport'),
-                              pageChrome: tLayout('chrome'),
-                              footer: tLayout('footer'),
-                              flow: tLayout('flow'),
-                              pinned: tLayout('pinned'),
-                            }}
-                          />
-                        </DsLayoutStack>
-                      </SectionCard>
-                    )}
-
-                    {showEditorChrome && (
-                      <DsLayoutStack gap={{ base: 'xl', sm: 'md' }}>
-                        <SummaryFieldCard
-                          entityType="post"
-                          entityId={postId}
-                          title={displayedTitle}
-                          summary={displayedSummary}
-                          summaryReadOnly={!canEditLocaleDocument}
-                          hideAiActions={!editorAiTarget}
-                          aiTarget={editorAiTarget}
-                          provider={activeEditLocale.isSourceLocaleReady ? currentProvider : null}
-                          doc={activeEditLocale.isSourceLocaleReady ? currentDoc : null}
-                          currentMemberId={currentMemberId}
-                          currentMemberDisplayName={userName}
-                          onSummaryChange={canEditLocaleDocument ? handleScopedLocaleSummaryChange : undefined}
-                        />
-                        <MetadataPanel
-                          title={displayedTitle}
-                          summary={displayedSummary}
-                          routePath={`/posts/${slug || postId}`}
-                          canonicalOrigin={canonicalOrigin}
-                          siteName={siteName}
-                          defaultImageUrl={featuredImageUrl}
-                          defaultSchemaType="Article"
-                        />
-                      </DsLayoutStack>
-                    )}
-
-                    {/* Selectors */}
-                    {showEditorChrome && (
-                      <DsLayoutGrid columns={{ base: 1, sm: 2, lg: 4 }}>
+                      <EditorSettingsSection title={tCommonLabels('classification')}>
                         <AuthoringExtension kind="relations">
                           <CategorySelector
                             postId={postId}
@@ -976,7 +858,116 @@ export function PostEditorView({ model }: { model: PostEditorViewModel }) {
                             />
                           </AuthoringExtension>
                         </DsLayoutStack>
-                      </DsLayoutGrid>
+                      </EditorSettingsSection>
+                    )}
+                    {/* Options */}
+                    {showEditorChrome && (
+                      <EditorSettingsSection title={tCommonLabels('options')}>
+                        <Checkbox
+                          id={`post-${postId}-comments-enabled`}
+                          label={t('allowComments')}
+                          checked={commentsEnabled}
+                          onChange={(e) => handleCommentsEnabledChange(e.currentTarget.checked)}
+                          disabled={!canMutateSourceDocument}
+                          size="sm"
+                        />
+                        <ContentLayoutField
+                          value={layout}
+                          onChange={handleLayoutChange}
+                          disabled={!canMutateSourceDocument}
+                          labels={{
+                            contentHeight: tLayout('contentHeight'),
+                            content: tLayout('content'),
+                            viewport: tLayout('viewport'),
+                            pageChrome: tLayout('chrome'),
+                            footer: tLayout('footer'),
+                            flow: tLayout('flow'),
+                            pinned: tLayout('pinned'),
+                          }}
+                        />
+                      </EditorSettingsSection>
+                    )}
+                    {showEditorChrome && (
+                      <SummaryFieldCard
+                        entityType="post"
+                        entityId={postId}
+                        title={displayedTitle}
+                        summary={displayedSummary}
+                        summaryReadOnly={!canEditLocaleDocument}
+                        hideAiActions={!editorAiTarget}
+                        aiTarget={editorAiTarget}
+                        provider={activeEditLocale.isSourceLocaleReady ? currentProvider : null}
+                        doc={activeEditLocale.isSourceLocaleReady ? currentDoc : null}
+                        currentMemberId={currentMemberId}
+                        currentMemberDisplayName={userName}
+                        onSummaryChange={canEditLocaleDocument ? handleScopedLocaleSummaryChange : undefined}
+                      />
+                    )}
+                    {/* OG Image & Featured Image */}
+                    {showEditorChrome && (
+                      <EditorSettingsSection title={tCommonLabels('images')}>
+                        <MediaPreviewGrid>
+                          <OgImagePreview
+                            src={ogImage.src}
+                            canRegenerate={
+                              canMutateContent && activeEditLocale.hasLiveRow && ogRegenerationLocale !== null
+                            }
+                            isRegenerating={regenerateOgImage.isPending || ogImage.isRegenerating}
+                            generationStatus={ogImage.status}
+                            generationError={ogImage.error}
+                            onRegenerate={() => {
+                              if (ogRegenerationLocale) {
+                                regenerateOgImage.mutate({
+                                  locale: ogRegenerationLocale,
+                                  targetKey: ogImage.targetKey,
+                                });
+                              }
+                            }}
+                          />
+                          <AuthoringExtension kind="uploads">
+                            <FeaturedImageUploader
+                              postId={postId}
+                              idPrefix={`post-${postId}-featured-image`}
+                              canEdit={canMutateSourceDocument}
+                              onOgGenerationRequested={() => void ogImage.trackLatest()}
+                            />
+                          </AuthoringExtension>
+                        </MediaPreviewGrid>
+                      </EditorSettingsSection>
+                    )}
+                    {showEditorChrome && (
+                      <MetadataPanel
+                        title={displayedTitle}
+                        summary={displayedSummary}
+                        routePath={`/posts/${slug || postId}`}
+                        canonicalOrigin={canonicalOrigin}
+                        siteName={siteName}
+                        defaultImageUrl={featuredImageUrl}
+                        defaultSchemaType="Article"
+                      />
+                    )}
+                    {/* Share Links */}
+                    {showEditorChrome && canManageShareLinks && (
+                      <AuthoringExtension kind="sharing">
+                        <ShareLinkSection
+                          entityType="post"
+                          entityId={postId}
+                          description={t('shareLinksDescription')}
+                          disabled={!canManageShareLinks || !canMutateSourceDocument}
+                          initialData={shareLinks}
+                        />
+                      </AuthoringExtension>
+                    )}
+                    {showEditorChrome && (
+                      <AuthoringExtension kind="translations">
+                        <EntityTranslationsPanel
+                          entityType="post"
+                          entityId={postId}
+                          canManage={canMutateContent}
+                          canAdministerTranslations={canMutateContent}
+                          canMutateTargets={canMutateContent}
+                        />
+                      </AuthoringExtension>
                     )}
                   </>
                 }

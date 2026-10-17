@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "67fb87693379e06636a8140863335d00adefdee74df9cbf3f0e4e6f2ee501d3c",
+  "manifestHash": "23420407f8a4d206264fe5cf4d44f6dfc958b3b255842860eca52c1da31b3315",
   "counts": {
-    "sourceFiles": 3775,
-    "productionSourceFiles": 2282,
-    "componentFiles": 900,
+    "sourceFiles": 3794,
+    "productionSourceFiles": 2299,
+    "componentFiles": 910,
     "coreFamilies": 57,
     "featureDomains": 53,
-    "storyFiles": 256,
-    "storyVariants": 1446,
+    "storyFiles": 257,
+    "storyVariants": 1457,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -335,6 +335,7 @@
     "components/core/ApplicationFrame/ApplicationFrame.stories.tsx",
     "components/core/ApplicationFrame/ApplicationFrame.tsx",
     "components/core/ApplicationFrame/ApplicationFrame.type-test.tsx",
+    "components/core/ApplicationFrame/SiteHeader.tsx",
     "components/core/ApplicationFrame/index.ts",
     "components/core/Badge/Badge.test.tsx",
     "components/core/Badge/LabelBadge.stories.tsx",
@@ -730,6 +731,7 @@
     "components/core/Section/SectionCard.tsx",
     "components/core/Section/SectionHeader.stories.tsx",
     "components/core/Section/SectionHeader.tsx",
+    "components/core/Section/SettingsSection.tsx",
     "components/core/Section/StatCard.stories.tsx",
     "components/core/Section/StatCard.test.tsx",
     "components/core/Section/StatCard.tsx",
@@ -1158,6 +1160,7 @@
     "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
     "features/authoring/EditorHeader/index.ts",
     "features/authoring/EditorHeader/status-options.ts",
+    "features/authoring/EditorSettingsSection.tsx",
     "features/campaign/CampaignAnalyticsPage.tsx",
     "features/campaign/CampaignDeliveryDialogs.tsx",
     "features/campaign/CampaignEditPage.delivery.test.tsx",
@@ -1251,6 +1254,7 @@
     "features/document-layout/ui/ContentLayoutFieldView.tsx",
     "features/document-layout/ui/ContentLayoutView.tsx",
     "features/document-layout/ui/DocumentHeadingScope.tsx",
+    "features/document-layout/ui/EntityDetailLayout.tsx",
     "features/document-layout/ui/document-heading-level.ts",
     "features/document-layout/ui/index.ts",
     "features/document-layout/ui/types.ts",
@@ -2108,6 +2112,7 @@
     "features/page/blocks/CollectionSizeControl.tsx",
     "features/page/blocks/EntityListView.test.tsx",
     "features/page/blocks/EntityListView.tsx",
+    "features/page/blocks/InfiniteCollection.stories.tsx",
     "features/page/blocks/ListBlockEditorBase.stories.tsx",
     "features/page/blocks/ListBlockEditorBase.tsx",
     "features/page/blocks/ListBlockSkeleton.tsx",
@@ -2119,6 +2124,7 @@
     "features/page/blocks/MobileBlockTablePaginationScroll.tsx",
     "features/page/blocks/TableLoadingFallback.tsx",
     "features/page/blocks/artist-grid/Editor.tsx",
+    "features/page/blocks/artist-grid/InfiniteList.tsx",
     "features/page/blocks/artist-grid/Skeleton.tsx",
     "features/page/blocks/artist-grid/View.tsx",
     "features/page/blocks/artist-grid/ViewClient.boundaries.test.tsx",
@@ -2126,6 +2132,7 @@
     "features/page/blocks/artist-grid/ViewClientRuntime.tsx",
     "features/page/blocks/artist-grid/ViewServer.tsx",
     "features/page/blocks/artist-grid/schema.ts",
+    "features/page/blocks/artist-grid/transform.ts",
     "features/page/blocks/author-list/Editor.tsx",
     "features/page/blocks/author-list/Skeleton.tsx",
     "features/page/blocks/author-list/View.tsx",
@@ -2210,7 +2217,10 @@
     "features/page/blocks/immersive-scene/useAuthenticatedMedia.ts",
     "features/page/blocks/immersive-scene/useImmersiveAssetUploadController.ts",
     "features/page/blocks/immersive-scene/useImmersiveUnitAssetUploads.ts",
+    "features/page/blocks/infinite-items.test.tsx",
+    "features/page/blocks/infinite-items.tsx",
     "features/page/blocks/label-list/Editor.tsx",
+    "features/page/blocks/label-list/InfiniteList.tsx",
     "features/page/blocks/label-list/Skeleton.tsx",
     "features/page/blocks/label-list/View.tsx",
     "features/page/blocks/label-list/ViewClient.test.tsx",
@@ -2218,6 +2228,7 @@
     "features/page/blocks/label-list/ViewClientRuntime.tsx",
     "features/page/blocks/label-list/ViewServer.tsx",
     "features/page/blocks/label-list/schema.ts",
+    "features/page/blocks/label-list/transform.ts",
     "features/page/blocks/label-marquee/Editor.tsx",
     "features/page/blocks/label-marquee/ViewServer.tsx",
     "features/page/blocks/label-marquee/schema.ts",
@@ -2250,6 +2261,7 @@
     "features/page/blocks/mermaid/schema.ts",
     "features/page/blocks/page-locale-prop-inventory.test.ts",
     "features/page/blocks/post-list/Editor.tsx",
+    "features/page/blocks/post-list/InfiniteList.tsx",
     "features/page/blocks/post-list/PostAuthorLinks.tsx",
     "features/page/blocks/post-list/PostMetaLinks.tsx",
     "features/page/blocks/post-list/Skeleton.tsx",
@@ -2259,6 +2271,7 @@
     "features/page/blocks/post-list/ViewClientRuntime.tsx",
     "features/page/blocks/post-list/ViewServer.tsx",
     "features/page/blocks/post-list/schema.ts",
+    "features/page/blocks/post-list/transform.ts",
     "features/page/blocks/post-map/Editor.tsx",
     "features/page/blocks/post-map/Skeleton.tsx",
     "features/page/blocks/post-map/View.tsx",
@@ -2284,6 +2297,7 @@
     "features/page/blocks/post-table/schema.ts",
     "features/page/blocks/post-table/spec.ts",
     "features/page/blocks/program-event-list/Editor.tsx",
+    "features/page/blocks/program-event-list/InfiniteList.tsx",
     "features/page/blocks/program-event-list/Skeleton.tsx",
     "features/page/blocks/program-event-list/View.tsx",
     "features/page/blocks/program-event-list/ViewClient.tsx",
@@ -2293,6 +2307,7 @@
     "features/page/blocks/public-view-loading.test.tsx",
     "features/page/blocks/registry.ts",
     "features/page/blocks/releases-gallery/Editor.tsx",
+    "features/page/blocks/releases-gallery/InfiniteList.tsx",
     "features/page/blocks/releases-gallery/Skeleton.tsx",
     "features/page/blocks/releases-gallery/View.tsx",
     "features/page/blocks/releases-gallery/ViewClient.test.tsx",
@@ -2300,6 +2315,7 @@
     "features/page/blocks/releases-gallery/ViewClientRuntime.tsx",
     "features/page/blocks/releases-gallery/ViewServer.tsx",
     "features/page/blocks/releases-gallery/schema.ts",
+    "features/page/blocks/releases-gallery/transform.ts",
     "features/page/blocks/rich-text/Editor.test.tsx",
     "features/page/blocks/rich-text/Editor.tsx",
     "features/page/blocks/rich-text/View.tsx",
@@ -2331,12 +2347,14 @@
     "features/page/blocks/work-table/schema.ts",
     "features/page/blocks/work-table/spec.ts",
     "features/page/blocks/works-gallery/Editor.tsx",
+    "features/page/blocks/works-gallery/InfiniteList.tsx",
     "features/page/blocks/works-gallery/Skeleton.tsx",
     "features/page/blocks/works-gallery/View.tsx",
     "features/page/blocks/works-gallery/ViewClient.tsx",
     "features/page/blocks/works-gallery/ViewClientRuntime.tsx",
     "features/page/blocks/works-gallery/ViewServer.tsx",
     "features/page/blocks/works-gallery/schema.ts",
+    "features/page/blocks/works-gallery/transform.ts",
     "features/page/page-section-dedupe.ts",
     "features/page/section-style.test.ts",
     "features/page/section-style.ts",
@@ -2559,6 +2577,7 @@
     "features/site/SiteLogo/SiteLogo.test.tsx",
     "features/site/SiteLogo/SiteLogo.tsx",
     "features/site/SiteLogo/index.ts",
+    "features/site/SiteLogo/placements.ts",
     "features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader.test.tsx",
     "features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader.tsx",
     "features/site/SiteOgImagePanel/SiteOgImagePanel.test.tsx",
@@ -2722,7 +2741,6 @@
     "features/work/WorkEditor/work-lifecycle-controls.ts",
     "features/work/WorkMediaDeliveryContext.test.tsx",
     "features/work/WorkMediaDeliveryContext.tsx",
-    "features/work/WorkPublicHeaderLayout.tsx",
     "features/work/work-view-model.ts",
     "lib/actions/account.test.ts",
     "lib/actions/account.ts",
@@ -2907,6 +2925,7 @@
     "lib/collab/block-room-durability.ts",
     "lib/collab/block-room-intent-journal.test.ts",
     "lib/collab/block-room-intent-journal.ts",
+    "lib/collab/block-room-journal-durability.ts",
     "lib/collab/block-room-journal-store.ts",
     "lib/collab/block-room-metadata.test.ts",
     "lib/collab/block-room-metadata.ts",
@@ -3998,6 +4017,11 @@
               "type": "string"
             },
             {
+              "name": "navigationTitle",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
               "name": "closeLabel",
               "optional": false,
               "type": "string"
@@ -4044,7 +4068,67 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": ["components/core/ApplicationFrame/ApplicationFrame.stories.tsx"],
-      "composedJsx": ["AriaButton", "OnDemandDrawer", "aside", "div", "footer", "header", "main"]
+      "composedJsx": [
+        "AriaButton",
+        "OnDemandDrawer",
+        "VisuallyHidden",
+        "aside",
+        "div",
+        "footer",
+        "header",
+        "main",
+        "span"
+      ]
+    },
+    {
+      "file": "components/core/ApplicationFrame/SiteHeader.tsx",
+      "owner": "Core/ApplicationFrame",
+      "exports": [
+        {
+          "name": "SiteHeader",
+          "kind": "function"
+        }
+      ],
+      "classification": "core",
+      "propsEvidence": [
+        {
+          "name": "SiteHeaderProps",
+          "extends": ["extends ClosedVisualProps"],
+          "properties": [
+            {
+              "name": "logo",
+              "optional": false,
+              "type": "ReactNode"
+            },
+            {
+              "name": "navigationToggle",
+              "optional": false,
+              "type": "ReactNode"
+            },
+            {
+              "name": "mobileLeadingActions",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
+              "name": "mobileActions",
+              "optional": false,
+              "type": "ReactNode"
+            },
+            {
+              "name": "desktopActions",
+              "optional": false,
+              "type": "ReactNode"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["features/shell/ui/Shell/ShellLayout.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": ["components/core/ApplicationFrame/ApplicationFrame.stories.tsx"],
+      "composedJsx": ["LayoutVisibility", "div"]
     },
     {
       "file": "components/core/Badge/LabelBadge.tsx",
@@ -4508,6 +4592,7 @@
         "features/page/blocks/immersive-scene/ImmersiveSceneUnitSettingsPanel.tsx",
         "features/page/blocks/immersive-scene/MeshOptimizationPanel.tsx",
         "features/page/blocks/immersive-scene/SceneRenderer.tsx",
+        "features/page/blocks/infinite-items.tsx",
         "features/page/blocks/map/Editor.tsx",
         "features/page/blocks/marquee/MarqueeView.tsx",
         "features/page/blocks/text-marquee/Editor.tsx",
@@ -5949,7 +6034,7 @@
         },
         {
           "name": "DisclosureDensity",
-          "type": "'standard' | 'compact'"
+          "type": "'standard' | 'compact' | 'chrome'"
         },
         {
           "name": "DisclosureShape",
@@ -5970,6 +6055,7 @@
       ],
       "productionConsumers": [
         "components/core/ParameterPanel/ParameterPanel.tsx",
+        "components/core/SideNavigation/SideNavigation.tsx",
         "features/admin/email-layout/EmailLayoutEditPage.tsx",
         "features/admin/email-template/EmailTemplateEditPage.tsx",
         "features/editor/tiptap/shader/ShaderApiReference.tsx",
@@ -6415,6 +6501,7 @@
         "features/shell/ui/Shell/ShellIslands.tsx",
         "features/shell/ui/Shell/ShellLayout.tsx",
         "features/shell/ui/Shell/ShellMobileNavigation.tsx",
+        "features/site/SiteOgImagePanel/SiteOgImagePanel.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
         "features/translation/admin/TranslationJobsPage.tsx",
         "features/translation/admin/TranslationOverviewPage.tsx",
@@ -6772,12 +6859,6 @@
         "features/data-table/DataTablePagination.tsx",
         "features/data-table/ServerDataTable/ServerDataTablePaginationView.tsx",
         "features/form/AdminFormSubmissionsPage.tsx",
-        "features/page/blocks/artist-grid/View.tsx",
-        "features/page/blocks/label-list/View.tsx",
-        "features/page/blocks/post-list/View.tsx",
-        "features/page/blocks/program-event-list/View.tsx",
-        "features/page/blocks/releases-gallery/View.tsx",
-        "features/page/blocks/works-gallery/View.tsx",
         "features/series/SeriesDetail.tsx"
       ],
       "catalogAdapters": [],
@@ -7256,6 +7337,22 @@
               "type": "ReactNode"
             }
           ]
+        },
+        {
+          "name": "DropdownMenuAnchorProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "x",
+              "optional": false,
+              "type": "number"
+            },
+            {
+              "name": "y",
+              "optional": false,
+              "type": "number"
+            }
+          ]
         }
       ],
       "typeAliasEvidence": [],
@@ -7305,6 +7402,7 @@
       ],
       "composedJsx": [
         "DocumentColorPreview",
+        "DropdownMenuAnchor",
         "Header",
         "IconCheck",
         "IconChevronRight",
@@ -7400,6 +7498,10 @@
         {
           "name": "DropdownMenuTarget",
           "kind": "value"
+        },
+        {
+          "name": "DropdownMenuAnchor",
+          "kind": "function"
         }
       ],
       "classification": "core",
@@ -7562,7 +7664,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": ["OverlayTriggerTarget"]
+      "composedJsx": ["OverlayTriggerTarget", "span"]
     },
     {
       "file": "components/core/EditorHeader/CollabSyncStatusIndicator.tsx",
@@ -8339,6 +8441,7 @@
       ],
       "typeAliasEvidence": [],
       "productionConsumers": [
+        "features/admin/settings/OgImageSettingsPage.tsx",
         "features/form/FormField/fields/CheckboxField.tsx",
         "features/form/FormField/fields/PhoneField.tsx",
         "features/form/FormField/fields/SwitchField.tsx",
@@ -8927,7 +9030,7 @@
             {
               "name": "surface",
               "optional": true,
-              "type": "'default' | 'muted' | 'transparent'"
+              "type": "ImagePreviewSurface"
             },
             {
               "name": "withBorder",
@@ -8957,7 +9060,12 @@
           ]
         }
       ],
-      "typeAliasEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "ImagePreviewSurface",
+          "type": "'default' | 'muted' | 'transparent' | 'theme-light' | 'theme-dark'"
+        }
+      ],
       "productionConsumers": [
         "components/core/ImageUpload/ImageUploadField.tsx",
         "features/metadata/ui/OgImagePreviewView.tsx"
@@ -9330,7 +9438,7 @@
             {
               "name": "surface",
               "optional": true,
-              "type": "'default' | 'muted' | 'transparent'"
+              "type": "ImagePreviewSurface"
             },
             {
               "name": "withBorder",
@@ -9574,6 +9682,7 @@
         "IconX",
         "ImagePreviewFrame",
         "LayoutStack",
+        "RemoveGutter",
         "Text",
         "UploadPlaceholder",
         "div",
@@ -12956,6 +13065,11 @@
               "type": "Responsive<LayoutColumnCount>"
             },
             {
+              "name": "minColumnWidth",
+              "optional": true,
+              "type": "Responsive<LayoutMinColumnWidth>"
+            },
+            {
               "name": "rowGap",
               "optional": true,
               "type": "Responsive<Space>"
@@ -13033,6 +13147,7 @@
         "components/core/Progress/Progress.tsx",
         "components/core/PublicMetadata/PublicMetadata.tsx",
         "components/core/Section/SectionHeader.tsx",
+        "components/core/Section/SettingsSection.tsx",
         "components/core/Section/StatCard.tsx",
         "components/core/Typography/ImageChrome.tsx",
         "features/account-email/AccountEmailOption.tsx",
@@ -13107,6 +13222,7 @@
         "features/auth/ui/VerificationFlowView.tsx",
         "features/authoring/DocumentEditorPanels.tsx",
         "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
+        "features/authoring/EditorSettingsSection.tsx",
         "features/campaign/CampaignAnalyticsPage.tsx",
         "features/campaign/CampaignDeliveryDialogs.tsx",
         "features/campaign/CampaignEditPage.tsx",
@@ -13241,7 +13357,6 @@
         "features/page/blocks/ListBlockSkeleton.tsx",
         "features/page/blocks/ListViewShell.tsx",
         "features/page/blocks/TableLoadingFallback.tsx",
-        "features/page/blocks/artist-grid/View.tsx",
         "features/page/blocks/artist-grid/ViewClientRuntime.tsx",
         "features/page/blocks/author-list/Editor.tsx",
         "features/page/blocks/author-list/Skeleton.tsx",
@@ -13258,7 +13373,7 @@
         "features/page/blocks/immersive-scene/MeshOptimizationPanel.tsx",
         "features/page/blocks/immersive-scene/RotationAxisInputs.tsx",
         "features/page/blocks/immersive-scene/SceneRenderer.tsx",
-        "features/page/blocks/label-list/View.tsx",
+        "features/page/blocks/infinite-items.tsx",
         "features/page/blocks/label-marquee/Editor.tsx",
         "features/page/blocks/map/Editor.tsx",
         "features/page/blocks/map/ViewRuntime.tsx",
@@ -13272,15 +13387,12 @@
         "features/page/blocks/post-table/Editor.tsx",
         "features/page/blocks/post-table/ViewServer.tsx",
         "features/page/blocks/post-table/columns.tsx",
-        "features/page/blocks/program-event-list/View.tsx",
         "features/page/blocks/program-event-list/ViewClientRuntime.tsx",
-        "features/page/blocks/releases-gallery/View.tsx",
         "features/page/blocks/releases-gallery/ViewClientRuntime.tsx",
         "features/page/blocks/text-marquee/Editor.tsx",
         "features/page/blocks/work-map/Editor.tsx",
         "features/page/blocks/work-table/Editor.tsx",
         "features/page/blocks/work-table/ViewServer.tsx",
-        "features/page/blocks/works-gallery/View.tsx",
         "features/page/blocks/works-gallery/ViewClientRuntime.tsx",
         "features/participants/ParticipantRow.tsx",
         "features/place/CreatePlaceModal.tsx",
@@ -13315,7 +13427,6 @@
         "features/program-event/ProgramEventEditor/ProgramEventEditor.tsx",
         "features/program-event/ProgramEventEditor/ProgramEventPosterUploader.tsx",
         "features/program-event/ProgramEventSeriesEditor/ProgramEventSeriesEditor.tsx",
-        "features/program-event/ProgramEventSeriesPublicView.tsx",
         "features/release/ReleaseCreditsList.tsx",
         "features/release/ReleaseEditor/ReleaseArtistsSectionView.tsx",
         "features/release/ReleaseEditor/ReleaseCreditsSection.tsx",
@@ -13467,6 +13578,7 @@
         "features/page/PageEditor/PageAccessSettings.stories.tsx",
         "features/page/PageEditor/SectionItemView.stories.tsx",
         "features/page/blocks/CollectionBlocks.stories.tsx",
+        "features/page/blocks/InfiniteCollection.stories.tsx",
         "features/page/blocks/embed/Embed.stories.tsx",
         "features/social-links/ui/SocialLinksEditorView.stories.tsx",
         "features/translation/TranslationLocaleRow.stories.tsx",
@@ -13601,6 +13713,7 @@
       ],
       "typeAliasEvidence": [],
       "productionConsumers": [
+        "components/core/ApplicationFrame/SiteHeader.tsx",
         "components/core/DataTable/DataTableView.tsx",
         "features/location/LocationPlaceMetadataRows.tsx",
         "features/shell/ui/Shell/ShellLayout.tsx"
@@ -14166,7 +14279,6 @@
         }
       ],
       "productionConsumers": [
-        "app/(general)/releases/[idOrSlug]/ReleasePublicView.tsx",
         "components/core/SelectionSurface/SelectionSurface.tsx",
         "features/artist/ArtistEditor/ArtistImageGalleryEditor.tsx",
         "features/media/FilePreview.tsx",
@@ -14211,7 +14323,6 @@
         "features/page/PageEditor/PageEditor.tsx",
         "features/policy/LegalOgImagePanel.tsx",
         "features/post/PostEditor/PostEditor.tsx",
-        "features/program-event/ProgramEventEditor/ProgramEventEditor.tsx",
         "features/program-event/ProgramEventSeriesEditor/ProgramEventSeriesEditor.tsx",
         "features/series/SeriesDetail.tsx",
         "features/site/SiteOgImagePanel/SiteOgImagePanel.tsx",
@@ -15337,11 +15448,17 @@
       ],
       "productionConsumers": [
         "features/admin/MapThemeEditor/MapThemeListPageView.tsx",
+        "features/admin/dashboard/AdminDashboardPage.tsx",
+        "features/admin/mail-adapter/MailAdaptersPage.tsx",
+        "features/admin/settings/OgImageSettingsPage.tsx",
         "features/admin/ui/AdminPageHeader/AdminPageHeader.tsx",
         "features/member/onboarding/NicknameOnboarding.tsx",
-        "features/program-event/ProgramEventSeriesPublicView.tsx",
-        "features/series/SeriesPublicView.tsx",
-        "features/share/SharePasswordView.tsx"
+        "features/menu/AdminMenusPage.tsx",
+        "features/share/SharePasswordView.tsx",
+        "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
+        "features/translation/admin/TranslationJobsPage.tsx",
+        "features/translation/admin/TranslationOverviewPage.tsx",
+        "features/translation/admin/TranslationSettingsPage.tsx"
       ],
       "catalogAdapters": ["stories/shared/AccountPreview.tsx"],
       "tests": [
@@ -16331,6 +16448,7 @@
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/settings/OgImageSettingsPage.tsx",
         "features/admin/ui/AdminNavigation/AdminNavigationView.tsx",
+        "features/authoring/EditorSettingsSection.tsx",
         "features/campaign/CampaignAnalyticsPage.tsx",
         "features/campaign/CampaignEditPage.tsx",
         "features/cookie-consent/ui/CookieConsentBannerView.tsx",
@@ -16358,7 +16476,6 @@
         "features/form/PublicFormView.tsx",
         "features/map/BaseMap.tsx",
         "features/media/ui/AttachmentSurface.tsx",
-        "features/menu/AdminMenusPage.tsx",
         "features/metadata/MetadataPanel/MetadataPanel.tsx",
         "features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
         "features/metadata/ui/OgGenerationRunProgressView.tsx",
@@ -16406,7 +16523,6 @@
         "features/series/SeriesDetail.tsx",
         "features/share/ui/ShareLinkSectionView.tsx",
         "features/site/SiteLoaderAssetsUploader/SiteLoaderAssetsUploader.tsx",
-        "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
         "features/social-links/ui/SocialLinksEditorView.tsx",
         "features/translation/ActiveEditLocaleContentPreviewView.tsx",
         "features/translation/TranslationPanelSectionCard.tsx",
@@ -16459,6 +16575,11 @@
               "type": "'with-title' | 'below-row'"
             },
             {
+              "name": "level",
+              "optional": true,
+              "type": "SectionHeaderLevel"
+            },
+            {
               "name": "title",
               "optional": false,
               "type": "ReactNode"
@@ -16476,13 +16597,17 @@
           ]
         }
       ],
-      "typeAliasEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "SectionHeaderLevel",
+          "type": "2 | 3"
+        }
+      ],
       "productionConsumers": [
+        "components/core/Section/SettingsSection.tsx",
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/settings/OgImageSettingsPage.tsx",
-        "features/admin/user/UserProfileFormSection.tsx",
-        "features/admin/user/auth/shared.tsx",
-        "features/menu/AdminMenusPage.tsx",
+        "features/authoring/EditorSettingsSection.tsx",
         "features/metadata/MetadataPanel/MetadataPanel.tsx",
         "features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
         "features/metadata/ui/UrlSectionView.tsx",
@@ -16494,17 +16619,13 @@
         "features/my/ui/McpIntegrationSettings/McpIntegrationSettingsView.tsx",
         "features/my/ui/PersonalAccessTokenSettings/PersonalAccessTokenSettingsView.tsx",
         "features/my/ui/SessionManagement/SessionManagementView.tsx",
-        "features/page/PageEditor/PageEditor.tsx",
         "features/policy/LegalOgImagePanel.tsx",
-        "features/post/PostEditor/PostEditor.tsx",
-        "features/program-event/ProgramEventEditor/ProgramEventEditor.tsx",
         "features/release/ReleaseEditor/ReleaseArtistsSectionView.tsx",
         "features/release/ReleaseEditor/ReleaseCreditsSection.tsx",
         "features/release/ReleaseEditor/ReleaseLabelsSection.tsx",
         "features/release/ReleaseEditor/ReleaseTagsSection.tsx",
         "features/release/ReleaseEditor/ReleaseTracksSection.tsx",
         "features/share/ui/ShareLinkSectionView.tsx",
-        "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
         "features/translation/TranslationPanelSectionCard.tsx",
         "features/translation/settings/TranslationProviderModal.tsx",
         "features/work/WorkEditor/WorkClientsSection.tsx",
@@ -16516,7 +16637,70 @@
         "components/core/Section/SectionHeader.stories.tsx",
         "stories/design-system/components/Components.stories.tsx"
       ],
-      "composedJsx": ["LayoutInline", "LayoutStack", "SupportingText", "Text", "div"]
+      "composedJsx": ["Heading", "LayoutInline", "LayoutStack", "SupportingText", "Text", "div"]
+    },
+    {
+      "file": "components/core/Section/SettingsSection.tsx",
+      "owner": "Core/Section",
+      "exports": [
+        {
+          "name": "SettingsSection",
+          "kind": "function"
+        },
+        {
+          "name": "SettingsGroup",
+          "kind": "function"
+        }
+      ],
+      "classification": "core",
+      "propsEvidence": [
+        {
+          "name": "SettingsSectionProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "title",
+              "optional": false,
+              "type": "ReactNode"
+            },
+            {
+              "name": "description",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
+              "name": "actions",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
+              "name": "children",
+              "optional": false,
+              "type": "ReactNode"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [
+        {
+          "name": "SettingsGroupProps",
+          "type": "SettingsSectionProps"
+        }
+      ],
+      "productionConsumers": [
+        "features/admin/mail-adapter/MailAdaptersPage.tsx",
+        "features/admin/settings/OgImageSettingsPage.tsx",
+        "features/admin/settings/SiteSettingsPage.tsx",
+        "features/admin/user/UserProfileFormSection.tsx",
+        "features/admin/user/auth/shared.tsx",
+        "features/menu/AdminMenusPage.tsx",
+        "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
+        "features/translation/admin/TranslationSettingsPage.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["LayoutStack", "SectionHeader"]
     },
     {
       "file": "components/core/Section/StatCard.tsx",
@@ -17049,6 +17233,11 @@
               "name": "onOpen",
               "optional": false,
               "type": "(index: number) => void"
+            },
+            {
+              "name": "pageTitle",
+              "optional": true,
+              "type": "boolean"
             }
           ]
         },
@@ -17157,6 +17346,7 @@
       ],
       "composedJsx": [
         "AriaButton",
+        "Heading",
         "IconButton",
         "IconCheck",
         "IconCornerLeftUp",
@@ -17301,12 +17491,12 @@
       "composedJsx": [
         "AriaButton",
         "AriaLink",
+        "Disclosure",
         "DropdownMenu",
         "DropdownMenu.Dropdown",
         "DropdownMenu.Item",
         "DropdownMenu.Label",
         "DropdownMenu.Target",
-        "IconChevronRight",
         "NavigationItem",
         "Tooltip",
         "div",
@@ -17985,6 +18175,11 @@
               "name": "contentPlacement",
               "optional": true,
               "type": "'start' | 'center'"
+            },
+            {
+              "name": "outlinePresentation",
+              "optional": true,
+              "type": "'responsive' | 'rail'"
             }
           ]
         },
@@ -18523,6 +18718,7 @@
         "features/shell/ui/Shell/ShellView.test.tsx"
       ],
       "stories": [
+        "components/core/Disclosure/Disclosure.stories.tsx",
         "components/core/Hierarchy/Hierarchy.stories.tsx",
         "components/core/TextButton/TextButton.stories.tsx",
         "stories/compositions/SizeDensity.stories.tsx",
@@ -18903,6 +19099,7 @@
       ],
       "typeAliasEvidence": [],
       "productionConsumers": [
+        "components/core/ApplicationFrame/ApplicationFrame.tsx",
         "components/core/CopyButton/CopyButton.tsx",
         "components/core/DataTable/DataTableView.tsx",
         "components/core/SelectionSurface/SelectionSurface.tsx",
@@ -18930,6 +19127,7 @@
         "features/my/ui/ProfileForm/ProfileFormView.tsx",
         "features/page/PageEditor/SectionItemView.tsx",
         "features/page/PageEditor/SectionList.tsx",
+        "features/page/blocks/infinite-items.tsx",
         "features/page/blocks/text-marquee/Editor.tsx",
         "features/series/SeriesDetail.tsx",
         "features/shell/LanguageMenu.tsx",
@@ -19052,6 +19250,7 @@
         "features/page/blocks/embed/ToolModule.tsx",
         "features/page/blocks/external-video/CanvasPreview.tsx",
         "features/page/blocks/form/ViewClient.tsx",
+        "features/page/blocks/infinite-items.tsx",
         "features/page/blocks/map/Editor.tsx",
         "features/page/blocks/marquee/MarqueeView.tsx",
         "features/page/blocks/post-list/View.tsx",
@@ -19314,7 +19513,6 @@
         "features/admin/client/ClientsTableContent.tsx",
         "features/admin/cms-page/PageModals.tsx",
         "features/admin/cms-page/PagesTableContent.tsx",
-        "features/admin/dashboard/AdminDashboardPage.tsx",
         "features/admin/email-layout/EmailLayoutEditPage.tsx",
         "features/admin/email-layout/EmailLayoutPreviewView.tsx",
         "features/admin/email-layout/EmailLayoutTargetEditor.tsx",
@@ -19381,6 +19579,7 @@
         "features/data-table/ServerDataTable/ServerDataTableSelectableSection.tsx",
         "features/document-layout/ui/ContentChrome.tsx",
         "features/document-layout/ui/ContentLayoutFieldView.tsx",
+        "features/document-layout/ui/EntityDetailLayout.tsx",
         "features/editor/AIMenu/AIMenu.tsx",
         "features/editor/components/EditorFileInsertView.tsx",
         "features/editor/components/EditorFileLibraryPickerView.tsx",
@@ -19540,13 +19739,13 @@
         "features/series/SeriesManagersModal.tsx",
         "features/series/SeriesPublicView.tsx",
         "features/share/ui/ShareLinkSectionView.tsx",
+        "features/shell/LanguageMenu.tsx",
         "features/shell/ui/PrintHeader/PrintHeaderView.tsx",
         "features/shell/ui/Shell/ShellIslands.tsx",
         "features/shell/ui/Shell/ShellLayout.tsx",
         "features/shell/ui/Shell/ShellMobileNavigation.tsx",
         "features/site/SiteAssetUploader/ui/ImageDropzoneView.tsx",
         "features/site/SiteLoaderAssetsUploader/SiteLoaderAssetsUploader.tsx",
-        "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
         "features/site/ui/SiteLogo/SiteLogoView.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/social-links/ui/SocialLinksEditorView.tsx",
@@ -21547,6 +21746,7 @@
       "composedJsx": [
         "Button",
         "ClientLogoUploader",
+        "DsLayoutGrid",
         "DsLayoutInline",
         "DsLayoutInset",
         "DsLayoutStack",
@@ -22168,7 +22368,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": ["stories/pages/AdminDashboard.stories.tsx"],
-      "composedJsx": ["DsHeading", "DsLayoutGrid", "DsLayoutStack", "PageLoader", "QueryErrorAlert", "StatCard"]
+      "composedJsx": ["DsLayoutGrid", "DsLayoutStack", "PageHeader", "PageLoader", "QueryErrorAlert", "StatCard"]
     },
     {
       "file": "features/admin/email-layout/EmailLayoutEditPage.tsx",
@@ -23913,7 +24113,6 @@
         "ConfirmationDialog",
         "ContentModal",
         "DialogActions",
-        "DsHeading",
         "DsLayoutInline",
         "DsLayoutInset",
         "DsLayoutStack",
@@ -23927,10 +24126,12 @@
         "LabelBadge",
         "LayoutInset",
         "NumberInput",
+        "PageHeader",
         "PasswordInput",
         "QueryErrorAlert",
         "SectionHeader",
         "Select",
+        "SettingsSection",
         "SupportingText",
         "Switch",
         "TextButton",
@@ -25936,6 +26137,16 @@
               "name": "getOgGenerationRunAction",
               "optional": false,
               "type": "typeof getOgGenerationRunAction"
+            },
+            {
+              "name": "getSettings",
+              "optional": true,
+              "type": "typeof getAllSiteSettings"
+            },
+            {
+              "name": "siteOg",
+              "optional": true,
+              "type": "SiteOgImageBindings"
             }
           ]
         },
@@ -25943,6 +26154,11 @@
           "name": "HomeSettingsPanelProps",
           "extends": [],
           "properties": [
+            {
+              "name": "sharingImage",
+              "optional": false,
+              "type": "ReactNode"
+            },
             {
               "name": "form",
               "optional": false,
@@ -26007,22 +26223,25 @@
         "Button",
         "ColorInput",
         "ContentSettingsPanel",
-        "DsHeading",
         "DsLayoutGrid",
         "DsLayoutGridItem",
         "DsLayoutInline",
-        "DsLayoutInset",
         "DsLayoutStack",
         "DsSectionCard",
         "DsText",
+        "Field",
         "HomeSettingsPanel",
         "Loader",
         "NumberInput",
         "OgGenerationRunProgress",
+        "PageHeader",
         "PageLoader",
         "QueryErrorAlert",
         "SectionCard",
         "SectionHeader",
+        "SettingsGroup",
+        "SettingsSection",
+        "SiteOgImagePanel",
         "Slider",
         "SupportingText",
         "Tabs",
@@ -26084,27 +26303,28 @@
               "name": "loader",
               "optional": true,
               "type": "import('@/features/site/SiteLoaderAssetsUploader/SiteLoaderAssetsUploader').SiteLoaderBindings"
-            },
-            {
-              "name": "og",
-              "optional": true,
-              "type": "import('@/features/site/SiteOgImagePanel/SiteOgImagePanel').SiteOgImageBindings"
             }
           ]
         }
       ],
-      "typeAliasEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "LogoSlot",
+          "type": "(typeof DISPLAY_LOGO_SLOTS)[number] | (typeof EMAIL_LOGO_SLOTS)[number]"
+        }
+      ],
       "productionConsumers": [],
       "catalogAdapters": [],
       "tests": [],
       "stories": ["stories/pages/SiteSettings.stories.tsx"],
       "composedJsx": [
-        "DsLayoutStack",
+        "DsLayoutGrid",
+        "LogoSlotGrid",
         "PageLoader",
         "QueryErrorAlert",
+        "SettingsGroup",
         "SiteAssetUploader",
         "SiteLoaderAssetsUploader",
-        "SiteOgImagePanel",
         "SiteSettingsForm"
       ]
     },
@@ -27741,6 +27961,11 @@
               "name": "checkNickname",
               "optional": true,
               "type": "NicknameAvailabilityCheck"
+            },
+            {
+              "name": "footer",
+              "optional": true,
+              "type": "ReactNode"
             }
           ]
         }
@@ -27758,8 +27983,8 @@
         "DsText",
         "LabelBadge",
         "MultiSelect",
-        "SectionHeader",
         "Select",
+        "SettingsSection",
         "SocialLinksEditor",
         "StatusBadge",
         "TextInput",
@@ -28201,7 +28426,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": ["DsLayoutStack", "PublicMetadataRow", "PublicMetadataRows", "SectionHeader", "StatusBadge"]
+      "composedJsx": ["DsLayoutStack", "PublicMetadataRow", "PublicMetadataRows", "SettingsSection", "StatusBadge"]
     },
     {
       "file": "features/admin/work/WorksPageView.tsx",
@@ -30284,12 +30509,15 @@
       "productionConsumers": [
         "features/page/PageEditor/PageEditor.tsx",
         "features/post/PostEditor/PostEditor.tsx",
+        "features/program-event/ProgramEventEditor/ProgramEventEditor.tsx",
+        "features/release/ReleaseEditor/ReleaseEditor.tsx",
+        "features/series/SeriesDetail.tsx",
         "features/work/WorkEditor/WorkEditor.tsx"
       ],
       "catalogAdapters": [],
       "tests": ["features/authoring/DocumentEditorPanels.test.tsx"],
       "stories": [],
-      "composedJsx": ["LayoutBleed", "LayoutStack", "Tabs", "Tabs.List", "Tabs.Panel", "Tabs.Tab"]
+      "composedJsx": ["LayoutBleed", "LayoutStack", "Tabs", "Tabs.List", "Tabs.Panel", "Tabs.Tab", "aside", "div"]
     },
     {
       "file": "features/authoring/EditorHeader/EditorHeader.tsx",
@@ -30377,6 +30605,31 @@
         "DsText",
         "SupportingText"
       ]
+    },
+    {
+      "file": "features/authoring/EditorSettingsSection.tsx",
+      "owner": "Feature/authoring",
+      "exports": [
+        {
+          "name": "EditorSettingsSection",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [],
+      "productionConsumers": [
+        "features/page/PageEditor/PageEditor.tsx",
+        "features/post/PostEditor/PostEditor.tsx",
+        "features/program-event/ProgramEventEditor/ProgramEventEditor.tsx",
+        "features/release/ReleaseEditor/ReleaseEditor.tsx",
+        "features/series/SeriesDetail.tsx",
+        "features/work/WorkEditor/WorkEditor.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["LayoutStack", "SectionCard", "SectionHeader"]
     },
     {
       "file": "features/campaign/CampaignAnalyticsPage.tsx",
@@ -32824,13 +33077,7 @@
       "typeAliasEvidence": [],
       "productionConsumers": [
         "app/(general)/series/[idOrSlug]/page.tsx",
-        "features/data-table/ServerDataTable/ServerDataTable.tsx",
-        "features/page/blocks/artist-grid/ViewServer.tsx",
-        "features/page/blocks/label-list/ViewServer.tsx",
-        "features/page/blocks/post-list/ViewServer.tsx",
-        "features/page/blocks/program-event-list/ViewServer.tsx",
-        "features/page/blocks/releases-gallery/ViewServer.tsx",
-        "features/page/blocks/works-gallery/ViewServer.tsx"
+        "features/data-table/ServerDataTable/ServerDataTable.tsx"
       ],
       "catalogAdapters": [],
       "tests": [],
@@ -33434,8 +33681,6 @@
       ],
       "typeAliasEvidence": [],
       "productionConsumers": [
-        "app/(general)/events/[idOrSlug]/ProgramEventViewClient.tsx",
-        "app/(general)/works/[idOrSlug]/WorkViewClient.tsx",
         "features/changelog/ChangelogPageView.tsx",
         "features/page/PageView/PageContentView.tsx",
         "features/policy/LegalDocumentLayout.tsx",
@@ -33582,8 +33827,6 @@
       ],
       "typeAliasEvidence": [],
       "productionConsumers": [
-        "app/(general)/events/[idOrSlug]/ProgramEventViewClient.tsx",
-        "app/(general)/works/[idOrSlug]/WorkViewClient.tsx",
         "features/changelog/ChangelogPageView.tsx",
         "features/document-layout/ContentLayoutView.tsx",
         "features/policy/LegalDocumentLayout.tsx"
@@ -33624,8 +33867,10 @@
       "typeAliasEvidence": [],
       "productionConsumers": [
         "app/(general)/artists/[idOrSlug]/ArtistPublicView.tsx",
+        "app/(general)/events/[idOrSlug]/ProgramEventViewClient.tsx",
         "app/(general)/labels/[idOrSlug]/LabelPublicView.tsx",
         "app/(general)/releases/[idOrSlug]/ReleasePublicView.tsx",
+        "app/(general)/works/[idOrSlug]/WorkViewClient.tsx",
         "features/document-layout/ui/ContentLayoutView.tsx",
         "features/page/PageView/blocks/DefaultBlockView.tsx",
         "features/page/PageView/blocks/GeneratedRichTextBlockViewRuntime.tsx",
@@ -33638,6 +33883,135 @@
       ],
       "stories": [],
       "composedJsx": ["DocumentHeadingParentLevelContext.Provider"]
+    },
+    {
+      "file": "features/document-layout/ui/EntityDetailLayout.tsx",
+      "owner": "Feature/document-layout",
+      "exports": [
+        {
+          "name": "EntityDetailLayout",
+          "kind": "function"
+        },
+        {
+          "name": "EntityDetailSection",
+          "kind": "function"
+        },
+        {
+          "name": "EntityDetailImage",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-ui boundary candidate (path-based; inspect source)",
+      "propsEvidence": [
+        {
+          "name": "EntityDetailLayoutProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "media",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
+              "name": "title",
+              "optional": false,
+              "type": "ReactNode"
+            },
+            {
+              "name": "titleLang",
+              "optional": true,
+              "type": "string"
+            },
+            {
+              "name": "meta",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
+              "name": "actions",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
+              "name": "children",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
+              "name": "printMedia",
+              "optional": true,
+              "type": "'block' | 'overlay'"
+            }
+          ]
+        },
+        {
+          "name": "EntityDetailSectionProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "title",
+              "optional": false,
+              "type": "ReactNode"
+            },
+            {
+              "name": "actions",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
+              "name": "lang",
+              "optional": true,
+              "type": "string"
+            },
+            {
+              "name": "titleId",
+              "optional": true,
+              "type": "string"
+            },
+            {
+              "name": "children",
+              "optional": false,
+              "type": "ReactNode"
+            }
+          ]
+        },
+        {
+          "name": "EntityDetailImageProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "src",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "alt",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "fit",
+              "optional": true,
+              "type": "'contain' | 'cover'"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": [
+        "app/(general)/artists/[idOrSlug]/ArtistPublicView.tsx",
+        "app/(general)/artists/[idOrSlug]/ArtistWorkSection.tsx",
+        "app/(general)/events/[idOrSlug]/ProgramEventViewClient.tsx",
+        "app/(general)/labels/[idOrSlug]/LabelPublicView.tsx",
+        "app/(general)/releases/[idOrSlug]/ReleasePublicView.tsx",
+        "app/(general)/works/[idOrSlug]/WorkViewClient.tsx",
+        "features/program-event/ProgramEventSeriesPublicView.tsx",
+        "features/series/SeriesPublicView.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["Heading", "article", "div", "h2", "header", "img", "section"]
     },
     {
       "file": "features/draft-mode/DraftModeAlert.tsx",
@@ -35020,9 +35394,9 @@
         "Button",
         "ContentModal",
         "DropdownMenu",
+        "DropdownMenu.Anchor",
         "DropdownMenu.Dropdown",
         "DropdownMenu.Item",
-        "DropdownMenu.Target",
         "DsLayoutInline",
         "DsLayoutInset",
         "DsLayoutStack",
@@ -41681,6 +42055,7 @@
         "DateTime",
         "DialogActions",
         "DropdownMenu",
+        "DropdownMenu.Anchor",
         "DropdownMenu.Divider",
         "DropdownMenu.Dropdown",
         "DropdownMenu.Item",
@@ -48701,7 +49076,6 @@
         "ContentModal",
         "DialogActions",
         "DndContext",
-        "DsHeading",
         "DsLayoutInline",
         "DsLayoutInset",
         "DsLayoutStack",
@@ -48714,12 +49088,12 @@
         "IconTrash",
         "LabelBadge",
         "MenuTargetItemsEditor",
+        "PageHeader",
         "PageLoader",
         "QueryErrorAlert",
-        "SectionCard",
-        "SectionHeader",
         "Select",
         "SelectionRow",
+        "SettingsSection",
         "SortableContext",
         "SortableMenuItem",
         "SupportingText",
@@ -51693,6 +52067,11 @@
               "name": "onCloseSecret",
               "optional": false,
               "type": "() => void"
+            },
+            {
+              "name": "headingLevel",
+              "optional": true,
+              "type": "SectionHeaderLevel"
             }
           ]
         }
@@ -52433,6 +52812,11 @@
               "name": "contentPlacement",
               "optional": true,
               "type": "'start' | 'center'"
+            },
+            {
+              "name": "outlinePresentation",
+              "optional": true,
+              "type": "'responsive' | 'rail'"
             }
           ]
         }
@@ -52858,6 +53242,7 @@
         "EditorActiveLocaleControl",
         "EditorHeader",
         "EditorRuntimeProvider",
+        "EditorSettingsSection",
         "EditorSnapshotHandoff",
         "EntityTranslationsPanel",
         "IconHistory",
@@ -52875,7 +53260,6 @@
         "QueryErrorAlert",
         "ScrollArea",
         "SectionCard",
-        "SectionHeader",
         "SectionList",
         "ShareLinkSection",
         "SummaryFieldCard",
@@ -54841,9 +55225,9 @@
               "type": "string"
             },
             {
-              "name": "gridCols",
+              "name": "trackScale",
               "optional": true,
-              "type": "{ base: number; sm: number; }"
+              "type": "CollectionTrackScale"
             },
             {
               "name": "renderMeta",
@@ -54987,11 +55371,6 @@
               "type": "ReactNode"
             },
             {
-              "name": "columnOptions",
-              "optional": true,
-              "type": "ReadonlyArray<{ value: string; label: string }>"
-            },
-            {
               "name": "slidesToShowOptions",
               "optional": true,
               "type": "ReadonlyArray<{ value: string; label: string }>"
@@ -55088,9 +55467,9 @@
               "type": "boolean"
             },
             {
-              "name": "gridCols",
+              "name": "trackScale",
               "optional": true,
-              "type": "{ base: number; sm: number }"
+              "type": "CollectionTrackScale"
             }
           ]
         }
@@ -55245,9 +55624,9 @@
               "type": "boolean"
             },
             {
-              "name": "gridCols",
+              "name": "trackScale",
               "optional": true,
-              "type": "{ base: number; sm: number }"
+              "type": "CollectionTrackScale"
             },
             {
               "name": "dataScope",
@@ -55455,6 +55834,36 @@
       ]
     },
     {
+      "file": "features/page/blocks/artist-grid/InfiniteList.tsx",
+      "owner": "Feature/page",
+      "exports": [
+        {
+          "name": "ArtistInfiniteList",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "Item",
+          "type": "ArtistListViewClientProps['artists'][number]"
+        },
+        {
+          "name": "ActionQuery",
+          "type": "Omit< Parameters<typeof import('@/lib/actions/artist').listArtistsForBlockAction>[0], 'offset' | 'requestedLocale' >"
+        }
+      ],
+      "productionConsumers": [
+        "features/page/blocks/artist-grid/View.tsx",
+        "features/page/blocks/artist-grid/ViewServer.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["ArtistListViewClient", "InfiniteItems"]
+    },
+    {
       "file": "features/page/blocks/artist-grid/Skeleton.tsx",
       "owner": "Feature/page",
       "exports": [
@@ -55535,14 +55944,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": [
-        "ArtistListViewClient",
-        "DsLayoutInline",
-        "DsLayoutInset",
-        "ListBlockSkeleton",
-        "Pagination",
-        "QueryErrorAlert"
-      ]
+      "composedJsx": ["ArtistInfiniteList", "ArtistListViewClient", "ListBlockSkeleton", "QueryErrorAlert"]
     },
     {
       "file": "features/page/blocks/artist-grid/ViewClient.tsx",
@@ -55558,6 +55960,7 @@
       "typeAliasEvidence": [],
       "productionConsumers": [
         "app/(general)/labels/[idOrSlug]/LabelPublicView.tsx",
+        "features/page/blocks/artist-grid/InfiniteList.tsx",
         "features/page/blocks/artist-grid/View.tsx",
         "features/page/blocks/artist-grid/ViewServer.tsx"
       ],
@@ -55632,10 +56035,10 @@
       "tests": [],
       "stories": [],
       "composedJsx": [
+        "ArtistInfiniteList",
         "ArtistListSkeleton",
         "ArtistListViewClient",
         "ArtistListViewServer",
-        "ServerDataTablePagination",
         "Suspense"
       ]
     },
@@ -55726,11 +56129,6 @@
           "name": "AuthorListSkeletonProps",
           "extends": [],
           "properties": [
-            {
-              "name": "columns",
-              "optional": true,
-              "type": "number"
-            },
             {
               "name": "limit",
               "optional": true,
@@ -57724,6 +58122,71 @@
       ]
     },
     {
+      "file": "features/page/blocks/infinite-items.tsx",
+      "owner": "Feature/page",
+      "exports": [
+        {
+          "name": "InfiniteLoadMore",
+          "kind": "function"
+        },
+        {
+          "name": "InfiniteItems",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "InfiniteLoadMoreProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "hasMore",
+              "optional": false,
+              "type": "boolean"
+            },
+            {
+              "name": "status",
+              "optional": false,
+              "type": "LoadStatus"
+            },
+            {
+              "name": "onLoadMore",
+              "optional": false,
+              "type": "() => unknown"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [
+        {
+          "name": "LoadStatus",
+          "type": "'idle' | 'loading' | 'failed'"
+        }
+      ],
+      "productionConsumers": [
+        "features/page/blocks/artist-grid/InfiniteList.tsx",
+        "features/page/blocks/label-list/InfiniteList.tsx",
+        "features/page/blocks/post-list/InfiniteList.tsx",
+        "features/page/blocks/program-event-list/InfiniteList.tsx",
+        "features/page/blocks/releases-gallery/InfiniteList.tsx",
+        "features/page/blocks/works-gallery/InfiniteList.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": ["features/page/blocks/infinite-items.test.tsx"],
+      "stories": ["features/page/blocks/InfiniteCollection.stories.tsx"],
+      "composedJsx": [
+        "Button",
+        "InfiniteLoadMore",
+        "LayoutInline",
+        "LayoutInset",
+        "LayoutStack",
+        "SupportingText",
+        "VisuallyHidden",
+        "div"
+      ]
+    },
+    {
       "file": "features/page/blocks/label-list/Editor.tsx",
       "owner": "Feature/page",
       "exports": [
@@ -57770,6 +58233,36 @@
       "tests": ["features/page/blocks/CollectionSettings.permissions.test.tsx"],
       "stories": [],
       "composedJsx": ["LabelListSettingsForm", "LabelListView", "ListBlockEditorBase", "Switch"]
+    },
+    {
+      "file": "features/page/blocks/label-list/InfiniteList.tsx",
+      "owner": "Feature/page",
+      "exports": [
+        {
+          "name": "LabelInfiniteList",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "Item",
+          "type": "LabelListViewClientProps['labels'][number]"
+        },
+        {
+          "name": "ActionQuery",
+          "type": "Omit<Parameters<typeof listLabelsForBlockAction>[0], 'offset' | 'requestedLocale'>"
+        }
+      ],
+      "productionConsumers": [
+        "features/page/blocks/label-list/View.tsx",
+        "features/page/blocks/label-list/ViewServer.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["InfiniteItems", "LabelListViewClient"]
     },
     {
       "file": "features/page/blocks/label-list/Skeleton.tsx",
@@ -57852,14 +58345,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": [
-        "DsLayoutInline",
-        "DsLayoutInset",
-        "LabelListViewClient",
-        "ListBlockSkeleton",
-        "Pagination",
-        "QueryErrorAlert"
-      ]
+      "composedJsx": ["LabelInfiniteList", "LabelListViewClient", "ListBlockSkeleton", "QueryErrorAlert"]
     },
     {
       "file": "features/page/blocks/label-list/ViewClient.tsx",
@@ -57874,6 +58360,7 @@
       "propsEvidence": [],
       "typeAliasEvidence": [],
       "productionConsumers": [
+        "features/page/blocks/label-list/InfiniteList.tsx",
         "features/page/blocks/label-list/View.tsx",
         "features/page/blocks/label-list/ViewServer.tsx"
       ],
@@ -57948,10 +58435,10 @@
       "tests": [],
       "stories": [],
       "composedJsx": [
+        "LabelInfiniteList",
         "LabelListSkeleton",
         "LabelListViewClient",
         "LabelListViewServer",
-        "ServerDataTablePagination",
         "Suspense"
       ]
     },
@@ -58575,6 +59062,32 @@
       ]
     },
     {
+      "file": "features/page/blocks/post-list/InfiniteList.tsx",
+      "owner": "Feature/page",
+      "exports": [
+        {
+          "name": "PostInfiniteList",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "Item",
+          "type": "PostListViewClientProps['posts'][number]"
+        }
+      ],
+      "productionConsumers": [
+        "features/page/blocks/post-list/View.tsx",
+        "features/page/blocks/post-list/ViewServer.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["InfiniteItems", "PostListViewClient"]
+    },
+    {
       "file": "features/page/blocks/post-list/PostAuthorLinks.tsx",
       "owner": "Feature/page",
       "exports": [
@@ -58756,9 +59269,8 @@
       "tests": ["features/page/blocks/CarouselSkeleton.loading.test.tsx"],
       "stories": [],
       "composedJsx": [
-        "DsLayoutInline",
         "DsLayoutInset",
-        "Pagination",
+        "PostInfiniteList",
         "PostListSkeleton",
         "PostListViewClient",
         "SupportingText",
@@ -58778,6 +59290,7 @@
       "propsEvidence": [],
       "typeAliasEvidence": [],
       "productionConsumers": [
+        "features/page/blocks/post-list/InfiniteList.tsx",
         "features/page/blocks/post-list/View.tsx",
         "features/page/blocks/post-list/ViewServer.tsx"
       ],
@@ -58886,13 +59399,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": [
-        "PostListSkeleton",
-        "PostListViewClient",
-        "PostListViewServer",
-        "ServerDataTablePagination",
-        "Suspense"
-      ]
+      "composedJsx": ["PostInfiniteList", "PostListSkeleton", "PostListViewClient", "PostListViewServer", "Suspense"]
     },
     {
       "file": "features/page/blocks/post-map/Editor.tsx",
@@ -59335,6 +59842,36 @@
       ]
     },
     {
+      "file": "features/page/blocks/program-event-list/InfiniteList.tsx",
+      "owner": "Feature/page",
+      "exports": [
+        {
+          "name": "ProgramEventInfiniteList",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "Item",
+          "type": "ProgramEventListViewClientProps['events'][number]"
+        },
+        {
+          "name": "BrowserQuery",
+          "type": "Omit< Parameters<typeof import('@/lib/queries/program-event-browser').listProgramEventsForBlockBrowser>[0], 'offset' | 'requestedLocale' >"
+        }
+      ],
+      "productionConsumers": [
+        "features/page/blocks/program-event-list/View.tsx",
+        "features/page/blocks/program-event-list/ViewServer.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["InfiniteItems", "ProgramEventListViewClient"]
+    },
+    {
       "file": "features/page/blocks/program-event-list/Skeleton.tsx",
       "owner": "Feature/page",
       "exports": [
@@ -59415,13 +59952,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": [
-        "DsLayoutInline",
-        "DsLayoutInset",
-        "ListBlockSkeleton",
-        "Pagination",
-        "ProgramEventListViewClient"
-      ]
+      "composedJsx": ["ListBlockSkeleton", "ProgramEventInfiniteList", "ProgramEventListViewClient"]
     },
     {
       "file": "features/page/blocks/program-event-list/ViewClient.tsx",
@@ -59436,6 +59967,7 @@
       "propsEvidence": [],
       "typeAliasEvidence": [],
       "productionConsumers": [
+        "features/page/blocks/program-event-list/InfiniteList.tsx",
         "features/page/blocks/program-event-list/View.tsx",
         "features/page/blocks/program-event-list/ViewServer.tsx"
       ],
@@ -59540,10 +60072,10 @@
       "tests": [],
       "stories": [],
       "composedJsx": [
+        "ProgramEventInfiniteList",
         "ProgramEventListSkeleton",
         "ProgramEventListViewClient",
         "ProgramEventListViewServer",
-        "ServerDataTablePagination",
         "Suspense"
       ]
     },
@@ -59602,6 +60134,36 @@
         "Select",
         "Switch"
       ]
+    },
+    {
+      "file": "features/page/blocks/releases-gallery/InfiniteList.tsx",
+      "owner": "Feature/page",
+      "exports": [
+        {
+          "name": "ReleaseInfiniteList",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "Item",
+          "type": "ReleaseListViewClientProps['releases'][number]"
+        },
+        {
+          "name": "BrowserQuery",
+          "type": "Omit<Parameters<typeof import('@/lib/queries/release-browser').listPublishedReleases>[0], 'offset'>"
+        }
+      ],
+      "productionConsumers": [
+        "features/page/blocks/releases-gallery/View.tsx",
+        "features/page/blocks/releases-gallery/ViewServer.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["InfiniteItems", "ReleaseListViewClient"]
     },
     {
       "file": "features/page/blocks/releases-gallery/Skeleton.tsx",
@@ -59684,14 +60246,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": [
-        "DsLayoutInline",
-        "DsLayoutInset",
-        "ListBlockSkeleton",
-        "Pagination",
-        "QueryErrorAlert",
-        "ReleaseListViewClient"
-      ]
+      "composedJsx": ["ListBlockSkeleton", "QueryErrorAlert", "ReleaseInfiniteList", "ReleaseListViewClient"]
     },
     {
       "file": "features/page/blocks/releases-gallery/ViewClient.tsx",
@@ -59708,6 +60263,7 @@
       "productionConsumers": [
         "app/(general)/artists/[idOrSlug]/ArtistPublicView.tsx",
         "app/(general)/labels/[idOrSlug]/LabelPublicView.tsx",
+        "features/page/blocks/releases-gallery/InfiniteList.tsx",
         "features/page/blocks/releases-gallery/View.tsx",
         "features/page/blocks/releases-gallery/ViewServer.tsx"
       ],
@@ -59764,7 +60320,10 @@
       "productionConsumers": [],
       "catalogAdapters": [],
       "tests": ["features/page/blocks/releases-gallery/ViewClient.test.tsx"],
-      "stories": ["features/page/blocks/CollectionBlocks.stories.tsx"],
+      "stories": [
+        "features/page/blocks/CollectionBlocks.stories.tsx",
+        "features/page/blocks/InfiniteCollection.stories.tsx"
+      ],
       "composedJsx": ["DateTime", "DsLayoutStack", "DsText", "EntityListView", "PostMetaLinks"]
     },
     {
@@ -59787,10 +60346,10 @@
       "tests": [],
       "stories": [],
       "composedJsx": [
+        "ReleaseInfiniteList",
         "ReleaseListSkeleton",
         "ReleaseListViewClient",
         "ReleaseListViewServer",
-        "ServerDataTablePagination",
         "Suspense"
       ]
     },
@@ -60380,6 +60939,36 @@
       "composedJsx": ["ListBlockEditorBase", "MultiSelect", "Switch", "WorkListSettingsForm", "WorkListView"]
     },
     {
+      "file": "features/page/blocks/works-gallery/InfiniteList.tsx",
+      "owner": "Feature/page",
+      "exports": [
+        {
+          "name": "WorkInfiniteList",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "Item",
+          "type": "WorkListViewClientProps['works'][number]"
+        },
+        {
+          "name": "ActionQuery",
+          "type": "Omit<NonNullable<Parameters<typeof listWorksPublishedAction>[0]>, 'offset'>"
+        }
+      ],
+      "productionConsumers": [
+        "features/page/blocks/works-gallery/View.tsx",
+        "features/page/blocks/works-gallery/ViewServer.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["InfiniteItems", "WorkListViewClient"]
+    },
+    {
       "file": "features/page/blocks/works-gallery/Skeleton.tsx",
       "owner": "Feature/page",
       "exports": [
@@ -60460,14 +61049,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": [
-        "DsLayoutInline",
-        "DsLayoutInset",
-        "ListBlockSkeleton",
-        "Pagination",
-        "QueryErrorAlert",
-        "WorkListViewClient"
-      ]
+      "composedJsx": ["ListBlockSkeleton", "QueryErrorAlert", "WorkInfiniteList", "WorkListViewClient"]
     },
     {
       "file": "features/page/blocks/works-gallery/ViewClient.tsx",
@@ -60482,6 +61064,7 @@
       "propsEvidence": [],
       "typeAliasEvidence": [],
       "productionConsumers": [
+        "features/page/blocks/works-gallery/InfiniteList.tsx",
         "features/page/blocks/works-gallery/View.tsx",
         "features/page/blocks/works-gallery/ViewServer.tsx"
       ],
@@ -60560,13 +61143,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": [
-        "ServerDataTablePagination",
-        "Suspense",
-        "WorkListSkeleton",
-        "WorkListViewClient",
-        "WorkListViewServer"
-      ]
+      "composedJsx": ["Suspense", "WorkInfiniteList", "WorkListSkeleton", "WorkListViewClient", "WorkListViewServer"]
     },
     {
       "file": "features/participants/ParticipantRow.tsx",
@@ -62905,10 +63482,10 @@
         "ContentLayoutField",
         "CreatePlaceModal",
         "DocumentEditorPanels",
-        "DsLayoutGrid",
         "DsLayoutStack",
         "EditorActiveLocaleControl",
         "EditorRuntimeProvider",
+        "EditorSettingsSection",
         "EntityTranslationsPanel",
         "FeaturedImageUploader",
         "LocationSelector",
@@ -62926,7 +63503,6 @@
         "PostScheduleDialog",
         "PostSessionExpiredDialog",
         "SectionCard",
-        "SectionHeader",
         "SeriesSelector",
         "ShareLinkSection",
         "SummaryFieldCard",
@@ -65003,6 +65579,7 @@
         "Checkbox",
         "CreatePlaceModal",
         "DateTimePicker",
+        "DocumentEditorPanels",
         "DsLayoutGrid",
         "DsLayoutInline",
         "DsLayoutInset",
@@ -65011,11 +65588,11 @@
         "EditorActiveLocaleControl",
         "EditorHeader",
         "EditorRuntimeProvider",
+        "EditorSettingsSection",
         "EntityTranslationsPanel",
         "LocalizedRichTextFragmentEditor",
         "LocationSelector",
         "MapPlaceActionProvider",
-        "MediaPreviewGrid",
         "MetadataPanel",
         "MultiSelect",
         "NumberInput",
@@ -65024,7 +65601,6 @@
         "ProgramEventEditorView",
         "ProgramEventPosterUploader",
         "SectionCard",
-        "SectionHeader",
         "Select",
         "SummaryFieldCard",
         "TextInput",
@@ -65354,7 +65930,7 @@
         "features/program-event/ProgramEventSeriesPublicView.stories.tsx",
         "stories/pages/EventSeries.stories.tsx"
       ],
-      "composedJsx": ["DsText", "LayoutGrid", "LayoutGridItem", "LayoutStack", "PageHeader", "img"]
+      "composedJsx": ["DsText", "EntityDetailImage", "EntityDetailLayout", "EntityDetailSection"]
     },
     {
       "file": "features/release/ReleaseCreditsList.tsx",
@@ -66092,6 +66668,7 @@
         "ActiveEditLocaleContentPreview",
         "AuthoringExtension",
         "DateInput",
+        "DocumentEditorPanels",
         "DsLayoutGrid",
         "DsLayoutInline",
         "DsLayoutStack",
@@ -66099,6 +66676,7 @@
         "EditorActiveLocaleControl",
         "EditorHeader",
         "EditorRuntimeProvider",
+        "EditorSettingsSection",
         "EntityTranslationsPanel",
         "QueryErrorAlert",
         "ReleaseArtistsSection",
@@ -66941,6 +67519,37 @@
               "type": "'default' | 'status-only' | 'button-only'"
             }
           ]
+        },
+        {
+          "name": "TrackAudioStatusIconProps",
+          "extends": ["extends Omit<TextProps, 'children' | 'id' | 'role' | 'tone' | 'size' | 'as'>"],
+          "properties": [
+            {
+              "name": "id",
+              "optional": true,
+              "type": "string"
+            },
+            {
+              "name": "kind",
+              "optional": false,
+              "type": "'idle' | 'warning' | 'processing' | 'ready' | 'failed'"
+            },
+            {
+              "name": "tone",
+              "optional": false,
+              "type": "StatusBadgeTone"
+            },
+            {
+              "name": "label",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "compact",
+              "optional": false,
+              "type": "boolean"
+            }
+          ]
         }
       ],
       "typeAliasEvidence": [
@@ -66965,8 +67574,7 @@
         "Loader",
         "Tooltip",
         "TrackAudioStatusIcon",
-        "div",
-        "span"
+        "div"
       ]
     },
     {
@@ -67131,6 +67739,7 @@
         "AuthoringExtension",
         "Button",
         "DateTime",
+        "DocumentEditorPanels",
         "DsLayoutInline",
         "DsLayoutInset",
         "DsLayoutStack",
@@ -67138,6 +67747,7 @@
         "EditorActiveLocaleControl",
         "EditorHeader",
         "EditorRuntimeProvider",
+        "EditorSettingsSection",
         "EntityTranslationsPanel",
         "IconButton",
         "IconChevronDown",
@@ -67145,7 +67755,6 @@
         "IconUsers",
         "IconX",
         "ImageUploadCropController",
-        "LayoutInset",
         "Loader",
         "MediaPreviewGrid",
         "OgImagePreview",
@@ -67410,12 +68019,11 @@
       "stories": ["features/series/SeriesPublicView.stories.tsx"],
       "composedJsx": [
         "DateTime",
-        "DsLayoutGrid",
-        "DsLayoutGridItem",
         "DsLayoutInset",
-        "DsLayoutStack",
         "DsText",
-        "PageHeader",
+        "EntityDetailImage",
+        "EntityDetailLayout",
+        "EntityDetailSection",
         "SupportingText",
         "Table",
         "Table.ScrollContainer",
@@ -67424,9 +68032,7 @@
         "Table.Th",
         "Table.Thead",
         "Table.Tr",
-        "TextButton",
-        "div",
-        "img"
+        "TextButton"
       ]
     },
     {
@@ -68053,7 +68659,7 @@
             {
               "name": "variant",
               "optional": true,
-              "type": "'icon' | 'text'"
+              "type": "'icon' | 'text' | 'navigation'"
             },
             {
               "name": "size",
@@ -68072,7 +68678,7 @@
       "productionConsumers": ["features/shell/Shell.tsx"],
       "catalogAdapters": [],
       "tests": ["features/shell/LanguageMenu.test.tsx"],
-      "stories": [],
+      "stories": ["stories/pages/Frames.stories.tsx"],
       "composedJsx": [
         "DropdownMenu",
         "DropdownMenu.Dropdown",
@@ -68080,6 +68686,7 @@
         "DropdownMenu.Target",
         "IconButton",
         "IconLanguage",
+        "Text",
         "TextButton",
         "VisuallyHidden"
       ]
@@ -68451,7 +69058,6 @@
         "DsText",
         "Footer",
         "LayoutGrid",
-        "LayoutInline",
         "LayoutVisibility",
         "Separator",
         "ShellAccountDesktop",
@@ -68465,6 +69071,7 @@
         "ShellNavigationToggle",
         "ShellSearchAction",
         "ShellThemeToggle",
+        "SiteHeader",
         "VisuallyHidden",
         "div"
       ]
@@ -68592,6 +69199,11 @@
               "name": "onImageChange",
               "optional": false,
               "type": "(url: string | null) => Promise<void>"
+            },
+            {
+              "name": "previewSurface",
+              "optional": true,
+              "type": "ImagePreviewSurface"
             }
           ]
         }
@@ -68778,6 +69390,11 @@
               "type": "number | 'auto'"
             },
             {
+              "name": "previewSurface",
+              "optional": true,
+              "type": "ImagePreviewSurface"
+            },
+            {
               "name": "label",
               "optional": false,
               "type": "string"
@@ -68789,7 +69406,7 @@
             },
             {
               "name": "uploadPrompt",
-              "optional": true,
+              "optional": false,
               "type": "string"
             },
             {
@@ -68831,6 +69448,27 @@
       ],
       "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
       "propsEvidence": [
+        {
+          "name": "SiteAssetPreview",
+          "extends": [],
+          "properties": [
+            {
+              "name": "height",
+              "optional": false,
+              "type": "number"
+            },
+            {
+              "name": "width",
+              "optional": false,
+              "type": "number | 'auto'"
+            },
+            {
+              "name": "surface",
+              "optional": true,
+              "type": "ImagePreviewSurface"
+            }
+          ]
+        },
         {
           "name": "SiteAssetUploaderProps",
           "extends": [],
@@ -68924,6 +69562,11 @@
               "name": "previewWidth",
               "optional": false,
               "type": "number | 'auto'"
+            },
+            {
+              "name": "previewSurface",
+              "optional": true,
+              "type": "ImagePreviewSurface"
             },
             {
               "name": "label",
@@ -69058,6 +69701,11 @@
           "extends": [],
           "properties": [
             {
+              "name": "form",
+              "optional": true,
+              "type": "'full' | 'symbol'"
+            },
+            {
               "name": "size",
               "optional": true,
               "type": "SiteLogoSize"
@@ -69138,10 +69786,7 @@
           "type": "Extract< SiteAssetType, 'site_og_background' | 'privacy_og_background' | 'terms_og_background' >"
         }
       ],
-      "productionConsumers": [
-        "features/policy/LegalOgImagePanel.tsx",
-        "features/site/SiteOgImagePanel/SiteOgImagePanel.tsx"
-      ],
+      "productionConsumers": ["features/policy/LegalOgImagePanel.tsx"],
       "catalogAdapters": [],
       "tests": ["features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader.test.tsx"],
       "stories": [],
@@ -69207,11 +69852,17 @@
         }
       ],
       "typeAliasEvidence": [],
-      "productionConsumers": ["features/admin/settings/SiteSettingsPage.tsx"],
+      "productionConsumers": ["features/admin/settings/OgImageSettingsPage.tsx"],
       "catalogAdapters": [],
       "tests": ["features/site/SiteOgImagePanel/SiteOgImagePanel.test.tsx"],
       "stories": [],
-      "composedJsx": ["AuthoringExtension", "MediaPreviewGrid", "OgImagePreview", "SiteOgBackgroundUploader"]
+      "composedJsx": [
+        "AuthoringExtension",
+        "MediaPreviewGrid",
+        "OgImagePreview",
+        "SiteOgBackgroundUploader",
+        "Skeleton"
+      ]
     },
     {
       "file": "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
@@ -69290,12 +69941,12 @@
       "composedJsx": [
         "Button",
         "ColorInput",
-        "DsHeading",
         "DsLayoutInline",
         "DsLayoutStack",
-        "SectionCard",
-        "SectionHeader",
+        "PageHeader",
         "Select",
+        "SettingsGroup",
+        "SettingsSection",
         "SocialLinksEditor",
         "Switch",
         "TextInput",
@@ -69463,6 +70114,11 @@
               "name": "label",
               "optional": true,
               "type": "string"
+            },
+            {
+              "name": "labelHidden",
+              "optional": true,
+              "type": "boolean"
             },
             {
               "name": "addButtonMode",
@@ -69879,6 +70535,11 @@
               "name": "label",
               "optional": true,
               "type": "string"
+            },
+            {
+              "name": "labelHidden",
+              "optional": true,
+              "type": "boolean"
             },
             {
               "name": "addButtonMode",
@@ -70901,7 +71562,6 @@
       "stories": ["stories/pages/TranslationAdmin.stories.tsx"],
       "composedJsx": [
         "Button",
-        "DsHeading",
         "DsLayoutInline",
         "DsLayoutStack",
         "DsText",
@@ -70910,6 +71570,7 @@
         "IconSettings2",
         "LabelBadge",
         "LocaleCode",
+        "PageHeader",
         "PageLoader",
         "StatusBadge",
         "SupportingText",
@@ -70966,6 +71627,7 @@
         "IconSettings2",
         "LabelBadge",
         "LocaleCode",
+        "PageHeader",
         "PageLoader",
         "StatCard",
         "SupportingText",
@@ -71054,7 +71716,6 @@
       "composedJsx": [
         "Button",
         "ConfirmationDialog",
-        "DsHeading",
         "DsLayoutInline",
         "DsLayoutStack",
         "DsSectionCard",
@@ -71067,14 +71728,15 @@
         "IconSettings2",
         "IconTrash",
         "LabelBadge",
+        "PageHeader",
         "PageLoader",
         "Select",
+        "SettingsSection",
         "SupportingText",
         "Switch",
         "TagsInput",
         "TranslationProviderModal",
-        "TranslationSettingsPage",
-        "div"
+        "TranslationSettingsPage"
       ]
     },
     {
@@ -72858,11 +73520,6 @@
           "extends": [],
           "properties": [
             {
-              "name": "title",
-              "optional": true,
-              "type": "string"
-            },
-            {
               "name": "children",
               "optional": false,
               "type": "React.ReactNode"
@@ -73325,6 +73982,7 @@
         "EditorActiveLocaleControl",
         "EditorHeader",
         "EditorRuntimeProvider",
+        "EditorSettingsSection",
         "EntityTranslationsPanel",
         "IconHistory",
         "LocalizedRichTextFragmentEditor",
@@ -73669,46 +74327,6 @@
       "tests": ["features/work/WorkMediaDeliveryContext.test.tsx"],
       "stories": [],
       "composedJsx": ["ContentMediaDeliveryProvider"]
-    },
-    {
-      "file": "features/work/WorkPublicHeaderLayout.tsx",
-      "owner": "Feature/work",
-      "exports": [
-        {
-          "name": "WorkPublicHeaderLayout",
-          "kind": "function"
-        }
-      ],
-      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [
-        {
-          "name": "WorkPublicHeaderLayoutProps",
-          "extends": [],
-          "properties": [
-            {
-              "name": "featuredImageUrl",
-              "optional": false,
-              "type": "string | null"
-            },
-            {
-              "name": "imageAlt",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "children",
-              "optional": false,
-              "type": "ReactNode"
-            }
-          ]
-        }
-      ],
-      "typeAliasEvidence": [],
-      "productionConsumers": ["app/(general)/works/[idOrSlug]/WorkViewClient.tsx"],
-      "catalogAdapters": [],
-      "tests": [],
-      "stories": [],
-      "composedJsx": ["Image", "div"]
     }
   ],
   "coreFamilies": [
@@ -73719,7 +74337,10 @@
     },
     {
       "owner": "Core/ApplicationFrame",
-      "components": ["components/core/ApplicationFrame/ApplicationFrame.tsx"],
+      "components": [
+        "components/core/ApplicationFrame/ApplicationFrame.tsx",
+        "components/core/ApplicationFrame/SiteHeader.tsx"
+      ],
       "stories": ["components/core/ApplicationFrame/ApplicationFrame.stories.tsx"]
     },
     {
@@ -74095,6 +74716,7 @@
       "components": [
         "components/core/Section/SectionCard.tsx",
         "components/core/Section/SectionHeader.tsx",
+        "components/core/Section/SettingsSection.tsx",
         "components/core/Section/StatCard.tsx",
         "components/core/Section/ToolbarCommand.tsx",
         "components/core/Section/ToolbarLayout.tsx",
@@ -74861,13 +75483,15 @@
         "features/authoring/EditorHeader/EditorHeader.tsx",
         "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "features/authoring/EditorHeader/index.ts",
-        "features/authoring/EditorHeader/status-options.ts"
+        "features/authoring/EditorHeader/status-options.ts",
+        "features/authoring/EditorSettingsSection.tsx"
       ],
       "components": [
         "features/authoring/AuthoringExtensionsContext.tsx",
         "features/authoring/DocumentEditorPanels.tsx",
         "features/authoring/EditorHeader/EditorHeader.tsx",
-        "features/authoring/EditorHeader/RejectedEditsDialog.tsx"
+        "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
+        "features/authoring/EditorSettingsSection.tsx"
       ],
       "stories": [],
       "tests": [
@@ -75090,6 +75714,7 @@
         "features/document-layout/ui/ContentLayoutFieldView.tsx",
         "features/document-layout/ui/ContentLayoutView.tsx",
         "features/document-layout/ui/DocumentHeadingScope.tsx",
+        "features/document-layout/ui/EntityDetailLayout.tsx",
         "features/document-layout/ui/document-heading-level.ts",
         "features/document-layout/ui/index.ts",
         "features/document-layout/ui/types.ts"
@@ -75100,7 +75725,8 @@
         "features/document-layout/ui/ContentChrome.tsx",
         "features/document-layout/ui/ContentLayoutFieldView.tsx",
         "features/document-layout/ui/ContentLayoutView.tsx",
-        "features/document-layout/ui/DocumentHeadingScope.tsx"
+        "features/document-layout/ui/DocumentHeadingScope.tsx",
+        "features/document-layout/ui/EntityDetailLayout.tsx"
       ],
       "stories": ["features/document-layout/ui/ContentLayoutFieldView.stories.tsx"],
       "tests": [
@@ -76355,12 +76981,14 @@
         "features/page/blocks/MobileBlockTablePaginationScroll.tsx",
         "features/page/blocks/TableLoadingFallback.tsx",
         "features/page/blocks/artist-grid/Editor.tsx",
+        "features/page/blocks/artist-grid/InfiniteList.tsx",
         "features/page/blocks/artist-grid/Skeleton.tsx",
         "features/page/blocks/artist-grid/View.tsx",
         "features/page/blocks/artist-grid/ViewClient.tsx",
         "features/page/blocks/artist-grid/ViewClientRuntime.tsx",
         "features/page/blocks/artist-grid/ViewServer.tsx",
         "features/page/blocks/artist-grid/schema.ts",
+        "features/page/blocks/artist-grid/transform.ts",
         "features/page/blocks/author-list/Editor.tsx",
         "features/page/blocks/author-list/Skeleton.tsx",
         "features/page/blocks/author-list/View.tsx",
@@ -76418,13 +77046,16 @@
         "features/page/blocks/immersive-scene/useAuthenticatedMedia.ts",
         "features/page/blocks/immersive-scene/useImmersiveAssetUploadController.ts",
         "features/page/blocks/immersive-scene/useImmersiveUnitAssetUploads.ts",
+        "features/page/blocks/infinite-items.tsx",
         "features/page/blocks/label-list/Editor.tsx",
+        "features/page/blocks/label-list/InfiniteList.tsx",
         "features/page/blocks/label-list/Skeleton.tsx",
         "features/page/blocks/label-list/View.tsx",
         "features/page/blocks/label-list/ViewClient.tsx",
         "features/page/blocks/label-list/ViewClientRuntime.tsx",
         "features/page/blocks/label-list/ViewServer.tsx",
         "features/page/blocks/label-list/schema.ts",
+        "features/page/blocks/label-list/transform.ts",
         "features/page/blocks/label-marquee/Editor.tsx",
         "features/page/blocks/label-marquee/ViewServer.tsx",
         "features/page/blocks/label-marquee/schema.ts",
@@ -76450,6 +77081,7 @@
         "features/page/blocks/mermaid/View.tsx",
         "features/page/blocks/mermaid/schema.ts",
         "features/page/blocks/post-list/Editor.tsx",
+        "features/page/blocks/post-list/InfiniteList.tsx",
         "features/page/blocks/post-list/PostAuthorLinks.tsx",
         "features/page/blocks/post-list/PostMetaLinks.tsx",
         "features/page/blocks/post-list/Skeleton.tsx",
@@ -76458,6 +77090,7 @@
         "features/page/blocks/post-list/ViewClientRuntime.tsx",
         "features/page/blocks/post-list/ViewServer.tsx",
         "features/page/blocks/post-list/schema.ts",
+        "features/page/blocks/post-list/transform.ts",
         "features/page/blocks/post-map/Editor.tsx",
         "features/page/blocks/post-map/Skeleton.tsx",
         "features/page/blocks/post-map/View.tsx",
@@ -76476,6 +77109,7 @@
         "features/page/blocks/post-table/schema.ts",
         "features/page/blocks/post-table/spec.ts",
         "features/page/blocks/program-event-list/Editor.tsx",
+        "features/page/blocks/program-event-list/InfiniteList.tsx",
         "features/page/blocks/program-event-list/Skeleton.tsx",
         "features/page/blocks/program-event-list/View.tsx",
         "features/page/blocks/program-event-list/ViewClient.tsx",
@@ -76484,12 +77118,14 @@
         "features/page/blocks/program-event-list/schema.ts",
         "features/page/blocks/registry.ts",
         "features/page/blocks/releases-gallery/Editor.tsx",
+        "features/page/blocks/releases-gallery/InfiniteList.tsx",
         "features/page/blocks/releases-gallery/Skeleton.tsx",
         "features/page/blocks/releases-gallery/View.tsx",
         "features/page/blocks/releases-gallery/ViewClient.tsx",
         "features/page/blocks/releases-gallery/ViewClientRuntime.tsx",
         "features/page/blocks/releases-gallery/ViewServer.tsx",
         "features/page/blocks/releases-gallery/schema.ts",
+        "features/page/blocks/releases-gallery/transform.ts",
         "features/page/blocks/rich-text/Editor.tsx",
         "features/page/blocks/rich-text/View.tsx",
         "features/page/blocks/rich-text/schema.ts",
@@ -76517,12 +77153,14 @@
         "features/page/blocks/work-table/schema.ts",
         "features/page/blocks/work-table/spec.ts",
         "features/page/blocks/works-gallery/Editor.tsx",
+        "features/page/blocks/works-gallery/InfiniteList.tsx",
         "features/page/blocks/works-gallery/Skeleton.tsx",
         "features/page/blocks/works-gallery/View.tsx",
         "features/page/blocks/works-gallery/ViewClient.tsx",
         "features/page/blocks/works-gallery/ViewClientRuntime.tsx",
         "features/page/blocks/works-gallery/ViewServer.tsx",
         "features/page/blocks/works-gallery/schema.ts",
+        "features/page/blocks/works-gallery/transform.ts",
         "features/page/page-section-dedupe.ts",
         "features/page/section-style.ts"
       ],
@@ -76579,6 +77217,7 @@
         "features/page/blocks/MobileBlockTablePaginationScroll.tsx",
         "features/page/blocks/TableLoadingFallback.tsx",
         "features/page/blocks/artist-grid/Editor.tsx",
+        "features/page/blocks/artist-grid/InfiniteList.tsx",
         "features/page/blocks/artist-grid/Skeleton.tsx",
         "features/page/blocks/artist-grid/View.tsx",
         "features/page/blocks/artist-grid/ViewClient.tsx",
@@ -76620,7 +77259,9 @@
         "features/page/blocks/immersive-scene/View.tsx",
         "features/page/blocks/immersive-scene/ViewRuntime.tsx",
         "features/page/blocks/immersive-scene/Workspace.tsx",
+        "features/page/blocks/infinite-items.tsx",
         "features/page/blocks/label-list/Editor.tsx",
+        "features/page/blocks/label-list/InfiniteList.tsx",
         "features/page/blocks/label-list/Skeleton.tsx",
         "features/page/blocks/label-list/View.tsx",
         "features/page/blocks/label-list/ViewClient.tsx",
@@ -76637,6 +77278,7 @@
         "features/page/blocks/mermaid/Editor.tsx",
         "features/page/blocks/mermaid/View.tsx",
         "features/page/blocks/post-list/Editor.tsx",
+        "features/page/blocks/post-list/InfiniteList.tsx",
         "features/page/blocks/post-list/PostAuthorLinks.tsx",
         "features/page/blocks/post-list/PostMetaLinks.tsx",
         "features/page/blocks/post-list/Skeleton.tsx",
@@ -76655,12 +77297,14 @@
         "features/page/blocks/post-table/View.tsx",
         "features/page/blocks/post-table/ViewServer.tsx",
         "features/page/blocks/program-event-list/Editor.tsx",
+        "features/page/blocks/program-event-list/InfiniteList.tsx",
         "features/page/blocks/program-event-list/Skeleton.tsx",
         "features/page/blocks/program-event-list/View.tsx",
         "features/page/blocks/program-event-list/ViewClient.tsx",
         "features/page/blocks/program-event-list/ViewClientRuntime.tsx",
         "features/page/blocks/program-event-list/ViewServer.tsx",
         "features/page/blocks/releases-gallery/Editor.tsx",
+        "features/page/blocks/releases-gallery/InfiniteList.tsx",
         "features/page/blocks/releases-gallery/Skeleton.tsx",
         "features/page/blocks/releases-gallery/View.tsx",
         "features/page/blocks/releases-gallery/ViewClient.tsx",
@@ -76680,6 +77324,7 @@
         "features/page/blocks/work-table/View.tsx",
         "features/page/blocks/work-table/ViewServer.tsx",
         "features/page/blocks/works-gallery/Editor.tsx",
+        "features/page/blocks/works-gallery/InfiniteList.tsx",
         "features/page/blocks/works-gallery/Skeleton.tsx",
         "features/page/blocks/works-gallery/View.tsx",
         "features/page/blocks/works-gallery/ViewClient.tsx",
@@ -76691,6 +77336,7 @@
         "features/page/PageEditor/SectionItemView.stories.tsx",
         "features/page/PageEditor/editors/ColumnsEditor.stories.tsx",
         "features/page/blocks/CollectionBlocks.stories.tsx",
+        "features/page/blocks/InfiniteCollection.stories.tsx",
         "features/page/blocks/ListBlockEditorBase.stories.tsx",
         "features/page/blocks/ListViewShell.stories.tsx",
         "features/page/blocks/embed/Embed.stories.tsx"
@@ -76762,6 +77408,7 @@
         "features/page/blocks/immersive-scene/schema.test.ts",
         "features/page/blocks/immersive-scene/settings-model.test.ts",
         "features/page/blocks/immersive-scene/useAuthenticatedMedia.test.tsx",
+        "features/page/blocks/infinite-items.test.tsx",
         "features/page/blocks/label-list/ViewClient.test.tsx",
         "features/page/blocks/list-view-utils.test.ts",
         "features/page/blocks/map-features/viewport.test.ts",
@@ -77214,6 +77861,7 @@
         "features/site/SiteLoaderAssetsUploader/SiteLoaderAssetsUploader.tsx",
         "features/site/SiteLogo/SiteLogo.tsx",
         "features/site/SiteLogo/index.ts",
+        "features/site/SiteLogo/placements.ts",
         "features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader.tsx",
         "features/site/SiteOgImagePanel/SiteOgImagePanel.tsx",
         "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
@@ -77502,7 +78150,6 @@
         "features/work/WorkEditor/useWorkLifecycle.ts",
         "features/work/WorkEditor/work-lifecycle-controls.ts",
         "features/work/WorkMediaDeliveryContext.tsx",
-        "features/work/WorkPublicHeaderLayout.tsx",
         "features/work/work-view-model.ts"
       ],
       "components": [
@@ -77516,8 +78163,7 @@
         "features/work/WorkEditor/credits/CreditSkeletons.tsx",
         "features/work/WorkEditor/credits/SortableCreditGroupHeader.tsx",
         "features/work/WorkEditor/credits/SortableCreditRow.tsx",
-        "features/work/WorkMediaDeliveryContext.tsx",
-        "features/work/WorkPublicHeaderLayout.tsx"
+        "features/work/WorkMediaDeliveryContext.tsx"
       ],
       "stories": [],
       "tests": [
@@ -77587,6 +78233,7 @@
       "importedSources": [
         ".storybook/fixture-i18n.tsx",
         "components/core/ApplicationFrame/ApplicationFrame.tsx",
+        "components/core/ApplicationFrame/SiteHeader.tsx",
         "components/core/Layout/index.ts",
         "components/core/MenuToggle/index.ts",
         "components/core/Navigation/index.ts",
@@ -78042,6 +78689,11 @@
           "preview": "http://localhost:6010/?path=/story/core-interaction-disclosure--nested-details"
         },
         {
+          "name": "NavigationGroup",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/core-interaction-disclosure--navigation-group"
+        },
+        {
           "name": "LabelAlignedHierarchy",
           "args": null,
           "preview": "http://localhost:6010/?path=/story/core-interaction-disclosure--label-aligned-hierarchy"
@@ -78051,6 +78703,7 @@
         ".storybook/fixture-i18n.tsx",
         "components/core/Disclosure/Disclosure.tsx",
         "components/core/Layout/index.ts",
+        "components/core/TextButton/index.ts",
         "components/core/Typography/index.ts"
       ]
     },
@@ -80714,6 +81367,11 @@
           "preview": "http://localhost:6010/?path=/story/core-interaction-selectionsurface--folder-navigation"
         },
         {
+          "name": "PageTitleLocation",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/core-interaction-selectionsurface--page-title-location"
+        },
+        {
           "name": "GridColumns",
           "args": "{ columnsMode: 'automatic' }",
           "preview": "http://localhost:6010/?path=/story/core-interaction-selectionsurface--grid-columns"
@@ -82960,6 +83618,29 @@
         "features/page/blocks/works-gallery/schema.ts",
         "features/social-links/prepare-social-links-display.ts",
         "stories/feature-localization.tsx"
+      ]
+    },
+    {
+      "file": "features/page/blocks/InfiniteCollection.stories.tsx",
+      "title": "Feature/Page/Infinite Collection",
+      "component": "InfiniteReleases",
+      "variants": [
+        {
+          "name": "LoadMore",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/feature-page-infinite-collection--load-more"
+        },
+        {
+          "name": "RetryAfterFailure",
+          "args": "{ failFirst: true }",
+          "preview": "http://localhost:6010/?path=/story/feature-page-infinite-collection--retry-after-failure"
+        }
+      ],
+      "importedSources": [
+        "components/core/Layout/index.ts",
+        "features/page/blocks/infinite-items.tsx",
+        "features/page/blocks/releases-gallery/ViewClientRuntime.tsx",
+        "features/page/blocks/releases-gallery/schema.ts"
       ]
     },
     {
@@ -85886,6 +86567,26 @@
           "name": "NavigationHierarchy",
           "args": "{ signedIn: true, nestedNavigation: true }",
           "preview": "http://localhost:6010/?path=/story/pages-application-frames--navigation-hierarchy"
+        },
+        {
+          "name": "StackedBrand",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/pages-application-frames--stacked-brand"
+        },
+        {
+          "name": "StackedBrandSignedIn",
+          "args": "{ signedIn: true }",
+          "preview": "http://localhost:6010/?path=/story/pages-application-frames--stacked-brand-signed-in"
+        },
+        {
+          "name": "StackedBrandAdmin",
+          "args": "{ kind: 'admin' }",
+          "preview": "http://localhost:6010/?path=/story/pages-application-frames--stacked-brand-admin"
+        },
+        {
+          "name": "StackedBrandAdminCompact",
+          "args": "{ kind: 'admin', mode: 'compact' }",
+          "preview": "http://localhost:6010/?path=/story/pages-application-frames--stacked-brand-admin-compact"
         }
       ],
       "importedSources": [
@@ -85898,10 +86599,15 @@
         "components/core/TextButton/index.ts",
         "components/core/Typography/index.ts",
         "features/admin/ui/AdminShell/AdminShellView.tsx",
+        "features/shell/LanguageMenu.tsx",
         "features/shell/ui/Shell/ShellView.tsx",
         "features/site/SiteLogo/index.ts",
+        "features/site/SiteLogo/placements.ts",
         "features/user/ui/UserShell/UserShellView.tsx",
+        "lib/contexts/ManifestContext.tsx",
         "lib/providers/DesignSystemProvider.tsx",
+        "lib/providers/SessionProvider.tsx",
+        "lib/types/site-setting/config.ts",
         "stories/shared/preview-navigation.ts"
       ]
     },
@@ -86764,6 +87470,7 @@
         "components/core/Layout/index.ts",
         "features/admin/settings/OgImageSettingsPage.tsx",
         "lib/actions/action-result.ts",
+        "lib/types/site-setting/config.ts",
         "lib/utils/og-config.ts",
         "stories/pages/fixtures/operations-a11y.ts"
       ]
@@ -87346,6 +88053,11 @@
           "preview": "http://localhost:6010/?path=/story/pages-public-entity-detail--work"
         },
         {
+          "name": "WorkWithImage",
+          "args": "{ media: true }",
+          "preview": "http://localhost:6010/?path=/story/pages-public-entity-detail--work-with-image"
+        },
+        {
           "name": "WorkSparse",
           "args": "{ sparse: true }",
           "preview": "http://localhost:6010/?path=/story/pages-public-entity-detail--work-sparse"
@@ -87364,6 +88076,16 @@
           "name": "Event",
           "args": "{ entity: 'event' }",
           "preview": "http://localhost:6010/?path=/story/pages-public-entity-detail--event"
+        },
+        {
+          "name": "EventWithPoster",
+          "args": "{ entity: 'event', media: true, long: true }",
+          "preview": "http://localhost:6010/?path=/story/pages-public-entity-detail--event-with-poster"
+        },
+        {
+          "name": "EventWithPosterPhone",
+          "args": "{ entity: 'event', media: true }",
+          "preview": "http://localhost:6010/?path=/story/pages-public-entity-detail--event-with-poster-phone"
         },
         {
           "name": "EventSparse",
@@ -87602,7 +88324,6 @@
       "importedSources": [
         "components/core/Layout/index.ts",
         "features/admin/settings/SiteSettingsPage.tsx",
-        "lib/actions/action-result.ts",
         "lib/types/site-setting/config.ts",
         "stories/pages/fixtures/operations-a11y.ts"
       ]
@@ -94772,6 +95493,26 @@
               "typeOnly": true
             }
           ]
+        },
+        {
+          "target": "components/core/ApplicationFrame/SiteHeader.tsx",
+          "symbols": [
+            {
+              "exported": "SiteHeader",
+              "imported": "SiteHeader",
+              "typeOnly": false
+            }
+          ]
+        },
+        {
+          "target": "components/core/ApplicationFrame/SiteHeader.tsx",
+          "symbols": [
+            {
+              "exported": "SiteHeaderProps",
+              "imported": "SiteHeaderProps",
+              "typeOnly": true
+            }
+          ]
         }
       ]
     },
@@ -95801,6 +96542,11 @@
           "target": "components/core/DropdownMenu/DropdownMenu.tsx",
           "symbols": [
             {
+              "exported": "DropdownMenuAnchorProps",
+              "imported": "DropdownMenuAnchorProps",
+              "typeOnly": true
+            },
+            {
               "exported": "DropdownMenuDividerProps",
               "imported": "DropdownMenuDividerProps",
               "typeOnly": true
@@ -96189,6 +96935,16 @@
               "exported": "ImagePreviewFrame",
               "imported": "ImagePreviewFrame",
               "typeOnly": false
+            }
+          ]
+        },
+        {
+          "target": "components/core/ImageUpload/ImagePreviewFrame.tsx",
+          "symbols": [
+            {
+              "exported": "ImagePreviewSurface",
+              "imported": "ImagePreviewSurface",
+              "typeOnly": true
             }
           ]
         },
@@ -97088,6 +97844,11 @@
             {
               "exported": "LayoutColumnCount",
               "imported": "LayoutColumnCount",
+              "typeOnly": true
+            },
+            {
+              "exported": "LayoutMinColumnWidth",
+              "imported": "LayoutMinColumnWidth",
               "typeOnly": true
             },
             {
@@ -98186,8 +98947,43 @@
           "target": "components/core/Section/SectionHeader.tsx",
           "symbols": [
             {
+              "exported": "SectionHeaderLevel",
+              "imported": "SectionHeaderLevel",
+              "typeOnly": true
+            },
+            {
               "exported": "SectionHeaderProps",
               "imported": "SectionHeaderProps",
+              "typeOnly": true
+            }
+          ]
+        },
+        {
+          "target": "components/core/Section/SettingsSection.tsx",
+          "symbols": [
+            {
+              "exported": "SettingsGroup",
+              "imported": "SettingsGroup",
+              "typeOnly": false
+            },
+            {
+              "exported": "SettingsSection",
+              "imported": "SettingsSection",
+              "typeOnly": false
+            }
+          ]
+        },
+        {
+          "target": "components/core/Section/SettingsSection.tsx",
+          "symbols": [
+            {
+              "exported": "SettingsGroupProps",
+              "imported": "SettingsGroupProps",
+              "typeOnly": true
+            },
+            {
+              "exported": "SettingsSectionProps",
+              "imported": "SettingsSectionProps",
               "typeOnly": true
             }
           ]

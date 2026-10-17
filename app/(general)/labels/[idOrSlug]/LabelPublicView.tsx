@@ -1,13 +1,9 @@
 'use client';
 
-import {
-  LayoutInset as AppLayoutInset,
-  LayoutStack as DsLayoutStack,
-  LayoutInline as DsLayoutInline,
-  LayoutInset as DsLayoutInset,
-} from '@/components/core/Layout';
+import { LayoutInline as DsLayoutInline, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
 
-import { Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
+import { Text as DsText } from '@/components/core/Typography';
+import { EntityDetailLayout, EntityDetailSection } from '@/features/document-layout/ui/EntityDetailLayout';
 import { useTranslations } from 'next-intl';
 
 import { Avatar } from '@/components/core/Display';
@@ -95,107 +91,80 @@ export function LabelPublicView({
   const imageDarkUrl =
     label.imageDarkUrl && buildManagedImageUrl(label.imageDarkUrl, MANAGED_IMAGE_PRESET.HEADER_IMAGE);
 
+  const contentLang = label.localizationInfo?.displayedLocale || label.localizationInfo?.sourceLocale || contentLocale;
+
   return (
     <>
       {labelMetadata ? <JsonLdScript data={buildLabelJsonLd(labelMetadata)} /> : null}
-      <DsLayoutStack gap="xl">
-        <div className={classes.header}>
-          <DsLayoutInline align="start" gap="xl" wrap="wrap">
-            {label.imageUrl || label.imageLightUrl || label.imageDarkUrl ? (
-              <div className={classes.imageContainer}>
-                <ThemedAssetImage
-                  fallbackUrl={imageUrl}
-                  lightUrl={imageLightUrl}
-                  darkUrl={imageDarkUrl}
-                  alt={label.name}
-                  className={classes.image}
-                />
-              </div>
+      <EntityDetailLayout
+        media={
+          label.imageUrl || label.imageLightUrl || label.imageDarkUrl ? (
+            <ThemedAssetImage
+              fallbackUrl={imageUrl}
+              lightUrl={imageLightUrl}
+              darkUrl={imageDarkUrl}
+              alt={label.name}
+              className={classes.logo}
+            />
+          ) : undefined
+        }
+        title={label.name}
+        titleLang={contentLang}
+        actions={
+          <ContentLanguageMenu
+            pathname={pathname}
+            query={query}
+            requestedLocale={contentLocale}
+            localizationInfo={label.localizationInfo}
+          />
+        }
+        meta={
+          <PublicMetadataRows>
+            {label.countryCode ? (
+              <PublicMetadataRow label={tCommonLabels('country')}>
+                <DsText size="sm">{countryName}</DsText>
+              </PublicMetadataRow>
             ) : null}
-            <div className={classes.infoContainer}>
-              <DsLayoutStack gap="xs">
-                <div className={classes.titleRow}>
-                  <DsLayoutInline gap="sm" wrap={{ base: 'wrap', sm: 'nowrap' }} justify="between" align="start">
-                    <div className={classes.titleBlock}>
-                      <DsHeading
-                        level={1}
-                        scale="title"
-                        lang={
-                          label.localizationInfo?.displayedLocale ||
-                          label.localizationInfo?.sourceLocale ||
-                          contentLocale
-                        }
-                      >
-                        {label.name}
-                      </DsHeading>
-                    </div>
-                    <div className={classes.headerActions}>
-                      <DsLayoutInline gap="xs" align="center" wrap="nowrap">
-                        <ContentLanguageMenu
-                          pathname={pathname}
-                          query={query}
-                          requestedLocale={contentLocale}
-                          localizationInfo={label.localizationInfo}
-                        />
-                      </DsLayoutInline>
-                    </div>
-                  </DsLayoutInline>
-                </div>
-
-                <PublicMetadataRows>
-                  {label.countryCode ? (
-                    <PublicMetadataRow label={tCommonLabels('country')}>
-                      <DsText size="sm">{countryName}</DsText>
-                    </PublicMetadataRow>
-                  ) : null}
-                  {label.website ? (
-                    <PublicMetadataRow label={tCommonLabels('website')}>
-                      <PublicMetadataLink href={label.website} external indicator="external">
-                        {label.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}
-                      </PublicMetadataLink>
-                    </PublicMetadataRow>
-                  ) : null}
-                  {hasSocialLinks ? (
-                    <PublicMetadataRow label={tCommonLabels('social')} valueAlign="center">
-                      <SocialLinksDisplayView entries={socialLinkEntries} iconSize="sm" />
-                    </PublicMetadataRow>
-                  ) : null}
-                  {label.parentLabel ? (
-                    <PublicMetadataRow label={t('details.parent')}>
-                      <PublicMetadataLink href={`/labels/${label.parentLabel.slug || label.parentLabel.id}`}>
-                        <DsLayoutInline gap="xs">
-                          {label.parentLabel.imageUrl ? (
-                            <Avatar
-                              src={buildManagedImageUrl(label.parentLabel.imageUrl, MANAGED_IMAGE_PRESET.AVATAR_XS)}
-                              size="xs"
-                              shape="circle"
-                            />
-                          ) : null}
-                          <DsText size="sm" tone="inherit">
-                            {label.parentLabel.name}
-                          </DsText>
-                        </DsLayoutInline>
-                      </PublicMetadataLink>
-                    </PublicMetadataRow>
-                  ) : null}
-                  <PublicMetadataRow label={t('details.stats')}>
-                    <DsText size="sm">
-                      {t('details.statsValue', { releases: label.releaseCount, artists: label.artistCount })}
+            {label.website ? (
+              <PublicMetadataRow label={tCommonLabels('website')}>
+                <PublicMetadataLink href={label.website} external indicator="external">
+                  {label.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                </PublicMetadataLink>
+              </PublicMetadataRow>
+            ) : null}
+            {hasSocialLinks ? (
+              <PublicMetadataRow label={tCommonLabels('social')} valueAlign="center">
+                <SocialLinksDisplayView entries={socialLinkEntries} iconSize="sm" />
+              </PublicMetadataRow>
+            ) : null}
+            {label.parentLabel ? (
+              <PublicMetadataRow label={t('details.parent')}>
+                <PublicMetadataLink href={`/labels/${label.parentLabel.slug || label.parentLabel.id}`}>
+                  <DsLayoutInline gap="xs">
+                    {label.parentLabel.imageUrl ? (
+                      <Avatar
+                        src={buildManagedImageUrl(label.parentLabel.imageUrl, MANAGED_IMAGE_PRESET.AVATAR_XS)}
+                        size="xs"
+                        shape="circle"
+                      />
+                    ) : null}
+                    <DsText size="sm" tone="inherit">
+                      {label.parentLabel.name}
                     </DsText>
-                  </PublicMetadataRow>
-                </PublicMetadataRows>
-              </DsLayoutStack>
-            </div>
-          </DsLayoutInline>
-        </div>
-
-        {label.content && label.content.length > 0 ? (
-          <div>
-            <AppLayoutInset blockEnd="sm">
-              <DsText size="sm" font="mono" weight="medium" tone="muted" role="heading" aria-level={2}>
-                {tCommonLabels('description')}
+                  </DsLayoutInline>
+                </PublicMetadataLink>
+              </PublicMetadataRow>
+            ) : null}
+            <PublicMetadataRow label={t('details.stats')}>
+              <DsText size="sm">
+                {t('details.statsValue', { releases: label.releaseCount, artists: label.artistCount })}
               </DsText>
-            </AppLayoutInset>
+            </PublicMetadataRow>
+          </PublicMetadataRows>
+        }
+      >
+        {label.content && label.content.length > 0 ? (
+          <EntityDetailSection title={tCommonLabels('description')}>
             <div
               className="prose"
               lang={label.localizationInfo?.displayedLocale || label.localizationInfo?.sourceLocale || contentLocale}
@@ -207,16 +176,11 @@ export function LabelPublicView({
                 ))}
               </DocumentHeadingScope>
             </div>
-          </div>
+          </EntityDetailSection>
         ) : null}
 
         {label.releases.length > 0 ? (
-          <div>
-            <AppLayoutInset blockEnd="sm">
-              <DsText size="sm" font="mono" weight="medium" tone="muted" role="heading" aria-level={2}>
-                {t('sections.releases', { count: label.releaseCount })}
-              </DsText>
-            </AppLayoutInset>
+          <EntityDetailSection title={t('sections.releases', { count: label.releaseCount })}>
             <ReleaseListViewClient
               releases={label.releases.slice(0, 12).map((release) => ({
                 id: release.id,
@@ -236,16 +200,11 @@ export function LabelPublicView({
                 </DsText>
               </DsLayoutInset>
             ) : null}
-          </div>
+          </EntityDetailSection>
         ) : null}
 
         {labelArtists.length > 0 ? (
-          <div>
-            <AppLayoutInset blockEnd="sm">
-              <DsText size="sm" font="mono" weight="medium" tone="muted" role="heading" aria-level={2}>
-                {t('sections.artists', { count: label.artistCount })}
-              </DsText>
-            </AppLayoutInset>
+          <EntityDetailSection title={t('sections.artists', { count: label.artistCount })}>
             <ArtistListViewClient
               artists={labelArtists.slice(0, 12).map((artist) => ({
                 id: artist.id,
@@ -264,9 +223,9 @@ export function LabelPublicView({
                 </DsText>
               </DsLayoutInset>
             ) : null}
-          </div>
+          </EntityDetailSection>
         ) : null}
-      </DsLayoutStack>
+      </EntityDetailLayout>
     </>
   );
 }

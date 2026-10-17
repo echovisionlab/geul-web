@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
+import { TestProviders } from '@/test/TestProviders';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -41,7 +41,7 @@ describe('ImageDropzone', () => {
 
     act(() => {
       root.render(
-        <DesignSystemProvider forceColorScheme="light">
+        <TestProviders>
           <ImageDropzone
             currentUrl={null}
             uploading={false}
@@ -61,7 +61,7 @@ describe('ImageDropzone', () => {
             onDrop={onDrop}
             onDelete={vi.fn()}
           />
-        </DesignSystemProvider>,
+        </TestProviders>,
       );
     });
 

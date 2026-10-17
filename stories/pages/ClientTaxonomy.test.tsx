@@ -5,6 +5,10 @@ import { afterEach, describe, it, expect, vi } from 'vitest';
 import { TestProviders } from '@/test/TestProviders';
 import { ClientEditorPreview } from './ClientEditor.stories';
 import { PostTaxonomyPreview } from './PostTaxonomy.stories';
+import { settleInAct, waitInAct, wrapQueryNotificationsInAct } from '@/test/act-wait';
+
+// Full production page renders: a loaded CI worker needs more than the default 5s per test.
+vi.setConfig({ testTimeout: 20_000 });
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), prefetch: vi.fn() }),
   useParams: () => ({ id: 'client-preview' }),
@@ -24,7 +28,9 @@ class ResizeObserverMock {
 }
 vi.stubGlobal('ResizeObserver', ResizeObserverMock);
 let host: HTMLDivElement, root: Root;
-afterEach(() => {
+wrapQueryNotificationsInAct();
+afterEach(async () => {
+  await settleInAct();
   act(() => root?.unmount());
   host?.remove();
 });
@@ -34,17 +40,10 @@ function render(node: React.ReactNode) {
   root = createRoot(host);
   act(() => root.render(<TestProviders>{node}</TestProviders>));
 }
-async function flush() {
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 30));
-  });
-}
 describe('actual detail and taxonomy page owners', () => {
   it('loads the real client edit query/baseline and both logo controls', async () => {
     render(<ClientEditorPreview />);
-    await flush();
-    await flush();
-    expect(host.querySelector<HTMLInputElement>('input[required]')?.value).toBe('Quiet Signal');
+    await waitInAct(() => expect(host.querySelector<HTMLInputElement>('input[required]')?.value).toBe('Quiet Signal'));
     expect(host.querySelectorAll('input[type=file]').length).toBe(2);
     const name = host.querySelector<HTMLInputElement>('input[required]')!;
     act(() => {
@@ -54,8 +53,7 @@ describe('actual detail and taxonomy page owners', () => {
     const save = Array.from(host.querySelectorAll('button')).find((node) => node.textContent === 'Save');
     expect(save).toBeDefined();
     await act(async () => save!.click());
-    await flush();
-    expect(host.querySelector('[role=alert]')?.textContent).toBe('Save');
+    await waitInAct(() => expect(host.querySelector('[role=alert]')?.textContent).toBe('Save'));
   });
   it('keeps the actual create-client branch without logo upload controls', () => {
     render(<ClientEditorPreview state="new" />);
@@ -64,8 +62,7 @@ describe('actual detail and taxonomy page owners', () => {
   });
   it.each(['category', 'tag'] as const)('loads actual %s post-list columns/query owner', async (kind) => {
     render(<PostTaxonomyPreview kind={kind} />);
-    await flush();
-    expect(host.textContent).toContain('June Han');
+    await waitInAct(() => expect(host.textContent).toContain('June Han'));
     expect(host.querySelector('a[href="/posts/listening-notes"]')).not.toBeNull();
     expect(host.querySelector('input[placeholder="Search posts..."]')).not.toBeNull();
   });

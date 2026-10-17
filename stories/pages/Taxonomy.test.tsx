@@ -54,34 +54,32 @@ function render(domain: 'genres' | 'formats' | 'styles' | 'categories' | 'tags' 
     ),
   );
 }
-async function flush() {
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 30));
-  });
-}
 describe('six actual taxonomy page owners', () => {
   it.each(['genres', 'formats', 'styles', 'categories', 'tags', 'userTags'] as const)(
     'creates through actual %s modal and updates actual table rows',
     async (domain) => {
       render(domain);
-      await flush();
-      expect(host.textContent).toContain('Ambient');
+      await vi.waitFor(() => expect(host.textContent).toContain('Ambient'));
       const create = Array.from(host.querySelectorAll('button')).find((node) => node.textContent?.startsWith('New '));
       expect(create).toBeDefined();
       await act(async () => create!.click());
-      const dialog = document.body.querySelector('[role=dialog]');
-      expect(dialog).not.toBeNull();
-      const input = dialog!.querySelector<HTMLInputElement>('input[required]')!;
+      const dialog = await vi.waitFor(() => {
+        const match = document.body.querySelector('[role=dialog]');
+        expect(match).not.toBeNull();
+        return match!;
+      });
+      const input = dialog.querySelector<HTMLInputElement>('input[required]')!;
       act(() => {
         Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input, 'Signal');
         input.dispatchEvent(new Event('input', { bubbles: true }));
       });
-      const submit = dialog!.querySelector<HTMLButtonElement>('button[type=submit]');
+      const submit = dialog.querySelector<HTMLButtonElement>('button[type=submit]');
       expect(submit).not.toBeNull();
       await act(async () => submit!.click());
-      await flush();
-      expect(host.textContent).toContain('Signal');
-      expect(document.body.querySelector('[role=dialog]')).toBeNull();
+      await vi.waitFor(() => {
+        expect(host.textContent).toContain('Signal');
+        expect(document.body.querySelector('[role=dialog]')).toBeNull();
+      });
     },
   );
 });

@@ -4,7 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import koMessages from '@/messages/ko.json';
 import type { PageMetadataDocument } from '@/lib/queries/metadata';
 import { renderToReadableStream } from 'react-dom/server';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import PublicPageView from './page';
 import { PageContent } from './PageContent';
 import { PageJsonLd } from './PageJsonLd';
@@ -107,6 +107,10 @@ describe('authorized page body streaming', () => {
     mocks.getPageMetadataDocument.mockResolvedValue(null);
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('streams the real body while JSON-LD metadata is still pending, unlike the prior dependency', async () => {
     const metadata = deferred<PageMetadataDocument>();
     mocks.getPageMetadataDocument.mockReturnValue(metadata.promise);
@@ -147,25 +151,31 @@ describe('authorized page body streaming', () => {
   });
 
   it('measures the controlled 50 ms page / 500 ms metadata dependency', async () => {
+    // The fake clock drives the dependency delays, React's setImmediate scheduling and the measurement.
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setImmediate', 'clearImmediate', 'performance'] });
     async function measure(legacy: boolean) {
       const started = performance.now();
       const readyPage = new Promise((resolve) => setTimeout(() => resolve(page), 50));
       const readyMetadata = new Promise((resolve) => setTimeout(() => resolve(null), 500));
       mocks.getPageView.mockReturnValue(readyPage);
       mocks.getPageMetadataDocument.mockReturnValue(readyMetadata);
-      const output = await start(legacy ? <LegacyPage /> : await PublicPageView(props()));
-      let html = '';
-      while (!html.includes(page.title)) {
-        const next = await output.reader.read();
-        if (next.done) {
-          break;
+      const body = (async () => {
+        const output = await start(legacy ? <LegacyPage /> : await PublicPageView(props()));
+        let html = '';
+        while (!html.includes(page.title)) {
+          const next = await output.reader.read();
+          if (next.done) {
+            break;
+          }
+          html += output.decoder.decode(next.value);
         }
-        html += output.decoder.decode(next.value);
-      }
-      expect(html).toContain(page.title);
-      const bodyMs = performance.now() - started;
-      await output.stream.allReady;
-      await output.reader.cancel();
+        expect(html).toContain(page.title);
+        const bodyMs = performance.now() - started;
+        await output.stream.allReady;
+        await output.reader.cancel();
+        return bodyMs;
+      })();
+      const [bodyMs] = await Promise.all([body, vi.runAllTimersAsync()]);
       return bodyMs;
     }
     const beforeMs = await measure(true);

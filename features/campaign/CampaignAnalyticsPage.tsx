@@ -179,7 +179,9 @@ export default function CampaignAnalyticsPage({
             <IconArrowLeft size={20} />
           </IconButton>
         </Tooltip>
-        <DsHeading level={2}>{t('title')}</DsHeading>
+        <DsHeading level={1} scale={2}>
+          {t('title')}
+        </DsHeading>
         <StatusBadge tone={CAMPAIGN_STATUS_TONES[campaign.status] ?? 'neutral'}>
           {tCampaignStatuses(campaign.status)}
         </StatusBadge>
@@ -266,7 +268,7 @@ export default function CampaignAnalyticsPage({
         </SectionCard>
       )}
 
-      <DsHeading level={3} scale={4}>
+      <DsHeading level={2} scale={4}>
         {tCommonLabels('recipients')}
       </DsHeading>
 

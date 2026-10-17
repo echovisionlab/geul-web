@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import type { CollectionSize } from '@/components/core/Collection';
 
+import type { CollectionTrackScale } from './content-layout';
 import { ListViewShell, type ListViewLayout, type ListViewShellItem } from './ListViewShell';
 
 export interface EntityListItem extends ListViewShellItem {
@@ -21,10 +22,7 @@ interface EntityListViewProps<T extends EntityListItem> {
   carouselLoop: boolean;
   carouselIndicators: boolean;
   emptyImageLabel?: string;
-  gridCols?: {
-    base: number;
-    sm: number;
-  };
+  trackScale?: CollectionTrackScale;
   renderMeta?: (item: T) => ReactNode;
 }
 
@@ -39,7 +37,7 @@ export function EntityListView<T extends EntityListItem>({
   imageAspectRatio = '16:9',
   carouselLoop,
   carouselIndicators,
-  gridCols = { base: 1, sm: 2 },
+  trackScale,
   renderMeta,
 }: EntityListViewProps<T>) {
   return (
@@ -54,7 +52,7 @@ export function EntityListView<T extends EntityListItem>({
       imageAspectRatio={imageAspectRatio}
       carouselLoop={carouselLoop}
       carouselIndicators={carouselIndicators}
-      gridCols={gridCols}
+      trackScale={trackScale}
       renderListMeta={renderMeta}
       renderMinimalMeta={renderMeta}
       renderCardsMeta={renderMeta}

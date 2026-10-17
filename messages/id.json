@@ -212,7 +212,10 @@
       "text": "Teks",
       "caption": "Keterangan",
       "allUsers": "Semua pengguna",
-      "newsletter": "Buletin"
+      "newsletter": "Buletin",
+      "images": "Gambar",
+      "classification": "Klasifikasi",
+      "related": "Terkait"
     },
     "entities": {
       "post": "Pos",
@@ -385,6 +388,12 @@
       "status": {
         "preparingImage": "Mempersiapkan gambar",
         "uploading": "Mengunggah"
+      },
+      "removeLabel": "Hapus {label}",
+      "errors": {
+        "tooLarge": "File terlalu besar. Maksimum {maxSize}",
+        "tooSmall": "File terlalu kecil. Minimum {minSize}",
+        "invalidType": "Jenis file ini tidak didukung."
       }
     },
     "states": {
@@ -449,6 +458,12 @@
       "pause": "Jeda animasi",
       "resume": "Lanjutkan animasi",
       "readAllInformation": "Baca semua informasi adegan"
+    },
+    "loadMore": {
+      "action": "Muat lebih banyak",
+      "loading": "Memuat lebih banyak…",
+      "failed": "Tidak dapat memuat item lainnya.",
+      "retry": "Coba lagi"
     }
   },
   "shell": {
@@ -704,7 +719,8 @@
             "subject": "Baris subjek email yang diberikan.",
             "siteName": "Nama situs dari pengaturan.",
             "siteOrigin": "Asal situs runtime.",
-            "logoEmailUrl": "URL logo khusus email dari pengaturan situs (jika disetel).",
+            "logoEmailUrl": "URL logo email terang dari pengaturan situs; logo gelap jika hanya itu yang diatur.",
+            "logoEmailDarkUrl": "URL logo email gelap untuk aplikasi email dalam mode gelap; logo terang jika hanya itu yang diatur.",
             "emailLang": "Kode bahasa diterapkan pada dokumen email yang dirender.",
             "emailDirection": "Arah teks untuk dokumen email yang dirender.",
             "emailFontFamily": "Tumpukan font Noto yang sadar lokal untuk email yang dirender.",
@@ -1104,7 +1120,8 @@
       "labelLanguageTranslatedDescription": "Menu publik hanya menampilkan terjemahan terkini untuk locale pengunjung yang sama persis; jika tidak, label sumber ditampilkan.",
       "labelLanguageFixedLocaleDescription": "Menu publik selalu menampilkan item ini dari lokal yang dipilih, terlepas dari lokasi pengunjungnya. Jika lokal tersebut tidak memiliki label aktif, label sumber akan digunakan.",
       "translatedItemBadge": "Lokal pengunjung",
-      "fixedLocaleItemBadge": "Memperbaiki: {locale}"
+      "fixedLocaleItemBadge": "Memperbaiki: {locale}",
+      "description": "Kelola menu navigasi yang ditampilkan di situs. Pilih menu untuk mengedit itemnya."
     },
     "emailEvents": {
       "title": "Pengiriman Email",
@@ -1405,7 +1422,8 @@
     "works": {
       "allTypes": "Semua Jenis",
       "empty": "Tidak ada karya yang ditemukan",
-      "loadMore": "Muat lebih banyak ({count} tersisa)"
+      "loadMore": "Muat lebih banyak ({count} tersisa)",
+      "filterByType": "Filter karya menurut jenis"
     },
     "releases": {
       "empty": "Belum ada rilis yang dirilis."
@@ -1702,7 +1720,7 @@
     },
     "personalAccessTokens": {
       "title": "Token akses pribadi",
-      "description": "Gunakan satu token akses pribadi ini dengan API yang disediakan {siteName}. Setiap permintaan memakai izin akun Anda saat ini. Remote MCP tidak menerima token ini.",
+      "description": "Gunakan satu token akses pribadi ini dengan API yang disediakan {siteName}. Setiap permintaan memakai izin akun Anda saat ini.",
       "empty": "Belum ada token akses pribadi yang dibuat.",
       "regenerate": "Buat ulang",
       "regenerateTitle": "Buat ulang token akses pribadi",
@@ -2648,14 +2666,16 @@
     },
     "home": {
       "sections": {
-        "logoSize": "Ukuran Logo"
+        "logoSize": "Ukuran Logo",
+        "currentImage": "Gambar saat ini dan latar"
       },
       "fields": {
         "backgroundColor": "Warna Latar Belakang"
       },
       "helpers": {
         "logoCentered": "Logo akan berada di tengah gambar",
-        "previewDescription": "Gambar OG beranda: Logo terpusat, tanpa teks judul"
+        "previewDescription": "Gambar OG beranda: Logo terpusat, tanpa teks judul",
+        "currentImage": "Gambar berbagi beranda yang dibuat dan latar opsionalnya."
       }
     },
     "content": {
@@ -3186,7 +3206,7 @@
         "showMeta": "Tampilkan meta",
         "sortBy": "Urutkan berdasarkan",
         "numberOfPosts": "Jumlah posting",
-        "showPagination": "Tampilkan penomoran halaman",
+        "showPagination": "Muat lebih banyak saat menggulir",
         "exposedFilters": "Filter terbuka",
         "exposedSorts": "Macam terbuka",
         "rowsPerPage": "Baris per halaman",
@@ -4656,11 +4676,15 @@
     "emailVerification": {
       "verified": "Email terverifikasi",
       "unverified": "Email belum diverifikasi"
+    },
+    "profile": {
+      "description": "Simpan menerapkan perubahan di bagian ini. Bagian di bawah menerapkan setiap perubahan secara langsung."
     }
   },
   "adminSettings": {
     "site": {
       "title": "Pengaturan Situs",
+      "description": "Identitas, merek, navigasi, dan bawaan pencarian untuk seluruh situs.",
       "notifications": {
         "saved": "Pengaturan disimpan",
         "noChanges": "Tidak ada perubahan untuk disimpan"
@@ -4678,7 +4702,12 @@
           "socialLinksDescription": "Tambahkan profil media sosial Anda. Ini akan ditampilkan di footer situs."
         },
         "branding": {
-          "title": "merek"
+          "title": "merek",
+          "logos": "Logo",
+          "logosDescription": "Logo lengkap dan simbol, untuk latar terang dan gelap. Varian yang kosong diganti otomatis.",
+          "emailLogos": "Logo email",
+          "emailLogosDescription": "Logo PNG untuk tata letak email. Aplikasi email dalam mode gelap memakai logo gelap.",
+          "iconsAndLoader": "Favicon dan animasi pemuatan"
         },
         "contentDisplay": {
           "title": "Konten & Tampilan",
@@ -4761,17 +4790,29 @@
         "errorMessage": "{label} harus {mimeTypes} (maks {maxSize})",
         "uploaded": "{label} diunggah",
         "removed": "{label} dihapus",
-        "logo_light": {
-          "label": "Logo Situs Ringan",
-          "description": "Ditampilkan pada latar belakang terang dan digunakan sebagai logo situs default."
+        "logo_full_light": {
+          "label": "Logo lengkap · terang",
+          "description": "Simbol dengan logotipe untuk latar terang: header situs, menu, cetak, dan gambar berbagi."
         },
-        "logo_dark": {
-          "label": "Logo Situs Gelap",
-          "description": "Ditampilkan pada latar belakang gelap. Kembali ke logo terang saat kosong."
+        "logo_full_dark": {
+          "label": "Logo lengkap · gelap",
+          "description": "Untuk latar gelap. Memakai logo lengkap terang jika kosong."
         },
-        "logo_email": {
-          "label": "Logo Surel",
-          "description": "Digunakan dalam templat dan tata letak email. PNG direkomendasikan untuk kompatibilitas klien."
+        "logo_symbol_light": {
+          "label": "Simbol · terang",
+          "description": "Hanya simbol, untuk ruang sempit seperti menu admin yang diciutkan. Memakai logo lengkap jika kosong."
+        },
+        "logo_symbol_dark": {
+          "label": "Simbol · gelap",
+          "description": "Untuk latar gelap. Memakai simbol terang jika kosong."
+        },
+        "logo_email_light": {
+          "label": "Logo email · terang",
+          "description": "PNG yang ditampilkan di email. Memakai logo email gelap jika kosong."
+        },
+        "logo_email_dark": {
+          "label": "Logo email · gelap",
+          "description": "PNG yang ditampilkan aplikasi email dalam mode gelap. Memakai logo email terang jika kosong."
         },
         "favicon": {
           "label": "Situs Favicon",

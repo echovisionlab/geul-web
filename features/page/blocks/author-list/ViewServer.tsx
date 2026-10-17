@@ -29,7 +29,6 @@ async function AuthorListViewServer({ props }: BlockViewProps) {
 
 export function AuthorListViewStreaming({ props }: BlockViewProps) {
   const p = parseAuthorListProps(props);
-  const columns = parseInt(p.columns || '3', 10);
   const limit = parseInt(p.limit || '6', 10);
   const selectedIds = parseAuthorIds(p.authorIds);
 
@@ -39,7 +38,6 @@ export function AuthorListViewStreaming({ props }: BlockViewProps) {
         <AuthorListSkeleton
           itemSize={p.itemSize}
           layout={p.layout}
-          columns={columns}
           limit={p.source === 'selected' ? selectedIds.length : limit}
         />
       }

@@ -115,6 +115,7 @@ function useEmailLayoutEditPageModel() {
     { name: 'site_name', description: tPage('variables.items.siteName') },
     { name: 'site_origin', description: tPage('variables.items.siteOrigin') },
     { name: 'logo_email_url', description: tPage('variables.items.logoEmailUrl') },
+    { name: 'logo_email_dark_url', description: tPage('variables.items.logoEmailDarkUrl') },
     { name: 'email_lang', description: tPage('variables.items.emailLang') },
     { name: 'email_direction', description: tPage('variables.items.emailDirection') },
     { name: 'email_font_family', description: tPage('variables.items.emailFontFamily') },

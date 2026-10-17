@@ -1,7 +1,7 @@
 import { DEFAULT_SITE_BRAND_COLOR } from '@/lib/theme/site-brand';
 import type { AllSettings } from '@echovisionlab/geul-proto/secure/site_setting_pb.ts';
 import type { OgImageConfigs, SiteSettingsView } from '@/lib/types/site-setting/config';
-import { assetRefUrl, themedAssetRefUrl } from '@/lib/utils/asset-ref';
+import { assetRefUrl } from '@/lib/utils/asset-ref';
 
 export function fromProtoAllSettings(proto: AllSettings): SiteSettingsView {
   const pub = proto.public;
@@ -21,10 +21,12 @@ export function fromProtoAllSettings(proto: AllSettings): SiteSettingsView {
     legal_email: pub?.legalEmail ?? '',
     contact_email: pub?.contactEmail ?? '',
     social_links: (pub?.socialLinks ?? {}) as Record<string, string>,
-    logo_url: themedAssetRefUrl(pub?.logoLightAsset, pub?.logoDarkAsset),
-    logo_light_url: assetRefUrl(pub?.logoLightAsset),
-    logo_dark_url: assetRefUrl(pub?.logoDarkAsset),
-    logo_email_url: assetRefUrl(pub?.logoEmailAsset),
+    logo_full_light_url: assetRefUrl(pub?.logoFullLightAsset),
+    logo_full_dark_url: assetRefUrl(pub?.logoFullDarkAsset),
+    logo_symbol_light_url: assetRefUrl(pub?.logoSymbolLightAsset),
+    logo_symbol_dark_url: assetRefUrl(pub?.logoSymbolDarkAsset),
+    logo_email_light_url: assetRefUrl(pub?.logoEmailLightAsset),
+    logo_email_dark_url: assetRefUrl(pub?.logoEmailDarkAsset),
     favicon_url: assetRefUrl(pub?.faviconAsset),
     loader_urls: loaderUrls,
     loader_assets: loaderAssets,

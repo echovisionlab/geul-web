@@ -14,6 +14,8 @@ export interface SocialLinksEditorProps {
   disabled?: boolean;
   maxLinks?: number;
   label?: string;
+  /** Hide the visible field label when a surrounding section heading already names the links. */
+  labelHidden?: boolean;
   addButtonMode?: 'button' | 'icon';
 }
 

@@ -69,6 +69,7 @@ let content: HTMLDivElement | null = null;
 let root: Root | null = null;
 
 afterEach(() => {
+  vi.useRealTimers();
   act(() => {
     root?.unmount();
   });
@@ -233,7 +234,6 @@ describe('MediaBlockHydrator', () => {
           <MediaBlockHydrator containerRef={containerRef} contentKey="legacy" />
         </NextIntlClientProvider>,
       );
-      await new Promise((resolve) => window.setTimeout(resolve, 20));
     });
     const track = legacy.querySelector<HTMLElement>('[data-audio-player-track]');
     await vi.waitFor(() => expect(track?.querySelector('input[data-audio-player-seek]')).not.toBeNull());
@@ -263,10 +263,12 @@ describe('MediaBlockHydrator', () => {
     await vi.waitFor(() => {
       expect(lastMountOptions).not.toBeNull();
     });
-    await act(async () => {
-      await Promise.resolve();
-      await new Promise((resolve) => window.setTimeout(resolve, 20));
-    });
+    await vi.waitFor(() =>
+      expect(content?.querySelector('[data-audio-player-wave]')).toHaveAttribute(
+        'data-audio-player-wave-ready',
+        'true',
+      ),
+    );
 
     const contentNode = content as HTMLDivElement;
     const player = contentNode.querySelector('[data-audio-player="true"]') as HTMLDivElement | null;
@@ -400,9 +402,10 @@ describe('MediaBlockHydrator', () => {
       }),
     );
     await renderVideoHarness();
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     await act(async () => {
       content?.replaceChildren();
-      await new Promise((resolve) => window.setTimeout(resolve, 20));
+      await vi.advanceTimersByTimeAsync(0);
       resolveRuntime({ mountVideoJsPlayer: mockMountVideoJsPlayer, disposeVideoJsPlayer: mockDisposeVideoJsPlayer });
     });
     expect(mockMountVideoJsPlayer).not.toHaveBeenCalled();
@@ -418,7 +421,9 @@ describe('MediaBlockHydrator', () => {
     await renderVideoHarness();
     await act(async () => {
       content?.querySelector('.video-block')?.setAttribute('data-hls-src', '/next.m3u8');
-      await new Promise((resolve) => window.setTimeout(resolve, 20));
+    });
+    await vi.waitFor(() => expect(mockLoadVideoJsRuntime).toHaveBeenCalledTimes(2));
+    await act(async () => {
       resolveRuntime({ mountVideoJsPlayer: mockMountVideoJsPlayer, disposeVideoJsPlayer: mockDisposeVideoJsPlayer });
     });
     expect(mockMountVideoJsPlayer).toHaveBeenCalledTimes(1);

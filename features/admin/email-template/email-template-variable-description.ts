@@ -13,6 +13,7 @@ export function describeEmailTemplateVariable(
     catalog: CatalogTranslator;
     siteOrigin: () => string;
     logoEmailUrl: () => string;
+    logoEmailDarkUrl: () => string;
   },
 ): string | null {
   const normalizedName = variableName.trim().toLowerCase();
@@ -21,6 +22,9 @@ export function describeEmailTemplateVariable(
   }
   if (normalizedName === 'logo_email_url') {
     return translators.logoEmailUrl();
+  }
+  if (normalizedName === 'logo_email_dark_url') {
+    return translators.logoEmailDarkUrl();
   }
   const lookupKey = normalizedName as never;
   return translators.catalog.has(lookupKey) ? translators.catalog(lookupKey) : null;

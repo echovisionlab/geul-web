@@ -132,10 +132,14 @@ it.each([
     expect(connect).toHaveBeenCalledTimes(1);
     expect(editor.isDestroyed).toBe(false);
   } finally {
-    await act(async () => {
-      root.unmount();
-      await new Promise((resolve) => setTimeout(resolve, 2));
-    });
+    // Tiptap destroys an unmounted editor on its own timer; tear the room down only after that.
+    const mounted = connect.mock.calls[0]?.[0] as Editor | undefined;
+    const destroyed =
+      mounted && !mounted.isDestroyed
+        ? new Promise<void>((resolve) => mounted.on('destroy', () => resolve()))
+        : Promise.resolve();
+    await act(async () => root.unmount());
+    await destroyed;
     client.clear();
     awareness.destroy();
     document.destroy();

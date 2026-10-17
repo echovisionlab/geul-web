@@ -1,45 +1,34 @@
 'use client';
-import { LayoutInline as DsLayoutInline, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
-import { useTranslations } from 'next-intl';
 
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-import { Pagination } from '@/components/core/Display';
 import { listLabelsForBlockAction } from '@/lib/actions/label';
 import { parseBooleanProp, parseIntegerProp } from '../list-view-utils';
 import { ListBlockSkeleton } from '../ListBlockSkeleton';
 import type { BlockViewProps } from '../types';
 import { parseLabelListProps } from './schema';
 import { LabelListViewClient } from './ViewClient';
+import { LabelInfiniteList } from './InfiniteList';
+import { toLabelListItem } from './transform';
 
 export function LabelListView({ props }: BlockViewProps) {
-  const tPagination = useTranslations('dataTable.pagination');
   const p = parseLabelListProps(props);
-  const [page, setPage] = useState(1);
-  const sortBy = p.sortBy || 'name';
-  const sortOrder = p.sortOrder || 'asc';
   const limit = parseIntegerProp(p.limit, 12);
   const columns = parseIntegerProp(p.columns, 3);
   const showPagination = parseBooleanProp(p.showPagination, false);
+  const query = { sortBy: p.sortBy || 'name', sortOrder: p.sortOrder || 'asc', limit };
 
-  const recipientsQuery = useQuery({
-    queryKey: ['labels', 'forBlock', { sortBy, sortOrder, limit, page }],
-    queryFn: () =>
-      listLabelsForBlockAction({
-        sortBy,
-        sortOrder,
-        limit,
-        offset: showPagination ? (page - 1) * limit : 0,
-      }).then(unwrapQueryResult),
+  const labelsQuery = useQuery({
+    queryKey: ['labels', 'forBlock', { ...query, offset: 0 }],
+    queryFn: () => listLabelsForBlockAction({ ...query, offset: 0 }).then(unwrapQueryResult),
   });
-  const { data, isLoading } = recipientsQuery;
+  const { data, isLoading } = labelsQuery;
 
-  if (recipientsQuery.isError && recipientsQuery.data === undefined) {
-    return <QueryErrorAlert queries={[recipientsQuery]} />;
+  if (labelsQuery.isError && labelsQuery.data === undefined) {
+    return <QueryErrorAlert queries={[labelsQuery]} />;
   }
   if (isLoading || !data) {
     return (
@@ -57,37 +46,21 @@ export function LabelListView({ props }: BlockViewProps) {
     );
   }
 
+  const items = data.labels.map(toLabelListItem);
   return (
     <>
-      <QueryErrorAlert queries={[recipientsQuery]} />
-      <LabelListViewClient
-        labels={data.labels.map((label) => ({
-          id: label.id,
-          href: `/labels/${label.slug?.trim() || label.id}`,
-          title: label.name,
-          imageUrl: label.imageUrl,
-          imageAlt: label.name,
-          countryCode: label.countryCode,
-        }))}
-        parsedProps={p}
-      />
-
-      {showPagination && data.pagination.total > limit ? (
-        <DsLayoutInset blockStart="md">
-          <DsLayoutInline justify="center">
-            <Pagination
-              total={Math.ceil(data.pagination.total / limit)}
-              value={page}
-              onChange={setPage}
-              labels={{
-                previousPage: tPagination('previousPage'),
-                nextPage: tPagination('nextPage'),
-                page: (page) => tPagination('page', { page }),
-              }}
-            />
-          </DsLayoutInline>
-        </DsLayoutInset>
-      ) : null}
+      <QueryErrorAlert queries={[labelsQuery]} />
+      {showPagination ? (
+        <LabelInfiniteList
+          key={JSON.stringify(query)}
+          initialLabels={items}
+          total={data.pagination.total}
+          query={query}
+          parsedProps={p}
+        />
+      ) : (
+        <LabelListViewClient labels={items} parsedProps={p} />
+      )}
     </>
   );
 }

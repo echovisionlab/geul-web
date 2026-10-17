@@ -4,6 +4,7 @@ import {
   LayoutStack as DsLayoutStack,
   LayoutInline as DsLayoutInline,
   LayoutInset as DsLayoutInset,
+  LayoutGrid as DsLayoutGrid,
 } from '@/components/core/Layout';
 import { useEffect, useRef, useState, type ComponentProps } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -188,41 +189,40 @@ export function ClientDetailPageView({
 
       <DsLayoutStack gap="md">
         {!isNew && (
-          <ClientLogoUploader
-            clientId={id}
-            uploadAction={logoBindings?.uploadAction}
-            deleteAction={logoBindings?.deleteAction}
-            currentImage={logoLightUrl}
-            variant="light"
-            name={name}
-            size={120}
-            label={tCommon('labels.logoLight')}
-            onImageChange={(url) => {
-              setLogoLightUrl(url);
-              if (baselineRef.current?.id === id) {
-                baselineRef.current.logoLightUrl = url;
-              }
-            }}
-          />
-        )}
-
-        {!isNew && (
-          <ClientLogoUploader
-            clientId={id}
-            uploadAction={logoBindings?.uploadAction}
-            deleteAction={logoBindings?.deleteAction}
-            currentImage={logoDarkUrl}
-            variant="dark"
-            name={name}
-            size={120}
-            label={tCommon('labels.logoDark')}
-            onImageChange={(url) => {
-              setLogoDarkUrl(url);
-              if (baselineRef.current?.id === id) {
-                baselineRef.current.logoDarkUrl = url;
-              }
-            }}
-          />
+          <DsLayoutGrid columns={{ base: 1, sm: 2 }} columnGap="lg" rowGap="lg">
+            <ClientLogoUploader
+              clientId={id}
+              uploadAction={logoBindings?.uploadAction}
+              deleteAction={logoBindings?.deleteAction}
+              currentImage={logoLightUrl}
+              variant="light"
+              name={name}
+              size={120}
+              label={tCommon('labels.logoLight')}
+              onImageChange={(url) => {
+                setLogoLightUrl(url);
+                if (baselineRef.current?.id === id) {
+                  baselineRef.current.logoLightUrl = url;
+                }
+              }}
+            />
+            <ClientLogoUploader
+              clientId={id}
+              uploadAction={logoBindings?.uploadAction}
+              deleteAction={logoBindings?.deleteAction}
+              currentImage={logoDarkUrl}
+              variant="dark"
+              name={name}
+              size={120}
+              label={tCommon('labels.logoDark')}
+              onImageChange={(url) => {
+                setLogoDarkUrl(url);
+                if (baselineRef.current?.id === id) {
+                  baselineRef.current.logoDarkUrl = url;
+                }
+              }}
+            />
+          </DsLayoutGrid>
         )}
 
         <TextInput

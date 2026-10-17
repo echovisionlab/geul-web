@@ -452,8 +452,8 @@ export default function AdminUserEditPage({
         </Alert>
       )}
 
-      <form id="admin-user-profile-form" onSubmit={handleSubmit}>
-        <DsLayoutStack gap="md">
+      <DsLayoutStack gap="xl">
+        <form id="admin-user-profile-form" onSubmit={handleSubmit}>
           <UserProfileFormSection
             checkNickname={checkNickname}
             user={user}
@@ -466,16 +466,16 @@ export default function AdminUserEditPage({
             onSocialLinksChange={setSocialLinks}
             onImageChange={handleImageChange}
             onCopyUserIdError={handleCopyUserIdError}
+            footer={
+              <DsLayoutInline justify="end">
+                <Button emphasis="medium" type="submit" loading={updateUser.isPending}>
+                  {tCommonActions('save')}
+                </Button>
+              </DsLayoutInline>
+            }
           />
-          <DsLayoutInline justify="end">
-            <Button emphasis="medium" type="submit" loading={updateUser.isPending}>
-              {tCommonActions('save')}
-            </Button>
-          </DsLayoutInline>
-        </DsLayoutStack>
-      </form>
+        </form>
 
-      <DsLayoutStack gap="lg">
         <UserSsoProvidersSection
           auth={user.auth_details}
           onRemoveProvider={handleRemoveSsoProvider}
@@ -507,15 +507,17 @@ export default function AdminUserEditPage({
           }
         />
         {!arePersonalAccessTokensLoading ? (
-          <PersonalAccessTokenSettings
-            subjectId={id}
-            bindings={tokenBindings}
-            mode="admin"
-            initialPersonalAccessTokens={projectPersonalAccessTokensForSettings(
-              personalAccessTokens?.personalAccessTokens ?? [],
-            )}
-            initialLoadFailed={Boolean(personalAccessTokens?.error)}
-          />
+          <DsLayoutStack as="section" gap="lg">
+            <PersonalAccessTokenSettings
+              subjectId={id}
+              bindings={tokenBindings}
+              mode="admin"
+              initialPersonalAccessTokens={projectPersonalAccessTokensForSettings(
+                personalAccessTokens?.personalAccessTokens ?? [],
+              )}
+              initialLoadFailed={Boolean(personalAccessTokens?.error)}
+            />
+          </DsLayoutStack>
         ) : null}
       </DsLayoutStack>
 

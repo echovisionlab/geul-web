@@ -17,7 +17,8 @@ describe('fromProtoAllSettings', () => {
             asset: { url: 'https://cdn.example.com/loader-1.gif' },
           },
         ],
-        logoLightAsset: { url: 'https://cdn.example.com/logo-light.svg' },
+        logoFullLightAsset: { url: 'https://cdn.example.com/logo-light.svg' },
+        logoEmailDarkAsset: { url: 'https://cdn.example.com/email-dark.png' },
       },
       runtime: { siteOrigin: 'https://example.com' },
       emailBatchSize: 100,
@@ -32,7 +33,11 @@ describe('fromProtoAllSettings', () => {
     expect(result.legal_email).toBe('legal@example.com');
     expect(result.site_origin).toBe('https://example.com');
     expect(result).not.toHaveProperty('site_url');
-    expect(result.logo_light_url).toBe('https://cdn.example.com/logo-light.svg');
+    expect(result.logo_full_light_url).toBe('https://cdn.example.com/logo-light.svg');
+    expect(result.logo_email_dark_url).toBe('https://cdn.example.com/email-dark.png');
+    // Stored slots stay raw: no fallback from the full logo to an unset slot.
+    expect(result.logo_full_dark_url).toBeNull();
+    expect(result.logo_symbol_light_url).toBeNull();
     expect(result.loader_urls).toEqual(['https://cdn.example.com/loader-1.gif']);
     expect(result.loader_assets).toEqual([{ file_id: 'loader-1', url: 'https://cdn.example.com/loader-1.gif' }]);
     expect(result).not.toHaveProperty('loader_url');

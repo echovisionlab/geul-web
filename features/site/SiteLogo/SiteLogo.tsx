@@ -8,15 +8,18 @@ import { useSiteSettings } from '@/lib/contexts/ManifestContext';
 import { toCdnUrl } from '@/lib/utils/file-url';
 
 export interface SiteLogoProps {
+  /** full: symbol with wordmark (default); symbol: the mark alone, for compact spaces. */
+  form?: 'full' | 'symbol';
   size?: SiteLogoSize;
   height?: number | 'intrinsic';
   style?: CSSProperties;
 }
 
-export function SiteLogo({ size = 'md', height, style }: SiteLogoProps) {
+/** The site's light/dark logo pair. The manifest resolves fallbacks, so both are set when any logo is. */
+export function SiteLogo({ form = 'full', size = 'md', height, style }: SiteLogoProps) {
   const { settings } = useSiteSettings();
-  const lightUrl = settings.logo_light_url ?? settings.logo_url ?? null;
-  const darkUrl = settings.logo_dark_url ?? null;
+  const lightUrl = form === 'symbol' ? settings.logo_symbol_light_url : settings.logo_full_light_url;
+  const darkUrl = form === 'symbol' ? settings.logo_symbol_dark_url : settings.logo_full_dark_url;
 
   return (
     <SiteLogoView

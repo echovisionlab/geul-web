@@ -232,3 +232,24 @@ describe('ImageUploadField', () => {
     expect(container.textContent).not.toContain('Upload an image');
   });
 });
+
+describe('ImageUploadField preview chrome', () => {
+  it('keeps the remove action on the corner of a hugging preview, even with an auto width', () => {
+    renderField({
+      imageUrl: 'https://cdn.example.test/logo.svg',
+      onRemove: vi.fn(),
+      removeButtonAriaLabel: 'Remove logo',
+      preview: { mode: 'hug', width: 'auto', height: 48, maxHeight: 48, surface: 'theme-dark' },
+    });
+    const remove = container.querySelector<HTMLButtonElement>('button[aria-label="Remove logo"]');
+    const box = remove?.parentElement;
+    expect(remove?.getAttribute('data-placement')).toBe('overlay-end');
+    expect(box?.style.width).toBe('fit-content');
+    expect(container.querySelector('[data-surface="theme-dark"]')).not.toBeNull();
+  });
+
+  it('previews a theme-specific asset on that theme surface', () => {
+    renderField({ imageUrl: 'https://cdn.example.test/logo.svg', preview: { mode: 'hug', surface: 'theme-light' } });
+    expect(container.querySelector('[data-surface="theme-light"]')).not.toBeNull();
+  });
+});

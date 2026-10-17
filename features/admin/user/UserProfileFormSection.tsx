@@ -7,14 +7,14 @@ import {
   LayoutGrid as DsLayoutGrid,
 } from '@/components/core/Layout';
 import { Text as DsText } from '@/components/core/Typography';
-import { useCallback } from 'react';
+import { useCallback, type ReactNode } from 'react';
 import { CopyButton } from '@/components/core/CopyButton';
 import { useTranslations } from 'next-intl';
 
 import type { UseFormReturnType } from '@mantine/form';
 import { LabelBadge, StatusBadge } from '@/components/core/Badge';
 import { MultiSelect, Select, Textarea, TextInput, ValidatingTextInput } from '@/components/core/Input';
-import { SectionHeader } from '@/components/core/Section';
+import { SettingsSection } from '@/components/core/Section';
 import { SocialLinksEditor } from '@/features/social-links/SocialLinksEditor';
 import { useNicknameValidation, type NicknameAvailabilityCheck } from '@/features/member/useNicknameValidation';
 import { UserAvatarUploader } from '@/features/user/UserAvatarUploader';
@@ -44,6 +44,8 @@ interface UserProfileFormSectionProps {
   /** Shows recovery feedback when the clipboard rejects the member ID copy. */
   onCopyUserIdError: () => void;
   checkNickname?: NicknameAvailabilityCheck;
+  /** The section's submit action; it saves only this section. */
+  footer?: ReactNode;
 }
 
 export function UserProfileFormSection({
@@ -58,6 +60,7 @@ export function UserProfileFormSection({
   onImageChange,
   onCopyUserIdError,
   checkNickname = checkNicknameAvailabilityAction,
+  footer,
 }: UserProfileFormSectionProps) {
   const tCommon = useTranslations('common');
   const tCommonLabels = useTranslations('common.labels');
@@ -85,9 +88,7 @@ export function UserProfileFormSection({
           : user.role;
 
   return (
-    <DsLayoutStack gap="md">
-      <SectionHeader title={tCommonLabels('profile')} />
-
+    <SettingsSection title={tCommonLabels('profile')} description={tPage('profile.description')}>
       <DsLayoutInline align="center" gap="sm">
         <UserAvatarUploader
           memberId={memberId}
@@ -223,6 +224,7 @@ export function UserProfileFormSection({
       />
 
       <SocialLinksEditor value={socialLinks} onChange={onSocialLinksChange} addButtonMode="icon" />
-    </DsLayoutStack>
+      {footer}
+    </SettingsSection>
   );
 }

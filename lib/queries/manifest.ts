@@ -16,7 +16,7 @@ import type { SocialLinks } from '@/lib/types/common/social-links';
 import type { ContentBlockMediaItem } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { materializeLocalizedPageSections, type LocalizedPageSection } from '@/features/editor/contract/localized-page';
 import { createLogger } from '@/lib/utils/logger';
-import { assetRefUrl, themedAssetRefUrl } from '@/lib/utils/asset-ref';
+import { assetRefUrl } from '@/lib/utils/asset-ref';
 import { getPublicPageResponse } from '@/lib/queries/page-public.server';
 
 const logger = createLogger('manifest-queries');
@@ -26,9 +26,11 @@ export interface ManifestSettings {
   site_title: string;
   meta_description: string;
   site_origin: string;
-  logo_url: string | null;
-  logo_light_url: string | null;
-  logo_dark_url: string | null;
+  /** Display logos resolved by the API (missing theme → other theme, missing form → other form). */
+  logo_full_light_url: string | null;
+  logo_full_dark_url: string | null;
+  logo_symbol_light_url: string | null;
+  logo_symbol_dark_url: string | null;
   favicon_url: string | null;
   favicon_asset_set: FaviconAssetSetUrls | null;
   loader_urls: string[];
@@ -84,9 +86,10 @@ const DEFAULT_MANIFEST: Manifest = {
     site_title: '',
     meta_description: '',
     site_origin: '',
-    logo_url: null,
-    logo_light_url: null,
-    logo_dark_url: null,
+    logo_full_light_url: null,
+    logo_full_dark_url: null,
+    logo_symbol_light_url: null,
+    logo_symbol_dark_url: null,
     favicon_url: null,
     favicon_asset_set: null,
     loader_urls: [],
@@ -158,9 +161,10 @@ function fromProtoSettings(settings: ProtoSiteSettings | undefined): ManifestSet
     site_title: settings.siteTitle,
     meta_description: settings.metaDescription,
     site_origin: settings.siteOrigin ?? '',
-    logo_url: themedAssetRefUrl(settings.logoLightAsset, settings.logoDarkAsset),
-    logo_light_url: settings.logoLightAsset?.url ?? null,
-    logo_dark_url: settings.logoDarkAsset?.url ?? null,
+    logo_full_light_url: assetRefUrl(settings.logoFullLightAsset),
+    logo_full_dark_url: assetRefUrl(settings.logoFullDarkAsset),
+    logo_symbol_light_url: assetRefUrl(settings.logoSymbolLightAsset),
+    logo_symbol_dark_url: assetRefUrl(settings.logoSymbolDarkAsset),
     favicon_url: settings.faviconAssetSet
       ? faviconAssetSet
         ? assetRefUrl(settings.faviconAsset)

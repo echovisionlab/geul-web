@@ -212,7 +212,10 @@
       "text": "Texto",
       "caption": "Legenda",
       "allUsers": "Todos os utilizadores",
-      "newsletter": "Boletim informativo"
+      "newsletter": "Boletim informativo",
+      "images": "Imagens",
+      "classification": "Classificação",
+      "related": "Relacionados"
     },
     "entities": {
       "post": "Publicação",
@@ -385,6 +388,12 @@
       "status": {
         "preparingImage": "Preparando imagem",
         "uploading": "Enviando"
+      },
+      "removeLabel": "Remover {label}",
+      "errors": {
+        "tooLarge": "Ficheiro demasiado grande. Tamanho máximo: {maxSize}",
+        "tooSmall": "Ficheiro demasiado pequeno. Tamanho mínimo: {minSize}",
+        "invalidType": "Este tipo de ficheiro não é suportado."
       }
     },
     "states": {
@@ -449,6 +458,12 @@
       "pause": "Pausar animação",
       "resume": "Retomar animação",
       "readAllInformation": "Ler todas as informações da cena"
+    },
+    "loadMore": {
+      "action": "Carregar mais",
+      "loading": "A carregar mais…",
+      "failed": "Não foi possível carregar mais itens.",
+      "retry": "Tentar novamente"
     }
   },
   "shell": {
@@ -704,7 +719,8 @@
             "subject": "Linha de assunto do email renderizada.",
             "siteName": "Nome do site nas definições.",
             "siteOrigin": "Origem do site em tempo de execução.",
-            "logoEmailUrl": "URL do logótipo específico do e-mail nas definições do website (se definido).",
+            "logoEmailUrl": "URL do logótipo de e-mail claro das definições do site; o escuro se for o único definido.",
+            "logoEmailDarkUrl": "URL do logótipo de e-mail escuro para aplicações no modo escuro; o claro se for o único definido.",
             "emailLang": "Código de idioma aplicado ao documento de correio eletrónico renderizado.",
             "emailDirection": "Direção do texto para o documento de email renderizado.",
             "emailFontFamily": "Pilha de fontes Noto com reconhecimento de localidade para o e-mail renderizado.",
@@ -1104,7 +1120,8 @@
       "labelLanguageTranslatedDescription": "Os menus públicos mostram apenas uma tradução atual para a localidade exata do visitante; caso contrário, mostram o rótulo de origem.",
       "labelLanguageFixedLocaleDescription": "Os menus públicos mostram sempre este item do local selecionado, independentemente do local do visitante. Se este código de idioma não tiver um rótulo ativo, será utilizado o rótulo de origem.",
       "translatedItemBadge": "Local do visitante",
-      "fixedLocaleItemBadge": "Corrigido: {locale}"
+      "fixedLocaleItemBadge": "Corrigido: {locale}",
+      "description": "Faça a gestão dos menus de navegação apresentados no site. Selecione um menu para editar os respetivos itens."
     },
     "emailEvents": {
       "title": "Entrega de e-mail",
@@ -1405,7 +1422,8 @@
     "works": {
       "allTypes": "Todos os tipos",
       "empty": "Nenhuma obra encontrada",
-      "loadMore": "Carregue mais ({count} restantes)"
+      "loadMore": "Carregue mais ({count} restantes)",
+      "filterByType": "Filtrar trabalhos por tipo"
     },
     "releases": {
       "empty": "Nenhum lançamento lançado ainda."
@@ -1415,7 +1433,7 @@
     "details": {
       "parent": "Pai",
       "stats": "Estatísticas",
-      "statsValue": "{releases} lançamentos, {artists} artistas"
+      "statsValue": "{releases, plural, one {# lançamento} many {# lançamentos} other {# lançamentos}}, {artists, plural, one {# artista} many {# artistas} other {# artistas}}"
     },
     "sections": {
       "releases": "Lançamentos ({count})",
@@ -1702,7 +1720,7 @@
     },
     "personalAccessTokens": {
       "title": "Token de acesso pessoal",
-      "description": "Utilize este único token de acesso pessoal com as APIs fornecidas pela {siteName}. Cada pedido utiliza as permissões atuais da sua conta. O Remote MCP não aceita este token.",
+      "description": "Utilize este único token de acesso pessoal com as APIs fornecidas pela {siteName}. Cada pedido utiliza as permissões atuais da sua conta.",
       "empty": "Ainda não foi criado nenhum token de acesso pessoal.",
       "regenerate": "Gerar novamente",
       "regenerateTitle": "Gerar novamente o token de acesso pessoal",
@@ -2648,14 +2666,16 @@
     },
     "home": {
       "sections": {
-        "logoSize": "Tamanho do logótipo"
+        "logoSize": "Tamanho do logótipo",
+        "currentImage": "Imagem atual e fundo"
       },
       "fields": {
         "backgroundColor": "Cor de fundo"
       },
       "helpers": {
         "logoCentered": "O logótipo ficará centralizado na imagem",
-        "previewDescription": "Imagem OG da página inicial: logótipo centrado, sem texto de título"
+        "previewDescription": "Imagem OG da página inicial: logótipo centrado, sem texto de título",
+        "currentImage": "A imagem de partilha gerada da página inicial e o fundo opcional."
       }
     },
     "content": {
@@ -3186,7 +3206,7 @@
         "showMeta": "Mostrar meta",
         "sortBy": "Ordenar por",
         "numberOfPosts": "Número de posts",
-        "showPagination": "Mostrar paginação",
+        "showPagination": "Carregar mais ao deslocar",
         "exposedFilters": "Filtros expostos",
         "exposedSorts": "Classificações expostas",
         "rowsPerPage": "Linhas por página",
@@ -4656,11 +4676,15 @@
     "emailVerification": {
       "verified": "E-mail verificado",
       "unverified": "E-mail não verificado"
+    },
+    "profile": {
+      "description": "Guardar aplica as alterações desta secção. As secções abaixo aplicam cada alteração de imediato."
     }
   },
   "adminSettings": {
     "site": {
       "title": "Configurações do site",
+      "description": "Identidade, marca, navegação e predefinições de pesquisa de todo o site.",
       "notifications": {
         "saved": "Configurações guardadas",
         "noChanges": "Nenhuma alteração para guardar"
@@ -4678,7 +4702,12 @@
           "socialLinksDescription": "Adicione os seus perfis de redes sociais. Serão exibidos no rodapé do site."
         },
         "branding": {
-          "title": "Marca"
+          "title": "Marca",
+          "logos": "Logótipos",
+          "logosDescription": "O logótipo completo e o símbolo, para fundos claros e escuros. As variantes em falta são substituídas automaticamente.",
+          "emailLogos": "Logótipos de e-mail",
+          "emailLogosDescription": "Logótipos PNG para esquemas de e-mail. As aplicações no modo escuro usam o logótipo escuro.",
+          "iconsAndLoader": "Favicon e animação de carregamento"
         },
         "contentDisplay": {
           "title": "Conteúdo e exibição",
@@ -4761,17 +4790,29 @@
         "errorMessage": "{label} deve ser {mimeTypes} (máx. {maxSize})",
         "uploaded": "{label} enviado",
         "removed": "{label} removido",
-        "logo_light": {
-          "label": "Logotipo do site leve",
-          "description": "Exibido em fundos claros e utilizado como logótipo padrão do site."
+        "logo_full_light": {
+          "label": "Logótipo completo · claro",
+          "description": "Símbolo com logótipo para fundos claros: cabeçalho, menus, impressão e imagens de partilha."
         },
-        "logo_dark": {
-          "label": "Logotipo do site escuro",
-          "description": "Exibido em fundos escuros. Volta ao logotipo claro quando vazio."
+        "logo_full_dark": {
+          "label": "Logótipo completo · escuro",
+          "description": "Para fundos escuros. Usa o logótipo completo claro quando vazio."
         },
-        "logo_email": {
-          "label": "Logótipo do e-mail",
-          "description": "Utilizado em modelos e layouts de e-mail. O PNG é recomendado para compatibilidade do cliente."
+        "logo_symbol_light": {
+          "label": "Símbolo · claro",
+          "description": "Apenas o símbolo, para espaços pequenos como o menu de administração recolhido. Usa o logótipo completo quando vazio."
+        },
+        "logo_symbol_dark": {
+          "label": "Símbolo · escuro",
+          "description": "Para fundos escuros. Usa o símbolo claro quando vazio."
+        },
+        "logo_email_light": {
+          "label": "Logótipo de e-mail · claro",
+          "description": "PNG mostrado nos e-mails. Usa o logótipo de e-mail escuro quando vazio."
+        },
+        "logo_email_dark": {
+          "label": "Logótipo de e-mail · escuro",
+          "description": "PNG que as aplicações de e-mail mostram no modo escuro. Usa o logótipo de e-mail claro quando vazio."
         },
         "favicon": {
           "label": "Favicon do site",

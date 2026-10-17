@@ -5,6 +5,10 @@ import { afterEach, describe, it, expect, vi } from 'vitest';
 import { within, userEvent } from 'storybook/test';
 import { TestProviders } from '@/test/TestProviders';
 import { AdminContentPreview } from './AdminContent.stories';
+import { waitInAct } from '@/test/act-wait';
+
+// Full production page renders: a loaded CI worker needs more than the default 5s per test.
+vi.setConfig({ testTimeout: 20_000 });
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
   usePathname: () => '/preview',
@@ -35,22 +39,20 @@ function render(domain: 'posts' | 'pages', state: 'ready' | 'empty' | 'error' = 
     ),
   );
 }
-async function flush() {
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 30));
-  });
-}
 describe('actual content administration page views', () => {
   it.each(['posts', 'pages'] as const)(
     'runs the actual %s creation controller and domain row rendering',
     async (domain) => {
       render(domain);
-      await flush();
-      const button = Array.from(host.querySelectorAll('button')).find((node) => node.textContent?.startsWith('New '));
-      expect(button).toBeDefined();
-      await act(async () => button!.click());
-      await flush();
-      expect(host.querySelector(`a[href*="${domain === 'posts' ? 'post' : 'page'}-3"]`)).not.toBeNull();
+      const button = await waitInAct(() => {
+        const match = Array.from(host.querySelectorAll('button')).find((node) => node.textContent?.startsWith('New '));
+        expect(match).toBeDefined();
+        return match!;
+      });
+      await act(async () => button.click());
+      await waitInAct(() =>
+        expect(host.querySelector(`a[href*="${domain === 'posts' ? 'post' : 'page'}-3"]`)).not.toBeNull(),
+      );
     },
   );
 });
@@ -60,13 +62,15 @@ describe('content list accessibility states', () => {
     'keeps %s visible titles and names the table, search, selection and results',
     async (domain) => {
       render(domain);
-      await flush();
       const canvas = within(host);
+      // The search field is a dynamically imported runtime.
+      await waitInAct(() =>
+        expect(
+          canvas.getByRole('searchbox', { name: domain === 'posts' ? 'Search posts...' : 'Search pages...' }),
+        ).toBeDefined(),
+      );
       expect(canvas.getByRole('heading', { level: 1 }).textContent).toBe(domain === 'posts' ? 'Posts' : 'Pages');
       expect(canvas.getByRole('table', { name: domain === 'posts' ? 'Posts' : 'Pages' })).toBeDefined();
-      expect(
-        canvas.getByRole('searchbox', { name: domain === 'posts' ? 'Search posts...' : 'Search pages...' }),
-      ).toBeDefined();
       expect(canvas.getByRole('checkbox', { name: 'Select all rows' })).toBeDefined();
       for (const checkbox of canvas.getAllByRole('checkbox')) {
         expect(checkbox.getAttribute('aria-label')).toBeTruthy();
@@ -81,8 +85,7 @@ describe('content list accessibility states', () => {
     'announces actual empty/error %s states without exposing stale rows',
     async (domain) => {
       render(domain, 'error');
-      await flush();
-      expect(within(host).getByRole('alert').textContent).toContain('Failed to load');
+      await waitInAct(() => expect(within(host).getByRole('alert').textContent).toContain('Failed to load'));
       expect(host.querySelector('table')).toBeNull();
     },
   );
@@ -90,7 +93,6 @@ describe('content list accessibility states', () => {
     'deletes a %s row through its named menu and retains useful focus',
     async (domain) => {
       render(domain);
-      await flush();
       const canvas = within(host);
       const name = domain === 'posts' ? 'Listening Notes' : 'Listening Room';
       const trigger = canvas.getAllByRole('button', { name: `Actions for ${name}` })[0];
@@ -98,19 +100,19 @@ describe('content list accessibility states', () => {
       await act(async () => {
         await userEvent.click(trigger);
       });
-      const menu = within(document.body).getByRole('menu');
+      const menu = await waitInAct(() => within(document.body).getByRole('menu'));
       await act(async () => {
         await userEvent.click(within(menu).getByRole('menuitem', { name: 'Delete' }));
       });
-      await flush();
-      const dialog = within(document.body).getByRole('dialog', { name: 'Delete' });
+      const dialog = await waitInAct(() => within(document.body).getByRole('dialog', { name: 'Delete' }));
       expect(dialog.textContent).toContain(name);
       await act(async () => {
         await userEvent.click(within(dialog).getByRole('button', { name: 'Delete' }));
       });
-      await flush();
-      expect(canvas.queryAllByRole('button', { name: `Actions for ${name}` })[0]).toBeUndefined();
-      expect(host.contains(document.activeElement)).toBe(true);
+      await waitInAct(() => {
+        expect(canvas.queryAllByRole('button', { name: `Actions for ${name}` })[0]).toBeUndefined();
+        expect(host.contains(document.activeElement)).toBe(true);
+      });
     },
   );
 });

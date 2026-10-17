@@ -1,4 +1,5 @@
 export { ImagePreviewFrame } from './ImagePreviewFrame';
+export type { ImagePreviewSurface } from './ImagePreviewFrame';
 export { ImagePreviewHeader } from './ImagePreviewHeader';
 export type { ImagePreviewHeaderProps } from './ImagePreviewHeader';
 export { ImageUploadCropField } from './ImageUploadCropField';

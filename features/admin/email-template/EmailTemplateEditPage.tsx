@@ -121,6 +121,7 @@ function useEmailTemplateEditPageModel() {
         catalog: tVariableCatalog,
         siteOrigin: () => tCommonLabels('siteOrigin'),
         logoEmailUrl: () => tEmailLayoutVariableItems('logoEmailUrl'),
+        logoEmailDarkUrl: () => tEmailLayoutVariableItems('logoEmailDarkUrl'),
       }),
     [tCommonLabels, tEmailLayoutVariableItems, tVariableCatalog],
   );
@@ -874,6 +875,7 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
             <SupportingText tone="secondary">{tEmailTemplates('detail.modals.test.description')}</SupportingText>
             <TextInput
               grow
+              aria-label={tCommonLabels('email')}
               placeholder={tCommonPlaceholders('testEmailExample')}
               disabled={!canEditTranslationSource}
               value={testEmail}

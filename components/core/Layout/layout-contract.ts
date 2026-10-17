@@ -10,6 +10,11 @@ export type LayoutPoint = 'base' | LayoutBreakpoint;
 export type Responsive<T> = T | Partial<Record<LayoutPoint, T>>;
 export type LayoutAlign = 'start' | 'center' | 'end' | 'stretch' | 'baseline';
 export type LayoutColumnCount = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+/** Minimum column width of a fluid grid (`sm` 9rem, `md` 14rem, `lg` 20rem): it fits as many columns as the width allows. */
+export const LAYOUT_MIN_COLUMN_WIDTHS = ['sm', 'md', 'lg'] as const;
+export type LayoutMinColumnWidth = (typeof LAYOUT_MIN_COLUMN_WIDTHS)[number];
+export const isMinColumnWidth = (value: unknown): value is LayoutMinColumnWidth =>
+  LAYOUT_MIN_COLUMN_WIDTHS.includes(value as LayoutMinColumnWidth);
 export type LayoutColumnSpan = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 'full';
 export type LayoutColumnOffset = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
 export type LayoutElement =

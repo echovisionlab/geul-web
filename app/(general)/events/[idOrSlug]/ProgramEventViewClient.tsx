@@ -1,12 +1,7 @@
 'use client';
 
-import { Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
-import {
-  LayoutStack as DsLayoutStack,
-  LayoutInline as DsLayoutInline,
-  LayoutGrid as DsLayoutGrid,
-  LayoutGridItem as DsLayoutGridItem,
-} from '@/components/core/Layout';
+import { Text as DsText } from '@/components/core/Typography';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
@@ -20,9 +15,12 @@ import {
 } from '@/components/core/PublicMetadata';
 import { CreditList } from '@/features/work/CreditList';
 // Leaf modules: these documents have no authored layout, so the collaboration schema stays off the route.
-import { ContentChrome } from '@/features/document-layout/ui/ContentChrome';
-import { ContentLayoutView } from '@/features/document-layout/ui/ContentLayoutView';
-import { FLOW_DOCUMENT_LAYOUT } from '@/features/document-layout/ui/types';
+import { DocumentHeadingScope } from '@/features/document-layout/ui/DocumentHeadingScope';
+import {
+  EntityDetailImage,
+  EntityDetailLayout,
+  EntityDetailSection,
+} from '@/features/document-layout/ui/EntityDetailLayout';
 import { TableOfContents } from '@/features/navigation/TableOfContents';
 import { GeneratedRichTextBlockView } from '@/features/page/PageView/blocks/GeneratedRichTextBlockView';
 import { ContentBlockMediaRuntimeProvider } from '@/features/media/ContentBlockMediaRuntimeContext';
@@ -137,184 +135,145 @@ export function ProgramEventViewClient({ event, locale, pathname, query, request
     />
   ) : null;
 
-  const MetadataSection = () => (
-    <DsLayoutStack gap="md">
-      <DsLayoutInline justify="between" align="start">
-        <DsLayoutStack gap="xs" flexible>
-          <DsHeading
-            level={1}
-            scale="title"
-            lang={event.localizationInfo?.displayedLocale || event.localizationInfo?.sourceLocale || requestedLocale}
-          >
-            {event.title || tCommonStates('untitledPlain')}
-          </DsHeading>
-          <PublicMetadataRows>
-            {event.type ? (
-              <PublicMetadataRow label={tCommonLabels('type')}>
-                <DsText size="sm" as="span">
-                  {event.type.name}
-                </DsText>
-              </PublicMetadataRow>
-            ) : null}
-            {event.series ? (
-              <PublicMetadataRow label={tProgramEventAdmin('public.series')}>
-                <PublicMetadataLink href={`/event-series/${event.series.slug || event.series.id}`}>
-                  {event.series.title}
-                </PublicMetadataLink>
-              </PublicMetadataRow>
-            ) : null}
-            {eventDate ? (
-              <PublicMetadataRow label={tProgramEventAdmin('public.date')}>
-                <DsText size="sm" as="span">
-                  {eventDate}
-                </DsText>
-              </PublicMetadataRow>
-            ) : null}
-            {event.locationPlace ? (
-              <LocationPlaceMetadataRows place={event.locationPlace} textSize="sm" coordinateVisibility="desktop" />
-            ) : null}
-            {event.ticketUrl ? (
-              <PublicMetadataRow label={tProgramEventAdmin('public.tickets')}>
-                <PublicMetadataLink href={event.ticketUrl} external indicator="external">
-                  {formatDisplayUrl(event.ticketUrl)}
-                </PublicMetadataLink>
-              </PublicMetadataRow>
-            ) : null}
-            {event.streamUrl ? (
-              <PublicMetadataRow label={tProgramEventAdmin('public.stream')}>
-                <PublicMetadataLink href={event.streamUrl} external indicator="external">
-                  {formatDisplayUrl(event.streamUrl)}
-                </PublicMetadataLink>
-              </PublicMetadataRow>
-            ) : null}
-            {event.externalUrl ? (
-              <PublicMetadataRow label={tProgramEventAdmin('public.link')}>
-                <PublicMetadataLink href={event.externalUrl} external indicator="external">
-                  {formatDisplayUrl(event.externalUrl)}
-                </PublicMetadataLink>
-              </PublicMetadataRow>
-            ) : null}
-            {event.artists.length > 0 ? (
-              <PublicMetadataRow label={tCommonEntities('artists')}>
-                <PublicMetadataValueGroup>
-                  {event.artists.map((artist) => (
-                    <PublicMetadataLink key={artist.id} href={`/artists/${artist.slug || artist.id}`}>
-                      {formatNameWithRole(artist.name, artist.role)}
-                    </PublicMetadataLink>
-                  ))}
-                </PublicMetadataValueGroup>
-              </PublicMetadataRow>
-            ) : null}
-            {event.labels.length > 0 ? (
-              <PublicMetadataRow label={tCommonEntities('labels')}>
-                <PublicMetadataValueGroup>
-                  {event.labels.map((label) => (
-                    <PublicMetadataLink key={label.id} href={`/labels/${label.slug || label.id}`}>
-                      {formatNameWithRole(label.name, label.role)}
-                    </PublicMetadataLink>
-                  ))}
-                </PublicMetadataValueGroup>
-              </PublicMetadataRow>
-            ) : null}
-            {event.clients.length > 0 ? (
-              <PublicMetadataRow label={tCommonEntities('clients')}>
-                <PublicMetadataValueGroup>
-                  {event.clients.map((client) =>
-                    client.website ? (
-                      <PublicMetadataLink key={client.id} href={client.website} external>
-                        {formatNameWithRole(client.name, client.role)}
-                      </PublicMetadataLink>
-                    ) : (
-                      <DsText key={client.id} size="sm" as="span">
-                        {formatNameWithRole(client.name, client.role)}
-                      </DsText>
-                    ),
-                  )}
-                </PublicMetadataValueGroup>
-              </PublicMetadataRow>
-            ) : null}
-            {event.credits.length > 0 ? (
-              <PublicMetadataRow label={tProgramEventAdmin('public.credits')}>
-                <DsLayoutStack gap="sm" role="list" aria-label={tProgramEventAdmin('public.credits')}>
-                  {event.credits.map((credit) => (
-                    <CreditList.Item
-                      key={credit.id}
-                      name={formatCreditName(credit, tCommonStates('unknown'))}
-                      role={credit.creditRole}
-                      note={credit.description}
-                      href={creditHref(credit)}
-                      imageUrl={credit.artist?.imageUrl ?? credit.member?.image}
-                    />
-                  ))}
-                </DsLayoutStack>
-              </PublicMetadataRow>
-            ) : null}
-          </PublicMetadataRows>
-        </DsLayoutStack>
-        <DsLayoutInline gap="xs">{languageMenu}</DsLayoutInline>
-      </DsLayoutInline>
-    </DsLayoutStack>
-  );
+  const contentLang =
+    event.localizationInfo?.displayedLocale || event.localizationInfo?.sourceLocale || requestedLocale;
 
-  // Running text reads like a post: the plain header shares the reading column; a poster header keeps
-  // its full-width grid. The outline sits beside the body (`center`).
   return (
-    <ContentLayoutView
-      layout={FLOW_DOCUMENT_LAYOUT}
-      chrome={
-        <ContentChrome measure={event.posterUrl ? 'full' : 'reading'}>
-          {event.posterUrl ? (
-            <DsLayoutGrid columns={12} gap="xl">
-              <DsLayoutGridItem span={{ base: 12, md: 7 }}>
-                <div
-                  style={{
-                    width: '100%',
-                    maxWidth: '100%',
-                  }}
-                >
-                  <img
-                    src={event.posterUrl}
-                    alt={event.title}
-                    style={{
-                      display: 'block',
-                      width: '100%',
-                      height: 'auto',
-                      maxHeight: 'min(80dvh, 900px)',
-                      objectFit: 'contain',
-                    }}
+    <EntityDetailLayout
+      media={event.posterUrl ? <EntityDetailImage src={event.posterUrl} alt={event.title} /> : undefined}
+      title={event.title || tCommonStates('untitledPlain')}
+      titleLang={contentLang}
+      actions={languageMenu}
+      meta={
+        <PublicMetadataRows>
+          {event.type ? (
+            <PublicMetadataRow label={tCommonLabels('type')}>
+              <DsText size="sm" as="span">
+                {event.type.name}
+              </DsText>
+            </PublicMetadataRow>
+          ) : null}
+          {event.series ? (
+            <PublicMetadataRow label={tProgramEventAdmin('public.series')}>
+              <PublicMetadataLink href={`/event-series/${event.series.slug || event.series.id}`}>
+                {event.series.title}
+              </PublicMetadataLink>
+            </PublicMetadataRow>
+          ) : null}
+          {eventDate ? (
+            <PublicMetadataRow label={tProgramEventAdmin('public.date')}>
+              <DsText size="sm" as="span">
+                {eventDate}
+              </DsText>
+            </PublicMetadataRow>
+          ) : null}
+          {event.locationPlace ? (
+            <LocationPlaceMetadataRows place={event.locationPlace} textSize="sm" coordinateVisibility="desktop" />
+          ) : null}
+          {event.ticketUrl ? (
+            <PublicMetadataRow label={tProgramEventAdmin('public.tickets')}>
+              <PublicMetadataLink href={event.ticketUrl} external indicator="external">
+                {formatDisplayUrl(event.ticketUrl)}
+              </PublicMetadataLink>
+            </PublicMetadataRow>
+          ) : null}
+          {event.streamUrl ? (
+            <PublicMetadataRow label={tProgramEventAdmin('public.stream')}>
+              <PublicMetadataLink href={event.streamUrl} external indicator="external">
+                {formatDisplayUrl(event.streamUrl)}
+              </PublicMetadataLink>
+            </PublicMetadataRow>
+          ) : null}
+          {event.externalUrl ? (
+            <PublicMetadataRow label={tProgramEventAdmin('public.link')}>
+              <PublicMetadataLink href={event.externalUrl} external indicator="external">
+                {formatDisplayUrl(event.externalUrl)}
+              </PublicMetadataLink>
+            </PublicMetadataRow>
+          ) : null}
+          {event.artists.length > 0 ? (
+            <PublicMetadataRow label={tCommonEntities('artists')}>
+              <PublicMetadataValueGroup>
+                {event.artists.map((artist) => (
+                  <PublicMetadataLink key={artist.id} href={`/artists/${artist.slug || artist.id}`}>
+                    {formatNameWithRole(artist.name, artist.role)}
+                  </PublicMetadataLink>
+                ))}
+              </PublicMetadataValueGroup>
+            </PublicMetadataRow>
+          ) : null}
+          {event.labels.length > 0 ? (
+            <PublicMetadataRow label={tCommonEntities('labels')}>
+              <PublicMetadataValueGroup>
+                {event.labels.map((label) => (
+                  <PublicMetadataLink key={label.id} href={`/labels/${label.slug || label.id}`}>
+                    {formatNameWithRole(label.name, label.role)}
+                  </PublicMetadataLink>
+                ))}
+              </PublicMetadataValueGroup>
+            </PublicMetadataRow>
+          ) : null}
+          {event.clients.length > 0 ? (
+            <PublicMetadataRow label={tCommonEntities('clients')}>
+              <PublicMetadataValueGroup>
+                {event.clients.map((client) =>
+                  client.website ? (
+                    <PublicMetadataLink key={client.id} href={client.website} external>
+                      {formatNameWithRole(client.name, client.role)}
+                    </PublicMetadataLink>
+                  ) : (
+                    <DsText key={client.id} size="sm" as="span">
+                      {formatNameWithRole(client.name, client.role)}
+                    </DsText>
+                  ),
+                )}
+              </PublicMetadataValueGroup>
+            </PublicMetadataRow>
+          ) : null}
+          {event.credits.length > 0 ? (
+            <PublicMetadataRow label={tProgramEventAdmin('public.credits')}>
+              <DsLayoutStack gap="sm" role="list" aria-label={tProgramEventAdmin('public.credits')}>
+                {event.credits.map((credit) => (
+                  <CreditList.Item
+                    key={credit.id}
+                    name={formatCreditName(credit, tCommonStates('unknown'))}
+                    role={credit.creditRole}
+                    note={credit.description}
+                    href={creditHref(credit)}
+                    imageUrl={credit.artist?.imageUrl ?? credit.member?.image}
                   />
-                </div>
-              </DsLayoutGridItem>
-              <DsLayoutGridItem span={{ base: 12, md: 5 }}>
-                <MetadataSection />
-              </DsLayoutGridItem>
-            </DsLayoutGrid>
-          ) : (
-            <MetadataSection />
-          )}
-        </ContentChrome>
+                ))}
+              </DsLayoutStack>
+            </PublicMetadataRow>
+          ) : null}
+        </PublicMetadataRows>
       }
     >
-      <TableOfContents items={tocItems} contentPlacement="center">
-        {event.content && event.content.length > 0 ? (
-          <div
-            className="prose"
-            data-reading-measure=""
-            lang={event.localizationInfo?.displayedLocale || event.localizationInfo?.sourceLocale || requestedLocale}
+      {event.content && event.content.length > 0 ? (
+        <EntityDetailSection title={tCommonLabels('description')}>
+          <TableOfContents
+            items={tocItems}
+            contentPlacement="start"
+            outlinePresentation={event.posterUrl ? 'rail' : 'responsive'}
           >
-            <ContentBlockMediaRuntimeProvider items={event.blockMedia}>
-              {event.content.map((block) => (
-                <GeneratedRichTextBlockView
-                  key={block.id}
-                  block={block}
-                  requestedLocale={requestedLocale}
-                  downloadOwner={{ entityType: PUBLIC_MEDIA_ENTITY_TYPE.PROGRAM_EVENT, entityId: event.id }}
-                />
-              ))}
-            </ContentBlockMediaRuntimeProvider>
-          </div>
-        ) : null}
-      </TableOfContents>
-    </ContentLayoutView>
+            <div className="prose" lang={contentLang}>
+              {/* The authored body sits under the level-2 section title: authored H1 → h3. */}
+              <DocumentHeadingScope parentLevel={2}>
+                <ContentBlockMediaRuntimeProvider items={event.blockMedia}>
+                  {event.content.map((block) => (
+                    <GeneratedRichTextBlockView
+                      key={block.id}
+                      block={block}
+                      requestedLocale={requestedLocale}
+                      downloadOwner={{ entityType: PUBLIC_MEDIA_ENTITY_TYPE.PROGRAM_EVENT, entityId: event.id }}
+                    />
+                  ))}
+                </ContentBlockMediaRuntimeProvider>
+              </DocumentHeadingScope>
+            </div>
+          </TableOfContents>
+        </EntityDetailSection>
+      ) : null}
+    </EntityDetailLayout>
   );
 }

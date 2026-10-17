@@ -4,7 +4,7 @@ import { useId, type CSSProperties, type ReactNode } from 'react';
 import { Button as AriaButton, Link as AriaLink } from 'react-aria-components';
 import { useNavigationClick } from '../Navigation/navigation-events';
 import { useNavigationPrefetch } from '../Navigation/navigation-prefetch';
-import { IconChevronRight } from '@tabler/icons-react';
+import { Disclosure } from '../Disclosure';
 import { DropdownMenu } from '../DropdownMenu';
 import { Tooltip } from '../Tooltip';
 import classes from './SideNavigation.module.css';
@@ -100,7 +100,6 @@ export function SideNavigation({
     >
       {sections.map((section, sectionIndex) => {
         const contentId = `${navigationId}-section-${sectionIndex}`;
-        const headerId = `${contentId}-header`;
         const sectionLabel = section.label;
         const hasLabel = Boolean(sectionLabel);
         const open = compact || !hasLabel || openSectionKeys.includes(section.key);
@@ -151,33 +150,42 @@ export function SideNavigation({
           );
         }
 
-        return (
-          <section
-            key={section.key}
-            className={classes.section}
-            aria-label={compact ? sectionLabel : undefined}
-            aria-labelledby={!compact && hasLabel ? headerId : undefined}
-            data-section-key={section.key}
-            data-section-label={hasLabel || undefined}
-          >
-            {!compact && hasLabel ? (
-              <AriaButton
-                id={headerId}
-                type="button"
-                className={classes.sectionHeader}
-                aria-controls={contentId}
-                aria-expanded={open}
-                onPress={() => onToggleSection(section.key)}
-              >
-                <span className={classes.sectionLabel}>{sectionLabel}</span>
-                <IconChevronRight className={classes.chevron} data-open={open || undefined} aria-hidden />
-              </AriaButton>
-            ) : null}
+        const items = section.items.map((item) => (
+          <NavigationItem key={item.key} item={item} compact={compact} onSelectItem={onSelectItem} />
+        ));
 
-            <div id={contentId} className={classes.sectionItems} hidden={!open} data-section-items={section.key}>
-              {section.items.map((item) => (
-                <NavigationItem key={item.key} item={item} compact={compact} onSelectItem={onSelectItem} />
-              ))}
+        // Expanded groups use the shared Core disclosure (the form editor's and the public drawer's
+        // nested-list spec); items keep the navigation-only current-page boundary.
+        if (!compact && sectionLabel) {
+          return (
+            <section
+              key={section.key}
+              className={classes.section}
+              aria-label={sectionLabel}
+              data-section-key={section.key}
+              data-section-label
+            >
+              <Disclosure
+                label={sectionLabel}
+                opened={open}
+                onChange={() => onToggleSection(section.key)}
+                appearance="plain"
+                density="chrome"
+                contentIndent="none"
+                withDivider={false}
+              >
+                <div className={classes.sectionItems} data-section-items={section.key}>
+                  {items}
+                </div>
+              </Disclosure>
+            </section>
+          );
+        }
+
+        return (
+          <section key={section.key} className={classes.section} data-section-key={section.key}>
+            <div id={contentId} className={classes.sectionItems} data-section-items={section.key}>
+              {items}
             </div>
           </section>
         );

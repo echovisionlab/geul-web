@@ -7,6 +7,10 @@ import { AdminEntityPagePreview } from './AdminEntities.stories';
 import { MyListsPagePreview } from './MyLists.stories';
 import { OnboardingPagePreview } from './Onboarding.stories';
 import { OAuthConsentPagePreview } from './OAuth.stories';
+import { settleInAct, waitInAct, wrapQueryNotificationsInAct } from '@/test/act-wait';
+
+// Full production page renders: a loaded CI worker needs more than the default 5s per test.
+vi.setConfig({ testTimeout: 20_000 });
 vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn(), back: vi.fn(), prefetch: vi.fn() }),
@@ -38,7 +42,9 @@ class ResizeObserverMock {
 vi.stubGlobal('ResizeObserver', ResizeObserverMock);
 let host: HTMLDivElement;
 let root: Root;
-afterEach(() => {
+wrapQueryNotificationsInAct();
+afterEach(async () => {
+  await settleInAct();
   act(() => root?.unmount());
   host?.remove();
   vi.useRealTimers();
@@ -48,11 +54,6 @@ function render(view: React.ReactNode) {
   document.body.append(host);
   root = createRoot(host);
   act(() => root.render(<TestProviders>{view}</TestProviders>));
-}
-async function flush() {
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 25));
-  });
 }
 describe('expanded production page adapters', () => {
   it.each(['artists', 'labels', 'releases'] as const)(
@@ -67,20 +68,17 @@ describe('expanded production page adapters', () => {
   );
   it('keeps actual entity empty state and table search UI', async () => {
     render(<AdminEntityPagePreview state="empty" />);
-    await flush();
-    expect(host.textContent).toContain('No artists');
+    await waitInAct(() => expect(host.textContent).toContain('No artists'));
     expect(host.querySelector('input[placeholder*=artists]')).not.toBeNull();
   });
   it('runs the actual works query owner against local credited rows', async () => {
     render(<MyListsPagePreview domain="works" />);
-    await flush();
-    expect(host.textContent).toContain('Night Signals');
+    await waitInAct(() => expect(host.textContent).toContain('Night Signals'));
     expect(host.textContent).toContain('Composer');
   });
   it('runs the actual posts query and create owner without service calls', async () => {
     render(<MyListsPagePreview domain="posts" />);
-    await flush();
-    expect(host.textContent).toContain('Listening notes');
+    await waitInAct(() => expect(host.textContent).toContain('Listening notes'));
     const button = host.querySelector<HTMLButtonElement>('button[aria-label="New post"]');
     expect(button).not.toBeNull();
     await act(async () => button!.click());

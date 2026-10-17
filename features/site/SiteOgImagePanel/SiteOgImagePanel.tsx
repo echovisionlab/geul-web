@@ -3,15 +3,26 @@
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
 
 import { useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { notifications } from '@/components/core/Notification';
 import { MediaPreviewGrid } from '@/components/core/MediaPreviewGrid';
 import { OgImagePreview } from '@/features/metadata/OgImagePreview';
-import { SiteOgBackgroundUploader } from '@/features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader';
+import { Skeleton } from '@/components/core/Display';
 import { getSiteOgStatusAction, regenerateSiteOgImageAction } from '@/lib/actions/site-setting';
 import { useOgImage } from '@/lib/hooks/useOgImage';
 import { SITE_OG_TARGET_ID } from '@/lib/og-generation-targets';
+
+// The background uploader (drop zone, cropper, upload pipeline) loads with the panel, not with the route,
+// so the OG settings page's first load carries only the preview.
+const SiteOgBackgroundUploader = dynamic(
+  () =>
+    import('@/features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader').then(
+      (module) => module.SiteOgBackgroundUploader,
+    ),
+  { loading: () => <Skeleton roleType="media" /> },
+);
 
 export interface SiteOgImageBindings {
   status: typeof getSiteOgStatusAction;

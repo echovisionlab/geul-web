@@ -10,7 +10,7 @@ import {
 } from '@/components/core/Collection';
 import { Skeleton } from '@/components/core/Display';
 import { SectionCard } from '@/components/core/Section';
-import { contentColumns } from './content-layout';
+import { collectionMinColumnWidth, type CollectionTrackScale } from './content-layout';
 import { getResponsiveSlideSize } from './constants';
 const ListCarousel = dynamic(() => import('./ListCarouselRuntime').then((module) => module.ListCarouselRuntime));
 interface ListBlockSkeletonProps {
@@ -23,7 +23,7 @@ interface ListBlockSkeletonProps {
   imageAspectRatio?: CollectionMediaProps['aspectRatio'];
   carouselLoop?: boolean;
   carouselIndicators?: boolean;
-  gridCols?: { base: number; sm: number };
+  trackScale?: CollectionTrackScale;
 }
 export function ListBlockSkeleton({
   className,
@@ -35,7 +35,7 @@ export function ListBlockSkeleton({
   imageAspectRatio = '16:9',
   carouselLoop = true,
   carouselIndicators = true,
-  gridCols = { base: 1, sm: 2 },
+  trackScale = 'standard',
 }: ListBlockSkeletonProps) {
   const metrics = getCollectionMetrics(itemSize);
   const horizontal = layout === 'list' || layout === 'cards' || (layout === 'carousel' && columns !== 1);
@@ -87,14 +87,7 @@ export function ListBlockSkeleton({
         {cards}
       </ListCarousel>
     ) : (
-      <LayoutGrid
-        columns={{
-          base: contentColumns(layout === 'cards' ? 1 : gridCols.base),
-          sm: contentColumns(layout === 'cards' ? 2 : gridCols.sm),
-          md: contentColumns(columns),
-        }}
-        gap={metrics.gridGap}
-      >
+      <LayoutGrid minColumnWidth={collectionMinColumnWidth(layout, itemSize, trackScale)} gap={metrics.gridGap}>
         {cards}
       </LayoutGrid>
     );

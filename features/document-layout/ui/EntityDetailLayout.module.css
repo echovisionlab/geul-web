@@ -1,0 +1,214 @@
+.root {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--geul-spacing-xl);
+  min-width: 0;
+}
+
+.media {
+  min-width: 0;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--geul-spacing-xl);
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--geul-spacing-md);
+  min-width: 0;
+}
+
+.titleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--geul-spacing-md);
+  min-width: 0;
+}
+
+.titleRow > :first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--geul-spacing-xs);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--geul-spacing-sm);
+  min-width: 0;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--geul-spacing-md);
+  min-height: var(--geul-control-height-sm);
+}
+
+/* The public label voice: the same mono, muted register as the metadata row labels. */
+.sectionTitle {
+  margin: 0;
+  color: var(--geul-text-muted);
+  font-family: var(--font-mono), monospace;
+  font-size: var(--geul-font-size-sm);
+  font-weight: var(--geul-font-weight-medium);
+  line-height: var(--geul-line-height-sm);
+}
+
+.sectionActions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--geul-spacing-xs);
+}
+
+.sectionBody {
+  min-width: 0;
+}
+
+/* Running text keeps the reading measure from the start edge; lists, tables and media use the full width. */
+.sectionBody :global(.prose) > :global([data-document-block]),
+.sectionBody > :global(p) {
+  max-width: var(--geul-content-width-reading);
+}
+
+.sectionBody :global(.prose) > :global([data-document-measure='standard']),
+.sectionBody :global(.prose) > :global([data-document-measure='wide']) {
+  max-width: none;
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: min(80dvh, 56rem);
+  object-fit: contain;
+  object-position: top left;
+}
+
+.image[data-fit='cover'] {
+  aspect-ratio: 1 / 1;
+  max-height: none;
+  object-fit: cover;
+}
+
+@media (width >= $mantine-breakpoint-md) {
+  .root[data-has-media] {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    column-gap: var(--geul-spacing-xl);
+  }
+
+  /* The media stays in view while the longer column scrolls. */
+  .media {
+    position: sticky;
+    top: calc(var(--app-shell-header-offset, 0px) + var(--geul-spacing-md));
+    align-self: start;
+  }
+}
+
+@media print {
+  .root,
+  .root[data-has-media] {
+    display: block;
+  }
+
+  .media {
+    position: static;
+    margin-block-end: 6mm;
+    break-inside: avoid;
+  }
+
+  .image {
+    width: auto;
+    max-width: 100%;
+    max-height: 62mm;
+  }
+
+  .main {
+    display: block;
+  }
+
+  .main > * + * {
+    margin-top: 6mm;
+  }
+
+  .header {
+    break-inside: avoid;
+  }
+
+  /* Overlay: the media is the header's darkened background, one unbreakable fragment. */
+  .root[data-print-media='overlay'] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .root[data-print-media='overlay'] .main {
+    display: contents;
+  }
+
+  .root[data-print-media='overlay'] .media,
+  .root[data-print-media='overlay'] .header {
+    grid-area: 1 / 1;
+  }
+
+  .root[data-print-media='overlay'] .media {
+    position: relative;
+    min-height: 62mm;
+    margin: 0;
+    overflow: hidden;
+    background: var(--geul-paper-image-background);
+    print-color-adjust: exact;
+  }
+
+  .root[data-print-media='overlay'] .media::after {
+    position: absolute;
+    inset: 0;
+    background: var(--geul-paper-image-gradient);
+    content: '';
+    print-color-adjust: exact;
+  }
+
+  .root[data-print-media='overlay'] .image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    object-fit: cover;
+    filter: saturate(0.78) brightness(0.78);
+    print-color-adjust: exact;
+  }
+
+  .root[data-print-media='overlay'] .header {
+    position: relative;
+    z-index: 1;
+    min-height: 62mm;
+    justify-content: flex-end;
+    padding: 8mm;
+    break-inside: avoid;
+  }
+
+  .root[data-print-media='overlay'] .header,
+  .root[data-print-media='overlay'] .header :global(*) {
+    color: var(--geul-text-on-image) !important;
+    border-color: var(--geul-paper-image-border) !important;
+  }
+
+  .root[data-print-media='overlay'] .section {
+    margin-top: 6mm;
+  }
+}

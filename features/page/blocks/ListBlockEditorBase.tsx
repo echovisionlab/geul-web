@@ -9,7 +9,6 @@ import { CollectionSizeControl } from './CollectionSizeControl';
 
 import { Select, NumberInput, SegmentedControl, Switch } from '@/components/core/Input';
 import {
-  COLUMN_OPTIONS,
   getAspectRatioOptions,
   getLayoutOptionsPostList,
   getSortOrderOptions,
@@ -38,7 +37,6 @@ interface ListBlockEditorBaseProps {
   carouselIndicators: string;
   filters?: ReactNode;
   extraDisplayOptions?: ReactNode;
-  columnOptions?: ReadonlyArray<{ value: string; label: string }>;
   slidesToShowOptions?: ReadonlyArray<{ value: string; label: string }>;
   onUpdate: (key: string, value: string) => void;
 }
@@ -65,7 +63,6 @@ export function ListBlockEditorBase({
   carouselIndicators,
   filters,
   extraDisplayOptions,
-  columnOptions = COLUMN_OPTIONS,
   slidesToShowOptions = SLIDES_TO_SHOW_OPTIONS,
   onUpdate,
 }: ListBlockEditorBaseProps) {
@@ -167,15 +164,12 @@ export function ListBlockEditorBase({
           onChange={(value) => !readOnly && onUpdate('itemSize', value)}
         />
 
-        {layout === 'grid' || layout === 'cards' || layout === 'carousel' ? (
+        {/* Grid and card columns follow the item size; only carousels take an authored count. */}
+        {layout === 'carousel' ? (
           <Select
             disabled={readOnly}
-            label={
-              layout === 'carousel'
-                ? tPageEditor('blockEditor.labels.slidesToShow')
-                : tPageEditor('blockEditor.labels.columns')
-            }
-            data={[...(layout === 'carousel' ? slidesToShowOptions : columnOptions)]}
+            label={tPageEditor('blockEditor.labels.slidesToShow')}
+            data={[...slidesToShowOptions]}
             value={columns}
             onChange={(value) => !readOnly && onUpdate('columns', value || defaultColumns)}
           />

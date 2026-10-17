@@ -5,7 +5,7 @@ import { existsSync, mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { classifyTest, discoverTestProjects, literalTestGlob } from './vitest-projects.mts';
+import { classifyTest, discoverTestProjects, literalTestGlob, sharesRuntime } from './vitest-projects.mts';
 
 let fixture: string | undefined;
 afterEach(() => {
@@ -47,6 +47,23 @@ describe('test project boundaries', () => {
     ['features/editor/tiptap/block-room-tiptap-diff.test.ts', '', 'node-unit'],
   ])('classifies %s with %j as %s', (file, source, expected) => {
     expect(classifyTest(file, source)).toBe(expected);
+  });
+
+  it.each([
+    ['node-unit', 'expect(parse(input)).toEqual(output);', true],
+    ['node-unit', "vi.mock('next/cache');", false],
+    ['node-unit', "vi.stubGlobal('fetch', fetchMock);", false],
+    ['node-unit', "process.env.SITE_ORIGIN = 'https://example.com';", false],
+    ['node-unit', 'vi.useFakeTimers();', false],
+    ['component', "import { render } from '@/test/render';", true],
+    ['component', 'afterEach(() => {\n  act(() => root.unmount());\n});', true],
+    ['component', 'root.render(<Button />);', false],
+    ['component', "import { render } from '@/test/render';\nObject.defineProperty(window, 'matchMedia', {});", false],
+    ['component', "// @geul-test-isolate: module state\nimport { render } from '@/test/render';", false],
+    ['server-contract', '', false],
+    ['editor-integration', '', false],
+  ] as const)('lets %s share a runtime for %j: %s', (project, source, expected) => {
+    expect(sharesRuntime(project, source)).toBe(expected);
   });
 
   it('keeps an explicit tier authoritative without interpreting marker text inside assertions', () => {

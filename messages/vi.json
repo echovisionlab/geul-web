@@ -212,7 +212,10 @@
       "text": "Chữ",
       "caption": "Đầu đề",
       "allUsers": "Tất cả người dùng",
-      "newsletter": "Bản tin"
+      "newsletter": "Bản tin",
+      "images": "Hình ảnh",
+      "classification": "Phân loại",
+      "related": "Liên quan"
     },
     "entities": {
       "post": "Bưu kiện",
@@ -385,6 +388,12 @@
       "status": {
         "preparingImage": "Đang chuẩn bị hình ảnh",
         "uploading": "Đang tải lên"
+      },
+      "removeLabel": "Xóa {label}",
+      "errors": {
+        "tooLarge": "Tệp quá lớn. Tối đa {maxSize}",
+        "tooSmall": "Tệp quá nhỏ. Tối thiểu {minSize}",
+        "invalidType": "Loại tệp này không được hỗ trợ."
       }
     },
     "states": {
@@ -449,6 +458,12 @@
       "pause": "Tạm dừng chuyển động",
       "resume": "Tiếp tục chuyển động",
       "readAllInformation": "Đọc toàn bộ thông tin của cảnh"
+    },
+    "loadMore": {
+      "action": "Tải thêm",
+      "loading": "Đang tải thêm…",
+      "failed": "Không thể tải thêm mục.",
+      "retry": "Thử lại"
     }
   },
   "shell": {
@@ -704,7 +719,8 @@
             "subject": "Dòng chủ đề email được hiển thị.",
             "siteName": "Tên trang web từ cài đặt.",
             "siteOrigin": "Nguồn gốc trang web thời gian chạy.",
-            "logoEmailUrl": "URL biểu tượng dành riêng cho email từ cài đặt trang web (nếu được đặt).",
+            "logoEmailUrl": "URL logo email sáng từ cài đặt trang; dùng logo tối nếu chỉ có logo đó.",
+            "logoEmailDarkUrl": "URL logo email tối cho ứng dụng email ở chế độ tối; dùng logo sáng nếu chỉ có logo đó.",
             "emailLang": "Mã ngôn ngữ được áp dụng cho tài liệu email được hiển thị.",
             "emailDirection": "Hướng văn bản cho tài liệu email được hiển thị.",
             "emailFontFamily": "Ngăn xếp phông chữ Noto nhận biết ngôn ngữ cho email được hiển thị.",
@@ -1104,7 +1120,8 @@
       "labelLanguageTranslatedDescription": "Menu công khai chỉ hiển thị bản dịch hiện tại khớp chính xác với ngôn ngữ của khách truy cập; nếu không sẽ hiển thị nhãn nguồn.",
       "labelLanguageFixedLocaleDescription": "Menu công khai luôn hiển thị mục này từ ngôn ngữ đã chọn, bất kể ngôn ngữ của khách truy cập. Nếu ngôn ngữ đó không có nhãn trực tiếp thì nhãn nguồn sẽ được sử dụng.",
       "translatedItemBadge": "Ngôn ngữ của khách truy cập",
-      "fixedLocaleItemBadge": "Đã sửa: {locale}"
+      "fixedLocaleItemBadge": "Đã sửa: {locale}",
+      "description": "Quản lý các menu điều hướng hiển thị trên trang. Chọn một menu để chỉnh sửa các mục."
     },
     "emailEvents": {
       "title": "Gửi email",
@@ -1405,7 +1422,8 @@
     "works": {
       "allTypes": "Tất cả các loại",
       "empty": "Không tìm thấy tác phẩm nào",
-      "loadMore": "Tải thêm (còn lại {count})"
+      "loadMore": "Tải thêm (còn lại {count})",
+      "filterByType": "Lọc tác phẩm theo loại"
     },
     "releases": {
       "empty": "Chưa có bản phát hành nào được phát hành."
@@ -1702,7 +1720,7 @@
     },
     "personalAccessTokens": {
       "title": "Mã truy cập cá nhân",
-      "description": "Dùng một mã truy cập cá nhân này với các API do {siteName} cung cấp. Mỗi yêu cầu sử dụng quyền hiện tại của tài khoản. Remote MCP không chấp nhận mã này.",
+      "description": "Dùng một mã truy cập cá nhân này với các API do {siteName} cung cấp. Mỗi yêu cầu sử dụng quyền hiện tại của tài khoản.",
       "empty": "Chưa có mã truy cập cá nhân nào được tạo.",
       "regenerate": "Tạo lại",
       "regenerateTitle": "Tạo lại mã truy cập cá nhân",
@@ -2648,14 +2666,16 @@
     },
     "home": {
       "sections": {
-        "logoSize": "Kích thước biểu tượng"
+        "logoSize": "Kích thước biểu tượng",
+        "currentImage": "Ảnh hiện tại và nền"
       },
       "fields": {
         "backgroundColor": "Màu nền"
       },
       "helpers": {
         "logoCentered": "Logo sẽ được căn giữa hình ảnh",
-        "previewDescription": "Hình ảnh OG trang chủ: Logo được căn giữa, không có văn bản tiêu đề"
+        "previewDescription": "Hình ảnh OG trang chủ: Logo được căn giữa, không có văn bản tiêu đề",
+        "currentImage": "Ảnh chia sẻ trang chủ đã tạo và nền tùy chọn."
       }
     },
     "content": {
@@ -3186,7 +3206,7 @@
         "showMeta": "Hiển thị meta",
         "sortBy": "Sắp xếp theo",
         "numberOfPosts": "Số lượng bài viết",
-        "showPagination": "Hiển thị phân trang",
+        "showPagination": "Tải thêm khi cuộn",
         "exposedFilters": "Bộ lọc tiếp xúc",
         "exposedSorts": "Các loại tiếp xúc",
         "rowsPerPage": "Hàng trên mỗi trang",
@@ -4656,11 +4676,15 @@
     "emailVerification": {
       "verified": "Đã xác minh email",
       "unverified": "Email chưa được xác minh"
+    },
+    "profile": {
+      "description": "Nút Lưu áp dụng các thay đổi trong phần này. Các phần bên dưới áp dụng mỗi thay đổi ngay lập tức."
     }
   },
   "adminSettings": {
     "site": {
       "title": "Cài đặt trang web",
+      "description": "Thông tin, thương hiệu, điều hướng và mặc định tìm kiếm cho toàn trang.",
       "notifications": {
         "saved": "Đã lưu cài đặt",
         "noChanges": "Không có thay đổi nào để lưu"
@@ -4678,7 +4702,12 @@
           "socialLinksDescription": "Thêm hồ sơ truyền thông xã hội của bạn. Chúng sẽ được hiển thị ở chân trang của trang web."
         },
         "branding": {
-          "title": "Xây dựng thương hiệu"
+          "title": "Xây dựng thương hiệu",
+          "logos": "Logo",
+          "logosDescription": "Logo đầy đủ và biểu tượng, cho nền sáng và nền tối. Các biến thể còn thiếu được thay thế tự động.",
+          "emailLogos": "Logo email",
+          "emailLogosDescription": "Logo PNG cho bố cục email. Ứng dụng email ở chế độ tối dùng logo tối.",
+          "iconsAndLoader": "Favicon và hiệu ứng tải"
         },
         "contentDisplay": {
           "title": "Nội dung & Hiển thị",
@@ -4761,17 +4790,29 @@
         "errorMessage": "{label} phải là {mimeTypes} (tối đa {maxSize})",
         "uploaded": "{label} đã tải lên",
         "removed": "Đã xóa {label}",
-        "logo_light": {
-          "label": "Logo trang web nhẹ",
-          "description": "Hiển thị trên nền sáng và được sử dụng làm logo mặc định của trang web."
+        "logo_full_light": {
+          "label": "Logo đầy đủ · sáng",
+          "description": "Biểu tượng kèm chữ cho nền sáng: đầu trang, menu, bản in và ảnh chia sẻ."
         },
-        "logo_dark": {
-          "label": "Logo trang web tối",
-          "description": "Hiển thị trên nền tối. Trở lại logo ánh sáng khi trống."
+        "logo_full_dark": {
+          "label": "Logo đầy đủ · tối",
+          "description": "Cho nền tối. Dùng logo đầy đủ sáng khi để trống."
         },
-        "logo_email": {
-          "label": "Biểu tượng email",
-          "description": "Được sử dụng trong các mẫu và bố cục email. PNG được khuyến nghị để tương thích với máy khách."
+        "logo_symbol_light": {
+          "label": "Biểu tượng · sáng",
+          "description": "Chỉ biểu tượng, cho không gian hẹp như menu quản trị thu gọn. Dùng logo đầy đủ khi để trống."
+        },
+        "logo_symbol_dark": {
+          "label": "Biểu tượng · tối",
+          "description": "Cho nền tối. Dùng biểu tượng sáng khi để trống."
+        },
+        "logo_email_light": {
+          "label": "Logo email · sáng",
+          "description": "Ảnh PNG hiển thị trong email. Dùng logo email tối khi để trống."
+        },
+        "logo_email_dark": {
+          "label": "Logo email · tối",
+          "description": "Ảnh PNG mà ứng dụng email hiển thị ở chế độ tối. Dùng logo email sáng khi để trống."
         },
         "favicon": {
           "label": "Biểu tượng trang web",

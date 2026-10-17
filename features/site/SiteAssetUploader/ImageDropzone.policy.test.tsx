@@ -4,6 +4,7 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ImageUploadRejection } from '@/components/core/ImageUpload';
+import { TestProviders } from '@/test/TestProviders';
 import { ImageDropzone } from './ImageDropzone';
 
 const { notificationShowMock, getViewProps, setViewProps } = vi.hoisted(() => {
@@ -55,21 +56,24 @@ describe('ImageDropzone rejection policy', () => {
     root = createRoot(host);
     act(() => {
       root?.render(
-        <ImageDropzone
-          currentUrl={null}
-          uploading={false}
-          deleting={false}
-          accept={['image/png']}
-          minSize={1024}
-          maxSize={2048}
-          previewHeight={100}
-          previewWidth={100}
-          label="Asset"
-          description="Asset description"
-          errorMessage="Unsupported asset"
-          onDrop={onDrop}
-          onDelete={vi.fn()}
-        />,
+        <TestProviders>
+          <ImageDropzone
+            currentUrl={null}
+            uploading={false}
+            deleting={false}
+            accept={['image/png']}
+            minSize={1024}
+            maxSize={2048}
+            previewHeight={100}
+            previewWidth={100}
+            label="Asset"
+            description="Asset description"
+            errorMessage="Unsupported asset"
+            uploadPrompt="Drop or click to upload"
+            onDrop={onDrop}
+            onDelete={vi.fn()}
+          />
+        </TestProviders>,
       );
     });
 

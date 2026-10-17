@@ -1,3 +1,36 @@
+# Writing tests
+
+A test earns its place by failing when user-visible behaviour breaks. Component tests use React Testing
+Library through `@/test/render`, which wraps the application providers and returns a `user`
+(`@testing-library/user-event`):
+
+```tsx
+import { render, screen } from '@/test/render';
+
+it('saves the profile', async () => {
+  const { user } = render(<ProfileForm onSave={save} />);
+  await user.type(screen.getByLabelText('Nickname'), 'June');
+  await user.click(screen.getByRole('button', { name: 'Save' }));
+  expect(await screen.findByRole('status')).toHaveTextContent('Saved');
+});
+```
+
+- Find elements by role, label or text (`getByRole`, `getByLabelText`), not CSS selectors, class names or
+  `container.querySelector`. Markup can change; what the user perceives cannot.
+- Wait with `findBy*` or a single `waitFor` assertion. No `setTimeout`, fixed sleeps or hand-written flush
+  loops; drive timers with `vi.useFakeTimers()` and `userEvent.setup({ advanceTimers: vi.advanceTimersByTime })`.
+- Mock only external boundaries (network, server actions, browser APIs jsdom lacks). Do not mock Core
+  components or the module under test; render the real tree.
+- Each assertion must fail if the behaviour is wrong. Do not assert implementation details (call order of
+  internal helpers, state shape) or restate the code under test.
+- Extend an existing test before adding a new one; fold case matrices into `it.each`. A Storybook play test
+  already covers an interaction in a real browser; do not duplicate it in jsdom.
+- Keep a test fast: a component test that needs more than ~300ms is a defect to fix, not a timeout to raise.
+
+`eslint-plugin-testing-library` enforces the query, waiting and container rules wherever a test uses
+Testing Library or `@/test/render`. Older tests that render with `createRoot`/`act` move to this style when
+they are next changed.
+
 # Test projects
 
 `pnpm test` runs every Vitest project. CI runs the same complete collection in
@@ -40,7 +73,17 @@ network access, and `vi.stubGlobal` replacements are restored after each case.
 DOM and Next fixtures are not imported into that project. All projects use fixed
 test-only runtime URLs from `test/runtime-env.mts`; shell variables cannot select
 a running service stack. Stubbed environment variables restore between cases.
-Forks, file parallelism, and Vitest file isolation remain enabled.
+Forks, file parallelism, and Vitest file isolation remain enabled for every file that is not shared (below).
+
+Files that cannot leak state run in a shared runtime: `node-unit-shared` and `component-shared` use
+threads without per-file isolation, so module loading and the DOM environment are set up once per worker
+instead of once per file. `sharesRuntime` in `scripts/test/vitest-projects.mts` decides from the source: no
+`vi.mock`/`vi.doMock`, global or environment stubs, spies, fake timers or global redefinitions, and DOM files
+must clean up what they render (Testing Library, or `unmount` in `afterEach`). A file whose module under
+test keeps state across imports declares `// @geul-test-isolate: <reason>` and stays isolated. The shared
+projects cut the local full run from 139s to 101s with the same 1,118 files; file-order shuffles
+(`--sequence.shuffle.files`) pass. `pnpm test:unit` and `pnpm test:components` include both halves of their
+tier.
 
 Keep per-test `vi.stubGlobal` fixtures in `beforeEach` with corresponding cleanup;
 avoid fixtures that are installed only at module load and then removed by a

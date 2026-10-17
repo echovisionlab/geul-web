@@ -68,7 +68,8 @@ export interface ShellViewSlots {
   printHeader: ReactNode;
   printWatermark: ReactNode;
   languageDesktop: ReactNode;
-  languageMobile: ReactNode;
+  /** Shown in the navigation drawer; the phone header has no language control. */
+  languageNavigation: ReactNode;
   languageFooterDesktop: ReactNode;
   languageFooterMobile: ReactNode;
   socialLinks: ReactNode;

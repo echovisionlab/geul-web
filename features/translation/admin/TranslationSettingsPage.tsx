@@ -1,7 +1,9 @@
 'use client';
 
 import { formatLocaleCode } from '@/components/core/Typography/locale-code';
-import { SupportingText, Text as DsText, Heading as DsHeading } from '@/components/core/Typography';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
+import { PageHeader } from '@/components/core/PageHeader';
+import { SettingsSection } from '@/components/core/Section';
 import { ConfirmationDialog } from '@/features/confirmation';
 
 import { SectionCard as DsSectionCard } from '@/components/core/Section/SectionCard';
@@ -341,59 +343,60 @@ export function TranslationSettingsPage({ client }: { client?: TranslationSettin
   }
 
   return (
-    <DsLayoutStack gap="md">
-      <DsLayoutInline justify="between" align="start">
-        <div>
-          <DsHeading level={2}>{t('title')}</DsHeading>
-          <SupportingText tone="secondary">{t('description')}</SupportingText>
-        </div>
-        <DsLayoutInline gap="sm">
-          <Button href="/admin/translations" tone="neutral" emphasis="medium" leftSection={<IconSettings2 size={16} />}>
-            {tCommonLabels('overview')}
-          </Button>
-          <Button
-            href="/admin/translations/jobs"
-            tone="neutral"
-            emphasis="medium"
-            leftSection={<IconChecklist size={16} />}
-          >
-            {t('actions.jobs')}
-          </Button>
-          <Button
-            emphasis="medium"
-            leftSection={<IconDeviceFloppy size={16} />}
-            onClick={() => {
-              const baseline = persistedFormRef.current;
-              if (!baseline) {
-                return;
-              }
-              const mutation = buildSettingsUpdateMutation(baseline, canonicalForm);
-              if (mutation) {
-                saveMutation.mutate(mutation);
-              }
-            }}
-            loading={saveMutation.isPending}
-            disabled={!hasSettingsChanges}
-          >
-            {t('actions.save')}
-          </Button>
-        </DsLayoutInline>
-      </DsLayoutInline>
+    <DsLayoutStack gap="lg">
+      <PageHeader
+        title={t('title')}
+        description={t('description')}
+        actions={
+          <DsLayoutInline gap="sm">
+            <Button
+              href="/admin/translations"
+              tone="neutral"
+              emphasis="medium"
+              leftSection={<IconSettings2 size={16} />}
+            >
+              {tCommonLabels('overview')}
+            </Button>
+            <Button
+              href="/admin/translations/jobs"
+              tone="neutral"
+              emphasis="medium"
+              leftSection={<IconChecklist size={16} />}
+            >
+              {t('actions.jobs')}
+            </Button>
+            <Button
+              emphasis="medium"
+              leftSection={<IconDeviceFloppy size={16} />}
+              onClick={() => {
+                const baseline = persistedFormRef.current;
+                if (!baseline) {
+                  return;
+                }
+                const mutation = buildSettingsUpdateMutation(baseline, canonicalForm);
+                if (mutation) {
+                  saveMutation.mutate(mutation);
+                }
+              }}
+              loading={saveMutation.isPending}
+              disabled={!hasSettingsChanges}
+            >
+              {t('actions.save')}
+            </Button>
+          </DsLayoutInline>
+        }
+      />
 
-      <DsSectionCard padding="lg">
-        <DsLayoutStack gap="md">
-          <DsLayoutInline justify="between" align="start">
-            <div>
-              <DsHeading level={3} scale={4}>
-                {t('sections.providers')}
-              </DsHeading>
-              <SupportingText tone="secondary">{t('sections.providersDescription')}</SupportingText>
-            </div>
+      <DsLayoutStack gap="xl">
+        <SettingsSection
+          title={t('sections.providers')}
+          description={t('sections.providersDescription')}
+          actions={
             <Button leftSection={<IconPlus size={16} />} emphasis="medium" onClick={openCreateProvider}>
               {t('actions.addProvider')}
             </Button>
-          </DsLayoutInline>
-
+          }
+        >
           <DsLayoutInline gap="sm">
             <LabelBadge tone={generationEnabled ? 'positive' : 'neutral'}>
               {generationEnabled ? t('generation.enabled') : t('generation.disabled')}
@@ -406,72 +409,68 @@ export function TranslationSettingsPage({ client }: { client?: TranslationSettin
           {providers.length === 0 ? (
             <SupportingText tone="secondary">{t('providerStates.empty')}</SupportingText>
           ) : (
-            <DsLayoutStack gap="lg">
+            <DsLayoutStack gap="sm">
               {providers.map((provider) => (
-                <DsLayoutStack key={provider.id} gap="xs" role="group" aria-label={provider.name}>
-                  <DsLayoutInline justify="between" align="center">
-                    <DsLayoutInline gap="sm">
-                      <DsText size="sm" weight="strong">
-                        {provider.name}
-                      </DsText>
-                      <LabelBadge tone="neutral">{getProviderTypeLabel(provider.type)}</LabelBadge>
-                      <LabelBadge tone={provider.isActive ? 'positive' : 'neutral'}>
-                        {provider.isActive ? t('providerStates.active') : t('providerStates.inactive')}
-                      </LabelBadge>
+                <DsSectionCard key={provider.id} padding="md">
+                  <DsLayoutStack gap="xs" role="group" aria-label={provider.name}>
+                    <DsLayoutInline justify="between" align="center">
+                      <DsLayoutInline gap="sm">
+                        <DsText size="sm" weight="strong">
+                          {provider.name}
+                        </DsText>
+                        <LabelBadge tone="neutral">{getProviderTypeLabel(provider.type)}</LabelBadge>
+                        <LabelBadge tone={provider.isActive ? 'positive' : 'neutral'}>
+                          {provider.isActive ? t('providerStates.active') : t('providerStates.inactive')}
+                        </LabelBadge>
+                      </DsLayoutInline>
+                      <DsLayoutInline gap="xs">
+                        <Switch
+                          checked={provider.isActive}
+                          onChange={(event) =>
+                            toggleProviderMutation.mutate({
+                              id: provider.id,
+                              isActive: event.currentTarget.checked,
+                            })
+                          }
+                          disabled={toggleProviderMutation.isPending}
+                          label={t('fields.providerActive.shortLabel')}
+                          aria-label={`${t('fields.providerActive.shortLabel')} ${provider.name}`}
+                        />
+                        <IconButton
+                          emphasis="medium"
+                          aria-label={`${t('actions.editProvider')} ${provider.name}`}
+                          title={t('actions.editProvider')}
+                          onClick={() => openEditProvider(provider)}
+                        >
+                          <IconEdit size={16} />
+                        </IconButton>
+                        <IconButton
+                          aria-label={`${t('actions.deleteProvider')} ${provider.name}`}
+                          title={t('actions.deleteProvider')}
+                          tone="danger"
+                          onClick={() => setDeleteProvider(provider)}
+                        >
+                          <IconTrash size={16} />
+                        </IconButton>
+                      </DsLayoutInline>
                     </DsLayoutInline>
-                    <DsLayoutInline gap="xs">
-                      <Switch
-                        checked={provider.isActive}
-                        onChange={(event) =>
-                          toggleProviderMutation.mutate({
-                            id: provider.id,
-                            isActive: event.currentTarget.checked,
-                          })
-                        }
-                        disabled={toggleProviderMutation.isPending}
-                        label={t('fields.providerActive.shortLabel')}
-                        aria-label={`${t('fields.providerActive.shortLabel')} ${provider.name}`}
-                      />
-                      <IconButton
-                        emphasis="medium"
-                        aria-label={`${t('actions.editProvider')} ${provider.name}`}
-                        title={t('actions.editProvider')}
-                        onClick={() => openEditProvider(provider)}
-                      >
-                        <IconEdit size={16} />
-                      </IconButton>
-                      <IconButton
-                        aria-label={`${t('actions.deleteProvider')} ${provider.name}`}
-                        title={t('actions.deleteProvider')}
-                        tone="danger"
-                        onClick={() => setDeleteProvider(provider)}
-                      >
-                        <IconTrash size={16} />
-                      </IconButton>
-                    </DsLayoutInline>
-                  </DsLayoutInline>
-                  <DsText size="sm" tone="secondary">
-                    {t('providerStates.priority', { priority: provider.priority })}
-                    {provider.config.case === 'llmConfig'
-                      ? ` · ${provider.config.value.model || t('providerStates.modelUnset')}`
-                      : ''}
-                    {provider.config.case === 'deeplConfig' && provider.config.value.apiBaseUrl
-                      ? ` · ${provider.config.value.apiBaseUrl}`
-                      : ''}
-                  </DsText>
-                </DsLayoutStack>
+                    <DsText size="sm" tone="secondary">
+                      {t('providerStates.priority', { priority: provider.priority })}
+                      {provider.config.case === 'llmConfig'
+                        ? ` · ${provider.config.value.model || t('providerStates.modelUnset')}`
+                        : ''}
+                      {provider.config.case === 'deeplConfig' && provider.config.value.apiBaseUrl
+                        ? ` · ${provider.config.value.apiBaseUrl}`
+                        : ''}
+                    </DsText>
+                  </DsLayoutStack>
+                </DsSectionCard>
               ))}
             </DsLayoutStack>
           )}
-        </DsLayoutStack>
-      </DsSectionCard>
+        </SettingsSection>
 
-      <DsSectionCard padding="lg">
-        <DsLayoutStack gap="sm">
-          <DsHeading level={3} scale={4}>
-            {t('sections.runtime')}
-          </DsHeading>
-          <SupportingText tone="secondary">{t('sections.runtimeDescription')}</SupportingText>
+        <SettingsSection title={t('sections.runtime')} description={t('sections.runtimeDescription')}>
           <Select
             label={t('fields.defaultLocale.label')}
             description={t('fields.defaultLocale.description')}
@@ -484,7 +483,7 @@ export function TranslationSettingsPage({ client }: { client?: TranslationSettin
           />
           <TagsInput
             label={t('fields.protectedTerms.label')}
-            description={t('fields.protectedTerms.description')}
+            description={`${t('fields.protectedTerms.description')} ${t('fields.protectedTerms.examples')}`}
             placeholder={t('fields.protectedTerms.placeholder')}
             value={form.protectedTerms}
             splitChars={[',', '\n']}
@@ -492,11 +491,8 @@ export function TranslationSettingsPage({ client }: { client?: TranslationSettin
               updateSettingsForm((current) => ({ ...current, protectedTerms: normalizeProtectedTerms(value) }))
             }
           />
-          <DsText size="xs" tone="secondary">
-            {t('fields.protectedTerms.examples')}
-          </DsText>
-        </DsLayoutStack>
-      </DsSectionCard>
+        </SettingsSection>
+      </DsLayoutStack>
 
       <TranslationProviderModal
         opened={providerModalOpen}

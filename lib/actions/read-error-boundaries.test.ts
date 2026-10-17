@@ -1,6 +1,6 @@
 import { resolveErrorStatus } from '@/features/application-error/error-status';
 import { Code, ConnectError } from '@connectrpc/connect';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({ rpc: vi.fn() }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
 vi.mock('@/lib/utils/logger', () => ({ createLogger: () => ({ error: vi.fn(), warn: vi.fn() }) }));
@@ -103,6 +103,15 @@ const cases: Array<[string, string, unknown[]]> = [
 beforeEach(() => {
   mocks.rpc.mockReset();
 });
+// Load every action module once up front: a cold transform under a loaded CI runner can exceed one test's
+// timeout, which would fail whichever case happens to import the module first.
+beforeAll(async () => {
+  await Promise.all(
+    [...new Set([...cases, ...detailCases].map(([module]) => module))].map(
+      (module) => import(/* @vite-ignore */ `./${module}`),
+    ),
+  );
+}, 60_000);
 describe.each(cases)('%s.%s serializable read failures', (module, name, args) => {
   it.each([
     [Code.InvalidArgument, 400],

@@ -273,4 +273,16 @@ describe('shared selection surface contracts', () => {
     expect(marquee.style.left).toBe('12px');
     expect(marquee.style.width).toBe('24px');
   });
+  it('makes the current location the page heading only when the path titles the page', () => {
+    act(() => root.render(<SelectionPath items={[{ name: 'Files' }, { id: 'a', name: 'Folder' }]} onOpen={vi.fn()} />));
+    expect(container.querySelector('h1')).toBeNull();
+    act(() =>
+      root.render(
+        <SelectionPath items={[{ name: 'Files' }, { id: 'a', name: 'Folder' }]} onOpen={vi.fn()} pageTitle />,
+      ),
+    );
+    const heading = container.querySelector('h1');
+    expect(heading?.textContent).toBe('Folder');
+    expect(heading?.getAttribute('aria-current')).toBe('location');
+  });
 });

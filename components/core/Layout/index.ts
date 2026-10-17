@@ -22,6 +22,7 @@ export type {
   LayoutBreakpoint,
   LayoutAlign,
   LayoutColumnCount,
+  LayoutMinColumnWidth,
   LayoutColumnSpan,
   LayoutColumnOffset,
   LayoutContainerSize,

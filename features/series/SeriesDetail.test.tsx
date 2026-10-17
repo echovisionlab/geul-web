@@ -61,9 +61,6 @@ vi.mock('@/components/core/TextButton', () => ({
   ),
 }));
 vi.mock('@/components/core/MediaPreviewGrid', () => ({ MediaPreviewGrid: () => null }));
-vi.mock('@/components/core/Section', () => ({
-  SectionCard: ({ children }: { children: ReactNode }) => <section>{children}</section>,
-}));
 vi.mock('@/components/core/Tooltip', () => ({ Tooltip: ({ children }: { children: ReactNode }) => children }));
 vi.mock('@/features/editor/EditorHeader', () => ({
   createDraftPublishedStatusOptions: () => [],

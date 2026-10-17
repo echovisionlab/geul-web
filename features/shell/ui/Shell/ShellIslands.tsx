@@ -458,6 +458,8 @@ export function ShellFrame({
   header,
   headerItems,
   secondaryItems,
+  navigationTitle,
+  navigationFooter,
   footer,
   accountItems,
   labels,
@@ -466,6 +468,8 @@ export function ShellFrame({
   header: ReactNode;
   headerItems: ShellViewNavigationItem[];
   secondaryItems: ShellViewNavigationItem[];
+  navigationTitle: ReactNode;
+  navigationFooter: ReactNode;
   footer: ReactNode;
   accountItems: ShellViewNavigationItem[];
   labels: { navigation: string; close: string; account: string; logOut: string };
@@ -488,13 +492,18 @@ export function ShellFrame({
       navigation={
         navigation ? (
           <>
-            <navigation.ShellMobileNavigation headerItems={headerItems} secondaryItems={secondaryItems} />
+            <navigation.ShellMobileNavigation
+              headerItems={headerItems}
+              secondaryItems={secondaryItems}
+              footer={navigationFooter}
+            />
           </>
         ) : null
       }
       navigationOpened={navigationOpened && Boolean(navigation)}
       onCloseNavigation={events.onToggleNavigation}
       navigationLabel={labels.navigation}
+      navigationTitle={navigationTitle}
       closeLabel={labels.close}
       navigationId={MOBILE_NAVIGATION_ID}
       footer={footer}

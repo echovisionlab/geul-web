@@ -549,9 +549,7 @@ export function FileManagerView(props: FileManagerViewProps) {
           }}
           placement="bottom-start"
         >
-          <DropdownMenu.Target>
-            <div className={classes.contextTarget} style={{ left: contextMenu.x, top: contextMenu.y }} aria-hidden />
-          </DropdownMenu.Target>
+          <DropdownMenu.Anchor x={contextMenu.x} y={contextMenu.y} />
           <DropdownMenu.Dropdown>
             {contextItem ? (
               <>

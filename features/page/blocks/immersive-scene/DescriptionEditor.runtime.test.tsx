@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import type { Editor } from '@tiptap/core';
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
@@ -10,15 +11,16 @@ import { ImmersiveSceneDescriptionEditor } from './DescriptionEditor';
 
 let root: Root | null = null;
 let host: HTMLDivElement | null = null;
+let mountedEditor: Editor | undefined;
 
 afterEach(async () => {
-  await act(async () => {
-    root?.unmount();
-    await new Promise((resolve) => setTimeout(resolve, 2));
-  });
+  await act(async () => root?.unmount());
+  // Tiptap destroys an unmounted editor on a timer; observe it before the next case mounts.
+  await vi.waitFor(() => expect(mountedEditor?.isDestroyed ?? true).toBe(true), { interval: 1 });
   host?.remove();
   root = null;
   host = null;
+  mountedEditor = undefined;
 });
 
 describe('ImmersiveSceneDescriptionEditor', () => {
@@ -46,6 +48,7 @@ describe('ImmersiveSceneDescriptionEditor', () => {
         );
       });
 
+      mountedEditor = host.querySelector<HTMLElement & { editor?: Editor }>('.ProseMirror')?.editor;
       expect(host.querySelector('[data-profile="immersive-scene-copy"]')).not.toBeNull();
       expect(host.querySelector('[data-testid="immersive-scene-description-content"]')?.textContent).toContain(
         'Scene copy',

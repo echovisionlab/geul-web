@@ -3,6 +3,7 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import { TestProviders } from '@/test/TestProviders';
+import { SessionProvider } from '@/lib/providers/SessionProvider';
 import { FramesPreview } from './Frames.stories';
 const { useMediaQuery } = vi.hoisted(() => ({ useMediaQuery: vi.fn(() => true) }));
 vi.mock('@mantine/hooks', async (original) => ({
@@ -26,7 +27,10 @@ function render(kind: 'public' | 'admin' | 'account') {
   act(() =>
     root.render(
       <TestProviders>
-        <FramesPreview kind={kind} />
+        {/* Same session boundary as the story decorator; the shell's LanguageMenu reads it. */}
+        <SessionProvider initialData={null}>
+          <FramesPreview kind={kind} />
+        </SessionProvider>
       </TestProviders>,
     ),
   );

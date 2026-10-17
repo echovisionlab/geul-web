@@ -43,16 +43,16 @@ describe('public document print surfaces', () => {
     expect(page).toContain('overflow: visible !important');
   });
 
-  it('prints the Work featured image and metadata as one overlay header fragment', () => {
-    const header = printRules('features/work/WorkPublicHeaderLayout.module.css');
-    const document = printRules('app/(general)/works/[idOrSlug]/WorkViewClient.module.css');
+  it('prints an overlay entity detail as one image-backed header fragment', () => {
+    const detail = printRules('features/document-layout/ui/EntityDetailLayout.module.css');
+    const work = read('app/(general)/works/[idOrSlug]/WorkViewClient.tsx');
 
-    expect(header).toContain('min-height: 62mm');
-    expect(header).toContain('break-inside: avoid');
-    expect(header).toContain('print-color-adjust: exact');
-    expect(header).toContain('position: absolute');
-    expect(document).toContain('display: block !important');
-    expect(document).toContain('overflow: visible !important');
+    expect(work).toContain('printMedia="overlay"');
+    expect(detail).toContain("[data-print-media='overlay']");
+    expect(detail).toContain('min-height: 62mm');
+    expect(detail).toContain('break-inside: avoid');
+    expect(detail).toContain('print-color-adjust: exact');
+    expect(detail).toContain('position: absolute');
   });
 
   it('prints active, preview, shared, and archived Policy documents through one module boundary', () => {

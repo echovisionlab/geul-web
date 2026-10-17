@@ -212,7 +212,10 @@
       "text": "Text",
       "caption": "Beschriftung",
       "allUsers": "Alle Benutzer",
-      "newsletter": "Newsletter"
+      "newsletter": "Newsletter",
+      "images": "Bilder",
+      "classification": "Einordnung",
+      "related": "Verknüpft"
     },
     "entities": {
       "post": "Beitrag",
@@ -385,6 +388,12 @@
       "status": {
         "preparingImage": "Bild wird vorbereitet",
         "uploading": "Wird hochgeladen"
+      },
+      "removeLabel": "{label} entfernen",
+      "errors": {
+        "tooLarge": "Datei zu groß. Maximal {maxSize}",
+        "tooSmall": "Datei zu klein. Mindestens {minSize}",
+        "invalidType": "Dieser Dateityp wird nicht unterstützt."
       }
     },
     "states": {
@@ -449,6 +458,12 @@
       "pause": "Animation pausieren",
       "resume": "Animation fortsetzen",
       "readAllInformation": "Alle Szeneninformationen lesen"
+    },
+    "loadMore": {
+      "action": "Mehr laden",
+      "loading": "Weitere werden geladen…",
+      "failed": "Weitere Einträge konnten nicht geladen werden.",
+      "retry": "Erneut versuchen"
     }
   },
   "shell": {
@@ -926,7 +941,7 @@
     },
     "personalAccessTokens": {
       "title": "Persönliches Zugriffstoken",
-      "description": "Verwende dieses eine persönliche Zugriffstoken für die von {siteName} bereitgestellten APIs. Für jede Anfrage gelten deine aktuellen Kontoberechtigungen. Remote MCP verwendet dieses Token nicht.",
+      "description": "Verwende dieses eine persönliche Zugriffstoken für die von {siteName} bereitgestellten APIs. Für jede Anfrage gelten deine aktuellen Kontoberechtigungen.",
       "empty": "Es wurden noch keine persönlichen Zugriffstoken erstellt.",
       "regenerate": "Neu erzeugen",
       "regenerateTitle": "Persönliches Zugriffstoken neu erzeugen",
@@ -1178,7 +1193,8 @@
             "subject": "Gerenderte Betreffzeile der E-Mail.",
             "siteName": "Name der Website aus den Einstellungen.",
             "siteOrigin": "Zur Laufzeit konfigurierte Website-Origin.",
-            "logoEmailUrl": "Spezielle Logo-URL für E-Mails aus den Website-Einstellungen (falls gesetzt).",
+            "logoEmailUrl": "URL des hellen E-Mail-Logos aus den Website-Einstellungen; das dunkle, wenn nur dieses gesetzt ist.",
+            "logoEmailDarkUrl": "URL des dunklen E-Mail-Logos für Mail-Apps im Dunkelmodus; das helle, wenn nur dieses gesetzt ist.",
             "emailLang": "Sprachcode, der auf das gerenderte E-Mail-Dokument angewendet wird.",
             "emailDirection": "Textrichtung für das gerenderte E-Mail-Dokument.",
             "emailFontFamily": "Lokalitätsabhängiger Noto-Font-Stack für die gerenderte E-Mail.",
@@ -1578,7 +1594,8 @@
       "labelLanguageTranslatedDescription": "Öffentliche Menüs zeigen nur eine aktuelle, exakt passende Übersetzung für die Besuchersprache; andernfalls wird die Quellbeschriftung angezeigt.",
       "labelLanguageFixedLocaleDescription": "Öffentliche Menüs zeigen diesen Eintrag immer in der ausgewählten Sprache, unabhängig von der Besuchersprache. Wenn diese Sprache keine Live-Beschriftung hat, wird die Quellbeschriftung verwendet.",
       "translatedItemBadge": "Besucher-Locale",
-      "fixedLocaleItemBadge": "Fixiert: {locale}"
+      "fixedLocaleItemBadge": "Fixiert: {locale}",
+      "description": "Verwalte die Navigationsmenüs der Website. Wähle ein Menü aus, um seine Einträge zu bearbeiten."
     },
     "emailEvents": {
       "title": "E-Mail-Zustellung",
@@ -1938,11 +1955,15 @@
     "emailVerification": {
       "verified": "E-Mail verifiziert",
       "unverified": "E-Mail nicht verifiziert"
+    },
+    "profile": {
+      "description": "Änderungen in diesem Abschnitt werden mit „Speichern“ übernommen. Die Abschnitte darunter übernehmen jede Änderung sofort."
     }
   },
   "adminSettings": {
     "site": {
       "title": "Website-Einstellungen",
+      "description": "Identität, Branding, Navigation und Suchvorgaben für die gesamte Website.",
       "notifications": {
         "saved": "Einstellungen gespeichert",
         "noChanges": "Keine Änderungen zum Speichern"
@@ -1960,7 +1981,12 @@
           "socialLinksDescription": "Fügen Sie Ihre Social-Media-Profile hinzu. Diese werden in der Website-Fußzeile angezeigt."
         },
         "branding": {
-          "title": "Branding"
+          "title": "Branding",
+          "logos": "Logos",
+          "logosDescription": "Das vollständige Logo und das Symbol, jeweils für helle und dunkle Hintergründe. Fehlende Varianten werden automatisch ersetzt.",
+          "emailLogos": "E-Mail-Logos",
+          "emailLogosDescription": "PNG-Logos für E-Mail-Layouts. Mail-Apps im Dunkelmodus verwenden das dunkle Logo.",
+          "iconsAndLoader": "Favicon und Ladeanimation"
         },
         "contentDisplay": {
           "title": "Inhalt & Anzeige",
@@ -2043,17 +2069,29 @@
         "errorMessage": "{label} muss {mimeTypes} sein (max. {maxSize})",
         "uploaded": "{label} hochgeladen",
         "removed": "{label} entfernt",
-        "logo_light": {
-          "label": "Helles Website-Logo",
-          "description": "Wird auf hellen Hintergründen angezeigt und als Standardlogo der Website verwendet."
+        "logo_full_light": {
+          "label": "Vollständiges Logo · hell",
+          "description": "Symbol mit Wortmarke für helle Hintergründe: Kopfzeile, Menüs, Druck und Vorschaubilder."
         },
-        "logo_dark": {
-          "label": "Dunkles Website-Logo",
-          "description": "Wird auf dunklen Hintergründen angezeigt. Fällt auf das helle Logo zurück, wenn leer."
+        "logo_full_dark": {
+          "label": "Vollständiges Logo · dunkel",
+          "description": "Für dunkle Hintergründe. Verwendet das helle vollständige Logo, wenn leer."
         },
-        "logo_email": {
-          "label": "E-Mail-Logo",
-          "description": "Wird in E-Mail-Vorlagen und -Layouts verwendet. PNG wird für die Kompatibilität mit Clients empfohlen."
+        "logo_symbol_light": {
+          "label": "Symbol · hell",
+          "description": "Nur das Symbol, für enge Bereiche wie das eingeklappte Admin-Menü. Verwendet das vollständige Logo, wenn leer."
+        },
+        "logo_symbol_dark": {
+          "label": "Symbol · dunkel",
+          "description": "Für dunkle Hintergründe. Verwendet das helle Symbol, wenn leer."
+        },
+        "logo_email_light": {
+          "label": "E-Mail-Logo · hell",
+          "description": "PNG, das in E-Mails angezeigt wird. Verwendet das dunkle E-Mail-Logo, wenn leer."
+        },
+        "logo_email_dark": {
+          "label": "E-Mail-Logo · dunkel",
+          "description": "PNG, das Mail-Apps im Dunkelmodus anzeigen. Verwendet das helle E-Mail-Logo, wenn leer."
         },
         "favicon": {
           "label": "Website-Favicon",
@@ -3158,14 +3196,16 @@
     },
     "home": {
       "sections": {
-        "logoSize": "Logogröße"
+        "logoSize": "Logogröße",
+        "currentImage": "Aktuelles Bild und Hintergrund"
       },
       "fields": {
         "backgroundColor": "Hintergrundfarbe"
       },
       "helpers": {
         "logoCentered": "Das Logo wird zentriert auf dem Bild angezeigt",
-        "previewDescription": "OG-Bild der Startseite: Logo zentriert, kein Titeltext"
+        "previewDescription": "OG-Bild der Startseite: Logo zentriert, kein Titeltext",
+        "currentImage": "Das erzeugte Vorschaubild der Startseite und der optionale Hintergrund darunter."
       }
     },
     "content": {
@@ -3611,7 +3651,7 @@
         "showMeta": "Metadaten anzeigen (Datum, Autor)",
         "sortBy": "Sortieren nach",
         "numberOfPosts": "Anzahl der Beiträge",
-        "showPagination": "Paginierung anzeigen",
+        "showPagination": "Beim Scrollen mehr laden",
         "exposedFilters": "Sichtbare Filter",
         "exposedSorts": "Sichtbare Sortierungen",
         "rowsPerPage": "Zeilen pro Seite",
@@ -4726,7 +4766,8 @@
     "works": {
       "allTypes": "Alle Typen",
       "empty": "Keine Werke gefunden",
-      "loadMore": "Mehr laden ({count} verbleibend)"
+      "loadMore": "Mehr laden ({count} verbleibend)",
+      "filterByType": "Werke nach Typ filtern"
     },
     "releases": {
       "empty": "Noch keine veröffentlichten Releases."
@@ -4736,7 +4777,7 @@
     "details": {
       "parent": "Übergeordnet",
       "stats": "Statistiken",
-      "statsValue": "{releases} Veröffentlichungen, {artists} Künstler"
+      "statsValue": "{releases, plural, one {# Veröffentlichung} other {# Veröffentlichungen}}, {artists, plural, one {# Künstler} other {# Künstler}}"
     },
     "sections": {
       "releases": "Veröffentlichungen ({count})",

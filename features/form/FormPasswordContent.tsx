@@ -21,6 +21,7 @@ import { Button } from '@/components/core/Button';
 import { PasswordInput } from '@/components/core/Input';
 import { PageLoader } from '@/features/site/PageLoader';
 import { SiteLogo } from '@/features/site/SiteLogo';
+import { SITE_LOGO_HEIGHT } from '@/features/site/SiteLogo/placements';
 import { checkFormAccessAction, verifyFormPasswordAction } from '@/lib/actions/form';
 
 interface FormPasswordContentProps {
@@ -46,6 +47,7 @@ export function FormPasswordContent({
   const t = useTranslations('formPasswordPage');
   const tCommonActions = useTranslations('common.actions');
   const tCommonPlaceholders = useTranslations('common.placeholders');
+  const tCommonLabels = useTranslations('common.labels');
   const router = useRouter();
   const [password, setPassword] = useState('');
   const [storedPassword, setStoredPassword] = useState<string | undefined>(undefined);
@@ -155,7 +157,7 @@ export function FormPasswordContent({
             <DsLayoutContainer size="compact">
               <DsLayoutStack gap="md">
                 <DsLayoutInset textAlign="center" space="none">
-                  <SiteLogo height={24} />
+                  <SiteLogo height={SITE_LOGO_HEIGHT.form} />
                 </DsLayoutInset>
 
                 <DsLayoutStack align="center" justify="center">
@@ -182,6 +184,7 @@ export function FormPasswordContent({
 
                         <div style={{ width: '100%' }}>
                           <PasswordInput
+                            aria-label={tCommonLabels('password')}
                             placeholder={tCommonPlaceholders('password')}
                             value={password}
                             onChange={(e) => setPassword(e.currentTarget.value)}

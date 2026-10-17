@@ -5,7 +5,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { notifications } from '@/components/core/Notification';
 import { ImageDropzone } from '@/features/site/SiteAssetUploader/ImageDropzone';
-import type { ImageUploadAccept } from '@/components/core/ImageUpload';
+import type { ImagePreviewSurface, ImageUploadAccept } from '@/components/core/ImageUpload';
 import { deleteSiteAssetAction, setSiteAssetAction } from '@/lib/actions/site-setting';
 import { getUploadSelectionMimeTypes, UPLOAD_CONFIGS } from '@/lib/constants/upload-config';
 import type { SiteAssetBindings } from '@/features/site/site-asset-bindings';
@@ -20,14 +20,31 @@ export type SiteDropzoneAssetType = Exclude<
   'site_og_background' | 'privacy_og_background' | 'terms_og_background'
 >;
 
-/** Preview dimensions for each site asset type */
-const SITE_ASSET_PREVIEW: Record<SiteDropzoneAssetType, { height: number; width: number | 'auto' }> = {
-  logo_light: { height: 60, width: 'auto' },
-  logo_dark: { height: 60, width: 'auto' },
-  logo_email: { height: 60, width: 'auto' },
+interface SiteAssetPreview {
+  height: number;
+  width: number | 'auto';
+  /** Logos preview on the theme background they are made for. */
+  surface?: ImagePreviewSurface;
+}
+
+const LOGO_PREVIEW_HEIGHT = 48;
+
+/** Preview geometry for each site asset type */
+const SITE_ASSET_PREVIEW: Record<SiteDropzoneAssetType, SiteAssetPreview> = {
+  logo_full_light: { height: LOGO_PREVIEW_HEIGHT, width: 'auto', surface: 'theme-light' },
+  logo_full_dark: { height: LOGO_PREVIEW_HEIGHT, width: 'auto', surface: 'theme-dark' },
+  logo_symbol_light: { height: LOGO_PREVIEW_HEIGHT, width: 'auto', surface: 'theme-light' },
+  logo_symbol_dark: { height: LOGO_PREVIEW_HEIGHT, width: 'auto', surface: 'theme-dark' },
+  logo_email_light: { height: LOGO_PREVIEW_HEIGHT, width: 'auto', surface: 'theme-light' },
+  logo_email_dark: { height: LOGO_PREVIEW_HEIGHT, width: 'auto', surface: 'theme-dark' },
   favicon: { height: 32, width: 32 },
   loader: { height: 40, width: 40 },
 };
+
+/** Email logos are PNG for mail clients; an SVG is converted before upload. */
+function isEmailLogo(type: SiteDropzoneAssetType): boolean {
+  return type === 'logo_email_light' || type === 'logo_email_dark';
+}
 
 function getSiteAssetSelectionAccept(
   type: SiteDropzoneAssetType,
@@ -146,7 +163,7 @@ export function SiteAssetUploader({ type, currentUrl, onSuccess, bindings }: Sit
     setUploading(true);
 
     try {
-      const preparedFile = type === 'logo_email' ? await maybeConvertSvg(file) : file;
+      const preparedFile = isEmailLogo(type) ? await maybeConvertSvg(file) : file;
 
       // Upload via multipart
       const { fileId } = await uploadFile(preparedFile, {
@@ -178,6 +195,7 @@ export function SiteAssetUploader({ type, currentUrl, onSuccess, bindings }: Sit
       maxSize={config.maxSize}
       previewHeight={preview.height}
       previewWidth={preview.width}
+      previewSurface={preview.surface}
       label={label}
       description={description}
       uploadPrompt={uploadPrompt}

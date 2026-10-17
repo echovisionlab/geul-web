@@ -30,7 +30,7 @@ export function ServerDataTablePaginationView({
   labels: { navigation, ...labels },
   reserveSpaceWhenHidden = false,
 }: ServerDataTablePaginationViewProps) {
-  if (totalPages < 1) {
+  if (totalPages <= 1) {
     return reserveSpaceWhenHidden ? (
       <DsLayoutInset blockStart="md" aria-hidden="true">
         <div style={{ minHeight: PAGINATION_RESERVED_MIN_HEIGHT_PX }} />

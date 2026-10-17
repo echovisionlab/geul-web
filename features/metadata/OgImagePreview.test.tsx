@@ -107,12 +107,9 @@ describe('OgImagePreview lifecycle presentation', () => {
 
     const statusIcon = host?.querySelector<HTMLElement>('[data-testid="og-generation-status-icon"]');
     expect(statusIcon?.getAttribute('tabindex')).toBe('0');
-    await act(async () => {
-      statusIcon?.focus();
-      await new Promise((resolve) => setTimeout(resolve, 120));
-    });
+    await act(async () => statusIcon?.focus());
 
-    expect(document.body.querySelector('[role="tooltip"]')?.textContent).toBe('Ready');
+    await vi.waitFor(() => expect(document.body.querySelector('[role="tooltip"]')?.textContent).toBe('Ready'));
   });
 
   it('keeps lookup errors visible as a focusable failed status icon without adding a row', () => {

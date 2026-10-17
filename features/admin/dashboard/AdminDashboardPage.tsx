@@ -1,6 +1,6 @@
 'use client';
 
-import { Heading as DsHeading } from '@/components/core/Typography';
+import { PageHeader } from '@/components/core/PageHeader';
 import { LayoutStack as DsLayoutStack, LayoutGrid as DsLayoutGrid } from '@/components/core/Layout';
 
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
@@ -24,7 +24,7 @@ export default function AdminDashboardPage({ loadStats = getAdminStats }: { load
   return (
     <DsLayoutStack>
       <QueryErrorAlert queries={[statsQuery]} />
-      <DsHeading level={2}>{tCommonLabels('dashboard')}</DsHeading>
+      <PageHeader title={tCommonLabels('dashboard')} />
 
       {statsQuery.isError ? null : isLoading ? (
         <PageLoader />

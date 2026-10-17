@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, describe, it, expect, vi } from 'vitest';
+import { afterEach, beforeEach, describe, it, expect, onTestFinished, vi } from 'vitest';
+import { notifyManager } from '@tanstack/react-query';
 import { TestProviders } from '@/test/TestProviders';
 import { FormOperationsPreview } from './FormOperations.stories';
 vi.mock('next/navigation', () => ({ useRouter: () => ({ replace: vi.fn(), push: vi.fn(), prefetch: vi.fn() }) }));
@@ -19,10 +20,17 @@ class ResizeObserverMock {
 }
 vi.stubGlobal('ResizeObserver', ResizeObserverMock);
 let host: HTMLDivElement, root: Root;
+beforeEach(() => {
+  // Deliver query results inside act so waits observe committed renders.
+  notifyManager.setNotifyFunction((callback) => {
+    act(callback);
+  });
+});
 afterEach(() => {
   act(() => root?.unmount());
   host?.remove();
   sessionStorage.clear();
+  notifyManager.setNotifyFunction((callback) => callback());
 });
 function render(
   surface: 'submissions' | 'detail' | 'dashboard' | 'password',
@@ -39,18 +47,12 @@ function render(
     ),
   );
 }
-async function flush() {
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 30));
-  });
-}
 describe('actual form operations page previews', () => {
   it('loads actual submissions query/table and fixture rows', async () => {
     render('submissions');
-    await flush();
+    await vi.waitFor(() => expect(host.querySelector('a[href$="submission-1"]')).not.toBeNull());
     expect(host.textContent).toContain('KR');
     expect(host.querySelector('input')).not.toBeNull();
-    expect(host.querySelector('a[href$="submission-1"]')).not.toBeNull();
   });
   it('renders submission metadata/responses and actual delete modal', async () => {
     render('detail');
@@ -62,13 +64,16 @@ describe('actual form operations page previews', () => {
     expect(document.body.querySelector('[role=dialog]')).not.toBeNull();
   });
   it('runs dashboard access then real data/chart composition', async () => {
+    // jsdom has no layout; give the chart plot the size its CSS supplies in a browser.
+    const measure = vi
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockReturnValue(new DOMRect(0, 0, 400, 300));
+    onTestFinished(() => measure.mockRestore());
     render('dashboard');
-    await flush();
-    await flush();
+    await vi.waitFor(() => expect(host.querySelector('[aria-label="Chart type"]')).not.toBeNull());
     expect(host.textContent).toContain('Listening Room');
     expect(host.textContent).toContain('24');
     expect(host.textContent).toContain('Session');
-    expect(host.querySelector('[aria-label="Chart type"]')).not.toBeNull();
   });
   it('retains actual invalid dashboard branch', () => {
     render('dashboard', 'invalid');
@@ -76,9 +81,7 @@ describe('actual form operations page previews', () => {
   });
   it('renders the actual password controller after access check', async () => {
     render('password');
-    await flush();
-    await flush();
-    expect(host.querySelector('input[type=password]')).not.toBeNull();
+    await vi.waitFor(() => expect(host.querySelector('input[type=password]')).not.toBeNull());
     expect(host.querySelector('form')).not.toBeNull();
   });
 });

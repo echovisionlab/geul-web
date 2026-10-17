@@ -212,7 +212,10 @@
       "text": "Texte",
       "caption": "Légende",
       "allUsers": "Tous les utilisateurs",
-      "newsletter": "Newsletter"
+      "newsletter": "Newsletter",
+      "images": "Images",
+      "classification": "Classement",
+      "related": "Liens"
     },
     "entities": {
       "post": "Article",
@@ -385,6 +388,12 @@
       "status": {
         "preparingImage": "Préparation de l’image",
         "uploading": "Téléversement"
+      },
+      "removeLabel": "Supprimer {label}",
+      "errors": {
+        "tooLarge": "Fichier trop volumineux. Taille maximale : {maxSize}",
+        "tooSmall": "Fichier trop petit. Taille minimale : {minSize}",
+        "invalidType": "Ce type de fichier n’est pas pris en charge."
       }
     },
     "states": {
@@ -449,6 +458,12 @@
       "pause": "Mettre l’animation en pause",
       "resume": "Reprendre l’animation",
       "readAllInformation": "Lire toutes les informations de la scène"
+    },
+    "loadMore": {
+      "action": "Charger plus",
+      "loading": "Chargement…",
+      "failed": "Impossible de charger plus d’éléments.",
+      "retry": "Réessayer"
     }
   },
   "shell": {
@@ -704,7 +719,8 @@
             "subject": "Objet de l'e-mail rendu.",
             "siteName": "Nom du site défini dans les paramètres.",
             "siteOrigin": "Origine du site configurée à l’exécution.",
-            "logoEmailUrl": "URL du logo spécifique aux e-mails à partir des paramètres du site (si défini).",
+            "logoEmailUrl": "URL du logo e-mail clair des paramètres du site ; le logo sombre s’il est le seul défini.",
+            "logoEmailDarkUrl": "URL du logo e-mail sombre pour les applications en mode sombre ; le logo clair s’il est le seul défini.",
             "emailLang": "Code de langue appliqué au document d'e-mail rendu.",
             "emailDirection": "Direction du texte pour le document d'e-mail rendu.",
             "emailFontFamily": "Pile de polices Noto adaptée à la langue pour l'e-mail rendu.",
@@ -1104,7 +1120,8 @@
       "labelLanguageTranslatedDescription": "Les menus publics affichent uniquement une traduction actuelle correspondant exactement à la langue du visiteur ; sinon ils affichent le libellé source.",
       "labelLanguageFixedLocaleDescription": "Les menus publics affichent toujours cet élément dans la langue sélectionnée, quelle que soit la langue du visiteur. Si cette langue n'a pas de libellé actif, le libellé source est utilisé.",
       "translatedItemBadge": "Langue du visiteur",
-      "fixedLocaleItemBadge": "Fixe : {locale}"
+      "fixedLocaleItemBadge": "Fixe : {locale}",
+      "description": "Gérez les menus de navigation affichés sur le site. Sélectionnez un menu pour modifier ses éléments."
     },
     "emailEvents": {
       "title": "Livraison des e-mails",
@@ -1405,7 +1422,8 @@
     "works": {
       "allTypes": "Tous les types",
       "empty": "Aucune œuvre trouvée",
-      "loadMore": "Charger plus ({count} restants)"
+      "loadMore": "Charger plus ({count} restants)",
+      "filterByType": "Filtrer les œuvres par type"
     },
     "releases": {
       "empty": "Aucune sortie publiée pour le moment."
@@ -1415,7 +1433,7 @@
     "details": {
       "parent": "Parent",
       "stats": "Statistiques",
-      "statsValue": "{releases} sorties, {artists} artistes"
+      "statsValue": "{releases, plural, one {# sortie} many {# sorties} other {# sorties}}, {artists, plural, one {# artiste} many {# artistes} other {# artistes}}"
     },
     "sections": {
       "releases": "Sorties ({count})",
@@ -1753,7 +1771,7 @@
     },
     "personalAccessTokens": {
       "title": "Jeton d’accès personnel",
-      "description": "Utilisez cet unique jeton d’accès personnel avec les API fournies par {siteName}. Chaque requête applique les autorisations actuelles de votre compte. Remote MCP n’accepte pas ce jeton.",
+      "description": "Utilisez cet unique jeton d’accès personnel avec les API fournies par {siteName}. Chaque requête applique les autorisations actuelles de votre compte.",
       "empty": "Aucun jeton d’accès personnel n’a été créé.",
       "regenerate": "Régénérer",
       "regenerateTitle": "Régénérer le jeton d’accès personnel",
@@ -2648,14 +2666,16 @@
     },
     "home": {
       "sections": {
-        "logoSize": "Taille du logo"
+        "logoSize": "Taille du logo",
+        "currentImage": "Image actuelle et arrière-plan"
       },
       "fields": {
         "backgroundColor": "Couleur de fond"
       },
       "helpers": {
         "logoCentered": "Le logo sera centré sur l'image",
-        "previewDescription": "Image OG de la page d'accueil : logo centré, sans texte de titre"
+        "previewDescription": "Image OG de la page d'accueil : logo centré, sans texte de titre",
+        "currentImage": "L’image de partage générée pour l’accueil et son arrière-plan facultatif."
       }
     },
     "content": {
@@ -3186,7 +3206,7 @@
         "showMeta": "Afficher les métadonnées (date, auteur)",
         "sortBy": "Trier par",
         "numberOfPosts": "Nombre d'articles",
-        "showPagination": "Afficher la pagination",
+        "showPagination": "Charger la suite au défilement",
         "exposedFilters": "Filtres exposés",
         "exposedSorts": "Tris exposés",
         "rowsPerPage": "Lignes par page",
@@ -4656,11 +4676,15 @@
     "emailVerification": {
       "verified": "E-mail vérifié",
       "unverified": "E-mail non vérifié"
+    },
+    "profile": {
+      "description": "Enregistrer applique les modifications de cette section. Les sections ci-dessous appliquent chaque modification immédiatement."
     }
   },
   "adminSettings": {
     "site": {
       "title": "Paramètres du site",
+      "description": "Identité, image de marque, navigation et paramètres de recherche du site.",
       "notifications": {
         "saved": "Paramètres enregistrés",
         "noChanges": "Aucune modification à enregistrer"
@@ -4678,7 +4702,12 @@
           "socialLinksDescription": "Ajoutez vos profils de réseaux sociaux. Ils seront affichés dans le pied de page du site."
         },
         "branding": {
-          "title": "Identité visuelle"
+          "title": "Identité visuelle",
+          "logos": "Logos",
+          "logosDescription": "Le logo complet et le symbole, pour fonds clairs et sombres. Les variantes manquantes sont remplacées automatiquement.",
+          "emailLogos": "Logos e-mail",
+          "emailLogosDescription": "Logos PNG pour les mises en page d’e-mail. Les applications en mode sombre utilisent le logo sombre.",
+          "iconsAndLoader": "Favicon et chargement"
         },
         "contentDisplay": {
           "title": "Contenu et affichage",
@@ -4761,17 +4790,29 @@
         "errorMessage": "{label} doit être {mimeTypes} (max {maxSize})",
         "uploaded": "{label} téléversé",
         "removed": "{label} supprimé",
-        "logo_light": {
-          "label": "Logo clair du site",
-          "description": "Affiché sur les arrière-plans clairs et utilisé comme logo par défaut du site."
+        "logo_full_light": {
+          "label": "Logo complet · clair",
+          "description": "Symbole avec logotype pour fonds clairs : en-tête, menus, impression et images de partage."
         },
-        "logo_dark": {
-          "label": "Logo sombre du site",
-          "description": "Affiché sur les arrière-plans sombres. Utilise le logo clair si ce champ est vide."
+        "logo_full_dark": {
+          "label": "Logo complet · sombre",
+          "description": "Pour fonds sombres. Utilise le logo complet clair s’il est vide."
         },
-        "logo_email": {
-          "label": "Logo d'e-mail",
-          "description": "Utilisé dans les modèles et mises en page d'e-mail. PNG recommandé pour la compatibilité client."
+        "logo_symbol_light": {
+          "label": "Symbole · clair",
+          "description": "Symbole seul, pour les espaces réduits comme le menu d’administration replié. Utilise le logo complet s’il est vide."
+        },
+        "logo_symbol_dark": {
+          "label": "Symbole · sombre",
+          "description": "Pour fonds sombres. Utilise le symbole clair s’il est vide."
+        },
+        "logo_email_light": {
+          "label": "Logo e-mail · clair",
+          "description": "PNG affiché dans les e-mails. Utilise le logo e-mail sombre s’il est vide."
+        },
+        "logo_email_dark": {
+          "label": "Logo e-mail · sombre",
+          "description": "PNG affiché par les applications de messagerie en mode sombre. Utilise le logo e-mail clair s’il est vide."
         },
         "favicon": {
           "label": "Favicon du site",

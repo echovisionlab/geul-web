@@ -1,43 +1,8 @@
-/* Header Section */
-
-/* Image Container */
-.imageContainer {
-  flex: 0 0 100%;
-  min-width: 0;
-}
-
-@media (width >= $mantine-breakpoint-sm) {
-  .imageContainer {
-    flex: 0 0 40%;
-    max-width: 400px;
-  }
-}
-
-.image {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-height: 70dvh;
-  object-fit: cover;
-}
-
 .galleryImage {
   display: block;
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
-}
-
-/* Info Container */
-.infoContainer {
-  flex: 1;
-  min-width: 280px;
-}
-
-/* Share Button */
-.shareButton {
-  min-width: 44px;
-  min-height: 44px;
 }
 
 .workThumb {
@@ -56,7 +21,3 @@
   height: 100%;
   object-fit: cover;
 }
-
-/* Track Row */
-
-/* Section Header */

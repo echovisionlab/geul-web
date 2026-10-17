@@ -536,33 +536,35 @@ export function LabelEditorView({ model }: { model: LabelEditorViewModel }) {
         />
 
         <DsLayoutStack gap="md">
-          <AuthoringExtension kind="uploads">
-            <LabelLogoUploader
-              labelId={id}
-              currentImage={logoImages.light}
-              variant="light"
-              name={displayedName}
-              inputId={`label-${id}-image`}
-              size={100}
-              label={tCommon('labels.logoLight')}
-              disabled={!canEditNeutral}
-              onImageChange={(url) => handleImageChange('light', url)}
-            />
-          </AuthoringExtension>
+          <DsLayoutGrid columns={{ base: 1, sm: 2 }} columnGap="lg" rowGap="lg">
+            <AuthoringExtension kind="uploads">
+              <LabelLogoUploader
+                labelId={id}
+                currentImage={logoImages.light}
+                variant="light"
+                name={displayedName}
+                inputId={`label-${id}-image`}
+                size={100}
+                label={tCommon('labels.logoLight')}
+                disabled={!canEditNeutral}
+                onImageChange={(url) => handleImageChange('light', url)}
+              />
+            </AuthoringExtension>
 
-          <AuthoringExtension kind="uploads">
-            <LabelLogoUploader
-              labelId={id}
-              currentImage={logoImages.dark}
-              variant="dark"
-              name={displayedName}
-              inputId={`label-${id}-image-dark`}
-              size={100}
-              label={tCommon('labels.logoDark')}
-              disabled={!canEditNeutral}
-              onImageChange={(url) => handleImageChange('dark', url)}
-            />
-          </AuthoringExtension>
+            <AuthoringExtension kind="uploads">
+              <LabelLogoUploader
+                labelId={id}
+                currentImage={logoImages.dark}
+                variant="dark"
+                name={displayedName}
+                inputId={`label-${id}-image-dark`}
+                size={100}
+                label={tCommon('labels.logoDark')}
+                disabled={!canEditNeutral}
+                onImageChange={(url) => handleImageChange('dark', url)}
+              />
+            </AuthoringExtension>
+          </DsLayoutGrid>
 
           <TextInput
             id={`label-${id}-name`}

@@ -132,6 +132,30 @@ Below uses `<` and at-least uses `>=`, so exact boundaries have one owner.
 LayoutContainer's reading/compact/standard/wide widths use separate contentWidth roles (36/48/62/75rem);
 `reading` is the running-prose screen measure; paper keeps the page measure ([table of contents and reading measure](design-system/table-of-contents.md#reading-measure)).
 A layout transition and a content maximum are independent decisions.
+
+Collection grids are fluid. `LayoutGrid minColumnWidth` (`sm`/`md`/`lg` = 9/14/20rem, responsive per
+breakpoint) fits as many equal columns as the width allows, so cards keep their scale on wide screens
+instead of stretching to a fixed count. Page collection blocks map item size to it (S/M/L, horizontal cards
+one step wider, square-artwork collections such as releases one step denser below `sm`); the authored column
+count is only a carousel's slides per view. Pagination never renders for a single page. A collection block
+with pagination on continues in place: the server renders the first page and nearing the end loads the next
+one; the "Load more" button is the same action for keyboard and assistive technology and the retry after a
+failure, which pauses automatic loading.
+
+Public entity details (event, work, release, artist, label, series, event series) share `EntityDetailLayout`:
+it spans the page width; from `md` the media (poster, cover, portrait, logo) keeps the start third in view and
+the title, metadata and `EntityDetailSection`s (`h2`, the mono label voice of the metadata rows) share the
+rest; below `md` it stacks. Running text keeps the reading measure from the start edge, never centered;
+lists and tables use the full width. A detail with media keeps its table of contents as the rail
+(`outlinePresentation="rail"`). Posts and Pages remain documents on the centered reading measure.
+
+Every authoring screen (Post, Page, Work, Event, Release, Series) composes `DocumentEditorPanels`: from `lg`
+the primary content (body, or a release's information and tracks, or a series' posts) takes the main column
+and the settings sit beside it in their own sticky, independently scrolling column (28rem, 32rem from `xl`);
+below `lg` they are Body / Settings tabs, and only phones bleed the body to the screen edge. Settings are
+`EditorSettingsSection` cards (or section components rendering the same card) in one order: URL, details,
+classification and related records, credits, options, summary, images, metadata, sharing, translations. Field
+grids that need width inside the column collapse to one column at `lg` (`columns={{ base: 1, md: 2, lg: 1 }}`).
 Three exact component geometry exceptions remain in responsive-policy: upload placeholder container,
 map callout scale and Mermaid figure. These do not authorize new screen-level numeric breakpoints.
 
@@ -705,3 +729,7 @@ The coordinated local-backup/download-policy change is uncommitted. Its validati
 screenshot plan live in `.artifacts/design-system/reviews/local-backups/`. Storybook, production
 visual inspection and the Notion Local Backups reference could not be inspected in the restricted
 execution environment; this is pending visual review, not design approval.
+
+## Site header and branding
+
+Core `ApplicationFrame/SiteHeader` owns responsive public header placement. See the [site branding contract](design-system/site-branding.md) and [change record](design-system/changelog.md).

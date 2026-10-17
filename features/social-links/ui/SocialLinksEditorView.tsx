@@ -41,6 +41,7 @@ export interface SocialLinksEditorViewProps {
   idPrefix?: string;
   disabled?: boolean;
   label?: string;
+  labelHidden?: boolean;
   addButtonMode?: 'button' | 'icon';
 }
 
@@ -58,16 +59,19 @@ export function SocialLinksEditorView({
   idPrefix,
   disabled = false,
   label,
+  labelHidden = false,
   addButtonMode = 'button',
 }: SocialLinksEditorViewProps) {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   return (
     <DsLayoutStack gap="xxs">
-      <DsLayoutInline justify="between">
-        <DsText size="sm" weight="medium">
-          {label ?? labels.fieldLabel}
-        </DsText>
+      <DsLayoutInline justify={labelHidden ? 'start' : 'between'}>
+        {labelHidden ? null : (
+          <DsText size="sm" weight="medium">
+            {label ?? labels.fieldLabel}
+          </DsText>
+        )}
         {addButtonMode === 'icon' ? (
           <Tooltip label={labels.addLink}>
             <IconButton

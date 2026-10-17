@@ -1,3 +1,64 @@
+/* Match MenuToggle's visibility breakpoint: balanced tracks center the brand in the
+ * viewport whenever the hamburger is shown, regardless of action-group widths. */
+.headerRow {
+  display: grid;
+  height: 100%;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--geul-spacing-xs);
+  padding-inline: var(--geul-spacing-sm);
+}
+
+.headerLeading,
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--geul-spacing-xs);
+}
+
+.headerDesktopActions {
+  display: flex;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.headerLeading {
+  justify-self: start;
+}
+
+.headerActions {
+  justify-self: end;
+}
+
+.headerBrand {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+@media (width < $mantine-breakpoint-xs) {
+  .headerRow {
+    gap: var(--geul-spacing-xxs);
+    padding-inline: var(--geul-spacing-xs);
+  }
+
+  .headerActions {
+    gap: 0;
+  }
+}
+
+@media (width >= $mantine-breakpoint-sm) {
+  .headerRow {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .headerLeading {
+    display: none;
+  }
+}
+
 .root {
   --_frame-navigation-width: 14rem;
   display: flex;

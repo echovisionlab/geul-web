@@ -2,7 +2,7 @@
 
 import { act, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { notifyManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { expect, it, vi } from 'vitest';
 import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
@@ -72,6 +72,10 @@ it('upgrades and downgrades item edits without replacing the mounted menu', asyn
   const root = createRoot(container);
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   setProviderAccessLevel(room.provider, 'view');
+  // Deliver query results inside act so the wait below observes committed renders.
+  notifyManager.setNotifyFunction((callback) => {
+    act(callback);
+  });
   try {
     await act(async () =>
       root.render(
@@ -82,9 +86,7 @@ it('upgrades and downgrades item edits without replacing the mounted menu', asyn
         </QueryClientProvider>,
       ),
     );
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 20));
-    });
+    await vi.waitFor(() => expect(container.querySelector('article')).not.toBeNull());
     const content = container.querySelector('article');
     expect(content?.textContent).toContain('Readable link');
     const edit = content?.querySelector('button');
@@ -97,6 +99,7 @@ it('upgrades and downgrades item edits without replacing the mounted menu', asyn
     expect(container.querySelector('article')).toBe(content);
   } finally {
     act(() => root.unmount());
+    notifyManager.setNotifyFunction((callback) => callback());
     client.clear();
     container.remove();
   }

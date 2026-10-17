@@ -1,13 +1,12 @@
 'use client';
 
 import { SectionCard as DsSectionCard } from '@/components/core/Section/SectionCard';
-import { MediaImage } from '@/components/core/MediaImage';
 import {
   LayoutInset as DsLayoutInset,
   LayoutInline as DsLayoutInline,
   LayoutStack as DsLayoutStack,
 } from '@/components/core/Layout';
-import { Text as DsText, Heading as DsHeading } from '@/components/core/Typography';
+import { Text as DsText } from '@/components/core/Typography';
 
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
@@ -20,6 +19,11 @@ import {
 } from '@/components/core/PublicMetadata';
 import { JsonLdScript } from '@/features/metadata/ui/JsonLdScript';
 import { DocumentHeadingScope } from '@/features/document-layout/ui/DocumentHeadingScope';
+import {
+  EntityDetailImage,
+  EntityDetailLayout,
+  EntityDetailSection,
+} from '@/features/document-layout/ui/EntityDetailLayout';
 import { GeneratedRichTextBlockView } from '@/features/page/PageView/blocks/GeneratedRichTextBlockView';
 import { ReleaseCreditsList } from '@/features/release/ReleaseCreditsList';
 import {
@@ -171,199 +175,160 @@ export function ReleasePublicView({
     return [...groups, { id: groupName, name: groupName, entries: [entry] }];
   }, []);
 
+  const contentLang =
+    release.localizationInfo?.displayedLocale || release.localizationInfo?.sourceLocale || requestedLocale;
+
   return (
     <>
       {releaseMetadata && <JsonLdScript data={buildReleaseJsonLd(releaseMetadata)} />}
-      <DsLayoutStack gap="xl">
-        <DsLayoutInline
-          direction={{ base: 'column', sm: 'row' }}
-          gap={{ base: 'md', sm: 'xl' }}
-          align="start"
-          wrap="nowrap"
-        >
-          <div className={classes.artworkCard}>
-            <div className={classes.artworkMedia}>
-              {release.artworkUrl ? (
-                <div className={classes.artworkImage}>
-                  <MediaImage
-                    src={buildManagedImageUrl(release.artworkUrl, MANAGED_IMAGE_PRESET.COVER_HERO)}
-                    alt={release.title}
-                    width="100%"
-                    height="100%"
-                    fit="cover"
-                  />
-                </div>
-              ) : (
-                <div className={classes.artworkPlaceholder}>
-                  <DsSectionCard padding="none" border="none" appearance="muted" stretch />
-                </div>
-              )}
+      <EntityDetailLayout
+        media={
+          release.artworkUrl ? (
+            <EntityDetailImage
+              src={buildManagedImageUrl(release.artworkUrl, MANAGED_IMAGE_PRESET.COVER_HERO) ?? release.artworkUrl}
+              alt={release.title}
+              fit="cover"
+            />
+          ) : (
+            <div className={classes.artworkPlaceholder}>
+              <DsSectionCard padding="none" border="none" appearance="muted" stretch />
             </div>
-          </div>
-
-          <div className={classes.meta}>
-            <DsLayoutStack gap="sm">
-              <DsLayoutInline
-                direction={{ base: 'column', sm: 'row' }}
-                gap="md"
-                justify="between"
-                align="start"
-                wrap="nowrap"
-              >
-                <div className={classes.metaMain}>
-                  <DsLayoutStack gap="xs">
-                    <DsHeading
-                      level={1}
-                      scale="title"
-                      lang={
-                        release.localizationInfo?.displayedLocale ||
-                        release.localizationInfo?.sourceLocale ||
-                        requestedLocale
-                      }
-                    >
-                      {release.title}
-                    </DsHeading>
-                    <PublicMetadataRows>
-                      <PublicMetadataRow
-                        label={releaseArtists.length === 1 ? tCommonEntities('artist') : tCommonEntities('artists')}
+          )
+        }
+        title={release.title}
+        titleLang={contentLang}
+        actions={
+          <ContentLanguageMenu
+            pathname={pathname}
+            query={query}
+            requestedLocale={requestedLocale}
+            localizationInfo={release.localizationInfo}
+          />
+        }
+        meta={
+          <PublicMetadataRows>
+            <PublicMetadataRow
+              label={releaseArtists.length === 1 ? tCommonEntities('artist') : tCommonEntities('artists')}
+            >
+              <PublicMetadataValueGroup>
+                {releaseArtists.length > 0 ? (
+                  joinInlineValues(
+                    releaseArtists.map((artist) => (
+                      <PublicMetadataLink
+                        key={`${artist.id}-${artist.role ?? ''}`}
+                        href={`/artists/${artist.slug || artist.id}`}
                       >
-                        <PublicMetadataValueGroup>
-                          {releaseArtists.length > 0 ? (
-                            joinInlineValues(
-                              releaseArtists.map((artist) => (
-                                <PublicMetadataLink
-                                  key={`${artist.id}-${artist.role ?? ''}`}
-                                  href={`/artists/${artist.slug || artist.id}`}
-                                >
-                                  {artist.name}
-                                </PublicMetadataLink>
-                              )),
-                            )
-                          ) : (
-                            <DsText size="sm" as="span">
-                              {releaseArtistFallbackLabel}
-                            </DsText>
-                          )}
-                        </PublicMetadataValueGroup>
-                      </PublicMetadataRow>
-                      <PublicMetadataRow label={tCommonLabels('type')}>
-                        <DsText size="sm" as="span">
-                          {getReleaseTypeLabel(release.type, {
-                            album: t('types.album'),
-                            ep: t('types.ep'),
-                            single: t('types.single'),
-                            compilation: t('types.compilation'),
-                            release: tCommonEntities('release'),
-                          })}
-                        </DsText>
-                      </PublicMetadataRow>
-                      <PublicMetadataRow label={tCommonLabels('releaseDate')}>
-                        <DsText size="sm" as="span">
-                          {releaseDate}
-                        </DsText>
-                      </PublicMetadataRow>
-                      {release.labels.length > 0 && (
-                        <PublicMetadataRow
-                          label={release.labels.length > 1 ? tCommonEntities('labels') : tCommonEntities('label')}
-                        >
-                          <PublicMetadataValueGroup>
-                            {joinInlineValues(
-                              release.labels.map((label) => (
-                                <PublicMetadataLink key={label.id} href={`/labels/${label.slug || label.id}`}>
-                                  {label.catalogNumber ? `${label.name} (${label.catalogNumber})` : label.name}
-                                </PublicMetadataLink>
-                              )),
-                            )}
-                          </PublicMetadataValueGroup>
-                        </PublicMetadataRow>
-                      )}
-                      {release.catalogNumber && (
-                        <PublicMetadataRow label={tCommonLabels('catalogNumber')}>
-                          <DsText size="sm" as="span">
-                            {release.catalogNumber}
-                          </DsText>
-                        </PublicMetadataRow>
-                      )}
-                      {release.formats.length > 0 && (
-                        <PublicMetadataRow
-                          label={release.formats.length > 1 ? tCommonEntities('formats') : tCommonEntities('format')}
-                        >
-                          <PublicMetadataValueGroup>
-                            {joinInlineValues(
-                              release.formats.map((format) => (
-                                <DsText key={format.id} size="sm" as="span">
-                                  {format.description ? `${format.name} (${format.description})` : format.name}
-                                </DsText>
-                              )),
-                            )}
-                          </PublicMetadataValueGroup>
-                        </PublicMetadataRow>
-                      )}
-                      {release.genres.length > 0 && (
-                        <PublicMetadataRow
-                          label={release.genres.length > 1 ? tCommonEntities('genres') : tCommonEntities('genre')}
-                        >
-                          <PublicMetadataValueGroup>
-                            {joinInlineValues(
-                              release.genres.map((genre) => (
-                                <DsText key={genre.id} size="sm" as="span">
-                                  {genre.name}
-                                </DsText>
-                              )),
-                            )}
-                          </PublicMetadataValueGroup>
-                        </PublicMetadataRow>
-                      )}
-                      {release.styles.length > 0 && (
-                        <PublicMetadataRow
-                          label={release.styles.length > 1 ? tCommonEntities('styles') : tCommonEntities('style')}
-                        >
-                          <PublicMetadataValueGroup>
-                            {joinInlineValues(
-                              release.styles.map((style) => (
-                                <DsText key={style.id} size="sm" as="span">
-                                  {style.name}
-                                </DsText>
-                              )),
-                            )}
-                          </PublicMetadataValueGroup>
-                        </PublicMetadataRow>
-                      )}
-                      {creditGroups.length > 0 && (
-                        <PublicMetadataRow label={tCommonEntities('credits')}>
-                          <div className={classes.detailCredits}>
-                            <ReleaseCreditsList groups={creditGroups} unknownLabel={tCommonStates('unknown')} />
-                          </div>
-                        </PublicMetadataRow>
-                      )}
-                      {hasLinks && (
-                        <PublicMetadataRow label={t('streaming')}>
-                          <SocialLinksDisplayView entries={streamingLinkEntries} variant="button" />
-                        </PublicMetadataRow>
-                      )}
-                    </PublicMetadataRows>
-                  </DsLayoutStack>
+                        {artist.name}
+                      </PublicMetadataLink>
+                    )),
+                  )
+                ) : (
+                  <DsText size="sm" as="span">
+                    {releaseArtistFallbackLabel}
+                  </DsText>
+                )}
+              </PublicMetadataValueGroup>
+            </PublicMetadataRow>
+            <PublicMetadataRow label={tCommonLabels('type')}>
+              <DsText size="sm" as="span">
+                {getReleaseTypeLabel(release.type, {
+                  album: t('types.album'),
+                  ep: t('types.ep'),
+                  single: t('types.single'),
+                  compilation: t('types.compilation'),
+                  release: tCommonEntities('release'),
+                })}
+              </DsText>
+            </PublicMetadataRow>
+            <PublicMetadataRow label={tCommonLabels('releaseDate')}>
+              <DsText size="sm" as="span">
+                {releaseDate}
+              </DsText>
+            </PublicMetadataRow>
+            {release.labels.length > 0 && (
+              <PublicMetadataRow
+                label={release.labels.length > 1 ? tCommonEntities('labels') : tCommonEntities('label')}
+              >
+                <PublicMetadataValueGroup>
+                  {joinInlineValues(
+                    release.labels.map((label) => (
+                      <PublicMetadataLink key={label.id} href={`/labels/${label.slug || label.id}`}>
+                        {label.catalogNumber ? `${label.name} (${label.catalogNumber})` : label.name}
+                      </PublicMetadataLink>
+                    )),
+                  )}
+                </PublicMetadataValueGroup>
+              </PublicMetadataRow>
+            )}
+            {release.catalogNumber && (
+              <PublicMetadataRow label={tCommonLabels('catalogNumber')}>
+                <DsText size="sm" as="span">
+                  {release.catalogNumber}
+                </DsText>
+              </PublicMetadataRow>
+            )}
+            {release.formats.length > 0 && (
+              <PublicMetadataRow
+                label={release.formats.length > 1 ? tCommonEntities('formats') : tCommonEntities('format')}
+              >
+                <PublicMetadataValueGroup>
+                  {joinInlineValues(
+                    release.formats.map((format) => (
+                      <DsText key={format.id} size="sm" as="span">
+                        {format.description ? `${format.name} (${format.description})` : format.name}
+                      </DsText>
+                    )),
+                  )}
+                </PublicMetadataValueGroup>
+              </PublicMetadataRow>
+            )}
+            {release.genres.length > 0 && (
+              <PublicMetadataRow
+                label={release.genres.length > 1 ? tCommonEntities('genres') : tCommonEntities('genre')}
+              >
+                <PublicMetadataValueGroup>
+                  {joinInlineValues(
+                    release.genres.map((genre) => (
+                      <DsText key={genre.id} size="sm" as="span">
+                        {genre.name}
+                      </DsText>
+                    )),
+                  )}
+                </PublicMetadataValueGroup>
+              </PublicMetadataRow>
+            )}
+            {release.styles.length > 0 && (
+              <PublicMetadataRow
+                label={release.styles.length > 1 ? tCommonEntities('styles') : tCommonEntities('style')}
+              >
+                <PublicMetadataValueGroup>
+                  {joinInlineValues(
+                    release.styles.map((style) => (
+                      <DsText key={style.id} size="sm" as="span">
+                        {style.name}
+                      </DsText>
+                    )),
+                  )}
+                </PublicMetadataValueGroup>
+              </PublicMetadataRow>
+            )}
+            {creditGroups.length > 0 && (
+              <PublicMetadataRow label={tCommonEntities('credits')}>
+                <div className={classes.detailCredits}>
+                  <ReleaseCreditsList groups={creditGroups} unknownLabel={tCommonStates('unknown')} />
                 </div>
-                <div className={classes.actions}>
-                  <DsLayoutInline gap="sm" align="start" justify="end" wrap={{ base: 'wrap', sm: 'nowrap' }}>
-                    <ContentLanguageMenu
-                      pathname={pathname}
-                      query={query}
-                      requestedLocale={requestedLocale}
-                      localizationInfo={release.localizationInfo}
-                    />
-                  </DsLayoutInline>
-                </div>
-              </DsLayoutInline>
-            </DsLayoutStack>
-          </div>
-        </DsLayoutInline>
-
+              </PublicMetadataRow>
+            )}
+            {hasLinks && (
+              <PublicMetadataRow label={t('streaming')}>
+                <SocialLinksDisplayView entries={streamingLinkEntries} variant="button" />
+              </PublicMetadataRow>
+            )}
+          </PublicMetadataRows>
+        }
+      >
         {release.content && release.content.length > 0 ? (
-          <DsLayoutStack gap="xxs">
-            <DsText size="sm" font="mono" weight="medium" tone="muted" role="heading" aria-level={2}>
-              {tCommonLabels('description')}
-            </DsText>
+          <EntityDetailSection title={tCommonLabels('description')}>
             <div
               className="prose"
               lang={
@@ -377,12 +342,9 @@ export function ReleasePublicView({
                 ))}
               </DocumentHeadingScope>
             </div>
-          </DsLayoutStack>
+          </EntityDetailSection>
         ) : release.descriptionText ? (
-          <DsLayoutStack gap="xxs">
-            <DsText size="sm" font="mono" weight="medium" tone="muted" role="heading" aria-level={2}>
-              {tCommonLabels('description')}
-            </DsText>
+          <EntityDetailSection title={tCommonLabels('description')}>
             <DsText
               wrap="preserve"
               lang={
@@ -391,15 +353,12 @@ export function ReleasePublicView({
             >
               {release.descriptionText}
             </DsText>
-          </DsLayoutStack>
+          </EntityDetailSection>
         ) : null}
 
         {release.tracks.length > 0 && (
-          <DsLayoutInset blockStart="xs">
-            <DsLayoutStack gap="sm" role="group" aria-label={tCommonEntities('tracks')}>
-              <DsText size="sm" font="mono" weight="medium" tone="muted" role="heading" aria-level={2}>
-                {tCommonEntities('tracks')}
-              </DsText>
+          <EntityDetailSection title={tCommonEntities('tracks')}>
+            <DsLayoutStack gap="none">
               {release.tracks.map((track, index) => (
                 <DsSectionCard
                   key={track.id}
@@ -444,9 +403,9 @@ export function ReleasePublicView({
                 </DsSectionCard>
               ))}
             </DsLayoutStack>
-          </DsLayoutInset>
+          </EntityDetailSection>
         )}
-      </DsLayoutStack>
+      </EntityDetailLayout>
     </>
   );
 }

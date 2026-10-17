@@ -33,6 +33,10 @@ Hierarchy supplies selected spacing to descendants. A nested Hierarchy without s
 Disclosure nested represents a child group inside a body aligned with the parent label. Include the child's default heading inset so spacing is not applied twice. Control tracks own handled-row alignment.
 contentIndent="label" aligns a body with its own heading; it remains distinct from a child step.
 
+Navigation lists group links with Disclosure density="chrome": compact geometry (28px control, end chevron)
+whose label starts on the chrome rows' xs 8px line, the same start as TextButton density="chrome" links and
+SideNavigation items. Do not mix density="compact" groups with chrome links; their labels differ by 4px.
+
 TextButton nested includes internal chrome padding in text alignment and prevents margin-based horizontal overflow on full-width links.
 SectionCard nested includes internal padding and its leading border. SideNavigation consumes the same hierarchy role between group headings and child labels, accounting for icon tracks and active borders.
 Selecting spacing smaller than required controls/markers/card insets does not remove them or overlap them with negative margins.

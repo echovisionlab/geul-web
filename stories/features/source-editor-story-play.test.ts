@@ -55,6 +55,7 @@ function check(host: HTMLElement, theme: ThemeId) {
 }
 
 afterEach(() => {
+  vi.useRealTimers();
   hosts.splice(0).forEach((host) => host.remove());
   if (originalThemeId === undefined) {
     delete document.documentElement.dataset.geulThemeId;
@@ -71,19 +72,21 @@ describe('Source Editor Syntax Contrast play', () => {
   });
 
   it('awaits the requested preset, delayed Monaco background and replaced notation after a toolbar switch', async () => {
+    vi.useFakeTimers();
     document.documentElement.dataset.geulThemeId = 'light';
     const fixture = sourceFixture('light');
     let completed = false;
     const result = check(fixture.host, 'ocean-dark').then(() => {
       completed = true;
     });
-    await new Promise<void>((resolve) => setTimeout(resolve, 10));
+    // Each step lets the play's waitFor retry at least once on its 50ms interval.
+    await vi.advanceTimersByTimeAsync(50);
     expect(completed).toBe(false);
     document.documentElement.dataset.geulThemeId = 'ocean-dark';
-    await new Promise<void>((resolve) => setTimeout(resolve, 10));
+    await vi.advanceTimersByTimeAsync(50);
     expect(completed).toBe(false);
     fixture.applyBackground('ocean-dark');
-    await new Promise<void>((resolve) => setTimeout(resolve, 10));
+    await vi.advanceTimersByTimeAsync(50);
     expect(completed).toBe(false);
     // Monaco may replace token nodes when its theme or tokenizer finishes.
     for (const [index, leaf] of fixture.leaves.entries()) {
@@ -92,6 +95,7 @@ describe('Source Editor Syntax Contrast play', () => {
       fixture.leaves[index] = replacement;
     }
     fixture.applyNotation('ocean-dark');
+    await vi.advanceTimersByTimeAsync(50);
     await result;
     expect(completed).toBe(true);
   });
@@ -99,7 +103,11 @@ describe('Source Editor Syntax Contrast play', () => {
   it('still rejects a persistent token with insufficient actual contrast', async () => {
     document.documentElement.dataset.geulThemeId = 'light';
     const fixture = sourceFixture('light');
+    vi.useFakeTimers();
     fixture.leaves[3].style.color = sourceEditorTheme('light').colors['editor.background'];
-    await expect(check(fixture.host, 'light')).rejects.toThrow(/greater than or equal to 4.5/);
+    const rejection = expect(check(fixture.host, 'light')).rejects.toThrow(/greater than or equal to 4.5/);
+    // Run the play's waitFor to its 1000ms timeout without spending real time.
+    await vi.advanceTimersByTimeAsync(1000);
+    await rejection;
   });
 });

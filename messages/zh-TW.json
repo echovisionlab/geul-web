@@ -212,7 +212,10 @@
       "text": "文字",
       "caption": "說明文字",
       "allUsers": "所有使用者",
-      "newsletter": "電子報"
+      "newsletter": "電子報",
+      "images": "圖片",
+      "classification": "分類",
+      "related": "相關"
     },
     "entities": {
       "post": "文章",
@@ -385,6 +388,12 @@
       "status": {
         "preparingImage": "正在準備圖片",
         "uploading": "上傳中"
+      },
+      "removeLabel": "移除{label}",
+      "errors": {
+        "tooLarge": "檔案過大。上限 {maxSize}",
+        "tooSmall": "檔案過小。下限 {minSize}",
+        "invalidType": "不支援此檔案類型。"
       }
     },
     "states": {
@@ -449,6 +458,12 @@
       "pause": "暫停動畫",
       "resume": "繼續動畫",
       "readAllInformation": "閱讀場景的全部資訊"
+    },
+    "loadMore": {
+      "action": "載入更多",
+      "loading": "正在載入更多…",
+      "failed": "無法載入更多項目。",
+      "retry": "重試"
     }
   },
   "shell": {
@@ -704,7 +719,8 @@
             "subject": "呈現的電子郵件主旨",
             "siteName": "設定中的站點名稱",
             "siteOrigin": "執行階段設定的網站來源。",
-            "logoEmailUrl": "網站設定中的電子郵件特定標誌 URL（如果已設定）",
+            "logoEmailUrl": "網站設定中的淺色郵件標誌 URL；僅設定深色時使用深色標誌。",
+            "logoEmailDarkUrl": "深色模式郵件應用程式使用的深色郵件標誌 URL；僅設定淺色時使用淺色標誌。",
             "emailLang": "套用到已渲染郵件文件的語言代碼",
             "emailDirection": "已渲染郵件文件的文字方向",
             "emailFontFamily": "套用到已渲染郵件的 locale 感知 Noto 字體堆疊",
@@ -1104,7 +1120,8 @@
       "labelLanguageTranslatedDescription": "公開選單僅顯示與訪客語言完全相符的目前翻譯；否則顯示原文標籤。",
       "labelLanguageFixedLocaleDescription": "公開選單始終使用所選語言顯示此項，不受訪客語言影響。如果該語言沒有即時標籤，則使用原文標籤。",
       "translatedItemBadge": "訪客語言",
-      "fixedLocaleItemBadge": "固定：{locale}"
+      "fixedLocaleItemBadge": "固定：{locale}",
+      "description": "管理網站上顯示的導覽選單。選擇一個選單即可編輯其項目。"
     },
     "emailEvents": {
       "title": "郵件投遞",
@@ -1405,7 +1422,8 @@
     "works": {
       "allTypes": "所有類型",
       "empty": "沒有找到作品",
-      "loadMore": "載入更多（剩餘 {count} 項）"
+      "loadMore": "載入更多（剩餘 {count} 項）",
+      "filterByType": "依類型篩選作品"
     },
     "releases": {
       "empty": "還沒有已發行的發行作品。"
@@ -1753,7 +1771,7 @@
     },
     "personalAccessTokens": {
       "title": "個人存取權杖",
-      "description": "使用這一個人存取權杖呼叫 {siteName} 提供的 API。每個請求都會使用您帳戶目前的權限。Remote MCP 不接受此權杖。",
+      "description": "使用這一個人存取權杖呼叫 {siteName} 提供的 API。每個請求都會使用您帳戶目前的權限。",
       "empty": "尚未建立個人存取權杖。",
       "regenerate": "重新產生",
       "regenerateTitle": "重新產生個人存取權杖",
@@ -2648,14 +2666,16 @@
     },
     "home": {
       "sections": {
-        "logoSize": "標誌大小"
+        "logoSize": "標誌大小",
+        "currentImage": "目前圖片與背景"
       },
       "fields": {
         "backgroundColor": "背景顏色"
       },
       "helpers": {
         "logoCentered": "徽標將位於圖像的中心",
-        "previewDescription": "首頁 OG 圖片：標誌居中，無標題文本"
+        "previewDescription": "首頁 OG 圖片：標誌居中，無標題文本",
+        "currentImage": "已產生的首頁分享圖片及其選用背景。"
       }
     },
     "content": {
@@ -3186,7 +3206,7 @@
         "showMeta": "顯示中繼資訊（日期、作者）",
         "sortBy": "排序方式",
         "numberOfPosts": "文章數量",
-        "showPagination": "顯示分頁",
+        "showPagination": "捲動時載入更多",
         "exposedFilters": "顯示的篩選項",
         "exposedSorts": "顯示的排序項",
         "rowsPerPage": "每頁列數",
@@ -4656,11 +4676,15 @@
     "emailVerification": {
       "verified": "電子郵件已驗證",
       "unverified": "電子郵件未驗證"
+    },
+    "profile": {
+      "description": "本區段的變更需按儲存後生效。下方各區段的變更會立即生效。"
     }
   },
   "adminSettings": {
     "site": {
       "title": "站點設定",
+      "description": "設定整個網站的資訊、品牌、導覽和搜尋預設值。",
       "notifications": {
         "saved": "設定已儲存",
         "noChanges": "沒有要儲存的更改"
@@ -4678,7 +4702,12 @@
           "socialLinksDescription": "新增您的社群媒體資料。這些將顯示在網站頁面腳中"
         },
         "branding": {
-          "title": "品牌推廣"
+          "title": "品牌推廣",
+          "logos": "標誌",
+          "logosDescription": "完整標誌和圖形標誌，分別用於淺色和深色背景。未設定的項目會自動替代。",
+          "emailLogos": "郵件標誌",
+          "emailLogosDescription": "用於郵件版面的 PNG 標誌。深色模式的郵件應用程式使用深色標誌。",
+          "iconsAndLoader": "網站圖示與載入動畫"
         },
         "contentDisplay": {
           "title": "內容與展示",
@@ -4761,17 +4790,29 @@
         "errorMessage": "{label} 必須是 {mimeTypes}（最大 {maxSize}）",
         "uploaded": "{label} 已上傳",
         "removed": "{label} 已刪除",
-        "logo_light": {
-          "label": "淺色網站標誌",
-          "description": "用於淺色背景，並作為預設網站標誌。"
+        "logo_full_light": {
+          "label": "完整標誌 · 淺色",
+          "description": "用於淺色背景的圖形與文字標誌，用於網站頁首、選單、列印和分享圖片。"
         },
-        "logo_dark": {
-          "label": "深色網站標誌",
-          "description": "用於深色背景。留空時會使用淺色標誌。"
+        "logo_full_dark": {
+          "label": "完整標誌 · 深色",
+          "description": "用於深色背景。留空時使用淺色完整標誌。"
         },
-        "logo_email": {
-          "label": "電子郵件標誌",
-          "description": "用於電子郵件範本和佈局。為了客戶端相容性，建議使用 PNG"
+        "logo_symbol_light": {
+          "label": "圖形標誌 · 淺色",
+          "description": "僅圖形，用於收合的管理選單等狹小空間。留空時使用完整標誌。"
+        },
+        "logo_symbol_dark": {
+          "label": "圖形標誌 · 深色",
+          "description": "用於深色背景。留空時使用淺色圖形標誌。"
+        },
+        "logo_email_light": {
+          "label": "郵件標誌 · 淺色",
+          "description": "郵件中顯示的 PNG。留空時使用深色郵件標誌。"
+        },
+        "logo_email_dark": {
+          "label": "郵件標誌 · 深色",
+          "description": "郵件應用程式在深色模式下顯示的 PNG。留空時使用淺色郵件標誌。"
         },
         "favicon": {
           "label": "網站圖示",

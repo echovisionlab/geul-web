@@ -19,7 +19,7 @@ import {
 } from '@/components/core/Collection';
 import { Button } from '@/components/core/Button';
 import { SectionCard } from '@/components/core/Section';
-import { contentColumns } from './content-layout';
+import { collectionMinColumnWidth, type CollectionTrackScale } from './content-layout';
 import { getResponsiveSlideSize } from './constants';
 import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
 
@@ -44,7 +44,8 @@ interface ListViewShellProps<T extends ListViewShellItem> {
   imageAspectRatio?: string;
   carouselLoop: boolean;
   carouselIndicators: boolean;
-  gridCols?: { base: number; sm: number };
+  /** `compact` for square artwork collections (one size step denser). */
+  trackScale?: CollectionTrackScale;
   dataScope?: 'post-list';
   renderListMeta?: (item: T) => ReactNode;
   renderMinimalMeta?: (item: T) => ReactNode;
@@ -145,7 +146,7 @@ export function ListViewShell<T extends ListViewShellItem>({
   imageAspectRatio = '16:9',
   carouselLoop,
   carouselIndicators,
-  gridCols = { base: 1, sm: 2 },
+  trackScale = 'standard',
   dataScope,
   renderListMeta,
   renderMinimalMeta,
@@ -324,14 +325,7 @@ export function ListViewShell<T extends ListViewShellItem>({
     );
   } else {
     body = (
-      <LayoutGrid
-        columns={{
-          base: contentColumns(layout === 'cards' ? 1 : gridCols.base),
-          sm: contentColumns(layout === 'cards' ? 2 : gridCols.sm),
-          md: contentColumns(columns),
-        }}
-        gap={metrics.gridGap}
-      >
+      <LayoutGrid minColumnWidth={collectionMinColumnWidth(layout, itemSize, trackScale)} gap={metrics.gridGap}>
         {items.map((item) => (
           <Fragment key={item.id}>
             {layout === 'cards'

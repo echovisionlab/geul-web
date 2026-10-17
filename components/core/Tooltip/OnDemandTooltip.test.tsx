@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+// @geul-test-isolate: the on-demand tooltip module keeps its loaded runtime across imports.
 
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';

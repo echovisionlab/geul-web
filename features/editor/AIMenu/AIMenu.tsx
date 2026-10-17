@@ -328,6 +328,7 @@ export function AIMenu({ client, context, target, onClose, dragHandleClassName, 
             <>
               <TextInput
                 ref={inputRef}
+                aria-label={placeholder}
                 placeholder={placeholder}
                 value={customPrompt}
                 onChange={(event) => setCustomPrompt(event.target.value)}

@@ -30,6 +30,7 @@ export function Field({
   const onlyChild = Children.count(children) === 1 ? Children.only(children) : null;
   const childProps = isValidElement(onlyChild) ? (onlyChild.props as Record<string, unknown>) : {};
   const childId = htmlFor ?? (typeof childProps.id === 'string' ? childProps.id : uid);
+  const labelId = `${childId}-label`;
   const descriptionId = description ? `${childId}-description` : undefined;
   const errorId = error ? `${childId}-error` : undefined;
   const describedBy =
@@ -48,6 +49,18 @@ export function Field({
     ? cloneElement(onlyChild as ReactElement<Record<string, unknown>>, {
         id: childId,
         ...(required ? { required: true } : {}),
+        // React Aria inputs cannot see a native `<label for>`; name them by reference too.
+        ...(typeof childProps['aria-label'] === 'string'
+          ? {}
+          : {
+              'aria-labelledby': [
+                ...new Set(
+                  [typeof childProps['aria-labelledby'] === 'string' ? childProps['aria-labelledby'] : '', labelId]
+                    .filter(Boolean)
+                    .flatMap((value) => value.split(/\s+/)),
+                ),
+              ].join(' '),
+            }),
         'aria-describedby': describedBy,
         'aria-invalid': error ? true : childProps['aria-invalid'],
         ...(typeof onlyChild.type !== 'string' ? { error: error ? true : childProps.error } : {}),
@@ -61,6 +74,7 @@ export function Field({
               focus delegation, without creating another keyboard stop. */}
           {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
           <label
+            id={labelId}
             className={classes.label}
             htmlFor={childId}
             onClick={() => {

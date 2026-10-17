@@ -203,27 +203,27 @@ describe('site setting asset actions', () => {
     expect(createFileClient).not.toHaveBeenCalled();
   });
 
-  it('returns the automatic full-regeneration run for the light logo', async () => {
+  it('returns the automatic full-regeneration run for the full light logo', async () => {
     setSettingMock.mockResolvedValueOnce({ success: true, ogGenerationRunId: 'logo-run' });
-    await expect(setSiteAssetAction('logo_light', 'file-1')).resolves.toEqual({
+    await expect(setSiteAssetAction('logo_full_light', 'file-1')).resolves.toEqual({
       success: true,
       ogGenerationRunId: 'logo-run',
     });
 
     expect(setSettingMock).toHaveBeenCalledWith({
-      key: 'logo_light_file_id',
+      key: 'logo_full_light_file_id',
       value: { kind: { case: 'stringValue', value: 'file-1' } },
     });
     expect(createFileClient).not.toHaveBeenCalled();
     expect(revalidatePath).toHaveBeenCalledWith('/', 'layout');
   });
 
-  it('does not report an OG run for a dark logo', async () => {
-    await expect(setSiteAssetAction('logo_dark', 'file-1')).resolves.toEqual({
+  it('does not report an OG run for an email logo', async () => {
+    await expect(setSiteAssetAction('logo_email_dark', 'file-1')).resolves.toEqual({
       success: true,
     });
     expect(setSettingMock).toHaveBeenCalledWith({
-      key: 'logo_dark_file_id',
+      key: 'logo_email_dark_file_id',
       value: { kind: { case: 'stringValue', value: 'file-1' } },
     });
   });

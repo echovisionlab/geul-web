@@ -91,11 +91,17 @@
   --_disclosure-control-gap: var(--geul-spacing-xs);
 }
 
-.root[data-density='compact'] {
+.root:is([data-density='compact'], [data-density='chrome']) {
   --_disclosure-inline-inset: var(--geul-spacing-xxs);
   --_disclosure-control-gap: var(--geul-spacing-xxs);
   --_disclosure-control-border: 0px;
   --_disclosure-chevron-track: max(var(--geul-control-height-compact), var(--geul-interaction-minimum));
+}
+
+/* Navigation lists: compact geometry on the chrome rows' `xs` label line, so a group label
+ * starts where sibling chrome links (TextButton density="chrome", SideNavigation items) start. */
+.root[data-density='chrome'] {
+  --_disclosure-inline-inset: var(--geul-spacing-xs);
 }
 
 .root[data-chevron-position='start'] {
@@ -137,7 +143,7 @@
   padding-inline: 0;
 }
 
-.root[data-density='compact'] > .header > .heading > .control {
+.root:is([data-density='compact'], [data-density='chrome']) > .header > .heading > .control {
   min-height: max(var(--geul-control-height-compact), var(--geul-interaction-minimum));
   padding: 0 var(--_disclosure-inline-inset);
   border: 0;
@@ -146,11 +152,11 @@
 
 /* Compact controls share adjacent compact action tracks. Outer inset belongs to
  * the action slots; do not repeat it between a handle and the title trigger. */
-.root[data-density='compact'] > .header {
+.root:is([data-density='compact'], [data-density='chrome']) > .header {
   gap: 0;
 }
 
-.root[data-density='compact'] > .header > .heading > .control > .chevronSlot {
+.root:is([data-density='compact'], [data-density='chrome']) > .header > .heading > .control > .chevronSlot {
   display: inline-grid;
   flex: none;
   width: max(var(--geul-control-height-compact), var(--geul-interaction-minimum));
@@ -158,23 +164,26 @@
   place-items: center;
 }
 
-.root[data-density='compact'][data-chevron-position='end'] > .header > .heading > .control {
+.root:is([data-density='compact'], [data-density='chrome'])[data-chevron-position='end']
+  > .header
+  > .heading
+  > .control {
   padding-inline-end: 0;
 }
 
-.root[data-density='compact'][data-leading-actions] {
+.root:is([data-density='compact'], [data-density='chrome'])[data-leading-actions] {
   --_disclosure-title-padding: 0px;
 }
 
-.root[data-density='compact'][data-leading-actions] > .header > .heading > .control {
+.root:is([data-density='compact'], [data-density='chrome'])[data-leading-actions] > .header > .heading > .control {
   padding-inline-start: 0;
 }
 
-.root[data-density='compact'][data-content-indent='small'] > .content {
+.root:is([data-density='compact'], [data-density='chrome'])[data-content-indent='small'] > .content {
   padding: var(--geul-spacing-xxs) var(--geul-spacing-xs);
 }
 
-.root[data-density='compact'] > .content {
+.root:is([data-density='compact'], [data-density='chrome']) > .content {
   padding-block: var(--geul-spacing-xxs);
 }
 
@@ -197,7 +206,7 @@
   grid-template-columns: max-content minmax(0, 1fr) max-content;
 }
 
-.root[data-content-indent='label'][data-density='compact'] {
+.root[data-content-indent='label']:is([data-density='compact'], [data-density='chrome']) {
   column-gap: 0;
 }
 

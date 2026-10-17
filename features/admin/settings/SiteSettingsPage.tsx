@@ -1,9 +1,9 @@
 'use client';
 
-import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { LayoutGrid as DsLayoutGrid } from '@/components/core/Layout';
+import { SettingsGroup } from '@/components/core/Section';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
-import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
@@ -11,14 +11,44 @@ import { notifications } from '@/components/core/Notification';
 import { PageLoader } from '@/features/site/PageLoader';
 import { SiteAssetUploader } from '@/features/site/SiteAssetUploader/SiteAssetUploader';
 import { SiteLoaderAssetsUploader } from '@/features/site/SiteLoaderAssetsUploader/SiteLoaderAssetsUploader';
-import { SiteOgImagePanel } from '@/features/site/SiteOgImagePanel/SiteOgImagePanel';
 import { SiteSettingsForm } from '@/features/site/SiteSettingsForm/SiteSettingsForm';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import { listAllPublishedPagesAdminAction } from '@/lib/actions/admin';
 import { updateSiteSettingsAction } from '@/lib/actions/site-setting';
 import { listMenus } from '@/lib/queries/menu-browser';
 import { getAllSiteSettings } from '@/lib/queries/site-setting-browser';
-import type { SiteSettingsPatch } from '@/lib/types/site-setting/config';
+import type { SiteSettingsPatch, SiteSettingsView } from '@/lib/types/site-setting/config';
+
+// Light and dark variants sit side by side from the sm breakpoint.
+const DISPLAY_LOGO_SLOTS = ['logo_full_light', 'logo_full_dark', 'logo_symbol_light', 'logo_symbol_dark'] as const;
+const EMAIL_LOGO_SLOTS = ['logo_email_light', 'logo_email_dark'] as const;
+type LogoSlot = (typeof DISPLAY_LOGO_SLOTS)[number] | (typeof EMAIL_LOGO_SLOTS)[number];
+
+function LogoSlotGrid({
+  slots,
+  settings,
+  bindings,
+  onSuccess,
+}: {
+  slots: readonly LogoSlot[];
+  settings: SiteSettingsView;
+  bindings: SiteSettingsPageBindings;
+  onSuccess: () => void;
+}) {
+  return (
+    <DsLayoutGrid columns={{ base: 1, sm: 2 }} columnGap="lg" rowGap="lg">
+      {slots.map((type) => (
+        <SiteAssetUploader
+          key={type}
+          bindings={bindings.asset}
+          type={type}
+          currentUrl={settings[`${type}_url`]}
+          onSuccess={onSuccess}
+        />
+      ))}
+    </DsLayoutGrid>
+  );
+}
 
 export interface SiteSettingsPageBindings {
   getSettings: typeof getAllSiteSettings;
@@ -27,7 +57,6 @@ export interface SiteSettingsPageBindings {
   update: typeof updateSiteSettingsAction;
   asset?: import('@/features/site/site-asset-bindings').SiteAssetBindings;
   loader?: import('@/features/site/SiteLoaderAssetsUploader/SiteLoaderAssetsUploader').SiteLoaderBindings;
-  og?: import('@/features/site/SiteOgImagePanel/SiteOgImagePanel').SiteOgImageBindings;
 }
 const defaultBindings: SiteSettingsPageBindings = {
   getSettings: getAllSiteSettings,
@@ -39,7 +68,6 @@ export default function SiteSettingsPage({ bindings = defaultBindings }: { bindi
   const tCommon = useTranslations('common');
   const tPage = useTranslations('adminSettings.site');
   const queryClient = useQueryClient();
-  const [ogGenerationRunId, setOgGenerationRunId] = useState<string>();
   const settingsQuery = useQuery({
     queryKey: ['siteSettings', 'all'],
     queryFn: bindings.getSettings,
@@ -65,9 +93,6 @@ export default function SiteSettingsPage({ bindings = defaultBindings }: { bindi
         return;
       }
       notifications.show({ message: tPage('notifications.saved'), tone: 'positive' });
-      if (result.ogGenerationRunId) {
-        setOgGenerationRunId(result.ogGenerationRunId);
-      }
       void queryClient.invalidateQueries({ queryKey: ['siteSettings'] });
     },
   });
@@ -100,47 +125,43 @@ export default function SiteSettingsPage({ bindings = defaultBindings }: { bindi
       }))}
       menus={menus.map((menu) => ({ value: menu.id, label: menu.name }))}
       branding={
-        <DsLayoutStack gap="md">
-          <SiteAssetUploader
-            bindings={bindings.asset}
-            type="logo_light"
-            currentUrl={settings.logo_light_url ?? settings.logo_url}
-            onSuccess={(runId) => {
-              if (runId) {
-                setOgGenerationRunId(runId);
-              }
-              refreshSettings();
-            }}
-          />
-          <SiteAssetUploader
-            bindings={bindings.asset}
-            type="logo_dark"
-            currentUrl={settings.logo_dark_url}
-            onSuccess={refreshSettings}
-          />
-          <SiteAssetUploader
-            bindings={bindings.asset}
-            type="logo_email"
-            currentUrl={settings.logo_email_url}
-            onSuccess={refreshSettings}
-          />
-          <SiteAssetUploader
-            bindings={bindings.asset}
-            type="favicon"
-            currentUrl={settings.favicon_url}
-            onSuccess={refreshSettings}
-          />
-          <SiteLoaderAssetsUploader
-            bindings={bindings.loader}
-            assets={settings.loader_assets}
-            onSuccess={refreshSettings}
-          />
-          <SiteOgImagePanel
-            bindings={bindings.og}
-            currentBackgroundUrl={settings.site_og_background_url}
-            automaticGenerationRunId={ogGenerationRunId}
-          />
-        </DsLayoutStack>
+        <>
+          <SettingsGroup
+            title={tPage('sections.branding.logos')}
+            description={tPage('sections.branding.logosDescription')}
+          >
+            <LogoSlotGrid
+              slots={DISPLAY_LOGO_SLOTS}
+              settings={settings}
+              bindings={bindings}
+              onSuccess={refreshSettings}
+            />
+          </SettingsGroup>
+          <SettingsGroup
+            title={tPage('sections.branding.emailLogos')}
+            description={tPage('sections.branding.emailLogosDescription')}
+          >
+            <LogoSlotGrid
+              slots={EMAIL_LOGO_SLOTS}
+              settings={settings}
+              bindings={bindings}
+              onSuccess={refreshSettings}
+            />
+          </SettingsGroup>
+          <SettingsGroup title={tPage('sections.branding.iconsAndLoader')}>
+            <SiteAssetUploader
+              bindings={bindings.asset}
+              type="favicon"
+              currentUrl={settings.favicon_url}
+              onSuccess={refreshSettings}
+            />
+            <SiteLoaderAssetsUploader
+              bindings={bindings.loader}
+              assets={settings.loader_assets}
+              onSuccess={refreshSettings}
+            />
+          </SettingsGroup>
+        </>
       }
     />
   );

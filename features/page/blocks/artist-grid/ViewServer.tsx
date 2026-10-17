@@ -1,61 +1,47 @@
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import { Suspense } from 'react';
-import { ServerDataTablePagination } from '@/features/data-table/ServerDataTable/ServerDataTablePagination';
 import { listArtistsForBlockAction } from '@/lib/actions/artist';
 import { prepareSocialLinksDisplay } from '@/features/social-links/prepare-social-links-display';
 import { parseBooleanProp, parseIntegerProp, splitCsv } from '../list-shared';
-import { buildBlockTableNamespace, parseBlockTableQuery, queryRecordToSearchParams } from '../table-utils';
 import type { BlockViewProps } from '../types';
 import { parseArtistListProps } from './schema';
 import { ArtistListSkeleton } from './Skeleton';
 import { ArtistListViewClient } from './ViewClient';
+import { ArtistInfiniteList } from './InfiniteList';
+import { toArtistListItem } from './transform';
 
-async function ArtistListViewServer({ sectionId, props, query, requestedLocale }: BlockViewProps) {
+async function ArtistListViewServer({ props, requestedLocale }: BlockViewProps) {
   const p = parseArtistListProps(props);
   const labelIds = splitCsv(p.labelIds);
   const limit = parseIntegerProp(p.limit, 12);
+  // Pagination continues the list in place: the first page renders here, later pages on demand.
   const showPagination = parseBooleanProp(p.showPagination, false);
   // Hidden metadata must not add prepared glyph paths to the HTML/RSC payload.
   const showMeta = p.showMeta !== 'false';
-  const namespace = buildBlockTableNamespace('artistList', sectionId);
-  const searchParams = queryRecordToSearchParams(query);
-  const tableQuery = showPagination
-    ? parseBlockTableQuery(searchParams, namespace, limit)
-    : { page: 1, pageSize: limit };
-
-  const { artists, pagination } = await listArtistsForBlockAction({
+  const query = {
     labelIds: labelIds.length > 0 ? labelIds : undefined,
     sortBy: p.sortBy as 'name' | 'published_at' | undefined,
     sortOrder: p.sortOrder as 'asc' | 'desc' | undefined,
-    limit: tableQuery.pageSize,
-    offset: ((tableQuery.page ?? 1) - 1) * (tableQuery.pageSize ?? limit),
-    requestedLocale,
-  }).then(unwrapQueryResult);
-
-  const transformedArtists = artists.map((a) => ({
-    id: a.id,
-    href: `/artists/${a.slug?.trim() || a.id}`,
-    title: a.name,
-    imageUrl: a.imageUrl ?? null,
-    imageAlt: a.name,
-    socialLinkEntries: showMeta ? prepareSocialLinksDisplay(a.socialLinks ?? {}) : [],
-  }));
-
-  const result = {
-    data: transformedArtists,
-    total: pagination.total,
-    page: tableQuery.page ?? 1,
-    pageSize: tableQuery.pageSize ?? limit,
-    totalPages: Math.ceil(pagination.total / (tableQuery.pageSize ?? limit)),
+    limit,
   };
+  const { artists, pagination } = await listArtistsForBlockAction({ ...query, offset: 0, requestedLocale }).then(
+    unwrapQueryResult,
+  );
+  const items = artists.map((artist) =>
+    toArtistListItem(artist, showMeta ? prepareSocialLinksDisplay(artist.socialLinks ?? {}) : []),
+  );
 
-  return (
-    <>
-      <ArtistListViewClient artists={transformedArtists} parsedProps={p} />
-      {showPagination ? (
-        <ServerDataTablePagination namespace={namespace} result={result} searchParams={searchParams} />
-      ) : null}
-    </>
+  return showPagination ? (
+    <ArtistInfiniteList
+      initialArtists={items}
+      total={pagination.total}
+      query={query}
+      showMeta={showMeta}
+      parsedProps={p}
+      locale={requestedLocale}
+    />
+  ) : (
+    <ArtistListViewClient artists={items} parsedProps={p} />
   );
 }
 

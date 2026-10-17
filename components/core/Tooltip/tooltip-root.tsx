@@ -54,6 +54,12 @@ export function useTooltipRoot({
   const hintContext = useMemo(() => ({ suppressed: hintDisabled, registerOverlay }), [hintDisabled, registerOverlay]);
   const [container, setContainer] = useState<HTMLSpanElement | null>(null);
   const [hoverOpen, setHoverOpen] = useState(false);
+  // React Aria stays controlled for the trigger's lifetime: suppression forces `false`, so an
+  // uncontrolled `undefined` would flip it between modes. Suppression also ends any open hint.
+  const [localOpen, setLocalOpen] = useState(false);
+  if (hintDisabled && localOpen) {
+    setLocalOpen(false);
+  }
   const hovering = useRef(false);
   const hoverOnly = events?.focus === false;
   const controlled = opened !== undefined;
@@ -77,10 +83,14 @@ export function useTooltipRoot({
   };
   /** Props of React Aria `TooltipTrigger` (and of its state/trigger hooks). */
   const triggerOptions = {
-    isOpen: hintDisabled ? false : controlled ? opened : hoverOnly ? hoverOpen : undefined,
+    isOpen: hintDisabled ? false : controlled ? opened : hoverOnly ? hoverOpen : localOpen,
     onOpenChange: (open: boolean) => {
-      if (hoverOnly && (!open || hovering.current)) {
-        setHoverOpen(open);
+      if (hoverOnly) {
+        if (!open || hovering.current) {
+          setHoverOpen(open);
+        }
+      } else if (!controlled) {
+        setLocalOpen(open);
       }
     },
     isDisabled: hintDisabled,

@@ -212,7 +212,10 @@
       "text": "Tekst",
       "caption": "Podpis",
       "allUsers": "Wszyscy użytkownicy",
-      "newsletter": "Biuletyn"
+      "newsletter": "Biuletyn",
+      "images": "Obrazy",
+      "classification": "Klasyfikacja",
+      "related": "Powiązane"
     },
     "entities": {
       "post": "Post",
@@ -385,6 +388,12 @@
       "status": {
         "preparingImage": "Przygotowanie obrazu",
         "uploading": "Przesyłanie"
+      },
+      "removeLabel": "Usuń: {label}",
+      "errors": {
+        "tooLarge": "Plik jest za duży. Maksymalnie {maxSize}",
+        "tooSmall": "Plik jest za mały. Minimalnie {minSize}",
+        "invalidType": "Ten typ pliku nie jest obsługiwany."
       }
     },
     "states": {
@@ -449,6 +458,12 @@
       "pause": "Wstrzymaj animację",
       "resume": "Wznów animację",
       "readAllInformation": "Przeczytaj wszystkie informacje o scenie"
+    },
+    "loadMore": {
+      "action": "Wczytaj więcej",
+      "loading": "Wczytywanie…",
+      "failed": "Nie udało się wczytać kolejnych elementów.",
+      "retry": "Spróbuj ponownie"
     }
   },
   "shell": {
@@ -704,7 +719,8 @@
             "subject": "Wyrenderowany temat wiadomości e-mail.",
             "siteName": "Nazwa witryny z ustawień.",
             "siteOrigin": "Pochodzenie witryny wykonawczej.",
-            "logoEmailUrl": "Adres URL logo specyficznego dla adresu e-mail z ustawień witryny (jeśli jest ustawiony).",
+            "logoEmailUrl": "URL jasnego logo e-mail z ustawień witryny; ciemne, jeśli tylko ono jest ustawione.",
+            "logoEmailDarkUrl": "URL ciemnego logo e-mail dla aplikacji w trybie ciemnym; jasne, jeśli tylko ono jest ustawione.",
             "emailLang": "Kod języka zastosowany do renderowanego dokumentu e-mail.",
             "emailDirection": "Kierunek tekstu renderowanego dokumentu e-mail.",
             "emailFontFamily": "Stos czcionek Noto obsługujący ustawienia regionalne dla renderowanej wiadomości e-mail.",
@@ -1104,7 +1120,8 @@
       "labelLanguageTranslatedDescription": "Menu publiczne pokazują tylko aktualne tłumaczenie dokładnie dla ustawień regionalnych odwiedzającego; w przeciwnym razie pokazują etykietę źródłową.",
       "labelLanguageFixedLocaleDescription": "Menu publiczne zawsze pokazują tę pozycję z wybranej lokalizacji, niezależnie od lokalizacji odwiedzającego. Jeśli te ustawienia regionalne nie mają aktywnej etykiety, używana jest etykieta źródłowa.",
       "translatedItemBadge": "Lokalizacja gościa",
-      "fixedLocaleItemBadge": "Naprawiono: {locale}"
+      "fixedLocaleItemBadge": "Naprawiono: {locale}",
+      "description": "Zarządzaj menu nawigacji wyświetlanymi w witrynie. Wybierz menu, aby edytować jego pozycje."
     },
     "emailEvents": {
       "title": "Dostawa e-mailem",
@@ -1405,7 +1422,8 @@
     "works": {
       "allTypes": "Wszystkie typy",
       "empty": "Nie znaleziono żadnych prac",
-      "loadMore": "Załaduj więcej (pozostało {count})"
+      "loadMore": "Załaduj więcej (pozostało {count})",
+      "filterByType": "Filtruj prace według typu"
     },
     "releases": {
       "empty": "Nie wydano jeszcze żadnych wydań."
@@ -1415,7 +1433,7 @@
     "details": {
       "parent": "Roślina mateczna",
       "stats": "Statystyki",
-      "statsValue": "wydawnictwa: {releases}, artyści: {artists}"
+      "statsValue": "{releases, plural, one {# wydawnictwo} few {# wydawnictwa} many {# wydawnictw} other {# wydawnictwa}}, {artists, plural, one {# artysta} few {# artystów} many {# artystów} other {# artysty}}"
     },
     "sections": {
       "releases": "Wydania ({count})",
@@ -1702,7 +1720,7 @@
     },
     "personalAccessTokens": {
       "title": "Osobisty token dostępu",
-      "description": "Używaj tego jednego osobistego tokenu dostępu z interfejsami API udostępnianymi przez {siteName}. Każde żądanie korzysta z bieżących uprawnień konta. Remote MCP nie akceptuje tego tokenu.",
+      "description": "Używaj tego jednego osobistego tokenu dostępu z interfejsami API udostępnianymi przez {siteName}. Każde żądanie korzysta z bieżących uprawnień konta.",
       "empty": "Nie utworzono jeszcze żadnego osobistego tokenu dostępu.",
       "regenerate": "Wygeneruj ponownie",
       "regenerateTitle": "Wygeneruj ponownie osobisty token dostępu",
@@ -2648,14 +2666,16 @@
     },
     "home": {
       "sections": {
-        "logoSize": "Rozmiar logo"
+        "logoSize": "Rozmiar logo",
+        "currentImage": "Bieżący obraz i tło"
       },
       "fields": {
         "backgroundColor": "Kolor tła"
       },
       "helpers": {
         "logoCentered": "Logo będzie wyśrodkowane na obrazie",
-        "previewDescription": "Obraz OG strony głównej: logo wyśrodkowane, bez tekstu tytułu"
+        "previewDescription": "Obraz OG strony głównej: logo wyśrodkowane, bez tekstu tytułu",
+        "currentImage": "Wygenerowany obraz udostępniania strony głównej i opcjonalne tło."
       }
     },
     "content": {
@@ -3186,7 +3206,7 @@
         "showMeta": "Pokaż meta",
         "sortBy": "Sortuj według",
         "numberOfPosts": "Liczba postów",
-        "showPagination": "Pokaż paginację",
+        "showPagination": "Wczytuj więcej podczas przewijania",
         "exposedFilters": "Odsłonięte filtry",
         "exposedSorts": "Rodzaje odsłonięte",
         "rowsPerPage": "Wiersze na stronę",
@@ -4656,11 +4676,15 @@
     "emailVerification": {
       "verified": "Adres e-mail zweryfikowany",
       "unverified": "E-mail niezweryfikowany"
+    },
+    "profile": {
+      "description": "Zapisz stosuje zmiany w tej sekcji. Sekcje poniżej stosują każdą zmianę natychmiast."
     }
   },
   "adminSettings": {
     "site": {
       "title": "Ustawienia witryny",
+      "description": "Tożsamość, marka, nawigacja i domyślne ustawienia wyszukiwania dla całej witryny.",
       "notifications": {
         "saved": "Ustawienia zostały zapisane",
         "noChanges": "Brak zmian do zapisania"
@@ -4678,7 +4702,12 @@
           "socialLinksDescription": "Dodaj swoje profile w mediach społecznościowych. Zostaną one wyświetlone w stopce witryny."
         },
         "branding": {
-          "title": "Marka"
+          "title": "Marka",
+          "logos": "Logo",
+          "logosDescription": "Pełne logo i symbol, na jasne i ciemne tła. Brakujące warianty są zastępowane automatycznie.",
+          "emailLogos": "Logo e-mail",
+          "emailLogosDescription": "Logo PNG dla układów wiadomości e-mail. Aplikacje w trybie ciemnym używają ciemnego logo.",
+          "iconsAndLoader": "Favicon i animacja ładowania"
         },
         "contentDisplay": {
           "title": "Treść i wyświetlanie",
@@ -4761,17 +4790,29 @@
         "errorMessage": "{label} musi wynosić {mimeTypes} (maks. {maxSize})",
         "uploaded": "Przesłano {label}",
         "removed": "Usunięto {label}",
-        "logo_light": {
-          "label": "Lekkie logo witryny",
-          "description": "Wyświetlane na jasnym tle i używane jako domyślne logo witryny."
+        "logo_full_light": {
+          "label": "Pełne logo · jasne",
+          "description": "Symbol z logotypem na jasne tła: nagłówek, menu, druk i obrazy udostępniania."
         },
-        "logo_dark": {
-          "label": "Logo ciemnej witryny",
-          "description": "Wyświetlane na ciemnym tle. Gdy jest pusty, powraca do jasnego logo."
+        "logo_full_dark": {
+          "label": "Pełne logo · ciemne",
+          "description": "Na ciemne tła. Gdy puste, używa jasnego pełnego logo."
         },
-        "logo_email": {
-          "label": "Logo e-mail",
-          "description": "Używany w szablonach i układach wiadomości e-mail. Ze względu na zgodność klienta zalecany jest format PNG."
+        "logo_symbol_light": {
+          "label": "Symbol · jasny",
+          "description": "Sam symbol, do małych przestrzeni, takich jak zwinięte menu administracyjne. Gdy pusty, używa pełnego logo."
+        },
+        "logo_symbol_dark": {
+          "label": "Symbol · ciemny",
+          "description": "Na ciemne tła. Gdy pusty, używa jasnego symbolu."
+        },
+        "logo_email_light": {
+          "label": "Logo e-mail · jasne",
+          "description": "PNG wyświetlany w wiadomościach e-mail. Gdy puste, używa ciemnego logo e-mail."
+        },
+        "logo_email_dark": {
+          "label": "Logo e-mail · ciemne",
+          "description": "PNG, który aplikacje pocztowe pokazują w trybie ciemnym. Gdy puste, używa jasnego logo e-mail."
         },
         "favicon": {
           "label": "Favikona witryny",

@@ -21,17 +21,14 @@ async function render(view: React.ReactNode) {
   host = document.createElement('div');
   document.body.append(host);
   root = createRoot(host);
-  await act(async () => {
-    root.render(<TestProviders>{view}</TestProviders>);
-    await new Promise((resolve) => setTimeout(resolve, 15));
-  });
+  await act(async () => root.render(<TestProviders>{view}</TestProviders>));
 }
 describe('actual account lifecycle page states', () => {
   it.each(['deletion-confirm', 'deletion-cancel', 'recovery-confirm'] as const)(
     'renders actual %s successful and invalid views',
     async (domain) => {
       await render(<AccountLifecyclePagePreview domain={domain} />);
-      expect(host.querySelector('[role=alert]')?.textContent).toContain('Applied');
+      await vi.waitFor(() => expect(host.querySelector('[role=alert]')?.textContent).toContain('Applied'));
       await act(async () =>
         root.render(
           <TestProviders>
@@ -45,7 +42,11 @@ describe('actual account lifecycle page states', () => {
   );
   it('submits the actual recovery request action and shows its safe email notice', async () => {
     await render(<AccountLifecyclePagePreview />);
-    const input = host.querySelector<HTMLInputElement>('input[name=email]')!;
+    const input = await vi.waitFor(() => {
+      const field = host.querySelector<HTMLInputElement>('input[name=email]');
+      expect(field).not.toBeNull();
+      return field!;
+    });
     input.value = 'june@example.com';
     await act(async () => {
       host
@@ -57,10 +58,7 @@ describe('actual account lifecycle page states', () => {
   });
   it('runs the actual unsubscribe controller locally and preserves missing token state', async () => {
     await render(<AccountLifecyclePagePreview domain="unsubscribe" />);
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 15));
-    });
-    expect(host.querySelector('[data-unsubscribe-state=success]')).not.toBeNull();
+    await vi.waitFor(() => expect(host.querySelector('[data-unsubscribe-state=success]')).not.toBeNull());
     await act(async () =>
       root.render(
         <TestProviders>

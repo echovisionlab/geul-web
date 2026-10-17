@@ -352,9 +352,22 @@ button.root[data-control-kind='text']:not([data-disabled]):is(:hover, [data-hove
 
 .root[data-control-kind='icon'][data-placement='overlay-end'] {
   position: absolute;
-  inset-block-start: calc(-1 * var(--geul-spacing-xxs));
-  inset-inline-end: calc(-1 * var(--geul-spacing-xxs));
+  inset-block-start: calc(var(--_control-height) / -2);
+  inset-inline-end: calc(var(--_control-height) / -2);
   z-index: var(--geul-layer-popup);
+}
+
+/* A corner badge centred on the media's corner: an opaque chip so the glyph never reads as
+   part of the artwork it sits on. Hosts reserve half the control as a gutter. */
+.root[data-control-kind='icon'][data-placement='overlay-end']:not([data-emphasis='strong']) {
+  background: var(--geul-surface);
+  border-color: var(--geul-border-default);
+}
+
+.root[data-control-kind='icon'][data-placement='overlay-end']:not([data-emphasis='strong']):not([data-disabled]):not(
+    [data-pending]
+  ):is(:hover, [data-hovered]) {
+  background: var(--geul-surface-hover);
 }
 
 .root[data-control-kind='icon'][data-placement='overlay-end-inside'] {

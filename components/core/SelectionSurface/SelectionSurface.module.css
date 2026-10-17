@@ -229,6 +229,10 @@
   flex: 1;
 }
 
+.path[data-page-title] li:last-child {
+  max-width: none;
+}
+
 .status {
   display: flex;
   justify-content: space-between;
