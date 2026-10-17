@@ -75,7 +75,8 @@ PR #143 (logo slots, contracts 0.10.0) measured with `next-client-build.mjs . bu
   to ask whether it has settled (`block-room-journal-durability.ts`), but the codec still reaches these
   routes through translation previews, so the duplicate remains.
 
-Only these five JS limits are raised (standard headroom, max(3%, 4 KiB), rounded up to 1 KiB):
+Only these seven JS limits are raised (the last two measured by the CI build, which places the duplicate on
+them as well) (standard headroom, max(3%, 4 KiB), rounded up to 1 KiB):
 
 | Route                               |   Measured | Previous budget | Updated budget |
 | ----------------------------------- | ---------: | --------------: | -------------: |
@@ -84,6 +85,8 @@ Only these five JS limits are raised (standard headroom, max(3%, 4 KiB), rounded
 | `/admin/forms/[id]/(edit)/settings` |  751.3 KiB |       750.0 KiB |      774.0 KiB |
 | `/admin/series/[id]`                |  695.9 KiB |       691.0 KiB |      717.0 KiB |
 | `/editor-lab-local`                 | 1010.3 KiB |      1008.0 KiB |     1041.0 KiB |
+| `/(general)/my/series/[id]`         |  709.6 KiB |       703.0 KiB |      731.0 KiB |
+| `/admin/campaigns/[id]`             |  909.0 KiB |       905.0 KiB |      937.0 KiB |
 
 Removing the duplicate means loading the block-room codec behind `import()` on these routes, which needs the
 translation preview and collaboration startup to tolerate an asynchronous codec; that is a separate change.

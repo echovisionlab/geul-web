@@ -108,7 +108,7 @@
       "cssGzip": 44032
     },
     "/(general)/my/series/[id]": {
-      "jsGzip": 719872,
+      "jsGzip": 748544,
       "cssGzip": 45056
     },
     "/(general)/my/series": {
@@ -232,7 +232,7 @@
       "cssGzip": 45056
     },
     "/admin/campaigns/[id]": {
-      "jsGzip": 926720,
+      "jsGzip": 959488,
       "cssGzip": 44032
     },
     "/admin/campaigns": {
