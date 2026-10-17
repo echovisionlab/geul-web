@@ -50,8 +50,17 @@ describe('complete production page preview controllers', () => {
   it('shows a failed OG preview response as a retryable error instead of indefinite loading', async () => {
     const fetchPreview = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(null, { status: 500 }));
     await render(<OgImageSettingsPreview />);
-    // The preview request waits for its 500ms input debounce before it can fail.
-    await vi.waitFor(() => expect(host.querySelector('[role=alert]')).not.toBeNull(), { timeout: 3000 });
+    // The preview request waits for its 500ms input debounce before it can fail; each poll lets React
+    // commit inside act, so the debounced request and its failure render on a loaded runner too.
+    await vi.waitFor(
+      async () => {
+        await act(async () => {
+          await new Promise((resolve) => setTimeout(resolve, 0));
+        });
+        expect(host.querySelector('[role=alert]')).not.toBeNull();
+      },
+      { timeout: 3000 },
+    );
     expect(host.textContent).not.toContain('Generating preview');
     const requests = fetchPreview.mock.calls.length;
     await act(async () => button('Try again')!.click());
