@@ -52,15 +52,21 @@ describe('complete production page preview controllers', () => {
     await render(<OgImageSettingsPreview />);
     // The preview request waits for its 500ms input debounce before it can fail; each poll lets React
     // commit inside act, so the debounced request and its failure render on a loaded runner too.
-    await vi.waitFor(
-      async () => {
-        await act(async () => {
-          await new Promise((resolve) => setTimeout(resolve, 0));
-        });
-        expect(host.querySelector('[role=alert]')).not.toBeNull();
-      },
-      { timeout: 3000 },
-    );
+    try {
+      await vi.waitFor(
+        async () => {
+          await act(async () => {
+            await new Promise((resolve) => setTimeout(resolve, 0));
+          });
+          expect(host.querySelector('[role=alert]')).not.toBeNull();
+        },
+        { timeout: 3000 },
+      );
+    } catch (error) {
+      // TEMPORARY CI diagnostic: what the page shows when the failure alert never appears.
+      console.error('OG preview diagnostic', fetchPreview.mock.calls.length, host.textContent?.slice(0, 1500));
+      throw error;
+    }
     expect(host.textContent).not.toContain('Generating preview');
     const requests = fetchPreview.mock.calls.length;
     await act(async () => button('Try again')!.click());
