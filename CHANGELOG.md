@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.15.0](https://github.com/echovisionlab/geul-web/compare/v0.14.3...v0.15.0) (2026-10-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* site logo slots, settings hierarchy and balanced site header ([#143](https://github.com/echovisionlab/geul-web/issues/143))
+
+### Features
+
+* site logo slots, settings hierarchy and balanced site header ([#143](https://github.com/echovisionlab/geul-web/issues/143)) ([8f81100](https://github.com/echovisionlab/geul-web/commit/8f81100b20033135e9732f111d006e27404339b7))
+
 ## [0.14.3](https://github.com/echovisionlab/geul-web/compare/v0.14.2...v0.14.3) (2026-10-17)
 
 
