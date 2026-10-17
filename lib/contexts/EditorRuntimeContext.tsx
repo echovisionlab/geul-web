@@ -14,7 +14,7 @@ import {
   type EditorRuntimeEventSubscriptionOptions,
 } from '@/lib/collab/subscribe-runtime-events';
 import { EditorRuntimeContext } from './editor-runtime-context-value';
-import { getBlockRoomJournalStore } from '@/lib/collab/block-room-journal-store';
+import { isBlockRoomJournalSettled } from '@/lib/collab/block-room-journal-durability';
 import { getProviderAccessLevel } from '@/lib/collab/provider-control-state';
 import { getDocumentRoomJournalStore } from '@/lib/collab/document-room-journal-store';
 
@@ -76,7 +76,7 @@ export function EditorRuntimeProvider({
       ? {
           kind: 'block-room' as const,
           protocol: requireBlockRoomDurabilityProtocol(blockRoomProtocol),
-          isDurable: () => getBlockRoomJournalStore()?.isSettled() ?? false,
+          isDurable: isBlockRoomJournalSettled,
           isParked,
         }
       : JOURNALED_DOCUMENT_ROOMS.has(entityType)

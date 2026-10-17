@@ -8719,6 +8719,7 @@
         "Consumer: features/shell/ui/Shell/ShellIslands.tsx",
         "Consumer: features/shell/ui/Shell/ShellLayout.tsx",
         "Consumer: features/shell/ui/Shell/ShellMobileNavigation.tsx",
+        "Consumer: features/site/SiteOgImagePanel/SiteOgImagePanel.tsx",
         "Consumer: features/translation/EntityTranslationsPanel.tsx",
         "Consumer: features/translation/admin/TranslationJobsPage.tsx",
         "Consumer: features/translation/admin/TranslationOverviewPage.tsx",

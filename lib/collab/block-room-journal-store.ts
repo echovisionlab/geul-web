@@ -5,6 +5,7 @@ import {
   type BlockRoomIntentScope,
 } from './block-room-intent-journal';
 import type { BlockRoomRecoverySnapshot } from './block-room-recovery';
+import { registerBlockRoomJournalDurability } from './block-room-journal-durability';
 import { getRoomJournalTitle } from './room-journal-titles';
 import {
   createBrowserRoomJournalStore,
@@ -44,6 +45,7 @@ export function getBlockRoomJournalStore(): BlockRoomJournalStore | null {
   if (browserStore) {
     const store = browserStore;
     subscribeBlockRoomIntentJournal((scope, changes) => store.writeChanges(scope, changes));
+    registerBlockRoomJournalDurability(() => store.isSettled());
   }
   return browserStore;
 }

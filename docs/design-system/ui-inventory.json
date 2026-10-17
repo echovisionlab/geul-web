@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "88d7cec0406b538d13393ce44c3ea0bbf5584de1ebe2543fa92c11ff03660d9e",
+  "manifestHash": "6cd4727d872b47f67b0057922cdb9fe26f316b8733e3648b776c770457bf4487",
   "counts": {
-    "sourceFiles": 3793,
-    "productionSourceFiles": 2298,
+    "sourceFiles": 3794,
+    "productionSourceFiles": 2299,
     "componentFiles": 910,
     "coreFamilies": 57,
     "featureDomains": 53,
@@ -2925,6 +2925,7 @@
     "lib/collab/block-room-durability.ts",
     "lib/collab/block-room-intent-journal.test.ts",
     "lib/collab/block-room-intent-journal.ts",
+    "lib/collab/block-room-journal-durability.ts",
     "lib/collab/block-room-journal-store.ts",
     "lib/collab/block-room-metadata.test.ts",
     "lib/collab/block-room-metadata.ts",
@@ -6500,6 +6501,7 @@
         "features/shell/ui/Shell/ShellIslands.tsx",
         "features/shell/ui/Shell/ShellLayout.tsx",
         "features/shell/ui/Shell/ShellMobileNavigation.tsx",
+        "features/site/SiteOgImagePanel/SiteOgImagePanel.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
         "features/translation/admin/TranslationJobsPage.tsx",
         "features/translation/admin/TranslationOverviewPage.tsx",
@@ -69784,10 +69786,7 @@
           "type": "Extract< SiteAssetType, 'site_og_background' | 'privacy_og_background' | 'terms_og_background' >"
         }
       ],
-      "productionConsumers": [
-        "features/policy/LegalOgImagePanel.tsx",
-        "features/site/SiteOgImagePanel/SiteOgImagePanel.tsx"
-      ],
+      "productionConsumers": ["features/policy/LegalOgImagePanel.tsx"],
       "catalogAdapters": [],
       "tests": ["features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader.test.tsx"],
       "stories": [],
@@ -69857,7 +69856,13 @@
       "catalogAdapters": [],
       "tests": ["features/site/SiteOgImagePanel/SiteOgImagePanel.test.tsx"],
       "stories": [],
-      "composedJsx": ["AuthoringExtension", "MediaPreviewGrid", "OgImagePreview", "SiteOgBackgroundUploader"]
+      "composedJsx": [
+        "AuthoringExtension",
+        "MediaPreviewGrid",
+        "OgImagePreview",
+        "SiteOgBackgroundUploader",
+        "Skeleton"
+      ]
     },
     {
       "file": "features/site/SiteSettingsForm/SiteSettingsForm.tsx",

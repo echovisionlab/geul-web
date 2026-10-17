@@ -59,6 +59,35 @@ attribution. The CI run did not retain source maps. Loading the editor or parser
 demand is a separate optimization that needs first-paste and selection interaction
 verification; the current change preserves synchronous authoring behavior.
 
+## Site logo slots and editor chunking (2026-10-17)
+
+PR #143 (logo slots, contracts 0.10.0) measured with `next-client-build.mjs . build-sourcemaps` against a
+`main` build:
+
+- `/admin/settings/og-image` gained the OG background uploader (drop zone, cropper, upload protos,
+  +76 KiB). `SiteOgImagePanel` now loads the uploader with `next/dynamic`, so the route stays within its
+  unchanged 426 KiB budget.
+- Editor routes load `geul-proto/content/block_content_pb.ts` (86.8 KiB raw) twice: once alone and once
+  inlined into the block-room codec chunk, both in the page's chunk group. A commit bisect places the change
+  at the contracts 0.10.0 bump together with the logo-slot commit that needs it; the proto files' imports are
+  unchanged, so module sizes moved Turbopack's chunk-merging, not the module graph. Next 16.3 exposes no JS
+  chunking control. The editor runtime no longer imports the block-room journal (and with it the codec) only
+  to ask whether it has settled (`block-room-journal-durability.ts`), but the codec still reaches these
+  routes through translation previews, so the duplicate remains.
+
+Only these five JS limits are raised (standard headroom, max(3%, 4 KiB), rounded up to 1 KiB):
+
+| Route                               |   Measured | Previous budget | Updated budget |
+| ----------------------------------- | ---------: | --------------: | -------------: |
+| `/(general)/campaigns/[id]`         |  936.8 KiB |       936.0 KiB |      965.0 KiB |
+| `/admin/email-templates/[id]`       |  851.6 KiB |       850.0 KiB |      878.0 KiB |
+| `/admin/forms/[id]/(edit)/settings` |  751.3 KiB |       750.0 KiB |      774.0 KiB |
+| `/admin/series/[id]`                |  695.9 KiB |       691.0 KiB |      717.0 KiB |
+| `/editor-lab-local`                 | 1010.3 KiB |      1008.0 KiB |     1041.0 KiB |
+
+Removing the duplicate means loading the block-room codec behind `import()` on these routes, which needs the
+translation preview and collaboration startup to tolerate an asynchronous codec; that is a separate change.
+
 ## Finding the cause of a regression
 
 ```sh
