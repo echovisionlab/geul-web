@@ -38,7 +38,6 @@ async function render(tab: 'builder' | 'settings' | 'translations' | 'submission
         <Preview tab={tab} detail={detail} />
       </TestProviders>,
     );
-    await new Promise((resolve) => setTimeout(resolve, 60));
   });
 }
 describe('complete form editing surfaces', () => {
@@ -47,9 +46,9 @@ describe('complete form editing surfaces', () => {
     async (tab) => {
       await render(tab);
       const canvas = within(host);
+      const panel = await vi.waitFor(() => canvas.getByRole('tabpanel'));
       const selected = canvas.getAllByRole('tab').find((item) => item.getAttribute('aria-selected') === 'true');
       expect(selected).toBeTruthy();
-      const panel = canvas.getByRole('tabpanel');
       expect(panel.getAttribute('aria-labelledby')).toBe(selected?.id);
       expect(selected?.getAttribute('aria-controls')).toBe(panel.id);
       // Inactive remote-route tabs have no rendered panel. The active surface
@@ -60,8 +59,8 @@ describe('complete form editing surfaces', () => {
 
   it('renders schema-ordered submission details inside the actual editor tab', async () => {
     await render('submissions', true);
+    await vi.waitFor(() => expect(host.textContent).toContain('June Han'));
     expect(host.textContent).toContain('Metadata');
-    expect(host.textContent).toContain('June Han');
     expect(within(host).getByRole('img', { name: 'True' })).toBeTruthy();
   });
 });

@@ -118,6 +118,8 @@ async function mountEditor(props: MonacoSourceEditorProps, themeId: ThemeId = 'l
   const host = document.createElement('div');
   document.body.append(host);
   const root: Root = createRoot(host);
+  // The runtime is a lazy chunk. Once its module is loaded, the lazy boundary resolves within the act scope.
+  await import('./MonacoSourceEditorRuntime');
   await act(async () => {
     root.render(
       <DesignSystemProvider forceTheme={themeId}>
@@ -125,16 +127,19 @@ async function mountEditor(props: MonacoSourceEditorProps, themeId: ThemeId = 'l
       </DesignSystemProvider>,
     );
   });
-  for (let attempt = 0; attempt < 50 && !host.querySelector('textarea'); attempt += 1) {
-    await act(async () => {
-      await new Promise<void>((resolve) => setTimeout(resolve, 10));
+  let input: HTMLTextAreaElement;
+  try {
+    input = await vi.waitFor(() => {
+      const textarea = host.querySelector('textarea');
+      if (!textarea) {
+        throw new Error('Fake Monaco textarea was not mounted');
+      }
+      return textarea;
     });
-  }
-  const input = host.querySelector('textarea');
-  if (!input) {
+  } catch (error) {
     await act(async () => root.unmount());
     host.remove();
-    throw new Error('Fake Monaco textarea was not mounted');
+    throw error;
   }
   return {
     input,

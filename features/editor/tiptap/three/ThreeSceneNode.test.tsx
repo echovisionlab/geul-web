@@ -432,11 +432,8 @@ describe('authoring Three.js scene resize', () => {
       (button) => button.getAttribute('aria-label') === KOREAN_THREE_SCENE_LABELS.apply,
     );
     expect(apply?.disabled).toBe(false);
-    await act(async () => {
-      apply?.click();
-      await new Promise((resolve) => setTimeout(resolve, 350));
-    });
-    expect(run).toHaveBeenLastCalledWith(nextSource);
+    await act(async () => apply?.click());
+    await vi.waitFor(() => expect(run).toHaveBeenLastCalledWith(nextSource));
     expect(sceneNode(editor!)?.content?.[0]).toEqual({ type: 'text', text: nextSource });
     await act(async () => root.unmount());
     element.remove();
@@ -669,11 +666,8 @@ describe('public Three.js scene interaction', () => {
     const apply = [...element.querySelectorAll('button')].find(
       (candidate) => candidate.getAttribute('aria-label') === KOREAN_THREE_SCENE_LABELS.apply,
     );
-    await act(async () => {
-      apply?.click();
-      await new Promise((resolve) => setTimeout(resolve, 350));
-    });
-    expect(run).toHaveBeenLastCalledWith('camera.position.z = 9;');
+    await act(async () => apply?.click());
+    await vi.waitFor(() => expect(run).toHaveBeenLastCalledWith('camera.position.z = 9;'));
     expect(JSON.stringify(editor!.getJSON())).toContain('camera.position.z = 4;');
     expect(JSON.stringify(editor!.getJSON())).not.toContain('camera.position.z = 9;');
 

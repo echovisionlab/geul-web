@@ -263,30 +263,11 @@ async function changeNumberInput(label: string, value: string) {
 }
 
 async function waitForButtonByText(text: string) {
-  for (let attempt = 0; attempt < 20; attempt += 1) {
+  return vi.waitFor(() => {
     const button = findButtonByText(text);
-    if (button) {
-      return button;
-    }
-    await act(async () => {
-      await new Promise((resolve) => window.setTimeout(resolve, 25));
-    });
-    await flushEffects();
-  }
-  return undefined;
-}
-
-async function waitForText(text: string) {
-  for (let attempt = 0; attempt < 20; attempt += 1) {
-    if (document.body.textContent?.includes(text)) {
-      return true;
-    }
-    await act(async () => {
-      await new Promise((resolve) => window.setTimeout(resolve, 25));
-    });
-    await flushEffects();
-  }
-  return false;
+    expect(button).toBeTruthy();
+    return button;
+  });
 }
 
 function createUploadControls(overrides: Partial<ImmersiveSceneUploadControls> = {}): ImmersiveSceneUploadControls {
@@ -1354,7 +1335,7 @@ describe('ImmersiveSceneSettingsForm', () => {
     await flushTimers();
     await flushEffects();
 
-    expect(await waitForText('optimized-file.glb')).toBe(true);
+    await vi.waitFor(() => expect(document.body.textContent).toContain('optimized-file.glb'));
 
     const selected = document.querySelector('[data-testid="immersive-scene-selected-mesh-optimization-unit-1"]');
     expect(selected?.textContent).toContain('blockEditor.labels.selectedOptimizedMesh');

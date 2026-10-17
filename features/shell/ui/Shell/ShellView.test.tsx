@@ -124,6 +124,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   act(() => root.unmount());
   container.remove();
   Object.values(events).forEach((event) => event.mockReset());
@@ -239,10 +240,11 @@ describe('ShellView', () => {
 
   it('keeps the phone account drawer open instead of opening the hidden desktop account menu', async () => {
     // The shared matchMedia stub reports a phone width, so only the mobile account drawer may open.
+    vi.useFakeTimers();
     renderView({ user: authenticatedUser, userMenuOpened: true });
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    });
+    // Run deferred overlay work (frames, transitions) before asserting that nothing replaced the drawer.
+    await act(async () => vi.advanceTimersByTimeAsync(100));
+    vi.useRealTimers();
     expect(document.querySelector('[role="menu"]')).toBeNull();
     expect(document.querySelector('[role="dialog"]')).not.toBeNull();
     expect(events.onCloseUserMenu).not.toHaveBeenCalled();

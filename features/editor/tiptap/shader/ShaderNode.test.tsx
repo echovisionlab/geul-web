@@ -54,6 +54,7 @@ beforeAll(() => {
   );
 });
 
+afterEach(() => vi.useRealTimers());
 afterAll(() => vi.unstubAllGlobals());
 
 function documentWithShader(fragmentSource = DEFAULT_SHADER_FRAGMENT_SOURCE, mode = 'edit') {
@@ -460,6 +461,7 @@ describe('Shader Monaco authoring boundary', () => {
   });
 
   it('debounces an edit-mode source correction and recovers a terminal preview error', async () => {
+    vi.useFakeTimers();
     const invalidSource = DEFAULT_SHADER_FRAGMENT_SOURCE.replace('fragColor =', 'fragColor = missing +');
     const correctedSource = DEFAULT_SHADER_FRAGMENT_SOURCE.replace('0.15', '0.45');
     const run = vi.fn();
@@ -507,7 +509,7 @@ describe('Shader Monaco authoring boundary', () => {
           <RecoveringAuthoringShader />
         </DesignSystemProvider>,
       );
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await vi.advanceTimersByTimeAsync(50);
     });
     expect(run).toHaveBeenCalledTimes(1);
     expect(element.querySelector('[data-testid="shader-error"]')).not.toBeNull();
@@ -521,7 +523,7 @@ describe('Shader Monaco authoring boundary', () => {
           value: correctedSource,
         }),
       ).toBe(true);
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await vi.advanceTimersByTimeAsync(300);
     });
     expect(run).toHaveBeenCalledTimes(2);
     expect(run).toHaveBeenLastCalledWith(programWithImage(correctedSource));
@@ -670,6 +672,7 @@ describe('Shader preview worker lifecycle', () => {
   });
 
   it('does not automatically retry a terminal read-only shader error', async () => {
+    vi.useFakeTimers();
     const run = vi.fn();
     const dispose = vi.fn();
     const runtimeFactory: ShaderPreviewRuntimeFactory = (_canvas, events) => ({
@@ -702,12 +705,10 @@ describe('Shader preview worker lifecycle', () => {
           <ReadOnlyShader />
         </DesignSystemProvider>,
       );
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await vi.advanceTimersByTimeAsync(50);
     });
     expect(run).toHaveBeenCalledTimes(1);
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    });
+    await act(async () => vi.advanceTimersByTimeAsync(100));
     expect(run).toHaveBeenCalledTimes(1);
     await act(async () => root.unmount());
     expect(dispose).toHaveBeenCalledTimes(1);

@@ -49,11 +49,6 @@ function render(view: React.ReactNode) {
   root = createRoot(host);
   act(() => root.render(<TestProviders>{view}</TestProviders>));
 }
-async function flush() {
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 25));
-  });
-}
 describe('expanded production page adapters', () => {
   it.each(['artists', 'labels', 'releases'] as const)(
     'runs the actual %s create controller with a local typed action',
@@ -67,20 +62,17 @@ describe('expanded production page adapters', () => {
   );
   it('keeps actual entity empty state and table search UI', async () => {
     render(<AdminEntityPagePreview state="empty" />);
-    await flush();
-    expect(host.textContent).toContain('No artists');
+    await vi.waitFor(() => expect(host.textContent).toContain('No artists'));
     expect(host.querySelector('input[placeholder*=artists]')).not.toBeNull();
   });
   it('runs the actual works query owner against local credited rows', async () => {
     render(<MyListsPagePreview domain="works" />);
-    await flush();
-    expect(host.textContent).toContain('Night Signals');
+    await vi.waitFor(() => expect(host.textContent).toContain('Night Signals'));
     expect(host.textContent).toContain('Composer');
   });
   it('runs the actual posts query and create owner without service calls', async () => {
     render(<MyListsPagePreview domain="posts" />);
-    await flush();
-    expect(host.textContent).toContain('Listening notes');
+    await vi.waitFor(() => expect(host.textContent).toContain('Listening notes'));
     const button = host.querySelector<HTMLButtonElement>('button[aria-label="New post"]');
     expect(button).not.toBeNull();
     await act(async () => button!.click());

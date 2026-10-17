@@ -1,7 +1,7 @@
 import { Code, ConnectError } from '@connectrpc/connect';
 import { PostStatus } from '@echovisionlab/geul-proto/public/post_pb.ts';
 import { WorkStatus } from '@echovisionlab/geul-proto/public/work_pb.ts';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   requestId: 0,
@@ -73,9 +73,6 @@ beforeEach(() => {
     menus: { header: [] },
   });
 });
-afterEach(() => {
-  vi.useRealTimers();
-});
 
 async function readers() {
   const { getPostView, getPostViewWithToken } = await import('./post');
@@ -103,20 +100,19 @@ describe('ordinary Post and Work raw response request reuse', () => {
     expect(mocks.postGet).toHaveBeenCalledTimes(expectedGetCalls);
   });
 
-  it('eliminates the second serial Work delay under the same 50ms artificial transport', async () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(0);
-    mocks.workGet.mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve(workResponse()), 50)));
+  it('answers the following serial Work body read from the settled metadata response', async () => {
     const r = await readers();
-    const started = Date.now();
-    const metadataPromise = r.getWorkMetadataDocument('entry', { requestedLocale: 'en' });
-    await vi.runAllTimersAsync();
-    expect(await metadataPromise).toMatchObject({ title: 'Work title', routePath: '/works/entry', kind: 'work' });
-    const bodyPromise = r.getWorkView('entry', { requestedLocale: 'en' });
-    await vi.runAllTimersAsync();
-    expect(await bodyPromise).toMatchObject({ title: 'Work title', status: 'published', blockMedia: [] });
+    expect(await r.getWorkMetadataDocument('entry', { requestedLocale: 'en' })).toMatchObject({
+      title: 'Work title',
+      routePath: '/works/entry',
+      kind: 'work',
+    });
+    expect(await r.getWorkView('entry', { requestedLocale: 'en' })).toMatchObject({
+      title: 'Work title',
+      status: 'published',
+      blockMedia: [],
+    });
     expect(mocks.workGet).toHaveBeenCalledTimes(expectedGetCalls);
-    expect(Date.now() - started).toBe(expectedGetCalls * 50);
   });
 });
 

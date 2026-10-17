@@ -61,6 +61,7 @@ afterEach(() => {
     value.editor.destroy();
     value.element.remove();
   }
+  vi.useRealTimers();
 });
 
 describe('independent block selection boundaries', () => {
@@ -264,6 +265,7 @@ describe('independent block selection boundaries', () => {
   });
 
   it('rejects a delayed stale browser text selection that follows a table boundary selection', async () => {
+    vi.useFakeTimers();
     const editor = createEditor([
       block('table', {
         type: 'table',
@@ -290,7 +292,7 @@ describe('independent block selection boundaries', () => {
 
     expect(handleBlockBoundaryArrow(editor, 'up')).toBe(true);
     expect(editor.state.selection).toBeInstanceOf(CellSelection);
-    await new Promise((resolve) => setTimeout(resolve, 30));
+    await vi.advanceTimersByTimeAsync(30);
     expect(editor.state.selection).toBeInstanceOf(CellSelection);
 
     editor.view.dispatch(
@@ -332,6 +334,7 @@ describe('independent block selection boundaries', () => {
   });
 
   it('protects a cell selection restored by a table mutation after toolbar pointer input', async () => {
+    vi.useFakeTimers();
     const editor = createEditor([
       block('table', {
         type: 'table',
@@ -353,7 +356,7 @@ describe('independent block selection boundaries', () => {
     editor.view.dom.dispatchEvent(new Event('pointerdown', { bubbles: true }));
     expect(editor.commands.setTableAlignment('right')).toBe(true);
     editor.commands.focus();
-    await new Promise((resolve) => setTimeout(resolve, 30));
+    await vi.advanceTimersByTimeAsync(30);
 
     expect(editor.state.selection).toBeInstanceOf(CellSelection);
     expect(editor.getAttributes('table').textAlignment).toBe('right');

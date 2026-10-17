@@ -115,11 +115,9 @@ describe('MapBlockHydrator', () => {
       renderMapMarkup(content!, 'Replacement Place');
     });
 
-    await act(async () => {
-      await new Promise((resolve) => window.setTimeout(resolve, 20));
-    });
-
-    expect(content.querySelector('[data-map-hydrated]')?.textContent).toBe('Replacement Place');
+    await vi.waitFor(() =>
+      expect(content?.querySelector('[data-map-hydrated]')?.textContent).toBe('Replacement Place'),
+    );
     expect(content.textContent).not.toContain('[Map: 1 place]');
     expect(embeddedProps.at(-1)?.blockAlignment).toBe('center');
   });

@@ -4,13 +4,13 @@ Run `node scripts/design-system/inventory.mjs` to regenerate; `--check` fails wh
 
 Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.
 
-Source manifest SHA-256: `a657e40a7f17e92984779639e05bcb90bc0560d912a52d6b59cc2feaf9ecc1dd`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
+Source manifest SHA-256: `88d7cec0406b538d13393ce44c3ea0bbf5584de1ebe2543fa92c11ff03660d9e`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
 
 ## Counts
 
 | Metric                | Count |
 | --------------------- | ----: |
-| sourceFiles           |  3792 |
+| sourceFiles           |  3793 |
 | productionSourceFiles |  2298 |
 | componentFiles        |   910 |
 | coreFamilies          |    57 |
@@ -151,7 +151,7 @@ Counts include every production JS/TS file in the domain; component files are Pa
 | [my](../../features/my)                               |     38 |         26 |       8 |    20 |             7 |
 | [navigation](../../features/navigation)               |      2 |          2 |       0 |     0 |             1 |
 | [newsletter](../../features/newsletter)               |      2 |          2 |       0 |     1 |             1 |
-| [page](../../features/page)                           |    251 |        165 |       8 |    89 |             4 |
+| [page](../../features/page)                           |    251 |        165 |       8 |    90 |             4 |
 | [participants](../../features/participants)           |      1 |          1 |       0 |     1 |             0 |
 | [place](../../features/place)                         |      7 |          7 |       0 |     3 |             0 |
 | [policy](../../features/policy)                       |     18 |         15 |       0 |     9 |             6 |

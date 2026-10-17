@@ -27,11 +27,6 @@ afterEach(() => {
   act(() => root?.unmount());
   host?.remove();
 });
-async function settle() {
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 40));
-  });
-}
 async function render(surface: 'mail' | 'og') {
   host = document.createElement('div');
   document.body.append(host);
@@ -45,20 +40,22 @@ async function render(surface: 'mail' | 'og') {
       </TestProviders>,
     ),
   );
-  await settle();
 }
 
 describe('production operations accessibility with local services', () => {
   it('keeps each mail adapter command and value associated with its own provider', async () => {
     await render('mail');
-    const group = host.querySelector('[role="group"][aria-label="Studio SMTP"]')!;
-    expect(group).not.toBeNull();
+    // Adapters arrive through the local query transport.
+    const group = await vi.waitFor(() => {
+      const match = host.querySelector('[role="group"][aria-label="Studio SMTP"]');
+      expect(match).not.toBeNull();
+      return match!;
+    });
     const toggle = group.querySelector<HTMLInputElement>('input[role="switch"]')!;
     expect(toggle.getAttribute('aria-label')).toBe(`${en.adminSettings.mail.row.enableAdapter} Studio SMTP`);
     expect(toggle.checked).toBe(false);
     await act(async () => toggle.click());
-    await settle();
-    expect(toggle.checked).toBe(true);
+    await vi.waitFor(() => expect(toggle.checked).toBe(true));
     expect(group.querySelector(`button[aria-label="${en.common.actions.edit} Studio SMTP"]`)).not.toBeNull();
     expect(group.querySelector(`button[aria-label="${en.common.actions.delete} Studio SMTP"]`)).not.toBeNull();
     expect(
@@ -68,16 +65,22 @@ describe('production operations accessibility with local services', () => {
 
   it('exposes OG settings tabs, named form and all three range values without adding visible labels', async () => {
     await render('og');
-    const tab = Array.from(host.querySelectorAll<HTMLButtonElement>('[role="tab"]')).find(
-      (button) => button.textContent === en.ogImageSettings.tabs.content,
-    )!;
-    expect(tab).toBeDefined();
+    const tab = await vi.waitFor(() => {
+      const match = Array.from(host.querySelectorAll<HTMLButtonElement>('[role="tab"]')).find(
+        (button) => button.textContent === en.ogImageSettings.tabs.content,
+      );
+      expect(match).toBeDefined();
+      return match!;
+    });
     await act(async () => tab.click());
-    await settle();
-    expect(tab.getAttribute('aria-selected')).toBe('true');
-    const form = host.querySelector(
-      `form[aria-label="${en.ogImageSettings.title} ${en.ogImageSettings.tabs.content}"]`,
-    )!;
+    const form = await vi.waitFor(() => {
+      expect(tab.getAttribute('aria-selected')).toBe('true');
+      const match = host.querySelector(
+        `form[aria-label="${en.ogImageSettings.title} ${en.ogImageSettings.tabs.content}"]`,
+      );
+      expect(match).not.toBeNull();
+      return match!;
+    });
     expect(form.getAttribute('aria-label')).toBe(`${en.ogImageSettings.title} ${en.ogImageSettings.tabs.content}`);
     const names = Array.from(form.querySelectorAll<HTMLInputElement>('input[type="range"]')).map((input) => {
       const label = document.getElementById(input.getAttribute('aria-labelledby')!);

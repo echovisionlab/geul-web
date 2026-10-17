@@ -1,41 +1,25 @@
 // @vitest-environment jsdom
-import { StrictMode, act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+import { StrictMode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { TestProviders } from '@/test/TestProviders';
+import { describe, expect, it, vi } from 'vitest';
+import { render, waitFor } from '@/test/render';
 import { PolicyVersionCreationPage } from './PolicyVersionCreationPage';
 vi.mock('next/navigation', () => ({ useRouter: () => ({ replace: vi.fn() }) }));
 vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
-let host: HTMLDivElement;
-let root: Root;
-afterEach(() => {
-  act(() => root?.unmount());
-  host?.remove();
-});
 async function run(
   createVersion: () => Promise<{ error?: string; data?: { id: string } }>,
   policy: 'terms' | 'privacy',
 ) {
-  host = document.createElement('div');
-  document.body.append(host);
-  root = createRoot(host);
   const navigate = vi.fn();
   const client = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
-  await act(async () =>
-    root.render(
-      <StrictMode>
-        <TestProviders>
-          <QueryClientProvider client={client}>
-            <PolicyVersionCreationPage policy={policy} createVersion={createVersion} navigate={navigate} />
-          </QueryClientProvider>
-        </TestProviders>
-      </StrictMode>,
-    ),
+  render(
+    <StrictMode>
+      <QueryClientProvider client={client}>
+        <PolicyVersionCreationPage policy={policy} createVersion={createVersion} navigate={navigate} />
+      </QueryClientProvider>
+    </StrictMode>,
   );
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 30));
-  });
+  await waitFor(() => expect(navigate).toHaveBeenCalled());
   return navigate;
 }
 describe('policy automatic draft creation route', () => {

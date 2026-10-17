@@ -141,11 +141,10 @@ describe('DropdownMenu', () => {
     expect(document.activeElement).toBe(items[0]);
     await act(async () => {
       items[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
-      await new Promise((resolve) => window.setTimeout(resolve, 30));
     });
-    expect(document.querySelector('[role="menu"]')).toBeNull();
+    await vi.waitFor(() => expect(document.querySelector('[role="menu"]')).toBeNull());
     expect(trigger.getAttribute('aria-expanded')).toBe('false');
-    expect(document.activeElement).toBe(trigger);
+    await vi.waitFor(() => expect(document.activeElement).toBe(trigger));
   });
 
   it('adapts a native sensor handle through a tooltip to the functional menu trigger', () => {

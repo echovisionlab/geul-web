@@ -87,7 +87,12 @@ async function escape() {
 }
 
 it('shows the same real dialog/input at 0 ms of a controlled 500 ms import and retains typed query', async () => {
-  probes.load.mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve(PostSpotlightRuntime), 500)));
+  let resolve!: (runtime: typeof PostSpotlightRuntime) => void;
+  probes.load.mockReturnValue(
+    new Promise((done) => {
+      resolve = done;
+    }),
+  );
   await mount();
   expect(probes.load).not.toHaveBeenCalled();
   expect(probes.query).not.toHaveBeenCalled();
@@ -105,6 +110,7 @@ it('shows the same real dialog/input at 0 ms of a controlled 500 ms import and r
   expect(document.activeElement).toBe(originalInput);
   expect(probes.query).not.toHaveBeenCalled();
   await tick(1);
+  await act(async () => resolve(PostSpotlightRuntime));
   expect(input()).toBe(originalInput);
   expect(input().value).toBe('ab');
   expect(probes.load).toHaveBeenCalledTimes(1);

@@ -19,11 +19,15 @@ vi.mock('next-intl', () => ({ useLocale: () => 'en', useTranslations: () => (key
 let root: Root | null = null;
 let host: HTMLDivElement | null = null;
 
-afterEach(async () => {
-  await act(async () => {
-    root?.unmount();
-    await new Promise((resolve) => setTimeout(resolve, 2));
-  });
+afterEach(() => {
+  // Tiptap destroys an unmounted editor from a short timer; run it instead of waiting for it.
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+  try {
+    act(() => root?.unmount());
+    vi.runOnlyPendingTimers();
+  } finally {
+    vi.useRealTimers();
+  }
   host?.remove();
   root = null;
   host = null;

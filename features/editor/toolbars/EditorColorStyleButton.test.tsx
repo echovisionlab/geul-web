@@ -17,6 +17,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   act(() => root.unmount());
   container.remove();
 });
@@ -89,10 +90,9 @@ describe('EditorColorStyleButton', () => {
     expect(document.activeElement).toBe(trigger);
     expect(document.querySelector('[role="tooltip"]')).toBeNull();
     expect(trigger.type).toBe('button');
+    vi.useFakeTimers();
     await act(async () => trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true })));
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 35));
-    });
+    await act(() => vi.advanceTimersByTimeAsync(35));
     expect(container.querySelector('[data-menu-dropdown]')).not.toBeNull();
     expect(document.activeElement).toBe(container.querySelector('[role="menuitem"]'));
     expect(document.querySelector('[role="tooltip"]')).toBeNull();

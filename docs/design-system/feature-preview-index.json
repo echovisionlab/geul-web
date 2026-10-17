@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceManifestHash": "a657e40a7f17e92984779639e05bcb90bc0560d912a52d6b59cc2feaf9ecc1dd",
+  "sourceManifestHash": "88d7cec0406b538d13393ce44c3ea0bbf5584de1ebe2543fa92c11ff03660d9e",
   "methodology": "All inventoried Feature component candidates. Direct value imports, literal lazy imports and transitive source relationships through production owners/local adapters are indexed separately. A dependency can be unused or render conditionally; neither relationship proves rendered states, route parity or design compliance. Empty JSX records include runtime/lazy/controller boundaries and must be inspected before treating them as visual gaps.",
   "counts": { "domains": 53, "componentFiles": 770, "jsxWithoutStoryRelationship": 45 },
   "domains": [

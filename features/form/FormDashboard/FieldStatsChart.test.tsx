@@ -115,22 +115,23 @@ describe('actual field statistics UI', () => {
         const button = container.querySelector('button')!;
         button.focus();
         button.click();
-        await new Promise((resolve) => setTimeout(resolve, 35));
       });
-      const option = Array.from(document.querySelectorAll('[role="option"]')).find(
-        (node) => node.textContent === name,
-      ) as HTMLElement;
-      expect(option, name).toBeTruthy();
-      await act(async () => {
-        option.click();
-        await new Promise((resolve) => setTimeout(resolve, 35));
+      const option = await vi.waitFor(() => {
+        const match = Array.from(document.querySelectorAll<HTMLElement>('[role="option"]')).find(
+          (node) => node.textContent === name,
+        );
+        expect(match, name).toBeTruthy();
+        return match!;
       });
-      if (kind === 'table') {
-        expect(container.querySelector('figure')).toBeNull();
-        expect(container.querySelector('table')?.textContent).toContain('Monome375.0%');
-      } else {
-        expect(container.querySelector('figure')?.dataset.kind).toBe(kind);
-      }
+      await act(async () => option.click());
+      await vi.waitFor(() => {
+        if (kind === 'table') {
+          expect(container.querySelector('figure')).toBeNull();
+          expect(container.querySelector('table')?.textContent).toContain('Monome375.0%');
+        } else {
+          expect(container.querySelector('figure')?.dataset.kind).toBe(kind);
+        }
+      });
     }
   });
 });

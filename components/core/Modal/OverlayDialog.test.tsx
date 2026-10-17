@@ -114,8 +114,7 @@ it('contains boundary Tab movement and restores focus to the actual opener after
   await act(async () => buttons[0].click());
   await act(async () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
   expect(document.querySelector('[role="dialog"]')).toBeNull();
-  await act(async () => new Promise<void>((resolve) => setTimeout(resolve, 50)));
-  expect(document.activeElement).toBe(opener);
+  await vi.waitFor(() => expect(document.activeElement).toBe(opener));
 });
 it('requires an active alertdialog message relationship', async () => {
   vi.spyOn(console, 'error').mockImplementation(() => {});
