@@ -212,7 +212,9 @@ describe('PublicFormView', () => {
     );
 
     await waitForAssertion(() => {
-      expect(document.querySelector('[data-testid="site-logo"]')?.getAttribute('data-height')).toBe(String(SITE_LOGO_HEIGHT.form));
+      expect(document.querySelector('[data-testid="site-logo"]')?.getAttribute('data-height')).toBe(
+        String(SITE_LOGO_HEIGHT.form),
+      );
     });
   });
 

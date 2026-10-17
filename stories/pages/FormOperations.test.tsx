@@ -63,7 +63,9 @@ describe('actual form operations page previews', () => {
   });
   it('runs dashboard access then real data/chart composition', async () => {
     // jsdom has no layout; give the chart plot the size its CSS supplies in a browser.
-    const measure = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 400, 300));
+    const measure = vi
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockReturnValue(new DOMRect(0, 0, 400, 300));
     onTestFinished(() => measure.mockRestore());
     render('dashboard');
     await flush();

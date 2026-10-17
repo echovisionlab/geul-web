@@ -787,7 +787,16 @@ const TrackAudioStatusIcon = forwardRef<HTMLElement, TrackAudioStatusIconProps>(
 
     if (kind === 'idle') {
       return (
-        <DsText {...triggerProps} ref={ref} id={id} size={size} tone="secondary" role="img" aria-label={label} as="span">
+        <DsText
+          {...triggerProps}
+          ref={ref}
+          id={id}
+          size={size}
+          tone="secondary"
+          role="img"
+          aria-label={label}
+          as="span"
+        >
           -
         </DsText>
       );

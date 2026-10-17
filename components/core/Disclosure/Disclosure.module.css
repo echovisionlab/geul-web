@@ -164,7 +164,10 @@
   place-items: center;
 }
 
-.root:is([data-density='compact'], [data-density='chrome'])[data-chevron-position='end'] > .header > .heading > .control {
+.root:is([data-density='compact'], [data-density='chrome'])[data-chevron-position='end']
+  > .header
+  > .heading
+  > .control {
   padding-inline-end: 0;
 }
 

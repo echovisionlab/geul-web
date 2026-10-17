@@ -27,11 +27,11 @@ menus continue to own interaction geometry, focus and hover states. No new visua
 
 Site settings store six logo slots, each with a light and a dark variant:
 
-| Slot | Artwork | Used by |
-| --- | --- | --- |
-| `logo_full_light` / `logo_full_dark` | Horizontal symbol + wordmark | Public header (all widths), navigation drawer, expanded admin navigation, forms, print, OG images |
-| `logo_symbol_light` / `logo_symbol_dark` | Symbol only | Compact admin navigation rail |
-| `logo_email_light` / `logo_email_dark` | PNG (SVG uploads are converted) | Email layouts (`{{logo_email_url}}`, `{{logo_email_dark_url}}`) |
+| Slot                                     | Artwork                         | Used by                                                                                           |
+| ---------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `logo_full_light` / `logo_full_dark`     | Horizontal symbol + wordmark    | Public header (all widths), navigation drawer, expanded admin navigation, forms, print, OG images |
+| `logo_symbol_light` / `logo_symbol_dark` | Symbol only                     | Compact admin navigation rail                                                                     |
+| `logo_email_light` / `logo_email_dark`   | PNG (SVG uploads are converted) | Email layouts (`{{logo_email_url}}`, `{{logo_email_dark_url}}`)                                   |
 
 The API resolves display fallbacks once for every consumer: a missing theme uses the other theme of the
 same form, then the other form. `SiteLogo form="full" | "symbol"` reads the resolved manifest pair, so
