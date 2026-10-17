@@ -7,6 +7,22 @@ function configuration(entity = crypto.randomUUID()) {
 }
 
 describe('authoritative editor configuration', () => {
+  it('retains the visible snapshot until settings change and preserves earlier snapshots', () => {
+    const state = configuration();
+    const initial = state.getConfiguration();
+    expect(state.getConfiguration()).toBe(initial);
+    state.edit({ slug: 'local' });
+    const edited = state.getConfiguration();
+    expect(edited).not.toBe(initial);
+    expect(initial.slug).toBe('initial');
+    const read = state.beginRead();
+    expect(state.getConfiguration()).toBe(edited);
+    state.adoptRead(read, { slug: 'peer', enabled: false, revision: 'r2' });
+    expect(state.getConfiguration()).toEqual({ slug: 'local', enabled: false, revision: 'r2' });
+    expect(state.getConfiguration()).not.toBe(edited);
+    expect(edited).toEqual({ slug: 'local', enabled: true, revision: 'r1' });
+  });
+
   it('keeps queued and in-flight fields while adopting disjoint peer fields', () => {
     const state = configuration();
     state.edit({ slug: 'local' });

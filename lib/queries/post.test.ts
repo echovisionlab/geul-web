@@ -1,9 +1,10 @@
-import { fromJson } from '@bufbuild/protobuf';
+import { create, fromJson } from '@bufbuild/protobuf';
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { Code, ConnectError } from '@connectrpc/connect';
 import { DocumentContentHeight, DocumentRegionPlacement } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
 import {
+  ContentBlockMediaItemSchema,
   LocalizedRichTextDocumentSchema,
   RichTextProfile,
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
@@ -58,6 +59,7 @@ function adminPost(overrides: Record<string, unknown> = {}) {
     id: 'post-1',
     configurationRevision: '10000000-0000-4000-8000-000000000001',
     title: 'Post',
+    sourceLocale: 'pt-BR',
     slug: 'post',
     summary: 'Summary',
     status: PostStatus.PUBLISHED,
@@ -445,7 +447,25 @@ describe('post server queries', () => {
 });
 
 describe('authorized Post SSR snapshot', () => {
+  it('preserves the source locale used when the edit URL has no language override', async () => {
+    mocks.createPostClient.mockResolvedValue(postClient);
+    postClient.getPost.mockResolvedValue(adminPost());
+    const post = await queries.getPostForEdit('00000000-0000-4000-8000-000000000001');
+    expect(post?.sourceLocale).toBe('pt-BR');
+  });
+
   it('preserves revision, fallback locale, read-only permission, media and body', async () => {
+    const blockMedia = [
+      create(ContentBlockMediaItemSchema, {
+        selector: { blockId: '019cd13a-3716-79af-8490-dbd124708825', referencePath: 'file' },
+        attachment: { state: { case: 'activeFileId', value: '019cd13a-3716-79af-8490-dbd124708826' } },
+        delivery: {
+          fileId: '019cd13a-3716-79af-8490-dbd124708826',
+          mimeType: 'audio/wav',
+          inline: { url: 'https://media.example/authorized-audio' },
+        },
+      }),
+    ];
     mocks.createPostClient.mockResolvedValue(postClient);
     postClient.getPostEditorDocument.mockResolvedValue({
       document: localizedDocument(),
@@ -454,19 +474,22 @@ describe('authorized Post SSR snapshot', () => {
       localeExists: false,
       documentRevision: 'revision-A',
       editable: false,
-      blockMedia: [],
+      blockMedia,
     });
     const snapshot = await queries.getPostEditorSnapshot('post-1', 'ko');
     expect(postClient.getPostEditorDocument).toHaveBeenCalledWith({ postId: 'post-1', locale: 'ko' });
     expect(snapshot).toMatchObject({
       documentRevision: 'revision-A',
+      locale: 'ko',
+      sourceLocale: 'en',
       localeExists: false,
       editable: false,
       title: '',
       summary: '',
-      blockMedia: [],
+      blockMedia,
       content: { type: 'doc' },
     });
+    expect(snapshot?.blockMedia).toBe(blockMedia);
   });
   it('does not fall back to public content after authorization denial', async () => {
     mocks.createPostClient.mockResolvedValue(postClient);

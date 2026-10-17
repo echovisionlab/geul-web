@@ -1,6 +1,7 @@
 'use client';
 
 import { saveFailureFromAction } from '@/lib/editor/save-failure';
+import { useMemo } from 'react';
 import { Code } from '@connectrpc/connect';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
@@ -204,6 +205,9 @@ export function usePostConfigSave(
     save(patch);
   };
 
+  const visibleConfiguration = controller.getConfiguration();
+  const configuration = useMemo(() => expand(visibleConfiguration), [visibleConfiguration]);
+
   return Object.assign(enqueue, {
     flush: save.flush,
     cancel: save.cancel,
@@ -214,6 +218,6 @@ export function usePostConfigSave(
     // conflicts use the blocking reload dialog.
     conflict: false,
     configurationRevision: controller.getCanonical().configurationRevision,
-    configuration: expand(controller.getConfiguration()),
+    configuration,
   });
 }

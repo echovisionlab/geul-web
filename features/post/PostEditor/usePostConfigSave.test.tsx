@@ -2,7 +2,7 @@
 
 import { Code } from '@connectrpc/connect';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act } from 'react';
+import { act, useEffect, useState } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { notifications } from '@/components/core/Notification';
@@ -162,6 +162,34 @@ afterEach(() => {
   container.remove();
   window.sessionStorage.clear();
   vi.useRealTimers();
+});
+
+it('settles when the editor adopts the returned document layout into local state', () => {
+  let renders = 0;
+  function ConfigurationConsumer() {
+    if (++renders > 10) {
+      throw new Error('Post configuration synchronization did not settle');
+    }
+    const [layout, setLayout] = useState(initialLayout);
+    const save = usePostConfigSave(postId, { ...configuration(initialRevision), documentLayout: layout });
+    useEffect(() => {
+      setLayout(save.configuration.documentLayout);
+    }, [save.configuration]);
+    return (
+      <output>
+        {layout.contentHeight}/{layout.pageChrome}/{layout.footer}
+      </output>
+    );
+  }
+  act(() =>
+    root.render(
+      <QueryClientProvider client={queryClient}>
+        <ConfigurationConsumer />
+      </QueryClientProvider>,
+    ),
+  );
+  expect(container.textContent).toBe('content/flow/flow');
+  expect(mocks.updatePostAction).not.toHaveBeenCalled();
 });
 
 describe('Post config saves', () => {
