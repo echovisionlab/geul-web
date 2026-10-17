@@ -42637,8 +42637,8 @@
               "line": 104,
               "property": "--_disclosure-inline-inset"
             },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 180, "property": "padding" },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 261, "property": "gap" }
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 183, "property": "padding" },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 264, "property": "gap" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 60, "value": "0.5rem", "context": ":root" }]
         },
@@ -42657,9 +42657,9 @@
               "line": 96,
               "property": "--_disclosure-control-gap"
             },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 180, "property": "padding" },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 184, "property": "padding-block" },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 191, "property": "column-gap" }
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 183, "property": "padding" },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 187, "property": "padding-block" },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 194, "property": "column-gap" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 59, "value": "0.25rem", "context": ":root" }
@@ -43253,8 +43253,8 @@
               "line": 104,
               "property": "--_disclosure-inline-inset"
             },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 180, "property": "padding" },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 261, "property": "gap" }
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 183, "property": "padding" },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 264, "property": "gap" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 60, "value": "0.5rem", "context": ":root" }]
         },
@@ -43273,9 +43273,9 @@
               "line": 96,
               "property": "--_disclosure-control-gap"
             },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 180, "property": "padding" },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 184, "property": "padding-block" },
-            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 191, "property": "column-gap" }
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 183, "property": "padding" },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 187, "property": "padding-block" },
+            { "file": "components/core/Disclosure/Disclosure.module.css", "line": 194, "property": "column-gap" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 59, "value": "0.25rem", "context": ":root" }
