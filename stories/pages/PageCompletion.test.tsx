@@ -64,6 +64,7 @@ describe('complete production page preview controllers', () => {
       );
     } catch (error) {
       // TEMPORARY CI diagnostic: what the page shows when the failure alert never appears.
+      // eslint-disable-next-line no-console
       console.error('OG preview diagnostic', fetchPreview.mock.calls.length, host.textContent?.slice(0, 1500));
       throw error;
     }
