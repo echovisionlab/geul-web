@@ -23,7 +23,7 @@ import { usePageEditor } from '@/features/page/PageEditor/PageEditorContext';
 import { useSearchCombobox } from '@/lib/hooks/useSearchCombobox';
 import { listAuthorsAction } from '@/lib/actions/user';
 import { searchMembers } from '@/lib/queries/user-browser';
-import { COLUMN_OPTIONS, getLayoutOptionsGridList, MAX_LIMIT_AUTHORS } from '../constants';
+import { getLayoutOptionsGridList, MAX_LIMIT_AUTHORS } from '../constants';
 import type { BlockCanvasPreviewProps, BlockEditorProps, BlockSettingsEditorProps } from '../types';
 import { parseAuthorIds, type AuthorListProps } from './schema';
 import { AuthorListView } from './View';
@@ -45,7 +45,6 @@ function AuthorListSettingsForm({ props, updateProps, readOnly = false }: Author
   const source = props.source || 'automatic';
   const selectedIds = parseAuthorIds(props.authorIds || '');
   const layout = props.layout || 'grid';
-  const columns = props.columns || '3';
   const limit = props.limit || '6';
   const showBio = props.showBio || 'true';
   const showAvatar = props.showAvatar || 'true';
@@ -251,16 +250,6 @@ function AuthorListSettingsForm({ props, updateProps, readOnly = false }: Author
           value={props.itemSize}
           onChange={(value) => updateProp('itemSize', value)}
         />
-
-        {layout === 'grid' && (
-          <Select
-            disabled={readOnly}
-            label={tPageEditor('blockEditor.labels.columns')}
-            data={[...COLUMN_OPTIONS]}
-            value={columns}
-            onChange={(value) => updateProp('columns', value || '3')}
-          />
-        )}
 
         {source === 'automatic' ? (
           <NumberInput

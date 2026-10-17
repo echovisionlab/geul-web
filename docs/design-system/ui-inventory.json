@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "4f2d45b34d25b047e171fca9069b4b44b91685d43d0bccbab543455f1fdffa1a",
+  "manifestHash": "5ea1e76905f65f657c74cf461d8ee0316d6c269b6ea0b08343a31bf3db4f89d2",
   "counts": {
-    "sourceFiles": 3778,
-    "productionSourceFiles": 2285,
-    "componentFiles": 902,
+    "sourceFiles": 3791,
+    "productionSourceFiles": 2297,
+    "componentFiles": 909,
     "coreFamilies": 57,
     "featureDomains": 53,
-    "storyFiles": 256,
-    "storyVariants": 1452,
+    "storyFiles": 257,
+    "storyVariants": 1457,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -1253,6 +1253,7 @@
     "features/document-layout/ui/ContentLayoutFieldView.tsx",
     "features/document-layout/ui/ContentLayoutView.tsx",
     "features/document-layout/ui/DocumentHeadingScope.tsx",
+    "features/document-layout/ui/EntityDetailLayout.tsx",
     "features/document-layout/ui/document-heading-level.ts",
     "features/document-layout/ui/index.ts",
     "features/document-layout/ui/types.ts",
@@ -2110,6 +2111,7 @@
     "features/page/blocks/CollectionSizeControl.tsx",
     "features/page/blocks/EntityListView.test.tsx",
     "features/page/blocks/EntityListView.tsx",
+    "features/page/blocks/InfiniteCollection.stories.tsx",
     "features/page/blocks/ListBlockEditorBase.stories.tsx",
     "features/page/blocks/ListBlockEditorBase.tsx",
     "features/page/blocks/ListBlockSkeleton.tsx",
@@ -2121,6 +2123,7 @@
     "features/page/blocks/MobileBlockTablePaginationScroll.tsx",
     "features/page/blocks/TableLoadingFallback.tsx",
     "features/page/blocks/artist-grid/Editor.tsx",
+    "features/page/blocks/artist-grid/InfiniteList.tsx",
     "features/page/blocks/artist-grid/Skeleton.tsx",
     "features/page/blocks/artist-grid/View.tsx",
     "features/page/blocks/artist-grid/ViewClient.boundaries.test.tsx",
@@ -2128,6 +2131,7 @@
     "features/page/blocks/artist-grid/ViewClientRuntime.tsx",
     "features/page/blocks/artist-grid/ViewServer.tsx",
     "features/page/blocks/artist-grid/schema.ts",
+    "features/page/blocks/artist-grid/transform.ts",
     "features/page/blocks/author-list/Editor.tsx",
     "features/page/blocks/author-list/Skeleton.tsx",
     "features/page/blocks/author-list/View.tsx",
@@ -2212,7 +2216,9 @@
     "features/page/blocks/immersive-scene/useAuthenticatedMedia.ts",
     "features/page/blocks/immersive-scene/useImmersiveAssetUploadController.ts",
     "features/page/blocks/immersive-scene/useImmersiveUnitAssetUploads.ts",
+    "features/page/blocks/infinite-items.tsx",
     "features/page/blocks/label-list/Editor.tsx",
+    "features/page/blocks/label-list/InfiniteList.tsx",
     "features/page/blocks/label-list/Skeleton.tsx",
     "features/page/blocks/label-list/View.tsx",
     "features/page/blocks/label-list/ViewClient.test.tsx",
@@ -2220,6 +2226,7 @@
     "features/page/blocks/label-list/ViewClientRuntime.tsx",
     "features/page/blocks/label-list/ViewServer.tsx",
     "features/page/blocks/label-list/schema.ts",
+    "features/page/blocks/label-list/transform.ts",
     "features/page/blocks/label-marquee/Editor.tsx",
     "features/page/blocks/label-marquee/ViewServer.tsx",
     "features/page/blocks/label-marquee/schema.ts",
@@ -2252,6 +2259,7 @@
     "features/page/blocks/mermaid/schema.ts",
     "features/page/blocks/page-locale-prop-inventory.test.ts",
     "features/page/blocks/post-list/Editor.tsx",
+    "features/page/blocks/post-list/InfiniteList.tsx",
     "features/page/blocks/post-list/PostAuthorLinks.tsx",
     "features/page/blocks/post-list/PostMetaLinks.tsx",
     "features/page/blocks/post-list/Skeleton.tsx",
@@ -2261,6 +2269,7 @@
     "features/page/blocks/post-list/ViewClientRuntime.tsx",
     "features/page/blocks/post-list/ViewServer.tsx",
     "features/page/blocks/post-list/schema.ts",
+    "features/page/blocks/post-list/transform.ts",
     "features/page/blocks/post-map/Editor.tsx",
     "features/page/blocks/post-map/Skeleton.tsx",
     "features/page/blocks/post-map/View.tsx",
@@ -2286,6 +2295,7 @@
     "features/page/blocks/post-table/schema.ts",
     "features/page/blocks/post-table/spec.ts",
     "features/page/blocks/program-event-list/Editor.tsx",
+    "features/page/blocks/program-event-list/InfiniteList.tsx",
     "features/page/blocks/program-event-list/Skeleton.tsx",
     "features/page/blocks/program-event-list/View.tsx",
     "features/page/blocks/program-event-list/ViewClient.tsx",
@@ -2295,6 +2305,7 @@
     "features/page/blocks/public-view-loading.test.tsx",
     "features/page/blocks/registry.ts",
     "features/page/blocks/releases-gallery/Editor.tsx",
+    "features/page/blocks/releases-gallery/InfiniteList.tsx",
     "features/page/blocks/releases-gallery/Skeleton.tsx",
     "features/page/blocks/releases-gallery/View.tsx",
     "features/page/blocks/releases-gallery/ViewClient.test.tsx",
@@ -2302,6 +2313,7 @@
     "features/page/blocks/releases-gallery/ViewClientRuntime.tsx",
     "features/page/blocks/releases-gallery/ViewServer.tsx",
     "features/page/blocks/releases-gallery/schema.ts",
+    "features/page/blocks/releases-gallery/transform.ts",
     "features/page/blocks/rich-text/Editor.test.tsx",
     "features/page/blocks/rich-text/Editor.tsx",
     "features/page/blocks/rich-text/View.tsx",
@@ -2333,12 +2345,14 @@
     "features/page/blocks/work-table/schema.ts",
     "features/page/blocks/work-table/spec.ts",
     "features/page/blocks/works-gallery/Editor.tsx",
+    "features/page/blocks/works-gallery/InfiniteList.tsx",
     "features/page/blocks/works-gallery/Skeleton.tsx",
     "features/page/blocks/works-gallery/View.tsx",
     "features/page/blocks/works-gallery/ViewClient.tsx",
     "features/page/blocks/works-gallery/ViewClientRuntime.tsx",
     "features/page/blocks/works-gallery/ViewServer.tsx",
     "features/page/blocks/works-gallery/schema.ts",
+    "features/page/blocks/works-gallery/transform.ts",
     "features/page/page-section-dedupe.ts",
     "features/page/section-style.test.ts",
     "features/page/section-style.ts",
@@ -2725,7 +2739,6 @@
     "features/work/WorkEditor/work-lifecycle-controls.ts",
     "features/work/WorkMediaDeliveryContext.test.tsx",
     "features/work/WorkMediaDeliveryContext.tsx",
-    "features/work/WorkPublicHeaderLayout.tsx",
     "features/work/work-view-model.ts",
     "lib/actions/account.test.ts",
     "lib/actions/account.ts",
@@ -4576,6 +4589,7 @@
         "features/page/blocks/immersive-scene/ImmersiveSceneUnitSettingsPanel.tsx",
         "features/page/blocks/immersive-scene/MeshOptimizationPanel.tsx",
         "features/page/blocks/immersive-scene/SceneRenderer.tsx",
+        "features/page/blocks/infinite-items.tsx",
         "features/page/blocks/map/Editor.tsx",
         "features/page/blocks/marquee/MarqueeView.tsx",
         "features/page/blocks/text-marquee/Editor.tsx",
@@ -6841,12 +6855,6 @@
         "features/data-table/DataTablePagination.tsx",
         "features/data-table/ServerDataTable/ServerDataTablePaginationView.tsx",
         "features/form/AdminFormSubmissionsPage.tsx",
-        "features/page/blocks/artist-grid/View.tsx",
-        "features/page/blocks/label-list/View.tsx",
-        "features/page/blocks/post-list/View.tsx",
-        "features/page/blocks/program-event-list/View.tsx",
-        "features/page/blocks/releases-gallery/View.tsx",
-        "features/page/blocks/works-gallery/View.tsx",
         "features/series/SeriesDetail.tsx"
       ],
       "catalogAdapters": [],
@@ -13053,6 +13061,11 @@
               "type": "Responsive<LayoutColumnCount>"
             },
             {
+              "name": "minColumnWidth",
+              "optional": true,
+              "type": "Responsive<LayoutMinColumnWidth>"
+            },
+            {
               "name": "rowGap",
               "optional": true,
               "type": "Responsive<Space>"
@@ -13339,7 +13352,6 @@
         "features/page/blocks/ListBlockSkeleton.tsx",
         "features/page/blocks/ListViewShell.tsx",
         "features/page/blocks/TableLoadingFallback.tsx",
-        "features/page/blocks/artist-grid/View.tsx",
         "features/page/blocks/artist-grid/ViewClientRuntime.tsx",
         "features/page/blocks/author-list/Editor.tsx",
         "features/page/blocks/author-list/Skeleton.tsx",
@@ -13356,7 +13368,7 @@
         "features/page/blocks/immersive-scene/MeshOptimizationPanel.tsx",
         "features/page/blocks/immersive-scene/RotationAxisInputs.tsx",
         "features/page/blocks/immersive-scene/SceneRenderer.tsx",
-        "features/page/blocks/label-list/View.tsx",
+        "features/page/blocks/infinite-items.tsx",
         "features/page/blocks/label-marquee/Editor.tsx",
         "features/page/blocks/map/Editor.tsx",
         "features/page/blocks/map/ViewRuntime.tsx",
@@ -13370,15 +13382,12 @@
         "features/page/blocks/post-table/Editor.tsx",
         "features/page/blocks/post-table/ViewServer.tsx",
         "features/page/blocks/post-table/columns.tsx",
-        "features/page/blocks/program-event-list/View.tsx",
         "features/page/blocks/program-event-list/ViewClientRuntime.tsx",
-        "features/page/blocks/releases-gallery/View.tsx",
         "features/page/blocks/releases-gallery/ViewClientRuntime.tsx",
         "features/page/blocks/text-marquee/Editor.tsx",
         "features/page/blocks/work-map/Editor.tsx",
         "features/page/blocks/work-table/Editor.tsx",
         "features/page/blocks/work-table/ViewServer.tsx",
-        "features/page/blocks/works-gallery/View.tsx",
         "features/page/blocks/works-gallery/ViewClientRuntime.tsx",
         "features/participants/ParticipantRow.tsx",
         "features/place/CreatePlaceModal.tsx",
@@ -13413,7 +13422,6 @@
         "features/program-event/ProgramEventEditor/ProgramEventEditor.tsx",
         "features/program-event/ProgramEventEditor/ProgramEventPosterUploader.tsx",
         "features/program-event/ProgramEventSeriesEditor/ProgramEventSeriesEditor.tsx",
-        "features/program-event/ProgramEventSeriesPublicView.tsx",
         "features/release/ReleaseCreditsList.tsx",
         "features/release/ReleaseEditor/ReleaseArtistsSectionView.tsx",
         "features/release/ReleaseEditor/ReleaseCreditsSection.tsx",
@@ -13565,6 +13573,7 @@
         "features/page/PageEditor/PageAccessSettings.stories.tsx",
         "features/page/PageEditor/SectionItemView.stories.tsx",
         "features/page/blocks/CollectionBlocks.stories.tsx",
+        "features/page/blocks/InfiniteCollection.stories.tsx",
         "features/page/blocks/embed/Embed.stories.tsx",
         "features/social-links/ui/SocialLinksEditorView.stories.tsx",
         "features/translation/TranslationLocaleRow.stories.tsx",
@@ -14265,7 +14274,6 @@
         }
       ],
       "productionConsumers": [
-        "app/(general)/releases/[idOrSlug]/ReleasePublicView.tsx",
         "components/core/SelectionSurface/SelectionSurface.tsx",
         "features/artist/ArtistEditor/ArtistImageGalleryEditor.tsx",
         "features/media/FilePreview.tsx",
@@ -15442,8 +15450,6 @@
         "features/admin/ui/AdminPageHeader/AdminPageHeader.tsx",
         "features/member/onboarding/NicknameOnboarding.tsx",
         "features/menu/AdminMenusPage.tsx",
-        "features/program-event/ProgramEventSeriesPublicView.tsx",
-        "features/series/SeriesPublicView.tsx",
         "features/share/SharePasswordView.tsx",
         "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
         "features/translation/admin/TranslationJobsPage.tsx",
@@ -18166,6 +18172,11 @@
               "name": "contentPlacement",
               "optional": true,
               "type": "'start' | 'center'"
+            },
+            {
+              "name": "outlinePresentation",
+              "optional": true,
+              "type": "'responsive' | 'rail'"
             }
           ]
         },
@@ -19113,6 +19124,7 @@
         "features/my/ui/ProfileForm/ProfileFormView.tsx",
         "features/page/PageEditor/SectionItemView.tsx",
         "features/page/PageEditor/SectionList.tsx",
+        "features/page/blocks/infinite-items.tsx",
         "features/page/blocks/text-marquee/Editor.tsx",
         "features/series/SeriesDetail.tsx",
         "features/shell/LanguageMenu.tsx",
@@ -19235,6 +19247,7 @@
         "features/page/blocks/embed/ToolModule.tsx",
         "features/page/blocks/external-video/CanvasPreview.tsx",
         "features/page/blocks/form/ViewClient.tsx",
+        "features/page/blocks/infinite-items.tsx",
         "features/page/blocks/map/Editor.tsx",
         "features/page/blocks/marquee/MarqueeView.tsx",
         "features/page/blocks/post-list/View.tsx",
@@ -19563,6 +19576,7 @@
         "features/data-table/ServerDataTable/ServerDataTableSelectableSection.tsx",
         "features/document-layout/ui/ContentChrome.tsx",
         "features/document-layout/ui/ContentLayoutFieldView.tsx",
+        "features/document-layout/ui/EntityDetailLayout.tsx",
         "features/editor/AIMenu/AIMenu.tsx",
         "features/editor/components/EditorFileInsertView.tsx",
         "features/editor/components/EditorFileLibraryPickerView.tsx",
@@ -33032,13 +33046,7 @@
       "typeAliasEvidence": [],
       "productionConsumers": [
         "app/(general)/series/[idOrSlug]/page.tsx",
-        "features/data-table/ServerDataTable/ServerDataTable.tsx",
-        "features/page/blocks/artist-grid/ViewServer.tsx",
-        "features/page/blocks/label-list/ViewServer.tsx",
-        "features/page/blocks/post-list/ViewServer.tsx",
-        "features/page/blocks/program-event-list/ViewServer.tsx",
-        "features/page/blocks/releases-gallery/ViewServer.tsx",
-        "features/page/blocks/works-gallery/ViewServer.tsx"
+        "features/data-table/ServerDataTable/ServerDataTable.tsx"
       ],
       "catalogAdapters": [],
       "tests": [],
@@ -33642,8 +33650,6 @@
       ],
       "typeAliasEvidence": [],
       "productionConsumers": [
-        "app/(general)/events/[idOrSlug]/ProgramEventViewClient.tsx",
-        "app/(general)/works/[idOrSlug]/WorkViewClient.tsx",
         "features/changelog/ChangelogPageView.tsx",
         "features/page/PageView/PageContentView.tsx",
         "features/policy/LegalDocumentLayout.tsx",
@@ -33790,8 +33796,6 @@
       ],
       "typeAliasEvidence": [],
       "productionConsumers": [
-        "app/(general)/events/[idOrSlug]/ProgramEventViewClient.tsx",
-        "app/(general)/works/[idOrSlug]/WorkViewClient.tsx",
         "features/changelog/ChangelogPageView.tsx",
         "features/document-layout/ContentLayoutView.tsx",
         "features/policy/LegalDocumentLayout.tsx"
@@ -33832,8 +33836,10 @@
       "typeAliasEvidence": [],
       "productionConsumers": [
         "app/(general)/artists/[idOrSlug]/ArtistPublicView.tsx",
+        "app/(general)/events/[idOrSlug]/ProgramEventViewClient.tsx",
         "app/(general)/labels/[idOrSlug]/LabelPublicView.tsx",
         "app/(general)/releases/[idOrSlug]/ReleasePublicView.tsx",
+        "app/(general)/works/[idOrSlug]/WorkViewClient.tsx",
         "features/document-layout/ui/ContentLayoutView.tsx",
         "features/page/PageView/blocks/DefaultBlockView.tsx",
         "features/page/PageView/blocks/GeneratedRichTextBlockViewRuntime.tsx",
@@ -33846,6 +33852,135 @@
       ],
       "stories": [],
       "composedJsx": ["DocumentHeadingParentLevelContext.Provider"]
+    },
+    {
+      "file": "features/document-layout/ui/EntityDetailLayout.tsx",
+      "owner": "Feature/document-layout",
+      "exports": [
+        {
+          "name": "EntityDetailLayout",
+          "kind": "function"
+        },
+        {
+          "name": "EntityDetailSection",
+          "kind": "function"
+        },
+        {
+          "name": "EntityDetailImage",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-ui boundary candidate (path-based; inspect source)",
+      "propsEvidence": [
+        {
+          "name": "EntityDetailLayoutProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "media",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
+              "name": "title",
+              "optional": false,
+              "type": "ReactNode"
+            },
+            {
+              "name": "titleLang",
+              "optional": true,
+              "type": "string"
+            },
+            {
+              "name": "meta",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
+              "name": "actions",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
+              "name": "children",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
+              "name": "printMedia",
+              "optional": true,
+              "type": "'block' | 'overlay'"
+            }
+          ]
+        },
+        {
+          "name": "EntityDetailSectionProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "title",
+              "optional": false,
+              "type": "ReactNode"
+            },
+            {
+              "name": "actions",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
+              "name": "lang",
+              "optional": true,
+              "type": "string"
+            },
+            {
+              "name": "titleId",
+              "optional": true,
+              "type": "string"
+            },
+            {
+              "name": "children",
+              "optional": false,
+              "type": "ReactNode"
+            }
+          ]
+        },
+        {
+          "name": "EntityDetailImageProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "src",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "alt",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "fit",
+              "optional": true,
+              "type": "'contain' | 'cover'"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": [
+        "app/(general)/artists/[idOrSlug]/ArtistPublicView.tsx",
+        "app/(general)/artists/[idOrSlug]/ArtistWorkSection.tsx",
+        "app/(general)/events/[idOrSlug]/ProgramEventViewClient.tsx",
+        "app/(general)/labels/[idOrSlug]/LabelPublicView.tsx",
+        "app/(general)/releases/[idOrSlug]/ReleasePublicView.tsx",
+        "app/(general)/works/[idOrSlug]/WorkViewClient.tsx",
+        "features/program-event/ProgramEventSeriesPublicView.tsx",
+        "features/series/SeriesPublicView.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["Heading", "article", "div", "h2", "header", "img", "section"]
     },
     {
       "file": "features/draft-mode/DraftModeAlert.tsx",
@@ -52646,6 +52781,11 @@
               "name": "contentPlacement",
               "optional": true,
               "type": "'start' | 'center'"
+            },
+            {
+              "name": "outlinePresentation",
+              "optional": true,
+              "type": "'responsive' | 'rail'"
             }
           ]
         }
@@ -55054,9 +55194,9 @@
               "type": "string"
             },
             {
-              "name": "gridCols",
+              "name": "trackScale",
               "optional": true,
-              "type": "{ base: number; sm: number; }"
+              "type": "CollectionTrackScale"
             },
             {
               "name": "renderMeta",
@@ -55200,11 +55340,6 @@
               "type": "ReactNode"
             },
             {
-              "name": "columnOptions",
-              "optional": true,
-              "type": "ReadonlyArray<{ value: string; label: string }>"
-            },
-            {
               "name": "slidesToShowOptions",
               "optional": true,
               "type": "ReadonlyArray<{ value: string; label: string }>"
@@ -55301,9 +55436,9 @@
               "type": "boolean"
             },
             {
-              "name": "gridCols",
+              "name": "trackScale",
               "optional": true,
-              "type": "{ base: number; sm: number }"
+              "type": "CollectionTrackScale"
             }
           ]
         }
@@ -55458,9 +55593,9 @@
               "type": "boolean"
             },
             {
-              "name": "gridCols",
+              "name": "trackScale",
               "optional": true,
-              "type": "{ base: number; sm: number }"
+              "type": "CollectionTrackScale"
             },
             {
               "name": "dataScope",
@@ -55668,6 +55803,36 @@
       ]
     },
     {
+      "file": "features/page/blocks/artist-grid/InfiniteList.tsx",
+      "owner": "Feature/page",
+      "exports": [
+        {
+          "name": "ArtistInfiniteList",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "Item",
+          "type": "ArtistListViewClientProps['artists'][number]"
+        },
+        {
+          "name": "ActionQuery",
+          "type": "Omit< Parameters<typeof import('@/lib/actions/artist').listArtistsForBlockAction>[0], 'offset' | 'requestedLocale' >"
+        }
+      ],
+      "productionConsumers": [
+        "features/page/blocks/artist-grid/View.tsx",
+        "features/page/blocks/artist-grid/ViewServer.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["ArtistListViewClient", "InfiniteItems"]
+    },
+    {
       "file": "features/page/blocks/artist-grid/Skeleton.tsx",
       "owner": "Feature/page",
       "exports": [
@@ -55748,14 +55913,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": [
-        "ArtistListViewClient",
-        "DsLayoutInline",
-        "DsLayoutInset",
-        "ListBlockSkeleton",
-        "Pagination",
-        "QueryErrorAlert"
-      ]
+      "composedJsx": ["ArtistInfiniteList", "ArtistListViewClient", "ListBlockSkeleton", "QueryErrorAlert"]
     },
     {
       "file": "features/page/blocks/artist-grid/ViewClient.tsx",
@@ -55771,6 +55929,7 @@
       "typeAliasEvidence": [],
       "productionConsumers": [
         "app/(general)/labels/[idOrSlug]/LabelPublicView.tsx",
+        "features/page/blocks/artist-grid/InfiniteList.tsx",
         "features/page/blocks/artist-grid/View.tsx",
         "features/page/blocks/artist-grid/ViewServer.tsx"
       ],
@@ -55845,10 +56004,10 @@
       "tests": [],
       "stories": [],
       "composedJsx": [
+        "ArtistInfiniteList",
         "ArtistListSkeleton",
         "ArtistListViewClient",
         "ArtistListViewServer",
-        "ServerDataTablePagination",
         "Suspense"
       ]
     },
@@ -55939,11 +56098,6 @@
           "name": "AuthorListSkeletonProps",
           "extends": [],
           "properties": [
-            {
-              "name": "columns",
-              "optional": true,
-              "type": "number"
-            },
             {
               "name": "limit",
               "optional": true,
@@ -57937,6 +58091,71 @@
       ]
     },
     {
+      "file": "features/page/blocks/infinite-items.tsx",
+      "owner": "Feature/page",
+      "exports": [
+        {
+          "name": "InfiniteLoadMore",
+          "kind": "function"
+        },
+        {
+          "name": "InfiniteItems",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "InfiniteLoadMoreProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "hasMore",
+              "optional": false,
+              "type": "boolean"
+            },
+            {
+              "name": "status",
+              "optional": false,
+              "type": "LoadStatus"
+            },
+            {
+              "name": "onLoadMore",
+              "optional": false,
+              "type": "() => void"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [
+        {
+          "name": "LoadStatus",
+          "type": "'idle' | 'loading' | 'failed'"
+        }
+      ],
+      "productionConsumers": [
+        "features/page/blocks/artist-grid/InfiniteList.tsx",
+        "features/page/blocks/label-list/InfiniteList.tsx",
+        "features/page/blocks/post-list/InfiniteList.tsx",
+        "features/page/blocks/program-event-list/InfiniteList.tsx",
+        "features/page/blocks/releases-gallery/InfiniteList.tsx",
+        "features/page/blocks/works-gallery/InfiniteList.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": ["features/page/blocks/InfiniteCollection.stories.tsx"],
+      "composedJsx": [
+        "Button",
+        "InfiniteLoadMore",
+        "LayoutInline",
+        "LayoutInset",
+        "LayoutStack",
+        "SupportingText",
+        "VisuallyHidden",
+        "div"
+      ]
+    },
+    {
       "file": "features/page/blocks/label-list/Editor.tsx",
       "owner": "Feature/page",
       "exports": [
@@ -57983,6 +58202,36 @@
       "tests": ["features/page/blocks/CollectionSettings.permissions.test.tsx"],
       "stories": [],
       "composedJsx": ["LabelListSettingsForm", "LabelListView", "ListBlockEditorBase", "Switch"]
+    },
+    {
+      "file": "features/page/blocks/label-list/InfiniteList.tsx",
+      "owner": "Feature/page",
+      "exports": [
+        {
+          "name": "LabelInfiniteList",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "Item",
+          "type": "LabelListViewClientProps['labels'][number]"
+        },
+        {
+          "name": "ActionQuery",
+          "type": "Omit<Parameters<typeof listLabelsForBlockAction>[0], 'offset' | 'requestedLocale'>"
+        }
+      ],
+      "productionConsumers": [
+        "features/page/blocks/label-list/View.tsx",
+        "features/page/blocks/label-list/ViewServer.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["InfiniteItems", "LabelListViewClient"]
     },
     {
       "file": "features/page/blocks/label-list/Skeleton.tsx",
@@ -58065,14 +58314,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": [
-        "DsLayoutInline",
-        "DsLayoutInset",
-        "LabelListViewClient",
-        "ListBlockSkeleton",
-        "Pagination",
-        "QueryErrorAlert"
-      ]
+      "composedJsx": ["LabelInfiniteList", "LabelListViewClient", "ListBlockSkeleton", "QueryErrorAlert"]
     },
     {
       "file": "features/page/blocks/label-list/ViewClient.tsx",
@@ -58087,6 +58329,7 @@
       "propsEvidence": [],
       "typeAliasEvidence": [],
       "productionConsumers": [
+        "features/page/blocks/label-list/InfiniteList.tsx",
         "features/page/blocks/label-list/View.tsx",
         "features/page/blocks/label-list/ViewServer.tsx"
       ],
@@ -58161,10 +58404,10 @@
       "tests": [],
       "stories": [],
       "composedJsx": [
+        "LabelInfiniteList",
         "LabelListSkeleton",
         "LabelListViewClient",
         "LabelListViewServer",
-        "ServerDataTablePagination",
         "Suspense"
       ]
     },
@@ -58788,6 +59031,32 @@
       ]
     },
     {
+      "file": "features/page/blocks/post-list/InfiniteList.tsx",
+      "owner": "Feature/page",
+      "exports": [
+        {
+          "name": "PostInfiniteList",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "Item",
+          "type": "PostListViewClientProps['posts'][number]"
+        }
+      ],
+      "productionConsumers": [
+        "features/page/blocks/post-list/View.tsx",
+        "features/page/blocks/post-list/ViewServer.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["InfiniteItems", "PostListViewClient"]
+    },
+    {
       "file": "features/page/blocks/post-list/PostAuthorLinks.tsx",
       "owner": "Feature/page",
       "exports": [
@@ -58969,9 +59238,8 @@
       "tests": ["features/page/blocks/CarouselSkeleton.loading.test.tsx"],
       "stories": [],
       "composedJsx": [
-        "DsLayoutInline",
         "DsLayoutInset",
-        "Pagination",
+        "PostInfiniteList",
         "PostListSkeleton",
         "PostListViewClient",
         "SupportingText",
@@ -58991,6 +59259,7 @@
       "propsEvidence": [],
       "typeAliasEvidence": [],
       "productionConsumers": [
+        "features/page/blocks/post-list/InfiniteList.tsx",
         "features/page/blocks/post-list/View.tsx",
         "features/page/blocks/post-list/ViewServer.tsx"
       ],
@@ -59099,13 +59368,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": [
-        "PostListSkeleton",
-        "PostListViewClient",
-        "PostListViewServer",
-        "ServerDataTablePagination",
-        "Suspense"
-      ]
+      "composedJsx": ["PostInfiniteList", "PostListSkeleton", "PostListViewClient", "PostListViewServer", "Suspense"]
     },
     {
       "file": "features/page/blocks/post-map/Editor.tsx",
@@ -59548,6 +59811,36 @@
       ]
     },
     {
+      "file": "features/page/blocks/program-event-list/InfiniteList.tsx",
+      "owner": "Feature/page",
+      "exports": [
+        {
+          "name": "ProgramEventInfiniteList",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "Item",
+          "type": "ProgramEventListViewClientProps['events'][number]"
+        },
+        {
+          "name": "BrowserQuery",
+          "type": "Omit< Parameters<typeof import('@/lib/queries/program-event-browser').listProgramEventsForBlockBrowser>[0], 'offset' | 'requestedLocale' >"
+        }
+      ],
+      "productionConsumers": [
+        "features/page/blocks/program-event-list/View.tsx",
+        "features/page/blocks/program-event-list/ViewServer.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["InfiniteItems", "ProgramEventListViewClient"]
+    },
+    {
       "file": "features/page/blocks/program-event-list/Skeleton.tsx",
       "owner": "Feature/page",
       "exports": [
@@ -59628,13 +59921,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": [
-        "DsLayoutInline",
-        "DsLayoutInset",
-        "ListBlockSkeleton",
-        "Pagination",
-        "ProgramEventListViewClient"
-      ]
+      "composedJsx": ["ListBlockSkeleton", "ProgramEventInfiniteList", "ProgramEventListViewClient"]
     },
     {
       "file": "features/page/blocks/program-event-list/ViewClient.tsx",
@@ -59649,6 +59936,7 @@
       "propsEvidence": [],
       "typeAliasEvidence": [],
       "productionConsumers": [
+        "features/page/blocks/program-event-list/InfiniteList.tsx",
         "features/page/blocks/program-event-list/View.tsx",
         "features/page/blocks/program-event-list/ViewServer.tsx"
       ],
@@ -59753,10 +60041,10 @@
       "tests": [],
       "stories": [],
       "composedJsx": [
+        "ProgramEventInfiniteList",
         "ProgramEventListSkeleton",
         "ProgramEventListViewClient",
         "ProgramEventListViewServer",
-        "ServerDataTablePagination",
         "Suspense"
       ]
     },
@@ -59815,6 +60103,36 @@
         "Select",
         "Switch"
       ]
+    },
+    {
+      "file": "features/page/blocks/releases-gallery/InfiniteList.tsx",
+      "owner": "Feature/page",
+      "exports": [
+        {
+          "name": "ReleaseInfiniteList",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "Item",
+          "type": "ReleaseListViewClientProps['releases'][number]"
+        },
+        {
+          "name": "BrowserQuery",
+          "type": "Omit<Parameters<typeof import('@/lib/queries/release-browser').listPublishedReleases>[0], 'offset'>"
+        }
+      ],
+      "productionConsumers": [
+        "features/page/blocks/releases-gallery/View.tsx",
+        "features/page/blocks/releases-gallery/ViewServer.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["InfiniteItems", "ReleaseListViewClient"]
     },
     {
       "file": "features/page/blocks/releases-gallery/Skeleton.tsx",
@@ -59897,14 +60215,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": [
-        "DsLayoutInline",
-        "DsLayoutInset",
-        "ListBlockSkeleton",
-        "Pagination",
-        "QueryErrorAlert",
-        "ReleaseListViewClient"
-      ]
+      "composedJsx": ["ListBlockSkeleton", "QueryErrorAlert", "ReleaseInfiniteList", "ReleaseListViewClient"]
     },
     {
       "file": "features/page/blocks/releases-gallery/ViewClient.tsx",
@@ -59921,6 +60232,7 @@
       "productionConsumers": [
         "app/(general)/artists/[idOrSlug]/ArtistPublicView.tsx",
         "app/(general)/labels/[idOrSlug]/LabelPublicView.tsx",
+        "features/page/blocks/releases-gallery/InfiniteList.tsx",
         "features/page/blocks/releases-gallery/View.tsx",
         "features/page/blocks/releases-gallery/ViewServer.tsx"
       ],
@@ -59977,7 +60289,10 @@
       "productionConsumers": [],
       "catalogAdapters": [],
       "tests": ["features/page/blocks/releases-gallery/ViewClient.test.tsx"],
-      "stories": ["features/page/blocks/CollectionBlocks.stories.tsx"],
+      "stories": [
+        "features/page/blocks/CollectionBlocks.stories.tsx",
+        "features/page/blocks/InfiniteCollection.stories.tsx"
+      ],
       "composedJsx": ["DateTime", "DsLayoutStack", "DsText", "EntityListView", "PostMetaLinks"]
     },
     {
@@ -60000,10 +60315,10 @@
       "tests": [],
       "stories": [],
       "composedJsx": [
+        "ReleaseInfiniteList",
         "ReleaseListSkeleton",
         "ReleaseListViewClient",
         "ReleaseListViewServer",
-        "ServerDataTablePagination",
         "Suspense"
       ]
     },
@@ -60593,6 +60908,36 @@
       "composedJsx": ["ListBlockEditorBase", "MultiSelect", "Switch", "WorkListSettingsForm", "WorkListView"]
     },
     {
+      "file": "features/page/blocks/works-gallery/InfiniteList.tsx",
+      "owner": "Feature/page",
+      "exports": [
+        {
+          "name": "WorkInfiniteList",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "Item",
+          "type": "WorkListViewClientProps['works'][number]"
+        },
+        {
+          "name": "ActionQuery",
+          "type": "Omit<NonNullable<Parameters<typeof listWorksPublishedAction>[0]>, 'offset'>"
+        }
+      ],
+      "productionConsumers": [
+        "features/page/blocks/works-gallery/View.tsx",
+        "features/page/blocks/works-gallery/ViewServer.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["InfiniteItems", "WorkListViewClient"]
+    },
+    {
       "file": "features/page/blocks/works-gallery/Skeleton.tsx",
       "owner": "Feature/page",
       "exports": [
@@ -60673,14 +61018,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": [
-        "DsLayoutInline",
-        "DsLayoutInset",
-        "ListBlockSkeleton",
-        "Pagination",
-        "QueryErrorAlert",
-        "WorkListViewClient"
-      ]
+      "composedJsx": ["ListBlockSkeleton", "QueryErrorAlert", "WorkInfiniteList", "WorkListViewClient"]
     },
     {
       "file": "features/page/blocks/works-gallery/ViewClient.tsx",
@@ -60695,6 +61033,7 @@
       "propsEvidence": [],
       "typeAliasEvidence": [],
       "productionConsumers": [
+        "features/page/blocks/works-gallery/InfiniteList.tsx",
         "features/page/blocks/works-gallery/View.tsx",
         "features/page/blocks/works-gallery/ViewServer.tsx"
       ],
@@ -60773,13 +61112,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": [
-        "ServerDataTablePagination",
-        "Suspense",
-        "WorkListSkeleton",
-        "WorkListViewClient",
-        "WorkListViewServer"
-      ]
+      "composedJsx": ["Suspense", "WorkInfiniteList", "WorkListSkeleton", "WorkListViewClient", "WorkListViewServer"]
     },
     {
       "file": "features/participants/ParticipantRow.tsx",
@@ -65567,7 +65900,7 @@
         "features/program-event/ProgramEventSeriesPublicView.stories.tsx",
         "stories/pages/EventSeries.stories.tsx"
       ],
-      "composedJsx": ["DsText", "LayoutGrid", "LayoutGridItem", "LayoutStack", "PageHeader", "img"]
+      "composedJsx": ["DsText", "EntityDetailImage", "EntityDetailLayout", "EntityDetailSection"]
     },
     {
       "file": "features/release/ReleaseCreditsList.tsx",
@@ -67653,12 +67986,11 @@
       "stories": ["features/series/SeriesPublicView.stories.tsx"],
       "composedJsx": [
         "DateTime",
-        "DsLayoutGrid",
-        "DsLayoutGridItem",
         "DsLayoutInset",
-        "DsLayoutStack",
         "DsText",
-        "PageHeader",
+        "EntityDetailImage",
+        "EntityDetailLayout",
+        "EntityDetailSection",
         "SupportingText",
         "Table",
         "Table.ScrollContainer",
@@ -67667,9 +67999,7 @@
         "Table.Th",
         "Table.Thead",
         "Table.Tr",
-        "TextButton",
-        "div",
-        "img"
+        "TextButton"
       ]
     },
     {
@@ -73154,11 +73484,6 @@
           "extends": [],
           "properties": [
             {
-              "name": "title",
-              "optional": true,
-              "type": "string"
-            },
-            {
               "name": "children",
               "optional": false,
               "type": "React.ReactNode"
@@ -73965,46 +74290,6 @@
       "tests": ["features/work/WorkMediaDeliveryContext.test.tsx"],
       "stories": [],
       "composedJsx": ["ContentMediaDeliveryProvider"]
-    },
-    {
-      "file": "features/work/WorkPublicHeaderLayout.tsx",
-      "owner": "Feature/work",
-      "exports": [
-        {
-          "name": "WorkPublicHeaderLayout",
-          "kind": "function"
-        }
-      ],
-      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [
-        {
-          "name": "WorkPublicHeaderLayoutProps",
-          "extends": [],
-          "properties": [
-            {
-              "name": "featuredImageUrl",
-              "optional": false,
-              "type": "string | null"
-            },
-            {
-              "name": "imageAlt",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "children",
-              "optional": false,
-              "type": "ReactNode"
-            }
-          ]
-        }
-      ],
-      "typeAliasEvidence": [],
-      "productionConsumers": ["app/(general)/works/[idOrSlug]/WorkViewClient.tsx"],
-      "catalogAdapters": [],
-      "tests": [],
-      "stories": [],
-      "composedJsx": ["Image", "div"]
     }
   ],
   "coreFamilies": [
@@ -75390,6 +75675,7 @@
         "features/document-layout/ui/ContentLayoutFieldView.tsx",
         "features/document-layout/ui/ContentLayoutView.tsx",
         "features/document-layout/ui/DocumentHeadingScope.tsx",
+        "features/document-layout/ui/EntityDetailLayout.tsx",
         "features/document-layout/ui/document-heading-level.ts",
         "features/document-layout/ui/index.ts",
         "features/document-layout/ui/types.ts"
@@ -75400,7 +75686,8 @@
         "features/document-layout/ui/ContentChrome.tsx",
         "features/document-layout/ui/ContentLayoutFieldView.tsx",
         "features/document-layout/ui/ContentLayoutView.tsx",
-        "features/document-layout/ui/DocumentHeadingScope.tsx"
+        "features/document-layout/ui/DocumentHeadingScope.tsx",
+        "features/document-layout/ui/EntityDetailLayout.tsx"
       ],
       "stories": ["features/document-layout/ui/ContentLayoutFieldView.stories.tsx"],
       "tests": [
@@ -76655,12 +76942,14 @@
         "features/page/blocks/MobileBlockTablePaginationScroll.tsx",
         "features/page/blocks/TableLoadingFallback.tsx",
         "features/page/blocks/artist-grid/Editor.tsx",
+        "features/page/blocks/artist-grid/InfiniteList.tsx",
         "features/page/blocks/artist-grid/Skeleton.tsx",
         "features/page/blocks/artist-grid/View.tsx",
         "features/page/blocks/artist-grid/ViewClient.tsx",
         "features/page/blocks/artist-grid/ViewClientRuntime.tsx",
         "features/page/blocks/artist-grid/ViewServer.tsx",
         "features/page/blocks/artist-grid/schema.ts",
+        "features/page/blocks/artist-grid/transform.ts",
         "features/page/blocks/author-list/Editor.tsx",
         "features/page/blocks/author-list/Skeleton.tsx",
         "features/page/blocks/author-list/View.tsx",
@@ -76718,13 +77007,16 @@
         "features/page/blocks/immersive-scene/useAuthenticatedMedia.ts",
         "features/page/blocks/immersive-scene/useImmersiveAssetUploadController.ts",
         "features/page/blocks/immersive-scene/useImmersiveUnitAssetUploads.ts",
+        "features/page/blocks/infinite-items.tsx",
         "features/page/blocks/label-list/Editor.tsx",
+        "features/page/blocks/label-list/InfiniteList.tsx",
         "features/page/blocks/label-list/Skeleton.tsx",
         "features/page/blocks/label-list/View.tsx",
         "features/page/blocks/label-list/ViewClient.tsx",
         "features/page/blocks/label-list/ViewClientRuntime.tsx",
         "features/page/blocks/label-list/ViewServer.tsx",
         "features/page/blocks/label-list/schema.ts",
+        "features/page/blocks/label-list/transform.ts",
         "features/page/blocks/label-marquee/Editor.tsx",
         "features/page/blocks/label-marquee/ViewServer.tsx",
         "features/page/blocks/label-marquee/schema.ts",
@@ -76750,6 +77042,7 @@
         "features/page/blocks/mermaid/View.tsx",
         "features/page/blocks/mermaid/schema.ts",
         "features/page/blocks/post-list/Editor.tsx",
+        "features/page/blocks/post-list/InfiniteList.tsx",
         "features/page/blocks/post-list/PostAuthorLinks.tsx",
         "features/page/blocks/post-list/PostMetaLinks.tsx",
         "features/page/blocks/post-list/Skeleton.tsx",
@@ -76758,6 +77051,7 @@
         "features/page/blocks/post-list/ViewClientRuntime.tsx",
         "features/page/blocks/post-list/ViewServer.tsx",
         "features/page/blocks/post-list/schema.ts",
+        "features/page/blocks/post-list/transform.ts",
         "features/page/blocks/post-map/Editor.tsx",
         "features/page/blocks/post-map/Skeleton.tsx",
         "features/page/blocks/post-map/View.tsx",
@@ -76776,6 +77070,7 @@
         "features/page/blocks/post-table/schema.ts",
         "features/page/blocks/post-table/spec.ts",
         "features/page/blocks/program-event-list/Editor.tsx",
+        "features/page/blocks/program-event-list/InfiniteList.tsx",
         "features/page/blocks/program-event-list/Skeleton.tsx",
         "features/page/blocks/program-event-list/View.tsx",
         "features/page/blocks/program-event-list/ViewClient.tsx",
@@ -76784,12 +77079,14 @@
         "features/page/blocks/program-event-list/schema.ts",
         "features/page/blocks/registry.ts",
         "features/page/blocks/releases-gallery/Editor.tsx",
+        "features/page/blocks/releases-gallery/InfiniteList.tsx",
         "features/page/blocks/releases-gallery/Skeleton.tsx",
         "features/page/blocks/releases-gallery/View.tsx",
         "features/page/blocks/releases-gallery/ViewClient.tsx",
         "features/page/blocks/releases-gallery/ViewClientRuntime.tsx",
         "features/page/blocks/releases-gallery/ViewServer.tsx",
         "features/page/blocks/releases-gallery/schema.ts",
+        "features/page/blocks/releases-gallery/transform.ts",
         "features/page/blocks/rich-text/Editor.tsx",
         "features/page/blocks/rich-text/View.tsx",
         "features/page/blocks/rich-text/schema.ts",
@@ -76817,12 +77114,14 @@
         "features/page/blocks/work-table/schema.ts",
         "features/page/blocks/work-table/spec.ts",
         "features/page/blocks/works-gallery/Editor.tsx",
+        "features/page/blocks/works-gallery/InfiniteList.tsx",
         "features/page/blocks/works-gallery/Skeleton.tsx",
         "features/page/blocks/works-gallery/View.tsx",
         "features/page/blocks/works-gallery/ViewClient.tsx",
         "features/page/blocks/works-gallery/ViewClientRuntime.tsx",
         "features/page/blocks/works-gallery/ViewServer.tsx",
         "features/page/blocks/works-gallery/schema.ts",
+        "features/page/blocks/works-gallery/transform.ts",
         "features/page/page-section-dedupe.ts",
         "features/page/section-style.ts"
       ],
@@ -76879,6 +77178,7 @@
         "features/page/blocks/MobileBlockTablePaginationScroll.tsx",
         "features/page/blocks/TableLoadingFallback.tsx",
         "features/page/blocks/artist-grid/Editor.tsx",
+        "features/page/blocks/artist-grid/InfiniteList.tsx",
         "features/page/blocks/artist-grid/Skeleton.tsx",
         "features/page/blocks/artist-grid/View.tsx",
         "features/page/blocks/artist-grid/ViewClient.tsx",
@@ -76920,7 +77220,9 @@
         "features/page/blocks/immersive-scene/View.tsx",
         "features/page/blocks/immersive-scene/ViewRuntime.tsx",
         "features/page/blocks/immersive-scene/Workspace.tsx",
+        "features/page/blocks/infinite-items.tsx",
         "features/page/blocks/label-list/Editor.tsx",
+        "features/page/blocks/label-list/InfiniteList.tsx",
         "features/page/blocks/label-list/Skeleton.tsx",
         "features/page/blocks/label-list/View.tsx",
         "features/page/blocks/label-list/ViewClient.tsx",
@@ -76937,6 +77239,7 @@
         "features/page/blocks/mermaid/Editor.tsx",
         "features/page/blocks/mermaid/View.tsx",
         "features/page/blocks/post-list/Editor.tsx",
+        "features/page/blocks/post-list/InfiniteList.tsx",
         "features/page/blocks/post-list/PostAuthorLinks.tsx",
         "features/page/blocks/post-list/PostMetaLinks.tsx",
         "features/page/blocks/post-list/Skeleton.tsx",
@@ -76955,12 +77258,14 @@
         "features/page/blocks/post-table/View.tsx",
         "features/page/blocks/post-table/ViewServer.tsx",
         "features/page/blocks/program-event-list/Editor.tsx",
+        "features/page/blocks/program-event-list/InfiniteList.tsx",
         "features/page/blocks/program-event-list/Skeleton.tsx",
         "features/page/blocks/program-event-list/View.tsx",
         "features/page/blocks/program-event-list/ViewClient.tsx",
         "features/page/blocks/program-event-list/ViewClientRuntime.tsx",
         "features/page/blocks/program-event-list/ViewServer.tsx",
         "features/page/blocks/releases-gallery/Editor.tsx",
+        "features/page/blocks/releases-gallery/InfiniteList.tsx",
         "features/page/blocks/releases-gallery/Skeleton.tsx",
         "features/page/blocks/releases-gallery/View.tsx",
         "features/page/blocks/releases-gallery/ViewClient.tsx",
@@ -76980,6 +77285,7 @@
         "features/page/blocks/work-table/View.tsx",
         "features/page/blocks/work-table/ViewServer.tsx",
         "features/page/blocks/works-gallery/Editor.tsx",
+        "features/page/blocks/works-gallery/InfiniteList.tsx",
         "features/page/blocks/works-gallery/Skeleton.tsx",
         "features/page/blocks/works-gallery/View.tsx",
         "features/page/blocks/works-gallery/ViewClient.tsx",
@@ -76991,6 +77297,7 @@
         "features/page/PageEditor/SectionItemView.stories.tsx",
         "features/page/PageEditor/editors/ColumnsEditor.stories.tsx",
         "features/page/blocks/CollectionBlocks.stories.tsx",
+        "features/page/blocks/InfiniteCollection.stories.tsx",
         "features/page/blocks/ListBlockEditorBase.stories.tsx",
         "features/page/blocks/ListViewShell.stories.tsx",
         "features/page/blocks/embed/Embed.stories.tsx"
@@ -77803,7 +78110,6 @@
         "features/work/WorkEditor/useWorkLifecycle.ts",
         "features/work/WorkEditor/work-lifecycle-controls.ts",
         "features/work/WorkMediaDeliveryContext.tsx",
-        "features/work/WorkPublicHeaderLayout.tsx",
         "features/work/work-view-model.ts"
       ],
       "components": [
@@ -77817,8 +78123,7 @@
         "features/work/WorkEditor/credits/CreditSkeletons.tsx",
         "features/work/WorkEditor/credits/SortableCreditGroupHeader.tsx",
         "features/work/WorkEditor/credits/SortableCreditRow.tsx",
-        "features/work/WorkMediaDeliveryContext.tsx",
-        "features/work/WorkPublicHeaderLayout.tsx"
+        "features/work/WorkMediaDeliveryContext.tsx"
       ],
       "stories": [],
       "tests": [
@@ -83276,6 +83581,29 @@
       ]
     },
     {
+      "file": "features/page/blocks/InfiniteCollection.stories.tsx",
+      "title": "Feature/Page/Infinite Collection",
+      "component": "InfiniteReleases",
+      "variants": [
+        {
+          "name": "LoadMore",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/feature-page-infinite-collection--load-more"
+        },
+        {
+          "name": "RetryAfterFailure",
+          "args": "{ failFirst: true }",
+          "preview": "http://localhost:6010/?path=/story/feature-page-infinite-collection--retry-after-failure"
+        }
+      ],
+      "importedSources": [
+        "components/core/Layout/index.ts",
+        "features/page/blocks/infinite-items.tsx",
+        "features/page/blocks/releases-gallery/ViewClientRuntime.tsx",
+        "features/page/blocks/releases-gallery/schema.ts"
+      ]
+    },
+    {
       "file": "features/page/blocks/ListBlockEditorBase.stories.tsx",
       "title": "Feature/Page/List Block Settings",
       "component": "Settings",
@@ -87685,6 +88013,11 @@
           "preview": "http://localhost:6010/?path=/story/pages-public-entity-detail--work"
         },
         {
+          "name": "WorkWithImage",
+          "args": "{ media: true }",
+          "preview": "http://localhost:6010/?path=/story/pages-public-entity-detail--work-with-image"
+        },
+        {
           "name": "WorkSparse",
           "args": "{ sparse: true }",
           "preview": "http://localhost:6010/?path=/story/pages-public-entity-detail--work-sparse"
@@ -87703,6 +88036,16 @@
           "name": "Event",
           "args": "{ entity: 'event' }",
           "preview": "http://localhost:6010/?path=/story/pages-public-entity-detail--event"
+        },
+        {
+          "name": "EventWithPoster",
+          "args": "{ entity: 'event', media: true, long: true }",
+          "preview": "http://localhost:6010/?path=/story/pages-public-entity-detail--event-with-poster"
+        },
+        {
+          "name": "EventWithPosterPhone",
+          "args": "{ entity: 'event', media: true }",
+          "preview": "http://localhost:6010/?path=/story/pages-public-entity-detail--event-with-poster-phone"
         },
         {
           "name": "EventSparse",
@@ -97461,6 +97804,11 @@
             {
               "exported": "LayoutColumnCount",
               "imported": "LayoutColumnCount",
+              "typeOnly": true
+            },
+            {
+              "exported": "LayoutMinColumnWidth",
+              "imported": "LayoutMinColumnWidth",
               "typeOnly": true
             },
             {

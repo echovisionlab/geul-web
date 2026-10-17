@@ -1,8 +1,7 @@
 'use client';
-import { SupportingText, Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
+import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
 import {
-  LayoutInset as AppLayoutInset,
   LayoutStack as DsLayoutStack,
   LayoutInline as DsLayoutInline,
   LayoutGrid as DsLayoutGrid,
@@ -35,6 +34,11 @@ import { buildArtistJsonLd } from '@/lib/utils/json-ld';
 import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
 import type { SearchParamRecord } from '@/lib/utils/request-path';
 import { ArtistWorkSection } from './ArtistWorkSection';
+import {
+  EntityDetailImage,
+  EntityDetailLayout,
+  EntityDetailSection,
+} from '@/features/document-layout/ui/EntityDetailLayout';
 import classes from './page.module.css';
 
 type ArtistView = NonNullable<Awaited<ReturnType<typeof getArtistView>>>;
@@ -85,96 +89,78 @@ export function ArtistPublicView({
   const hasSocialLinks = artist.socialLinks && Object.keys(artist.socialLinks).length > 0;
   const getReleaseArtists = getArtistReleaseArtists(artist);
 
+  const contentLang =
+    artist.localizationInfo?.displayedLocale || artist.localizationInfo?.sourceLocale || contentLocale;
+
   return (
     <>
       {artistMetadata && <JsonLdScript data={buildArtistJsonLd(artistMetadata)} />}
-      <DsLayoutStack gap="xl">
-        <div className={classes.header}>
-          <DsLayoutInline align="start" gap="xl" wrap="wrap">
-            {artist.imageUrl && (
-              <div className={classes.imageContainer}>
-                <img
-                  src={buildManagedImageUrl(artist.imageUrl, MANAGED_IMAGE_PRESET.HEADER_IMAGE) ?? undefined}
-                  alt={artist.name}
-                  className={classes.image}
-                />
-              </div>
+      <EntityDetailLayout
+        media={
+          artist.imageUrl ? (
+            <EntityDetailImage
+              src={buildManagedImageUrl(artist.imageUrl, MANAGED_IMAGE_PRESET.HEADER_IMAGE) ?? artist.imageUrl}
+              alt={artist.name}
+            />
+          ) : undefined
+        }
+        title={artist.name}
+        titleLang={contentLang}
+        actions={
+          <ContentLanguageMenu
+            pathname={pathname}
+            query={query}
+            requestedLocale={contentLocale}
+            localizationInfo={artist.localizationInfo}
+          />
+        }
+        meta={
+          <PublicMetadataRows>
+            {artist.isGroup && (
+              <PublicMetadataRow label={tCommonLabels('type')}>
+                <DsText size="sm" as="span">
+                  {t('labels.group')}
+                </DsText>
+              </PublicMetadataRow>
             )}
-            <div className={classes.infoContainer}>
-              <DsLayoutStack gap="xs">
-                <DsLayoutInline justify="between" align="start" wrap="nowrap">
-                  <DsHeading
-                    level={1}
-                    scale="title"
-                    lang={
-                      artist.localizationInfo?.displayedLocale || artist.localizationInfo?.sourceLocale || contentLocale
-                    }
-                  >
-                    {artist.name}
-                  </DsHeading>
-                  <DsLayoutInline gap="sm" align="start" wrap="nowrap">
-                    <ContentLanguageMenu
-                      pathname={pathname}
-                      query={query}
-                      requestedLocale={contentLocale}
-                      localizationInfo={artist.localizationInfo}
-                    />
-                  </DsLayoutInline>
-                </DsLayoutInline>
-
-                <PublicMetadataRows>
-                  {artist.isGroup && (
-                    <PublicMetadataRow label={tCommonLabels('type')}>
-                      <DsText size="sm" as="span">
-                        {t('labels.group')}
-                      </DsText>
-                    </PublicMetadataRow>
-                  )}
-                  {artist.realName && (
-                    <PublicMetadataRow label={t('details.realName')}>
-                      <DsText size="sm">{artist.realName}</DsText>
-                    </PublicMetadataRow>
-                  )}
-                  {artist.countryCode && (
-                    <PublicMetadataRow label={tCommonLabels('country')}>
-                      <DsText size="sm">{countryName}</DsText>
-                    </PublicMetadataRow>
-                  )}
-                  {artist.website && (
-                    <PublicMetadataRow label={tCommonLabels('website')}>
-                      <PublicMetadataLink href={artist.website} external indicator="external">
-                        {artist.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}
-                      </PublicMetadataLink>
-                    </PublicMetadataRow>
-                  )}
-                  {hasSocialLinks && (
-                    <PublicMetadataRow label={tCommonLabels('social')} valueAlign="center">
-                      <SocialLinksDisplayView entries={socialLinkEntries} iconSize="sm" />
-                    </PublicMetadataRow>
-                  )}
-                  {artist.labels.length > 0 && (
-                    <PublicMetadataRow label={tCommonEntities('label')}>
-                      <PublicMetadataValueGroup>
-                        {artist.labels.map((label) => (
-                          <PublicMetadataLink key={label.id} href={`/labels/${label.slug || label.id}`}>
-                            {label.name}
-                          </PublicMetadataLink>
-                        ))}
-                      </PublicMetadataValueGroup>
-                    </PublicMetadataRow>
-                  )}
-                </PublicMetadataRows>
-              </DsLayoutStack>
-            </div>
-          </DsLayoutInline>
-        </div>
+            {artist.realName && (
+              <PublicMetadataRow label={t('details.realName')}>
+                <DsText size="sm">{artist.realName}</DsText>
+              </PublicMetadataRow>
+            )}
+            {artist.countryCode && (
+              <PublicMetadataRow label={tCommonLabels('country')}>
+                <DsText size="sm">{countryName}</DsText>
+              </PublicMetadataRow>
+            )}
+            {artist.website && (
+              <PublicMetadataRow label={tCommonLabels('website')}>
+                <PublicMetadataLink href={artist.website} external indicator="external">
+                  {artist.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                </PublicMetadataLink>
+              </PublicMetadataRow>
+            )}
+            {hasSocialLinks && (
+              <PublicMetadataRow label={tCommonLabels('social')} valueAlign="center">
+                <SocialLinksDisplayView entries={socialLinkEntries} iconSize="sm" />
+              </PublicMetadataRow>
+            )}
+            {artist.labels.length > 0 && (
+              <PublicMetadataRow label={tCommonEntities('label')}>
+                <PublicMetadataValueGroup>
+                  {artist.labels.map((label) => (
+                    <PublicMetadataLink key={label.id} href={`/labels/${label.slug || label.id}`}>
+                      {label.name}
+                    </PublicMetadataLink>
+                  ))}
+                </PublicMetadataValueGroup>
+              </PublicMetadataRow>
+            )}
+          </PublicMetadataRows>
+        }
+      >
         {artist.images.length > 1 ? (
-          <div>
-            <AppLayoutInset blockEnd="sm">
-              <DsText size="sm" font="mono" weight="medium" tone="muted" role="heading" aria-level={2}>
-                {t('sections.gallery')}
-              </DsText>
-            </AppLayoutInset>
+          <EntityDetailSection title={t('sections.gallery')}>
             <DsLayoutGrid columns={{ base: 2, sm: 3, md: 4 }} gap="md">
               {artist.images
                 .slice(1)
@@ -189,15 +175,10 @@ export function ArtistPublicView({
                   ) : null,
                 )}
             </DsLayoutGrid>
-          </div>
+          </EntityDetailSection>
         ) : null}
         {artist.content && artist.content.length > 0 && (
-          <div>
-            <AppLayoutInset blockEnd="sm">
-              <DsText size="sm" font="mono" weight="medium" tone="muted" role="heading" aria-level={2}>
-                {t('sections.biography')}
-              </DsText>
-            </AppLayoutInset>
+          <EntityDetailSection title={t('sections.biography')}>
             <div
               className="prose"
               lang={artist.localizationInfo?.displayedLocale || artist.localizationInfo?.sourceLocale || contentLocale}
@@ -209,14 +190,9 @@ export function ArtistPublicView({
                 ))}
               </DocumentHeadingScope>
             </div>
-          </div>
+          </EntityDetailSection>
         )}
-        <div>
-          <AppLayoutInset blockEnd="sm">
-            <DsText size="sm" font="mono" weight="medium" tone="muted" role="heading" aria-level={2}>
-              {tCommonEntities('releases')}
-            </DsText>
-          </AppLayoutInset>
+        <EntityDetailSection title={tCommonEntities('releases')}>
           {artist.releases.length > 0 ? (
             <ReleaseListViewClient
               releases={artist.releases.map((release) => ({
@@ -235,7 +211,7 @@ export function ArtistPublicView({
               <SupportingText tone="secondary">{t('releases.empty')}</SupportingText>
             </DsLayoutInset>
           )}
-        </div>
+        </EntityDetailSection>
         {artist.works.length > 0 && (
           <ArtistWorkSection
             works={artist.works.map((work) => ({
@@ -248,43 +224,36 @@ export function ArtistPublicView({
           />
         )}
         {artist.tracks.length > 0 && (
-          <div>
-            <AppLayoutInset blockEnd="sm">
-              <DsText size="sm" font="mono" weight="medium" tone="muted" role="heading" aria-level={2}>
-                {t('sections.tracks', { count: artist.tracks.length })}
-              </DsText>
-            </AppLayoutInset>
-            <SectionCard padding="none">
-              <DsLayoutStack gap="none">
-                {artist.tracks.slice(0, 10).map((track, index) => (
-                  <SectionCard
-                    key={track.id}
-                    padding="none"
-                    appearance="plain"
-                    border={index === 0 ? 'none' : 'block-start'}
-                  >
-                    <DsLayoutInset block="sm" inline="md">
-                      <DsLayoutInline justify="between" wrap="nowrap" data-first={index === 0 || undefined}>
-                        <DsText size="sm" weight="medium" lines={1}>
-                          {track.title}
-                        </DsText>
-                        <LabelBadge>{track.roleName}</LabelBadge>
-                      </DsLayoutInline>
-                    </DsLayoutInset>
-                  </SectionCard>
-                ))}
-                {artist.tracks.length > 10 && (
+          <EntityDetailSection title={t('sections.tracks', { count: artist.tracks.length })}>
+            <DsLayoutStack gap="none">
+              {artist.tracks.slice(0, 10).map((track, index) => (
+                <SectionCard
+                  key={track.id}
+                  padding="none"
+                  appearance="plain"
+                  border={index === 0 ? 'none' : 'block-start'}
+                >
                   <DsLayoutInset block="sm">
-                    <DsText size="sm" tone="secondary" align="center">
-                      {t('tracks.more', { count: artist.tracks.length - 10 })}
-                    </DsText>
+                    <DsLayoutInline justify="between" wrap="nowrap" data-first={index === 0 || undefined}>
+                      <DsText size="sm" weight="medium" lines={1}>
+                        {track.title}
+                      </DsText>
+                      <LabelBadge>{track.roleName}</LabelBadge>
+                    </DsLayoutInline>
                   </DsLayoutInset>
-                )}
-              </DsLayoutStack>
-            </SectionCard>
-          </div>
+                </SectionCard>
+              ))}
+              {artist.tracks.length > 10 && (
+                <DsLayoutInset block="sm">
+                  <DsText size="sm" tone="secondary" align="center">
+                    {t('tracks.more', { count: artist.tracks.length - 10 })}
+                  </DsText>
+                </DsLayoutInset>
+              )}
+            </DsLayoutStack>
+          </EntityDetailSection>
         )}
-      </DsLayoutStack>
+      </EntityDetailLayout>
     </>
   );
 }

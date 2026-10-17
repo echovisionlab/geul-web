@@ -5,14 +5,8 @@ import type { CarouselSlideSize } from '@/components/core/Carousel';
  */
 
 // ============================================================================
-// Column Options
+// Carousel Options (grids size their columns from the item size)
 // ============================================================================
-
-export const COLUMN_OPTIONS = [
-  { value: '2', label: '2' },
-  { value: '3', label: '3' },
-  { value: '4', label: '4' },
-] as const;
 
 export const SLIDES_TO_SHOW_OPTIONS = [
   { value: '1', label: '1' },

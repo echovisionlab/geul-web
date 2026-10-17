@@ -65,6 +65,10 @@ export function Pagination({
   ...props
 }: PaginationProps) {
   const count = Number.isFinite(total) ? Math.max(1, Math.floor(total)) : 1;
+  // A single page has nowhere to go: no navigation is rendered.
+  if (count <= 1) {
+    return null;
+  }
   const current = Number.isFinite(value) ? Math.min(count, Math.max(1, Math.floor(value))) : 1;
   const pages = [
     ...new Set([1, ...Array.from({ length: 5 }, (_, i) => current - 2 + i).filter((p) => p > 1 && p < count), count]),

@@ -154,8 +154,6 @@ describe('native Core Display contracts', () => {
   it.each([
     { value: 2.7, total: 5.2, expected: 2 },
     { value: Number.NaN, total: 5, expected: 1 },
-    { value: 2, total: Number.NaN, expected: 1 },
-    { value: Number.POSITIVE_INFINITY, total: Number.POSITIVE_INFINITY, expected: 1 },
   ])('keeps one finite integer current page for value=$value total=$total', ({ value, total, expected }) => {
     const change = vi.fn();
     render(
@@ -174,6 +172,21 @@ describe('native Core Display contracts', () => {
     act(() => (container.querySelector('[aria-label="Next page"]') as HTMLButtonElement).click());
     expect(change.mock.calls.every(([page]) => Number.isFinite(page) && Number.isInteger(page))).toBe(true);
   });
+
+  it.each([1, 0, Number.NaN, Number.POSITIVE_INFINITY])(
+    'renders no navigation when total=%s leaves one page',
+    (total) => {
+      render(
+        <Pagination
+          value={1}
+          total={total}
+          onChange={vi.fn()}
+          labels={{ previousPage: 'Previous page', nextPage: 'Next page', page: (page) => `Page ${page}` }}
+        />,
+      );
+      expect(container.innerHTML).toBe('');
+    },
+  );
 
   describe('link mode', () => {
     const labels: PaginationLabels = {

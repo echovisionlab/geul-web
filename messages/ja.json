@@ -455,6 +455,12 @@
       "pause": "アニメーションを一時停止",
       "resume": "アニメーションを再開",
       "readAllInformation": "シーンのすべての情報を読む"
+    },
+    "loadMore": {
+      "action": "さらに読み込む",
+      "loading": "読み込み中…",
+      "failed": "項目をさらに読み込めませんでした。",
+      "retry": "再試行"
     }
   },
   "shell": {
@@ -1413,7 +1419,8 @@
     "works": {
       "allTypes": "すべての種類",
       "empty": "作品が見つかりません",
-      "loadMore": "さらに表示（残り {count} 件）"
+      "loadMore": "さらに表示（残り {count} 件）",
+      "filterByType": "種類で作品を絞り込む"
     },
     "releases": {
       "empty": "リリースされた作品はまだありません。"
@@ -3196,7 +3203,7 @@
         "showMeta": "メタ情報を表示（日付・作成者）",
         "sortBy": "並び順の基準",
         "numberOfPosts": "投稿数",
-        "showPagination": "ページネーションを表示",
+        "showPagination": "スクロールで続きを読み込む",
         "exposedFilters": "表示するフィルター",
         "exposedSorts": "表示する並び順",
         "rowsPerPage": "1ページあたりの行数",

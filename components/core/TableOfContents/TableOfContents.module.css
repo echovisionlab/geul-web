@@ -34,14 +34,17 @@
   }
 }
 
+/* A rail-only outline (`outline="rail"`) keeps the rail reserve at every width. */
 @media (width >= $mantine-breakpoint-lg) {
-  :global([data-table-of-contents-scope]):has(.layout[data-outline]),
-  .layout[data-outline] {
+  :global([data-table-of-contents-scope]):has(.layout[data-outline]:not([data-outline-presentation='rail'])),
+  .layout[data-outline]:not([data-outline-presentation='rail']) {
     --_table-of-contents-inset-end: var(--_toc-column-track);
   }
 
-  :global([data-table-of-contents-scope]):has(.layout[data-outline][data-placement='center']),
-  .layout[data-outline][data-placement='center'] {
+  :global([data-table-of-contents-scope]):has(
+    .layout[data-outline][data-placement='center']:not([data-outline-presentation='rail'])
+  ),
+  .layout[data-outline][data-placement='center']:not([data-outline-presentation='rail']) {
     --_table-of-contents-inset-start: var(--_toc-column-track);
   }
 }
@@ -71,13 +74,13 @@
 @media (width >= $mantine-breakpoint-lg) {
   /* A centered document stays one composition on very wide screens: breakouts up to `standard`
      with the column beside them, instead of the column drifting to the far viewport edge. */
-  .layout[data-outline][data-placement='center'] {
+  .layout[data-outline][data-placement='center']:not([data-outline-presentation='rail']) {
     width: 100%;
     max-width: calc(var(--geul-content-width-standard) + 2 * var(--_toc-column-track));
     margin-inline: auto;
   }
 
-  .track {
+  .layout:not([data-outline-presentation='rail']) > .track {
     width: var(--_toc-column-width);
   }
 }

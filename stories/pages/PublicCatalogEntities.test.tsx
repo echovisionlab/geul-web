@@ -49,7 +49,7 @@ describe('actual public catalog entity views', () => {
     await render('artist');
     expect(host.querySelectorAll('h1')).toHaveLength(1);
     expect(host.querySelector('h1')).toHaveTextContent('Mina Park');
-    expect(host.querySelectorAll('[role="heading"][aria-level="2"]').length).toBeGreaterThanOrEqual(4);
+    expect(host.querySelectorAll('[data-entity-detail-section] > div > h2').length).toBeGreaterThanOrEqual(4);
     expect(host.querySelector('a[href="/labels/quiet-records"]')).toHaveTextContent('Quiet Records');
     expect(host.querySelector('a[href="/works/night-signals"]')).toHaveTextContent('Night Signals');
     expect(host.querySelector('.prose')).toHaveAttribute('lang', 'en');
@@ -57,7 +57,7 @@ describe('actual public catalog entity views', () => {
   it('retains label body, related artist and release reading order', async () => {
     await render('label');
     expect(host.querySelector('h1')).toHaveTextContent('Quiet Records');
-    expect(host.querySelectorAll('[role="heading"][aria-level="2"]')).toHaveLength(3);
+    expect(host.querySelectorAll('[data-entity-detail-section] > div > h2')).toHaveLength(3);
     expect(host.querySelector('a[href="/releases/night-signals"]')).toHaveAccessibleName('Night Signals');
     expect(host.querySelector('a[href="/artists/mina-park"]')).toHaveAccessibleName('Mina Park');
     expect(host.querySelector('.prose')).toHaveTextContent('Recording and sharing the sound of a place.');

@@ -455,6 +455,12 @@
       "pause": "Pausar animação",
       "resume": "Retomar animação",
       "readAllInformation": "Ler todas as informações da cena"
+    },
+    "loadMore": {
+      "action": "Carregar mais",
+      "loading": "A carregar mais…",
+      "failed": "Não foi possível carregar mais itens.",
+      "retry": "Tentar novamente"
     }
   },
   "shell": {
@@ -1413,7 +1419,8 @@
     "works": {
       "allTypes": "Todos os tipos",
       "empty": "Nenhuma obra encontrada",
-      "loadMore": "Carregue mais ({count} restantes)"
+      "loadMore": "Carregue mais ({count} restantes)",
+      "filterByType": "Filtrar trabalhos por tipo"
     },
     "releases": {
       "empty": "Nenhum lançamento lançado ainda."
@@ -1423,7 +1430,7 @@
     "details": {
       "parent": "Pai",
       "stats": "Estatísticas",
-      "statsValue": "{releases} lançamentos, {artists} artistas"
+      "statsValue": "{releases, plural, one {# lançamento} other {# lançamentos}}, {artists, plural, one {# artista} other {# artistas}}"
     },
     "sections": {
       "releases": "Lançamentos ({count})",
@@ -3196,7 +3203,7 @@
         "showMeta": "Mostrar meta",
         "sortBy": "Ordenar por",
         "numberOfPosts": "Número de posts",
-        "showPagination": "Mostrar paginação",
+        "showPagination": "Carregar mais ao deslocar",
         "exposedFilters": "Filtros expostos",
         "exposedSorts": "Classificações expostas",
         "rowsPerPage": "Linhas por página",

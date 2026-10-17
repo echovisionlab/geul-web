@@ -129,8 +129,7 @@ describe('carousel skeleton runtime boundaries', () => {
       expect.objectContaining({
         categoryIds: ['first', 'second'],
         limit: 3,
-        page: 1,
-        showPagination: true,
+        offset: 0,
       }),
     ]);
     await query.queryFn();

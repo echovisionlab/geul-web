@@ -455,6 +455,12 @@
       "pause": "Jeda animasi",
       "resume": "Lanjutkan animasi",
       "readAllInformation": "Baca semua informasi adegan"
+    },
+    "loadMore": {
+      "action": "Muat lebih banyak",
+      "loading": "Memuat lebih banyak…",
+      "failed": "Tidak dapat memuat item lainnya.",
+      "retry": "Coba lagi"
     }
   },
   "shell": {
@@ -1413,7 +1419,8 @@
     "works": {
       "allTypes": "Semua Jenis",
       "empty": "Tidak ada karya yang ditemukan",
-      "loadMore": "Muat lebih banyak ({count} tersisa)"
+      "loadMore": "Muat lebih banyak ({count} tersisa)",
+      "filterByType": "Filter karya menurut jenis"
     },
     "releases": {
       "empty": "Belum ada rilis yang dirilis."
@@ -3196,7 +3203,7 @@
         "showMeta": "Tampilkan meta",
         "sortBy": "Urutkan berdasarkan",
         "numberOfPosts": "Jumlah posting",
-        "showPagination": "Tampilkan penomoran halaman",
+        "showPagination": "Muat lebih banyak saat menggulir",
         "exposedFilters": "Filter terbuka",
         "exposedSorts": "Macam terbuka",
         "rowsPerPage": "Baris per halaman",

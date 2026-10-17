@@ -455,6 +455,12 @@
       "pause": "Animasyonu duraklat",
       "resume": "Animasyonu sürdür",
       "readAllInformation": "Sahnenin tüm bilgilerini oku"
+    },
+    "loadMore": {
+      "action": "Daha fazla yükle",
+      "loading": "Yükleniyor…",
+      "failed": "Daha fazla öğe yüklenemedi.",
+      "retry": "Tekrar dene"
     }
   },
   "shell": {
@@ -1413,7 +1419,8 @@
     "works": {
       "allTypes": "Tüm Türler",
       "empty": "Hiçbir eser bulunamadı",
-      "loadMore": "Daha fazlasını yükle ({count} kaldı)"
+      "loadMore": "Daha fazlasını yükle ({count} kaldı)",
+      "filterByType": "Çalışmaları türe göre filtrele"
     },
     "releases": {
       "empty": "Henüz yayınlanmış bir yayın yok."
@@ -3196,7 +3203,7 @@
         "showMeta": "Metayı göster",
         "sortBy": "Sırala",
         "numberOfPosts": "Gönderi sayısı",
-        "showPagination": "Sayfalandırmayı göster",
+        "showPagination": "Kaydırdıkça daha fazla yükle",
         "exposedFilters": "Açıkta kalan filtreler",
         "exposedSorts": "Açıkta kalan çeşitler",
         "rowsPerPage": "Sayfa başına satır",

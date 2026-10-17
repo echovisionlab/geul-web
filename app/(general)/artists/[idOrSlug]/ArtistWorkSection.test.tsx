@@ -32,8 +32,7 @@ describe('artist works search', () => {
     expect(input).toHaveAttribute('aria-label', 'Search...');
     const collection = document.getElementById(input.getAttribute('aria-describedby')!);
     expect(collection).toHaveTextContent('Works');
-    expect(collection).toHaveAttribute('role', 'heading');
-    expect(collection).toHaveAttribute('aria-level', '2');
+    expect(collection?.tagName).toBe('H2');
     act(() => input.focus());
     await act(async () => {
       Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set?.call(input, 'Night');

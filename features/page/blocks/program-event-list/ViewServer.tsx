@@ -1,34 +1,28 @@
 import { Suspense } from 'react';
-import { ServerDataTablePagination } from '@/features/data-table/ServerDataTable/ServerDataTablePagination';
 import { listProgramEventsForBlock } from '@/lib/queries/program-event';
 import { parseBooleanProp, parseIntegerProp, splitCsv } from '../list-shared';
-import { buildBlockTableNamespace, parseBlockTableQuery, queryRecordToSearchParams } from '../table-utils';
 import type { BlockViewProps } from '../types';
 import { parseProgramEventListProps } from './schema';
 import { ProgramEventListSkeleton } from './Skeleton';
 import { ProgramEventListViewClient } from './ViewClient';
+import { ProgramEventInfiniteList } from './InfiniteList';
 
-async function ProgramEventListViewServer({ sectionId, props, query, requestedLocale }: BlockViewProps) {
+async function ProgramEventListViewServer({ props, requestedLocale }: BlockViewProps) {
   const p = parseProgramEventListProps(props);
   const limit = parseIntegerProp(p.limit, 6);
+  // Pagination continues the list in place: the first page renders here, later pages on demand.
   const showPagination = parseBooleanProp(p.showPagination, false);
-  const namespace = buildBlockTableNamespace('programEventList', sectionId);
-  const searchParams = queryRecordToSearchParams(query);
-  const tableQuery = showPagination
-    ? parseBlockTableQuery(searchParams, namespace, limit)
-    : { page: 1, pageSize: limit };
   const typeIds = splitCsv(p.typeIds);
-
-  const { events, pagination } = await listProgramEventsForBlock({
+  const query = {
     typeIds: typeIds.length > 0 ? typeIds : undefined,
     seriesId: p.seriesId || undefined,
     timeWindow: p.timeWindow,
-    limit: tableQuery.pageSize,
-    offset: ((tableQuery.page ?? 1) - 1) * (tableQuery.pageSize ?? limit),
     sortBy: p.sortBy,
     sortOrder: p.sortOrder,
-    requestedLocale,
-  });
+    limit,
+  };
+
+  const { events, pagination } = await listProgramEventsForBlock({ ...query, offset: 0, requestedLocale });
 
   const transformedEvents = events.map((event) => ({
     id: event.id,
@@ -44,21 +38,16 @@ async function ProgramEventListViewServer({ sectionId, props, query, requestedLo
     locationMode: event.locationMode,
   }));
 
-  const result = {
-    data: transformedEvents,
-    total: pagination.total,
-    page: tableQuery.page ?? 1,
-    pageSize: tableQuery.pageSize ?? limit,
-    totalPages: Math.ceil(pagination.total / (tableQuery.pageSize ?? limit)),
-  };
-
-  return (
-    <>
-      <ProgramEventListViewClient events={transformedEvents} parsedProps={p} locale={requestedLocale} />
-      {showPagination ? (
-        <ServerDataTablePagination namespace={namespace} result={result} searchParams={searchParams} />
-      ) : null}
-    </>
+  return showPagination ? (
+    <ProgramEventInfiniteList
+      initialEvents={transformedEvents}
+      total={pagination.total}
+      query={query}
+      parsedProps={p}
+      locale={requestedLocale}
+    />
+  ) : (
+    <ProgramEventListViewClient events={transformedEvents} parsedProps={p} locale={requestedLocale} />
   );
 }
 

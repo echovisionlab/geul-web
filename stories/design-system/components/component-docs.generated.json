@@ -2026,6 +2026,7 @@
         "Consumer: features/page/blocks/immersive-scene/ImmersiveSceneUnitSettingsPanel.tsx",
         "Consumer: features/page/blocks/immersive-scene/MeshOptimizationPanel.tsx",
         "Consumer: features/page/blocks/immersive-scene/SceneRenderer.tsx",
+        "Consumer: features/page/blocks/infinite-items.tsx",
         "Consumer: features/page/blocks/map/Editor.tsx",
         "Consumer: features/page/blocks/marquee/MarqueeView.tsx",
         "Consumer: features/page/blocks/text-marquee/Editor.tsx",
@@ -8687,7 +8688,6 @@
         "Consumer: features/page/PageView/blocks/DefaultMathBlockView.tsx",
         "Consumer: features/page/PageView/blocks/GeneratedMathBlockView.tsx",
         "Consumer: features/page/blocks/ListBlockSkeleton.tsx",
-        "Consumer: features/page/blocks/artist-grid/View.tsx",
         "Consumer: features/page/blocks/author-list/Editor.tsx",
         "Consumer: features/page/blocks/author-list/Skeleton.tsx",
         "Consumer: features/page/blocks/author-list/ViewClientRuntime.tsx",
@@ -8695,12 +8695,7 @@
         "Consumer: features/page/blocks/immersive-scene/MeshOptimizationPanel.tsx",
         "Consumer: features/page/blocks/immersive-scene/SceneRenderer.tsx",
         "Consumer: features/page/blocks/immersive-scene/Workspace.tsx",
-        "Consumer: features/page/blocks/label-list/View.tsx",
-        "Consumer: features/page/blocks/post-list/View.tsx",
         "Consumer: features/page/blocks/post-map/Skeleton.tsx",
-        "Consumer: features/page/blocks/program-event-list/View.tsx",
-        "Consumer: features/page/blocks/releases-gallery/View.tsx",
-        "Consumer: features/page/blocks/works-gallery/View.tsx",
         "Consumer: features/participants/ParticipantRow.tsx",
         "Consumer: features/place/CreatePlaceModal.tsx",
         "Consumer: features/place/PlaceDetailForm.tsx",
@@ -47742,8 +47737,6 @@
         "Consumer: features/admin/ui/AdminPageHeader/AdminPageHeader.tsx",
         "Consumer: features/member/onboarding/NicknameOnboarding.tsx",
         "Consumer: features/menu/AdminMenusPage.tsx",
-        "Consumer: features/program-event/ProgramEventSeriesPublicView.tsx",
-        "Consumer: features/series/SeriesPublicView.tsx",
         "Consumer: features/share/SharePasswordView.tsx",
         "Consumer: features/site/SiteSettingsForm/SiteSettingsForm.tsx",
         "Consumer: features/translation/admin/TranslationJobsPage.tsx",
@@ -47777,13 +47770,13 @@
         {
           "name": "--geul-spacing-lg",
           "registered": true,
-          "sources": [{ "file": "components/core/Layout/layout-contract.ts", "line": 194, "property": "lg" }],
+          "sources": [{ "file": "components/core/Layout/layout-contract.ts", "line": 199, "property": "lg" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 63, "value": "1rem", "context": ":root" }]
         },
         {
           "name": "--geul-spacing-md",
           "registered": true,
-          "sources": [{ "file": "components/core/Layout/layout-contract.ts", "line": 193, "property": "md" }],
+          "sources": [{ "file": "components/core/Layout/layout-contract.ts", "line": 198, "property": "md" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 62, "value": "0.75rem", "context": ":root" }
           ]
@@ -47791,7 +47784,7 @@
         {
           "name": "--geul-spacing-role-action-group",
           "registered": true,
-          "sources": [{ "file": "components/core/Layout/layout-contract.ts", "line": 196, "property": "action-group" }],
+          "sources": [{ "file": "components/core/Layout/layout-contract.ts", "line": 201, "property": "action-group" }],
           "definitions": [
             {
               "file": "lib/styles/design-tokens.css",
@@ -47804,7 +47797,7 @@
         {
           "name": "--geul-spacing-role-section",
           "registered": true,
-          "sources": [{ "file": "components/core/Layout/layout-contract.ts", "line": 197, "property": "section" }],
+          "sources": [{ "file": "components/core/Layout/layout-contract.ts", "line": 202, "property": "section" }],
           "definitions": [
             {
               "file": "lib/styles/design-tokens.css",
@@ -47817,7 +47810,7 @@
         {
           "name": "--geul-spacing-sm",
           "registered": true,
-          "sources": [{ "file": "components/core/Layout/layout-contract.ts", "line": 192, "property": "sm" }],
+          "sources": [{ "file": "components/core/Layout/layout-contract.ts", "line": 197, "property": "sm" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 61, "value": "0.625rem", "context": ":root" }
           ]
@@ -47825,19 +47818,19 @@
         {
           "name": "--geul-spacing-xl",
           "registered": true,
-          "sources": [{ "file": "components/core/Layout/layout-contract.ts", "line": 195, "property": "xl" }],
+          "sources": [{ "file": "components/core/Layout/layout-contract.ts", "line": 200, "property": "xl" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 64, "value": "1.5rem", "context": ":root" }]
         },
         {
           "name": "--geul-spacing-xs",
           "registered": true,
-          "sources": [{ "file": "components/core/Layout/layout-contract.ts", "line": 191, "property": "xs" }],
+          "sources": [{ "file": "components/core/Layout/layout-contract.ts", "line": 196, "property": "xs" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 60, "value": "0.5rem", "context": ":root" }]
         },
         {
           "name": "--geul-spacing-xxs",
           "registered": true,
-          "sources": [{ "file": "components/core/Layout/layout-contract.ts", "line": 190, "property": "xxs" }],
+          "sources": [{ "file": "components/core/Layout/layout-contract.ts", "line": 195, "property": "xxs" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 59, "value": "0.25rem", "context": ":root" }
           ]
@@ -47892,6 +47885,12 @@
         { "name": "LayoutGrid.fill", "type": "'inline' | 'block' | 'both'", "required": false },
         { "name": "LayoutGrid.flexible", "type": "boolean", "required": false },
         { "name": "LayoutGrid.gap", "type": "Responsive<Space>", "required": false },
+        {
+          "name": "LayoutGrid.minColumnWidth",
+          "type": "Responsive<LayoutMinColumnWidth>",
+          "required": false,
+          "description": "A fluid grid: as many equal columns as fit, each at least this wide (never wider than the grid).\nReplaces `columns`; items take one track each, so `LayoutGridItem` spans do not apply."
+        },
         { "name": "LayoutGrid.order", "type": "0 | 1 | 2 | 3 | 4", "required": false },
         { "name": "LayoutGrid.printFlow", "type": "'row' | 'stack'", "required": false },
         { "name": "LayoutGrid.rowGap", "type": "Responsive<Space>", "required": false },
@@ -48664,7 +48663,6 @@
         "Consumer: features/page/blocks/ListBlockSkeleton.tsx",
         "Consumer: features/page/blocks/ListViewShell.tsx",
         "Consumer: features/page/blocks/TableLoadingFallback.tsx",
-        "Consumer: features/page/blocks/artist-grid/View.tsx",
         "Consumer: features/page/blocks/artist-grid/ViewClientRuntime.tsx",
         "Consumer: features/page/blocks/author-list/Editor.tsx",
         "Consumer: features/page/blocks/author-list/Skeleton.tsx",
@@ -48681,7 +48679,7 @@
         "Consumer: features/page/blocks/immersive-scene/MeshOptimizationPanel.tsx",
         "Consumer: features/page/blocks/immersive-scene/RotationAxisInputs.tsx",
         "Consumer: features/page/blocks/immersive-scene/SceneRenderer.tsx",
-        "Consumer: features/page/blocks/label-list/View.tsx",
+        "Consumer: features/page/blocks/infinite-items.tsx",
         "Consumer: features/page/blocks/label-marquee/Editor.tsx",
         "Consumer: features/page/blocks/map/Editor.tsx",
         "Consumer: features/page/blocks/map/ViewRuntime.tsx",
@@ -48695,15 +48693,12 @@
         "Consumer: features/page/blocks/post-table/Editor.tsx",
         "Consumer: features/page/blocks/post-table/ViewServer.tsx",
         "Consumer: features/page/blocks/post-table/columns.tsx",
-        "Consumer: features/page/blocks/program-event-list/View.tsx",
         "Consumer: features/page/blocks/program-event-list/ViewClientRuntime.tsx",
-        "Consumer: features/page/blocks/releases-gallery/View.tsx",
         "Consumer: features/page/blocks/releases-gallery/ViewClientRuntime.tsx",
         "Consumer: features/page/blocks/text-marquee/Editor.tsx",
         "Consumer: features/page/blocks/work-map/Editor.tsx",
         "Consumer: features/page/blocks/work-table/Editor.tsx",
         "Consumer: features/page/blocks/work-table/ViewServer.tsx",
-        "Consumer: features/page/blocks/works-gallery/View.tsx",
         "Consumer: features/page/blocks/works-gallery/ViewClientRuntime.tsx",
         "Consumer: features/participants/ParticipantRow.tsx",
         "Consumer: features/place/CreatePlaceModal.tsx",
@@ -48738,7 +48733,6 @@
         "Consumer: features/program-event/ProgramEventEditor/ProgramEventEditor.tsx",
         "Consumer: features/program-event/ProgramEventEditor/ProgramEventPosterUploader.tsx",
         "Consumer: features/program-event/ProgramEventSeriesEditor/ProgramEventSeriesEditor.tsx",
-        "Consumer: features/program-event/ProgramEventSeriesPublicView.tsx",
         "Consumer: features/release/ReleaseCreditsList.tsx",
         "Consumer: features/release/ReleaseEditor/ReleaseArtistsSectionView.tsx",
         "Consumer: features/release/ReleaseEditor/ReleaseCreditsSection.tsx",
@@ -52097,7 +52091,6 @@
       ],
       "usage": [
         "Supply alt for meaningful images and empty alt for decoration. Choose fill/fit, aspect ratio and fallback for actual content conditions.",
-        "Consumer: app/(general)/releases/[idOrSlug]/ReleasePublicView.tsx",
         "Consumer: components/core/SelectionSurface/SelectionSurface.tsx",
         "Consumer: features/artist/ArtistEditor/ArtistImageGalleryEditor.tsx",
         "Consumer: features/media/FilePreview.tsx",
@@ -55517,10 +55510,10 @@
           "name": "--geul-border-default",
           "registered": true,
           "sources": [
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 170, "property": "border" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 173, "property": "border" },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 250,
+              "line": 253,
               "property": "border-inline-start"
             }
           ],
@@ -55558,12 +55551,12 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 278,
+              "line": 281,
               "property": "outline"
             },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 279,
+              "line": 282,
               "property": "outline-offset"
             }
           ],
@@ -55573,10 +55566,10 @@
           "name": "--geul-border-thin",
           "registered": true,
           "sources": [
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 170, "property": "border" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 173, "property": "border" },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 250,
+              "line": 253,
               "property": "border-inline-start"
             }
           ],
@@ -55613,7 +55606,7 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 76,
+              "line": 79,
               "property": "max-width"
             }
           ],
@@ -55630,7 +55623,7 @@
             },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 183,
+              "line": 186,
               "property": "min-height"
             }
           ],
@@ -55642,7 +55635,7 @@
           "name": "--geul-focus",
           "registered": true,
           "sources": [
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 278, "property": "outline" }
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 281, "property": "outline" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 184, "value": "#242622", "context": ":root" },
@@ -55678,7 +55671,7 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 187,
+              "line": 190,
               "property": "font-size"
             }
           ],
@@ -55693,7 +55686,7 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 213,
+              "line": 216,
               "property": "font-weight"
             }
           ],
@@ -55710,12 +55703,12 @@
             },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 183,
+              "line": 186,
               "property": "min-height"
             },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 247,
+              "line": 250,
               "property": "min-height"
             }
           ],
@@ -55733,7 +55726,7 @@
           "name": "--geul-layer-sticky",
           "registered": true,
           "sources": [
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 66, "property": "z-index" }
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 69, "property": "z-index" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 126, "value": "100", "context": ":root" }]
         },
@@ -55743,7 +55736,7 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 188,
+              "line": 191,
               "property": "line-height"
             }
           ],
@@ -55755,7 +55748,7 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 271,
+              "line": 274,
               "property": "transition"
             }
           ],
@@ -55769,7 +55762,7 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 271,
+              "line": 274,
               "property": "transition"
             }
           ],
@@ -55781,7 +55774,7 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 171,
+              "line": 174,
               "property": "border-radius"
             }
           ],
@@ -55793,7 +55786,7 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 172,
+              "line": 175,
               "property": "box-shadow"
             }
           ],
@@ -55810,21 +55803,21 @@
           "name": "--geul-spacing-md",
           "registered": true,
           "sources": [
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 103, "property": "height" },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 127, "property": "width" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 106, "property": "height" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 130, "property": "width" },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 185,
+              "line": 188,
               "property": "padding-inline"
             },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 233,
+              "line": 236,
               "property": "padding-inline-start"
             },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 249,
+              "line": 252,
               "property": "padding-inline"
             }
           ],
@@ -55846,10 +55839,10 @@
               "line": 16,
               "property": "--_toc-top"
             },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 92, "property": "height" },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 120, "property": "width" },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 144, "property": "width" },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 161, "property": "width" }
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 95, "property": "height" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 123, "property": "width" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 147, "property": "width" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 164, "property": "width" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 64, "value": "1.5rem", "context": ":root" }]
         },
@@ -55857,27 +55850,27 @@
           "name": "--geul-spacing-xs",
           "registered": true,
           "sources": [
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 103, "property": "height" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 106, "property": "height" },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 105,
+              "line": 108,
               "property": "padding-block"
             },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 134, "property": "width" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 137, "property": "width" },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 163,
+              "line": 166,
               "property": "padding"
             },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 185,
+              "line": 188,
               "property": "padding-inline"
             },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 227, "property": "gap" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 230, "property": "gap" },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 249,
+              "line": 252,
               "property": "padding-inline"
             }
           ],
@@ -55887,15 +55880,15 @@
           "name": "--geul-spacing-xxs",
           "registered": true,
           "sources": [
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 138, "property": "width" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 141, "property": "width" },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 184,
+              "line": 187,
               "property": "padding-block"
             },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 248,
+              "line": 251,
               "property": "padding-block"
             }
           ],
@@ -55909,7 +55902,7 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 169,
+              "line": 172,
               "property": "background"
             }
           ],
@@ -55947,7 +55940,7 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 219,
+              "line": 222,
               "property": "background"
             }
           ],
@@ -55985,7 +55978,7 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 204,
+              "line": 207,
               "property": "background"
             }
           ],
@@ -56023,7 +56016,7 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 129,
+              "line": 132,
               "property": "background"
             }
           ],
@@ -56061,17 +56054,17 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 146,
+              "line": 149,
               "property": "background"
             },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 203, "property": "color" },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 208, "property": "color" },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 212, "property": "color" },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 218, "property": "color" },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 258, "property": "color" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 206, "property": "color" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 211, "property": "color" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 215, "property": "color" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 221, "property": "color" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 261, "property": "color" },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 266,
+              "line": 269,
               "property": "background"
             }
           ],
@@ -56107,8 +56100,8 @@
           "name": "--geul-text-secondary",
           "registered": true,
           "sources": [
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 168, "property": "color" },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 186, "property": "color" }
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 171, "property": "color" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 189, "property": "color" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 161, "value": "#45443d", "context": ":root" },
@@ -56170,6 +56163,13 @@
           "required": false,
           "description": "`center` keeps a centered reading column centered by reserving the same space on both sides;\n`start` reserves only the inline end (section-based pages whose title and sections start aligned).",
           "defaultValue": "'start'"
+        },
+        {
+          "name": "outlinePresentation",
+          "type": "'responsive' | 'rail'",
+          "required": false,
+          "description": "`responsive` (default) shows the persistent column from `lg`. `rail` keeps the rail at every width,\nfor a document that shares the page width with another column (an entity detail's media).",
+          "defaultValue": "'responsive'"
         }
       ],
       "stateStories": [
@@ -61095,6 +61095,7 @@
         "Consumer: features/page/blocks/embed/ToolModule.tsx",
         "Consumer: features/page/blocks/external-video/CanvasPreview.tsx",
         "Consumer: features/page/blocks/form/ViewClient.tsx",
+        "Consumer: features/page/blocks/infinite-items.tsx",
         "Consumer: features/page/blocks/map/Editor.tsx",
         "Consumer: features/page/blocks/marquee/MarqueeView.tsx",
         "Consumer: features/page/blocks/post-list/View.tsx",
@@ -62044,6 +62045,7 @@
         "Consumer: features/data-table/ServerDataTable/ServerDataTableSelectableSection.tsx",
         "Consumer: features/document-layout/ui/ContentChrome.tsx",
         "Consumer: features/document-layout/ui/ContentLayoutFieldView.tsx",
+        "Consumer: features/document-layout/ui/EntityDetailLayout.tsx",
         "Consumer: features/editor/AIMenu/AIMenu.tsx",
         "Consumer: features/editor/components/EditorFileInsertView.tsx",
         "Consumer: features/editor/components/EditorFileLibraryPickerView.tsx",
@@ -62739,6 +62741,7 @@
         "Consumer: features/my/ui/ProfileForm/ProfileFormView.tsx",
         "Consumer: features/page/PageEditor/SectionItemView.tsx",
         "Consumer: features/page/PageEditor/SectionList.tsx",
+        "Consumer: features/page/blocks/infinite-items.tsx",
         "Consumer: features/page/blocks/text-marquee/Editor.tsx",
         "Consumer: features/series/SeriesDetail.tsx",
         "Consumer: features/shell/LanguageMenu.tsx",

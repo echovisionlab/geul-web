@@ -1,5 +1,21 @@
 # Design system changes
 
+## 2026-10-17 — public details, fluid collections and continued lists (unreleased)
+
+New Feature `EntityDetailLayout` / `EntityDetailSection` / `EntityDetailImage` (document-layout) give every
+public entity detail one full-width composition: media in the start third from `md` (sticky), title, metadata
+and h2 sections beside it, stacked below `md`. Event, Work, Release, Artist, Label, Series and Event series
+adopt it; their ad hoc `role="heading"` labels, Work's `WorkPublicHeaderLayout` and Release's fixed 280px
+artwork column are removed. Work keeps its paper overlay header through `printMedia="overlay"`. `CreditList`
+no longer prints its own title.
+
+Core `LayoutGrid` adds `minColumnWidth` (`sm`/`md`/`lg`, responsive): a fluid grid of equal columns at least
+that wide. Page collection blocks size columns from the item size instead of the authored count, which now
+applies to carousels only (the editor shows "Slides to show" for carousels and no column control otherwise).
+Core `TableOfContentsView` adds `outlinePresentation="rail"` for documents sharing the page width. Core
+`Pagination` and server table pagination render nothing for a single page. Collection blocks with pagination
+on continue in place (`InfiniteItems`, Load more / retry) instead of page links.
+
 ## 2026-10-17 — admin page outline (unreleased)
 
 Every admin page now has exactly one h1 at the page title scale, followed by h2 sections. Mail adapters,

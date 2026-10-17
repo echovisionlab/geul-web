@@ -11,7 +11,6 @@ import { AuthorListViewClient } from './ViewClient';
 import { AuthorListSkeleton } from './Skeleton';
 export function AuthorListView({ props }: BlockViewProps) {
   const p = parseAuthorListProps(props);
-  const columns = parseInt(p.columns || '3', 10);
   const limit = parseInt(p.limit || '6', 10);
   const selectedIds = parseAuthorIds(p.authorIds);
   const selected = p.source === 'selected';
@@ -30,7 +29,6 @@ export function AuthorListView({ props }: BlockViewProps) {
   if (isLoading) {
     return (
       <AuthorListSkeleton
-        columns={columns}
         limit={selected ? selectedIds.length : limit}
         layout={p.layout}
         itemSize={p.itemSize}

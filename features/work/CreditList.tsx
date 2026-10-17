@@ -21,7 +21,6 @@ interface CreditListGroupProps {
   children: React.ReactNode;
 }
 interface CreditListRootProps {
-  title?: string;
   children: React.ReactNode;
 }
 /* -------------------------------------------------------------------------- */
@@ -36,7 +35,7 @@ function CreditListItem({ name, role, note, href, imageUrl }: CreditListItemProp
         <DsText size="sm">
           {nameElement}
           {role && (
-            <DsText as="span" tone="secondary">
+            <DsText as="span" size="sm" tone="secondary">
               {' '}
               — {role}
             </DsText>
@@ -72,16 +71,9 @@ function CreditListGroup({ name, children }: CreditListGroupProps) {
 /* -------------------------------------------------------------------------- */
 /*                               CreditList Root                              */
 /* -------------------------------------------------------------------------- */
-function CreditListRoot({ title, children }: CreditListRootProps) {
-  const tCommon = useTranslations('common');
-  return (
-    <DsLayoutStack gap="sm">
-      <DsText size="sm" weight="medium">
-        {title || tCommon('entities.credits')}
-      </DsText>
-      <DsLayoutStack gap="sm">{children}</DsLayoutStack>
-    </DsLayoutStack>
-  );
+/** Credit groups; the surrounding section owns the "Credits" title. */
+function CreditListRoot({ children }: CreditListRootProps) {
+  return <DsLayoutStack gap="sm">{children}</DsLayoutStack>;
 }
 /* -------------------------------------------------------------------------- */
 /*                                  Export                                    */

@@ -2,7 +2,6 @@
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
 import {
-  LayoutInset as AppLayoutInset,
   LayoutInline as DsLayoutInline,
   LayoutInset as DsLayoutInset,
   LayoutStack as DsLayoutStack,
@@ -20,6 +19,7 @@ import { SearchInput } from '@/components/core/Input';
 // View pages load menu code on first interaction.
 import { OnDemandDropdownMenu as DropdownMenu } from '@/components/core/DropdownMenu/OnDemandDropdownMenu';
 import { WORK_TYPES, type WorkType } from '@/lib/types/work/model';
+import { EntityDetailSection } from '@/features/document-layout/ui/EntityDetailLayout';
 import classes from './page.module.css';
 
 interface Work {
@@ -67,52 +67,47 @@ export function ArtistWorkSection({ works }: WorksSectionProps) {
   };
 
   return (
-    <div>
-      <DsLayoutInset blockEnd="xs">
-        <DsLayoutInline justify="between" align="center">
-          <AppLayoutInset blockEnd="sm">
-            <DsText size="sm" font="mono" weight="medium" tone="muted" role="heading" aria-level={2} id={sectionId}>
-              {tCommonEntities('works')}
-            </DsText>
-          </AppLayoutInset>
-          <DsLayoutInline gap="xs">
-            <div style={{ width: 160 }}>
-              <SearchInput
-                aria-label={tCommonPlaceholders('search')}
-                aria-describedby={sectionId}
-                placeholder={tCommonPlaceholders('search')}
-                size="xs"
-                value={search}
-                onChange={(e) => setSearch(e.currentTarget.value)}
-              />
-            </div>
-            <DropdownMenu placement="bottom-end" arrow>
-              <DropdownMenu.Target>
-                <IconButton
-                  emphasis={typeFilter ? 'medium' : 'low'}
-                  size="sm"
-                  tone="neutral"
-                  aria-label="Filter works by type"
-                >
-                  <IconFilter size={16} />
-                </IconButton>
-              </DropdownMenu.Target>
-              <DropdownMenu.Dropdown>
-                <DropdownMenu.Item onClick={() => setTypeFilter(null)} selected={!typeFilter}>
-                  {t('allTypes')}
+    <EntityDetailSection
+      title={tCommonEntities('works')}
+      titleId={sectionId}
+      actions={
+        <DsLayoutInline gap="xs">
+          <div style={{ width: 160 }}>
+            <SearchInput
+              aria-label={tCommonPlaceholders('search')}
+              aria-describedby={sectionId}
+              placeholder={tCommonPlaceholders('search')}
+              size="xs"
+              value={search}
+              onChange={(e) => setSearch(e.currentTarget.value)}
+            />
+          </div>
+          <DropdownMenu placement="bottom-end" arrow>
+            <DropdownMenu.Target>
+              <IconButton
+                emphasis={typeFilter ? 'medium' : 'low'}
+                size="sm"
+                tone="neutral"
+                aria-label={t('filterByType')}
+              >
+                <IconFilter size={16} />
+              </IconButton>
+            </DropdownMenu.Target>
+            <DropdownMenu.Dropdown>
+              <DropdownMenu.Item onClick={() => setTypeFilter(null)} selected={!typeFilter}>
+                {t('allTypes')}
+              </DropdownMenu.Item>
+              <DropdownMenu.Divider />
+              {WORK_TYPES.map((type) => (
+                <DropdownMenu.Item key={type} onClick={() => setTypeFilter(type)} selected={typeFilter === type}>
+                  {getWorkTypeLabel(type)}
                 </DropdownMenu.Item>
-                <DropdownMenu.Divider />
-                {WORK_TYPES.map((type) => (
-                  <DropdownMenu.Item key={type} onClick={() => setTypeFilter(type)} selected={typeFilter === type}>
-                    {getWorkTypeLabel(type)}
-                  </DropdownMenu.Item>
-                ))}
-              </DropdownMenu.Dropdown>
-            </DropdownMenu>
-          </DsLayoutInline>
+              ))}
+            </DropdownMenu.Dropdown>
+          </DropdownMenu>
         </DsLayoutInline>
-      </DsLayoutInset>
-
+      }
+    >
       <DsLayoutStack gap="none">
         {filteredWorks.map((work, index) => {
           const imageUrl = work.featured_image_url;
@@ -154,6 +149,6 @@ export function ArtistWorkSection({ works }: WorksSectionProps) {
           </DsLayoutInset>
         )}
       </DsLayoutStack>
-    </div>
+    </EntityDetailSection>
   );
 }

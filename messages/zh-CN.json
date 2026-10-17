@@ -455,6 +455,12 @@
       "pause": "暂停动画",
       "resume": "继续动画",
       "readAllInformation": "阅读场景的全部信息"
+    },
+    "loadMore": {
+      "action": "加载更多",
+      "loading": "正在加载更多…",
+      "failed": "无法加载更多项目。",
+      "retry": "重试"
     }
   },
   "shell": {
@@ -1413,7 +1419,8 @@
     "works": {
       "allTypes": "所有类型",
       "empty": "未找到作品",
-      "loadMore": "加载更多（剩余 {count} 项）"
+      "loadMore": "加载更多（剩余 {count} 项）",
+      "filterByType": "按类型筛选作品"
     },
     "releases": {
       "empty": "还没有已发行的发行作品。"
@@ -3196,7 +3203,7 @@
         "showMeta": "显示元信息（日期、作者）",
         "sortBy": "排序方式",
         "numberOfPosts": "文章数量",
-        "showPagination": "显示分页",
+        "showPagination": "滚动时加载更多",
         "exposedFilters": "显示的筛选项",
         "exposedSorts": "显示的排序项",
         "rowsPerPage": "每页行数",

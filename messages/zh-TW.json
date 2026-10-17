@@ -455,6 +455,12 @@
       "pause": "暫停動畫",
       "resume": "繼續動畫",
       "readAllInformation": "閱讀場景的全部資訊"
+    },
+    "loadMore": {
+      "action": "載入更多",
+      "loading": "正在載入更多…",
+      "failed": "無法載入更多項目。",
+      "retry": "重試"
     }
   },
   "shell": {
@@ -1413,7 +1419,8 @@
     "works": {
       "allTypes": "所有類型",
       "empty": "沒有找到作品",
-      "loadMore": "載入更多（剩餘 {count} 項）"
+      "loadMore": "載入更多（剩餘 {count} 項）",
+      "filterByType": "依類型篩選作品"
     },
     "releases": {
       "empty": "還沒有已發行的發行作品。"
@@ -3196,7 +3203,7 @@
         "showMeta": "顯示中繼資訊（日期、作者）",
         "sortBy": "排序方式",
         "numberOfPosts": "文章數量",
-        "showPagination": "顯示分頁",
+        "showPagination": "捲動時載入更多",
         "exposedFilters": "顯示的篩選項",
         "exposedSorts": "顯示的排序項",
         "rowsPerPage": "每頁列數",

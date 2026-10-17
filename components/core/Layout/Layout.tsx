@@ -13,6 +13,7 @@ import { primitiveTokens } from '../design-tokens';
 import {
   isColumnCount,
   isColumnOffset,
+  isMinColumnWidth,
   isColumnSpan,
   isSpace,
   layoutPoints,
@@ -23,6 +24,7 @@ import {
   spaceValue,
   type LayoutAlign,
   type LayoutColumnCount,
+  type LayoutMinColumnWidth,
   type LayoutColumnOffset,
   type LayoutColumnSpan,
   type LayoutContainerSize,
@@ -79,6 +81,11 @@ export interface LayoutContainerProps extends LayoutBaseProps {
 }
 export interface LayoutGridProps extends Omit<LayoutStackProps, 'justify'> {
   columns?: Responsive<LayoutColumnCount>;
+  /**
+   * A fluid grid: as many equal columns as fit, each at least this wide (never wider than the grid).
+   * Replaces `columns`; items take one track each, so `LayoutGridItem` spans do not apply.
+   */
+  minColumnWidth?: Responsive<LayoutMinColumnWidth>;
   rowGap?: Responsive<Space>;
   columnGap?: Responsive<Space>;
   rows?: 'content' | 'stretch';
@@ -375,6 +382,7 @@ export const LayoutGrid = forwardRef<HTMLElement, LayoutGridProps>(
       as,
       children,
       columns,
+      minColumnWidth,
       gap,
       rowGap,
       columnGap,
@@ -393,6 +401,10 @@ export const LayoutGrid = forwardRef<HTMLElement, LayoutGridProps>(
   ) => {
     const Element = resolveElement(as);
     const resolvedColumns = resolveResponsive(columns, 1, isColumnCount, 'columns');
+    const minColumns =
+      minColumnWidth === undefined
+        ? undefined
+        : resolveResponsive(minColumnWidth, 'md', isMinColumnWidth, 'grid minimum column width');
     return (
       <GridContext.Provider value={resolvedColumns}>
         <StructuralElement
@@ -404,12 +416,16 @@ export const LayoutGrid = forwardRef<HTMLElement, LayoutGridProps>(
           style={
             {
               ...responsiveVariables('columns', resolvedColumns),
+              ...(minColumns
+                ? responsiveVariables('min-column', minColumns, (width) => `var(--_layout-track-${width})`)
+                : {}),
               ...spacing('row-gap', rowGap ?? gap, 'md'),
               ...spacing('column-gap', columnGap ?? gap, 'md'),
             } as CSSProperties
           }
           data-geul-layout="grid"
           data-geul-layout-rows={validChoice(rows, ['content', 'stretch'], 'grid rows')}
+          data-geul-layout-min-column={minColumns ? '' : undefined}
           data-geul-layout-align={validChoice(align, alignValues, 'align')}
         >
           {children}

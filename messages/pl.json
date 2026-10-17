@@ -455,6 +455,12 @@
       "pause": "Wstrzymaj animację",
       "resume": "Wznów animację",
       "readAllInformation": "Przeczytaj wszystkie informacje o scenie"
+    },
+    "loadMore": {
+      "action": "Wczytaj więcej",
+      "loading": "Wczytywanie…",
+      "failed": "Nie udało się wczytać kolejnych elementów.",
+      "retry": "Spróbuj ponownie"
     }
   },
   "shell": {
@@ -1413,7 +1419,8 @@
     "works": {
       "allTypes": "Wszystkie typy",
       "empty": "Nie znaleziono żadnych prac",
-      "loadMore": "Załaduj więcej (pozostało {count})"
+      "loadMore": "Załaduj więcej (pozostało {count})",
+      "filterByType": "Filtruj prace według typu"
     },
     "releases": {
       "empty": "Nie wydano jeszcze żadnych wydań."
@@ -3196,7 +3203,7 @@
         "showMeta": "Pokaż meta",
         "sortBy": "Sortuj według",
         "numberOfPosts": "Liczba postów",
-        "showPagination": "Pokaż paginację",
+        "showPagination": "Wczytuj więcej podczas przewijania",
         "exposedFilters": "Odsłonięte filtry",
         "exposedSorts": "Rodzaje odsłonięte",
         "rowsPerPage": "Wiersze na stronę",

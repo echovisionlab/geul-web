@@ -455,6 +455,12 @@
       "pause": "Tạm dừng chuyển động",
       "resume": "Tiếp tục chuyển động",
       "readAllInformation": "Đọc toàn bộ thông tin của cảnh"
+    },
+    "loadMore": {
+      "action": "Tải thêm",
+      "loading": "Đang tải thêm…",
+      "failed": "Không thể tải thêm mục.",
+      "retry": "Thử lại"
     }
   },
   "shell": {
@@ -1413,7 +1419,8 @@
     "works": {
       "allTypes": "Tất cả các loại",
       "empty": "Không tìm thấy tác phẩm nào",
-      "loadMore": "Tải thêm (còn lại {count})"
+      "loadMore": "Tải thêm (còn lại {count})",
+      "filterByType": "Lọc tác phẩm theo loại"
     },
     "releases": {
       "empty": "Chưa có bản phát hành nào được phát hành."
@@ -3196,7 +3203,7 @@
         "showMeta": "Hiển thị meta",
         "sortBy": "Sắp xếp theo",
         "numberOfPosts": "Số lượng bài viết",
-        "showPagination": "Hiển thị phân trang",
+        "showPagination": "Tải thêm khi cuộn",
         "exposedFilters": "Bộ lọc tiếp xúc",
         "exposedSorts": "Các loại tiếp xúc",
         "rowsPerPage": "Hàng trên mỗi trang",

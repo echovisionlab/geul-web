@@ -455,6 +455,12 @@
       "pause": "إيقاف الحركة مؤقتًا",
       "resume": "استئناف الحركة",
       "readAllInformation": "قراءة جميع معلومات المشهد"
+    },
+    "loadMore": {
+      "action": "تحميل المزيد",
+      "loading": "جارٍ تحميل المزيد…",
+      "failed": "تعذّر تحميل المزيد من العناصر.",
+      "retry": "إعادة المحاولة"
     }
   },
   "shell": {
@@ -2861,7 +2867,8 @@
     "works": {
       "allTypes": "جميع الأنواع",
       "empty": "لم يتم العثور على أعمال",
-      "loadMore": "تحميل المزيد ({count} متبقٍ)"
+      "loadMore": "تحميل المزيد ({count} متبقٍ)",
+      "filterByType": "تصفية الأعمال حسب النوع"
     },
     "releases": {
       "empty": "لا توجد إصدارات منشورة بعد."
@@ -2871,7 +2878,7 @@
     "details": {
       "parent": "الأصل",
       "stats": "الإحصائيات",
-      "statsValue": "{releases} إصدارات، {artists} فنانًا"
+      "statsValue": "الإصدارات: {releases}، الفنانون: {artists}"
     },
     "sections": {
       "releases": "الإصدارات ({count})",
@@ -4232,7 +4239,7 @@
         "showMeta": "إظهار البيانات الوصفية (التاريخ، المؤلف)",
         "sortBy": "الترتيب حسب",
         "numberOfPosts": "عدد المنشورات",
-        "showPagination": "إظهار الترقيم الصفحي",
+        "showPagination": "تحميل المزيد عند التمرير",
         "exposedFilters": "عوامل التصفية المعروضة",
         "exposedSorts": "خيارات الترتيب المعروضة",
         "rowsPerPage": "عدد الصفوف في الصفحة",

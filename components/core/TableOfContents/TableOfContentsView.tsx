@@ -43,6 +43,11 @@ export interface TableOfContentsViewProps {
    * `start` reserves only the inline end (section-based pages whose title and sections start aligned).
    */
   contentPlacement?: 'start' | 'center';
+  /**
+   * `responsive` (default) shows the persistent column from `lg`. `rail` keeps the rail at every width,
+   * for a document that shares the page width with another column (an entity detail's media).
+   */
+  outlinePresentation?: 'responsive' | 'rail';
 }
 
 /** Three or fewer headings do not need navigation. */
@@ -114,11 +119,12 @@ export function TableOfContentsView({
   title,
   children,
   contentPlacement = 'start',
+  outlinePresentation = 'responsive',
 }: TableOfContentsViewProps) {
   const listId = useId();
   const titleId = useId();
   const wide = Boolean(useMediaQuery(breakpointQuery('lg', 'at-least')));
-  const presentation = wide ? 'column' : 'rail';
+  const presentation = wide && outlinePresentation === 'responsive' ? 'column' : 'rail';
   const wrapper = useRef<HTMLDivElement>(null);
   const rail = useRef<HTMLAnchorElement>(null);
   const marksRef = useRef<HTMLSpanElement>(null);
@@ -576,7 +582,12 @@ export function TableOfContentsView({
   // The outline precedes the document in reading and focus order (as the column is seen beside the
   // document's first lines); the track is out of flow, so the visual layout does not depend on it.
   return (
-    <div className={classes.layout} data-outline={outlined || undefined} data-placement={contentPlacement}>
+    <div
+      className={classes.layout}
+      data-outline={outlined || undefined}
+      data-placement={contentPlacement}
+      data-outline-presentation={outlinePresentation === 'rail' ? 'rail' : undefined}
+    >
       {outlined ? <div className={classes.track}>{navigation}</div> : null}
       {children}
     </div>

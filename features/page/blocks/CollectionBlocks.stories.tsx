@@ -369,7 +369,8 @@ const meta = {
     },
     itemSize: { control: 'inline-radio', options: sizes },
     fixture: { control: 'select', options: ['editorial', 'stress', 'missing-media', 'empty'] },
-    columns: { control: 'inline-radio', options: ['1', '2', '3', '4'] },
+    // Grid columns follow the item size; the authored count is the carousel's slides per view.
+    columns: { control: 'inline-radio', options: ['1', '2', '3', '4'], if: { arg: 'layout', eq: 'carousel' } },
     imageAspectRatio: {
       control: 'select',
       options: ['16:9', '4:3', '1:1', 'auto'],

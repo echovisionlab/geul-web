@@ -455,6 +455,12 @@
       "pause": "Pause animation",
       "resume": "Resume animation",
       "readAllInformation": "Read all scene information"
+    },
+    "loadMore": {
+      "action": "Load more",
+      "loading": "Loading more…",
+      "failed": "Couldn't load more items.",
+      "retry": "Try again"
     }
   },
   "shell": {
@@ -1413,7 +1419,8 @@
     "works": {
       "allTypes": "All Types",
       "empty": "No works found",
-      "loadMore": "Load more ({count} remaining)"
+      "loadMore": "Load more ({count} remaining)",
+      "filterByType": "Filter works by type"
     },
     "releases": {
       "empty": "No released releases yet."
@@ -1423,7 +1430,7 @@
     "details": {
       "parent": "Parent",
       "stats": "Stats",
-      "statsValue": "{releases} releases, {artists} artists"
+      "statsValue": "{releases, plural, one {# release} other {# releases}}, {artists, plural, one {# artist} other {# artists}}"
     },
     "sections": {
       "releases": "Releases ({count})",
@@ -3196,7 +3203,7 @@
         "showMeta": "Show meta",
         "sortBy": "Sort by",
         "numberOfPosts": "Number of posts",
-        "showPagination": "Show pagination",
+        "showPagination": "Load more while scrolling",
         "exposedFilters": "Exposed filters",
         "exposedSorts": "Exposed sorts",
         "rowsPerPage": "Rows per page",

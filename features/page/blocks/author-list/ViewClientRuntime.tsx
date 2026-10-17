@@ -2,7 +2,7 @@
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 import { useTranslations } from 'next-intl';
 import { getCollectionMetrics } from '@/components/core/Collection/collection-contract';
-import { contentColumns } from '@/features/page/blocks/content-layout';
+import { collectionMinColumnWidth } from '@/features/page/blocks/content-layout';
 import {
   LayoutStack as DsLayoutStack,
   LayoutGrid as DsLayoutGrid,
@@ -39,7 +39,6 @@ export function AuthorListViewClient({ authors, parsedProps: p }: AuthorListView
   const t = useTranslations();
   const metrics = getCollectionMetrics(p.itemSize);
   const layout = p.layout || 'grid';
-  const columns = parseInt(p.columns || '3', 10);
   const showBio = p.showBio !== 'false';
   const showAvatar = p.showAvatar !== 'false';
   if (!authors?.length) {
@@ -99,7 +98,7 @@ export function AuthorListViewClient({ authors, parsedProps: p }: AuthorListView
   }
   return (
     <div className="author-list-block" data-collection-size={p.itemSize} role="list">
-      <DsLayoutGrid columns={{ base: 1, sm: 2, md: contentColumns(columns) }} gap={metrics.gridGap}>
+      <DsLayoutGrid minColumnWidth={collectionMinColumnWidth('grid', p.itemSize)} gap={metrics.gridGap}>
         {displayAuthors.map((author) => (
           <DsLayoutInline role="listitem" key={author.id} align="start" wrap="nowrap" gap={metrics.rowGap}>
             {showAvatar ? <AuthorAvatarLink author={author} size={metrics.avatarSize} /> : null}

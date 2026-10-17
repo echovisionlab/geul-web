@@ -455,6 +455,12 @@
       "pause": "Animatie pauzeren",
       "resume": "Animatie hervatten",
       "readAllInformation": "Alle scène-informatie lezen"
+    },
+    "loadMore": {
+      "action": "Meer laden",
+      "loading": "Meer laden…",
+      "failed": "Kon geen items meer laden.",
+      "retry": "Opnieuw proberen"
     }
   },
   "shell": {
@@ -1413,7 +1419,8 @@
     "works": {
       "allTypes": "Alle typen",
       "empty": "Geen werken gevonden",
-      "loadMore": "Meer laden ({count} resterend)"
+      "loadMore": "Meer laden ({count} resterend)",
+      "filterByType": "Werken filteren op type"
     },
     "releases": {
       "empty": "Nog geen gepubliceerde releases."
@@ -1423,7 +1430,7 @@
     "details": {
       "parent": "Bovenliggend",
       "stats": "Statistieken",
-      "statsValue": "{releases} releases, {artists} artiesten"
+      "statsValue": "{releases, plural, one {# release} other {# releases}}, {artists, plural, one {# artiest} other {# artiesten}}"
     },
     "sections": {
       "releases": "Uitgaven ({count})",
@@ -3196,7 +3203,7 @@
         "showMeta": "Metadata tonen (datum, auteur)",
         "sortBy": "Sorteren op",
         "numberOfPosts": "Aantal berichten",
-        "showPagination": "Paginering tonen",
+        "showPagination": "Meer laden tijdens scrollen",
         "exposedFilters": "Zichtbare filters",
         "exposedSorts": "Zichtbare sorteringen",
         "rowsPerPage": "Rijen per pagina",

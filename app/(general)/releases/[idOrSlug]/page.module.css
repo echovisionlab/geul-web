@@ -1,25 +1,8 @@
-.artworkCard {
-  width: 100%;
-  overflow: hidden;
-}
-
-.artworkMedia {
-  aspect-ratio: 1 / 1;
-}
-
-.artworkImage,
+/* Without artwork the media column keeps the cover's square. */
 .artworkPlaceholder {
   display: block;
   width: 100%;
-  height: 100%;
-}
-
-.artworkImage {
-  object-fit: cover;
-}
-
-.meta {
-  min-width: 0;
+  aspect-ratio: 1 / 1;
 }
 
 .detailCredits {
@@ -28,41 +11,4 @@
 
 .trackMeta {
   min-width: 0;
-}
-
-.trackAudio {
-  width: 100%;
-  display: block;
-}
-
-.metaMain {
-  flex: 1;
-  min-width: 0;
-}
-
-@media (width >= $mantine-breakpoint-sm) {
-  .artworkCard {
-    width: 280px;
-    flex: 0 0 280px;
-  }
-
-  .artworkMedia {
-    aspect-ratio: auto;
-    height: 280px;
-  }
-
-  .meta {
-    flex: 1;
-    min-width: 280px;
-  }
-}
-
-.actions {
-  width: 100%;
-}
-
-@media (width >= $mantine-breakpoint-sm) {
-  .actions {
-    width: auto;
-  }
 }

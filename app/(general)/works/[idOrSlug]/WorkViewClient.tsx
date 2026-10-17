@@ -1,8 +1,8 @@
 'use client';
 
-import { Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
+import { Text as DsText } from '@/components/core/Typography';
 
-import { LayoutInline as DsLayoutInline, LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { LayoutInline as DsLayoutInline } from '@/components/core/Layout';
 import { useMemo, type ReactNode } from 'react';
 
 import { IconPencil } from '@tabler/icons-react';
@@ -25,9 +25,12 @@ import {
   type SocialLinkDisplayViewModel,
 } from '@/features/social-links/ui/SocialLinksDisplayView';
 // Leaf modules: these documents have no authored layout, so the collaboration schema stays off the route.
-import { ContentChrome } from '@/features/document-layout/ui/ContentChrome';
-import { ContentLayoutView } from '@/features/document-layout/ui/ContentLayoutView';
-import { FLOW_DOCUMENT_LAYOUT } from '@/features/document-layout/ui/types';
+import { DocumentHeadingScope } from '@/features/document-layout/ui/DocumentHeadingScope';
+import {
+  EntityDetailImage,
+  EntityDetailLayout,
+  EntityDetailSection,
+} from '@/features/document-layout/ui/EntityDetailLayout';
 import { TableOfContents } from '@/features/navigation/TableOfContents';
 import { GeneratedRichTextBlockView } from '@/features/page/PageView/blocks/GeneratedRichTextBlockView';
 import { ContentBlockMediaRuntimeProvider } from '@/features/media/ContentBlockMediaRuntimeContext';
@@ -36,13 +39,11 @@ import { PUBLIC_MEDIA_ENTITY_TYPE } from '@/features/media-download/download-wir
 import type { LocalizedRichTextBlock } from '@/features/editor/contract/localized-rich-text';
 import { ContentLanguageMenu } from '@/features/translation/ContentLanguageMenu';
 import { CreditList } from '@/features/work/CreditList';
-import { WorkPublicHeaderLayout } from '@/features/work/WorkPublicHeaderLayout';
 import { WorkMediaDeliveryProvider } from '@/features/work/WorkMediaDeliveryContext';
 import { buildGeneratedBlockTocItems } from '@/lib/toc-items';
 import type { WorkType } from '@/lib/types/work/model';
 import type { LocationPlaceSummary } from '@/lib/utils/location-place';
 import { formatWorkPeriodLabel } from '@/lib/utils/work-period';
-import classes from './WorkViewClient.module.css';
 
 interface Credit {
   id: string;
@@ -138,9 +139,6 @@ export function WorkViewClient({
   const { credits, clients } = work;
   const periodLabel = formatWorkPeriodLabel(work.year, work.month, work.untilYear, work.untilMonth, work.isPresent);
 
-  const hasCreditsOrClients =
-    (credits && (credits.groups.length > 0 || credits.ungrouped.length > 0)) || (clients && clients.length > 0);
-
   const getWorkTypeLabel = (type: string) => {
     switch (type as WorkType) {
       case 'music_project':
@@ -174,61 +172,89 @@ export function WorkViewClient({
     />
   ) : null;
 
-  const MetadataSection = () => (
-    <div className={classes.metadata}>
-      <DsLayoutInline justify="between" align="start">
-        <DsLayoutStack gap="xs" flexible>
-          <DsHeading
-            level={1}
-            scale="title"
-            lang={work.localizationInfo?.displayedLocale || work.localizationInfo?.sourceLocale || requestedLocale}
-          >
-            {work.title || tCommonStates('untitledPlain')}
-          </DsHeading>
-          <PublicMetadataRows>
-            {renderDetailRow(tCommonLabels('type'), getWorkTypeLabel(work.type))}
-            {renderDetailRow(t('details.period'), periodLabel)}
-            {work.publishedAt &&
-              work.updatedAt &&
-              work.updatedAt !== work.publishedAt &&
-              renderDetailRow(tCommonLabels('updated'), dateTime.dateTime(work.updatedAt))}
-            {!work.publishedAt &&
-              work.updatedAt &&
-              renderDetailRow(tCommonLabels('lastEdited'), dateTime.dateTime(work.updatedAt))}
-            {work.locationPlace && (
-              <LocationPlaceMetadataRows place={work.locationPlace} textSize="sm" coordinateVisibility="desktop" />
-            )}
-            {work.type === 'music_project' && (
-              <MusicProjectMeta metadata={metadata} musicLinkEntries={musicLinkEntries} />
-            )}
-            {work.type === 'portfolio' && <PortfolioMeta metadata={metadata} />}
-            {work.type === 'article' && <ArticleMeta metadata={metadata} />}
-            {work.type === 'contribution' && <ContributionMeta metadata={metadata} />}
-          </PublicMetadataRows>
-        </DsLayoutStack>
-        <DsLayoutInline gap="xs">
-          {languageMenu}
-          {work.canEdit && (
-            <Tooltip label={tCommonActions('edit')}>
-              <IconButton
-                tone="neutral"
-                emphasis="low"
-                size="lg"
-                href={`/works/${work.id}?edit=true`}
-                aria-label={t('actions.editAria')}
-              >
-                <IconPencil size={22} />
-              </IconButton>
-            </Tooltip>
-          )}
-          <PrintButton />
-        </DsLayoutInline>
-      </DsLayoutInline>
+  const contentLang = work.localizationInfo?.displayedLocale || work.localizationInfo?.sourceLocale || requestedLocale;
+  const hasCredits = Boolean(credits && (credits.groups.length > 0 || credits.ungrouped.length > 0));
 
-      {hasCreditsOrClients && (
-        <>
-          <DsLayoutStack gap="md">
-            {credits && (credits.groups.length > 0 || credits.ungrouped.length > 0) && (
+  return (
+    <WorkMediaDeliveryProvider
+      idOrSlug={work.slug || work.id}
+      requestedLocale={requestedLocale}
+      shareToken={shareToken}
+      sharePassword={sharePassword}
+    >
+      <ContentBlockMediaRuntimeProvider items={work.blockMedia}>
+        <EntityDetailLayout
+          media={work.featuredImageUrl ? <EntityDetailImage src={work.featuredImageUrl} alt={work.title} /> : undefined}
+          printMedia="overlay"
+          title={work.title || tCommonStates('untitledPlain')}
+          titleLang={contentLang}
+          actions={
+            <DsLayoutInline gap="xs">
+              {languageMenu}
+              {work.canEdit && (
+                <Tooltip label={tCommonActions('edit')}>
+                  <IconButton
+                    tone="neutral"
+                    emphasis="low"
+                    size="lg"
+                    href={`/works/${work.id}?edit=true`}
+                    aria-label={t('actions.editAria')}
+                  >
+                    <IconPencil size={22} />
+                  </IconButton>
+                </Tooltip>
+              )}
+              <PrintButton />
+            </DsLayoutInline>
+          }
+          meta={
+            <PublicMetadataRows>
+              {renderDetailRow(tCommonLabels('type'), getWorkTypeLabel(work.type))}
+              {renderDetailRow(t('details.period'), periodLabel)}
+              {work.publishedAt &&
+                work.updatedAt &&
+                work.updatedAt !== work.publishedAt &&
+                renderDetailRow(tCommonLabels('updated'), dateTime.dateTime(work.updatedAt))}
+              {!work.publishedAt &&
+                work.updatedAt &&
+                renderDetailRow(tCommonLabels('lastEdited'), dateTime.dateTime(work.updatedAt))}
+              {work.locationPlace && (
+                <LocationPlaceMetadataRows place={work.locationPlace} textSize="sm" coordinateVisibility="desktop" />
+              )}
+              {work.type === 'music_project' && (
+                <MusicProjectMeta metadata={metadata} musicLinkEntries={musicLinkEntries} />
+              )}
+              {work.type === 'portfolio' && <PortfolioMeta metadata={metadata} />}
+              {work.type === 'article' && <ArticleMeta metadata={metadata} />}
+              {work.type === 'contribution' && <ContributionMeta metadata={metadata} />}
+            </PublicMetadataRows>
+          }
+        >
+          {work.content && work.content.length > 0 ? (
+            <EntityDetailSection title={tCommonLabels('description')}>
+              <TableOfContents
+                items={tocItems}
+                contentPlacement="start"
+                outlinePresentation={work.featuredImageUrl ? 'rail' : 'responsive'}
+              >
+                <div className="prose" lang={contentLang}>
+                  {/* The authored body sits under the level-2 section title: authored H1 → h3. */}
+                  <DocumentHeadingScope parentLevel={2}>
+                    {work.content.map((block) => (
+                      <GeneratedRichTextBlockView
+                        key={block.id}
+                        block={block}
+                        requestedLocale={requestedLocale}
+                        downloadOwner={{ entityType: PUBLIC_MEDIA_ENTITY_TYPE.WORK, entityId: work.id }}
+                      />
+                    ))}
+                  </DocumentHeadingScope>
+                </div>
+              </TableOfContents>
+            </EntityDetailSection>
+          ) : null}
+          {hasCredits && credits ? (
+            <EntityDetailSection title={tCommonEntities('credits')}>
               <CreditList>
                 {credits.groups.map((group) => (
                   <CreditList.Group key={group.id} name={group.name}>
@@ -269,69 +295,18 @@ export function WorkViewClient({
                   </CreditList.Group>
                 )}
               </CreditList>
-            )}
-
-            {clients && clients.length > 0 && (
-              <DsLayoutStack gap="sm">
-                <DsText size="sm" weight="medium">
-                  {tCommonEntities('clients')}
-                </DsText>
-                <DsLayoutInline gap="md">
-                  {clients.map((client) => (
-                    <ClientPublicMark key={client.id} {...client} />
-                  ))}
-                </DsLayoutInline>
-              </DsLayoutStack>
-            )}
-          </DsLayoutStack>
-        </>
-      )}
-    </div>
-  );
-
-  return (
-    <WorkMediaDeliveryProvider
-      idOrSlug={work.slug || work.id}
-      requestedLocale={requestedLocale}
-      shareToken={shareToken}
-      sharePassword={sharePassword}
-    >
-      <ContentBlockMediaRuntimeProvider items={work.blockMedia}>
-        <article className={classes.document} data-work-document="">
-          {/* Running text reads like a post: the plain header shares the reading column; a featured
-              image header keeps its full-width grid. The outline sits beside the body (`center`). */}
-          <ContentLayoutView
-            layout={FLOW_DOCUMENT_LAYOUT}
-            chrome={
-              <ContentChrome measure={work.featuredImageUrl ? 'full' : 'reading'}>
-                <WorkPublicHeaderLayout featuredImageUrl={work.featuredImageUrl} imageAlt={work.title}>
-                  <MetadataSection />
-                </WorkPublicHeaderLayout>
-              </ContentChrome>
-            }
-          >
-            <TableOfContents items={tocItems} contentPlacement="center">
-              {work.content && work.content.length > 0 ? (
-                <div
-                  className={`prose ${classes.content}`}
-                  data-reading-measure=""
-                  lang={
-                    work.localizationInfo?.displayedLocale || work.localizationInfo?.sourceLocale || requestedLocale
-                  }
-                >
-                  {work.content.map((block) => (
-                    <GeneratedRichTextBlockView
-                      key={block.id}
-                      block={block}
-                      requestedLocale={requestedLocale}
-                      downloadOwner={{ entityType: PUBLIC_MEDIA_ENTITY_TYPE.WORK, entityId: work.id }}
-                    />
-                  ))}
-                </div>
-              ) : null}
-            </TableOfContents>
-          </ContentLayoutView>
-        </article>
+            </EntityDetailSection>
+          ) : null}
+          {clients && clients.length > 0 ? (
+            <EntityDetailSection title={tCommonEntities('clients')}>
+              <DsLayoutInline gap="md">
+                {clients.map((client) => (
+                  <ClientPublicMark key={client.id} {...client} />
+                ))}
+              </DsLayoutInline>
+            </EntityDetailSection>
+          ) : null}
+        </EntityDetailLayout>
       </ContentBlockMediaRuntimeProvider>
     </WorkMediaDeliveryProvider>
   );
