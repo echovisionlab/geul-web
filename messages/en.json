@@ -212,7 +212,10 @@
       "text": "Text",
       "caption": "Caption",
       "allUsers": "All users",
-      "newsletter": "Newsletter"
+      "newsletter": "Newsletter",
+      "images": "Images",
+      "classification": "Classification",
+      "related": "Related"
     },
     "entities": {
       "post": "Post",

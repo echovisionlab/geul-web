@@ -212,7 +212,10 @@
       "text": "텍스트",
       "caption": "캡션",
       "allUsers": "모든 사용자",
-      "newsletter": "뉴스레터"
+      "newsletter": "뉴스레터",
+      "images": "이미지",
+      "classification": "분류",
+      "related": "관련 항목"
     },
     "entities": {
       "post": "포스트",

@@ -3,6 +3,8 @@
 import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
 
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
+import { DocumentEditorPanels } from '@/features/authoring/DocumentEditorPanels';
+import { EditorSettingsSection } from '@/features/authoring/EditorSettingsSection';
 
 import { Text as DsText } from '@/components/core/Typography';
 import {
@@ -31,9 +33,8 @@ import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@/components/core/Notification';
 import { EditorHeader } from '@/features/editor/EditorHeader';
 
-import { MediaPreviewGrid } from '@/components/core/MediaPreviewGrid';
 import { PageLoader } from '@/features/site/PageLoader';
-import { SectionCard, SectionHeader } from '@/components/core/Section';
+import { SectionCard } from '@/components/core/Section';
 import { UrlSection } from '@/features/metadata/UrlSection';
 import { getEditorBodyLoadingId, getEditorBodyReadyId } from '@/features/editor/lib/media-test-ids';
 import { MetadataPanel } from '@/features/metadata/MetadataPanel/MetadataPanel';
@@ -918,363 +919,357 @@ export function ProgramEventEditorView({ model }: { model: ProgramEventEditorVie
           controls={<EditorActiveLocaleControl state={activeEditLocale} />}
         />
 
-        <MediaPreviewGrid>
-          <AuthoringExtension kind="uploads">
-            <ProgramEventPosterUploader
-              eventId={eventId}
-              media={posterMedia}
-              idPrefix={`program-event-${eventId}-poster`}
-              canEdit={canEditNeutral}
-              onMediaChange={setPosterMedia}
-            />
-          </AuthoringExtension>
-          <MetadataPanel
-            title={displayedTitle}
-            summary={displayedSummary}
-            routePath={routePath}
-            canonicalOrigin={canonicalOrigin}
-            siteName={siteName}
-            defaultImageUrl={primaryPosterUrl}
-            defaultSchemaType="Event"
-          />
-        </MediaPreviewGrid>
-
-        <UrlSection
-          baseUrl={baseUrl}
-          entityType="program_event"
-          entityId={eventId}
-          slug={toSlugInputValue(slug)}
-          idPrefix={`program-event-${eventId}`}
-          disabled={!canEditNeutral}
-          onChange={(value) => {
-            if (canEditNeutral) {
-              const nextSlug = sanitizeSlugInput(value);
-              setSlug(nextSlug);
-              queueNeutralPatch({ slug: nextSlug });
-            }
-          }}
-        />
-
-        <SummaryFieldCard
-          entityType="program_event"
-          entityId={eventId}
-          title={displayedTitle}
-          summary={displayedSummary}
-          summaryReadOnly={
-            !shouldUseLocaleDocument || !canEditCurrentLocale || !blockRoom.isSynced || !canEditTranslationSource
-          }
-          hideAiActions
-          onSummaryChange={shouldUseLocaleDocument ? handleSummaryChange : undefined}
-        />
-
-        <AuthoringExtension kind="translations">
-          <EntityTranslationsPanel
-            entityType="program_event"
-            entityId={eventId}
-            canManage
-            canAdministerTranslations={canEditEvent}
-            canMutateTargets={canEditEvent}
-          />
-        </AuthoringExtension>
-
-        <SectionCard>
-          <DsLayoutStack gap="md">
-            <SectionHeader title={tProgramEventAdmin('editor.details')} />
-            <DsLayoutGrid columns={{ base: 1, md: 2 }}>
-              <Select
-                label={tCommonLabels('type')}
-                searchable
+        <DocumentEditorPanels
+          settings={
+            <>
+              <UrlSection
+                baseUrl={baseUrl}
+                entityType="program_event"
+                entityId={eventId}
+                slug={toSlugInputValue(slug)}
+                idPrefix={`program-event-${eventId}`}
                 disabled={!canEditNeutral}
-                value={typeId}
-                searchValue={typeCombobox.dropdownOpened ? typeSearch : (selectedType?.name ?? '')}
-                onSearchChange={setTypeSearch}
-                dropdownOpened={typeCombobox.dropdownOpened}
-                onDropdownOpen={typeCombobox.openDropdown}
-                onDropdownClose={typeCombobox.closeDropdown}
-                placeholder={tCommon('actions.searchItems', {
-                  items: tCommonEntities('programEventTypes').toLowerCase(),
-                })}
-                aria-busy={createType.isPending || undefined}
-                onChange={(id) => {
-                  if (id) {
-                    handleTypeSelect(id);
+                onChange={(value) => {
+                  if (canEditNeutral) {
+                    const nextSlug = sanitizeSlugInput(value);
+                    setSlug(nextSlug);
+                    queueNeutralPatch({ slug: nextSlug });
                   }
                 }}
-                data={[
-                  ...filteredTypes.map((option) => ({ value: option.id, label: option.name })),
-                  ...(canCreateType
-                    ? [{ value: '$create', label: tCommon('actions.createNamed', { name: typeSearch.trim() }) }]
-                    : []),
-                ]}
-                nothingFoundMessage={tCommon('states.none')}
               />
-              <Select
-                label={tProgramEventAdmin('editor.series')}
-                data={seriesSelectData}
-                value={seriesId}
-                onChange={(value) => {
-                  setSeriesId(value);
-                  queueNeutralPatch({ seriesId: value ?? null });
-                }}
-                searchable
-                clearable
-                disabled={!canEditNeutral}
-              />
-              <NumberInput
-                label={tProgramEventAdmin('editor.seriesOrder')}
-                value={seriesOrder ?? ''}
-                min={0}
-                onChange={(value) => {
-                  const next = typeof value === 'number' ? value : null;
-                  setSeriesOrder(next);
-                  queueNeutralPatch({ seriesOrder: next });
-                }}
-                disabled={!canEditNeutral}
-              />
-              <Select
-                label={tProgramEventAdmin('editor.timezone')}
-                data={timezoneSelectData}
-                value={timezone}
-                onChange={(value) => {
-                  if (!value) {
-                    return;
-                  }
-                  setTimezone(value);
-                  queueNeutralPatch({ timezone: value });
-                }}
-                searchable
-                allowDeselect={false}
-                disabled={!canEditNeutral}
-              />
-              <DateTimePicker
-                label={tProgramEventAdmin('editor.startsAt')}
-                value={startsAtInput}
-                onChange={(value) => {
-                  if (!value) {
-                    return;
-                  }
-                  try {
-                    const next = zonedDateTimeInputToInstant(value, timezone);
-                    setStartsAt(next);
-                    queueNeutralPatch({ startsAt: next });
-                  } catch {
-                    notifications.show({
-                      message: tCommon('notifications.saveFailed'),
-                      tone: 'danger',
-                    });
-                  }
-                }}
-                disabled={!canEditNeutral}
-              />
-              <DateTimePicker
-                label={tProgramEventAdmin('editor.endsAt')}
-                value={endsAtInput}
-                clearable
-                onChange={(value) => {
-                  try {
-                    const next = value ? zonedDateTimeInputToInstant(value, timezone) : null;
-                    setEndsAt(next);
-                    queueNeutralPatch({ endsAt: next });
-                  } catch {
-                    notifications.show({
-                      message: tCommon('notifications.saveFailed'),
-                      tone: 'danger',
-                    });
-                  }
-                }}
-                disabled={!canEditNeutral}
-              />
-            </DsLayoutGrid>
-            <DsLayoutInline>
-              <Checkbox
-                label={tProgramEventAdmin('editor.allDay')}
-                checked={allDay}
-                onChange={(event) => {
-                  setAllDay(event.currentTarget.checked);
-                  queueNeutralPatch({ allDay: event.currentTarget.checked });
-                }}
-                disabled={!canEditNeutral}
-              />
-            </DsLayoutInline>
-            <DsLayoutGrid columns={{ base: 1, md: 2 }}>
-              <Select
-                label={tProgramEventAdmin('editor.locationMode')}
-                data={[
-                  { value: 'map_place', label: tProgramEventAdmin('locationModes.mapPlace') },
-                  { value: 'online', label: tProgramEventAdmin('locationModes.online') },
-                  { value: 'hybrid', label: tProgramEventAdmin('locationModes.hybrid') },
-                  { value: 'tba', label: tProgramEventAdmin('locationModes.tba') },
-                ]}
-                value={locationMode}
-                onChange={(value) => {
-                  const next = (value ?? 'tba') as ProgramEventLocationModeValue;
-                  setLocationMode(next);
-                  queueNeutralPatch({ locationMode: next });
-                }}
-                disabled={!canEditNeutral}
-              />
-            </DsLayoutGrid>
-            {showLocationSelector ? (
-              <LocationSelector
-                value={mapPlaceId}
-                idPrefix={`program-event-${eventId}-location`}
-                canEdit={canEditNeutral}
-                onChange={(value) => {
-                  setMapPlaceId(value);
-                  queueNeutralPatch({ mapPlaceId: value });
-                }}
-                onCreateNew={(searchTerm) => {
-                  if (!canEditNeutral) {
-                    return;
-                  }
-                  setCreatePlaceInitialName(searchTerm);
-                  openCreatePlace();
-                }}
-              />
-            ) : null}
-            <DsLayoutGrid columns={{ base: 1, md: 3 }}>
-              <TextInput
-                label={tProgramEventAdmin('editor.ticketUrl')}
-                value={ticketUrl}
-                onChange={(event) => {
-                  const next = event.currentTarget.value;
-                  setTicketUrl(next);
-                  queueNeutralPatch({ ticketUrl: next || null });
-                }}
-                disabled={!canEditNeutral}
-              />
-              <TextInput
-                label={tProgramEventAdmin('editor.streamUrl')}
-                value={streamUrl}
-                onChange={(event) => {
-                  const next = event.currentTarget.value;
-                  setStreamUrl(next);
-                  queueNeutralPatch({ streamUrl: next || null });
-                }}
-                disabled={!canEditNeutral}
-              />
-              <TextInput
-                label={tProgramEventAdmin('editor.externalUrl')}
-                value={externalUrl}
-                onChange={(event) => {
-                  const next = event.currentTarget.value;
-                  setExternalUrl(next);
-                  queueNeutralPatch({ externalUrl: next || null });
-                }}
-                disabled={!canEditNeutral}
-              />
-            </DsLayoutGrid>
-          </DsLayoutStack>
-        </SectionCard>
-
-        <SectionCard>
-          <DsLayoutStack gap="md">
-            <DsLayoutGrid columns={{ base: 1, md: 3 }}>
-              <MultiSelect
-                label={tCommonEntities('artists')}
-                data={artistSelectData}
-                value={artistIds}
-                onChange={(values) => {
-                  setArtistIds(values);
-                  const observed = relationBaselineRef.current.artists;
-                  const baselineById = new Map(observed.map((relation) => [relation.id, relation]));
-                  queueNeutralPatch({
-                    artists: values.map((id, sortOrder) => ({
-                      id,
-                      ...(baselineById.has(id) ? { role: baselineById.get(id)?.role } : {}),
-                      sortOrder,
-                    })),
-                    observed: { artists: observed },
-                  });
-                }}
-                searchable
-                disabled={!canEditNeutral}
-              />
-              <MultiSelect
-                label={tCommonEntities('labels')}
-                data={labelSelectData}
-                value={labelIds}
-                onChange={(values) => {
-                  setLabelIds(values);
-                  const observed = relationBaselineRef.current.labels;
-                  const baselineById = new Map(observed.map((relation) => [relation.id, relation]));
-                  queueNeutralPatch({
-                    labels: values.map((id, sortOrder) => ({
-                      id,
-                      ...(baselineById.has(id) ? { role: baselineById.get(id)?.role } : {}),
-                      sortOrder,
-                    })),
-                    observed: { labels: observed },
-                  });
-                }}
-                searchable
-                disabled={!canEditNeutral}
-              />
-              <MultiSelect
-                label={tCommonEntities('clients')}
-                data={clientSelectData}
-                value={clientIds}
-                onChange={(values) => {
-                  setClientIds(values);
-                  const observed = relationBaselineRef.current.clients;
-                  const baselineById = new Map(observed.map((relation) => [relation.id, relation]));
-                  queueNeutralPatch({
-                    clients: values.map((id, sortOrder) => ({
-                      id,
-                      ...(baselineById.has(id) ? { role: baselineById.get(id)?.role } : {}),
-                      sortOrder,
-                    })),
-                    observed: { clients: observed },
-                  });
-                }}
-                searchable
-                disabled={!canEditNeutral}
-              />
-            </DsLayoutGrid>
-          </DsLayoutStack>
-        </SectionCard>
-
-        <AuthoringExtension kind="relations">
-          <ProgramEventCreditsSection eventId={eventId} canEdit={canEditNeutral} initialCredits={initialCredits} />
-        </AuthoringExtension>
-
-        <div style={{ ...{ minHeight: 360, display: 'flex', flexDirection: 'column' }, flex: 1 }}>
-          <SectionCard layout="stack" grow withBorder padding="md">
-            <DsLayoutInset blockEnd="xs">
-              <DsText size="sm" weight="medium">
-                {tCommonLabels('body')}
-              </DsText>
-            </DsLayoutInset>
-            <div style={{ position: 'relative' }}>
-              <DsLayoutInset flexible space="none">
-                {editorReady ? (
-                  <div style={{ height: '100%' }} id={getEditorBodyReadyId('program_event', eventId)}>
-                    <LocalizedRichTextFragmentEditor
-                      key={`program-event-${eventId}-${roomLocale}`}
-                      provider={blockRoom.provider!}
-                      blockRoomController={blockRoom.controller!}
-                      userName={userName}
-                      editable={canEditCurrentLocale}
-                      entityId={eventId}
-                      entityType={TranscodeEntityType.PROGRAM_EVENT}
-                      allowNeutralBlockEdits={activeEditLocale.isSourceLocale}
-                      allowStructuralEdits={activeEditLocale.isSourceLocale}
-                      aiTarget={
-                        canEditCurrentLocale && activeEditLocale.activeLocale
-                          ? { type: 'program-event', id: eventId, locale: activeEditLocale.activeLocale }
-                          : undefined
+              <EditorSettingsSection title={tProgramEventAdmin('editor.details')}>
+                <DsLayoutGrid columns={{ base: 1, md: 2 }}>
+                  <Select
+                    label={tCommonLabels('type')}
+                    searchable
+                    disabled={!canEditNeutral}
+                    value={typeId}
+                    searchValue={typeCombobox.dropdownOpened ? typeSearch : (selectedType?.name ?? '')}
+                    onSearchChange={setTypeSearch}
+                    dropdownOpened={typeCombobox.dropdownOpened}
+                    onDropdownOpen={typeCombobox.openDropdown}
+                    onDropdownClose={typeCombobox.closeDropdown}
+                    placeholder={tCommon('actions.searchItems', {
+                      items: tCommonEntities('programEventTypes').toLowerCase(),
+                    })}
+                    aria-busy={createType.isPending || undefined}
+                    onChange={(id) => {
+                      if (id) {
+                        handleTypeSelect(id);
                       }
-                    />
-                  </div>
-                ) : (
-                  <div id={getEditorBodyLoadingId('program_event', eventId)}>
-                    <PageLoader size="sm" minHeight={300} />
-                  </div>
-                )}
-              </DsLayoutInset>
-            </div>
-          </SectionCard>
-        </div>
+                    }}
+                    data={[
+                      ...filteredTypes.map((option) => ({ value: option.id, label: option.name })),
+                      ...(canCreateType
+                        ? [{ value: '$create', label: tCommon('actions.createNamed', { name: typeSearch.trim() }) }]
+                        : []),
+                    ]}
+                    nothingFoundMessage={tCommon('states.none')}
+                  />
+                  <Select
+                    label={tProgramEventAdmin('editor.series')}
+                    data={seriesSelectData}
+                    value={seriesId}
+                    onChange={(value) => {
+                      setSeriesId(value);
+                      queueNeutralPatch({ seriesId: value ?? null });
+                    }}
+                    searchable
+                    clearable
+                    disabled={!canEditNeutral}
+                  />
+                  <NumberInput
+                    label={tProgramEventAdmin('editor.seriesOrder')}
+                    value={seriesOrder ?? ''}
+                    min={0}
+                    onChange={(value) => {
+                      const next = typeof value === 'number' ? value : null;
+                      setSeriesOrder(next);
+                      queueNeutralPatch({ seriesOrder: next });
+                    }}
+                    disabled={!canEditNeutral}
+                  />
+                  <Select
+                    label={tProgramEventAdmin('editor.timezone')}
+                    data={timezoneSelectData}
+                    value={timezone}
+                    onChange={(value) => {
+                      if (!value) {
+                        return;
+                      }
+                      setTimezone(value);
+                      queueNeutralPatch({ timezone: value });
+                    }}
+                    searchable
+                    allowDeselect={false}
+                    disabled={!canEditNeutral}
+                  />
+                  <DateTimePicker
+                    label={tProgramEventAdmin('editor.startsAt')}
+                    value={startsAtInput}
+                    onChange={(value) => {
+                      if (!value) {
+                        return;
+                      }
+                      try {
+                        const next = zonedDateTimeInputToInstant(value, timezone);
+                        setStartsAt(next);
+                        queueNeutralPatch({ startsAt: next });
+                      } catch {
+                        notifications.show({
+                          message: tCommon('notifications.saveFailed'),
+                          tone: 'danger',
+                        });
+                      }
+                    }}
+                    disabled={!canEditNeutral}
+                  />
+                  <DateTimePicker
+                    label={tProgramEventAdmin('editor.endsAt')}
+                    value={endsAtInput}
+                    clearable
+                    onChange={(value) => {
+                      try {
+                        const next = value ? zonedDateTimeInputToInstant(value, timezone) : null;
+                        setEndsAt(next);
+                        queueNeutralPatch({ endsAt: next });
+                      } catch {
+                        notifications.show({
+                          message: tCommon('notifications.saveFailed'),
+                          tone: 'danger',
+                        });
+                      }
+                    }}
+                    disabled={!canEditNeutral}
+                  />
+                </DsLayoutGrid>
+                <DsLayoutInline>
+                  <Checkbox
+                    label={tProgramEventAdmin('editor.allDay')}
+                    checked={allDay}
+                    onChange={(event) => {
+                      setAllDay(event.currentTarget.checked);
+                      queueNeutralPatch({ allDay: event.currentTarget.checked });
+                    }}
+                    disabled={!canEditNeutral}
+                  />
+                </DsLayoutInline>
+                <DsLayoutGrid columns={{ base: 1, md: 2, lg: 1 }}>
+                  <Select
+                    label={tProgramEventAdmin('editor.locationMode')}
+                    data={[
+                      { value: 'map_place', label: tProgramEventAdmin('locationModes.mapPlace') },
+                      { value: 'online', label: tProgramEventAdmin('locationModes.online') },
+                      { value: 'hybrid', label: tProgramEventAdmin('locationModes.hybrid') },
+                      { value: 'tba', label: tProgramEventAdmin('locationModes.tba') },
+                    ]}
+                    value={locationMode}
+                    onChange={(value) => {
+                      const next = (value ?? 'tba') as ProgramEventLocationModeValue;
+                      setLocationMode(next);
+                      queueNeutralPatch({ locationMode: next });
+                    }}
+                    disabled={!canEditNeutral}
+                  />
+                </DsLayoutGrid>
+                {showLocationSelector ? (
+                  <LocationSelector
+                    value={mapPlaceId}
+                    idPrefix={`program-event-${eventId}-location`}
+                    canEdit={canEditNeutral}
+                    onChange={(value) => {
+                      setMapPlaceId(value);
+                      queueNeutralPatch({ mapPlaceId: value });
+                    }}
+                    onCreateNew={(searchTerm) => {
+                      if (!canEditNeutral) {
+                        return;
+                      }
+                      setCreatePlaceInitialName(searchTerm);
+                      openCreatePlace();
+                    }}
+                  />
+                ) : null}
+                <DsLayoutGrid columns={{ base: 1, md: 3, lg: 1 }}>
+                  <TextInput
+                    label={tProgramEventAdmin('editor.ticketUrl')}
+                    value={ticketUrl}
+                    onChange={(event) => {
+                      const next = event.currentTarget.value;
+                      setTicketUrl(next);
+                      queueNeutralPatch({ ticketUrl: next || null });
+                    }}
+                    disabled={!canEditNeutral}
+                  />
+                  <TextInput
+                    label={tProgramEventAdmin('editor.streamUrl')}
+                    value={streamUrl}
+                    onChange={(event) => {
+                      const next = event.currentTarget.value;
+                      setStreamUrl(next);
+                      queueNeutralPatch({ streamUrl: next || null });
+                    }}
+                    disabled={!canEditNeutral}
+                  />
+                  <TextInput
+                    label={tProgramEventAdmin('editor.externalUrl')}
+                    value={externalUrl}
+                    onChange={(event) => {
+                      const next = event.currentTarget.value;
+                      setExternalUrl(next);
+                      queueNeutralPatch({ externalUrl: next || null });
+                    }}
+                    disabled={!canEditNeutral}
+                  />
+                </DsLayoutGrid>
+              </EditorSettingsSection>
+              <EditorSettingsSection title={tCommonLabels('related')}>
+                <DsLayoutStack gap="md">
+                  <MultiSelect
+                    label={tCommonEntities('artists')}
+                    data={artistSelectData}
+                    value={artistIds}
+                    onChange={(values) => {
+                      setArtistIds(values);
+                      const observed = relationBaselineRef.current.artists;
+                      const baselineById = new Map(observed.map((relation) => [relation.id, relation]));
+                      queueNeutralPatch({
+                        artists: values.map((id, sortOrder) => ({
+                          id,
+                          ...(baselineById.has(id) ? { role: baselineById.get(id)?.role } : {}),
+                          sortOrder,
+                        })),
+                        observed: { artists: observed },
+                      });
+                    }}
+                    searchable
+                    disabled={!canEditNeutral}
+                  />
+                  <MultiSelect
+                    label={tCommonEntities('labels')}
+                    data={labelSelectData}
+                    value={labelIds}
+                    onChange={(values) => {
+                      setLabelIds(values);
+                      const observed = relationBaselineRef.current.labels;
+                      const baselineById = new Map(observed.map((relation) => [relation.id, relation]));
+                      queueNeutralPatch({
+                        labels: values.map((id, sortOrder) => ({
+                          id,
+                          ...(baselineById.has(id) ? { role: baselineById.get(id)?.role } : {}),
+                          sortOrder,
+                        })),
+                        observed: { labels: observed },
+                      });
+                    }}
+                    searchable
+                    disabled={!canEditNeutral}
+                  />
+                  <MultiSelect
+                    label={tCommonEntities('clients')}
+                    data={clientSelectData}
+                    value={clientIds}
+                    onChange={(values) => {
+                      setClientIds(values);
+                      const observed = relationBaselineRef.current.clients;
+                      const baselineById = new Map(observed.map((relation) => [relation.id, relation]));
+                      queueNeutralPatch({
+                        clients: values.map((id, sortOrder) => ({
+                          id,
+                          ...(baselineById.has(id) ? { role: baselineById.get(id)?.role } : {}),
+                          sortOrder,
+                        })),
+                        observed: { clients: observed },
+                      });
+                    }}
+                    searchable
+                    disabled={!canEditNeutral}
+                  />
+                </DsLayoutStack>
+              </EditorSettingsSection>
+              <AuthoringExtension kind="relations">
+                <ProgramEventCreditsSection
+                  eventId={eventId}
+                  canEdit={canEditNeutral}
+                  initialCredits={initialCredits}
+                />
+              </AuthoringExtension>
+              <SummaryFieldCard
+                entityType="program_event"
+                entityId={eventId}
+                title={displayedTitle}
+                summary={displayedSummary}
+                summaryReadOnly={
+                  !shouldUseLocaleDocument || !canEditCurrentLocale || !blockRoom.isSynced || !canEditTranslationSource
+                }
+                hideAiActions
+                onSummaryChange={shouldUseLocaleDocument ? handleSummaryChange : undefined}
+              />
+              <EditorSettingsSection title={tCommonLabels('images')}>
+                <AuthoringExtension kind="uploads">
+                  <ProgramEventPosterUploader
+                    eventId={eventId}
+                    media={posterMedia}
+                    idPrefix={`program-event-${eventId}-poster`}
+                    canEdit={canEditNeutral}
+                    onMediaChange={setPosterMedia}
+                  />
+                </AuthoringExtension>
+              </EditorSettingsSection>
+              <MetadataPanel
+                title={displayedTitle}
+                summary={displayedSummary}
+                routePath={routePath}
+                canonicalOrigin={canonicalOrigin}
+                siteName={siteName}
+                defaultImageUrl={primaryPosterUrl}
+                defaultSchemaType="Event"
+              />
+              <AuthoringExtension kind="translations">
+                <EntityTranslationsPanel
+                  entityType="program_event"
+                  entityId={eventId}
+                  canManage
+                  canAdministerTranslations={canEditEvent}
+                  canMutateTargets={canEditEvent}
+                />
+              </AuthoringExtension>
+            </>
+          }
+        >
+          <div style={{ ...{ minHeight: 360, display: 'flex', flexDirection: 'column' }, flex: 1 }}>
+            <SectionCard layout="stack" grow padding={{ base: 'none', sm: 'md' }}>
+              <div style={{ position: 'relative' }}>
+                <DsLayoutInset flexible space="none">
+                  {editorReady ? (
+                    <div style={{ height: '100%' }} id={getEditorBodyReadyId('program_event', eventId)}>
+                      <LocalizedRichTextFragmentEditor
+                        key={`program-event-${eventId}-${roomLocale}`}
+                        provider={blockRoom.provider!}
+                        blockRoomController={blockRoom.controller!}
+                        userName={userName}
+                        editable={canEditCurrentLocale}
+                        entityId={eventId}
+                        entityType={TranscodeEntityType.PROGRAM_EVENT}
+                        allowNeutralBlockEdits={activeEditLocale.isSourceLocale}
+                        allowStructuralEdits={activeEditLocale.isSourceLocale}
+                        aiTarget={
+                          canEditCurrentLocale && activeEditLocale.activeLocale
+                            ? { type: 'program-event', id: eventId, locale: activeEditLocale.activeLocale }
+                            : undefined
+                        }
+                      />
+                    </div>
+                  ) : (
+                    <div id={getEditorBodyLoadingId('program_event', eventId)}>
+                      <PageLoader size="sm" minHeight={300} />
+                    </div>
+                  )}
+                </DsLayoutInset>
+              </div>
+            </SectionCard>
+          </div>
+        </DocumentEditorPanels>
 
         <CreatePlaceModal
           opened={createPlaceOpened}

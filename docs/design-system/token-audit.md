@@ -4,7 +4,7 @@ This report is generated from production source by `node scripts/design-system/c
 
 ## Current measured scope
 
-- 2427 production CSS/TS/TSX files scanned under app, components, features and lib, plus the central theme.ts.
+- 2429 production CSS/TS/TSX files scanned under app, components, features and lib, plus the central theme.ts.
 - 213 known semantic and font tokens in shared CSS definition files.
 - 0 remaining interface/runtime literal color occurrences in 0 files, excluding central definitions and the authored-color exceptions below.
 - 0 remaining authored editor palette literals in legacy variables.css. Their exact document colors belong to the shared authored palette source.
@@ -12,7 +12,7 @@ This report is generated from production source by `node scripts/design-system/c
 - 0 existing literal CSS spacing/typography occurrences covered by the migration baseline.
 - 0 existing custom-property declarations/inline assignments outside central files (private `--_*` implementation variables are permitted).
 - 177 literal CSS dimension occurrences in spacing, typography and geometry properties; 71 distinct values. These are audit findings, not blanket errors: canvas dimensions, geometry and responsive layouts require context.
-- 760 CSS custom-property declarations, 293 distinct names, 142 names declared more than once. Theme/state/media overrides are expected; equal values alone do not establish semantic duplication.
+- 763 CSS custom-property declarations, 295 distinct names, 143 names declared more than once. Theme/state/media overrides are expected; equal values alone do not establish semantic duplication.
 - 0 findings match the reviewed migration baseline; 0 new violations; 0 obsolete baseline keys eligible for removal.
 
 ## Enforcement contract
@@ -128,6 +128,7 @@ Authored typography exceptions (artwork, not interface roles):
 | `--_tab-active-ink`                  |            5 | `components/core/Tabs/Tabs.module.css`                                                                 |
 | `--_tab-active-fill`                 |            5 | `components/core/Tabs/Tabs.module.css`                                                                 |
 | `--_text-hierarchy-inset`            |            2 | `components/core/TextButton/TextButton.module.css`                                                     |
+| `--_document-settings-width`         |            2 | `features/authoring/DocumentEditorPanels.module.css`                                                   |
 | `--_document-layout-controls-space`  |            2 | `features/document-layout/ui/ContentLayoutView.module.css`                                             |
 | `--_map-callout-line-color`          |            2 | `features/map/ui/MapLibreMapView.css`                                                                  |
 | `--_map-callout-current-text-color`  |            2 | `features/map/ui/MapLibreMapView.css`                                                                  |

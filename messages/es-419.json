@@ -212,7 +212,10 @@
       "text": "Texto",
       "caption": "Subtítulo",
       "allUsers": "Todos los usuarios",
-      "newsletter": "Hoja informativa"
+      "newsletter": "Hoja informativa",
+      "images": "Imágenes",
+      "classification": "Clasificación",
+      "related": "Relacionado"
     },
     "entities": {
       "post": "Correo",

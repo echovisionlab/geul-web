@@ -212,7 +212,10 @@
       "text": "Metin",
       "caption": "Altyazı",
       "allUsers": "Tüm kullanıcılar",
-      "newsletter": "Bülten"
+      "newsletter": "Bülten",
+      "images": "Görseller",
+      "classification": "Sınıflandırma",
+      "related": "İlişkili"
     },
     "entities": {
       "post": "Postalamak",

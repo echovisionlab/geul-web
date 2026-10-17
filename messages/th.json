@@ -212,7 +212,10 @@
       "text": "ข้อความ",
       "caption": "คำบรรยายภาพ",
       "allUsers": "ผู้ใช้บริการทุกคน",
-      "newsletter": "จดหมายข่าว"
+      "newsletter": "จดหมายข่าว",
+      "images": "รูปภาพ",
+      "classification": "การจัดหมวดหมู่",
+      "related": "ที่เกี่ยวข้อง"
     },
     "entities": {
       "post": "โพสต์",

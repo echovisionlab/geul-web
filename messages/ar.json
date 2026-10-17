@@ -212,7 +212,10 @@
       "text": "النص",
       "caption": "التسمية التوضيحية",
       "allUsers": "كل المستخدمين",
-      "newsletter": "النشرة الإخبارية"
+      "newsletter": "النشرة الإخبارية",
+      "images": "الصور",
+      "classification": "التصنيف",
+      "related": "عناصر مرتبطة"
     },
     "entities": {
       "post": "منشور",

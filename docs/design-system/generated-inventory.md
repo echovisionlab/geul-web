@@ -4,15 +4,15 @@ Run `node scripts/design-system/inventory.mjs` to regenerate; `--check` fails wh
 
 Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.
 
-Source manifest SHA-256: `5ea1e76905f65f657c74cf461d8ee0316d6c269b6ea0b08343a31bf3db4f89d2`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
+Source manifest SHA-256: `a657e40a7f17e92984779639e05bcb90bc0560d912a52d6b59cc2feaf9ecc1dd`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
 
 ## Counts
 
 | Metric                | Count |
 | --------------------- | ----: |
-| sourceFiles           |  3791 |
-| productionSourceFiles |  2297 |
-| componentFiles        |   909 |
+| sourceFiles           |  3792 |
+| productionSourceFiles |  2298 |
+| componentFiles        |   910 |
 | coreFamilies          |    57 |
 | featureDomains        |    53 |
 | storyFiles            |   257 |
@@ -124,7 +124,7 @@ Counts include every production JS/TS file in the domain; component files are Pa
 | [application-error](../../features/application-error) |      9 |          5 |       2 |     5 |             1 |
 | [artist](../../features/artist)                       |      9 |          9 |       1 |     2 |             0 |
 | [auth](../../features/auth)                           |     30 |         12 |       1 |    20 |             5 |
-| [authoring](../../features/authoring)                 |      6 |          4 |       0 |     2 |             0 |
+| [authoring](../../features/authoring)                 |      7 |          5 |       0 |     2 |             0 |
 | [campaign](../../features/campaign)                   |     10 |          7 |       0 |     5 |             3 |
 | [changelog](../../features/changelog)                 |      1 |          1 |       0 |     0 |             1 |
 | [client](../../features/client)                       |      2 |          2 |       0 |     1 |             0 |

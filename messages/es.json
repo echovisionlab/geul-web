@@ -212,7 +212,10 @@
       "text": "Texto",
       "caption": "Leyenda",
       "allUsers": "Todos los usuarios",
-      "newsletter": "Boletín"
+      "newsletter": "Boletín",
+      "images": "Imágenes",
+      "classification": "Clasificación",
+      "related": "Relacionado"
     },
     "entities": {
       "post": "Publicación",

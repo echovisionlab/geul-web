@@ -5,6 +5,7 @@ import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
 
 import { DocumentEditorPanels } from '@/features/authoring/DocumentEditorPanels';
+import { EditorSettingsSection } from '@/features/authoring/EditorSettingsSection';
 
 import { Text as DsText } from '@/components/core/Typography';
 import { LayoutStack as DsLayoutStack, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
@@ -824,33 +825,6 @@ export function WorkEditorView({ model }: { model: WorkEditorViewModel }) {
         <DocumentEditorPanels
           settings={
             <>
-              {/* OG Image & Featured Image */}
-              <MediaPreviewGrid>
-                <OgImagePreview
-                  src={ogImage.src}
-                  canRegenerate={canEditWork && activeEditLocale.hasLiveRow && Boolean(activeEditLocale.activeLocale)}
-                  isRegenerating={regenerateOgImage.isPending || ogImage.isRegenerating}
-                  generationStatus={ogImage.status}
-                  generationError={ogImage.error}
-                  onRegenerate={() => {
-                    if (activeEditLocale.activeLocale) {
-                      regenerateOgImage.mutate({
-                        locale: activeEditLocale.activeLocale,
-                        targetKey: ogImage.targetKey,
-                      });
-                    }
-                  }}
-                />
-                <AuthoringExtension kind="uploads">
-                  <WorkFeaturedImageUploader
-                    workId={workId}
-                    idPrefix={`work-${workId}-featured-image`}
-                    canEdit={canEditNeutral}
-                    onOgGenerationRequested={() => void ogImage.trackLatest()}
-                  />
-                </AuthoringExtension>
-              </MediaPreviewGrid>
-
               {/* URL Section */}
               <UrlSection
                 baseUrl={baseUrl}
@@ -865,36 +839,6 @@ export function WorkEditorView({ model }: { model: WorkEditorViewModel }) {
                 onBlur={slugMgmt.handleBlur}
                 disabled={!canEditNeutral}
               />
-
-              {/* Share Links */}
-              <AuthoringExtension kind="sharing">
-                <ShareLinkSection
-                  entityType="work"
-                  entityId={workId}
-                  description={t('shareLinksDescription')}
-                  disabled={!canEditNeutral}
-                />
-              </AuthoringExtension>
-
-              <AuthoringExtension kind="translations">
-                <EntityTranslationsPanel
-                  entityType="work"
-                  entityId={workId}
-                  canManage
-                  canAdministerTranslations={isAdmin && canEditWork}
-                  canMutateTargets={canEditWork}
-                />
-              </AuthoringExtension>
-
-              <DsLayoutStack gap="xxs">
-                <LocationSelector
-                  value={mapPlaceId}
-                  idPrefix={`work-${workId}-location`}
-                  canEdit={canEditNeutral}
-                  onChange={handleMapPlaceChange}
-                  onCreateNew={handleCreatePlaceStart}
-                />
-              </DsLayoutStack>
 
               {/* Meta Form */}
               <WorkMetaForm
@@ -911,6 +855,29 @@ export function WorkEditorView({ model }: { model: WorkEditorViewModel }) {
                 onChange={handleMetaChange}
               />
 
+              <EditorSettingsSection title={tCommonLabels('classification')}>
+                <LocationSelector
+                  value={mapPlaceId}
+                  idPrefix={`work-${workId}-location`}
+                  canEdit={canEditNeutral}
+                  onChange={handleMapPlaceChange}
+                  onCreateNew={handleCreatePlaceStart}
+                />
+              </EditorSettingsSection>
+
+              {/* Credits */}
+              <AuthoringExtension kind="relations">
+                <WorkCreditsSection workId={workId} canEdit={canEditNeutral} />
+              </AuthoringExtension>
+
+              {/* Clients */}
+              <AuthoringExtension kind="relations">
+                <WorkClientsSection
+                  workId={workId}
+                  canEdit={canEditNeutral}
+                  initialClientDetails={initialClientDetails}
+                />
+              </AuthoringExtension>
               <SummaryFieldCard
                 entityType="work"
                 entityId={workId}
@@ -930,6 +897,35 @@ export function WorkEditorView({ model }: { model: WorkEditorViewModel }) {
                 onSummaryChange={currentLocaleCanEdit ? handleSummaryChange : undefined}
               />
 
+              {/* OG Image & Featured Image */}
+              <EditorSettingsSection title={tCommonLabels('images')}>
+                <MediaPreviewGrid>
+                  <OgImagePreview
+                    src={ogImage.src}
+                    canRegenerate={canEditWork && activeEditLocale.hasLiveRow && Boolean(activeEditLocale.activeLocale)}
+                    isRegenerating={regenerateOgImage.isPending || ogImage.isRegenerating}
+                    generationStatus={ogImage.status}
+                    generationError={ogImage.error}
+                    onRegenerate={() => {
+                      if (activeEditLocale.activeLocale) {
+                        regenerateOgImage.mutate({
+                          locale: activeEditLocale.activeLocale,
+                          targetKey: ogImage.targetKey,
+                        });
+                      }
+                    }}
+                  />
+                  <AuthoringExtension kind="uploads">
+                    <WorkFeaturedImageUploader
+                      workId={workId}
+                      idPrefix={`work-${workId}-featured-image`}
+                      canEdit={canEditNeutral}
+                      onOgGenerationRequested={() => void ogImage.trackLatest()}
+                    />
+                  </AuthoringExtension>
+                </MediaPreviewGrid>
+              </EditorSettingsSection>
+
               <MetadataPanel
                 title={displayedTitle}
                 summary={displayedSummary}
@@ -940,17 +936,23 @@ export function WorkEditorView({ model }: { model: WorkEditorViewModel }) {
                 defaultSchemaType="CreativeWork"
               />
 
-              {/* Credits */}
-              <AuthoringExtension kind="relations">
-                <WorkCreditsSection workId={workId} canEdit={canEditNeutral} />
+              {/* Share Links */}
+              <AuthoringExtension kind="sharing">
+                <ShareLinkSection
+                  entityType="work"
+                  entityId={workId}
+                  description={t('shareLinksDescription')}
+                  disabled={!canEditNeutral}
+                />
               </AuthoringExtension>
 
-              {/* Clients */}
-              <AuthoringExtension kind="relations">
-                <WorkClientsSection
-                  workId={workId}
-                  canEdit={canEditNeutral}
-                  initialClientDetails={initialClientDetails}
+              <AuthoringExtension kind="translations">
+                <EntityTranslationsPanel
+                  entityType="work"
+                  entityId={workId}
+                  canManage
+                  canAdministerTranslations={isAdmin && canEditWork}
+                  canMutateTargets={canEditWork}
                 />
               </AuthoringExtension>
             </>

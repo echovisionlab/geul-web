@@ -1,5 +1,15 @@
 # Design system changes
 
+## 2026-10-17 — authoring settings column (unreleased)
+
+`DocumentEditorPanels` puts the settings in a sticky, independently scrolling column beside the body from
+`lg` (tabs below `lg`; the body bleeds to the edge on phones only). Event, Release and Series adopt it with
+Post, Page and Work. New Feature `EditorSettingsSection` is the settings card; all editors order their cards
+URL → details → classification/related → credits → options → summary → images → metadata → sharing →
+translations. Release's bordered "Basic Information" box, Event's bordered "Body" box and untitled relation
+card, and Work's loose location/image grid become standard cards; Work's type-specific group labels move
+from `xs` to `sm` so they no longer read smaller than the fields they group.
+
 ## 2026-10-17 — public details, fluid collections and continued lists (unreleased)
 
 New Feature `EntityDetailLayout` / `EntityDetailSection` / `EntityDetailImage` (document-layout) give every

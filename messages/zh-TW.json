@@ -212,7 +212,10 @@
       "text": "文字",
       "caption": "說明文字",
       "allUsers": "所有使用者",
-      "newsletter": "電子報"
+      "newsletter": "電子報",
+      "images": "圖片",
+      "classification": "分類",
+      "related": "相關"
     },
     "entities": {
       "post": "文章",

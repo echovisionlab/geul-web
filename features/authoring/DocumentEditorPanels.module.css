@@ -1,0 +1,51 @@
+/*
+ * From `lg` the writing surface and the document settings sit side by side: the body takes the
+ * remaining width, the settings keep their own column in view and scroll on their own.
+ */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--_document-settings-width);
+  align-items: start;
+  gap: var(--geul-spacing-xl);
+  min-width: 0;
+  flex: 1 1 auto;
+
+  --_document-settings-width: 28rem;
+  --_document-settings-top: calc(var(--geul-chrome-scroll-offset) + var(--geul-spacing-md));
+}
+
+.body {
+  display: flex;
+  min-width: 0;
+  min-height: 100%;
+  flex-direction: column;
+}
+
+.settings {
+  position: sticky;
+  top: var(--_document-settings-top);
+  display: flex;
+  max-height: calc(100dvh - var(--_document-settings-top) - var(--geul-spacing-md));
+  flex-direction: column;
+  gap: var(--geul-spacing-md);
+  min-width: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+@media (width >= $mantine-breakpoint-xl) {
+  .split {
+    --_document-settings-width: 32rem;
+  }
+}
+
+@media print {
+  .split {
+    display: block;
+  }
+
+  .settings {
+    display: none;
+  }
+}

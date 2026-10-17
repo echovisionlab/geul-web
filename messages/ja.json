@@ -212,7 +212,10 @@
       "text": "テキスト",
       "caption": "キャプション",
       "allUsers": "すべてのユーザー",
-      "newsletter": "ニュースレター"
+      "newsletter": "ニュースレター",
+      "images": "画像",
+      "classification": "分類",
+      "related": "関連"
     },
     "entities": {
       "post": "投稿",

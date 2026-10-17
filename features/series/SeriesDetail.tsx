@@ -3,12 +3,13 @@
 import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
 
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
+import { DocumentEditorPanels } from '@/features/authoring/DocumentEditorPanels';
+import { EditorSettingsSection } from '@/features/authoring/EditorSettingsSection';
 import { SupportingText, Text as DsText, VisuallyHidden } from '@/components/core/Typography';
 import {
   LayoutStack as DsLayoutStack,
   LayoutInline as DsLayoutInline,
   LayoutInset as DsLayoutInset,
-  LayoutInset,
 } from '@/components/core/Layout';
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
@@ -644,94 +645,99 @@ export function SeriesDetailView({
           ]}
         />
 
-        <MediaPreviewGrid>
-          <OgImagePreview
-            src={ogImage.src}
-            canRegenerate={
-              canEdit && canRegenerateOg && activeEditLocale.hasLiveRow && Boolean(activeEditLocale.activeLocale)
-            }
-            isRegenerating={regenerateOgImage.isPending || ogImage.isRegenerating}
-            generationStatus={ogImage.status}
-            generationError={ogImage.error}
-            onRegenerate={() => {
-              if (activeEditLocale.activeLocale) {
-                regenerateOgImage.mutate({
-                  locale: activeEditLocale.activeLocale,
-                  targetKey: ogImage.targetKey,
-                });
-              }
-            }}
-          />
-          <ImageUploadCropController
-            imageUrl={featuredImageUrl}
-            canEdit={canEdit}
-            isUploading={isUploading}
-            uploadProgress={uploadProgress}
-            isRemoving={removeFeaturedImage.isPending}
-            onUpload={handleFeaturedImageUpload}
-            onRemove={() => removeFeaturedImage.mutate()}
-            label={tFeaturedImage('label')}
-          />
-        </MediaPreviewGrid>
-
-        <LayoutInset space="none" blockStart="md">
-          <SectionCard>
-            <DsLayoutStack>
-              <DsLayoutInline gap="xs">
-                <DsText id={`${viewId}-slug`} size="sm" weight="medium">
-                  {tCommon('labels.slug')}
-                </DsText>
-              </DsLayoutInline>
-              <TextInput
-                aria-labelledby={`${viewId}-slug`}
-                value={slug}
-                onChange={(e) => slugMgmt.handleChange(e.currentTarget.value)}
-                disabled={!canEdit || !activeEditLocale.isSourceLocale}
-                error={slugMgmt.error}
-                rightSection={
-                  slugMgmt.isChecking ? (
-                    <Loader size="xs" />
-                  ) : slug && slugMgmt.isAvailable === true ? (
-                    <StatusIcon icon={IconCheck} tone="positive" />
-                  ) : undefined
-                }
-                description={t('slug.manualDescription')}
-              />
-              <Textarea
-                label={tCommon('labels.description')}
-                value={displayedDescription}
-                onChange={(event) => {
-                  if (!canEditCurrentCopy) {
-                    return;
-                  }
-                  collaboration.setField('summary', event.currentTarget.value);
-                }}
-                disabled={!canEditCurrentCopy || activeEditLocale.isLoading}
-                minRows={3}
-              />
-              {activeEditLocale.isSourceLocale && (
-                <DsLayoutInline justify="end">
-                  <Button disabled={!canEdit} onClick={handleSave} loading={updateSeries.isPending}>
-                    {tActions('saveChanges')}
-                  </Button>
-                </DsLayoutInline>
-              )}
-            </DsLayoutStack>
-          </SectionCard>
-        </LayoutInset>
-
-        <AuthoringExtension kind="translations">
-          <EntityTranslationsPanel
-            entityType="post_series"
-            entityId={seriesId}
-            canManage
-            canMutateTargets={canEdit}
-            canAdministerTranslations={canEdit && scope === 'admin'}
-          />
-        </AuthoringExtension>
-
-        <LayoutInset space="none" blockStart="md">
-          <SectionCard>
+        <DocumentEditorPanels
+          settings={
+            <>
+              <EditorSettingsSection title={tCommon('labels.details')}>
+                <DsLayoutStack>
+                  <DsLayoutInline gap="xs">
+                    <DsText id={`${viewId}-slug`} size="sm" weight="medium">
+                      {tCommon('labels.slug')}
+                    </DsText>
+                  </DsLayoutInline>
+                  <TextInput
+                    aria-labelledby={`${viewId}-slug`}
+                    value={slug}
+                    onChange={(e) => slugMgmt.handleChange(e.currentTarget.value)}
+                    disabled={!canEdit || !activeEditLocale.isSourceLocale}
+                    error={slugMgmt.error}
+                    rightSection={
+                      slugMgmt.isChecking ? (
+                        <Loader size="xs" />
+                      ) : slug && slugMgmt.isAvailable === true ? (
+                        <StatusIcon icon={IconCheck} tone="positive" />
+                      ) : undefined
+                    }
+                    description={t('slug.manualDescription')}
+                  />
+                  <Textarea
+                    label={tCommon('labels.description')}
+                    value={displayedDescription}
+                    onChange={(event) => {
+                      if (!canEditCurrentCopy) {
+                        return;
+                      }
+                      collaboration.setField('summary', event.currentTarget.value);
+                    }}
+                    disabled={!canEditCurrentCopy || activeEditLocale.isLoading}
+                    minRows={3}
+                  />
+                  {activeEditLocale.isSourceLocale && (
+                    <DsLayoutInline justify="end">
+                      <Button disabled={!canEdit} onClick={handleSave} loading={updateSeries.isPending}>
+                        {tActions('saveChanges')}
+                      </Button>
+                    </DsLayoutInline>
+                  )}
+                </DsLayoutStack>
+              </EditorSettingsSection>
+              <EditorSettingsSection title={tCommon('labels.images')}>
+                <MediaPreviewGrid>
+                  <OgImagePreview
+                    src={ogImage.src}
+                    canRegenerate={
+                      canEdit &&
+                      canRegenerateOg &&
+                      activeEditLocale.hasLiveRow &&
+                      Boolean(activeEditLocale.activeLocale)
+                    }
+                    isRegenerating={regenerateOgImage.isPending || ogImage.isRegenerating}
+                    generationStatus={ogImage.status}
+                    generationError={ogImage.error}
+                    onRegenerate={() => {
+                      if (activeEditLocale.activeLocale) {
+                        regenerateOgImage.mutate({
+                          locale: activeEditLocale.activeLocale,
+                          targetKey: ogImage.targetKey,
+                        });
+                      }
+                    }}
+                  />
+                  <ImageUploadCropController
+                    imageUrl={featuredImageUrl}
+                    canEdit={canEdit}
+                    isUploading={isUploading}
+                    uploadProgress={uploadProgress}
+                    isRemoving={removeFeaturedImage.isPending}
+                    onUpload={handleFeaturedImageUpload}
+                    onRemove={() => removeFeaturedImage.mutate()}
+                    label={tFeaturedImage('label')}
+                  />
+                </MediaPreviewGrid>
+              </EditorSettingsSection>
+              <AuthoringExtension kind="translations">
+                <EntityTranslationsPanel
+                  entityType="post_series"
+                  entityId={seriesId}
+                  canManage
+                  canMutateTargets={canEdit}
+                  canAdministerTranslations={canEdit && scope === 'admin'}
+                />
+              </AuthoringExtension>
+            </>
+          }
+        >
+          <SectionCard padding={{ base: 'none', sm: 'md' }}>
             <DsLayoutInset blockEnd="md">
               <DsLayoutInline justify="between">
                 <DsText
@@ -890,7 +896,7 @@ export function SeriesDetailView({
               </Table.ScrollContainer>
             )}
           </SectionCard>
-        </LayoutInset>
+        </DocumentEditorPanels>
 
         <SeriesManagersModal
           seriesId={seriesId}

@@ -212,7 +212,10 @@
       "text": "Teks",
       "caption": "Keterangan",
       "allUsers": "Semua pengguna",
-      "newsletter": "Buletin"
+      "newsletter": "Buletin",
+      "images": "Gambar",
+      "classification": "Klasifikasi",
+      "related": "Terkait"
     },
     "entities": {
       "post": "Pos",

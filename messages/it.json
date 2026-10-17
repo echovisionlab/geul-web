@@ -212,7 +212,10 @@
       "text": "Testo",
       "caption": "Didascalia",
       "allUsers": "Tutti gli utenti",
-      "newsletter": "Newsletter"
+      "newsletter": "Newsletter",
+      "images": "Immagini",
+      "classification": "Classificazione",
+      "related": "Correlati"
     },
     "entities": {
       "post": "Inviare",

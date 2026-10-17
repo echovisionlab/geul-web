@@ -212,7 +212,10 @@
       "text": "Chữ",
       "caption": "Đầu đề",
       "allUsers": "Tất cả người dùng",
-      "newsletter": "Bản tin"
+      "newsletter": "Bản tin",
+      "images": "Hình ảnh",
+      "classification": "Phân loại",
+      "related": "Liên quan"
     },
     "entities": {
       "post": "Bưu kiện",

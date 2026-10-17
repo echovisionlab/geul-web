@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "sourceManifestHash": "5ea1e76905f65f657c74cf461d8ee0316d6c269b6ea0b08343a31bf3db4f89d2",
+  "sourceManifestHash": "a657e40a7f17e92984779639e05bcb90bc0560d912a52d6b59cc2feaf9ecc1dd",
   "methodology": "All inventoried Feature component candidates. Direct value imports, literal lazy imports and transitive source relationships through production owners/local adapters are indexed separately. A dependency can be unused or render conditionally; neither relationship proves rendered states, route parity or design compliance. Empty JSX records include runtime/lazy/controller boundaries and must be inspected before treating them as visual gaps.",
-  "counts": { "domains": 53, "componentFiles": 769, "jsxWithoutStoryRelationship": 45 },
+  "counts": { "domains": 53, "componentFiles": 770, "jsxWithoutStoryRelationship": 45 },
   "domains": [
     {
       "domain": "account",
@@ -1192,7 +1192,14 @@
           "file": "features/authoring/DocumentEditorPanels.tsx",
           "hasJsx": true,
           "directStories": [],
-          "relatedStories": ["Pages/Editors/Page", "Pages/Editors/Post", "Pages/Editors/Work"]
+          "relatedStories": [
+            "Pages/Editors/Page",
+            "Pages/Editors/Post",
+            "Pages/Editors/Program Events",
+            "Pages/Editors/Release",
+            "Pages/Editors/Series",
+            "Pages/Editors/Work"
+          ]
         },
         {
           "file": "features/authoring/EditorHeader/EditorHeader.tsx",
@@ -1235,6 +1242,19 @@
             "Pages/Editors/Legal",
             "Pages/Admin/Map Places",
             "Pages/Admin/Map Theme Editor",
+            "Pages/Editors/Page",
+            "Pages/Editors/Post",
+            "Pages/Editors/Program Events",
+            "Pages/Editors/Release",
+            "Pages/Editors/Series",
+            "Pages/Editors/Work"
+          ]
+        },
+        {
+          "file": "features/authoring/EditorSettingsSection.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": [
             "Pages/Editors/Page",
             "Pages/Editors/Post",
             "Pages/Editors/Program Events",

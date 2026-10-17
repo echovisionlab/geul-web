@@ -212,7 +212,10 @@
       "text": "Tekst",
       "caption": "Bijschrift",
       "allUsers": "Alle gebruikers",
-      "newsletter": "Nieuwsbrief"
+      "newsletter": "Nieuwsbrief",
+      "images": "Afbeeldingen",
+      "classification": "Indeling",
+      "related": "Gerelateerd"
     },
     "entities": {
       "post": "Bericht",

@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "5ea1e76905f65f657c74cf461d8ee0316d6c269b6ea0b08343a31bf3db4f89d2",
+  "manifestHash": "a657e40a7f17e92984779639e05bcb90bc0560d912a52d6b59cc2feaf9ecc1dd",
   "counts": {
-    "sourceFiles": 3791,
-    "productionSourceFiles": 2297,
-    "componentFiles": 909,
+    "sourceFiles": 3792,
+    "productionSourceFiles": 2298,
+    "componentFiles": 910,
     "coreFamilies": 57,
     "featureDomains": 53,
     "storyFiles": 257,
@@ -1160,6 +1160,7 @@
     "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
     "features/authoring/EditorHeader/index.ts",
     "features/authoring/EditorHeader/status-options.ts",
+    "features/authoring/EditorSettingsSection.tsx",
     "features/campaign/CampaignAnalyticsPage.tsx",
     "features/campaign/CampaignDeliveryDialogs.tsx",
     "features/campaign/CampaignEditPage.delivery.test.tsx",
@@ -13218,6 +13219,7 @@
         "features/auth/ui/VerificationFlowView.tsx",
         "features/authoring/DocumentEditorPanels.tsx",
         "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
+        "features/authoring/EditorSettingsSection.tsx",
         "features/campaign/CampaignAnalyticsPage.tsx",
         "features/campaign/CampaignDeliveryDialogs.tsx",
         "features/campaign/CampaignEditPage.tsx",
@@ -14318,7 +14320,6 @@
         "features/page/PageEditor/PageEditor.tsx",
         "features/policy/LegalOgImagePanel.tsx",
         "features/post/PostEditor/PostEditor.tsx",
-        "features/program-event/ProgramEventEditor/ProgramEventEditor.tsx",
         "features/program-event/ProgramEventSeriesEditor/ProgramEventSeriesEditor.tsx",
         "features/series/SeriesDetail.tsx",
         "features/site/SiteOgImagePanel/SiteOgImagePanel.tsx",
@@ -16444,6 +16445,7 @@
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/settings/OgImageSettingsPage.tsx",
         "features/admin/ui/AdminNavigation/AdminNavigationView.tsx",
+        "features/authoring/EditorSettingsSection.tsx",
         "features/campaign/CampaignAnalyticsPage.tsx",
         "features/campaign/CampaignEditPage.tsx",
         "features/cookie-consent/ui/CookieConsentBannerView.tsx",
@@ -16602,6 +16604,7 @@
         "components/core/Section/SettingsSection.tsx",
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/settings/OgImageSettingsPage.tsx",
+        "features/authoring/EditorSettingsSection.tsx",
         "features/metadata/MetadataPanel/MetadataPanel.tsx",
         "features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
         "features/metadata/ui/UrlSectionView.tsx",
@@ -16613,10 +16616,7 @@
         "features/my/ui/McpIntegrationSettings/McpIntegrationSettingsView.tsx",
         "features/my/ui/PersonalAccessTokenSettings/PersonalAccessTokenSettingsView.tsx",
         "features/my/ui/SessionManagement/SessionManagementView.tsx",
-        "features/page/PageEditor/PageEditor.tsx",
         "features/policy/LegalOgImagePanel.tsx",
-        "features/post/PostEditor/PostEditor.tsx",
-        "features/program-event/ProgramEventEditor/ProgramEventEditor.tsx",
         "features/release/ReleaseEditor/ReleaseArtistsSectionView.tsx",
         "features/release/ReleaseEditor/ReleaseCreditsSection.tsx",
         "features/release/ReleaseEditor/ReleaseLabelsSection.tsx",
@@ -30506,12 +30506,15 @@
       "productionConsumers": [
         "features/page/PageEditor/PageEditor.tsx",
         "features/post/PostEditor/PostEditor.tsx",
+        "features/program-event/ProgramEventEditor/ProgramEventEditor.tsx",
+        "features/release/ReleaseEditor/ReleaseEditor.tsx",
+        "features/series/SeriesDetail.tsx",
         "features/work/WorkEditor/WorkEditor.tsx"
       ],
       "catalogAdapters": [],
       "tests": ["features/authoring/DocumentEditorPanels.test.tsx"],
       "stories": [],
-      "composedJsx": ["LayoutBleed", "LayoutStack", "Tabs", "Tabs.List", "Tabs.Panel", "Tabs.Tab"]
+      "composedJsx": ["LayoutBleed", "LayoutStack", "Tabs", "Tabs.List", "Tabs.Panel", "Tabs.Tab", "aside", "div"]
     },
     {
       "file": "features/authoring/EditorHeader/EditorHeader.tsx",
@@ -30599,6 +30602,31 @@
         "DsText",
         "SupportingText"
       ]
+    },
+    {
+      "file": "features/authoring/EditorSettingsSection.tsx",
+      "owner": "Feature/authoring",
+      "exports": [
+        {
+          "name": "EditorSettingsSection",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [],
+      "productionConsumers": [
+        "features/page/PageEditor/PageEditor.tsx",
+        "features/post/PostEditor/PostEditor.tsx",
+        "features/program-event/ProgramEventEditor/ProgramEventEditor.tsx",
+        "features/release/ReleaseEditor/ReleaseEditor.tsx",
+        "features/series/SeriesDetail.tsx",
+        "features/work/WorkEditor/WorkEditor.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["LayoutStack", "SectionCard", "SectionHeader"]
     },
     {
       "file": "features/campaign/CampaignAnalyticsPage.tsx",
@@ -53211,6 +53239,7 @@
         "EditorActiveLocaleControl",
         "EditorHeader",
         "EditorRuntimeProvider",
+        "EditorSettingsSection",
         "EditorSnapshotHandoff",
         "EntityTranslationsPanel",
         "IconHistory",
@@ -53228,7 +53257,6 @@
         "QueryErrorAlert",
         "ScrollArea",
         "SectionCard",
-        "SectionHeader",
         "SectionList",
         "ShareLinkSection",
         "SummaryFieldCard",
@@ -58122,7 +58150,7 @@
             {
               "name": "onLoadMore",
               "optional": false,
-              "type": "() => void"
+              "type": "() => unknown"
             }
           ]
         }
@@ -63451,10 +63479,10 @@
         "ContentLayoutField",
         "CreatePlaceModal",
         "DocumentEditorPanels",
-        "DsLayoutGrid",
         "DsLayoutStack",
         "EditorActiveLocaleControl",
         "EditorRuntimeProvider",
+        "EditorSettingsSection",
         "EntityTranslationsPanel",
         "FeaturedImageUploader",
         "LocationSelector",
@@ -63472,7 +63500,6 @@
         "PostScheduleDialog",
         "PostSessionExpiredDialog",
         "SectionCard",
-        "SectionHeader",
         "SeriesSelector",
         "ShareLinkSection",
         "SummaryFieldCard",
@@ -65549,6 +65576,7 @@
         "Checkbox",
         "CreatePlaceModal",
         "DateTimePicker",
+        "DocumentEditorPanels",
         "DsLayoutGrid",
         "DsLayoutInline",
         "DsLayoutInset",
@@ -65557,11 +65585,11 @@
         "EditorActiveLocaleControl",
         "EditorHeader",
         "EditorRuntimeProvider",
+        "EditorSettingsSection",
         "EntityTranslationsPanel",
         "LocalizedRichTextFragmentEditor",
         "LocationSelector",
         "MapPlaceActionProvider",
-        "MediaPreviewGrid",
         "MetadataPanel",
         "MultiSelect",
         "NumberInput",
@@ -65570,7 +65598,6 @@
         "ProgramEventEditorView",
         "ProgramEventPosterUploader",
         "SectionCard",
-        "SectionHeader",
         "Select",
         "SummaryFieldCard",
         "TextInput",
@@ -66638,6 +66665,7 @@
         "ActiveEditLocaleContentPreview",
         "AuthoringExtension",
         "DateInput",
+        "DocumentEditorPanels",
         "DsLayoutGrid",
         "DsLayoutInline",
         "DsLayoutStack",
@@ -66645,6 +66673,7 @@
         "EditorActiveLocaleControl",
         "EditorHeader",
         "EditorRuntimeProvider",
+        "EditorSettingsSection",
         "EntityTranslationsPanel",
         "QueryErrorAlert",
         "ReleaseArtistsSection",
@@ -67707,6 +67736,7 @@
         "AuthoringExtension",
         "Button",
         "DateTime",
+        "DocumentEditorPanels",
         "DsLayoutInline",
         "DsLayoutInset",
         "DsLayoutStack",
@@ -67714,6 +67744,7 @@
         "EditorActiveLocaleControl",
         "EditorHeader",
         "EditorRuntimeProvider",
+        "EditorSettingsSection",
         "EntityTranslationsPanel",
         "IconButton",
         "IconChevronDown",
@@ -67721,7 +67752,6 @@
         "IconUsers",
         "IconX",
         "ImageUploadCropController",
-        "LayoutInset",
         "Loader",
         "MediaPreviewGrid",
         "OgImagePreview",
@@ -73946,6 +73976,7 @@
         "EditorActiveLocaleControl",
         "EditorHeader",
         "EditorRuntimeProvider",
+        "EditorSettingsSection",
         "EntityTranslationsPanel",
         "IconHistory",
         "LocalizedRichTextFragmentEditor",
@@ -75446,13 +75477,15 @@
         "features/authoring/EditorHeader/EditorHeader.tsx",
         "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "features/authoring/EditorHeader/index.ts",
-        "features/authoring/EditorHeader/status-options.ts"
+        "features/authoring/EditorHeader/status-options.ts",
+        "features/authoring/EditorSettingsSection.tsx"
       ],
       "components": [
         "features/authoring/AuthoringExtensionsContext.tsx",
         "features/authoring/DocumentEditorPanels.tsx",
         "features/authoring/EditorHeader/EditorHeader.tsx",
-        "features/authoring/EditorHeader/RejectedEditsDialog.tsx"
+        "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
+        "features/authoring/EditorSettingsSection.tsx"
       ],
       "stories": [],
       "tests": [

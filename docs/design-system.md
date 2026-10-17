@@ -148,6 +148,14 @@ the title, metadata and `EntityDetailSection`s (`h2`, the mono label voice of th
 rest; below `md` it stacks. Running text keeps the reading measure from the start edge, never centered;
 lists and tables use the full width. A detail with media keeps its table of contents as the rail
 (`outlinePresentation="rail"`). Posts and Pages remain documents on the centered reading measure.
+
+Every authoring screen (Post, Page, Work, Event, Release, Series) composes `DocumentEditorPanels`: from `lg`
+the primary content (body, or a release's information and tracks, or a series' posts) takes the main column
+and the settings sit beside it in their own sticky, independently scrolling column (28rem, 32rem from `xl`);
+below `lg` they are Body / Settings tabs, and only phones bleed the body to the screen edge. Settings are
+`EditorSettingsSection` cards (or section components rendering the same card) in one order: URL, details,
+classification and related records, credits, options, summary, images, metadata, sharing, translations. Field
+grids that need width inside the column collapse to one column at `lg` (`columns={{ base: 1, md: 2, lg: 1 }}`).
 Three exact component geometry exceptions remain in responsive-policy: upload placeholder container,
 map callout scale and Mermaid figure. These do not authorize new screen-level numeric breakpoints.
 

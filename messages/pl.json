@@ -212,7 +212,10 @@
       "text": "Tekst",
       "caption": "Podpis",
       "allUsers": "Wszyscy użytkownicy",
-      "newsletter": "Biuletyn"
+      "newsletter": "Biuletyn",
+      "images": "Obrazy",
+      "classification": "Klasyfikacja",
+      "related": "Powiązane"
     },
     "entities": {
       "post": "Post",

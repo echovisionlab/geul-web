@@ -212,7 +212,10 @@
       "text": "Texte",
       "caption": "Légende",
       "allUsers": "Tous les utilisateurs",
-      "newsletter": "Newsletter"
+      "newsletter": "Newsletter",
+      "images": "Images",
+      "classification": "Classement",
+      "related": "Liens"
     },
     "entities": {
       "post": "Article",

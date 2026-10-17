@@ -212,7 +212,10 @@
       "text": "Text",
       "caption": "Beschriftung",
       "allUsers": "Alle Benutzer",
-      "newsletter": "Newsletter"
+      "newsletter": "Newsletter",
+      "images": "Bilder",
+      "classification": "Einordnung",
+      "related": "Verknüpft"
     },
     "entities": {
       "post": "Beitrag",

@@ -248,7 +248,7 @@ function MusicProjectFields({
   const tCommonLabels = useTranslations('common.labels');
   return (
     <DsLayoutStack gap="sm">
-      <DsText size="xs" tone="secondary" weight="medium">
+      <DsText size="sm" tone="secondary" weight="medium">
         {t('title')}
       </DsText>
       <DsLayoutGrid columns={{ base: 1, sm: 2 }}>
@@ -311,7 +311,7 @@ function PortfolioFields({
 
   return (
     <DsLayoutStack gap="sm">
-      <DsText size="xs" tone="secondary" weight="medium">
+      <DsText size="sm" tone="secondary" weight="medium">
         {t('title')}
       </DsText>
 
@@ -353,7 +353,7 @@ function ArticleFields({
   const tCommonPlaceholders = useTranslations('common.placeholders');
   return (
     <DsLayoutStack gap="sm">
-      <DsText size="xs" tone="secondary" weight="medium">
+      <DsText size="sm" tone="secondary" weight="medium">
         {t('title')}
       </DsText>
       <DsLayoutGrid columns={{ base: 1, sm: 2 }}>
@@ -397,7 +397,7 @@ function ContributionFields({
   const tCommonPlaceholders = useTranslations('common.placeholders');
   return (
     <DsLayoutStack gap="sm">
-      <DsText size="xs" tone="secondary" weight="medium">
+      <DsText size="sm" tone="secondary" weight="medium">
         {t('title')}
       </DsText>
       <DsLayoutGrid columns={{ base: 1, sm: 2 }}>
