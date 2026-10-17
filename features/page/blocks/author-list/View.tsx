@@ -27,13 +27,7 @@ export function AuthorListView({ props }: BlockViewProps) {
     return <QueryErrorAlert queries={[loadedDataQuery]} />;
   }
   if (isLoading) {
-    return (
-      <AuthorListSkeleton
-        limit={selected ? selectedIds.length : limit}
-        layout={p.layout}
-        itemSize={p.itemSize}
-      />
-    );
+    return <AuthorListSkeleton limit={selected ? selectedIds.length : limit} layout={p.layout} itemSize={p.itemSize} />;
   }
   if (!data?.length) {
     return (
