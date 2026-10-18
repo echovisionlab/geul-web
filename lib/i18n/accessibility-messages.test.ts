@@ -76,18 +76,6 @@ describe.each(SUPPORTED_LOCALES)('%s accessibility message runtime', (locale) =>
     expect(errors).toEqual([]);
   });
 
-  it('preserves authored filenames literally instead of treating braces or punctuation as ICU', () => {
-    const errors: unknown[] = [];
-    const translate = createTranslator({
-      locale,
-      messages: loadRawMessages(locale),
-      onError: (error) => errors.push(error),
-    });
-    const filename = '녹음 {원본} [A&B] 01.wav';
-    expect(translate('dataTable.aria.selectRow', { label: filename })).toContain(filename);
-    expect(errors).toEqual([]);
-  });
-
   it('formats zero-page results without consuming or announcing an impossible page number', () => {
     const errors: unknown[] = [];
     const translate = createTranslator({

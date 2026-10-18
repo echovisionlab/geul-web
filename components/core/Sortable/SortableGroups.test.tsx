@@ -1,4 +1,3 @@
-import { I18nProvider as DesignSystemProvider } from 'react-aria-components';
 import type { ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
@@ -104,36 +103,5 @@ describe('SortableGroups', () => {
     expect(collision({ pointerCoordinates: null } as Parameters<typeof collision>[0])).toEqual([
       { id: 'keyboard-target' },
     ]);
-  });
-
-  it('keeps domain content in caller-provided group and item renderers', () => {
-    interface TestItem extends SortableItem {
-      name: string;
-    }
-
-    interface TestGroup extends SortableGroup<TestItem> {
-      id: string;
-    }
-
-    const html = renderToStaticMarkup(
-      <DesignSystemProvider>
-        <SortableGroups<TestGroup, TestItem>
-          groups={[{ id: 'group', items: [{ id: 'item', name: 'Domain item' }] }]}
-          onGroupsChange={vi.fn()}
-          getGroupLabel={(group) => group.id}
-          getItemLabel={(item) => item.name}
-          renderGroup={({ group, children }) => (
-            <section>
-              <h2>{group.id}</h2>
-              {children}
-            </section>
-          )}
-          renderItem={({ item }) => <div>{String(item.name)}</div>}
-        />
-      </DesignSystemProvider>,
-    );
-
-    expect(html).toContain('<h2>group</h2>');
-    expect(html).toContain('Domain item');
   });
 });

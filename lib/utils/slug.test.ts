@@ -9,4 +9,8 @@ describe('slug input sanitizers', () => {
   it('keeps safe nested Page path segments', () => {
     expect(sanitizePageSlugInput('abc/def')).toBe('abc/def');
   });
+
+  it('normalizes each Page segment without replacing an interior slash', () => {
+    expect(sanitizePageSlugInput('Nested Path/Team Page')).toBe('nested-path/team-page');
+  });
 });

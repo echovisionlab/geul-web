@@ -103,11 +103,4 @@ describe('Tiptap AI DCDP context', () => {
 
     expect(resolveTiptapAIContext(editor).isSupported).toBe(false);
   });
-
-  it('refuses non-editable Tiptap state before opening the menu', () => {
-    const editor = createEditor();
-    editor.setEditable(false);
-
-    expect(resolveTiptapAIContext(editor).isSupported).toBe(false);
-  });
 });

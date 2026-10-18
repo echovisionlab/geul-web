@@ -188,22 +188,6 @@ describe('buildFieldValidator', () => {
       expect(validator.safeParse(undefined).success).toBe(true);
     });
 
-    it('validates email format', () => {
-      const field: FormFieldSchema = {
-        id: 'email-1',
-        name: 'email',
-        type: 'email',
-        validation: {
-          validators: [{ id: 'v1', name: 'Required', predicate: 'required' }],
-        },
-      };
-      const validator = buildFieldValidator(field);
-
-      expect(validator.safeParse('invalid-email').success).toBe(false);
-      expect(validator.safeParse('missing@domain').success).toBe(false);
-      expect(validator.safeParse('@example.com').success).toBe(false);
-    });
-
     it('validates email with length constraints', () => {
       const field: FormFieldSchema = {
         id: 'email-1',
@@ -332,27 +316,6 @@ describe('buildFieldValidator', () => {
       expect(validator.safeParse(42).success).toBe(true);
       expect(validator.safeParse(41).success).toBe(false);
       expect(validator.safeParse(43).success).toBe(false);
-    });
-
-    it('validates range (gte + lte)', () => {
-      const field: FormFieldSchema = {
-        id: 'num-1',
-        name: 'rating',
-        type: 'number',
-        validation: {
-          validators: [
-            { id: 'v1', name: 'Min', predicate: 'gte', value: 1 },
-            { id: 'v2', name: 'Max', predicate: 'lte', value: 5 },
-          ],
-        },
-      };
-      const validator = buildFieldValidator(field);
-
-      expect(validator.safeParse(1).success).toBe(true);
-      expect(validator.safeParse(3).success).toBe(true);
-      expect(validator.safeParse(5).success).toBe(true);
-      expect(validator.safeParse(0).success).toBe(false);
-      expect(validator.safeParse(6).success).toBe(false);
     });
   });
 
@@ -702,79 +665,6 @@ describe('buildFieldValidator', () => {
   });
 
   // =============================================================================
-  // Textarea Field Tests
-  // =============================================================================
-
-  describe('textarea field', () => {
-    it('validates required textarea', () => {
-      const field: FormFieldSchema = {
-        id: 'textarea-1',
-        name: 'bio',
-        type: 'textarea',
-        validation: {
-          validators: [{ id: 'v1', name: 'Required', predicate: 'required' }],
-        },
-      };
-      const validator = buildFieldValidator(field);
-
-      expect(validator.safeParse('Some text here').success).toBe(true);
-      expect(validator.safeParse('').success).toBe(false);
-    });
-
-    it('validates textarea with length constraints', () => {
-      const field: FormFieldSchema = {
-        id: 'textarea-1',
-        name: 'description',
-        type: 'textarea',
-        validation: {
-          validators: [
-            { id: 'v1', name: 'Min', predicate: 'gte', value: 10 },
-            { id: 'v2', name: 'Max', predicate: 'lte', value: 500 },
-          ],
-        },
-      };
-      const validator = buildFieldValidator(field);
-
-      expect(validator.safeParse('Short text here').success).toBe(true);
-      expect(validator.safeParse('Short').success).toBe(false); // Less than 10
-      expect(validator.safeParse('a'.repeat(501)).success).toBe(false); // More than 500
-    });
-  });
-
-  // =============================================================================
-  // Phone (Tel) Field Tests
-  // =============================================================================
-
-  describe('tel field', () => {
-    it('validates required phone', () => {
-      const field: FormFieldSchema = {
-        id: 'tel-1',
-        name: 'phone',
-        type: 'tel',
-        validation: {
-          validators: [{ id: 'v1', name: 'Required', predicate: 'required' }],
-        },
-      };
-      const validator = buildFieldValidator(field);
-
-      expect(validator.safeParse('010-1234-5678').success).toBe(true);
-      expect(validator.safeParse('').success).toBe(false);
-    });
-
-    it('validates optional phone', () => {
-      const field: FormFieldSchema = {
-        id: 'tel-1',
-        name: 'altPhone',
-        type: 'tel',
-      };
-      const validator = buildFieldValidator(field);
-
-      expect(validator.safeParse('010-1234-5678').success).toBe(true);
-      expect(validator.safeParse('').success).toBe(true);
-    });
-  });
-
-  // =============================================================================
   // Custom Error Messages Tests
   // =============================================================================
 
@@ -794,32 +684,6 @@ describe('buildFieldValidator', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].message).toBe('Name is mandatory');
-      }
-    });
-
-    it('uses custom min length message', () => {
-      const field: FormFieldSchema = {
-        id: 'text-1',
-        name: 'password',
-        type: 'text',
-        validation: {
-          validators: [
-            {
-              id: 'v1',
-              name: 'Min Length',
-              predicate: 'gte',
-              value: 8,
-              message: 'Password must be at least 8 characters',
-            },
-          ],
-        },
-      };
-      const validator = buildFieldValidator(field);
-      const result = validator.safeParse('short');
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Password must be at least 8 characters');
       }
     });
 

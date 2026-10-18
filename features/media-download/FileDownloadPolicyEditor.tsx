@@ -1,6 +1,5 @@
 'use client';
 
-import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { VisuallyHidden } from '@/components/core/Typography';
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
@@ -25,6 +24,13 @@ import type {
 import { publishEditorEntityChange, useEditorEntityChanges } from '@/lib/editor/editor-entity-changes';
 import { useAuthoritativeConfiguration } from '@/lib/editor/useAuthoritativeConfiguration';
 import { getUntrackedConfigurationWriteOrigin } from '@/lib/editor/editor-write-origin';
+import {
+  ACCESS_SCOPE_VALUES,
+  accessSelectionChange,
+  policyMatchesTarget,
+  policyChangeDocument,
+  policyOwnerDocument,
+} from './file-download-policy-state';
 import {
   enqueueFileDownloadPolicyWrite,
   runAfterFileDownloadPolicyWrites,
@@ -56,19 +62,6 @@ interface FileDownloadPolicyEditorProps extends FileDownloadPolicyTarget {
 const SEGMENTS_PAGE_SIZE = 50;
 const SEGMENT_SEARCH_DEBOUNCE_MS = 200;
 const POLICY_AUTOSAVE_DEBOUNCE_MS = 250;
-const ACCESS_SCOPE_VALUES = {
-  disabled: 'scope:disabled',
-  public: 'scope:public',
-  authenticated: 'scope:authenticated',
-  restricted: 'scope:restricted',
-} as const;
-
-type AccessScopeValue = (typeof ACCESS_SCOPE_VALUES)[keyof typeof ACCESS_SCOPE_VALUES];
-
-function isAccessScopeValue(value: string): value is AccessScopeValue {
-  return Object.values(ACCESS_SCOPE_VALUES).includes(value as AccessScopeValue);
-}
-
 interface PendingPolicySave {
   generation: number;
   sequence: number;
@@ -102,36 +95,6 @@ function mergeSegments(
     byId.set(segment.id, segment);
   }
   return Array.from(byId.values());
-}
-
-function policyMatchesTarget(policy: FileDownloadPolicyModel, target: FileDownloadPolicyTarget): boolean {
-  return (
-    policy.entityType === target.entityType &&
-    policy.entityId === target.entityId &&
-    policy.blockId === target.blockId &&
-    policy.referencePath === target.referencePath &&
-    policy.fileId === target.expectedFileId
-  );
-}
-
-function policyChangeDocument(target: FileDownloadPolicyTarget): string {
-  return `file-policy:${target.expectedFileId}:${target.entityType}:${target.entityId}:${target.blockId ?? ''}:${target.referencePath ?? ''}`;
-}
-
-function policyOwnerDocument(target: FileDownloadPolicyTarget, releaseId?: string): string | null {
-  if (target.entityType === TranscodeEntityType.TRACK) {
-    return releaseId ? `release:${releaseId}` : null;
-  }
-  const ownerType = {
-    [TranscodeEntityType.POST]: 'post',
-    [TranscodeEntityType.PAGE]: 'page',
-    [TranscodeEntityType.WORK]: 'work',
-    [TranscodeEntityType.PROGRAM_EVENT]: 'program-event',
-  }[
-    target.entityType as
-      TranscodeEntityType.POST | TranscodeEntityType.PAGE | TranscodeEntityType.WORK | TranscodeEntityType.PROGRAM_EVENT
-  ];
-  return ownerType ? `${ownerType}:${target.entityId}` : null;
 }
 
 function sortedPolicySegmentIds(policy: FileDownloadPolicyModel): string[] {
@@ -969,31 +932,12 @@ export function FileDownloadPolicyEditor({
         disabled={readOnly || !enabled || loading || targetStale}
         rightSection={saving || segmentsLoadingMore ? <Loader size="xs" /> : undefined}
         onChange={(values) => {
-          const addedValue = values.find((value) => !selectedAccessValues.includes(value));
-          if (addedValue && isAccessScopeValue(addedValue)) {
-            if (addedValue === ACCESS_SCOPE_VALUES.restricted) {
-              return;
-            }
-            const nextAudience =
-              addedValue === ACCESS_SCOPE_VALUES.disabled
-                ? 'disabled'
-                : addedValue === ACCESS_SCOPE_VALUES.public
-                  ? 'public'
-                  : 'authenticated';
-            setSaved(false);
-            queueSave(nextAudience, []);
+          const change = accessSelectionChange(selectedAccessValues, values);
+          if (!change) {
             return;
           }
-
-          const nextAudienceSegmentIds = values.filter((value) => !isAccessScopeValue(value));
-          if (nextAudienceSegmentIds.length === 0) {
-            setSaved(false);
-            queueSave('disabled', []);
-            return;
-          }
-
           setSaved(false);
-          queueSave('restricted', nextAudienceSegmentIds);
+          queueSave(change.audience, change.audienceSegmentIds);
         }}
       />
     </div>

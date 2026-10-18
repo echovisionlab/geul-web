@@ -218,16 +218,6 @@ describe('site setting asset actions', () => {
     expect(revalidatePath).toHaveBeenCalledWith('/', 'layout');
   });
 
-  it('does not report an OG run for an email logo', async () => {
-    await expect(setSiteAssetAction('logo_email_dark', 'file-1')).resolves.toEqual({
-      success: true,
-    });
-    expect(setSettingMock).toHaveBeenCalledWith({
-      key: 'logo_email_dark_file_id',
-      value: { kind: { case: 'stringValue', value: 'file-1' } },
-    });
-  });
-
   it('updates settings with targeted cache invalidation', async () => {
     setManySettingsMock.mockResolvedValueOnce({ success: true, ogGenerationRunId: 'settings-run' });
     await expect(
@@ -292,43 +282,37 @@ describe('site setting asset actions', () => {
     });
   });
 
-  it('updates and regenerates OG image configs through the admin service', async () => {
+  it.each([
+    { name: 'home', update: updateHomeOgConfigAction, key: 'og_image_config.home' },
+    { name: 'content', update: updateContentOgConfigAction, key: 'og_image_config.content' },
+  ])('writes the $name OG config section as one JSON value without a pre-read', async ({ update, key }) => {
     setSettingMock.mockResolvedValue({ success: true, ogGenerationRunId: 'config-run' });
+    const config = { title: 'Heading', layout: { align: 'left' } };
 
-    await expect(updateHomeOgConfigAction({ title: 'Home' } as never)).resolves.toEqual({
-      success: true,
-      ogGenerationRunId: 'config-run',
-    });
-    await expect(updateContentOgConfigAction({ title: 'Content' } as never)).resolves.toEqual({
-      success: true,
-      ogGenerationRunId: 'config-run',
-    });
+    await expect(update(config as never)).resolves.toEqual({ success: true, ogGenerationRunId: 'config-run' });
+
+    expect(setSettingMock).toHaveBeenCalledWith({ key, value: fromJson(ValueSchema, config) });
+    expect(getSettingMock).not.toHaveBeenCalled();
+  });
+
+  it('regenerates the primary site OG image', async () => {
     await expect(regenerateSiteOgImageAction()).resolves.toEqual({
       success: true,
       runId: 'manual-run',
       generationId: 'generation-1',
     });
+
+    expect(regenerateOgImageMock).toHaveBeenCalledWith(
+      expect.objectContaining({ entityType: OgEntityType.SITE, selection: { target: { case: 'primary', value: {} } } }),
+    );
+  });
+
+  it('reports how many OG images a full regeneration queued', async () => {
     await expect(regenerateAllOgImagesAction()).resolves.toEqual({
       success: true,
       runId: 'global-run',
       generationCount: 12,
     });
-
-    expect(setSettingMock).toHaveBeenNthCalledWith(1, {
-      key: 'og_image_config.home',
-      value: fromJson(ValueSchema, { title: 'Home' }),
-    });
-    expect(setSettingMock).toHaveBeenNthCalledWith(2, {
-      key: 'og_image_config.content',
-      value: fromJson(ValueSchema, { title: 'Content' }),
-    });
-    expect(getSettingMock).not.toHaveBeenCalled();
-    expect(regenerateOgImageMock).toHaveBeenCalledWith({
-      entityType: OgEntityType.SITE,
-      entityId: undefined,
-      selection: { target: { case: 'primary', value: {} } },
-    });
-    expect(regenerateAllOgImagesMock).toHaveBeenCalledWith({});
   });
 
   it('surfaces an atomic OG config section update failure without a stale pre-read', async () => {
@@ -340,38 +324,47 @@ describe('site setting asset actions', () => {
     expect(getSettingMock).not.toHaveBeenCalled();
   });
 
-  it('loads and regenerates site and legal OG image status', async () => {
+  it('loads the current site OG image', async () => {
     await expect(getSiteOgStatusAction()).resolves.toEqual({
       data: {
         assetId: 'site-og-asset',
         url: 'https://cdn.example.com/asset/site-og-asset/og.webp',
       },
     });
-    await expect(getLegalOgImageAction('privacy', 'ko')).resolves.toEqual({
+  });
+
+  it('loads legal OG images through the locale-scoped legal page reader', async () => {
+    await expect(getLegalOgImageAction('privacy', ' ko ')).resolves.toEqual({
       data: {
         assetId: 'privacy-og-asset',
         url: 'https://cdn.example.com/asset/privacy-og-asset/og.webp',
       },
     });
+    expect(createPublicPrivacyClientWithAuth).toHaveBeenCalledWith('ko');
+    expect(createPublicTermsClientWithAuth).not.toHaveBeenCalled();
+
     await expect(getLegalOgImageAction('terms')).resolves.toEqual({
       data: {
         assetId: 'terms-og-asset',
         url: 'https://cdn.example.com/asset/terms-og-asset/og.webp',
       },
     });
-    await expect(regenerateLegalOgImageAction('privacy')).resolves.toEqual({
+    expect(createPublicTermsClientWithAuth).toHaveBeenCalledWith(null);
+  });
+
+  it.each([
+    { locale: undefined, selection: { target: { case: 'primary', value: {} } } },
+    { locale: ' ja ', selection: { target: { case: 'locale', value: 'ja' } } },
+  ])('regenerates the privacy OG image for locale $locale', async ({ locale, selection }) => {
+    await expect(regenerateLegalOgImageAction('privacy', locale)).resolves.toEqual({
       success: true,
       runId: 'manual-run',
       generationId: 'generation-1',
     });
 
-    expect(createPublicPrivacyClientWithAuth).toHaveBeenCalledWith('ko');
-    expect(createPublicTermsClientWithAuth).toHaveBeenCalledWith(null);
-    expect(regenerateOgImageMock).toHaveBeenCalledWith({
-      entityType: OgEntityType.PRIVACY,
-      entityId: undefined,
-      selection: { target: { case: 'primary', value: {} } },
-    });
+    expect(regenerateOgImageMock).toHaveBeenCalledWith(
+      expect.objectContaining({ entityType: OgEntityType.PRIVACY, selection }),
+    );
   });
 
   it('adds and removes loader references without deleting the original file', async () => {

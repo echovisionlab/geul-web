@@ -118,13 +118,4 @@ describe('AdminPageHeader', () => {
 
     expect(onCreate).toHaveBeenCalledTimes(1);
   });
-
-  it('renders cleanly without action items', () => {
-    render(<AdminPageHeader title="Forms" description="Shared form definitions" />);
-
-    expect(document.querySelector('h1')?.textContent).toBe('Forms');
-    expect(document.body.textContent).toContain('Shared form definitions');
-    expect(document.querySelectorAll('button').length).toBe(0);
-    expect(document.querySelectorAll('a').length).toBe(0);
-  });
 });

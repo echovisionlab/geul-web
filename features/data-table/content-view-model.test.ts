@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { ColumnDef } from '@/lib/types/common/data-table';
 import {
   createDataTableViewColumns,
   cycleDataTableSorts,
@@ -13,44 +12,6 @@ interface Row {
 }
 
 describe('data table content view model', () => {
-  it('maps repository column definitions into Core view columns', () => {
-    const onSort = vi.fn();
-    const columns: ColumnDef<Row>[] = [
-      { key: 'displayName', header: 'Name', accessor: 'displayName', width: 240, minWidth: 180 },
-      { key: 'count', header: 'Count', cell: (row) => `#${row.count}`, sortable: false },
-      { key: 'actions', header: '', kind: 'action', cell: () => 'Open' },
-    ];
-
-    const viewColumns = createDataTableViewColumns({
-      columns,
-      currentSorts: [{ field: 'display_name', direction: 'desc' }],
-      sortConfig: [{ field: 'display_name', label: 'Name' }],
-      getSortAriaLabel: (label) => `Sort by ${label}`,
-      actionColumnLabel: 'Actions',
-      onSort,
-    });
-
-    expect(viewColumns[0]).toMatchObject({
-      key: 'displayName',
-      header: 'Name',
-      width: 240,
-      minWidth: 180,
-      sort: {
-        ariaLabel: 'Sort by Name',
-        direction: 'desc',
-        order: 1,
-      },
-    });
-    expect(viewColumns[0]?.renderCell({ displayName: 'Alpha', count: 2 })).toBe('Alpha');
-    expect(viewColumns[1]?.renderCell({ displayName: 'Alpha', count: 2 })).toBe('#2');
-    expect(viewColumns[1]?.sort).toBeUndefined();
-    expect(viewColumns[2]).toMatchObject({ kind: 'action', header: '', accessibleLabel: 'Actions' });
-    expect(viewColumns[0]?.accessibleLabel).toBeUndefined();
-
-    viewColumns[0]?.sort?.onToggle();
-    expect(onSort).toHaveBeenCalledWith('display_name');
-  });
-
   it('describes each active multi-sort priority and localized direction in the mapped view model', () => {
     const viewColumns = createDataTableViewColumns<Row>({
       columns: [

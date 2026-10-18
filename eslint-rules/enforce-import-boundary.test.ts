@@ -70,6 +70,36 @@ function expectRejected(fixture: BoundaryFixture) {
 }
 
 describe('enforce-import-boundary', () => {
+  it.each(['ts', 'tsx'])('allows the shared render helper only in Core .test.%s files', (extension) => {
+    const source = "import { render } from '@/test/render'; export { render };";
+    expectAllowed({
+      boundary: 'core',
+      filePath: `components/core/Input/Fixture.test.${extension}`,
+      source,
+    });
+    expectRejected({
+      boundary: 'core',
+      filePath: `components/core/Input/Fixture.${extension}`,
+      source,
+    });
+    expectRejected({
+      boundary: 'core',
+      filePath: `features/share/ui/Fixture.test.${extension}`,
+      source,
+    });
+  });
+
+  it.each(['@/test', '@/test/render/internal', '@/test/TestProviders', '@/lib/api/client', '@/features/share'])(
+    'keeps other application imports restricted in Core tests: %s',
+    (module) => {
+      expectRejected({
+        boundary: 'core',
+        filePath: 'components/core/Input/Fixture.test.tsx',
+        source: `export * from '${module}';`,
+      });
+    },
+  );
+
   it('allows only reviewed pure presentation entries across Feature UI boundaries', () => {
     expectAllowed({
       boundary: 'feature-ui',

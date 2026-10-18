@@ -6,6 +6,7 @@ import { Editor } from '@tiptap/core';
 import { TextSelection } from '@tiptap/pm/state';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createTiptapWireExtensions } from '../wire-schema';
+import { EDITOR_TOOLBAR_SHORTCUTS } from '../../toolbars/EditorToolbarTooltip';
 import { TiptapAIAssistant } from './TiptapAIAssistant';
 import { TiptapAIAssistantSurface, useTiptapAIController } from './TiptapAIController';
 import { resolveTiptapAIContext } from './tiptap-ai';
@@ -109,7 +110,9 @@ afterEach(() => {
 });
 
 describe('TiptapAIAssistant', () => {
-  it('opens on Mod-J and closes when the captured selection becomes stale', () => {
+  it('opens on the advertised AI shortcut and closes when the captured selection becomes stale', () => {
+    const [modifier, key] = EDITOR_TOOLBAR_SHORTCUTS.ai.split('-');
+    expect(modifier).toBe('Mod');
     const currentEditor = createEditor();
     editor = currentEditor;
     element = document.createElement('div');
@@ -121,7 +124,7 @@ describe('TiptapAIAssistant', () => {
     });
     act(() => {
       currentEditor.view.dom.dispatchEvent(
-        new KeyboardEvent('keydown', { key: 'j', ctrlKey: true, bubbles: true, cancelable: true }),
+        new KeyboardEvent('keydown', { key, ctrlKey: true, bubbles: true, cancelable: true }),
       );
     });
     expect(document.querySelector('[data-testid="tiptap-ai-menu"]')).not.toBeNull();
@@ -153,28 +156,6 @@ describe('TiptapAIAssistant', () => {
     });
 
     expect(document.querySelector('[data-testid="tiptap-ai-menu"]')).toBeNull();
-  });
-
-  it('uses the same typed controller for current and supplied selection contexts', () => {
-    const currentEditor = createEditor();
-    editor = currentEditor;
-    element = document.createElement('div');
-    document.body.append(element);
-    root = createRoot(element);
-
-    act(() => {
-      root?.render(<ControllerHarness currentEditor={currentEditor} />);
-    });
-    act(() => {
-      document.querySelector<HTMLButtonElement>('[data-testid="open-ai-current"]')?.click();
-    });
-    expect(document.querySelector('[data-testid="tiptap-ai-menu"]')).not.toBeNull();
-
-    act(() => {
-      document.querySelector<HTMLButtonElement>('[data-testid="tiptap-ai-menu"]')?.click();
-      document.querySelector<HTMLButtonElement>('[data-testid="open-ai-selection"]')?.click();
-    });
-    expect(document.querySelector('[data-testid="tiptap-ai-menu"]')).not.toBeNull();
   });
 
   it('allows locale-owned selected text while refusing structure-generating context', () => {

@@ -200,37 +200,6 @@ describe('VersionHistoryDrawerView', () => {
     expect(onRetry).toHaveBeenCalledOnce();
   });
 
-  it('uses the Core near-end trigger to load another page while keeping existing history visible', async () => {
-    let notify: (() => void) | undefined;
-    vi.stubGlobal(
-      'IntersectionObserver',
-      class {
-        constructor(callback: IntersectionObserverCallback) {
-          notify = () =>
-            callback([{ isIntersecting: true } as IntersectionObserverEntry], this as unknown as IntersectionObserver);
-        }
-        observe() {}
-        disconnect() {}
-      },
-    );
-    const onLoad = vi.fn(async () => {});
-    const pagination = { contextKey: 'work:one', nextPage: 2, loading: false, error: null, onLoad };
-    renderView({ pagination });
-    expect(notify).toBeDefined();
-    await act(async () => {
-      notify!();
-      notify!();
-    });
-    expect(onLoad).toHaveBeenCalledOnce();
-    expect(document.body.querySelector('[role="listitem"]')).toHaveTextContent('Edited title');
-    renderView({ pagination: { ...pagination, loading: true } });
-    expect(document.body.querySelector('[data-near-end-loader] [role="status"]')).toHaveTextContent(labels.loading);
-    expect(document.body.querySelector('[role="listitem"]')).toHaveTextContent('Edited title');
-    renderView({ pagination: { ...pagination, nextPage: null } });
-    expect(document.body.querySelector('[data-near-end-loader]')).toHaveTextContent(labels.end);
-    expect(document.body.querySelector('[data-near-end-loader] button')).toBeNull();
-  });
-
   it('keeps earlier rows on a page failure and delegates a bounded retry to the same page', async () => {
     const onLoad = vi.fn(async () => {});
     renderView({

@@ -134,7 +134,7 @@ describe('useCollaborativeFeaturedImage', () => {
     expect(latest?.featuredImageUrl).toBe('https://example.com/manage-cover.jpg');
   });
 
-  it('keeps the current URL and logs when hydration fails', async () => {
+  it('shows no image for an unhydrated file and logs when every delivery attempt fails', async () => {
     getMediaDeliveryMock.mockRejectedValue(new Error('delivery unavailable'));
 
     act(() => {

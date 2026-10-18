@@ -36,6 +36,7 @@ import { ComboboxOpenBridge } from './ComboboxOpenBridge';
 import classes from './Input.module.css';
 import { useCoreInputLabels } from './input-labels';
 import { InputClearGlyph, InputOpenGlyph } from './InputGlyphs';
+import { countVisiblePills } from './multi-select-overflow';
 
 export interface MultiSelectProps extends InputBaseProps {
   data?: InputOptions;
@@ -116,28 +117,14 @@ export const MultiSelect = forwardRef<HTMLInputElement, MultiSelectProps>((props
       const summary = source.querySelector<HTMLElement>('[data-core-multiselect-summary-measure]');
       const input = list.querySelector<HTMLInputElement>('input');
       const reserve = props.searchable && input ? input.getBoundingClientRect().width || input.offsetWidth : 0;
-      const width = Math.max(0, (list.getBoundingClientRect().width || list.offsetWidth) - reserve);
-      if (!width) {
-        setVisible(values.length);
-        return;
-      }
-      const gap = Number.parseFloat(getComputedStyle(list).gap) || 0;
-      const widths = pills.map((pill) => pill.getBoundingClientRect().width || pill.offsetWidth);
-      const total = widths.reduce((a, b) => a + b, 0) + gap * Math.max(0, widths.length - 1);
-      if (total <= width) {
-        setVisible(values.length);
-        return;
-      }
-      let used = summary?.getBoundingClientRect().width || summary?.offsetWidth || 1;
-      let count = 0;
-      for (const pillWidth of widths) {
-        if (used + gap + pillWidth > width) {
-          break;
-        }
-        used += gap + pillWidth;
-        count++;
-      }
-      setVisible(count);
+      setVisible(
+        countVisiblePills({
+          available: Math.max(0, (list.getBoundingClientRect().width || list.offsetWidth) - reserve),
+          widths: pills.map((pill) => pill.getBoundingClientRect().width || pill.offsetWidth),
+          gap: Number.parseFloat(getComputedStyle(list).gap) || 0,
+          summaryWidth: summary?.getBoundingClientRect().width || summary?.offsetWidth || 1,
+        }),
+      );
     };
     measure();
     const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);

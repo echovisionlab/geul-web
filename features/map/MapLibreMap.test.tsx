@@ -329,36 +329,6 @@ describe('MapLibreMap', () => {
     expect(mapLibreKeydown).toHaveBeenCalledTimes(2);
   });
 
-  it('passes an injected map style to the MapLibre runtime', async () => {
-    await act(async () => {
-      root?.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <MapLibreMap
-            places={[]}
-            center={{ lat: 37.5, lng: 127.1 }}
-            zoom={12}
-            themeConfig={INITIAL_MAP_THEME_LIGHT_CONFIG}
-            mapStyleOverride={{
-              version: 8,
-              name: 'Offline fixture',
-              sources: {},
-              layers: [
-                {
-                  id: 'background',
-                  type: 'background',
-                  paint: { 'background-color': '#f5f5f5' },
-                },
-              ],
-            }}
-          />
-        </DesignSystemProvider>,
-      );
-    });
-
-    const props = JSON.parse(document.querySelector<HTMLElement>('[data-map-view]')?.dataset.props ?? '{}');
-    expect(props.mapStyleName).toBe('Offline fixture');
-  });
-
   it('keeps the initial MapView style stable until load, applies the latest theme, and cleans up its listener', async () => {
     const initialTheme = INITIAL_MAP_THEME_LIGHT_CONFIG;
     const firstTheme = { ...initialTheme, backgroundColor: '#123456' };

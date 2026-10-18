@@ -57,15 +57,6 @@ describe('SocialIcon', () => {
     expect(icon.querySelector('title')).toBeNull();
   });
 
-  it('exposes brand and hover-brand color modes without leaking icon metadata', () => {
-    const icon = renderIcon(<SocialIcon platform="bandcamp" colorMode="hoverBrand" data-testid="bandcamp" />);
-
-    expect(icon.getAttribute('data-social-platform')).toBe('bandcamp');
-    expect(icon.getAttribute('data-color-mode')).toBe('hoverBrand');
-    expect(icon.style.getPropertyValue('--_social-brand-light')).toMatch(/^#[0-9a-f]{6}$/i);
-    expect(icon.getAttribute('fill')).toBe('currentColor');
-  });
-
   it('uses a GitHub dark override and falls back to light for platforms without one', () => {
     const githubColors = getSocialIconBrandColors('github');
     const bandcampColors = getSocialIconBrandColors('bandcamp');

@@ -3,6 +3,7 @@ import { unwrapQueryResult } from '@/lib/api/query-result';
 import { getTranslations } from 'next-intl/server';
 import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
 import { listSegmentsAdminAction } from '@/lib/actions/audience';
+import { toPaginatedListInput } from '@/lib/types/common/query';
 import { parseTableQuery } from '@/lib/utils/table-url';
 
 interface PageProps {
@@ -35,12 +36,7 @@ export default async function AdminSegmentsPage({ searchParams }: PageProps) {
   ];
 
   const result = await listSegmentsAdminAction({
-    page: query.page,
-    pageSize: query.pageSize,
-    search: query.search,
-    sort: query.sorts?.map((s) => ({ field: s.field, order: s.direction })),
-    filter: query.filters,
-    filterBy: query.filterBy,
+    ...toPaginatedListInput(query),
     includeArchived: params.get('includeArchived') === 'true',
   }).then(unwrapQueryResult);
 

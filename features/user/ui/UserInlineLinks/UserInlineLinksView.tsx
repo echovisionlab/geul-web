@@ -52,7 +52,15 @@ export function UserInlineLinksView({
   visibleUsers.forEach((user, index) => {
     if (separatorLabel && index > 0) {
       items.push(
-        <Text as="span" size={textSize} tone={textColor ?? 'inherit'} key={`separator-${user.id}`} nowrap>
+        <Text
+          as="span"
+          size={textSize}
+          tone={textColor ?? 'inherit'}
+          key={`separator-${user.id}`}
+          nowrap
+          // A comma reads as a pause; slash and pipe are visual boundaries that screen readers would announce.
+          aria-hidden={separator === 'comma' ? undefined : true}
+        >
           {separatorLabel}
         </Text>,
       );

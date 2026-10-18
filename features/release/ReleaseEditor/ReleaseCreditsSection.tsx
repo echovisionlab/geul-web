@@ -14,12 +14,7 @@ import {
   useSensors,
   type DragEndEvent,
 } from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortableItem } from '@/components/core/Sortable';
 import { IconGripVertical, IconPencil, IconPlus, IconX } from '@tabler/icons-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -37,6 +32,7 @@ import { setReleaseCreditsAction } from '@/lib/actions/release';
 import { publishEditorEntityChange } from '@/lib/editor/editor-entity-changes';
 import { listUsersAdminAction } from '@/lib/actions/user';
 import type { CreditTargetType, ReleaseCreditItem } from '@/lib/types/release/model';
+import { reorderWithIntent } from './reorder-with-intent';
 interface ReleaseCreditsSectionProps {
   releaseId: string;
   idPrefix?: string;
@@ -165,20 +161,9 @@ export function ReleaseCreditsSection({
     if (!canEdit) {
       return;
     }
-    const { active, over } = event;
-    if (!over || active.id === over.id) {
-      return;
-    }
-    const oldIndex = credits.findIndex((c) => c.id === active.id);
-    const newIndex = credits.findIndex((c) => c.id === over.id);
-    if (oldIndex !== -1 && newIndex !== -1) {
-      const reordered = arrayMove(credits, oldIndex, newIndex);
-      const movedIndex = reordered.findIndex((credit) => credit.id === active.id);
-      persistCredits(reordered, {
-        itemId: String(active.id),
-        previousItemId: movedIndex > 0 ? reordered[movedIndex - 1].id : undefined,
-        nextItemId: movedIndex + 1 < reordered.length ? reordered[movedIndex + 1].id : undefined,
-      });
+    const reorder = reorderWithIntent(credits, event.active.id, event.over?.id, (credit) => credit.id);
+    if (reorder) {
+      persistCredits(reorder.items, reorder.intent);
     }
   };
   const handleAdd = () => {

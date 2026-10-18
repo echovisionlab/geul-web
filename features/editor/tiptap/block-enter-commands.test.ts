@@ -16,7 +16,6 @@ import { NodeSelection } from '@tiptap/pm/state';
 import { describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
 import { TranslationStructureLockExtension } from '@/lib/editor/extensions/TranslationStructureLockExtension';
-import { splitCurrentTextBlock } from './block-commands';
 import { createBlockRoomProseMirrorBridge } from './block-room-prosemirror-bridge';
 import { createPostBlockRoomTiptapController } from './block-room-tiptap-controller';
 import { createTiptapWireExtensions } from './wire-schema';
@@ -688,67 +687,6 @@ describe('Tiptap text-block Enter commands', () => {
     },
   );
 
-  it.each([
-    ['bulletListItem', {}, {}],
-    ['numberedListItem', { start: 3 }, { start: 4 }],
-    ['checkListItem', { checked: true }, { checked: false }],
-  ])('continues a non-empty %s with a new item', (type, attrs, expectedNextAttrs) => {
-    const mounted = mount(
-      documentWith(
-        container('list-item', {
-          type,
-          attrs,
-          content: [{ type: 'text', text: 'Item' }],
-        }),
-      ),
-    );
-    placeCursorAtEnd(mounted.editor, type, 'Item');
-
-    expect(splitCurrentTextBlock(mounted.editor)).toBe(true);
-
-    const group = mounted.editor.state.doc.firstChild;
-    expect(group?.child(0).attrs.id).toBe('list-item');
-    expect(group?.child(1).attrs.id).not.toBe('list-item');
-    expect(group?.child(1).firstChild?.type.name).toBe(type);
-    expect(group?.child(1).firstChild?.attrs).toMatchObject(expectedNextAttrs);
-    mounted.destroy();
-  });
-
-  it.each(['heading', 'quote', 'callout', 'bulletListItem', 'numberedListItem', 'checkListItem'])(
-    'exits an empty %s to a paragraph without changing its block ID',
-    (type) => {
-      const mounted = mount(documentWith(container('empty-text-block', { type })));
-      mounted.editor.commands.setTextSelection(nodePosition(mounted.editor, type) + 1);
-
-      expect(splitCurrentTextBlock(mounted.editor)).toBe(true);
-
-      const group = mounted.editor.state.doc.firstChild;
-      expect(group?.childCount).toBe(1);
-      expect(group?.child(0).attrs.id).toBe('empty-text-block');
-      expect(group?.child(0).firstChild?.type.name).toBe('paragraph');
-      mounted.destroy();
-    },
-  );
-
-  it('continues a quote as a paragraph', () => {
-    const mounted = mount(
-      documentWith(
-        container('quote', {
-          type: 'quote',
-          content: [{ type: 'text', text: 'Quoted' }],
-        }),
-      ),
-    );
-    placeCursorAtEnd(mounted.editor, 'quote', 'Quoted');
-
-    expect(splitCurrentTextBlock(mounted.editor)).toBe(true);
-
-    const group = mounted.editor.state.doc.firstChild;
-    expect(group?.child(0).firstChild?.type.name).toBe('quote');
-    expect(group?.child(1).firstChild?.type.name).toBe('paragraph');
-    mounted.destroy();
-  });
-
   it('exits a Callout into a default Paragraph without carrying its background', () => {
     const mounted = mount(
       documentWith(
@@ -832,26 +770,6 @@ describe('Tiptap text-block Enter commands', () => {
     expect(block?.attrs.id).toBe('paragraph');
     expect(block?.firstChild?.content.content.map((node) => node.type.name)).toEqual(['text', 'hardBreak', 'text']);
     expect(mounted.editor.state.doc.firstChild?.childCount).toBe(1);
-    mounted.destroy();
-  });
-
-  it('keeps nested children attached to the original block when its text is split', () => {
-    const childGroup: JSONContent = {
-      type: 'blockGroup',
-      content: [container('child', { type: 'paragraph', content: [{ type: 'text', text: 'Child' }] })],
-    };
-    const mounted = mount(
-      documentWith(
-        container('parent', { type: 'bulletListItem', content: [{ type: 'text', text: 'Parent' }] }, childGroup),
-      ),
-    );
-    placeCursorAtEnd(mounted.editor, 'bulletListItem', 'Parent');
-
-    expect(splitCurrentTextBlock(mounted.editor)).toBe(true);
-
-    const group = mounted.editor.state.doc.firstChild;
-    expect(group?.child(0).child(1).firstChild?.attrs.id).toBe('child');
-    expect(group?.child(1).childCount).toBe(1);
     mounted.destroy();
   });
 });

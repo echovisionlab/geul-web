@@ -68,9 +68,9 @@ describe('responsive social platform picker', () => {
     const props = render();
     const input = host.querySelector<HTMLInputElement>('#social-url')!;
     expect(input).toHaveAccessibleName('GitHub: URL');
-    await act(async () => userEvent.type(input, '/edit'));
+    await userEvent.type(input, '/edit');
     expect(props.onValueChange).toHaveBeenCalled();
-    await act(async () => userEvent.tab());
+    await userEvent.tab();
     expect(props.onValueBlur).toHaveBeenCalled();
     act(() => within(host).getByRole('button', { name: 'Remove' }).click());
     expect(props.onRemove).toHaveBeenCalledOnce();
@@ -80,42 +80,36 @@ describe('responsive social platform picker', () => {
     const trigger = host.querySelector<HTMLButtonElement>('#social-platform-picker')!;
     expect(trigger).toHaveAccessibleName('Platform: GitHub');
     expect(trigger.textContent).toBe('');
-    await act(async () => userEvent.click(trigger));
+    await userEvent.click(trigger);
     const dialog = within(document.body).getByRole('dialog', { name: 'Platform: GitHub' });
     const search = within(dialog).getByRole('combobox', { name: 'Platform' });
     expect(search).toHaveFocus();
-    await act(async () => {
-      await userEvent.clear(search);
-      await userEvent.type(search, 'Bandcamp');
-    });
+    await userEvent.clear(search);
+    await userEvent.type(search, 'Bandcamp');
     const ids = [...document.querySelectorAll('[id]')].map((element) => element.id);
     expect(new Set(ids).size).toBe(ids.length);
     const option = within(document.body).getByRole('option', { name: 'Bandcamp' });
-    await act(async () => userEvent.click(option));
+    await userEvent.click(option);
     expect(props.onPlatformChange).toHaveBeenCalledWith('bandcamp');
     expect(dialog).not.toBeInTheDocument();
     // React Aria restores trigger focus on the next animation frame.
-    await act(async () => {
-      await waitFor(() => expect(trigger).toHaveFocus());
-    });
+    await waitFor(() => expect(trigger).toHaveFocus());
     expect(host.querySelector('#social-url')).toHaveValue('https://github.com/monome');
   });
   it('dismisses nested search before the picker and keeps permission changes effective', async () => {
     render();
     const trigger = host.querySelector<HTMLButtonElement>('#social-platform-picker')!;
-    await act(async () => userEvent.click(trigger));
-    await act(async () => userEvent.keyboard('{ArrowDown}'));
+    await userEvent.click(trigger);
+    await userEvent.keyboard('{ArrowDown}');
     expect(within(document.body).getByRole('listbox')).toBeInTheDocument();
-    await act(async () => userEvent.keyboard('{Escape}'));
+    await userEvent.keyboard('{Escape}');
     expect(within(document.body).queryByRole('listbox')).not.toBeInTheDocument();
     expect(within(document.body).getByRole('dialog', { name: 'Platform: GitHub' })).toBeInTheDocument();
-    await act(async () => userEvent.keyboard('{Escape}'));
+    await userEvent.keyboard('{Escape}');
     expect(within(document.body).queryByRole('dialog')).not.toBeInTheDocument();
     // The focus restoration also updates the trigger's React Aria focus state.
-    await act(async () => {
-      await waitFor(() => expect(trigger).toHaveFocus());
-    });
-    await act(async () => userEvent.click(trigger));
+    await waitFor(() => expect(trigger).toHaveFocus());
+    await userEvent.click(trigger);
     render({ disabled: true });
     // Closing the picker restores focus on the next frame.
     await act(async () => {
@@ -129,7 +123,7 @@ describe('responsive social platform picker', () => {
   it('closes the compact popup and focuses the full picker when the row becomes wider', async () => {
     render();
     const trigger = host.querySelector<HTMLButtonElement>('#social-platform-picker')!;
-    await act(async () => userEvent.click(trigger));
+    await userEvent.click(trigger);
     const compactWrapper = trigger.closest('div')!;
     const observer = observers.find((entry) => entry.target === host.firstElementChild)!;
     expect(observer).toBeDefined();
@@ -137,9 +131,7 @@ describe('responsive social platform picker', () => {
     act(() => observer.callback([], observer.instance));
     expect(within(document.body).queryByRole('dialog')).not.toBeInTheDocument();
     // The responsive focus hand-off is scheduled with requestAnimationFrame.
-    await act(async () => {
-      await waitFor(() => expect(host.querySelector('#social-platform')).toHaveFocus());
-    });
+    await waitFor(() => expect(host.querySelector('#social-platform')).toHaveFocus());
     expect(host.querySelector('#social-url')).toHaveValue('https://github.com/monome');
   });
 });

@@ -32,10 +32,8 @@ import {
   getTranslationEntryPresenceKey,
   getTranslationJobBadgeLabel,
 } from '@/features/translation/translation-entry-status';
-import {
-  selectActiveTranslationJobsByLocale,
-  useActiveTranslationJobsByLocale,
-} from '@/features/translation/useActiveTranslationJobsByLocale';
+import { useActiveTranslationJobsByLocale } from '@/features/translation/useActiveTranslationJobsByLocale';
+import { selectActiveTranslationJobsByLocale } from './translation-job-polling';
 import { useEntityTranslationData } from '@/features/translation/useEntityTranslationData';
 import { useTranslationLocaleCommands } from '@/features/translation/useTranslationLocaleCommands';
 import {
@@ -47,7 +45,7 @@ import {
   useTranslationGenerationAvailability,
 } from '@/features/translation/useTranslationGenerationAvailability';
 import { useOptionalEditorRuntimeContext } from '@/lib/contexts/EditorRuntimeContext';
-import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
+import { createTranslationSaveBarriers } from './translation-save-barriers';
 import { mutateAIDocumentTargetTranslation, type AIDocumentTargetType } from '@/lib/ai/document-client';
 import { DEFAULT_LOCALE } from '@/lib/i18n/locale';
 import { CONTENT_LANGUAGE_QUERY_PARAM } from '@/lib/translation/content-language';
@@ -230,28 +228,7 @@ export function EntityTranslationsPanel({
     getLocaleDisplayLabel,
     refreshEntries,
     refreshJobs,
-    beforeRegenerate: async () => {
-      if (!(await flushEditorSaves(`${entityType}:${entityId}`))) {
-        throw new Error('Pending editor saves did not complete.');
-      }
-      const runtimeEntityTypeMatches =
-        runtimeContext?.entityType === entityType ||
-        (runtimeContext?.entityType === 'series' && entityType === 'post_series');
-      if (runtimeContext && runtimeEntityTypeMatches && runtimeContext.entityId === entityId) {
-        await runtimeContext.persistNow();
-      }
-    },
-    beforeSourceChange: async () => {
-      const runtimeEntityTypeMatches =
-        runtimeContext?.entityType === entityType ||
-        (runtimeContext?.entityType === 'series' && entityType === 'post_series');
-      if (runtimeContext && runtimeEntityTypeMatches && runtimeContext.entityId === entityId) {
-        await runtimeContext.persistNow();
-      }
-      if (!(await flushEditorSaves(`${entityType}:${entityId}`))) {
-        throw new Error('Pending editor saves did not complete.');
-      }
-    },
+    ...createTranslationSaveBarriers({ entityType, entityId, runtimeContext }),
     getBlockRoomSnapshot: runtimeContext?.getBlockRoomSnapshot,
     afterSourceChange: (nextLocale) => {
       if (pathname) {

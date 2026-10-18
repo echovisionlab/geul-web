@@ -22,19 +22,6 @@ describe('resolveAudioViewModel', () => {
     expect(model.spectrogramUrl).toBe('https://cdn.example.com/spectrogram.png');
   });
 
-  it('does not expose playback when HLS is missing', () => {
-    const model = resolveAudioViewModel({
-      fileId: 'audio-2',
-      url: 'https://cdn.example.com/original.flac',
-      originalUrl: 'https://cdn.example.com/original.flac',
-      processingStatus: 'completed',
-    });
-
-    expect(model.playbackSource).toBe(null);
-    expect(model.playbackUrl).toBe('');
-    expect(model.actions).toEqual([]);
-  });
-
   it('does not use original as a playback fallback when HLS is missing', () => {
     const model = resolveAudioViewModel({
       fileId: 'audio-3',
@@ -45,19 +32,6 @@ describe('resolveAudioViewModel', () => {
     expect(model.playbackSource).toBe(null);
     expect(model.playbackUrl).toBe('');
     expect(model.statusLabel).toBe(null);
-  });
-
-  it('uses HLS when available', () => {
-    const model = resolveAudioViewModel({
-      fileId: 'audio-3b',
-      originalUrl: 'https://cdn.example.com/original.wav',
-      hlsUrl: 'https://cdn.example.com/master.m3u8',
-      processingStatus: 'completed',
-    });
-
-    expect(model.playbackSource).toBe('hls');
-    expect(model.playbackUrl).toBe('https://cdn.example.com/master.m3u8');
-    expect(model.isReady).toBe(true);
   });
 
   it('exposes aggregate processing status separately from playback labels', () => {

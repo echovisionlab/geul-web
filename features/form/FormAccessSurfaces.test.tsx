@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { act } from 'react';
+import { act, type ComponentProps } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { expect, it, vi } from 'vitest';
@@ -9,9 +9,9 @@ import { TestProviders } from '@/test/TestProviders';
 import { FormSettingsContent } from './FormSettingsContent';
 import { FormTranslationsPanel } from './FormTranslationsPanel';
 
-const mocks = vi.hoisted(() => ({ provider: {}, updateFromTitle: vi.fn(), translations: vi.fn() }));
+const mocks = vi.hoisted(() => ({ provider: {}, title: 'Form', updateFromTitle: vi.fn(), translations: vi.fn() }));
 vi.mock('@/lib/contexts/FormEditorContext', () => ({
-  useFormEditorContext: () => ({ provider: mocks.provider, fields: { title: 'Form' }, isSynced: true }),
+  useFormEditorContext: () => ({ provider: mocks.provider, fields: { title: mocks.title }, isSynced: true }),
 }));
 vi.mock('./FormTranslationContext', () => ({
   useFormTranslationContext: () => ({
@@ -37,6 +37,22 @@ vi.mock('@/features/translation/EntityTranslationsPanel', () => ({
   },
 }));
 
+const settingsProps = {
+  formId: 'form-1',
+  baseUrl: 'https://example.test',
+  initialSlug: 'form',
+  initialIsPublic: true,
+  initialOpensAt: null,
+  initialClosesAt: null,
+  initialMaxSubmissions: null,
+  initialRequireAuth: false,
+  initialAllowedRoles: [],
+  initialAllowDuplicateSubmission: true,
+  initialOgImageUrl: null,
+  initialFeaturedImageUrl: null,
+  initialHasPassword: false,
+} satisfies ComponentProps<typeof FormSettingsContent>;
+
 it('upgrades and downgrades mounted form settings and translation controls', async () => {
   const host = document.createElement('div');
   document.body.append(host);
@@ -48,21 +64,7 @@ it('upgrades and downgrades mounted form settings and translation controls', asy
       root.render(
         <QueryClientProvider client={client}>
           <TestProviders>
-            <FormSettingsContent
-              formId="form-1"
-              baseUrl="https://example.test"
-              initialSlug="form"
-              initialIsPublic
-              initialOpensAt={null}
-              initialClosesAt={null}
-              initialMaxSubmissions={null}
-              initialRequireAuth={false}
-              initialAllowedRoles={[]}
-              initialAllowDuplicateSubmission
-              initialOgImageUrl={null}
-              initialFeaturedImageUrl={null}
-              initialHasPassword={false}
-            />
+            <FormSettingsContent {...settingsProps} />
             <FormTranslationsPanel formId="form-1" />
           </TestProviders>
         </QueryClientProvider>,
@@ -92,5 +94,39 @@ it('upgrades and downgrades mounted form settings and translation controls', asy
     act(() => root.unmount());
     client.clear();
     host.remove();
+  }
+});
+
+it('routes source title edits through the shared slug hook instead of saving the slug directly', async () => {
+  const host = document.createElement('div');
+  document.body.append(host);
+  const root = createRoot(host);
+  const client = new QueryClient();
+  const update = vi.fn();
+  const renderSettings = () =>
+    root.render(
+      <QueryClientProvider client={client}>
+        <TestProviders>
+          <FormSettingsContent {...settingsProps} bindings={{ update }} />
+        </TestProviders>
+      </QueryClientProvider>,
+    );
+  try {
+    setProviderAccessLevel(mocks.provider, 'edit');
+    mocks.updateFromTitle.mockClear();
+    mocks.title = 'Form';
+    await act(async () => renderSettings());
+    expect(mocks.updateFromTitle).toHaveBeenLastCalledWith('Form');
+
+    mocks.title = 'Renamed form';
+    await act(async () => renderSettings());
+
+    expect(mocks.updateFromTitle).toHaveBeenLastCalledWith('Renamed form');
+    expect(update).not.toHaveBeenCalled();
+  } finally {
+    act(() => root.unmount());
+    client.clear();
+    host.remove();
+    mocks.title = 'Form';
   }
 });

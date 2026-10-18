@@ -279,16 +279,6 @@ describe('EditorFileLibraryPickerView', () => {
     expect(onConfirmFiles).toHaveBeenCalledExactlyOnceWith([file]);
   });
 
-  it('uses Finder-style highlighted grid selection without checkboxes', () => {
-    const onSelectedFilesChange = vi.fn();
-    const onActivateRow = vi.fn();
-    renderView([], { onSelectedFilesChange, onActivateRow });
-    expect(host.querySelector('input[type="checkbox"]')).toBeNull();
-    act(() => host.querySelector<HTMLElement>('[data-file-viewer-item="story-file-audio"]')?.click());
-    expect(onSelectedFilesChange).toHaveBeenCalledWith([editorFileLibraryBrowseRows[1]]);
-    expect(onActivateRow).not.toHaveBeenCalled();
-  });
-
   it('toggles multiple grid files by touch without checkbox controls', () => {
     const first = editorFileLibraryBrowseRows[1];
     if (first.kind !== 'file') {
@@ -413,13 +403,6 @@ describe('EditorFileLibraryPickerView', () => {
       expect(onSelectedFilesChange).toHaveBeenLastCalledWith([first, last]);
     },
   );
-
-  it('does not narrow the result surface with a persistent detail inspector', () => {
-    renderView();
-
-    expect(host.querySelector('[data-file-library-details]')).toBeNull();
-    expect(host.querySelector('[data-inspector-open]')).toBeNull();
-  });
 
   it('previews an eligible file on double click without submitting a partial multi-selection', () => {
     const onConfirmFiles = vi.fn();

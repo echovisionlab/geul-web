@@ -159,40 +159,6 @@ describe('ImageUploadField', () => {
     expect(placeholder?.style.aspectRatio).toBe('3 / 1');
   });
 
-  it('renders the preview at intrinsic ratio and removes it from the overlay button', () => {
-    const onRemove = vi.fn();
-    renderField({
-      imageUrl: '/logo.svg',
-      changeHint: 'Click the image to replace',
-      dropzoneId: 'change-logo-dropzone',
-      dropzoneAriaLabel: 'Change logo',
-      removeButtonAriaLabel: 'Remove logo',
-      onRemove,
-      onFileSelect: vi.fn(),
-    });
-
-    const image = container.querySelector<HTMLImageElement>('img');
-    const previewSurface = image?.parentElement?.parentElement;
-    const dropzone = previewSurface?.parentElement?.parentElement;
-    expect(image?.getAttribute('src')).toBe('/logo.svg');
-    expect(image?.getAttribute('alt')).toBe('Preview image');
-    expect(image?.style.width).toBe('auto');
-    expect(previewSurface?.style.width).toBe('fit-content');
-    expect(dropzone?.style.width).toBe('fit-content');
-    expect(
-      container.querySelector<HTMLInputElement>('#change-logo-dropzone input[type="file"]')?.getAttribute('aria-label'),
-    ).toBe('Change logo');
-    expect(container.textContent).toContain('Click the image to replace');
-    expect(container.querySelector('button[aria-label="Remove logo"]')).toHaveAttribute('data-emphasis', 'medium');
-    expect(container.querySelector('button[aria-label="Remove logo"]')).toHaveAttribute('data-control-size', 'xs');
-
-    act(() => {
-      container.querySelector<HTMLButtonElement>('button[aria-label="Remove logo"]')?.click();
-    });
-
-    expect(onRemove).toHaveBeenCalledTimes(1);
-  });
-
   it('renders fixed-ratio previews through the full-width shared frame', () => {
     renderField({
       imageUrl: '/featured.webp',

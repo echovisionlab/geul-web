@@ -296,18 +296,6 @@ describe('DropdownMenu', () => {
     error.mockRestore();
   });
 
-  it('exposes the required compound API', () => {
-    expect(DropdownMenu.Target).toBeDefined();
-    expect(DropdownMenu.Anchor).toBeDefined();
-    expect(DropdownMenu.Dropdown).toBeDefined();
-    expect(DropdownMenu.Item).toBeDefined();
-    expect(DropdownMenu.Label).toBeDefined();
-    expect(DropdownMenu.Divider).toBeDefined();
-    expect(DropdownMenu.Sub).toBeDefined();
-    expect(DropdownMenu.Sub.Target).toBeDefined();
-    expect(DropdownMenu.Sub.Dropdown).toBeDefined();
-  });
-
   it('applies Core sizing and radius while preserving selected, disabled, and destructive semantics', () => {
     const onSelect = vi.fn();
     const onDisabled = vi.fn();

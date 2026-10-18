@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { act, createRef, useState } from 'react';
+import { act, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -66,26 +66,6 @@ describe('EditorMediaBlockShell', () => {
     expect(normalizedCss).toContain(
       `${selectedSuppressedFrame} select { -webkit-user-select: auto; user-select: auto; }`,
     );
-  });
-
-  it('renders resize handles when resizing is enabled', () => {
-    const html = renderToStaticMarkup(
-      <EditorMediaBlockFrame
-        containerRef={createRef<HTMLDivElement>()}
-        widthPercent={60}
-        margin="0 auto"
-        allowResize
-        resizeLeftLabel="너비 왼쪽"
-        resizeRightLabel="너비 오른쪽"
-      >
-        <div>content</div>
-      </EditorMediaBlockFrame>,
-    );
-
-    expect(html).toContain('data-resize-direction="left"');
-    expect(html).toContain('data-resize-direction="right"');
-    expect(html).toContain('width:60%');
-    expect(html).toContain('margin:0 auto');
   });
 
   it('projects editor selection and resize state into Core handle visibility', () => {

@@ -37,7 +37,11 @@ import { PageLoader } from '@/features/site/PageLoader';
 import classes from './FileManagerView.module.css';
 import type { FileManagerFileView, FileManagerItemView, FileManagerUsageItemView } from './model';
 import { FileBrowserGridView } from './ui/FileBrowserGridView';
-import { fileBrowserListPresentation, fileBrowserSizeLabel as formatFileSize } from './file-browser-presentation';
+import {
+  fileBrowserListPresentation,
+  fileBrowserSizeLabel as formatFileSize,
+  fileUsageLabel,
+} from './file-browser-presentation';
 import { fileBrowserContentInset } from './ui/file-browser-layout';
 import { FileBrowserListView } from './ui/FileBrowserListView';
 import { FileBrowserHeader } from './ui/FileBrowserHeader';
@@ -191,23 +195,6 @@ function itemDisplayName(item: FileManagerRow) {
 function itemMemberName(item: FileManagerRow, labels: FileManagerViewLabels) {
   const member = item.kind === 'file' ? item.uploadedByMember : item.createdByMember;
   return member ? (member.deleted ? labels.deletedMember : member.nickname) : labels.unknownMember;
-}
-
-function usageDomainLabel(usage: FileManagerUsageView, labels: FileManagerViewLabels) {
-  return labels.usageDomains[usage.domain] ?? labels.usages;
-}
-
-function usageDisplayLabel(usage: FileManagerUsageView, labels: FileManagerViewLabels) {
-  const domain = usageDomainLabel(usage, labels);
-  if (usage.domain === FileUsageDomain.SITE_SETTINGS) {
-    return `${domain} · ${labels.usageSlots[usage.slot] ?? usage.title?.trim() ?? usage.slot}`;
-  }
-  const target = usage.title?.trim() || usage.entityId;
-  const exactLocator = usage.blockId ?? (usage.domain === FileUsageDomain.TRACK ? usage.entityId : undefined);
-  const location = [usage.blockType, usage.slot !== 'editor' ? usage.slot : undefined, exactLocator]
-    .filter(Boolean)
-    .join(' · ');
-  return `${domain} · ${target}${location ? ` · ${location}` : ''}`;
 }
 
 function stopItemActivation(event: MouseEvent<HTMLElement>) {
@@ -703,10 +690,10 @@ export function FileManagerView(props: FileManagerViewProps) {
                   <div key={`${usage.domain}-${usage.entityId}-${usage.slot}-${usage.blockId ?? ''}-${index}`}>
                     {usage.link ? (
                       <TextButton href={usage.link} appearance="accent" size="sm">
-                        {usageDisplayLabel(usage, labels)}
+                        {fileUsageLabel(usage, labels)}
                       </TextButton>
                     ) : (
-                      <DsText size="sm">{usageDisplayLabel(usage, labels)}</DsText>
+                      <DsText size="sm">{fileUsageLabel(usage, labels)}</DsText>
                     )}
                   </div>
                 ))}

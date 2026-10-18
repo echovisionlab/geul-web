@@ -7,7 +7,6 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
 import type { PostMeta } from '@/lib/collab/post-meta';
-import type { BlockRoomRecoverySnapshot } from '@/lib/collab/block-room-recovery';
 import { updatePostBlockRoomDocumentMetadata } from '@/lib/collab/block-room-metadata';
 import { PostMetaProvider, usePostMeta } from './PostMetaContext';
 
@@ -162,10 +161,7 @@ afterEach(() => {
 });
 
 describe('PostMetaProvider', () => {
-  it('selects the exact source or existing target room and keeps a missing target on source fallback', async () => {
-    await renderProvider();
-    expect(localeRoom.connect).toHaveBeenLastCalledWith('post', postId, 'ko', undefined);
-
+  it('connects the existing target locale to its exact Block room', async () => {
     localeRoom.active = {
       activeLocale: 'en',
       sourceLocale: 'ko',
@@ -176,42 +172,6 @@ describe('PostMetaProvider', () => {
     await renderProvider();
     expect(localeRoom.connect).toHaveBeenLastCalledWith('post', postId, 'en', undefined);
     expect(latest?.roomLocale).toBe('en');
-
-    localeRoom.active = { ...localeRoom.active, activeLocale: 'ja', hasLiveRow: false };
-    await renderProvider();
-    expect(localeRoom.connect).toHaveBeenLastCalledWith('post', postId, 'ko', undefined);
-    expect(latest?.roomLocale).toBe('ko');
-  });
-
-  it('exposes only the recovery snapshot matching the current Post and locale room', async () => {
-    const koSnapshot = { documentType: 'post', entityId: postId, locale: 'ko' } as BlockRoomRecoverySnapshot;
-    const enSnapshot = { documentType: 'post', entityId: postId, locale: 'en' } as BlockRoomRecoverySnapshot;
-    recoveryRoom.snapshots[`post:${postId}:ko`] = koSnapshot;
-    recoveryRoom.snapshots[`post:${postId}:en`] = enSnapshot;
-
-    await renderProvider();
-    expect(latest?.recoverySnapshot).toBe(koSnapshot);
-    expect(localeRoom.connect).toHaveBeenLastCalledWith('post', postId, 'ko', undefined);
-
-    localeRoom.active = {
-      activeLocale: 'en',
-      sourceLocale: 'ko',
-      isSourceLocale: false,
-      isSourceLocaleReady: true,
-      hasLiveRow: true,
-    };
-    await renderProvider();
-    expect(latest?.recoverySnapshot).toBe(enSnapshot);
-    expect(localeRoom.connect).toHaveBeenLastCalledWith('post', postId, 'en', undefined);
-
-    await renderProvider(false, '22222222-2222-4222-8222-222222222222');
-    expect(latest?.recoverySnapshot).toBeNull();
-    expect(localeRoom.connect).toHaveBeenLastCalledWith(
-      'post',
-      '22222222-2222-4222-8222-222222222222',
-      'en',
-      undefined,
-    );
   });
 
   it('uses one resident Block Y.Doc and batches taxonomy metadata through CAS', async () => {

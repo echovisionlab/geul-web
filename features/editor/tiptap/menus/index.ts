@@ -1,6 +1,5 @@
 export {
   createSelectionBubbleMenuLabels,
-  SELECTION_BUBBLE_MENU_CONTROL_ORDER,
   SelectionBubbleMenuView,
   shouldShowSelectionBubbleMenu,
   TiptapSelectionBubbleMenu,

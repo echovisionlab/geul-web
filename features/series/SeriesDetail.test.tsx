@@ -22,6 +22,7 @@ const mocks = vi.hoisted(() => ({
   editorHeader: vi.fn(),
   routerPush: vi.fn(),
   updateSeries: vi.fn(),
+  updateFromTitle: vi.fn(),
 }));
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: mocks.routerPush }) }));
@@ -114,7 +115,7 @@ vi.mock('@/lib/hooks/useSlugManagement', () => ({
     handleChange: vi.fn(),
     isChecking: false,
     toggleAutoMode: vi.fn(),
-    updateFromTitle: vi.fn(),
+    updateFromTitle: mocks.updateFromTitle,
   }),
 }));
 vi.mock('@/lib/hooks/useUpload', () => ({ useUpload: () => ({ upload: vi.fn(), isUploading: false }) }));
@@ -233,6 +234,7 @@ describe('SeriesDetail post ordering', () => {
     return mocks.editorHeader.mock.calls.at(-1)?.[0] as {
       onBack: () => void | Promise<void>;
       onStatusChange: (status: 'draft' | 'published') => void | Promise<void>;
+      onTitleChange: (value: string) => void;
     };
   }
 
@@ -321,6 +323,16 @@ describe('SeriesDetail post ordering', () => {
     expect(mocks.notification).toHaveBeenCalledWith({ message: 'saveFailed', tone: 'danger' });
   });
 
+  it('routes source title edits through the shared slug hook instead of saving the slug directly', async () => {
+    const header = await renderSeries();
+
+    await act(async () => header.onTitleChange('Renamed series'));
+
+    expect(mocks.setCollaborationField).toHaveBeenCalledWith('title', 'Renamed series');
+    expect(mocks.updateFromTitle).toHaveBeenCalledWith('Renamed series');
+    expect(mocks.updateSeries).not.toHaveBeenCalled();
+  });
+
   it('optimistically reorders and restores the authoritative order when persistence fails', async () => {
     let resolveReorder: ((result: { error: 'series_unavailable' }) => void) | undefined;
     mocks.reorder.mockReturnValue(
@@ -356,14 +368,6 @@ describe('SeriesDetail post ordering', () => {
     expect(
       container.querySelector('[data-testid="series-translations-panel"]')?.getAttribute('data-can-administer'),
     ).toBe('true');
-    expect(mocks.useLocaleDocumentSession).toHaveBeenCalledWith(
-      expect.objectContaining({
-        entityType: 'post_series',
-      }),
-    );
-    expect(mocks.usePostSeriesCollaboration).toHaveBeenCalledWith('series-1', 'en');
-    expect(mocks.editorHeader).toHaveBeenCalledWith(expect.objectContaining({ isConnected: true, isSynced: true }));
-
     const table = container.querySelector('table');
     expect(table).toHaveAccessibleName('posts.title');
     expect(
@@ -410,11 +414,7 @@ describe('SeriesDetail post ordering', () => {
       );
     });
 
-    expect(mocks.useLocaleDocumentSession).toHaveBeenCalledWith(
-      expect.objectContaining({
-        entityType: 'post_series',
-      }),
-    );
+    expect(mocks.editorHeader.mock.lastCall?.[0].titleDisabled).toBe(false);
     expect(
       container.querySelector('[data-testid="series-translations-panel"]')?.getAttribute('data-can-administer'),
     ).toBe('false');

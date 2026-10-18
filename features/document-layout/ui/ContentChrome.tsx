@@ -8,8 +8,8 @@ export interface ContentChromeProps {
   children?: ReactNode;
   tone?: 'default' | 'inverse';
   /**
-   * `reading` puts the chrome on the body's reading column: the outline's reserved inline space (from
-   * the document's table-of-contents scope) plus the centered `reading` measure, on screen only.
+   * `reading` puts the chrome on the body's reading column: the `reading` measure from the start edge,
+   * clear of the outline's reserved inline space (from the document's table-of-contents scope), on screen only.
    * `full` (default) spans the document width, for full-bleed headers such as heroes and image grids.
    */
   measure?: 'full' | 'reading';
@@ -44,7 +44,7 @@ export function ContentChrome({ title, children, tone = 'default', measure = 'fu
       data-measure={measure}
     >
       {measure === 'reading' ? (
-        <LayoutContainer size="reading" inset="none">
+        <LayoutContainer size="reading" inset="none" placement="start">
           {toned}
         </LayoutContainer>
       ) : (

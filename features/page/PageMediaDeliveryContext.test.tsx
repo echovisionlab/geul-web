@@ -4,49 +4,12 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { PublicMediaEntityType } from '@echovisionlab/geul-proto/public/file_pb.ts';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ContentMediaDeliveryProvider, useContentMediaDelivery } from '@/features/media/ContentMediaDeliveryContext';
+import { useContentMediaDelivery } from '@/features/media/ContentMediaDeliveryContext';
 import { PageMediaDeliveryProvider } from './PageMediaDeliveryContext';
 
 afterEach(() => vi.unstubAllGlobals());
 
 describe('PageMediaDeliveryProvider server wrapper', () => {
-  it('forwards the generated PAGE identity, endpoints, full share context, and children unchanged', () => {
-    const children = <span>Page content</span>;
-    const element = PageMediaDeliveryProvider({
-      idOrSlug: 'shared%20page',
-      requestedLocale: 'ko',
-      shareToken: 'share-token',
-      sharePassword: ' password ',
-      children,
-    });
-
-    expect(element.type).toBe(ContentMediaDeliveryProvider);
-    expect(element.props).toEqual({
-      idOrSlug: 'shared%20page',
-      requestedLocale: 'ko',
-      shareToken: 'share-token',
-      sharePassword: ' password ',
-      mediaAssetsEndpoint: '/api/page/media-assets',
-      mediaDownloadEndpoint: '/api/page/media-download',
-      entityType: PublicMediaEntityType.PAGE,
-      children,
-    });
-    expect(element.props.children).toBe(children);
-  });
-
-  it('preserves absent share credentials on the homepage', () => {
-    const element = PageMediaDeliveryProvider({ idOrSlug: '/', requestedLocale: 'en', children: null });
-
-    expect(element.props).toMatchObject({
-      idOrSlug: '/',
-      requestedLocale: 'en',
-      shareToken: undefined,
-      sharePassword: undefined,
-      entityType: PublicMediaEntityType.PAGE,
-      children: null,
-    });
-  });
-
   it('retains Page download authorization and asset lookup requests through the actual client context', async () => {
     const selector = { blockId: '01b3db42-75f1-4bf1-8cb9-9b3baf57e795', referencePath: 'file' };
     const fileId = 'b67328c4-668c-5bf2-8f1e-41465149ded6';

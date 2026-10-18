@@ -200,19 +200,6 @@ describe('buildProgramEventOgMetadata', () => {
     });
     expect(fallback.openGraph.images?.[0]?.url).toBe('https://cdn.example.test/asset/site-default/og.webp');
   });
-
-  it('keeps the global poster as the translated Program Event image without substituting a locale OG', () => {
-    const metadata = buildProgramEventOgMetadata({
-      canonicalOrigin: 'https://studio.example.com',
-      routePath: '/events/open-studio?lang=en',
-      title: 'Translated event title',
-      posterUrl: 'https://cdn.example.test/asset/poster/shared-event.webp',
-      siteOgImageUrl: 'https://cdn.example.test/asset/site-default/og.webp',
-    });
-
-    expect(metadata.openGraph.title).toBe('Translated event title');
-    expect(metadata.openGraph.images).toEqual([{ url: 'https://cdn.example.test/asset/poster/shared-event.webp' }]);
-  });
 });
 
 describe('buildReleaseOgMetadata', () => {

@@ -1,10 +1,9 @@
 // @vitest-environment jsdom
 import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 
-import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
+import { render, screen, type RenderResult } from '@/test/render';
 import { act } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useOptionalEditorRuntimeContext } from '@/lib/contexts/EditorRuntimeContext';
@@ -31,7 +30,8 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => mockSearchParams,
 }));
 
-vi.mock('next-intl', () => ({
+vi.mock('next-intl', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('next-intl')>()),
   useTranslations: (namespace: string) => {
     const translate = (key: string, values?: Record<string, unknown>) => {
       const fullKey = `${namespace}.${key}`;
@@ -119,46 +119,14 @@ vi.mock('@/lib/actions/form', () => ({
   deleteFormAction: (...args: unknown[]) => deleteFormActionMock(...args),
 }));
 
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+let view: (RenderResult & { user: ReturnType<typeof render>['user'] }) | undefined;
+let queryClient: QueryClient;
 
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: (query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener() {},
-    removeListener() {},
-    addEventListener() {},
-    removeEventListener() {},
-    dispatchEvent() {
-      return false;
-    },
-  }),
-});
-
-let container: HTMLDivElement | null = null;
-let root: Root | null = null;
-
-function render(node: React.ReactNode) {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      mutations: { retry: false },
-      queries: { retry: false },
-    },
+function renderLayout(node: React.ReactNode) {
+  queryClient = new QueryClient({
+    defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
   });
-
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-
-  act(() => {
-    root?.render(
-      <QueryClientProvider client={queryClient}>
-        <DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>
-      </QueryClientProvider>,
-    );
-  });
+  view = render(<QueryClientProvider client={queryClient}>{node}</QueryClientProvider>);
 }
 
 function RuntimeContextProbe() {
@@ -173,7 +141,6 @@ async function flush() {
 }
 
 beforeEach(() => {
-  vi.useFakeTimers();
   pushMock.mockReset();
   updateFormActionMock.mockReset();
   deleteFormActionMock.mockReset();
@@ -217,13 +184,9 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  act(() => {
-    root?.unmount();
-  });
-  container?.remove();
-  root = null;
-  container = null;
-  vi.useRealTimers();
+  view?.unmount();
+  queryClient?.clear();
+  view = undefined;
 });
 
 describe('AdminFormLayoutClient', () => {
@@ -231,24 +194,24 @@ describe('AdminFormLayoutClient', () => {
     const provider = { on: vi.fn(), off: vi.fn() };
     setProviderAccessLevel(provider, 'view');
     mockFormEditorContext = { ...mockFormEditorContext, provider };
-    render(
+    renderLayout(
       <AdminFormLayoutClient formId="form-1">
         <p data-testid="form-body">Readable form</p>
       </AdminFormLayoutClient>,
     );
-    const body = container?.querySelector('[data-testid="form-body"]');
-    expect(container?.querySelector('[data-testid="editor-title-disabled"]')?.textContent).toBe('true');
+    const body = screen.getByTestId('form-body');
+    expect(screen.getByTestId('editor-title-disabled')?.textContent).toBe('true');
     act(() => setProviderAccessLevel(provider, 'edit'));
-    expect(container?.querySelector('[data-testid="editor-title-disabled"]')?.textContent).toBe('false');
-    expect(container?.querySelector('[data-testid="form-body"]')).toBe(body);
+    expect(screen.getByTestId('editor-title-disabled')?.textContent).toBe('false');
+    expect(screen.getByTestId('form-body')).toBe(body);
     act(() => setProviderAccessLevel(provider, 'view'));
-    expect(container?.querySelector('[data-testid="editor-title-disabled"]')?.textContent).toBe('true');
-    expect(container?.querySelector('[data-testid="editor-status-enabled"]')?.textContent).toBe('false');
-    expect(container?.querySelector('[data-testid="editor-delete-enabled"]')?.textContent).toBe('false');
-    expect(container?.querySelector('[data-testid="form-body"]')).toBe(body);
+    expect(screen.getByTestId('editor-title-disabled')?.textContent).toBe('true');
+    expect(screen.getByTestId('editor-status-enabled')?.textContent).toBe('false');
+    expect(screen.getByTestId('editor-delete-enabled')?.textContent).toBe('false');
+    expect(screen.getByTestId('form-body')).toBe(body);
   });
   it('exposes the active form collaboration runtime to nested translation panels', () => {
-    render(
+    renderLayout(
       <AdminFormLayoutClient formId="form-1">
         <RuntimeContextProbe />
       </AdminFormLayoutClient>,
@@ -258,76 +221,65 @@ describe('AdminFormLayoutClient', () => {
     expect(runtimeContext?.getBlockRoomSnapshot).toEqual(expect.any(Function));
   });
 
-  it('preserves the current query string when switching tabs', () => {
+  it('connects the selected settings tab to its single named panel', () => {
+    mockSearchParams = new URLSearchParams('edit=true&tab=settings');
+    renderLayout(<AdminFormLayoutClient formId="form-1">Settings body</AdminFormLayoutClient>);
+    const tab = screen.getByRole('tab', { name: 'Settings', selected: true });
+    const panel = screen.getByRole('tabpanel', { name: 'Settings' });
+    expect(tab).toHaveAttribute('aria-controls', panel.id);
+    expect(panel).toHaveAttribute('aria-labelledby', tab.id);
+    expect(screen.getAllByRole('tabpanel')).toHaveLength(1);
+  });
+
+  it('preserves the current query string when switching tabs', async () => {
     mockSearchParams = new URLSearchParams('lang=ko&foo=bar');
 
-    render(<AdminFormLayoutClient formId="form-1">Body</AdminFormLayoutClient>);
+    renderLayout(<AdminFormLayoutClient formId="form-1">Body</AdminFormLayoutClient>);
 
-    const settingsTab = Array.from(document.querySelectorAll('[role="tab"]')).find(
-      (tab) => tab.textContent?.trim() === 'Settings',
-    );
-    expect(settingsTab).toBeDefined();
-
-    act(() => {
-      settingsTab?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
+    await view!.user.click(screen.getByRole('tab', { name: 'Settings' }));
 
     expect(pushMock).toHaveBeenCalledWith('/forms/form-1?lang=ko&foo=bar&edit=true&tab=settings');
   });
 
-  it('updates the source form title through collaboration without mixing DB settings into Yjs', async () => {
-    render(<AdminFormLayoutClient formId="form-1">Body</AdminFormLayoutClient>);
-
-    const triggerButton = Array.from(document.querySelectorAll('button')).find(
-      (button) => button.textContent === 'Trigger title change',
-    );
-    expect(triggerButton).not.toBeNull();
-
-    act(() => {
-      triggerButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
-
-    expect(mockSetField).toHaveBeenNthCalledWith(1, 'title', 'Updated title');
-    expect(mockSetField).toHaveBeenCalledTimes(1);
-    expect(updateFormActionMock).not.toHaveBeenCalled();
-  });
-
-  it('edits an existing target title through the locale-scoped collaborative document', async () => {
-    mockFormEditorContext.fields.title = '번역 제목';
-    mockFormTranslationContext = {
-      activeEditLocale: {
+  it.each([
+    { locale: 'source', title: 'Old title', target: null, localeMenu: false },
+    {
+      locale: 'existing target',
+      title: '번역 제목',
+      target: {
         activeLocale: 'ko',
         activeLocaleLabel: 'Korean',
-        sourceLocale: 'en',
-        localeOptions: [],
-        setActiveLocale: vi.fn(),
-        isLoading: false,
         isControlVisible: true,
         isSourceLocale: false,
         hasLiveRow: true,
         displayTitle: '번역 제목',
-        canEditActiveLocale: true,
       },
-      isEditingScopedLocale: true,
-    };
+      localeMenu: true,
+    },
+  ])(
+    'edits the $locale form title through its collaborative document without mixing DB settings into Yjs',
+    async ({ title, target, localeMenu }) => {
+      if (target) {
+        mockFormEditorContext.fields.title = title;
+        mockFormTranslationContext = {
+          ...mockFormTranslationContext,
+          activeEditLocale: { ...mockFormTranslationContext.activeEditLocale, ...target },
+          isEditingScopedLocale: true,
+        };
+      }
 
-    render(<AdminFormLayoutClient formId="form-1">Body</AdminFormLayoutClient>);
+      renderLayout(<AdminFormLayoutClient formId="form-1">Body</AdminFormLayoutClient>);
 
-    expect(document.body.textContent).toContain('번역 제목');
-    expect(document.body.textContent).toContain('Locale menu');
-    expect(document.querySelector('[data-testid="editor-title-disabled"]')?.textContent).toBe('false');
+      expect(screen.queryByTestId('editor-title')?.textContent).toBe(title);
+      expect(Boolean(screen.queryByTestId('locale-menu'))).toBe(localeMenu);
+      expect(screen.queryByTestId('editor-title-disabled')?.textContent).toBe('false');
 
-    const triggerButton = Array.from(document.querySelectorAll('button')).find(
-      (button) => button.textContent === 'Trigger title change',
-    );
-    expect(triggerButton).not.toBeNull();
+      await view!.user.click(screen.getByRole('button', { name: 'Trigger title change' }));
+      await flush();
 
-    act(() => {
-      triggerButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
-    await flush();
-
-    expect(mockSetField).toHaveBeenCalledWith('title', 'Updated title');
-    expect(updateFormActionMock).not.toHaveBeenCalled();
-  });
+      expect(mockSetField).toHaveBeenCalledTimes(1);
+      expect(mockSetField).toHaveBeenCalledWith('title', 'Updated title');
+      expect(updateFormActionMock).not.toHaveBeenCalled();
+    },
+  );
 });

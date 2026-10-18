@@ -24,15 +24,15 @@
 }
 
 /*
- * Reading measure (posts): running text keeps the `reading` content width, centered in the document
- * box. Full-width dense blocks (tables, code, diagrams) may extend to `standard`; full-width visual
+ * Reading measure (posts, legal documents): running text keeps the `reading` content width from the
+ * start edge of the document box, where the title and hero text start. Full-width dense blocks (tables, code, diagrams) may extend to `standard`; full-width visual
  * blocks (images, video, external video, maps, executable scenes) to `wide`. Breakouts never exceed
  * the document box, which the table of contents layout already keeps clear of the outline.
  * `data-document-measure` is set by the public block view from the block kind and preview width.
  */
 .prose[data-reading-measure] > [data-document-block] {
   max-width: var(--geul-content-width-reading);
-  margin-inline: auto;
+  margin-inline: 0 auto;
 }
 
 .prose[data-reading-measure] > [data-document-measure='standard'] {

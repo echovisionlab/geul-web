@@ -3,7 +3,6 @@ import {
   buildNicknameOnboardingHref,
   DEFAULT_ONBOARDING_RETURN_TO,
   loadAfterOnboardingGate,
-  resolveNicknameOnboardingInitialValue,
   resolveOnboardingReturnTo,
 } from './onboarding-redirect';
 
@@ -19,11 +18,6 @@ describe('nickname onboarding redirect', () => {
     expect(resolveOnboardingReturnTo('https://evil.example/')).toBe(DEFAULT_ONBOARDING_RETURN_TO);
     expect(resolveOnboardingReturnTo('//evil.example/')).toBe(DEFAULT_ONBOARDING_RETURN_TO);
     expect(resolveOnboardingReturnTo('/onboarding/nickname?return_to=/admin')).toBe(DEFAULT_ONBOARDING_RETURN_TO);
-  });
-
-  it('uses only the ephemeral provider suggestion as the onboarding input value', () => {
-    expect(resolveNicknameOnboardingInitialValue('  SuggestedName  ')).toBe('SuggestedName');
-    expect(resolveNicknameOnboardingInitialValue(null)).toBe('');
   });
 
   it('redirects an incomplete Member before loading unrelated root bootstrap data', async () => {

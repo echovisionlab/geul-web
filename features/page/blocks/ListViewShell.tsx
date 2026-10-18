@@ -19,10 +19,14 @@ import {
 } from '@/components/core/Collection';
 import { Button } from '@/components/core/Button';
 import { SectionCard } from '@/components/core/Section';
-import { collectionMinColumnWidth, type CollectionTrackScale } from './content-layout';
+import { COLLECTION_COLUMN_GROWTH, collectionMinColumnWidth, type CollectionTrackScale } from './content-layout';
 import { getResponsiveSlideSize } from './constants';
 import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
 
+// The widest Core Collection thumbnail (XL, the 28rem grid track); smaller sizes reuse the same file.
+const THUMBNAIL_IMAGE_SIZES = '28rem';
+// A hero carousel title grows with the item size from `sm` (phones keep scale 3).
+const HERO_TITLE_SCALE = { xs: 3, s: 3, m: 2, l: 1, xl: 1 } as const satisfies Record<CollectionSize, 1 | 2 | 3>;
 const ListCarousel = dynamic(() => import('./ListCarouselRuntime').then((module) => module.ListCarouselRuntime));
 
 export type ListViewLayout = 'grid' | 'list' | 'cards' | 'minimal' | 'carousel';
@@ -129,7 +133,7 @@ function ItemMedia({
         aria-label={item.title?.trim() || tStates('untitled')}
         tabIndex={-1}
       >
-        <MediaImage item={item} naturalSize={naturalSize} sizes={thumbnail ? '128px' : undefined} />
+        <MediaImage item={item} naturalSize={naturalSize} sizes={thumbnail ? THUMBNAIL_IMAGE_SIZES : undefined} />
       </Link>
     </CollectionMedia>
   );
@@ -291,7 +295,7 @@ export function ListViewShell<T extends ListViewShellItem>({
                     contrast="image"
                     tone="inverse"
                     level={2}
-                    scale={{ base: 3, sm: itemSize === 's' ? 3 : itemSize === 'l' ? 1 : 2 }}
+                    scale={{ base: 3, sm: HERO_TITLE_SCALE[itemSize] }}
                     lines={2}
                   >
                     {item.title ?? ''}
@@ -325,7 +329,11 @@ export function ListViewShell<T extends ListViewShellItem>({
     );
   } else {
     body = (
-      <LayoutGrid minColumnWidth={collectionMinColumnWidth(layout, itemSize, trackScale)} gap={metrics.gridGap}>
+      <LayoutGrid
+        minColumnWidth={collectionMinColumnWidth(layout, itemSize, trackScale)}
+        columnGrowth={COLLECTION_COLUMN_GROWTH}
+        gap={metrics.gridGap}
+      >
         {items.map((item) => (
           <Fragment key={item.id}>
             {layout === 'cards'

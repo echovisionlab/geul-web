@@ -1,4 +1,4 @@
-import { createPageBlockFixtureSections, PAGE_BLOCK_TYPES } from '@echovisionlab/geul-common/page';
+import { createPageBlockFixtureSections } from '@echovisionlab/geul-common/page';
 import { pageBlockManifest } from '@/features/page/blocks/block-manifest';
 import { DEFAULT_SECTION_SETTINGS, parseSectionMetaSafe } from '@/features/page/blocks/section-schema';
 
@@ -21,10 +21,6 @@ function flattenSections(
 }
 
 describe('page section schema', () => {
-  it('keeps the shared block type list in sync with the fixture set', () => {
-    expect(createPageBlockFixtureSections().map((section) => section.type)).toEqual([...PAGE_BLOCK_TYPES]);
-  });
-
   it('accepts the current prop shape for every registered block type', () => {
     const sections = flattenSections(createPageBlockFixtureSections());
 
@@ -199,5 +195,31 @@ describe('page section schema', () => {
       labelId: 'label-1',
     });
     expect(section?.props).not.toHaveProperty('unknownField');
+  });
+
+  it('fills missing section settings with the shared contract defaults', () => {
+    const defaults = {
+      backgroundColor: '',
+      paddingTop: '0',
+      paddingBottom: '0',
+      paddingLeft: '0',
+      paddingRight: '0',
+      maxWidth: 'full',
+    };
+    expect(DEFAULT_SECTION_SETTINGS).toEqual(defaults);
+    const section = parseSectionMetaSafe({
+      id: 'section-settings',
+      type: 'rich-text',
+      settings: { paddingTop: '8', maxWidth: 'narrow' },
+    });
+    expect(section?.settings).toEqual({ ...defaults, paddingTop: '8', maxWidth: 'narrow' });
+  });
+
+  it.each([
+    ['without an id', { type: 'rich-text' }],
+    ['of an unknown block type', { id: 'section-unknown', type: 'unknown' }],
+    ['with an unsupported max width', { id: 'section-wide', type: 'rich-text', settings: { maxWidth: 'wide' } }],
+  ])('rejects a stored section %s', (_, section) => {
+    expect(parseSectionMetaSafe(section)).toBeNull();
   });
 });

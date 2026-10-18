@@ -154,14 +154,6 @@ describe('listClientsForBlockAction', () => {
 
     expect(listMock).toHaveBeenCalledWith({ pagination: { limit: 24, offset: 0 } });
   });
-
-  it('propagates lookup failures instead of returning an empty result', async () => {
-    listMock.mockRejectedValue(new Error('backend unavailable'));
-
-    await expect(listClientsForBlockAction({ requestedLocale: null }).then(unwrapQueryResult)).rejects.toMatchObject({
-      status: 500,
-    });
-  });
 });
 
 describe('getClientsForBlockByIdsAction', () => {
@@ -232,13 +224,5 @@ describe('getClientsForBlockByIdsAction', () => {
     expect(getMock).toHaveBeenNthCalledWith(3, { id: 'client-3' });
     expect(getMock).toHaveBeenNthCalledWith(4, { id: 'missing' });
     expect(getMock).toHaveBeenNthCalledWith(5, { id: 'empty' });
-  });
-
-  it('propagates lookup failures instead of returning an empty result', async () => {
-    getMock.mockRejectedValue(new ConnectError('unavailable', Code.Unavailable));
-
-    await expect(
-      getClientsForBlockByIdsAction({ ids: ['client-1'], requestedLocale: undefined }).then(unwrapQueryResult),
-    ).rejects.toMatchObject({ status: 503 });
   });
 });

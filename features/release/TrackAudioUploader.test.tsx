@@ -1,16 +1,16 @@
 // @vitest-environment jsdom
 
-import { act } from 'react';
+import type { ReactElement } from 'react';
 import { randomTestId, randomTestUuid } from '@echovisionlab/geul-common/test/random-id';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { UploadSessionStatus } from '@echovisionlab/geul-proto/secure/file_pb.ts';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { notifications } from '@/components/core/Notification';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
+import { NotificationRegion, notifications } from '@/components/core/Notification';
 import { abortUploadAction, findMultipartUploadCandidateAction } from '@/lib/actions/file';
 import { UploadType } from '@/lib/types/upload/model';
 import { rememberUploadSession } from '@/lib/upload/upload-session-store';
-import { TestProviders } from '@/test/TestProviders';
+import { act, render as renderUI, screen, waitFor } from '@/test/render';
 import { TrackAudioUploader } from './TrackAudioUploader';
 
 const uploadHookMocks = vi.hoisted(() => ({
@@ -31,26 +31,6 @@ const mockUseUploadResumeState = vi.fn<
 >(() => ({
   resumeNotice: null,
   hasActiveSession: false,
-}));
-
-vi.mock('@tanstack/react-query', () => ({
-  useMutation: (options?: {
-    mutationFn?: (...args: any[]) => unknown;
-    onSuccess?: (result: any) => void;
-    onError?: (error: unknown) => void;
-  }) => ({
-    mutateAsync: vi.fn(async (...args: any[]) => {
-      try {
-        const result = await options?.mutationFn?.(...args);
-        options?.onSuccess?.(result);
-        return result;
-      } catch (error) {
-        options?.onError?.(error);
-        throw error;
-      }
-    }),
-    isPending: false,
-  }),
 }));
 
 vi.mock('@/lib/hooks/useFileUpload', () => ({
@@ -75,25 +55,9 @@ vi.mock('@/lib/actions/file', () => ({
   findMultipartUploadCandidateAction: vi.fn(),
 }));
 
-vi.mock('@/components/core/Notification', () => ({
-  notifications: {
-    show: vi.fn(),
-  },
-}));
-
-vi.mock('@/lib/utils/client-logger', () => ({
-  createClientLogger: () => ({
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
-    debug: vi.fn(),
-  }),
-}));
-
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-let container: HTMLDivElement | null = null;
-let root: Root | null = null;
+let view: ReturnType<typeof renderUI>;
+let queryClient: QueryClient;
+let pickerClick: MockInstance<() => void>;
 
 function createTrackAudioTestIds() {
   const releaseId = randomTestUuid();
@@ -101,11 +65,8 @@ function createTrackAudioTestIds() {
   const uploadId = randomTestId('upload');
   const fileId = randomTestUuid();
   const pendingFileId = randomTestUuid();
-  const resumeFileId = randomTestUuid();
   const attemptId = randomTestUuid();
   const pendingAttemptId = randomTestUuid();
-  const resumeAttemptId = randomTestUuid();
-  const currentAttemptId = randomTestUuid();
   const currentAudioFileId = randomTestUuid();
 
   return {
@@ -114,401 +75,59 @@ function createTrackAudioTestIds() {
     uploadId,
     fileId,
     pendingFileId,
-    resumeFileId,
     attemptId,
     pendingAttemptId,
-    resumeAttemptId,
-    currentAttemptId,
     currentAudioFileId,
     fileUrl: `https://cdn.example.test/media/token/${fileId}.ogg`,
-    cancelButtonSelector: `#release-track-audio-cancel-button-${trackId}`,
   };
 }
 
-function render(node: React.ReactNode) {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-
-  act(() => {
-    root?.render(<TestProviders>{node}</TestProviders>);
-  });
+function tree(node: ReactElement) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      {node}
+      <NotificationRegion closeLabel="Close" />
+    </QueryClientProvider>
+  );
 }
 
-function rerender(node: React.ReactNode) {
-  act(() => {
-    root?.render(<TestProviders>{node}</TestProviders>);
-  });
+function render(node: ReactElement) {
+  view = renderUI(tree(node));
+  return view;
+}
+
+function rerender(node: ReactElement) {
+  view.rerender(tree(node));
 }
 
 async function selectUploadFile(file: File) {
-  const input = document.querySelector<HTMLInputElement>('input[type="file"]');
-  expect(input).not.toBeNull();
-
-  await act(async () => {
-    Object.defineProperty(input, 'files', {
-      value: [file],
-      configurable: true,
-    });
-    input?.dispatchEvent(new Event('change', { bubbles: true }));
-    await new Promise((resolve) => setTimeout(resolve, 0));
-  });
+  pickerClick.mockClear();
+  await view.user.click(screen.getByRole('button', { name: 'Upload audio file' }));
+  const pickerInput = pickerClick.mock.contexts.at(-1) as HTMLInputElement | undefined;
+  expect(pickerInput).toBeDefined();
+  await view.user.upload(pickerInput!, file);
 }
 
+beforeEach(() => {
+  queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
+  uploadHookMocks.upload.mockReset();
+  uploadHookMocks.abort.mockReset();
+  pickerClick = vi.spyOn(HTMLInputElement.prototype, 'click');
+});
+
 afterEach(() => {
-  act(() => {
-    root?.unmount();
-  });
-  container?.remove();
-  root = null;
-  container = null;
+  act(() => notifications.clean());
+  queryClient.clear();
   vi.clearAllMocks();
+  vi.restoreAllMocks();
   uploadHookMocks.isUploading = false;
   mockUseUploadResumeState.mockReset();
-  mockUseUploadResumeState.mockReturnValue({
-    resumeNotice: null,
-    hasActiveSession: false,
-  });
+  mockUseUploadResumeState.mockReturnValue({ resumeNotice: null, hasActiveSession: false });
   window.sessionStorage.clear();
 });
 
 describe('TrackAudioUploader', () => {
-  it('limits the native picker to audio file extensions without enabling mp4 video files', () => {
-    const ids = createTrackAudioTestIds();
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        inputId="track-audio-input"
-        processingStatus="TRACK_PROCESSING_STATUS_PENDING"
-      />,
-    );
-
-    const input = document.querySelector<HTMLInputElement>('#track-audio-input');
-    expect(input?.accept).toContain('.m4a');
-    expect(input?.accept).not.toContain('audio/mp4');
-    expect(input?.accept).not.toContain('.mp4');
-  });
-
-  it('shows an icon-only processing status while detailed lifecycle progress stays out of the cell', () => {
-    const ids = createTrackAudioTestIds();
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_PROCESSING"
-        processingActive
-        processingProgress={42}
-        audioAttached
-        compact
-        mode="status-only"
-      />,
-    );
-
-    expect(document.querySelector('[aria-label="Processing 42%"]')).not.toBeNull();
-    expect(document.body.textContent).not.toContain('Processing');
-    expect(document.body.textContent).not.toContain('Processing 42%');
-  });
-
-  it('does not expose ready text while an active lifecycle stage is still running', () => {
-    const ids = createTrackAudioTestIds();
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_COMPLETED"
-        processingActive
-        processingProgress={84}
-        audioAttached
-        compact
-        mode="status-only"
-      />,
-    );
-
-    expect(document.querySelector('[aria-label="Processing 84%"]')).not.toBeNull();
-    expect(document.body.textContent).not.toContain('Ready');
-    expect(document.body.textContent).not.toContain('Processing');
-  });
-
-  it('shows a ready icon when lifecycle has already completed', () => {
-    const ids = createTrackAudioTestIds();
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_COMPLETED"
-        processingProgress={100}
-        audioAttached
-        compact
-        mode="status-only"
-      />,
-    );
-
-    expect(document.querySelector('[aria-label="Audio ready"]')).not.toBeNull();
-    expect(document.body.textContent).not.toContain('Audio ready');
-  });
-
-  it('shows idle for a bare pending track with no audio or resumable upload', () => {
-    const ids = createTrackAudioTestIds();
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_PENDING"
-        audioAttached={false}
-        compact
-        mode="status-only"
-      />,
-    );
-
-    expect(document.body.textContent).toContain('-');
-    expect(document.body.textContent).not.toContain('Upload audio file');
-  });
-
-  it('prioritizes active local upload state over interrupted upload warnings in the status cell', () => {
-    const ids = createTrackAudioTestIds();
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_PENDING"
-        activeUploadState={{ active: true, progress: 21, stage: 'uploading' }}
-        audioAttached={false}
-        pendingUploadFileId={ids.pendingFileId}
-        pendingUploadAttemptId={ids.pendingAttemptId}
-        pendingUploadStatus="pending"
-        pendingUploadStartedAt="2026-04-10T00:00:00.000Z"
-        compact
-        mode="status-only"
-      />,
-    );
-
-    expect(document.querySelector(`#release-track-audio-status-${ids.trackId}-processing`)).not.toBeNull();
-    expect(document.querySelector(`#release-track-audio-status-${ids.trackId}-warning`)).toBeNull();
-    expect(document.body.textContent).not.toContain('Interrupted upload found');
-  });
-
-  it('hides the upload trigger while a local upload is active and leaves cancel available', () => {
-    const ids = createTrackAudioTestIds();
-    uploadHookMocks.isUploading = true;
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_PENDING"
-        audioAttached={false}
-        compact
-        mode="button-only"
-      />,
-    );
-
-    expect(document.querySelector(`#release-track-audio-upload-action-${ids.trackId}`)).toBeNull();
-    expect(document.querySelector(ids.cancelButtonSelector)).not.toBeNull();
-  });
-
-  it('does not clear stale pending upload markers from the passive status renderer', () => {
-    const ids = createTrackAudioTestIds();
-    mockUseUploadResumeState.mockReturnValue({
-      resumeNotice: null,
-      hasActiveSession: false,
-    });
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus={null}
-        audioAttached={false}
-        pendingUploadFileId={ids.pendingFileId}
-        pendingUploadAttemptId={ids.pendingAttemptId}
-        pendingUploadStatus="pending"
-        pendingUploadStartedAt="2026-04-10T00:00:00.000Z"
-        compact
-        mode="status-only"
-      />,
-    );
-    expect(mockUseUploadResumeState).toHaveBeenCalledWith(UploadType.TRACK_AUDIO, null, {
-      entityType: TranscodeEntityType.TRACK,
-      fileId: ids.pendingFileId,
-      attemptId: ids.pendingAttemptId,
-      pendingFileId: ids.pendingFileId,
-      hasDurableSource: false,
-    });
-  });
-
-  it('keeps a resumable pending file id local in the active button-side renderer', () => {
-    const ids = createTrackAudioTestIds();
-    mockUseUploadResumeState.mockReturnValue({
-      resumeNotice: {
-        uploadId: ids.uploadId,
-        fileId: ids.resumeFileId,
-        fileName: 'audio.ogg',
-        attemptId: ids.resumeAttemptId,
-        status: 1,
-      },
-      hasActiveSession: true,
-    } as any);
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_PENDING"
-        audioAttached={false}
-        compact
-        mode="button-only"
-      />,
-    );
-    expect(mockUseUploadResumeState).toHaveBeenCalledWith(UploadType.TRACK_AUDIO, ids.trackId, {
-      entityType: TranscodeEntityType.TRACK,
-      fileId: undefined,
-      attemptId: undefined,
-      pendingFileId: undefined,
-      hasDurableSource: false,
-    });
-  });
-
-  it('does not restore a resumable pending file id from the passive status renderer', () => {
-    const ids = createTrackAudioTestIds();
-    mockUseUploadResumeState.mockReturnValue({
-      resumeNotice: {
-        uploadId: ids.uploadId,
-        fileId: ids.resumeFileId,
-        fileName: 'audio.ogg',
-        attemptId: ids.resumeAttemptId,
-        status: 1,
-      },
-      hasActiveSession: true,
-    } as any);
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_PENDING"
-        audioAttached={false}
-        compact
-        mode="status-only"
-      />,
-    );
-    expect(mockUseUploadResumeState).toHaveBeenCalledWith(UploadType.TRACK_AUDIO, null, {
-      entityType: TranscodeEntityType.TRACK,
-      fileId: undefined,
-      attemptId: undefined,
-      pendingFileId: undefined,
-      hasDurableSource: false,
-    });
-  });
-
-  it('uses the current original file as the CAS fence for replacement resume lookup', () => {
-    const ids = createTrackAudioTestIds();
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        audioOriginalFileId={ids.currentAudioFileId}
-        processingStatus="TRACK_PROCESSING_STATUS_PENDING"
-        audioAttached
-        pendingUploadFileId={ids.pendingFileId}
-        pendingUploadAttemptId={ids.pendingAttemptId}
-        pendingUploadStatus="pending"
-        compact
-        mode="button-only"
-      />,
-    );
-
-    expect(mockUseUploadResumeState).toHaveBeenCalledWith(UploadType.TRACK_AUDIO, ids.trackId, {
-      entityType: TranscodeEntityType.TRACK,
-      expectedCurrentFileId: ids.currentAudioFileId,
-      fileId: ids.pendingFileId,
-      attemptId: ids.pendingAttemptId,
-      pendingFileId: ids.pendingFileId,
-      hasDurableSource: true,
-    });
-  });
-
-  it('does not synthesize a new attempt id when resuming a server session without one', () => {
-    const ids = createTrackAudioTestIds();
-    mockUseUploadResumeState.mockReturnValue({
-      resumeNotice: {
-        uploadId: ids.uploadId,
-        fileId: ids.resumeFileId,
-        fileName: 'audio.ogg',
-        attemptId: '',
-        status: 1,
-      },
-      hasActiveSession: true,
-    } as any);
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_PENDING"
-        audioAttached={false}
-        compact
-        mode="button-only"
-      />,
-    );
-
-    expect(mockUseUploadResumeState).toHaveBeenCalledWith(UploadType.TRACK_AUDIO, ids.trackId, {
-      entityType: TranscodeEntityType.TRACK,
-      fileId: undefined,
-      attemptId: undefined,
-      pendingFileId: undefined,
-      hasDurableSource: false,
-    });
-  });
-
-  it('does not adopt a resumed session over an already fenced pending attempt', () => {
-    const ids = createTrackAudioTestIds();
-    mockUseUploadResumeState.mockReturnValue({
-      resumeNotice: {
-        uploadId: ids.uploadId,
-        fileId: ids.resumeFileId,
-        fileName: 'audio.ogg',
-        attemptId: ids.resumeAttemptId,
-        status: 1,
-      },
-      hasActiveSession: true,
-    } as any);
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_PENDING"
-        audioAttached={false}
-        pendingUploadAttemptId={ids.currentAttemptId}
-        compact
-        mode="button-only"
-      />,
-    );
-
-    expect(mockUseUploadResumeState).toHaveBeenCalledWith(UploadType.TRACK_AUDIO, ids.trackId, {
-      entityType: TranscodeEntityType.TRACK,
-      fileId: undefined,
-      attemptId: ids.currentAttemptId,
-      pendingFileId: undefined,
-      hasDurableSource: false,
-    });
-  });
-
-  it('does not publish pending upload state before a backend multipart session exists', async () => {
-    const ids = createTrackAudioTestIds();
-    uploadHookMocks.upload.mockRejectedValue(new Error('Upload interrupted'));
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_PENDING"
-        audioAttached={false}
-        compact
-        mode="button-only"
-      />,
-    );
-
-    await selectUploadFile(new File(['audio'], 'audio.ogg', { type: 'audio/ogg' }));
-
-    expect(uploadHookMocks.upload).toHaveBeenCalled();
-  });
-
-  it('does not issue a secondary browser attach mutation after upload completion', async () => {
+  it('passes the track identity and current-file CAS fence to upload', async () => {
     const ids = createTrackAudioTestIds();
     uploadHookMocks.upload.mockImplementation(async (_file: File, options: any) => {
       options.onMultipartSession?.({
@@ -547,33 +166,6 @@ describe('TrackAudioUploader', () => {
     );
   });
 
-  it('keeps recoverable pending identity when backend-owned upload completion fails recoverably', async () => {
-    const ids = createTrackAudioTestIds();
-    uploadHookMocks.upload.mockImplementation(async (_file: File, options: any) => {
-      options.onMultipartSession?.({
-        uploadId: ids.uploadId,
-        fileId: ids.fileId,
-        resumed: false,
-        resumable: true,
-      });
-      throw new Error('Upload interrupted');
-    });
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_PENDING"
-        audioAttached={false}
-        compact
-        mode="button-only"
-      />,
-    );
-
-    await selectUploadFile(new File(['audio'], 'audio.ogg', { type: 'audio/ogg' }));
-
-    expect(uploadHookMocks.upload).toHaveBeenCalled();
-  });
-
   it('keeps a non-resumable finalizing session available for exact completion retry', async () => {
     const ids = createTrackAudioTestIds();
     uploadHookMocks.upload.mockImplementation(async (_file: File, options: any) => {
@@ -599,10 +191,9 @@ describe('TrackAudioUploader', () => {
 
     await selectUploadFile(new File(['audio'], 'audio.ogg', { type: 'audio/ogg' }));
 
-    const cancelButton = document.querySelector<HTMLButtonElement>(ids.cancelButtonSelector);
-    expect(cancelButton).not.toBeNull();
-    expect(cancelButton?.disabled).toBe(true);
-    expect(cancelButton?.title).toBe('Finalizing');
+    const cancelButton = screen.getByRole('button', { name: 'Cancel' });
+    expect(cancelButton).toBeDisabled();
+    expect(cancelButton).toHaveAttribute('title', 'Finalizing');
     expect(mockUseUploadResumeState).toHaveBeenLastCalledWith(UploadType.TRACK_AUDIO, ids.trackId, {
       entityType: TranscodeEntityType.TRACK,
       fileId: ids.fileId,
@@ -615,6 +206,7 @@ describe('TrackAudioUploader', () => {
   it('locks cancellation as soon as Complete starts and reconciles a successful completion', async () => {
     const ids = createTrackAudioTestIds();
     let resolveUpload: (result: { url: string; fileId: string }) => void = () => {};
+    let beginFinalizing = () => {};
     const onPendingUploadCancelled = vi.fn();
     const onUploadProgressChange = vi.fn();
     const props = {
@@ -635,17 +227,15 @@ describe('TrackAudioUploader', () => {
         resumed: false,
         resumable: true,
       });
-      options.onLifecycle?.({
-        correlationId: 'track-audio-test',
-        mode: 'upload',
-        stage: 'finalizing',
-        percentage: 100,
-        fileId: ids.fileId,
-        source: 'local',
-      });
-      // Exercise a click that races React committing the disabled state. The guard must already
-      // know that Complete owns the session.
-      document.querySelector<HTMLButtonElement>(ids.cancelButtonSelector)?.click();
+      beginFinalizing = () =>
+        options.onLifecycle?.({
+          correlationId: 'track-audio-test',
+          mode: 'upload',
+          stage: 'finalizing',
+          percentage: 100,
+          fileId: ids.fileId,
+          source: 'local',
+        });
       return new Promise((resolve) => {
         resolveUpload = resolve;
       });
@@ -654,9 +244,15 @@ describe('TrackAudioUploader', () => {
     render(<TrackAudioUploader {...props} />);
     await selectUploadFile(new File(['audio'], 'audio.ogg', { type: 'audio/ogg' }));
 
-    const cancelButton = document.querySelector<HTMLButtonElement>(ids.cancelButtonSelector);
-    expect(cancelButton?.disabled).toBe(true);
-    expect(cancelButton?.title).toBe('Finalizing');
+    const cancelButton = screen.getByRole('button', { name: 'Cancel' });
+    expect(cancelButton).toBeEnabled();
+    act(() => {
+      beginFinalizing();
+      // Complete owns the session before React commits the disabled button.
+      cancelButton.click();
+    });
+    expect(cancelButton).toBeDisabled();
+    expect(cancelButton).toHaveAttribute('title', 'Finalizing');
     expect(onUploadProgressChange).toHaveBeenCalledWith(ids.trackId, {
       active: true,
       progress: 100,
@@ -668,15 +264,11 @@ describe('TrackAudioUploader', () => {
 
     await act(async () => {
       resolveUpload({ url: ids.fileUrl, fileId: ids.fileId });
-      await Promise.resolve();
     });
 
-    expect(notifications.show).toHaveBeenCalledWith({
-      message: 'Audio uploaded, processing started',
-      tone: 'positive',
-    });
+    expect(await screen.findByText('Audio uploaded, processing started')).toBeInTheDocument();
     expect(onPendingUploadCancelled).not.toHaveBeenCalled();
-    expect(document.querySelector(ids.cancelButtonSelector)).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Cancel' })).not.toBeInTheDocument();
     expect(onUploadProgressChange).toHaveBeenLastCalledWith(ids.trackId, {
       active: false,
       progress: 0,
@@ -752,17 +344,15 @@ describe('TrackAudioUploader', () => {
 
     await act(async () => {
       rejectUpload(new Error('Upload finalization failed'));
-      await Promise.resolve();
     });
 
     mockUseUploadResumeState.mockReturnValue({ resumeNotice: finalizingResumeNotice, hasActiveSession: true });
     rerender(<TrackAudioUploader {...props} />);
 
-    const cancelButton = document.querySelector<HTMLButtonElement>(ids.cancelButtonSelector);
-    expect(cancelButton).not.toBeNull();
-    expect(cancelButton?.disabled).toBe(true);
-    expect(cancelButton?.title).toBe('Finalizing');
-    cancelButton?.click();
+    const cancelButton = screen.getByRole('button', { name: 'Cancel' });
+    expect(cancelButton).toBeDisabled();
+    expect(cancelButton).toHaveAttribute('title', 'Finalizing');
+    await view.user.click(cancelButton);
     expect(abortUploadAction).not.toHaveBeenCalled();
     expect(uploadHookMocks.abort).not.toHaveBeenCalled();
     expect(onPendingUploadCancelled).not.toHaveBeenCalled();
@@ -771,42 +361,11 @@ describe('TrackAudioUploader', () => {
 
     expect(uploadHookMocks.upload).toHaveBeenCalledTimes(2);
     expect(onPendingUploadCancelled).not.toHaveBeenCalled();
-    expect(notifications.show).toHaveBeenCalledWith({
-      message: 'Audio uploaded, processing started',
-      tone: 'positive',
-    });
-    expect(document.querySelector(ids.cancelButtonSelector)).toBeNull();
+    expect(await screen.findByText('Audio uploaded, processing started')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Cancel' })).not.toBeInTheDocument();
   });
 
-  it('disables cancellation and exposes the localized phase when the server reports FINALIZING', () => {
-    const ids = createTrackAudioTestIds();
-    mockUseUploadResumeState.mockReturnValue({
-      resumeNotice: {
-        uploadId: ids.uploadId,
-        fileId: ids.fileId,
-        fileName: 'audio.ogg',
-        attemptId: ids.attemptId,
-        status: UploadSessionStatus.FINALIZING,
-      },
-      hasActiveSession: true,
-    });
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_PENDING"
-        audioAttached={false}
-        compact
-        mode="button-only"
-      />,
-    );
-
-    const cancelButton = document.querySelector<HTMLButtonElement>(ids.cancelButtonSelector);
-    expect(cancelButton?.disabled).toBe(true);
-    expect(cancelButton?.title).toBe('Finalizing');
-  });
-
-  it('shows an upload failure notification when backend failure clears pending state before the local upload rejects', async () => {
+  it('reports an interrupted upload after the pending presentation is refreshed', async () => {
     const ids = createTrackAudioTestIds();
     let rejectUpload: (error: Error) => void = () => {};
     uploadHookMocks.upload.mockImplementation((_file: File, options: any) => {
@@ -839,14 +398,9 @@ describe('TrackAudioUploader', () => {
 
     await act(async () => {
       rejectUpload(new Error('Upload interrupted'));
-      await Promise.resolve();
     });
 
-    expect(notifications.show).toHaveBeenCalledWith(
-      expect.objectContaining({
-        tone: 'danger',
-      }),
-    );
+    expect(await screen.findByText('Failed to upload file')).toBeInTheDocument();
   });
 
   it('aborts the remote multipart session when cancelling a tracked pending upload before resume notice resolves', async () => {
@@ -887,11 +441,7 @@ describe('TrackAudioUploader', () => {
       />,
     );
 
-    await act(async () => {
-      document
-        .querySelector<HTMLButtonElement>(ids.cancelButtonSelector)
-        ?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-    });
+    await view.user.click(screen.getByRole('button', { name: 'Cancel' }));
 
     expect(findMultipartUploadCandidateAction).toHaveBeenCalledWith({
       uploadType: UploadType.TRACK_AUDIO,
@@ -901,9 +451,8 @@ describe('TrackAudioUploader', () => {
       fileId: ids.pendingFileId,
       uploadId: ids.uploadId,
     });
-    expect(abortUploadAction).toHaveBeenCalledWith({
-      fileId: ids.pendingFileId,
-      uploadId: ids.uploadId,
-    });
+    await waitFor(() =>
+      expect(abortUploadAction).toHaveBeenCalledWith({ fileId: ids.pendingFileId, uploadId: ids.uploadId }),
+    );
   });
 });

@@ -14,12 +14,7 @@ import {
   useSensors,
   type DragEndEvent,
 } from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortableItem } from '@/components/core/Sortable';
 import { IconGripVertical, IconPencil, IconPlus, IconX } from '@tabler/icons-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -36,6 +31,7 @@ import { setReleaseLabelsAction } from '@/lib/actions/release';
 import { publishEditorEntityChange } from '@/lib/editor/editor-entity-changes';
 import { listLabelsForSelector } from '@/lib/queries/label-browser';
 import type { ReleaseLabelItem } from '@/lib/types/release/model';
+import { reorderWithIntent } from './reorder-with-intent';
 interface ReleaseLabelsSectionProps {
   releaseId: string;
   idPrefix?: string;
@@ -135,20 +131,12 @@ export function ReleaseLabelsSection({
     });
   };
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (!canEdit || !over || active.id === over.id) {
+    if (!canEdit) {
       return;
     }
-    const oldIndex = labels.findIndex((l) => l.label_id === active.id);
-    const newIndex = labels.findIndex((l) => l.label_id === over.id);
-    if (oldIndex !== -1 && newIndex !== -1) {
-      const newLabels = arrayMove(labels, oldIndex, newIndex);
-      const movedIndex = newLabels.findIndex((label) => label.label_id === active.id);
-      persistLabels(newLabels, {
-        itemId: String(active.id),
-        previousItemId: movedIndex > 0 ? newLabels[movedIndex - 1].label_id : undefined,
-        nextItemId: movedIndex + 1 < newLabels.length ? newLabels[movedIndex + 1].label_id : undefined,
-      });
+    const reorder = reorderWithIntent(labels, event.active.id, event.over?.id, (label) => label.label_id);
+    if (reorder) {
+      persistLabels(reorder.items, reorder.intent);
     }
   };
   const availableLabels = allLabels?.filter((label) => !labels.some((l) => l.label_id === label.id));

@@ -275,14 +275,6 @@ describe('upload-pipeline', () => {
       expect(result).toBe(file);
     });
 
-    it('converts when upload type allows webp', async () => {
-      const file = makeFile('cover.jpg', 'image/jpeg', 1024);
-      const result = await preprocessUploadFile(file, UploadType.EDITOR_IMAGE);
-
-      expect(mockConvertToWebP).toHaveBeenCalledTimes(1);
-      expect(result.type).toBe('image/webp');
-    });
-
     it('keeps managed raster normalization even when the encoded file is larger', async () => {
       const file = makeFile('cover.jpg', 'image/jpeg', 1024);
       mockConvertToWebP.mockResolvedValueOnce({

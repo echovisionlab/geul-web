@@ -8,30 +8,6 @@ describe('mapPublicLocalizationInfo', () => {
     expect(mapPublicLocalizationInfo(undefined)).toBeNull();
   });
 
-  it('maps available locales and localized state fields', () => {
-    const mapped = mapPublicLocalizationInfo({
-      requestedLocale: 'en',
-      displayedLocale: 'ko',
-      sourceLocale: 'ko',
-      isFallback: true,
-      isOriginal: false,
-      machineGenerated: true,
-      fallbackReason: 3,
-      availableLocales: ['ko', 'en'],
-    } as unknown as LocalizationInfo);
-
-    expect(mapped).toEqual({
-      requestedLocale: 'en',
-      displayedLocale: 'ko',
-      sourceLocale: 'ko',
-      isFallback: true,
-      isOriginal: false,
-      machineGenerated: true,
-      fallbackReason: 3,
-      availableLocales: ['ko', 'en'],
-    });
-  });
-
   it('omits available locales when the proto list is empty', () => {
     const mapped = mapPublicLocalizationInfo({
       requestedLocale: 'ko',

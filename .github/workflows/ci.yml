@@ -140,6 +140,8 @@ jobs:
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
           # Writes the user-level npmrc that reads NODE_AUTH_TOKEN; pnpm ignores
           # environment-backed auth in the repository .npmrc.
           registry-url: https://npm.pkg.github.com
@@ -216,6 +218,8 @@ jobs:
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
           # Writes the user-level npmrc that reads NODE_AUTH_TOKEN; pnpm ignores
           # environment-backed auth in the repository .npmrc.
           registry-url: https://npm.pkg.github.com
@@ -243,21 +247,115 @@ jobs:
         run: pnpm prepare:maplibre-worker
       - name: Prepare p5 runtime
         run: pnpm prepare:p5-runtime
+      - name: Build cache compatibility
+        id: build-cache
+        env:
+          COMPATIBILITY: ${{ hashFiles('.nvmrc', 'pnpm-lock.yaml', 'pnpm-workspace.yaml', 'package.json', 'tooling/*/package.json', 'tooling/*/index.*', 'patches/*.patch', 'tsconfig*.json', 'next.config.*', 'scripts/next-typescript-config.mjs', 'postcss.config.*') }}
+        run: echo "compatibility=$COMPATIBILITY" >> "$GITHUB_OUTPUT"
+      - name: Restore full TypeScript cache
+        id: full-ts-cache
+        continue-on-error: true
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tsconfig.tsbuildinfo
+          key: build-v1-quality-full-ts-${{ runner.os }}-${{ runner.arch }}-${{ steps.build-cache.outputs.compatibility }}-${{ github.sha }}
+          restore-keys: build-v1-quality-full-ts-${{ runner.os }}-${{ runner.arch }}-${{ steps.build-cache.outputs.compatibility }}-
+      - name: Restore Next app TypeScript cache
+        id: app-ts-cache
+        continue-on-error: true
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .next/cache/.tsbuildinfo
+          key: build-v1-quality-app-ts-${{ runner.os }}-${{ runner.arch }}-${{ steps.build-cache.outputs.compatibility }}-${{ github.sha }}
+          restore-keys: build-v1-quality-app-ts-${{ runner.os }}-${{ runner.arch }}-${{ steps.build-cache.outputs.compatibility }}-
+      - name: Restore Turbopack cache
+        id: turbo-cache
+        continue-on-error: true
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .next/cache/turbopack
+          key: build-v1-quality-turbo-${{ runner.os }}-${{ runner.arch }}-${{ steps.build-cache.outputs.compatibility }}-${{ github.sha }}
+          restore-keys: build-v1-quality-turbo-${{ runner.os }}-${{ runner.arch }}-${{ steps.build-cache.outputs.compatibility }}-
+      - name: Discard incomplete cache restores
+        env:
+          FULL_TS_KEY: ${{ steps.full-ts-cache.outputs.cache-matched-key }}
+          APP_TS_KEY: ${{ steps.app-ts-cache.outputs.cache-matched-key }}
+          TURBO_KEY: ${{ steps.turbo-cache.outputs.cache-matched-key }}
+          FULL_TS_RESULT: ${{ steps.full-ts-cache.outcome }}
+          APP_TS_RESULT: ${{ steps.app-ts-cache.outcome }}
+          TURBO_RESULT: ${{ steps.turbo-cache.outcome }}
+        run: |
+          if [ "$FULL_TS_RESULT" != success ] || [ -z "$FULL_TS_KEY" ]; then rm -f tsconfig.tsbuildinfo; fi
+          if [ "$APP_TS_RESULT" != success ] || [ -z "$APP_TS_KEY" ]; then rm -f .next/cache/.tsbuildinfo; fi
+          if [ "$TURBO_RESULT" != success ] || [ -z "$TURBO_KEY" ]; then rm -rf .next/cache/turbopack; fi
+      - name: Generate Next.js types
+        run: pnpm exec next typegen
+      - name: Full strict TypeScript check
+        run: pnpm typecheck
       - name: Next.js build
         run: pnpm build
       - name: Bundle budget
         run: pnpm perf:bundle
+      - name: Save full TypeScript cache
+        id: full-ts-save
+        if: success() && steps.full-ts-cache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tsconfig.tsbuildinfo
+          key: build-v1-quality-full-ts-${{ runner.os }}-${{ runner.arch }}-${{ steps.build-cache.outputs.compatibility }}-${{ github.sha }}
+      - name: Save Next app TypeScript cache
+        id: app-ts-save
+        if: success() && steps.app-ts-cache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .next/cache/.tsbuildinfo
+          key: build-v1-quality-app-ts-${{ runner.os }}-${{ runner.arch }}-${{ steps.build-cache.outputs.compatibility }}-${{ github.sha }}
+      - name: Save Turbopack cache
+        id: turbo-save
+        if: success() && steps.turbo-cache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .next/cache/turbopack
+          key: build-v1-quality-turbo-${{ runner.os }}-${{ runner.arch }}-${{ steps.build-cache.outputs.compatibility }}-${{ github.sha }}
+      - name: Build cache summary
+        if: always()
+        env:
+          FULL_TS_HIT: ${{ steps.full-ts-cache.outputs.cache-hit }}
+          APP_TS_HIT: ${{ steps.app-ts-cache.outputs.cache-hit }}
+          TURBO_HIT: ${{ steps.turbo-cache.outputs.cache-hit }}
+          FULL_TS_KEY: ${{ steps.full-ts-cache.outputs.cache-matched-key }}
+          APP_TS_KEY: ${{ steps.app-ts-cache.outputs.cache-matched-key }}
+          TURBO_KEY: ${{ steps.turbo-cache.outputs.cache-matched-key }}
+          FULL_TS_RESTORE: ${{ steps.full-ts-cache.outcome }}
+          APP_TS_RESTORE: ${{ steps.app-ts-cache.outcome }}
+          TURBO_RESTORE: ${{ steps.turbo-cache.outcome }}
+          FULL_TS_SAVE: ${{ steps.full-ts-save.outcome }}
+          APP_TS_SAVE: ${{ steps.app-ts-save.outcome }}
+          TURBO_SAVE: ${{ steps.turbo-save.outcome }}
+        run: |
+          {
+            printf '### Build caches\n\n'
+            printf 'Exact hit is true only for this commit; a matched older key is a compatible restore.\n\n'
+            printf '| Cache | Restore | Exact hit | Matched key | Save |\n'
+            printf '| --- | --- | --- | --- | --- |\n'
+            printf '| Full TypeScript | %s | %s | %s | %s |\n' "$FULL_TS_RESTORE" "${FULL_TS_HIT:-false}" "${FULL_TS_KEY:-none}" "$FULL_TS_SAVE"
+            printf '| Next app TypeScript | %s | %s | %s | %s |\n' "$APP_TS_RESTORE" "${APP_TS_HIT:-false}" "${APP_TS_KEY:-none}" "$APP_TS_SAVE"
+            printf '| Turbopack | %s | %s | %s | %s |\n' "$TURBO_RESTORE" "${TURBO_HIT:-false}" "${TURBO_KEY:-none}" "$TURBO_SAVE"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   test:
     name: Tests
-    needs: [scope, format, quality]
+    needs: [scope, format]
     if: needs.scope.outputs.run_full == 'true'
     # Repo-scoped ARC scale set: one 8-CPU pod on mini (172.16.71.79).
     runs-on: geul-web-mini
     timeout-minutes: 45
     env:
       # Reviewed renderer source, pinned to the merged API main commit.
-      EMAIL_PREVIEW_API_REVISION: d65f5f5105f36a01eb1866b493194be30648ec28
+      EMAIL_PREVIEW_API_REVISION: 6e0a343d99150d553e327ba00bc66168e0ba5d10
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -273,6 +371,8 @@ jobs:
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
           registry-url: https://npm.pkg.github.com
           scope: '@echovisionlab'
       - name: CPU count
@@ -297,8 +397,8 @@ jobs:
         run: |
           pnpm install --frozen-lockfile
           echo 'NPM_CONFIG_USERCONFIG=/dev/null' >> "$GITHUB_ENV"
-      - name: Design system tests
-        run: node --test --test-concurrency="$CI_TEST_WORKERS" scripts/design-system/*.test.mjs
+      - name: Tooling tests
+        run: node --test --test-concurrency="$CI_TEST_WORKERS" scripts/design-system/*.test.mjs scripts/i18n/*.test.mjs
       - name: Vitest
         # Includes node-unit, both former component shards, server-contract,
         # editor-integration, and theme.test.ts's light/dark contrast contracts.

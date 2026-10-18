@@ -56,8 +56,8 @@ const meta: Meta<typeof TableOfContentsView> = {
   component: TableOfContentsView,
   parameters: { layout: 'fullscreen' },
   decorators: [withFeatureLabels({ project: (_args, translate) => ({ title: translate('tableOfContents.title') }) })],
-  // The outline always reserves its space beside the document it navigates (the production
-  // composition); `contentPlacement` mirrors a centered reading column.
+  // The outline always reserves its space at the inline end of the document it navigates (the
+  // production composition); the document starts at the start edge.
   render: (args) => (
     <TableOfContentsView {...args}>
       <DocumentArticle items={args.items} />
@@ -65,7 +65,6 @@ const meta: Meta<typeof TableOfContentsView> = {
   ),
   args: {
     title: 'Table of Contents',
-    contentPlacement: 'center',
     children: null,
     items: [
       { id: 'overview', label: 'Overview', level: 2 },

@@ -401,6 +401,8 @@ export const semanticThemes = {
     'text-primary': colors.neutral[900],
     'text-secondary': colors.neutral[800],
     'text-muted': colors.neutral[700],
+    // The ink a quiet (secondary or muted) navigation item takes under a pointer: one shared hover step.
+    'text-hover': colors.neutral[900],
     'border-default': colors.neutral[500],
     'border-strong': colors.neutral[600],
     // Neutral commands stay quiet; explicit semantic actions share the existing palette.
@@ -465,6 +467,7 @@ export const semanticThemes = {
     'text-primary': colors.graphite[50],
     'text-secondary': colors.graphite[100],
     'text-muted': colors.graphite[200],
+    'text-hover': colors.graphite[50],
     'border-default': colors.graphite[400],
     'border-strong': colors.graphite[300],
     // Neutral commands stay quiet; explicit semantic actions share the existing palette.

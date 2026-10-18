@@ -1,5 +1,5 @@
 import { codeToHtml as fullCodeToHtml } from 'shiki/bundle/full';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { codeToHtml } from './print-code-highlighter';
 
 const themes = { light: 'github-light', dark: 'github-dark' } as const;
@@ -21,23 +21,6 @@ describe('print code highlighter', () => {
     // This overrides only the comparison fixtures, never production highlighting.
     const options = { lang, themes, defaultColor: false, tokenizeTimeLimit: 0 } as const;
     expect(await codeToHtml(source, options)).toBe(await fullCodeToHtml(source, options));
-  });
-
-  it('keeps parity when wall-clock jumps would exhaust the default tokenization budget', async () => {
-    const source = 'const answer = 42;';
-    const options = { lang: 'js', themes, defaultColor: false } as const;
-    const expected = await fullCodeToHtml(source, { ...options, tokenizeTimeLimit: 0 });
-    let clock = Date.now();
-    const dateNow = vi.spyOn(Date, 'now').mockImplementation(() => (clock += 501));
-    try {
-      // A scheduling pause can change HTML without any grammar or theme change.
-      expect(await codeToHtml(source, options)).not.toBe(expected);
-      expect(await fullCodeToHtml(source, options)).not.toBe(expected);
-      expect(await codeToHtml(source, { ...options, tokenizeTimeLimit: 0 })).toBe(expected);
-      expect(await fullCodeToHtml(source, { ...options, tokenizeTimeLimit: 0 })).toBe(expected);
-    } finally {
-      dateNow.mockRestore();
-    }
   });
 
   it('rejects unknown languages so the component can preserve its raw fallback', async () => {

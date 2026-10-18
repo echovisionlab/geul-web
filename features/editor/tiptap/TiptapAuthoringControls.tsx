@@ -2,7 +2,6 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { Editor } from '@tiptap/core';
-import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
 import { NodeSelection } from '@tiptap/pm/state';
 import { BubbleMenu, type BubbleMenuProps } from '@tiptap/react/menus';
 import {
@@ -46,6 +45,7 @@ import {
 } from './slash';
 import { SiteVariablePicker } from './site-variables/SiteVariablePicker';
 import { applyTiptapSlashSiteVariable } from './slash/execute';
+import { getTiptapSlashQuery } from './slash/query';
 import { TiptapEmojiPicker } from './emoji';
 import {
   createDelegatedWorkflow,
@@ -153,53 +153,15 @@ export function applyTiptapSlashItem(editor: Editor, item: TiptapSlashItem, rang
   return executeTiptapSlashItem({ editor, item, range }).status === 'applied';
 }
 
-function slashQueryAfterInlineNode(parent: ProseMirrorNode, parentOffset: number): string | null {
-  let previousNode: ProseMirrorNode | null = null;
-  let query: string | null = null;
-  parent.forEach((child, childOffset) => {
-    const cursorOffset = parentOffset - childOffset;
-    if (
-      query === null &&
-      previousNode?.isInline &&
-      !previousNode.isText &&
-      child.isText &&
-      cursorOffset >= 0 &&
-      cursorOffset <= child.nodeSize
-    ) {
-      query = /^\/([^\s/]*)$/u.exec(child.text?.slice(0, cursorOffset) ?? '')?.[1] ?? null;
-    }
-    previousNode = child;
-  });
-  return query;
-}
-
 export function getSlashMenuState(editor: Editor): SlashMenuState | null {
-  if (!editor.isEditable || !editor.state.selection.empty) {
+  const query = getTiptapSlashQuery(editor.state, editor.isEditable);
+  if (!query) {
     return null;
   }
-  const { $from, from } = editor.state.selection;
-  if (!$from.parent.isTextblock) {
-    return null;
-  }
-  const textBeforeCursor = $from.parent.textBetween(0, $from.parentOffset, '\n', '\n');
-  const query =
-    /(?:^|\s)\/([^\s/]*)$/u.exec(textBeforeCursor)?.[1] ?? slashQueryAfterInlineNode($from.parent, $from.parentOffset);
-  if (query === null) {
-    return null;
-  }
-  // Inline nodes and their source text do not map one-to-one onto document
-  // positions, so measure the trigger backwards from the actual cursor.
-  const slashFrom = from - (query.length + 1);
-  const contentPosition = $from.before($from.depth);
-  const blockId = String($from.node($from.depth - 1).attrs.id ?? '');
-  const coordinates = editor.view.coordsAtPos(slashFrom);
+  const coordinates = editor.view.coordsAtPos(query.from);
   const root = editor.view.dom.closest('.tiptap-editor')?.getBoundingClientRect();
   return {
-    query: query.toLocaleLowerCase(),
-    from: slashFrom,
-    to: from,
-    contentPosition,
-    blockId,
+    ...query,
     left: Math.max(8, coordinates.left - (root?.left ?? 0)),
     top: Math.max(8, coordinates.bottom - (root?.top ?? 0)),
   };

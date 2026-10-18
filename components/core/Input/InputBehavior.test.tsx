@@ -55,24 +55,21 @@ describe('closed React Aria input behavior', () => {
     expect(container.querySelector('button[aria-label="Clear all"]')).toBeNull();
   });
 
-  it('preserves mixed semantics and prevents changes to disabled and read-only checkboxes', async () => {
+  it('ignores label clicks on standalone disabled and read-only checkboxes', async () => {
     const changed = vi.fn();
     render(
       <>
-        <Checkbox label="Mixed choice" checked indeterminate />
         <Checkbox label="Read-only choice" checked readOnly onChange={changed} />
         <Checkbox label="Disabled choice" disabled onChange={changed} />
       </>,
     );
     const inputs = Array.from(container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'));
-    expect(inputs[0].indeterminate).toBe(true);
-    expect(inputs[0].closest('label')?.textContent).toBe('Mixed choice');
     await act(async () => {
+      inputs[0].closest('label')!.click();
       inputs[1].closest('label')!.click();
-      inputs[2].closest('label')!.click();
     });
-    expect(inputs[1].checked).toBe(true);
-    expect(inputs[2].checked).toBe(false);
+    expect(inputs[0].checked).toBe(true);
+    expect(inputs[1].checked).toBe(false);
     expect(changed).not.toHaveBeenCalled();
   });
 
@@ -242,14 +239,8 @@ describe('closed React Aria input behavior', () => {
     const input = container.querySelector<HTMLInputElement>('input')!;
     act(() => input.focus());
     expect(document.activeElement).toBe(input);
-    expect(input.getAttribute('aria-invalid')).toBe('true');
-    expect(
-      input
-        .getAttribute('aria-describedby')
-        ?.split(' ')
-        .map((id) => document.getElementById(id)?.textContent)
-        .join(' '),
-    ).toContain('Name required');
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    expect(input).toHaveAccessibleDescription('Name required');
     expect(container.querySelector(`.${classes.root}`)?.getAttribute('data-geul-input-animate')).toBe('false');
     expect(container.querySelector(`.${classes.wrapper}`)).not.toBeNull();
   });

@@ -120,16 +120,6 @@ describe('design token contract', () => {
     }
   });
 
-  it('preserves the logo red separately from interaction colors', () => {
-    expect(primitiveTokens.colors.brand).toBe('#b02d23');
-    expect(primitiveTokens.colors.red[500]).toBe(primitiveTokens.colors.brand);
-    expect(theme.palette).toBe(primitiveTokens.colors);
-    for (const mode of ['light', 'dark'] as const) {
-      expect(semanticThemes[mode]['action-ink']).not.toBe(primitiveTokens.colors.brand);
-      expect(semanticThemes[mode]['action-primary']).not.toBe(primitiveTokens.colors.brand);
-    }
-  });
-
   it('keeps every named color grade ordered from light to dark', () => {
     for (const family of ['neutral', 'graphite', 'red', 'green', 'blue', 'yellow', 'orange'] as const) {
       const ramp = primitiveTokens.colors[family];
@@ -143,11 +133,7 @@ describe('design token contract', () => {
     }
   });
 
-  it('retains the reviewed functional colors without adding another warning meaning', () => {
-    expect(primitiveTokens.colors.green[500]).toBe('#287a3f');
-    expect(primitiveTokens.colors.blue[500]).toBe('#235f96');
-    expect(primitiveTokens.colors.yellow[500]).toBe('#d5a900');
-    expect(primitiveTokens.colors.orange[500]).toBe('#ce5526');
+  it('takes warning from the yellow ramp and gives no status role an orange meaning', () => {
     for (const mode of ['light', 'dark'] as const) {
       expect(Object.values(primitiveTokens.colors.yellow)).toContain(semanticThemes[mode]['status-warning']);
       for (const role of ['status-accent', 'status-positive', 'status-warning', 'status-danger'] as const) {

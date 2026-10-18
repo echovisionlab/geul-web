@@ -1,71 +1,24 @@
 // @vitest-environment jsdom
 
-import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
-import { act, useState } from 'react';
-import { createRoot } from 'react-dom/client';
-
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { useState } from 'react';
+import { describe, expect, it, vi } from 'vitest';
+import { render, screen } from '@/test/render';
 import { ExecutableBlockTitle, ExecutableRuntimeControls, ExecutableRuntimeStatus } from './ExecutableRuntimeControls';
 
-afterEach(() => {
-  document.body.replaceChildren();
-});
-
 describe('ExecutableRuntimeControls', () => {
-  it('uses one explicit runtime status style independent of prose inheritance', () => {
-    const host = document.createElement('div');
-    document.body.append(host);
-    const root = createRoot(host);
+  it('announces the running and stopped state through one polite live region', () => {
+    const politeRegion = (text: string) =>
+      screen.getByText((_, element) => element?.getAttribute('aria-live') === 'polite' && element.textContent === text);
+    const { rerender } = render(<ExecutableRuntimeStatus status="running" running="Running" stopped="Stopped" />);
 
-    act(() => {
-      root.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <ExecutableRuntimeStatus status="running" running="Running" stopped="Stopped" />
-        </DesignSystemProvider>,
-      );
-    });
+    const status = politeRegion('Running');
 
-    const status = host.querySelector<HTMLElement>('[data-executable-runtime-status]');
-    expect(status?.tagName).toBe('SPAN');
-    expect(status?.textContent).toBe('Running');
-    expect(status?.dataset.placement).toBe('overlay-start');
-    expect(status?.getAttribute('aria-live')).toBe('polite');
-    expect(status?.style.padding).toBe('');
+    rerender(<ExecutableRuntimeStatus status="stopped" running="Running" stopped="Stopped" />);
 
-    act(() => root.unmount());
+    expect(politeRegion('Stopped')).toBe(status);
   });
 
-  it('renders authoring and public titles with the same title-row contract', () => {
-    const host = document.createElement('div');
-    document.body.append(host);
-    const root = createRoot(host);
-    const onChange = vi.fn();
-
-    act(() => {
-      root.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <ExecutableBlockTitle title="" fallback="Three.js scene" editable onChange={onChange} />
-          <ExecutableBlockTitle title="Localized scene" fallback="Three.js scene" editable={false} />
-        </DesignSystemProvider>,
-      );
-    });
-
-    const rows = host.querySelectorAll('[data-executable-title]');
-    expect(rows).toHaveLength(2);
-    const titleInput = host.querySelector<HTMLInputElement>('[data-executable-title-input]');
-    expect(titleInput?.value).toBe('');
-    expect(titleInput?.placeholder).toBe('Three.js scene');
-    expect(titleInput?.closest('[data-executable-title]')).not.toBeNull();
-    expect(host.querySelector('figcaption')?.textContent).toBe('Localized scene');
-    expect((rows[0] as HTMLElement).style.padding).toBe((rows[1] as HTMLElement).style.padding);
-    expect((rows[0] as HTMLElement).style.color).toBe((rows[1] as HTMLElement).style.color);
-    expect((rows[0] as HTMLElement).style.borderBottom).toBe('');
-    expect((rows[1] as HTMLElement).style.borderBottom).toBe('');
-
-    act(() => root.unmount());
-  });
-
-  it('can clear and replace an authored title without persisting fallback copy', () => {
+  it('can clear and replace an authored title without persisting fallback copy', async () => {
     function Titles() {
       const [title, setTitle] = useState('Original scene');
       return (
@@ -75,65 +28,44 @@ describe('ExecutableRuntimeControls', () => {
         </>
       );
     }
-    const host = document.createElement('div');
-    document.body.append(host);
-    const root = createRoot(host);
-    act(() =>
-      root.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <Titles />
-        </DesignSystemProvider>,
-      ),
-    );
-    const input = host.querySelector<HTMLInputElement>('[data-executable-title-input]')!;
-    const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
+    const { user } = render(<Titles />);
+    const input = screen.getByRole('textbox', { name: 'Three.js scene' });
     for (const title of ['', '밤하늘 Scene', '']) {
-      act(() => {
-        setValue.call(input, title);
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-      });
-      expect(input.value).toBe(title);
-      expect(host.querySelector('figcaption')?.textContent).toBe(title || 'Three.js scene');
+      await user.clear(input);
+      if (title) {
+        await user.type(input, title);
+      }
+      expect(input).toHaveValue(title);
+      expect(screen.getByText(title || 'Three.js scene')).toBeInTheDocument();
     }
-    act(() => root.unmount());
   });
 
-  it('keeps stop, restart and original reset in one transparent icon-control row', () => {
-    const host = document.createElement('div');
-    document.body.append(host);
-    const root = createRoot(host);
+  it('keeps stop, restart and original reset in one transparent icon-control row', async () => {
     const callbacks = { stop: vi.fn(), restart: vi.fn(), reset: vi.fn() };
+    const { user } = render(
+      <ExecutableRuntimeControls
+        type="p5Sketch"
+        running
+        labels={{ run: 'Run', stop: 'Stop', restart: 'Restart', resetOriginal: 'Reset to original' }}
+        onRun={callbacks.restart}
+        onStop={callbacks.stop}
+        onRestart={callbacks.restart}
+        onResetOriginal={callbacks.reset}
+      />,
+    );
 
-    act(() => {
-      root.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <ExecutableRuntimeControls
-            type="p5Sketch"
-            running
-            labels={{ run: 'Run', stop: 'Stop', restart: 'Restart', resetOriginal: 'Reset to original' }}
-            onRun={callbacks.restart}
-            onStop={callbacks.stop}
-            onRestart={callbacks.restart}
-            onResetOriginal={callbacks.reset}
-          />
-        </DesignSystemProvider>,
-      );
-    });
-
-    const row = host.querySelector('[data-runtime-controls="p5Sketch"]');
-    const buttons = [...row!.querySelectorAll<HTMLButtonElement>('button')];
+    const buttons = screen.getAllByRole('button');
     expect(buttons.map((button) => button.getAttribute('aria-label'))).toEqual([
       'Stop',
       'Restart',
       'Reset to original',
     ]);
-    expect(buttons.every((button) => button.getAttribute('data-emphasis') === 'low')).toBe(true);
-
-    act(() => buttons.forEach((button) => button.click()));
+    for (const button of buttons) {
+      expect(button).toHaveAttribute('data-emphasis', 'low');
+      await user.click(button);
+    }
     expect(callbacks.stop).toHaveBeenCalledOnce();
     expect(callbacks.restart).toHaveBeenCalledOnce();
     expect(callbacks.reset).toHaveBeenCalledOnce();
-
-    act(() => root.unmount());
   });
 });

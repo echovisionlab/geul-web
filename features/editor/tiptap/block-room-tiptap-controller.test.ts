@@ -37,6 +37,7 @@ import {
   undoBlockRoom,
 } from '@/lib/collab/interactive-mutation-undo';
 import { createTiptapWireExtensions } from './wire-schema';
+import { allKindsDocument, authoredMathLatex } from './block-room-tiptap-controller.fixtures';
 import { SHADER_STAGE_DEFINITIONS } from './shader/shader-program';
 import { createTiptapPlaygroundRoom } from './TiptapPlayground.story-fixtures';
 import { setShaderNodeMode } from './shader/ShaderNode';
@@ -269,110 +270,7 @@ function tableDocument(): LocalizedRichTextDocument {
   } as JsonValue);
 }
 
-function allKindsDocument(): LocalizedRichTextDocument {
-  const ids = Array.from(
-    { length: 16 },
-    (_, index) => `10000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
-  );
-  const shaderStages = [
-    'common',
-    'vertex',
-    'bufferA',
-    'bufferB',
-    'bufferC',
-    'bufferD',
-    'cubemap',
-    'sound',
-    'image',
-  ].map((kind, index) => ({
-    kind: index + 1,
-    source: `${kind}-source`,
-    channels: Array.from({ length: 4 }, () => ({
-      kind: 1,
-      file: { activeFileId: '20000000-0000-4000-8000-000000000002' },
-      faces: Array.from({ length: 6 }, () => ({
-        activeFileId: '20000000-0000-4000-8000-000000000003',
-      })),
-    })),
-  }));
-  const tableRowId = '10000000-0000-4000-8000-000000000187';
-  const tableCellId = '10000000-0000-4000-8000-000000000188';
-  const base = [
-    { paragraph: { props: { textAlignment: 2 } } },
-    { heading: { props: { level: 2 } } },
-    { bulletListItem: { props: {} } },
-    { numberedListItem: { props: { start: 3 } } },
-    { checkListItem: { props: { checked: true } } },
-    { quote: { props: {} } },
-    { codeBlock: { props: { language: 11 } } },
-    { divider: { props: {} } },
-    {
-      table: {
-        props: {},
-        content: { rows: [{ id: tableRowId, cells: [{ id: tableCellId, header: false, props: {} }] }] },
-      },
-    },
-    { p5Sketch: { props: { source: 'p5-source', capabilities: [1] } } },
-    { threeScene: { props: { source: 'three-source', language: 2 } } },
-    { shader: { props: { stages: shaderStages } } },
-    { math: { props: { latex: 'x^2' } } },
-    {
-      map: {
-        props: {
-          mapPlaceIds: ['20000000-0000-4000-8000-000000000010', '20000000-0000-4000-8000-000000000011'],
-          aspectRatio: 1,
-        },
-      },
-    },
-    {
-      file: {
-        props: {
-          attachment: { activeFileId: '20000000-0000-4000-8000-000000000001' },
-          name: 'file',
-        },
-      },
-    },
-    { callout: { props: { icon: '⚠️', backgroundColor: 'yellow' } } },
-  ];
-  const locale = [
-    { paragraph: { props: {}, content: [{ text: { text: 'p' } }] } },
-    { heading: { props: {}, content: [{ text: { text: 'h' } }] } },
-    { bulletListItem: { props: {}, content: [{ text: { text: 'b' } }] } },
-    { numberedListItem: { props: {}, content: [{ text: { text: 'n' } }] } },
-    { checkListItem: { props: {}, content: [{ text: { text: 'c' } }] } },
-    { quote: { props: {}, content: [{ text: { text: 'q' } }] } },
-    { codeBlock: { props: { title: 'code' }, content: 'const value = 1;' } },
-    { divider: { props: {} } },
-    {
-      table: {
-        props: {},
-        content: {
-          rows: [{ rowId: tableRowId, cells: [{ cellId: tableCellId, content: [{ text: { text: 'cell' } }] }] }],
-        },
-      },
-    },
-    { p5Sketch: { props: { title: 'p5' } } },
-    { threeScene: { props: { title: 'three' } } },
-    { shader: { props: { title: 'shader' } } },
-    { math: { props: {} } },
-    { map: { props: {} } },
-    { file: { props: { alt: 'alt', caption: 'caption' } } },
-    { callout: { props: {}, content: [{ text: { text: 'notice' } }] } },
-  ];
-  return fromJson(LocalizedRichTextDocumentSchema, {
-    blockCatalogFingerprint: contentBlockCatalogFingerprint,
-    profile: RichTextProfile.POST,
-    locale: 'ko',
-    base: {
-      nodes: base.map((block, index) => ({ block: { id: ids[index], ...block }, placement: { index } })),
-    },
-    localeOverlay: {
-      locale: 'ko',
-      blocks: locale.map((block, index) => ({ blockId: ids[index], ...block })),
-    },
-  } as unknown as JsonValue);
-}
-
+// Backslashes and braces must survive every projection unchanged.
 function textFromRoom(room: Y.Doc, documentType: BlockRoomDocumentType = 'post'): string {
   const document = materializeCanonicalBlockRoom(room, documentType);
   if (document.$typeName !== 'api.content.v1.LocalizedRichTextDocument') {
@@ -799,38 +697,6 @@ describe('PostBlockRoomTiptapController', () => {
     editor.destroy();
   });
 
-  it('projects every generated Post rich-text kind without dropping executable or attachment payloads', () => {
-    const room = new Y.Doc();
-    hydrateCanonicalBlockRoom(room, 'post', 'ko', allKindsDocument(), []);
-    const allKindsBridge = createBlockRoomProseMirrorBridge({ document: room, documentType: 'post', locale: 'ko' });
-    const controller = createPostBlockRoomTiptapController(allKindsBridge);
-    const blocks = (controller.initialContent as TestJsonNode).content?.[0]?.content ?? [];
-    expect(blocks.map((block) => block.content?.[0]?.type)).toEqual([
-      'paragraph',
-      'heading',
-      'bulletListItem',
-      'numberedListItem',
-      'checkListItem',
-      'quote',
-      'codeBlock',
-      'divider',
-      'table',
-      'p5Sketch',
-      'threeScene',
-      'shader',
-      'math',
-      'map',
-      'file',
-      'callout',
-    ]);
-    expect(blocks[0]?.content?.[0]?.attrs?.textAlignment).toBe('center');
-    expect(blocks[9]?.content?.[0]?.content?.[0]?.text).toBe('p5-source');
-    expect(blocks[10]?.content?.[0]?.content?.[0]?.text).toBe('three-source');
-    expect(blocks[11]?.content?.[0]?.content).toHaveLength(9);
-    expect(blocks[14]?.content?.[0]?.attrs?.fileId).toBe('20000000-0000-4000-8000-000000000001');
-    expect(blocks[15]?.content?.[0]?.attrs).toMatchObject({ icon: '⚠️', backgroundColor: 'yellow' });
-  });
-
   it('keeps the selected Shader when switching to source mode beside a Mermaid block', async () => {
     const room = createTiptapPlaygroundRoom();
     const mermaid = Node.create({
@@ -927,6 +793,8 @@ describe('PostBlockRoomTiptapController', () => {
     const shaderValue = materialized.base?.nodes[11]?.block?.value;
     expect(p5Value?.case === 'p5Sketch' ? p5Value.value.props?.source : undefined).toBe('p5-next');
     expect(shaderValue?.case === 'shader' ? shaderValue.value.props?.stages[8]?.source : undefined).toBe('image-next');
+    const mathValue = materialized.base?.nodes[12]?.block?.value;
+    expect(mathValue?.case === 'math' ? mathValue.value.props?.latex : undefined).toBe(authoredMathLatex);
     disconnect();
     editor.destroy();
   });

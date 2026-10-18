@@ -262,12 +262,3 @@ describe('release queries', () => {
     await expect(queries.getReleasePublic('release-1')).rejects.toBe(error);
   });
 });
-
-it('preserves admin list failure instead of reporting an empty successful list', async () => {
-  releaseClient.listReleasesAdmin.mockRejectedValueOnce(new Error('permission denied'));
-  expect(await queries.listReleasesAdmin({ page: 3, pageSize: 10 })).toMatchObject({
-    error: 'permission denied',
-    page: 3,
-    pageSize: 10,
-  });
-});

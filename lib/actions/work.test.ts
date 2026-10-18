@@ -79,9 +79,6 @@ describe('work actions', () => {
     mocks.createArtistClient.mockResolvedValue(artistClient);
     mocks.regenerateOgImage.mockResolvedValue({ runId: 'run-1', generationIds: ['generation-1'] });
     mocks.createAdminClient.mockResolvedValue({ regenerateOgImage: mocks.regenerateOgImage });
-    mocks.createShareLinkAction.mockResolvedValue({ shareLink: { id: 'share-1' } });
-    mocks.deleteShareLinkAction.mockResolvedValue({ success: true });
-    mocks.listShareLinksAction.mockResolvedValue({ ok: true, value: [{ id: 'share-1' }] });
 
     publicWorkClient.list.mockResolvedValue({
       works: [
@@ -128,22 +125,6 @@ describe('work actions', () => {
       success: true,
       ogGenerationRunId: 'delete-featured-run',
     });
-    workClient.getWorkCredits.mockResolvedValue({
-      groups: [{ id: 'group-1', workId: 'work-1', name: 'Music', sortOrder: 0 }],
-      credits: [
-        {
-          id: 'credit-1',
-          groupId: undefined,
-          name: 'Guest',
-          creditRole: undefined,
-          sortOrder: 1,
-          artist: { id: 'artist-1', name: 'Artist', slug: undefined, imageUrl: undefined },
-          member: undefined,
-        },
-      ],
-    });
-    workClient.addWorkCredit.mockResolvedValue({ id: 'credit-1' });
-    workClient.createWorkCreditGroup.mockResolvedValue({ id: 'group-1', name: 'Band' });
     workClient.listMyCreditedWorks.mockResolvedValue({
       works: [
         {
@@ -160,9 +141,6 @@ describe('work actions', () => {
         },
       ],
       pagination: { total: 1 },
-    });
-    artistClient.listArtists.mockResolvedValue({
-      artists: [{ id: 'artist-1', name: 'Artist', imageUrl: undefined }],
     });
   });
 
@@ -285,7 +263,7 @@ describe('work actions', () => {
     });
   });
 
-  it('maps work mutations, credits, share links, and OG refreshes', async () => {
+  it('creates an ongoing music project work', async () => {
     await expect(
       actions.createWorkAction({
         title: 'Work',
@@ -295,21 +273,43 @@ describe('work actions', () => {
         untilYear: null,
         untilMonth: null,
         isPresent: true,
-        summary: 'Summary',
-        metadata: { role: 'sound' },
-        featured: true,
       }),
     ).resolves.toEqual({ data: { id: 'work-1' } });
-    await expect(actions.updateWorkAction('work-1', { mapPlaceId: null })).resolves.toEqual({
+
+    expect(workClient.createWork).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Work',
+        type: WorkType.MUSIC_PROJECT,
+        year: 2026,
+        month: 1,
+        untilYear: undefined,
+        untilMonth: undefined,
+        isPresent: true,
+      }),
+    );
+  });
+
+  it('clears the work map place without touching other fields', async () => {
+    await expect(actions.updateWorkAction('work-1', { mapPlaceId: null })).resolves.toEqual({ success: true });
+
+    expect(workClient.updateWork).toHaveBeenCalledWith({ id: 'work-1', mapPlaceId: '' });
+  });
+
+  it('regenerates the work OG image for the requested locale', async () => {
+    await expect(actions.regenerateWorkOgImageAction('work-1', 'ko')).resolves.toEqual({
       success: true,
+      runId: 'run-1',
+      generationId: 'generation-1',
     });
-    await expect(actions.updateWorkSlugAction('work-1', ' New Slug ')).resolves.toEqual({
-      success: true,
-      slug: ' New Slug ',
+
+    expect(mocks.regenerateOgImage).toHaveBeenCalledWith({
+      entityType: OgEntityType.WORK,
+      entityId: 'work-1',
+      selection: { target: { case: 'locale', value: 'ko' } },
     });
-    await expect(actions.publishWorkAction('work-1')).resolves.toEqual({ success: true });
-    await expect(actions.unpublishWorkAction('work-1')).resolves.toEqual({ success: true });
-    await expect(actions.deleteWorkAction('work-1')).resolves.toEqual({ success: true });
+  });
+
+  it('returns the OG run started by a featured image change', async () => {
     await expect(actions.setWorkFeaturedImageAction('work-1', 'file-1')).resolves.toEqual({
       success: true,
       imageUrl: 'https://cdn.example/work.webp',
@@ -319,55 +319,27 @@ describe('work actions', () => {
       success: true,
       ogGenerationRunId: 'delete-featured-run',
     });
-    await expect(actions.getWorkGroupsWithCreditsAction('work-1')).resolves.toMatchObject({
-      groups: [{ id: 'group-1' }],
-      credits: [{ id: 'credit-1', artist: { id: 'artist-1' } }],
-    });
-    await expect(actions.addWorkCreditAction({ workId: 'work-1', name: 'Guest' })).resolves.toEqual({
-      success: true,
-      creditId: 'credit-1',
-    });
-    await expect(actions.updateWorkCreditAction('credit-1', { groupId: null })).resolves.toEqual({
-      success: true,
-    });
-    await expect(actions.removeWorkCreditAction('credit-1')).resolves.toEqual({ success: true });
-    await expect(actions.regenerateWorkOgImageAction('work-1', 'ko')).resolves.toEqual({
-      success: true,
-      runId: 'run-1',
-      generationId: 'generation-1',
-    });
-    await expect(actions.createWorkCreditGroupAction({ workId: 'work-1', name: 'Band' })).resolves.toEqual({
-      success: true,
-      group: { id: 'group-1', name: 'Band' },
-    });
-    await expect(actions.updateWorkCreditGroupAction('group-1', { name: 'Crew' })).resolves.toEqual({
-      success: true,
-    });
-    await expect(actions.deleteWorkCreditGroupAction('group-1')).resolves.toEqual({
-      success: true,
-    });
-    await expect(actions.searchArtistsForCreditAction('work-1', ' Artist ').then(unwrapQueryResult)).resolves.toEqual([
-      { id: 'artist-1', name: 'Artist', imageUrl: null },
-    ]);
-    await expect(actions.searchArtistsForCreditAction('work-1', '   ').then(unwrapQueryResult)).resolves.toEqual([]);
-    await expect(actions.listWorkShareLinksAction('work-1')).resolves.toEqual([{ id: 'share-1' }]);
-    await expect(actions.createWorkShareLinkAction({ workId: 'work-1', label: 'Preview' })).resolves.toEqual({
-      shareLink: { id: 'share-1' },
-    });
-    await expect(actions.deleteWorkShareLinkAction('share-1')).resolves.toEqual({ success: true });
+  });
 
-    expect(workClient.createWork).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'Work', type: WorkType.MUSIC_PROJECT, isPresent: true }),
+  it('returns no artists for a blank credit search without querying the backend', async () => {
+    await expect(actions.searchArtistsForCreditAction('work-1', '   ').then(unwrapQueryResult)).resolves.toEqual([]);
+
+    expect(artistClient.listArtists).not.toHaveBeenCalled();
+  });
+
+  it('moves a credit out of its group only when the group is cleared', async () => {
+    await expect(actions.updateWorkCreditAction('credit-1', { groupId: null })).resolves.toEqual({ success: true });
+    expect(workClient.updateWorkCredit).toHaveBeenLastCalledWith(
+      expect.objectContaining({ creditId: 'credit-1', groupId: '' }),
     );
-    expect(workClient.updateWork).toHaveBeenCalledWith({
-      id: 'work-1',
-      mapPlaceId: '',
+
+    await expect(actions.updateWorkCreditAction('credit-1', { creditRole: 'Mixing' })).resolves.toEqual({
+      success: true,
     });
-    expect(mocks.regenerateOgImage).toHaveBeenCalledWith({
-      entityType: OgEntityType.WORK,
-      entityId: 'work-1',
-      selection: { target: { case: 'locale', value: 'ko' } },
-    });
+    expect(workClient.updateWorkCredit).toHaveBeenLastCalledWith(
+      expect.objectContaining({ creditId: 'credit-1', creditRole: 'Mixing' }),
+    );
+    expect(workClient.updateWorkCredit.mock.lastCall?.[0].groupId).toBeUndefined();
   });
 
   it('sends metadata and client baselines with mergeable Work field changes', async () => {

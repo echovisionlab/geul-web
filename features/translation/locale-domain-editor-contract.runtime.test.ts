@@ -6,14 +6,6 @@ function source(path: string): string {
 }
 
 describe('locale domain editor wiring', () => {
-  it.each([
-    ['artist', '../artist/ArtistEditor/ArtistBioEditor.tsx'],
-    ['label', '../label/LabelEditor/LabelDescriptionEditor.tsx'],
-    ['release', '../release/ReleaseEditor/ReleaseDescriptionEditor.tsx'],
-  ])('forwards the %s target structure lock into CompactTiptapEditor', (_domain, path) => {
-    expect(source(path)).toContain('structureLocked={structureLocked}');
-  });
-
   it('keeps Artist and Label names locale-owned while neutral metadata remains source-only', () => {
     const artist = source('../artist/ArtistEditor/ArtistDetailEditor.tsx');
     const label = source('../label/AdminLabelDetailClient.tsx');

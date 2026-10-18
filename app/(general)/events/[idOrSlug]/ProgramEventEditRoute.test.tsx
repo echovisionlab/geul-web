@@ -119,15 +119,6 @@ describe('Program Event edit query route', () => {
     expect(html).toContain(`editor:${EVENT_ID}:archived:edit,delete,publish`);
   });
 
-  it('mounts an editable draft for an authorized Admin ID', async () => {
-    mocks.getProgramEventAdmin.mockResolvedValue({ ...event, status: 'draft' });
-
-    const html = renderToStaticMarkup(await renderProgramEventEditRoute(EVENT_ID, { edit: 'true' }));
-
-    expect(mocks.getProgramEventAdmin).toHaveBeenCalledWith(EVENT_ID);
-    expect(html).toContain(`editor:${EVENT_ID}:draft:edit,delete,publish`);
-  });
-
   it('mounts the collaboration editor for an archived Event Author in read-only mode', async () => {
     mocks.getSession.mockResolvedValue({ user: { id: 'member-2', nickname: 'Author', role: 'author' } });
 

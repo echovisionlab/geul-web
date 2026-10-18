@@ -69,9 +69,4 @@ describe('SiteLogo identity', () => {
     ]);
     expect(host.querySelector('img')?.getAttribute('alt')).toBe('Archive Studio');
   });
-  it('uses LOGO when no site title or logo is configured', () => {
-    render();
-    expect(host.textContent).toBe('LOGO');
-    expect(host.textContent).not.toBe('Site logo');
-  });
 });

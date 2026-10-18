@@ -35,6 +35,8 @@ const meta: Meta<typeof Collection> = {
 };
 export default meta;
 type Story = StoryObj<typeof Collection>;
+export const ExtraSmall: Story = { args: { size: 'xs' } };
 export const Small: Story = { args: { size: 's' } };
 export const Medium: Story = {};
 export const Large: Story = { args: { size: 'l' } };
+export const ExtraLarge: Story = { args: { size: 'xl' } };

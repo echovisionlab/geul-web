@@ -100,15 +100,13 @@ describe('TableOfContentsView', () => {
       'utf8',
     );
     expect(css).toContain(':global([data-table-of-contents-scope]):has(.layout[data-outline])');
-    expect(css).toMatch(
-      /\.layout\[data-outline\] \{\s*padding-inline: var\(--_table-of-contents-inset-start\) var\(--_table-of-contents-inset-end\);/,
-    );
+    expect(css).toMatch(/\.layout\[data-outline\] \{\s*padding-inline-end: var\(--_table-of-contents-inset-end\);/);
     expect(css).toMatch(/\.column \.link \{[^}]*min-height: var\(--geul-interaction-minimum\);/);
   });
 
   it('puts the outline before the document in reading order and fits it below the sticky line from the start', async () => {
     renderToc(
-      <TableOfContentsView items={items(4)} title="Contents" contentPlacement="center">
+      <TableOfContentsView items={items(4)} title="Contents">
         <p id="document">Document</p>
       </TableOfContentsView>,
     );
@@ -359,12 +357,11 @@ describe('TableOfContentsView', () => {
 describe('TableOfContentsView reserved layout', () => {
   it('reserves the outline beside server-rendered children before the deferred outline mounts', async () => {
     renderToc(
-      <TableOfContentsView items={items(4)} title="Contents" contentPlacement="center">
+      <TableOfContentsView items={items(4)} title="Contents">
         <p id="document">Document</p>
       </TableOfContentsView>,
     );
     const layout = container!.querySelector<HTMLElement>('[data-outline]')!;
-    expect(layout.getAttribute('data-placement')).toBe('center');
     expect(layout.querySelector('#document')).not.toBeNull();
     expect(container!.querySelector('[role="navigation"]')).toBeNull();
     await flushTocSchedule();

@@ -6,6 +6,19 @@ export function isActiveTranslationJobStatus(status: TranslationJobStatus): bool
   return status === TranslationJobStatus.QUEUED || status === TranslationJobStatus.RUNNING;
 }
 
+export function selectActiveTranslationJobsByLocale(jobs: TranslationJob[] | undefined): Map<string, TranslationJob> {
+  const activeJobByLocale = new Map<string, TranslationJob>();
+
+  for (const job of jobs ?? []) {
+    if (!job.targetLocale || !isActiveTranslationJobStatus(job.status) || activeJobByLocale.has(job.targetLocale)) {
+      continue;
+    }
+    activeJobByLocale.set(job.targetLocale, job);
+  }
+
+  return activeJobByLocale;
+}
+
 export function hasActiveTranslationJobs(jobs: TranslationJob[] | undefined): boolean {
   return (jobs ?? []).some((job) => isActiveTranslationJobStatus(job.status));
 }

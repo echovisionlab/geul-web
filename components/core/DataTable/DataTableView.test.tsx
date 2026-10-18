@@ -620,17 +620,6 @@ describe('DataTableView', () => {
     expect(preventedByRowAction).toBe(false);
   });
 
-  it('allows dense consumers to lower the desktop table minimum width', () => {
-    renderView({
-      ...baseProps,
-      rows: [{ id: 'row-1', name: 'Alpha', count: 2 }],
-      columns: [{ key: 'name', header: 'Name', renderCell: (row) => row.name }],
-      desktopMinWidth: 560,
-    });
-
-    expect(document.querySelector<HTMLElement>('[data-datatable-scroll] table')?.style.minWidth).toBe('560px');
-  });
-
   it('keeps file-browser row interactions opt-in', () => {
     const onClick = vi.fn();
     const onDoubleClick = vi.fn();

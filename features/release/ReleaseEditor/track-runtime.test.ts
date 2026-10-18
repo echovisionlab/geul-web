@@ -54,6 +54,36 @@ describe('release track runtime model', () => {
     expect(resolveTrackProgressIndicator(DEFAULT_MEDIA_STATUS_LABELS, null, null)).toBeNull();
   });
 
+  it.each([
+    [
+      'validating the first resumable chunk',
+      { progress: 18, stage: 'validating' },
+      null,
+      { label: 'Validating 18%', progress: 18, color: 'blue' },
+    ],
+    ['backend processing', null, { progress: 67 }, { label: 'Processing 67%', progress: 67, color: 'cyan' }],
+  ] as const)('labels %s', (_case, upload, processing, expected) => {
+    expect(resolveTrackProgressIndicator(DEFAULT_MEDIA_STATUS_LABELS, upload, processing)).toEqual(expected);
+  });
+
+  it('tracks backend processing progress until processing completes', () => {
+    expect(
+      getTrackProcessingLifecycle(
+        track({ processing_status: RELEASE_TRACK_PROCESSING_STATUS.processing, processing_progress: 54 }),
+      ),
+    ).toEqual({ progress: 54 });
+    expect(
+      getTrackProcessingLifecycle(
+        track({ processing_status: RELEASE_TRACK_PROCESSING_STATUS.processing, processing_progress: 81 }),
+      ),
+    ).toEqual({ progress: 81 });
+    expect(
+      getTrackProcessingLifecycle(
+        track({ processing_status: RELEASE_TRACK_PROCESSING_STATUS.completed, processing_progress: null }),
+      ),
+    ).toBeNull();
+  });
+
   it('resolves pending upload availability and expiry deterministically', () => {
     const labels = { resumeAvailable: 'Resume', resumeExpired: 'Expired' };
     const now = Date.parse('2026-08-09T00:00:00.000Z');

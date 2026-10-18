@@ -25,8 +25,8 @@ export interface LegalDocumentLayoutProps {
 }
 
 /**
- * Public legal documents read like posts: the header and running text share one centered reading
- * column, the outline sits beside them (`center` placement) and paper keeps the page measure.
+ * Public legal documents read like posts: the header and running text share one reading column from
+ * the start edge, the outline sits at the inline end and paper keeps the page measure.
  */
 export function LegalDocumentLayout({
   header,
@@ -44,7 +44,7 @@ export function LegalDocumentLayout({
         layout={FLOW_DOCUMENT_LAYOUT}
         chrome={<ContentChrome measure="reading">{header}</ContentChrome>}
       >
-        <TableOfContents items={tocItems} contentPlacement="center">
+        <TableOfContents items={tocItems}>
           {blocks ? (
             <LegalRichTextContent
               blocks={blocks}
@@ -54,7 +54,7 @@ export function LegalDocumentLayout({
               readingMeasure
             />
           ) : (
-            <LayoutContainer size="reading" inset="none">
+            <LayoutContainer size="reading" inset="none" placement="start">
               {empty}
             </LayoutContainer>
           )}

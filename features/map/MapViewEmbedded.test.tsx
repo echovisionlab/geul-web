@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { render, waitFor } from '@/test/render';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MapViewConfig } from '@/lib/types/map/model';
 import { MapViewEmbedded } from './MapViewEmbedded';
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
@@ -29,7 +29,8 @@ vi.mock('@/features/map/MapLibreMap', () => {
   return { MapLibreMap: () => null };
 });
 
-vi.mock('next-intl', () => ({
+vi.mock('next-intl', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('next-intl')>()),
   useTranslations: () => (key: string) => key,
 }));
 
@@ -44,11 +45,6 @@ vi.mock('@/hooks/useResolvedMapThemeConfig', () => ({
 vi.mock('@/lib/providers/LocaleProvider', () => ({
   useLocale: () => 'en',
 }));
-
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-let host: HTMLDivElement | null = null;
-let root: Root | null = null;
 
 const emptyConfig = {
   center: { lat: 37.5, lng: 127.1 },
@@ -78,30 +74,11 @@ beforeEach(() => {
   mocks.themeResolution.isLoading = true;
   mocks.themeResolution.isError = false;
   mocks.mapRuntimeImportCount = 0;
-  host = document.createElement('div');
-  document.body.appendChild(host);
-  root = createRoot(host);
-});
-
-afterEach(() => {
-  act(() => {
-    root?.unmount();
-  });
-  host?.remove();
-  host = null;
-  root = null;
 });
 
 describe('MapViewEmbedded runtime loading', () => {
   it('starts one runtime import only for a used map and overlaps it with theme resolution', async () => {
-    await act(async () => {
-      root?.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <MapViewEmbedded config={emptyConfig} />
-        </DesignSystemProvider>,
-      );
-      await Promise.resolve();
-    });
+    const view = render(<MapViewEmbedded config={emptyConfig} />);
 
     expect(mocks.mapRuntimeImportCount).toBe(0);
 
@@ -110,14 +87,8 @@ describe('MapViewEmbedded runtime loading', () => {
       places: [{ id: 'place-1', name: 'Studio', address: 'Seoul', lat: 37.5, lng: 127.1 }],
     } as MapViewConfig;
 
-    await act(async () => {
-      root?.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <MapViewEmbedded config={mapConfig} />
-        </DesignSystemProvider>,
-      );
-      await Promise.resolve();
-    });
+    view.rerender(<MapViewEmbedded config={mapConfig} />);
+    await waitFor(() => expect(mocks.mapRuntimeImportCount).toBe(1));
 
     // The theme query remains unresolved here, so this proves the import starts independently.
     expect(mocks.themeResolution.isLoading).toBe(true);
@@ -126,33 +97,24 @@ describe('MapViewEmbedded runtime loading', () => {
     mocks.themeResolution.config = {};
     mocks.themeResolution.isLoading = false;
 
-    await act(async () => {
-      root?.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <MapViewEmbedded config={mapConfig} />
-        </DesignSystemProvider>,
-      );
-      await Promise.resolve();
-    });
+    view.rerender(<MapViewEmbedded config={mapConfig} />);
 
     expect(mocks.mapRuntimeImportCount).toBe(1);
   });
-  it('preserves authored map geometry and caption while the theme is unavailable', async () => {
+  it('preserves authored map geometry and caption while the theme is unavailable', () => {
     mocks.themeResolution.isLoading = false;
     mocks.themeResolution.isError = true;
-    await act(async () => {
-      root?.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <MapViewEmbedded
-            config={{ ...emptyConfig, aspectRatio: '4:3' }}
-            allowEmpty
-            caption={<span>Map caption</span>}
-          />
-        </DesignSystemProvider>,
-      );
-    });
-    expect(host?.querySelector<HTMLElement>('[style*="aspect-ratio"]')?.style.aspectRatio).toBe('4 / 3');
-    expect(host?.textContent).toContain('themeUnavailable');
-    expect(host?.textContent).toContain('Map caption');
+    const html = renderToStaticMarkup(
+      <DesignSystemProvider forceColorScheme="light">
+        <MapViewEmbedded
+          config={{ ...emptyConfig, aspectRatio: '4:3' }}
+          allowEmpty
+          caption={<span>Map caption</span>}
+        />
+      </DesignSystemProvider>,
+    );
+    expect(html).toContain('aspect-ratio:4 / 3');
+    expect(html).toContain('themeUnavailable');
+    expect(html).toContain('Map caption');
   });
 });

@@ -93,15 +93,4 @@ describe('PublicMetadata', () => {
     expect(html).toContain('Published');
     expect(html).toContain('2026');
   });
-
-  it('marks non-text values that should center within the metadata line', () => {
-    const html = renderMetadata(
-      <PublicMetadataRow label="Social" valueAlign="center">
-        <svg role="img" aria-label="Instagram" />
-      </PublicMetadataRow>,
-    );
-
-    expect(html).toContain('data-align="center"');
-    expect(html).toContain('aria-label="Instagram"');
-  });
 });

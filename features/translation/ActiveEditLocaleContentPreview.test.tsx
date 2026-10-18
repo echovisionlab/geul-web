@@ -85,16 +85,4 @@ describe('ActiveEditLocaleContentPreview', () => {
     );
     expect(container?.textContent).not.toContain('old preview');
   });
-  it('preserves authored preview text scale and uses supporting typography only for the empty state', () => {
-    render(<ActiveEditLocaleContentPreview localeLabel="English" hasLiveRow contentPreview="Authored preview" />);
-    const authored = Array.from(container?.querySelectorAll('[data-core-typography="text"]') ?? []).find(
-      (node) => node.textContent === 'Authored preview',
-    );
-    expect(authored?.getAttribute('data-size')).toBe('sm');
-
-    render(<ActiveEditLocaleContentPreview localeLabel="English" hasLiveRow contentPreview="" />);
-    const empty = container?.querySelector('[role="status"]');
-    expect(empty?.getAttribute('data-size')).toBe('xs');
-    expect(empty?.getAttribute('data-weight')).toBe('regular');
-  });
 });

@@ -22,7 +22,7 @@ export interface ConfirmDialogEntry {
 let entries: readonly ConfirmDialogEntry[] = [];
 const empty: readonly ConfirmDialogEntry[] = [];
 const listeners = new Set<() => void>();
-export function publishConfirmDialogs(next: readonly ConfirmDialogEntry[]) {
+function publishConfirmDialogs(next: readonly ConfirmDialogEntry[]) {
   entries = next;
   listeners.forEach((fn) => fn());
 }
@@ -44,3 +44,27 @@ export const confirmDialogs = {
     publishConfirmDialogs(entries.filter((entry) => entry.id !== id || entry.pending));
   },
 };
+/**
+ * Runs the confirmation of the newest dialog: it stays pending (and cannot close) while `onConfirm` runs, is
+ * removed on success, and becomes available for a retry after `onError` on failure. A repeated call while
+ * pending, or for a dialog that is not the newest, does nothing.
+ */
+export function confirmDialog(id: string) {
+  const active = entries.at(-1);
+  if (active?.id !== id || active.pending) {
+    return;
+  }
+  const { onConfirm, onError } = active.options;
+  publishConfirmDialogs(entries.map((entry) => (entry.id === id ? { ...entry, pending: true } : entry)));
+  return Promise.resolve()
+    .then(onConfirm)
+    .then(
+      () => {
+        publishConfirmDialogs(entries.filter((entry) => entry.id !== id));
+      },
+      (error) => {
+        publishConfirmDialogs(entries.map((entry) => (entry.id === id ? { ...entry, pending: false } : entry)));
+        onError?.(error);
+      },
+    );
+}

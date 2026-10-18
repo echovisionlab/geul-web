@@ -12,13 +12,14 @@ import { PostEditor } from './PostEditor';
 
 const postId = '11111111-1111-4111-8111-111111111111';
 const postSaveDocument = `post:${postId}`;
-const recoveryScopes = [`${postSaveDocument}:ko`, `${postSaveDocument}:ja`];
+const recoveryScopes = [`${postSaveDocument}:en`, `${postSaveDocument}:ko`, `${postSaveDocument}:ja`];
 
 const mocks = vi.hoisted(() => {
   const noOp = vi.fn();
   return {
     postMeta: null as unknown,
     lifecycleOptions: vi.fn(),
+    updateFromTitle: vi.fn(),
     configUpdate: Object.assign(vi.fn(), {
       flush: vi.fn(async () => true),
       isPending: false,
@@ -100,7 +101,7 @@ vi.mock('@/lib/hooks/useSlugManagement', () => ({
     isChecking: false,
     handleChange: vi.fn(),
     handleBlur: vi.fn(),
-    updateFromTitle: vi.fn(),
+    updateFromTitle: mocks.updateFromTitle,
   }),
 }));
 vi.mock('./usePostConfigSave', () => ({ usePostConfigSave: () => mocks.configUpdate }));
@@ -223,7 +224,7 @@ function metadataPreview({ displayTitle, displaySummary, activeLocale }: Metadat
         activeLocaleLabel: activeLocale,
         sourceLocale: 'en',
         sourceLocaleLabel: 'English',
-        isSourceLocale: false,
+        isSourceLocale: activeLocale === 'en',
         isSourceLocaleReady: true,
         hasLiveRow: true,
         canEditActiveLocale: true,
@@ -295,6 +296,8 @@ function editField(testId: 'title' | 'summary', value: string) {
 
 beforeEach(() => {
   vi.useFakeTimers();
+  mocks.updateFromTitle.mockReset();
+  mocks.configUpdate.mockClear();
   recoveryScopes.forEach((scope) => clearEditorSaveRecovery(scope));
   mocks.postMeta = metadataPreview({
     displayTitle: 'Korean preview title 1',
@@ -419,24 +422,21 @@ describe('PostEditor translated metadata drafts', () => {
     expect(getPendingEditorPatch(postSaveDocument)).toEqual({});
   });
 
-  it('updates the untouched title while preserving a pending summary through preview refresh', async () => {
+  it('routes source title edits through the shared slug hook instead of writing the slug directly', async () => {
+    const postMeta = metadataPreview({
+      displayTitle: 'Source title',
+      displaySummary: 'Source summary',
+      activeLocale: 'en',
+    });
+    mocks.postMeta = postMeta;
     await renderEditor();
 
     await act(async () => {
-      editField('summary', 'Local Korean summary');
+      editField('title', 'Renamed source title');
     });
-    expect(getPendingEditorPatch(postSaveDocument)).toEqual({ locale: 'ko', summary: 'Local Korean summary' });
 
-    mocks.postMeta = metadataPreview({
-      displayTitle: 'Korean preview title 2',
-      displaySummary: 'Korean preview summary 2',
-      activeLocale: 'ko',
-    });
-    await renderEditor();
-
-    expect(container?.querySelector<HTMLInputElement>('[data-testid="title"]')?.value).toBe('Korean preview title 2');
-    expect(container?.querySelector<HTMLTextAreaElement>('[data-testid="summary"]')?.value).toBe(
-      'Local Korean summary',
-    );
+    expect(mocks.updateFromTitle).toHaveBeenCalledWith('Renamed source title');
+    expect(postMeta.setSlug).not.toHaveBeenCalled();
+    expect(mocks.configUpdate).not.toHaveBeenCalledWith(expect.objectContaining({ slug: expect.anything() }));
   });
 });

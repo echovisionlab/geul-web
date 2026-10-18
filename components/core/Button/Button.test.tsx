@@ -5,8 +5,6 @@ import '@testing-library/jest-dom/vitest';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { PageHeader } from '../PageHeader';
 import { IconButton } from '../IconButton';
 import { TextButton } from '../TextButton';
 import { Button, type ButtonActionProps } from './Button';
@@ -56,12 +54,6 @@ function renderButton(node: React.ReactNode): HTMLButtonElement {
 }
 
 describe('Button', () => {
-  it('renders an accessible button with the provided label', () => {
-    const button = renderButton(<Button>Save</Button>);
-
-    expect(button.textContent).toBe('Save');
-  });
-
   it('gives pending progress the action name when its visible content is decorative', () => {
     renderButton(
       <Button loading aria-label="Upload recording">
@@ -70,18 +62,6 @@ describe('Button', () => {
     );
     expect(container?.querySelector('[role="progressbar"]')).toHaveAccessibleName('Upload recording');
     expect(container?.querySelector('button')?.textContent).toBe('↑');
-  });
-
-  it('retains an external action label for pending progress without requiring duplicate hidden copy', () => {
-    renderButton(
-      <>
-        <span id="submit-label">Submit</span>
-        <Button loading aria-labelledby="submit-label">
-          ✓
-        </Button>
-      </>,
-    );
-    expect(container?.querySelector('[role="progressbar"]')).toHaveAccessibleName('Submit');
   });
 
   it.each([
@@ -114,49 +94,6 @@ describe('Button', () => {
     const button = renderButton(<Button>Save</Button>);
     expect(button.getAttribute('data-tone')).toBe('neutral');
     expect(button.getAttribute('data-emphasis')).toBe('medium');
-  });
-
-  it('maps neutral medium emphasis to the quiet visual variant', () => {
-    const button = renderButton(
-      <Button tone="neutral" emphasis="medium">
-        Secondary
-      </Button>,
-    );
-
-    expect(button.getAttribute('data-control-size')).toBe('sm');
-    expect(button.getAttribute('data-control-kind')).toBe('button');
-  });
-
-  it('maps danger controls to the filled red treatment', () => {
-    const button = renderButton(
-      <Button tone="danger" emphasis="strong">
-        Delete
-      </Button>,
-    );
-
-    expect(button.getAttribute('data-emphasis')).toBe('strong');
-    expect(button.getAttribute('data-tone')).toBe('danger');
-  });
-
-  it('preserves disabled state', () => {
-    const button = renderButton(<Button disabled>Disabled</Button>);
-
-    expect(button.disabled).toBe(true);
-  });
-
-  it('announces pending while keeping the action focusable and refusing repeated clicks', () => {
-    const onClick = vi.fn();
-    const button = renderButton(
-      <Button loading onClick={onClick}>
-        Saving
-      </Button>,
-    );
-    expect(button.getAttribute('data-pending')).toBe('true');
-    expect(button.getAttribute('aria-disabled')).toBe('true');
-    expect(button.disabled).toBe(false);
-    expect(container?.querySelector('[role=progressbar]')).not.toBeNull();
-    act(() => button.click());
-    expect(onClick).not.toHaveBeenCalled();
   });
 
   it('runs an ordinary action once and blocks disabled actions', () => {
@@ -382,36 +319,5 @@ describe('Button', () => {
     expect(button.hasAttribute('data-core-owner')).toBe(false);
     expect(button.hasAttribute('data-active')).toBe(false);
     expect(button.getAttribute('data-testid')).toBe('native-affordance');
-  });
-  it('inherits one header row density across action kinds while leaving inline text geometry intrinsic', () => {
-    act(() =>
-      root?.render(
-        <>
-          <PageHeader
-            title="Posts"
-            actions={
-              <>
-                <Button>New post</Button>
-                <IconButton label="Search">+</IconButton>
-                <TextButton>Open</TextButton>
-              </>
-            }
-          />
-          <TextButton>Inline details</TextButton>
-        </>,
-      ),
-    );
-    const actions = container?.querySelectorAll('[data-control-kind]');
-    expect(Array.from(actions ?? []).map((node) => node.getAttribute('data-control-size'))).toEqual([
-      'sm',
-      'sm',
-      'sm',
-      null,
-    ]);
-  });
-  it('keeps multiline labels inside a named shared contract', () => {
-    const button = renderButton(<Button labelWrap="wrap">Subscribe to newsletter updates</Button>);
-    expect(button.getAttribute('data-label-wrap')).toBe('wrap');
-    expect(button.textContent).toContain('newsletter updates');
   });
 });

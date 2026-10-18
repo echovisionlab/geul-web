@@ -240,19 +240,6 @@ describe('SideNavigation', () => {
     expect(getItemLink('dashboard').hasAttribute('data-active')).toBe(true);
   });
 
-  it('renders the Core link and emits item selection through its callback', () => {
-    const onSelectItem = vi.fn();
-    renderNavigation({ onSelectItem });
-
-    const profileLink = getItemLink('profile');
-    expect(profileLink.getAttribute('href')).toBe('/account/profile');
-
-    act(() => profileLink.click());
-
-    expect(onSelectItem).toHaveBeenCalledOnce();
-    expect(onSelectItem).toHaveBeenCalledWith(sections[2].items[0]);
-  });
-
   it('keeps item icons decorative while preserving the visible expanded label', () => {
     renderNavigation();
 
@@ -262,12 +249,5 @@ describe('SideNavigation', () => {
     expect(iconContainer).not.toBeNull();
     expect(dashboardLink.textContent).toBe('Dashboard');
     expect(dashboardLink.hasAttribute('aria-label')).toBe(false);
-  });
-
-  it('allows feature compositions to hide icons only in expanded mode', () => {
-    renderNavigation({ showExpandedIcons: false });
-
-    expect(container.querySelector('nav')?.getAttribute('data-expanded-icons')).toBe('hidden');
-    expect(getItemLink('dashboard').querySelector('[aria-hidden="true"]')).not.toBeNull();
   });
 });

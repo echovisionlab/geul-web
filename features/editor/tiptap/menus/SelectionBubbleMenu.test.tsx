@@ -207,6 +207,41 @@ describe('SelectionBubbleMenuView keyboard navigation', () => {
     expect(onEscapeFocus).toHaveBeenCalledOnce();
   });
 
+  it('shows every available control in the established order, with secondary commands behind More', async () => {
+    render(
+      <SelectionBubbleMenuView
+        commands={commands({ canNest: true, canUnnest: true, canConvertToInlineMath: true, canOpenAI: true })}
+        labels={labels}
+      />,
+    );
+    const toolbar = container!.querySelector<HTMLElement>('[role="toolbar"]')!;
+
+    expect(
+      [...toolbar.querySelectorAll<HTMLElement>('[data-selection-toolbar-action]')].map((control) =>
+        control.getAttribute('aria-label'),
+      ),
+    ).toEqual([
+      'Block type',
+      'Bold',
+      'Italic',
+      'Underline',
+      'Alignment',
+      'Text',
+      'Background',
+      'Create link',
+      'Options',
+    ]);
+    await act(async () => toolbar.querySelector<HTMLButtonElement>('[data-testid="tiptap-selection-more"]')!.click());
+    expect([...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].map((item) => item.textContent)).toEqual([
+      'Strike',
+      'Code',
+      'Nest',
+      'Unnest',
+      'Inline math',
+      expect.stringMatching(/^AI/u),
+    ]);
+  });
+
   it('keeps secondary formatting and AI commands in the actual compact menu', async () => {
     const openAI = vi.fn(() => true);
     const toggleTextStyle = vi.fn(() => true);

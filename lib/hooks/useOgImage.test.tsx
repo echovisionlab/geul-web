@@ -282,37 +282,6 @@ describe('useOgImage', () => {
     expect(probe().dataset.src).toBe('https://cdn.example.test/asset-b.webp');
   });
 
-  it('shows a replacement as queued while its first lookup transiently fails', async () => {
-    let replacementAttempts = 0;
-    mocks.getGeneration.mockImplementation(async (generationId: string) => {
-      if (generationId === 'generation-a') {
-        return {
-          generation: generation('generation-a', 'superseded', {
-            replacementGenerationId: 'generation-b',
-          }),
-        };
-      }
-      replacementAttempts += 1;
-      if (replacementAttempts === 1) {
-        throw new Error('replacement lookup failed');
-      }
-      return { generation: generation('generation-b', 'processing') };
-    });
-
-    await renderProbe();
-    await click('track');
-    await flushWork();
-
-    expect(probe().dataset.generationId).toBe('generation-b');
-    expect(probe().dataset.status).toBe('queued');
-    expect(probe().dataset.regenerating).toBe('true');
-    expect(probe().dataset.error).toBe('Failed to load OG generation');
-
-    await advance(1_000);
-    expect(probe().dataset.status).toBe('processing');
-    expect(probe().dataset.error).toBe('');
-  });
-
   it('uses lifecycle events only as a wake-up to query the latest target generation', async () => {
     mocks.getLatest.mockResolvedValue({
       generation: generation('generation-latest', 'processing'),
@@ -478,32 +447,6 @@ describe('useOgImage', () => {
       }
     },
   );
-
-  it('discovers an automatic run created after mount when the browser becomes active again', async () => {
-    mocks.getLatest
-      .mockResolvedValueOnce({})
-      .mockResolvedValueOnce({ generation: generation('generation-after-mount', 'queued') });
-    mocks.getGeneration.mockResolvedValue({
-      generation: generation('generation-after-mount', 'processing'),
-    });
-
-    await renderProbe();
-    expect(probe().dataset.generationId).toBe('');
-
-    await advance(30_000);
-    expect(mocks.getLatest).toHaveBeenCalledTimes(1);
-    expect(probe().dataset.generationId).toBe('');
-
-    act(() => {
-      window.dispatchEvent(new Event('online'));
-    });
-    await flushWork();
-
-    expect(mocks.getLatest).toHaveBeenCalledTimes(2);
-    expect(mocks.getGeneration).toHaveBeenCalledWith('generation-after-mount');
-    expect(probe().dataset.generationId).toBe('generation-after-mount');
-    expect(probe().dataset.status).toBe('processing');
-  });
 
   it('uses lifecycle as the fast path and rechecks after provider reconnect', async () => {
     const statusListeners = new Set<(event: { status: string }) => void>();

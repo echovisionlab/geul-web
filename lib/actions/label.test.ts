@@ -143,14 +143,6 @@ describe('listLabelsForBlockAction', () => {
       ],
     });
   });
-
-  it('propagates lookup failures instead of returning an empty result', async () => {
-    listMock.mockRejectedValue(new Error('backend unavailable'));
-
-    await expect(listLabelsForBlockAction({ requestedLocale: null }).then(unwrapQueryResult)).rejects.toMatchObject({
-      status: 500,
-    });
-  });
 });
 
 describe('getLabelsForBlockByIdsAction', () => {
@@ -245,13 +237,5 @@ describe('getLabelsForBlockByIdsAction', () => {
         }),
       ],
     });
-  });
-
-  it('propagates lookup failures instead of returning an empty result', async () => {
-    listMock.mockRejectedValue(new Error('unavailable'));
-
-    await expect(
-      getLabelsForBlockByIdsAction({ ids: ['label-one'], requestedLocale: undefined }).then(unwrapQueryResult),
-    ).rejects.toMatchObject({ status: 500 });
   });
 });

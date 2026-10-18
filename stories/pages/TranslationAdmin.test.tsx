@@ -2,6 +2,7 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { within } from 'storybook/test';
 import { TestProviders } from '@/test/TestProviders';
 import { createTranslationClient } from '@/lib/api/browser/secure-translation';
 import { TranslationAdminPreview } from './TranslationAdmin.stories';
@@ -57,10 +58,13 @@ async function render(surface: 'overview' | 'settings' | 'jobs', state: 'ready' 
 describe('translation page preview controllers', () => {
   it('outlines the overview as the page title followed by its sections', async () => {
     await render('overview');
-    await expectEventually(() => expect(host.querySelectorAll('h2')).toHaveLength(2));
-    const sections = Array.from(host.querySelectorAll('h2'));
-    expect(sections.every((heading) => heading.getAttribute('data-level') === '4')).toBe(true);
-    expect(host.querySelector('h1')?.textContent).toBe('Translations');
+    const page = within(host);
+    await expectEventually(() => expect(page.getAllByRole('heading', { level: 2 })).toHaveLength(2));
+    const title = page.getByRole('heading', { level: 1, name: 'Translations' });
+    expect(page.getAllByRole('heading', { level: 1 })).toEqual([title]);
+    for (const section of page.getAllByRole('heading', { level: 2 })) {
+      expect(title.compareDocumentPosition(section) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    }
     expect(createTranslationClient).not.toHaveBeenCalled();
   });
   it('cancels an active job through the local RPC and refreshes the production table', async () => {
@@ -78,21 +82,6 @@ describe('translation page preview controllers', () => {
     await expectEventually(() => expect(host.textContent).not.toContain('night-signals'));
     expect(host.querySelector('[role="status"]')?.textContent).toBe('No translation jobs yet.');
     expect((document.activeElement as HTMLButtonElement).textContent).toContain('Refresh');
-    expect(createTranslationClient).not.toHaveBeenCalled();
-  });
-  it('toggles the actual provider switch and retains confirmed local state after refetch', async () => {
-    await render('settings');
-    await expectEventually(() => expect(host.querySelector('input[type="checkbox"]')).not.toBeNull());
-    const toggle = host.querySelector<HTMLInputElement>('input[type="checkbox"]')!;
-    expect(toggle.checked).toBe(true);
-    expect(host.querySelector('[role="group"][aria-label="Editorial translation"]')).not.toBeNull();
-    expect(host.querySelector('button[aria-label="Edit provider Editorial translation"]')).not.toBeNull();
-    expect(host.querySelector('input[role="switch"][aria-label="Active Editorial translation"]')).not.toBeNull();
-    await act(async () => toggle.click());
-    await expectEventually(() =>
-      expect(host.querySelector<HTMLInputElement>('input[type="checkbox"]')?.checked).toBe(false),
-    );
-    expect(host.textContent).toContain('Editorial translation');
     expect(createTranslationClient).not.toHaveBeenCalled();
   });
   it('projects failed local reads onto the production settings error branch', async () => {

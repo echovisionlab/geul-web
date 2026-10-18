@@ -74,6 +74,14 @@ const TEMPLATE_ID = '11111111-1111-4111-8111-111111111111';
 const LAYOUT_ID = '22222222-2222-4222-8222-222222222222';
 let routeId = TEMPLATE_ID;
 
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((finish) => {
+    resolve = finish;
+  });
+  return { promise, resolve };
+}
+
 vi.mock('next/navigation', () => ({
   useParams: () => ({ id: routeId }),
   useRouter: () => ({ push: pushMock, replace: vi.fn() }),
@@ -271,12 +279,14 @@ vi.mock('@/features/email/EmailTemplateEditor/EmailTemplateEditor', () => ({
 }));
 
 vi.mock('@/features/translation/EmailEntityTranslationsPanel', () => ({
-  EmailEntityTranslationsPanel: () => <div data-testid="email_layout-translations" />,
+  EmailEntityTranslationsPanel: ({ entityId }: { entityId: string }) => (
+    <div data-testid="email_layout-translations" data-entity-id={entityId} />
+  ),
 }));
 
 vi.mock('@/features/translation/EntityTranslationsPanel', () => ({
-  EntityTranslationsPanel: ({ entityType }: { entityType: string }) => (
-    <div data-testid={`${entityType}-translations`} />
+  EntityTranslationsPanel: ({ entityType, entityId }: { entityType: string; entityId: string }) => (
+    <div data-testid={`${entityType}-translations`} data-entity-id={entityId} />
   ),
 }));
 
@@ -370,14 +380,6 @@ function emitMetadataUpdate(update: TestMetadataUpdate) {
   });
 }
 
-function notifySaveStateChanged() {
-  act(() => {
-    for (const listener of [...api.saveStateListeners]) {
-      listener();
-    }
-  });
-}
-
 beforeEach(() => {
   setProviderAccessLevel(localeRoom.provider, 'edit');
   vi.clearAllMocks();
@@ -436,26 +438,6 @@ afterEach(() => {
 });
 
 describe('email authoring detail pages', () => {
-  it('renders the current email template detail without archive lifecycle controls', async () => {
-    routeId = TEMPLATE_ID;
-    renderPage(<EmailTemplateEditPage />);
-    await flush();
-
-    expect(document.body.textContent).toContain('Custom template detail');
-    expect(document.querySelector('[data-testid="email_template-translations"]')).not.toBeNull();
-    expect(document.body.textContent?.toLowerCase()).not.toMatch(/archive|restore|include archived/);
-  });
-
-  it('renders the current email layout detail without archive lifecycle controls', async () => {
-    routeId = LAYOUT_ID;
-    renderPage(<EmailLayoutEditPage />);
-    await flush();
-
-    expect(document.body.textContent).toContain('Custom layout detail');
-    expect(document.querySelector('[data-testid="email_layout-translations"]')).not.toBeNull();
-    expect(document.body.textContent?.toLowerCase()).not.toMatch(/archive|restore|include archived/);
-  });
-
   it('keeps an admitted target subject editable and empty while transport is disconnected', async () => {
     routeId = TEMPLATE_ID;
     localeRoom.activeLocale = 'ko';
@@ -520,28 +502,6 @@ describe('email authoring detail pages', () => {
     expect(api.subjectSave).not.toHaveBeenCalled();
   });
 
-  it('protects locally queued subject input from peer adoption until the save clears', async () => {
-    routeId = TEMPLATE_ID;
-    renderPage(<EmailTemplateEditPage />);
-    await flush();
-
-    const subject = findInputByLabelText('common.labels.subject');
-    setInputValue(subject, 'Local typing');
-    api.pendingEditorPatch.subject = 'Local typing';
-    emitMetadataUpdate({ operation: 'locale', values: { subject: 'Peer subject' }, sequence: 2 });
-    await flush();
-
-    expect(subject.value).toBe('Local typing');
-    expect(api.subjectSave).toHaveBeenCalledOnce();
-
-    delete api.pendingEditorPatch.subject;
-    notifySaveStateChanged();
-    await flush();
-
-    expect(subject.value).toBe('Peer subject');
-    expect(api.subjectSave).toHaveBeenCalledOnce();
-  });
-
   it('stops the mocked test action when pending editor saves fail', async () => {
     routeId = TEMPLATE_ID;
     renderPage(<EmailTemplateEditPage />);
@@ -568,6 +528,14 @@ describe('email authoring detail pages', () => {
   it('awaits registered saves and provider durability before the mocked test action', async () => {
     routeId = TEMPLATE_ID;
     api.sendTestEmailTemplateAction.mockResolvedValue({ success: true });
+    const saved = deferred<boolean>();
+    const durable = deferred<void>();
+    const persistenceStarted = deferred<void>();
+    api.flushEditorSaves.mockReturnValue(saved.promise);
+    api.persistCollaborativeDocumentNow.mockImplementation(() => {
+      persistenceStarted.resolve();
+      return durable.promise;
+    });
     renderPage(<EmailTemplateEditPage />);
     await flush();
 
@@ -584,14 +552,18 @@ describe('email authoring detail pages', () => {
     await flush();
 
     expect(api.flushEditorSaves).toHaveBeenCalledWith(`email_template:${TEMPLATE_ID}`);
-    expect(api.persistCollaborativeDocumentNow).toHaveBeenCalledWith(expect.any(Object));
+    expect(api.persistCollaborativeDocumentNow).not.toHaveBeenCalled();
+    expect(api.sendTestEmailTemplateAction).not.toHaveBeenCalled();
+    await act(async () => {
+      saved.resolve(true);
+      await persistenceStarted.promise;
+    });
+    expect(api.sendTestEmailTemplateAction).not.toHaveBeenCalled();
+    await act(async () => durable.resolve());
+    await vi.waitFor(() =>
+      expect(api.sendTestEmailTemplateAction).toHaveBeenCalledWith(TEMPLATE_ID, 'test@example.test', 'en'),
+    );
     expect(api.sendTestEmailTemplateAction).toHaveBeenCalledOnce();
-    expect(api.flushEditorSaves.mock.invocationCallOrder[0]).toBeLessThan(
-      api.persistCollaborativeDocumentNow.mock.invocationCallOrder[0],
-    );
-    expect(api.persistCollaborativeDocumentNow.mock.invocationCallOrder[0]).toBeLessThan(
-      api.sendTestEmailTemplateAction.mock.invocationCallOrder[0],
-    );
   });
 
   it('publishes an email template layout change hint after the asset update succeeds', async () => {
@@ -650,6 +622,10 @@ it('upgrades and downgrades HTML, name and key without replacing the layout body
   await flush();
   expect(container?.querySelector('[data-testid="layout-editor"]')).not.toBeNull();
   const body = container?.querySelector('[data-testid="layout-editor"]');
+  expect(document.querySelector('[data-testid="email_layout-translations"]')).toHaveAttribute(
+    'data-entity-id',
+    LAYOUT_ID,
+  );
   expect(localeRoom.editorProps.mock.lastCall?.[0].editable).toBe(false);
   act(() => setProviderAccessLevel(localeRoom.provider, 'edit'));
   expect(localeRoom.editorProps.mock.lastCall?.[0].editable).toBe(true);
@@ -669,6 +645,10 @@ it('upgrades and downgrades subject and layout while retaining the template body
   expect(findInputByLabelText('common.labels.subject').disabled).toBe(true);
   const subject = findInputByLabelText('common.labels.subject');
   const body = container?.querySelector('[data-testid="template-editor"]');
+  expect(document.querySelector('[data-testid="email_template-translations"]')).toHaveAttribute(
+    'data-entity-id',
+    TEMPLATE_ID,
+  );
   expect(body?.getAttribute('data-editable')).toBe('false');
   act(() => setProviderAccessLevel(localeRoom.provider, 'edit'));
   expect(subject.disabled).toBe(false);

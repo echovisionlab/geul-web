@@ -67,33 +67,20 @@ The owner approved three presentations of the same outline for reserved layouts.
 in the Notion/ChatGPT interaction family: a quiet indicator, a revealed title list and, when
 the screen has room, the same list kept visible. No floating launcher or search panel is added.
 
-| Viewport (reserved layout) | Presentation                                                                                                          | Reserved inline space                                                                   |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `lg` (75em) and wider      | Persistent column: mono `xs` title label, one 1px line, `sm` secondary rows, current row in ink with a 2px ink marker | Column (15rem) + `xl` gap at the inline end; `center` placement mirrors it at the start |
-| `sm`–`lg`                  | Quiet rail; hover, keyboard focus or a press reveals the bounded title list                                           | Rail target width (28px; 44px on coarse pointers); mirrored for `center`                |
-| below `sm` (phones)        | The same rail, scrubbable by touch                                                                                    | Rail target width at the inline end only                                                |
+| Viewport (reserved layout) | Presentation                                                                                                                                                                | Reserved inline space                                               |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `lg` (75em) and wider      | Persistent column: mono `xs` title label, one 1px line, `xs` muted rows (hover: `text-hover` on `surface-hover`), current row in ink at medium weight with a 2px ink marker | Column (15rem) + `xl` gap at the inline end                         |
+| `sm`–`lg`                  | Quiet rail; hover, keyboard focus or a press reveals the bounded title list                                                                                                 | Rail target width (28px; 44px on coarse pointers) at the inline end |
+| below `sm` (phones)        | The same rail, scrubbable by touch                                                                                                                                          | Rail target width at the inline end only                            |
 
-The column starts at `lg` with a balanced reserve (column 15rem + `xl` gap = 16.5rem on each side
-for `center` placement), so the reading column stays centered under the title and the site header.
-The document box between the reserves holds the 44rem reading measure once the frame is 77rem wide:
-1256px at the site frame's 12px inset. Measured (post, terms, changelog, work, event; LTR and RTL):
-
-| Viewport | Outline        | Reading column | Body → outline clearance | Body center offset |
-| -------- | -------------- | -------------- | ------------------------ | ------------------ |
-| 1024px   | rail (28px)    | 704px          | 120px                    | 0                  |
-| 1200px   | column (240px) | 648px (boxed)  | 24px (`xl` gap)          | 0                  |
-| 1280px   | column         | 704px          | 36px                     | 0                  |
-| 1440px   | column         | 704px          | 116px                    | 0                  |
-| 1920px   | column         | 704px          | 168px                    | 0                  |
-
-Between 1200 and 1255px the measure is bounded by the document box (648–703px, at least 84 Latin
-characters), never by the column: it cannot reach the outline. The alternatives were rejected:
-moving the column to `xl` (88em) would hide the persistent outline on 1280–1407px laptops, and an
-asymmetric reserve would push the body and title about 120px off the header's center for a 56px
-range of widths. The column and rail are sticky inside the reserved track, below the site header,
+The column starts at `lg`. Every document starts at the frame's start edge and runs up to the reserve at
+the inline end (owner decision 2026-10-18, replacing the balanced 2026-10-13 reserve that centered the
+reading column): the title, hero text and running text share the start edge, and the outline column
+sits at the inline end. The column and rail are sticky inside the reserved track, below the site header,
 and stop at the end of the document box, so the footer boundary needs no measurement. The document
-plays (`assertOutlineClearance` in `stories/public/fixtures/document-outline.ts`) assert that no
-reading block or reading chrome reaches the outline.
+plays (`stories/public/fixtures/document-outline.ts`) assert that no reading block or reading chrome
+reaches the outline (`assertOutlineClearance`) and that the first reading block starts where the title
+starts.
 
 The outline is never taller than the viewport below the sticky line. Until the document has
 scrolled the outline up to that line (it starts below a title or hero), Core also subtracts the
@@ -103,11 +90,10 @@ document end the outline leaves with the document box like any sticky element.
 
 ### Placement
 
-`center` is for running text on the reading measure: posts, legal documents and the changelog. The
-outline reserve is mirrored on both sides (from `sm`) so the reading column stays centered. `start` is
-for section-composed bodies: CMS pages and entity details (work, event), whose title and sections keep
-the start edge, and only the inline end is reserved. One rule decides: the body is a reading column
-(`center`) or a section composition (`start`).
+There is one placement: the document starts at the start edge and only the inline end is reserved.
+Running text (posts, legal documents, the changelog) keeps the reading measure from that edge; CMS
+pages and entity details keep their section composition. The `center` placement was removed on
+2026-10-18.
 
 `outlinePresentation="rail"` keeps the rail at every width for a body that shares the page width with
 another column: an entity detail with media. The persistent column needs a full-width body.
@@ -115,10 +101,10 @@ another column: an entity detail with media. The persistent column needs a full-
 ### Chrome outside the outline layout
 
 Titles, heroes and overlaid document controls are rendered by `ContentLayoutView` outside the outline
-layout. Its root carries `tableOfContentsScope`; inside it `--_table-of-contents-inset-start` and
-`--_table-of-contents-inset-end` hold the reserved inline space (0 without an outline and on paper).
-`ContentChrome measure="reading"` pads by those insets and centers the reading measure, the post hero
-pads its title by the insets plus the centered remainder, and `ContentLayoutView` ends its document
+layout. Its root carries `tableOfContentsScope`; inside it `--_table-of-contents-inset-end` holds the
+reserved inline space (0 without an outline and on paper). `ContentChrome measure="reading"` keeps the
+reading measure on the start edge clear of that space, the post hero ends its title where the reading
+measure ends, and `ContentLayoutView` ends its document
 controls at `--_table-of-contents-inset-end`. A content-language menu therefore never sits over the
 outline column (it overlapped the column label on untitled pages before), and every title shares the
 first body line's start edge at every width.
@@ -178,8 +164,8 @@ width for every language and script (owner decision 2026-10-13; it was 36rem). A
 (16px Noto Sans, line height `line-height-document` 1.7) a full line measures about 92 Latin, 60
 Hangul and 120 Arabic characters, spaces included (`typography-audit.mjs measure`, `reading`). In
 posts the plain header, running text, series and
-comments share one centered column; the hero image keeps its full width and its title is padded onto
-the same column. Legal documents (current, scheduled preview, history detail and share link), the
+comments share one column on the start edge; the hero image keeps its full width and its title starts
+and ends with the same column. Legal documents (current, scheduled preview, history detail and share link), the
 changelog and work/event details use the same composition: `ContentLayoutView` with
 `ContentChrome measure="reading"` for their header (notices, title, metadata, document actions) and
 `.prose[data-reading-measure]` (or `LayoutContainer size="reading"` for the changelog list) for the
@@ -194,8 +180,7 @@ document relationship.
 | Images, video, standalone external video, maps, p5/three/shader scenes | `wide` (75rem)     |
 
 A block with an authored preview width below 100% stays in the reading column. Breakouts never
-exceed the document box; with the persistent column the centered layout is capped at
-`standard` plus both column reserves, so breakouts end at `standard` beside the column.
+exceed the document box, which ends at the outline's reserve.
 The measure applies on screen only; paper keeps the print stylesheet's page measure
 (`LayoutContainer size="reading"` drops its maximum in print).
 
@@ -235,7 +220,7 @@ current meaning but must not override manual outline scrolling.
 ## Public contract and content
 
 Props are `items: TocItem[]`, `title`, `children` (required: the document the outline navigates)
-and `contentPlacement` (`start` default, `center` for a centered reading column).
+and `outlinePresentation` (`responsive` default, `rail` beside another column).
 `hasTableOfContents(items)` exposes the threshold and `tableOfContentsScope` marks the ancestor
 that shares the reserved insets with outside chrome. Items remain `{ id, label, level }`. IDs must
 match rendered headings in document order.
@@ -280,7 +265,7 @@ Theme changes use the existing semantic roles. Heading language stays authored.
 | TOC-13 | Scrub on a phone                    | Press the rail, drag vertically, release; repeat and drag sideways    | Highlighted heading follows the finger; release navigates and focuses the heading; sideways/cancel does not navigate               | ScrubNavigation; PhoneRail                                                    |
 | TOC-14 | Read nested sections                | Open an h2–h6 outline with long titles; scroll to a deep section      | Nested list; indentation capped at three steps; titles wrap/clamp; parents of the current row shown in ink                         | DeepNesting                                                                   |
 | TOC-15 | Align document chrome               | Hero/plain post and untitled page with a language menu at 390–1920    | Title and first body line share a start edge; document controls end before the outline column                                      | PostHeroLongDocument; PageLongDocumentUntitled                                |
-| TOC-16 | Read legal, changelog, work, event  | Open each long document at 390–1920, light/dark, ar; print A4         | Reading column, `center` outline, same header order; paper has no outline and the page measure                                     | TermsLongDocument; ChangelogLongDocument; WorkLongDocument; EventLongDocument |
+| TOC-16 | Read legal, changelog, work, event  | Open each long document at 390–1920, light/dark, ar; print A4         | Reading column on the start edge, outline at the end, same header order; paper has no outline                                      | TermsLongDocument; ChangelogLongDocument; WorkLongDocument; EventLongDocument |
 | TOC-11 | Document changes or IDs are missing | Replace items; supply a missing target                                | Three-or-fewer clears navigation; pending work cleaned up; remaining heading indices intact                                        | Core unit tests                                                               |
 
 ## Verification and migration
@@ -293,7 +278,7 @@ independent touch targets: the whole rail is one target that maps position to he
 
 Removing the standalone rail is a breaking Core change: `children` is required and `footerSelector`
 is gone. Every consumer was migrated (see the changelog); a new consumer passes its document as
-children and picks `center` (running text) or `start` (section composition). The legal editor
+children. The legal editor
 preview renders the body without an outline.
 
 Run `node scripts/design-system/review.mjs run toc-navigation`.

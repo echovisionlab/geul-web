@@ -41,7 +41,16 @@ export default defineConfig({
           ? [
               {
                 extends: true,
-                test: { name: `${name}-shared`, include: shared, setupFiles, pool: 'threads' as const, isolate: false },
+                test: {
+                  name: `${name}-shared`,
+                  include: shared,
+                  setupFiles:
+                    name === 'component'
+                      ? [...setupFiles, resolve(projectRoot, 'test/shared-dom.setup.ts')]
+                      : setupFiles,
+                  pool: 'threads' as const,
+                  isolate: false,
+                },
               },
             ]
           : []),

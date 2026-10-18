@@ -37,8 +37,6 @@ vi.mock('@/lib/api/browser/public-terms', () => ({
   createPublicTermsClient: mocks.client,
   createPublicTermsClientWithLocale: mocks.client,
 }));
-import { getArchivedPrivacy } from './privacy-browser';
-import { getArchivedTerms } from './terms-browser';
 import { getPublicLegalHistory, getPublicLegalHistoryDetail } from './legal-history.server';
 
 beforeEach(() => {
@@ -98,38 +96,5 @@ describe.each(['privacy', 'terms'] as const)('%s history server data', (kind) =>
     mocks.list.mockRejectedValue(error);
     await expect(getPublicLegalHistoryDetail(kind, 'old', 'en')).rejects.toBe(error);
     expect((await getPublicLegalHistory(kind, 'en')).archived).toEqual([]);
-  });
-  it('measures the actual old/new archived query with identical 50 ms RPC delays', async () => {
-    vi.useFakeTimers();
-    const delayed = <T>(value: T) => new Promise<T>((resolve) => setTimeout(() => resolve(value), 50));
-    mocks.get.mockImplementation(({ id }) => delayed({ [kind]: entity(id || 'current') }));
-    mocks.list.mockImplementation(() => delayed({ items: [{ id: 'old' }] }));
-    const oldRead = kind === 'privacy' ? getArchivedPrivacy : getArchivedTerms;
-    const beforeStart = Date.now();
-    let beforeReady: number | undefined;
-    const before = oldRead('old', 'ko').then(() => {
-      beforeReady = Date.now() - beforeStart;
-    });
-    await vi.advanceTimersByTimeAsync(50);
-    expect(beforeReady).toBeUndefined();
-    await vi.advanceTimersByTimeAsync(50);
-    await before;
-    const beforeCalls = { get: mocks.get.mock.calls.length, list: mocks.list.mock.calls.length };
-    mocks.get.mockClear();
-    mocks.list.mockClear();
-    const afterStart = Date.now();
-    let afterReady: number | undefined;
-    const after = getPublicLegalHistoryDetail(kind, 'old', 'ko').then(() => {
-      afterReady = Date.now() - afterStart;
-    });
-    await vi.advanceTimersByTimeAsync(50);
-    expect(afterReady).toBeUndefined();
-    await vi.advanceTimersByTimeAsync(50);
-    await after;
-    expect(beforeReady).toBe(100);
-    expect(afterReady).toBe(100);
-    expect(beforeCalls).toEqual({ get: 2, list: 1 });
-    expect(mocks.get).toHaveBeenCalledTimes(2);
-    expect(mocks.list).toHaveBeenCalledTimes(1);
   });
 });

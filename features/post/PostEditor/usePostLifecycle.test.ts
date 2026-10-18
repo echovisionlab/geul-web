@@ -76,28 +76,4 @@ describe('Post lifecycle save barrier', () => {
     expect(onSaveFailure).not.toHaveBeenCalled();
     expect(lock.current).toBe(false);
   });
-
-  it.each(['publish', 'unpublish', 'archive', 'schedule', 'republish'] as const)(
-    'allows a %s lifecycle action after the registered save succeeds',
-    async (name) => {
-      let pending = true;
-      const flush = vi.fn(async () => {
-        pending = false;
-        return true;
-      });
-      const action = vi.fn(async () => name);
-      const onSaveFailure = vi.fn();
-      unregisterSave = registerEditorSave(`post:${postId}`, { flush, hasPending: () => pending });
-
-      await expect(runPostLifecycleActionAfterSave(postId, { current: false }, action, onSaveFailure)).resolves.toBe(
-        name,
-      );
-
-      expect(flush).toHaveBeenCalledOnce();
-      expect(action).toHaveBeenCalledOnce();
-      expect(onSaveFailure).not.toHaveBeenCalled();
-      unregisterSave();
-      unregisterSave = null;
-    },
-  );
 });

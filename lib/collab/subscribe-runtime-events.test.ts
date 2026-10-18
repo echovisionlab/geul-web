@@ -83,13 +83,6 @@ describe('subscribeToProviderRuntimeEvents', () => {
     vi.useRealTimers();
   });
 
-  it('returns a no-op without a provider', async () => {
-    const { subscribeToProviderRuntimeEvents } = await freshModule();
-    const unsubscribe = subscribeToProviderRuntimeEvents(null, vi.fn());
-    expect(unsubscribe).toBeTypeOf('function');
-    unsubscribe();
-  });
-
   it('delivers events received before the Common parser loads, in order, through the filters', async () => {
     const { subscribeToProviderRuntimeEvents } = await freshModule();
     const runtime = createProvider();

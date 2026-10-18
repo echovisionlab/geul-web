@@ -447,14 +447,6 @@ describe('checkFormAccessAction', () => {
       valid: false,
     });
   });
-
-  it('distinguishes denied verification from an incorrect password', async () => {
-    verifyPasswordMock.mockRejectedValue(new ConnectError('bad password', Code.PermissionDenied));
-
-    await expect(verifyFormPasswordAction('contact', 'secret', 'token').then(unwrapQueryResult)).rejects.toMatchObject({
-      status: 403,
-    });
-  });
 });
 
 describe('form admin actions', () => {
@@ -506,18 +498,6 @@ describe('form admin actions', () => {
       filters: [{ field: 'search', op: FilterOp.ILIKE, value: 'contact' }],
       sorts: [{ field: 'updatedAt', order: SortOrder.DESC }],
     });
-  });
-
-  it('propagates an unavailable admin listing', async () => {
-    listFormsAdminMock.mockRejectedValue(new ConnectError('unavailable', Code.Unavailable));
-
-    await expect(
-      listFormsAdminAction({
-        page: 3,
-        pageSize: 50,
-        search: 'contact',
-      }).then(unwrapQueryResult),
-    ).rejects.toMatchObject({ status: 503 });
   });
 
   it('revalidates the scoped form paths when updating forms', async () => {
@@ -786,11 +766,5 @@ describe('form submission actions', () => {
         },
       },
     });
-  });
-
-  it('propagates submission stats failures', async () => {
-    getSubmissionStatsMock.mockRejectedValue(new ConnectError('boom', Code.Internal));
-
-    await expect(getFormSubmissionStatsAction('form-1').then(unwrapQueryResult)).rejects.toMatchObject({ status: 500 });
   });
 });

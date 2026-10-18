@@ -21,6 +21,37 @@ export function createEmptyConfig(): SegmentConfigState {
   };
 }
 
+function mergePendingStringSet(canonical: string[], submitted: string[], latest: string[]): string[] {
+  const merged = new Set(canonical);
+  const submittedSet = new Set(submitted);
+  const latestSet = new Set(latest);
+  for (const value of latest) {
+    if (!submittedSet.has(value)) {
+      merged.add(value);
+    }
+  }
+  for (const value of submitted) {
+    if (!latestSet.has(value)) {
+      merged.delete(value);
+    }
+  }
+  return Array.from(merged);
+}
+
+/** Applies the edits made while a save was pending (`submitted` -> `latest`) on top of the saved `canonical` config. */
+export function rebasePendingConfig(
+  canonical: SegmentConfigState,
+  submitted: SegmentConfigState,
+  latest: SegmentConfigState,
+): SegmentConfigState {
+  return {
+    memberTagIds: mergePendingStringSet(canonical.memberTagIds, submitted.memberTagIds, latest.memberTagIds),
+    accountRoles: mergePendingStringSet(canonical.accountRoles, submitted.accountRoles, latest.accountRoles),
+    createdAfter: latest.createdAfter === submitted.createdAfter ? canonical.createdAfter : latest.createdAfter,
+    createdBefore: latest.createdBefore === submitted.createdBefore ? canonical.createdBefore : latest.createdBefore,
+  };
+}
+
 function roleFromValue(role: string): AuthorizationRole | null {
   switch (role) {
     case 'admin':

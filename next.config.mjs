@@ -1,6 +1,7 @@
 import bundleAnalyzer from '@next/bundle-analyzer';
 import createNextIntlPlugin from 'next-intl/plugin';
 import { fileURLToPath } from 'node:url';
+import { nextTypeScriptConfig } from './scripts/next-typescript-config.mjs';
 import { prepareClientMediaCodecs } from './scripts/prepare-client-media-codecs.mjs';
 import { prepareThreeRuntime } from './scripts/prepare-three-runtime.mjs';
 
@@ -10,6 +11,11 @@ await prepareThreeRuntime();
 const useLocalContracts = process.env.LOCAL_CONTRACTS === '1';
 const releaseImageBuild = process.env.RELEASE_IMAGE_BUILD === 'true';
 const workspaceRoot = fileURLToPath(new URL('..', import.meta.url));
+const appTypeScript = nextTypeScriptConfig({
+  rootDir: fileURLToPath(new URL('.', import.meta.url)),
+  useLocalContracts,
+  distDir: process.env.DIST_DIR,
+});
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
@@ -23,7 +29,7 @@ const allowedDevOrigins = process.env.ALLOWED_DEV_ORIGINS
 export default withNextIntl(
   withBundleAnalyzer({
     agentRules: false,
-    distDir: process.env.DIST_DIR || '.next',
+    distDir: appTypeScript.distDir,
     output: 'standalone',
     outputFileTracingIncludes: {
       '/*': ['./node_modules/@swc/helpers/**/*'],
@@ -56,7 +62,7 @@ export default withNextIntl(
       // Release Please only changes reviewed release metadata. The implementation
       // source has already passed the required PR build with the TypeScript 7 CLI.
       ignoreBuildErrors: releaseImageBuild,
-      tsconfigPath: useLocalContracts ? 'tsconfig.local-contracts.json' : 'tsconfig.json',
+      tsconfigPath: appTypeScript.tsconfigPath,
     },
     serverExternalPackages: ['yjs', 'sharp'],
   }),

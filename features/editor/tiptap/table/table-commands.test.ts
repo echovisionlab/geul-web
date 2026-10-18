@@ -4,6 +4,7 @@ import { Editor, type JSONContent } from '@tiptap/core';
 import { TextSelection } from '@tiptap/pm/state';
 import { CellSelection, columnResizingPluginKey, selectedRect, type ResizeState } from '@tiptap/pm/tables';
 import { describe, expect, it, vi } from 'vitest';
+import { DOCUMENT_COLOR_VALUES } from '@/components/core/DocumentColorPreview';
 import { createTiptapWireExtensions } from '../wire-schema';
 import { isBlockId } from '@/lib/editor/block-id';
 import { getTableGeometryError } from './table-commands';
@@ -61,21 +62,7 @@ function pointerEvent(type: string, init: MouseEventInit & { pointerId: number }
   return event as PointerEvent;
 }
 
-async function flushDomObserver(): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, 0));
-}
-
 describe('Tiptap table commands', () => {
-  it('renders table content without a separate outer selector control', async () => {
-    const mounted = createEditor();
-    expect(mounted.editor.commands.insertTable({ rows: 2, columns: 2 })).toBe(true);
-    await flushDomObserver();
-    const runtime = mounted.editor.view.dom.querySelector<HTMLElement>('[data-testid="tiptap-table-runtime"]');
-    expect(runtime?.querySelector('[data-testid="tiptap-table-selector"]')).toBeNull();
-    expect(runtime?.firstElementChild?.querySelector('table')).not.toBeNull();
-    mounted.destroy();
-  });
-
   it('creates a rectangular table with durable header, span, and colwidth attrs', () => {
     const errors: string[] = [];
     const mounted = createEditor((message) => errors.push(message));
@@ -130,25 +117,6 @@ describe('Tiptap table commands', () => {
       mounted.editor.view.dom.querySelector('[data-testid="tiptap-table-runtime"]')?.hasAttribute('data-selected'),
     ).toBe(false);
     expect(mounted.editor.view.dom.querySelectorAll('[data-testid$="drag-handle"]')).toHaveLength(0);
-    mounted.destroy();
-  });
-
-  it('does not create row, column, or extension controls on cell hover', async () => {
-    const mounted = createEditor();
-    expect(mounted.editor.commands.insertTable({ rows: 2, columns: 2 })).toBe(true);
-    await flushDomObserver();
-    const runtime = mounted.editor.view.dom.querySelector<HTMLElement>('[data-testid="tiptap-table-runtime"]');
-    const bodyCell = runtime?.querySelector<HTMLTableCellElement>('td');
-    if (!runtime || !bodyCell) {
-      throw new Error('Expected a rendered body cell.');
-    }
-    bodyCell.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: 120, clientY: 130 }));
-    await flushDomObserver();
-    expect(runtime.querySelector('[data-testid="tiptap-table-row-drag-handle"]')).toBeNull();
-    expect(runtime.querySelector('[data-testid="tiptap-table-column-drag-handle"]')).toBeNull();
-    expect(runtime.querySelector('[data-testid="tiptap-table-extend-row"]')).toBeNull();
-    expect(runtime.querySelector('[data-testid="tiptap-table-extend-column"]')).toBeNull();
-    expect(runtime.querySelectorAll('.column-resize-hit-zone').length).toBeGreaterThan(0);
     mounted.destroy();
   });
 
@@ -208,27 +176,30 @@ describe('Tiptap table commands', () => {
     mounted.destroy();
   });
 
-  it('round-trips pink cell text and background colors through DOM parsing', () => {
-    const mounted = createEditor();
-    expect(mounted.editor.commands.insertTable({ rows: 1, columns: 1 })).toBe(true);
-    selectFirstTableCell(mounted.editor);
-    expect(mounted.editor.commands.setTableCellTextColor('pink')).toBe(true);
-    expect(mounted.editor.commands.setTableCellBackgroundColor('pink')).toBe(true);
-    const html = mounted.editor.getHTML();
-    expect(html).toContain('data-text-color="pink"');
-    expect(html).toContain('data-background-color="pink"');
-    mounted.destroy();
+  it.each(DOCUMENT_COLOR_VALUES.filter((color) => color !== 'default'))(
+    'round-trips %s cell text and background colors through DOM parsing',
+    (color) => {
+      const mounted = createEditor();
+      expect(mounted.editor.commands.insertTable({ rows: 1, columns: 1 })).toBe(true);
+      selectFirstTableCell(mounted.editor);
+      expect(mounted.editor.commands.setTableCellTextColor(color)).toBe(true);
+      expect(mounted.editor.commands.setTableCellBackgroundColor(color)).toBe(true);
+      const html = mounted.editor.getHTML();
+      expect(html).toContain(`data-text-color="${color}"`);
+      expect(html).toContain(`data-background-color="${color}"`);
+      mounted.destroy();
 
-    const restored = createEditor(undefined, html);
-    let cell: { attrs: Record<string, unknown> } | undefined;
-    restored.editor.state.doc.descendants((node) => {
-      if (!cell && node.type.spec.tableRole === 'cell') {
-        cell = node;
-      }
-    });
-    expect(cell?.attrs).toMatchObject({ textColor: 'pink', backgroundColor: 'pink' });
-    restored.destroy();
-  });
+      const restored = createEditor(undefined, html);
+      let cell: { attrs: Record<string, unknown> } | undefined;
+      restored.editor.state.doc.descendants((node) => {
+        if (!cell && node.type.spec.tableRole === 'cell') {
+          cell = node;
+        }
+      });
+      expect(cell?.attrs).toMatchObject({ textColor: color, backgroundColor: color });
+      restored.destroy();
+    },
+  );
 
   it('resizes only an internal boundary and persists normalized percentages', () => {
     const mounted = createEditor();

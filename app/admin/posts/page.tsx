@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
 import { PostsPageView } from '@/features/admin/post/PostsPageView';
 import { listPostsAdmin } from '@/lib/queries/post';
+import { toPaginatedListInput } from '@/lib/types/common/query';
 import { parseTableQuery } from '@/lib/utils/table-url';
 
 interface PageProps {
@@ -43,14 +44,7 @@ export default async function AdminPostsPage({ searchParams }: PageProps) {
     { field: 'updated_at', label: tCommon('labels.updated') },
   ];
 
-  const result = await listPostsAdmin({
-    page: query.page,
-    pageSize: query.pageSize,
-    search: query.search,
-    sort: query.sorts?.map((s) => ({ field: s.field, order: s.direction })),
-    filter: query.filters,
-    filterBy: query.filterBy,
-  });
+  const result = await listPostsAdmin(toPaginatedListInput(query));
 
   return (
     <PostsPageView

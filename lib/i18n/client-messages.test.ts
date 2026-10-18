@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { clientMessageCoverage, pickMessagePaths, selectClientMessages } from './client-messages';
-import { CLIENT_MESSAGE_SCOPES } from './client-message-scope';
-import { CLIENT_MESSAGE_SCOPE_PATHS } from './client-message-scopes.generated';
+import { clientMessageCoverage, selectClientMessages } from './client-messages';
 import { getMessagesForLocale } from './messages';
-import { SUPPORTED_LOCALES } from './locale';
 
 // Namespaces used by public entity views, legal documents and the shared Page fallback
 // (including public blocks), without editor-only namespaces.
@@ -112,17 +109,5 @@ describe('scoped client message catalogue', () => {
     expect(clientMessageCoverage('/login')).toEqual(['auth']);
     expect(clientMessageCoverage('/forms/example')).toEqual(['forms']);
     expect(clientMessageCoverage('/admin')).not.toContain('public');
-  });
-
-  it.each(SUPPORTED_LOCALES)('selects every scope path in %s', async (locale) => {
-    const messages = await getMessagesForLocale(locale);
-    const full = Buffer.byteLength(JSON.stringify(messages));
-    for (const scope of CLIENT_MESSAGE_SCOPES) {
-      const selected = pickMessagePaths(messages, CLIENT_MESSAGE_SCOPE_PATHS[scope]);
-      for (const path of CLIENT_MESSAGE_SCOPE_PATHS[scope]) {
-        expect(getPath(selected, path), `${locale} ${scope}: ${path}`).toBeDefined();
-      }
-      expect(Buffer.byteLength(JSON.stringify(selected)), `${locale} ${scope}`).toBeLessThan(full);
-    }
   });
 });

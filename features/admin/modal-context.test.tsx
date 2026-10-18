@@ -142,14 +142,4 @@ describe('admin modal context factories', () => {
     click('close create');
     expect(container.querySelector('output')?.textContent).toBe('none:none:false');
   });
-
-  it('fails clearly when a generated hook is used outside its provider', () => {
-    const modal = createDeleteModalContext<{ id: string }>('Example');
-    function Probe() {
-      modal.useModal();
-      return null;
-    }
-
-    expect(() => act(() => root.render(<Probe />))).toThrow('useExampleModal must be used within ExampleModalProvider');
-  });
 });

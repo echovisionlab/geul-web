@@ -154,22 +154,6 @@ export function createSelectionBubbleMenuLabels(
   };
 }
 
-export const SELECTION_BUBBLE_MENU_CONTROL_ORDER = [
-  'block-type',
-  'bold',
-  'italic',
-  'underline',
-  'strike',
-  'code',
-  'alignment',
-  'colors',
-  'nest',
-  'unnest',
-  'link',
-  'inline-math',
-  'ai',
-] as const;
-
 const bubbleOptions: NonNullable<BubbleMenuProps['options']> = {
   placement: 'top',
   offset: 8,

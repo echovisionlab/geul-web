@@ -38,7 +38,7 @@ import {
   RELEASE_TRACK_PROCESSING_STATUS,
   type ReleaseTrackProcessingStatus,
 } from './ReleaseEditor/track-processing-status';
-import { isTrackAudioUploadFinalizing } from './track-audio-upload-policy';
+import { isTrackAudioUploadFinalizing, shouldAdoptResumeNotice } from './track-audio-upload-policy';
 
 const logger = createClientLogger('TrackAudioUploader');
 const ACCEPT_TRACK_AUDIO = ['.mp3', '.wav', '.flac', '.aac', '.ogg', '.oga', '.m4a', '.aif', '.aiff'].join(',');
@@ -225,18 +225,23 @@ export function TrackAudioUploader({
     isUploadResumeSuppressed(resumeNotice, suppressedResumeIdentity);
 
   useEffect(() => {
-    if (!managesPendingState) {
-      return;
-    }
-    const trackedAttemptId = trackedPendingAttemptId || activePendingAttemptRef.current;
-    if (trackedPendingFileId || !resumeNotice?.fileId || audioAttached || isResumeNoticeSuppressed) {
-      return;
-    }
-    if (trackedAttemptId && (!resumeNotice.attemptId || trackedAttemptId !== resumeNotice.attemptId)) {
+    const noticeFileId = resumeNotice?.fileId;
+    const noticeAttemptId = resumeNotice?.attemptId;
+    if (
+      !managesPendingState ||
+      !noticeFileId ||
+      !shouldAdoptResumeNotice({
+        trackedPendingFileId,
+        trackedAttemptId: trackedPendingAttemptId || activePendingAttemptRef.current,
+        resumeNotice: { fileId: noticeFileId, attemptId: noticeAttemptId },
+        audioAttached,
+        suppressed: isResumeNoticeSuppressed,
+      })
+    ) {
       return;
     }
 
-    markPendingUpload(resumeNotice.fileId, resumeNotice.attemptId || trackedPendingAttemptId || '');
+    markPendingUpload(noticeFileId, noticeAttemptId || trackedPendingAttemptId || '');
   }, [
     audioAttached,
     markPendingUpload,

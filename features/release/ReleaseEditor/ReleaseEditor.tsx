@@ -73,7 +73,8 @@ import { requireActionSuccess } from '@/lib/editor/require-action-success';
 import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 import { useAuthoritativeConfiguration, type ConfigurationWrite } from '@/lib/editor/useAuthoritativeConfiguration';
 import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
-import { flushAllEditorSaves, getPendingEditorPatch } from '@/lib/editor/editor-save-registry';
+import { getPendingEditorPatch } from '@/lib/editor/editor-save-registry';
+import { flushEditorSavesOrNotify } from '@/lib/editor/flush-editor-saves-or-notify';
 import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
 import { useEditorEntityChanges } from '@/lib/editor/editor-entity-changes';
 import { persistCollaborativeDocumentNow } from '@/lib/collab/persist-now';
@@ -542,8 +543,7 @@ function useReleaseEditorViewModel({
   const runReleaseTransition = useCallback(
     async (transition: () => void | Promise<void>) => {
       try {
-        if (!(await flushAllEditorSaves(`release:${releaseId}`))) {
-          notifications.show({ message: tCommon('notifications.saveFailed'), tone: 'danger' });
+        if (!(await flushEditorSavesOrNotify(`release:${releaseId}`, tCommon('notifications.saveFailed')))) {
           return false;
         }
         if (currentProvider) {

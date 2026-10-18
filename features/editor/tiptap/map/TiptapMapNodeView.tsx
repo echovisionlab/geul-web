@@ -417,6 +417,7 @@ function TiptapMapNodeView({
                 setIsEditingCaption(false);
               }
             }}
+            aria-label={tMap('captionPlaceholder')}
             placeholder={tMap('captionPlaceholder')}
             size="xs"
             autoFocus

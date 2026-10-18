@@ -95,7 +95,7 @@ export default async function SeriesPage({ params, searchParams }: Props) {
       }
     >
       <SeriesPublicPostsView
-        tableLabel={tCommon('entities.posts')}
+        tableLabel={series.title}
         posts={postResult.posts.map((post) => ({
           id: post.id,
           title: post.title,

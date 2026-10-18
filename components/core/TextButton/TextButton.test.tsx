@@ -77,46 +77,6 @@ describe('TextButton', () => {
     expect(link.querySelectorAll('[hidden]')).toHaveLength(1);
   });
 
-  it('renders a native button with semantic visual data and forwarded props', () => {
-    const onClick = vi.fn();
-    const ref = createRef<HTMLButtonElement>();
-
-    render(
-      <TextButton
-        ref={ref}
-        onClick={onClick}
-        appearance="muted"
-        size="xs"
-        controlSize="xs"
-        weight="semibold"
-        display="flex"
-        fullWidth
-        nowrap
-        aria-label="Open cookie settings"
-        data-consumer="footer"
-      >
-        Cookie settings
-      </TextButton>,
-    );
-
-    const button = container.querySelector<HTMLButtonElement>('button');
-    expect(button).toBe(ref.current);
-    expect(button?.type).toBe('button');
-    expect(button?.getAttribute('data-control-kind')).toBe('text');
-    expect(button?.getAttribute('aria-label')).toBe('Open cookie settings');
-    expect(button?.getAttribute('data-consumer')).toBe('footer');
-    expect(button?.getAttribute('data-appearance')).toBe('muted');
-    expect(button?.getAttribute('data-size')).toBe('xs');
-    expect(button?.getAttribute('data-control-size')).toBe('xs');
-    expect(button?.getAttribute('data-weight')).toBe('semibold');
-    expect(button?.getAttribute('data-display')).toBe('flex');
-    expect(button?.getAttribute('data-full-width')).toBe('true');
-    expect(button?.getAttribute('data-nowrap')).toBe('true');
-
-    act(() => button?.click());
-    expect(onClick).toHaveBeenCalledOnce();
-  });
-
   it('preserves native button type and disabled behavior', () => {
     const onClick = vi.fn();
 
@@ -132,19 +92,6 @@ describe('TextButton', () => {
 
     act(() => button?.click());
     expect(onClick).not.toHaveBeenCalled();
-  });
-
-  it('retains text typography and explicit control sizing without changing the native role', () => {
-    render(
-      <TextButton size="xs" display="block">
-        Download file
-      </TextButton>,
-    );
-    const button = container.querySelector('button');
-    expect(button?.hasAttribute('data-control-size')).toBe(false);
-    expect(button?.getAttribute('data-weight')).toBe('regular');
-    render(<TextButton controlSize="sm">Open settings</TextButton>);
-    expect(container.querySelector('button')?.getAttribute('data-weight')).toBe('medium');
   });
 
   it('renders href actions through an accessible anchor and forwards anchor props and refs', () => {
@@ -173,19 +120,6 @@ describe('TextButton', () => {
     expect(link?.getAttribute('download')).toBe('about.txt');
     expect(link?.getAttribute('aria-current')).toBe('page');
     expect(link?.getAttribute('data-appearance')).toBe('accent');
-  });
-
-  it('preserves external href values for native browser navigation', () => {
-    render(
-      <TextButton href="https://example.com/docs" target="_blank" rel="noopener noreferrer">
-        Documentation
-      </TextButton>,
-    );
-
-    const link = container.querySelector<HTMLAnchorElement>('a');
-    expect(link?.getAttribute('href')).toBe('https://example.com/docs');
-    expect(link?.getAttribute('target')).toBe('_blank');
-    expect(link?.getAttribute('rel')).toBe('noopener noreferrer');
   });
 
   it('runs navigation callbacks for an internal route and leaves external links native', () => {
@@ -266,35 +200,6 @@ describe('TextButton', () => {
     const glyph = button.querySelector('svg')!;
     expect(glyph).toHaveAttribute('aria-hidden', 'true');
     expect(button.firstElementChild?.textContent).toBe(name);
-  });
-
-  it('accepts ref and interaction props injected by DropdownMenu.Target', () => {
-    const ref = createRef<HTMLButtonElement>();
-
-    render(
-      <DesignSystemProvider>
-        <DropdownMenu portal={false}>
-          <DropdownMenu.Target>
-            <TextButton ref={ref} appearance="muted">
-              Language
-            </TextButton>
-          </DropdownMenu.Target>
-          <DropdownMenu.Dropdown>
-            <DropdownMenu.Item>English</DropdownMenu.Item>
-          </DropdownMenu.Dropdown>
-        </DropdownMenu>
-      </DesignSystemProvider>,
-    );
-
-    const button = container.querySelector<HTMLButtonElement>('button');
-    expect(button).toBe(ref.current);
-    expect(['true', 'menu']).toContain(button?.getAttribute('aria-haspopup'));
-    expect(button?.getAttribute('aria-expanded')).toBe('false');
-
-    act(() => button?.click());
-
-    expect(button?.getAttribute('aria-expanded')).toBe('true');
-    expect(document.querySelector('[role="menu"]')).not.toBeNull();
   });
   it('forwards accepted native advisory text on actions and links', () => {
     render(

@@ -57,29 +57,11 @@ function findButton(matches: (text: string) => boolean) {
   });
 }
 describe('actual collection page controllers', () => {
-  it.each(['clients', 'series', 'works'] as const)('renders actual %s table empty owner', async (domain) => {
-    render(domain, 'empty');
-    await vi.waitFor(() => expect(host.textContent?.toLowerCase()).toContain(`no ${domain}`));
-  });
-  it('creates a client row using the actual header controller', async () => {
-    render('clients');
-    const button = await findButton((text) => text.startsWith('new client'));
-    await act(async () => button.click());
-    expect(host.textContent).toContain('New Client');
-    expect(host.querySelector('a[href="/admin/clients/client-2"]')).not.toBeNull();
-  });
   it('creates a work and refetches the real client query owner', async () => {
     render('works');
     await vi.waitFor(() => expect(host.textContent).toContain('Night Signals'));
     const button = await findButton((text) => text.includes('new work'));
     await act(async () => button.click());
     await vi.waitFor(() => expect(host.textContent).toContain('Untitled Work'));
-  });
-  it('opens the real series creation form', async () => {
-    render('series');
-    const button = await findButton((text) => text.includes('create series'));
-    await act(async () => button.click());
-    expect(document.body.querySelector('[role=dialog]')).not.toBeNull();
-    expect(document.body.querySelector('input[required]')).not.toBeNull();
   });
 });

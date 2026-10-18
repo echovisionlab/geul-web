@@ -49,33 +49,6 @@ const labels = {
 };
 
 describe('EditorColorStyleButton', () => {
-  it('previews active text and background independently in distinct triggers', () => {
-    act(() => {
-      root.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <EditorColorStyleButton
-            labels={labels}
-            textColor="blue"
-            backgroundColor="yellow"
-            onTextColorChange={vi.fn()}
-            onBackgroundColorChange={vi.fn()}
-          />
-        </DesignSystemProvider>,
-      );
-    });
-
-    const text = container.querySelector<HTMLElement>('button[aria-label="Text"] [data-editor-color-swatch="text"]')!;
-    const background = container.querySelector<HTMLElement>(
-      'button[aria-label="Background"] [data-editor-color-swatch="background"]',
-    )!;
-    expect(text.dataset.color).toBe('blue');
-    expect(text.style.color).toBe('var(--editor-text-color-blue)');
-    expect(text.style.backgroundColor).toBe('var(--editor-background-color-default)');
-    expect(background.dataset.color).toBe('yellow');
-    expect(background.style.color).toBe('var(--editor-text-color-default)');
-    expect(background.style.backgroundColor).toBe('var(--editor-background-color-yellow)');
-  });
-
   it('keeps focus hints suppressed and opens the accessible dropdown by keyboard', async () => {
     act(() => {
       root.render(
@@ -123,6 +96,7 @@ describe('EditorColorStyleButton', () => {
     EDITOR_COLOR_VALUES.forEach((color, index) => {
       expect(textSwatches[index]?.dataset.color).toBe(color);
       expect(textSwatches[index]?.style.color).toBe(`var(--editor-text-color-${color})`);
+      expect(textSwatches[index]?.hasAttribute('data-transparent'), `text ${color}`).toBe(false);
     });
     await act(async () => menu.querySelector<HTMLElement>('[data-test="text-color-default"]')!.click());
     await act(async () => container.querySelector<HTMLButtonElement>('button[aria-label="Background"]')!.click());
@@ -134,6 +108,10 @@ describe('EditorColorStyleButton', () => {
     EDITOR_COLOR_VALUES.forEach((color, index) => {
       expect(backgroundSwatches[index]?.dataset.color).toBe(color);
       expect(backgroundSwatches[index]?.style.backgroundColor).toBe(`var(--editor-background-color-${color})`);
+      // Only the transparent default background is drawn as transparency instead of a fake fill.
+      expect(backgroundSwatches[index]?.hasAttribute('data-transparent'), `background ${color}`).toBe(
+        color === 'default',
+      );
     });
   });
 

@@ -1,160 +1,59 @@
 // @vitest-environment jsdom
 
-import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
-import { act, type ReactNode } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { render, screen, waitFor } from '@/test/render';
+import type { SiteLoaderAsset } from '@/lib/types/site-setting/config';
 import { SiteLoaderAssetsUploader } from './SiteLoaderAssetsUploader';
 
 const uploadFileMock = vi.fn();
 const addSiteLoaderAssetActionMock = vi.fn();
 const removeSiteLoaderAssetActionMock = vi.fn();
 
-let fileSelectHandler: ((file: File) => void | Promise<void>) | null = null;
-let container: HTMLDivElement | null = null;
-let root: Root | null = null;
-
-vi.mock('@tanstack/react-query', () => ({
-  useMutation: ({
-    mutationFn,
-    onSuccess,
-  }: {
-    mutationFn: (vars: any) => Promise<any>;
-    onSuccess?: (result: any) => void;
-  }) => ({
-    mutateAsync: async (vars: any) => {
-      const result = await mutationFn(vars);
-      onSuccess?.(result);
-      return result;
-    },
-    mutate: async (vars: any) => {
-      const result = await mutationFn(vars);
-      onSuccess?.(result);
-      return result;
-    },
-    isPending: false,
-  }),
-}));
-
-vi.mock('next-intl', () => ({
-  useLocale: () => 'en',
-  useTranslations: () => (key: string, values?: Record<string, string>) => values?.label ?? key,
-}));
-
-vi.mock('@/components/core/Notification', () => ({
-  notifications: {
-    show: vi.fn(),
-  },
-}));
-
-vi.mock('@/components/core/ImageUpload', () => ({
-  ImageUploadField: ({ onFileSelect }: { onFileSelect: (file: File) => void | Promise<void> }) => {
-    fileSelectHandler = onFileSelect;
-    return <div data-testid="image-upload-field" />;
-  },
-}));
-
-vi.mock('@/components/core/IconButton', () => ({
-  IconButton: ({ children, onClick }: { children: ReactNode; onClick: () => void }) => (
-    <button type="button" onClick={onClick}>
-      {children}
-    </button>
-  ),
-}));
-
 vi.mock('@/lib/hooks/useUpload', () => ({
-  useUpload: () => ({
-    uploadFile: uploadFileMock,
-    isUploading: false,
-  }),
-}));
-
-vi.mock('@/lib/hooks/useUploadValidation', () => ({
-  useUploadValidation: () => ({
-    validateFile: () => ({ valid: true as const }),
-  }),
+  useUpload: () => ({ uploadFile: uploadFileMock, isUploading: false }),
 }));
 
 vi.mock('@/lib/actions/site-setting', () => ({
-  addSiteLoaderAssetAction: (...args: any[]) => addSiteLoaderAssetActionMock(...args),
-  removeSiteLoaderAssetAction: (...args: any[]) => removeSiteLoaderAssetActionMock(...args),
+  addSiteLoaderAssetAction: (...args: unknown[]) => addSiteLoaderAssetActionMock(...args),
+  removeSiteLoaderAssetAction: (...args: unknown[]) => removeSiteLoaderAssetActionMock(...args),
 }));
 
-beforeEach(() => {
-  Object.defineProperty(window, 'matchMedia', {
-    writable: true,
-    value: vi.fn().mockImplementation((query: string) => ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    })),
-  });
-  uploadFileMock.mockResolvedValue({ fileId: 'file-1', url: '/media/site/loader/file-1.gif' });
-  addSiteLoaderAssetActionMock.mockResolvedValue({ success: true });
-  removeSiteLoaderAssetActionMock.mockResolvedValue({ success: true });
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-});
+function renderUploader(assets: SiteLoaderAsset[]) {
+  const client = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+  return render(
+    <QueryClientProvider client={client}>
+      <SiteLoaderAssetsUploader assets={assets} />
+    </QueryClientProvider>,
+  );
+}
 
-afterEach(() => {
-  act(() => {
-    root?.unmount();
-  });
-  container?.remove();
-  container = null;
-  root = null;
-  fileSelectHandler = null;
-  uploadFileMock.mockReset();
-  addSiteLoaderAssetActionMock.mockReset();
-  removeSiteLoaderAssetActionMock.mockReset();
+beforeEach(() => {
+  uploadFileMock.mockReset().mockResolvedValue({ fileId: 'file-1', url: '/media/site/loader/file-1.gif' });
+  addSiteLoaderAssetActionMock.mockReset().mockResolvedValue({ success: true });
+  removeSiteLoaderAssetActionMock.mockReset().mockResolvedValue({ success: true });
 });
 
 describe('SiteLoaderAssetsUploader', () => {
-  it('uploads a loader and appends it to the loader pool', async () => {
+  it('uploads a selected GIF to the loader slot and adds the returned file to the loader pool', async () => {
+    const { user } = renderUploader([]);
     const file = new File(['gif'], 'loader.gif', { type: 'image/gif' });
 
-    act(() => {
-      root?.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <SiteLoaderAssetsUploader assets={[]} />
-        </DesignSystemProvider>,
-      );
-    });
+    await user.upload(screen.getByLabelText('Site Loader', { selector: 'input' }), file);
 
-    expect(fileSelectHandler).toBeTruthy();
-    await act(async () => {
-      await fileSelectHandler?.(file);
-    });
-
+    await waitFor(() => expect(addSiteLoaderAssetActionMock).toHaveBeenCalledWith('file-1'));
     expect(uploadFileMock).toHaveBeenCalledWith(file, { slotId: 'loader' });
-    expect(addSiteLoaderAssetActionMock).toHaveBeenCalledWith('file-1');
   });
 
-  it('removes a selected loader asset by file id', async () => {
-    act(() => {
-      root?.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <SiteLoaderAssetsUploader
-            assets={[{ file_id: 'file-2', url: 'https://cdn.example.com/media/site/loader/file-2.gif' }]}
-          />
-        </DesignSystemProvider>,
-      );
-    });
+  it('removes an existing loader asset by its file id', async () => {
+    const { user } = renderUploader([
+      { file_id: 'file-2', url: 'https://cdn.example.com/media/site/loader/file-2.gif' },
+    ]);
 
-    const removeButton = container?.querySelector('button');
-    expect(removeButton).toBeTruthy();
+    await user.click(screen.getByRole('button', { name: 'Remove Site Loader 1' }));
 
-    await act(async () => {
-      removeButton?.click();
-    });
-
-    expect(removeSiteLoaderAssetActionMock).toHaveBeenCalledWith('file-2');
+    await waitFor(() => expect(removeSiteLoaderAssetActionMock).toHaveBeenCalledWith('file-2'));
+    expect(addSiteLoaderAssetActionMock).not.toHaveBeenCalled();
   });
 });

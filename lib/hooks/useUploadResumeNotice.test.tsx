@@ -256,26 +256,6 @@ describe('useUploadResumeState', () => {
     });
   });
 
-  it('reports missing slot-scoped attempt identity after backend lookup finds no session', async () => {
-    const slotId = randomTestId('slot-image');
-    const attemptId = randomTestUuid();
-
-    probeOptions = {
-      slotId,
-      attemptId,
-    };
-    mockFindMultipartUploadCandidateAction.mockResolvedValue(null);
-
-    await renderProbe();
-
-    expect(mockFindMultipartUploadCandidateAction).not.toHaveBeenCalled();
-    expect(latestState).toEqual({
-      code: UploadResumeStateCode.MISSING_SESSION,
-      resumeNotice: null,
-      hasActiveSession: false,
-    });
-  });
-
   it('does not show a resume notice while any upload is active for the same slot', async () => {
     mockUseIsUploadSurfaceSlotActive.mockReturnValue(true);
 

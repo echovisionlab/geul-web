@@ -1,14 +1,17 @@
 // @vitest-environment jsdom
 import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 
-import { act, type ComponentProps } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+import type { ComponentProps } from 'react';
+import { act, render, screen } from '@/test/render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   onBack: null as null | (() => void | Promise<void>),
   onStatusChange: null as null | ((status: string) => void | Promise<void>),
   onDelete: null as null | (() => void | Promise<void>),
+  onTitleChange: null as null | ((value: string) => void),
+  updateFromTitle: vi.fn(),
+  debouncedPatch: vi.fn(),
   routerBack: vi.fn(),
   notification: vi.fn(),
   lifecycleChangeStatus: vi.fn(),
@@ -17,7 +20,8 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ back: mocks.routerBack, refresh: vi.fn() }) }));
-vi.mock('next-intl', () => ({
+vi.mock('next-intl', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('next-intl')>()),
   useTranslations: () => Object.assign((key: string) => key, { rich: (key: string) => key }),
 }));
 vi.mock('@tanstack/react-query', () => ({
@@ -32,19 +36,21 @@ vi.mock('@/features/editor/EditorHeader', () => ({
     onBack,
     onStatusChange,
     onDelete,
+    onTitleChange,
   }: {
     titleDisabled?: boolean;
     onBack?: () => void | Promise<void>;
     onStatusChange?: (status: string) => void | Promise<void>;
     onDelete?: () => void | Promise<void>;
+    onTitleChange?: (value: string) => void;
   }) => {
     mocks.onBack = onBack ?? null;
+    mocks.onTitleChange = onTitleChange ?? null;
     mocks.onStatusChange = onStatusChange ?? null;
     mocks.onDelete = onDelete ?? null;
     return <header data-testid="work-header" data-readonly={String(titleDisabled)} />;
   },
 }));
-vi.mock('@/components/core/MediaPreviewGrid', () => ({ MediaPreviewGrid: 'div' }));
 vi.mock('@/features/metadata/OgImagePreview', () => ({ OgImagePreview: () => null }));
 vi.mock('@/features/site/PageLoader', () => ({ PageLoader: () => null }));
 vi.mock('@/features/share/ShareLinkSection', () => ({ ShareLinkSection: () => null }));
@@ -94,7 +100,7 @@ vi.mock('@/lib/hooks/useSlugManagement', () => ({
     isChecking: false,
     handleChange: vi.fn(),
     handleBlur: vi.fn(),
-    updateFromTitle: vi.fn(),
+    updateFromTitle: mocks.updateFromTitle,
   }),
 }));
 vi.mock('@/lib/collab/block-room-metadata', () => ({ updateBlockRoomLocaleMetadata: vi.fn() }));
@@ -103,7 +109,7 @@ vi.mock('@/lib/editor/editor-entity-changes', () => ({
   useEditorEntityChanges: vi.fn(),
 }));
 vi.mock('@/lib/editor/useBlockRoomMetadataUpdates', () => ({ useBlockRoomMetadataUpdates: vi.fn() }));
-vi.mock('@/lib/editor/useDebouncedPatch', () => ({ useDebouncedPatch: () => vi.fn() }));
+vi.mock('@/lib/editor/useDebouncedPatch', () => ({ useDebouncedPatch: () => mocks.debouncedPatch }));
 vi.mock('@/lib/editor/useDebouncedRoomMetadata', () => ({ useDebouncedRoomMetadata: () => vi.fn() }));
 vi.mock('@/features/work/WorkEditor/WorkCreditsSection', () => ({ WorkCreditsSection: () => null }));
 vi.mock('@/features/work/WorkEditor/WorkClientsSection', () => ({ WorkClientsSection: () => null }));
@@ -122,8 +128,6 @@ vi.mock('@/features/work/WorkEditor/useWorkLifecycle', () => ({
 
 import { WorkEditor } from '@/features/work/WorkEditor/WorkEditor';
 import { registerEditorSave } from '@/lib/editor/editor-save-registry';
-
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 const props = {
   workId: 'work-1',
@@ -152,19 +156,17 @@ const props = {
   siteName: 'Example',
 } satisfies ComponentProps<typeof WorkEditor>;
 
-let container: HTMLDivElement;
-let root: Root;
+let view: ReturnType<typeof render> | undefined;
 let unregisterPendingSave: (() => void) | null;
 
 beforeEach(() => {
   vi.clearAllMocks();
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
+  view = undefined;
   unregisterPendingSave = null;
   mocks.onBack = null;
   mocks.onStatusChange = null;
   mocks.onDelete = null;
+  mocks.onTitleChange = null;
   mocks.meta = {
     slug: 'work-title',
     type: 'project',
@@ -216,13 +218,17 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  act(() => root.unmount());
+  view?.unmount();
   unregisterPendingSave?.();
-  container.remove();
 });
 
 function renderWork(onBack?: () => void, canEdit: boolean = props.canEdit) {
-  act(() => root.render(<WorkEditor {...props} canEdit={canEdit} onBack={onBack} />));
+  const editor = <WorkEditor {...props} canEdit={canEdit} onBack={onBack} />;
+  if (view) {
+    view.rerender(editor);
+  } else {
+    view = render(editor);
+  }
 }
 
 describe('WorkEditor navigation save barriers', () => {
@@ -231,20 +237,31 @@ describe('WorkEditor navigation save barriers', () => {
     mocks.meta!.provider = provider;
     setProviderAccessLevel(provider, 'view');
     renderWork(undefined, false);
-    const header = container.querySelector('[data-testid="work-header"]');
+    const header = screen.getByTestId('work-header');
     expect(mocks.onStatusChange).toBeNull();
     act(() => setProviderAccessLevel(provider, 'edit'));
     expect(mocks.onStatusChange).toBeNull();
     renderWork(undefined, true);
     expect(header?.getAttribute('data-readonly')).toBe('false');
-    expect(container.querySelector('[data-testid="work-header"]')).toBe(header);
+    expect(screen.getByTestId('work-header')).toBe(header);
     expect(mocks.onStatusChange).toBeTypeOf('function');
     act(() => setProviderAccessLevel(provider, 'view'));
     expect(mocks.onStatusChange).toBeNull();
     expect(mocks.onDelete).toBeNull();
     expect(header?.getAttribute('data-readonly')).toBe('true');
-    expect(container.querySelector('[data-testid="work-header"]')).toBe(header);
+    expect(screen.getByTestId('work-header')).toBe(header);
   });
+  it('routes title edits through the shared slug hook instead of writing the slug directly', () => {
+    renderWork();
+    expect(mocks.onTitleChange).toBeTypeOf('function');
+
+    act(() => mocks.onTitleChange?.('Renamed work'));
+
+    expect(mocks.updateFromTitle).toHaveBeenCalledWith('Renamed work');
+    expect(mocks.meta!.setSlug).not.toHaveBeenCalled();
+    expect(mocks.debouncedPatch).not.toHaveBeenCalledWith(expect.objectContaining({ slug: expect.anything() }));
+  });
+
   it('waits for registered Work saves before navigating back', async () => {
     let resolveFlush: ((result: boolean) => void) | undefined;
     let pending = true;
@@ -269,24 +286,38 @@ describe('WorkEditor navigation save barriers', () => {
     });
     expect(onBack).toHaveBeenCalledOnce();
   });
-
-  it('blocks Work status and delete actions when registered saves fail', async () => {
+  it('blocks navigation, status and deletion on failed saves and allows them after saving succeeds', async () => {
+    let saved = false;
     unregisterPendingSave = registerEditorSave('work:work-1', {
-      flush: async () => false,
-      hasPending: () => true,
+      flush: async () => saved,
+      hasPending: () => !saved,
       getPendingPatch: () => ({ metadata: { local: true } }),
     });
-    renderWork();
+    const onBack = vi.fn();
+    renderWork(onBack);
     expect(mocks.onStatusChange).toBeTypeOf('function');
     expect(mocks.onDelete).toBeTypeOf('function');
 
     await act(async () => {
+      await mocks.onBack?.();
       await mocks.onStatusChange?.('published');
       await mocks.onDelete?.();
     });
 
+    expect(onBack).not.toHaveBeenCalled();
     expect(mocks.lifecycleChangeStatus).not.toHaveBeenCalled();
     expect(mocks.lifecycleDelete).not.toHaveBeenCalled();
-    expect(mocks.notification).toHaveBeenCalledTimes(2);
+    expect(mocks.notification).toHaveBeenCalledTimes(3);
+    expect(mocks.notification).toHaveBeenCalledWith({ message: 'notifications.saveFailed', tone: 'danger' });
+
+    saved = true;
+    await act(async () => {
+      await mocks.onBack?.();
+      await mocks.onStatusChange?.('published');
+      await mocks.onDelete?.();
+    });
+    expect(onBack).toHaveBeenCalledOnce();
+    expect(mocks.lifecycleChangeStatus).toHaveBeenCalledWith('published');
+    expect(mocks.lifecycleDelete).toHaveBeenCalledOnce();
   });
 });

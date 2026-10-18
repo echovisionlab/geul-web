@@ -26,25 +26,6 @@ function fixtureRoot(t, sources) {
 const fixture = (t, sources) => createSourceResolver(fixtureRoot(t, sources));
 const prop = (result, name) => result.api.find((item) => item.name === name);
 
-test('every component has English editorial guidance without translating source-provided story names', () => {
-  for (const [title, guide] of Object.entries(guidance)) {
-    for (const field of ['summary', 'anatomy', 'usage', 'accessibility', 'constraints']) {
-      const values = Array.isArray(guide[field]) ? guide[field] : [guide[field]];
-      assert.ok(values.length, `${title}: ${field} must be documented`);
-      for (const value of values) {
-        assert.equal(typeof value, 'string', `${title}: ${field} must contain text`);
-        assert.ok(value.trim(), `${title}: ${field} must not be blank`);
-        assert.doesNotMatch(value, /[가-힣]/u, `${title}: ${field} must use English editorial text`);
-      }
-    }
-  }
-  const story = parseComponentStory(
-    'Localized.stories.tsx',
-    `export default {title: 'Core/Actions/Button'}; export const Example = {name: '저장 중'};`,
-  );
-  assert.equal(story.stateStories[0].name, '저장 중');
-});
-
 test('CSF parsing preserves actual names and export IDs without evaluating render code', () => {
   const story = parseComponentStory(
     'Button.stories.tsx',

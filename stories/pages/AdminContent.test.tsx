@@ -1,14 +1,8 @@
 // @vitest-environment jsdom
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, describe, it, expect, vi } from 'vitest';
-import { within, userEvent } from 'storybook/test';
-import { TestProviders } from '@/test/TestProviders';
+import { afterEach, beforeAll, beforeEach, describe, it, expect, vi } from 'vitest';
+import { render, screen, waitFor, within } from '@/test/render';
 import { AdminContentPreview } from './AdminContent.stories';
-import { waitInAct } from '@/test/act-wait';
 
-// Full production page renders: a loaded CI worker needs more than the default 5s per test.
-vi.setConfig({ testTimeout: 20_000 });
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
   usePathname: () => '/preview',
@@ -16,103 +10,72 @@ vi.mock('next/navigation', () => ({
 }));
 vi.mock('@/lib/actions/post', () => ({ createPostAction: vi.fn(), deletePostAdminAction: vi.fn() }));
 vi.mock('@/lib/actions/page', () => ({ createPageAction: vi.fn(), deletePageAdminAction: vi.fn() }));
-class ResizeObserverMock {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-}
-vi.stubGlobal('ResizeObserver', ResizeObserverMock);
-let host: HTMLDivElement, root: Root;
-afterEach(() => {
-  act(() => root?.unmount());
-  host?.remove();
-});
-function render(domain: 'posts' | 'pages', state: 'ready' | 'empty' | 'error' = 'ready') {
-  host = document.createElement('div');
-  document.body.append(host);
-  root = createRoot(host);
-  act(() =>
-    root.render(
-      <TestProviders>
-        <AdminContentPreview domain={domain} state={state} />
-      </TestProviders>,
-    ),
-  );
-}
-describe('actual content administration page views', () => {
-  it.each(['posts', 'pages'] as const)(
-    'runs the actual %s creation controller and domain row rendering',
-    async (domain) => {
-      render(domain);
-      const button = await waitInAct(() => {
-        const match = Array.from(host.querySelectorAll('button')).find((node) => node.textContent?.startsWith('New '));
-        expect(match).toBeDefined();
-        return match!;
-      });
-      await act(async () => button.click());
-      await waitInAct(() =>
-        expect(host.querySelector(`a[href*="${domain === 'posts' ? 'post' : 'page'}-3"]`)).not.toBeNull(),
-      );
+
+beforeEach(() => {
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
     },
   );
 });
+
+afterEach(() => vi.unstubAllGlobals());
+
+// The toolbar imports are shared setup; each case waits for its own observable controls.
+beforeAll(async () => {
+  await Promise.all([
+    import('@/features/data-table/ServerDataTable/ServerDataTableSearchRuntime'),
+    import('@/features/data-table/ServerDataTable/ServerDataTableMultiFilterRuntime'),
+    import('@/features/data-table/ServerDataTable/ServerDataTableMultiSortRuntime'),
+  ]);
+}, 60_000);
 
 describe('content list accessibility states', () => {
   it.each(['posts', 'pages'] as const)(
     'keeps %s visible titles and names the table, search, selection and results',
     async (domain) => {
-      render(domain);
-      const canvas = within(host);
-      // The search field is a dynamically imported runtime.
-      await waitInAct(() =>
-        expect(
-          canvas.getByRole('searchbox', { name: domain === 'posts' ? 'Search posts...' : 'Search pages...' }),
-        ).toBeDefined(),
-      );
-      expect(canvas.getByRole('heading', { level: 1 }).textContent).toBe(domain === 'posts' ? 'Posts' : 'Pages');
-      expect(canvas.getByRole('table', { name: domain === 'posts' ? 'Posts' : 'Pages' })).toBeDefined();
-      expect(canvas.getByRole('checkbox', { name: 'Select all rows' })).toBeDefined();
-      for (const checkbox of canvas.getAllByRole('checkbox')) {
-        expect(checkbox.getAttribute('aria-label')).toBeTruthy();
+      render(<AdminContentPreview domain={domain} />);
+      const title = domain === 'posts' ? 'Posts' : 'Pages';
+      expect(await screen.findByRole('searchbox', { name: `Search ${domain}...` })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { level: 1, name: title })).toBeInTheDocument();
+      expect(screen.getByRole('table', { name: title })).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: 'Select all rows' })).toBeInTheDocument();
+      for (const checkbox of screen.getAllByRole('checkbox')) {
+        expect(checkbox).toHaveAccessibleName();
       }
-      expect(host.querySelector('[role="status"]')?.textContent).toContain('2 results');
-      expect(host.querySelector(`a[href*="${domain === 'posts' ? 'post-1' : 'page-1'}"]`)?.textContent).toContain(
-        'Listening',
+      expect(screen.getByRole('status')).toHaveTextContent('2 results');
+      const name = domain === 'posts' ? 'Listening Notes' : 'Listening Room';
+      expect(screen.getAllByRole('link', { name })[0]).toHaveAttribute(
+        'href',
+        expect.stringContaining(domain === 'posts' ? 'post-1' : 'page-1'),
       );
     },
   );
+
+  // Both domains share the same table error branch.
+  it('announces the actual error state without exposing stale rows', async () => {
+    render(<AdminContentPreview domain="posts" state="error" />);
+    expect(await screen.findByRole('alert')).toHaveTextContent('Failed to load');
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+  });
+
   it.each(['posts', 'pages'] as const)(
-    'announces actual empty/error %s states without exposing stale rows',
+    'deletes a %s row through its named menu and returns focus to list search',
     async (domain) => {
-      render(domain, 'error');
-      await waitInAct(() => expect(within(host).getByRole('alert').textContent).toContain('Failed to load'));
-      expect(host.querySelector('table')).toBeNull();
-    },
-  );
-  it.each(['posts', 'pages'] as const)(
-    'deletes a %s row through its named menu and retains useful focus',
-    async (domain) => {
-      render(domain);
-      const canvas = within(host);
+      const view = render(<AdminContentPreview domain={domain} />);
       const name = domain === 'posts' ? 'Listening Notes' : 'Listening Room';
-      const trigger = canvas.getAllByRole('button', { name: `Actions for ${name}` })[0];
-      act(() => trigger.focus());
-      await act(async () => {
-        await userEvent.click(trigger);
-      });
-      const menu = await waitInAct(() => within(document.body).getByRole('menu'));
-      await act(async () => {
-        await userEvent.click(within(menu).getByRole('menuitem', { name: 'Delete' }));
-      });
-      const dialog = await waitInAct(() => within(document.body).getByRole('dialog', { name: 'Delete' }));
-      expect(dialog.textContent).toContain(name);
-      await act(async () => {
-        await userEvent.click(within(dialog).getByRole('button', { name: 'Delete' }));
-      });
-      await waitInAct(() => {
-        expect(canvas.queryAllByRole('button', { name: `Actions for ${name}` })[0]).toBeUndefined();
-        expect(host.contains(document.activeElement)).toBe(true);
-      });
+      const triggers = await screen.findAllByRole('button', { name: `Actions for ${name}` });
+      await view.user.click(triggers[0]!);
+      const menu = await screen.findByRole('menu');
+      await view.user.click(within(menu).getByRole('menuitem', { name: 'Delete' }));
+      const dialog = await screen.findByRole('dialog', { name: 'Delete' });
+      expect(dialog).toHaveTextContent(name);
+      await view.user.click(within(dialog).getByRole('button', { name: 'Delete' }));
+      await waitFor(() => expect(screen.queryAllByRole('button', { name: `Actions for ${name}` })).toHaveLength(0));
+      await waitFor(() => expect(screen.getByRole('searchbox', { name: `Search ${domain}...` })).toHaveFocus());
     },
   );
 });

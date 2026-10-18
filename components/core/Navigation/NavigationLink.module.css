@@ -89,7 +89,7 @@
 }
 
 .root:is([data-tone='secondary'], [data-tone='muted']):is(:hover, [data-hovered]) {
-  color: var(--geul-text-primary);
+  color: var(--geul-text-hover);
 }
 
 .root[data-weight='regular'] {

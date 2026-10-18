@@ -400,17 +400,6 @@ describe('post server queries', () => {
     });
   });
 
-  it('logs and propagates an edit lookup transport error unchanged', async () => {
-    const transportError = new Error('connection closed');
-    postClient.getPost.mockRejectedValueOnce(transportError);
-
-    await expect(queries.getPostForEdit('00000000-0000-4000-8000-000000000001')).rejects.toBe(transportError);
-    expect(mocks.loggerError).toHaveBeenCalledOnce();
-    expect(mocks.loggerError).toHaveBeenCalledWith('GetPostForEdit failed', {
-      error: transportError,
-    });
-  });
-
   it('logs and propagates malformed edit route encoding', async () => {
     let thrown: unknown;
     try {

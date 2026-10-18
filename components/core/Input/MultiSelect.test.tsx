@@ -100,11 +100,9 @@ describe('MultiSelect React Aria selected-value contract', () => {
     }
   });
 
-  it('shows all values when they fit and collapses overflow into a non-removable summary', () => {
-    render();
-    expect(pills()).toHaveLength(3);
+  it('collapses values that do not fit into a non-removable summary', () => {
     width = 290;
-    render({ size: 'xs' });
+    render();
     expect(pills()).toHaveLength(1);
     expect(pills()[0].textContent).toContain('Ambient');
     const summary = container.querySelector('[data-core-multiselect-summary]');

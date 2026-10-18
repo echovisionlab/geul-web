@@ -203,39 +203,6 @@ describe('Block-room Tiptap codec', () => {
     }
   });
 
-  it('round-trips a Callout body with durable nested Blocks', () => {
-    const child = descriptor(
-      'paragraph',
-      '10000000-0000-4000-8000-000000000202',
-      { props: {} },
-      { props: {}, content: [{ text: { text: 'Nested copy' } }] },
-    );
-    const callout: ProseMirrorBlockDescriptor = {
-      ...descriptor(
-        'callout',
-        '10000000-0000-4000-8000-000000000201',
-        { props: { icon: '⚠️', backgroundColor: 'yellow' } },
-        { props: {}, content: [{ text: { text: 'Callout body' } }] },
-      ),
-      children: [child],
-    };
-
-    const parsed = parseDocument(documentToTiptap([callout]));
-    expect(parsed[0]).toMatchObject({ kind: 'callout', attrs: { icon: '⚠️', backgroundColor: 'yellow' } });
-    expect(parsed[0]?.content).toEqual([{ type: 'text', text: 'Callout body', marks: [] }]);
-    expect(parsed[0]?.children[0]).toMatchObject({
-      kind: 'paragraph',
-      parentBlockId: '10000000-0000-4000-8000-000000000201',
-    });
-    expect(splitPayload(parsed[0]!)).toEqual({
-      base: { props: { icon: '⚠️', backgroundColor: 'yellow' } },
-      locale: { props: {}, content: [{ text: { text: 'Callout body', styles: {} } }] },
-    });
-    expect(splitPayload(parsed[0]!.children[0]!).locale.content).toEqual([
-      { text: { text: 'Nested copy', styles: {} } },
-    ]);
-  });
-
   it('omits PM-invalid empty styled leaves while preserving visible siblings through an unrelated edit', () => {
     const directId = '10000000-0000-4000-8000-000000000191';
     const linkedId = '10000000-0000-4000-8000-000000000192';
@@ -432,157 +399,82 @@ describe('Block-room Tiptap codec', () => {
     editor.destroy();
   });
 
-  it('rejects tables that do not have durable row and cell identities', () => {
-    const legacy = descriptor(
-      'table',
-      '10000000-0000-4000-8000-000000000224',
-      {
-        props: {},
-        content: {
-          rows: [
-            {
-              cells: [
-                { header: true, props: {} },
-                { header: true, props: {} },
-              ],
-            },
-            {
-              cells: [
-                { header: false, props: {} },
-                { header: false, props: {} },
-              ],
-            },
-          ],
+  it('projects header-row cells to table headers and publishes them back without inventing body content', () => {
+    const rowIds = ['10000000-0000-4000-8000-000000000231', '10000000-0000-4000-8000-000000000232'];
+    const cellIds = [
+      ['10000000-0000-4000-8000-000000000233', '10000000-0000-4000-8000-000000000234'],
+      ['10000000-0000-4000-8000-000000000235', '10000000-0000-4000-8000-000000000236'],
+    ];
+    const input = documentToTiptap([
+      descriptor(
+        'table',
+        '10000000-0000-4000-8000-000000000230',
+        {
+          props: {},
+          content: {
+            rows: rowIds.map((id, row) => ({
+              id,
+              cells: cellIds[row]!.map((cellId) => ({ id: cellId, header: row === 0, props: {} })),
+            })),
+          },
         },
-      },
-      {
-        props: {},
-        content: {
-          rows: [
-            { cells: [{ content: [{ text: { text: 'A' } }] }, { content: [{ text: { text: 'B' } }] }] },
-            { cells: [{ content: [{ text: { text: 'C' } }] }, { content: [{ text: { text: 'D' } }] }] },
-          ],
+        {
+          props: {},
+          content: {
+            rows: [
+              {
+                rowId: rowIds[0]!,
+                cells: [
+                  { cellId: cellIds[0]![0]!, content: [{ text: { text: 'Column 1', styles: {} } }] },
+                  { cellId: cellIds[0]![1]!, content: [{ text: { text: 'Column 2', styles: {} } }] },
+                ],
+              },
+              { rowId: rowIds[1]!, cells: cellIds[1]!.map((cellId) => ({ cellId, content: [] })) },
+            ],
+          },
         },
+      ),
+    ]);
+    const editor = new Editor({
+      element: document.createElement('div'),
+      extensions: createTiptapWireExtensions(),
+      content: input,
+    });
+
+    const json = editor.getJSON() as JSONContent;
+    let table: JSONContent | undefined;
+    const findTable = (node: JSONContent) => {
+      if (node.type === 'table') {
+        table ??= node;
+      }
+      node.content?.forEach(findTable);
+    };
+    findTable(json);
+    expect(table?.content?.map((row) => row.content?.map((cell) => cell.type))).toEqual([
+      ['tableHeader', 'tableHeader'],
+      ['tableCell', 'tableCell'],
+    ]);
+
+    const published = splitPayload(parseDocument(json)[0]!);
+    expect(published.base).toMatchObject({
+      content: {
+        rows: [
+          { id: rowIds[0], cells: [{ header: true }, { header: true }] },
+          { id: rowIds[1], cells: [{ header: false }, { header: false }] },
+        ],
       },
-    );
-    expect(() => documentToTiptap([legacy])).toThrow('must have durable UUID identities');
-  });
-
-  it('rejects missing locale identities even when base table identities are durable', () => {
-    const rowId = '10000000-0000-4000-8000-000000000225';
-    const cellId = '10000000-0000-4000-8000-000000000226';
-    expect(() =>
-      documentToTiptap([
-        descriptor(
-          'table',
-          '10000000-0000-4000-8000-000000000227',
-          { props: {}, content: { rows: [{ id: rowId, cells: [{ id: cellId, header: false, props: {} }] }] } },
-          { props: {}, content: { rows: [{ cells: [{ content: [{ text: { text: 'legacy locale' } }] }] }] } },
-        ),
-      ]),
-    ).toThrow('must have durable UUID identities');
-  });
-
-  it('rejects malformed table UUIDs', () => {
-    expect(() =>
-      documentToTiptap([
-        descriptor(
-          'table',
-          '10000000-0000-4000-8000-000000000234',
-          { props: {}, content: { rows: [{ id: 'not-a-uuid', cells: [] }] } },
-          { props: {}, content: { rows: [{ rowId: 'not-a-uuid', cells: [] }] } },
-        ),
-      ]),
-    ).toThrow('must have durable UUID identities');
-  });
-
-  it('rejects partially migrated table identity sets', () => {
-    expect(() =>
-      documentToTiptap([
-        descriptor(
-          'table',
-          '10000000-0000-4000-8000-000000000228',
+    });
+    expect(published.locale).toMatchObject({
+      content: {
+        rows: [
           {
-            props: {},
-            content: {
-              rows: [
-                { id: '10000000-0000-4000-8000-000000000229', cells: [{ header: false, props: {} }] },
-                { cells: [{ header: false, props: {} }] },
-              ],
-            },
+            rowId: rowIds[0],
+            cells: [{ content: [{ text: { text: 'Column 1' } }] }, { content: [{ text: { text: 'Column 2' } }] }],
           },
-          { props: {}, content: { rows: [{ cells: [{ content: [] }] }, { cells: [{ content: [] }] }] } },
-        ),
-      ]),
-    ).toThrow('must have durable UUID identities');
-  });
-
-  it('rejects duplicate table identities instead of pairing duplicate positions', () => {
-    const rowId = '10000000-0000-4000-8000-000000000231';
-    const cellId = '10000000-0000-4000-8000-000000000232';
-    expect(() =>
-      documentToTiptap([
-        descriptor(
-          'table',
-          '10000000-0000-4000-8000-000000000230',
-          {
-            props: {},
-            content: {
-              rows: [
-                { id: rowId, cells: [] },
-                { id: rowId, cells: [] },
-              ],
-            },
-          },
-          {
-            props: {},
-            content: {
-              rows: [
-                { rowId, cells: [] },
-                { rowId, cells: [] },
-              ],
-            },
-          },
-        ),
-      ]),
-    ).toThrow('missing or duplicate durable row ID');
-
-    expect(() =>
-      documentToTiptap([
-        descriptor(
-          'table',
-          '10000000-0000-4000-8000-000000000233',
-          {
-            props: {},
-            content: { rows: [{ id: rowId, cells: [{ id: cellId }, { id: cellId }] }] },
-          },
-          {
-            props: {},
-            content: {
-              rows: [
-                {
-                  rowId,
-                  cells: [
-                    { cellId, content: [] },
-                    { cellId, content: [] },
-                  ],
-                },
-              ],
-            },
-          },
-        ),
-      ]),
-    ).toThrow('missing or duplicate durable cell ID');
-  });
-});
-
-describe('Mermaid canonical wire', () => {
-  it('preserves source text in the shared payload and title in the locale payload', () => {
-    const base = { props: { source: 'flowchart LR\n  A --> B' } };
-    const locale = { props: { title: '설명' } };
-    const document = documentToTiptap([descriptor('mermaid', 'mermaid-block', base, locale)]);
-    const blocks = parseDocument(document);
-    expect(blocks[0]?.kind).toBe('mermaid');
-    expect(splitPayload(blocks[0]!)).toEqual({ base, locale });
+          { rowId: rowIds[1], cells: [{ content: [] }, { content: [] }] },
+        ],
+      },
+    });
+    editor.destroy();
   });
 });

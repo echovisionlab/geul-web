@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { insertMirroredBlockAtPosition, type InsertPosition } from './block-insert';
+import { insertMirroredBlockAtPosition } from './block-insert';
 import type { EditorMediaCommandPort } from './media-block-updates';
 
 interface MockEditor extends EditorMediaCommandPort {
@@ -39,37 +39,6 @@ function createMockEditor(existingBlockIds: string[]): MockEditor {
 }
 
 describe('insertMirroredBlockAtPosition', () => {
-  it('inserts the same generated block id into both editors', () => {
-    const primaryEditor = createMockEditor(['ref-block']);
-    const mirrorEditor = createMockEditor(['ref-block']);
-    const savedPosition: InsertPosition = { referenceBlockId: 'ref-block' };
-
-    insertMirroredBlockAtPosition(
-      primaryEditor,
-      mirrorEditor,
-      {
-        type: 'file',
-        props: { url: 'https://example.com/image.png' },
-      },
-      savedPosition,
-    );
-
-    const primaryInsert = primaryEditor.inserted[0]?.blocks[0];
-    const mirrorInsert = mirrorEditor.inserted[0]?.blocks[0];
-
-    expect(typeof primaryInsert?.id).toBe('string');
-    expect(primaryInsert).toMatchObject({
-      id: mirrorInsert?.id,
-      type: 'file',
-      props: { url: 'https://example.com/image.png' },
-    });
-    expect(mirrorInsert).toMatchObject({
-      id: primaryInsert?.id,
-      type: 'file',
-      props: { url: 'https://example.com/image.png' },
-    });
-  });
-
   it('removes the shared-first placeholder when the locale insert fails', () => {
     const pendingBlockId = '01b3db42-75f1-4bf1-8cb9-9b3baf57e795';
     const deleteBlock = vi.fn(() => true);

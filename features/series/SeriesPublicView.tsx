@@ -22,6 +22,7 @@ export interface SeriesPublicPostItem {
 
 interface SeriesPublicPostsViewProps {
   posts: SeriesPublicPostItem[];
+  /** Names the table and its scroll region; the enclosing section already carries the "Posts" title. */
   tableLabel?: string;
   labels: {
     title: string;

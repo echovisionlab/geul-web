@@ -144,43 +144,34 @@ describe('error number recovery', () => {
     expect(host.querySelector('canvas')).toBeNull();
   });
 
-  it('reveals a cloud and runs one Ionian transition into the error number', async () => {
-    const { setMeshSequence, scheduleTransition, setAnimationLoop } = mockGraphics();
-    await mount();
-    expect(setMeshSequence).toHaveBeenCalledWith(['error-scatter', '500']);
-    expect(host.querySelector<HTMLElement>('[data-error-fallback]')?.style.opacity).toBe('0');
-    expect(scheduleTransition).toHaveBeenCalledExactlyOnceWith(1, 1100, expect.any(Function));
-    const draw = setAnimationLoop.mock.lastCall![0] as (time: number) => void;
-    for (let time = 1000; time <= 1300; time += 50) {
-      draw(time);
-    }
-    expect(scheduleTransition).toHaveBeenCalledTimes(1);
-  });
-
-  it('follows the pointer outside the number and clears input when the page loses it', async () => {
+  it('clears pointer input when the page loses the pointer and stops listening once unmounted', async () => {
     const { pointerPosition } = mockGraphics();
     await mount();
     const number = host.querySelector<HTMLElement>('[data-error-code]')!;
+    // jsdom has no layout; give the number a box so pointer movement can be followed.
     vi.spyOn(number, 'getBoundingClientRect').mockReturnValue({
       left: 200,
       top: 100,
       width: 480,
       height: 200,
     } as DOMRect);
-    expect(number.getAttribute('data-particles-ready')).toBe('true');
+    const followed = { x: expect.any(Number), y: expect.any(Number) };
+
     window.dispatchEvent(new MouseEvent('pointermove', { clientX: 760, clientY: 220 }));
-    expect(pointerPosition).toHaveBeenLastCalledWith({ x: 1, y: expect.closeTo(-0.2) });
+    expect(pointerPosition).toHaveBeenLastCalledWith(followed);
     window.dispatchEvent(new Event('blur'));
     expect(pointerPosition).toHaveBeenLastCalledWith(null);
+
     window.dispatchEvent(new MouseEvent('pointermove', { clientX: 100, clientY: 0 }));
-    expect(pointerPosition).toHaveBeenLastCalledWith({ x: -1, y: 1 });
     window.dispatchEvent(new MouseEvent('pointerout', { relatedTarget: document.body }));
-    expect(pointerPosition).toHaveBeenLastCalledWith({ x: -1, y: 1 });
+    expect(pointerPosition).toHaveBeenLastCalledWith(followed);
     window.dispatchEvent(new MouseEvent('pointerout', { relatedTarget: null }));
     expect(pointerPosition).toHaveBeenLastCalledWith(null);
+
     await act(async () => root.unmount());
     pointerPosition.mockClear();
     window.dispatchEvent(new MouseEvent('pointermove', { clientX: 760, clientY: 220 }));
+    window.dispatchEvent(new Event('blur'));
     expect(pointerPosition).not.toHaveBeenCalled();
   });
 

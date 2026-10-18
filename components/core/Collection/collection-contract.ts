@@ -3,12 +3,12 @@ import type { Space } from '../Layout';
 import type { TextSize } from '../Typography';
 
 /** Item scale is independent of layout and the author's chosen column count. */
-export const COLLECTION_SIZES = ['s', 'm', 'l'] as const;
+export const COLLECTION_SIZES = ['xs', 's', 'm', 'l', 'xl'] as const;
 export type CollectionSize = (typeof COLLECTION_SIZES)[number];
 export const DEFAULT_COLLECTION_SIZE: CollectionSize = 'm';
 
 export interface CollectionMetrics {
-  titleSize: Extract<TextSize, 'sm' | 'md' | 'lg'>;
+  titleSize: Extract<TextSize, 'sm' | 'md' | 'lg' | 'xl'>;
   metaSize: Extract<TextSize, 'xs' | 'sm'>;
   rowGap: Space;
   gridGap: Space;
@@ -18,14 +18,24 @@ export interface CollectionMetrics {
 }
 
 const metrics = {
-  s: { titleSize: 'sm', metaSize: 'xs', rowGap: 'sm', gridGap: 'md', itemGap: 'xxs', rowInset: 'xs', avatarSize: 'md' },
+  xs: {
+    titleSize: 'sm',
+    metaSize: 'xs',
+    rowGap: 'xs',
+    gridGap: 'sm',
+    itemGap: 'xxs',
+    rowInset: 'xxs',
+    avatarSize: 'sm',
+  },
+  s: { titleSize: 'md', metaSize: 'xs', rowGap: 'sm', gridGap: 'md', itemGap: 'xxs', rowInset: 'xs', avatarSize: 'md' },
   m: { titleSize: 'md', metaSize: 'sm', rowGap: 'md', gridGap: 'lg', itemGap: 'xs', rowInset: 'sm', avatarSize: 'lg' },
   l: { titleSize: 'lg', metaSize: 'sm', rowGap: 'xl', gridGap: 'xl', itemGap: 'sm', rowInset: 'md', avatarSize: 'xl' },
+  xl: { titleSize: 'xl', metaSize: 'sm', rowGap: 'xl', gridGap: 'xl', itemGap: 'sm', rowInset: 'lg', avatarSize: 'xl' },
 } as const satisfies Record<CollectionSize, CollectionMetrics>;
 
 export function getCollectionMetrics(size: CollectionSize = DEFAULT_COLLECTION_SIZE): CollectionMetrics {
   if (!Object.hasOwn(metrics, size)) {
-    throw new RangeError('Core Collection size must be s, m or l');
+    throw new RangeError(`Core Collection size must be one of ${COLLECTION_SIZES.join(', ')}`);
   }
   return metrics[size];
 }

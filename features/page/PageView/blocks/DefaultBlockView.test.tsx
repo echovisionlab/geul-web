@@ -1,6 +1,9 @@
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { NextIntlClientProvider } from 'next-intl';
 import { renderToStaticMarkup } from 'react-dom/server';
+import type { ReactElement } from 'react';
+import { JSDOM } from 'jsdom';
+import { within } from '@testing-library/react';
 import { create } from '@bufbuild/protobuf';
 import { beforeAll, describe, expect, it } from 'vitest';
 
@@ -18,6 +21,11 @@ import { siteVariableLinkLabel, resolvedSiteVariableLinkLabel, siteVariableHrefC
 import enMessages from '@/messages/en.json';
 import type { Block, InlineContent } from '@/lib/types/page-content';
 import { DefaultBlockView, resolveShaderMediaAsset, resolveUnifiedFileViewKind } from './DefaultBlockView';
+
+/** Parses the public server markup into a document so it can be queried the way a reader perceives it. */
+function renderToDocument(node: ReactElement) {
+  return new JSDOM(renderToStaticMarkup(node)).window.document;
+}
 
 describe('DefaultBlockView', () => {
   it.each(siteVariableHrefCases)('resolves legacy href: $name', ({ source, expected, settings }) => {
@@ -253,8 +261,8 @@ describe('DefaultBlockView', () => {
     expect(html).toContain('<span>공간은 소리를 기억한다.</span>');
   });
 
-  it('renders a materialized Callout around its nested Blocks', () => {
-    const html = renderToStaticMarkup(
+  it('renders a Callout as one surface with its icon, colour, body and nested Blocks', () => {
+    const page = renderToDocument(
       <DefaultBlockView
         block={{
           id: 'callout',
@@ -274,12 +282,11 @@ describe('DefaultBlockView', () => {
       />,
     );
 
-    expect(html).toContain('<aside data-callout="" data-bg-color="blue" data-text-color="default">');
-    expect(html).toContain('<span data-callout-icon="" aria-hidden="true">💡</span>');
-    expect(html).toContain(
-      '<div data-callout-content=""><div data-callout-copy=""><span>Callout body</span></div><div data-document-block="paragraph"',
-    );
-    expect(html).toContain('Nested Callout copy');
+    const callout = within(page.body).getByRole('complementary');
+    expect(callout).toHaveAttribute('data-bg-color', 'blue');
+    expect(within(callout).getByText('💡')).toHaveAttribute('aria-hidden', 'true');
+    expect(within(callout).getByText('Callout body')).toBeInTheDocument();
+    expect(within(callout).getByText('Nested Callout copy')).toBeInTheDocument();
   });
 
   it('renders materialized table content and durable column widths', () => {
@@ -505,7 +512,7 @@ describe('DefaultBlockView', () => {
     expect(html).toContain('<hr/>');
   });
 
-  it('renders attachment captions below the title row', () => {
+  it('shows an attachment name above its caption without linking the raw file URL', () => {
     const block: Block = {
       id: 'attachment',
       type: 'file',
@@ -523,7 +530,7 @@ describe('DefaultBlockView', () => {
       children: [],
     };
 
-    const html = renderToStaticMarkup(
+    const page = renderToDocument(
       <NextIntlClientProvider
         locale="en"
         timeZone="UTC"
@@ -541,15 +548,14 @@ describe('DefaultBlockView', () => {
       </NextIntlClientProvider>,
     );
 
-    expect(html).toContain('attachment-title');
-    expect(html).toContain('attachment-block__surface');
-    expect(html).not.toContain('data-control-size');
-    expect(html).not.toContain('href="https://cdn.example.com/file.pdf"');
-    expect(html).toContain('Field notes');
-    expect(html).toContain('media-block__caption');
-    expect(html).toContain('Recorded in the lower valley');
-    expect(html.indexOf('attachment-block__header')).toBeLessThan(html.indexOf('media-block__caption'));
-    expect(html).toContain('width:62%');
+    const name = within(page.body).getByText('Field notes');
+    const caption = within(page.body).getByText('Recorded in the lower valley');
+    expect(name.compareDocumentPosition(caption) & name.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(
+      within(page.body)
+        .queryAllByRole('link')
+        .map((link) => link.getAttribute('href')),
+    ).not.toContain('https://cdn.example.com/file.pdf');
   });
 
   it('renders the image original-download action from the exact Block runtime decision', () => {
@@ -599,7 +605,7 @@ describe('DefaultBlockView', () => {
     expect(html).toContain('aria-label="Download Field recording still"');
   });
 
-  it('renders image captions with the shared media shell classes', () => {
+  it('shows an image caption in its figure at the authored width and alignment', () => {
     const block: Block = {
       id: 'image',
       type: 'file',
@@ -616,13 +622,12 @@ describe('DefaultBlockView', () => {
       children: [],
     };
 
-    const html = renderToStaticMarkup(<DefaultBlockView block={block} />);
+    const page = renderToDocument(<DefaultBlockView block={block} />);
 
-    expect(html).toContain('class="image-block"');
-    expect(html).toContain('media-block__caption');
-    expect(html).toContain('Documented during setup');
-    expect(html).toContain('width:54%');
-    expect(html).toContain('margin-left:auto');
+    const figure = within(page.body).getByRole('figure');
+    expect(within(figure).getByRole('img', { name: 'setup.webp' })).toBeInTheDocument();
+    expect(within(figure).getByText('Documented during setup')).toBeInTheDocument();
+    expect(figure).toHaveStyle({ width: '54%', marginLeft: 'auto', marginRight: 'auto' });
   });
 
   it('keeps restored missing media blocks while rendering only kind-specific fallbacks', () => {

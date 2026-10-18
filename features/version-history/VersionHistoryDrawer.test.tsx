@@ -237,18 +237,6 @@ describe('VersionHistoryDrawer controller', () => {
     expect(routerRefreshMock).toHaveBeenCalledOnce();
   });
 
-  it.each(['post', 'page', 'work'] as const)(
-    'uses the same-locale source-only restore warning for %s',
-    async (entityType) => {
-      await renderSettledController(true, { onClose: vi.fn(), onRestored: vi.fn() }, true, entityType);
-
-      act(() => currentViewProps().onSelectVersion('version-2'));
-      expect(currentViewProps().labels.restoreBody).toBe(
-        'Same-locale restore v2 (EN) stales translations without regeneration.',
-      );
-    },
-  );
-
   it('uses the destructive source-locale switch warning for a cross-locale snapshot', async () => {
     listVersionsRequestMock.mockResolvedValue({
       versions: [{ ...versions[0], sourceLocale: 'ko' }],

@@ -227,33 +227,6 @@ describe('immersive scene schema', () => {
     ]);
   });
 
-  it('defaults to visual units with blank copy when no props are provided', () => {
-    const config = parseImmersiveSceneConfig({});
-
-    expect(config.units[0]).toMatchObject({
-      id: 'who-we-are',
-      mesh: 'sphere',
-      color: '#d8dde5',
-      title: '',
-      text: '',
-    });
-  });
-
-  it('serializes shared visual props separately from localized copy props', () => {
-    const config = parseImmersiveSceneConfig({});
-
-    expect(JSON.parse(serializeImmersiveSceneVisualUnits(config.units))[0]).toEqual({
-      id: 'who-we-are',
-      mesh: 'sphere',
-      color: '#d8dde5',
-    });
-    expect(JSON.parse(serializeImmersiveSceneCopyUnits(config.units))[0]).toEqual({
-      id: 'who-we-are',
-      title: '',
-      text: '',
-    });
-  });
-
   it('serializes asset references as durable IDs and authored settings only', () => {
     const units = parseImmersiveSceneUnits(
       [

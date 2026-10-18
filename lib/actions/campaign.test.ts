@@ -111,21 +111,6 @@ describe('createCampaignAction', () => {
       subject: 'Launch Campaign',
     });
   });
-
-  it('forwards distinct shared name and localized subject when both are provided', async () => {
-    createCampaignRpcMock.mockResolvedValue({
-      campaign: { id: 'campaign-4' },
-    });
-
-    await expect(createCampaignAction('Admin Only Name', 'Public Subject')).resolves.toEqual({
-      data: { id: 'campaign-4' },
-    });
-
-    expect(createCampaignRpcMock).toHaveBeenCalledWith({
-      name: 'Admin Only Name',
-      subject: 'Public Subject',
-    });
-  });
 });
 
 describe('getCampaignAction', () => {

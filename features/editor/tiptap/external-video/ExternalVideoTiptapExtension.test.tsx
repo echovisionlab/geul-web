@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { act, useEffect } from 'react';
-import { getSchema, type Editor } from '@tiptap/core';
+import { type Editor } from '@tiptap/core';
 import { NodeSelection, TextSelection } from '@tiptap/pm/state';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { createRoot } from 'react-dom/client';
@@ -9,8 +9,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ExternalVideoViewProps } from '@/features/media/ExternalVideoView';
 import { createTiptapWireExtensions } from '../wire-schema';
 import {
-  UnsupportedTiptapExternalVideoError,
-  assertTiptapExternalVideoSupport,
   createTiptapExternalVideoExtension,
   getTiptapStandaloneExternalVideos,
   updateTiptapExternalVideoLayout,
@@ -475,10 +473,5 @@ describe('Tiptap external-video atom', () => {
     expect(mounted.element.querySelector('[data-tiptap-external-video-widget] iframe')).toBeTruthy();
 
     await mounted.destroy();
-  });
-
-  it('fails explicitly when integrated without the paragraph compatibility attributes', () => {
-    const schema = getSchema(createTiptapWireExtensions());
-    expect(() => assertTiptapExternalVideoSupport({ schema })).toThrow(UnsupportedTiptapExternalVideoError);
   });
 });

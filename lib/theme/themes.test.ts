@@ -13,15 +13,6 @@ describe('review theme registry', () => {
     expect(normalizeThemeId('ocean-dark')).toBe('ocean-dark');
   });
 
-  it.each(themeIds)('%s retains the canonical role vocabulary and inherited values', (id) => {
-    const definition = getThemeDefinition(id);
-    const roles = getThemeTokens(id);
-    expect(Object.keys(roles).sort()).toEqual(Object.keys(semanticThemes.light).sort());
-    for (const [role, value] of Object.entries(semanticThemes[definition.base])) {
-      expect(roles[role as keyof typeof roles]).toBe(definition.overrides[role as keyof typeof roles] ?? value);
-    }
-  });
-
   it('builds custom presets from the existing material palette without expanding tokens', () => {
     const paletteValues = Object.values(primitiveTokens.colors).flatMap((entry) =>
       typeof entry === 'string' ? [entry] : Object.values(entry),

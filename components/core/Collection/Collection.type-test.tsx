@@ -5,8 +5,8 @@ const supported = (
     <CollectionMedia aspectRatio="1:1" width="thumbnail" backdrop="transparent" />
   </Collection>
 );
-// @ts-expect-error Collection has a closed S/M/L contract.
-const arbitrarySize = <Collection size="xl" />;
+// @ts-expect-error Collection has a closed XS–XL contract.
+const arbitrarySize = <Collection size="xxl" />;
 // @ts-expect-error Consumers cannot override collection geometry.
 const customStyle = <Collection style={{ gap: 999 }} />;
 // @ts-expect-error Consumers cannot override media geometry.

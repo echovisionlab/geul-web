@@ -1,48 +1,48 @@
 // @vitest-environment jsdom
-import { act } from 'react';
-import { createRoot } from 'react-dom/client';
-import { expect, it, vi } from 'vitest';
+// @geul-test-isolate: the renderer module must begin unloaded to exercise the first request.
+import { useState } from 'react';
+import { act, render, screen, waitFor } from '@/test/render';
+import { afterEach, expect, it, vi } from 'vitest';
 import { confirmDialogs, ConfirmDialogHost, preloadConfirmDialogs } from './confirm-dialogs';
+import { getConfirmDialogs } from './confirm-dialog-store';
 
-// The first dynamic import transforms the React Aria dialog graph; allow for a cold module cache.
-it(
-  'keeps a request made before the renderer loads, opens it, and restores focus to the trigger',
-  { timeout: 20000 },
-  async () => {
-    const trigger = document.createElement('button');
-    trigger.textContent = 'Remove';
-    document.body.append(trigger);
-    trigger.focus();
-    const onConfirm = vi.fn();
-    // Opened before any host has loaded the renderer: the request waits in the store.
-    confirmDialogs.open({
-      title: 'Delete item',
-      message: 'Remove this item?',
-      confirmLabel: 'Delete',
-      cancelLabel: 'Cancel',
-      closeLabel: 'Close',
-      onConfirm,
-    });
-    const host = document.createElement('div');
-    document.body.append(host);
-    const root = createRoot(host);
-    await act(async () => root.render(<ConfirmDialogHost />));
-    // The host requested the renderer chunk when it saw the queued request; wait for that chunk.
-    await act(() => preloadConfirmDialogs());
-    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
-    expect(document.querySelector('[role="dialog"]')).toHaveAccessibleName('Delete item');
-    const cancel = [...document.querySelectorAll<HTMLButtonElement>('button')].find((b) => b.textContent === 'Cancel')!;
-    await act(async () => cancel.click());
-    expect(document.querySelector('[role="dialog"]')).toBeNull();
-    expect(onConfirm).not.toHaveBeenCalled();
-    await vi.waitFor(() => expect(trigger).toHaveFocus());
-    act(() => root.unmount());
-    host.remove();
-    trigger.remove();
-  },
-);
+afterEach(() => {
+  act(() => getConfirmDialogs().forEach(({ id }) => confirmDialogs.close(id)));
+});
 
-it('renders nothing on the server and before any request', async () => {
-  const { renderToString } = await import('react-dom/server');
-  expect(renderToString(<ConfirmDialogHost />)).toBe('');
+it('keeps a request made before the host loads, opens it, and restores focus to the trigger', async () => {
+  const onConfirm = vi.fn();
+  function Example() {
+    const [showHost, setShowHost] = useState(false);
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => {
+            confirmDialogs.open({
+              title: 'Delete item',
+              message: 'Remove this item?',
+              confirmLabel: 'Delete',
+              cancelLabel: 'Cancel',
+              closeLabel: 'Close',
+              onConfirm,
+            });
+            setShowHost(true);
+          }}
+        >
+          Remove
+        </button>
+        {showHost ? <ConfirmDialogHost /> : null}
+      </>
+    );
+  }
+  const { user } = render(<Example />);
+  const trigger = screen.getByRole('button', { name: 'Remove' });
+  await user.click(trigger);
+  await act(() => preloadConfirmDialogs());
+  expect(screen.getByRole('dialog', { name: 'Delete item' })).toBeInTheDocument();
+  await user.click(screen.getByRole('button', { name: 'Cancel' }));
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(onConfirm).not.toHaveBeenCalled();
+  await waitFor(() => expect(trigger).toHaveFocus());
 });

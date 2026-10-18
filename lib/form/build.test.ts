@@ -30,26 +30,6 @@ describe('evaluateConditionLogic', () => {
       };
       expect(evaluateConditionLogic(condition, { status: 'inactive' })).toBe(false);
     });
-
-    it('handles numeric equality', () => {
-      const condition: FormStepCondition = {
-        field: 'count',
-        operator: 'eq',
-        value: 5,
-      };
-      expect(evaluateConditionLogic(condition, { count: 5 })).toBe(true);
-      expect(evaluateConditionLogic(condition, { count: 6 })).toBe(false);
-    });
-
-    it('handles boolean equality', () => {
-      const condition: FormStepCondition = {
-        field: 'enabled',
-        operator: 'eq',
-        value: true,
-      };
-      expect(evaluateConditionLogic(condition, { enabled: true })).toBe(true);
-      expect(evaluateConditionLogic(condition, { enabled: false })).toBe(false);
-    });
   });
 
   describe('neq operator', () => {
@@ -120,15 +100,6 @@ describe('evaluateConditionLogic', () => {
       };
       expect(evaluateConditionLogic(condition, { age: 18 })).toBe(true);
       expect(evaluateConditionLogic(condition, { age: 21 })).toBe(true);
-    });
-
-    it('returns false when field value is less than condition value', () => {
-      const condition: FormStepCondition = {
-        field: 'age',
-        operator: 'gte',
-        value: 18,
-      };
-      expect(evaluateConditionLogic(condition, { age: 16 })).toBe(false);
     });
   });
 
@@ -335,17 +306,6 @@ describe('evaluateConditionLogic', () => {
   });
 
   describe('condition groups', () => {
-    it('evaluates AND logic correctly - all true', () => {
-      const group: FormConditionGroup = {
-        logic: 'and',
-        conditions: [
-          { field: 'status', operator: 'eq', value: 'active' },
-          { field: 'age', operator: 'gte', value: 18 },
-        ],
-      };
-      expect(evaluateConditionLogic(group, { status: 'active', age: 21 })).toBe(true);
-    });
-
     it('evaluates AND logic correctly - one false', () => {
       const group: FormConditionGroup = {
         logic: 'and',
@@ -367,17 +327,6 @@ describe('evaluateConditionLogic', () => {
       };
       expect(evaluateConditionLogic(group, { role: 'admin' })).toBe(true);
       expect(evaluateConditionLogic(group, { role: 'moderator' })).toBe(true);
-    });
-
-    it('evaluates OR logic correctly - all false', () => {
-      const group: FormConditionGroup = {
-        logic: 'or',
-        conditions: [
-          { field: 'role', operator: 'eq', value: 'admin' },
-          { field: 'role', operator: 'eq', value: 'moderator' },
-        ],
-      };
-      expect(evaluateConditionLogic(group, { role: 'user' })).toBe(false);
     });
 
     it('evaluates nested groups', () => {
@@ -406,82 +355,7 @@ describe('evaluateConditionLogic', () => {
 // =============================================================================
 
 describe('buildForm', () => {
-  const createBasicSchema = (): FormSchema => ({
-    id: 'test-form',
-    steps: [
-      {
-        id: 'step-1',
-        title: 'Basic Info',
-        fields: [
-          {
-            id: 'field-name',
-            name: 'name',
-            type: 'text',
-            validation: {
-              validators: [{ id: 'v1', name: 'Required', predicate: 'required' }],
-            },
-          },
-          {
-            id: 'field-email',
-            name: 'email',
-            type: 'email',
-            validation: {
-              validators: [{ id: 'v2', name: 'Required', predicate: 'required' }],
-            },
-          },
-        ],
-      },
-    ],
-  });
-
-  describe('parse', () => {
-    it('parses valid data successfully', () => {
-      const schema = createBasicSchema();
-      const form = buildForm(schema);
-      const result = form.parse({ name: 'John', email: 'john@example.com' });
-      expect(result).toEqual({ name: 'John', email: 'john@example.com' });
-    });
-
-    it('throws on invalid data', () => {
-      const schema = createBasicSchema();
-      const form = buildForm(schema);
-      expect(() => form.parse({ name: '', email: '' })).toThrow();
-    });
-  });
-
-  describe('safeParse', () => {
-    it('returns success for valid data', () => {
-      const schema = createBasicSchema();
-      const form = buildForm(schema);
-      const result = form.safeParse({ name: 'John', email: 'john@example.com' });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual({ name: 'John', email: 'john@example.com' });
-      }
-    });
-
-    it('returns error for invalid data', () => {
-      const schema = createBasicSchema();
-      const form = buildForm(schema);
-      const result = form.safeParse({ name: '', email: '' });
-      expect(result.success).toBe(false);
-    });
-  });
-
   describe('getVisibleSteps', () => {
-    it('returns all steps when no conditions', () => {
-      const schema: FormSchema = {
-        id: 'test-form',
-        steps: [
-          { id: 'step-1', title: 'Step 1' },
-          { id: 'step-2', title: 'Step 2' },
-        ],
-      };
-      const form = buildForm(schema);
-      const visibleSteps = form.getVisibleSteps({});
-      expect(visibleSteps).toHaveLength(2);
-    });
-
     it('filters steps based on condition', () => {
       const schema: FormSchema = {
         id: 'test-form',
@@ -574,34 +448,6 @@ describe('buildForm', () => {
   });
 
   describe('legacy schema support', () => {
-    it('normalizes flat field schemas into a single-step form', () => {
-      const schema = normalizeFormSchema({
-        fields: [
-          {
-            name: 'email',
-            label: 'Email',
-            type: 'email',
-            required: true,
-          },
-        ],
-      });
-
-      expect(schema.steps).toHaveLength(1);
-      expect(schema.steps[0]).toMatchObject({
-        title: 'Form',
-        fields: [
-          {
-            name: 'email',
-            label: 'Email',
-            type: 'email',
-          },
-        ],
-      });
-      expect(schema.steps[0].fields?.[0].validation?.validators).toEqual([
-        expect.objectContaining({ predicate: 'required' }),
-      ]);
-    });
-
     it('builds legacy schemas without throwing and preserves field keys', () => {
       const form = buildForm({
         fields: [

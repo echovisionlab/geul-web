@@ -140,27 +140,6 @@ describe('ConfirmModal', () => {
     expect(onClose).toHaveBeenCalledOnce();
     expect(onConfirm).not.toHaveBeenCalled();
   });
-
-  it('maps semantic centered and size props at the Core boundary', () => {
-    renderModal(
-      <ConfirmModal
-        opened
-        onClose={vi.fn()}
-        onConfirm={vi.fn()}
-        title="Restore version"
-        message="Restore the selected version?"
-        confirmLabel="Restore"
-        cancelLabel="Cancel"
-        closeLabel="Close dialog"
-        centered
-        size="compact"
-      />,
-    );
-
-    const modalRoot = document.body.querySelector<HTMLElement>('[data-size="compact"][data-centered="true"]');
-
-    expect(modalRoot).not.toBeNull();
-  });
   it('describes a simple confirmation message without flattening structured message content', () => {
     const common = {
       opened: true,

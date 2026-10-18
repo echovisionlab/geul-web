@@ -1,199 +1,87 @@
 // @vitest-environment jsdom
 
-import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
-import { act, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { render, screen, waitFor } from '@/test/render';
 
 import AdminWorksPage from './page';
 
-const pushMock = vi.fn();
-const createWorkActionMock = vi.fn();
-const deleteWorkActionMock = vi.fn();
-const listWorksAdminActionMock = vi.fn();
+const navigation = vi.hoisted(() => ({ push: vi.fn() }));
+const workActions = vi.hoisted(() => ({ list: vi.fn(), create: vi.fn(), remove: vi.fn() }));
 
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: pushMock,
-  }),
+  useRouter: () => ({ push: navigation.push, replace: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
+  usePathname: () => '/works',
+  useSearchParams: () => new URLSearchParams(),
 }));
 
-vi.mock('next-intl', () => ({
-  useLocale: () => 'ko',
-  useTranslations: (namespace: string) => {
-    const translate = (key: string, values?: Record<string, unknown>) => {
-      if (key === 'actions.newItem') {
-        return `New ${String(values?.item ?? 'item')}`;
-      }
-      if (key === 'actions.searchItems') {
-        return `Search ${String(values?.items ?? 'items')}`;
-      }
-      return `${namespace}.${key}`;
-    };
-    return Object.assign(translate, { rich: translate });
-  },
-}));
-
-vi.mock('@/components/core/Notification', () => ({
-  notifications: {
-    show: vi.fn(),
-  },
-}));
-
-vi.mock('@/features/admin/ui/AdminPageHeader', () => ({
-  AdminPageHeader: (props: {
-    title: string;
-    items?: Array<{
-      key: string;
-      label: string;
-      onClick?: () => void;
-      disabled?: boolean;
-    }>;
-  }) => (
-    <header>
-      <h1>{props.title}</h1>
-      {props.items?.map((item) => (
-        <button key={item.key} type="button" data-testid={item.key} disabled={item.disabled} onClick={item.onClick}>
-          {item.label}
-        </button>
-      ))}
-    </header>
-  ),
-}));
-
-vi.mock('@/features/data-table/DataTableSelectableSection', () => ({
-  DataTableSelectableSection: () => <div data-testid="works-table" />,
-}));
-
-vi.mock('@/components/core/DataTable', () => ({
-  TableRowMenu: () => <button type="button">Row menu</button>,
-}));
-
-vi.mock('@/components/core/Button', () => ({
-  Button: ({ children, disabled, onClick }: { children: ReactNode; disabled?: boolean; onClick?: () => void }) => (
-    <button type="button" disabled={disabled} onClick={onClick}>
-      {children}
-    </button>
-  ),
-}));
-
-vi.mock('@/components/core/Badge', () => ({
-  LabelBadge: ({ children }: { children: ReactNode }) => <span>{children}</span>,
-  StatusBadge: ({ children }: { children: ReactNode }) => <span>{children}</span>,
-}));
-
-vi.mock('@/lib/i18n/admin-labels', () => ({
-  normalizeEnumToken: (value: string) => value,
-  translateCommonStatus: (value: string) => value,
-}));
-
-vi.mock('@/lib/providers/LocaleProvider', () => ({
-  useLocale: () => 'en',
-}));
-
+// Server actions are the boundary: the list returns the row the create action persisted on its next call.
 vi.mock('@/lib/actions/work', () => ({
-  createWorkAction: (...args: unknown[]) => createWorkActionMock(...args),
-  deleteWorkAction: (...args: unknown[]) => deleteWorkActionMock(...args),
-  listWorksAdminAction: (...args: unknown[]) => listWorksAdminActionMock(...args),
+  createWorkAction: workActions.create,
+  deleteWorkAction: workActions.remove,
+  listWorksAdminAction: workActions.list,
 }));
 
-let container: HTMLDivElement | null = null;
-let root: Root | null = null;
-let queryClient: QueryClient | null = null;
+const createdWork = {
+  id: 'new-work-id',
+  title: 'Untitled Work',
+  slug: null,
+  type: 'portfolio',
+  featuredImageUrl: null,
+  featured: false,
+  status: 'draft',
+  creditCount: 0,
+  clientCount: 0,
+  createdAt: null,
+  updatedAt: null,
+};
 
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: (query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener() {},
-    removeListener() {},
-    addEventListener() {},
-    removeEventListener() {},
-    dispatchEvent() {
-      return false;
-    },
-  }),
-});
-
-function render() {
-  queryClient = new QueryClient({
-    defaultOptions: {
-      mutations: { retry: false },
-      queries: { retry: false },
-    },
-  });
-
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-
-  act(() => {
-    root?.render(
-      <QueryClientProvider client={queryClient!}>
-        <DesignSystemProvider forceColorScheme="light">
-          <AdminWorksPage />
-        </DesignSystemProvider>
-      </QueryClientProvider>,
-    );
-  });
-}
-
-async function flush() {
-  await act(async () => {
-    await Promise.resolve();
-  });
+function listResult(rows: (typeof createdWork)[]) {
+  return {
+    ok: true,
+    value: { data: rows, total: rows.length, page: 1, pageSize: 20, totalPages: rows.length > 0 ? 1 : 0 },
+  };
 }
 
 beforeEach(() => {
-  pushMock.mockReset();
-  createWorkActionMock.mockReset();
-  deleteWorkActionMock.mockReset();
-  listWorksAdminActionMock.mockReset();
-  listWorksAdminActionMock.mockResolvedValue({
-    ok: true,
-    value: {
-      items: [],
-      page: 1,
-      pageSize: 20,
-      totalItems: 0,
-      totalPages: 0,
+  navigation.push.mockReset();
+  workActions.list
+    .mockReset()
+    .mockResolvedValueOnce(listResult([]))
+    .mockResolvedValue(listResult([createdWork]));
+  workActions.create.mockReset().mockResolvedValue({ data: { id: 'new-work-id' } });
+  workActions.remove.mockReset();
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
     },
-  });
-  createWorkActionMock.mockResolvedValue({
-    data: { id: 'new-work-id' },
-  });
+  );
 });
 
 afterEach(() => {
-  act(() => {
-    root?.unmount();
-  });
-  container?.remove();
-  root = null;
-  container = null;
-  queryClient?.clear();
-  queryClient = null;
+  vi.unstubAllGlobals();
 });
 
 describe('AdminWorksPage', () => {
-  it('invalidates the work list cache before navigating to a newly created work', async () => {
-    render();
-    await flush();
+  it('refreshes the work list and opens the new work in the editor after creating it', async () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
+    const { user } = render(
+      <QueryClientProvider client={queryClient}>
+        <AdminWorksPage />
+      </QueryClientProvider>,
+    );
+    await waitFor(() => expect(workActions.list).toHaveBeenCalledTimes(1));
 
-    const invalidateQueries = vi.spyOn(queryClient!, 'invalidateQueries');
-    const createButton = document.querySelector<HTMLButtonElement>('[data-testid="create-work"]');
-    expect(createButton).not.toBeNull();
+    await user.click(await screen.findByRole('button', { name: 'New Work' }));
 
-    await act(async () => {
-      createButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
-    await flush();
-
-    expect(createWorkActionMock).toHaveBeenCalledTimes(1);
-    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['works'] });
-    expect(pushMock).toHaveBeenCalledWith('/works/new-work-id?edit=true');
+    const rowLinks = await screen.findAllByRole('link', { name: 'Untitled Work' });
+    for (const link of rowLinks) {
+      expect(link.getAttribute('href')).toContain('new-work-id');
+    }
+    expect(workActions.list).toHaveBeenCalledTimes(2);
+    expect(workActions.create).toHaveBeenCalledTimes(1);
+    expect(navigation.push.mock.calls.filter(([href]) => href === '/works/new-work-id?edit=true')).toHaveLength(1);
   });
 });

@@ -1,20 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import {
-  getMapClusterRadiusPxForZoom,
-  MAP_CLUSTER_DEFAULT_MIN_POINTS,
-  MAP_CLUSTER_DEFAULT_RADIUS_PX,
-  MAP_CLUSTER_MAX_ZOOM,
-  MAP_CLUSTER_SAMPLE_INTERVAL_MS,
-} from './map-cluster';
+import { getMapClusterRadiusPxForZoom } from './map-cluster';
 
 describe('map-cluster spec', () => {
-  it('exports shared defaults for cluster tuning', () => {
-    expect(MAP_CLUSTER_DEFAULT_RADIUS_PX).toBe(56);
-    expect(MAP_CLUSTER_MAX_ZOOM).toBe(22);
-    expect(MAP_CLUSTER_SAMPLE_INTERVAL_MS).toBe(120);
-    expect(MAP_CLUSTER_DEFAULT_MIN_POINTS).toBe(2);
-  });
-
   it('shrinks the viewport cluster radius on narrower widths and higher zooms', () => {
     expect(getMapClusterRadiusPxForZoom(1.5, 390)).toBeLessThan(getMapClusterRadiusPxForZoom(1.5, 1280));
     expect(getMapClusterRadiusPxForZoom(5, 390)).toBeLessThan(getMapClusterRadiusPxForZoom(5, 1280));

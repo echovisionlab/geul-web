@@ -86,7 +86,8 @@ export function CommentSection({
 
   return (
     <DsLayoutStack gap="lg">
-      <DsHeading level={3}>
+      {/* A document-level section after the body: the level below the post title, at the h3 visual size. */}
+      <DsHeading level={2} scale={3}>
         {t('title')}{' '}
         {totalCount > 0 && (
           <DsText as="span" tone="secondary" size="lg">

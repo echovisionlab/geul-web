@@ -181,12 +181,6 @@ describe('LegalOgImagePanel', () => {
     expect(mocks.trackLatest).toHaveBeenCalledTimes(1);
   });
 
-  it('starts polling after a translated legal title creates a run', async () => {
-    renderPanel('privacy', { runId: 'translation-run', locale: 'ko', sequence: 1 });
-    await flush();
-    expect(mocks.trackLatest).toHaveBeenCalledTimes(1);
-  });
-
   it('uses the active content locale instead of the UI locale', async () => {
     renderPanel('privacy', { runId: 'translation-run-ja', locale: 'ja', sequence: 1 }, 'ja');
     await flush();

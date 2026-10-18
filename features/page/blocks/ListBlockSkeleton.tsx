@@ -10,7 +10,7 @@ import {
 } from '@/components/core/Collection';
 import { Skeleton } from '@/components/core/Display';
 import { SectionCard } from '@/components/core/Section';
-import { collectionMinColumnWidth, type CollectionTrackScale } from './content-layout';
+import { COLLECTION_COLUMN_GROWTH, collectionMinColumnWidth, type CollectionTrackScale } from './content-layout';
 import { getResponsiveSlideSize } from './constants';
 const ListCarousel = dynamic(() => import('./ListCarouselRuntime').then((module) => module.ListCarouselRuntime));
 interface ListBlockSkeletonProps {
@@ -87,7 +87,11 @@ export function ListBlockSkeleton({
         {cards}
       </ListCarousel>
     ) : (
-      <LayoutGrid minColumnWidth={collectionMinColumnWidth(layout, itemSize, trackScale)} gap={metrics.gridGap}>
+      <LayoutGrid
+        minColumnWidth={collectionMinColumnWidth(layout, itemSize, trackScale)}
+        columnGrowth={COLLECTION_COLUMN_GROWTH}
+        gap={metrics.gridGap}
+      >
         {cards}
       </LayoutGrid>
     );

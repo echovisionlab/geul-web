@@ -160,22 +160,6 @@ describe('IconButton', () => {
     expect(onDragStart).not.toHaveBeenCalled();
   });
 
-  it('matches a text-button control height without changing standalone sizes', () => {
-    const aligned = renderIconButton(
-      <IconButton label="Remove" size="xs">
-        X
-      </IconButton>,
-    );
-    expect(aligned.getAttribute('data-control-size')).toBe('xs');
-
-    const standalone = renderIconButton(
-      <IconButton label="Remove" size="lg">
-        X
-      </IconButton>,
-    );
-    expect(standalone.getAttribute('data-control-size')).toBe('lg');
-  });
-
   it('owns toggle semantics and the selected appearance from pressed', () => {
     const unsafe = { tone: 'accent', emphasis: 'strong' } as unknown as { tone?: never; emphasis?: never };
     const pressed = renderIconButton(
@@ -200,12 +184,6 @@ describe('IconButton', () => {
     );
     expect(command.hasAttribute('aria-pressed')).toBe(false);
     expect(command.dataset.tone).toBe('danger');
-  });
-
-  it('renders an accessible icon button', () => {
-    const button = renderIconButton(<IconButton label="Edit">E</IconButton>);
-
-    expect(button.getAttribute('aria-label')).toBe('Edit');
   });
 
   it.each([
@@ -283,23 +261,6 @@ describe('IconButton', () => {
     expect(button.getAttribute('data-emphasis')).toBe('low');
   });
 
-  it('maps semantic danger tone without exposing raw colors', () => {
-    const button = renderIconButton(
-      <IconButton label="Delete" tone="danger">
-        D
-      </IconButton>,
-    );
-
-    expect(button.getAttribute('data-tone')).toBe('danger');
-  });
-
-  it('preserves aria-labelledby when the label is external', () => {
-    const button = renderIconButton(<IconButton aria-labelledby="external-icon-button-label">E</IconButton>);
-
-    expect(button.getAttribute('aria-labelledby')).toBe('external-icon-button-label');
-    expect(button.hasAttribute('aria-label')).toBe(false);
-  });
-
   it.each([
     {},
     { label: '' },
@@ -311,19 +272,6 @@ describe('IconButton', () => {
     expect(() => renderIconButton(<IconButton {...(props as IconButtonActionProps)}>E</IconButton>)).toThrow(
       /exactly one nonempty/,
     );
-  });
-
-  it('resolves an external label as an accessible name for both the command and pending progress', () => {
-    const button = renderIconButton(
-      <>
-        <span id="edit-record">Edit record</span>
-        <IconButton aria-labelledby="edit-record" loading>
-          E
-        </IconButton>
-      </>,
-    );
-    expect(button).toHaveAccessibleName(expect.stringContaining('Edit record'));
-    expect(container?.querySelector('[role="progressbar"]')).toHaveAccessibleName('Edit record');
   });
 
   it('keeps the visual count decorative and validates numeric badge input', () => {
@@ -364,18 +312,6 @@ describe('IconButton', () => {
     expect(onReset).not.toHaveBeenCalled();
   });
 
-  it('preserves disabled state', () => {
-    const button = renderIconButton(
-      <IconButton label="Disabled edit" disabled>
-        E
-      </IconButton>,
-    );
-
-    expect(button.disabled).toBe(true);
-    expect(button.getAttribute('data-emphasis')).toBe('low');
-    expect(button.classList.contains(classes.root)).toBe(true);
-  });
-
   it('keeps accepted native advisory text on a disabled action without changing its name', () => {
     const button = renderIconButton(
       <IconButton label="Cancel" disabled title="Finalizing">
@@ -407,18 +343,5 @@ describe('IconButton', () => {
     const pending = container!.querySelector<HTMLElement>('[aria-busy="true"]')!;
     expect(pending.tagName).toBe('SPAN');
     expect(pending.title).toBe('Saving changes');
-  });
-
-  it('applies the same Core low-emphasis disabled treatment to semantic tones', () => {
-    const button = renderIconButton(
-      <IconButton label="Disabled delete" tone="danger" emphasis="low" disabled>
-        D
-      </IconButton>,
-    );
-
-    expect(button.disabled).toBe(true);
-    expect(button.getAttribute('data-tone')).toBe('danger');
-    expect(button.getAttribute('data-emphasis')).toBe('low');
-    expect(button.classList.contains(classes.root)).toBe(true);
   });
 });

@@ -1,213 +1,41 @@
 // @vitest-environment jsdom
-
-import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
+import { describe, expect, it } from 'vitest';
+import { render, screen } from '@/test/render';
 import { FormBuilder } from './FormBuilder';
 
-const buildFormMock = vi.fn();
-
-vi.mock('next-intl', () => ({
-  useTranslations: (namespace: string) => (key: string, values?: Record<string, unknown>) => {
-    if (namespace === 'formAdmin.builder') {
-      if (key === 'addStep') {
-        return 'Add step';
-      }
-      if (key === 'step.addField') {
-        return 'Add field';
-      }
-      if (key === 'step.removeStep') {
-        return `Remove step ${String(values?.index ?? '')}`;
-      }
-      if (key === 'field.removeField') {
-        return `Remove field ${String(values?.name ?? '')}`;
-      }
-      if (key === 'step.fieldsCount') {
-        return `${String(values?.count ?? 0)} fields`;
-      }
-      return key;
-    }
-
-    if (namespace === 'common.labels') {
-      return key;
-    }
-
-    if (namespace === 'common.states') {
-      if (key === 'untitledPlain') {
-        return 'Untitled';
-      }
-      return key;
-    }
-
-    if (namespace === 'pageEditor') {
-      return key;
-    }
-
-    return key;
-  },
-}));
-
-vi.mock('@mantine/hooks', () => ({
-  useMediaQuery: () => false,
-}));
-
-vi.mock('@/components/core/Notification', () => ({
-  notifications: {
-    show: vi.fn(),
-  },
-}));
-
-vi.mock('@/components/core/Sortable', () => ({
-  verticalKeyboardCoordinates: () => undefined,
-  SortableGroups: ({ groups, renderGroup, renderItem }: any) => (
-    <div data-testid="sortable-groups">
-      {groups.map((group: any) => (
-        <div key={group.id}>
-          {renderGroup({
-            group,
-            isDropTarget: false,
-            dragHandleProps: { attributes: {}, listeners: {} },
-            children: (
-              <div>
-                {group.items.map((item: any) => (
-                  <div key={item.id}>
-                    {renderItem({
-                      item,
-                      groupId: group.id,
-                      dragHandleProps: { attributes: {}, listeners: {} },
-                    })}
-                  </div>
-                ))}
-              </div>
-            ),
-          })}
-        </div>
-      ))}
-    </div>
-  ),
-}));
-
-vi.mock('@/features/form/FormRenderer', () => ({
-  FormRenderer: () => <div data-testid="form-preview">Preview</div>,
-}));
-
-vi.mock('@/features/form/useFormValidationMessages', () => ({
-  useFormValidationMessages: () => ({}),
-}));
-
-vi.mock('@/lib/form/build', () => ({
-  buildForm: (schema: { id: string }) => buildFormMock(schema),
-}));
-
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: (query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener() {},
-    removeListener() {},
-    addEventListener() {},
-    removeEventListener() {},
-    dispatchEvent() {
-      return false;
-    },
-  }),
-});
-
-class ResizeObserverMock {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-}
-
-Object.defineProperty(globalThis, 'ResizeObserver', {
-  writable: true,
-  value: ResizeObserverMock,
-});
-
-const baseSchema = {
+const schema = {
   id: 'schema-1',
   steps: [
     {
       id: 'step-1',
       title: 'Localized step',
-      fields: [
-        {
-          id: 'field-1',
-          key: 'message',
-          label: 'Localized field',
-          type: 'text' as const,
-        },
-      ],
+      fields: [{ id: 'field-1', key: 'message', label: 'Localized field', type: 'text' as const }],
     },
   ],
 };
 
-let container: HTMLDivElement | null = null;
-let root: Root | null = null;
-
-function render(mode: 'full' | 'translation' | 'readOnly') {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-
-  act(() => {
-    root?.render(
-      <DesignSystemProvider forceColorScheme="light">
-        <FormBuilder schema={baseSchema} mode={mode} title="Localized form" />
-      </DesignSystemProvider>,
-    );
-  });
-}
-
-beforeEach(() => {
-  buildFormMock.mockReset();
-  buildFormMock.mockImplementation((schema: { id: string }) => ({ id: schema.id }));
-});
-
-afterEach(() => {
-  act(() => {
-    root?.unmount();
-  });
-  container?.remove();
-  root = null;
-  container = null;
-});
-
 describe('FormBuilder', () => {
-  it('hides structure editing controls in translation mode', () => {
-    render('translation');
-
-    expect(document.body.textContent).not.toContain('Add step');
-    expect(document.querySelector('[aria-label^="Remove step"]')).toBeNull();
-    expect(document.querySelector('[aria-label^="Remove field"]')).toBeNull();
-    expect(document.querySelector('[data-interaction="drag-handle"]')).toBeNull();
-    expect(document.body.textContent).not.toContain('Add field');
+  it('hides structure editing controls in translation mode', async () => {
+    const { user } = render(<FormBuilder schema={schema} mode="translation" title="Localized form" />);
+    await user.click(screen.getByRole('button', { name: /Localized step.*fields/ }));
+    expect(screen.queryByRole('button', { name: 'Add Step' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Add Field' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Remove (step|field)/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Drag (step|field)/ })).not.toBeInTheDocument();
   });
 
   it('puts editing controls before the preview in keyboard and reading order', () => {
-    render('full');
-
-    const editor = document.querySelector('[data-testid="sortable-groups"]');
-    const preview = document.querySelector('[data-testid="form-preview"]');
-    expect(editor).not.toBeNull();
-    expect(preview).not.toBeNull();
-    expect(editor!.compareDocumentPosition(preview!)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(
-      Array.from(container!.querySelectorAll<HTMLElement>('[style]')).some((element) => Boolean(element.style.order)),
-    ).toBe(false);
+    render(<FormBuilder schema={schema} mode="full" title="Localized form" />);
+    const builder = screen.getByRole('heading', { name: 'Form Builder' });
+    const preview = screen.getByRole('heading', { name: 'Preview' });
+    expect(builder.compareDocumentPosition(preview) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  it('shows structure editing controls in full mode', () => {
-    render('full');
-
-    expect(document.body.textContent).toContain('Add step');
-    expect(document.querySelector('[aria-label^="Remove step"]')).not.toBeNull();
-    expect(document.querySelectorAll('[data-interaction="drag-handle"]')).toHaveLength(2);
+  it('shows structure editing controls in full mode', async () => {
+    const { user } = render(<FormBuilder schema={schema} mode="full" title="Localized form" />);
+    await user.click(screen.getByRole('button', { name: /Localized step.*fields/ }));
+    expect(screen.getByRole('button', { name: 'Add Step' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Remove step 1' })).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: /Drag (step|field)/ })).toHaveLength(2);
   });
 });

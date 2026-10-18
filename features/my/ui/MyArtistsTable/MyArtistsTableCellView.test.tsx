@@ -39,23 +39,6 @@ function render(node: ReactNode) {
 }
 
 describe('MyArtistsTableCellView', () => {
-  it('renders only the supplied serializable row display values', () => {
-    render(
-      <>
-        <MyArtistsTableCellView cell="avatar" row={row} />
-        <MyArtistsTableCellView cell="name" row={row} />
-        <MyArtistsTableCellView cell="status" row={row} />
-        <MyArtistsTableCellView cell="created" row={row} />
-      </>,
-    );
-
-    expect(container.querySelector<HTMLAnchorElement>(`a[href="${row.href}"]`)?.textContent).toBe(row.name);
-    expect(container.textContent).toContain(row.slugLabel);
-    expect(container.textContent).toContain(row.statusLabel);
-    expect(container.textContent).toContain(row.createdLabel);
-    expect(container.querySelector<HTMLImageElement>('img')?.src).toContain(row.imageUrl);
-  });
-
   it('omits optional slug and image values without deriving replacements', () => {
     const sparseRow = { ...row, slugLabel: null, imageUrl: null };
     render(

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
+import { expect, waitFor } from 'storybook/test';
 
 import { prepareSocialLinksDisplay } from '@/features/social-links/prepare-social-links-display';
 import { LayoutContainer, LayoutInset, LayoutStack } from '@/components/core/Layout';
@@ -43,6 +44,8 @@ interface CollectionStoryProps {
   carouselIndicators: boolean;
   locale?: string;
   labels: Record<string, string>;
+  /** Items shown (six by default). */
+  limit?: number;
 }
 
 const entities: Entity[] = ['posts', 'events', 'artists', 'releases', 'works', 'labels', 'authors'];
@@ -132,7 +135,7 @@ function titleFor(entity: Entity, index: number, fixture: Fixture): string {
 
 function renderCollection(props: CollectionStoryProps) {
   const { entity, fixture } = props;
-  const indices = fixture === 'empty' ? [] : [0, 1, 2, 3, 4, 5];
+  const indices = fixture === 'empty' ? [] : [0, 1, 2, 3, 4, 5].slice(0, props.limit ?? 6);
   const display = {
     layout: props.layout,
     itemSize: props.itemSize,
@@ -318,6 +321,29 @@ function CollectionBlockPreview(props: CollectionStoryProps) {
   );
 }
 
+/**
+ * An events page as authors build it: an upcoming list above a past-events grid. One item size gives
+ * both blocks the same image width, so a list block and a grid block sit together without a scale jump.
+ */
+function EventsPageComposition(props: CollectionStoryProps & { pastLayout: ListViewLayout }) {
+  const section = (title: string, layout: ListViewLayout, limit: number) => (
+    <LayoutStack as="section" gap="md">
+      <Heading level={2} scale={3}>
+        {title}
+      </Heading>
+      {renderCollection({ ...props, entity: 'events', layout, limit })}
+    </LayoutStack>
+  );
+  return (
+    <LayoutInset block="lg" inline="md">
+      <LayoutStack gap="xl">
+        {section(props.labels.upcoming, props.layout, 2)}
+        {section(props.labels.past, props.pastLayout, 3)}
+      </LayoutStack>
+    </LayoutInset>
+  );
+}
+
 const meta = {
   title: 'Feature/Page/Collection Blocks',
   component: CollectionBlockPreview,
@@ -338,9 +364,13 @@ const meta = {
         cards: 'pageEditor.blockEditor.options.layout.cards',
         minimal: 'pageEditor.blockEditor.options.layout.minimal',
         carousel: 'pageEditor.blockEditor.options.layout.carousel',
+        xs: 'pageEditor.blockEditor.options.itemSize.xs',
         s: 'pageEditor.blockEditor.options.itemSize.s',
         m: 'pageEditor.blockEditor.options.itemSize.m',
         l: 'pageEditor.blockEditor.options.itemSize.l',
+        xl: 'pageEditor.blockEditor.options.itemSize.xl',
+        upcoming: 'pageEditor.blockEditor.options.timeWindow.upcoming',
+        past: 'pageEditor.blockEditor.options.timeWindow.past',
       },
     }),
   ],
@@ -399,3 +429,44 @@ export const LongContent: Story = { args: { fixture: 'stress', layout: 'cards' }
 export const MissingMedia: Story = { args: { fixture: 'missing-media' } };
 export const Empty: Story = { args: { fixture: 'empty' } };
 export const HeroCarousel: Story = { args: { layout: 'carousel', columns: '1', itemSize: 'l' } };
+
+/** A list thumbnail is as wide as the grid card minimum and never shorter than its title and metadata. */
+async function assertSharedMediaScale({ canvasElement }: { canvasElement: HTMLElement }) {
+  await waitFor(() => expect(canvasElement.querySelectorAll('[data-width="thumbnail"]').length).toBeGreaterThan(0));
+  for (const media of canvasElement.querySelectorAll<HTMLElement>('[data-width="thumbnail"]')) {
+    const text = media.nextElementSibling as HTMLElement;
+    expect(media.getBoundingClientRect().height).toBeGreaterThanOrEqual(text.getBoundingClientRect().height - 1);
+  }
+}
+
+export const EventsPage: StoryObj<typeof EventsPageComposition> = {
+  render: (args) => <EventsPageComposition {...args} />,
+  args: { layout: 'list', pastLayout: 'grid' },
+  argTypes: {
+    layout: { name: 'upcoming layout', control: 'select', options: layouts },
+    pastLayout: { name: 'past layout', control: 'select', options: layouts },
+    entity: { table: { disable: true } },
+    authorLayout: { table: { disable: true } },
+  },
+  play: assertSharedMediaScale,
+};
+export const EventsPageExtraSmall: StoryObj<typeof EventsPageComposition> = {
+  ...EventsPage,
+  args: { ...EventsPage.args, itemSize: 'xs' },
+};
+export const EventsPageSmall: StoryObj<typeof EventsPageComposition> = {
+  ...EventsPage,
+  args: { ...EventsPage.args, itemSize: 's' },
+};
+export const EventsPageLarge: StoryObj<typeof EventsPageComposition> = {
+  ...EventsPage,
+  args: { ...EventsPage.args, itemSize: 'l' },
+};
+export const EventsPageExtraLarge: StoryObj<typeof EventsPageComposition> = {
+  ...EventsPage,
+  args: { ...EventsPage.args, itemSize: 'xl' },
+};
+export const EventsPagePhone: StoryObj<typeof EventsPageComposition> = {
+  ...EventsPage,
+  globals: { viewport: { value: 'phone', isRotated: false } },
+};

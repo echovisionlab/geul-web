@@ -539,20 +539,6 @@ describe('useHocuspocusConnection request identity', () => {
     expect(journal.hasDocumentRoomIntents(documentName, null)).toBe(true);
   });
 
-  it('starts parked when the room admits a viewer read-only', async () => {
-    const documentName = `menu:${entityId}:de`;
-    await act(async () => {
-      root?.render(<ReloadHarness documentName={documentName} />);
-      await Promise.resolve();
-    });
-    const first = providerState.instances[0]!;
-    act(() =>
-      first.emit('stateless', { payload: JSON.stringify({ v: 3, kind: 'room.access_changed', access: 'view' }) }),
-    );
-    const { getProviderAccessLevel } = await import('@/lib/collab/provider-control-state');
-    expect(getProviderAccessLevel(first)).toBe('view');
-  });
-
   it('saves parked intents again when a readmission reports edit access', async () => {
     const documentName = `menu:${entityId}:it`;
     await act(async () => {

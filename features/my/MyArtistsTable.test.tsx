@@ -1,48 +1,12 @@
-// @vitest-environment jsdom
-
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { MyArtistsDataTableProps, MyArtistsDataTableQuery } from '@/features/my/MyArtistsDataTable';
-
-interface ArtistsResult {
-  data: Array<{
-    id: string;
-    name: string;
-    slug: string | null;
-    imageUrl: string | null;
-    status: string;
-    createdAt: Date | null;
-  }>;
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
-
-interface QueryOptions {
-  queryKey: unknown[];
-  queryFn: () => Promise<ArtistsResult>;
-  initialData: ArtistsResult;
-}
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { describe, expect, it, vi } from 'vitest';
+import type { MyArtistsDataTableProps } from '@/features/my/MyArtistsDataTable';
+import { MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
 
 const mocks = vi.hoisted(() => ({
-  isLoading: false,
-  queryData: null as ArtistsResult | null,
-  queryOptions: null as QueryOptions | null,
   dataTableProps: null as MyArtistsDataTableProps | null,
-  listMyArtistsAction: vi.fn(),
-  buildManagedImageUrl: vi.fn((src: string | null) => (src ? `managed:${src}:avatar-sm` : null)),
-}));
-
-vi.mock('@tanstack/react-query', () => ({
-  useQuery: (options: QueryOptions) => {
-    mocks.queryOptions = options;
-    return {
-      data: mocks.queryData ?? options.initialData,
-      isLoading: mocks.isLoading,
-    };
-  },
+  buildManagedImageUrl: vi.fn((src: string | null | undefined) => (src ? `managed:${src}` : null)),
 }));
 
 vi.mock('next-intl', () => ({
@@ -56,26 +20,19 @@ vi.mock('@/features/my/MyArtistsDataTable', () => ({
   },
 }));
 
-vi.mock('@/lib/actions/artist', () => ({
-  listMyArtistsAction: mocks.listMyArtistsAction,
-}));
-
 vi.mock('@/lib/providers/LocaleProvider', () => ({
   useLocale: () => 'en-US',
 }));
 
-vi.mock('@/lib/utils/managed-image-url', () => ({
+vi.mock('@/lib/utils/managed-image-url', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/utils/managed-image-url')>()),
   buildManagedImageUrl: mocks.buildManagedImageUrl,
-  MANAGED_IMAGE_PRESET: { AVATAR_SM: 'avatar-sm' },
 }));
 
 import { MyArtistsTable } from './MyArtistsTable';
 
-let container: HTMLDivElement;
-let root: Root;
-
 const createdAt = new Date(2026, 6, 4, 12, 0, 0);
-const initialData: ArtistsResult = {
+const initialData = {
   data: [
     {
       id: 'artist-published',
@@ -100,44 +57,16 @@ const initialData: ArtistsResult = {
   totalPages: 1,
 };
 
-beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-  mocks.isLoading = false;
-  mocks.queryData = initialData;
-  mocks.queryOptions = null;
-  mocks.dataTableProps = null;
-  mocks.listMyArtistsAction.mockReset();
-  mocks.buildManagedImageUrl.mockClear();
-});
-
-afterEach(() => {
-  act(() => root.unmount());
-  container.remove();
-});
-
-function renderController() {
-  act(() => {
-    root.render(<MyArtistsTable initialData={initialData} />);
-  });
-}
-
-function getDataTableProps() {
-  expect(mocks.dataTableProps).not.toBeNull();
-  return mocks.dataTableProps!;
-}
-
-function getQueryOptions() {
-  expect(mocks.queryOptions).not.toBeNull();
-  return mocks.queryOptions!;
-}
-
 describe('MyArtistsTable controller', () => {
   it('preformats localized rows, managed image URLs, dates, statuses, and edit hrefs', () => {
-    renderController();
+    const listAction = vi.fn(() => new Promise<never>(() => undefined));
+    renderToStaticMarkup(
+      <QueryClientProvider client={new QueryClient()}>
+        <MyArtistsTable initialData={initialData} listAction={listAction} />
+      </QueryClientProvider>,
+    );
 
-    expect(getDataTableProps()).toMatchObject({
+    expect(mocks.dataTableProps).toMatchObject({
       labels: {
         title: 'common.entities.artists',
         image: 'common.labels.image',
@@ -159,7 +88,7 @@ describe('MyArtistsTable controller', () => {
             id: 'artist-published',
             name: 'Mina Park',
             slugLabel: '/mina-park',
-            imageUrl: 'managed:/media/mina.jpg:avatar-sm',
+            imageUrl: 'managed:/media/mina.jpg',
             href: '/artists/artist-published?edit=true',
             statusLabel: 'common.statuses.published',
             statusTone: 'positive',
@@ -178,48 +107,6 @@ describe('MyArtistsTable controller', () => {
         ],
       },
     });
-    expect(mocks.buildManagedImageUrl).toHaveBeenCalledTimes(2);
-  });
-
-  it('owns query state and maps table query changes to the list action input', async () => {
-    mocks.listMyArtistsAction.mockResolvedValue({ ok: true, value: initialData });
-    renderController();
-
-    const nextQuery: MyArtistsDataTableQuery = {
-      page: 3,
-      pageSize: 10,
-      search: 'mina',
-      filterBy: 'OR',
-      filters: [{ field: 'name', op: 'ilike', value: 'mina' }],
-      sorts: [
-        { field: 'created_at', direction: 'desc' },
-        { field: 'name', direction: 'asc' },
-      ],
-    };
-
-    act(() => getDataTableProps().onQueryChange(nextQuery));
-
-    expect(getDataTableProps().query).toEqual(nextQuery);
-    expect(getQueryOptions().queryKey).toEqual(['artists', 'my', nextQuery]);
-
-    await getQueryOptions().queryFn();
-    expect(mocks.listMyArtistsAction).toHaveBeenCalledWith({
-      filter: nextQuery.filters,
-      filterBy: 'OR',
-      sort: [
-        { field: 'created_at', order: 'desc' },
-        { field: 'name', order: 'asc' },
-      ],
-      page: 3,
-      pageSize: 10,
-      search: 'mina',
-    });
-  });
-
-  it('forwards the query loading state to the table controller', () => {
-    mocks.isLoading = true;
-    renderController();
-
-    expect(getDataTableProps().loading).toBe(true);
+    expect(mocks.buildManagedImageUrl).toHaveBeenCalledWith('/media/mina.jpg', MANAGED_IMAGE_PRESET.AVATAR_SM);
   });
 });

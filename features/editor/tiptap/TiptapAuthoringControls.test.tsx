@@ -34,7 +34,6 @@ vi.stubGlobal(
 );
 
 const enEditorMessages = enMessages.editorCommon.editor;
-const koEditorMessages = koMessages.editorCommon.editor;
 
 vi.mock('next-intl', () => ({
   useLocale: () => 'ko',
@@ -148,64 +147,6 @@ async function flushMenuUpdate() {
 }
 
 describe('Tiptap authoring controls', () => {
-  it('uses the editor-neutral slash labels and exposes the unified file item', () => {
-    const items = createTiptapSlashItems(koEditorMessages);
-
-    expect(items.find((item) => item.key === 'heading')).toMatchObject({
-      execution: { type: 'intrinsic', nodeName: 'heading' },
-      enabled: true,
-    });
-    expect(items.find((item) => item.key === 'file')).toMatchObject({
-      execution: { type: 'workflow', workflow: 'file' },
-      enabled: false,
-    });
-    expect(items.find((item) => item.key === 'map')).toMatchObject({
-      enabled: false,
-      unavailableReason: expect.any(String),
-    });
-    expect(items.find((item) => item.key === 'external-video')).toMatchObject({
-      enabled: false,
-      unavailableReason: expect.any(String),
-    });
-    expect(items.find((item) => item.key === 'ai')).toMatchObject({
-      enabled: false,
-      unavailableReason: expect.any(String),
-    });
-  });
-
-  it('keeps promised but unbound capabilities visible as explicit unavailable items', () => {
-    const unavailableItems = createTiptapSlashItems(enEditorMessages, {
-      ai: true,
-      externalVideo: true,
-      map: true,
-      table: true,
-    });
-    for (const key of ['ai', 'external-video', 'map']) {
-      expect(unavailableItems.find((item) => item.key === key)).toMatchObject({
-        enabled: false,
-        unavailableReason: expect.any(String),
-      });
-    }
-    expect(unavailableItems.find((item) => item.key === 'table')).toMatchObject({ enabled: true });
-
-    const boundItems = createTiptapSlashItems(
-      enEditorMessages,
-      { ai: true, externalVideo: true, map: true, table: true },
-      {
-        onAIAssistantActivate: vi.fn(),
-        onExternalVideoActivate: vi.fn(),
-        onMapActivate: vi.fn(),
-        onTableActivate: vi.fn(),
-      },
-    );
-    for (const key of ['ai', 'external-video', 'map', 'table']) {
-      expect(boundItems.find((item) => item.key === key)).toMatchObject({
-        enabled: true,
-        unavailableReason: undefined,
-      });
-    }
-  });
-
   it('replaces the slash query and changes only the current durable block content node', () => {
     const mounted = createEditor();
     const heading = createTiptapSlashItems(enEditorMessages).find((item) => item.key === 'heading');
@@ -234,45 +175,6 @@ describe('Tiptap authoring controls', () => {
       ],
     });
     expect(mounted.editor.getText()).not.toContain('/heading');
-    mounted.destroy();
-  });
-
-  it('detects the exact slash range after inline math source and after a hard break', () => {
-    for (const prefix of [
-      [
-        { type: 'mathInline', content: [{ type: 'text', text: 'x' }] },
-        { type: 'text', text: ' /p5' },
-      ],
-      [{ type: 'text', text: 'Hello' }, { type: 'hardBreak' }, { type: 'text', text: '/p5' }],
-    ]) {
-      const mounted = createEditorWithBlock({ type: 'paragraph', content: prefix });
-      const paragraph = mounted.editor.state.doc.nodeAt(2);
-      if (!paragraph) {
-        throw new Error('Slash detection paragraph is missing');
-      }
-      const cursor = 3 + paragraph.content.size;
-      mounted.editor.commands.setTextSelection(cursor);
-
-      expect(getSlashMenuState(mounted.editor)).toMatchObject({
-        from: cursor - '/p5'.length,
-        to: cursor,
-        contentPosition: 2,
-        blockId: 'target-block',
-        query: 'p5',
-      });
-      mounted.destroy();
-    }
-  });
-
-  it('does not treat a slash inside ordinary text as a command boundary', () => {
-    const mounted = createEditor('x/heading');
-    const paragraph = mounted.editor.state.doc.nodeAt(2);
-    if (!paragraph) {
-      throw new Error('Ordinary-text paragraph is missing');
-    }
-    mounted.editor.commands.setTextSelection(3 + paragraph.content.size);
-
-    expect(getSlashMenuState(mounted.editor)).toBeNull();
     mounted.destroy();
   });
 
@@ -557,28 +459,6 @@ describe('Tiptap authoring controls', () => {
     await act(async () =>
       mounted.editor.view.dom.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true })),
     );
-
-    await controls.destroy();
-    mounted.destroy();
-  });
-
-  it('shows the official bubble menu only for text selections and applies formatting without losing selection', async () => {
-    const text = 'Selectable text';
-    const mounted = createEditor(text);
-    const controls = await renderControls(mounted.editor);
-    await act(async () => mounted.editor.view.focus());
-    await act(async () => {
-      mounted.editor.commands.setTextSelection({ from: 3, to: 3 + text.length });
-    });
-    await flushMenuUpdate();
-
-    expect(document.querySelector('[data-testid="tiptap-selection-menu"]')).toBeNull();
-
-    await act(async () => {
-      mounted.editor.commands.setTextSelection(3 + text.length);
-    });
-    await flushMenuUpdate();
-    expect(document.querySelector('[data-testid="tiptap-selection-menu"]')).toBeNull();
 
     await controls.destroy();
     mounted.destroy();

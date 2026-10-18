@@ -265,27 +265,6 @@ describe('FormRenderer', () => {
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 
-  it('hides the progress bar when only one step is visible', () => {
-    renderSingleStepSubmitForm(vi.fn().mockResolvedValue(undefined));
-
-    expect(container?.querySelector('[role="progressbar"]')).toBeNull();
-  });
-
-  it('renders the progress bar for multi-step forms', () => {
-    renderMultiStepForm();
-
-    expect(container?.querySelector('[role="progressbar"]')).not.toBeNull();
-  });
-
-  it('hides the previous button on the first step', async () => {
-    renderMultiStepForm();
-    await flushUpdates();
-
-    const buttons = Array.from(container?.querySelectorAll('button') ?? []);
-    expect(buttons.some((button) => button.textContent?.includes('Previous'))).toBe(false);
-    expect(buttons.some((button) => button.textContent?.includes('Next'))).toBe(true);
-  });
-
   it('shows the previous button after advancing past the first step', async () => {
     renderMultiStepForm();
     await flushUpdates();

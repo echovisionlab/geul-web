@@ -117,7 +117,7 @@ afterEach(() => {
 });
 
 describe('typed Block-room collaborative rich-text editor', () => {
-  it('routes one typed controller and never creates a legacy fragment or hidden mirror', () => {
+  it('gives a full-permission editor an unlocked structure, the resident awareness and structural media commands', () => {
     const blockRoomController = controller();
     const residentProvider = provider();
     render(
@@ -133,17 +133,15 @@ describe('typed Block-room collaborative rich-text editor', () => {
       />,
     );
 
-    expect(editorSpy).toHaveBeenCalledOnce();
-    expect(editorSpy.mock.calls[0]?.[0]).toMatchObject({
+    const editorProps = editorSpy.mock.lastCall?.[0];
+    expect(editorProps).toMatchObject({
       blockRoomController,
-      awareness: residentProvider.awareness,
       editable: true,
       structureLocked: false,
-      localUser: { name: 'editor', color: expect.stringMatching(/^#[0-9a-f]{6}$/) },
+      localUser: { name: 'editor' },
     });
-    expect(editorSpy.mock.calls[0]?.[0]).not.toHaveProperty('fragment');
-    expect(container?.querySelector('[data-testid="localized-neutral-tiptap-mirror"]')).toBeNull();
-    expect(mediaSurfaceSpy).toHaveBeenCalledWith(
+    expect(editorProps?.awareness).toBe(residentProvider.awareness);
+    expect(mediaSurfaceSpy).toHaveBeenLastCalledWith(
       expect.objectContaining({
         provider: residentProvider,
         mediaCommandProvider: residentProvider,

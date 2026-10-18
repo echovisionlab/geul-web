@@ -221,25 +221,6 @@ describe('LocationPlaceMenu', () => {
     expect(document.querySelector('button')?.getAttribute('data-appearance')).toBe('default');
     expect(document.querySelector('button')?.classList.contains('mantine-UnstyledButton-root')).toBe(false);
   });
-
-  it('supports a compact name-only trigger for metadata rows', () => {
-    renderLocationPlaceMenu(
-      <LocationPlaceMenu
-        place={{ name: 'Custom Studio', lat: 37.5665, lng: 126.978 }}
-        variant="name"
-        showIcon={false}
-        showChevron={false}
-      />,
-    );
-
-    expect(document.body.textContent).toContain('Custom Studio');
-    expect(document.body.textContent).not.toContain('Latitude 37.566500');
-    expect(document.body.textContent).not.toContain('Longitude 126.978000');
-    expect(document.querySelector('button')?.getAttribute('data-hover-accent')).toBe('true');
-    expect(document.querySelector('button')?.getAttribute('data-appearance')).toBe('default');
-    expect(document.querySelector('button')?.getAttribute('data-display')).toBe('block');
-    expect(document.querySelector('button')?.hasAttribute('data-control-size')).toBe(false);
-  });
 });
 
 describe('LocationPlaceMetadataRows', () => {

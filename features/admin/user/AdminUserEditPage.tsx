@@ -40,34 +40,12 @@ import { listAllUserTagsAction } from '@/lib/actions/user-tag';
 import type { SocialLinks } from '@/lib/types/common/social-links';
 import type { NicknameAvailabilityCheck } from '@/features/member/useNicknameValidation';
 import { guardNotFound } from '@/lib/utils/not-found-guard';
-
-interface AdminUserProfileSnapshot {
-  nickname: string;
-  bio: string;
-  role: string;
-  tagIds: string[];
-  website: string;
-  socialLinks: SocialLinks;
-}
-
-function sameStringRecord(left: Record<string, string>, right: Record<string, string>): boolean {
-  const leftKeys = Object.keys(left).sort();
-  const rightKeys = Object.keys(right).sort();
-  return (
-    leftKeys.length === rightKeys.length &&
-    leftKeys.every((key, index) => {
-      return key === rightKeys[index] && left[key] === right[key];
-    })
-  );
-}
-
-function sameTagIds(left: string[], right: string[]): boolean {
-  if (left.length !== right.length) {
-    return false;
-  }
-  const rightIds = new Set(right);
-  return left.every((id) => rightIds.has(id));
-}
+import {
+  buildAdminUserProfileChanges,
+  shouldAdoptServerProfile,
+  type AdminUserProfileChanges,
+  type AdminUserProfileSnapshot,
+} from './admin-user-profile';
 
 export interface AdminUserEditPageBindings {
   getUserAdminAction: typeof getUserAdminAction;
@@ -159,15 +137,7 @@ export default function AdminUserEditPage({
   };
 
   const updateUser = useMutation({
-    mutationFn: (data: {
-      id: string;
-      nickname?: string;
-      bio?: string | null;
-      website?: string | null;
-      socialLinks?: Record<string, string> | null;
-      role?: string;
-      tagIds?: string[];
-    }) =>
+    mutationFn: (data: AdminUserProfileChanges) =>
       bindings.updateUserAction(data.id, {
         ...data,
         social_links: data.socialLinks,
@@ -303,18 +273,17 @@ export default function AdminUserEditPage({
   });
 
   useEffect(() => {
-    if (!user || updateUser.isPending) {
-      return;
-    }
-    if (savedUserSnapshotRef.current === user) {
-      return;
-    }
-    const baseline = profileBaselineRef.current;
     if (
-      baseline &&
-      (formRef.current.isDirty() ||
-        website !== baseline.website ||
-        !sameStringRecord(socialLinks, baseline.socialLinks))
+      !user ||
+      !shouldAdoptServerProfile({
+        user,
+        isSaving: updateUser.isPending,
+        savedSnapshot: savedUserSnapshotRef.current,
+        baseline: profileBaselineRef.current,
+        isFormDirty: formRef.current.isDirty(),
+        website,
+        socialLinks,
+      })
     ) {
       return;
     }
@@ -358,27 +327,15 @@ export default function AdminUserEditPage({
       return;
     }
 
-    const changes: Parameters<typeof updateUser.mutate>[0] = { id };
-    if (form.isDirty('nickname')) {
-      changes.nickname = values.nickname;
-    }
-    if (form.isDirty('bio')) {
-      changes.bio = values.bio || null;
-    }
-    if (form.isDirty('role')) {
-      changes.role = values.role;
-    }
-    if (form.isDirty('tagIds') && !sameTagIds(values.tagIds, baseline.tagIds)) {
-      changes.tagIds = values.tagIds;
-    }
-    if (website !== baseline.website) {
-      changes.website = website || null;
-    }
-    if (!sameStringRecord(socialLinks, baseline.socialLinks)) {
-      changes.socialLinks = socialLinks;
-    }
-
-    if (Object.keys(changes).length > 1) {
+    const changes = buildAdminUserProfileChanges({
+      id,
+      values,
+      isDirty: (path) => form.isDirty(path),
+      baseline,
+      website,
+      socialLinks,
+    });
+    if (changes) {
       updateUser.mutate(changes);
     }
   });

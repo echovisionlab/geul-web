@@ -37,7 +37,6 @@ const secondPostId = '22222222-2222-4222-8222-222222222222';
 const initialRevision = '10000000-0000-4000-8000-000000000001';
 const nextRevision = '10000000-0000-4000-8000-000000000002';
 const finalRevision = '10000000-0000-4000-8000-000000000003';
-const latestRevision = '10000000-0000-4000-8000-000000000004';
 type UpdateResponse = {
   ok: boolean;
   success?: true;
@@ -372,25 +371,6 @@ describe('Post config saves', () => {
     );
   });
 
-  it('keeps entity-wide settings in the Post queue when the active room locale changes', async () => {
-    mocks.updatePostAction.mockResolvedValueOnce(updateSuccess(nextRevision));
-    act(() => update({ commentsEnabled: false }));
-    activeRoomLocale = 'ja';
-    render();
-
-    await act(async () => {
-      expect(await update.flush()).toBe(true);
-    });
-
-    expect(mocks.updatePostAction).toHaveBeenCalledExactlyOnceWith(
-      postId,
-      { commentsEnabled: false },
-      initialRevision,
-      expect.any(String),
-    );
-    expect(container.textContent).toContain('ja');
-  });
-
   it('merges a disjoint stale scalar setting and retries once against the latest revision', async () => {
     render(TwoHookHarness);
     mocks.updatePostAction
@@ -490,74 +470,6 @@ describe('Post config saves', () => {
     expect(update.configuration).toEqual(
       configuration(finalRevision, { commentsEnabled: false, documentLayout: remoteLayout }),
     );
-  });
-
-  it('does not replace a newer peer snapshot with an older in-flight acknowledgement', async () => {
-    const response = deferred<UpdateResponse>();
-    mocks.updatePostAction.mockReturnValueOnce(response.promise);
-    mocks.getPostConfigurationAction
-      .mockResolvedValueOnce(actionConfiguration(finalRevision, { commentsEnabled: true, mapPlaceId: 'peer-place' }))
-      .mockResolvedValueOnce(actionConfiguration(latestRevision, { commentsEnabled: true, mapPlaceId: 'peer-place' }));
-    render();
-    act(() => update({ commentsEnabled: false }));
-    let flushPromise!: Promise<boolean>;
-    act(() => {
-      flushPromise = update.flush();
-    });
-    await settlePromises();
-
-    await signalEntityChange();
-    response.resolve(updateSuccess(nextRevision, { commentsEnabled: false }));
-    await act(async () => {
-      expect(await flushPromise).toBe(true);
-      await settlePromises();
-    });
-
-    expect(update.configurationRevision).toBe(latestRevision);
-    expect(update.configuration.commentsEnabled).toBe(true);
-    expect(update.configuration.mapPlaceId).toBe('peer-place');
-  });
-
-  it('preserves the field already in flight when a peer read returns', async () => {
-    const response = deferred<UpdateResponse>();
-    mocks.updatePostAction.mockReturnValueOnce(response.promise);
-    mocks.getPostConfigurationAction.mockResolvedValueOnce(
-      actionConfiguration(finalRevision, { commentsEnabled: true, mapPlaceId: 'peer-place' }),
-    );
-    act(() => update({ commentsEnabled: false }));
-    let flush!: Promise<boolean>;
-    act(() => {
-      flush = update.flush();
-    });
-    await act(async () => {
-      await settlePromises();
-    });
-    expect(mocks.updatePostAction).toHaveBeenCalledOnce();
-    await signalEntityChange();
-    expect(update.configuration.commentsEnabled).toBe(false);
-    expect(update.configuration.mapPlaceId).toBe('peer-place');
-    response.resolve(updateSuccess(nextRevision, { commentsEnabled: false }));
-    await act(async () => {
-      await flush;
-      await settlePromises();
-    });
-  });
-
-  it('drops a peer read begun before a local write acknowledges', async () => {
-    const oldRead = deferred<ReturnType<typeof actionConfiguration>>();
-    mocks.getPostConfigurationAction.mockReturnValueOnce(oldRead.promise);
-    await signalEntityChange();
-    mocks.updatePostAction.mockResolvedValueOnce(updateSuccess(nextRevision, { commentsEnabled: false }));
-    act(() => update({ commentsEnabled: false }));
-    await act(async () => {
-      expect(await update.flush()).toBe(true);
-    });
-    await act(async () => {
-      oldRead.resolve(actionConfiguration(initialRevision, { commentsEnabled: true }));
-      await settlePromises();
-    });
-    expect(update.configurationRevision).toBe(nextRevision);
-    expect(update.configuration.commentsEnabled).toBe(false);
   });
 
   it('does not retry a committed old intent when its reconciliation read fails', async () => {

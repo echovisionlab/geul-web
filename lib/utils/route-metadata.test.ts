@@ -1,15 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { resolveAdminRouteMetadata, withNoIndex } from './route-metadata';
-
-describe('resolveAdminRouteMetadata', () => {
-  it('resolves the Site Admin file manager route', () => {
-    expect(resolveAdminRouteMetadata('/admin/files', 'Geul')).toMatchObject({
-      path: '/admin/files',
-      title: 'Files',
-      description: 'Files page in the admin panel for Geul.',
-    });
-  });
-});
+import { withNoIndex } from './route-metadata';
 
 describe('withNoIndex', () => {
   it('prevents referrer leakage by default', () => {

@@ -11,17 +11,21 @@ import { RootErrorPageView } from './RootErrorPageView';
 
 describe('root error fallback', () => {
   let root: ReturnType<typeof createRoot> | undefined;
+  let container: HTMLDivElement | undefined;
   afterEach(async () => {
     if (root) {
       await act(async () => root?.unmount());
     }
-    document.body.replaceChildren();
+    root = undefined;
+    container?.remove();
+    container = undefined;
   });
 
   it('offers a working retry and home link with only its local site theme', async () => {
-    const container = document.createElement('div');
-    document.body.append(container);
-    root = createRoot(container);
+    const host = document.createElement('div');
+    container = host;
+    document.body.append(host);
+    root = createRoot(host);
     const retry = vi.fn();
     await act(async () =>
       root!.render(
@@ -30,11 +34,11 @@ describe('root error fallback', () => {
         </DesignSystemProvider>,
       ),
     );
-    expect(container.querySelector('h1')?.textContent).toBe(messages.ko.titles['500']);
-    expect(container.querySelector('a')?.getAttribute('href')).toBe('/');
-    await act(async () => container.querySelector('button')!.click());
+    expect(host.querySelector('h1')?.textContent).toBe(messages.ko.titles['500']);
+    expect(host.querySelector('a')?.getAttribute('href')).toBe('/');
+    await act(async () => host.querySelector('button')!.click());
     expect(retry).toHaveBeenCalledOnce();
-    expect(container.querySelector('button')?.getAttribute('data-emphasis')).toBe('low');
+    expect(host.querySelector('button')?.getAttribute('data-emphasis')).toBe('low');
   });
 
   it('keeps the provider-free fallback synchronized with every supported language', () => {

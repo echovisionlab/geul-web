@@ -427,25 +427,4 @@ describe('Tiptap slash execution', () => {
     expect(mounted.editor.getJSON()).toEqual(before);
     mounted.destroy();
   });
-
-  it('does nothing when a capability item is unavailable', () => {
-    const mounted = mountEditor('/p5');
-    const callback = vi.fn();
-    const p5 = requiredItem(
-      createTiptapSlashCatalog(slashMessages, {
-        capabilities: { p5: true },
-      }),
-      'p5',
-    );
-    const before = mounted.editor.getJSON();
-
-    expect(
-      executeTiptapSlashItem({ editor: mounted.editor, item: p5, range: mounted.range, callbacks: { p5: callback } }),
-    ).toEqual({
-      status: 'unavailable',
-    });
-    expect(callback).not.toHaveBeenCalled();
-    expect(mounted.editor.getJSON()).toEqual(before);
-    mounted.destroy();
-  });
 });

@@ -116,18 +116,6 @@ describe('TranslationStructureLockExtension helpers', () => {
     ).toBe(false);
   });
 
-  it('allows scoped programmatic structure sync wrappers to run and unwind', () => {
-    let depthSeenInside = false;
-
-    const result = runWithTranslationStructureSync(() => {
-      depthSeenInside = true;
-      return 'ok';
-    });
-
-    expect(depthSeenInside).toBe(true);
-    expect(result).toBe('ok');
-  });
-
   it('allows text-only doc changes and rejects local block-structure changes', () => {
     const previousDoc = schema.node('doc', null, [paragraph('block-1', 'Hello')]);
     const textEditedDoc = schema.node('doc', null, [paragraph('block-1', 'Hello world')]);

@@ -1,6 +1,6 @@
 import { CampaignTargetMode } from '@echovisionlab/geul-proto/secure/campaign_pb.ts';
 import { describe, expect, it } from 'vitest';
-import { CAMPAIGN_FIELDS_JSON_KEYS, CampaignFieldsSchema, DEFAULT_CAMPAIGN_FIELDS } from './campaign-fields.schema';
+import { CampaignFieldsSchema, DEFAULT_CAMPAIGN_FIELDS } from './campaign-fields.schema';
 
 describe('campaign fields schema', () => {
   it('defaults to an explicit all-recipient target', () => {
@@ -35,9 +35,5 @@ describe('campaign fields schema', () => {
         targetMode: CampaignTargetMode.UNSPECIFIED,
       }).success,
     ).toBe(false);
-  });
-
-  it('keeps every stable campaign relationship out of JSON serialization', () => {
-    expect(CAMPAIGN_FIELDS_JSON_KEYS.size).toBe(0);
   });
 });

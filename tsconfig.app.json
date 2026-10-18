@@ -1,0 +1,37 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": ".cache/typescript/app.tsbuildinfo"
+  },
+  "include": [
+    "app/**/*",
+    "components/**/*",
+    "features/**/*",
+    "hooks/**/*",
+    "i18n/**/*",
+    "lib/**/*",
+    "types/**/*",
+    "theme.ts",
+    "proxy.ts",
+    "instrumentation.ts",
+    "instrumentation-client.ts",
+    "global.d.ts",
+    "next-env.d.ts",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/*.type-test.*",
+    "**/type-test-env.d.ts",
+    "**/*.story.*",
+    "**/*.stories.*",
+    "**/*.test-fixture.*",
+    "**/*.fixtures.*",
+    "**/*-fixtures.*",
+    "**/fixtures/**",
+    "**/__fixtures__/**",
+    "**/__tests__/**"
+  ]
+}

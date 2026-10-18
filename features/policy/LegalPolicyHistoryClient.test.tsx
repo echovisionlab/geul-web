@@ -9,6 +9,7 @@ import {
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { hydrateRoot, type Root } from 'react-dom/client';
 import { renderSettledServerHtml } from '@/test/settled-server-render';
+import { waitInAct } from '@/test/act-wait';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -95,7 +96,7 @@ async function ssrAndHydrate(content: ReactNode, client: QueryClient) {
 }
 
 describe('legal history server snapshots', () => {
-  it('measures the unseeded history baseline: loader in SSR and two hydration queries', async () => {
+  it('shows a loader on the server without a snapshot, then fetches the requested locale once and lists versions', async () => {
     const getActive = vi.fn().mockResolvedValue({ id: 'current', version: 3, effectiveFrom: null });
     const listArchived = vi.fn().mockResolvedValue([{ id: 'old', version: 2, effectiveFrom: null }]);
     const client = new QueryClient({ defaultOptions: { queries: { staleTime: 60000, retry: false } } });
@@ -110,6 +111,13 @@ describe('legal history server snapshots', () => {
       client,
     );
     expect(html).toContain('Loading policy');
+    await waitInAct(() =>
+      expect(Array.from(container!.querySelectorAll('tbody a'), (link) => link.getAttribute('href'))).toEqual([
+        '/privacy?lang=ko',
+        '/privacy/history/old?lang=ko',
+      ]),
+    );
+    expect(container!.textContent).not.toContain('Loading policy');
     expect(getActive).toHaveBeenCalledExactlyOnceWith('ko');
     expect(listArchived).toHaveBeenCalledTimes(1);
   });

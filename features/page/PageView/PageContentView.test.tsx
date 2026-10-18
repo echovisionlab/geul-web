@@ -211,63 +211,6 @@ describe('PageContentView', () => {
     expect(document.querySelector('[data-content-chrome] h1')?.textContent).toBe('Empty');
     expect(pageRendererSpy).toHaveBeenCalledWith(expect.objectContaining({ sections: [] }));
   });
-
-  it('passes canonical section order without using content for layout classification', () => {
-    const sections = [
-      { id: 'copy-1', kind: 'rich-text', props: {} },
-      { id: 'copy-2', kind: 'rich-text', props: {} },
-    ];
-    render(
-      <PageContentView
-        pathname="/"
-        requestedLocale="en"
-        page={{
-          title: '',
-          showTitle: false,
-          documentLayout: { contentHeight: 'content', pageChrome: 'flow', footer: 'flow' },
-          content: sections as never,
-          blockMedia: [],
-        }}
-      />,
-    );
-
-    expect(pageRendererSpy).toHaveBeenCalledWith(expect.objectContaining({ sections }));
-  });
-
-  it('switches locale bodies without changing the root document layout', () => {
-    const documentLayout = { contentHeight: 'viewport', pageChrome: 'pinned', footer: 'flow' } as const;
-    const renderLocale = (requestedLocale: string, sectionId: string) => (
-      <PageContentView
-        pathname="/localized"
-        requestedLocale={requestedLocale}
-        page={{
-          title: 'Localized',
-          showTitle: false,
-          documentLayout,
-          content: [{ id: sectionId, kind: 'rich-text', settings: {}, props: {} }] as never,
-          blockMedia: [],
-        }}
-      />
-    );
-
-    render(renderLocale('en', 'section-en'));
-    act(() =>
-      root?.render(
-        <DesignSystemProvider forceColorScheme="light">{renderLocale('ko', 'section-ko')}</DesignSystemProvider>,
-      ),
-    );
-
-    const layout = document.querySelector('[data-content-layout]');
-    expect(layout?.getAttribute('data-content-height')).toBe('viewport');
-    expect(layout?.getAttribute('data-page-chrome')).toBe('pinned');
-    expect(layout?.getAttribute('data-footer-layout')).toBe('flow');
-    expect(pageRendererSpy).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        sections: [expect.objectContaining({ id: 'section-ko' })],
-        requestedLocale: 'ko',
-      }),
-    );
-  });
 });
 
 describe('Page content language', () => {

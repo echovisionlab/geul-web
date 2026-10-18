@@ -1,608 +1,88 @@
 // @vitest-environment jsdom
-
-import { act, type ComponentProps, type ReactNode } from 'react';
-import { Code, ConnectError } from '@connectrpc/connect';
-import {
-  TranslationLLMProviderPreset,
-  TranslationProviderType,
-  type TranslationProvider,
-} from '@echovisionlab/geul-proto/secure/translation_pb.ts';
+import { act } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { buildSettingsUpdateMutation } from '@/features/translation/admin/TranslationSettingsPage';
-import TranslationSettingsPage from './page';
+import { expect, it, vi } from 'vitest';
+import { TranslationProviderType } from '@echovisionlab/geul-proto/secure/translation_pb.ts';
+import {
+  TranslationSettingsPage,
+  type TranslationSettingsPageClient,
+} from '@/features/translation/admin/TranslationSettingsPage';
+import { translationAdminFixture } from '@/stories/pages/fixtures/translation-admin';
+import { render, screen, waitFor, within } from '@/test/render';
 
-const api = vi.hoisted(() => ({
-  getTranslationSettings: vi.fn(),
-  listTranslationLocales: vi.fn(),
-  listTranslationProviders: vi.fn(),
-  updateTranslationSettings: vi.fn(),
-  createTranslationProvider: vi.fn(),
-  updateTranslationProvider: vi.fn(),
-  deleteTranslationProvider: vi.fn(),
-}));
-
-const notifications = vi.hoisted(() => ({
-  show: vi.fn(),
-}));
-
-vi.mock('next-intl', () => ({
-  useTranslations: (namespace?: string) => (key: string, values?: Record<string, unknown>) => {
-    const prefix = namespace ? `${namespace}.` : '';
-    if (values?.name) {
-      return `${prefix}${key} ${values.name}`;
-    }
-    if (values?.priority !== undefined) {
-      return `${prefix}${key} ${values.priority}`;
-    }
-    return `${prefix}${key}`;
-  },
-}));
-
-vi.mock('next/link', () => ({
-  default: ({ href, children }: { href: string; children: ReactNode }) => <a href={href}>{children}</a>,
-}));
-
-vi.mock('@tabler/icons-react', () => ({
-  IconChecklist: () => null,
-  IconDeviceFloppy: () => null,
-  IconEdit: () => null,
-  IconPlus: () => null,
-  IconSettings2: () => null,
-  IconTrash: () => null,
-}));
-
-vi.mock('@/components/core/Notification', () => ({
-  notifications,
-}));
-
-vi.mock('@/components/core/Badge', () => ({
-  LabelBadge: ({ children }: { children: ReactNode }) => <span>{children}</span>,
-}));
-
-vi.mock('@/components/core/Button', () => ({
-  Button: ({
-    children,
-    disabled,
-    href,
-    loading,
-    onClick,
-  }: {
-    children: ReactNode;
-    disabled?: boolean;
-    href?: string;
-    loading?: boolean;
-    onClick?: () => void;
-  }) =>
-    href ? (
-      <a href={href}>{children}</a>
-    ) : (
-      <button type="button" disabled={disabled || loading} onClick={onClick}>
-        {children}
-      </button>
-    ),
-}));
-
-vi.mock('@/components/core/IconButton', () => ({
-  IconButton: ({
-    'aria-label': ariaLabel,
-    children,
-    onClick,
-    title,
-  }: {
-    'aria-label'?: string;
-    children: ReactNode;
-    onClick?: () => void;
-    title?: string;
-  }) => (
-    <button type="button" aria-label={ariaLabel ?? title} onClick={onClick}>
-      {children}
-    </button>
-  ),
-}));
-
-vi.mock('@/components/core/Input', () => ({
-  NumberInput: ({
-    label,
-    value,
-    onChange,
-  }: {
-    label: string;
-    value: number | '';
-    onChange: (value: number | '') => void;
-  }) => (
-    <label>
-      {label}
-      <input
-        aria-label={label}
-        type="number"
-        value={value}
-        onChange={(event) => onChange(event.currentTarget.value === '' ? '' : Number(event.currentTarget.value))}
+it('saves a masked locale update, refetches settings and retains input changed during the save', async () => {
+  const fixture = translationAdminFixture('ready');
+  const read = vi.fn(fixture.getTranslationSettings);
+  let finishSave!: () => Promise<void>;
+  const update = vi.fn<typeof fixture.updateTranslationSettings>(
+    (input) =>
+      new Promise((resolve) => {
+        finishSave = async () => resolve(await fixture.updateTranslationSettings(input));
+      }),
+  );
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const view = render(
+    <QueryClientProvider client={client}>
+      <TranslationSettingsPage
+        client={{ ...fixture, getTranslationSettings: read, updateTranslationSettings: update }}
       />
-    </label>
-  ),
-  PasswordInput: ({
-    label,
-    value,
-    onChange,
-  }: {
-    label: string;
-    value: string;
-    onChange: ComponentProps<'input'>['onChange'];
-  }) => (
-    <label>
-      {label}
-      <input aria-label={label} type="password" value={value} onChange={onChange} />
-    </label>
-  ),
-  Select: ({
-    data,
-    label,
-    value,
-    onChange,
-  }: {
-    data: Array<{ value: string; label: string }>;
-    label: string;
-    value: string;
-    onChange: (value: string | null) => void;
-  }) => (
-    <label>
-      {label}
-      <select aria-label={label} value={value} onChange={(event) => onChange(event.currentTarget.value || null)}>
-        {data.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </label>
-  ),
-  Switch: ({
-    checked,
-    label,
-    onChange,
-  }: {
-    checked: boolean;
-    label: string;
-    onChange: ComponentProps<'input'>['onChange'];
-  }) => (
-    <label>
-      <input aria-label={label} type="checkbox" checked={checked} onChange={onChange} />
-      {label}
-    </label>
-  ),
-  TextInput: ({
-    label,
-    value,
-    onChange,
-  }: {
-    label: string;
-    value: string;
-    onChange: ComponentProps<'input'>['onChange'];
-  }) => (
-    <label>
-      {label}
-      <input aria-label={label} value={value} onChange={onChange} />
-    </label>
-  ),
-  TagsInput: ({ label, value, onChange }: { label: string; value: string[]; onChange: (value: string[]) => void }) => (
-    <label>
-      {label}
-      <input
-        aria-label={label}
-        value={value.join(', ')}
-        onChange={(event) => onChange(event.currentTarget.value.split(','))}
-      />
-    </label>
-  ),
-}));
-
-vi.mock('@/components/core/Modal', () => ({
-  DialogActions: ({ children, leadingActions }: { children?: ReactNode; leadingActions?: ReactNode }) => (
-    <div>
-      {leadingActions}
-      {children}
-    </div>
-  ),
-  ContentModal: ({ opened, title, children }: { opened: boolean; title: string; children: ReactNode }) =>
-    opened ? (
-      <section role="dialog">
-        <h2>{title}</h2>
-        {children}
-      </section>
-    ) : null,
-  ConfirmModal: ({
-    confirmLabel,
-    message,
-    onConfirm,
-    opened,
-    title,
-  }: {
-    confirmLabel: string;
-    message: string;
-    onConfirm: () => void;
-    opened: boolean;
-    title: string;
-  }) =>
-    opened ? (
-      <section role="alertdialog">
-        <h2>{title}</h2>
-        <p>{message}</p>
-        <button type="button" onClick={onConfirm}>
-          {confirmLabel}
-        </button>
-      </section>
-    ) : null,
-}));
-
-vi.mock('@/features/site/PageLoader', () => ({
-  PageLoader: () => <div>loading</div>,
-}));
-
-vi.mock('@/lib/api/browser/secure-translation', () => ({
-  createTranslationClient: () => api,
-}));
-
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-let container: HTMLDivElement | null = null;
-let root: Root | null = null;
-let queryClient: QueryClient | null = null;
-
-const settings = {
-  defaultLocale: 'en',
-  protectedTerms: ['Photoshop', 'React Native'],
-};
-
-function llmProvider(overrides: Partial<TranslationProvider> = {}): TranslationProvider {
-  return {
-    id: 'provider-1',
-    name: 'Gemini Provider',
-    type: TranslationProviderType.LLM,
-    isActive: true,
-    priority: 10,
-    config: {
-      case: 'llmConfig',
-      value: {
-        preset: TranslationLLMProviderPreset.TRANSLATION_LLM_PROVIDER_PRESET_GEMINI,
-        model: 'gemini-2.5-flash-lite',
-        supportsJsonMode: true,
-        inputTokenPriceUsdPerMillion: 0.1,
-        outputTokenPriceUsdPerMillion: 0.4,
-        maxContextTokens: 1_000_000,
-        temperature: 0.2,
-      },
-    },
-    ...overrides,
-  } as TranslationProvider;
-}
-
-function deeplProvider(overrides: Partial<TranslationProvider> = {}): TranslationProvider {
-  return {
-    id: 'provider-2',
-    name: 'DeepL Provider',
-    type: TranslationProviderType.DEEPL,
-    isActive: false,
-    priority: 20,
-    config: {
-      case: 'deeplConfig',
-      value: {
-        apiBaseUrl: 'https://api.deepl.com',
-      },
-    },
-    ...overrides,
-  } as TranslationProvider;
-}
-
-function buttonByText(text: string) {
-  const button = [...document.querySelectorAll('button')].find((node) => node.textContent?.includes(text)) as
-    HTMLButtonElement | undefined;
-  expect(button).toBeTruthy();
-  return button!;
-}
-
-function inputByLabel(label: string) {
-  const input = document.querySelector(`[aria-label="${label}"]`) as HTMLInputElement | null;
-  expect(input).toBeTruthy();
-  return input!;
-}
-
-function selectByLabel(label: string) {
-  const select = document.querySelector(`[aria-label="${label}"]`) as HTMLSelectElement | null;
-  expect(select).toBeTruthy();
-  return select!;
-}
-
-async function settle() {
-  for (let i = 0; i < 5; i += 1) {
-    await act(async () => {
-      await Promise.resolve();
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      await Promise.resolve();
-    });
-  }
-}
-
-function renderPage() {
-  act(() => {
-    root?.render(
-      <QueryClientProvider client={queryClient!}>
-        <TranslationSettingsPage />
-      </QueryClientProvider>,
-    );
-  });
-}
-
-async function changeInput(label: string, value: string) {
-  const input = inputByLabel(label);
-  await act(async () => {
-    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
-    setter?.call(input, value);
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-  });
-}
-
-async function changeSelect(label: string, value: string) {
-  const select = selectByLabel(label);
-  await act(async () => {
-    const setter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value')?.set;
-    setter?.call(select, value);
-    select.dispatchEvent(new Event('change', { bubbles: true }));
-  });
-}
-
-beforeEach(() => {
-  api.updateTranslationSettings.mockReset();
-  api.getTranslationSettings.mockResolvedValue({
-    settings,
-    generationEnabled: false,
-    generationDisabledReason: 'translation generation requires an active translation provider',
-  });
-  api.listTranslationLocales.mockResolvedValue({
-    locales: [
-      { code: 'en', displayName: 'English' },
-      { code: 'ko', displayName: 'Korean' },
-      { code: 'ja', displayName: 'Japanese' },
-    ],
-  });
-  api.listTranslationProviders.mockResolvedValue({
-    providers: [llmProvider()],
-  });
-  api.updateTranslationSettings.mockResolvedValue({ settings });
-  api.createTranslationProvider.mockResolvedValue({ provider: llmProvider({ id: 'created' }) });
-  api.updateTranslationProvider.mockResolvedValue({ provider: llmProvider() });
-  api.deleteTranslationProvider.mockResolvedValue({ success: true });
-
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-  queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-  });
-});
-
-afterEach(() => {
-  act(() => {
-    root?.unmount();
-  });
-  queryClient?.clear();
-  container?.remove();
-  document.body.innerHTML = '';
-  container = null;
-  root = null;
-  queryClient = null;
-  vi.clearAllMocks();
-});
-
-describe('TranslationSettingsPage', () => {
-  it('renders provider state and preserves the source default and exact protected terms', async () => {
-    api.getTranslationSettings.mockResolvedValueOnce({
-      settings,
-      generationEnabled: false,
-      generationDisabledReason: 'translation generation requires an active translation provider',
-    });
-    api.getTranslationSettings.mockResolvedValue({
-      settings: { ...settings, defaultLocale: 'ko' },
-      generationEnabled: false,
-      generationDisabledReason: 'translation generation requires an active translation provider',
-    });
-    api.updateTranslationSettings.mockResolvedValueOnce({ settings: { ...settings, defaultLocale: 'ko' } });
-    renderPage();
-    await settle();
-
-    expect(document.body.textContent).toContain('Gemini Provider');
-    expect(document.body.textContent).toContain('gemini-2.5-flash-lite');
-    expect(document.body.textContent).toContain('translationSettingsPage.generation.disabled');
-    expect(document.body.textContent).toContain('translation generation requires an active translation provider');
-    const initialSettingsQueries = api.getTranslationSettings.mock.calls.length;
-    expect(buttonByText('translationSettingsPage.actions.save').disabled).toBe(true);
-
-    await changeSelect('translationSettingsPage.fields.defaultLocale.label', 'ko');
-
-    await act(async () => {
-      buttonByText('translationSettingsPage.actions.save').click();
-    });
-    await settle();
-
-    expect(api.updateTranslationSettings).toHaveBeenCalledWith({
+    </QueryClientProvider>,
+  );
+  try {
+    const locale = await screen.findByRole('combobox', { name: 'Default locale' });
+    const save = screen.getByRole('button', { name: 'Save settings' });
+    expect(save).toBeDisabled();
+    await view.user.click(locale);
+    await view.user.click(screen.getByRole('option', { name: 'Korean (KO)' }));
+    await view.user.click(save);
+    await waitFor(() => expect(update).toHaveBeenCalledOnce());
+    expect(update).toHaveBeenCalledWith({
       settings: { defaultLocale: 'ko', protectedTerms: [] },
       updateMask: { paths: ['default_locale'] },
-      baseSettings: settings,
+      baseSettings: { defaultLocale: 'en', protectedTerms: ['Geul', 'Night Signals'] },
     });
-    expect(api.getTranslationSettings.mock.calls.length).toBeGreaterThan(initialSettingsQueries);
-  });
+    await view.user.click(locale);
+    await view.user.click(screen.getByRole('option', { name: 'Japanese (JA)' }));
+    await act(finishSave);
+    await waitFor(() => expect(read).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(save).toBeEnabled());
+    expect(locale).toHaveValue('Japanese (JA)');
+  } finally {
+    view.unmount();
+    client.clear();
+  }
+});
 
-  it('treats blank and exact-duplicate protected-term input as a canonical no-op', async () => {
-    renderPage();
-    await settle();
+function renderSettings(client: TranslationSettingsPageClient) {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const view = render(
+    <QueryClientProvider client={queryClient}>
+      <TranslationSettingsPage client={client} />
+    </QueryClientProvider>,
+  );
+  return {
+    ...view,
+    dispose: () => {
+      view.unmount();
+      queryClient.clear();
+    },
+  };
+}
 
-    await changeInput('translationSettingsPage.fields.protectedTerms.label', ' Photoshop, Photoshop, React Native,   ');
-
-    expect(buttonByText('translationSettingsPage.actions.save').disabled).toBe(true);
-    expect(api.updateTranslationSettings).not.toHaveBeenCalled();
-  });
-
-  it('keeps a dirty field on refresh while adopting a remote change to an untouched field', async () => {
-    renderPage();
-    await settle();
-    await changeSelect('translationSettingsPage.fields.defaultLocale.label', 'ko');
-
-    act(() => {
-      queryClient!.setQueryData(['translation-settings'], {
-        settings: { defaultLocale: 'en', protectedTerms: ['Remote term'] },
-        generationEnabled: false,
-      });
-    });
-    await settle();
-
-    expect(selectByLabel('translationSettingsPage.fields.defaultLocale.label').value).toBe('ko');
-    expect(inputByLabel('translationSettingsPage.fields.protectedTerms.label').value).toBe('Remote term');
-    expect(buttonByText('translationSettingsPage.actions.save').disabled).toBe(false);
-  });
-
-  it('adopts the latest server value when the same field changed remotely', async () => {
-    renderPage();
-    await settle();
-    await changeSelect('translationSettingsPage.fields.defaultLocale.label', 'ko');
-
-    act(() => {
-      queryClient!.setQueryData(['translation-settings'], {
-        settings: { defaultLocale: 'ja', protectedTerms: settings.protectedTerms },
-        generationEnabled: false,
-      });
-    });
-    await settle();
-
-    expect(selectByLabel('translationSettingsPage.fields.defaultLocale.label').value).toBe('ja');
-    expect(buttonByText('translationSettingsPage.actions.save').disabled).toBe(true);
-  });
-
-  it('preserves input changed while the settings save is pending', async () => {
-    let resolveSave: ((value: { settings: typeof settings }) => void) | undefined;
-    api.updateTranslationSettings.mockReturnValueOnce(
-      new Promise((resolve) => {
-        resolveSave = resolve;
-      }),
-    );
-    const submittedSettings = { ...settings, defaultLocale: 'ko' };
-    api.getTranslationSettings.mockResolvedValue({ settings: submittedSettings, generationEnabled: false });
-
-    renderPage();
-    await settle();
-    await changeSelect('translationSettingsPage.fields.defaultLocale.label', 'ko');
-    await act(async () => buttonByText('translationSettingsPage.actions.save').click());
-    await changeInput('translationSettingsPage.fields.protectedTerms.label', 'Photoshop, draft term');
-
-    await act(async () => {
-      resolveSave?.({ settings: submittedSettings });
-      await Promise.resolve();
-    });
-    await settle();
-
-    expect(inputByLabel('translationSettingsPage.fields.protectedTerms.label').value).toBe('Photoshop, draft term');
-    expect(buttonByText('translationSettingsPage.actions.save').disabled).toBe(false);
-  });
-
-  it('trims and exact-deduplicates protected terms while preserving case in the update payload', async () => {
-    api.updateTranslationSettings.mockResolvedValueOnce({
-      settings: { defaultLocale: 'en', protectedTerms: ['Photoshop', 'photoshop', 'React Native'] },
-    });
-    renderPage();
-    await settle();
-
-    await changeInput(
-      'translationSettingsPage.fields.protectedTerms.label',
-      ' Photoshop , Photoshop, photoshop, React Native ',
-    );
-    await act(async () => {
-      buttonByText('translationSettingsPage.actions.save').click();
-    });
-    await settle();
-
-    expect(api.updateTranslationSettings).toHaveBeenCalledWith({
-      settings: {
-        defaultLocale: '',
-        protectedTerms: ['Photoshop', 'photoshop', 'React Native'],
-      },
-      updateMask: { paths: ['protected_terms'] },
-      baseSettings: settings,
-    });
-  });
-
-  it('builds independent touched-field patches from two stale settings forms', () => {
-    const baseline = { defaultLocale: 'en', protectedTerms: ['Observed term', 'Remove me'] };
-    const localeEdit = buildSettingsUpdateMutation(baseline, {
-      defaultLocale: 'ko',
-      protectedTerms: baseline.protectedTerms,
-    });
-    const termsEdit = buildSettingsUpdateMutation(baseline, {
-      defaultLocale: 'en',
-      protectedTerms: ['Observed term', 'Local addition'],
-    });
-
-    expect(localeEdit?.paths).toEqual(['default_locale']);
-    expect(termsEdit?.paths).toEqual(['protected_terms']);
-    expect(termsEdit?.baseline).toEqual(baseline);
-    expect(buildSettingsUpdateMutation(baseline, { defaultLocale: 'en', protectedTerms: [] })?.paths).toEqual([
-      'protected_terms',
-    ]);
-  });
-
-  it('shows bounded authorization and internal errors without exposing raw RPC details', async () => {
-    api.updateTranslationSettings
-      .mockRejectedValueOnce(new ConnectError('secret permission context', Code.PermissionDenied))
-      .mockRejectedValueOnce(new ConnectError('raw provider credential failure', Code.Internal));
-    renderPage();
-    await settle();
-    await changeSelect('translationSettingsPage.fields.defaultLocale.label', 'ko');
-
-    await act(async () => buttonByText('translationSettingsPage.actions.save').click());
-    await settle();
-    expect(notifications.show).toHaveBeenCalledWith({ tone: 'danger', message: 'Forbidden' });
-
-    await act(async () => buttonByText('translationSettingsPage.actions.save').click());
-    await settle();
-    expect(notifications.show).toHaveBeenCalledWith({
-      tone: 'danger',
-      message: 'translationSettingsPage.notifications.saveFailed',
-    });
-    expect(JSON.stringify(notifications.show.mock.calls)).not.toContain('raw provider credential failure');
-    expect(JSON.stringify(notifications.show.mock.calls)).not.toContain('secret permission context');
-  });
-
-  it('validates and creates an LLM provider with default cost controls', async () => {
-    api.listTranslationProviders.mockResolvedValue({ providers: [] });
-
-    renderPage();
-    await settle();
-
-    await act(async () => {
-      buttonByText('translationSettingsPage.actions.addProvider').click();
-    });
-    await act(async () => {
-      buttonByText('translationSettingsPage.actions.createProvider').click();
-    });
-
-    expect(notifications.show).toHaveBeenCalledWith({
-      tone: 'danger',
-      message: 'translationSettingsPage.validation.providerNameRequired',
-    });
-
-    await changeInput('translationSettingsPage.fields.providerName.label', 'Primary Gemini');
-    await changeInput('translationSettingsPage.fields.llmApiKey.label', 'gemini-secret');
-
-    await act(async () => {
-      buttonByText('translationSettingsPage.actions.createProvider').click();
-    });
-    await settle();
-
-    expect(api.createTranslationProvider).toHaveBeenCalledTimes(1);
-    expect(api.createTranslationProvider).toHaveBeenCalledWith(
+it('creates the named LLM provider through its credentials dialog', async () => {
+  const fixture = translationAdminFixture('empty');
+  const create = vi.fn(fixture.createTranslationProvider);
+  const view = renderSettings({ ...fixture, createTranslationProvider: create });
+  try {
+    await view.user.click(await screen.findByRole('button', { name: 'Add provider' }));
+    const dialog = within(await screen.findByRole('dialog', { name: 'Create translation provider' }));
+    await view.user.click(dialog.getByRole('textbox', { name: 'Provider name' }));
+    await view.user.paste('Primary Gemini');
+    await view.user.click(dialog.getByLabelText('LLM API key'));
+    await view.user.paste('gemini-secret');
+    await view.user.click(dialog.getByRole('button', { name: 'Create provider' }));
+    await waitFor(() => expect(create).toHaveBeenCalledOnce());
+    expect(create).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'Primary Gemini',
         type: TranslationProviderType.LLM,
@@ -610,84 +90,78 @@ describe('TranslationSettingsPage', () => {
         priority: 0,
         config: expect.objectContaining({
           case: 'llmConfig',
-          value: expect.objectContaining({
-            apiKey: 'gemini-secret',
-            model: 'gemini-2.5-flash-lite',
-            supportsJsonMode: true,
-            inputTokenPriceUsdPerMillion: 0.1,
-            outputTokenPriceUsdPerMillion: 0.4,
-            maxContextTokens: 1_000_000,
-            temperature: 0.2,
-          }),
+          value: expect.objectContaining({ apiKey: 'gemini-secret', model: 'gemini-2.5-flash-lite' }),
         }),
       }),
     );
+    expect(await screen.findByRole('group', { name: 'Primary Gemini' })).toBeInTheDocument();
+  } finally {
+    view.dispose();
+  }
+});
+
+it('updates the selected DeepL provider with a blank credential to retain its stored secret', async () => {
+  const fixture = translationAdminFixture('ready');
+  const result = await fixture.createTranslationProvider({
+    name: 'DeepL Provider',
+    type: TranslationProviderType.DEEPL,
+    isActive: false,
+    priority: 20,
+    config: { case: 'deeplConfig', value: { apiKey: 'stored-secret', apiBaseUrl: 'https://api.deepl.com' } },
   });
-
-  it('edits, toggles, and deletes DeepL providers without requiring a repeated secret', async () => {
-    api.listTranslationProviders.mockResolvedValue({ providers: [deeplProvider()] });
-
-    renderPage();
-    await settle();
-
-    await act(async () => {
-      inputByLabel('translationSettingsPage.fields.providerActive.shortLabel').click();
-    });
-    expect(api.updateTranslationProvider).toHaveBeenCalledWith({
-      id: 'provider-2',
-      isActive: true,
-    });
-
-    await act(async () => {
-      (
-        document.querySelector(
-          '[aria-label="translationSettingsPage.actions.editProvider DeepL Provider"]',
-        ) as HTMLButtonElement
-      ).click();
-    });
-
-    await changeSelect('translationSettingsPage.fields.providerType.label', 'deepl');
-    await changeInput('translationSettingsPage.fields.providerName.label', 'DeepL Updated');
-    await changeInput('translationSettingsPage.fields.deeplApiBaseUrl.label', 'https://api-free.deepl.com');
-
-    await act(async () => {
-      buttonByText('common.actions.save').click();
-    });
-    await settle();
-
-    expect(api.updateTranslationProvider).toHaveBeenCalledWith(
+  const update = vi.fn(fixture.updateTranslationProvider);
+  const view = renderSettings({ ...fixture, updateTranslationProvider: update });
+  try {
+    const group = within(await screen.findByRole('group', { name: 'DeepL Provider' }));
+    await view.user.click(group.getByRole('button', { name: 'Edit provider DeepL Provider' }));
+    const dialog = within(await screen.findByRole('dialog', { name: 'Edit translation provider' }));
+    expect(dialog.getByLabelText('DeepL API key')).toHaveValue('');
+    expect(dialog.getByLabelText('DeepL API key')).toHaveAccessibleDescription('Leave blank to keep the stored key.');
+    await view.user.clear(dialog.getByRole('textbox', { name: 'Provider name' }));
+    await view.user.paste('DeepL Updated');
+    await view.user.clear(dialog.getByRole('textbox', { name: 'DeepL API base URL' }));
+    await view.user.paste('https://api-free.deepl.com');
+    await view.user.click(dialog.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(update).toHaveBeenCalledOnce());
+    expect(update).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'provider-2',
+        id: result.provider!.id,
         name: 'DeepL Updated',
         type: TranslationProviderType.DEEPL,
         isActive: false,
         priority: 20,
         config: expect.objectContaining({
           case: 'deeplConfig',
-          value: expect.objectContaining({
-            apiKey: '',
-            apiBaseUrl: 'https://api-free.deepl.com',
-          }),
+          value: expect.objectContaining({ apiKey: '', apiBaseUrl: 'https://api-free.deepl.com' }),
         }),
       }),
     );
+    expect(await screen.findByRole('group', { name: 'DeepL Updated' })).toBeInTheDocument();
+  } finally {
+    view.dispose();
+  }
+});
 
-    await act(async () => {
-      (
-        document.querySelector(
-          '[aria-label="translationSettingsPage.actions.deleteProvider DeepL Provider"]',
-        ) as HTMLButtonElement
-      ).click();
-    });
-    expect(document.body.textContent).toContain('translationSettingsPage.modal.deleteProviderMessage DeepL Provider');
-
-    await act(async () => {
-      buttonByText('translationSettingsPage.actions.deleteProvider').click();
-    });
-    await settle();
-
-    expect(api.deleteTranslationProvider).toHaveBeenCalledWith({
-      id: 'provider-2',
-    });
+it('deletes only the selected provider after its confirmation', async () => {
+  const fixture = translationAdminFixture('ready');
+  const result = await fixture.createTranslationProvider({
+    name: 'Archive DeepL',
+    type: TranslationProviderType.DEEPL,
+    config: { case: 'deeplConfig', value: { apiKey: 'stored-secret' } },
   });
+  const remove = vi.fn(fixture.deleteTranslationProvider);
+  const view = renderSettings({ ...fixture, deleteTranslationProvider: remove });
+  try {
+    const group = within(await screen.findByRole('group', { name: 'Archive DeepL' }));
+    await view.user.click(group.getByRole('button', { name: 'Delete provider Archive DeepL' }));
+    const dialog = within(await screen.findByRole('dialog', { name: 'Delete translation provider' }));
+    expect(dialog.getByText(/Delete Archive DeepL\?/)).toBeInTheDocument();
+    expect(remove).not.toHaveBeenCalled();
+    await view.user.click(dialog.getByRole('button', { name: 'Delete provider' }));
+    await waitFor(() => expect(remove).toHaveBeenCalledExactlyOnceWith({ id: result.provider!.id }));
+    await waitFor(() => expect(screen.queryByRole('group', { name: 'Archive DeepL' })).not.toBeInTheDocument());
+    expect(screen.getByRole('group', { name: 'Editorial translation' })).toBeInTheDocument();
+  } finally {
+    view.dispose();
+  }
 });

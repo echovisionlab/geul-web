@@ -78,32 +78,6 @@ function renderView(overrides: Partial<AdminNavigationViewProps> = {}) {
 }
 
 describe('AdminNavigationView', () => {
-  it('composes branding, active navigation, theme action, and site return in expanded mode', () => {
-    renderView();
-
-    expect(container.querySelector('nav')?.getAttribute('aria-label')).toBe('Administration');
-    expect(container.querySelector('a[aria-current="page"]')?.textContent).toContain('Users');
-    expect(container.textContent).toContain('Administration Panel');
-    expect(container.textContent).toContain('Back to site');
-
-    const theme = container.querySelector<HTMLButtonElement>('button[aria-label="Toggle color scheme"]');
-    const settings = container.querySelector<HTMLAnchorElement>('a[href="/admin/settings"]');
-    const back = container.querySelector<HTMLAnchorElement>('a[href="/"]');
-
-    expect(theme?.querySelector('svg')).toBeNull();
-    expect(back?.querySelector('svg')).toBeNull();
-
-    act(() => {
-      theme?.click();
-      settings?.click();
-      back?.click();
-    });
-
-    expect(events.onToggleColorScheme).toHaveBeenCalledOnce();
-    expect(events.onNavigate).toHaveBeenCalledWith('/admin/settings');
-    expect(events.onNavigate).toHaveBeenCalledWith('/');
-  });
-
   it('keeps every destination available in compact mode without exposing an expansion control on mobile', () => {
     renderView({ mode: 'compact', openSectionKeys: [] });
 

@@ -3,6 +3,7 @@ import { act, useState } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { notifications } from '@/components/core/Notification';
 import { reorderTracksAction } from '@/lib/actions/track';
 import type { ReleaseTrackItem } from '@/lib/collab/schemas/release-fields.schema';
 import { restoreTrackOrder, useTrackOrderSave } from './useTrackOrderSave';
@@ -87,6 +88,7 @@ it('serializes rapid reorders and restores the last acknowledged order after a l
   expect(onMutationSettled).toHaveBeenNthCalledWith(1, true);
   expect(onMutationSettled).toHaveBeenNthCalledWith(2, false);
   expect(current).toEqual(first);
+  expect(notifications.show).toHaveBeenCalledWith({ message: 'offline', tone: 'danger' });
 });
 
 it('restores only ordering, preserving edits and current membership', () => {

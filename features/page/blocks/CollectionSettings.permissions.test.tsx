@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 
-import { act, type ReactNode } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { render, screen, within } from '@/test/render';
 
 import { TestProviders } from '@/test/TestProviders';
 import { ArtistListEditor, ArtistListSettingsEditor } from './artist-grid/Editor';
@@ -43,8 +43,6 @@ vi.mock('./program-event-list/View', () => ({ ProgramEventListView: () => null }
 vi.mock('./releases-gallery/View', () => ({ ReleaseListView: () => null }));
 vi.mock('./works-gallery/View', () => ({ WorkListView: () => null }));
 
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
 const editors = [
   ['posts', PostListSettingsEditor, PostListEditor],
   ['events', ProgramEventListSettingsEditor, ProgramEventListEditor],
@@ -63,43 +61,32 @@ const fixtureProps = {
 };
 
 describe('collection source settings permissions', () => {
-  let container: HTMLDivElement;
-  let root: Root;
-
   beforeEach(() => {
     editorContext.editable = true;
     editorContext.allowStructuralEdits = true;
     editorContext.updateSection.mockClear();
-    container = document.createElement('div');
-    document.body.append(container);
-    root = createRoot(container);
   });
 
-  afterEach(() => {
-    act(() => root.unmount());
-    container.remove();
-  });
-
-  function render(node: ReactNode) {
-    act(() => root.render(<TestProviders>{node}</TestProviders>));
-  }
-
-  function expectDisabledControls() {
-    const controls = container.querySelectorAll<HTMLInputElement | HTMLButtonElement | HTMLSelectElement>(
-      'input, button, select',
+  function expectDisabledControls(node: React.ReactElement) {
+    const document = new DOMParser().parseFromString(
+      renderToStaticMarkup(<TestProviders>{node}</TestProviders>),
+      'text/html',
     );
+    const output = within(document.body);
+    const roles = ['button', 'checkbox', 'switch', 'radio', 'textbox', 'combobox', 'spinbutton'] as const;
+    const controls = roles.flatMap((role) => output.queryAllByRole(role, { hidden: true }));
     expect(controls.length).toBeGreaterThan(0);
     for (const control of controls) {
-      expect(control.disabled || control.getAttribute('aria-disabled') === 'true', control.outerHTML).toBe(true);
+      expect(
+        control.hasAttribute('disabled') || control.getAttribute('aria-disabled') === 'true',
+        control.outerHTML,
+      ).toBe(true);
     }
-    act(() => {
-      controls.forEach((control) => control.click());
-    });
   }
 
   it.each(editors)('disables all %s shared controls for a translator', (_name, SettingsEditor) => {
     const updateSharedProps = vi.fn();
-    render(
+    expectDisabledControls(
       <SettingsEditor
         sectionId="collection"
         props={fixtureProps}
@@ -110,13 +97,12 @@ describe('collection source settings permissions', () => {
         updateSettings={vi.fn()}
       />,
     );
-    expectDisabledControls();
     expect(updateSharedProps).not.toHaveBeenCalled();
   });
 
-  it.each(editors)('keeps %s controls usable for a source editor', (_name, SettingsEditor) => {
+  it.each(editors)('keeps %s controls usable for a source editor', async (_name, SettingsEditor) => {
     const updateSharedProps = vi.fn();
-    render(
+    const { user } = render(
       <SettingsEditor
         sectionId="collection"
         props={fixtureProps}
@@ -127,17 +113,16 @@ describe('collection source settings permissions', () => {
         updateSettings={vi.fn()}
       />,
     );
-    const toggle = container.querySelector<HTMLInputElement>('input[type="checkbox"]');
-    expect(toggle).not.toBeNull();
-    expect(toggle?.disabled).toBe(false);
-    act(() => toggle?.click());
+    const toggle = [...screen.queryAllByRole('checkbox'), ...screen.queryAllByRole('switch')][0];
+    expect(toggle).toBeDefined();
+    expect(toggle).toBeEnabled();
+    await user.click(toggle!);
     expect(updateSharedProps).toHaveBeenCalled();
   });
 
   it.each(editors)('reflects structural permissions in the legacy %s editor', (_name, _SettingsEditor, Editor) => {
     editorContext.allowStructuralEdits = false;
-    render(<Editor sectionId="collection" props={fixtureProps} />);
-    expectDisabledControls();
+    expectDisabledControls(<Editor sectionId="collection" props={fixtureProps} />);
     expect(editorContext.updateSection).not.toHaveBeenCalled();
   });
 });

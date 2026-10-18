@@ -51,7 +51,7 @@ import { useRichTextBlockRoomController } from '@/features/editor/hooks/useBlock
 import { useBlockRoomConnection } from '@/lib/collab/useBlockRoomConnection';
 import { useSlugManagement } from '@/lib/hooks/useSlugManagement';
 import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
-import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
+import { flushEditorSavesOrNotify } from '@/lib/editor/flush-editor-saves-or-notify';
 import { normalizeEnumToken } from '@/lib/i18n/admin-labels';
 import type { getLabelAdmin } from '@/lib/queries/label';
 import { listLabelsForSelector } from '@/lib/queries/label-browser';
@@ -284,13 +284,10 @@ function useLabelEditorViewModel({ id, label, baseUrl, backHref = '/admin/labels
     },
   });
 
-  const flushPendingSaves = useCallback(async () => {
-    const saved = await flushEditorSaves(`label:${id}`);
-    if (!saved) {
-      notifications.show({ message: tCommon('notifications.saveFailed'), tone: 'danger' });
-    }
-    return saved;
-  }, [id, tCommon]);
+  const flushPendingSaves = useCallback(
+    () => flushEditorSavesOrNotify(`label:${id}`, tCommon('notifications.saveFailed')),
+    [id, tCommon],
+  );
   const handleBack = useCallback(async () => {
     if (await flushPendingSaves()) {
       router.push(backHref);

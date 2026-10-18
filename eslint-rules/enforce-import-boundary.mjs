@@ -87,6 +87,15 @@ export const enforceImportBoundaryRule = {
         return;
       }
 
+      if (
+        boundaryKind === 'core' &&
+        source === '@/test/render' &&
+        relativeFilename.startsWith(`components${path.sep}core${path.sep}`) &&
+        /\.test\.tsx?$/.test(filename)
+      ) {
+        return;
+      }
+
       if (isRestrictedSource(boundaryKind, source)) {
         context.report({
           node,

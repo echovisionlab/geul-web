@@ -8,7 +8,6 @@ import { DEFAULT_MAP_CONFIG } from '@/lib/types/map/model';
 import { MapLibreMapEditor } from './MapLibreMapEditor';
 
 const mocks = vi.hoisted(() => ({
-  locale: 'en',
   mapProps: null as Record<string, unknown> | null,
 }));
 
@@ -33,13 +32,8 @@ vi.mock('@tanstack/react-query', () => ({
 }));
 
 vi.mock('next-intl', () => ({
-  useTranslations: () => (key: string, values?: Record<string, string>) => {
-    if (key === 'copyValueTitle') {
-      return mocks.locale === 'ko' ? `${values?.label} 값 복사` : `Click to copy ${values?.label} value`;
-    }
-
-    return key;
-  },
+  useTranslations: () => (key: string, values?: Record<string, string>) =>
+    values?.label ? `${key}(${values.label})` : key,
 }));
 
 vi.mock('@/features/map/MapParameterControls', () => ({
@@ -52,7 +46,6 @@ let container: HTMLDivElement | null = null;
 let root: Root | null = null;
 
 beforeEach(() => {
-  mocks.locale = 'en';
   mocks.mapProps = null;
   container = document.createElement('div');
   document.body.appendChild(container);
@@ -180,9 +173,8 @@ describe('MapLibreMapEditor interactions', () => {
 });
 
 describe('MapLibreMapEditor parameter copy localization', () => {
-  it.each(['en', 'ko'])('projects localized copy actions in %s', (locale) => {
-    mocks.locale = locale;
+  it('names each parameter copy action with the copy message for that parameter', () => {
     const target = renderEditor();
-    expect(target.getAttribute('aria-label')).toBe(locale === 'ko' ? 'Zoom 값 복사' : 'Click to copy Zoom value');
+    expect(target.getAttribute('aria-label')).toBe('copyValueTitle(Zoom)');
   });
 });

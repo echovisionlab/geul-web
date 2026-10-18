@@ -1,143 +1,55 @@
 // @vitest-environment jsdom
 
-import { act, type ReactNode } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+import { act, render, screen, waitFor, within } from '@/test/render';
 import { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
 import { AuthorizationRole } from '@echovisionlab/geul-proto/policy/access_pb.ts';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { SegmentModals } from './SegmentModals';
+import { SegmentModalProvider, useSegmentModal } from './SegmentModalContext';
 
-const mocks = vi.hoisted(() => ({
-  editingSegmentId: null as string | null,
-  closeEdit: vi.fn(),
-  getSegmentAction: vi.fn(),
-  updateSegmentAction: vi.fn(),
-  notificationsShow: vi.fn(),
-}));
-
+const actions = vi.hoisted(() => ({ get: vi.fn(), update: vi.fn() }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
-vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
-vi.mock('@/components/core/Notification', () => ({ notifications: { show: mocks.notificationsShow } }));
-
 vi.mock('@/lib/actions/audience', () => ({
   archiveSegmentAction: vi.fn(),
   createSegmentAction: vi.fn(),
   estimateSegmentCountAction: vi.fn(),
-  getSegmentAction: mocks.getSegmentAction,
+  getSegmentAction: actions.get,
   restoreSegmentAction: vi.fn(),
-  updateSegmentAction: mocks.updateSegmentAction,
+  updateSegmentAction: actions.update,
 }));
-vi.mock('./SegmentModalContext', () => ({
-  useSegmentModal: () => ({
-    lifecycleSegment: null,
-    lifecycleAction: null,
-    closeLifecycle: vi.fn(),
-    isCreateOpen: false,
-    closeCreate: vi.fn(),
-    editingSegmentId: mocks.editingSegmentId,
-    closeEdit: mocks.closeEdit,
-  }),
-}));
-vi.mock('@/components/core/Input', () => ({
-  Select: () => null,
-  TextInput: ({
-    label,
-    value,
-    onChange,
-  }: {
-    label: string;
-    value: string;
-    onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  }) => <input aria-label={label} value={value} onChange={onChange} />,
-}));
-vi.mock('@/components/core/Modal', () => ({
-  ConfirmModal: () => null,
-  FormModal: ({
-    opened,
-    children,
-    onSubmit,
-  }: {
-    opened: boolean;
-    children: ReactNode;
-    onSubmit?: () => void | Promise<void>;
-  }) =>
-    opened ? (
-      <div data-testid="segment-form">
-        {children}
-        <button type="button" data-testid="save-segment" onClick={() => void onSubmit?.()}>
-          Save
-        </button>
-      </div>
-    ) : null,
-}));
-vi.mock('./SegmentConfigFields', () => ({ SegmentConfigFields: () => null }));
 
-import { SegmentModals } from './SegmentModals';
+function Controls() {
+  const { openEdit } = useSegmentModal();
+  return (
+    <>
+      <button type="button" onClick={() => openEdit('segment-a')}>
+        Edit segment A
+      </button>
+      <button type="button" onClick={() => openEdit('segment-b')}>
+        Edit segment B
+      </button>
+    </>
+  );
+}
 
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-type SegmentResult = {
-  data: {
-    name: string;
-    description: string;
-    segmentType: number;
-    config: { memberTagIds: string[]; accountRoles: string[]; createdAfter?: string; createdBefore?: string };
-    estimatedCount: number;
-  };
-};
-
-type SegmentUpdateResult = {
-  data: {
-    id: string;
-    name: string;
-    description: string;
-    segmentType: SegmentType;
-    config: { memberTagIds: string[]; accountRoles: string[]; createdAfter?: string; createdBefore?: string };
-    estimatedCount: number | null;
-    archivedAt: Date | null;
-  };
-};
+function Scenario() {
+  return (
+    <SegmentModalProvider>
+      <Controls />
+      <SegmentModals refresh={() => {}} />
+    </SegmentModalProvider>
+  );
+}
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
-  const promise = new Promise<T>((resolvePromise) => {
-    resolve = resolvePromise;
+  const promise = new Promise<T>((done) => {
+    resolve = done;
   });
   return { promise, resolve };
 }
 
-let container: HTMLDivElement;
-let root: Root;
-
-beforeEach(() => {
-  mocks.editingSegmentId = null;
-  mocks.closeEdit.mockReset();
-  mocks.getSegmentAction.mockReset();
-  mocks.updateSegmentAction.mockReset();
-  mocks.notificationsShow.mockReset();
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-});
-
-afterEach(() => {
-  act(() => root.unmount());
-  container.remove();
-});
-
-function renderForSegment(id: string | null) {
-  mocks.editingSegmentId = id;
-  act(() => root.render(<SegmentModals />));
-}
-
-function changeInput(input: HTMLInputElement, value: string) {
-  act(() => {
-    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
-    setter?.call(input, value);
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-  });
-}
-
-function updateResult(name: string, accountRoles: string[] = ['user']): SegmentUpdateResult {
+function segment(name: string, accountRoles: string[] = ['user']) {
   return {
     data: {
       id: 'segment-a',
@@ -151,116 +63,85 @@ function updateResult(name: string, accountRoles: string[] = ['user']): SegmentU
   };
 }
 
-describe('SegmentModals edit loading', () => {
-  it('ignores an edit response after its segment was closed and another segment opened', async () => {
-    const segmentA = deferred<SegmentResult>();
-    const segmentB = deferred<SegmentResult>();
-    mocks.getSegmentAction.mockImplementation((id: string) =>
-      id === 'segment-a' ? segmentA.promise : segmentB.promise,
-    );
+beforeEach(() => {
+  actions.get.mockReset();
+  actions.update.mockReset();
+});
 
-    renderForSegment('segment-a');
-    renderForSegment(null);
-    renderForSegment('segment-b');
-
+describe('SegmentModals edit lifecycle', () => {
+  it('ignores a stale load after closing one segment and opening another', async () => {
+    const segmentA = deferred<ReturnType<typeof segment>>();
+    const segmentB = deferred<ReturnType<typeof segment>>();
+    actions.get.mockImplementation((id: string) => (id === 'segment-a' ? segmentA.promise : segmentB.promise));
+    const { user } = render(<Scenario />);
+    await user.click(screen.getByRole('button', { name: 'Edit segment A' }));
+    let dialog = await screen.findByRole('dialog');
+    await user.click(within(dialog).getByRole('button', { name: 'Close' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    await user.click(screen.getByRole('button', { name: 'Edit segment B' }));
     await act(async () => {
-      segmentB.resolve({
-        data: {
-          name: 'Segment B',
-          description: 'B description',
-          segmentType: 1,
-          config: { memberTagIds: [], accountRoles: [] },
-          estimatedCount: 20,
-        },
-      });
+      segmentB.resolve(segment('Segment B'));
       await segmentB.promise;
     });
-
-    expect(container.querySelector<HTMLInputElement>('[aria-label="labels.name"]')?.value).toBe('Segment B');
-
+    dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByRole('textbox', { name: 'Name' })).toHaveValue('Segment B');
     await act(async () => {
-      segmentA.resolve({
-        data: {
-          name: 'Segment A',
-          description: 'A description',
-          segmentType: 1,
-          config: { memberTagIds: [], accountRoles: [] },
-          estimatedCount: 10,
-        },
-      });
+      segmentA.resolve(segment('Segment A'));
       await segmentA.promise;
     });
-
-    expect(container.querySelector<HTMLInputElement>('[aria-label="labels.name"]')?.value).toBe('Segment B');
+    expect(within(dialog).getByRole('textbox', { name: 'Name' })).toHaveValue('Segment B');
   });
 
-  it('sends only touched scalar optionals and rebases typing over the canonical save response', async () => {
-    const pendingUpdate = deferred<SegmentUpdateResult>();
-    const finalUpdate = deferred<SegmentUpdateResult>();
-    mocks.getSegmentAction.mockResolvedValue({
-      data: {
-        name: 'Segment A',
-        description: 'A description',
-        segmentType: SegmentType.MEMBERS_BY_FILTER,
-        config: { memberTagIds: [], accountRoles: ['user'] },
-        estimatedCount: 20,
-      },
-    });
-    mocks.updateSegmentAction.mockReturnValueOnce(pendingUpdate.promise).mockReturnValueOnce(finalUpdate.promise);
-
-    renderForSegment('segment-a');
-    await act(async () => {
-      await Promise.resolve();
-    });
-
-    const nameInput = container.querySelector<HTMLInputElement>('[aria-label="labels.name"]');
-    expect(nameInput).not.toBeNull();
-    changeInput(nameInput!, 'Local name');
-    act(() => container.querySelector<HTMLButtonElement>('[data-testid="save-segment"]')?.click());
-
-    expect(mocks.updateSegmentAction).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({
+  it('sends touched scalar fields and keeps typing over the canonical save response', async () => {
+    const pending = deferred<ReturnType<typeof segment>>();
+    actions.get.mockResolvedValue(segment('Segment A'));
+    actions.update
+      .mockReturnValueOnce(pending.promise)
+      .mockResolvedValueOnce(segment('Typed while saving', ['admin', 'user']));
+    const view = render(<Scenario />);
+    const { user } = view;
+    try {
+      await user.click(screen.getByRole('button', { name: 'Edit segment A' }));
+      const name = await screen.findByRole('textbox', { name: 'Name' });
+      await user.clear(name);
+      await user.paste('Local name');
+      await user.click(screen.getByRole('button', { name: 'Save' }));
+      expect(actions.update).toHaveBeenNthCalledWith(1, {
         id: 'segment-a',
         name: 'Local name',
         config: expect.objectContaining({ accountRoles: [AuthorizationRole.USER] }),
-        observed: expect.objectContaining({
+        observed: {
           segmentType: SegmentType.MEMBERS_BY_FILTER,
           config: expect.objectContaining({ accountRoles: [AuthorizationRole.USER] }),
-        }),
-      }),
-    );
-    const submitted = mocks.updateSegmentAction.mock.calls[0][0] as Record<string, unknown>;
-    expect(Object.hasOwn(submitted, 'description')).toBe(false);
-    expect(Object.hasOwn(submitted, 'segmentType')).toBe(false);
-
-    changeInput(nameInput!, 'Typed while save is pending');
-    await act(async () => {
-      pendingUpdate.resolve(updateResult('Local name', ['admin', 'user']));
-      await pendingUpdate.promise;
-    });
-
-    expect(container.querySelector<HTMLInputElement>('[aria-label="labels.name"]')?.value).toBe(
-      'Typed while save is pending',
-    );
-    expect(container.querySelector('[data-testid="segment-form"]')).not.toBeNull();
-
-    await act(async () => {
-      container.querySelector<HTMLButtonElement>('[data-testid="save-segment"]')?.click();
-      finalUpdate.resolve(updateResult('Pending second name', ['admin', 'user']));
-      await finalUpdate.promise;
-    });
-    expect(mocks.updateSegmentAction).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({
-        name: 'Typed while save is pending',
-        observed: expect.objectContaining({
+        },
+      });
+      expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+      await user.clear(name);
+      await user.paste('Typed while saving');
+      await act(async () => {
+        pending.resolve(segment('Local name', ['admin', 'user']));
+        await pending.promise;
+      });
+      await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled());
+      expect(name).toHaveValue('Typed while saving');
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      await user.click(screen.getByRole('button', { name: 'Save' }));
+      expect(actions.update).toHaveBeenNthCalledWith(2, {
+        id: 'segment-a',
+        name: 'Typed while saving',
+        config: expect.objectContaining({ accountRoles: [AuthorizationRole.ADMIN, AuthorizationRole.USER] }),
+        observed: {
+          segmentType: SegmentType.MEMBERS_BY_FILTER,
           config: expect.objectContaining({ accountRoles: [AuthorizationRole.ADMIN, AuthorizationRole.USER] }),
-        }),
-      }),
-    );
-    expect(Object.hasOwn(mocks.updateSegmentAction.mock.calls[1][0] as object, 'description')).toBe(false);
-    expect(Object.hasOwn(mocks.updateSegmentAction.mock.calls[1][0] as object, 'segmentType')).toBe(false);
-    expect(mocks.closeEdit).toHaveBeenCalled();
+        },
+      });
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    } finally {
+      view.unmount();
+      await act(async () => {
+        pending.resolve(segment('Local name', ['admin', 'user']));
+        await pending.promise;
+      });
+    }
   });
 });

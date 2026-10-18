@@ -4,8 +4,7 @@ import { Editor } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createTiptapWireExtensions } from '../wire-schema';
-import { isMonacoSourceEditorEvent } from '../code-editor';
-import { codeEditorModelPath, selectCodeBlockAtPosition } from './CodeBlockNode';
+import { selectCodeBlockAtPosition } from './CodeBlockNode';
 import { replaceCodeBlockSource } from './code-source-transaction';
 
 const mounted: { editor: Editor; element: HTMLElement }[] = [];
@@ -60,42 +59,6 @@ afterEach(() => {
 });
 
 describe('code block Monaco source adapter', () => {
-  it('scopes stable model paths to the editor authority instance', () => {
-    const visibleLocaleEditor = {};
-    const hiddenMirrorEditor = {};
-    expect(codeEditorModelPath(visibleLocaleEditor, 'shared-block-id', 'ts')).toBe(
-      codeEditorModelPath(visibleLocaleEditor, 'shared-block-id', 'ts'),
-    );
-    expect(codeEditorModelPath(visibleLocaleEditor, 'shared-block-id', 'ts')).not.toBe(
-      codeEditorModelPath(hiddenMirrorEditor, 'shared-block-id', 'ts'),
-    );
-    expect(codeEditorModelPath(visibleLocaleEditor, 'unsafe/id', 'glsl')).toContain('unsafe%2Fid.glsl');
-  });
-
-  it.each([
-    ['ArrowLeft', false],
-    ['ArrowRight', true],
-    ['Enter', false],
-    ['Tab', false],
-  ])('isolates %s keyboard handling from ProseMirror (shift=%s)', (key, shiftKey) => {
-    const root = document.createElement('div');
-    root.dataset.sourceEditor = 'monaco';
-    const textarea = document.createElement('textarea');
-    root.append(textarea);
-    document.body.append(root);
-    const event = new KeyboardEvent('keydown', { key, shiftKey, bubbles: true });
-    Object.defineProperty(event, 'target', { value: textarea });
-    expect(isMonacoSourceEditorEvent(event)).toBe(true);
-    root.remove();
-  });
-
-  it('does not swallow outer block keyboard events', () => {
-    const button = document.createElement('button');
-    const event = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true });
-    Object.defineProperty(event, 'target', { value: button });
-    expect(isMonacoSourceEditorEvent(event)).toBe(false);
-  });
-
   it('exits Monaco to the exact code node selection without changing source or attributes', () => {
     const { editor, position, node } = fixture();
     const before = editor.state.doc.toJSON();

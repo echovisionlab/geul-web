@@ -1,95 +1,54 @@
-// @vitest-environment jsdom
-
-import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { describe, expect, it } from 'vitest';
+import type { PublicLegalHistoryDetail } from '@/lib/queries/legal-history';
+import { TestProviders } from '@/test/TestProviders';
 
 import { PrivacyHistoryDetailClient } from './privacy/history/[id]/PrivacyHistoryDetailClient';
 import { TermsHistoryDetailClient } from './terms/history/[id]/TermsHistoryDetailClient';
 
-const queryResult = vi.hoisted(() => ({
-  data: null as null | Record<string, unknown>,
-  isLoading: false,
-}));
+function renderVersion(
+  Component: typeof PrivacyHistoryDetailClient | typeof TermsHistoryDetailClient,
+  status: PublicLegalHistoryDetail['status'],
+) {
+  const data: PublicLegalHistoryDetail = {
+    id: 'opened-version',
+    version: 2,
+    title: 'Legal document',
+    content: [],
+    localizationInfo: null,
+    status,
+    effectiveFrom: new Date('2026-08-01T00:00:00Z'),
+    effectiveUntil: null,
+    createdAt: null,
+  };
+  return renderToStaticMarkup(
+    <QueryClientProvider client={new QueryClient()}>
+      <TestProviders>
+        <Component
+          id="opened-version"
+          initialData={{ id: 'opened-version', requestedLocale: 'en', updatedAt: 1, data }}
+        />
+      </TestProviders>
+    </QueryClientProvider>,
+  );
+}
 
-vi.mock('@tanstack/react-query', () => ({
-  useQuery: () => queryResult,
-}));
+describe.each([
+  ['privacy', PrivacyHistoryDetailClient],
+  ['terms', TermsHistoryDetailClient],
+] as const)('%s history detail status', (_domain, Component) => {
+  it('shows Active for the current version opened through history', () => {
+    const html = renderVersion(Component, 'active');
 
-vi.mock('@/lib/queries/privacy-browser', () => ({
-  getArchivedPrivacy: vi.fn(),
-}));
+    expect(html).toContain('>Active<');
+    expect(html).not.toContain('Archived');
+  });
 
-vi.mock('@/lib/queries/terms-browser', () => ({
-  getArchivedTerms: vi.fn(),
-}));
+  it('shows Archived for a superseded version', () => {
+    const html = renderVersion(Component, 'archived');
 
-vi.mock('next/link', () => ({
-  default: ({ children, href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
-    <a href={String(href)} {...props}>
-      {children}
-    </a>
-  ),
-}));
-
-vi.mock('next-intl', () => ({
-  useLocale: () => 'en',
-  useTranslations: (namespace: string) => {
-    const translate = (key: string) => `${namespace}.${key}`;
-    return Object.assign(translate, { rich: translate });
-  },
-}));
-
-vi.mock('@/features/navigation/TableOfContents', () => ({
-  // The navigation owner wraps the document so Core can reserve the outline beside it.
-  TableOfContents: ({ children }: { children: React.ReactNode }) => children,
-}));
-
-vi.mock('@/features/site/PageLoader', () => ({
-  PageLoader: () => <div>Loading</div>,
-}));
-
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-let container: HTMLDivElement;
-let root: Root;
-
-beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-});
-
-afterEach(() => {
-  act(() => root.unmount());
-  container.remove();
-});
-
-describe('legal history exact-version status', () => {
-  it.each([
-    ['privacy', PrivacyHistoryDetailClient],
-    ['terms', TermsHistoryDetailClient],
-  ] as const)('shows Active for a current %s version opened through history', (_domain, Component) => {
-    queryResult.data = {
-      id: 'current-version',
-      version: 2,
-      title: 'Current legal document',
-      content: [],
-      status: 'active',
-      effectiveFrom: new Date('2026-08-01T00:00:00Z'),
-      effectiveUntil: null,
-    };
-
-    act(() => {
-      root.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <Component id="current-version" />
-        </DesignSystemProvider>,
-      );
-    });
-
-    expect(container.textContent).toContain('common.statuses.active');
-    expect(container.textContent).not.toContain('common.statuses.archived');
+    expect(html).toContain('>Archived<');
+    expect(html).not.toContain('>Active<');
   });
 });

@@ -21,16 +21,22 @@ body {
 }
 
 /*
- * Korean breaks lines at spaces, not inside words (eojeol). Japanese and Chinese keep breaking between
- * characters. `overflow-wrap: anywhere` stays the fallback for words longer than their box.
+ * Korean breaks lines at spaces, not inside words (eojeol), in every interface language: Korean titles
+ * and names often sit in English pages without their own `lang`. `keep-all` only changes breaks inside
+ * CJK runs, so Latin text is unaffected; Japanese and Chinese, which break between characters, opt out.
+ * `overflow-wrap` keeps a word longer than its box from overflowing.
  */
-:lang(ko) {
+:root {
   word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+:lang(ko) {
   overflow-wrap: anywhere;
 }
 
-/* `word-break` inherits: content that declares another language inside Korean UI breaks by its own rules. */
-[lang]:not(:lang(ko)) {
+:lang(ja),
+:lang(zh) {
   word-break: normal;
 }
 

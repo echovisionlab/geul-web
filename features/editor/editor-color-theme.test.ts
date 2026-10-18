@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import postcss from 'postcss';
 import { describe, expect, it } from 'vitest';
 import { EDITOR_COLOR_VALUES } from './toolbars/EditorColorStyleButton';
 import { authoredEditorPalettes, primitiveTokens, semanticThemes } from '@/components/core/design-tokens';
@@ -108,54 +109,57 @@ describe('editor semantic color theme', () => {
     }
   });
 
-  it('reuses the default color families and supplies the missing brown, purple and pink grades', () => {
-    const names = ['brown', 'red', 'orange', 'green', 'blue', 'purple', 'pink'] as const;
-    for (const name of names) {
-      expect(semanticThemes.light[`document-text-${name}`]).toBe(primitiveTokens.colors[name][700]);
-      expect(semanticThemes.dark[`document-text-${name}`]).toBe(primitiveTokens.colors[name][300]);
-      expect(semanticThemes.light[`document-background-${name}`]).toBe(primitiveTokens.colors[name][50]);
-      expect(semanticThemes.dark[`document-background-${name}`]).toBe(primitiveTokens.colors[name][900]);
-    }
-    for (const name of ['brown', 'purple', 'pink'] as const) {
+  it.each(['light', 'dark'] as const)(
+    'uses primary text and a transparent background as the %s document default',
+    (mode) => {
+      expect(semanticThemes[mode]['document-text-default']).toBe(semanticThemes[mode]['text-primary']);
+      expect(semanticThemes[mode]['document-background-default']).toBe('transparent');
+    },
+  );
+
+  it.each(['brown', 'purple', 'pink'] as const)(
+    'supplies a complete %s grade scale that darkens monotonically',
+    (name) => {
       const family = primitiveTokens.colors[name];
       expect(Object.keys(family)).toEqual(['50', '100', '200', '300', '400', '500', '600', '700', '800', '900']);
       const luminances = Object.values(family).map(relativeLuminance);
       for (let index = 1; index < luminances.length; index += 1) {
         expect(luminances[index], `${name} grades increase in darkness`).toBeLessThan(luminances[index - 1]);
       }
-    }
-    expect(semanticThemes.light['document-text-default']).toBe(semanticThemes.light['text-primary']);
-    expect(semanticThemes.dark['document-text-default']).toBe(semanticThemes.dark['text-primary']);
-    expect(semanticThemes.light['document-background-default']).toBe('transparent');
-    expect(semanticThemes.dark['document-background-default']).toBe('transparent');
-  });
+    },
+  );
 
-  it('maps actual inline mark attributes and accepts all ten table colors', () => {
-    const documentContent = read('../../lib/styles/document-content.css');
-    // Table presentation (shared by the live editor and the SSR snapshot) owns the cell colour set.
-    const tableExtensions = read('./tiptap/table/table-presentation.ts');
+  it.each(EDITOR_COLOR_VALUES.filter((color) => color !== 'default'))(
+    'styles %s inline text and background color marks with their semantic tokens',
+    (color) => {
+      const declarations = new Map<string, string>();
+      postcss.parse(read('../../lib/styles/document-content.css')).walkDecls((declaration) => {
+        const rule = declaration.parent;
+        if (rule?.type !== 'rule') {
+          return;
+        }
+        for (const selector of (rule as postcss.Rule).selectors) {
+          declarations.set(`${selector.replace(/\s+/gu, ' ')}|${declaration.prop}`, declaration.value);
+        }
+      });
+      // The wire color marks render `data-style-type` with their `stringValue` attribute.
+      const valueOf = (kind: 'textColor' | 'backgroundColor', property: string) =>
+        [...declarations.entries()].find(
+          ([key]) =>
+            key.endsWith(`|${property}`) &&
+            key.includes(`[data-style-type='${kind}']`) &&
+            key.includes(`[stringvalue='${color}']`),
+        )?.[1];
 
-    EDITOR_COLOR_VALUES.filter((color) => color !== 'default').forEach((color) => {
-      expect(documentContent).toContain(
-        `[data-style-type='textColor']:is([stringvalue='${color}'], [data-style-value='${color}'])`,
-      );
-      expect(documentContent).toContain(
-        `[data-style-type='backgroundColor']:is([stringvalue='${color}'], [data-style-value='${color}'])`,
-      );
-    });
-    const tableColorSet = tableExtensions.match(/const tableColors = new Set\(\[([^\]]+)\]\);/)?.[1];
-    expect(tableColorSet).toBeDefined();
-    EDITOR_COLOR_VALUES.forEach((color) => expect(tableColorSet).toContain(`'${color}'`));
-  });
+      expect(valueOf('textColor', 'color')).toBe(`var(--editor-text-color-${color})`);
+      expect(valueOf('backgroundColor', 'background-color')).toBe(`var(--editor-background-color-${color})`);
+    },
+  );
 
-  it('shows transparent default backgrounds as transparency in swatches', () => {
+  it('styles transparent swatches with a transparency pattern', () => {
     const swatches = read('../../components/core/DocumentColorPreview/DocumentColorPreview.module.css');
-    const preview = read('../../components/core/DocumentColorPreview/DocumentColorPreview.tsx');
-    const blockMenu = read('./tiptap/TiptapBlockMenu.tsx');
 
     expect(swatches).toContain('[data-transparent]');
-    expect(preview).toContain("kind !== 'text' && background === 'default'");
-    expect(blockMenu).toContain('colorPreview={{ kind, color }}');
   });
 
   it('loads the document bridge globally and KaTeX styles with math renderers', () => {

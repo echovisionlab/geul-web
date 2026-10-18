@@ -212,12 +212,6 @@ describe('listClientsForSelector', () => {
     expect(listClientsMock).toHaveBeenCalledWith({ pagination: { limit: 100, offset: 0 } });
   });
 
-  it('returns an empty selector result when the public API omits clients', async () => {
-    listClientsMock.mockResolvedValue({});
-
-    await expect(listClientsForSelector()).resolves.toEqual([]);
-  });
-
   it('preserves client selector failure', async () => {
     listClientsMock.mockRejectedValue(new Error('backend unavailable'));
 

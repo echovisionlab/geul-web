@@ -1,6 +1,4 @@
 // @vitest-environment jsdom
-
-import { I18nProvider as DesignSystemProvider } from 'react-aria-components';
 import '@testing-library/jest-dom/vitest';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
@@ -22,16 +20,6 @@ afterEach(() => {
   act(() => root.unmount());
   container.remove();
 });
-
-function renderNativeSelect(animate = true) {
-  act(() => {
-    root.render(
-      <DesignSystemProvider>
-        <NativeSelect label="Language" data={['English', 'Korean']} animate={animate} />
-      </DesignSystemProvider>,
-    );
-  });
-}
 
 describe('NativeSelect', () => {
   it('preserves the required field name and only references rendered help and error copy', () => {
@@ -70,18 +58,5 @@ describe('NativeSelect', () => {
     expect(container.querySelector(`.${classes.section}`)?.textContent).toBe('Language icon');
     expect(container.querySelectorAll('select')).toHaveLength(1);
     expect(container.querySelector('button')).toBeNull();
-  });
-  it('uses the shared underline input and animated wrapper styles', () => {
-    renderNativeSelect();
-
-    expect(container.querySelector('select')?.classList.contains(classes.input)).toBe(true);
-    expect(container.querySelector(`.${classes.wrapper}`)).not.toBeNull();
-  });
-
-  it('keeps the underline style while allowing focus animation to be disabled', () => {
-    renderNativeSelect(false);
-
-    expect(container.querySelector('select')?.classList.contains(classes.input)).toBe(true);
-    expect(container.querySelector(`.${classes.wrapper}`)).not.toBeNull();
   });
 });

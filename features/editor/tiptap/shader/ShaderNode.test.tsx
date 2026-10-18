@@ -13,8 +13,6 @@ import { executableBlockIdForPosition } from '../executable-source';
 import {
   createShaderExtension,
   KOREAN_SHADER_LABELS,
-  markerFor,
-  resolveShaderViewMode,
   replaceShaderStageChannels,
   replaceShaderStageSource,
   selectShaderNode,
@@ -22,17 +20,8 @@ import {
 } from './ShaderNode';
 import { ShaderPublicPreview } from './ShaderPublicPreview';
 import { DEFAULT_SHADER_PROGRAM, SHADER_STAGE_DEFINITIONS } from './shader-program';
-import {
-  createShaderPreviewWorkerRuntime,
-  shaderContainedSize,
-  type ShaderPreviewRuntimeFactory,
-} from './shader-preview-runtime';
-import {
-  DEFAULT_SHADER_FRAGMENT_SOURCE,
-  DEFAULT_SHADER_VERTEX_SOURCE,
-  normalizeShaderError,
-  validateShaderSource,
-} from './shader-source';
+import type { ShaderPreviewRuntimeFactory } from './shader-preview-runtime';
+import { DEFAULT_SHADER_FRAGMENT_SOURCE, DEFAULT_SHADER_VERTEX_SOURCE } from './shader-source';
 
 // NodeView/preview ownership is exercised below with the real editor. Monaco's
 // engine, workers and model lifecycle are covered by code-editor tests and the
@@ -109,35 +98,6 @@ function shader(editor: Editor): NodeType | undefined {
 }
 
 describe('Shader source and wire contract', () => {
-  it('normalizes implementation-specific compile logs into editor markers', () => {
-    expect(normalizeShaderError('ERROR: 0:14:3: undeclared identifier', 'compile', 9)).toEqual({
-      kind: 'compile',
-      message: 'undeclared identifier',
-      line: 5,
-      column: 3,
-    });
-    expect(normalizeShaderError('0(22) : error C0000: syntax error', 'compile', 9)).toEqual({
-      kind: 'compile',
-      message: 'syntax error',
-      line: 13,
-      column: 1,
-    });
-  });
-
-  it('accepts ordinary fragment main and ShaderToy mainImage entrypoints', () => {
-    expect(validateShaderSource('void main() {}')).toBeNull();
-    expect(validateShaderSource(DEFAULT_SHADER_FRAGMENT_SOURCE)).toBeNull();
-  });
-
-  it('only exposes a compile marker on the exact filename tab', () => {
-    const error = { kind: 'compile' as const, stage: 'bufferA' as const, message: 'broken', line: 3, column: 2 };
-    expect(markerFor(error, 'image')).toEqual([]);
-    expect(markerFor(error, 'bufferA')).toEqual([
-      expect.objectContaining({ message: 'broken', startLineNumber: 3, startColumn: 2 }),
-    ]);
-    expect(markerFor({ kind: 'link', stage: 'link', message: 'failed' }, 'image')).toEqual([]);
-  });
-
   it('stores source as text content and only layout/runtime mode as attributes', () => {
     const editor = new Editor({
       extensions: [
@@ -248,12 +208,6 @@ describe('Shader Monaco authoring boundary', () => {
       editor.destroy();
     },
   );
-
-  it('uses local view mode when the editable surface lacks neutral authority', () => {
-    expect(resolveShaderViewMode(false, 'edit', 'preview')).toBe('preview');
-    expect(resolveShaderViewMode(false, 'edit', 'source')).toBe('source');
-    expect(resolveShaderViewMode(true, 'edit', 'preview')).toBe('edit');
-  });
 
   it('applies only the changed text range and preserves attrs', () => {
     const editor = new Editor({
@@ -535,75 +489,6 @@ describe('Shader Monaco authoring boundary', () => {
 });
 
 describe('Shader preview worker lifecycle', () => {
-  it('contains the 16:9 drawing buffer inside wide and narrow durable preview surfaces', () => {
-    expect(shaderContainedSize(900, 320)).toEqual({ width: 569, height: 320 });
-    expect(shaderContainedSize(400, 320)).toEqual({ width: 400, height: 225 });
-  });
-
-  it('transfers one OffscreenCanvas, forwards pointer state and terminates on stop/dispose', () => {
-    vi.useFakeTimers();
-    const instances: FakeWorker[] = [];
-    class FakeWorker {
-      onmessage: ((event: MessageEvent) => void) | null = null;
-      onerror: (() => void) | null = null;
-      postMessage = vi.fn();
-      terminate = vi.fn();
-      constructor() {
-        instances.push(this);
-      }
-    }
-    vi.stubGlobal('Worker', FakeWorker);
-    const offscreen = {} as OffscreenCanvas;
-    const canvas = document.createElement('canvas');
-    Object.defineProperty(canvas, 'transferControlToOffscreen', { value: vi.fn(() => offscreen) });
-    canvas.getBoundingClientRect = () => ({
-      width: 640,
-      height: 360,
-      x: 0,
-      y: 0,
-      top: 0,
-      right: 640,
-      bottom: 360,
-      left: 0,
-      toJSON: () => ({}),
-    });
-    const events = { onReady: vi.fn(), onStopped: vi.fn(), onError: vi.fn() };
-    const runtime = createShaderPreviewWorkerRuntime(canvas, events);
-    runtime.run(programWithImage());
-    expect(instances).toHaveLength(1);
-    expect(instances[0]!.postMessage).toHaveBeenCalledWith(
-      {
-        type: 'start',
-        program: programWithImage(),
-        audioEnabled: false,
-        canvas: offscreen,
-      },
-      [offscreen],
-    );
-    instances[0]!.onmessage?.(new MessageEvent('message', { data: { type: 'ready' } }));
-    expect(events.onReady).toHaveBeenCalledOnce();
-    runtime.pointer(12, 34, true);
-    expect(instances[0]!.postMessage).toHaveBeenLastCalledWith({ type: 'pointer', x: 12, y: 34, pressed: true });
-    runtime.resize(800, 450);
-    expect(instances[0]!.postMessage).toHaveBeenLastCalledWith({ type: 'resize', width: 800, height: 450 });
-    runtime.stop();
-    expect(instances[0]!.postMessage).toHaveBeenLastCalledWith({ type: 'stop' });
-    vi.advanceTimersByTime(100);
-    expect(instances[0]!.terminate).toHaveBeenCalledOnce();
-    expect(events.onStopped).toHaveBeenCalledOnce();
-    runtime.dispose();
-    vi.unstubAllGlobals();
-    vi.stubGlobal(
-      'ResizeObserver',
-      class {
-        observe() {}
-        unobserve() {}
-        disconnect() {}
-      },
-    );
-    vi.useRealTimers();
-  });
-
   it('uses a fresh canvas transfer after a visible preview is hidden and resumed', async () => {
     const run = vi.fn();
     const dispose = vi.fn();

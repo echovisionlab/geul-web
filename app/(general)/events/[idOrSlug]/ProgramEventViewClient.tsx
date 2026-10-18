@@ -251,11 +251,7 @@ export function ProgramEventViewClient({ event, locale, pathname, query, request
     >
       {event.content && event.content.length > 0 ? (
         <EntityDetailSection title={tCommonLabels('description')}>
-          <TableOfContents
-            items={tocItems}
-            contentPlacement="start"
-            outlinePresentation={event.posterUrl ? 'rail' : 'responsive'}
-          >
+          <TableOfContents items={tocItems} outlinePresentation={event.posterUrl ? 'rail' : 'responsive'}>
             <div className="prose" lang={contentLang}>
               {/* The authored body sits under the level-2 section title: authored H1 → h3. */}
               <DocumentHeadingScope parentLevel={2}>

@@ -1,32 +1,7 @@
 // @vitest-environment jsdom
 
 import { createP5PreviewRuntime } from './p5-preview-runtime';
-import { buildP5SandboxDocument } from './p5-preview-document';
 import { DEFAULT_P5_SKETCH_SOURCE } from './p5-source';
-
-describe('p5.js sandbox render readiness', () => {
-  it('keeps the default sketch visibly centered until the pointer enters the canvas', () => {
-    expect(DEFAULT_P5_SKETCH_SOURCE).toContain('const pointerIsInside =');
-    expect(DEFAULT_P5_SKETCH_SOURCE).toContain('pointerIsInside ? mouseX : width / 2');
-    expect(DEFAULT_P5_SKETCH_SOURCE).toContain('pointerIsInside ? mouseY : height / 2');
-  });
-
-  it('resolves the mount after document load and reports ready only after a canvas is attached', () => {
-    const sandboxDocument = buildP5SandboxDocument(DEFAULT_P5_SKETCH_SOURCE, 'mount-contract', '/p5.js');
-
-    expect(sandboxDocument).toMatch(/new runnerWindow\.p5\(sketch, ["']sketch["']\)/u);
-    expect(sandboxDocument).not.toMatch(
-      /new runnerWindow\.p5\(sketch, runnerDocument\.getElementById\(["']sketch["']\)\)/u,
-    );
-    expect(sandboxDocument).toMatch(/runnerDocument\.querySelector\(["']#sketch canvas["']\)/u);
-    expect(sandboxDocument).toContain('#sketch{display:grid;place-items:center}');
-    expect(sandboxDocument).toContain('width:auto!important;height:auto!important');
-    const drawIndex = sandboxDocument.indexOf('await program.draw?.(...args);');
-    const readyIndex = sandboxDocument.indexOf('signalReady();', drawIndex);
-    expect(drawIndex).toBeGreaterThan(-1);
-    expect(readyIndex).toBeGreaterThan(drawIndex);
-  });
-});
 
 describe('p5.js device runner contract', () => {
   afterEach(() => {
@@ -161,6 +136,78 @@ describe('p5.js device runner contract', () => {
       kind: 'resource',
       message: 'Device-enabled p5.js previews require a configured isolated runner origin.',
     });
+    runtime.dispose();
+  });
+
+  it('terminates a preflight that exceeds the CPU budget before mounting a frame', () => {
+    vi.useFakeTimers();
+    const terminate = vi.fn();
+    const pendingWorkers: PendingWorker[] = [];
+    class PendingWorker {
+      onmessage: ((event: MessageEvent) => void) | null = null;
+      onerror: ((event: ErrorEvent) => void) | null = null;
+      postMessage = vi.fn();
+      terminate = terminate;
+
+      constructor() {
+        pendingWorkers.push(this);
+      }
+    }
+    vi.stubGlobal('Worker', PendingWorker);
+    const mount = document.createElement('div');
+    const onError = vi.fn();
+    const runtime = createP5PreviewRuntime(mount, {
+      onReady: vi.fn(),
+      onStopped: vi.fn(),
+      onError,
+    });
+    runtime.run('while (true) {}');
+    const pendingWorker = pendingWorkers[0];
+    expect(pendingWorker).toBeDefined();
+    pendingWorker?.onmessage?.(new MessageEvent('message', { data: { type: 'initialized' } }));
+    vi.advanceTimersByTime(751);
+    expect(terminate).toHaveBeenCalledOnce();
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: 'resource', message: expect.stringContaining('CPU budget') }),
+    );
+    expect(mount.querySelector('iframe')).toBeNull();
+    runtime.dispose();
+  });
+
+  it('does not charge worker startup time to the author setup CPU budget', () => {
+    vi.useFakeTimers();
+    const pendingWorkers: PendingWorker[] = [];
+    class PendingWorker {
+      onmessage: ((event: MessageEvent) => void) | null = null;
+      onerror: ((event: ErrorEvent) => void) | null = null;
+      postMessage = vi.fn();
+      terminate = vi.fn();
+
+      constructor() {
+        pendingWorkers.push(this);
+      }
+    }
+    vi.stubGlobal('Worker', PendingWorker);
+    const onError = vi.fn();
+    const runtime = createP5PreviewRuntime(document.createElement('div'), {
+      onReady: vi.fn(),
+      onStopped: vi.fn(),
+      onError,
+    });
+    runtime.run(DEFAULT_P5_SKETCH_SOURCE);
+    const pendingWorker = pendingWorkers[0];
+    expect(pendingWorker).toBeDefined();
+
+    vi.advanceTimersByTime(751);
+    expect(onError).not.toHaveBeenCalled();
+    pendingWorker?.onmessage?.(new MessageEvent('message', { data: { type: 'initialized' } }));
+    expect(pendingWorker?.postMessage).toHaveBeenCalledWith({
+      type: 'preflight',
+      source: DEFAULT_P5_SKETCH_SOURCE,
+    });
+    vi.advanceTimersByTime(751);
+    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringContaining('CPU budget') }));
+
     runtime.dispose();
   });
 });

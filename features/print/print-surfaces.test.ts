@@ -1,70 +1,82 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import postcss from 'postcss';
 import { describe, expect, it } from 'vitest';
 
-function read(path: string): string {
-  return readFileSync(resolve(process.cwd(), path), 'utf8');
-}
-
-function printRules(path: string): string {
-  const css = read(path);
-  return /@media print\s*\{([\s\S]*)\}\s*$/u.exec(css)?.[1] ?? '';
+/** The declarations that `@media print` applies to `selector` in one stylesheet, `!important` kept. */
+function printDeclarations(path: string, selector: string): Record<string, string> {
+  const declarations: Record<string, string> = {};
+  postcss.parse(readFileSync(resolve(process.cwd(), path), 'utf8')).walkAtRules('media', (media) => {
+    if (!/\bprint\b/u.test(media.params)) {
+      return;
+    }
+    media.walkRules((rule) => {
+      if (rule.selectors.includes(selector)) {
+        rule.walkDecls((declaration) => {
+          declarations[declaration.prop] = `${declaration.value}${declaration.important ? ' !important' : ''}`;
+        });
+      }
+    });
+  });
+  return declarations;
 }
 
 describe('public document print surfaces', () => {
-  it('removes fixed-chrome offsets from every frame kind and prints on paper in every theme', () => {
-    const frame = printRules('components/core/ApplicationFrame/ApplicationFrame.module.css');
-    const variables = printRules('lib/styles/variables.css');
-    const print = read('lib/styles/print.css');
-
-    expect(frame).toMatch(/\.root\[data-frame-kind\] \.main\s*\{[^}]*margin:\s*0;[^}]*padding:\s*0;/su);
-    expect(variables).toMatch(/html\[data-geul-theme\] body\s*\{[^}]*var\(--geul-paper-background\) !important/su);
-    // Image-backed (inverse) headings keep their contrast; every other heading prints in paper ink.
-    expect(print).toContain(":is(h1, h2, h3, h4, h5, h6):not([data-tone='inverse'])");
+  it('removes the fixed-chrome offsets of every frame kind from the printed main area', () => {
+    expect(
+      printDeclarations('components/core/ApplicationFrame/ApplicationFrame.module.css', '.root[data-frame-kind] .main'),
+    ).toMatchObject({ margin: '0', padding: '0' });
   });
 
-  it('separates document chrome from the body once, in the shared layout', () => {
-    const layout = read('features/document-layout/ui/ContentLayoutView.module.css');
-    const post = read('features/post/PostViewContent.tsx');
-
-    expect(layout).toMatch(/\.flowChrome\s*\{[^}]*margin-block-end:\s*var\(--geul-spacing-md\);/su);
-    expect(layout).toMatch(/\.pinnedChrome \+ \.body\s*\{[^}]*padding-block-start:\s*var\(--geul-spacing-md\);/su);
-    expect(post).not.toContain('blockStart=');
+  it('prints every theme on paper and every non-inverse heading in paper ink', () => {
+    expect(printDeclarations('lib/styles/variables.css', 'html[data-geul-theme] body')).toMatchObject({
+      'background-color': 'var(--geul-paper-background) !important',
+    });
+    // Image-backed (inverse) headings keep their contrast on the printed image.
+    expect(
+      printDeclarations('lib/styles/print.css', ":is(h1, h2, h3, h4, h5, h6):not([data-tone='inverse'])"),
+    ).toMatchObject({ color: 'var(--geul-paper-ink) !important' });
   });
 
-  it('resets Page sections, pinned layouts, and columns to paged block flow', () => {
-    const layout = printRules('features/document-layout/ui/ContentLayoutView.module.css');
-    const page = printRules('features/page/PageView/BlockRenderer.module.css');
-
-    expect(layout).toContain('display: block !important');
-    expect(layout).toContain('position: static !important');
-    expect(page).toContain(':global(.columns-section)');
-    expect(page).toContain('display: block !important');
-    expect(page).toContain('overflow: visible !important');
+  it.each([
+    ['features/document-layout/ui/ContentLayoutView.module.css', ".root[data-content-height='viewport']"],
+    ['features/document-layout/ui/ContentLayoutView.module.css', ".root[data-content-height='viewport'] .body"],
+    ['features/page/PageView/BlockRenderer.module.css', ":global([data-footer-layout='pinned']) .sections"],
+    ['features/page/PageView/BlockRenderer.module.css', '.section'],
+  ])('resets %s %s to paged block flow', (path, selector) => {
+    expect(printDeclarations(path, selector)).toMatchObject({
+      display: 'block !important',
+      overflow: 'visible !important',
+    });
   });
 
-  it('prints an overlay entity detail as one image-backed header fragment', () => {
-    const detail = printRules('features/document-layout/ui/EntityDetailLayout.module.css');
-    const work = read('app/(general)/works/[idOrSlug]/WorkViewClient.tsx');
-
-    expect(work).toContain('printMedia="overlay"');
-    expect(detail).toContain("[data-print-media='overlay']");
-    expect(detail).toContain('min-height: 62mm');
-    expect(detail).toContain('break-inside: avoid');
-    expect(detail).toContain('print-color-adjust: exact');
-    expect(detail).toContain('position: absolute');
+  it('prints pinned document chrome in flow and Page columns as stacked blocks', () => {
+    expect(
+      printDeclarations('features/document-layout/ui/ContentLayoutView.module.css', '.pinnedChrome'),
+    ).toMatchObject({ position: 'static !important' });
+    expect(
+      printDeclarations('features/page/PageView/BlockRenderer.module.css', ':global(.columns-section)'),
+    ).toMatchObject({ display: 'block !important' });
   });
 
-  it('prints active, preview, shared, and archived Policy documents through one module boundary', () => {
-    const policy = printRules('features/policy/LegalDocumentView.module.css');
-    const privacy = read('app/(general)/privacy/PrivacyPageClient.tsx');
-    const terms = read('app/(general)/terms/TermsPageClient.tsx');
-    const shared = read('features/policy/LegalShareDocumentView.tsx');
+  it('prints an overlay entity detail header as one unbroken fragment over its exact-colour image', () => {
+    const layout = 'features/document-layout/ui/EntityDetailLayout.module.css';
 
-    expect(policy).toContain('display: table-header-group');
-    expect(policy).toContain('break-inside: avoid');
-    expect(privacy).toContain('data-legal-document="privacy"');
-    expect(terms).toContain('data-legal-document="terms"');
-    expect(shared).toContain('data-legal-document={document.entityType}');
+    expect(printDeclarations(layout, ".root[data-print-media='overlay'] .header")).toMatchObject({
+      'break-inside': 'avoid',
+    });
+    expect(printDeclarations(layout, ".root[data-print-media='overlay'] .media")).toMatchObject({
+      'print-color-adjust': 'exact',
+    });
+    expect(printDeclarations(layout, ".root[data-print-media='overlay'] .image")).toMatchObject({
+      'print-color-adjust': 'exact',
+    });
+  });
+
+  it('repeats Policy table headers on every printed page and keeps rows whole', () => {
+    const policy = 'features/policy/LegalDocumentView.module.css';
+
+    expect(printDeclarations(policy, '.content thead')).toMatchObject({ display: 'table-header-group' });
+    expect(printDeclarations(policy, '.content tr')).toMatchObject({ 'break-inside': 'avoid' });
   });
 });

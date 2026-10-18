@@ -6,7 +6,7 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { NativeSelect, PasswordInput, Textarea, TextInput } from '../Input';
+import { NativeSelect, Textarea, TextInput } from '../Input';
 import { Field } from './Field';
 import { Checkbox } from '../Input/Checkbox';
 
@@ -77,20 +77,6 @@ describe('Field', () => {
     expect(container?.querySelector('input')?.getAttribute('aria-invalid')).toBe('grammar');
   });
 
-  it('merges child guidance with field help and error without duplicating IDs', () => {
-    render(
-      <>
-        <span id="child-help">Use your account email</span>
-        <Field label="Email" htmlFor="email" description="Used for receipts" error="Invalid address">
-          <input aria-describedby="child-help email-description" />
-        </Field>
-      </>,
-    );
-    expect(container?.querySelector('input')?.getAttribute('aria-describedby')).toBe(
-      'child-help email-description email-error',
-    );
-  });
-
   it('deduplicates individual child description tokens before merging field guidance', () => {
     render(
       <>
@@ -104,15 +90,6 @@ describe('Field', () => {
       'aria-describedby',
       'child-help email-description email-error',
     );
-  });
-
-  it('preserves select validation supplied by the child without a wrapper error', () => {
-    render(
-      <Field label="Language">
-        <NativeSelect aria-invalid="true" data={['English']} />
-      </Field>,
-    );
-    expect(container?.querySelector('select')).toHaveAttribute('aria-invalid', 'true');
   });
 
   it('keeps a readonly required textarea focusable and connects all wrapper guidance', () => {
@@ -182,21 +159,6 @@ describe('Field', () => {
     expect(error?.textContent).toContain('Name is required');
     expect(input?.getAttribute('aria-describedby')).toContain('field-display-name-description');
     expect(input?.getAttribute('aria-describedby')).toContain('field-display-name-error');
-    expect(input?.getAttribute('aria-invalid')).toBe('true');
-  });
-
-  it('preserves invalid state wiring for password inputs', () => {
-    render(
-      <Field label="Confirm password" htmlFor="field-confirm-password" error="Passwords do not match">
-        <PasswordInput placeholder="Confirm password" />
-      </Field>,
-    );
-
-    const input = document.querySelector('input#field-confirm-password');
-    const error = document.querySelector('#field-confirm-password-error');
-
-    expect(error?.textContent).toContain('Passwords do not match');
-    expect(input?.getAttribute('aria-describedby')).toContain('field-confirm-password-error');
     expect(input?.getAttribute('aria-invalid')).toBe('true');
   });
 

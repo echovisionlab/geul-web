@@ -1,6 +1,5 @@
-import { MySection } from '@echovisionlab/geul-proto/secure/member_pb.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { getMyProfile, getMySections } from './my-account';
+import { getMyProfile } from './my-account';
 
 const mocks = vi.hoisted(() => ({
   createMemberClient: vi.fn(),
@@ -40,13 +39,5 @@ describe('my account projections', () => {
     });
 
     await expect(getMyProfile()).resolves.toBeNull();
-  });
-
-  it('loads navigation capabilities only through the dedicated lazy read', async () => {
-    const sections = [MySection.PROFILE, MySection.POSTS];
-    mocks.getMySections.mockResolvedValue({ sections });
-
-    await expect(getMySections()).resolves.toEqual(sections);
-    expect(mocks.getMySections).toHaveBeenCalledWith({});
   });
 });

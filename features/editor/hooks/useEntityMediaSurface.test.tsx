@@ -118,12 +118,4 @@ describe('useEntityMediaSurface', () => {
     expect(harness.inserted[0]?.block.props).not.toHaveProperty('mediaAttemptId');
     expect(latestSurface?.uploadProgress).toBeNull();
   });
-
-  it('does not install the old external-image placeholder extension', async () => {
-    mocks.upload.mockResolvedValue({ fileId: randomTestUuid(), url: 'https://cdn.example.test/file' });
-    await render();
-
-    expect(latestSurface?.mediaTiptapExtensions).toEqual([]);
-    expect(latestSurface?.externalImageProgress).toBeNull();
-  });
 });

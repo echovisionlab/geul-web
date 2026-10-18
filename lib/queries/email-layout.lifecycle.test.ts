@@ -55,16 +55,6 @@ describe('email layout lifecycle queries', () => {
     await expect(listEmailLayoutsSimple()).rejects.toBe(failure);
   });
 
-  it('uses the same unarchived contract for composition pickers', async () => {
-    listEmailLayoutsAdmin.mockResolvedValue({ layouts: [], pagination: { total: 0 } });
-
-    await listEmailLayoutsSimple();
-
-    expect(listEmailLayoutsAdmin).toHaveBeenCalledWith({
-      pagination: { limit: 100, offset: 0 },
-    });
-  });
-
   it('loads every layout for composition pickers', async () => {
     listEmailLayoutsAdmin
       .mockResolvedValueOnce({

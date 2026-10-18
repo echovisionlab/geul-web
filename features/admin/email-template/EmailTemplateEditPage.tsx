@@ -52,8 +52,8 @@ import {
 } from '@/lib/actions/email-template';
 import { updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata';
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
-import { persistCollaborativeDocumentNow } from '@/lib/collab/persist-now';
-import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
+import { flushEditorSavesOrNotify } from '@/lib/editor/flush-editor-saves-or-notify';
+import { persistEditorDocumentBeforeAction } from '@/lib/editor/persist-editor-document-before-action';
 import { publishEditorEntityChange, useEditorEntityChanges } from '@/lib/editor/editor-entity-changes';
 import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
 import { useAuthoritativeConfiguration } from '@/lib/editor/useAuthoritativeConfiguration';
@@ -370,21 +370,17 @@ function useEmailTemplateEditPageModel() {
       return;
     }
     void (async () => {
-      if (!(await flushEditorSaves(`email_template:${templateId}`))) {
-        notifications.show({ message: tCommonNotifications('saveFailed'), tone: 'danger' });
-        return;
-      }
-      if (localeMode.shouldUseLocaleDocument && !isSynced) {
-        notifications.show({ message: tCommonStates('syncing'), tone: 'accent' });
-        return;
-      }
-      try {
-        await persistCollaborativeDocumentNow(currentProvider);
-      } catch (error) {
-        notifications.show({
-          message: error instanceof Error ? error.message : tCommonNotifications('saveFailed'),
-          tone: 'danger',
-        });
+      if (
+        !(await persistEditorDocumentBeforeAction({
+          document: `email_template:${templateId}`,
+          provider: currentProvider,
+          requiresSync: localeMode.shouldUseLocaleDocument,
+          isSynced,
+          saveFailedMessage: tCommonNotifications('saveFailed'),
+          syncingMessage: tCommonStates('syncing'),
+          syncingTone: 'accent',
+        }))
+      ) {
         return;
       }
       sendTest.mutate({
@@ -667,11 +663,9 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
           isSynced={isSynced}
           onBack={() => {
             void (async () => {
-              if (!(await flushEditorSaves(`email_template:${templateId}`))) {
-                notifications.show({ message: tCommonNotifications('saveFailed'), tone: 'danger' });
-                return;
+              if (await flushEditorSavesOrNotify(`email_template:${templateId}`, tCommonNotifications('saveFailed'))) {
+                router.push('/admin/email-templates');
               }
-              router.push('/admin/email-templates');
             })();
           }}
           backTooltip={tEmailTemplates('detail.backTooltip')}

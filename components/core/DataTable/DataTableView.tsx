@@ -23,7 +23,7 @@ import {
   getReservedTableContentMinHeight,
   getTableLoadingMinHeight,
 } from './layout';
-import type { DataTableRowSelectionState } from './selection';
+import { nextPageSelection, type DataTableRowSelectionState } from './selection';
 import classes from './DataTableView.module.css';
 
 export type DataTableViewSortDirection = 'asc' | 'desc';
@@ -292,14 +292,7 @@ export function DataTableView<T>({
         return;
       }
 
-      const next = new Set(selection.selectedRowKeys);
-      selectablePageRowKeys.forEach((key) => next.delete(key));
-
-      if (checked) {
-        selectablePageRowKeys.forEach((key) => next.add(key));
-      }
-
-      selection.onSelectedRowKeysChange(Array.from(next));
+      selection.onSelectedRowKeysChange(nextPageSelection(selection.selectedRowKeys, selectablePageRowKeys, checked));
     },
     [selectablePageRowKeys, selection],
   );

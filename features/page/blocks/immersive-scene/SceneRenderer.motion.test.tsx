@@ -9,24 +9,50 @@ import koMessages from '@/messages/ko.json';
 import { ImmersiveSceneRenderer } from './SceneRenderer';
 import { parseImmersiveSceneConfig } from './schema';
 
-const runtime = vi.hoisted(() => ({ render: vi.fn(), pointer: vi.fn(), intersection: vi.fn() }));
+const runtime = vi.hoisted(() => ({
+  render: vi.fn(),
+  pointer: vi.fn(),
+  intersection: vi.fn(),
+  repelDistance: vi.fn(),
+  engineOptions: vi.fn(),
+  rendererOptions: vi.fn(),
+  clearColor: vi.fn(),
+  engines: [] as { object: import('three').Points<import('three').BufferGeometry, import('three').ShaderMaterial> }[],
+}));
 
 // Exercise the actual playback/effect owner while replacing only GPU/CDN I/O.
 vi.mock('@/lib/three/cdn-runtime', async () => {
   const three = await vi.importActual<typeof import('three')>('three');
   class Renderer {
     debug = { checkShaderErrors: false };
-    setClearColor() {}
+    constructor(options: unknown) {
+      runtime.rendererOptions(options);
+    }
+    setClearColor(color: unknown, alpha: number) {
+      runtime.clearColor(color, alpha);
+    }
     setPixelRatio() {}
     setSize() {}
     render() {}
     dispose() {}
   }
   class Engine {
-    object = new three.Mesh(new three.BufferGeometry(), new three.MeshBasicMaterial());
+    object = new three.Points(
+      new three.BufferGeometry(),
+      new three.ShaderMaterial({
+        uniforms: {},
+        fragmentShader: 'uniform float uProgress;\nvoid main() { gl_FragColor = finalColor; }',
+      }),
+    );
+    constructor(options: unknown) {
+      runtime.engineOptions(options);
+      runtime.engines.push(this);
+    }
     setVelocityTractionForce() {}
     setPositionalTractionForce() {}
-    setMaxRepelDistance() {}
+    setMaxRepelDistance(distance: number) {
+      runtime.repelDistance(distance);
+    }
     setGeometrySize() {}
     registerMesh() {}
     async setMeshSequence() {}
@@ -79,6 +105,11 @@ beforeEach(() => {
   runtime.render.mockClear();
   runtime.pointer.mockClear();
   runtime.intersection.mockClear();
+  runtime.repelDistance.mockClear();
+  runtime.engineOptions.mockClear();
+  runtime.rendererOptions.mockClear();
+  runtime.clearColor.mockClear();
+  runtime.engines.length = 0;
   let frameId = 0;
   vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
     frames.set(++frameId, callback);
@@ -120,11 +151,11 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-async function renderScene() {
+async function renderScene(sceneConfig = config) {
   await act(async () =>
     root.render(
       <TestProviders>
-        <ImmersiveSceneRenderer config={config} />
+        <ImmersiveSceneRenderer config={sceneConfig} />
       </TestProviders>,
     ),
   );
@@ -144,6 +175,68 @@ function click(label: string) {
   expect(button).toBeDefined();
   act(() => button!.dispatchEvent(new MouseEvent('click', { bubbles: true })));
 }
+
+const radians = (degrees: number) => degrees * (Math.PI / 180);
+
+describe('Authored immersive scene controls', () => {
+  const singleUnit = {
+    unitsJson: '[{"id":"single","mesh":"sphere","color":"#ffffff"}]',
+    particleBrightness: '1.6',
+    darkParticleBrightness: '1.9',
+    rotationX: '10',
+    rotationY: '20',
+    rotationZ: '30',
+    rotationSpeedX: '0.2',
+    rotationSpeedY: '0.42',
+    rotationSpeedZ: '-0.1',
+    hoverRepelRadius: '0.7',
+  };
+
+  it.each([
+    ['light', 1.6],
+    ['dark', 1.9],
+  ] as const)('lights particles with the authored %s-scheme brightness', async (preferredScheme, brightness) => {
+    await renderScene(parseImmersiveSceneConfig({ ...singleUnit, preferredScheme }));
+
+    expect(runtime.engines[0].object.material.uniforms.uParticleBrightness.value).toBe(brightness);
+  });
+
+  it('keeps the background, rotation and hover effects running when they are enabled', async () => {
+    await renderScene(parseImmersiveSceneConfig(singleUnit));
+    for (let time = 0; time <= 500; time += 100) {
+      frame(time);
+    }
+
+    expect(runtime.rendererOptions).toHaveBeenCalledWith(expect.objectContaining({ alpha: false }));
+    expect(runtime.clearColor).toHaveBeenLastCalledWith(expect.anything(), 1);
+    expect(runtime.engines[0].object.rotation.y).toBeGreaterThan(radians(20));
+    expect(runtime.engineOptions).toHaveBeenCalledWith(expect.objectContaining({ useIntersection: true }));
+    expect(runtime.repelDistance).toHaveBeenLastCalledWith(0.7);
+  });
+
+  it('drops the background, holds the authored pose and ignores the pointer when the controls are off', async () => {
+    await renderScene(
+      parseImmersiveSceneConfig({
+        ...singleUnit,
+        backgroundEnabled: 'false',
+        rotationEnabled: 'false',
+        hoverEnabled: 'false',
+      }),
+    );
+    for (let time = 0; time <= 500; time += 100) {
+      frame(time);
+    }
+
+    expect(runtime.rendererOptions).toHaveBeenCalledWith(expect.objectContaining({ alpha: true }));
+    expect(runtime.clearColor).toHaveBeenLastCalledWith(expect.anything(), 0);
+    const { rotation } = runtime.engines[0].object;
+    expect(rotation.x).toBeCloseTo(radians(10));
+    expect(rotation.y).toBeCloseTo(radians(20));
+    expect(rotation.z).toBeCloseTo(radians(30));
+    expect(runtime.engineOptions).toHaveBeenCalledWith(expect.objectContaining({ useIntersection: false }));
+    expect(runtime.repelDistance).toHaveBeenLastCalledWith(0);
+  });
+});
 
 describe('Public immersive motion and information', () => {
   it('freezes playback, canvas frames and pointer effects, then resumes at the same progress', async () => {

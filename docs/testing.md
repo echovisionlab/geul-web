@@ -27,6 +27,27 @@ it('saves the profile', async () => {
   already covers an interaction in a real browser; do not duplicate it in jsdom.
 - Keep a test fast: a component test that needs more than ~300ms is a defect to fix, not a timeout to raise.
 
+## Deciding whether a test earns its place
+
+This section applies the shared testing guide (`shared-ai-testing/v2`,
+`~/.config/ai-guides/guides/testing-guide.md`) to this repository.
+
+- Tie each test to a requirement, a public contract or a reproduced defect, and name the wrong behaviour it
+  catches. Take expected values from that source, not from the current output, and do not copy production
+  branches or formulas into the test.
+- Run the real code under test. Mock external boundaries only; a test that mocks the logic it claims to
+  check, or only asserts that a mock received what the code passed it, verifies nothing.
+- Pin source text, markup, CSS values or a whole output only when that is the contract being protected.
+  Test framework behaviour (React, zod, next-intl, React Aria) only when the test checks our configuration,
+  wiring, extension or compatibility, or a past defect.
+- A bug fix gets a regression test that fails before the fix and passes after it. For a new test, check
+  that it fails when the behaviour is wrong; a controlled change to the code is enough where in doubt.
+- Delete a test only after reading what it verifies and confirming that a remaining test asserts the same
+  expectation, or that it protects no requirement. Never delete by category, name, length or coverage count.
+- When a test fails, separate an implementation defect, a wrong test, a changed requirement and an
+  environment problem. Do not change assertions, inputs or recorded outputs, or skip and mock the failure
+  away, until the cause is understood.
+
 `eslint-plugin-testing-library` enforces the query, waiting and container rules wherever a test uses
 Testing Library or `@/test/render`. Older tests that render with `createRoot`/`act` move to this style when
 they are next changed.
@@ -40,6 +61,14 @@ The same job then runs the Storybook CI scope in one Jest test invocation.
 Every applicable job still gates `Validate`; no changed-file selection narrows
 these test collections.
 
+`Tests` and `Build and static checks` run in parallel after `Format`, on their
+existing separate runners. `Validate` requires both jobs to succeed. The quality
+job generates Next route types, runs the full strict TypeScript project, and then
+builds with the strict application project. Tests and tooling remain in the full
+checker; the three existing Storybook-only accessibility tests remain in the
+dedicated Storybook checker. See [build performance](./performance/build-performance.md)
+for project boundaries, local contract commands, and cache measurements.
+
 | Project              | Boundary                                                                  | Command                |
 | -------------------- | ------------------------------------------------------------------------- | ---------------------- |
 | `node-unit`          | Node logic, policies, codecs, and mocked transports; no DOM or Next setup | `pnpm test:unit`       |
@@ -51,6 +80,26 @@ These boundaries describe the runtime fixture, not a claim that every Node test
 replaces all collaborators. For example, a codec can use real in-memory Yjs data
 without a service process. CRDT convergence, keyboard commands, profile guards,
 and live structure locks retain their real editor integration tests.
+
+Upload preparation, completion recovery, access-policy normalization and reorder
+calculations run directly in Node. Their component tests retain the connections
+that pure tests cannot prove: a cancelled upload issues no abort during finalization,
+a failed save prevents navigation or delivery, and a reordered relation sends its
+neighbor intent and observed order to the persistence action.
+
+State-only Tiptap tests create an unmounted editor and install the actual extension
+plugins when exercising input rules or transaction filters. An editor constructed
+with `element: null` does not install those plugins by itself. Keyboard dispatch,
+DOM selection, focus, rendered File hydration and controller-to-writer routing
+keep their mounted fixtures.
+
+Use real Core controls and the production View when testing their connection to a
+controller. A View mock that accepts callbacks does not verify that a user can
+reach those callbacks. SSR is appropriate for initial content and permission
+attributes; it cannot verify effect-driven query gating or later state changes.
+Run user-event interactions with real timers, or explicitly control the complete
+timer boundary. Its `advanceTimers` option alone does not drain every timer used
+by the installed React Testing Library async wrapper.
 
 `scripts/test/vitest-projects.mts` discovers the existing `.test.ts` and `.test.tsx`
 files once when Vitest starts and assigns each to one project. Existing
@@ -98,6 +147,17 @@ mounting an editor. The profile suites retain the end-to-end in-memory wiring,
 variable insertion, slash menus, keyboard handling, and rejected transactions;
 the corresponding standalone policy/normalization cases are no longer repeated
 inside those mounted suites.
+
+Page lifecycle save-barrier tests import the lifecycle operation without loading
+the Page editor UI. Media filename/style helpers run in Node, and active-job
+selection shares the existing translation polling test file. Their assertions
+remain; these cases need no DOM environment. Column insertion tests keep the
+real menu, dialog, cancellation/reopening, and remote-column updates. The
+cancellation fixture omits existing child chrome, which is covered by insertion
+and authority cases.
+Slash query/range cases use real ProseMirror documents and selections without
+mounting an EditorView. Coordinate calculation, keyboard, focus, and IME cases
+retain their editor fixtures.
 
 Policy profile contracts retain editor disposal and replacement-controller
 recovery. Media runtime contracts use deferred responses to cover stale ready

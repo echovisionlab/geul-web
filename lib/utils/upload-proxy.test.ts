@@ -1,35 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import {
-  buildUploadProxyRequestHeaders,
-  buildUploadProxyResponseHeaders,
-  isUploadPartRequest,
-  resolveUploadProxyBaseUrl,
-} from './upload-proxy';
+import { buildUploadProxyRequestHeaders, buildUploadProxyResponseHeaders } from './upload-proxy';
 
 describe('upload proxy routing', () => {
-  it('routes PUT /part through the API gateway', () => {
-    expect(isUploadPartRequest('PUT', ['part'])).toBe(true);
-    expect(
-      resolveUploadProxyBaseUrl({
-        method: 'PUT',
-        path: ['part'],
-        apiUrl: 'http://gateway.internal',
-      }),
-    ).toBe('http://gateway.internal');
-  });
-
-  it('keeps non-part upload calls on the gateway path', () => {
-    expect(isUploadPartRequest('POST', ['initiate'])).toBe(false);
-    expect(isUploadPartRequest('PUT', ['other'])).toBe(false);
-    expect(
-      resolveUploadProxyBaseUrl({
-        method: 'POST',
-        path: ['initiate'],
-        apiUrl: 'http://gateway.internal',
-      }),
-    ).toBe('http://gateway.internal');
-  });
-
   it('forwards only content and range metadata plus the server-owned cookie', () => {
     const headers = buildUploadProxyRequestHeaders(
       new Headers({

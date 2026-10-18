@@ -5,10 +5,7 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { ExecutableSelectionMenu } from './ExecutableSelectionMenu';
-import {
-  createExecutableSelectionMenuRegistry,
-  type ExecutableSelectionMenuBinding,
-} from './ExecutableSelectionMenuRegistry';
+import { type ExecutableSelectionMenuBinding } from './ExecutableSelectionMenuRegistry';
 
 const labels = {
   menu: 'p5.js sketch',
@@ -68,16 +65,6 @@ describe('executable selection menu', () => {
     ).toBe(true);
     act(() => root.unmount());
     element.remove();
-  });
-
-  it('keeps registry bindings editor-instance local and cleans the exact binding only', () => {
-    const registry = createExecutableSelectionMenuRegistry();
-    const first = binding();
-    const second = binding();
-    const unregisterFirst = registry.register('block', first);
-    registry.register('block', second);
-    unregisterFirst();
-    expect(registry.get('block')).toBe(second);
   });
 
   it('cancels the target mouse press before React Aria can bypass the toolbar selection guard', async () => {

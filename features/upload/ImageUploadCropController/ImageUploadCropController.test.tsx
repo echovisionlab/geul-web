@@ -161,18 +161,13 @@ describe('ImageUploadCropController aspect ratio', () => {
     expect(props.labels.changeHint).toBeUndefined();
   });
 
-  it.each([16 / 9, 1, 4 / 3, 9 / 16, 1.234, { min: 9 / 16, max: 1.234 }, 'free'] as const)(
-    'keeps crop geometry %j without persistent captions or constraint controls',
-    (aspectRatio) => {
-      renderController({ aspectRatio });
-      const props = getRenderedCropFieldProps();
-      expect(props.aspectRatio).toEqual(aspectRatio);
-      expect(props.labels.emptyDescription).toBe('');
-      expect(props.labels.constraints).toBeUndefined();
-      expect(props.labels.constraintsLabel).toBeUndefined();
-      expect(props.labels.changeHint).toBeUndefined();
-    },
-  );
+  it.each([
+    { caller: 'release artwork', aspectRatio: 1 },
+    { caller: 'program event', aspectRatio: 'free' },
+  ] as const)('hands the $caller crop geometry to the cropper unchanged', ({ aspectRatio }) => {
+    renderController({ aspectRatio });
+    expect(getRenderedCropFieldProps().aspectRatio).toEqual(aspectRatio);
+  });
 
   it('filters artwork selection to its supported source formats without rejecting by original byte size', () => {
     renderController({ uploadType: UploadType.RELEASE_ARTWORK, aspectRatio: 1 });

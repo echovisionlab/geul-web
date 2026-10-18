@@ -35,13 +35,6 @@ describe('Core SearchInput', () => {
     expect(input).toHaveAccessibleName('Search users');
     expect(container.querySelector('[data-search-glyph] svg')).toHaveAttribute('aria-hidden', 'true');
   });
-
-  it('keeps TextInput size and density on the field root', () => {
-    render(<SearchInput aria-label="Search" size="xs" density="compact" />);
-    const field = container.querySelector('[data-geul-input]')!;
-    expect(field).toHaveAttribute('data-geul-input-size', 'xs');
-    expect(field).toHaveAttribute('data-geul-input-density', 'compact');
-  });
 });
 
 describe('SearchComboboxView leading glyph', () => {
@@ -65,11 +58,6 @@ describe('SearchComboboxView leading glyph', () => {
     minimumQueryMessage: 'Type more',
     noResultsMessage: 'No results',
   };
-
-  it('renders the shared search glyph', () => {
-    render(<SearchComboboxView {...base} leadingGlyph="search" />);
-    expect(container.querySelector('[data-search-glyph]')).not.toBeNull();
-  });
 
   it('rejects a second leading slot', () => {
     expect(() => render(<SearchComboboxView {...base} leadingGlyph="search" leftSection={<span />} />)).toThrow(

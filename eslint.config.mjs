@@ -71,7 +71,16 @@ const restrictedCoreImportPaths = [
 export default defineConfig(
   ...mantine,
   {
-    ignores: ['**/*.{mjs,cjs,js,d.ts,d.mts}', '.next', '.next-integration-*', '.artifacts', 'gen', 'scripts', 'tests'],
+    ignores: [
+      '**/*.{mjs,cjs,js,d.ts,d.mts}',
+      '.next',
+      '.next-local-contracts/**',
+      '.next-integration-*',
+      '.artifacts',
+      'gen',
+      'scripts',
+      'tests',
+    ],
   },
   {
     rules: { 'no-alert': 'off' },
@@ -273,6 +282,27 @@ export default defineConfig(
               group: restrictedCoreImportPatterns,
               message:
                 'Core UI must not import app, feature, non-core components, generated API, domain model, data, auth, routing, runtime context, or platform modules. Move orchestration to features and pass resolved UI state through props.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['components/core/**/*.test.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: restrictedCoreImportPaths,
+          patterns: [
+            {
+              group: restrictedCoreImportPatterns.filter((pattern) => !pattern.startsWith('@/')),
+              message: 'Core tests retain the production import boundary outside the shared render helper.',
+            },
+            {
+              regex: '^@/(?!test/render$)',
+              message: 'Core tests may import @/test/render; other application aliases remain restricted.',
             },
           ],
         },

@@ -17,12 +17,9 @@ const collectionBlockTypes = [
 describe.each(collectionBlockTypes)('%s collection size schema', (type) => {
   it('uses the same sizes and default as the canonical shared storage contract', () => {
     const field = pageSectionCatalog[type].fields.itemSize;
-    expect(field).toMatchObject({
-      type: 'enum',
-      values: [...COLLECTION_SIZES],
-      default: DEFAULT_COLLECTION_SIZE,
-      ownership: 'shared',
-    });
+    // The catalog appends new sizes to keep wire numbers; the UI lists them from smallest to largest.
+    expect(field).toMatchObject({ type: 'enum', default: DEFAULT_COLLECTION_SIZE, ownership: 'shared' });
+    expect([...field.values].sort()).toEqual([...COLLECTION_SIZES].sort());
   });
 
   it('renders existing blocks at the system default size', () => {
@@ -35,6 +32,6 @@ describe.each(collectionBlockTypes)('%s collection size schema', (type) => {
   });
 
   it('rejects values outside the system size contract', () => {
-    expect(pageBlockManifest[type].schema.safeParse({ itemSize: 'xl' }).success).toBe(false);
+    expect(pageBlockManifest[type].schema.safeParse({ itemSize: 'xxl' }).success).toBe(false);
   });
 });

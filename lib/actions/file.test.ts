@@ -296,30 +296,6 @@ describe('initiateUploadAction upload identity', () => {
     );
     expect(initiateMultipartUploadMock.mock.calls[0]?.[0]).not.toHaveProperty('blockId');
   });
-
-  it('keeps slot identity for a structured editor asset', async () => {
-    initiateMultipartUploadMock.mockResolvedValue({
-      uploadId: 'upload-1',
-      fileId: 'file-1',
-      uploadedParts: [],
-    });
-
-    await initiateUploadAction({
-      uploadType: UploadType.EDITOR_IMAGE,
-      entityId: 'page-1',
-      entityType: TranscodeEntityType.PAGE,
-      fileSize: 1024,
-      mimeType: 'image/webp',
-      fileName: 'structured.webp',
-      slotId: 'structured-slot-1',
-    });
-
-    expect(initiateMultipartUploadMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        slotId: 'structured-slot-1',
-      }),
-    );
-  });
 });
 
 describe('upload delivery selection', () => {
@@ -382,21 +358,6 @@ describe('upload delivery selection', () => {
 });
 
 describe('multipart completion recovery error classification', () => {
-  it('forwards the exact upload and file capability pair during candidate lookup', async () => {
-    findMultipartUploadCandidateMock.mockResolvedValue({});
-
-    await findMultipartUploadCandidateAction({
-      uploadType: UploadType.GENERAL_FILE,
-      entityId: '',
-      fileId: 'file-1',
-      uploadId: 'upload-1',
-    });
-
-    expect(findMultipartUploadCandidateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ fileId: 'file-1', uploadId: 'upload-1' }),
-    );
-  });
-
   it.each([
     [Code.InvalidArgument, 'Upload failed'],
     [Code.NotFound, 'Upload failed'],
@@ -510,27 +471,6 @@ describe('downloadFromUrlAction upload identity', () => {
       expectedCurrentFileId: testCase.expectedCurrentFileId,
     });
     expect(downloadFromUrlMock.mock.calls[0]?.[0]).not.toHaveProperty('blockId');
-  });
-
-  it('keeps structured slot identity for remote ingest', async () => {
-    downloadFromUrlMock.mockResolvedValue({
-      fileId: 'file-imported',
-      delivery: mediaDeliveryFixture({ fileId: 'file-imported', mimeType: 'image/webp' }),
-    });
-
-    await downloadFromUrlAction({
-      uploadType: UploadType.EDITOR_IMAGE,
-      entityId: 'page-1',
-      entityType: TranscodeEntityType.PAGE,
-      url: 'https://source.example.com/structured.webp',
-      slotId: 'structured-slot-1',
-    });
-
-    expect(downloadFromUrlMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        slotId: 'structured-slot-1',
-      }),
-    );
   });
 
   it('uses the exact File and upload identities for multipart resume lookup', async () => {

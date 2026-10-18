@@ -1,5 +1,5 @@
-/* The reading column of chrome outside the outline layout starts where the body's does: the outline's
-   reserved inline space first (0 without an outline), then the centered reading measure. */
+/* The reading column of chrome outside the outline layout starts where the body's does: the start
+   edge, with the reading measure ending clear of the outline's reserved inline space (0 without one). */
 .reading {
-  padding-inline: var(--_table-of-contents-inset-start, 0px) var(--_table-of-contents-inset-end, 0px);
+  padding-inline-end: var(--_table-of-contents-inset-end, 0px);
 }

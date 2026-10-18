@@ -1,75 +1,130 @@
 // @vitest-environment jsdom
+// @geul-test-tier editor-integration
 
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { Editor } from '@tiptap/core';
+import { fromJson, type JsonValue } from '@bufbuild/protobuf';
+import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
+import {
+  LocalizedRichTextDocumentSchema,
+  RichTextProfile,
+} from '@echovisionlab/geul-proto/content/block_content_pb.ts';
+import { hydrateCanonicalBlockRoom } from '@echovisionlab/geul-common/collaboration/block-room-codec';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { Awareness } from 'y-protocols/awareness';
+import * as Y from 'yjs';
+import { act, render, screen } from '@/test/render';
+import { createBlockRoomProseMirrorBridge } from '@/features/editor/tiptap/block-room-prosemirror-bridge';
+import { createRichTextBlockRoomTiptapController } from '@/features/editor/tiptap/block-room-tiptap-controller';
+import type { EmailCampaignTiptapEditorHandle } from '@/features/editor/tiptap/profiles/EmailTiptapEditor';
 import { EmailTemplateEditor } from './EmailTemplateEditor';
 
-const profileProps: Array<Record<string, unknown>> = [];
+const PARAGRAPH_ID = '019cce25-dbc0-7d12-9f1f-735b1a6c6b41';
 
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+let yDocument: Y.Doc | null = null;
+let awareness: Awareness | null = null;
+let unmount: (() => void) | null = null;
+const mountedEditors = new Set<Editor>();
 
-vi.mock('@/features/editor/tiptap/profiles/EmailTiptapEditor', () => ({
-  EmailTiptapEditor: (props: Record<string, unknown>) => {
-    profileProps.push(props);
-    return <div data-testid="email-tiptap-editor" data-editable={String(props.editable)} />;
-  },
-}));
+beforeEach(() => {
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  );
+});
+
+afterEach(async () => {
+  try {
+    unmount?.();
+    // Tiptap defers destruction; the collaboration resources must outlive it.
+    await vi.waitFor(() => expect([...mountedEditors].every((editor) => editor.isDestroyed)).toBe(true));
+  } finally {
+    awareness?.destroy();
+    yDocument?.destroy();
+    awareness = null;
+    yDocument = null;
+    unmount = null;
+    mountedEditors.clear();
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  }
+});
+
+/** An in-memory email-template Block room holding one Korean paragraph. */
+function templateRoom() {
+  yDocument = new Y.Doc();
+  awareness = new Awareness(yDocument);
+  hydrateCanonicalBlockRoom(
+    yDocument,
+    'email-template',
+    'ko',
+    fromJson(LocalizedRichTextDocumentSchema, {
+      blockCatalogFingerprint: contentBlockCatalogFingerprint,
+      profile: RichTextProfile.EMAIL,
+      locale: 'ko',
+      base: { nodes: [{ block: { id: PARAGRAPH_ID, paragraph: { props: {} } }, placement: { index: 0 } }] },
+      localeOverlay: {
+        locale: 'ko',
+        blocks: [{ blockId: PARAGRAPH_ID, paragraph: { props: {}, content: [{ text: { text: '이메일 본문' } }] } }],
+      },
+    } as JsonValue),
+    [],
+  );
+  const controller = createRichTextBlockRoomTiptapController(
+    createBlockRoomProseMirrorBridge({ document: yDocument, documentType: 'email-template', locale: 'ko' }),
+  );
+  const connect = controller.connect.bind(controller);
+  vi.spyOn(controller, 'connect').mockImplementation((editor) => {
+    mountedEditors.add(editor);
+    return connect(editor);
+  });
+  return { controller, provider: { awareness } };
+}
+
+async function renderTemplateEditor(editable: boolean): Promise<EmailCampaignTiptapEditorHandle> {
+  const { controller, provider } = templateRoom();
+  const onEditorReady = vi.fn<(editor: EmailCampaignTiptapEditorHandle) => void>();
+  ({ unmount } = render(
+    <EmailTemplateEditor
+      templateId="template-1"
+      accessibleLabel="Email content"
+      contentLanguage="ko"
+      provider={provider}
+      blockRoomController={controller}
+      editable={editable}
+      onEditorReady={onEditorReady}
+    />,
+  ));
+  await vi.waitFor(() => expect(onEditorReady).toHaveBeenCalled());
+  return onEditorReady.mock.calls[0]![0];
+}
 
 describe('EmailTemplateEditor', () => {
-  let container: HTMLDivElement | null = null;
-  let root: Root | null = null;
+  it('opens a template body without edit permission read-only, labelled and in its content language', async () => {
+    const editor = await renderTemplateEditor(false);
 
-  afterEach(() => {
-    act(() => root?.unmount());
-    container?.remove();
-    container = null;
-    root = null;
-    profileProps.length = 0;
+    const body = screen.getByRole('document', { name: 'Email content' });
+    expect(body).toHaveAttribute('contenteditable', 'false');
+    expect(body).toHaveAttribute('lang', 'ko');
+    expect(screen.queryByRole('textbox', { name: 'Email content' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Insert variable' })).not.toBeInTheDocument();
+
+    await act(async () => editor.insertVariable('site_name'));
+    expect(editor.getText()).toContain('이메일 본문');
+    expect(editor.getText()).not.toContain('{{site_name}}');
   });
 
-  it('passes only the typed Block-room controller to the email profile', () => {
-    const controller = { initialContent: { type: 'doc', content: [] } };
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    root = createRoot(container);
+  it('lets a template editor with edit permission change the body', async () => {
+    const editor = await renderTemplateEditor(true);
 
-    act(() =>
-      root?.render(
-        <EmailTemplateEditor
-          templateId="template-1"
-          accessibleLabel="Email content"
-          contentLanguage="ko"
-          provider={{ awareness: {} } as never}
-          blockRoomController={controller as never}
-        />,
-      ),
-    );
+    const body = screen.getByRole('textbox', { name: 'Email content' });
+    expect(body).toHaveAttribute('contenteditable', 'true');
+    expect(body).toHaveAttribute('lang', 'ko');
 
-    expect(container.querySelector('[data-testid="email-tiptap-editor"]')).not.toBeNull();
-    expect(profileProps[0]?.blockRoomController).toBe(controller);
-    expect(profileProps[0]?.accessibleLabel).toBe('Email content');
-    expect(profileProps[0]?.contentLanguage).toBe('ko');
-    expect(profileProps[0]).not.toHaveProperty('fragment');
-    expect(profileProps[0]?.availableVariables).toBeUndefined();
-  });
-
-  it('passes an explicit read-only state to the editor profile', () => {
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    root = createRoot(container);
-
-    act(() =>
-      root?.render(
-        <EmailTemplateEditor
-          templateId="template-1"
-          provider={{ awareness: {} } as never}
-          blockRoomController={{} as never}
-          editable={false}
-        />,
-      ),
-    );
-
-    expect(container.querySelector('[data-testid="email-tiptap-editor"]')?.getAttribute('data-editable')).toBe('false');
+    await act(async () => editor.insertVariable('site_name'));
+    expect(editor.getText()).toContain('{{site_name}}');
   });
 });

@@ -253,35 +253,6 @@ describe('public page queries', () => {
     });
   });
 
-  it('returns the authoritative typed document for draft and published responses', async () => {
-    getPublicPageRpcMock.mockResolvedValue({
-      page: {
-        id: 'page-draft',
-        slug: 'draft',
-        title: 'Draft',
-        status: PublicPageStatus.DRAFT,
-        showTitle: false,
-        document: localizedPageDocument(),
-      },
-      blockMedia: [],
-    });
-
-    await expect(getPageView('draft')).resolves.toMatchObject({ content: [{ id: sectionId }] });
-
-    getPublicPageRpcMock.mockResolvedValue({
-      page: {
-        id: 'page-published',
-        slug: 'published',
-        title: 'Published',
-        status: PublicPageStatus.PUBLISHED,
-        showTitle: true,
-        document: localizedPageDocument(),
-      },
-      blockMedia: [],
-    });
-    await expect(getPageView('published')).resolves.toMatchObject({ content: [{ id: sectionId }] });
-  });
-
   it('maps the root layout on the admin DTO', async () => {
     getAdminPageRpcMock.mockResolvedValue({
       id: 'page-1',

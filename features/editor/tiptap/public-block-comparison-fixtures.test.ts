@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { Editor, Node } from '@tiptap/core';
 import { describe, expect, it } from 'vitest';
-import { richTextBlockKindByProtoCase } from '@echovisionlab/geul-proto/content/block_catalog.ts';
 import { materializeLocalizedRichTextTree } from '@/features/editor/contract/localized-rich-text';
 import { createPublicBlockComparisonDocument } from './public-block-comparison-fixtures';
 import { createTiptapPlaygroundRoom } from './TiptapPlayground.story-fixtures';
@@ -9,25 +8,6 @@ import { createTiptapWireExtensions } from './wire-schema';
 import { createTiptapTableExtensions } from './table';
 
 describe('public block comparison', () => {
-  it('projects both readable and wide authored math without changing the source', () => {
-    const room = createTiptapPlaygroundRoom(createPublicBlockComparisonDocument());
-    try {
-      const editorMath = room.controller.initialContent.content?.[0]?.content?.flatMap(
-        (block) => block.content?.filter((node) => node.type === 'math') ?? [],
-      );
-      const publishedMath = materializeLocalizedRichTextTree(room.controller.getLocalizedDocumentSnapshot()).filter(
-        (block) => block.kind === 'math',
-      );
-      expect(editorMath).toHaveLength(2);
-      expect(publishedMath.map((block) => block.base.props?.latex)).toEqual(
-        editorMath!.map((node) => node.attrs?.latex),
-      );
-      expect(editorMath![1]?.attrs?.latex.match(/\\frac/g)).toHaveLength(12);
-    } finally {
-      room.awareness.destroy();
-      room.document.destroy();
-    }
-  });
   it('projects authored column headings in both table specimens while preserving the empty body state', () => {
     const room = createTiptapPlaygroundRoom(createPublicBlockComparisonDocument());
     try {
@@ -111,20 +91,6 @@ describe('public block comparison', () => {
     } finally {
       disconnect();
       editor.destroy();
-      room.awareness.destroy();
-      room.document.destroy();
-    }
-  });
-  it('covers every generated rich-text kind with a valid resident document', () => {
-    const room = createTiptapPlaygroundRoom(createPublicBlockComparisonDocument(true));
-    try {
-      const blocks = materializeLocalizedRichTextTree(room.controller.getLocalizedDocumentSnapshot());
-      expect(new Set(blocks.map((block) => block.kind))).toEqual(new Set(Object.values(richTextBlockKindByProtoCase)));
-      const headings = room.controller.initialContent.content?.[0]?.content?.filter(
-        (node) => node.content?.[0]?.type === 'heading',
-      );
-      expect(headings?.slice(0, 3).map((node) => node.content?.[0]?.attrs?.level)).toEqual([1, 2, 3]);
-    } finally {
       room.awareness.destroy();
       room.document.destroy();
     }

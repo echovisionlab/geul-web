@@ -6,7 +6,6 @@ import { CellSelection } from '@tiptap/pm/tables';
 import { describe, expect, it, vi } from 'vitest';
 import { createTiptapWireExtensions } from '../wire-schema';
 import { createTiptapTableExtensions } from '../table';
-import { SELECTION_BUBBLE_MENU_CONTROL_ORDER } from './SelectionBubbleMenu';
 import {
   canShowSelectionBubbleMenu,
   createSelectionBubbleMenuCommands,
@@ -69,24 +68,6 @@ function selectSecondBlockText(editor: Editor) {
 }
 
 describe('Tiptap selection BubbleMenu command authority', () => {
-  it('keeps the established Geul control order explicit', () => {
-    expect(SELECTION_BUBBLE_MENU_CONTROL_ORDER).toEqual([
-      'block-type',
-      'bold',
-      'italic',
-      'underline',
-      'strike',
-      'code',
-      'alignment',
-      'colors',
-      'nest',
-      'unnest',
-      'link',
-      'inline-math',
-      'ai',
-    ]);
-  });
-
   it('shows for inline code so the code toggle remains reachable, but not for a code block or node selection', () => {
     const mounted = mountEditor();
     selectSecondBlockText(mounted.editor);

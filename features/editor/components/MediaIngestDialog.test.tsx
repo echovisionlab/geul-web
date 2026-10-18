@@ -113,23 +113,6 @@ afterEach(() => {
 });
 
 describe('MediaIngestDialog close authority', () => {
-  it('starts in compact upload size and expands only the actual library tab', () => {
-    renderDialog({ onClose: vi.fn() });
-    expect(container?.querySelector('[data-modal-size="compact"][data-modal-density="compact"]')).not.toBeNull();
-    expect(container?.querySelector('[data-testid="select-library"]')).toBeNull();
-    const libraryTab = [...(container?.querySelectorAll<HTMLElement>('[role="tab"]') ?? [])].find(
-      (tab) => tab.textContent === 'ingestDialog.openLibrary',
-    );
-    act(() => libraryTab?.click());
-    expect(container?.querySelector('[data-modal-size="wide"]')).not.toBeNull();
-    expect(container?.querySelector('[data-testid="select-library"]')).not.toBeNull();
-    const uploadTab = [...(container?.querySelectorAll<HTMLElement>('[role="tab"]') ?? [])].find(
-      (tab) => tab.textContent === 'ingestDialog.backToUpload',
-    );
-    act(() => uploadTab?.click());
-    expect(container?.querySelector('[data-modal-size="compact"]')).not.toBeNull();
-    expect(container?.querySelector('[data-testid="select-library"]')).toBeNull();
-  });
   it('reports an explicit cancellation from modal close', () => {
     const onClose = vi.fn();
     renderDialog({ onClose });

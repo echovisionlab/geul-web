@@ -110,26 +110,6 @@ function setInputValue(input: HTMLInputElement, value: string) {
 }
 
 describe('ProfileFormView', () => {
-  it('renders display-ready values and copies the UID with semantic Core tones', async () => {
-    const writeText = vi.fn().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
-    renderView();
-
-    expect(container.querySelector<HTMLInputElement>('#profile-uid')?.value).toBe('usr_profile_1');
-    expect(container.querySelector<HTMLInputElement>('#profile-nickname')?.value).toBe('June Han');
-
-    const copyButton = container.querySelector<HTMLButtonElement>('[aria-label="Copy UID"]');
-    expect(copyButton?.dataset.tone).toBe('neutral');
-
-    await act(async () => copyButton?.click());
-    expect(writeText).toHaveBeenCalledWith('usr_profile_1');
-    expect(copyButton?.dataset.tone).toBe('positive');
-
-    for (const control of container.querySelectorAll<HTMLElement>('[data-control-kind][data-tone]')) {
-      expect(['accent', 'neutral', 'positive', 'warning', 'danger']).toContain(control.dataset.tone);
-    }
-  });
-
   it('submits edited values and supports adding and removing social-link rows', () => {
     renderView();
 

@@ -8,7 +8,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { notifications } from '@/components/core/Notification';
 import { PublicFormView } from './PublicFormView';
-import { SITE_LOGO_HEIGHT } from '@/features/site/SiteLogo/placements';
 
 const pushMock = vi.fn();
 const submitFormActionMock = vi.fn();
@@ -189,35 +188,6 @@ afterEach(() => {
 });
 
 describe('PublicFormView', () => {
-  it('uses the shared shell logo size', async () => {
-    render(
-      <PublicFormView
-        slug="contact"
-        form={{
-          id: 'form-1',
-          title: '문의하기',
-          slug: 'contact',
-          schema: { id: 'schema-1', steps: [] },
-          status: 'published',
-          isPublic: true,
-          requireAuth: false,
-          allowedRoles: [],
-          allowDuplicateSubmission: true,
-          hasPassword: false,
-        }}
-        accessData={null}
-        requestedLocale="ko"
-        viewerCountryCode="KR"
-      />,
-    );
-
-    await waitForAssertion(() => {
-      expect(document.querySelector('[data-testid="site-logo"]')?.getAttribute('data-height')).toBe(
-        String(SITE_LOGO_HEIGHT.form),
-      );
-    });
-  });
-
   it('shows the shared pending loader while submitting before routing to success', async () => {
     let resolveSubmit: ((value: { success: true }) => void) | undefined;
     submitFormActionMock.mockImplementation(

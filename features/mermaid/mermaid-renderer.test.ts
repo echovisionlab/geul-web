@@ -89,39 +89,43 @@ describe('Mermaid rendering boundary', () => {
   });
 });
 
+const colorPattern = /^(?:#[\da-f]{3,8}|(?:rgb|hsl|oklch|lab|lch)a?\(.*\)|transparent)$/iu;
+
+/** Every colour-valued Mermaid theme variable, including the comma-joined xyChart palette. */
+function colorEntries(variables: Record<string, unknown>, prefix = ''): [string, string][] {
+  return Object.entries(variables).flatMap(([key, value]): [string, string][] => {
+    const path = `${prefix}${key}`;
+    if (value && typeof value === 'object') {
+      return colorEntries(value as Record<string, unknown>, `${path}.`);
+    }
+    if (typeof value !== 'string') {
+      return [];
+    }
+    const parts = key === 'plotColorPalette' ? value.split(',').map((part) => part.trim()) : [value];
+    return parts.filter((part) => colorPattern.test(part)).map((part, index) => [`${path}[${index}]`, part]);
+  });
+}
+
 describe('Mermaid site-owned theme defaults', () => {
-  it.each(['light', 'dark'] as const)('uses canonical %s colors even without a DOM appearance', async (theme) => {
-    const { semanticThemes } = await import('@/components/core/design-tokens');
+  it('assigns only site light and dark tokens to every Mermaid colour, even without a DOM appearance', async () => {
+    const { invariantTokens, semanticThemes } = await import('@/components/core/design-tokens');
     const { renderMermaid } = await import('./mermaid-renderer');
-    await renderMermaid('flowchart LR\n A --> B', theme, new AbortController().signal);
-    const colors = semanticThemes[theme];
-    expect(engine.initialize).toHaveBeenCalledWith(
-      expect.objectContaining({
-        theme: 'base',
-        themeVariables: expect.objectContaining({
-          darkMode: theme === 'dark',
-          actorBkg: colors.surface,
-          attributeBackgroundColorEven: colors['surface-muted'],
-          stateBkg: colors.surface,
-          critBorderColor: colors['status-danger'],
-          activeTaskBorderColor: colors['status-accent'],
-          doneTaskBorderColor: colors['status-positive'],
-          pie1: colors.surface,
-          pieSectionTextColor: colors['text-primary'],
-          cScale11: colors['surface-muted'],
-          git7: colors['chart-series-secondary'],
-          xyChart: expect.objectContaining({
-            plotColorPalette: [
-              colors['chart-series-primary'],
-              colors['chart-series-secondary'],
-              colors['chart-series-tertiary'],
-            ].join(','),
-          }),
-        }),
-      }),
-    );
-    const source = engine.render.mock.calls[0][1];
-    expect(source).toBe('flowchart LR\n A --> B');
+    const palettes: Partial<Record<'light' | 'dark', string[]>> = {};
+    for (const theme of ['light', 'dark'] as const) {
+      engine.initialize.mockClear();
+      await renderMermaid('flowchart LR\n A --> B', theme, new AbortController().signal);
+      const config = engine.initialize.mock.lastCall?.[0];
+      expect(config).toMatchObject({ theme: 'base', themeVariables: { darkMode: theme === 'dark' } });
+
+      const siteColors = new Set<string>([...Object.values(semanticThemes[theme]), ...Object.values(invariantTokens)]);
+      const colors = colorEntries(config.themeVariables);
+      expect(colors.length).toBeGreaterThan(0);
+      for (const [path, color] of colors) {
+        expect(siteColors.has(color), `${theme} ${path}: ${color} is not a site token`).toBe(true);
+      }
+      palettes[theme] = colors.map(([, color]) => color);
+    }
+    expect(palettes.light).not.toEqual(palettes.dark);
   });
 
   it('preserves explicit authored diagram styles and locks only global presentation configuration', async () => {

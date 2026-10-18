@@ -93,6 +93,9 @@ describe('UserInlineLinks', () => {
     );
 
     expect(document.body.textContent).toContain('Writer One/Writer Two');
+    // The slash is a visual boundary between names; screen readers hear the names only.
+    const separator = [...document.body.querySelectorAll('span')].find((element) => element.textContent === '/');
+    expect(separator).toHaveAttribute('aria-hidden', 'true');
   });
 
   it('limits visible users and shows an overflow label', () => {

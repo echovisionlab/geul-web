@@ -23,7 +23,8 @@ export interface MyArtistsDataTableLabels {
 }
 
 export interface MyArtistsDataTableProps {
-  result: MyArtistsDataTableResult;
+  /** Undefined while a page or search other than the server-rendered one is loading. */
+  result: MyArtistsDataTableResult | undefined;
   labels: MyArtistsDataTableLabels;
   query: MyArtistsDataTableQuery;
   loading?: boolean;

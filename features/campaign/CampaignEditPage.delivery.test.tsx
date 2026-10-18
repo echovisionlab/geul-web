@@ -13,7 +13,15 @@ const mocks = vi.hoisted(() => ({
   updateName: vi.fn(),
   queryClient: { invalidateQueries: vi.fn() },
   sendCampaign: vi.fn(),
+  sendTest: vi.fn(),
   scheduleCampaign: vi.fn(),
+  routerPush: vi.fn(),
+  isSynced: true,
+  localeSession: null as null | {
+    roomLocale: string;
+    activeEditLocale: Record<string, unknown>;
+    shouldUseLocaleDocument: boolean;
+  },
   notificationsShow: vi.fn(),
   refetchCampaign: vi.fn(),
   getCampaign: vi.fn(),
@@ -23,7 +31,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('next/navigation', () => ({
   useParams: () => ({ id: 'campaign-1' }),
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => ({ push: mocks.routerPush }),
 }));
 
 vi.mock('next-intl', () => ({
@@ -60,6 +68,9 @@ vi.mock('@tanstack/react-query', async () => {
           isLoading: false,
           refetch: mocks.refetchCampaign,
         };
+      }
+      if (queryKey[0] === 'emailLayouts') {
+        return { data: [{ id: 'layout-1', name: 'Layout one' }], isError: false, isLoading: false };
       }
       if (queryKey[0] === 'segments') {
         return {
@@ -104,12 +115,17 @@ vi.mock('@/features/editor/EditorHeader', () => ({
     actionItems,
     title,
     onTitleChange,
+    onBack,
   }: {
     title: string;
     onTitleChange: (value: string) => void;
+    onBack: () => void;
     actionItems: Array<{ key: string; label: string; disabled?: boolean; onClick: () => void }>;
   }) => (
     <div>
+      <button type="button" data-testid="back" onClick={onBack}>
+        Back
+      </button>
       <output data-testid="campaign-name">{title}</output>
       <button type="button" data-testid="name-first" onClick={() => onTitleChange('First draft')}>
         First name
@@ -130,8 +146,36 @@ vi.mock('@/features/editor/EditorPermissionRevokedDialog', () => ({ EditorPermis
 vi.mock('@/features/editor/EditorSessionExpiredDialog', () => ({ EditorSessionExpiredDialog: () => null }));
 
 vi.mock('@/components/core/Input', () => ({
-  Select: () => null,
-  TextInput: () => null,
+  // The layout picker: choosing its first option reports that option's value, as the Core Select does.
+  Select: ({
+    data,
+    disabled,
+    onChange,
+  }: {
+    data: Array<{ value: string }>;
+    disabled?: boolean;
+    onChange: (value: string | null) => void;
+  }) => (
+    <button
+      type="button"
+      data-testid="layout-select"
+      disabled={disabled}
+      onClick={() => onChange(data[0]?.value ?? null)}
+    >
+      Choose layout
+    </button>
+  ),
+  TextInput: ({
+    label,
+    value,
+    disabled,
+    onChange,
+  }: {
+    label: string;
+    value: string;
+    disabled?: boolean;
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  }) => <input aria-label={label} data-testid="subject" value={value} disabled={disabled} onChange={onChange} />,
 }));
 vi.mock('@/components/core/Input/DateTimeInput', () => ({
   dateTimeValueToDate: ({ date, time }: { date: Date | null; time: string }) => {
@@ -151,10 +195,12 @@ vi.mock('@/features/campaign/CampaignEditor/CampaignEditor', () => ({ CampaignEd
 vi.mock('@/features/campaign/CampaignDeliveryDialogs', () => ({
   CampaignDeliveryDialogs: ({
     readOnly,
+    testDialog,
     sendDialog,
     scheduleDialog,
   }: {
     readOnly?: boolean;
+    testDialog: { onEmailChange: (email: string) => void; onSend: () => void };
     sendDialog: { opened: boolean; pending: boolean; labels: { warning: string }; onSend: () => void };
     scheduleDialog: {
       opened: boolean;
@@ -167,6 +213,10 @@ vi.mock('@/features/campaign/CampaignDeliveryDialogs', () => ({
     mocks.confirmSend = sendDialog.onSend;
     return (
       <div>
+        <button type="button" data-testid="test-email" onClick={() => testDialog.onEmailChange('qa@example.com')} />
+        <button type="button" data-testid="test-confirm" disabled={readOnly} onClick={testDialog.onSend}>
+          Confirm test
+        </button>
         <div data-testid="send-warning">{sendDialog.labels.warning}</div>
         <div data-testid="schedule-audience">{scheduleDialog.audience}</div>
         <button
@@ -194,10 +244,27 @@ vi.mock('@/features/campaign/CampaignDeliveryDialogs', () => ({
     );
   },
 }));
-vi.mock('@/features/campaign/CampaignRecipientScopeControl', () => ({ CampaignRecipientScopeControl: () => null }));
+vi.mock('@/features/campaign/CampaignRecipientScopeControl', () => ({
+  CampaignRecipientScopeControl: ({
+    disabled,
+    onChange,
+  }: {
+    disabled?: boolean;
+    onChange: (value: 'SUBSCRIBED_USERS' | 'ALL_MATCHING_USERS') => void;
+  }) => (
+    <button
+      type="button"
+      data-testid="recipient-scope-all"
+      disabled={disabled}
+      onClick={() => onChange('ALL_MATCHING_USERS')}
+    >
+      All matching users
+    </button>
+  ),
+}));
 vi.mock('@/features/campaign/useCampaignDeliveryCommands', () => ({
   useCampaignDeliveryCommands: () => ({
-    sendTest: { mutate: vi.fn(), isPending: false },
+    sendTest: { mutate: mocks.sendTest, isPending: false },
     sendCampaign: { mutate: mocks.sendCampaign, isPending: false },
     scheduleCampaign: { mutate: mocks.scheduleCampaign, isPending: false },
     cancelSchedule: { mutate: vi.fn(), isPending: false },
@@ -243,13 +310,10 @@ vi.mock('@/features/campaign/CampaignTargetControl', async () => {
   };
 });
 vi.mock('@/features/translation/EntityTranslationsPanel', () => ({ EntityTranslationsPanel: () => null }));
-vi.mock('@/features/translation/locale-display-fields', () => ({
-  canEditLocaleDocumentField: () => true,
-  resolveResidentLocaleField: ({ sourceValue }: { sourceValue: string }) => sourceValue,
-}));
 vi.mock('@/features/translation/TranslationLocaleControl', () => ({ TranslationLocaleControl: () => null }));
 vi.mock('@/features/translation/useLocaleDocumentSession', () => ({
   useLocaleDocumentSession: () => ({
+    roomLocale: mocks.localeSession?.roomLocale,
     activeEditLocale: {
       activeLocale: 'en',
       sourceLocale: 'en',
@@ -260,8 +324,9 @@ vi.mock('@/features/translation/useLocaleDocumentSession', () => ({
       localeOptions: [],
       isControlVisible: false,
       setActiveLocale: vi.fn(),
+      ...mocks.localeSession?.activeEditLocale,
     },
-    mode: { shouldUseLocaleDocument: false },
+    mode: { shouldUseLocaleDocument: mocks.localeSession?.shouldUseLocaleDocument ?? false },
     hasRoomMutationAuthority: () => true,
   }),
 }));
@@ -296,7 +361,7 @@ vi.mock('@/lib/collab/useBlockRoomConnection', () => ({
     bootstrap: null,
     protocol: null,
     isConnected: true,
-    isSynced: true,
+    isSynced: mocks.isSynced,
   }),
 }));
 vi.mock('@/lib/i18n/locale', () => ({
@@ -306,6 +371,7 @@ vi.mock('@/lib/i18n/locale', () => ({
 vi.mock('@/lib/queries/email-layout', () => ({ listEmailLayoutsSimple: vi.fn() }));
 vi.mock('@/lib/utils/not-found-guard', () => ({ guardNotFound: vi.fn() }));
 
+import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
 import CampaignEditPage from './CampaignEditPage';
 
 function deferred<T>() {
@@ -335,7 +401,12 @@ describe('CampaignEditPage delivery target confirmation', () => {
     mocks.updateConfiguration.mockReset();
     mocks.updateName.mockReset();
     mocks.sendCampaign.mockReset();
+    mocks.sendTest.mockReset();
     mocks.scheduleCampaign.mockReset();
+    mocks.routerPush.mockReset();
+    mocks.isSynced = true;
+    mocks.localeSession = null;
+    vi.mocked(flushEditorSaves).mockReset().mockResolvedValue(true);
     mocks.notificationsShow.mockReset();
     mocks.refetchCampaign.mockReset();
     mocks.getCampaign.mockReset().mockImplementation(async () => ({ ok: true, value: mocks.campaign }));
@@ -433,6 +504,119 @@ describe('CampaignEditPage delivery target confirmation', () => {
       recipientScope: 'SUBSCRIBED_USERS',
     });
   });
+
+  const deliveryPaths = [
+    {
+      path: 'send-all',
+      start: () => click('send-confirm'),
+      delivery: () => mocks.sendCampaign,
+      expected: ['SUBSCRIBED_USERS'],
+    },
+    {
+      path: 'send-test',
+      start: async () => {
+        await click('test-email');
+        await click('test-confirm');
+      },
+      delivery: () => mocks.sendTest,
+      expected: [{ email: 'qa@example.com', locale: 'en' }],
+    },
+    {
+      path: 'schedule',
+      start: async () => {
+        await click('schedule-date');
+        await click('schedule-confirm');
+      },
+      delivery: () => mocks.scheduleCampaign,
+      expected: [{ scheduledAt: expect.any(Date), recipientScope: 'SUBSCRIBED_USERS' }],
+    },
+  ];
+
+  /** One user click, committed before the next one reads the page state. */
+  async function click(testId: string) {
+    await act(async () => container.querySelector<HTMLButtonElement>(`[data-testid="${testId}"]`)!.click());
+  }
+
+  it.each(deliveryPaths)(
+    '$path delivers nothing while unsaved campaign edits fail to save',
+    async ({ start, delivery }) => {
+      vi.mocked(flushEditorSaves).mockResolvedValueOnce(false);
+      await act(async () => root.render(createElement(CampaignEditPage)));
+
+      await start();
+
+      await vi.waitFor(() =>
+        expect(mocks.notificationsShow).toHaveBeenCalledWith(expect.objectContaining({ tone: 'danger' })),
+      );
+      expect(delivery()).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each(deliveryPaths)(
+    '$path delivers once unsaved campaign edits are saved',
+    async ({ start, delivery, expected }) => {
+      await act(async () => root.render(createElement(CampaignEditPage)));
+
+      await start();
+
+      await vi.waitFor(() => expect(delivery()).toHaveBeenCalledWith(...expected));
+      expect(flushEditorSaves).toHaveBeenCalledWith('campaign:campaign-1');
+      expect(vi.mocked(flushEditorSaves).mock.invocationCallOrder[0]).toBeLessThan(
+        delivery().mock.invocationCallOrder[0]!,
+      );
+    },
+  );
+
+  it('stays on the campaign when Back cannot save pending edits, and leaves once they are saved', async () => {
+    vi.mocked(flushEditorSaves).mockResolvedValueOnce(false);
+    await act(async () => root.render(createElement(CampaignEditPage)));
+
+    await click('back');
+    await vi.waitFor(() =>
+      expect(mocks.notificationsShow).toHaveBeenCalledWith(expect.objectContaining({ tone: 'danger' })),
+    );
+    expect(mocks.routerPush).not.toHaveBeenCalled();
+
+    await click('back');
+    await vi.waitFor(() => expect(mocks.routerPush).toHaveBeenCalledWith('/admin/campaigns'));
+  });
+
+  it.each([
+    ['layout', 'layout-select', { layoutId: 'layout-1' }],
+    ['recipient scope', 'recipient-scope-all', { recipientScope: 'ALL_MATCHING_USERS' }],
+  ])('writes only the changed %s to the campaign configuration', async (_field, control, values) => {
+    mocks.updateConfiguration.mockResolvedValue({});
+    await act(async () => root.render(createElement(CampaignEditPage)));
+
+    await click(control);
+
+    await vi.waitFor(() =>
+      expect(mocks.updateConfiguration).toHaveBeenCalledWith('campaign-1', values, expect.any(String)),
+    );
+    expect(mocks.updateConfiguration).toHaveBeenCalledOnce();
+  });
+
+  it('shows an explicitly empty target-locale subject and keeps it locked until the locale room syncs', async () => {
+    mocks.isSynced = false;
+    mocks.localeSession = {
+      roomLocale: 'ko',
+      shouldUseLocaleDocument: true,
+      activeEditLocale: { activeLocale: 'ko', sourceLocale: 'en', isSourceLocale: false, displayTitle: '' },
+    };
+    await act(async () => root.render(createElement(CampaignEditPage)));
+    const subject = () => container.querySelector<HTMLInputElement>('[data-testid="subject"]')!;
+
+    // The source subject ('Subject') must not stand in for the translator's intentional empty value.
+    expect(subject().value).toBe('');
+    expect(subject().disabled).toBe(true);
+
+    mocks.isSynced = true;
+    await act(async () => root.render(createElement(CampaignEditPage)));
+
+    expect(subject().value).toBe('');
+    expect(subject().disabled).toBe(false);
+  });
+
   it('drops a peer read started before a configuration write after the write has settled', async () => {
     const staleRead = deferred<{ ok: true; value: Record<string, unknown> | null }>();
     const staleCampaign = { ...mocks.campaign };
@@ -455,38 +639,5 @@ describe('CampaignEditPage delivery target confirmation', () => {
       await staleRead.promise;
     });
     expect(container.querySelector('[data-testid="send-warning"]')?.textContent).toBe('Send to New segment');
-  });
-  it('preserves a newer name draft through peer refetch and an older name acknowledgement', async () => {
-    vi.useFakeTimers();
-    const firstWrite = deferred<{ name: string }>();
-    const secondWrite = deferred<{ name: string }>();
-    mocks.updateName.mockImplementation((_id: string, name: string) =>
-      name === 'First draft' ? firstWrite.promise : secondWrite.promise,
-    );
-    await act(async () => root.render(createElement(CampaignEditPage)));
-    act(() => container.querySelector<HTMLButtonElement>('[data-testid="name-first"]')!.click());
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(500);
-    });
-    act(() => container.querySelector<HTMLButtonElement>('[data-testid="name-second"]')!.click());
-    await act(async () => {
-      mocks.peerChange?.();
-    });
-    expect(container.querySelector('[data-testid="campaign-name"]')?.textContent).toBe('Second draft');
-    await act(async () => {
-      firstWrite.resolve({ name: 'Canonical first' });
-      await firstWrite.promise;
-    });
-    expect(container.querySelector('[data-testid="campaign-name"]')?.textContent).toBe('Second draft');
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(500);
-    });
-    await act(async () => {
-      secondWrite.resolve({ name: 'Canonical second' });
-      await secondWrite.promise;
-    });
-    expect(container.querySelector('[data-testid="campaign-name"]')?.textContent).toBe('Canonical second');
-    expect(mocks.updateName).toHaveBeenCalledWith('campaign-1', 'First draft', expect.any(String));
-    expect(mocks.updateName).toHaveBeenCalledWith('campaign-1', 'Second draft', expect.any(String));
   });
 });

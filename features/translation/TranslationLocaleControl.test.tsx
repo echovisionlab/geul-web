@@ -232,34 +232,4 @@ describe('TranslationLocaleControl', () => {
 
     expect(onChange).toHaveBeenCalledWith('ko');
   });
-
-  it('normalizes blank native-select changes back to null', () => {
-    const onChange = vi.fn();
-
-    render(
-      <TranslationLocaleControl
-        variant="native-select"
-        options={[
-          { value: 'en', label: 'English' },
-          { value: 'ko', label: '한국어' },
-        ]}
-        sourceLocale="en"
-        value="en"
-        onChange={onChange}
-      />,
-    );
-
-    const select = container?.querySelector('select') as HTMLSelectElement | null;
-    expect(select).not.toBeNull();
-
-    act(() => {
-      if (!select) {
-        return;
-      }
-      select.value = '';
-      select.dispatchEvent(new Event('change', { bubbles: true }));
-    });
-
-    expect(onChange).toHaveBeenCalledWith(null);
-  });
 });

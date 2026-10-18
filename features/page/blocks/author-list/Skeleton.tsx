@@ -1,4 +1,4 @@
-import { collectionMinColumnWidth } from '@/features/page/blocks/content-layout';
+import { COLLECTION_COLUMN_GROWTH, collectionMinColumnWidth } from '@/features/page/blocks/content-layout';
 import {
   LayoutGrid as DsLayoutGrid,
   LayoutStack as DsLayoutStack,
@@ -17,7 +17,9 @@ export function AuthorListSkeleton({ limit = 6, itemSize, layout = 'grid' }: Aut
   return (
     <div className="author-list-block" data-collection-size={itemSize ?? 'm'} aria-busy="true">
       <DsLayoutGrid
-        {...(layout === 'list' ? { columns: 1 } : { minColumnWidth: collectionMinColumnWidth('grid', itemSize) })}
+        {...(layout === 'list'
+          ? { columns: 1 }
+          : { minColumnWidth: collectionMinColumnWidth('grid', itemSize), columnGrowth: COLLECTION_COLUMN_GROWTH })}
         gap={layout === 'list' ? 'none' : metrics.gridGap}
       >
         {Array.from({ length: limit }).map((_, i) => (

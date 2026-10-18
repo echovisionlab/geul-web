@@ -154,8 +154,8 @@ describe('EntityListView', () => {
         );
       });
       const image = container?.querySelector<HTMLImageElement>('img[src="https://example.com/landscape.jpg"]');
-      const frame = image?.closest<HTMLElement>('[style*="aspect-ratio"]');
-      expect(frame?.style.aspectRatio).toBe('1 / 1');
+      const frame = image?.closest<HTMLElement>('[style*="--_collection-media-ratio"]');
+      expect(frame?.style.getPropertyValue('--_collection-media-ratio')).toBe('1 / 1');
       expect(image?.style.objectFit).toBe('cover');
     },
   );
@@ -190,8 +190,8 @@ describe('EntityListView', () => {
       });
       for (const item of items) {
         const image = container?.querySelector<HTMLImageElement>(`img[src="${item.imageUrl}"]`);
-        const frame = image?.closest<HTMLElement>('[style*="aspect-ratio"]');
-        expect(frame?.style.aspectRatio).toBe('auto');
+        const frame = image?.closest<HTMLElement>('[style*="--_collection-media-ratio"]');
+        expect(frame?.style.getPropertyValue('--_collection-media-ratio')).toBe('auto');
         expect(image?.style.width).toBe('100%');
         expect(image?.style.height).toBe('auto');
         expect(image?.style.position).not.toBe('absolute');
@@ -202,39 +202,6 @@ describe('EntityListView', () => {
       }
     },
   );
-  it('keeps the shared hero carousel slide wrapper for single-item hero layouts', () => {
-    const items = [
-      {
-        id: 'artist-1',
-        href: '/artists/artist-1',
-        title: 'Artist One',
-        imageUrl: 'https://example.com/artist.jpg',
-      },
-    ];
-
-    act(() => {
-      root?.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <NextIntlClientProvider locale="en" messages={enMessages} timeZone="UTC">
-            <EntityListView
-              items={items}
-              className="artist-list-block"
-              emptyLabel="No artists found"
-              layout="carousel"
-              columns={1}
-              showImage
-              carouselLoop
-              carouselIndicators
-            />
-          </NextIntlClientProvider>
-        </DesignSystemProvider>,
-      );
-    });
-
-    const heroSlide = document.querySelector('[data-hero-carousel-slide]');
-    expect(heroSlide).not.toBeNull();
-    expect(heroSlide?.querySelector('img[src="https://example.com/artist.jpg"]')).not.toBeNull();
-  });
 
   it.each([true, false])('honors image=%s and hidden indicators in one-column carousels', (showImage) => {
     act(() => {

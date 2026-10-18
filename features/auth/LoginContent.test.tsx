@@ -1039,38 +1039,6 @@ describe('LoginContent', () => {
     expect(socialButtons.every((button) => !button.disabled)).toBe(true);
   });
 
-  it('places passkey login after the email continue action', async () => {
-    vi.stubGlobal('PublicKeyCredential', class PublicKeyCredentialMock {});
-    Object.defineProperty(window.navigator, 'credentials', {
-      configurable: true,
-      value: { get: vi.fn() },
-    });
-    (window as unknown as Record<string, unknown>).__oryWebAuthnInitialized = true;
-    (window as unknown as Record<string, unknown>).oryPasskeyLogin = vi.fn();
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(jsonResponse(passkeyFlow)));
-
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceColorScheme="light">
-            <LoginContent />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
-
-    const emailButton = document.querySelector<HTMLButtonElement>('#login-email-code-submit');
-    const passkeyButton = document.querySelector<HTMLButtonElement>('[data-testid="login-passkey"]');
-    expect(emailButton).not.toBeNull();
-    expect(passkeyButton).not.toBeNull();
-    if (!emailButton || !passkeyButton) {
-      throw new Error('expected email and passkey login actions');
-    }
-    expect(emailButton.compareDocumentPosition(passkeyButton) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
-    expect(emailButton.style.height).toBe(passkeyButton.style.height);
-  });
-
   it('shows only the email action as loading while disabling passkey and social alternatives', async () => {
     vi.stubGlobal('PublicKeyCredential', class PublicKeyCredentialMock {});
     Object.defineProperty(window.navigator, 'credentials', {

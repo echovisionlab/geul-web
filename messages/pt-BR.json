@@ -3407,9 +3407,11 @@
           "inherit": "Seguir tema claro"
         },
         "itemSize": {
+          "xs": "XS · Muito compacto",
           "s": "S · Compacto",
           "m": "M · Padrão",
-          "l": "L · Grande"
+          "l": "L · Grande",
+          "xl": "XL · Muito grande"
         }
       },
       "actions": {

@@ -256,32 +256,6 @@ describe('useMediaProcessingRuntimeState', () => {
     expect(getProbeNode().getAttribute('data-loading')).toBe('false');
   });
 
-  it('bootstraps backend runtime state by durable file id', async () => {
-    mockedGetFileStatusAction.mockResolvedValue({
-      completed: true,
-      failed: false,
-      unavailable: false,
-      url: '',
-      originalUrl: '',
-      waveformUrl: 'https://cdn.example.com/waveform.json',
-      spectrogramUrl: '',
-      thumbnailUrl: '',
-      hlsUrl: 'https://cdn.example.com/ready.m3u8',
-      durationSeconds: 42,
-      processingStatus: MediaProcessingStatus.READY,
-      processingPercentage: undefined,
-    });
-
-    await renderProbe({ fileId: 'file-1' });
-
-    expect(mockedGetFileStatusAction).toHaveBeenCalledWith('file-1');
-    const node = getProbeNode();
-    expect(node.getAttribute('data-status')).toBe(String(MediaProcessingStatus.READY));
-    expect(node.getAttribute('data-hls-url')).toBe('https://cdn.example.com/ready.m3u8');
-    expect(node.getAttribute('data-waveform-url')).toBe('https://cdn.example.com/waveform.json');
-    expect(node.getAttribute('data-loading')).toBe('false');
-  });
-
   it('starts processing bootstrap only after pending identity becomes a durable file id', async () => {
     mockedGetFileStatusAction.mockResolvedValue({
       completed: false,

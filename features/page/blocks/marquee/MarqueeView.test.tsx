@@ -118,18 +118,6 @@ function setElementRect(element: Element, rect: Pick<DOMRect, 'width' | 'height'
 }
 
 describe('MarqueeView', () => {
-  it('marks the marquee as a full-width page block', () => {
-    const html = renderToStaticMarkup(
-      <TestProviders>
-        <MarqueeView items={[{ id: 'text-1', text: 'Full width item' }]} options={baseOptions} />
-      </TestProviders>,
-    );
-
-    expect(html).toContain('class="');
-    expect(html).toContain('marquee-block');
-    expect(html).toContain('data-block-type="marquee"');
-  });
-
   it('applies render variants through data attributes and CSS variables', () => {
     const html = renderToStaticMarkup(
       <TestProviders>

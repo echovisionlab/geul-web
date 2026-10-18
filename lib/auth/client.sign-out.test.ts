@@ -1,4 +1,4 @@
-// @vitest-environment jsdom
+// @vitest-environment node
 import { afterEach, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -14,14 +14,13 @@ vi.mock('@/lib/providers/SessionProvider', () => ({ useSessionContext: () => nul
 
 import { signOut } from './client';
 
-const originalLocation = window.location;
 afterEach(() => {
-  Object.defineProperty(window, 'location', { configurable: true, value: originalLocation });
+  vi.unstubAllGlobals();
 });
 
 it('ends the member everywhere and deletes their unsaved-edit journals before the logout flow', async () => {
   const location = { href: '/editor' };
-  Object.defineProperty(window, 'location', { configurable: true, value: location });
+  vi.stubGlobal('window', { location });
   let finishClear!: () => void;
   mocks.clearRoomJournalsForSignOut.mockReturnValue(new Promise<void>((resolve) => (finishClear = resolve)));
 

@@ -1,10 +1,9 @@
 // @vitest-environment jsdom
 
 import { act, type HTMLAttributes } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+import { render as renderWithProviders, screen } from '@/test/render';
 import type { NodeViewProps } from '@tiptap/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { getMapInteractionOptions } from '@/features/map/utils/interaction-options';
 import type { TiptapMapSelectionMenuBinding, TiptapMapSelectionMenuRegistry } from '../menus/map-external';
 import { TiptapMapNodeView, type TiptapMapNodeOptions } from './TiptapMapNodeView';
 
@@ -32,10 +31,12 @@ const updateAttributesSpy = vi.fn();
 let resizeDirection: 'left' | 'right' | null = null;
 let registeredBinding: TiptapMapSelectionMenuBinding | undefined;
 
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
 vi.mock('@tiptap/react', () => ({
-  NodeViewWrapper: ({ children, ...props }: HTMLAttributes<HTMLDivElement>) => <div {...props}>{children}</div>,
+  NodeViewWrapper: ({ children, ...props }: HTMLAttributes<HTMLDivElement>) => (
+    <div role="group" aria-label="Map block" {...props}>
+      {children}
+    </div>
+  ),
   ReactNodeViewRenderer: vi.fn(),
 }));
 vi.mock('../useExactTiptapNodeSelection', () => ({
@@ -58,17 +59,14 @@ vi.mock('@tanstack/react-query', () => ({
   }),
   useQueryClient: () => ({ invalidateQueries: vi.fn() }),
 }));
-vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
+vi.mock('next-intl', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('next-intl')>()),
+  useTranslations: () => (key: string) => key,
+}));
 
-vi.mock('@mantine/hooks', () => ({ useDisclosure: () => [false, { open: openPlacesModal, close: vi.fn() }] }));
-vi.mock('@/components/core/Input', () => ({
-  TextInput: ({
-    classNames,
-    textRole: _textRole,
-    ...props
-  }: HTMLAttributes<HTMLInputElement> & { classNames?: { input?: string }; textRole?: string }) => (
-    <input className={classNames?.input} {...props} />
-  ),
+vi.mock('@mantine/hooks', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@mantine/hooks')>()),
+  useDisclosure: () => [false, { open: openPlacesModal, close: vi.fn() }],
 }));
 vi.mock('@/features/place/PlacesManageModal', () => ({ PlacesManageModal: () => null }));
 vi.mock('@/features/map/MapLibreMapEditor', () => ({
@@ -95,6 +93,8 @@ vi.mock('@/features/map/MapLibreMapEditor', () => ({
     mapEditorSpy.props = { config, interactive };
     return (
       <div
+        role="region"
+        aria-label="Map canvas"
         data-map-place-count={places.length}
         data-interactive={interactive}
         data-has-place-management={Boolean(onManagePlaces)}
@@ -134,6 +134,8 @@ vi.mock('@/features/editor/ui/EditorMediaBlockShell', () => ({
     suppressStaticTextSelection?: boolean;
   }) => (
     <div
+      role="group"
+      aria-label="Map frame"
       data-map-frame
       data-allow-resize={allowResize}
       data-resizing={isResizing || undefined}
@@ -158,8 +160,8 @@ vi.mock('@/features/editor/hooks/useBlockResize', () => ({
 vi.mock('@/lib/contexts/MapPlaceActionContext', () => ({ useCreateMapPlaceForBlockAction: () => vi.fn() }));
 vi.mock('../wire-schema', () => ({ WireMap: { extend: vi.fn() } }));
 
-let container: HTMLDivElement | null = null;
-let root: Root | null = null;
+let mounted: ReturnType<typeof renderWithProviders> | undefined;
+let user: ReturnType<typeof renderWithProviders>['user'];
 
 function render(
   attrs: Record<string, unknown>,
@@ -195,9 +197,6 @@ function render(
     on: vi.fn(),
     off: vi.fn(),
   };
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
   const renderCurrent = () => {
     const nodeViewProps = {
       editor,
@@ -210,23 +209,28 @@ function render(
         renderCurrent();
       },
     } as unknown as NodeViewProps;
-    root?.render(<TiptapMapNodeView {...nodeViewProps} {...currentOptions} />);
+    const view = <TiptapMapNodeView {...nodeViewProps} {...currentOptions} />;
+    if (mounted) {
+      mounted.rerender(view);
+    } else {
+      mounted = renderWithProviders(view);
+      user = mounted.user;
+    }
   };
-  act(renderCurrent);
+  renderCurrent();
   return {
+    unmount: () => mounted?.unmount(),
     rerender(nextOptions: TiptapMapNodeOptions, nextEditorEditable = editor.isEditable) {
       editor.isEditable = nextEditorEditable;
       currentOptions = nextOptions;
-      act(renderCurrent);
+      renderCurrent();
     },
   };
 }
 
 afterEach(() => {
-  act(() => root?.unmount());
-  container?.remove();
-  container = null;
-  root = null;
+  mounted?.unmount();
+  mounted = undefined;
   dispatch.mockReset();
   neutralPatch.mockReset();
   deleteBlockCallback.mockReset();
@@ -245,7 +249,7 @@ describe('TiptapMapNodeView', () => {
   it('leaves map pointer selection to the Tiptap NodeView owner', () => {
     render({ mapPlaceIds: 'place-1', previewWidth: '100' });
 
-    const mapNode = container?.querySelector<HTMLElement>('[data-content-type="map"]');
+    const mapNode = screen.getByRole('group', { name: 'Map block' });
     const event = new MouseEvent('mousedown', { bubbles: true, button: 0, cancelable: true });
     act(() => mapNode?.dispatchEvent(event));
 
@@ -255,15 +259,15 @@ describe('TiptapMapNodeView', () => {
     expect(editorFocus).not.toHaveBeenCalled();
   });
 
-  it('renders and updates a full map canvas without requiring a place', () => {
+  it('renders and updates a full map canvas without requiring a place', async () => {
     render(
       { mapPlaceIds: '', previewWidth: '100', centerLat: '37.5', centerLng: '127' },
       { onNeutralAttrsChange: neutralPatch },
     );
 
-    expect(container?.querySelector('[data-map-place-count="0"]')).toBeTruthy();
-    expect(container?.querySelector('[data-testid="tiptap-map-empty"]')).toBeNull();
-    act(() => container?.querySelector<HTMLButtonElement>('[data-map-config-change]')?.click());
+    expect(screen.getByRole('region', { name: 'Map canvas' })).toHaveAttribute('data-map-place-count', '0');
+    expect(screen.queryByTestId('tiptap-map-empty')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'change map' }));
     expect(neutralPatch).toHaveBeenCalledWith(
       'map-block',
       expect.objectContaining({ mapPlaceIds: '', centerLat: '37.5', centerLng: '127' }),
@@ -278,7 +282,7 @@ describe('TiptapMapNodeView', () => {
       previewWidth: '100',
     });
 
-    expect(container?.querySelector('[data-map-place-count="1"]')).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'Map canvas' })).toHaveAttribute('data-map-place-count', '1');
     expect(mapEditorSpy.props?.config).toEqual(
       expect.objectContaining({
         center: { lat: 37.5, lng: 127 },
@@ -286,21 +290,7 @@ describe('TiptapMapNodeView', () => {
     );
   });
 
-  it('renders selected places as an editable map and mirrors structural patches', () => {
-    render(
-      { mapPlaceIds: 'place-1', previewWidth: '100', aspectRatio: '16:9', caption: '' },
-      { onNeutralAttrsChange: neutralPatch },
-    );
-
-    expect(container?.querySelector('[data-map-place-count="1"]')).toBeTruthy();
-    expect(container?.querySelector('[data-interactive="true"]')).toBeTruthy();
-    act(() => container?.querySelector<HTMLButtonElement>('[data-map-config-change]')?.click());
-    expect(neutralPatch).toHaveBeenCalledWith('map-block', expect.objectContaining({ mapPlaceIds: 'place-1' }), {
-      zoom: '11',
-    });
-  });
-
-  it('projects stored flags to the exact MapLibre handlers and updates dragPan live', () => {
+  it('projects stored string flags to the live map config and persists an enabled drag as a string attr', async () => {
     render({
       mapPlaceIds: 'place-1',
       previewWidth: '100',
@@ -311,51 +301,20 @@ describe('TiptapMapNodeView', () => {
       tiltable: 'true',
     });
 
-    const map = container?.querySelector<HTMLElement>('[data-map-place-count="1"]');
+    const map = screen.getByRole('region', { name: 'Map canvas' });
     expect(map?.getAttribute('data-interactive')).toBe('true');
     expect(map?.getAttribute('data-config-draggable')).toBe('false');
     expect(map?.getAttribute('data-config-zoomable')).toBe('false');
     expect(map?.getAttribute('data-config-rotatable')).toBe('true');
     expect(map?.getAttribute('data-config-tiltable')).toBe('true');
-    expect(mapEditorSpy.props?.interactive).toBe(true);
-    expect(mapEditorSpy.props?.config).toEqual(
-      expect.objectContaining({
-        draggable: false,
-        zoomable: false,
-        rotatable: true,
-        tiltable: true,
-      }),
-    );
-    expect({
-      dragPan: mapEditorSpy.props?.config.draggable,
-      dragRotate: mapEditorSpy.props?.config.rotatable,
-      touchPitch: mapEditorSpy.props?.config.tiltable,
-      pitchWithRotate: mapEditorSpy.props?.config.tiltable,
-      ...getMapInteractionOptions(mapEditorSpy.props?.config ?? {}),
-    }).toEqual({
-      dragPan: false,
-      scrollZoom: false,
-      touchZoomRotate: false,
-      doubleClickZoom: false,
-      keyboard: true,
-      dragRotate: true,
-      touchPitch: true,
-      pitchWithRotate: true,
-    });
 
-    act(() => container?.querySelector<HTMLButtonElement>('[data-enable-map-drag]')?.click());
+    await user.click(screen.getByRole('button', { name: 'enable drag' }));
     expect(updateAttributesSpy).toHaveBeenCalledWith({ draggable: 'true' });
     expect(map?.getAttribute('data-config-draggable')).toBe('true');
     expect(mapEditorSpy.props?.config.draggable).toBe(true);
-    expect(getMapInteractionOptions(mapEditorSpy.props?.config ?? {})).toEqual({
-      scrollZoom: false,
-      touchZoomRotate: false,
-      doubleClickZoom: false,
-      keyboard: true,
-    });
   });
 
-  it('uses the same durable interaction projection in read-only mode while hard-gating settings writes', () => {
+  it('uses the same durable interaction projection in read-only mode while hard-gating settings writes', async () => {
     render(
       {
         mapPlaceIds: 'place-1',
@@ -371,13 +330,13 @@ describe('TiptapMapNodeView', () => {
       false,
     );
 
-    const map = container?.querySelector<HTMLElement>('[data-map-place-count="1"]');
+    const map = screen.getByRole('region', { name: 'Map canvas' });
     expect(map?.getAttribute('data-interactive')).toBe('true');
     expect(map?.getAttribute('data-config-draggable')).toBe('false');
     expect(map?.getAttribute('data-config-zoomable')).toBe('true');
     expect(map?.getAttribute('data-config-rotatable')).toBe('false');
     expect(map?.getAttribute('data-config-tiltable')).toBe('true');
-    act(() => container?.querySelector<HTMLButtonElement>('[data-enable-map-drag]')?.click());
+    await user.click(screen.getByRole('button', { name: 'enable drag' }));
     expect(updateAttributesSpy).not.toHaveBeenCalled();
   });
 
@@ -385,50 +344,53 @@ describe('TiptapMapNodeView', () => {
     resizeDirection = 'right';
     render({ mapPlaceIds: 'place-1', previewWidth: '100', aspectRatio: '16:9', caption: '' }, {}, true);
 
-    expect(container?.querySelector('[data-map-frame][data-selected="true"]')).toBeTruthy();
-    expect(container?.querySelector('[data-map-frame][data-resizing="true"]')).toBeTruthy();
+    expect(screen.getByRole('group', { name: 'Map frame' })).toHaveAttribute('data-selected', 'true');
+    expect(screen.getByRole('group', { name: 'Map frame' })).toHaveAttribute('data-resizing', 'true');
   });
 
-  it('keeps the selected static map surface separate from the text-selectable caption editor', () => {
+  it('keeps the selected static map surface separate from the text-selectable caption editor', async () => {
     render({ mapPlaceIds: 'place-1', previewWidth: '100', aspectRatio: '16:9', caption: '' }, {}, true);
 
-    const staticSurface = container?.querySelector<HTMLElement>('[data-map-static-surface]');
-    const caption = container?.querySelector<HTMLButtonElement>('[data-testid="tiptap-map-caption"]');
-    expect(staticSurface).toBeTruthy();
+    // eslint-disable-next-line testing-library/no-node-access -- The wrapper owns static text selection; the external map and caption must stay on opposite sides.
+    const staticSurface = screen.getByRole('region', { name: 'Map canvas' }).parentElement!;
+    const caption = screen.getByRole('button', { name: 'clickToAddCaption' });
+    expect(staticSurface).toHaveAttribute('data-map-static-surface');
     expect(caption).toBeTruthy();
     expect(caption?.hasAttribute('data-editor-media-caption')).toBe(false);
-    expect(container?.querySelector('[data-map-frame]')?.getAttribute('data-suppress-static-text-selection')).toBe(
+    expect(screen.getByRole('group', { name: 'Map frame' })?.getAttribute('data-suppress-static-text-selection')).toBe(
       'true',
     );
-    expect(staticSurface?.querySelector('.maplibregl-ctrl-attrib')).toBeTruthy();
-    expect(staticSurface?.querySelector('[data-map-label]')).toBeTruthy();
-    expect(staticSurface?.querySelector('[data-map-settings]')).toBeTruthy();
+    expect(staticSurface).toContainElement(screen.getByText('Map attribution'));
+    expect(staticSurface).toContainElement(screen.getByText('Map label'));
+    expect(staticSurface).toContainElement(screen.getByRole('button', { name: 'Map settings' }));
     expect(staticSurface?.contains(caption ?? null)).toBe(false);
 
-    act(() => caption?.click());
-    const captionInput = container?.querySelector<HTMLInputElement>('input');
+    await user.click(caption);
+    const captionInput = screen.getByRole('textbox', { name: 'captionPlaceholder' });
     expect(captionInput).toBeTruthy();
     expect(staticSurface?.contains(captionInput ?? null)).toBe(false);
   });
 
-  it('hides read-only authoring controls while preserving durable map interactions', () => {
+  it('hides read-only authoring controls while preserving durable map interactions', async () => {
     render(
       { mapPlaceIds: 'place-1', previewWidth: '100', aspectRatio: '16:9', caption: '' },
       {
         allowNeutralBlockEdits: false,
         allowLocalizedBlockEdits: false,
+        onNeutralAttrsChange: neutralPatch,
       },
     );
 
-    expect(container?.querySelector('[data-interactive="true"]')).toBeTruthy();
-    expect(container?.querySelector('[data-settings-hidden="true"]')).toBeTruthy();
-    expect(container?.querySelector('[data-has-place-management="false"]')).toBeTruthy();
-    expect(container?.querySelector('[data-map-frame][data-allow-resize="false"]')).toBeTruthy();
-    expect(container?.querySelector('[data-map-config-change]')).toBeTruthy();
-    act(() => container?.querySelector<HTMLButtonElement>('[data-map-config-change]')?.click());
-    expect(dispatch).not.toHaveBeenCalled();
-    expect(container?.textContent).not.toContain('clickToAddCaption');
-    expect(container?.querySelector('[data-testid="tiptap-map-caption"]')).toBeNull();
+    expect(screen.getByRole('region', { name: 'Map canvas' })).toHaveAttribute('data-interactive', 'true');
+    expect(screen.getByRole('region', { name: 'Map canvas' })).toHaveAttribute('data-settings-hidden', 'true');
+    expect(screen.getByRole('region', { name: 'Map canvas' })).toHaveAttribute('data-has-place-management', 'false');
+    expect(screen.getByRole('group', { name: 'Map frame' })).toHaveAttribute('data-allow-resize', 'false');
+    expect(screen.getByRole('button', { name: 'change map' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'change map' }));
+    expect(updateAttributesSpy).not.toHaveBeenCalled();
+    expect(neutralPatch).not.toHaveBeenCalled();
+    expect(screen.queryByText('clickToAddCaption')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /clickToAddCaption|Seoul/ })).toBeNull();
   });
 
   it('keeps the selected read-only display caption inside static selection suppression', () => {
@@ -439,49 +401,40 @@ describe('TiptapMapNodeView', () => {
     );
     mounted.rerender({ allowNeutralBlockEdits: false, allowLocalizedBlockEdits: false }, false);
 
-    const caption = [...(container?.querySelectorAll<HTMLElement>('div') ?? [])].find(
-      (element) => element.textContent === 'Seoul map' && element.children.length === 0,
-    );
+    const caption = screen.getByText('Seoul map');
     expect(caption).toBeTruthy();
     expect(caption?.tagName).not.toBe('BUTTON');
     expect(caption?.hasAttribute('data-editor-media-caption')).toBe(false);
-    expect(container?.querySelector('[data-content-type="map"]')?.hasAttribute('data-selected')).toBe(false);
-    expect(container?.querySelector('[data-map-frame]')?.hasAttribute('data-selected')).toBe(false);
+    expect(screen.getByRole('group', { name: 'Map block' })?.hasAttribute('data-selected')).toBe(false);
+    expect(screen.getByRole('group', { name: 'Map frame' })?.hasAttribute('data-selected')).toBe(false);
   });
 
-  it('ANDs localized and neutral permissions with the editor editable state', () => {
+  it('ANDs localized and neutral permissions with the editor editable state', async () => {
     render(
       { mapPlaceIds: 'place-1', previewWidth: '100', aspectRatio: '16:9', caption: 'Seoul' },
-      { allowNeutralBlockEdits: true, allowLocalizedBlockEdits: true },
+      { allowNeutralBlockEdits: true, allowLocalizedBlockEdits: true, onNeutralAttrsChange: neutralPatch },
       true,
       false,
     );
 
-    expect(container?.querySelector('[data-interactive="true"]')).toBeTruthy();
-    expect(container?.querySelector('[data-settings-hidden="true"]')).toBeTruthy();
-    expect(container?.querySelector('[data-map-frame][data-allow-resize="false"]')).toBeTruthy();
-    expect(container?.querySelector('[data-testid="tiptap-map-caption"]')).toBeNull();
-    expect(container?.querySelector('input')).toBeNull();
-    act(() => container?.querySelector<HTMLButtonElement>('[data-map-config-change]')?.click());
-    expect(dispatch).not.toHaveBeenCalled();
+    expect(screen.getByRole('region', { name: 'Map canvas' })).toHaveAttribute('data-interactive', 'true');
+    expect(screen.getByRole('region', { name: 'Map canvas' })).toHaveAttribute('data-settings-hidden', 'true');
+    expect(screen.getByRole('group', { name: 'Map frame' })).toHaveAttribute('data-allow-resize', 'false');
+    expect(screen.queryByRole('button', { name: /clickToAddCaption|Seoul/ })).toBeNull();
+    expect(screen.queryByRole('textbox')).toBeNull();
+    await user.click(screen.getByRole('button', { name: 'change map' }));
+    expect(updateAttributesSpy).not.toHaveBeenCalled();
+    expect(neutralPatch).not.toHaveBeenCalled();
   });
 
-  it('renders a full read-only map without a place or place activation placeholder', () => {
-    render({ mapPlaceIds: '', previewWidth: '100' }, { allowNeutralBlockEdits: true }, false, false);
-
-    expect(container?.querySelector('[data-map-place-count="0"]')).toBeTruthy();
-    expect(container?.querySelector('[data-testid="tiptap-map-empty"]')).toBeNull();
-    expect(container?.querySelector('[data-interactive="true"]')).toBeTruthy();
-  });
-
-  it('uses a native button to activate localized caption editing', () => {
+  it('uses a native button to activate localized caption editing', async () => {
     render({ mapPlaceIds: 'place-1', previewWidth: '100', aspectRatio: '16:9', caption: '' });
 
-    const caption = container?.querySelector<HTMLButtonElement>('[data-testid="tiptap-map-caption"]');
+    const caption = screen.getByRole('button', { name: 'clickToAddCaption' });
     expect(caption?.tagName).toBe('BUTTON');
-    expect(caption?.type).toBe('button');
-    act(() => caption?.click());
-    expect(container?.querySelector('input')).toBeTruthy();
+    expect(caption).toHaveAttribute('type', 'button');
+    await user.click(caption);
+    expect(screen.getByRole('textbox', { name: 'captionPlaceholder' })).toBeInTheDocument();
   });
 
   it('registers private map commands with the supplied editor-local menu registry and unregisters on unmount', () => {
@@ -495,7 +448,7 @@ describe('TiptapMapNodeView', () => {
       get: vi.fn(),
       subscribe: vi.fn(() => vi.fn()),
     };
-    render(
+    const view = render(
       {
         mapPlaceIds: 'place-1',
         previewWidth: '72',
@@ -522,7 +475,7 @@ describe('TiptapMapNodeView', () => {
     expect(openPlacesModal).toHaveBeenCalledTimes(1);
 
     act(() => registeredBinding?.commands.focusCaption?.());
-    expect(container?.querySelector('input')).toBeTruthy();
+    expect(screen.getByRole('textbox', { name: 'captionPlaceholder' })).toBeInTheDocument();
 
     act(() => registeredBinding?.commands.centerPlace?.('place-1'));
     expect(neutralPatch).toHaveBeenLastCalledWith('map-block', expect.objectContaining({ mapPlaceIds: 'place-1' }), {
@@ -557,8 +510,7 @@ describe('TiptapMapNodeView', () => {
     );
     expect(editorFocus).toHaveBeenCalledTimes(1);
 
-    act(() => root?.unmount());
-    root = null;
+    view.unmount();
     expect(register).toHaveBeenCalled();
     expect(unregisterMenu).toHaveBeenCalledTimes(register.mock.calls.length);
   });
@@ -635,6 +587,6 @@ describe('TiptapMapNodeView', () => {
     expect(dispatch).not.toHaveBeenCalled();
     expect(neutralPatch).not.toHaveBeenCalled();
     expect(deleteBlockCallback).not.toHaveBeenCalled();
-    expect(container?.querySelector('input')).toBeNull();
+    expect(screen.queryByRole('textbox')).toBeNull();
   });
 });

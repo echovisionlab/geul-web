@@ -3407,9 +3407,11 @@
           "inherit": "Follow light"
         },
         "itemSize": {
+          "xs": "XS · Extra compact",
           "s": "S · Compact",
           "m": "M · Standard",
-          "l": "L · Large"
+          "l": "L · Large",
+          "xl": "XL · Extra large"
         }
       },
       "actions": {
