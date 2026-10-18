@@ -60,10 +60,10 @@ import { TranslationLocaleControl } from '@/features/translation/TranslationLoca
 import { useLocaleDocumentSession } from '@/features/translation/useLocaleDocumentSession';
 import { listActiveSegmentsAction } from '@/lib/actions/audience';
 import { getCampaignAction, updateCampaignConfigurationAction } from '@/lib/actions/campaign';
-import { persistCollaborativeDocumentNow } from '@/lib/collab/persist-now';
 import { updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata';
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
-import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
+import { flushEditorSavesOrNotify } from '@/lib/editor/flush-editor-saves-or-notify';
+import { persistEditorDocumentBeforeAction } from '@/lib/editor/persist-editor-document-before-action';
 import { publishEditorEntityChange, useEditorEntityChanges } from '@/lib/editor/editor-entity-changes';
 import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
 import { useAuthoritativeConfiguration } from '@/lib/editor/useAuthoritativeConfiguration';
@@ -328,24 +328,15 @@ function useCampaignEditPageModel() {
     if (!canMutate) {
       return true;
     }
-    if (!(await flushEditorSaves(`campaign:${campaignId}`))) {
-      notifications.show({ message: tCommonNotifications('saveFailed'), tone: 'danger' });
-      return false;
-    }
-    if (localeMode.shouldUseLocaleDocument && !isSynced) {
-      notifications.show({ message: tStates('syncing'), tone: 'warning' });
-      return false;
-    }
-    try {
-      await persistCollaborativeDocumentNow(currentProvider);
-      return true;
-    } catch (error) {
-      notifications.show({
-        message: error instanceof Error ? error.message : tCommonNotifications('saveFailed'),
-        tone: 'danger',
-      });
-      return false;
-    }
+    return persistEditorDocumentBeforeAction({
+      document: `campaign:${campaignId}`,
+      provider: currentProvider,
+      requiresSync: localeMode.shouldUseLocaleDocument,
+      isSynced,
+      saveFailedMessage: tCommonNotifications('saveFailed'),
+      syncingMessage: tStates('syncing'),
+      syncingTone: 'warning',
+    });
   }, [
     accessInterruption.blocked,
     campaignId,
@@ -359,11 +350,9 @@ function useCampaignEditPageModel() {
 
   const handleBack = useCallback(() => {
     void (async () => {
-      if (!(await flushEditorSaves(`campaign:${campaignId}`))) {
-        notifications.show({ message: tCommonNotifications('saveFailed'), tone: 'danger' });
-        return;
+      if (await flushEditorSavesOrNotify(`campaign:${campaignId}`, tCommonNotifications('saveFailed'))) {
+        router.push('/admin/campaigns');
       }
-      router.push('/admin/campaigns');
     })();
   }, [campaignId, router, tCommonNotifications]);
 

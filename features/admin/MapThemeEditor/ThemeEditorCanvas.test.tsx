@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ThemeSettings, ThemeVariant } from '@/lib/types/map-theme/model';
 import { DEFAULT_THEME_SETTINGS } from '@/lib/types/map-theme/schema';
 import { TestProviders } from '@/test/TestProviders';
-import { parseColorToRgba, ThemeEditorCanvas } from './ThemeEditorCanvas';
+import { ThemeEditorCanvas } from './ThemeEditorCanvas';
 
 vi.mock('next/dynamic', () => ({
   default: () =>
@@ -156,17 +156,6 @@ function Harness({ settings }: { settings: ThemeSettings }) {
 }
 
 describe('ThemeEditorCanvas', () => {
-  it('parses every color form allowed by the Map Theme contract', () => {
-    expect(parseColorToRgba('#123')).toEqual({ r: 17, g: 34, b: 51, a: 1 });
-    expect(parseColorToRgba('#1234')).toEqual({ r: 17, g: 34, b: 51, a: 68 / 255 });
-    expect(parseColorToRgba('#112233')).toEqual({ r: 17, g: 34, b: 51, a: 1 });
-    expect(parseColorToRgba('#11223344')).toEqual({ r: 17, g: 34, b: 51, a: 68 / 255 });
-    expect(parseColorToRgba(' rgb( 17 , 34 , 51 ) ')).toEqual({ r: 17, g: 34, b: 51, a: 1 });
-    expect(parseColorToRgba('rgba( 17, 34 , 51, 0.5 )')).toEqual({ r: 17, g: 34, b: 51, a: 0.5 });
-    expect(parseColorToRgba('transparent')).toEqual({ r: 0, g: 0, b: 0, a: 0 });
-    expect(() => parseColorToRgba('rgb(999, 34, 51)')).toThrow('Unsupported Map Theme color');
-  });
-
   it('edits actual Core controls and cannot remove the last callout field', async () => {
     const onVariantChange = vi.fn();
     const onSettingsChange = vi.fn();

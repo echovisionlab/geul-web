@@ -73,7 +73,7 @@ import {
 import type { ProgramEventEditorAction } from './program-event-actions';
 import type { ProgramEventLocationModeValue } from '@/lib/types/program-event/location-mode';
 import { requireActionSuccess } from '@/lib/editor/require-action-success';
-import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
+import { flushEditorSavesOrNotify } from '@/lib/editor/flush-editor-saves-or-notify';
 import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
 import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
@@ -564,11 +564,7 @@ function useProgramEventEditorViewModel({
     while (pendingAuxiliaryWritesRef.current.size > 0) {
       await Promise.all([...pendingAuxiliaryWritesRef.current]);
     }
-    const saved = await flushEditorSaves(`program_event:${eventId}`);
-    if (!saved) {
-      notifications.show({ message: tCommon('notifications.saveFailed'), tone: 'danger' });
-    }
-    return saved;
+    return flushEditorSavesOrNotify(`program_event:${eventId}`, tCommon('notifications.saveFailed'));
   }, [eventId, tCommon]);
   const handleBack = useCallback(async () => {
     if (await flushPendingSaves()) {

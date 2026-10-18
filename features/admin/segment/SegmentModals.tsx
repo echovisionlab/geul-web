@@ -20,7 +20,7 @@ import {
   restoreSegmentAction,
   updateSegmentAction,
 } from '@/lib/actions/audience';
-import { buildSegmentConfig, createEmptyConfig, type SegmentConfigState } from './SegmentConfig';
+import { buildSegmentConfig, createEmptyConfig, rebasePendingConfig, type SegmentConfigState } from './SegmentConfig';
 import { SegmentConfigFields } from './SegmentConfigFields';
 import { useSegmentModal } from './SegmentModalContext';
 type SegmentEditConfig = SegmentConfigState;
@@ -51,34 +51,6 @@ function segmentConfigState(config: {
 }
 function sameStringSet(left: string[], right: string[]): boolean {
   return left.length === right.length && left.every((value) => right.includes(value));
-}
-function mergePendingStringSet(canonical: string[], submitted: string[], latest: string[]): string[] {
-  const merged = new Set(canonical);
-  const submittedSet = new Set(submitted);
-  const latestSet = new Set(latest);
-  for (const value of latest) {
-    if (!submittedSet.has(value)) {
-      merged.add(value);
-    }
-  }
-  for (const value of submitted) {
-    if (!latestSet.has(value)) {
-      merged.delete(value);
-    }
-  }
-  return Array.from(merged);
-}
-function rebasePendingConfig(
-  canonical: SegmentEditConfig,
-  submitted: SegmentEditConfig,
-  latest: SegmentEditConfig,
-): SegmentEditConfig {
-  return {
-    memberTagIds: mergePendingStringSet(canonical.memberTagIds, submitted.memberTagIds, latest.memberTagIds),
-    accountRoles: mergePendingStringSet(canonical.accountRoles, submitted.accountRoles, latest.accountRoles),
-    createdAfter: latest.createdAfter === submitted.createdAfter ? canonical.createdAfter : latest.createdAfter,
-    createdBefore: latest.createdBefore === submitted.createdBefore ? canonical.createdBefore : latest.createdBefore,
-  };
 }
 function sameSegmentEditDraft(left: SegmentEditDraft, right: SegmentEditDraft): boolean {
   return (

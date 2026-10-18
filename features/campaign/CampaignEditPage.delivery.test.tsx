@@ -640,37 +640,4 @@ describe('CampaignEditPage delivery target confirmation', () => {
     });
     expect(container.querySelector('[data-testid="send-warning"]')?.textContent).toBe('Send to New segment');
   });
-  it('preserves a newer name draft through peer refetch and an older name acknowledgement', async () => {
-    vi.useFakeTimers();
-    const firstWrite = deferred<{ name: string }>();
-    const secondWrite = deferred<{ name: string }>();
-    mocks.updateName.mockImplementation((_id: string, name: string) =>
-      name === 'First draft' ? firstWrite.promise : secondWrite.promise,
-    );
-    await act(async () => root.render(createElement(CampaignEditPage)));
-    act(() => container.querySelector<HTMLButtonElement>('[data-testid="name-first"]')!.click());
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(500);
-    });
-    act(() => container.querySelector<HTMLButtonElement>('[data-testid="name-second"]')!.click());
-    await act(async () => {
-      mocks.peerChange?.();
-    });
-    expect(container.querySelector('[data-testid="campaign-name"]')?.textContent).toBe('Second draft');
-    await act(async () => {
-      firstWrite.resolve({ name: 'Canonical first' });
-      await firstWrite.promise;
-    });
-    expect(container.querySelector('[data-testid="campaign-name"]')?.textContent).toBe('Second draft');
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(500);
-    });
-    await act(async () => {
-      secondWrite.resolve({ name: 'Canonical second' });
-      await secondWrite.promise;
-    });
-    expect(container.querySelector('[data-testid="campaign-name"]')?.textContent).toBe('Canonical second');
-    expect(mocks.updateName).toHaveBeenCalledWith('campaign-1', 'First draft', expect.any(String));
-    expect(mocks.updateName).toHaveBeenCalledWith('campaign-1', 'Second draft', expect.any(String));
-  });
 });

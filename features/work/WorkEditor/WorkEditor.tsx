@@ -53,7 +53,8 @@ import { updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata'
 import { useSlugManagement } from '@/lib/hooks/useSlugManagement';
 import { toNullableSlug, toSlugInputValue } from '@/lib/utils/slug';
 import { publishEditorEntityChange, useEditorEntityChanges } from '@/lib/editor/editor-entity-changes';
-import { flushEditorSaves, getPendingEditorPatch } from '@/lib/editor/editor-save-registry';
+import { getPendingEditorPatch } from '@/lib/editor/editor-save-registry';
+import { flushEditorSavesOrNotify } from '@/lib/editor/flush-editor-saves-or-notify';
 import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
 import { WorkClientsSection } from './WorkClientsSection';
 import { WorkCreditsSection } from './WorkCreditsSection';
@@ -181,13 +182,10 @@ function useWorkEditorViewModel({
       router.back();
     }
   }, [onBack, router]);
-  const flushPendingSaves = useCallback(async () => {
-    const saved = await flushEditorSaves(`work:${workId}`);
-    if (!saved) {
-      notifications.show({ message: tCommon('notifications.saveFailed'), tone: 'danger' });
-    }
-    return saved;
-  }, [tCommon, workId]);
+  const flushPendingSaves = useCallback(
+    () => flushEditorSavesOrNotify(`work:${workId}`, tCommon('notifications.saveFailed')),
+    [tCommon, workId],
+  );
   const handleBack = useCallback(async () => {
     if (await flushPendingSaves()) {
       navigateBack();

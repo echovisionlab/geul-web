@@ -9,6 +9,8 @@ import { SubmissionDeleteButton } from './SubmissionDeleteButton';
 const router = vi.hoisted(() => ({ push: vi.fn() }));
 vi.mock('next/navigation', () => ({ useRouter: () => router }));
 
+let disposeButton: (() => void) | undefined;
+
 function renderButton(deleteAction: (submissionId: string) => Promise<{ error?: string }>) {
   const onDeleted = vi.fn();
   const client = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
@@ -23,10 +25,16 @@ function renderButton(deleteAction: (submissionId: string) => Promise<{ error?: 
       <NotificationRegion closeLabel="Close" />
     </QueryClientProvider>,
   );
+  disposeButton = () => {
+    view.unmount();
+    client.clear();
+  };
   return { ...view, onDeleted };
 }
 
 afterEach(() => {
+  disposeButton?.();
+  disposeButton = undefined;
   notifications.clean();
 });
 

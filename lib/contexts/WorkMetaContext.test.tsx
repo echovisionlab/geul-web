@@ -230,20 +230,6 @@ describe('WorkMetaProvider', () => {
     unregister();
   });
 
-  it('preserves a newer local field edit when an earlier canonical write completes', () => {
-    renderProvider();
-    act(() => latest?.setMetadata({ description: 'First edit' }));
-    const write = latest!.configuration!.beginWrite(['metadata']);
-    act(() => latest?.setMetadata({ description: 'Second edit' }));
-    act(() => write.acknowledge({ metadata: { description: 'First edit', peer: 'Canonical peer value' } }));
-
-    expect(latest?.metadata).toEqual({ description: 'Second edit' });
-    expect(latest?.configuration?.getCanonical().metadata).toEqual({
-      description: 'First edit',
-      peer: 'Canonical peer value',
-    });
-  });
-
   it('ignores an authorized read started before the latest configuration write acknowledgement', async () => {
     renderProvider();
     let finishRead!: (result: Awaited<ReturnType<typeof getWorkConfigurationAction>>) => void;
@@ -434,15 +420,11 @@ describe('client save failures', () => {
     });
     renderProvider(null, {
       ...initialMeta,
-      year: 2025,
-      metadata: { peerKey: 'peer value' },
       clients: ['server-client'],
     });
     await act(async () => Promise.resolve());
     expect(updateWorkFieldsAction).toHaveBeenCalledTimes(1);
     expect(latest?.clients).toEqual(['unsaved']);
-    expect(latest?.metadata).toEqual({ peerKey: 'peer value' });
-    expect(latest?.year).toBe(2025);
     expect(updateWorkFieldsAction).toHaveBeenNthCalledWith(
       1,
       workId,

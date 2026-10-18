@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "9aa5db37404014c1d60d395a016e175898a6f807276d62607219c2c7c4fb1af7",
+  "manifestHash": "c4cc65945c5d2cdce312f2ffe5657ac2290a3bc8b5bd7bcfe1ec386ee86badfb",
   "counts": {
-    "sourceFiles": 3732,
-    "productionSourceFiles": 2286,
+    "sourceFiles": 3805,
+    "productionSourceFiles": 2298,
     "componentFiles": 908,
     "coreFamilies": 57,
     "featureDomains": 53,
@@ -388,6 +388,7 @@
     "components/core/DataTable/index.ts",
     "components/core/DataTable/layout.test.ts",
     "components/core/DataTable/layout.ts",
+    "components/core/DataTable/page-selection.test.ts",
     "components/core/DataTable/selection.test.tsx",
     "components/core/DataTable/selection.ts",
     "components/core/DateTime/DateTime.stories.tsx",
@@ -587,6 +588,8 @@
     "components/core/Input/index.ts",
     "components/core/Input/input-contract.ts",
     "components/core/Input/input-labels.ts",
+    "components/core/Input/multi-select-overflow.test.ts",
+    "components/core/Input/multi-select-overflow.ts",
     "components/core/Input/native-range.ts",
     "components/core/Input/useInputCombobox.ts",
     "components/core/Input/useMultiSelect.test.tsx",
@@ -657,9 +660,11 @@
     "components/core/Modal/Modal.type-test.tsx",
     "components/core/Modal/OverlayDialog.test.tsx",
     "components/core/Modal/OverlayDialog.tsx",
+    "components/core/Modal/confirm-dialog-store.test.ts",
     "components/core/Modal/confirm-dialog-store.ts",
     "components/core/Modal/confirm-dialogs.on-demand.test.tsx",
     "components/core/Modal/confirm-dialogs.retry.test.tsx",
+    "components/core/Modal/confirm-dialogs.server.test.tsx",
     "components/core/Modal/confirm-dialogs.test.tsx",
     "components/core/Modal/confirm-dialogs.tsx",
     "components/core/Modal/index.ts",
@@ -841,6 +846,7 @@
     "components/core/file-selection.ts",
     "components/core/index.ts",
     "components/core/layer-contract.ts",
+    "components/core/on-demand-module.test.tsx",
     "components/core/on-demand-module.ts",
     "components/core/on-demand-overlays.ts",
     "components/core/overlay-contract.test.ts",
@@ -860,6 +866,7 @@
     "features/account/ConfirmRecoveryPageView.tsx",
     "features/account/RecoverAccountContent.test.tsx",
     "features/account/RecoverAccountContent.tsx",
+    "features/admin/AdminShell/AdminShell.navigation.test.tsx",
     "features/admin/AdminShell/AdminShell.test.tsx",
     "features/admin/AdminShell/AdminShell.tsx",
     "features/admin/AdminShell/AdminShellView.test.tsx",
@@ -874,6 +881,7 @@
     "features/admin/MapThemeEditor/MapThemeListView.tsx",
     "features/admin/MapThemeEditor/MapThemeVariantTabs.test.tsx",
     "features/admin/MapThemeEditor/MapThemeVariantTabs.tsx",
+    "features/admin/MapThemeEditor/ThemeEditorCanvas.color.test.ts",
     "features/admin/MapThemeEditor/ThemeEditorCanvas.stories.tsx",
     "features/admin/MapThemeEditor/ThemeEditorCanvas.test.tsx",
     "features/admin/MapThemeEditor/ThemeEditorCanvas.tsx",
@@ -1031,6 +1039,7 @@
     "features/admin/tag/TagsTableContent.tsx",
     "features/admin/tag/index.ts",
     "features/admin/taxonomy-description-clear.test.tsx",
+    "features/admin/taxonomy-edit-draft.ts",
     "features/admin/ui/AdminNavigation/AdminNavigationView.test.tsx",
     "features/admin/ui/AdminNavigation/AdminNavigationView.tsx",
     "features/admin/ui/AdminNavigation/index.ts",
@@ -1057,6 +1066,8 @@
     "features/admin/user/UsersPageView.tsx",
     "features/admin/user/UsersTableContent.tsx",
     "features/admin/user/UsersTableView.tsx",
+    "features/admin/user/admin-user-profile.test.ts",
+    "features/admin/user/admin-user-profile.ts",
     "features/admin/user/auth/UserBanStateSection.tsx",
     "features/admin/user/auth/UserDeliveryEmailSection.tsx",
     "features/admin/user/auth/UserSsoProvidersSection.tsx",
@@ -1163,6 +1174,7 @@
     "features/campaign/CampaignTargetControl.test.tsx",
     "features/campaign/CampaignTargetControl.tsx",
     "features/campaign/useCampaignDeliveryCommands.ts",
+    "features/campaign/useCampaignName.test.tsx",
     "features/campaign/useCampaignName.ts",
     "features/campaign/useCampaignPreview.test.tsx",
     "features/campaign/useCampaignPreview.ts",
@@ -1343,6 +1355,7 @@
     "features/editor/test-utils/editor-media-command-port.ts",
     "features/editor/test-utils/intersection-observer.ts",
     "features/editor/tiptap/ExecutableRuntime.stories.tsx",
+    "features/editor/tiptap/TiptapAuthoringControls.catalog.test.ts",
     "features/editor/tiptap/TiptapAuthoringControls.test.tsx",
     "features/editor/tiptap/TiptapAuthoringControls.tsx",
     "features/editor/tiptap/TiptapBlockContainerNodeView.test.tsx",
@@ -1350,6 +1363,7 @@
     "features/editor/tiptap/TiptapBlockMenu.tsx",
     "features/editor/tiptap/TiptapEditor-lifetime.test.tsx",
     "features/editor/tiptap/TiptapEditor.tsx",
+    "features/editor/tiptap/TiptapFileBlockNodeView.hydration.test.tsx",
     "features/editor/tiptap/TiptapFileBlockNodeView.test.tsx",
     "features/editor/tiptap/TiptapFileBlockNodeView.tsx",
     "features/editor/tiptap/TiptapPlayground.stories.tsx",
@@ -1363,8 +1377,10 @@
     "features/editor/tiptap/ai/index.ts",
     "features/editor/tiptap/ai/tiptap-ai.test.ts",
     "features/editor/tiptap/ai/tiptap-ai.ts",
+    "features/editor/tiptap/block-commands.node.test.ts",
     "features/editor/tiptap/block-commands.test.ts",
     "features/editor/tiptap/block-commands.ts",
+    "features/editor/tiptap/block-enter-commands.node.test.ts",
     "features/editor/tiptap/block-enter-commands.test.ts",
     "features/editor/tiptap/block-room-collaboration-integrity.test.ts",
     "features/editor/tiptap/block-room-external-video-codec.test.ts",
@@ -1377,8 +1393,11 @@
     "features/editor/tiptap/block-room-prosemirror-registry.ts",
     "features/editor/tiptap/block-room-text-positions.test.ts",
     "features/editor/tiptap/block-room-text-positions.ts",
+    "features/editor/tiptap/block-room-tiptap-codec.node.test.ts",
     "features/editor/tiptap/block-room-tiptap-codec.test.ts",
     "features/editor/tiptap/block-room-tiptap-codec.ts",
+    "features/editor/tiptap/block-room-tiptap-controller.fixtures.ts",
+    "features/editor/tiptap/block-room-tiptap-controller.projection.test.ts",
     "features/editor/tiptap/block-room-tiptap-controller.test.ts",
     "features/editor/tiptap/block-room-tiptap-controller.ts",
     "features/editor/tiptap/block-room-tiptap-diff.ts",
@@ -1407,12 +1426,14 @@
     "features/editor/tiptap/code-editor/source-editor-contrast.test.ts",
     "features/editor/tiptap/code-editor/source-editor-presentation.test.ts",
     "features/editor/tiptap/code-editor/source-editor-presentation.ts",
+    "features/editor/tiptap/code/CodeBlockNode.node.test.ts",
     "features/editor/tiptap/code/CodeBlockNode.test.ts",
     "features/editor/tiptap/code/CodeBlockNode.tsx",
     "features/editor/tiptap/code/CodeBlockSelectionMenu.test.tsx",
     "features/editor/tiptap/code/CodeBlockSelectionMenu.tsx",
     "features/editor/tiptap/code/CodeBlockSurface.test.tsx",
     "features/editor/tiptap/code/CodeBlockSurface.tsx",
+    "features/editor/tiptap/code/PrintCodeSource.styles.test.ts",
     "features/editor/tiptap/code/PrintCodeSource.test.tsx",
     "features/editor/tiptap/code/PrintCodeSource.tsx",
     "features/editor/tiptap/code/code-block-commands.test.ts",
@@ -1435,6 +1456,7 @@
     "features/editor/tiptap/emoji/useTiptapEmojiData.ts",
     "features/editor/tiptap/executable-source.test.ts",
     "features/editor/tiptap/executable-source.ts",
+    "features/editor/tiptap/external-video/ExternalVideoTiptapExtension.schema.test.ts",
     "features/editor/tiptap/external-video/ExternalVideoTiptapExtension.test.tsx",
     "features/editor/tiptap/external-video/ExternalVideoTiptapExtension.tsx",
     "features/editor/tiptap/external-video/index.ts",
@@ -1453,6 +1475,7 @@
     "features/editor/tiptap/integration/shader-menu.test.tsx",
     "features/editor/tiptap/integration/slash-workflows.test.ts",
     "features/editor/tiptap/integration/slash-workflows.ts",
+    "features/editor/tiptap/line-break-round-trip.node.test.ts",
     "features/editor/tiptap/line-break-round-trip.test.ts",
     "features/editor/tiptap/live-node-view.tsx",
     "features/editor/tiptap/live-translation-structure-lock.ts",
@@ -1460,11 +1483,14 @@
     "features/editor/tiptap/map/TiptapMapNodeView.test.tsx",
     "features/editor/tiptap/map/TiptapMapNodeView.tsx",
     "features/editor/tiptap/map/index.ts",
+    "features/editor/tiptap/markdown-paste.node.test.ts",
     "features/editor/tiptap/markdown-paste.test.ts",
     "features/editor/tiptap/markdown-paste.ts",
     "features/editor/tiptap/math/TiptapMathNodeViews.tsx",
     "features/editor/tiptap/math/index.ts",
+    "features/editor/tiptap/math/math-clipboard.test.ts",
     "features/editor/tiptap/math/math-clipboard.ts",
+    "features/editor/tiptap/math/math-input.test.ts",
     "features/editor/tiptap/math/math-input.ts",
     "features/editor/tiptap/math/math-render-runtime.test.tsx",
     "features/editor/tiptap/math/math-render-runtime.ts",
@@ -1476,6 +1502,7 @@
     "features/editor/tiptap/menus/SelectionBubbleMenu.tsx",
     "features/editor/tiptap/menus/executable/ExecutableSelectionMenu.test.tsx",
     "features/editor/tiptap/menus/executable/ExecutableSelectionMenu.tsx",
+    "features/editor/tiptap/menus/executable/ExecutableSelectionMenuRegistry.test.ts",
     "features/editor/tiptap/menus/executable/ExecutableSelectionMenuRegistry.tsx",
     "features/editor/tiptap/menus/executable/TiptapExecutableSelectionBubbleMenu.tsx",
     "features/editor/tiptap/menus/executable/index.ts",
@@ -1515,6 +1542,7 @@
     "features/editor/tiptap/p5/p5-node-attributes.ts",
     "features/editor/tiptap/p5/p5-node-options.ts",
     "features/editor/tiptap/p5/p5-preflight.worker.ts",
+    "features/editor/tiptap/p5/p5-preview-document.test.ts",
     "features/editor/tiptap/p5/p5-preview-document.ts",
     "features/editor/tiptap/p5/p5-preview-protocol.ts",
     "features/editor/tiptap/p5/p5-preview-runtime.test.ts",
@@ -1522,9 +1550,11 @@
     "features/editor/tiptap/p5/p5-runner-url.ts",
     "features/editor/tiptap/p5/p5-runtime-assets.ts",
     "features/editor/tiptap/p5/p5-sandbox-runner.ts",
+    "features/editor/tiptap/p5/p5-source.test.ts",
     "features/editor/tiptap/p5/p5-source.ts",
     "features/editor/tiptap/p5/useP5SelectionMenu.ts",
     "features/editor/tiptap/p5/useP5SketchSession.ts",
+    "features/editor/tiptap/pagination.node.test.ts",
     "features/editor/tiptap/pagination.test.ts",
     "features/editor/tiptap/pagination.ts",
     "features/editor/tiptap/profiles/CompactTiptapEditor.stories.tsx",
@@ -1552,12 +1582,14 @@
     "features/editor/tiptap/shader/index.ts",
     "features/editor/tiptap/shader/shader-editor-api.test.ts",
     "features/editor/tiptap/shader/shader-editor-api.ts",
+    "features/editor/tiptap/shader/shader-preview-protocol.test.ts",
     "features/editor/tiptap/shader/shader-preview-runtime.test.ts",
     "features/editor/tiptap/shader/shader-preview-runtime.ts",
     "features/editor/tiptap/shader/shader-preview-worker.test.ts",
     "features/editor/tiptap/shader/shader-preview.worker.ts",
     "features/editor/tiptap/shader/shader-program.test.ts",
     "features/editor/tiptap/shader/shader-program.ts",
+    "features/editor/tiptap/shader/shader-source.node.test.ts",
     "features/editor/tiptap/shader/shader-source.test.ts",
     "features/editor/tiptap/shader/shader-source.ts",
     "features/editor/tiptap/shader/shader-worker-protocol.test.ts",
@@ -1569,6 +1601,7 @@
     "features/editor/tiptap/site-variables/site-variable.story-fixtures.ts",
     "features/editor/tiptap/slash/catalog.test.ts",
     "features/editor/tiptap/slash/catalog.ts",
+    "features/editor/tiptap/slash/execute.node.test.ts",
     "features/editor/tiptap/slash/execute.test.ts",
     "features/editor/tiptap/slash/execute.ts",
     "features/editor/tiptap/slash/index.ts",
@@ -1583,19 +1616,24 @@
     "features/editor/tiptap/table/table-constants.ts",
     "features/editor/tiptap/table/table-extensions.tsx",
     "features/editor/tiptap/table/table-presentation.ts",
+    "features/editor/tiptap/three/ThreeSceneNode.commands.test.ts",
     "features/editor/tiptap/three/ThreeSceneNode.test.tsx",
     "features/editor/tiptap/three/ThreeSceneNode.tsx",
     "features/editor/tiptap/three/index.ts",
+    "features/editor/tiptap/three/three-preview-runtime.test.ts",
     "features/editor/tiptap/three/three-preview-runtime.ts",
     "features/editor/tiptap/three/three-preview-worker.test.ts",
     "features/editor/tiptap/three/three-preview.worker.ts",
+    "features/editor/tiptap/three/three-source.test.ts",
     "features/editor/tiptap/three/three-source.ts",
+    "features/editor/tiptap/three/three-transpile.test.ts",
     "features/editor/tiptap/three/three-transpile.ts",
     "features/editor/tiptap/three/three-transpile.worker.ts",
     "features/editor/tiptap/useExactTiptapNodeSelection.test.ts",
     "features/editor/tiptap/useExactTiptapNodeSelection.ts",
     "features/editor/tiptap/useSelectionBubbleMenuLabels.ts",
     "features/editor/tiptap/useTiptapEditorEditable.ts",
+    "features/editor/tiptap/wire-schema.node.test.ts",
     "features/editor/tiptap/wire-schema.test.ts",
     "features/editor/tiptap/wire-schema.ts",
     "features/editor/toolbars/BlockAlignButton.tsx",
@@ -1635,7 +1673,9 @@
     "features/file-manager/FileManager.tsx",
     "features/file-manager/FileManagerView.test.tsx",
     "features/file-manager/FileManagerView.tsx",
+    "features/file-manager/file-browser-presentation.test.ts",
     "features/file-manager/file-browser-presentation.ts",
+    "features/file-manager/file-browser-presentation.usage.test.ts",
     "features/file-manager/i18n.ts",
     "features/file-manager/index.ts",
     "features/file-manager/model.ts",
@@ -1697,6 +1737,7 @@
     "features/form/FormField/useFormField.ts",
     "features/form/FormField/utils.ts",
     "features/form/FormPasswordContent.tsx",
+    "features/form/FormRenderer.ssr.test.tsx",
     "features/form/FormRenderer.test.tsx",
     "features/form/FormRenderer.tsx",
     "features/form/FormSettingsContent.tsx",
@@ -1812,6 +1853,8 @@
     "features/media-download/FileDownloadPolicyEditor.tsx",
     "features/media-download/download-wire-values.test.ts",
     "features/media-download/download-wire-values.ts",
+    "features/media-download/file-download-policy-state.test.ts",
+    "features/media-download/file-download-policy-state.ts",
     "features/media-download/file-download-policy-write-coordinator.test.ts",
     "features/media-download/file-download-policy-write-coordinator.ts",
     "features/media/AudioMediaView.tsx",
@@ -1846,6 +1889,7 @@
     "features/media/runtime/videojs-player.ts",
     "features/media/runtime/videojs-source.ts",
     "features/media/standalone-external-video.generated.test.ts",
+    "features/media/standalone-external-video.test.ts",
     "features/media/standalone-external-video.ts",
     "features/media/ui/AttachmentMediaView.tsx",
     "features/media/ui/AttachmentSurface.stories.tsx",
@@ -1861,6 +1905,7 @@
     "features/media/ui/ThemedAssetImageView.stories.tsx",
     "features/media/ui/ThemedAssetImageView.tsx",
     "features/media/useAudioPlaybackController.ts",
+    "features/member/onboarding/NicknameOnboarding.test.tsx",
     "features/member/onboarding/NicknameOnboarding.tsx",
     "features/member/useNicknameValidation.test.tsx",
     "features/member/useNicknameValidation.ts",
@@ -1997,6 +2042,7 @@
     "features/page/PageEditor/SectionItem.test.tsx",
     "features/page/PageEditor/SectionItem.tsx",
     "features/page/PageEditor/SectionItemView.stories.tsx",
+    "features/page/PageEditor/SectionItemView.test.tsx",
     "features/page/PageEditor/SectionItemView.tsx",
     "features/page/PageEditor/SectionList.accessibility.test.tsx",
     "features/page/PageEditor/SectionList.test.tsx",
@@ -2062,6 +2108,7 @@
     "features/page/PageView/blocks/GeneratedRichTextBlockViewRuntime.tsx",
     "features/page/PageView/blocks/GeneratedRichTextViewUtils.ts",
     "features/page/PageView/blocks/PublicDocumentBlock.tsx",
+    "features/page/PageView/blocks/PublicExecutableBlockView.print.test.tsx",
     "features/page/PageView/blocks/PublicExecutableBlockView.test.tsx",
     "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
     "features/page/PageView/blocks/PublicHeadingOutline.test.tsx",
@@ -2331,6 +2378,9 @@
     "features/page/blocks/works-gallery/schema.test.ts",
     "features/page/blocks/works-gallery/schema.ts",
     "features/page/blocks/works-gallery/transform.ts",
+    "features/page/page-access-draft.test.ts",
+    "features/page/page-access-draft.ts",
+    "features/page/page-section-dedupe.test.ts",
     "features/page/page-section-dedupe.ts",
     "features/page/section-style.test.ts",
     "features/page/section-style.ts",
@@ -2450,6 +2500,7 @@
     "features/program-event/ProgramEventEditor/ProgramEventEditor.test.tsx",
     "features/program-event/ProgramEventEditor/ProgramEventEditor.tsx",
     "features/program-event/ProgramEventEditor/ProgramEventPosterUploader.tsx",
+    "features/program-event/ProgramEventEditor/program-event-actions.test.ts",
     "features/program-event/ProgramEventEditor/program-event-actions.ts",
     "features/program-event/ProgramEventEditor/program-event-date-time.ssr.test.tsx",
     "features/program-event/ProgramEventEditor/useProgramEventLifecycle.test.tsx",
@@ -2483,6 +2534,8 @@
     "features/release/ReleaseEditor/ReleaseTracksSection.tsx",
     "features/release/ReleaseEditor/TrackCreditsEditorSection.test.tsx",
     "features/release/ReleaseEditor/TrackCreditsEditorSection.tsx",
+    "features/release/ReleaseEditor/reorder-with-intent.test.ts",
+    "features/release/ReleaseEditor/reorder-with-intent.ts",
     "features/release/ReleaseEditor/track-credit-mutation.test.ts",
     "features/release/ReleaseEditor/track-credit-mutation.ts",
     "features/release/ReleaseEditor/track-processing-status.ts",
@@ -2490,9 +2543,11 @@
     "features/release/ReleaseEditor/track-runtime.ts",
     "features/release/ReleaseEditor/useTrackOrderSave.test.tsx",
     "features/release/ReleaseEditor/useTrackOrderSave.ts",
+    "features/release/TrackAudioUploader.markup.test.tsx",
     "features/release/TrackAudioUploader.resume.test.tsx",
     "features/release/TrackAudioUploader.test.tsx",
     "features/release/TrackAudioUploader.tsx",
+    "features/release/track-audio-upload-policy.test.ts",
     "features/release/track-audio-upload-policy.ts",
     "features/search/SearchCombobox.tsx",
     "features/series/SeriesDetail.test.tsx",
@@ -2606,6 +2661,8 @@
     "features/translation/admin/TranslationJobsPage.tsx",
     "features/translation/admin/TranslationOverviewPage.tsx",
     "features/translation/admin/TranslationSettingsPage.tsx",
+    "features/translation/admin/settings-form.test.ts",
+    "features/translation/admin/settings-form.ts",
     "features/translation/document-state.test.ts",
     "features/translation/document-state.ts",
     "features/translation/locale-display-fields.test.ts",
@@ -2620,6 +2677,7 @@
     "features/translation/menu-translation-model.ts",
     "features/translation/openTranslationDeleteConfirm.tsx",
     "features/translation/settings/TranslationProviderModal.tsx",
+    "features/translation/settings/provider-form.test.ts",
     "features/translation/settings/provider-form.ts",
     "features/translation/structured-locale-body.test.ts",
     "features/translation/structured-locale-body.ts",
@@ -2630,6 +2688,8 @@
     "features/translation/translation-errors.ts",
     "features/translation/translation-job-polling.test.ts",
     "features/translation/translation-job-polling.ts",
+    "features/translation/translation-save-barriers.test.ts",
+    "features/translation/translation-save-barriers.ts",
     "features/translation/useActiveEditLocale.test.ts",
     "features/translation/useActiveEditLocale.ts",
     "features/translation/useActiveTranslationJobsByLocale.test.tsx",
@@ -2644,6 +2704,7 @@
     "features/translation/useTranslationGenerationAvailability.ts",
     "features/translation/useTranslationLifecycleSubscription.test.tsx",
     "features/translation/useTranslationLifecycleSubscription.ts",
+    "features/translation/useTranslationLocaleCommands.test.tsx",
     "features/translation/useTranslationLocaleCommands.tsx",
     "features/translation/useTranslationPanelLabels.ts",
     "features/upload/ImageUploadCropController/ImageUploadCropController.stories.tsx",
@@ -2652,6 +2713,7 @@
     "features/upload/ImageUploadCropController/index.ts",
     "features/upload/ImageUploadCropController/useImageUploadCrop.test.tsx",
     "features/upload/ImageUploadCropController/useImageUploadCrop.ts",
+    "features/upload/useFeaturedImageCommands.test.tsx",
     "features/upload/useFeaturedImageCommands.ts",
     "features/upload/useImageAssetUpload.test.tsx",
     "features/upload/useImageAssetUpload.ts",
@@ -3000,10 +3062,14 @@
     "lib/editor/extensions/TranslationStructureLockExtension.test.ts",
     "lib/editor/extensions/TranslationStructureLockExtension.ts",
     "lib/editor/extensions/tiptap.ts",
+    "lib/editor/flush-editor-saves-or-notify.test.ts",
+    "lib/editor/flush-editor-saves-or-notify.ts",
     "lib/editor/leave-with-durable-edits.test.ts",
     "lib/editor/leave-with-durable-edits.ts",
     "lib/editor/merge-metadata-patches.test.ts",
     "lib/editor/merge-metadata-patches.ts",
+    "lib/editor/persist-editor-document-before-action.test.ts",
+    "lib/editor/persist-editor-document-before-action.ts",
     "lib/editor/require-action-success.ts",
     "lib/editor/save-failure.ts",
     "lib/editor/schema.test.ts",
@@ -3182,6 +3248,7 @@
     "lib/media/shared.ts",
     "lib/media/status.test.ts",
     "lib/media/status.ts",
+    "lib/media/use-editor-file-status-bootstrap.node.test.ts",
     "lib/media/use-editor-file-status-bootstrap.test.tsx",
     "lib/media/use-editor-file-status-bootstrap.ts",
     "lib/media/use-media-processing-runtime-state.test.tsx",
@@ -3208,6 +3275,7 @@
     "lib/policy-status.ts",
     "lib/providers/AppDesignSystemProvider.tsx",
     "lib/providers/AppNotificationRegion.tsx",
+    "lib/providers/ClientMessagesProvider.ssr.test.tsx",
     "lib/providers/ClientMessagesProvider.test.tsx",
     "lib/providers/ClientMessagesProvider.tsx",
     "lib/providers/DesignSystemProvider.test.tsx",
@@ -3351,6 +3419,7 @@
     "lib/three/three-cdn-module.generated.mjs",
     "lib/toc-items.test.ts",
     "lib/toc-items.ts",
+    "lib/translation/action-error.test.ts",
     "lib/translation/action-error.ts",
     "lib/translation/content-language.test.ts",
     "lib/translation/content-language.ts",
@@ -3386,6 +3455,7 @@
     "lib/types/common/json-parser.ts",
     "lib/types/common/metadata.ts",
     "lib/types/common/proto-filter.ts",
+    "lib/types/common/query.test.ts",
     "lib/types/common/query.ts",
     "lib/types/common/social-links-model.ts",
     "lib/types/common/social-links.test.ts",
@@ -3473,7 +3543,9 @@
     "lib/types/work/table-spec.ts",
     "lib/upload/client-media-transport.test.ts",
     "lib/upload/client-media-transport.ts",
+    "lib/upload/direct-upload-runner.test.ts",
     "lib/upload/direct-upload-runner.ts",
+    "lib/upload/direct-upload.test-fixture.ts",
     "lib/upload/failure.test.ts",
     "lib/upload/failure.ts",
     "lib/upload/file-upload-contract.ts",
@@ -3492,6 +3564,7 @@
     "lib/upload/resume-suppression.ts",
     "lib/upload/transport-policy.test.ts",
     "lib/upload/transport-policy.ts",
+    "lib/upload/upload-completion-policy.test.ts",
     "lib/upload/upload-completion-policy.ts",
     "lib/upload/upload-errors.ts",
     "lib/upload/upload-inactivity.ts",
@@ -3628,6 +3701,7 @@
     "stories/foundations/Typography.stories.tsx",
     "stories/pages/Account.stories.tsx",
     "stories/pages/AccountAccessibility.ts",
+    "stories/pages/AccountLifecycle.markup.test.tsx",
     "stories/pages/AccountLifecycle.stories.tsx",
     "stories/pages/AccountLifecycle.test.tsx",
     "stories/pages/AdminCollections.stories.tsx",
@@ -3652,7 +3726,6 @@
     "stories/pages/EventSeries.stories.tsx",
     "stories/pages/FileManager.stories.tsx",
     "stories/pages/FormEditorPage.stories.tsx",
-    "stories/pages/FormEditorPage.test.tsx",
     "stories/pages/FormOperations.stories.tsx",
     "stories/pages/FormOperations.test.tsx",
     "stories/pages/Forms.stories.tsx",
@@ -3678,11 +3751,11 @@
     "stories/pages/OperationsAccessibility.test.tsx",
     "stories/pages/PageCompletion.test.tsx",
     "stories/pages/PageEditorPage.stories.tsx",
-    "stories/pages/PageExpansions.test.tsx",
     "stories/pages/PostEditorPage.stories.tsx",
     "stories/pages/PostTaxonomy.stories.tsx",
     "stories/pages/ProgramEventEditorsPage.stories.tsx",
     "stories/pages/ProgramEventLists.stories.tsx",
+    "stories/pages/PublicCatalogEntities.accessibility.test.tsx",
     "stories/pages/PublicCatalogEntities.stories.tsx",
     "stories/pages/PublicCatalogEntities.test.tsx",
     "stories/pages/PublicDocuments.stories.tsx",
@@ -15043,6 +15116,7 @@
       "catalogAdapters": [],
       "tests": [
         "components/core/Modal/confirm-dialogs.on-demand.test.tsx",
+        "components/core/Modal/confirm-dialogs.server.test.tsx",
         "components/core/Modal/confirm-dialogs.test.tsx"
       ],
       "stories": ["components/core/Modal/ConfirmModal.stories.tsx", "stories/features/EditorAccessEnded.stories.tsx"],
@@ -15287,7 +15361,16 @@
       "typeAliasEvidence": [],
       "productionConsumers": [],
       "catalogAdapters": [],
-      "tests": ["components/core/Notification/Notification.test.tsx", "features/form/SubmissionDeleteButton.test.tsx"],
+      "tests": [
+        "components/core/Notification/Notification.test.tsx",
+        "features/form/SubmissionDeleteButton.test.tsx",
+        "features/release/ReleaseEditor/ReleaseArtistsSection.test.tsx",
+        "features/release/ReleaseEditor/ReleaseCreditsSection.test.tsx",
+        "features/release/ReleaseEditor/ReleaseTracksSection.test.tsx",
+        "features/release/ReleaseEditor/TrackCreditsEditorSection.test.tsx",
+        "features/release/TrackAudioUploader.test.tsx",
+        "features/upload/useFeaturedImageCommands.test.tsx"
+      ],
       "stories": [],
       "composedJsx": ["IconButton", "IconX", "Text", "Toast", "ToastContent", "ToastRegion", "span"]
     },
@@ -19936,7 +20019,7 @@
       "typeAliasEvidence": [],
       "productionConsumers": ["app/(general)/account/deletion/cancel/page.tsx"],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["stories/pages/AccountLifecycle.markup.test.tsx"],
       "stories": ["stories/pages/AccountLifecycle.stories.tsx"],
       "composedJsx": [
         "Alert",
@@ -19964,7 +20047,7 @@
       "typeAliasEvidence": [],
       "productionConsumers": ["app/(general)/account/deletion/confirm/page.tsx"],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["stories/pages/AccountLifecycle.markup.test.tsx"],
       "stories": ["stories/pages/AccountLifecycle.stories.tsx"],
       "composedJsx": [
         "Alert",
@@ -19992,7 +20075,7 @@
       "typeAliasEvidence": [],
       "productionConsumers": ["app/(general)/account/recovery/confirm/page.tsx"],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["stories/pages/AccountLifecycle.markup.test.tsx"],
       "stories": ["stories/pages/AccountLifecycle.stories.tsx"],
       "composedJsx": [
         "Alert",
@@ -20108,7 +20191,11 @@
       "typeAliasEvidence": [],
       "productionConsumers": ["app/admin/layout.tsx"],
       "catalogAdapters": [],
-      "tests": ["features/admin/AdminShell/AdminShell.test.tsx", "features/admin/AdminShell/AdminShellView.test.tsx"],
+      "tests": [
+        "features/admin/AdminShell/AdminShell.navigation.test.tsx",
+        "features/admin/AdminShell/AdminShell.test.tsx",
+        "features/admin/AdminShell/AdminShellView.test.tsx"
+      ],
       "stories": [],
       "composedJsx": ["AdminShellView", "SiteLogo"]
     },
@@ -20558,7 +20645,10 @@
       ],
       "productionConsumers": ["features/admin/MapThemeEditor/ThemeEditorPage.tsx"],
       "catalogAdapters": [],
-      "tests": ["features/admin/MapThemeEditor/ThemeEditorCanvas.test.tsx"],
+      "tests": [
+        "features/admin/MapThemeEditor/ThemeEditorCanvas.color.test.ts",
+        "features/admin/MapThemeEditor/ThemeEditorCanvas.test.tsx"
+      ],
       "stories": ["features/admin/MapThemeEditor/ThemeEditorCanvas.stories.tsx"],
       "composedJsx": [
         "DsLayoutInline",
@@ -21508,7 +21598,7 @@
         "features/admin/category/CreateCategoryButton.tsx"
       ],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["features/admin/taxonomy-description-clear.test.tsx"],
       "stories": [],
       "composedJsx": []
     },
@@ -21656,7 +21746,7 @@
       "typeAliasEvidence": [],
       "productionConsumers": ["app/admin/clients/[id]/page.tsx"],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["app/admin/clients/[id]/page.test.tsx"],
       "stories": ["stories/pages/ClientEditor.stories.tsx"],
       "composedJsx": [
         "Button",
@@ -23466,7 +23556,7 @@
         "features/admin/genre/GenresPageView.tsx"
       ],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["features/admin/taxonomy-description-clear.test.tsx"],
       "stories": [],
       "composedJsx": []
     },
@@ -24021,7 +24111,7 @@
       "typeAliasEvidence": [],
       "productionConsumers": ["app/admin/settings/mail/page.tsx"],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["stories/pages/PageCompletion.test.tsx"],
       "stories": ["stories/pages/MailAdapters.stories.tsx"],
       "composedJsx": [
         "Button",
@@ -24261,7 +24351,7 @@
         "features/admin/post/PostsPageView.tsx"
       ],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["features/admin/post/PostRowMenu.test.tsx"],
       "stories": [],
       "composedJsx": []
     },
@@ -25461,7 +25551,7 @@
         "features/admin/segment/SegmentsPageView.tsx"
       ],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["features/admin/segment/SegmentModals.test.tsx"],
       "stories": [],
       "composedJsx": ["SegmentModalContext.Provider"]
     },
@@ -26317,7 +26407,7 @@
         "features/admin/style/StylesPageView.tsx"
       ],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["features/admin/taxonomy-description-clear.test.tsx"],
       "stories": [],
       "composedJsx": []
     },
@@ -27472,42 +27562,6 @@
       "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
       "propsEvidence": [
         {
-          "name": "AdminUserProfileSnapshot",
-          "extends": [],
-          "properties": [
-            {
-              "name": "nickname",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "bio",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "role",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "tagIds",
-              "optional": false,
-              "type": "string[]"
-            },
-            {
-              "name": "website",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "socialLinks",
-              "optional": false,
-              "type": "SocialLinks"
-            }
-          ]
-        },
-        {
           "name": "AdminUserEditPageBindings",
           "extends": [],
           "properties": [
@@ -27567,7 +27621,7 @@
       "typeAliasEvidence": [],
       "productionConsumers": ["app/admin/users/[id]/page.tsx"],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["app/admin/users/[id]/page.test.tsx"],
       "stories": ["stories/pages/AdminUserEdit.stories.tsx"],
       "composedJsx": [
         "Alert",
@@ -36050,7 +36104,10 @@
         "features/editor/tiptap/profiles/EmailTiptapEditor.tsx"
       ],
       "catalogAdapters": ["stories/shared/EditorMenusPreview.tsx"],
-      "tests": ["features/editor/tiptap/TiptapAuthoringControls.test.tsx"],
+      "tests": [
+        "features/editor/tiptap/TiptapAuthoringControls.catalog.test.ts",
+        "features/editor/tiptap/TiptapAuthoringControls.test.tsx"
+      ],
       "stories": [],
       "composedJsx": [
         "Action",
@@ -37467,6 +37524,7 @@
       "tests": [
         "features/editor/external-video-insert.test.ts",
         "features/editor/tiptap/block-room-external-video-codec.test.ts",
+        "features/editor/tiptap/external-video/ExternalVideoTiptapExtension.schema.test.ts",
         "features/editor/tiptap/external-video/ExternalVideoTiptapExtension.test.tsx"
       ],
       "stories": [],
@@ -38057,7 +38115,7 @@
       "catalogAdapters": [],
       "tests": [
         "features/editor/tiptap/integration/shader-menu.test.tsx",
-        "features/editor/tiptap/menus/executable/ExecutableSelectionMenu.test.tsx"
+        "features/editor/tiptap/menus/executable/ExecutableSelectionMenuRegistry.test.ts"
       ],
       "stories": [],
       "composedJsx": ["ExecutableSelectionMenuRegistryContext.Provider"]
@@ -39639,7 +39697,8 @@
         "features/editor/tiptap/integration/shader-menu.test.tsx",
         "features/editor/tiptap/integration/slash-workflows.test.ts",
         "features/editor/tiptap/shader/ShaderNode.test.tsx",
-        "features/editor/tiptap/wire-schema.test.ts"
+        "features/editor/tiptap/shader/shader-source.node.test.ts",
+        "features/editor/tiptap/wire-schema.node.test.ts"
       ],
       "stories": [],
       "composedJsx": [
@@ -40023,8 +40082,9 @@
       "tests": [
         "features/editor/tiptap/block-commands.test.ts",
         "features/editor/tiptap/executable-source.test.ts",
+        "features/editor/tiptap/three/ThreeSceneNode.commands.test.ts",
         "features/editor/tiptap/three/ThreeSceneNode.test.tsx",
-        "features/editor/tiptap/wire-schema.test.ts"
+        "features/editor/tiptap/wire-schema.node.test.ts"
       ],
       "stories": [],
       "composedJsx": [
@@ -44543,7 +44603,7 @@
         "features/page/blocks/form/ViewClient.tsx"
       ],
       "catalogAdapters": [],
-      "tests": ["features/form/FormRenderer.test.tsx"],
+      "tests": ["features/form/FormRenderer.ssr.test.tsx", "features/form/FormRenderer.test.tsx"],
       "stories": [],
       "composedJsx": ["Code", "ContentModal", "DsLayoutStack", "FormStep", "Progress", "SupportingText"]
     },
@@ -44850,7 +44910,7 @@
         "features/form/FormEditRoute.tsx"
       ],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["stories/pages/FormOperations.test.tsx"],
       "stories": ["stories/pages/FormOperations.stories.tsx"],
       "composedJsx": [
         "DsHeading",
@@ -47383,12 +47443,7 @@
           ]
         }
       ],
-      "typeAliasEvidence": [
-        {
-          "name": "AccessScopeValue",
-          "type": "(typeof ACCESS_SCOPE_VALUES)[keyof typeof ACCESS_SCOPE_VALUES]"
-        }
-      ],
+      "typeAliasEvidence": [],
       "productionConsumers": [
         "features/editor/components/MediaDownloadPolicyPanel.tsx",
         "features/media-download/ConnectedFileDownloadPolicyEditor.tsx"
@@ -48796,7 +48851,7 @@
       ],
       "productionConsumers": ["app/(general)/onboarding/nickname/NicknameOnboardingPage.tsx"],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["features/member/onboarding/NicknameOnboarding.test.tsx"],
       "stories": ["stories/pages/Onboarding.stories.tsx"],
       "composedJsx": [
         "Button",
@@ -53476,7 +53531,7 @@
       "typeAliasEvidence": [],
       "productionConsumers": ["features/page/PageEditor/SectionList.tsx"],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["features/page/PageEditor/SectionItem.test.tsx"],
       "stories": [],
       "composedJsx": ["SectionContent", "SectionItemView"]
     },
@@ -53555,7 +53610,7 @@
         "features/page/PageEditor/editors/ColumnsEditor.tsx"
       ],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["features/page/PageEditor/SectionItemView.test.tsx"],
       "stories": ["features/page/PageEditor/SectionItemView.stories.tsx"],
       "composedJsx": [
         "CanvasPreview",
@@ -54774,7 +54829,10 @@
         "features/page/PageView/blocks/GeneratedExecutableBlockView.tsx"
       ],
       "catalogAdapters": [],
-      "tests": ["features/page/PageView/blocks/PublicExecutableBlockView.test.tsx"],
+      "tests": [
+        "features/page/PageView/blocks/PublicExecutableBlockView.print.test.tsx",
+        "features/page/PageView/blocks/PublicExecutableBlockView.test.tsx"
+      ],
       "stories": [],
       "composedJsx": [
         "Alert",
@@ -67329,7 +67387,11 @@
       ],
       "productionConsumers": ["features/release/ReleaseEditor/ReleaseTracksSection.tsx"],
       "catalogAdapters": [],
-      "tests": ["features/release/TrackAudioUploader.resume.test.tsx", "features/release/TrackAudioUploader.test.tsx"],
+      "tests": [
+        "features/release/TrackAudioUploader.markup.test.tsx",
+        "features/release/TrackAudioUploader.resume.test.tsx",
+        "features/release/TrackAudioUploader.test.tsx"
+      ],
       "stories": [],
       "composedJsx": [
         "DsLayoutInline",
@@ -71432,50 +71494,8 @@
         }
       ],
       "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [
-        {
-          "name": "FormState",
-          "extends": [],
-          "properties": [
-            {
-              "name": "defaultLocale",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "protectedTerms",
-              "optional": false,
-              "type": "string[]"
-            }
-          ]
-        },
-        {
-          "name": "SettingsUpdateMutation",
-          "extends": [],
-          "properties": [
-            {
-              "name": "form",
-              "optional": false,
-              "type": "FormState"
-            },
-            {
-              "name": "baseline",
-              "optional": false,
-              "type": "FormState"
-            },
-            {
-              "name": "paths",
-              "optional": false,
-              "type": "SettingsUpdatePath[]"
-            }
-          ]
-        }
-      ],
+      "propsEvidence": [],
       "typeAliasEvidence": [
-        {
-          "name": "SettingsUpdatePath",
-          "type": "'default_locale' | 'protected_terms'"
-        },
         {
           "name": "TranslationSettingsPageClient",
           "type": "Pick< ReturnType<typeof createTranslationClient>, | 'getTranslationSettings' | 'listTranslationLocales' | 'listTranslationProviders' | 'updateTranslationSettings' | 'createTranslationProvider' | 'updateTranslationProvide"
@@ -74852,6 +74872,7 @@
         "features/admin/tag/TagsPageView.tsx",
         "features/admin/tag/TagsTableContent.tsx",
         "features/admin/tag/index.ts",
+        "features/admin/taxonomy-edit-draft.ts",
         "features/admin/ui/AdminNavigation/AdminNavigationView.tsx",
         "features/admin/ui/AdminNavigation/index.ts",
         "features/admin/ui/AdminPageHeader/AdminPageHeader.tsx",
@@ -74874,6 +74895,7 @@
         "features/admin/user/UsersPageView.tsx",
         "features/admin/user/UsersTableContent.tsx",
         "features/admin/user/UsersTableView.tsx",
+        "features/admin/user/admin-user-profile.ts",
         "features/admin/user/auth/UserBanStateSection.tsx",
         "features/admin/user/auth/UserDeliveryEmailSection.tsx",
         "features/admin/user/auth/UserSsoProvidersSection.tsx",
@@ -75038,11 +75060,13 @@
         "features/admin/ui/AdminPageHeader/AdminPageHeader.stories.tsx"
       ],
       "tests": [
+        "features/admin/AdminShell/AdminShell.navigation.test.tsx",
         "features/admin/AdminShell/AdminShell.test.tsx",
         "features/admin/AdminShell/AdminShellView.test.tsx",
         "features/admin/IconViewModeControl.test.tsx",
         "features/admin/MapThemeEditor/MapThemeEditorInterruptionDialogs.test.tsx",
         "features/admin/MapThemeEditor/MapThemeVariantTabs.test.tsx",
+        "features/admin/MapThemeEditor/ThemeEditorCanvas.color.test.ts",
         "features/admin/MapThemeEditor/ThemeEditorCanvas.test.tsx",
         "features/admin/MapThemeEditor/useMapThemeEditorInterruption.test.tsx",
         "features/admin/artist/ArtistDeleteDialogView.test.tsx",
@@ -75061,7 +75085,8 @@
         "features/admin/taxonomy-description-clear.test.tsx",
         "features/admin/ui/AdminNavigation/AdminNavigationView.test.tsx",
         "features/admin/ui/AdminPageHeader/AdminPageHeader.test.tsx",
-        "features/admin/user/UserAuthAdminSections.test.tsx"
+        "features/admin/user/UserAuthAdminSections.test.tsx",
+        "features/admin/user/admin-user-profile.test.ts"
       ],
       "directlyImportingRoutes": [
         "/admin/artists",
@@ -75298,6 +75323,7 @@
         "features/campaign/CampaignEditPage.delivery.test.tsx",
         "features/campaign/CampaignEditor/CampaignEditor.test.tsx",
         "features/campaign/CampaignTargetControl.test.tsx",
+        "features/campaign/useCampaignName.test.tsx",
         "features/campaign/useCampaignPreview.test.tsx"
       ],
       "directlyImportingRoutes": ["/campaigns/[id]/analytics", "/campaigns/[id]", "/admin/campaigns/[id]/analytics"]
@@ -75590,6 +75616,7 @@
         "features/editor/tiptap/block-room-prosemirror-registry.ts",
         "features/editor/tiptap/block-room-text-positions.ts",
         "features/editor/tiptap/block-room-tiptap-codec.ts",
+        "features/editor/tiptap/block-room-tiptap-controller.fixtures.ts",
         "features/editor/tiptap/block-room-tiptap-controller.ts",
         "features/editor/tiptap/block-room-tiptap-diff.ts",
         "features/editor/tiptap/block-room-tiptap-mutation-writer.ts",
@@ -75872,21 +75899,27 @@
         "features/editor/lib/editor-media-runtime-store.test.ts",
         "features/editor/lib/media-block-updates.test.ts",
         "features/editor/lib/media-file-insert.test.ts",
+        "features/editor/tiptap/TiptapAuthoringControls.catalog.test.ts",
         "features/editor/tiptap/TiptapAuthoringControls.test.tsx",
         "features/editor/tiptap/TiptapBlockContainerNodeView.test.tsx",
         "features/editor/tiptap/TiptapEditor-lifetime.test.tsx",
+        "features/editor/tiptap/TiptapFileBlockNodeView.hydration.test.tsx",
         "features/editor/tiptap/TiptapFileBlockNodeView.test.tsx",
         "features/editor/tiptap/TiptapSnapshot.test.tsx",
         "features/editor/tiptap/ai/TiptapAIAssistant.test.tsx",
         "features/editor/tiptap/ai/tiptap-ai.test.ts",
+        "features/editor/tiptap/block-commands.node.test.ts",
         "features/editor/tiptap/block-commands.test.ts",
+        "features/editor/tiptap/block-enter-commands.node.test.ts",
         "features/editor/tiptap/block-enter-commands.test.ts",
         "features/editor/tiptap/block-room-collaboration-integrity.test.ts",
         "features/editor/tiptap/block-room-external-video-codec.test.ts",
         "features/editor/tiptap/block-room-presence.test.ts",
         "features/editor/tiptap/block-room-prosemirror-bridge.test.ts",
         "features/editor/tiptap/block-room-text-positions.test.ts",
+        "features/editor/tiptap/block-room-tiptap-codec.node.test.ts",
         "features/editor/tiptap/block-room-tiptap-codec.test.ts",
+        "features/editor/tiptap/block-room-tiptap-controller.projection.test.ts",
         "features/editor/tiptap/block-room-tiptap-controller.test.ts",
         "features/editor/tiptap/block-room-tiptap-mutation-writer.test.ts",
         "features/editor/tiptap/block-room-tiptap-structure-plan.test.ts",
@@ -75897,9 +75930,11 @@
         "features/editor/tiptap/code-editor/source-editor-boundary.test.ts",
         "features/editor/tiptap/code-editor/source-editor-contrast.test.ts",
         "features/editor/tiptap/code-editor/source-editor-presentation.test.ts",
+        "features/editor/tiptap/code/CodeBlockNode.node.test.ts",
         "features/editor/tiptap/code/CodeBlockNode.test.ts",
         "features/editor/tiptap/code/CodeBlockSelectionMenu.test.tsx",
         "features/editor/tiptap/code/CodeBlockSurface.test.tsx",
+        "features/editor/tiptap/code/PrintCodeSource.styles.test.ts",
         "features/editor/tiptap/code/PrintCodeSource.test.tsx",
         "features/editor/tiptap/code/code-block-commands.test.ts",
         "features/editor/tiptap/code/print-code-highlighter.test.ts",
@@ -75907,6 +75942,7 @@
         "features/editor/tiptap/emoji/TiptapEmojiPicker.test.ts",
         "features/editor/tiptap/emoji/emoji-extension.test.ts",
         "features/editor/tiptap/executable-source.test.ts",
+        "features/editor/tiptap/external-video/ExternalVideoTiptapExtension.schema.test.ts",
         "features/editor/tiptap/external-video/ExternalVideoTiptapExtension.test.tsx",
         "features/editor/tiptap/integration/authoring-shortcuts.test.ts",
         "features/editor/tiptap/integration/block-boundary-navigation.test.ts",
@@ -75915,13 +75951,18 @@
         "features/editor/tiptap/integration/empty-paragraph-range-selection.test.ts",
         "features/editor/tiptap/integration/shader-menu.test.tsx",
         "features/editor/tiptap/integration/slash-workflows.test.ts",
+        "features/editor/tiptap/line-break-round-trip.node.test.ts",
         "features/editor/tiptap/line-break-round-trip.test.ts",
         "features/editor/tiptap/map/TiptapMapNodeView.test.tsx",
+        "features/editor/tiptap/markdown-paste.node.test.ts",
         "features/editor/tiptap/markdown-paste.test.ts",
+        "features/editor/tiptap/math/math-clipboard.test.ts",
+        "features/editor/tiptap/math/math-input.test.ts",
         "features/editor/tiptap/math/math-render-runtime.test.tsx",
         "features/editor/tiptap/math/math-runtime.test.tsx",
         "features/editor/tiptap/menus/SelectionBubbleMenu.test.tsx",
         "features/editor/tiptap/menus/executable/ExecutableSelectionMenu.test.tsx",
+        "features/editor/tiptap/menus/executable/ExecutableSelectionMenuRegistry.test.ts",
         "features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu.test.tsx",
         "features/editor/tiptap/menus/map-external/MapSelectionMenu.test.tsx",
         "features/editor/tiptap/menus/map-external/MapSelectionMenuRegistry.test.ts",
@@ -75933,7 +75974,10 @@
         "features/editor/tiptap/mermaid/mermaid-extension.test.ts",
         "features/editor/tiptap/p5/P5SketchNode.test.tsx",
         "features/editor/tiptap/p5/p5-capabilities.test.ts",
+        "features/editor/tiptap/p5/p5-preview-document.test.ts",
         "features/editor/tiptap/p5/p5-preview-runtime.test.ts",
+        "features/editor/tiptap/p5/p5-source.test.ts",
+        "features/editor/tiptap/pagination.node.test.ts",
         "features/editor/tiptap/pagination.test.ts",
         "features/editor/tiptap/profiles/CompactTiptapEditor.test.ts",
         "features/editor/tiptap/profiles/ControlledTiptapEditor.test.tsx",
@@ -75945,19 +75989,27 @@
         "features/editor/tiptap/public-block-comparison-fixtures.test.ts",
         "features/editor/tiptap/shader/ShaderNode.test.tsx",
         "features/editor/tiptap/shader/shader-editor-api.test.ts",
+        "features/editor/tiptap/shader/shader-preview-protocol.test.ts",
         "features/editor/tiptap/shader/shader-preview-runtime.test.ts",
         "features/editor/tiptap/shader/shader-preview-worker.test.ts",
         "features/editor/tiptap/shader/shader-program.test.ts",
+        "features/editor/tiptap/shader/shader-source.node.test.ts",
         "features/editor/tiptap/shader/shader-source.test.ts",
         "features/editor/tiptap/shader/shader-worker-protocol.test.ts",
         "features/editor/tiptap/site-variables/SiteVariable.test.tsx",
         "features/editor/tiptap/slash/catalog.test.ts",
+        "features/editor/tiptap/slash/execute.node.test.ts",
         "features/editor/tiptap/slash/execute.test.ts",
         "features/editor/tiptap/slash/navigation.test.ts",
         "features/editor/tiptap/table/table-commands.test.ts",
+        "features/editor/tiptap/three/ThreeSceneNode.commands.test.ts",
         "features/editor/tiptap/three/ThreeSceneNode.test.tsx",
+        "features/editor/tiptap/three/three-preview-runtime.test.ts",
         "features/editor/tiptap/three/three-preview-worker.test.ts",
+        "features/editor/tiptap/three/three-source.test.ts",
+        "features/editor/tiptap/three/three-transpile.test.ts",
         "features/editor/tiptap/useExactTiptapNodeSelection.test.ts",
+        "features/editor/tiptap/wire-schema.node.test.ts",
         "features/editor/tiptap/wire-schema.test.ts",
         "features/editor/toolbars/EditorColorStyleButton.test.tsx",
         "features/editor/toolbars/EditorToolbarTooltip.test.tsx",
@@ -76043,6 +76095,8 @@
       "tests": [
         "features/file-manager/FileManager.test.tsx",
         "features/file-manager/FileManagerView.test.tsx",
+        "features/file-manager/file-browser-presentation.test.ts",
+        "features/file-manager/file-browser-presentation.usage.test.ts",
         "features/file-manager/useFileBrowserViewSettings.test.tsx"
       ],
       "directlyImportingRoutes": ["/admin/files"]
@@ -76160,6 +76214,7 @@
         "features/form/FormEditor/FormEditor.test.tsx",
         "features/form/FormField/accessibility.test.tsx",
         "features/form/FormField/error-rendering.test.tsx",
+        "features/form/FormRenderer.ssr.test.tsx",
         "features/form/FormRenderer.test.tsx",
         "features/form/FormTranslationContext.test.tsx",
         "features/form/PublicFormView.test.tsx",
@@ -76385,6 +76440,7 @@
         "features/media/runtime/videojs-loader.test.ts",
         "features/media/runtime/videojs-player.test.ts",
         "features/media/standalone-external-video.generated.test.ts",
+        "features/media/standalone-external-video.test.ts",
         "features/media/ui/MediaPlayerStatusOverlay.test.tsx"
       ],
       "directlyImportingRoutes": []
@@ -76397,6 +76453,7 @@
         "features/media-download/ConnectedFileDownloadPolicyEditor.tsx",
         "features/media-download/FileDownloadPolicyEditor.tsx",
         "features/media-download/download-wire-values.ts",
+        "features/media-download/file-download-policy-state.ts",
         "features/media-download/file-download-policy-write-coordinator.ts"
       ],
       "components": [
@@ -76409,6 +76466,7 @@
         "features/media-download/AuthorizedDownloadAction.test.tsx",
         "features/media-download/FileDownloadPolicyEditor.test.tsx",
         "features/media-download/download-wire-values.test.ts",
+        "features/media-download/file-download-policy-state.test.ts",
         "features/media-download/file-download-policy-write-coordinator.test.ts"
       ],
       "directlyImportingRoutes": []
@@ -76419,7 +76477,10 @@
       "sourceFiles": ["features/member/onboarding/NicknameOnboarding.tsx", "features/member/useNicknameValidation.ts"],
       "components": ["features/member/onboarding/NicknameOnboarding.tsx"],
       "stories": [],
-      "tests": ["features/member/useNicknameValidation.test.tsx"],
+      "tests": [
+        "features/member/onboarding/NicknameOnboarding.test.tsx",
+        "features/member/useNicknameValidation.test.tsx"
+      ],
       "directlyImportingRoutes": []
     },
     {
@@ -76904,6 +76965,7 @@
         "features/page/blocks/works-gallery/ViewServer.tsx",
         "features/page/blocks/works-gallery/schema.ts",
         "features/page/blocks/works-gallery/transform.ts",
+        "features/page/page-access-draft.ts",
         "features/page/page-section-dedupe.ts",
         "features/page/section-style.ts"
       ],
@@ -77094,6 +77156,7 @@
         "features/page/PageEditor/PageFeaturedImageUploader.test.tsx",
         "features/page/PageEditor/SectionContent.test.tsx",
         "features/page/PageEditor/SectionItem.test.tsx",
+        "features/page/PageEditor/SectionItemView.test.tsx",
         "features/page/PageEditor/SectionList.accessibility.test.tsx",
         "features/page/PageEditor/SectionList.test.tsx",
         "features/page/PageEditor/block-room-page-sections.test.ts",
@@ -77114,6 +77177,7 @@
         "features/page/PageView/blocks/GeneratedRichTextBlockView.boundaries.test.tsx",
         "features/page/PageView/blocks/GeneratedRichTextBlockView.ssr.test.tsx",
         "features/page/PageView/blocks/GeneratedRichTextBlockView.test.tsx",
+        "features/page/PageView/blocks/PublicExecutableBlockView.print.test.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.test.tsx",
         "features/page/PageView/blocks/PublicHeadingOutline.test.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.test.tsx",
@@ -77186,6 +77250,8 @@
         "features/page/blocks/work-map/schema.test.ts",
         "features/page/blocks/work-table/schema.test.ts",
         "features/page/blocks/works-gallery/schema.test.ts",
+        "features/page/page-access-draft.test.ts",
+        "features/page/page-section-dedupe.test.ts",
         "features/page/section-style.test.ts"
       ],
       "directlyImportingRoutes": ["/[...slug]", "/", "/series/[idOrSlug]", "/s/[token]"]
@@ -77433,6 +77499,7 @@
       "stories": ["features/program-event/ProgramEventSeriesPublicView.stories.tsx"],
       "tests": [
         "features/program-event/ProgramEventEditor/ProgramEventEditor.test.tsx",
+        "features/program-event/ProgramEventEditor/program-event-actions.test.ts",
         "features/program-event/ProgramEventEditor/program-event-date-time.ssr.test.tsx",
         "features/program-event/ProgramEventEditor/useProgramEventLifecycle.test.tsx",
         "features/program-event/ProgramEventEditor/useProgramEventNeutralConfiguration.test.tsx",
@@ -77460,6 +77527,7 @@
         "features/release/ReleaseEditor/ReleaseTrackCreateView.tsx",
         "features/release/ReleaseEditor/ReleaseTracksSection.tsx",
         "features/release/ReleaseEditor/TrackCreditsEditorSection.tsx",
+        "features/release/ReleaseEditor/reorder-with-intent.ts",
         "features/release/ReleaseEditor/track-credit-mutation.ts",
         "features/release/ReleaseEditor/track-processing-status.ts",
         "features/release/ReleaseEditor/track-runtime.ts",
@@ -77493,11 +77561,14 @@
         "features/release/ReleaseEditor/ReleaseEditor.configuration.test.tsx",
         "features/release/ReleaseEditor/ReleaseTracksSection.test.tsx",
         "features/release/ReleaseEditor/TrackCreditsEditorSection.test.tsx",
+        "features/release/ReleaseEditor/reorder-with-intent.test.ts",
         "features/release/ReleaseEditor/track-credit-mutation.test.ts",
         "features/release/ReleaseEditor/track-runtime.test.ts",
         "features/release/ReleaseEditor/useTrackOrderSave.test.tsx",
+        "features/release/TrackAudioUploader.markup.test.tsx",
         "features/release/TrackAudioUploader.resume.test.tsx",
-        "features/release/TrackAudioUploader.test.tsx"
+        "features/release/TrackAudioUploader.test.tsx",
+        "features/release/track-audio-upload-policy.test.ts"
       ],
       "directlyImportingRoutes": ["/releases/[idOrSlug]"]
     },
@@ -77720,6 +77791,7 @@
         "features/translation/admin/TranslationJobsPage.tsx",
         "features/translation/admin/TranslationOverviewPage.tsx",
         "features/translation/admin/TranslationSettingsPage.tsx",
+        "features/translation/admin/settings-form.ts",
         "features/translation/document-state.ts",
         "features/translation/locale-display-fields.ts",
         "features/translation/locale-document-mode.ts",
@@ -77734,6 +77806,7 @@
         "features/translation/translation-entry-status.ts",
         "features/translation/translation-errors.ts",
         "features/translation/translation-job-polling.ts",
+        "features/translation/translation-save-barriers.ts",
         "features/translation/useActiveEditLocale.ts",
         "features/translation/useActiveTranslationJobsByLocale.ts",
         "features/translation/useEntityTranslationData.ts",
@@ -77773,6 +77846,7 @@
         "features/translation/LocalizedCollaborativeRichTextEditor.runtime.test.tsx",
         "features/translation/LocalizedCollaborativeRichTextEditor.test.tsx",
         "features/translation/TranslationLocaleControl.test.tsx",
+        "features/translation/admin/settings-form.test.ts",
         "features/translation/document-state.test.ts",
         "features/translation/locale-display-fields.test.ts",
         "features/translation/locale-document-mode.test.ts",
@@ -77780,15 +77854,18 @@
         "features/translation/locale-domain-editor-contract.runtime.test.ts",
         "features/translation/locale-option-format.test.tsx",
         "features/translation/menu-translation-model.test.ts",
+        "features/translation/settings/provider-form.test.ts",
         "features/translation/structured-locale-body.test.ts",
         "features/translation/tiptap-localized-structure.test.ts",
         "features/translation/translation-job-polling.test.ts",
+        "features/translation/translation-save-barriers.test.ts",
         "features/translation/useActiveEditLocale.test.ts",
         "features/translation/useActiveTranslationJobsByLocale.test.tsx",
         "features/translation/useLocaleDocumentSession.test.ts",
         "features/translation/useSourceDocumentCollaboration.test.tsx",
         "features/translation/useTranslationActionFocus.test.tsx",
-        "features/translation/useTranslationLifecycleSubscription.test.tsx"
+        "features/translation/useTranslationLifecycleSubscription.test.tsx",
+        "features/translation/useTranslationLocaleCommands.test.tsx"
       ],
       "directlyImportingRoutes": ["/series/[idOrSlug]"]
     },
@@ -77807,6 +77884,7 @@
       "tests": [
         "features/upload/ImageUploadCropController/ImageUploadCropController.test.tsx",
         "features/upload/ImageUploadCropController/useImageUploadCrop.test.tsx",
+        "features/upload/useFeaturedImageCommands.test.tsx",
         "features/upload/useImageAssetUpload.test.tsx"
       ],
       "directlyImportingRoutes": []
@@ -91578,6 +91656,10 @@
           "symbols": ["listArtistsAdminAction"]
         },
         {
+          "file": "lib/types/common/query.ts",
+          "symbols": ["toPaginatedListInput"]
+        },
+        {
           "file": "lib/utils/table-url.ts",
           "symbols": ["parseTableQuery"]
         }
@@ -91623,6 +91705,10 @@
           "symbols": ["listSegmentsAdminAction"]
         },
         {
+          "file": "lib/types/common/query.ts",
+          "symbols": ["toPaginatedListInput"]
+        },
+        {
           "file": "lib/utils/table-url.ts",
           "symbols": ["parseTableQuery"]
         }
@@ -91631,7 +91717,7 @@
       "composedJsx": ["SegmentsPageView"],
       "controllerEvidence": [
         "getTranslations",
-        "listSegmentsAdminAction({\n    page: query.page,\n    pageSize: query.pageSize,\n    search: query.search,\n    sort: query.sorts?.map((s) => ({ field: s.field, order: s.direction })),\n    filter: query.filters,\n    filterBy: query.filterBy,\n    includeArchived: params.get('includeArchived') === 'true',\n  }).then",
+        "listSegmentsAdminAction({\n    ...toPaginatedListInput(query),\n    includeArchived: params.get('includeArchived') === 'true',\n  }).then",
         "params.get"
       ],
       "inheritedLayouts": ["app/admin/layout.tsx", "app/layout.tsx"],
@@ -91849,6 +91935,10 @@
         {
           "file": "lib/queries/client.ts",
           "symbols": ["listClientsAdmin"]
+        },
+        {
+          "file": "lib/types/common/query.ts",
+          "symbols": ["toPaginatedListInput"]
         },
         {
           "file": "lib/utils/table-url.ts",
@@ -92762,6 +92852,10 @@
           "symbols": ["listPagesAdmin"]
         },
         {
+          "file": "lib/types/common/query.ts",
+          "symbols": ["toPaginatedListInput"]
+        },
+        {
           "file": "lib/utils/table-url.ts",
           "symbols": ["parseTableQuery"]
         }
@@ -92801,6 +92895,10 @@
         {
           "file": "lib/queries/post.ts",
           "symbols": ["listPostsAdmin"]
+        },
+        {
+          "file": "lib/types/common/query.ts",
+          "symbols": ["toPaginatedListInput"]
         },
         {
           "file": "lib/utils/table-url.ts",
@@ -92921,6 +93019,10 @@
         {
           "file": "lib/queries/release.ts",
           "symbols": ["listReleasesAdmin"]
+        },
+        {
+          "file": "lib/types/common/query.ts",
+          "symbols": ["toPaginatedListInput"]
         },
         {
           "file": "lib/utils/table-url.ts",
@@ -93411,6 +93513,10 @@
         {
           "file": "lib/actions/user-tag.ts",
           "symbols": ["listUserTagsAdminAction"]
+        },
+        {
+          "file": "lib/types/common/query.ts",
+          "symbols": ["toPaginatedListInput"]
         },
         {
           "file": "lib/utils/table-url.ts",

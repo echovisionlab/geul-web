@@ -1,8 +1,5 @@
-// @vitest-environment jsdom
-
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Category, Tag } from '@/lib/collab/post-meta';
 import { CategorySelector } from './CategorySelector';
 import { TagSelector } from './TagSelector';
@@ -65,20 +62,9 @@ vi.mock('@/lib/actions/tag', () => ({
   listTagsAction: vi.fn(),
 }));
 
-let container: HTMLDivElement;
-let root: Root;
-
 beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
   mocks.latestProps = null;
   vi.clearAllMocks();
-});
-
-afterEach(() => {
-  act(() => root.unmount());
-  container.remove();
 });
 
 describe('Post taxonomy selector sync boundary', () => {
@@ -103,15 +89,13 @@ describe('Post taxonomy selector sync boundary', () => {
       { id: 'tag-2', name: 'Next tag', slug: 'next-tag' },
     ],
   ])('does not write %s relations before shared sync', (_kind, renderSelector, setter, item) => {
-    act(() => root.render(renderSelector()));
+    renderToStaticMarkup(renderSelector());
 
     expect(mocks.latestProps?.canEdit).toBe(false);
     expect(mocks.latestProps?.canCreateNew).toBe(false);
-    act(() => {
-      mocks.latestProps?.onSelect(item);
-      mocks.latestProps?.onDeselect(item);
-      mocks.latestProps?.onCreate('New');
-    });
+    mocks.latestProps?.onSelect(item);
+    mocks.latestProps?.onDeselect(item);
+    mocks.latestProps?.onCreate('New');
 
     expect(setter).not.toHaveBeenCalled();
     expect(mocks.mutate).not.toHaveBeenCalled();

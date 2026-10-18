@@ -17,6 +17,23 @@ export interface CurrentPageRowSelectionResult<T> extends DataTableRowSelectionS
   someOnPageSelected: boolean;
 }
 
+/**
+ * Selects or clears every selectable row on the current page. Keys from other pages and of rows that cannot
+ * be selected stay as they are.
+ */
+export function nextPageSelection(
+  selectedRowKeys: readonly string[],
+  selectablePageRowKeys: readonly string[],
+  checked: boolean,
+): string[] {
+  const next = new Set(selectedRowKeys);
+  selectablePageRowKeys.forEach((key) => next.delete(key));
+  if (checked) {
+    selectablePageRowKeys.forEach((key) => next.add(key));
+  }
+  return Array.from(next);
+}
+
 export function useCurrentPageRowSelection<T>(
   rows: T[] | undefined,
   getRowKey: (row: T) => string,

@@ -1,148 +1,111 @@
 // @vitest-environment jsdom
 
-import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
+import { describe, expect, it, vi } from 'vitest';
+import { render, screen } from '@/test/render';
 import { EmbedSettingsForm } from './SettingsForm';
 import type { EmbedProps } from './schema';
 
-vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-let container: HTMLDivElement;
-let root: Root;
-const shared = vi.fn();
-const localized = vi.fn();
-function render(props: Partial<EmbedProps>, allowSharedEdits = true) {
-  act(() =>
-    root.render(
-      <DesignSystemProvider forceColorScheme="light">
-        <EmbedSettingsForm
-          props={props}
-          allowSharedEdits={allowSharedEdits}
-          updateSharedProps={shared}
-          updateLocalizedProps={localized}
-        />
-      </DesignSystemProvider>,
-    ),
+vi.mock('next-intl', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('next-intl')>()),
+  useTranslations: () => (key: string) => key,
+}));
+
+function setup(props: Partial<EmbedProps>, allowSharedEdits = true) {
+  const shared = vi.fn();
+  const localized = vi.fn();
+  const element = (value: Partial<EmbedProps>) => (
+    <EmbedSettingsForm
+      props={value}
+      allowSharedEdits={allowSharedEdits}
+      updateSharedProps={shared}
+      updateLocalizedProps={localized}
+    />
   );
+  const view = render(element(props));
+  return { ...view, shared, localized, refresh: (value: Partial<EmbedProps>) => view.rerender(element(value)) };
 }
-function input(label: string) {
-  const element = Array.from(container.querySelectorAll('label')).find((item) => item.textContent?.startsWith(label))!;
-  return (
-    element.htmlFor ? document.getElementById(element.htmlFor) : element.querySelector('input')
-  ) as HTMLInputElement;
-}
-function type(element: HTMLInputElement, value: string) {
-  act(() => {
-    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(element, value);
-    element.dispatchEvent(new Event('input', { bubbles: true }));
-  });
-}
-function blur(element: HTMLInputElement) {
-  act(() => element.dispatchEvent(new FocusEvent('focusout', { bubbles: true })));
-}
-beforeEach(() => {
-  vi.stubGlobal(
-    'ResizeObserver',
-    class {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
-    },
-  );
-  shared.mockClear();
-  localized.mockClear();
-  container = document.createElement('div');
-  document.body.append(container);
-  root = createRoot(container);
-});
-afterEach(() => {
-  act(() => root.unmount());
-  container.remove();
-});
+const input = (label: string) => screen.getByLabelText(label, { exact: true });
+
+const permissions = [
+  ['allowScripts', 'scriptsLabel', 'scriptsDescription'],
+  ['allowSameOrigin', 'storageLabel', 'storageDescription'],
+  ['allowForms', 'formsLabel', 'formsDescription'],
+  ['allowDownloads', 'downloadsLabel', 'downloadsDescription'],
+  ['allowPopups', 'popupsLabel', 'popupsDescription'],
+  ['allowMicrophone', 'microphoneLabel', 'microphoneDescription'],
+  ['allowSpeakerSelection', 'speakerSelectionLabel', 'speakerSelectionDescription'],
+  ['allowFullscreen', 'fullscreenLabel', 'fullscreenDescription'],
+] as const;
 
 describe('Embed settings persistence boundaries', () => {
-  it('shows module execution information instead of iframe height and permissions, preserving translator title edits', () => {
-    render({ uri: 'https://tools-new.dsub.io/embed/index.js' }, false);
-    expect(container.textContent).toContain('toolDescription');
-    expect(container.textContent).not.toContain('heightModeLabel');
-    expect(container.querySelectorAll('input[type="checkbox"]')).toHaveLength(0);
-    expect(input('urlLabel').disabled).toBe(true);
-    type(input('titleLabel'), 'Localized tool');
-    expect(localized).toHaveBeenCalledWith({ title: 'Localized tool' });
-    expect(shared).not.toHaveBeenCalled();
-    render({ uri: 'https://external.example/page' });
-    expect(container.textContent).toContain('heightModeLabel');
-    expect(container.querySelectorAll('input[type="checkbox"]')).toHaveLength(8);
+  it('shows module execution information instead of iframe height and permissions', () => {
+    const { refresh } = setup({ uri: 'https://tools-new.dsub.io/embed/index.js' }, false);
+    expect(screen.getByText('toolDescription')).toBeInTheDocument();
+    expect(screen.queryByRole('combobox', { name: 'heightModeLabel' })).toBeNull();
+    expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
+    expect(input('urlLabel')).toBeDisabled();
+    refresh({ uri: 'https://external.example/page' });
+    expect(screen.getByRole('combobox', { name: 'heightModeLabel' })).toBeInTheDocument();
+    expect(screen.getAllByRole('checkbox')).toHaveLength(8);
   });
-  it('gives every permission a named checkbox and complete accessible description, with pointer activation', () => {
-    render({});
-    const permissions = [
-      ['allowScripts', 'scriptsLabel', 'scriptsDescription'],
-      ['allowSameOrigin', 'storageLabel', 'storageDescription'],
-      ['allowForms', 'formsLabel', 'formsDescription'],
-      ['allowDownloads', 'downloadsLabel', 'downloadsDescription'],
-      ['allowPopups', 'popupsLabel', 'popupsDescription'],
-      ['allowMicrophone', 'microphoneLabel', 'microphoneDescription'],
-      ['allowSpeakerSelection', 'speakerSelectionLabel', 'speakerSelectionDescription'],
-      ['allowFullscreen', 'fullscreenLabel', 'fullscreenDescription'],
-    ] as const;
-    expect(container.querySelectorAll('input[type="checkbox"]')).toHaveLength(8);
-    expect(container.querySelector('[role="switch"]')).toBeNull();
+
+  it('names each permission and routes its checkbox to the corresponding persisted flag', async () => {
+    const { user, shared } = setup({});
+    expect(screen.getAllByRole('checkbox')).toHaveLength(8);
+    expect(screen.queryByRole('switch')).toBeNull();
     for (const [key, label, description] of permissions) {
-      const checkbox = input(label);
-      expect(checkbox).toHaveRole('checkbox');
-      expect(checkbox).toHaveAccessibleName(label);
+      const checkbox = screen.getByRole('checkbox', { name: label });
       expect(checkbox).toHaveAccessibleDescription(description);
-      const wasChecked = checkbox.checked;
-      const labelElement = checkbox.labels![0];
-      act(() => {
-        labelElement.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0, detail: 1 }));
-        labelElement.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, button: 0, detail: 1 }));
-        labelElement.dispatchEvent(new MouseEvent('click', { bubbles: true, button: 0, detail: 1 }));
-      });
+      const wasChecked = (checkbox as HTMLInputElement).checked;
+      await user.click(checkbox);
       expect(shared).toHaveBeenLastCalledWith({ [key]: wasChecked ? 'false' : 'true' });
     }
   });
 
-  it('keeps incomplete URL draft local and commits only valid HTTPS on blur', () => {
-    render({ uri: 'https://embed.example' });
-    type(input('urlLabel'), 'https://');
-    blur(input('urlLabel'));
+  it('keeps incomplete URL draft local and commits only valid HTTPS on blur', async () => {
+    const { user, shared, refresh } = setup({ uri: 'https://embed.example' });
+    await user.clear(input('urlLabel'));
+    await user.type(input('urlLabel'), 'https://');
+    await user.tab();
     expect(shared).not.toHaveBeenCalled();
-    expect(input('urlLabel').value).toBe('https://');
-    type(input('urlLabel'), 'https://new.example/tool');
+    expect(input('urlLabel')).toHaveValue('https://');
+    await user.clear(input('urlLabel'));
+    await user.type(input('urlLabel'), 'https://new.example/tool');
     expect(shared).not.toHaveBeenCalled();
-    blur(input('urlLabel'));
+    await user.tab();
     expect(shared).toHaveBeenCalledWith({ uri: 'https://new.example/tool' });
-    render({ uri: 'https://remote.example' });
-    expect(input('urlLabel').value).toBe('https://remote.example');
+    refresh({ uri: 'https://remote.example' });
+    expect(input('urlLabel')).toHaveValue('https://remote.example');
   });
-  it('does not persist transient empty or out-of-range height', () => {
-    render({ height: '480' });
+
+  it('does not persist transient empty or out-of-range height', async () => {
+    const { user, shared } = setup({ height: '480' });
     for (const value of ['', 'NaN', '10', '99999']) {
-      type(input('heightLabel'), value);
-      blur(input('heightLabel'));
-      expect(input('heightLabel').value).toBe('480');
+      await user.clear(input('heightLabel'));
+      if (value) {
+        await user.type(input('heightLabel'), value);
+      }
+      await user.tab();
+      expect(input('heightLabel')).toHaveValue('480');
     }
     expect(shared).not.toHaveBeenCalled();
-    type(input('heightLabel'), '720');
-    blur(input('heightLabel'));
+    await user.clear(input('heightLabel'));
+    await user.type(input('heightLabel'), '720');
+    await user.tab();
     expect(shared).toHaveBeenCalledWith({ height: '720' });
   });
-  it('disables every shared control for translators while allowing localized title edits', () => {
-    render({ uri: 'https://embed.example' }, false);
-    expect(input('urlLabel').disabled).toBe(true);
-    expect(input('heightLabel').disabled).toBe(true);
-    expect(input('heightModeLabel').disabled).toBe(true);
-    for (const control of container.querySelectorAll('input[type="checkbox"]')) {
-      expect((control as HTMLInputElement).disabled).toBe(true);
-      act(() => (control as HTMLInputElement).labels![0].click());
+
+  it('disables every shared control for translators while allowing localized title edits', async () => {
+    const { user, shared, localized } = setup({ uri: 'https://embed.example' }, false);
+    expect(input('urlLabel')).toBeDisabled();
+    expect(input('heightLabel')).toBeDisabled();
+    expect(screen.getByRole('combobox', { name: 'heightModeLabel' })).toBeDisabled();
+    for (const control of screen.getAllByRole('checkbox')) {
+      expect(control).toBeDisabled();
     }
-    type(input('titleLabel'), 'Translated tool');
-    expect(localized).toHaveBeenCalledWith({ title: 'Translated tool' });
+    await user.click(input('titleLabel'));
+    await user.paste('Translated tool');
+    expect(localized).toHaveBeenLastCalledWith({ title: 'Translated tool' });
     expect(shared).not.toHaveBeenCalled();
   });
 });

@@ -54,6 +54,7 @@ describe('authoritative editor configuration', () => {
     state.edit({ slug: 'second', enabled: false });
     first.acknowledge({ slug: 'first-canonical', enabled: true, revision: 'r2' }, { full: true });
     expect(state.getConfiguration()).toEqual({ slug: 'second', enabled: false, revision: 'r2' });
+    expect(state.getCanonical()).toEqual({ slug: 'first-canonical', enabled: true, revision: 'r2' });
   });
 
   it('does not clear newer intent when an older queued value starts later', () => {
@@ -77,6 +78,24 @@ describe('authoritative editor configuration', () => {
     older.acknowledge({ target: 'older' });
     expect(state.getConfiguration().target).toBe('newer');
     expect(patches.at(-1)).toEqual({ target: 'newer' });
+  });
+
+  it('keeps the newer value when non-authoritative key-only writes settle in reverse order with a read after each', () => {
+    const patches: unknown[] = [];
+    const state = new AuthoritativeConfiguration(
+      `email_template:${crypto.randomUUID()}`,
+      { layoutId: 'original' as string | null },
+      (patch) => patches.push(patch),
+    );
+    const first = state.beginWrite(['layoutId']);
+    const second = state.beginWrite(['layoutId']);
+    second.acknowledge({ layoutId: 'second' }, { authoritative: false });
+    state.adoptRead(state.beginRead(), { layoutId: 'second' });
+    first.acknowledge({ layoutId: 'first' }, { authoritative: false });
+    state.adoptRead(state.beginRead(), { layoutId: 'second' });
+    expect(state.getConfiguration().layoutId).toBe('second');
+    expect(state.hasPending()).toBe(false);
+    expect(patches).not.toContainEqual({ layoutId: 'first' });
   });
 
   it('holds nonoptimistic key-only values during an in-flight authoritative read', () => {

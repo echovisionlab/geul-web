@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
 
 import { listReleasesAdmin } from '@/lib/queries/release';
+import { toPaginatedListInput } from '@/lib/types/common/query';
 import { parseTableQuery } from '@/lib/utils/table-url';
 
 interface PageProps {
@@ -58,14 +59,7 @@ export default async function AdminReleasesPage({ searchParams }: PageProps) {
     { field: 'status', label: tCommon('labels.status') },
   ];
 
-  const result = await listReleasesAdmin({
-    page: query.page,
-    pageSize: query.pageSize,
-    search: query.search,
-    sort: query.sorts?.map((s) => ({ field: s.field, order: s.direction })),
-    filter: query.filters,
-    filterBy: query.filterBy,
-  });
+  const result = await listReleasesAdmin(toPaginatedListInput(query));
 
   return (
     <ReleasesPageView

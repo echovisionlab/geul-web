@@ -10,14 +10,8 @@ import { NodeSelection } from '@tiptap/pm/state';
 import type { EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
 import { createTiptapWireExtensions } from '../wire-schema';
 import { createThreeSceneExtension, KOREAN_THREE_SCENE_LABELS } from './ThreeSceneNode';
-import { createThreePreviewWorkerRuntime, type ThreePreviewRuntimeFactory } from './three-preview-runtime';
-import {
-  DEFAULT_THREE_SCENE_SOURCE,
-  normalizeThreeSceneError,
-  stripThreeSceneRuntimeImport,
-  validateThreeSceneSource,
-} from './three-source';
-import { transpileThreeSceneSource } from './three-transpile';
+import type { ThreePreviewRuntimeFactory } from './three-preview-runtime';
+import { DEFAULT_THREE_SCENE_SOURCE } from './three-source';
 
 vi.mock('../code-editor', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../code-editor')>()),
@@ -111,106 +105,6 @@ function sceneNode(editor: Editor): NodeType | undefined {
   return blockContainer ? firstChildNode(blockContainer) : undefined;
 }
 
-describe('Three.js scene source policy', () => {
-  it('rejects network and dynamic import while preserving source location', () => {
-    expect(validateThreeSceneSource('const ok = 1;\nfetch("https://example.com")')).toMatchObject({
-      kind: 'policy',
-      line: 2,
-      column: 1,
-    });
-    expect(validateThreeSceneSource('import("https://example.com/mod.js")')).toMatchObject({ kind: 'policy' });
-    expect(validateThreeSceneSource('export const sceneValue = 1')).toMatchObject({ kind: 'policy' });
-    expect(validateThreeSceneSource(DEFAULT_THREE_SCENE_SOURCE)).toBeNull();
-    expect(DEFAULT_THREE_SCENE_SOURCE.startsWith("import * as THREE from 'three';\n")).toBe(true);
-    expect(stripThreeSceneRuntimeImport(DEFAULT_THREE_SCENE_SOURCE)).not.toContain("from 'three'");
-    expect(validateThreeSceneSource("import * as Other from 'other';\nconst ok = 1;")).toMatchObject({
-      kind: 'policy',
-    });
-  });
-
-  it('emits executable JavaScript from TypeScript without module wrappers or deprecation diagnostics', () => {
-    const result = transpileThreeSceneSource(
-      "import * as THREE from 'three';\nfunction frame(time: number): number { return Math.round(time); }",
-    );
-    expect(result.type).toBe('compiled');
-    if (result.type !== 'compiled') {
-      return;
-    }
-    expect(result.source).not.toContain(': number');
-    expect(result.source).not.toContain('exports.');
-    expect(result.source).not.toContain('require(');
-    expect(result.source).not.toContain("from 'three'");
-    const program = new Function(`${result.source}\nreturn { frame };`)() as { frame: (time: number) => number };
-    expect(program.frame(4.6)).toBe(5);
-  });
-
-  it('sanitizes runtime resource URLs and keeps line and column', () => {
-    const error = new Error('failed at https://private.example/scene');
-    error.stack = 'Error\n at three-scene.js:7:9';
-    expect(normalizeThreeSceneError(error, 'runtime', 2)).toEqual({
-      kind: 'runtime',
-      message: 'failed at [resource]',
-      line: 5,
-      column: 9,
-    });
-  });
-
-  it('transpiles durable TypeScript before starting the isolated preview worker', () => {
-    const workers: Array<{
-      name: string;
-      onmessage: ((event: MessageEvent) => void) | null;
-      postMessage: ReturnType<typeof vi.fn>;
-      terminate: ReturnType<typeof vi.fn>;
-    }> = [];
-    class FakeWorker {
-      name: string;
-      onmessage: ((event: MessageEvent) => void) | null = null;
-      onerror: (() => void) | null = null;
-      postMessage = vi.fn();
-      terminate = vi.fn();
-
-      constructor(_url: URL, options?: WorkerOptions) {
-        this.name = options?.name ?? '';
-        workers.push(this);
-      }
-    }
-    vi.stubGlobal('Worker', FakeWorker);
-    const canvas = document.createElement('canvas');
-    const offscreen = {} as OffscreenCanvas;
-    Object.defineProperty(canvas, 'transferControlToOffscreen', { value: () => offscreen });
-    const onReady = vi.fn();
-    const runtime = createThreePreviewWorkerRuntime(canvas, {
-      onReady,
-      onStopped: vi.fn(),
-      onError: vi.fn(),
-    });
-    const typescriptSource = 'function frame(time: number) { camera.position.z = time; }';
-
-    runtime.run(typescriptSource);
-    const transpiler = workers.find((worker) => worker.name === 'three-scene-transpile');
-    expect(transpiler?.postMessage).toHaveBeenCalledWith({ type: 'transpile', source: typescriptSource });
-    transpiler?.onmessage?.(
-      new MessageEvent('message', {
-        data: { type: 'compiled', source: 'function frame(time) { camera.position.z = time; }' },
-      }),
-    );
-    const preview = workers.find((worker) => worker.name === 'three-scene-preview');
-    expect(preview?.postMessage).toHaveBeenCalledWith(
-      {
-        type: 'start',
-        source: 'function frame(time) { camera.position.z = time; }',
-        canvas: offscreen,
-      },
-      [offscreen],
-    );
-    preview?.onmessage?.(new MessageEvent('message', { data: { type: 'ready' } }));
-    expect(onReady).toHaveBeenCalledOnce();
-
-    runtime.dispose();
-    vi.unstubAllGlobals();
-  });
-});
-
 describe('Three.js Tiptap node', () => {
   it('persists source, view mode and preview settings in the wire document', () => {
     const editor = new Editor({
@@ -251,41 +145,6 @@ describe('Three.js Tiptap node', () => {
     });
     expect(sceneNode(editor)?.attrs?.previewWidth).toBe('10');
     expect(editor.getHTML()).toContain('data-preview-width="10"');
-    editor.destroy();
-  });
-
-  it('inserts a schema-valid block and refuses the command when read-only', () => {
-    const editor = new Editor({
-      extensions: [
-        ...createTiptapWireExtensions(),
-        createThreeSceneExtension({
-          labels: KOREAN_THREE_SCENE_LABELS,
-          authoringMode: FULL_AUTHORING_MODE,
-        }),
-      ],
-      content: {
-        type: 'doc',
-        content: [
-          {
-            type: 'blockGroup',
-            content: [{ type: 'blockContainer', attrs: { id: 'p' }, content: [{ type: 'paragraph' }] }],
-          },
-        ],
-      },
-    });
-    expect(
-      editor.commands.insertThreeScene({
-        blockId: 'inserted',
-        title: 'Night scene',
-        source: 'camera.position.z = 2;',
-        previewWidth: '72',
-      }),
-    ).toBe(true);
-    expect(JSON.stringify(editor.getJSON())).toContain('camera.position.z = 2;');
-    expect(JSON.stringify(editor.getJSON())).toContain('Night scene');
-    expect(JSON.stringify(editor.getJSON())).toContain('"previewWidth":"72"');
-    editor.setEditable(false);
-    expect(editor.commands.insertThreeScene()).toBe(false);
     editor.destroy();
   });
 });

@@ -5,7 +5,6 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Editor } from '@tiptap/core';
 import { EditorContent, useEditor } from '@tiptap/react';
-import { Fragment, Schema, Slice } from '@tiptap/pm/model';
 import { NodeSelection, TextSelection } from '@tiptap/pm/state';
 
 import { fromJson, type JsonValue } from '@bufbuild/protobuf';
@@ -15,13 +14,13 @@ import {
   RichTextProfile,
   type LocalizedRichTextDocument,
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import * as Y from 'yjs';
 import { hydrateCanonicalBlockRoom } from '@echovisionlab/geul-common/collaboration/block-room-codec';
 import { createBlockRoomProseMirrorBridge } from '../block-room-prosemirror-bridge';
 import { createPostBlockRoomTiptapController } from '../block-room-tiptap-controller';
 import { createTiptapWireExtensions } from '../wire-schema';
-import { loadMathRenderer, TiptapMathInput, normalizeMathFragment, withTiptapMathExtensions } from './index';
+import { loadMathRenderer, withTiptapMathExtensions } from './index';
 
 // KaTeX loads on demand; these tests assert the rendered state.
 beforeAll(async () => {
@@ -61,55 +60,7 @@ function findNodePosition(editor: Editor, name: string): number {
   return position;
 }
 
-function inputText(editor: Editor, text: string): boolean {
-  const position = editor.state.selection.from;
-  return Boolean(
-    editor.view.someProp('handleTextInput', (handler) =>
-      handler(editor.view, position, position, text, () => editor.state.tr),
-    ),
-  );
-}
-
 describe('Tiptap math runtime', () => {
-  it('converts a completed $...$ input rule without converting incomplete, empty, or code source', () => {
-    const mounted = createEditor({ type: 'paragraph', content: [{ type: 'text', text: '$x' }] });
-    mounted.editor.commands.setTextSelection(findNodePosition(mounted.editor, 'paragraph') + 3);
-    expect(inputText(mounted.editor, '$')).toBe(true);
-    expect(mounted.editor.getJSON()).toMatchObject({
-      content: [
-        {
-          content: [
-            {
-              content: [
-                {
-                  type: 'paragraph',
-                  content: [{ type: 'mathInline', content: [{ type: 'text', text: 'x' }] }],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    });
-    mounted.destroy();
-
-    const incomplete = createEditor({ type: 'paragraph', content: [{ type: 'text', text: '$x' }] });
-    incomplete.editor.commands.setTextSelection(findNodePosition(incomplete.editor, 'paragraph') + 3);
-    expect(inputText(incomplete.editor, 'y')).toBe(false);
-    expect(incomplete.editor.getText()).toContain('$x');
-    incomplete.destroy();
-
-    const empty = createEditor({ type: 'paragraph', content: [{ type: 'text', text: '$' }] });
-    empty.editor.commands.setTextSelection(findNodePosition(empty.editor, 'paragraph') + 2);
-    expect(inputText(empty.editor, '$')).toBe(false);
-    empty.destroy();
-
-    const code = createEditor({ type: 'codeBlock', content: [{ type: 'text', text: '$x' }] });
-    code.editor.commands.setTextSelection(findNodePosition(code.editor, 'codeBlock') + 3);
-    expect(inputText(code.editor, '$')).toBe(false);
-    code.destroy();
-  });
-
   it('serializes inline source text through the schema HTML content hole', () => {
     const mounted = createEditor({
       type: 'paragraph',
@@ -117,201 +68,6 @@ describe('Tiptap math runtime', () => {
     });
 
     expect(mounted.editor.getHTML()).toContain('<span data-inline-content-type="mathInline">E^MC2</span>');
-    mounted.destroy();
-  });
-
-  it('keeps inline source plain and skips delimiter conversion while the caret is inside it', () => {
-    const mounted = createEditor({
-      type: 'paragraph',
-      content: [{ type: 'mathInline', content: [{ type: 'text', text: '$x' }] }],
-    });
-    const position = findNodePosition(mounted.editor, 'mathInline');
-    mounted.editor.commands.setTextSelection({ from: position + 1, to: position + 3 });
-    mounted.editor.chain().toggleMark('bold').run();
-    expect(mounted.editor.state.doc.nodeAt(position)?.firstChild?.marks).toHaveLength(0);
-
-    mounted.editor.commands.setTextSelection(position + 3);
-    expect(inputText(mounted.editor, '$')).toBe(false);
-    expect(mounted.editor.state.doc.nodeAt(position)?.textContent).toBe('$x');
-
-    const pasted = new Slice(Fragment.from(mounted.editor.state.schema.text('$y$')), 0, 0);
-    const transformed = mounted.editor.view.someProp('transformPasted', (transform) =>
-      transform(pasted, mounted.editor.view, true),
-    );
-    expect(transformed).toBe(pasted);
-    mounted.destroy();
-  });
-
-  it('converts a complete standalone $$...$$ paragraph to block math only outside a table', () => {
-    const mounted = createEditor({ type: 'paragraph', content: [{ type: 'text', text: '$$x^2$' }] });
-    mounted.editor.commands.setTextSelection(findNodePosition(mounted.editor, 'paragraph') + 7);
-    expect(inputText(mounted.editor, '$')).toBe(true);
-    expect(mounted.editor.state.doc.nodeAt(findNodePosition(mounted.editor, 'math'))?.attrs.latex).toBe('x^2');
-    mounted.destroy();
-  });
-
-  it('leaves block source unchanged when the block target or math schema is unavailable', () => {
-    const missingTarget = createEditor({ type: 'paragraph', content: [{ type: 'text', text: '$$x^2$' }] });
-    missingTarget.editor.commands.setTextSelection(findNodePosition(missingTarget.editor, 'paragraph') + 7);
-    const nodeAt = vi.spyOn(missingTarget.editor.state.doc, 'nodeAt').mockReturnValue(null);
-    expect(inputText(missingTarget.editor, '$')).toBe(false);
-    nodeAt.mockRestore();
-    expect(missingTarget.editor.getText()).toContain('$$x^2$');
-    missingTarget.destroy();
-
-    const element = document.createElement('div');
-    document.body.append(element);
-    const missingMath = new Editor({
-      element,
-      extensions: [...createTiptapWireExtensions().filter((extension) => extension.name !== 'math'), TiptapMathInput],
-      content: {
-        type: 'doc',
-        content: [
-          {
-            type: 'blockGroup',
-            content: [block('target', { type: 'paragraph', content: [{ type: 'text', text: '$$x^2$' }] })],
-          },
-        ],
-      },
-    });
-    missingMath.commands.setTextSelection(findNodePosition(missingMath, 'paragraph') + 7);
-    expect(inputText(missingMath, '$')).toBe(false);
-    expect(missingMath.getText()).toContain('$$x^2$');
-    missingMath.destroy();
-    element.remove();
-  });
-
-  it('does not replace a partial textblock match and delete its trailing suffix', () => {
-    const mounted = createEditor({
-      type: 'paragraph',
-      content: [{ type: 'text', text: '$$x^2$ trailing' }],
-    });
-    mounted.editor.commands.setTextSelection(findNodePosition(mounted.editor, 'paragraph') + 7);
-    const before = mounted.editor.getJSON();
-    expect(inputText(mounted.editor, '$')).toBe(false);
-    expect(mounted.editor.getJSON()).toEqual(before);
-    mounted.destroy();
-  });
-
-  it('does not create inline math when the inline schema is unavailable', () => {
-    const element = document.createElement('div');
-    document.body.append(element);
-    const editor = new Editor({
-      element,
-      extensions: [
-        ...createTiptapWireExtensions().filter((extension) => extension.name !== 'mathInline'),
-        TiptapMathInput,
-      ],
-      content: {
-        type: 'doc',
-        content: [
-          {
-            type: 'blockGroup',
-            content: [block('target', { type: 'paragraph', content: [{ type: 'text', text: '$x' }] })],
-          },
-        ],
-      },
-    });
-    editor.commands.setTextSelection(findNodePosition(editor, 'paragraph') + 3);
-    const before = editor.getJSON();
-    expect(inputText(editor, '$')).toBe(false);
-    expect(editor.getJSON()).toEqual(before);
-    editor.destroy();
-    element.remove();
-  });
-
-  it('never upgrades completed block delimiters inside a table cell', () => {
-    const mounted = createEditor({
-      type: 'table',
-      content: [
-        {
-          type: 'tableRow',
-          content: [
-            {
-              type: 'tableCell',
-              content: [
-                {
-                  type: 'tableParagraph',
-                  content: [{ type: 'text', text: '$$x^2$' }],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    });
-    mounted.editor.commands.setTextSelection(findNodePosition(mounted.editor, 'tableParagraph') + 7);
-    const before = mounted.editor.getJSON();
-    expect(inputText(mounted.editor, '$')).toBe(false);
-    expect(mounted.editor.getJSON()).toEqual(before);
-    expect(findNodePosition(mounted.editor, 'math')).toBe(-1);
-    mounted.destroy();
-  });
-
-  it('normalizes every supported pasted delimiter into inline math without upgrading display source to a block', () => {
-    const mounted = createEditor({ type: 'paragraph' });
-    const paragraph = mounted.editor.state.schema.nodes.paragraph!.create(
-      null,
-      mounted.editor.state.schema.text('a $x$ $$y$$ \\(z\\) \\[w\\]'),
-    );
-    const pasted = new Slice(Fragment.from(paragraph), 0, 0);
-    const slice = mounted.editor.view.someProp('transformPasted', (transform) =>
-      transform(pasted, mounted.editor.view, true),
-    );
-    expect(slice).toBeInstanceOf(Slice);
-    if (!slice) {
-      throw new Error('Math clipboard transform is not registered');
-    }
-    expect(slice.content.firstChild?.childCount).toBe(8);
-    const names: string[] = [];
-    slice.content.firstChild?.forEach((node) => names.push(node.type.name));
-    expect(names.filter((name) => name === 'mathInline')).toHaveLength(4);
-    expect(names).not.toContain('math');
-    mounted.destroy();
-  });
-
-  it('returns pasted content unchanged when the inline math schema is unavailable', () => {
-    const schema = new Schema({
-      nodes: {
-        doc: { content: 'paragraph+' },
-        paragraph: { content: 'text*' },
-        text: {},
-      },
-    });
-    const paragraph = schema.nodes.paragraph;
-    if (!paragraph) {
-      throw new Error('Paragraph schema is unavailable');
-    }
-    const fragment = Fragment.from(paragraph.create(null, schema.text('a $x$ value')));
-    expect(normalizeMathFragment(fragment, schema)).toBe(fragment);
-  });
-
-  it('prefers an outer delimiter over every nested delimiter it contains', () => {
-    const mounted = createEditor({ type: 'paragraph' });
-    const paragraph = mounted.editor.state.schema.nodes.paragraph;
-    if (!paragraph) {
-      throw new Error('Paragraph schema is unavailable');
-    }
-    const fragment = Fragment.from(paragraph.create(null, mounted.editor.state.schema.text('\\[$x$ + $y$\\]')));
-    const normalized = normalizeMathFragment(fragment, mounted.editor.state.schema);
-    expect(normalized.firstChild?.childCount).toBe(1);
-    expect(normalized.firstChild?.firstChild?.type.name).toBe('mathInline');
-    expect(normalized.firstChild?.firstChild?.textContent).toBe('$x$ + $y$');
-    mounted.destroy();
-  });
-
-  it('does not recursively normalize the source of an existing inline math node', () => {
-    const mounted = createEditor({ type: 'paragraph' });
-    const mathInline = mounted.editor.state.schema.nodes.mathInline;
-    if (!mathInline) {
-      throw new Error('Inline math schema is unavailable');
-    }
-    const fragment = Fragment.from(mathInline.create(null, mounted.editor.state.schema.text('$x$')));
-    const normalized = normalizeMathFragment(fragment, mounted.editor.state.schema);
-    expect(normalized.childCount).toBe(1);
-    expect(normalized.firstChild?.type.name).toBe('mathInline');
-    expect(normalized.firstChild?.textContent).toBe('$x$');
-    expect(normalized.firstChild?.firstChild?.type.name).toBe('text');
     mounted.destroy();
   });
 

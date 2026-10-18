@@ -26,13 +26,14 @@ const sdkPopupCss = popupRules('node_modules/video.js/dist/video-js.css');
 
 let reactRoot: Root | undefined;
 const disposers: Array<() => void> = [];
+const containers: HTMLElement[] = [];
 afterEach(() => {
   if (reactRoot) {
     act(() => reactRoot?.unmount());
   }
   reactRoot = undefined;
   disposers.splice(0).forEach((dispose) => dispose());
-  document.body.replaceChildren();
+  containers.splice(0).forEach((container) => container.remove());
   document.head.querySelector('[data-media-proof]')?.remove();
 });
 function makeSdkDom() {
@@ -41,6 +42,7 @@ function makeSdkDom() {
   root.innerHTML =
     '<button class="vjs-button vjs-play-control" aria-label="Play"></button><div class="vjs-menu-button-popup"><div class="vjs-menu"><ul class="vjs-menu-content"><li class="vjs-menu-item vjs-selected" role="menuitemradio" aria-checked="true" tabindex="0">1x</li></ul></div></div>';
   document.body.appendChild(root);
+  containers.push(root);
   disposers.push(applyVideoMediaPresentation(root, { kind: 'video-js' }));
   return root;
 }
@@ -58,6 +60,7 @@ describe('Core media contracts', () => {
   it('retains semantic media group names and description relationships without exposing presentation overrides', () => {
     const host = document.createElement('div');
     document.body.append(host);
+    containers.push(host);
     reactRoot = createRoot(host);
     act(() =>
       reactRoot!.render(
@@ -79,6 +82,7 @@ describe('Core media contracts', () => {
   it('keeps live transport callbacks and accessible names on actual shared controls', () => {
     const host = document.createElement('div');
     document.body.appendChild(host);
+    containers.push(host);
     reactRoot = createRoot(host);
     const play = vi.fn(),
       mute = vi.fn(),

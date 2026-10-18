@@ -368,14 +368,6 @@ describe('SeriesDetail post ordering', () => {
     expect(
       container.querySelector('[data-testid="series-translations-panel"]')?.getAttribute('data-can-administer'),
     ).toBe('true');
-    expect(mocks.useLocaleDocumentSession).toHaveBeenCalledWith(
-      expect.objectContaining({
-        entityType: 'post_series',
-      }),
-    );
-    expect(mocks.usePostSeriesCollaboration).toHaveBeenCalledWith('series-1', 'en');
-    expect(mocks.editorHeader).toHaveBeenCalledWith(expect.objectContaining({ isConnected: true, isSynced: true }));
-
     const table = container.querySelector('table');
     expect(table).toHaveAccessibleName('posts.title');
     expect(
@@ -422,11 +414,7 @@ describe('SeriesDetail post ordering', () => {
       );
     });
 
-    expect(mocks.useLocaleDocumentSession).toHaveBeenCalledWith(
-      expect.objectContaining({
-        entityType: 'post_series',
-      }),
-    );
+    expect(mocks.editorHeader.mock.lastCall?.[0].titleDisabled).toBe(false);
     expect(
       container.querySelector('[data-testid="series-translations-panel"]')?.getAttribute('data-can-administer'),
     ).toBe('false');

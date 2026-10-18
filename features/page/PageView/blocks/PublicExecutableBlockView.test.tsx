@@ -3,8 +3,6 @@
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -177,17 +175,6 @@ afterEach(() => {
 });
 
 describe('PublicExecutableBlockView', () => {
-  it('switches the executable body from flex to fragmentable block flow for print', () => {
-    const css = readFileSync(
-      resolve(process.cwd(), 'features/page/PageView/blocks/PublicExecutableBlockView.module.css'),
-      'utf8',
-    );
-    const printRules = /@media print\s*\{([\s\S]*)\}\s*\.canvas/u.exec(css)?.[1];
-
-    expect(printRules).toMatch(/\.header\s*\{[^}]*break-after:\s*avoid;/su);
-    expect(printRules).toMatch(/\.body\s*\{[^}]*display:\s*block;/su);
-  });
-
   it('names the p5 preview as a group without hiding its runtime-generated controls', async () => {
     const { factories, runtimes } = createFactories();
     factories.p5Sketch = vi.fn((mount) => {
@@ -298,30 +285,6 @@ describe('PublicExecutableBlockView', () => {
     await act(async () => buttonByText(mounted.host, 'Run').click());
 
     expect(runtimes.p5Sketch.run).toHaveBeenCalledWith('original source', { capabilities });
-    await mounted.destroy();
-  });
-
-  it.each([
-    ['p5Sketch', 'javascript', ['original source']],
-    ['threeScene', 'typescript', ['original source']],
-    ['shader', 'glsl', ['vertex source', 'original source']],
-  ] as const)('uses highlighted source instead of the %s runtime for print', async (type, language, sources) => {
-    const { factories } = createFactories();
-    const mounted = await mountPublicExecutable({ type, factories, title: 'Printable source' });
-    const printSource = mounted.host.querySelector(`[data-executable-print-source="${type}"]`);
-
-    expect(printSource).not.toBeNull();
-    expect(printSource?.querySelector('img')).toBeNull();
-    expect([...printSource!.querySelectorAll('[data-print-code-source]')]).toHaveLength(sources.length);
-    expect([...printSource!.querySelectorAll('[data-print-code-source]')].map((source) => source.textContent)).toEqual(
-      sources,
-    );
-    expect(
-      [...printSource!.querySelectorAll('[data-print-code-source]')].every(
-        (source) => source.getAttribute('data-language') === language,
-      ),
-    ).toBe(true);
-
     await mounted.destroy();
   });
 

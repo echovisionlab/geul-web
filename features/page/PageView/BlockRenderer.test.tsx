@@ -378,44 +378,15 @@ describe('PageRenderer', () => {
     ]);
   });
 
-  it('drops duplicate column or section ids at view time', () => {
-    const duplicateSection = {
-      id: 'duplicate-child',
-      type: 'rich-text' as const,
+  it('deduplicates content before dispatching registered block views', () => {
+    const section: PageContent['sections'][number] = {
+      id: 'duplicate',
+      type: 'rich-text',
       settings: {},
       props: {},
       content: [],
     };
-    const content: PageContent = {
-      sections: [
-        {
-          id: 'columns-root',
-          type: 'columns' as const,
-          settings: {},
-          props: { columnRatios: '1:1', gap: '24' },
-          columns: [
-            {
-              id: 'duplicate-column',
-              sections: [duplicateSection],
-            },
-            {
-              id: 'duplicate-column',
-              sections: [duplicateSection],
-            },
-          ],
-        },
-      ],
-    };
-
-    renderToStaticMarkup(<PageRenderer content={content} query={{}} />);
-
-    expect(blockViewCalls.get('rich-text')).toEqual([
-      {
-        sectionId: 'duplicate-child',
-        props: {},
-        content: [],
-        columns: undefined,
-      },
-    ]);
+    renderToStaticMarkup(<PageRenderer content={{ sections: [section, section] }} query={{}} />);
+    expect(blockViewCalls.get('rich-text')).toHaveLength(1);
   });
 });

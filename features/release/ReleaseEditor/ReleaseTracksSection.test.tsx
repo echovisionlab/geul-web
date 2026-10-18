@@ -1,833 +1,262 @@
 // @vitest-environment jsdom
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { NotificationRegion, notifications } from '@/components/core/Notification';
 import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
-import { ReleaseEditorAccessProvider } from './ReleaseEditorAccessContext';
-
-import { act } from 'react';
-import { randomTestUuid } from '@echovisionlab/geul-common/test/random-id';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { notifications } from '@/components/core/Notification';
 import type { ReleaseTrackItem } from '@/lib/collab/schemas/release-fields.schema';
-import { DEFAULT_MEDIA_STATUS_LABELS } from '@/lib/media/status';
-import { TestProviders } from '@/test/TestProviders';
-import { ReleaseTracksSection } from './ReleaseTracksSection';
-import { RELEASE_TRACK_PROCESSING_STATUS } from './track-processing-status';
-import { resolveTrackProgressIndicator } from './track-runtime';
+import { act, render, screen, waitFor, within } from '@/test/render';
+import { ReleaseEditorAccessProvider } from './ReleaseEditorAccessContext';
+import { ReleaseTracksSection, SortableTrackListItem } from './ReleaseTracksSection';
 
-const deleteTrackActionMock = vi.fn();
-const reorderTracksActionMock = vi.fn();
-const useUploadResumeStateMock = vi.hoisted(() =>
-  vi.fn(
-    () =>
-      ({
-        code: 'idle',
-        resumeNotice: null,
-        hasActiveSession: false,
-      }) as any,
-  ),
-);
-type MediaRuntimeStateMockResult = {
-  value: unknown;
-  isLoading: boolean;
-};
-const useMediaProcessingRuntimeStateMock = vi.hoisted(() =>
-  vi.fn((_options: unknown): MediaRuntimeStateMockResult => ({
-    value: null,
-    isLoading: false,
-  })),
-);
-let latestDragEndHandler: ((event: { active: { id: string }; over: { id: string } | null }) => void) | null = null;
-
-vi.mock('@dnd-kit/core', () => ({
-  DndContext: ({
-    children,
-    onDragEnd,
-  }: {
-    children: React.ReactNode;
-    onDragEnd?: (event: { active: { id: string }; over: { id: string } | null }) => void;
-  }) => {
-    latestDragEndHandler = onDragEnd ?? null;
-    return <>{children}</>;
-  },
-  KeyboardSensor: class {},
-  PointerSensor: class {},
-  closestCenter: vi.fn(),
-  useSensor: vi.fn(() => ({})),
-  useSensors: vi.fn((...sensors: unknown[]) => sensors),
-}));
-
-vi.mock('@dnd-kit/sortable', () => ({
-  SortableContext: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  arrayMove: <T,>(items: T[], from: number, to: number) => {
-    const next = [...items];
-    const [moved] = next.splice(from, 1);
-    next.splice(to, 0, moved);
-    return next;
-  },
-  sortableKeyboardCoordinates: vi.fn(),
-  useSortable: () => ({
-    attributes: {},
-    listeners: {},
-    setNodeRef: vi.fn(),
-    transform: null,
-    transition: undefined,
-    isDragging: false,
-  }),
-  verticalListSortingStrategy: {},
-}));
-
-vi.mock('@dnd-kit/utilities', () => ({
-  CSS: {
-    Translate: {
-      toString: () => '',
-    },
-  },
-}));
-
-vi.mock('@tanstack/react-query', () => ({
-  useMutation: ({
-    mutationFn,
-    onSuccess,
-    onError,
-  }: {
-    mutationFn: (vars: any) => Promise<any>;
-    onSuccess?: (result: any, vars: any) => void;
-    onError?: (error: unknown, vars: any) => void;
-  }) => ({
-    mutate: async (vars: any, options?: { onSuccess?: (result: any) => void }) => {
-      try {
-        const result = await mutationFn(vars);
-        onSuccess?.(result, vars);
-        options?.onSuccess?.(result);
-        return result;
-      } catch (error) {
-        onError?.(error, vars);
-      }
-    },
-    isPending: false,
-  }),
-  useQuery: () => ({
-    data: undefined,
-  }),
-}));
-
-vi.mock('@/components/core/Notification', () => ({
-  notifications: {
-    show: vi.fn(),
-  },
-}));
-
-vi.mock('@/components/core/Button', () => ({
-  Button: ({
-    children,
-    onClick,
-    disabled,
-  }: {
-    children: React.ReactNode;
-    onClick?: () => void;
-    disabled?: boolean;
-  }) => (
-    <button type="button" onClick={onClick} disabled={disabled}>
-      {children}
-    </button>
-  ),
-}));
-
-vi.mock('@/components/core/IconButton', () => ({
-  IconButton: ({
-    children,
-    onClick,
-    tone,
-    ...props
-  }: {
-    children: React.ReactNode;
-    onClick?: () => void;
-    tone?: string;
-    [key: string]: unknown;
-  }) => (
-    <button type="button" onClick={onClick} data-tone={tone ?? ''} {...props}>
-      {children}
-    </button>
-  ),
-}));
-
-vi.mock('@/components/core/Input', () => ({
-  Checkbox: () => null,
-  SegmentedControl: () => null,
-  TimePicker: () => null,
-  Select: () => null,
-  TextInput: () => null,
-}));
-
-vi.mock('@/components/core/Modal', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/components/core/Modal')>()),
-  ContentModal: ({ opened, children }: { opened: boolean; children: React.ReactNode }) =>
-    opened ? <div role="dialog">{children}</div> : null,
-  ConfirmModal: ({
-    opened,
-    title,
-    message,
-    onClose,
-    onConfirm,
-  }: {
-    opened: boolean;
-    title: string;
-    message: React.ReactNode;
-    onClose: () => void;
-    onConfirm: () => void;
-  }) =>
-    opened ? (
-      <div data-testid="confirm-modal">
-        <div>{title}</div>
-        <div>{message}</div>
-        <button type="button" onClick={onClose}>
-          Close
-        </button>
-        <button type="button" onClick={onConfirm}>
-          Confirm
-        </button>
-      </div>
-    ) : null,
-}));
-
-vi.mock('@/components/core/Section', () => ({
-  SectionCard: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  SectionHeader: ({ title, actions }: { title: React.ReactNode; actions?: React.ReactNode }) => (
-    <div>
-      <div>{title}</div>
-      {actions}
-    </div>
-  ),
-}));
-
-vi.mock('@/lib/actions/artist', () => ({
-  listArtistsAction: vi.fn(),
-}));
-
-vi.mock('@/lib/actions/user', () => ({
-  listUsersAdminAction: vi.fn(),
-}));
-
-vi.mock('@/lib/actions/track', () => ({
-  createTrackAction: vi.fn(),
-  updateTrackAction: vi.fn(),
-  deleteTrackAction: (...args: any[]) => deleteTrackActionMock(...args),
-  reorderTracksAction: (...args: any[]) => reorderTracksActionMock(...args),
-  setTrackCreditsAction: vi.fn(),
-}));
-
-vi.mock('@/features/media-download/ConnectedFileDownloadPolicyEditor', () => ({
-  ConnectedFileDownloadPolicyEditor: () => <div data-testid="file-download-policy-editor" />,
-}));
-
-vi.mock('@/lib/hooks/useUploadResumeNotice', () => ({
-  useUploadResumeState: () => useUploadResumeStateMock(),
-}));
-
-vi.mock('@/lib/media/use-media-processing-runtime-state', () => ({
-  useMediaProcessingRuntimeState: (options: unknown) => useMediaProcessingRuntimeStateMock(options),
-}));
-
-vi.mock('../TrackAudioUploader', () => ({
-  TrackAudioUploader: (props: {
-    trackId: string;
-    mode?: string;
-    processingStatus?: string | null;
-    processingActive?: boolean;
-    processingProgress?: number | null;
-    onPendingUploadCancelled?: (identity: { attemptId?: string; fileId?: string }) => void;
-  }) => {
-    latestTrackAudioUploaderProps[`${props.trackId}:${props.mode ?? 'default'}`] = props;
-
-    return (
-      <div
-        data-testid={`audio-uploader-${props.trackId}-${props.mode ?? 'default'}`}
-        data-processing-status={props.processingStatus ?? ''}
-      >
-        {props.processingActive ? 'processing' : 'none'}:{props.processingProgress ?? 'null'}
-      </div>
-    );
-  },
-}));
-
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: vi.fn(),
-});
-
-function setMobileViewport(matches: boolean) {
-  window.matchMedia = vi.fn().mockImplementation((query: string) => ({
-    matches,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  }));
-}
-
-class ResizeObserverMock {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-}
-
-Object.defineProperty(globalThis, 'ResizeObserver', {
-  writable: true,
-  value: ResizeObserverMock,
-});
-
-let container: HTMLDivElement | null = null;
-let root: Root | null = null;
-let latestTrackAudioUploaderProps: Record<string, any> = {};
-
-function render(node: React.ReactNode) {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-
-  act(() => {
-    root?.render(<TestProviders>{node}</TestProviders>);
-  });
-}
-
-async function flushUpdates() {
-  await act(async () => {
-    await Promise.resolve();
-  });
-}
-
-async function clickElement(element: Element | null | undefined) {
-  expect(element).not.toBeNull();
-  expect(element).not.toBeUndefined();
-
-  act(() => {
-    element?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-  });
-
-  await flushUpdates();
-}
-
-afterEach(() => {
-  act(() => {
-    root?.unmount();
-  });
-  container?.remove();
-  root = null;
-  container = null;
-});
-
-beforeEach(() => {
-  setMobileViewport(false);
-  deleteTrackActionMock.mockReset();
-  deleteTrackActionMock.mockResolvedValue({ ok: true, success: true });
-  reorderTracksActionMock.mockReset();
-  reorderTracksActionMock.mockResolvedValue({ ok: true, success: true });
-  useUploadResumeStateMock.mockReset();
-  useUploadResumeStateMock.mockReturnValue({
+const mocks = vi.hoisted(() => ({
+  deleteTrack: vi.fn(),
+  reorderTracks: vi.fn(),
+  listArtists: vi.fn(),
+  listUsers: vi.fn(),
+  runtime: vi.fn((_options: unknown): { value: unknown; isLoading: boolean } => ({ value: null, isLoading: false })),
+  resume: vi.fn((): { code: string; resumeNotice: any; hasActiveSession: boolean } => ({
     code: 'idle',
     resumeNotice: null,
     hasActiveSession: false,
-  } as any);
-  useMediaProcessingRuntimeStateMock.mockReset();
-  useMediaProcessingRuntimeStateMock.mockReturnValue({
-    value: null,
-    isLoading: false,
+  })),
+}));
+vi.mock('@/lib/actions/track', () => ({
+  createTrackAction: vi.fn(),
+  updateTrackAction: vi.fn(),
+  setTrackCreditsAction: vi.fn(),
+  deleteTrackAction: mocks.deleteTrack,
+  reorderTracksAction: mocks.reorderTracks,
+}));
+vi.mock('@/lib/actions/artist', () => ({ listArtistsAction: mocks.listArtists }));
+vi.mock('@/lib/actions/user', () => ({ listUsersAdminAction: mocks.listUsers }));
+vi.mock('@/lib/hooks/useUploadResumeNotice', () => ({ useUploadResumeState: mocks.resume }));
+vi.mock('@/lib/media/use-media-processing-runtime-state', () => ({ useMediaProcessingRuntimeState: mocks.runtime }));
+vi.mock('@/lib/hooks/useFileUpload', () => ({
+  UPLOAD_ABORTED_MESSAGE: 'Upload aborted',
+  UPLOAD_FAILED_MESSAGE: 'Upload failed',
+  UPLOAD_FINALIZATION_FAILED_MESSAGE: 'Upload finalization failed',
+  UPLOAD_INTERRUPTED_MESSAGE: 'Upload interrupted',
+  useFileUpload: () => ({ upload: vi.fn(), abort: vi.fn(), isUploading: false }),
+}));
+const abortUpload = vi.hoisted(() => vi.fn());
+vi.mock('@/lib/actions/file', () => ({ abortUploadAction: abortUpload, findMultipartUploadCandidateAction: vi.fn() }));
+
+let client: QueryClient;
+function track(overrides: Partial<ReleaseTrackItem> = {}): ReleaseTrackItem {
+  return {
+    id: 'track-1',
+    title: 'Intro',
+    track_number: 1,
+    duration_seconds: 90,
+    audio_attached: false,
+    processing_status: null,
+    credits: [],
+    ...overrides,
+  };
+}
+function renderSection(tracks = [track()], onTracksChange = vi.fn()) {
+  return render(
+    <QueryClientProvider client={client}>
+      <ReleaseTracksSection releaseId="release-1" tracks={tracks} onTracksChange={onTracksChange} />
+      <NotificationRegion closeLabel="Close" />
+    </QueryClientProvider>,
+  );
+}
+function resumeSession() {
+  mocks.resume.mockReturnValue({
+    code: 'available',
+    hasActiveSession: true,
+    resumeNotice: {
+      fileId: 'resume-file',
+      uploadId: 'resume-upload',
+      attemptId: 'resume-attempt',
+      fileName: 'audio.wav',
+      status: 2,
+    },
   });
-  latestTrackAudioUploaderProps = {};
-  latestDragEndHandler = null;
-  vi.mocked(notifications.show).mockReset();
+}
+beforeEach(() => {
+  client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
+  mocks.listArtists.mockResolvedValue({ ok: true, value: [] });
+  mocks.listUsers.mockResolvedValue({ ok: true, value: { data: [] } });
+  mocks.deleteTrack.mockResolvedValue({ success: true });
+  mocks.reorderTracks.mockResolvedValue({ success: true });
+  abortUpload.mockResolvedValue({ success: true });
+});
+afterEach(() => {
+  client.clear();
+  act(() => notifications.clean());
+  vi.clearAllMocks();
+  mocks.resume.mockReturnValue({ code: 'idle', resumeNotice: null, hasActiveSession: false });
+  mocks.runtime.mockReturnValue({ value: null, isLoading: false });
 });
 
 describe('ReleaseTracksSection', () => {
-  it('upgrades and downgrades add, audio and drag controls on the same track table', () => {
+  it('upgrades and downgrades editing controls without replacing the track table', async () => {
     const provider = {};
     const onTracksChange = vi.fn();
-    const tracks: ReleaseTrackItem[] = ['track-1', 'track-2'].map((id, index) => ({
-      id,
-      title: id,
-      track_number: index + 1,
-      duration_seconds: 90,
-      audio_attached: false,
-      processing_status: null,
-      credits: [],
-    }));
     function Editor() {
-      const canEdit = useEditorAccessLevel(provider) === 'edit';
       return (
-        <ReleaseEditorAccessProvider value={canEdit}>
-          <ReleaseTracksSection releaseId="release-1" tracks={tracks} onTracksChange={onTracksChange} />
+        <ReleaseEditorAccessProvider value={useEditorAccessLevel(provider) === 'edit'}>
+          <ReleaseTracksSection releaseId="release-1" tracks={[track()]} onTracksChange={onTracksChange} />
         </ReleaseEditorAccessProvider>
       );
     }
     setProviderAccessLevel(provider, 'view');
-    render(<Editor />);
-    const table = document.querySelector('table');
-    const add = document.querySelector('#release-track-add-action button') as HTMLButtonElement;
-    expect(add.disabled).toBe(true);
+    const { user } = render(
+      <QueryClientProvider client={client}>
+        <Editor />
+      </QueryClientProvider>,
+    );
+    const table = screen.getByRole('table');
+    const add = screen.getByRole('button', { name: 'Add Track' });
+    expect(add).toBeDisabled();
     act(() => setProviderAccessLevel(provider, 'edit'));
-    expect(add.disabled).toBe(false);
-    expect(latestTrackAudioUploaderProps['track-1:button-only'].disabled).toBe(false);
-    expect(document.querySelector('table')).toBe(table);
+    expect(add).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Upload audio file' })).toBeEnabled();
+    expect(screen.getByRole('table')).toBe(table);
     act(() => setProviderAccessLevel(provider, 'view'));
-    expect(document.querySelector('table')).toBe(table);
-    expect(table?.textContent).toContain('track-1');
-    expect(add.disabled).toBe(true);
-    expect(latestTrackAudioUploaderProps['track-1:button-only'].disabled).toBe(true);
-    act(() => latestDragEndHandler?.({ active: { id: 'track-2' }, over: { id: 'track-1' } }));
+    expect(screen.getByRole('table')).toBe(table);
+    expect(screen.getByRole('button', { name: 'Upload audio file' })).toBeDisabled();
+    const handle = screen.getByRole('button', { name: /Reorder.*Intro/i });
+    expect(handle).toBeDisabled();
+    await user.click(handle);
     expect(onTracksChange).not.toHaveBeenCalled();
-    expect(reorderTracksActionMock).not.toHaveBeenCalled();
+    expect(mocks.reorderTracks).not.toHaveBeenCalled();
   });
-  it('passes failed processing state to the mobile uploader status view', () => {
-    setMobileViewport(true);
-    const trackId = randomTestUuid();
-    const fileId = randomTestUuid();
-    const tracks: ReleaseTrackItem[] = [
-      {
-        id: trackId,
-        track_number: 1,
-        title: 'Failed processing',
-        duration_seconds: null,
-        audio_attached: false,
-        audio_original_file_id: fileId,
-        processing_status: null,
-        credits: [],
-      },
-    ];
 
-    useMediaProcessingRuntimeStateMock.mockReturnValue({
-      value: {
-        processing_status: RELEASE_TRACK_PROCESSING_STATUS.failed,
-        processing_progress: 0,
-        duration_seconds: null,
-      },
+  it('renders a failed backend status in the mobile track item', () => {
+    mocks.runtime.mockReturnValue({
+      value: { processing_status: 'TRACK_PROCESSING_STATUS_FAILED', processing_progress: 0, duration_seconds: null },
       isLoading: false,
     });
-
-    render(<ReleaseTracksSection releaseId={randomTestUuid()} tracks={tracks} onTracksChange={vi.fn()} />);
-
-    expect(document.querySelector('table')).toBeNull();
-    expect(document.querySelector(`[data-testid="audio-uploader-${trackId}-status-only"]`)).toHaveAttribute(
-      'data-processing-status',
-      RELEASE_TRACK_PROCESSING_STATUS.failed,
+    render(
+      <QueryClientProvider client={client}>
+        <SortableTrackListItem
+          track={track({ audio_original_file_id: 'audio-file' })}
+          expanded={false}
+          onToggle={vi.fn()}
+          onDelete={vi.fn()}
+          uploadProgress={null}
+          onUploadProgressChange={vi.fn()}
+          editor={null}
+          formatDuration={() => '1:30'}
+        />
+      </QueryClientProvider>,
     );
+    expect(screen.getByRole('img', { name: 'Failed' })).toBeInTheDocument();
   });
 
-  it('renders upload progress in the mobile track layout', () => {
-    setMobileViewport(true);
-    const trackId = randomTestUuid();
-    const tracks: ReleaseTrackItem[] = [
-      {
-        id: trackId,
-        track_number: 1,
-        title: 'Uploading',
-        duration_seconds: null,
-        audio_attached: false,
-        processing_status: null,
-        credits: [],
-      },
-    ];
-
-    render(<ReleaseTracksSection releaseId={randomTestUuid()} tracks={tracks} onTracksChange={vi.fn()} />);
-
-    act(() => {
-      latestTrackAudioUploaderProps[`${trackId}:button-only`]?.onUploadProgressChange?.(trackId, {
-        active: true,
-        progress: 37,
-        stage: 'uploading',
-      });
-    });
-
-    expect(document.querySelector('table')).toBeNull();
-    expect(document.body.textContent).toContain('Uploading 37%');
-  });
-
-  it('renders resumable-upload notice in the mobile track layout', () => {
-    setMobileViewport(true);
-    const trackId = randomTestUuid();
-    useUploadResumeStateMock.mockReturnValue({
-      code: 'available',
-      resumeNotice: {
-        uploadId: randomTestUuid(),
-        fileId: randomTestUuid(),
-        key: 'release/test/audio.wav',
-        fileName: 'audio.wav',
-        status: 2,
-      },
-      hasActiveSession: true,
-    } as any);
-    const tracks: ReleaseTrackItem[] = [
-      {
-        id: trackId,
-        track_number: 1,
-        title: 'Resumable upload',
-        duration_seconds: null,
-        audio_attached: false,
-        processing_status: null,
-        credits: [],
-      },
-    ];
-
-    render(<ReleaseTracksSection releaseId={randomTestUuid()} tracks={tracks} onTracksChange={vi.fn()} />);
-
-    expect(document.querySelector('table')).toBeNull();
-    expect(document.querySelector(`#release-track-resume-row-${trackId}`)).toBeNull();
-    expect(document.body.textContent).toContain('Interrupted upload found');
-  });
-
-  it('opens the inline track editor from the mobile track layout', async () => {
-    setMobileViewport(true);
-    const tracks: ReleaseTrackItem[] = [
-      {
-        id: 'mobile-track',
-        track_number: 1,
-        title: 'Intro',
-        duration_seconds: 90,
-        audio_attached: false,
-        processing_status: null,
-        credits: [],
-      },
-    ];
-
-    render(<ReleaseTracksSection releaseId={randomTestUuid()} tracks={tracks} onTracksChange={vi.fn()} />);
-
-    const editButton = Array.from(document.querySelectorAll('button')).find(
-      (button) => button.getAttribute('aria-label') === 'Edit',
+  it('renders mobile upload progress without mounting the release editor', () => {
+    render(
+      <QueryClientProvider client={client}>
+        <SortableTrackListItem
+          track={track()}
+          expanded={false}
+          onToggle={vi.fn()}
+          onDelete={vi.fn()}
+          uploadProgress={{ progress: 37, stage: 'uploading' }}
+          onUploadProgressChange={vi.fn()}
+          editor={null}
+          formatDuration={() => '1:30'}
+        />
+      </QueryClientProvider>,
     );
-    await clickElement(editButton);
-
-    expect(document.querySelector('table')).toBeNull();
-    expect(document.body.textContent).toContain('Track credits');
+    expect(screen.getByText('Uploading 37%')).toBeInTheDocument();
   });
 
-  it('keeps the same progress row while showing validating for the first resumable chunk', () => {
-    expect(
-      resolveTrackProgressIndicator(DEFAULT_MEDIA_STATUS_LABELS, { progress: 18, stage: 'validating' }, null),
-    ).toEqual({
-      label: 'Validating 18%',
-      progress: 18,
-      color: 'blue',
-    });
+  it('renders a backend resume notice in the mobile track item', () => {
+    resumeSession();
+    render(
+      <QueryClientProvider client={client}>
+        <SortableTrackListItem
+          track={track()}
+          expanded={false}
+          onToggle={vi.fn()}
+          onDelete={vi.fn()}
+          uploadProgress={null}
+          onUploadProgressChange={vi.fn()}
+          editor={null}
+          formatDuration={() => '1:30'}
+        />
+      </QueryClientProvider>,
+    );
+    expect(screen.getByText('Interrupted upload found')).toBeInTheDocument();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
-  it('uses aggregate processing labels for backend-owned track processing', () => {
-    expect(
-      resolveTrackProgressIndicator(DEFAULT_MEDIA_STATUS_LABELS, null, {
-        progress: 67,
-      }),
-    ).toEqual({
-      label: 'Processing 67%',
-      progress: 67,
-      color: 'cyan',
-    });
+  it('connects the mobile edit command to expansion', async () => {
+    const onToggle = vi.fn();
+    const props = {
+      track: track(),
+      expanded: false,
+      onToggle,
+      onDelete: vi.fn(),
+      uploadProgress: null,
+      onUploadProgressChange: vi.fn(),
+      editor: <p>Track credits</p>,
+      formatDuration: () => '1:30',
+    };
+    const { user, rerender } = render(
+      <QueryClientProvider client={client}>
+        <SortableTrackListItem {...props} />
+      </QueryClientProvider>,
+    );
+    await user.click(screen.getByRole('button', { name: 'Edit' }));
+    expect(onToggle).toHaveBeenCalledOnce();
+    rerender(
+      <QueryClientProvider client={client}>
+        <SortableTrackListItem {...props} expanded />
+      </QueryClientProvider>,
+    );
+    expect(await screen.findByText('Track credits')).toBeInTheDocument();
   });
 
-  it('renders an interrupted upload warning in the full-width row area', () => {
-    const releaseId = randomTestUuid();
-    const trackId = randomTestUuid();
-    const pendingFileId = randomTestUuid();
-    const tracks: ReleaseTrackItem[] = [
-      {
-        id: trackId,
-        track_number: 1,
-        title: 'Interrupted',
-        duration_seconds: null,
-        audio_attached: false,
-        processing_status: null,
-        pending_upload_file_id: pendingFileId,
+  it('renders a tracked interrupted upload below the desktop track', () => {
+    renderSection([
+      track({
+        pending_upload_file_id: 'pending-file',
         pending_upload_status: 'pending',
-        pending_upload_started_at: new Date(Date.now() - 60_000).toISOString(),
-        credits: [],
-      },
-    ];
-
-    render(<ReleaseTracksSection releaseId={releaseId} tracks={tracks} onTracksChange={vi.fn()} />);
-
-    expect(document.body.textContent).toContain('Interrupted upload found');
-  });
-
-  it('renders the full-width resume row when only backend resume state is available', () => {
-    const releaseId = randomTestUuid();
-    const trackId = randomTestUuid();
-    const fileId = randomTestUuid();
-    const uploadId = randomTestUuid();
-    const tracks: ReleaseTrackItem[] = [
-      {
-        id: trackId,
-        track_number: 1,
-        title: 'Backend resumable',
-        duration_seconds: null,
-        audio_attached: false,
-        processing_status: null,
-        credits: [],
-      },
-    ];
-
-    useUploadResumeStateMock.mockReturnValue({
-      code: 'available',
-      resumeNotice: {
-        uploadId,
-        fileId,
-        key: 'release/test/audio.wav',
-        fileName: 'audio.wav',
-        status: 2,
-      },
-      hasActiveSession: true,
-    } as any);
-
-    render(<ReleaseTracksSection releaseId={releaseId} tracks={tracks} onTracksChange={vi.fn()} />);
-
-    expect(document.querySelector(`#release-track-resume-row-${trackId}`)).not.toBeNull();
-    expect(document.body.textContent).toContain('Interrupted upload found');
-  });
-
-  it('hides the backend-only resume row after the track uploader cancels it', () => {
-    const releaseId = randomTestUuid();
-    const trackId = randomTestUuid();
-    const fileId = randomTestUuid();
-    const uploadId = randomTestUuid();
-    const tracks: ReleaseTrackItem[] = [
-      {
-        id: trackId,
-        track_number: 1,
-        title: 'Backend resumable',
-        duration_seconds: null,
-        audio_attached: false,
-        processing_status: null,
-        credits: [],
-      },
-    ];
-
-    useUploadResumeStateMock.mockReturnValue({
-      code: 'available',
-      resumeNotice: {
-        uploadId,
-        fileId,
-        key: 'release/test/audio.wav',
-        fileName: 'audio.wav',
-        status: 2,
-      },
-      hasActiveSession: true,
-    } as any);
-
-    render(<ReleaseTracksSection releaseId={releaseId} tracks={tracks} onTracksChange={vi.fn()} />);
-
-    expect(document.querySelector(`#release-track-resume-row-${trackId}`)).not.toBeNull();
-
-    act(() => {
-      latestTrackAudioUploaderProps[`${trackId}:button-only`]?.onPendingUploadCancelled?.({
-        fileId,
-      });
-    });
-
-    expect(document.querySelector(`#release-track-resume-row-${trackId}`)).toBeNull();
-  });
-
-  it('restores saved track order and reports a rejected reorder', async () => {
-    reorderTracksActionMock.mockResolvedValueOnce({
-      ok: false,
-      error: 'permission denied',
-      errorCode: 'PERMISSION_DENIED',
-    });
-    const onTracksChange = vi.fn();
-    const tracks: ReleaseTrackItem[] = [
-      {
-        id: 'track-1',
-        track_number: 1,
-        title: 'Intro',
-        duration_seconds: 90,
-        audio_attached: false,
-        processing_status: null,
-        credits: [],
-      },
-      {
-        id: 'track-2',
-        track_number: 2,
-        title: 'Outro',
-        duration_seconds: 120,
-        audio_attached: false,
-        processing_status: null,
-        credits: [],
-      },
-    ];
-
-    render(<ReleaseTracksSection releaseId="release-1" tracks={tracks} onTracksChange={onTracksChange} />);
-
-    expect(latestDragEndHandler).not.toBeNull();
-
-    act(() => {
-      latestDragEndHandler?.({
-        active: { id: 'track-2' },
-        over: { id: 'track-1' },
-      });
-    });
-
-    expect(onTracksChange).toHaveBeenCalledWith([
-      expect.objectContaining({ id: 'track-2', track_number: 1 }),
-      expect.objectContaining({ id: 'track-1', track_number: 2 }),
+        pending_upload_started_at: new Date().toISOString(),
+      }),
     ]);
-    await flushUpdates();
-    expect(onTracksChange).toHaveBeenLastCalledWith(tracks);
-    expect(notifications.show).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'permission denied', tone: 'danger' }),
-    );
+    expect(screen.getByText('Interrupted upload found')).toBeInTheDocument();
   });
 
-  it('expands inline track editor when clicking a track title', async () => {
-    const onTracksChange = vi.fn();
-    const tracks: ReleaseTrackItem[] = [
-      {
-        id: 'track-1',
-        track_number: 1,
-        title: 'Intro',
-        duration_seconds: 90,
-        audio_attached: false,
-        processing_status: null,
-        credits: [],
-      },
-    ];
+  it('shows a backend-only resume row and hides it after cancelling that session', async () => {
+    resumeSession();
+    const { user } = renderSection();
+    expect(screen.getByText('Interrupted upload found')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    await waitFor(() => expect(screen.queryByText('Interrupted upload found')).not.toBeInTheDocument());
+    expect(abortUpload).toHaveBeenCalledWith({ fileId: 'resume-file', uploadId: 'resume-upload' });
+  });
 
-    render(<ReleaseTracksSection releaseId="release-1" tracks={tracks} onTracksChange={onTracksChange} />);
-
-    expect(document.body.textContent).not.toContain('Track Credits');
-
-    const toggleButton = Array.from(document.querySelectorAll('button')).find(
-      (button) => button.getAttribute('aria-label') === 'Edit',
-    );
-    await clickElement(toggleButton);
-
-    expect(document.body.textContent).toContain('Track credits');
-    expect(document.body.textContent).toContain('Add Credit');
+  it('opens the inline credits editor from the desktop track title', async () => {
+    const { user } = renderSection();
+    expect(screen.queryByText('Track credits')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Intro' }));
+    expect(await screen.findByText('Track credits')).toBeInTheDocument();
+    expect(screen.getByText('Add Credit')).toBeInTheDocument();
   });
 
   it('requires confirmation before deleting a track', async () => {
     const onTracksChange = vi.fn();
-    const tracks: ReleaseTrackItem[] = [
-      {
-        id: 'track-1',
-        track_number: 1,
-        title: 'Intro',
-        duration_seconds: 90,
-        audio_attached: false,
-        processing_status: null,
-        credits: [],
-      },
-    ];
-
-    render(<ReleaseTracksSection releaseId="release-1" tracks={tracks} onTracksChange={onTracksChange} />);
-
-    expect(deleteTrackActionMock).not.toHaveBeenCalled();
-    expect(document.querySelector('[data-testid="confirm-modal"]')).toBeNull();
-
-    await clickElement(document.querySelector('button[data-tone="danger"]'));
-
-    expect(deleteTrackActionMock).not.toHaveBeenCalled();
-    const confirmModal = document.querySelector('[data-testid="confirm-modal"]');
-    expect(confirmModal?.textContent).toContain('Are you sure you want to delete this track?');
-
-    const confirmButton = Array.from(document.querySelectorAll('button')).find(
-      (button) => button.textContent === 'Confirm',
-    );
-    await clickElement(confirmButton);
-
-    expect(deleteTrackActionMock).toHaveBeenCalledWith('track-1', expect.any(String));
-    expect(onTracksChange).toHaveBeenCalledWith([]);
+    const { user } = renderSection([track()], onTracksChange);
+    expect(mocks.deleteTrack).not.toHaveBeenCalled();
+    await user.click(screen.getByRole('button', { name: 'Delete' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Delete' });
+    expect(within(dialog).getByText('Are you sure you want to delete this track?')).toBeInTheDocument();
+    expect(mocks.deleteTrack).not.toHaveBeenCalled();
+    await user.click(within(dialog).getByRole('button', { name: 'Delete' }));
+    await waitFor(() => expect(onTracksChange).toHaveBeenCalledWith([]));
+    expect(mocks.deleteTrack).toHaveBeenCalledWith('track-1', expect.any(String));
   });
 
-  it('passes backend snapshot release track processing fields through to the track audio status UI', async () => {
-    const onTracksChange = vi.fn();
-    const releaseId = randomTestUuid();
-    const trackId = randomTestUuid();
-    const fileId = randomTestUuid();
-    const tracks: ReleaseTrackItem[] = [
-      {
-        id: trackId,
-        track_number: 1,
-        title: 'Intro',
-        duration_seconds: 90,
-        audio_attached: true,
-        audio_original_file_id: fileId,
-        processing_status: 'TRACK_PROCESSING_STATUS_PROCESSING',
-        processing_progress: 54,
-        credits: [],
-      },
-    ];
-
-    render(<ReleaseTracksSection releaseId={releaseId} tracks={tracks} onTracksChange={onTracksChange} />);
-
-    expect(document.querySelector(`[data-testid="audio-uploader-${trackId}-status-only"]`)?.textContent).toBe(
-      'processing:54',
-    );
-
-    act(() => {
-      root?.render(
-        <TestProviders>
-          <ReleaseTracksSection
-            releaseId={releaseId}
-            tracks={[
-              {
-                ...tracks[0],
-                processing_progress: 81,
-              },
-            ]}
-            onTracksChange={onTracksChange}
-          />
-        </TestProviders>,
-      );
-    });
-
-    expect(document.querySelector(`[data-testid="audio-uploader-${trackId}-status-only"]`)?.textContent).toBe(
-      'processing:81',
-    );
-
-    act(() => {
-      root?.render(
-        <TestProviders>
-          <ReleaseTracksSection
-            releaseId={releaseId}
-            tracks={[
-              {
-                ...tracks[0],
-                processing_status: 'TRACK_PROCESSING_STATUS_COMPLETED',
-                processing_progress: null,
-              },
-            ]}
-            onTracksChange={onTracksChange}
-          />
-        </TestProviders>,
-      );
-    });
-
-    expect(document.querySelector(`[data-testid="audio-uploader-${trackId}-status-only"]`)?.textContent).toBe(
-      'none:null',
-    );
-  });
-
-  it('uses backend runtime state for release track status without collab processing fields', async () => {
-    const onTracksChange = vi.fn();
-    const releaseId = randomTestUuid();
-    const trackId = randomTestUuid();
-    const fileId = randomTestUuid();
-    const tracks: ReleaseTrackItem[] = [
-      {
-        id: trackId,
-        track_number: 1,
-        title: 'Intro',
-        duration_seconds: null,
-        audio_attached: false,
-        audio_original_file_id: fileId,
-        processing_status: null,
-        processing_progress: null,
-        credits: [],
-      },
-    ];
-
-    useMediaProcessingRuntimeStateMock.mockReturnValue({
+  it('subscribes to the track file runtime and shows processing without collaboration fields', () => {
+    mocks.runtime.mockReturnValue({
       value: {
         processing_status: 'TRACK_PROCESSING_STATUS_PROCESSING',
         processing_progress: 45,
@@ -835,17 +264,10 @@ describe('ReleaseTracksSection', () => {
       },
       isLoading: false,
     });
-
-    render(<ReleaseTracksSection releaseId={releaseId} tracks={tracks} onTracksChange={onTracksChange} />);
-
-    expect(useMediaProcessingRuntimeStateMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        fileId,
-        trackId,
-      }),
-    );
-    expect(document.querySelector(`[data-testid="audio-uploader-${trackId}-status-only"]`)?.textContent).toBe(
-      'processing:45',
-    );
+    renderSection([track({ audio_original_file_id: 'audio-file' })]);
+    expect(mocks.runtime).toHaveBeenCalledWith(expect.objectContaining({ fileId: 'audio-file', trackId: 'track-1' }));
+    const row = screen.getByRole('row', { name: /Intro/i });
+    expect(within(row).getByRole('progressbar', { name: 'Processing 45%' })).toBeInTheDocument();
+    expect(screen.getByText('Processing 45%')).toBeInTheDocument();
   });
 });

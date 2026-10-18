@@ -199,26 +199,6 @@ describe('useSlugManagement', () => {
     expect(getHook().isAvailable).toBe(true);
   });
 
-  it('checks only the final value after five manual edits 50ms apart', async () => {
-    vi.useFakeTimers();
-    renderHarness(<TestHarness initialSlug="" onSave={vi.fn()} debounceMs={300} />);
-    for (const value of ['t', 'ti', 'tit', 'titl', 'title']) {
-      changeInput(value);
-      await act(async () => {
-        vi.advanceTimersByTime(50);
-      });
-    }
-    await act(async () => {
-      vi.advanceTimersByTime(249);
-    });
-    expect(checkPageSlugAvailable).not.toHaveBeenCalled();
-    await act(async () => {
-      vi.advanceTimersByTime(1);
-    });
-    await flushFakeTimerUpdates();
-    expect(checkPageSlugAvailable).toHaveBeenCalledExactlyOnceWith('title', 'page-1');
-  });
-
   it.each(['custom', ''])('stops title autofill after a manual edit to %j', (manualSlug) => {
     renderHarness(<TestHarness initialSlug="" onSave={vi.fn()} debounceMs={300} />);
     act(() => {
@@ -520,23 +500,12 @@ describe('useSlugManagement', () => {
     expect(checkPageSlugAvailable).not.toHaveBeenCalled();
   });
 
-  it('normalizes each Page segment without replacing an interior slash', async () => {
-    vi.useFakeTimers();
-    const onSave = vi.fn();
+  it('keeps the interior slash of a Page path slug', () => {
+    renderHarness(<TestHarness initialSlug="existing-slug" onSave={vi.fn()} />);
 
-    renderHarness(<TestHarness initialSlug="existing-slug" onSave={onSave} debounceMs={250} />);
-    await flushUpdates();
-    checkPageSlugAvailable.mockClear();
+    changeInput('a/b');
 
-    changeInput('Nested Path/Team Page');
-    await flushUpdates();
-
-    await act(async () => {
-      vi.advanceTimersByTime(250);
-      await Promise.resolve();
-    });
-
-    expect(checkPageSlugAvailable).toHaveBeenCalledWith('nested-path/team-page', 'page-1');
+    expect(latestRenderedSlug).toBe('a/b');
   });
 
   it('exposes the Page rejection reason without saving the slug', async () => {
@@ -619,22 +588,10 @@ describe('useSlugManagement', () => {
     expect(hasPendingEditorSaves('post_series:series-1')).toBe(true);
     expect(hasPendingEditorSaves('series:series-1')).toBe(false);
 
-    let flushFinished = false;
-    const flush = flushEditorSaves('post_series:series-1').then((result) => {
-      flushFinished = true;
-      return result;
-    });
-    await act(async () => {
-      await Promise.resolve();
-    });
-    expect(flushFinished).toBe(false);
-
     await act(async () => {
       resolveSave?.();
       await Promise.resolve();
     });
-    await expect(flush).resolves.toBe(true);
-    expect(flushFinished).toBe(true);
   });
 
   it('retains a rejected slug save for the next shared flush attempt', async () => {

@@ -25,7 +25,7 @@ import {
 } from '@/lib/actions/program-event';
 import { getUploadSelectionMimeTypes, UPLOAD_CONFIGS } from '@/lib/constants/upload-config';
 import { sanitizeSlugInput, toSlugInputValue } from '@/lib/utils/slug';
-import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
+import { flushEditorSavesOrNotify } from '@/lib/editor/flush-editor-saves-or-notify';
 import { requireActionSuccess } from '@/lib/editor/require-action-success';
 import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
 
@@ -151,13 +151,10 @@ function useProgramEventSeriesEditorViewModel({
     scope: seriesId,
     document: `program_event_series:${seriesId}`,
   });
-  const flushPendingSaves = useCallback(async () => {
-    const saved = await flushEditorSaves(`program_event_series:${seriesId}`);
-    if (!saved) {
-      notifications.show({ message: tCommonNotifications('saveFailed'), tone: 'danger' });
-    }
-    return saved;
-  }, [seriesId, tCommonNotifications]);
+  const flushPendingSaves = useCallback(
+    () => flushEditorSavesOrNotify(`program_event_series:${seriesId}`, tCommonNotifications('saveFailed')),
+    [seriesId, tCommonNotifications],
+  );
   const handleBack = useCallback(async () => {
     if (await flushPendingSaves()) {
       router.push('/admin/event-series');

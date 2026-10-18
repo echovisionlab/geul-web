@@ -56,7 +56,7 @@ import { useSlugManagement } from '@/lib/hooks/useSlugManagement';
 import { useOgGenerationLookupSignal } from '@/lib/hooks/useOgGenerationLookupSignal';
 import { useOgImage } from '@/lib/hooks/useOgImage';
 import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
-import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
+import { flushEditorSavesOrNotify } from '@/lib/editor/flush-editor-saves-or-notify';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import { listLabelsForSelector } from '@/lib/queries/label-browser';
 import type { SocialLinks } from '@/lib/types/common/social-links';
@@ -296,13 +296,10 @@ function useArtistDetailEditorViewModel({ id, artist, baseUrl }: ArtistDetailEdi
     },
   });
 
-  const flushPendingSaves = useCallback(async () => {
-    const saved = await flushEditorSaves(`artist:${id}`);
-    if (!saved) {
-      notifications.show({ message: tCommon('notifications.saveFailed'), tone: 'danger' });
-    }
-    return saved;
-  }, [id, tCommon]);
+  const flushPendingSaves = useCallback(
+    () => flushEditorSavesOrNotify(`artist:${id}`, tCommon('notifications.saveFailed')),
+    [id, tCommon],
+  );
   const handleBack = useCallback(async () => {
     if (await flushPendingSaves()) {
       router.back();

@@ -120,9 +120,12 @@ describe('FileMediaPreview', () => {
       source: { originalUrl: '/audio.mp3', processingStatus: MediaProcessingStatus.FAILED },
       playable: false,
     },
-  ])('enables playback only when ready: $status', ({ source, playable }) => {
+  ])('enables playback only when ready: $status', async ({ source, playable }) => {
     render(<FileMediaPreview source={{ ...audioSource, ...source }} />);
 
+    if (source.originalUrl || source.hlsUrl) {
+      await waitFor(() => expect(runtime.waveSurfers).toHaveLength(1));
+    }
     expect(screen.getByRole('button', { name: 'Play audio' })).toHaveProperty('disabled', !playable);
   });
 

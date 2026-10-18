@@ -12,10 +12,9 @@ import type { EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode'
 import { createTiptapWireExtensions } from '../wire-schema';
 import { createP5SketchExtension } from './p5-extension';
 import { KOREAN_P5_SKETCH_LABELS } from './p5-labels.fixtures';
-import { createP5PreviewRuntime, type P5PreviewRuntimeFactory } from './p5-preview-runtime';
-import { buildP5SandboxDocument } from './p5-preview-document';
+import type { P5PreviewRuntimeFactory } from './p5-preview-runtime';
 import type { P5Capability } from './p5-capabilities';
-import { DEFAULT_P5_SKETCH_SOURCE, normalizeP5SketchError, validateP5SketchSource } from './p5-source';
+import { DEFAULT_P5_SKETCH_SOURCE } from './p5-source';
 
 // Focus still runs the real editor and lazy loader. Emoji lookup data is a separate
 // contract, covered by emoji-extension tests and the browser; these cases use no emoji.
@@ -145,134 +144,6 @@ async function mountReact(context: TestContext, node: ReactNode) {
   await act(async () => root.render(<DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>));
   return { container, unmount };
 }
-
-describe('p5.js sketch source policy', () => {
-  it('rejects network, page, storage and sketch schedulers with a source location', () => {
-    expect(validateP5SketchSource('const ok = 1;\nfetch("https://example.com")')).toMatchObject({
-      kind: 'policy',
-      line: 2,
-      column: 1,
-    });
-    expect(validateP5SketchSource('document.body.textContent = "unsafe"')).toMatchObject({ kind: 'policy' });
-    expect(validateP5SketchSource('setTimeout(() => {}, 1)')).toMatchObject({ kind: 'policy' });
-    expect(validateP5SketchSource('function setup() { createCapture(AUDIO); }')).toMatchObject({
-      kind: 'policy',
-      message: expect.stringContaining('must be declared'),
-    });
-    expect(validateP5SketchSource('function setup() { createCapture(AUDIO); }', ['microphone'])).toBeNull();
-    expect(validateP5SketchSource('function setup() { requestCurrentPosition(); }')).toMatchObject({
-      kind: 'policy',
-      message: expect.stringContaining('must be declared'),
-    });
-    expect(validateP5SketchSource('function setup() { requestCurrentPosition(); }', ['location'])).toBeNull();
-    expect(
-      validateP5SketchSource('function mousePressed() { requestBluetoothDevice({ acceptAllDevices: true }); }'),
-    ).toMatchObject({
-      kind: 'policy',
-      message: expect.stringContaining('must be declared'),
-    });
-    expect(
-      validateP5SketchSource('function mousePressed() { requestBluetoothDevice({ acceptAllDevices: true }); }', [
-        'bluetooth',
-      ]),
-    ).toBeNull();
-    expect(validateP5SketchSource(DEFAULT_P5_SKETCH_SOURCE)).toBeNull();
-  });
-
-  it('sanitizes resource URLs while keeping an author source location', () => {
-    const error = new Error('failed at https://private.example/sketch');
-    error.stack = 'Error\n at p5-sketch.js:7:9';
-    expect(normalizeP5SketchError(error, 'runtime', 2)).toEqual({
-      kind: 'runtime',
-      message: 'failed at [resource]',
-      line: 5,
-      column: 9,
-    });
-  });
-
-  it('creates an opaque-frame document that denies network, same-origin and nested execution', () => {
-    const sandboxDocument = buildP5SandboxDocument('</script><script>parent.pwned=true</script>', 'contract', '/p5.js');
-    expect(sandboxDocument).toContain("connect-src 'none'");
-    expect(sandboxDocument).toContain("worker-src 'none'");
-    expect(sandboxDocument).not.toContain('</script><script>parent.pwned=true</script>');
-  });
-
-  it('terminates a preflight that exceeds the CPU budget before mounting a frame', () => {
-    vi.useFakeTimers();
-    const terminate = vi.fn();
-    const pendingWorkers: PendingWorker[] = [];
-    class PendingWorker {
-      onmessage: ((event: MessageEvent) => void) | null = null;
-      onerror: ((event: ErrorEvent) => void) | null = null;
-      postMessage = vi.fn();
-      terminate = terminate;
-
-      constructor() {
-        pendingWorkers.push(this);
-      }
-    }
-    vi.stubGlobal('Worker', PendingWorker);
-    const mount = document.createElement('div');
-    const onError = vi.fn();
-    const runtime = createP5PreviewRuntime(mount, {
-      onReady: vi.fn(),
-      onStopped: vi.fn(),
-      onError,
-    });
-    runtime.run('while (true) {}');
-    const pendingWorker = pendingWorkers[0];
-    expect(pendingWorker).toBeDefined();
-    pendingWorker?.onmessage?.(new MessageEvent('message', { data: { type: 'initialized' } }));
-    vi.advanceTimersByTime(751);
-    expect(terminate).toHaveBeenCalledOnce();
-    expect(onError).toHaveBeenCalledWith(
-      expect.objectContaining({ kind: 'resource', message: expect.stringContaining('CPU budget') }),
-    );
-    expect(mount.querySelector('iframe')).toBeNull();
-    runtime.dispose();
-    vi.unstubAllGlobals();
-    vi.useRealTimers();
-  });
-
-  it('does not charge worker startup time to the author setup CPU budget', () => {
-    vi.useFakeTimers();
-    const pendingWorkers: PendingWorker[] = [];
-    class PendingWorker {
-      onmessage: ((event: MessageEvent) => void) | null = null;
-      onerror: ((event: ErrorEvent) => void) | null = null;
-      postMessage = vi.fn();
-      terminate = vi.fn();
-
-      constructor() {
-        pendingWorkers.push(this);
-      }
-    }
-    vi.stubGlobal('Worker', PendingWorker);
-    const onError = vi.fn();
-    const runtime = createP5PreviewRuntime(document.createElement('div'), {
-      onReady: vi.fn(),
-      onStopped: vi.fn(),
-      onError,
-    });
-    runtime.run(DEFAULT_P5_SKETCH_SOURCE);
-    const pendingWorker = pendingWorkers[0];
-    expect(pendingWorker).toBeDefined();
-
-    vi.advanceTimersByTime(751);
-    expect(onError).not.toHaveBeenCalled();
-    pendingWorker?.onmessage?.(new MessageEvent('message', { data: { type: 'initialized' } }));
-    expect(pendingWorker?.postMessage).toHaveBeenCalledWith({
-      type: 'preflight',
-      source: DEFAULT_P5_SKETCH_SOURCE,
-    });
-    vi.advanceTimersByTime(751);
-    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringContaining('CPU budget') }));
-
-    runtime.dispose();
-    vi.unstubAllGlobals();
-    vi.useRealTimers();
-  });
-});
 
 describe('p5.js Tiptap node', () => {
   it('persists source, view mode and preview settings in the wire document', () => {

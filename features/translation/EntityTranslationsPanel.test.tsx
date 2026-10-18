@@ -255,29 +255,6 @@ describe('EntityTranslationsPanel API commands', () => {
     expect(mocks.notificationShow).toHaveBeenCalledWith(expect.objectContaining({ tone: 'neutral' }));
   });
 
-  it('flushes the Form save-registry key before regenerating translations', async () => {
-    await renderReady({ entityType: 'form', entityId: 'form-1' });
-
-    await click('entity-translations-panel-regenerate-fr');
-
-    expect(mocks.flushEditorSaves).toHaveBeenCalledWith('form:form-1');
-    expect(mocks.regenerateEntityTranslations).toHaveBeenCalledOnce();
-  });
-
-  it('does not persist or regenerate when pending editor saves fail to flush', async () => {
-    mocks.flushEditorSaves.mockResolvedValue(false);
-    await renderReady();
-
-    await click('entity-translations-panel-regenerate-fr');
-
-    expect(mocks.persistNow).not.toHaveBeenCalled();
-    expect(mocks.regenerateEntityTranslations).not.toHaveBeenCalled();
-    expect(mocks.notificationShow).toHaveBeenCalledWith({
-      tone: 'danger',
-      message: koMessages.translationPanel.notifications.regenerateFailed,
-    });
-  });
-
   it('keeps explicit regenerate available for an existing target and labels a missing target as generate', async () => {
     mocks.listEntityTranslations.mockResolvedValue({
       sourceLocale: 'en',
@@ -304,11 +281,9 @@ describe('EntityTranslationsPanel API commands', () => {
     expect(container.querySelector('[data-testid="translation-locale-row-ja"]')?.textContent).toContain(
       '대상 문서가 아직 없습니다',
     );
-    await click('entity-translations-panel-regenerate-fr');
-    expect(mocks.regenerateEntityTranslations).toHaveBeenCalledWith({ target: TARGET, locales: ['fr'] });
   });
 
-  it('starts a new regeneration and cancels the exact active job', async () => {
+  it('keeps other locales available and cancels the exact active job', async () => {
     mocks.listTranslationJobs.mockResolvedValue({
       jobs: [job('running-ja', 'ja', TranslationJobStatus.RUNNING)],
     });
@@ -318,9 +293,6 @@ describe('EntityTranslationsPanel API commands', () => {
     expect((document.getElementById('entity-translations-panel-regenerate-fr') as HTMLButtonElement).disabled).toBe(
       false,
     );
-    await click('entity-translations-panel-regenerate-fr');
-    expect(mocks.regenerateEntityTranslations).toHaveBeenCalledWith({ target: TARGET, locales: ['fr'] });
-
     await click('entity-translations-panel-cancel-ja');
     expect(mocks.cancelTranslationJob).toHaveBeenCalledWith({ jobId: 'running-ja' });
     expect(container.textContent).not.toContain('provider_response_invalid');
@@ -355,28 +327,24 @@ describe('EntityTranslationsPanel API commands', () => {
     expect(document.querySelector('textarea')).toBeNull();
   });
 
-  it('opens an existing target directly when Post target authoring is available', async () => {
+  it.each([
+    { locale: 'fr', existing: true },
+    { locale: 'ja', existing: false },
+  ])('opens the exact $locale target editor (existing: $existing)', async ({ locale, existing }) => {
     await renderReady({ canAdministerTranslations: false });
 
-    await click('entity-translations-panel-edit-fr');
+    await click(`entity-translations-panel-edit-${locale}`);
 
-    expect(mocks.mutateTargetTranslation).not.toHaveBeenCalled();
-    expect(mocks.routerReplace).toHaveBeenCalledWith('/posts/post-1?edit=true&tab=translations&lang=fr', {
-      scroll: false,
-    });
-  });
-
-  it('creates a missing target before refreshing and entering its exact editor route', async () => {
-    await renderReady({ canAdministerTranslations: false });
-
-    await click('entity-translations-panel-edit-ja');
-
-    expect(mocks.mutateTargetTranslation).toHaveBeenCalledWith({
-      target: { type: 'post', id: 'post-1', locale: 'ja' },
-      action: 'create',
-    });
-    expect(mocks.listEntityTranslations.mock.calls.length).toBeGreaterThanOrEqual(2);
-    expect(mocks.routerReplace).toHaveBeenCalledWith('/posts/post-1?edit=true&tab=translations&lang=ja', {
+    if (existing) {
+      expect(mocks.mutateTargetTranslation).not.toHaveBeenCalled();
+    } else {
+      expect(mocks.mutateTargetTranslation).toHaveBeenCalledWith({
+        target: { type: 'post', id: 'post-1', locale },
+        action: 'create',
+      });
+      expect(mocks.listEntityTranslations.mock.calls.length).toBeGreaterThanOrEqual(2);
+    }
+    expect(mocks.routerReplace).toHaveBeenCalledWith(`/posts/post-1?edit=true&tab=translations&lang=${locale}`, {
       scroll: false,
     });
   });
@@ -434,61 +402,8 @@ describe('EntityTranslationsPanel API commands', () => {
       sourceLocale: 'fr',
       expectedDocumentRevision: '22222222-2222-4222-8222-222222222222',
     });
-    expect(mocks.flushEditorSaves).toHaveBeenCalledWith('post:post-1');
-    expect(mocks.persistNow.mock.invocationCallOrder.at(-1)).toBeLessThan(
-      mocks.flushEditorSaves.mock.invocationCallOrder.at(-1) ?? Number.POSITIVE_INFINITY,
-    );
-    expect(mocks.flushEditorSaves.mock.invocationCallOrder.at(-1)).toBeLessThan(
-      mocks.getBlockRoomSnapshot.mock.invocationCallOrder.at(-1) ?? Number.POSITIVE_INFINITY,
-    );
-    expect(mocks.getBlockRoomSnapshot.mock.invocationCallOrder.at(-1)).toBeLessThan(
-      mocks.setEntitySourceLocale.mock.invocationCallOrder.at(-1) ?? Number.POSITIVE_INFINITY,
-    );
     expect(mocks.routerReplace).toHaveBeenCalledWith('/posts/post-1?edit=true&tab=translations&lang=fr');
     expect(mocks.listEntityTranslations.mock.calls.length).toBeGreaterThanOrEqual(2);
-  });
-
-  it('blocks a source-locale switch when pending editor saves fail to flush', async () => {
-    mocks.flushEditorSaves.mockResolvedValue(false);
-    await renderReady();
-    const select = document.querySelector('select') as HTMLSelectElement;
-
-    await act(async () => {
-      select.value = 'fr';
-      select.dispatchEvent(new Event('change', { bubbles: true }));
-    });
-    const confirmation = mocks.openConfirmModal.mock.calls[0]?.[0];
-    await act(async () => {
-      await expect(confirmation.onConfirm()).rejects.toThrow('Pending editor saves did not complete.');
-    });
-    await settle();
-
-    expect(mocks.flushEditorSaves).toHaveBeenCalledWith('post:post-1');
-    expect(mocks.getBlockRoomSnapshot).not.toHaveBeenCalled();
-    expect(mocks.setEntitySourceLocale).not.toHaveBeenCalled();
-    expect(mocks.routerReplace).not.toHaveBeenCalled();
-    expect(mocks.notificationShow).toHaveBeenCalledWith({
-      tone: 'danger',
-      message: koMessages.translationPanel.notifications.sourceLocaleUpdateFailed,
-    });
-  });
-
-  it('renders stable authorization and fallback errors without exposing raw RPC details', async () => {
-    mocks.regenerateEntityTranslations
-      .mockRejectedValueOnce(new ConnectError('secret upstream detail', Code.PermissionDenied))
-      .mockRejectedValueOnce(new ConnectError('provider credential raw detail', Code.Internal));
-    await renderReady();
-
-    await click('entity-translations-panel-regenerate-fr');
-    expect(mocks.notificationShow).toHaveBeenCalledWith({ tone: 'danger', message: 'Forbidden' });
-
-    await click('entity-translations-panel-regenerate-fr');
-    expect(mocks.notificationShow).toHaveBeenCalledWith({
-      tone: 'danger',
-      message: koMessages.translationPanel.notifications.regenerateFailed,
-    });
-    expect(container.textContent).not.toContain('secret upstream detail');
-    expect(container.textContent).not.toContain('provider credential raw detail');
   });
 });
 

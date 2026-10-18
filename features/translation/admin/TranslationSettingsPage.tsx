@@ -35,70 +35,20 @@ import {
 import { createTranslationClient } from '@/lib/api/browser/secure-translation';
 import { getTranslationActionErrorMessage } from '@/lib/translation/action-error';
 import { normalizeProtectedTerms } from '@/lib/translation/protected-terms';
+import {
+  buildSettingsUpdateMutation,
+  canonicalizeSettingsForm,
+  mergeRefreshedSettingsForm,
+  preserveSettingsEditsMadeDuringSave,
+  settingsFormsEqual,
+  toUpdateSettingsRequest,
+  type FormState,
+  type SettingsUpdateMutation,
+} from './settings-form';
 
 const settingsQueryKey = ['translation-settings'] as const;
 const localesQueryKey = ['translation-locales'] as const;
 const providersQueryKey = ['translation-providers'] as const;
-
-interface FormState {
-  defaultLocale: string;
-  protectedTerms: string[];
-}
-
-type SettingsUpdatePath = 'default_locale' | 'protected_terms';
-
-interface SettingsUpdateMutation {
-  form: FormState;
-  baseline: FormState;
-  paths: SettingsUpdatePath[];
-}
-
-function canonicalizeSettingsForm(form: FormState): FormState {
-  return {
-    defaultLocale: form.defaultLocale,
-    protectedTerms: normalizeProtectedTerms(form.protectedTerms),
-  };
-}
-
-function settingsFormsEqual(left: FormState, right: FormState): boolean {
-  return left.defaultLocale === right.defaultLocale && protectedTermsEqual(left.protectedTerms, right.protectedTerms);
-}
-
-function protectedTermsEqual(left: string[], right: string[]): boolean {
-  return left.length === right.length && left.every((term, index) => term === right[index]);
-}
-
-function mergeRefreshedSettingsForm(local: FormState, baseline: FormState | null, incoming: FormState): FormState {
-  if (!baseline) {
-    return incoming;
-  }
-  return {
-    defaultLocale: incoming.defaultLocale !== baseline.defaultLocale ? incoming.defaultLocale : local.defaultLocale,
-    protectedTerms: protectedTermsEqual(incoming.protectedTerms, baseline.protectedTerms)
-      ? local.protectedTerms
-      : incoming.protectedTerms,
-  };
-}
-
-function preserveSettingsEditsMadeDuringSave(current: FormState, submitted: FormState, saved: FormState): FormState {
-  return {
-    defaultLocale: current.defaultLocale === submitted.defaultLocale ? saved.defaultLocale : current.defaultLocale,
-    protectedTerms: protectedTermsEqual(current.protectedTerms, submitted.protectedTerms)
-      ? saved.protectedTerms
-      : current.protectedTerms,
-  };
-}
-
-export function buildSettingsUpdateMutation(baseline: FormState, form: FormState): SettingsUpdateMutation | null {
-  const paths: SettingsUpdatePath[] = [];
-  if (baseline.defaultLocale !== form.defaultLocale) {
-    paths.push('default_locale');
-  }
-  if (!protectedTermsEqual(baseline.protectedTerms, form.protectedTerms)) {
-    paths.push('protected_terms');
-  }
-  return paths.length > 0 ? { form, baseline, paths } : null;
-}
 
 export type TranslationSettingsPageClient = Pick<
   ReturnType<typeof createTranslationClient>,
@@ -180,17 +130,7 @@ export function TranslationSettingsPage({ client }: { client?: TranslationSettin
 
   const saveMutation = useMutation({
     mutationFn: async (mutation: SettingsUpdateMutation) =>
-      translationClient.updateTranslationSettings({
-        settings: {
-          defaultLocale: mutation.paths.includes('default_locale') ? mutation.form.defaultLocale : '',
-          protectedTerms: mutation.paths.includes('protected_terms') ? mutation.form.protectedTerms : [],
-        },
-        updateMask: { paths: mutation.paths },
-        baseSettings: {
-          defaultLocale: mutation.baseline.defaultLocale,
-          protectedTerms: mutation.baseline.protectedTerms,
-        },
-      }),
+      translationClient.updateTranslationSettings(toUpdateSettingsRequest(mutation)),
     onSuccess: async (result, mutation) => {
       const savedForm = canonicalizeSettingsForm({
         defaultLocale: result.settings?.defaultLocale ?? mutation.form.defaultLocale,

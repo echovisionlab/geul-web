@@ -15,3 +15,17 @@ describe('page section width', () => {
     expect(sectionSettingsSchema.safeParse({ maxWidth: 'reading' }).success).toBe(false);
   });
 });
+
+describe('page section padding', () => {
+  it('applies stored padding as pixels and leaves unset sides unstyled', () => {
+    expect(
+      getPageSectionStyle({ paddingTop: '12', paddingBottom: '16', paddingLeft: '20', paddingRight: '24' }),
+    ).toMatchObject({ paddingTop: '12px', paddingBottom: '16px', paddingLeft: '20px', paddingRight: '24px' });
+    expect(getPageSectionStyle({ paddingTop: '12' })).toMatchObject({
+      paddingTop: '12px',
+      paddingBottom: undefined,
+      paddingLeft: undefined,
+      paddingRight: undefined,
+    });
+  });
+});

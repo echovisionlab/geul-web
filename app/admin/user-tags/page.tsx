@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table/ServerDataTable';
 import { UserTagsPageView } from '@/features/admin/user-tag/UserTagsPageView';
 import { listUserTagsAdminAction } from '@/lib/actions/user-tag';
+import { toPaginatedListInput } from '@/lib/types/common/query';
 import { parseTableQuery } from '@/lib/utils/table-url';
 
 interface PageProps {
@@ -34,14 +35,7 @@ export default async function AdminUserTagsPage({ searchParams }: PageProps) {
     { field: 'created_at', label: tCommon('labels.created') },
   ];
 
-  const result = await listUserTagsAdminAction({
-    page: query.page,
-    pageSize: query.pageSize,
-    search: query.search,
-    sort: query.sorts?.map((s) => ({ field: s.field, order: s.direction })),
-    filter: query.filters,
-    filterBy: query.filterBy,
-  }).then(unwrapQueryResult);
+  const result = await listUserTagsAdminAction(toPaginatedListInput(query)).then(unwrapQueryResult);
 
   return (
     <UserTagsPageView

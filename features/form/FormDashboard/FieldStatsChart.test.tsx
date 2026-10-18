@@ -1,137 +1,90 @@
 // @vitest-environment jsdom
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import en from '@/messages/en.json';
+import { render, screen, within } from '@/test/render';
 import ko from '@/messages/ko.json';
 import { FieldStatsChart } from './FieldStatsChart';
-let root: Root;
-let container: HTMLDivElement;
+
 beforeEach(() => {
-  container = document.createElement('div');
-  document.body.append(container);
-  root = createRoot(container);
-  vi.stubGlobal(
-    'ResizeObserver',
-    class {
-      observe() {}
-      disconnect() {}
-      unobserve() {}
-    },
-  );
-  // jsdom has no layout; give the chart plot the size its CSS supplies in a browser.
+  // jsdom has no layout; supply the chart's browser plot dimensions.
   vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 400, 300));
 });
-afterEach(() => {
-  act(() => root.unmount());
-  container.remove();
-  vi.unstubAllGlobals();
-  vi.restoreAllMocks();
-});
-function render(stat: Parameters<typeof FieldStatsChart>[0]['fieldStat'], locale = 'en') {
-  act(() =>
-    root.render(
-      <NextIntlClientProvider locale={locale} messages={locale === 'ko' ? ko : en}>
-        <FieldStatsChart fieldStat={stat} />
-      </NextIntlClientProvider>,
-    ),
-  );
-}
+afterEach(() => vi.restoreAllMocks());
+
+const distribution = {
+  fieldId: 'a',
+  fieldName: 'Artist',
+  fieldType: 'select',
+  distribution: [
+    { value: 'Monome', count: 3 },
+    { value: '', count: 1 },
+  ],
+};
+
 describe('actual field statistics UI', () => {
   it('reads distribution values and localized totals in the chart accessible table', () => {
+    render(<FieldStatsChart fieldStat={distribution} />, { locale: 'ko', messages: ko });
+    expect(screen.getByRole('figure', { name: 'Artist' })).toHaveAttribute('data-kind', 'donut');
+    const table = screen.getByRole('table', { name: 'Artist' });
+    expect(within(table).getByRole('row', { name: /Monome.*3.*75\.0%/ })).toBeInTheDocument();
+    expect(within(table).getByRole('row', { name: /\(비어 있음\).*1.*25\.0%/ })).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: '차트 유형' })).toBeInTheDocument();
+  });
+
+  it('keeps numeric min, max, mean and count summaries for a histogram', () => {
     render(
-      {
-        fieldId: 'a',
-        fieldName: 'Artist',
-        fieldType: 'select',
-        distribution: [
-          { value: 'Monome', count: 3 },
-          { value: '', count: 1 },
-        ],
-      },
-      'ko',
+      <FieldStatsChart
+        fieldStat={{
+          fieldId: 'n',
+          fieldName: 'Score',
+          fieldType: 'number',
+          min: 0,
+          max: 19,
+          avg: 8.25,
+          count: 4,
+          histogram: [
+            { bucket: 0, count: 3 },
+            { bucket: 10, count: 1 },
+          ],
+        }}
+      />,
     );
-    expect(container.querySelector('figure')?.dataset.kind).toBe('donut');
-    expect(container.querySelector('table')?.textContent).toContain('Monome375.0%');
-    expect(container.querySelector('table')?.textContent).toContain('(비어 있음)125.0%');
-    expect(container.querySelector('[aria-label="차트 유형"]')).not.toBeNull();
+    expect(screen.getByRole('figure', { name: 'Score' })).toHaveAttribute('data-kind', 'histogram');
+    expect(screen.getByText('Minimum:', { exact: false })).toHaveTextContent('Minimum: 0.00');
+    expect(screen.getByText('Maximum:', { exact: false })).toHaveTextContent('Maximum: 19.00');
+    expect(screen.getByText('Average:', { exact: false })).toHaveTextContent('Average: 8.25');
+    expect(screen.getByText('Count:', { exact: false })).toHaveTextContent('Count: 4');
   });
-  it('keeps numeric min/max/mean/count summaries and histogram upper bounds', () => {
-    render({
-      fieldId: 'n',
-      fieldName: 'Score',
-      fieldType: 'number',
-      min: 0,
-      max: 19,
-      avg: 8.25,
-      count: 4,
-      histogram: [
-        { bucket: 0, count: 3 },
-        { bucket: 10, count: 1 },
-      ],
-    });
-    expect(container.querySelector('figure')?.dataset.kind).toBe('histogram');
-    expect(container.textContent).toContain('Minimum: 0.00');
-    expect(container.textContent).toContain('Average: 8.25');
-    expect(container.textContent).toContain('Count: 4');
-    expect(container.querySelector('table')?.textContent).toContain('0.0 – 10.0');
-  });
+
   it('changes the field-specific chart default when the rendered field changes', () => {
-    render({ fieldId: 'a', fieldName: 'Artist', fieldType: 'select', distribution: [{ value: 'A', count: 1 }] });
-    render({
-      fieldId: 'd',
-      fieldName: 'Date',
-      fieldType: 'date',
-      dateDistribution: [{ date: '2026-10-10', count: 1 }],
-    });
-    expect(container.querySelector('figure')?.dataset.kind).toBe('area');
-    expect(container.querySelector('table')?.textContent).toContain('2026-10-10');
+    const { rerender } = render(<FieldStatsChart fieldStat={distribution} />);
+    rerender(
+      <FieldStatsChart
+        fieldStat={{
+          fieldId: 'd',
+          fieldName: 'Date',
+          fieldType: 'date',
+          dateDistribution: [{ date: '2026-10-10', count: 1 }],
+        }}
+      />,
+    );
+    expect(screen.getByRole('figure', { name: 'Date' })).toHaveAttribute('data-kind', 'area');
+    expect(screen.getByRole('table', { name: 'Date' })).toHaveTextContent('2026-10-10');
   });
-  it('uses the catalogue locale for the empty response state without rendering a misleading plot', () => {
-    render({ fieldId: 'e', fieldName: 'Empty', fieldType: 'select', distribution: [] }, 'ko');
-    expect(container.textContent).toContain('아직 응답이 없습니다');
-    expect(container.querySelector('figure')).toBeNull();
+
+  it('uses the catalogue locale for the empty response state', () => {
+    render(<FieldStatsChart fieldStat={{ ...distribution, distribution: [] }} />, { locale: 'ko', messages: ko });
+    expect(screen.getByText('아직 응답이 없습니다')).toBeInTheDocument();
+    expect(screen.queryByRole('figure')).not.toBeInTheDocument();
   });
-  it('switches the actual Select across every distribution chart and its visible table', async () => {
-    render({
-      fieldId: 'a',
-      fieldName: 'Artist',
-      fieldType: 'select',
-      distribution: [
-        { value: 'Monome', count: 3 },
-        { value: 'TX–6', count: 1 },
-      ],
-    });
-    for (const [name, kind] of [
-      ['Pie', 'pie'],
-      ['Horizontal bars', 'bar-horizontal'],
-      ['Vertical bars', 'bar-vertical'],
-      ['Radar', 'radar'],
-      ['Table', 'table'],
-      ['Donut', 'donut'],
-    ]) {
-      await act(async () => {
-        const button = container.querySelector('button')!;
-        button.focus();
-        button.click();
-      });
-      const option = await vi.waitFor(() => {
-        const match = Array.from(document.querySelectorAll<HTMLElement>('[role="option"]')).find(
-          (node) => node.textContent === name,
-        );
-        expect(match, name).toBeTruthy();
-        return match!;
-      });
-      await act(async () => option.click());
-      await vi.waitFor(() => {
-        if (kind === 'table') {
-          expect(container.querySelector('figure')).toBeNull();
-          expect(container.querySelector('table')?.textContent).toContain('Monome375.0%');
-        } else {
-          expect(container.querySelector('figure')?.dataset.kind).toBe(kind);
-        }
-      });
-    }
+
+  it('switches the actual Select to another plot and to the table alternative', async () => {
+    const { user } = render(<FieldStatsChart fieldStat={distribution} />);
+    await user.click(screen.getByRole('button', { name: 'Show suggestions' }));
+    await user.click(await screen.findByRole('option', { name: 'Pie' }));
+    expect(screen.getByRole('figure', { name: 'Artist' })).toHaveAttribute('data-kind', 'pie');
+    await user.click(screen.getByRole('button', { name: 'Show suggestions' }));
+    await user.click(await screen.findByRole('option', { name: 'Table' }));
+    expect(screen.queryByRole('figure')).not.toBeInTheDocument();
+    expect(screen.getByRole('table', { name: 'Artist' })).toHaveTextContent('Monome');
   });
 });

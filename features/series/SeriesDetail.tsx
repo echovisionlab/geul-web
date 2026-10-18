@@ -31,7 +31,7 @@ import { OgImagePreview } from '@/features/metadata/OgImagePreview';
 import { EditorActiveLocaleControl } from '@/features/translation/EditorActiveLocaleControl';
 import { EntityTranslationsPanel } from '@/features/translation/EntityTranslationsPanel';
 import { useLocaleDocumentSession } from '@/features/translation/useLocaleDocumentSession';
-import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
+import { flushEditorSavesOrNotify } from '@/lib/editor/flush-editor-saves-or-notify';
 import { SectionCard } from '@/components/core/Section';
 import { ImageUploadCropController } from '@/features/upload/ImageUploadCropController';
 import {
@@ -354,13 +354,10 @@ function useSeriesDetailModel({ initialData, scope }: SeriesDetailProps) {
       slug,
     });
   };
-  const flushPendingSaves = useCallback(async () => {
-    const saved = await flushEditorSaves(`post_series:${seriesId}`);
-    if (!saved) {
-      notifications.show({ message: tCommonNotifications('saveFailed'), tone: 'danger' });
-    }
-    return saved;
-  }, [seriesId, tCommonNotifications]);
+  const flushPendingSaves = useCallback(
+    () => flushEditorSavesOrNotify(`post_series:${seriesId}`, tCommonNotifications('saveFailed')),
+    [seriesId, tCommonNotifications],
+  );
   const handleBack = useCallback(async () => {
     if (await flushPendingSaves()) {
       router.push(backHref);

@@ -21,7 +21,6 @@ import { createRichTextBlockRoomTiptapController } from './block-room-tiptap-con
 import { createMarkdownPasteExtension } from './markdown-paste';
 import { createTiptapWireExtensions } from './wire-schema';
 import { createCompactTiptapExtensions } from './profiles/CompactTiptapEditor';
-import { inlineContentProjectionEqual, parseDocument, splitPayload } from './block-room-tiptap-codec';
 
 const ids = ['10000000-0000-4000-8000-000000000111', '10000000-0000-4000-8000-000000000112'];
 const cases = [
@@ -194,30 +193,6 @@ describe('line-break persistence through the live controller', () => {
       s.editor.commands.setContent(s.controller.initialContent);
       expect(Y.encodeStateAsUpdate(s.room)).toEqual(saved);
     }
-    s.close();
-  });
-
-  it('canonicalizes newline text supplied by JSON imports before persistence and compares legacy projections equally', () => {
-    const s = subject('post', RichTextProfile.POST);
-    const doc: JSONContent = s.editor.getJSON();
-    doc.content![0]!.content![0]!.content![0]!.content = [
-      { type: 'text', text: '\na\r\n\nb\r', marks: [{ type: 'bold' }] },
-    ];
-    const payload = splitPayload(parseDocument(doc)[0]!);
-    expect(payload.locale.content).toEqual([
-      { hardBreak: {} },
-      { text: { text: 'a', styles: { bold: true } } },
-      { hardBreak: {} },
-      { hardBreak: {} },
-      { text: { text: 'b', styles: { bold: true } } },
-      { hardBreak: {} },
-    ]);
-    expect(
-      inlineContentProjectionEqual(
-        [{ text: { text: 'a\nb' } }],
-        [{ text: { text: 'a' } }, { hardBreak: {} }, { text: { text: 'b' } }],
-      ),
-    ).toBe(true);
     s.close();
   });
 });

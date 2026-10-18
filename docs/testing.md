@@ -73,6 +73,26 @@ replaces all collaborators. For example, a codec can use real in-memory Yjs data
 without a service process. CRDT convergence, keyboard commands, profile guards,
 and live structure locks retain their real editor integration tests.
 
+Upload preparation, completion recovery, access-policy normalization and reorder
+calculations run directly in Node. Their component tests retain the connections
+that pure tests cannot prove: a cancelled upload issues no abort during finalization,
+a failed save prevents navigation or delivery, and a reordered relation sends its
+neighbor intent and observed order to the persistence action.
+
+State-only Tiptap tests create an unmounted editor and install the actual extension
+plugins when exercising input rules or transaction filters. An editor constructed
+with `element: null` does not install those plugins by itself. Keyboard dispatch,
+DOM selection, focus, rendered File hydration and controller-to-writer routing
+keep their mounted fixtures.
+
+Use real Core controls and the production View when testing their connection to a
+controller. A View mock that accepts callbacks does not verify that a user can
+reach those callbacks. SSR is appropriate for initial content and permission
+attributes; it cannot verify effect-driven query gating or later state changes.
+Run user-event interactions with real timers, or explicitly control the complete
+timer boundary. Its `advanceTimers` option alone does not drain every timer used
+by the installed React Testing Library async wrapper.
+
 `scripts/test/vitest-projects.mts` discovers the existing `.test.ts` and `.test.tsx`
 files once when Vitest starts and assigns each to one project. Existing
 `@vitest-environment` directives remain authoritative: SSR stays in Node and DOM

@@ -1,43 +1,23 @@
-// @vitest-environment jsdom
-import { act, type ReactNode } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+// @vitest-environment node
+import type { ReactNode } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { describe, expect, it } from 'vitest';
 import { TestProviders } from '@/test/TestProviders';
 import { LoginErrorPageView } from '@/features/auth/LoginErrorPageView';
 import { ChangelogPageView } from '@/features/changelog/ChangelogPageView';
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), prefetch: vi.fn() }),
-  usePathname: () => '/preview',
-  useSearchParams: () => new URLSearchParams(),
-}));
-let host: HTMLDivElement;
-let root: Root;
-afterEach(() => {
-  act(() => root?.unmount());
-  host?.remove();
-});
-async function render(view: ReactNode) {
-  host = document.createElement('div');
-  document.body.append(host);
-  root = createRoot(host);
-  await act(async () => root.render(<TestProviders>{view}</TestProviders>));
+function render(view: ReactNode) {
+  return renderToStaticMarkup(<TestProviders>{view}</TestProviders>);
 }
 describe('production public page previews', () => {
-  it('offers account recovery only for pending deletion', async () => {
-    await render(<LoginErrorPageView error={{ id: 'account_pending_deletion' }} />);
-    expect(host.querySelector('a[href="/account/recover"]')?.textContent).toContain('Recover Account');
-    await act(async () =>
-      root.render(
-        <TestProviders>
-          <LoginErrorPageView error={{ id: 'account_banned' }} />
-        </TestProviders>,
-      ),
-    );
-    expect(host.querySelector('a[href="/account/recover"]')).toBeNull();
-    expect(host.querySelector('a[href="/login"]')?.textContent).toContain('Back to Login');
+  it('offers account recovery only for pending deletion', () => {
+    const pending = render(<LoginErrorPageView error={{ id: 'account_pending_deletion' }} />);
+    expect(pending).toMatch(/<a\b[^>]*href="\/account\/recover"[^>]*>.*?Recover Account/);
+    const banned = render(<LoginErrorPageView error={{ id: 'account_banned' }} />);
+    expect(banned).not.toContain('href="/account/recover"');
+    expect(banned).toMatch(/<a\b[^>]*href="\/login"[^>]*>.*?Back to Login/);
   });
-  it('keeps authored changelog release anchors and safe external links', async () => {
-    await render(
+  it('keeps authored changelog release anchors and safe external links', () => {
+    const markup = render(
       <ChangelogPageView
         releases={[
           {
@@ -61,11 +41,11 @@ describe('production public page previews', () => {
         ]}
       />,
     );
-    expect(host.querySelector('[id="release-0.11.2"]')?.textContent).toBe('0.11.2');
-    const link = host.querySelector('a[href="https://github.com/echovisionlab/geul-web/issues/1"]');
-    expect(link?.getAttribute('target')).toBe('_blank');
-    expect(link?.getAttribute('rel')).toBe('noopener noreferrer');
-    expect(host.querySelector('[id="release-0.11.2-fixes"]')?.textContent).toBe('Fixes');
-    expect(host.querySelector('[lang="en"]')).not.toBeNull();
+    expect(markup).toMatch(/id="release-0\.11\.2"[^>]*>0\.11\.2</);
+    const link = markup.match(/<a\b[^>]*href="https:\/\/github\.com\/echovisionlab\/geul-web\/issues\/1"[^>]*>/)?.[0];
+    expect(link).toContain('target="_blank"');
+    expect(link).toContain('rel="noopener noreferrer"');
+    expect(markup).toMatch(/id="release-0\.11\.2-fixes"[^>]*>Fixes</);
+    expect(markup).toContain('lang="en"');
   });
 });

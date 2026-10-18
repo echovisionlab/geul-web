@@ -9,7 +9,7 @@ import { useDateTimeFormatter } from '@/features/date-time/DateTime';
 import { MyArtistsDataTable, type MyArtistsDataTableResult } from '@/features/my/MyArtistsDataTable';
 import type { MyArtistsTableRowViewModel } from '@/features/my/ui/MyArtistsTable';
 import { listMyArtistsAction } from '@/lib/actions/artist';
-import type { PaginatedQuery } from '@/lib/types/common/query';
+import { toPaginatedListInput, type PaginatedQuery } from '@/lib/types/common/query';
 import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
 
 interface MyArtistListItem {
@@ -95,15 +95,7 @@ export function MyArtistsTable({ initialData, listAction = listMyArtistsAction }
 
   const loadedDataQuery = useQuery({
     queryKey: ['artists', 'my', query],
-    queryFn: () =>
-      listAction({
-        filter: query.filters,
-        filterBy: query.filterBy,
-        sort: query.sorts?.map((sort) => ({ field: sort.field, order: sort.direction })),
-        page: query.page ?? 1,
-        pageSize: query.pageSize ?? 20,
-        search: query.search,
-      }).then(unwrapQueryResult),
+    queryFn: () => listAction(toPaginatedListInput(query)).then(unwrapQueryResult),
     // The server-rendered page belongs to the first query only; another page or search must load its own rows.
     initialData: hashKey([query]) === initialQueryHash ? initialData : undefined,
   });

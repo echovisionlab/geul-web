@@ -13,12 +13,7 @@ import {
   useSensors,
   type DragEndEvent,
 } from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortableItem } from '@/components/core/Sortable';
 import { IconGripVertical, IconPlus, IconX } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
@@ -30,6 +25,7 @@ import { IconButton } from '@/components/core/IconButton';
 import { Select } from '@/components/core/Input';
 import { SectionCard, SectionHeader } from '@/components/core/Section';
 import type { ReleaseArtistItem } from '@/lib/types/release/model';
+import { reorderWithIntent } from './reorder-with-intent';
 export interface ReleaseArtistOption {
   id: string;
   name: string;
@@ -81,19 +77,12 @@ export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange
     );
   };
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
-    if (!canEdit || !over || active.id === over.id) {
+    if (!canEdit) {
       return;
     }
-    const oldIndex = artists.findIndex((artist) => artist.artist_id === active.id);
-    const newIndex = artists.findIndex((artist) => artist.artist_id === over.id);
-    if (oldIndex !== -1 && newIndex !== -1) {
-      const reordered = arrayMove(artists, oldIndex, newIndex);
-      const movedIndex = reordered.findIndex((artist) => artist.artist_id === active.id);
-      normalizeAndChange(reordered, {
-        itemId: String(active.id),
-        previousItemId: movedIndex > 0 ? reordered[movedIndex - 1].artist_id : undefined,
-        nextItemId: movedIndex + 1 < reordered.length ? reordered[movedIndex + 1].artist_id : undefined,
-      });
+    const reorder = reorderWithIntent(artists, active.id, over?.id, (artist) => artist.artist_id);
+    if (reorder) {
+      normalizeAndChange(reorder.items, reorder.intent);
     }
   };
   const handleAdd = () => {

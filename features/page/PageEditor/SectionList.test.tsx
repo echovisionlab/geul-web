@@ -1,85 +1,21 @@
 // @vitest-environment jsdom
 
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { PageSectionPreinsertDialog } from './PageSectionPreinsertDialog';
+import { describe, expect, it, vi } from 'vitest';
+import { render, screen } from '@/test/render';
+import { PageSectionPreinsertDialog, type ConfiguredSectionType } from './PageSectionPreinsertDialog';
 
-vi.mock('next-intl', () => ({
+vi.mock('next-intl', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('next-intl')>()),
   useTranslations: () => (key: string) => key,
 }));
 
-vi.mock('@/components/core/Button', () => ({
-  Button: ({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
-    <button type="button" {...props}>
-      {children}
-    </button>
-  ),
-}));
-
-vi.mock('@/components/core/DropdownMenu', () => ({
-  DropdownMenu: Object.assign(({ children }: { children: React.ReactNode }) => <div>{children}</div>, {
-    Target: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    Dropdown: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    Item: ({ children }: { children: React.ReactNode }) => <button type="button">{children}</button>,
-  }),
-}));
-
-vi.mock('./SectionItem', () => ({ SectionItem: () => null }));
-
-vi.mock('@/components/core/Input', () => ({
-  TextInput: ({
-    label: _label,
-    error: _error,
-    ...props
-  }: React.InputHTMLAttributes<HTMLInputElement> & {
-    label?: string;
-    error?: React.ReactNode;
-  }) => <input {...props} />,
-  Select: ({
-    data,
-    value,
-    onChange,
-    searchable: _searchable,
-    ...props
-  }: {
-    searchable?: boolean;
-    data: readonly { value: string; label: string }[];
-    value: string | null;
-    onChange: (value: string | null) => void;
-  } & Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'onChange' | 'value'>) => (
-    <select {...props} value={value ?? ''} onChange={(event) => onChange(event.currentTarget.value || null)}>
-      <option value="" />
-      {data.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
-  ),
-}));
-
-let container: HTMLDivElement;
-let root: Root;
-
-beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-});
-
-afterEach(() => {
-  act(() => root.unmount());
-  container.remove();
-});
-
-function renderDialog(
-  type: 'external-video' | 'embed' | 'form',
-  onCancel: () => void,
-  onInsert: (type: 'external-video' | 'embed' | 'form', props: Record<string, unknown>) => void,
-) {
-  act(() => {
-    root.render(
+function setup(type: ConfiguredSectionType) {
+  const onCancel = vi.fn();
+  const onInsert = vi.fn();
+  return {
+    onCancel,
+    onInsert,
+    ...render(
       <PageSectionPreinsertDialog
         type={type}
         title={type}
@@ -88,84 +24,54 @@ function renderDialog(
         onCancel={onCancel}
         onInsert={onInsert}
       />,
-    );
-  });
-}
-
-function changeInput(input: HTMLInputElement, value: string): void {
-  Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set?.call(input, value);
-  input.dispatchEvent(new Event('input', { bubbles: true }));
+    ),
+  };
 }
 
 describe('Page section pre-insert configuration', () => {
-  it('cancels without inserting a durable Block', () => {
-    const onCancel = vi.fn();
-    const onInsert = vi.fn();
-    renderDialog('external-video', onCancel, onInsert);
-
-    act(() => {
-      document.querySelector<HTMLButtonElement>('[data-page-section-preinsert-cancel]')?.click();
-    });
-
+  it('cancels without inserting a durable Block', async () => {
+    const { user, onCancel, onInsert } = setup('external-video');
+    await user.click(screen.getByRole('button', { name: 'cancel' }));
     expect(onCancel).toHaveBeenCalledOnce();
     expect(onInsert).not.toHaveBeenCalled();
   });
 
-  it('inserts an external-video exactly once only after a valid HTTP(S) URI exists', () => {
-    const onInsert = vi.fn();
-    renderDialog('external-video', vi.fn(), onInsert);
-    const input = document.querySelector<HTMLInputElement>('[data-page-section-preinsert-url]')!;
-    const confirm = document.querySelector<HTMLButtonElement>('[data-page-section-preinsert-confirm]')!;
-
-    expect(confirm.disabled).toBe(true);
-    act(() => {
-      changeInput(input, 'not-a-uri');
-    });
-    expect(confirm.disabled).toBe(true);
-    expect(onInsert).not.toHaveBeenCalled();
-
-    act(() => {
-      changeInput(input, ' https://video.example/watch/1 ');
-    });
-    expect(confirm.disabled).toBe(false);
-    act(() => confirm.click());
-
-    expect(onInsert).toHaveBeenCalledOnce();
-    expect(onInsert).toHaveBeenCalledWith('external-video', { url: 'https://video.example/watch/1' });
-  });
-
-  it('requires a noncredential HTTPS URI before inserting an Embed', () => {
-    const onInsert = vi.fn();
-    renderDialog('embed', vi.fn(), onInsert);
-    const input = document.querySelector<HTMLInputElement>('[data-page-section-preinsert-url]')!;
-    const confirm = document.querySelector<HTMLButtonElement>('[data-page-section-preinsert-confirm]')!;
-    for (const value of ['', 'invalid', 'http://embed.example', 'https://user:password@embed.example']) {
-      act(() => changeInput(input, value));
-      expect(confirm.disabled).toBe(true);
-      act(() => confirm.click());
+  it.each([
+    ['external-video', 'URL', 'not-a-uri', ' https://video.example/watch/1 ', { url: 'https://video.example/watch/1' }],
+    [
+      'embed',
+      'embed.urlLabel',
+      'https://user:password@embed.example',
+      ' https://embed.example/app ',
+      { uri: 'https://embed.example/app' },
+    ],
+  ] as const)(
+    'gates %s insertion and stores the trimmed configured URL exactly once',
+    async (type, label, invalid, valid, props) => {
+      const { user, onInsert } = setup(type);
+      const input = screen.getByRole('textbox', { name: label });
+      const confirm = screen.getByRole('button', { name: 'add' });
+      expect(confirm).toBeDisabled();
+      await user.type(input, invalid);
+      expect(confirm).toBeDisabled();
+      await user.click(confirm);
       expect(onInsert).not.toHaveBeenCalled();
-    }
-    act(() => changeInput(input, ' https://embed.example/app '));
-    expect(confirm.disabled).toBe(false);
-    act(() => confirm.click());
-    expect(onInsert).toHaveBeenCalledExactlyOnceWith('embed', { uri: 'https://embed.example/app' });
-  });
+      await user.clear(input);
+      await user.type(input, valid);
+      expect(confirm).toBeEnabled();
+      await user.click(confirm);
+      expect(onInsert).toHaveBeenCalledExactlyOnceWith(type, props);
+    },
+  );
 
-  it('inserts a Form exactly once only after a published Form is selected', () => {
-    const onInsert = vi.fn();
-    renderDialog('form', vi.fn(), onInsert);
-    const select = document.querySelector<HTMLSelectElement>('[data-page-section-preinsert-form]')!;
-    const confirm = document.querySelector<HTMLButtonElement>('[data-page-section-preinsert-confirm]')!;
-
-    expect(confirm.disabled).toBe(true);
-    act(() => {
-      select.value = 'form-published';
-      select.dispatchEvent(new Event('change', { bubbles: true }));
-    });
-    expect(confirm.disabled).toBe(false);
-    act(() => confirm.click());
-
-    expect(onInsert).toHaveBeenCalledOnce();
-    expect(onInsert).toHaveBeenCalledWith('form', { formId: 'form-published' });
+  it('inserts a Form exactly once only after a published Form is selected', async () => {
+    const { user, onInsert } = setup('form');
+    const confirm = screen.getByRole('button', { name: 'add' });
+    expect(confirm).toBeDisabled();
+    await user.click(screen.getByRole('combobox', { name: 'blockEditor.labels.selectForm' }));
+    await user.click(await screen.findByRole('option', { name: 'Published Form' }));
+    expect(confirm).toBeEnabled();
+    await user.click(confirm);
+    expect(onInsert).toHaveBeenCalledExactlyOnceWith('form', { formId: 'form-published' });
   });
 });

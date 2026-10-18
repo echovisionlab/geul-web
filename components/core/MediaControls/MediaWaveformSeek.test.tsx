@@ -13,17 +13,20 @@ import classes from './MediaControls.module.css';
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 let root: Root | undefined;
+let container: HTMLDivElement | undefined;
 afterEach(() => {
   if (root) {
     act(() => root?.unmount());
   }
   root = undefined;
-  document.body.replaceChildren();
+  container?.remove();
+  container = undefined;
 });
 
 function renderSeek(props: Partial<MediaWaveformSeekProps> = {}) {
   const host = document.createElement('div');
   document.body.append(host);
+  container = host;
   root = createRoot(host);
   const onSeek = vi.fn();
   const onTogglePlayback = vi.fn();

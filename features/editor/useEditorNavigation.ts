@@ -1,9 +1,9 @@
 'use client';
 
 import { useCallback } from 'react';
-import { notifications } from '@/components/core/Notification';
 import { useTranslations } from 'next-intl';
-import { flushAllEditorSaves, hasPendingEditorSaves } from '@/lib/editor/editor-save-registry';
+import { hasPendingEditorSaves } from '@/lib/editor/editor-save-registry';
+import { flushEditorSavesOrNotify } from '@/lib/editor/flush-editor-saves-or-notify';
 
 type Navigation = () => void | Promise<void>;
 
@@ -21,8 +21,7 @@ export function useEditorNavigation(document: string) {
         await navigation();
         return true;
       }
-      if (!(await flushAllEditorSaves(document))) {
-        notifications.show({ message: t('saveFailed'), tone: 'danger' });
+      if (!(await flushEditorSavesOrNotify(document, t('saveFailed')))) {
         return false;
       }
       await navigation();

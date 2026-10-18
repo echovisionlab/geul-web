@@ -32,6 +32,7 @@ describe('editor library file selection', () => {
   it('filters library files by the target block upload contract', () => {
     const audio = libraryFile();
     const image = libraryFile({ mimeType: 'image/png', extension: 'png', fileSize: 2048 });
+    const video = libraryFile({ mimeType: 'video/mp4', extension: 'mp4', fileSize: 8192 });
     const oversizedAttachment = libraryFile({
       mimeType: 'application/pdf',
       extension: 'pdf',
@@ -49,6 +50,7 @@ describe('editor library file selection', () => {
     expect(isEditorLibraryFileEligible(failedImage, 'file')).toBe(false);
     expect(isUnifiedEditorLibraryFileEligible(audio)).toBe(true);
     expect(isUnifiedEditorLibraryFileEligible(image)).toBe(true);
+    expect(isUnifiedEditorLibraryFileEligible(video)).toBe(true);
     expect(isUnifiedEditorLibraryFileEligible(oversizedAttachment)).toBe(false);
     expect(isUnifiedEditorLibraryFileEligible(failedImage)).toBe(false);
   });

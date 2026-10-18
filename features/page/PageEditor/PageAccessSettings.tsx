@@ -8,7 +8,12 @@ import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/core/Button';
 import { Checkbox, MultiSelect, Select } from '@/components/core/Input';
-import { DEFAULT_PAGE_ACCESS_POLICY, type PageAccessPolicyValue } from '@/lib/types/page-access';
+import type { PageAccessPolicyValue } from '@/lib/types/page-access';
+import {
+  canonicalPageAccessPolicy,
+  setPageAccessMembership,
+  updatePageAccessConditions,
+} from '@/features/page/page-access-draft';
 
 export interface PageAccessSettingsProps {
   value: PageAccessPolicyValue;
@@ -21,10 +26,6 @@ export interface PageAccessSettingsProps {
 }
 
 type SaveStatus = 'idle' | 'pending' | 'saved' | 'error';
-
-function canonicalPolicy(value: PageAccessPolicyValue): PageAccessPolicyValue {
-  return value.mode === 'conditions' ? value : { ...DEFAULT_PAGE_ACCESS_POLICY, mode: value.mode };
-}
 
 export function PageAccessSettings({
   value,
@@ -74,18 +75,15 @@ export function PageAccessSettings({
 
   const conditionGroupCount =
     Number(draft.roles.length > 0) + Number(draft.userTagIds.length > 0) + Number(draft.newsletterSubscriber);
-  const updateConditions = (changes: Partial<PageAccessPolicyValue>) => {
-    const next = { ...draft, ...changes };
-    const hasConditions = next.roles.length > 0 || next.userTagIds.length > 0 || next.newsletterSubscriber;
-    update({ ...next, mode: hasConditions ? 'conditions' : 'authenticated' });
-  };
+  const updateConditions = (changes: Partial<PageAccessPolicyValue>) =>
+    update(updatePageAccessConditions(draft, changes));
 
   async function save() {
     if (emptyConditions) {
       setState((current) => ({ ...current, attemptedSave: true, status: 'idle', error: '' }));
       return;
     }
-    const saved = canonicalPolicy(draft);
+    const saved = canonicalPageAccessPolicy(draft);
     setState((current) => ({ ...current, status: 'pending', error: '', attemptedSave: false }));
     try {
       const result = await onSave(saved);
@@ -113,9 +111,7 @@ export function PageAccessSettings({
           label={t('roleUser')}
           description={t('memberDescription')}
           checked={draft.mode !== 'public'}
-          onChange={(event) =>
-            update(event.currentTarget.checked ? { mode: 'authenticated' } : { ...DEFAULT_PAGE_ACCESS_POLICY })
-          }
+          onChange={(event) => update(setPageAccessMembership(draft, event.currentTarget.checked))}
           disabled={disabled || pending}
         />
         <Checkbox

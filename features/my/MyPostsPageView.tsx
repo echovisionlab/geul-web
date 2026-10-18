@@ -15,7 +15,7 @@ import type { SortFieldConfig } from '@/features/data-table/DataTableMultiSort';
 import { CreatePostButton } from '@/features/post/CreatePostButton';
 import { listMyPosts } from '@/lib/queries/post-browser';
 import type { ColumnDef } from '@/lib/types/common/data-table';
-import type { PaginatedQuery } from '@/lib/types/common/query';
+import { toPaginatedListInput, type PaginatedQuery } from '@/lib/types/common/query';
 import { buildEntityEditHref } from '@/lib/utils/entity-edit-route';
 
 // Define the type to match the actual return type from listMyPostsAction (via toPlainPost)
@@ -135,15 +135,7 @@ export function MyPostsPageView({ listAction = listMyPosts, createBindings }: My
 
   const { data, isLoading } = useQuery({
     queryKey: ['posts', 'my', query],
-    queryFn: () =>
-      listAction({
-        filter: query.filters,
-        filterBy: query.filterBy,
-        sort: query.sorts?.map((s) => ({ field: s.field, order: s.direction })),
-        page: query.page ?? 1,
-        pageSize: query.pageSize ?? 20,
-        search: query.search,
-      }),
+    queryFn: () => listAction(toPaginatedListInput(query)),
   });
 
   return (

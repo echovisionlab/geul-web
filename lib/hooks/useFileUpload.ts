@@ -6,9 +6,7 @@ import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.
 import type { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import { useMutation } from '@tanstack/react-query';
-import { Code } from '@connectrpc/connect';
-import type { ActionResult } from '@/lib/actions/action-result';
-import { CLIENT_MEDIA_ARTIFACTS_MISSING } from '@/lib/upload/upload-errors';
+import { unwrapClientMediaCompletion } from '@/lib/upload/upload-errors';
 import {
   abortUploadAction,
   completeUploadAction,
@@ -71,30 +69,6 @@ function normalizeRuntimeEntityType(
     default:
       return undefined;
   }
-}
-
-function unwrapClientMediaCompletion(result: ActionResult<{ url: string; fileId: string }>): {
-  url: string;
-  fileId: string;
-} {
-  if (result.ok) {
-    return { url: result.url, fileId: result.fileId };
-  }
-  if (result.error === CLIENT_MEDIA_ARTIFACTS_MISSING) {
-    throw new Error(CLIENT_MEDIA_ARTIFACTS_MISSING);
-  }
-  if (result.errorCode === Code.Unauthenticated) {
-    throw new Error('Unauthorized');
-  }
-  if (result.errorCode === Code.PermissionDenied) {
-    throw new Error('Forbidden');
-  }
-  if (
-    [Code.InvalidArgument, Code.NotFound, Code.FailedPrecondition, Code.DataLoss].includes(result.errorCode as Code)
-  ) {
-    throw new Error('Upload failed');
-  }
-  throw new Error(result.error);
 }
 
 export function useFileUpload(options?: UseFileUploadOptions) {

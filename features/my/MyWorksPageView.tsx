@@ -17,7 +17,7 @@ import type { FilterFieldConfig } from '@/features/data-table/DataTableMultiFilt
 import type { SortFieldConfig } from '@/features/data-table/DataTableMultiSort';
 import { listMyCreditedWorksAction } from '@/lib/actions/work';
 import type { ColumnDef } from '@/lib/types/common/data-table';
-import type { PaginatedQuery } from '@/lib/types/common/query';
+import { toPaginatedListInput, type PaginatedQuery } from '@/lib/types/common/query';
 import type { CreditedWork } from '@/lib/types/work/model';
 import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
 
@@ -139,15 +139,7 @@ export function MyWorksPageView({ listAction = listMyCreditedWorksAction }: MyWo
   const [query, setQuery] = useState<PaginatedQuery>({ page: 1, pageSize: 20 });
   const loadedDataQuery = useQuery({
     queryKey: ['works', 'my', 'credited', query],
-    queryFn: () =>
-      listAction({
-        filter: query.filters,
-        filterBy: query.filterBy,
-        sort: query.sorts?.map((sort) => ({ field: sort.field, order: sort.direction })),
-        page: query.page ?? 1,
-        pageSize: query.pageSize ?? 20,
-        search: query.search,
-      }).then(unwrapQueryResult),
+    queryFn: () => listAction(toPaginatedListInput(query)).then(unwrapQueryResult),
   });
   const { data, isLoading } = loadedDataQuery;
 

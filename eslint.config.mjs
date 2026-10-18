@@ -280,6 +280,27 @@ export default defineConfig(
     },
   },
   {
+    files: ['components/core/**/*.test.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: restrictedCoreImportPaths,
+          patterns: [
+            {
+              group: restrictedCoreImportPatterns.filter((pattern) => !pattern.startsWith('@/')),
+              message: 'Core tests retain the production import boundary outside the shared render helper.',
+            },
+            {
+              regex: '^@/(?!test/render$)',
+              message: 'Core tests may import @/test/render; other application aliases remain restricted.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ['features/**/ui/**/*.tsx', 'features/**/ui/**/*.ts'],
     ignores: ['**/*.stories.ts', '**/*.stories.tsx', '**/*.story.ts', '**/*.story.tsx'],
     rules: {

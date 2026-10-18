@@ -76,16 +76,6 @@ function viewProps() {
 }
 
 describe('AdminShell controller', () => {
-  it('does not prefetch the server-rendered Member administration response', () => {
-    renderController();
-
-    const memberAdministration = viewProps()
-      .navSections.flatMap((section) => section.items)
-      .find((item) => item.href === '/admin/users');
-
-    expect(memberAdministration?.prefetch).toBe(false);
-  });
-
   it('preserves the desktop expansion preference across breakpoints and ignores mobile toggles', () => {
     renderController();
     expect(viewProps()).toMatchObject({

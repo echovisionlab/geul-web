@@ -1,7 +1,11 @@
 // @vitest-environment jsdom
 
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+import type { ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { TestProviders } from '@/test/TestProviders';
+import { act, renderHook, waitFor } from '@/test/render';
+import { notifications } from '@/components/core/Notification';
+import type { PostStatus } from '@/lib/types/post/model';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PostAction } from '@echovisionlab/geul-proto/secure/post_pb.ts';
 import {
@@ -15,7 +19,6 @@ import { usePostLifecycle } from './usePostLifecycle';
 import type { PostScheduleResolution } from './post-schedule';
 
 const state = vi.hoisted(() => ({
-  mutations: [] as Array<(...args: never[]) => Promise<unknown>>,
   postPublish: vi.fn(),
   postUnpublish: vi.fn(),
   postArchive: vi.fn(),
@@ -27,15 +30,7 @@ const state = vi.hoisted(() => ({
   eventPublish: vi.fn(),
   eventArchive: vi.fn(),
 }));
-vi.mock('@tanstack/react-query', () => ({
-  useMutation: ({ mutationFn }: { mutationFn: (...args: never[]) => Promise<unknown> }) => {
-    state.mutations.push(mutationFn);
-    return { mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false };
-  },
-}));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
-vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
-vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 vi.mock('@/lib/actions/post', () => ({
   publishPostAction: state.postPublish,
   unpublishPostAction: state.postUnpublish,
@@ -57,34 +52,40 @@ vi.mock('@/lib/actions/program-event', () => ({
   updateProgramEventAction: vi.fn(),
 }));
 
-function Post({ id }: { id: string }) {
-  usePostLifecycle({
+let client: QueryClient;
+function wrapper({ children }: { children: ReactNode }) {
+  return (
+    <TestProviders>
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    </TestProviders>
+  );
+}
+function usePost(id: string, initialStatus: PostStatus = 'draft') {
+  return usePostLifecycle({
     postId: id,
-    initialStatus: 'draft',
+    initialStatus,
     initialScheduledAt: null,
     initialScheduledTimeZone: null,
-    allowedActions: [PostAction.PUBLISH_NOW, PostAction.UNPUBLISH],
+    allowedActions: [
+      PostAction.PUBLISH_NOW,
+      PostAction.UNPUBLISH,
+      PostAction.ARCHIVE,
+      PostAction.CANCEL_SCHEDULE,
+      PostAction.REPUBLISH,
+      PostAction.SCHEDULE,
+    ],
     openSchedule: vi.fn(),
     closeSchedule: vi.fn(),
   });
-  return null;
 }
-function Work({ id }: { id: string }) {
-  useWorkLifecycle({ workId: id, initialStatus: 'draft', canEdit: true, isAdmin: true, onDeleted: vi.fn() });
-  return null;
-}
-function Event({ id }: { id: string }) {
-  useProgramEventLifecycle({ eventId: id, initialStatus: 'draft', allowedActions: ['publish', 'archive'] });
-  return null;
-}
-
-let root: Root;
 beforeEach(() => {
-  vi.clearAllMocks();
-  state.mutations.length = 0;
-  root = createRoot(document.createElement('div'));
+  client = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+  Object.values(state).forEach((action) => action.mockReset().mockResolvedValue({ success: true }));
 });
-afterEach(() => act(() => root.unmount()));
+afterEach(() => {
+  client.clear();
+  act(() => notifications.clean());
+});
 
 describe('status metadata origins', () => {
   it('forwards schedule origin at request time with the existing schedule intent', async () => {
@@ -95,10 +96,9 @@ describe('status metadata origins', () => {
       localLabel: 'Local',
       utcLabel: 'UTC',
     };
-    act(() => root.render(<Post id={id} />));
-    const schedule = state.mutations[3] as unknown as (value: PostScheduleResolution) => Promise<unknown>;
+    const { result } = renderHook(() => usePost(id), { wrapper });
     await act(async () => {
-      await schedule(resolution);
+      await result.current.schedule.mutateAsync(resolution);
     });
     expect(state.postSchedule).toHaveBeenCalledExactlyOnceWith(
       id,
@@ -109,28 +109,50 @@ describe('status metadata origins', () => {
   });
 
   it.each([
-    ['post-publish', Post, 'post', 0, state.postPublish],
-    ['post-unpublish', Post, 'post', 1, state.postUnpublish],
-    ['post-archive', Post, 'post', 2, state.postArchive],
-    ['post-cancel', Post, 'post', 4, state.postCancel],
-    ['post-republish', Post, 'post', 5, state.postRepublish],
-    ['work-publish', Work, 'work', 0, state.workPublish],
-    ['work-unpublish', Work, 'work', 1, state.workUnpublish],
-    ['event-publish', Event, 'program_event', 1, state.eventPublish],
-    ['event-archive', Event, 'program_event', 2, state.eventArchive],
-  ] as const)(
-    'forwards tab origin and keeps authoritative refresh enabled for %s',
-    async (id, Harness, entity, index, action) => {
-      const owner = Symbol('canonical-owner');
-      registerConfigurationOriginWrite(`${entity}:${id}`, owner)(true);
-      const origin = getEditorWriteOrigin();
-      expect(hasAdoptedConfigurationOrigin(`${entity}:${id}`, owner, origin)).toBe(true);
-      act(() => root.render(<Harness id={id} />));
-      await act(async () => {
-        await state.mutations[index]();
+    ['post-publish', 'draft', 'published', state.postPublish],
+    ['post-unpublish', 'published', 'draft', state.postUnpublish],
+    ['post-archive', 'published', 'archived', state.postArchive],
+    ['post-cancel', 'scheduled', 'draft', state.postCancel],
+    ['post-republish', 'archived', 'published', state.postRepublish],
+  ] as const)('forwards tab origin and releases authoritative refresh for %s', async (id, initial, next, action) => {
+    const owner = Symbol('canonical-owner');
+    registerConfigurationOriginWrite(`post:${id}`, owner)(true);
+    const origin = getEditorWriteOrigin();
+    expect(hasAdoptedConfigurationOrigin(`post:${id}`, owner, origin)).toBe(true);
+    const { result } = renderHook(() => usePost(id, initial), { wrapper });
+    act(() => result.current.changeStatus(next));
+    await waitFor(() => expect(action).toHaveBeenCalledExactlyOnceWith(id, origin));
+    expect(hasAdoptedConfigurationOrigin(`post:${id}`, owner, origin)).toBe(false);
+  });
+
+  it.each([
+    ['work-publish', 'work', 'published', state.workPublish],
+    ['work-unpublish', 'work', 'draft', state.workUnpublish],
+    ['event-publish', 'program_event', 'published', state.eventPublish],
+    ['event-archive', 'program_event', 'archived', state.eventArchive],
+  ] as const)('forwards tab origin and releases authoritative refresh for %s', async (id, entity, next, action) => {
+    const owner = Symbol('canonical-owner');
+    registerConfigurationOriginWrite(`${entity}:${id}`, owner)(true);
+    const origin = getEditorWriteOrigin();
+    expect(hasAdoptedConfigurationOrigin(`${entity}:${id}`, owner, origin)).toBe(true);
+    function useLifecycle() {
+      const work = useWorkLifecycle({
+        workId: id,
+        initialStatus: 'draft',
+        canEdit: true,
+        isAdmin: true,
+        onDeleted: vi.fn(),
       });
-      expect(action).toHaveBeenCalledExactlyOnceWith(id, origin);
-      expect(hasAdoptedConfigurationOrigin(`${entity}:${id}`, owner, origin)).toBe(false);
-    },
-  );
+      const event = useProgramEventLifecycle({
+        eventId: id,
+        initialStatus: 'draft',
+        allowedActions: ['publish', 'archive'],
+      });
+      return entity === 'work' ? work : event;
+    }
+    const { result } = renderHook(useLifecycle, { wrapper });
+    act(() => result.current.changeStatus(next));
+    await waitFor(() => expect(action).toHaveBeenCalledExactlyOnceWith(id, origin));
+    expect(hasAdoptedConfigurationOrigin(`${entity}:${id}`, owner, origin)).toBe(false);
+  });
 });

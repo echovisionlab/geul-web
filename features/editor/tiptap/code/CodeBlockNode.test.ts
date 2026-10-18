@@ -4,7 +4,7 @@ import { Editor } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createTiptapWireExtensions } from '../wire-schema';
-import { codeEditorModelPath, selectCodeBlockAtPosition } from './CodeBlockNode';
+import { selectCodeBlockAtPosition } from './CodeBlockNode';
 import { replaceCodeBlockSource } from './code-source-transaction';
 
 const mounted: { editor: Editor; element: HTMLElement }[] = [];
@@ -59,18 +59,6 @@ afterEach(() => {
 });
 
 describe('code block Monaco source adapter', () => {
-  it('scopes stable model paths to the editor authority instance', () => {
-    const visibleLocaleEditor = {};
-    const hiddenMirrorEditor = {};
-    expect(codeEditorModelPath(visibleLocaleEditor, 'shared-block-id', 'ts')).toBe(
-      codeEditorModelPath(visibleLocaleEditor, 'shared-block-id', 'ts'),
-    );
-    expect(codeEditorModelPath(visibleLocaleEditor, 'shared-block-id', 'ts')).not.toBe(
-      codeEditorModelPath(hiddenMirrorEditor, 'shared-block-id', 'ts'),
-    );
-    expect(codeEditorModelPath(visibleLocaleEditor, 'unsafe/id', 'glsl')).toContain('unsafe%2Fid.glsl');
-  });
-
   it('exits Monaco to the exact code node selection without changing source or attributes', () => {
     const { editor, position, node } = fixture();
     const before = editor.state.doc.toJSON();

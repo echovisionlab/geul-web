@@ -1,3 +1,5 @@
+import { Code } from '@connectrpc/connect';
+import type { ActionResult } from '@/lib/actions/action-result';
 import {
   UPLOAD_ABORTED_MESSAGE,
   UPLOAD_FAILED_MESSAGE,
@@ -94,6 +96,31 @@ export const CLIENT_MEDIA_ARTIFACTS_MISSING = 'CLIENT_MEDIA_ARTIFACTS_MISSING';
 
 export function isClientMediaArtifactsMissingError(error: unknown): boolean {
   return error instanceof Error && error.message === CLIENT_MEDIA_ARTIFACTS_MISSING;
+}
+
+/** Turns a client media commit result into the completion value, or the error the completion policy classifies. */
+export function unwrapClientMediaCompletion(result: ActionResult<{ url: string; fileId: string }>): {
+  url: string;
+  fileId: string;
+} {
+  if (result.ok) {
+    return { url: result.url, fileId: result.fileId };
+  }
+  if (result.error === CLIENT_MEDIA_ARTIFACTS_MISSING) {
+    throw new Error(CLIENT_MEDIA_ARTIFACTS_MISSING);
+  }
+  if (result.errorCode === Code.Unauthenticated) {
+    throw new Error('Unauthorized');
+  }
+  if (result.errorCode === Code.PermissionDenied) {
+    throw new Error('Forbidden');
+  }
+  if (
+    [Code.InvalidArgument, Code.NotFound, Code.FailedPrecondition, Code.DataLoss].includes(result.errorCode as Code)
+  ) {
+    throw new Error('Upload failed');
+  }
+  throw new Error(result.error);
 }
 
 export function isClientMediaRestoreMismatchError(

@@ -1,10 +1,8 @@
 // @vitest-environment jsdom
 
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { act, render, within } from '@/test/render';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MapBlockHydrator } from './MapBlockHydrator';
-import { waitInAct } from '@/test/act-wait';
 
 const embeddedProps: Array<{ blockAlignment?: string }> = [];
 
@@ -28,20 +26,8 @@ vi.mock('./MapViewEmbedded', () => ({
   ),
 }));
 
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-if (!window.requestAnimationFrame) {
-  window.requestAnimationFrame = (callback: FrameRequestCallback) =>
-    window.setTimeout(() => callback(performance.now()), 0);
-}
-
-if (!window.cancelAnimationFrame) {
-  window.cancelAnimationFrame = (handle: number) => window.clearTimeout(handle);
-}
-
 let host: HTMLDivElement | null = null;
-let content: HTMLDivElement | null = null;
-let root: Root | null = null;
+let view: ReturnType<typeof render> | undefined;
 
 function renderMapMarkup(container: HTMLElement, placeName: string) {
   const mapBlock = document.createElement('div');
@@ -83,41 +69,42 @@ function renderMapMarkup(container: HTMLElement, placeName: string) {
   container.replaceChildren(mapBlock);
 }
 
+beforeEach(() => {
+  vi.useFakeTimers();
+});
+
 afterEach(() => {
-  act(() => {
-    root?.unmount();
-  });
+  view?.unmount();
+  view = undefined;
   host?.remove();
   embeddedProps.length = 0;
-  root = null;
-  content = null;
   host = null;
+  vi.useRealTimers();
 });
 
 describe('MapBlockHydrator', () => {
   it('rehydrates map blocks again when placeholder HTML is reinserted', async () => {
     host = document.createElement('div');
-    content = document.createElement('div');
+    const content = document.createElement('div');
     host.appendChild(content);
     document.body.appendChild(host);
-    root = createRoot(host);
+    const controller = document.createElement('div');
+    host.appendChild(controller);
 
     renderMapMarkup(content, 'Initial Place');
 
+    view = render(<MapBlockHydrator containerRef={{ current: content }} />, { container: controller });
+
+    expect(within(content).getByText('Initial Place')).toBeInTheDocument();
+    expect(within(content).queryByText('[Map: 1 place]')).not.toBeInTheDocument();
+
     await act(async () => {
-      root?.render(<MapBlockHydrator containerRef={{ current: content }} />);
-      await new Promise((resolve) => window.setTimeout(resolve, 0));
+      renderMapMarkup(content, 'Replacement Place');
     });
 
-    expect(content.querySelector('[data-map-hydrated]')?.textContent).toBe('Initial Place');
-    expect(content.textContent).not.toContain('[Map: 1 place]');
-
-    act(() => {
-      renderMapMarkup(content!, 'Replacement Place');
-    });
-
-    await waitInAct(() => expect(content?.querySelector('[data-map-hydrated]')?.textContent).toBe('Replacement Place'));
-    expect(content.textContent).not.toContain('[Map: 1 place]');
+    await act(async () => vi.advanceTimersToNextFrame());
+    expect(within(content).getByText('Replacement Place')).toBeInTheDocument();
+    expect(within(content).queryByText('[Map: 1 place]')).not.toBeInTheDocument();
     expect(embeddedProps.at(-1)?.blockAlignment).toBe('center');
   });
 });

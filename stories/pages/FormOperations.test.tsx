@@ -1,58 +1,30 @@
-// @vitest-environment jsdom
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
-import { notifyManager } from '@tanstack/react-query';
+// @vitest-environment node
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { expect, it, vi } from 'vitest';
 import { TestProviders } from '@/test/TestProviders';
-import { FormOperationsPreview } from './FormOperations.stories';
-vi.mock('next/navigation', () => ({ useRouter: () => ({ replace: vi.fn(), push: vi.fn(), prefetch: vi.fn() }) }));
-vi.mock('@/lib/actions/form', () => ({
-  listFormSubmissionsAction: vi.fn(),
-  deleteFormSubmissionAction: vi.fn(),
-  checkFormAccessAction: vi.fn(),
-  getFormDashboardByShareAction: vi.fn(),
-  verifyFormPasswordAction: vi.fn(),
-}));
-class ResizeObserverMock {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-}
-vi.stubGlobal('ResizeObserver', ResizeObserverMock);
-let host: HTMLDivElement, root: Root;
-beforeEach(() => {
-  // Deliver query results inside act so waits observe committed renders.
-  notifyManager.setNotifyFunction((callback) => {
-    act(callback);
-  });
-});
-afterEach(() => {
-  act(() => root?.unmount());
-  host?.remove();
-  sessionStorage.clear();
-  notifyManager.setNotifyFunction((callback) => callback());
-});
-function render(
-  surface: 'submissions' | 'detail' | 'dashboard' | 'password',
-  state: 'ready' | 'empty' | 'invalid' = 'ready',
-) {
-  host = document.createElement('div');
-  document.body.append(host);
-  root = createRoot(host);
-  act(() =>
-    root.render(
+import { FormSubmissionDetailPageView } from '@/features/form/FormSubmissionDetailPageView';
+
+vi.mock('next/navigation', () => ({ useRouter: () => ({ replace: vi.fn(), push: vi.fn() }) }));
+vi.mock('@/lib/actions/form', () => ({ deleteFormSubmissionAction: vi.fn() }));
+
+it('renders submission metadata and responses with its delete action', () => {
+  const markup = renderToStaticMarkup(
+    <QueryClientProvider client={new QueryClient()}>
       <TestProviders>
-        <FormOperationsPreview surface={surface} state={state} />
-      </TestProviders>,
-    ),
+        <FormSubmissionDetailPageView
+          formId="form-1"
+          formSchema={{
+            id: 'form-1',
+            steps: [{ id: 'identity', fields: [{ id: 'name', type: 'text', label: 'Name' }] }],
+          }}
+          submission={{ id: 'submission-1', formId: 'form-1', data: { name: 'June Han' }, ipAddress: '192.0.2.1' }}
+        />
+      </TestProviders>
+    </QueryClientProvider>,
   );
-}
-describe('actual form operations page previews', () => {
-  // The confirmation flow behind the delete action is covered in features/form/SubmissionDeleteButton.test.tsx.
-  it('renders submission metadata/responses with its delete action', () => {
-    render('detail');
-    expect(host.textContent).toContain('June Han');
-    expect(host.textContent).toContain('192.0.2.1');
-    expect(host.querySelector('button[aria-label="Delete"]')).not.toBeNull();
-  });
+  expect(markup).toContain('June Han');
+  expect(markup).toContain('Metadata');
+  expect(markup).toContain('192.0.2.1');
+  expect(markup).toMatch(/<button\b[^>]*aria-label="Delete"/);
 });

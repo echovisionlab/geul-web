@@ -1,119 +1,62 @@
 // @vitest-environment jsdom
 
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { afterEach, expect, it, vi } from 'vitest';
+import { notifications } from '@/components/core/Notification';
+import { act, render } from '@/test/render';
 import { WorkFeaturedImageUploader } from './WorkFeaturedImageUploader';
 
-const { notificationShowMock, setFeaturedImageActionMock, setFeaturedImageMock, uploadMock } = vi.hoisted(() => ({
-  notificationShowMock: vi.fn(),
-  setFeaturedImageActionMock: vi.fn(),
-  setFeaturedImageMock: vi.fn(),
-  uploadMock: vi.fn(),
-}));
-
+const mocks = vi.hoisted(() => ({ upload: vi.fn(), setImage: vi.fn(), setAction: vi.fn() }));
 let uploadHandler: ((blob: Blob) => void | Promise<void>) | null = null;
-let container: HTMLDivElement | null = null;
-let root: Root | null = null;
-
-vi.mock('@tanstack/react-query', () => ({
-  useMutation: ({
-    mutationFn,
-    onSuccess,
-  }: {
-    mutationFn: (variables: unknown) => Promise<unknown>;
-    onSuccess?: (result: unknown, variables: unknown) => void;
-  }) => ({
-    mutateAsync: async (variables: unknown) => {
-      const result = await mutationFn(variables);
-      onSuccess?.(result, variables);
-      return result;
-    },
-    mutate: async (variables?: unknown) => {
-      const result = await mutationFn(variables);
-      onSuccess?.(result, variables);
-      return result;
-    },
-    isPending: false,
-  }),
-}));
-
-vi.mock('next-intl', () => ({
-  useTranslations: () => (key: string) => key,
-}));
-
-vi.mock('@/components/core/Notification', () => ({
-  notifications: { show: notificationShowMock },
-}));
-
 vi.mock('@/features/upload/ImageUploadCropController', () => ({
-  ImageUploadCropController: ({ onUpload }: { onUpload: (blob: Blob) => void | Promise<void> }) => {
+  ImageUploadCropController: ({ onUpload }: { onUpload: typeof uploadHandler }) => {
     uploadHandler = onUpload;
-    return <div />;
+    return null;
   },
 }));
-
 vi.mock('@/lib/actions/work', () => ({
-  setWorkFeaturedImageAction: (...args: unknown[]) => setFeaturedImageActionMock(...args),
+  setWorkFeaturedImageAction: mocks.setAction,
   removeWorkFeaturedImageAction: vi.fn(),
 }));
-
 vi.mock('@/lib/contexts/WorkMetaContext', () => ({
   useWorkMeta: () => ({
     featuredImageUrl: null,
-    setFeaturedImage: setFeaturedImageMock,
+    setFeaturedImage: mocks.setImage,
     isConnected: true,
     isSynced: true,
   }),
 }));
+vi.mock('@/lib/hooks/useUpload', () => ({ useUpload: () => ({ upload: mocks.upload, isUploading: false }) }));
+afterEach(() => {
+  act(() => notifications.clean());
+  vi.clearAllMocks();
+  uploadHandler = null;
+});
 
-vi.mock('@/lib/hooks/useUpload', () => ({
-  useUpload: () => ({ upload: uploadMock, isUploading: false }),
-}));
-
-vi.mock('@/lib/utils/client-logger', () => ({
-  createClientLogger: () => ({ error: vi.fn() }),
-}));
-
-beforeEach(() => {
-  uploadMock.mockResolvedValue({ fileId: 'work-file-id' });
-  setFeaturedImageActionMock.mockResolvedValue({
+it('stores the uploaded file ID through the Work action and keeps the URL for display', async () => {
+  mocks.upload.mockResolvedValue({ fileId: 'work-file-id' });
+  mocks.setAction.mockResolvedValue({
     imageUrl: 'https://example.com/work-cover.jpg',
     ogGenerationRunId: 'work-og-run',
   });
-  setFeaturedImageMock.mockReturnValue(true);
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-});
-
-afterEach(() => {
-  act(() => root?.unmount());
-  container?.remove();
-  container = null;
-  root = null;
-  uploadHandler = null;
-  uploadMock.mockReset();
-  setFeaturedImageActionMock.mockReset();
-  setFeaturedImageMock.mockReset();
-  notificationShowMock.mockReset();
-});
-
-describe('WorkFeaturedImageUploader', () => {
-  it('stores the uploaded file ID in collaboration and keeps the URL for display', async () => {
-    const onOgGenerationRequested = vi.fn();
-    act(() => {
-      root?.render(
-        <WorkFeaturedImageUploader workId="work-1" canEdit onOgGenerationRequested={onOgGenerationRequested} />,
-      );
-    });
-
+  mocks.setImage.mockReturnValue(true);
+  const onOgGenerationRequested = vi.fn();
+  const client = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+  const { unmount } = render(
+    <QueryClientProvider client={client}>
+      <WorkFeaturedImageUploader workId="work-1" canEdit onOgGenerationRequested={onOgGenerationRequested} />
+    </QueryClientProvider>,
+  );
+  try {
+    expect(uploadHandler).toBeTypeOf('function');
     await act(async () => {
-      await uploadHandler?.(new Blob(['image'], { type: 'image/webp' }));
+      await uploadHandler!(new Blob(['image'], { type: 'image/webp' }));
     });
-
-    expect(setFeaturedImageActionMock).toHaveBeenCalledWith('work-1', 'work-file-id');
-    expect(setFeaturedImageMock).toHaveBeenCalledWith('work-file-id', 'https://example.com/work-cover.jpg');
+    expect(mocks.setAction).toHaveBeenCalledWith('work-1', 'work-file-id');
+    expect(mocks.setImage).toHaveBeenCalledWith('work-file-id', 'https://example.com/work-cover.jpg');
     expect(onOgGenerationRequested).toHaveBeenCalledWith('work-og-run');
-  });
+  } finally {
+    unmount();
+    client.clear();
+  }
 });
