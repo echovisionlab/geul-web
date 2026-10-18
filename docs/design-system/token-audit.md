@@ -12,7 +12,7 @@ This report is generated from production source by `node scripts/design-system/c
 - 0 existing literal CSS spacing/typography occurrences covered by the migration baseline.
 - 0 existing custom-property declarations/inline assignments outside central files (private `--_*` implementation variables are permitted).
 - 177 literal CSS dimension occurrences in spacing, typography and geometry properties; 71 distinct values. These are audit findings, not blanket errors: canvas dimensions, geometry and responsive layouts require context.
-- 763 CSS custom-property declarations, 295 distinct names, 143 names declared more than once. Theme/state/media overrides are expected; equal values alone do not establish semantic duplication.
+- 756 CSS custom-property declarations, 292 distinct names, 142 names declared more than once. Theme/state/media overrides are expected; equal values alone do not establish semantic duplication.
 - 0 findings match the reviewed migration baseline; 0 new violations; 0 obsolete baseline keys eligible for removal.
 
 ## Enforcement contract
@@ -89,7 +89,7 @@ Authored typography exceptions (artwork, not interface roles):
 | `--_alert-ink`                       |            5 | `components/core/Alert/Alert.module.css`                                                               |
 | `--_frame-navigation-width`          |            2 | `components/core/ApplicationFrame/ApplicationFrame.module.css`                                         |
 | `--_badge-ink`                       |            5 | `components/core/Badge/Badge.module.css`                                                               |
-| `--_collection-thumbnail`            |            4 | `components/core/Collection/Collection.module.css`                                                     |
+| `--_collection-thumbnail`            |            3 | `components/core/Collection/Collection.module.css`                                                     |
 | `--_collection-hero`                 |            3 | `components/core/Collection/Collection.module.css`                                                     |
 | `--_action-ink`                      |            5 | `components/core/Control.module.css`                                                                   |
 | `--_action-ink-muted`                |            5 | `components/core/Control.module.css`                                                                   |
@@ -123,7 +123,6 @@ Authored typography exceptions (artwork, not interface roles):
 | `--_selection-status-inset`          |            3 | `components/core/SelectionSurface/SelectionSurface.module.css`                                         |
 | `--_navigation-leading-track`        |            2 | `components/core/SideNavigation/SideNavigation.module.css`                                             |
 | `--_social-brand-color`              |            2 | `components/core/Social/SocialIcon.module.css`                                                         |
-| `--_table-of-contents-inset-start`   |            4 | `components/core/TableOfContents/TableOfContents.module.css`                                           |
 | `--_table-of-contents-inset-end`     |            3 | `components/core/TableOfContents/TableOfContents.module.css`                                           |
 | `--_tab-active-ink`                  |            5 | `components/core/Tabs/Tabs.module.css`                                                                 |
 | `--_tab-active-fill`                 |            5 | `components/core/Tabs/Tabs.module.css`                                                                 |

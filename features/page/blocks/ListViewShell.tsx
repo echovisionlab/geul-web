@@ -23,6 +23,8 @@ import { collectionMinColumnWidth, type CollectionTrackScale } from './content-l
 import { getResponsiveSlideSize } from './constants';
 import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
 
+// The widest Core Collection thumbnail (L, the 20rem grid track); smaller sizes reuse the same file.
+const THUMBNAIL_IMAGE_SIZES = '20rem';
 const ListCarousel = dynamic(() => import('./ListCarouselRuntime').then((module) => module.ListCarouselRuntime));
 
 export type ListViewLayout = 'grid' | 'list' | 'cards' | 'minimal' | 'carousel';
@@ -129,7 +131,7 @@ function ItemMedia({
         aria-label={item.title?.trim() || tStates('untitled')}
         tabIndex={-1}
       >
-        <MediaImage item={item} naturalSize={naturalSize} sizes={thumbnail ? '128px' : undefined} />
+        <MediaImage item={item} naturalSize={naturalSize} sizes={thumbnail ? THUMBNAIL_IMAGE_SIZES : undefined} />
       </Link>
     </CollectionMedia>
   );

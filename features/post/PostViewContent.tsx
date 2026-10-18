@@ -163,7 +163,7 @@ export function PostViewContent({
             </ContentChrome>
           }
         >
-          <TableOfContents items={tocItems} contentPlacement="center">
+          <TableOfContents items={tocItems}>
             <DsLayoutInset inline={post.featuredImageUrl ? 'md' : 'none'}>
               <div className={classes.contentFlow}>
                 {/* Content */}
@@ -187,7 +187,7 @@ export function PostViewContent({
 
                 {/* Series Navigation */}
                 {post.series && (
-                  <DsLayoutContainer size="reading" inset="none">
+                  <DsLayoutContainer size="reading" inset="none" placement="start">
                     <SectionCard appearance="plain" padding="none" withBorder={false}>
                       <DsLayoutStack gap="sm" role="navigation" aria-label={post.series.title}>
                         <DsLayoutInline gap="xs">
@@ -237,7 +237,7 @@ export function PostViewContent({
 
                 {/* Comments */}
                 <div className="print-hide">
-                  <DsLayoutContainer size="reading" inset="none">
+                  <DsLayoutContainer size="reading" inset="none" placement="start">
                     <CommentSection
                       listAction={commentBindings?.listAction}
                       sessionSnapshot={commentBindings?.sessionSnapshot}

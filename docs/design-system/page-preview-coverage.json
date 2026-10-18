@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "methodology": "All App Router visual entry files indexed by TypeScript imports/JSX; exact reviewed route/boundary maps count separately from mere Feature story overlap. Unmapped entrypoints remain explicit gaps. Static source census is not a browser pass.",
-  "sourceManifestHash": "22a84f7b0bafd403895989c79ba721d4b7d084b407e64609101d1d0e71dc0b11",
+  "sourceManifestHash": "49dbcdef0e7f0743a19b1c031ab379aa75c26de6c8fcfa455fadf09970fbf7e1",
   "counts": {
     "queryEditorBranches": 12,
     "editorBranchPreviews": 12,
@@ -26621,7 +26621,7 @@
     },
     {
       "file": "app/(general)/series/[idOrSlug]/page.tsx",
-      "sha256": "ba89c97409d14c33acd3e26dd11179da672f036f70ae90b899594e161134ad7a",
+      "sha256": "76f7797932a2da3a4fbeb485cc52d56b117e38f44bb72affee0f0d04f73c7a01",
       "kind": "page",
       "route": "/series/[idOrSlug]",
       "family": "Public",

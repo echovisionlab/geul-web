@@ -31,7 +31,7 @@ function StoryView({ withImage = false, empty = false }: { withImage?: boolean; 
     <div style={{ width: 'min(1040px, 94vw)' }}>
       <SeriesPublicView title="Night Walks" featuredImageUrl={featuredImageUrl} postsLabel={t('common.entities.posts')}>
         <SeriesPublicPostsView
-          tableLabel={t('common.entities.posts')}
+          tableLabel="Night Walks"
           posts={empty ? [] : posts}
           labels={{
             title: t('common.labels.title'),

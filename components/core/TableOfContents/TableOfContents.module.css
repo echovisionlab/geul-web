@@ -1,11 +1,8 @@
 /*
  * Outline geometry is component-private. The entry is the rail's pointer target (28px, 44px on
  * coarse pointers); the column is the persistent wide-screen outline. The layout keeps both outside
- * the document text: rail width below lg, column + xl gap from lg. The reserve is balanced so the
- * reading column stays centered under the title. The document box between the reserves is
- * 100% − 2 × 16.5rem: from lg it holds the 44rem reading measure once the frame is 77rem wide
- * (1232px plus the frame inset, 1256px at the site's 12px inset); between 1200 and 1255px the
- * measure is bounded by the box (648–703px) and never reaches the column.
+ * the document text at the inline end: rail width below lg, column + xl gap from lg. The document
+ * starts at the frame's start edge and runs up to that reserve; the outline sits at the inline end.
  */
 :global([data-table-of-contents-scope]),
 .layout,
@@ -18,20 +15,12 @@
 
 /*
  * The reserved inline space. The layout pads itself with it; a `tableOfContentsScope` ancestor
- * publishes the same values to document chrome outside the layout (titles, heroes, overlaid
- * controls) so they align with the reserved document box. Without an outline both are 0.
+ * publishes the same value to document chrome outside the layout (titles, heroes, overlaid
+ * controls) so they end where the reserved document box ends. Without an outline it is 0.
  */
 :global([data-table-of-contents-scope]):has(.layout[data-outline]),
 .layout[data-outline] {
-  --_table-of-contents-inset-start: 0px;
   --_table-of-contents-inset-end: var(--_toc-entry-width);
-}
-
-@media (width >= $mantine-breakpoint-sm) {
-  :global([data-table-of-contents-scope]):has(.layout[data-outline][data-placement='center']),
-  .layout[data-outline][data-placement='center'] {
-    --_table-of-contents-inset-start: var(--_toc-entry-width);
-  }
 }
 
 /* A rail-only outline (`outline="rail"`) keeps the rail reserve at every width. */
@@ -39,13 +28,6 @@
   :global([data-table-of-contents-scope]):has(.layout[data-outline]:not([data-outline-presentation='rail'])),
   .layout[data-outline]:not([data-outline-presentation='rail']) {
     --_table-of-contents-inset-end: var(--_toc-column-track);
-  }
-
-  :global([data-table-of-contents-scope]):has(
-    .layout[data-outline][data-placement='center']:not([data-outline-presentation='rail'])
-  ),
-  .layout[data-outline][data-placement='center']:not([data-outline-presentation='rail']) {
-    --_table-of-contents-inset-start: var(--_toc-column-track);
   }
 }
 
@@ -59,7 +41,7 @@
 }
 
 .layout[data-outline] {
-  padding-inline: var(--_table-of-contents-inset-start) var(--_table-of-contents-inset-end);
+  padding-inline-end: var(--_table-of-contents-inset-end);
 }
 
 .track {
@@ -72,14 +54,6 @@
 }
 
 @media (width >= $mantine-breakpoint-lg) {
-  /* A centered document stays one composition on very wide screens: breakouts up to `standard`
-     with the column beside them, instead of the column drifting to the far viewport edge. */
-  .layout[data-outline][data-placement='center']:not([data-outline-presentation='rail']) {
-    width: 100%;
-    max-width: calc(var(--geul-content-width-standard) + 2 * var(--_toc-column-track));
-    margin-inline: auto;
-  }
-
   .layout:not([data-outline-presentation='rail']) > .track {
     width: var(--_toc-column-width);
   }
@@ -246,8 +220,11 @@
 }
 
 .column .link {
-  /* Compact rows for a fine pointer; the shared 44px minimum on coarse-pointer wide screens (tablets). */
+  /* Compact rows for a fine pointer; the shared 44px minimum on coarse-pointer wide screens (tablets).
+     The persistent column is secondary navigation beside the text: one step below the revealed list. */
   min-height: var(--geul-interaction-minimum);
+  font-size: var(--geul-font-size-xs);
+  line-height: var(--geul-line-height-xs);
   padding-block: var(--geul-spacing-xxs);
   padding-inline: calc(var(--geul-spacing-md) + var(--_toc-depth) * var(--geul-spacing-md)) var(--geul-spacing-xs);
   border-inline-start: var(--geul-border-thin) solid var(--geul-border-default);
@@ -296,16 +273,11 @@
   }
 
   :global([data-table-of-contents-scope]):has(.layout[data-outline]),
-  :global([data-table-of-contents-scope]):has(.layout[data-outline][data-placement='center']),
-  .layout[data-outline],
-  .layout[data-outline][data-placement='center'] {
-    --_table-of-contents-inset-start: 0px;
+  .layout[data-outline] {
     --_table-of-contents-inset-end: 0px;
   }
 
-  .layout[data-outline],
-  .layout[data-outline][data-placement='center'] {
-    max-width: none;
-    padding-inline: 0;
+  .layout[data-outline] {
+    padding-inline-end: 0;
   }
 }

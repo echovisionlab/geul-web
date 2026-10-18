@@ -1,16 +1,20 @@
+/* One media width per item size, shared by every layout: a list thumbnail is exactly as wide as the
+   minimum grid card of the same size (the `LayoutGrid minColumnWidth` tracks sm/md/lg = 9/14/20rem),
+   so grid and list blocks of one size show their images at the same scale. At 16:9 each thumbnail is
+   at least as tall as its two-line title and two metadata lines. */
 .collection {
   min-inline-size: 0;
-  --_collection-thumbnail: calc(var(--geul-spacing-xl) * 3);
+  --_collection-thumbnail: calc(var(--geul-spacing-lg) * 14);
   --_collection-hero: calc(var(--geul-spacing-xl) * 12);
 }
 
 .collection[data-core-collection-size='s'] {
-  --_collection-thumbnail: calc(var(--geul-spacing-xl) * 2);
+  --_collection-thumbnail: calc(var(--geul-spacing-lg) * 9);
   --_collection-hero: calc(var(--geul-spacing-xl) * 9);
 }
 
 .collection[data-core-collection-size='l'] {
-  --_collection-thumbnail: calc(var(--geul-spacing-xl) * 4);
+  --_collection-thumbnail: calc(var(--geul-spacing-lg) * 20);
   --_collection-hero: calc(var(--geul-spacing-xl) * 15);
 }
 
@@ -21,9 +25,11 @@
   background: var(--geul-surface-muted);
 }
 
+/* In a narrow row (phones, sidebars) the thumbnail yields to the text and keeps its ratio. */
 .media[data-width='thumbnail'] {
   inline-size: var(--_collection-thumbnail);
-  flex: 0 0 var(--_collection-thumbnail);
+  max-inline-size: 40%;
+  flex: 0 0 auto;
   align-self: start;
 }
 
@@ -39,11 +45,5 @@
   .media[data-hero] {
     aspect-ratio: auto;
     block-size: var(--_collection-hero);
-  }
-}
-
-@media (width < $mantine-breakpoint-sm) {
-  .collection[data-core-collection-size='l'] {
-    --_collection-thumbnail: calc(var(--geul-spacing-xl) * 3);
   }
 }

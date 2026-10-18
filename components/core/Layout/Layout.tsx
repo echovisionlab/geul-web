@@ -78,6 +78,8 @@ export interface LayoutSpacerProps extends Omit<LayoutNativeProps, 'role' | 'tab
 export interface LayoutContainerProps extends LayoutBaseProps {
   size?: LayoutContainerSize;
   inset?: Responsive<Space>;
+  /** `center` (default) centers the measure in the available width; `start` keeps it on the start edge. */
+  placement?: 'center' | 'start';
 }
 export interface LayoutGridProps extends Omit<LayoutStackProps, 'justify'> {
   columns?: Responsive<LayoutColumnCount>;
@@ -350,9 +352,26 @@ const containerWidths: Record<LayoutContainerSize, string> = {
   full: '100%',
 };
 export const LayoutContainer = forwardRef<HTMLElement, LayoutContainerProps>(
-  ({ as, children, size = 'standard', inset, flexible, fill, shrink, clip, textAlign, order, ...props }, ref) => {
+  (
+    {
+      as,
+      children,
+      size = 'standard',
+      inset,
+      placement = 'center',
+      flexible,
+      fill,
+      shrink,
+      clip,
+      textAlign,
+      order,
+      ...props
+    },
+    ref,
+  ) => {
     const Element = resolveElement(as);
     validChoice(size, Object.keys(containerWidths), 'container size');
+    validChoice(placement, ['center', 'start'], 'container placement');
     return (
       <StructuralElement
         element={Element}
@@ -368,6 +387,7 @@ export const LayoutContainer = forwardRef<HTMLElement, LayoutContainerProps>(
         }
         data-geul-layout="container"
         data-geul-layout-size={size}
+        data-geul-layout-placement={placement === 'start' ? 'start' : undefined}
       >
         {children}
       </StructuralElement>

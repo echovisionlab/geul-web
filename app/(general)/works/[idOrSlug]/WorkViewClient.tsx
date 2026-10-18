@@ -232,11 +232,7 @@ export function WorkViewClient({
         >
           {work.content && work.content.length > 0 ? (
             <EntityDetailSection title={tCommonLabels('description')}>
-              <TableOfContents
-                items={tocItems}
-                contentPlacement="start"
-                outlinePresentation={work.featuredImageUrl ? 'rail' : 'responsive'}
-              >
+              <TableOfContents items={tocItems} outlinePresentation={work.featuredImageUrl ? 'rail' : 'responsive'}>
                 <div className="prose" lang={contentLang}>
                   {/* The authored body sits under the level-2 section title: authored H1 → h3. */}
                   <DocumentHeadingScope parentLevel={2}>

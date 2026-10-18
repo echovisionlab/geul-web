@@ -15,12 +15,26 @@ export async function assertDocumentOutline({ canvasElement }: { canvasElement: 
   const skips = levels.flatMap((level, index) => (index > 0 && level > levels[index - 1] + 1 ? [index] : []));
   expect(skips).toEqual([]);
   assertOutlineClearance(canvasElement);
+  assertReadingStartEdge(canvasElement);
+}
+
+/** Running text starts where its title starts: the reading column sits on the document's start edge. */
+function assertReadingStartEdge(canvasElement: HTMLElement) {
+  const block = canvasElement.querySelector<HTMLElement>('.prose[data-reading-measure] > [data-document-block]');
+  const title = canvasElement.querySelector<HTMLElement>('h1');
+  if (!block || !title) {
+    return;
+  }
+  const rtl = getComputedStyle(block).direction === 'rtl';
+  const body = block.getBoundingClientRect();
+  const heading = title.getBoundingClientRect();
+  expect(Math.abs(rtl ? body.right - heading.right : body.left - heading.left)).toBeLessThanOrEqual(1);
 }
 
 /**
  * The reading column, its breakouts and the reading chrome never reach the outline beside them (the
  * persistent column from `lg`, the rail below): Core reserves the outline's inline space and the
- * `reading` measure is bounded by the document box between the reserves.
+ * `reading` measure is bounded by the document box that ends at the reserve.
  */
 export function assertOutlineClearance(canvasElement: HTMLElement) {
   const navigation = canvasElement.querySelector<HTMLElement>('[data-presentation]');
@@ -32,10 +46,6 @@ export function assertOutlineClearance(canvasElement: HTMLElement) {
   const blocks = canvasElement.querySelectorAll<HTMLElement>(
     '.prose[data-reading-measure] > [data-document-block], [data-geul-layout-size="reading"]',
   );
-  // A centered outline layout carries a reading column; section-composed pages (`start`) may not.
-  if (canvasElement.querySelector('[data-outline][data-placement="center"]')) {
-    expect(blocks.length).toBeGreaterThan(0);
-  }
   for (const block of blocks) {
     const box = block.getBoundingClientRect();
     if (!box.width) {

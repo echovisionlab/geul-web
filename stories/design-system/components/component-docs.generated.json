@@ -7116,36 +7116,38 @@
       ],
       "tokenReferences": [
         {
-          "name": "--geul-spacing-xl",
+          "name": "--geul-spacing-lg",
           "registered": true,
           "sources": [
             {
               "file": "components/core/Collection/Collection.module.css",
-              "line": 3,
+              "line": 7,
               "property": "--_collection-thumbnail"
             },
-            { "file": "components/core/Collection/Collection.module.css", "line": 4, "property": "--_collection-hero" },
             {
               "file": "components/core/Collection/Collection.module.css",
-              "line": 8,
+              "line": 12,
               "property": "--_collection-thumbnail"
             },
-            { "file": "components/core/Collection/Collection.module.css", "line": 9, "property": "--_collection-hero" },
+            {
+              "file": "components/core/Collection/Collection.module.css",
+              "line": 17,
+              "property": "--_collection-thumbnail"
+            }
+          ],
+          "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 63, "value": "1rem", "context": ":root" }]
+        },
+        {
+          "name": "--geul-spacing-xl",
+          "registered": true,
+          "sources": [
+            { "file": "components/core/Collection/Collection.module.css", "line": 8, "property": "--_collection-hero" },
             {
               "file": "components/core/Collection/Collection.module.css",
               "line": 13,
-              "property": "--_collection-thumbnail"
-            },
-            {
-              "file": "components/core/Collection/Collection.module.css",
-              "line": 14,
               "property": "--_collection-hero"
             },
-            {
-              "file": "components/core/Collection/Collection.module.css",
-              "line": 47,
-              "property": "--_collection-thumbnail"
-            }
+            { "file": "components/core/Collection/Collection.module.css", "line": 18, "property": "--_collection-hero" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 64, "value": "1.5rem", "context": ":root" }]
         },
@@ -7153,7 +7155,7 @@
           "name": "--geul-surface-muted",
           "registered": true,
           "sources": [
-            { "file": "components/core/Collection/Collection.module.css", "line": 21, "property": "background" }
+            { "file": "components/core/Collection/Collection.module.css", "line": 25, "property": "background" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 157, "value": "#eae8df", "context": ":root" },
@@ -47859,6 +47861,13 @@
         { "name": "LayoutContainer.flexible", "type": "boolean", "required": false },
         { "name": "LayoutContainer.inset", "type": "Responsive<Space>", "required": false },
         { "name": "LayoutContainer.order", "type": "0 | 1 | 2 | 3 | 4", "required": false },
+        {
+          "name": "LayoutContainer.placement",
+          "type": "'center' | 'start'",
+          "required": false,
+          "description": "`center` (default) centers the measure in the available width; `start` keeps it on the start edge.",
+          "defaultValue": "'center'"
+        },
         { "name": "LayoutContainer.shrink", "type": "boolean", "required": false },
         {
           "name": "LayoutContainer.size",
@@ -55510,10 +55519,10 @@
           "name": "--geul-border-default",
           "registered": true,
           "sources": [
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 173, "property": "border" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 147, "property": "border" },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 253,
+              "line": 230,
               "property": "border-inline-start"
             }
           ],
@@ -55551,12 +55560,12 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 281,
+              "line": 258,
               "property": "outline"
             },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 282,
+              "line": 259,
               "property": "outline-offset"
             }
           ],
@@ -55566,10 +55575,10 @@
           "name": "--geul-border-thin",
           "registered": true,
           "sources": [
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 173, "property": "border" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 147, "property": "border" },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 253,
+              "line": 230,
               "property": "border-inline-start"
             }
           ],
@@ -55581,7 +55590,7 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 16,
+              "line": 13,
               "property": "--_toc-top"
             }
           ],
@@ -55601,29 +55610,17 @@
           ]
         },
         {
-          "name": "--geul-content-width-standard",
-          "registered": true,
-          "sources": [
-            {
-              "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 79,
-              "property": "max-width"
-            }
-          ],
-          "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 83, "value": "62rem", "context": ":root" }]
-        },
-        {
           "name": "--geul-control-height-compact",
           "registered": true,
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 13,
+              "line": 10,
               "property": "--_toc-entry-width"
             },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 186,
+              "line": 160,
               "property": "min-height"
             }
           ],
@@ -55635,7 +55632,7 @@
           "name": "--geul-focus",
           "registered": true,
           "sources": [
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 281, "property": "outline" }
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 258, "property": "outline" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 184, "value": "#242622", "context": ":root" },
@@ -55671,7 +55668,7 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 190,
+              "line": 164,
               "property": "font-size"
             }
           ],
@@ -55681,12 +55678,27 @@
           ]
         },
         {
+          "name": "--geul-font-size-xs",
+          "registered": true,
+          "sources": [
+            {
+              "file": "components/core/TableOfContents/TableOfContents.module.css",
+              "line": 226,
+              "property": "font-size"
+            }
+          ],
+          "definitions": [
+            { "file": "lib/styles/design-tokens.css", "line": 85, "value": "0.75rem", "context": ":root" },
+            { "file": "lib/styles/design-tokens.css", "line": 589, "value": "8pt", "context": "@media print → :root" }
+          ]
+        },
+        {
           "name": "--geul-font-weight-strong",
           "registered": true,
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 216,
+              "line": 190,
               "property": "font-weight"
             }
           ],
@@ -55698,17 +55710,17 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 13,
+              "line": 10,
               "property": "--_toc-entry-width"
             },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 186,
+              "line": 160,
               "property": "min-height"
             },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 250,
+              "line": 225,
               "property": "min-height"
             }
           ],
@@ -55726,7 +55738,7 @@
           "name": "--geul-layer-sticky",
           "registered": true,
           "sources": [
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 69, "property": "z-index" }
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 51, "property": "z-index" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 126, "value": "100", "context": ":root" }]
         },
@@ -55736,11 +55748,23 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 191,
+              "line": 165,
               "property": "line-height"
             }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 103, "value": "1.45", "context": ":root" }]
+        },
+        {
+          "name": "--geul-line-height-xs",
+          "registered": true,
+          "sources": [
+            {
+              "file": "components/core/TableOfContents/TableOfContents.module.css",
+              "line": 227,
+              "property": "line-height"
+            }
+          ],
+          "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 102, "value": "1.4", "context": ":root" }]
         },
         {
           "name": "--geul-motion-easing",
@@ -55748,7 +55772,7 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 274,
+              "line": 251,
               "property": "transition"
             }
           ],
@@ -55762,7 +55786,7 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 274,
+              "line": 251,
               "property": "transition"
             }
           ],
@@ -55774,7 +55798,7 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 174,
+              "line": 148,
               "property": "border-radius"
             }
           ],
@@ -55786,7 +55810,7 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 175,
+              "line": 149,
               "property": "box-shadow"
             }
           ],
@@ -55803,21 +55827,21 @@
           "name": "--geul-spacing-md",
           "registered": true,
           "sources": [
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 106, "property": "height" },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 130, "property": "width" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 80, "property": "height" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 104, "property": "width" },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 188,
+              "line": 162,
               "property": "padding-inline"
             },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 236,
+              "line": 210,
               "property": "padding-inline-start"
             },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 252,
+              "line": 229,
               "property": "padding-inline"
             }
           ],
@@ -55831,18 +55855,18 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 15,
+              "line": 12,
               "property": "--_toc-column-track"
             },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 16,
+              "line": 13,
               "property": "--_toc-top"
             },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 95, "property": "height" },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 123, "property": "width" },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 147, "property": "width" },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 164, "property": "width" }
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 69, "property": "height" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 97, "property": "width" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 121, "property": "width" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 138, "property": "width" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 64, "value": "1.5rem", "context": ":root" }]
         },
@@ -55850,27 +55874,27 @@
           "name": "--geul-spacing-xs",
           "registered": true,
           "sources": [
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 106, "property": "height" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 80, "property": "height" },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 108,
+              "line": 82,
               "property": "padding-block"
             },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 137, "property": "width" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 111, "property": "width" },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 166,
+              "line": 140,
               "property": "padding"
             },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 188,
+              "line": 162,
               "property": "padding-inline"
             },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 230, "property": "gap" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 204, "property": "gap" },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 252,
+              "line": 229,
               "property": "padding-inline"
             }
           ],
@@ -55880,15 +55904,15 @@
           "name": "--geul-spacing-xxs",
           "registered": true,
           "sources": [
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 141, "property": "width" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 115, "property": "width" },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 187,
+              "line": 161,
               "property": "padding-block"
             },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 251,
+              "line": 228,
               "property": "padding-block"
             }
           ],
@@ -55902,7 +55926,7 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 172,
+              "line": 146,
               "property": "background"
             }
           ],
@@ -55940,7 +55964,7 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 222,
+              "line": 196,
               "property": "background"
             }
           ],
@@ -55978,7 +56002,7 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 207,
+              "line": 181,
               "property": "background"
             }
           ],
@@ -56016,7 +56040,7 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 132,
+              "line": 106,
               "property": "background"
             }
           ],
@@ -56054,17 +56078,17 @@
           "sources": [
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 149,
+              "line": 123,
               "property": "background"
             },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 206, "property": "color" },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 211, "property": "color" },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 215, "property": "color" },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 221, "property": "color" },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 261, "property": "color" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 180, "property": "color" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 185, "property": "color" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 189, "property": "color" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 195, "property": "color" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 238, "property": "color" },
             {
               "file": "components/core/TableOfContents/TableOfContents.module.css",
-              "line": 269,
+              "line": 246,
               "property": "background"
             }
           ],
@@ -56100,8 +56124,8 @@
           "name": "--geul-text-secondary",
           "registered": true,
           "sources": [
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 171, "property": "color" },
-            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 189, "property": "color" }
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 145, "property": "color" },
+            { "file": "components/core/TableOfContents/TableOfContents.module.css", "line": 163, "property": "color" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 161, "value": "#45443d", "context": ":root" },
@@ -56157,13 +56181,6 @@
         },
         { "name": "items", "type": "TocItem[]", "required": true },
         { "name": "title", "type": "string", "required": true },
-        {
-          "name": "contentPlacement",
-          "type": "'start' | 'center'",
-          "required": false,
-          "description": "`center` keeps a centered reading column centered by reserving the same space on both sides;\n`start` reserves only the inline end (section-based pages whose title and sections start aligned).",
-          "defaultValue": "'start'"
-        },
         {
           "name": "outlinePresentation",
           "type": "'responsive' | 'rail'",

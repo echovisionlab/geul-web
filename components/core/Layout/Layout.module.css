@@ -47,6 +47,10 @@
   margin-inline: auto;
 }
 
+.container[data-geul-layout-placement='start'] {
+  margin-inline: 0 auto;
+}
+
 .grid {
   display: grid;
 }

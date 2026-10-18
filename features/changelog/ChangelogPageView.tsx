@@ -18,7 +18,7 @@ import { TableOfContents, type TocItem } from '@/features/navigation/TableOfCont
 import type { ChangelogRelease, ChangelogInlinePart } from '@/lib/changelog/changelog';
 import { APP_VERSION_LABEL } from '@/lib/site-version';
 
-/** Release notes read as one running-text document: reading column, outline beside it (`center`). */
+/** Release notes read as one running-text document: reading column from the start edge, outline at the end. */
 export function ChangelogPageView({ releases }: { releases: ChangelogRelease[] }) {
   const tocItems = buildChangelogTocItems(releases);
   const header = (
@@ -38,8 +38,8 @@ export function ChangelogPageView({ releases }: { releases: ChangelogRelease[] }
   );
   return (
     <ContentLayoutView layout={FLOW_DOCUMENT_LAYOUT} chrome={<ContentChrome measure="reading">{header}</ContentChrome>}>
-      <TableOfContents items={tocItems} contentPlacement="center">
-        <DsLayoutContainer size="reading" inset="none">
+      <TableOfContents items={tocItems}>
+        <DsLayoutContainer size="reading" inset="none" placement="start">
           <DsLayoutStack gap="none" lang="en">
             {releases.map((release) => (
               <DsLayoutInset key={release.version} blockEnd="xl">

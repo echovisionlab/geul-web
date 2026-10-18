@@ -137,7 +137,10 @@ Collection grids are fluid. `LayoutGrid minColumnWidth` (`sm`/`md`/`lg` = 9/14/2
 breakpoint) fits as many equal columns as the width allows, so cards keep their scale on wide screens
 instead of stretching to a fixed count. Page collection blocks map item size to it (S/M/L, horizontal cards
 one step wider, square-artwork collections such as releases one step denser below `sm`); the authored column
-count is only a carousel's slides per view. Pagination never renders for a single page. A collection block
+count is only a carousel's slides per view. One item size is one media width in every layout: a list or
+horizontal-card thumbnail is as wide as the minimum grid card of that size (S/M/L = 9/14/20rem, at most 40%
+of a narrow row), so grid and list blocks of one size sit together at the same image scale and a 16:9
+thumbnail is never shorter than its title and metadata. Pagination never renders for a single page. A collection block
 with pagination on continues in place: the server renders the first page and nearing the end loads the next
 one; the "Load more" button is the same action for keyboard and assistive technology and the retry after a
 failure, which pauses automatic loading.
@@ -147,7 +150,9 @@ it spans the page width; from `md` the media (poster, cover, portrait, logo) kee
 the title, metadata and `EntityDetailSection`s (`h2`, the mono label voice of the metadata rows) share the
 rest; below `md` it stacks. Running text keeps the reading measure from the start edge, never centered;
 lists and tables use the full width. A detail with media keeps its table of contents as the rail
-(`outlinePresentation="rail"`). Posts and Pages remain documents on the centered reading measure.
+(`outlinePresentation="rail"`). Posts, legal documents and the changelog read the same way (owner decision
+2026-10-18): the title, hero text and running text start at the start edge, the outline sits at the inline
+end, and wide blocks (images, tables, code) use the full document box.
 
 Every authoring screen (Post, Page, Work, Event, Release, Series) composes `DocumentEditorPanels`: from `lg`
 the primary content (body, or a release's information and tracks, or a series' posts) takes the main column

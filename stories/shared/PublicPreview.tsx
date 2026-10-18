@@ -44,7 +44,7 @@ export function PublicSeriesPreview({ empty = false }: { empty?: boolean }) {
         }
       >
         <SeriesPublicPostsView
-          tableLabel="Posts"
+          tableLabel="Night walks"
           posts={empty ? [] : posts}
           labels={{
             title: 'Title',

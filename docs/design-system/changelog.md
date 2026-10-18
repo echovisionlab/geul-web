@@ -1,5 +1,15 @@
 # Design system changes
 
+## 2026-10-18 — start-edge documents and one media scale per item size (unreleased)
+
+Posts, legal documents and the changelog start at the start edge like entity details and pages: title, hero
+text and running text share that edge and the outline sits at the inline end. Core `TableOfContentsView`
+loses `contentPlacement` (the `center` placement and `--_table-of-contents-inset-start` are removed); Core
+`LayoutContainer` gains `placement="start"`. The persistent outline column's rows move from `sm` to `xs`.
+Core Collection thumbnails take the minimum grid card width of their size (S/M/L = 9/14/20rem, at most 40% of
+a narrow row), so list and grid blocks of one size show images at the same scale and a 16:9 thumbnail is no
+longer shorter than its title and metadata.
+
 ## 2026-10-17 — authoring settings column (unreleased)
 
 `DocumentEditorPanels` puts the settings in a sticky, independently scrolling column beside the body from

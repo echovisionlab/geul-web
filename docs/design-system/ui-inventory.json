@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "23420407f8a4d206264fe5cf4d44f6dfc958b3b255842860eca52c1da31b3315",
+  "manifestHash": "dcbbb4024e05e0446c315d37ce35e4767513b16f3acd96fb8c0f46d42ff1f39c",
   "counts": {
     "sourceFiles": 3794,
     "productionSourceFiles": 2299,
@@ -10,7 +10,7 @@
     "coreFamilies": 57,
     "featureDomains": 53,
     "storyFiles": 257,
-    "storyVariants": 1457,
+    "storyVariants": 1461,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -13052,6 +13052,11 @@
               "name": "inset",
               "optional": true,
               "type": "Responsive<Space>"
+            },
+            {
+              "name": "placement",
+              "optional": true,
+              "type": "'center' | 'start'"
             }
           ]
         },
@@ -18170,11 +18175,6 @@
               "name": "children",
               "optional": false,
               "type": "ReactNode"
-            },
-            {
-              "name": "contentPlacement",
-              "optional": true,
-              "type": "'start' | 'center'"
             },
             {
               "name": "outlinePresentation",
@@ -52809,11 +52809,6 @@
               "type": "ReactNode"
             },
             {
-              "name": "contentPlacement",
-              "optional": true,
-              "type": "'start' | 'center'"
-            },
-            {
               "name": "outlinePresentation",
               "optional": true,
               "type": "'responsive' | 'rail'"
@@ -83596,6 +83591,26 @@
           "name": "HeroCarousel",
           "args": "{ layout: 'carousel', columns: '1', itemSize: 'l' }",
           "preview": "http://localhost:6010/?path=/story/feature-page-collection-blocks--hero-carousel"
+        },
+        {
+          "name": "EventsPage",
+          "args": "{ layout: 'list', pastLayout: 'grid' }",
+          "preview": "http://localhost:6010/?path=/story/feature-page-collection-blocks--events-page"
+        },
+        {
+          "name": "EventsPageSmall",
+          "args": "{ ...EventsPage.args, itemSize: 's' }",
+          "preview": "http://localhost:6010/?path=/story/feature-page-collection-blocks--events-page-small"
+        },
+        {
+          "name": "EventsPageLarge",
+          "args": "{ ...EventsPage.args, itemSize: 'l' }",
+          "preview": "http://localhost:6010/?path=/story/feature-page-collection-blocks--events-page-large"
+        },
+        {
+          "name": "EventsPagePhone",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/feature-page-collection-blocks--events-page-phone"
         }
       ],
       "importedSources": [

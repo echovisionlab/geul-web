@@ -39,11 +39,6 @@ export interface TableOfContentsViewProps {
    */
   children: ReactNode;
   /**
-   * `center` keeps a centered reading column centered by reserving the same space on both sides;
-   * `start` reserves only the inline end (section-based pages whose title and sections start aligned).
-   */
-  contentPlacement?: 'start' | 'center';
-  /**
    * `responsive` (default) shows the persistent column from `lg`. `rail` keeps the rail at every width,
    * for a document that shares the page width with another column (an entity detail's media).
    */
@@ -118,7 +113,6 @@ export function TableOfContentsView({
   items: sourceItems,
   title,
   children,
-  contentPlacement = 'start',
   outlinePresentation = 'responsive',
 }: TableOfContentsViewProps) {
   const listId = useId();
@@ -585,7 +579,6 @@ export function TableOfContentsView({
     <div
       className={classes.layout}
       data-outline={outlined || undefined}
-      data-placement={contentPlacement}
       data-outline-presentation={outlinePresentation === 'rail' ? 'rail' : undefined}
     >
       {outlined ? <div className={classes.track}>{navigation}</div> : null}
