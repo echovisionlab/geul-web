@@ -341,9 +341,9 @@ jobs:
             printf 'Exact hit is true only for this commit; a matched older key is a compatible restore.\n\n'
             printf '| Cache | Restore | Exact hit | Matched key | Save |\n'
             printf '| --- | --- | --- | --- | --- |\n'
-            printf '| Full TypeScript | %s | %s | `%s` | %s |\n' "$FULL_TS_RESTORE" "${FULL_TS_HIT:-false}" "${FULL_TS_KEY:-none}" "$FULL_TS_SAVE"
-            printf '| Next app TypeScript | %s | %s | `%s` | %s |\n' "$APP_TS_RESTORE" "${APP_TS_HIT:-false}" "${APP_TS_KEY:-none}" "$APP_TS_SAVE"
-            printf '| Turbopack | %s | %s | `%s` | %s |\n' "$TURBO_RESTORE" "${TURBO_HIT:-false}" "${TURBO_KEY:-none}" "$TURBO_SAVE"
+            printf '| Full TypeScript | %s | %s | %s | %s |\n' "$FULL_TS_RESTORE" "${FULL_TS_HIT:-false}" "${FULL_TS_KEY:-none}" "$FULL_TS_SAVE"
+            printf '| Next app TypeScript | %s | %s | %s | %s |\n' "$APP_TS_RESTORE" "${APP_TS_HIT:-false}" "${APP_TS_KEY:-none}" "$APP_TS_SAVE"
+            printf '| Turbopack | %s | %s | %s | %s |\n' "$TURBO_RESTORE" "${TURBO_HIT:-false}" "${TURBO_KEY:-none}" "$TURBO_SAVE"
           } >> "$GITHUB_STEP_SUMMARY"
 
   test:
