@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.0](https://github.com/echovisionlab/geul-web/compare/v0.16.1...v0.17.0) (2026-10-18)
+
+
+### Features
+
+* calm design system, Geul font system and entity detail layout ([#149](https://github.com/echovisionlab/geul-web/issues/149)) ([9c41c26](https://github.com/echovisionlab/geul-web/commit/9c41c2649aaaeb256a7145fcee78c69435ccb773))
+
 ## [0.16.1](https://github.com/echovisionlab/geul-web/compare/v0.16.0...v0.16.1) (2026-10-18)
 
 
