@@ -3,7 +3,7 @@ import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { hashKey, useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
 import { MyArtistsDataTable, type MyArtistsDataTableResult } from '@/features/my/MyArtistsDataTable';
@@ -84,14 +84,14 @@ function toRowViewModel(
 }
 
 /** Connects My Artists queries and localization to the table controller. */
+const INITIAL_QUERY: PaginatedQuery = { page: 1, pageSize: 20 };
+const initialQueryHash = hashKey([INITIAL_QUERY]);
+
 export function MyArtistsTable({ initialData, listAction = listMyArtistsAction }: MyArtistsTableProps) {
   const t = useTranslations('artists');
   const tCommon = useTranslations('common');
   const dateTime = useDateTimeFormatter();
-  const [query, setQuery] = useState<PaginatedQuery>({
-    page: 1,
-    pageSize: 20,
-  });
+  const [query, setQuery] = useState<PaginatedQuery>(INITIAL_QUERY);
 
   const loadedDataQuery = useQuery({
     queryKey: ['artists', 'my', query],
@@ -104,7 +104,8 @@ export function MyArtistsTable({ initialData, listAction = listMyArtistsAction }
         pageSize: query.pageSize ?? 20,
         search: query.search,
       }).then(unwrapQueryResult),
-    initialData,
+    // The server-rendered page belongs to the first query only; another page or search must load its own rows.
+    initialData: hashKey([query]) === initialQueryHash ? initialData : undefined,
   });
   const { data, isLoading } = loadedDataQuery;
 
@@ -112,7 +113,7 @@ export function MyArtistsTable({ initialData, listAction = listMyArtistsAction }
     draft: tCommon('statuses.draft'),
     published: tCommon('statuses.published'),
   };
-  const result: MyArtistsDataTableResult = {
+  const result: MyArtistsDataTableResult | undefined = data && {
     ...data,
     data: data.data.map((artist) => toRowViewModel(artist, dateTime.date, statusLabels)),
   };

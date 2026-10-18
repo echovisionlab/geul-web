@@ -35,7 +35,8 @@ const mocks = vi.hoisted(() => ({
   buildManagedImageUrl: vi.fn((src: string | null) => (src ? `managed:${src}:avatar-sm` : null)),
 }));
 
-vi.mock('@tanstack/react-query', () => ({
+vi.mock('@tanstack/react-query', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@tanstack/react-query')>()),
   useQuery: (options: QueryOptions) => {
     mocks.queryOptions = options;
     return {

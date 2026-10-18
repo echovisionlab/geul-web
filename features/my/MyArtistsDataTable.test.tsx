@@ -96,7 +96,7 @@ describe('MyArtistsDataTable', () => {
   });
 
   it('renders the supplied empty and loading states', () => {
-    const emptyResult = { ...defaultProps.result, data: [], total: 0, totalPages: 0 };
+    const emptyResult = { ...defaultProps.result!, data: [], total: 0, totalPages: 0 };
     renderDataTable({ result: emptyResult });
     expect(container.textContent).toContain(labels.empty);
 
