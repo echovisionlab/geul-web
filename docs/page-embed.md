@@ -48,12 +48,12 @@ The four tools now live in `geul-tools`, with one Vite/React app, Node process,
 container image and independent HTTPS origin per tool. They share the Web theme,
 20 locales, client bootstrap, dependency versions and static HTTP implementation.
 
-| Page URL               | Tool origin                                 |
-| ---------------------- | ------------------------------------------- |
-| `/tools/transcode`     | `https://tools-transcode.rawsector.com`     |
-| `/tools/youtube-audio` | `https://tools-youtube-audio.rawsector.com` |
-| `/tools/hwp`           | `https://tools-hwp.rawsector.com`           |
-| `/tools/portadj`       | `https://tools-portadj.rawsector.com`       |
+| Page URL               | Tool origin                           |
+| ---------------------- | ------------------------------------- |
+| `/tools/transcode`     | `https://transcode.rawsector.com`     |
+| `/tools/youtube-audio` | `https://youtube-audio.rawsector.com` |
+| `/tools/hwp`           | `https://hwp.rawsector.com`           |
+| `/tools/portadj`       | `https://portadj.rawsector.com`       |
 
 These Web URLs are available to CMS Pages containing generic Embed blocks; the
 four tool-specific Web routes and bundled implementations have been removed.
