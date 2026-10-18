@@ -76,8 +76,10 @@ it('creates the named LLM provider through its credentials dialog', async () => 
   try {
     await view.user.click(await screen.findByRole('button', { name: 'Add provider' }));
     const dialog = within(await screen.findByRole('dialog', { name: 'Create translation provider' }));
-    await view.user.type(dialog.getByRole('textbox', { name: 'Provider name' }), 'Primary Gemini');
-    await view.user.type(dialog.getByLabelText('LLM API key'), 'gemini-secret');
+    await view.user.click(dialog.getByRole('textbox', { name: 'Provider name' }));
+    await view.user.paste('Primary Gemini');
+    await view.user.click(dialog.getByLabelText('LLM API key'));
+    await view.user.paste('gemini-secret');
     await view.user.click(dialog.getByRole('button', { name: 'Create provider' }));
     await waitFor(() => expect(create).toHaveBeenCalledOnce());
     expect(create).toHaveBeenCalledWith(
@@ -116,9 +118,9 @@ it('updates the selected DeepL provider with a blank credential to retain its st
     expect(dialog.getByLabelText('DeepL API key')).toHaveValue('');
     expect(dialog.getByLabelText('DeepL API key')).toHaveAccessibleDescription('Leave blank to keep the stored key.');
     await view.user.clear(dialog.getByRole('textbox', { name: 'Provider name' }));
-    await view.user.type(dialog.getByRole('textbox', { name: 'Provider name' }), 'DeepL Updated');
+    await view.user.paste('DeepL Updated');
     await view.user.clear(dialog.getByRole('textbox', { name: 'DeepL API base URL' }));
-    await view.user.type(dialog.getByRole('textbox', { name: 'DeepL API base URL' }), 'https://api-free.deepl.com');
+    await view.user.paste('https://api-free.deepl.com');
     await view.user.click(dialog.getByRole('button', { name: 'Save' }));
     await waitFor(() => expect(update).toHaveBeenCalledOnce());
     expect(update).toHaveBeenCalledWith(

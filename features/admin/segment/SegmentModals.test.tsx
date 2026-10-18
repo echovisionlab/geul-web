@@ -98,39 +98,50 @@ describe('SegmentModals edit lifecycle', () => {
     actions.update
       .mockReturnValueOnce(pending.promise)
       .mockResolvedValueOnce(segment('Typed while saving', ['admin', 'user']));
-    const { user } = render(<Scenario />);
-    await user.click(screen.getByRole('button', { name: 'Edit segment A' }));
-    const name = await screen.findByRole('textbox', { name: 'Name' });
-    await user.clear(name);
-    await user.type(name, 'Local name');
-    await user.click(screen.getByRole('button', { name: 'Save' }));
-    expect(actions.update).toHaveBeenNthCalledWith(1, {
-      id: 'segment-a',
-      name: 'Local name',
-      config: expect.objectContaining({ accountRoles: [AuthorizationRole.USER] }),
-      observed: {
-        segmentType: SegmentType.MEMBERS_BY_FILTER,
+    const view = render(<Scenario />);
+    const { user } = view;
+    try {
+      await user.click(screen.getByRole('button', { name: 'Edit segment A' }));
+      const name = await screen.findByRole('textbox', { name: 'Name' });
+      await user.clear(name);
+      await user.paste('Local name');
+      await user.click(screen.getByRole('button', { name: 'Save' }));
+      expect(actions.update).toHaveBeenNthCalledWith(1, {
+        id: 'segment-a',
+        name: 'Local name',
         config: expect.objectContaining({ accountRoles: [AuthorizationRole.USER] }),
-      },
-    });
-    await user.clear(name);
-    await user.type(name, 'Typed while saving');
-    await act(async () => {
-      pending.resolve(segment('Local name', ['admin', 'user']));
-      await pending.promise;
-    });
-    expect(name).toHaveValue('Typed while saving');
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Save' }));
-    expect(actions.update).toHaveBeenNthCalledWith(2, {
-      id: 'segment-a',
-      name: 'Typed while saving',
-      config: expect.objectContaining({ accountRoles: [AuthorizationRole.ADMIN, AuthorizationRole.USER] }),
-      observed: {
-        segmentType: SegmentType.MEMBERS_BY_FILTER,
+        observed: {
+          segmentType: SegmentType.MEMBERS_BY_FILTER,
+          config: expect.objectContaining({ accountRoles: [AuthorizationRole.USER] }),
+        },
+      });
+      expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+      await user.clear(name);
+      await user.paste('Typed while saving');
+      await act(async () => {
+        pending.resolve(segment('Local name', ['admin', 'user']));
+        await pending.promise;
+      });
+      await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled());
+      expect(name).toHaveValue('Typed while saving');
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      await user.click(screen.getByRole('button', { name: 'Save' }));
+      expect(actions.update).toHaveBeenNthCalledWith(2, {
+        id: 'segment-a',
+        name: 'Typed while saving',
         config: expect.objectContaining({ accountRoles: [AuthorizationRole.ADMIN, AuthorizationRole.USER] }),
-      },
-    });
-    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+        observed: {
+          segmentType: SegmentType.MEMBERS_BY_FILTER,
+          config: expect.objectContaining({ accountRoles: [AuthorizationRole.ADMIN, AuthorizationRole.USER] }),
+        },
+      });
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    } finally {
+      view.unmount();
+      await act(async () => {
+        pending.resolve(segment('Local name', ['admin', 'user']));
+        await pending.promise;
+      });
+    }
   });
 });

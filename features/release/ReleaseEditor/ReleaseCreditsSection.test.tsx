@@ -58,12 +58,12 @@ describe('ReleaseCreditsSection', () => {
     await user.click(screen.getByRole('button', { name: 'Add Credit' }));
     const dialog = await screen.findByRole('dialog', { name: 'Add Credit' });
     await user.click(within(dialog).getByRole('radio', { name: 'Text' }));
-    await user.type(within(dialog).getByRole('textbox', { name: 'Credited name' }), 'Sleeve notes');
-    await user.type(within(dialog).getByRole('textbox', { name: 'Role (Optional)' }), 'Writer');
-    await user.type(
-      within(dialog).getByRole('textbox', { name: 'Note (Optional)' }),
-      'Refers to Blue Circuit and Midnight Radio',
-    );
+    await user.click(within(dialog).getByRole('textbox', { name: 'Credited name' }));
+    await user.paste('Sleeve notes');
+    await user.click(within(dialog).getByRole('textbox', { name: 'Role (Optional)' }));
+    await user.paste('Writer');
+    await user.click(within(dialog).getByRole('textbox', { name: 'Note (Optional)' }));
+    await user.paste('Refers to Blue Circuit and Midnight Radio');
     await user.click(within(dialog).getByRole('button', { name: 'Add' }));
 
     expect(onCreditsChange).toHaveBeenCalledWith([
@@ -136,11 +136,12 @@ describe('ReleaseCreditsSection', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Note (Optional)' });
     const note = within(dialog).getByRole('textbox', { name: 'Note (Optional)' });
     await user.clear(note);
-    await user.type(note, 'Updated note mentioning Blue Circuit');
+    await user.paste('Updated note mentioning Blue Circuit');
     await user.click(within(dialog).getByRole('button', { name: 'Save' }));
 
     expect(onCreditNoteChange).toHaveBeenCalledWith('credit-1', 'Updated note mentioning Blue Circuit');
     expect(onCreditsChange).not.toHaveBeenCalled();
+    expect(actions.setReleaseCredits).not.toHaveBeenCalled();
   });
 
   it('clears note state when removing a credit', async () => {
@@ -196,6 +197,7 @@ describe('ReleaseCreditsSection', () => {
       ),
     );
     expect(onCreditNoteChange).toHaveBeenCalledWith('credit-1', '');
+    expect(await screen.findByText('Credits updated')).toBeInTheDocument();
   });
 
   it('keeps credit mutations disabled while translation authoring is locked', async () => {

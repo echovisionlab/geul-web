@@ -61,6 +61,14 @@ The same job then runs the Storybook CI scope in one Jest test invocation.
 Every applicable job still gates `Validate`; no changed-file selection narrows
 these test collections.
 
+`Tests` and `Build and static checks` run in parallel after `Format`, on their
+existing separate runners. `Validate` requires both jobs to succeed. The quality
+job generates Next route types, runs the full strict TypeScript project, and then
+builds with the strict application project. Tests and tooling remain in the full
+checker; the three existing Storybook-only accessibility tests remain in the
+dedicated Storybook checker. See [build performance](./performance/build-performance.md)
+for project boundaries, local contract commands, and cache measurements.
+
 | Project              | Boundary                                                                  | Command                |
 | -------------------- | ------------------------------------------------------------------------- | ---------------------- |
 | `node-unit`          | Node logic, policies, codecs, and mocked transports; no DOM or Next setup | `pnpm test:unit`       |

@@ -4,6 +4,7 @@ node_modules/
 
 # Generated and build output
 .next/
+.next-local-contracts
 .next-integration-*/
 out/
 coverage/

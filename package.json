@@ -35,6 +35,8 @@
     "build": "env -u NODE_ENV dotenv -e .env -- next build",
     "build:local-contracts": "LOCAL_CONTRACTS=1 OATHKEEPER_URL=http://localhost:8000 KRATOS_URL=http://localhost:4433 KRATOS_ADMIN_URL=http://localhost:4434 HYDRA_ADMIN_URL=http://localhost:4445 MCP_OAUTH_ISSUER_URL=http://sso.localhost:4444 SITE_ORIGIN=http://localhost:3000 SESSION_COOKIE_NAME=site_session DRAFT_SECRET=build-time-placeholder-secret123 ENCRYPTION_SECRET=build-time-placeholder-secret123 HOST=localhost pnpm build",
     "typecheck": "tsc --noEmit",
+    "typecheck:app": "tsc --noEmit --project tsconfig.app.json",
+    "typecheck:app:local-contracts": "tsc --noEmit --project tsconfig.app.local-contracts.json",
     "typecheck:local-contracts": "tsc --noEmit --project tsconfig.local-contracts.json",
     "lint": "eslint --cache . --max-warnings=0",
     "lint:styles": "stylelint '**/*.css' --cache",

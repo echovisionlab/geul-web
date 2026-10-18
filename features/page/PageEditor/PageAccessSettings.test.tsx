@@ -39,24 +39,52 @@ async function choose(user: ReturnType<typeof render>['user'], label: string, op
 }
 
 describe('PageAccessSettings', () => {
+  const savedConditions: PageAccessPolicyValue = {
+    mode: 'conditions',
+    match: 'all',
+    roles: ['author', 'admin'],
+    userTagIds: ['tag-a'],
+    newsletterSubscriber: true,
+  };
+
   it('keeps two roles in one condition group and shows the match selector only for multiple groups', async () => {
     const { user, onSave } = setup();
-    await user.click(checkbox('roleAuthor'));
-    await user.click(checkbox('roleAdmin'));
-    expect(checkbox('roleUser')).toBeChecked();
+    const audience = within(screen.getByRole('group', { name: 'audience' }));
+    const author = audience.getByRole('checkbox', { name: 'roleAuthor' });
+    const admin = audience.getByRole('checkbox', { name: 'roleAdmin' });
+    const member = audience.getByRole('checkbox', { name: 'roleUser' });
+    await user.click(author);
+    await user.click(admin);
+    expect(member).toBeChecked();
     expect(screen.queryByRole('combobox', { name: 'match' })).toBeNull();
     await choose(user, 'userTags', 'Supporter');
     expect(screen.getByRole('combobox', { name: 'match' })).toBeInTheDocument();
+    await user.click(saveButton());
+    expect(await screen.findByRole('status')).toHaveTextContent('saved');
+    expect(saveButton()).toBeDisabled();
+    expect(onSave).toHaveBeenCalledWith({
+      mode: 'conditions',
+      match: 'any',
+      roles: ['author', 'admin'],
+      userTagIds: ['tag-a'],
+      newsletterSubscriber: false,
+    });
+  });
+
+  it('saves role, tag, and newsletter groups with the selected match rule', async () => {
+    const { user, onSave } = setup({
+      value: { ...savedConditions, match: 'any', newsletterSubscriber: false },
+    });
     await user.click(checkbox('newsletter'));
     await choose(user, 'match', 'all');
     await user.click(saveButton());
-    expect(onSave).toHaveBeenCalledWith({
-      mode: 'conditions',
-      match: 'all',
-      roles: ['author', 'admin'],
-      userTagIds: ['tag-a'],
-      newsletterSubscriber: true,
-    });
+    expect(await screen.findByRole('status')).toHaveTextContent('saved');
+    expect(saveButton()).toBeDisabled();
+    expect(onSave).toHaveBeenCalledWith(savedConditions);
+  });
+
+  it('clears saved role, tag, and newsletter conditions when membership is turned off', async () => {
+    const { user, onSave } = setup({ value: savedConditions });
     await user.click(checkbox('roleUser'));
     expect(checkbox('roleAuthor')).not.toBeChecked();
     expect(checkbox('roleAdmin')).not.toBeChecked();
@@ -64,6 +92,8 @@ describe('PageAccessSettings', () => {
     expect(screen.queryByText('Supporter')).toBeNull();
     expect(screen.queryByRole('combobox', { name: 'match' })).toBeNull();
     await user.click(saveButton());
+    expect(await screen.findByRole('status')).toHaveTextContent('saved');
+    expect(saveButton()).toBeDisabled();
     expect(onSave).toHaveBeenLastCalledWith(DEFAULT_PAGE_ACCESS_POLICY);
   });
 

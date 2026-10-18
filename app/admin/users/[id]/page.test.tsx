@@ -57,12 +57,14 @@ it('keeps an unonboarded Member draft across refresh and saves only the edited p
   const member = { ...loaded.value, id: 'member-1', role: 'user' as const, onboarded: false };
   const read = vi.fn(async () => ({ ok: true as const, value: member }));
   let finishSave!: (result: { success: boolean }) => void;
-  const update = vi.fn(
-    () =>
-      new Promise<{ success: boolean }>((resolve) => {
-        finishSave = resolve;
-      }),
-  );
+  const save = new Promise<{ success: boolean }>((resolve) => {
+    finishSave = resolve;
+  });
+  const update = vi.fn(() => save);
+  let finishRefetch!: (result: { ok: true; value: typeof member }) => void;
+  const refetch = new Promise<{ ok: true; value: typeof member }>((resolve) => {
+    finishRefetch = resolve;
+  });
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const view = render(
     <QueryClientProvider client={client}>
@@ -77,7 +79,7 @@ it('keeps an unonboarded Member draft across refresh and saves only the edited p
     const bio = await screen.findByRole('textbox', { name: /Bio/ });
     await waitFor(() => expect(bio).toHaveValue(member.bio));
     await view.user.clear(bio);
-    await view.user.type(bio, 'Temporary bio');
+    await view.user.paste('Temporary bio');
     act(() => client.setQueryData(['users', 'admin', 'member-1'], { ...member, bio: 'Changed elsewhere' }));
     expect(bio).toHaveValue('Temporary bio');
     await view.user.click(screen.getByRole('button', { name: 'Save' }));
@@ -88,6 +90,7 @@ it('keeps an unonboarded Member draft across refresh and saves only the edited p
       social_links: undefined,
       tag_ids: undefined,
     });
+    expect(screen.getByRole('button', { name: 'Save' })).toHaveAttribute('aria-busy', 'true');
     act(() =>
       client.setQueryData(['users', 'admin', 'member-1'], {
         ...member,
@@ -98,12 +101,22 @@ it('keeps an unonboarded Member draft across refresh and saves only the edited p
     expect(await screen.findByRole('heading', { level: 1, name: 'Peer update' })).toBeInTheDocument();
     expect(bio).toHaveValue('Temporary bio');
     // Keep the same query snapshot while the mutation settles, as before its refetch returns.
-    read.mockImplementationOnce(() => new Promise(() => {}));
-    await act(async () => finishSave({ success: true }));
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled());
+    read.mockReturnValueOnce(refetch);
+    await act(async () => {
+      finishSave({ success: true });
+      await save;
+    });
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).not.toHaveAttribute('aria-busy', 'true'));
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
+    expect(read).toHaveBeenCalledTimes(2);
     expect(bio).toHaveValue('Temporary bio');
   } finally {
     view.unmount();
+    await act(async () => {
+      finishSave({ success: true });
+      finishRefetch({ ok: true, value: member });
+      await Promise.all([save, refetch]);
+    });
     client.clear();
   }
 });
