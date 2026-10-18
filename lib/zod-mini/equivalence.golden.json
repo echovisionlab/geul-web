@@ -13913,13 +13913,13 @@
     {
       "threw": {
         "$error": true,
-        "message": "[\n  {\n    \"code\": \"invalid_value\",\n    \"values\": [\n      \"s\",\n      \"m\",\n      \"l\"\n    ],\n    \"path\": [\n      \"itemSize\"\n    ],\n    \"message\": \"Invalid option: expected one of \\\"s\\\"|\\\"m\\\"|\\\"l\\\"\"\n  }\n]",
+        "message": "[\n  {\n    \"code\": \"invalid_value\",\n    \"values\": [\n      \"xs\",\n      \"s\",\n      \"m\",\n      \"l\",\n      \"xl\"\n    ],\n    \"path\": [\n      \"itemSize\"\n    ],\n    \"message\": \"Invalid option: expected one of \\\"xs\\\"|\\\"s\\\"|\\\"m\\\"|\\\"l\\\"|\\\"xl\\\"\"\n  }\n]",
         "issues": [
           {
             "code": "invalid_value",
-            "values": ["s", "m", "l"],
+            "values": ["xs", "s", "m", "l", "xl"],
             "path": ["itemSize"],
-            "message": "Invalid option: expected one of \"s\"|\"m\"|\"l\""
+            "message": "Invalid option: expected one of \"xs\"|\"s\"|\"m\"|\"l\"|\"xl\""
           }
         ]
       }
@@ -17339,6 +17339,10 @@
   "features/page/blocks list-shared collectionSizeSchema": [
     {
       "success": true,
+      "data": "xs"
+    },
+    {
+      "success": true,
       "data": "s"
     },
     {
@@ -17350,13 +17354,17 @@
       "data": "l"
     },
     {
+      "success": true,
+      "data": "xl"
+    },
+    {
       "success": false,
       "issues": [
         {
           "code": "invalid_value",
-          "values": ["s", "m", "l"],
+          "values": ["xs", "s", "m", "l", "xl"],
           "path": [],
-          "message": "Invalid option: expected one of \"s\"|\"m\"|\"l\""
+          "message": "Invalid option: expected one of \"xs\"|\"s\"|\"m\"|\"l\"|\"xl\""
         }
       ]
     },
@@ -17369,9 +17377,9 @@
       "issues": [
         {
           "code": "invalid_value",
-          "values": ["s", "m", "l"],
+          "values": ["xs", "s", "m", "l", "xl"],
           "path": [],
-          "message": "Invalid option: expected one of \"s\"|\"m\"|\"l\""
+          "message": "Invalid option: expected one of \"xs\"|\"s\"|\"m\"|\"l\"|\"xl\""
         }
       ]
     },
@@ -17380,9 +17388,9 @@
       "issues": [
         {
           "code": "invalid_value",
-          "values": ["s", "m", "l"],
+          "values": ["xs", "s", "m", "l", "xl"],
           "path": [],
-          "message": "Invalid option: expected one of \"s\"|\"m\"|\"l\""
+          "message": "Invalid option: expected one of \"xs\"|\"s\"|\"m\"|\"l\"|\"xl\""
         }
       ]
     },
@@ -17391,9 +17399,9 @@
       "issues": [
         {
           "code": "invalid_value",
-          "values": ["s", "m", "l"],
+          "values": ["xs", "s", "m", "l", "xl"],
           "path": [],
-          "message": "Invalid option: expected one of \"s\"|\"m\"|\"l\""
+          "message": "Invalid option: expected one of \"xs\"|\"s\"|\"m\"|\"l\"|\"xl\""
         }
       ]
     },
@@ -17402,9 +17410,9 @@
       "issues": [
         {
           "code": "invalid_value",
-          "values": ["s", "m", "l"],
+          "values": ["xs", "s", "m", "l", "xl"],
           "path": [],
-          "message": "Invalid option: expected one of \"s\"|\"m\"|\"l\""
+          "message": "Invalid option: expected one of \"xs\"|\"s\"|\"m\"|\"l\"|\"xl\""
         }
       ]
     },
@@ -17413,9 +17421,9 @@
       "issues": [
         {
           "code": "invalid_value",
-          "values": ["s", "m", "l"],
+          "values": ["xs", "s", "m", "l", "xl"],
           "path": [],
-          "message": "Invalid option: expected one of \"s\"|\"m\"|\"l\""
+          "message": "Invalid option: expected one of \"xs\"|\"s\"|\"m\"|\"l\"|\"xl\""
         }
       ]
     },
@@ -17424,9 +17432,9 @@
       "issues": [
         {
           "code": "invalid_value",
-          "values": ["s", "m", "l"],
+          "values": ["xs", "s", "m", "l", "xl"],
           "path": [],
-          "message": "Invalid option: expected one of \"s\"|\"m\"|\"l\""
+          "message": "Invalid option: expected one of \"xs\"|\"s\"|\"m\"|\"l\"|\"xl\""
         }
       ]
     }

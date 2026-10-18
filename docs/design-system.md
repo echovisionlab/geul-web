@@ -133,13 +133,13 @@ LayoutContainer's reading/compact/standard/wide widths use separate contentWidth
 `reading` is the running-prose screen measure; paper keeps the page measure ([table of contents and reading measure](design-system/table-of-contents.md#reading-measure)).
 A layout transition and a content maximum are independent decisions.
 
-Collection grids are fluid. `LayoutGrid minColumnWidth` (`sm`/`md`/`lg` = 9/14/20rem, responsive per
+Collection grids are fluid. `LayoutGrid minColumnWidth` (`xs`–`xl` = 7/10/14/20/28rem, responsive per
 breakpoint) fits as many equal columns as the width allows, so cards keep their scale on wide screens
-instead of stretching to a fixed count. Page collection blocks map item size to it (S/M/L, horizontal cards
+instead of stretching to a fixed count. Page collection blocks map item size to it (XS–XL, horizontal cards
 one step wider, square-artwork collections such as releases one step denser below `sm`); the authored column
 count is only a carousel's slides per view. One item size is one media width in every layout: a list or
-horizontal-card thumbnail is as wide as the minimum grid card of that size (S/M/L = 9/14/20rem, at most 40%
-of a narrow row), so grid and list blocks of one size sit together at the same image scale and a 16:9
+horizontal-card thumbnail is as wide as the minimum grid card of that size (XS/S/M/L/XL = 7/10/14/20/28rem, at most 40%
+of a narrow row, square on phones), so grid and list blocks of one size sit together at the same image scale and a 16:9
 thumbnail is never shorter than its title and metadata. Pagination never renders for a single page. A collection block
 with pagination on continues in place: the server renders the first page and nearing the end loads the next
 one; the "Load more" button is the same action for keyboard and assistive technology and the retry after a
@@ -218,6 +218,9 @@ The local page preview owns simulated verification; component state stories neve
 
 Core Button defaults to `neutral / medium`: a transparent surface and medium-weight label.
 Supporting controls use a surface change on hover; they do not use a link underline.
+Quiet navigation (secondary or muted ink: links, tabs, side navigation, outline rows) takes the one
+`text-hover` ink under a pointer, with `surface-hover` where the item is a row; a Core test rejects a
+hover rule that names a text role directly.
 `low` uses quieter ink. Ordinary secondary actions such as changing email or connecting an
 account remain borderless; `outline` is an explicit functional-boundary exception. Inline TextButton navigation retains glyph
 underline feedback. IconButton uses surface feedback and retains its accessible name and target

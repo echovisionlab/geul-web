@@ -3407,9 +3407,11 @@
           "inherit": "Ikuti cahaya"
         },
         "itemSize": {
+          "xs": "XS · Sangat ringkas",
           "s": "S · Ringkas",
           "m": "M · Standar",
-          "l": "L · Besar"
+          "l": "L · Besar",
+          "xl": "XL · Sangat besar"
         }
       },
       "actions": {

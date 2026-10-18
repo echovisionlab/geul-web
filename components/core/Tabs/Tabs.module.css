@@ -55,7 +55,7 @@
 }
 
 .tab:not([data-disabled]):is(:hover, [data-hovered]) {
-  color: var(--geul-text-primary);
+  color: var(--geul-text-hover);
 }
 
 .tab[data-disabled] {

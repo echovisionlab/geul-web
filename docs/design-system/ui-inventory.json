@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "dcbbb4024e05e0446c315d37ce35e4767513b16f3acd96fb8c0f46d42ff1f39c",
+  "manifestHash": "25a3d1a20bf5ca0dfab844b6cd0937a051e3c795a1052b47a5693a3192ae3aef",
   "counts": {
-    "sourceFiles": 3794,
+    "sourceFiles": 3795,
     "productionSourceFiles": 2299,
     "componentFiles": 910,
     "coreFamilies": 57,
     "featureDomains": 53,
     "storyFiles": 257,
-    "storyVariants": 1461,
+    "storyVariants": 1465,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -847,6 +847,7 @@
     "components/core/control-style.ts",
     "components/core/design-tokens.ts",
     "components/core/file-selection.ts",
+    "components/core/hover-ink.test.ts",
     "components/core/index.ts",
     "components/core/layer-contract.ts",
     "components/core/on-demand-module.ts",
@@ -13073,6 +13074,11 @@
               "name": "minColumnWidth",
               "optional": true,
               "type": "Responsive<LayoutMinColumnWidth>"
+            },
+            {
+              "name": "columnGrowth",
+              "optional": true,
+              "type": "Responsive<'fill' | 'none'>"
             },
             {
               "name": "rowGap",
@@ -78436,6 +78442,11 @@
       "component": "Collection",
       "variants": [
         {
+          "name": "ExtraSmall",
+          "args": "{ size: 'xs' }",
+          "preview": "http://localhost:6010/?path=/story/core-data-display-collection--extra-small"
+        },
+        {
           "name": "Small",
           "args": "{ size: 's' }",
           "preview": "http://localhost:6010/?path=/story/core-data-display-collection--small"
@@ -78449,6 +78460,11 @@
           "name": "Large",
           "args": "{ size: 'l' }",
           "preview": "http://localhost:6010/?path=/story/core-data-display-collection--large"
+        },
+        {
+          "name": "ExtraLarge",
+          "args": "{ size: 'xl' }",
+          "preview": "http://localhost:6010/?path=/story/core-data-display-collection--extra-large"
         }
       ],
       "importedSources": [
@@ -83598,6 +83614,11 @@
           "preview": "http://localhost:6010/?path=/story/feature-page-collection-blocks--events-page"
         },
         {
+          "name": "EventsPageExtraSmall",
+          "args": "{ ...EventsPage.args, itemSize: 'xs' }",
+          "preview": "http://localhost:6010/?path=/story/feature-page-collection-blocks--events-page-extra-small"
+        },
+        {
           "name": "EventsPageSmall",
           "args": "{ ...EventsPage.args, itemSize: 's' }",
           "preview": "http://localhost:6010/?path=/story/feature-page-collection-blocks--events-page-small"
@@ -83606,6 +83627,11 @@
           "name": "EventsPageLarge",
           "args": "{ ...EventsPage.args, itemSize: 'l' }",
           "preview": "http://localhost:6010/?path=/story/feature-page-collection-blocks--events-page-large"
+        },
+        {
+          "name": "EventsPageExtraLarge",
+          "args": "{ ...EventsPage.args, itemSize: 'xl' }",
+          "preview": "http://localhost:6010/?path=/story/feature-page-collection-blocks--events-page-extra-large"
         },
         {
           "name": "EventsPagePhone",

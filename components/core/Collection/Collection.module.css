@@ -1,5 +1,5 @@
 /* One media width per item size, shared by every layout: a list thumbnail is exactly as wide as the
-   minimum grid card of the same size (the `LayoutGrid minColumnWidth` tracks sm/md/lg = 9/14/20rem),
+   minimum grid card of the same size (the `LayoutGrid minColumnWidth` tracks xs–xl = 7/10/14/20/28rem, a √2 scale),
    so grid and list blocks of one size show their images at the same scale. At 16:9 each thumbnail is
    at least as tall as its two-line title and two metadata lines. */
 .collection {
@@ -8,8 +8,13 @@
   --_collection-hero: calc(var(--geul-spacing-xl) * 12);
 }
 
+.collection[data-core-collection-size='xs'] {
+  --_collection-thumbnail: calc(var(--geul-spacing-lg) * 7);
+  --_collection-hero: calc(var(--geul-spacing-xl) * 7.5);
+}
+
 .collection[data-core-collection-size='s'] {
-  --_collection-thumbnail: calc(var(--geul-spacing-lg) * 9);
+  --_collection-thumbnail: calc(var(--geul-spacing-lg) * 10);
   --_collection-hero: calc(var(--geul-spacing-xl) * 9);
 }
 
@@ -18,19 +23,33 @@
   --_collection-hero: calc(var(--geul-spacing-xl) * 15);
 }
 
+.collection[data-core-collection-size='xl'] {
+  --_collection-thumbnail: calc(var(--geul-spacing-lg) * 28);
+  --_collection-hero: calc(var(--geul-spacing-xl) * 18);
+}
+
 .media {
   position: relative;
   overflow: hidden;
   min-inline-size: 0;
+  aspect-ratio: var(--_collection-media-ratio, auto);
   background: var(--geul-surface-muted);
 }
 
-/* In a narrow row (phones, sidebars) the thumbnail yields to the text and keeps its ratio. */
+/* In a narrow row (phones, sidebars) the thumbnail yields to the text, at most 40% of the row. */
 .media[data-width='thumbnail'] {
   inline-size: var(--_collection-thumbnail);
   max-inline-size: 40%;
   flex: 0 0 auto;
   align-self: start;
+}
+
+/* On phones that 40% is too short for a wide crop: a square thumbnail stays as tall as its title and
+   metadata, so the row keeps one height. */
+@media (width < $mantine-breakpoint-sm) {
+  .media[data-width='thumbnail'] {
+    aspect-ratio: 1;
+  }
 }
 
 .media[data-backdrop='transparent'] {

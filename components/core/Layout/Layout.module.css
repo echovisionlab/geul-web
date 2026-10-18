@@ -91,13 +91,19 @@
 }
 
 /* Fluid grid: the attribute outranks every breakpoint's fixed `columns` track list. Each point's
-   named minimum width (`--_layout-min-column-*`) resolves to one of the track widths below. */
+   named minimum width (`--_layout-min-column-*`) resolves to one of the track widths below; its maximum
+   (`--_layout-column-max-*`) is `1fr` (fill the row) or the same track (`columnGrowth="none"`). */
 .grid[data-geul-layout-min-column] {
-  --_layout-track-sm: 9rem;
+  --_layout-track-xs: 7rem;
+  --_layout-track-sm: 10rem;
   --_layout-track-md: 14rem;
   --_layout-track-lg: 20rem;
+  --_layout-track-xl: 28rem;
 
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--_layout-min-column-base)), 1fr));
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(100%, var(--_layout-min-column-base)), var(--_layout-column-max-base))
+  );
 }
 
 .gridItem {
@@ -135,7 +141,10 @@
   }
 
   .grid[data-geul-layout-min-column] {
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--_layout-min-column-xs)), 1fr));
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(min(100%, var(--_layout-min-column-xs)), var(--_layout-column-max-xs))
+    );
   }
 
   .gridItem {
@@ -174,7 +183,10 @@
   }
 
   .grid[data-geul-layout-min-column] {
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--_layout-min-column-sm)), 1fr));
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(min(100%, var(--_layout-min-column-sm)), var(--_layout-column-max-sm))
+    );
   }
 
   .gridItem {
@@ -213,7 +225,10 @@
   }
 
   .grid[data-geul-layout-min-column] {
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--_layout-min-column-md)), 1fr));
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(min(100%, var(--_layout-min-column-md)), var(--_layout-column-max-md))
+    );
   }
 
   .gridItem {
@@ -252,7 +267,10 @@
   }
 
   .grid[data-geul-layout-min-column] {
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--_layout-min-column-lg)), 1fr));
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(min(100%, var(--_layout-min-column-lg)), var(--_layout-column-max-lg))
+    );
   }
 
   .gridItem {
@@ -291,7 +309,10 @@
   }
 
   .grid[data-geul-layout-min-column] {
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--_layout-min-column-xl)), 1fr));
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(min(100%, var(--_layout-min-column-xl)), var(--_layout-column-max-xl))
+    );
   }
 
   .gridItem {

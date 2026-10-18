@@ -154,8 +154,8 @@ describe('EntityListView', () => {
         );
       });
       const image = container?.querySelector<HTMLImageElement>('img[src="https://example.com/landscape.jpg"]');
-      const frame = image?.closest<HTMLElement>('[style*="aspect-ratio"]');
-      expect(frame?.style.aspectRatio).toBe('1 / 1');
+      const frame = image?.closest<HTMLElement>('[style*="--_collection-media-ratio"]');
+      expect(frame?.style.getPropertyValue('--_collection-media-ratio')).toBe('1 / 1');
       expect(image?.style.objectFit).toBe('cover');
     },
   );
@@ -190,8 +190,8 @@ describe('EntityListView', () => {
       });
       for (const item of items) {
         const image = container?.querySelector<HTMLImageElement>(`img[src="${item.imageUrl}"]`);
-        const frame = image?.closest<HTMLElement>('[style*="aspect-ratio"]');
-        expect(frame?.style.aspectRatio).toBe('auto');
+        const frame = image?.closest<HTMLElement>('[style*="--_collection-media-ratio"]');
+        expect(frame?.style.getPropertyValue('--_collection-media-ratio')).toBe('auto');
         expect(image?.style.width).toBe('100%');
         expect(image?.style.height).toBe('auto');
         expect(image?.style.position).not.toBe('absolute');

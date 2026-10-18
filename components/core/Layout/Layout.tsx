@@ -88,6 +88,11 @@ export interface LayoutGridProps extends Omit<LayoutStackProps, 'justify'> {
    * Replaces `columns`; items take one track each, so `LayoutGridItem` spans do not apply.
    */
   minColumnWidth?: Responsive<LayoutMinColumnWidth>;
+  /**
+   * With `minColumnWidth`: `fill` (default) stretches the columns to fill each row; `none` keeps every
+   * column at its minimum width and leaves the spare space at the row end, so items keep one exact scale.
+   */
+  columnGrowth?: Responsive<'fill' | 'none'>;
   rowGap?: Responsive<Space>;
   columnGap?: Responsive<Space>;
   rows?: 'content' | 'stretch';
@@ -396,6 +401,8 @@ export const LayoutContainer = forwardRef<HTMLElement, LayoutContainerProps>(
 );
 LayoutContainer.displayName = 'LayoutContainer';
 
+const isColumnGrowth = (value: unknown): value is 'fill' | 'none' => value === 'fill' || value === 'none';
+
 export const LayoutGrid = forwardRef<HTMLElement, LayoutGridProps>(
   (
     {
@@ -403,6 +410,7 @@ export const LayoutGrid = forwardRef<HTMLElement, LayoutGridProps>(
       children,
       columns,
       minColumnWidth,
+      columnGrowth,
       gap,
       rowGap,
       columnGap,
@@ -425,6 +433,7 @@ export const LayoutGrid = forwardRef<HTMLElement, LayoutGridProps>(
       minColumnWidth === undefined
         ? undefined
         : resolveResponsive(minColumnWidth, 'md', isMinColumnWidth, 'grid minimum column width');
+    const growth = resolveResponsive(columnGrowth, 'fill', isColumnGrowth, 'grid column growth');
     return (
       <GridContext.Provider value={resolvedColumns}>
         <StructuralElement
@@ -437,7 +446,15 @@ export const LayoutGrid = forwardRef<HTMLElement, LayoutGridProps>(
             {
               ...responsiveVariables('columns', resolvedColumns),
               ...(minColumns
-                ? responsiveVariables('min-column', minColumns, (width) => `var(--_layout-track-${width})`)
+                ? {
+                    ...responsiveVariables('min-column', minColumns, (width) => `var(--_layout-track-${width})`),
+                    ...Object.fromEntries(
+                      layoutPoints.map((point) => [
+                        `--_layout-column-max-${point}`,
+                        growth[point] === 'none' ? `var(--_layout-track-${minColumns[point]})` : '1fr',
+                      ]),
+                    ),
+                  }
                 : {}),
               ...spacing('row-gap', rowGap ?? gap, 'md'),
               ...spacing('column-gap', columnGap ?? gap, 'md'),

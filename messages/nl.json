@@ -3407,9 +3407,11 @@
           "inherit": "Lichte modus volgen"
         },
         "itemSize": {
+          "xs": "XS · Extra compact",
           "s": "S · Compact",
           "m": "M · Standaard",
-          "l": "L · Groot"
+          "l": "L · Groot",
+          "xl": "XL · Extra groot"
         }
       },
       "actions": {

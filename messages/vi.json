@@ -3407,9 +3407,11 @@
           "inherit": "Đi theo ánh sáng"
         },
         "itemSize": {
+          "xs": "XS · Rất gọn",
           "s": "S · Gọn",
           "m": "M · Tiêu chuẩn",
-          "l": "L · Lớn"
+          "l": "L · Lớn",
+          "xl": "XL · Rất lớn"
         }
       },
       "actions": {

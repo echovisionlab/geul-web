@@ -875,7 +875,7 @@ export const equivalenceCases: EquivalenceCase[] = [
       'artist-grid',
       parseArtistListProps,
       { layout: 'carousel', itemSize: 's', columns: '4', sortBy: 'published_at', imageAspectRatio: '16:9' },
-      [{ layout: 'masonry' }, { itemSize: 'xl' }, { columns: 4 }, { showMeta: true }],
+      [{ layout: 'masonry' }, { itemSize: 'xxl' }, { columns: 4 }, { showMeta: true }],
     ],
     [
       'author-list',
@@ -1055,10 +1055,12 @@ export const equivalenceCases: EquivalenceCase[] = [
     ...COMMON_BAD_INPUTS,
   ]),
   schemaCase('features/page/blocks list-shared collectionSizeSchema', collectionSizeSchema, [
+    'xs',
     's',
     'm',
     'l',
     'xl',
+    'xxl',
     ...COMMON_BAD_INPUTS,
   ]),
   schemaCase('features/page/blocks list-shared booleanString', booleanString, [

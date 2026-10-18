@@ -5,14 +5,14 @@ This report is generated from production source by `node scripts/design-system/c
 ## Current measured scope
 
 - 2430 production CSS/TS/TSX files scanned under app, components, features and lib, plus the central theme.ts.
-- 213 known semantic and font tokens in shared CSS definition files.
+- 214 known semantic and font tokens in shared CSS definition files.
 - 0 remaining interface/runtime literal color occurrences in 0 files, excluding central definitions and the authored-color exceptions below.
 - 0 remaining authored editor palette literals in legacy variables.css. Their exact document colors belong to the shared authored palette source.
 - 20 authored editor color definitions are owned by the shared token source and generated into the same durable document roles.
 - 0 existing literal CSS spacing/typography occurrences covered by the migration baseline.
 - 0 existing custom-property declarations/inline assignments outside central files (private `--_*` implementation variables are permitted).
 - 177 literal CSS dimension occurrences in spacing, typography and geometry properties; 71 distinct values. These are audit findings, not blanket errors: canvas dimensions, geometry and responsive layouts require context.
-- 756 CSS custom-property declarations, 292 distinct names, 142 names declared more than once. Theme/state/media overrides are expected; equal values alone do not establish semantic duplication.
+- 767 CSS custom-property declarations, 295 distinct names, 143 names declared more than once. Theme/state/media overrides are expected; equal values alone do not establish semantic duplication.
 - 0 findings match the reviewed migration baseline; 0 new violations; 0 obsolete baseline keys eligible for removal.
 
 ## Enforcement contract
@@ -89,8 +89,8 @@ Authored typography exceptions (artwork, not interface roles):
 | `--_alert-ink`                       |            5 | `components/core/Alert/Alert.module.css`                                                               |
 | `--_frame-navigation-width`          |            2 | `components/core/ApplicationFrame/ApplicationFrame.module.css`                                         |
 | `--_badge-ink`                       |            5 | `components/core/Badge/Badge.module.css`                                                               |
-| `--_collection-thumbnail`            |            3 | `components/core/Collection/Collection.module.css`                                                     |
-| `--_collection-hero`                 |            3 | `components/core/Collection/Collection.module.css`                                                     |
+| `--_collection-thumbnail`            |            5 | `components/core/Collection/Collection.module.css`                                                     |
+| `--_collection-hero`                 |            5 | `components/core/Collection/Collection.module.css`                                                     |
 | `--_action-ink`                      |            5 | `components/core/Control.module.css`                                                                   |
 | `--_action-ink-muted`                |            5 | `components/core/Control.module.css`                                                                   |
 | `--_action-fill`                     |            5 | `components/core/Control.module.css`                                                                   |
@@ -158,6 +158,7 @@ Authored typography exceptions (artwork, not interface roles):
 | `--geul-text-primary`                |            5 | `lib/styles/design-tokens.css`                                                                         |
 | `--geul-text-secondary`              |            5 | `lib/styles/design-tokens.css`                                                                         |
 | `--geul-text-muted`                  |            5 | `lib/styles/design-tokens.css`                                                                         |
+| `--geul-text-hover`                  |            5 | `lib/styles/design-tokens.css`                                                                         |
 | `--geul-border-default`              |            5 | `lib/styles/design-tokens.css`                                                                         |
 | `--geul-border-strong`               |            5 | `lib/styles/design-tokens.css`                                                                         |
 | `--geul-action-ink`                  |            5 | `lib/styles/design-tokens.css`                                                                         |

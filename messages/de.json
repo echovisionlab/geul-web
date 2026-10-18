@@ -3852,9 +3852,11 @@
           "inherit": "Hellem Modus folgen"
         },
         "itemSize": {
+          "xs": "XS · Sehr kompakt",
           "s": "S · Kompakt",
           "m": "M · Standard",
-          "l": "L · Groß"
+          "l": "L · Groß",
+          "xl": "XL · Sehr groß"
         }
       },
       "actions": {

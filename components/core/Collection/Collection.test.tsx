@@ -11,7 +11,7 @@ function host(node: React.ReactNode) {
 }
 describe('Collection contract', () => {
   it('rejects unsupported scales and keeps public presentation escapes out of runtime markup', () => {
-    expect(() => getCollectionMetrics('xl' as 'm')).toThrow(RangeError);
+    expect(() => getCollectionMetrics('xxl' as 'm')).toThrow(RangeError);
     const escape = {
       size: 's',
       style: { color: 'red' },
@@ -34,7 +34,7 @@ describe('Collection contract', () => {
       className: 'override',
     } as unknown as CollectionMediaProps;
     const element = host(<CollectionMedia {...escape} />).firstElementChild as HTMLElement;
-    expect(element.style.aspectRatio).toBe('4 / 3');
+    expect(element.style.getPropertyValue('--_collection-media-ratio')).toBe('4 / 3');
     expect(element.style.width).toBe('');
     expect(element.className).not.toContain('override');
     expect(element.dataset.width).toBe('thumbnail');

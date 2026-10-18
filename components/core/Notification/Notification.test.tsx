@@ -1,12 +1,15 @@
 // @vitest-environment jsdom
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
+import { destroyAnnouncer } from 'react-aria/private/live-announcer/LiveAnnouncer';
 import { afterEach, beforeEach, expect, it } from 'vitest';
 import { NotificationRegion } from './NotificationRegion';
 import { notificationQueue, notifications } from './notifications';
 let host: HTMLDivElement;
 let root: Root;
 beforeEach(async () => {
+  // The live announcer is a document singleton; start from an empty one so assertions see only this file's notices.
+  destroyAnnouncer();
   notifications.clean();
   host = document.createElement('div');
   document.body.append(host);
@@ -19,6 +22,7 @@ afterEach(() => {
     root.unmount();
   });
   host.remove();
+  destroyAnnouncer();
 });
 it('limits visible notices and dismisses the selected notice with the localized close control', async () => {
   await act(async () => {

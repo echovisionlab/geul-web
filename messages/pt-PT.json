@@ -3407,9 +3407,11 @@
           "inherit": "Siga a luz"
         },
         "itemSize": {
+          "xs": "XS · Muito compacto",
           "s": "S · Compacto",
           "m": "M · Padrão",
-          "l": "L · Grande"
+          "l": "L · Grande",
+          "xl": "XL · Muito grande"
         }
       },
       "actions": {

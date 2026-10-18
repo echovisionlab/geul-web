@@ -6,9 +6,16 @@ Posts, legal documents and the changelog start at the start edge like entity det
 text and running text share that edge and the outline sits at the inline end. Core `TableOfContentsView`
 loses `contentPlacement` (the `center` placement and `--_table-of-contents-inset-start` are removed); Core
 `LayoutContainer` gains `placement="start"`. The persistent outline column's rows move from `sm` to `xs`.
-Core Collection thumbnails take the minimum grid card width of their size (S/M/L = 9/14/20rem, at most 40% of
-a narrow row), so list and grid blocks of one size show images at the same scale and a 16:9 thumbnail is no
-longer shorter than its title and metadata.
+Core Collection has five item sizes (XS–XL, contracts 0.11.0 appends `xs`/`xl`) and Core `LayoutGrid` five
+minimum column widths (7/10/14/20/28rem, a √2 scale). A collection thumbnail takes the minimum grid card width of its size (at
+most 40% of a narrow row), so list and grid blocks of one size show images at the same scale and a 16:9 thumbnail
+is no longer shorter than its title and metadata. New semantic token `text-hover` is the one hover ink of quiet
+navigation (NavigationLink secondary/muted tones, Tabs, SideNavigation, outline rows); a Core test rejects hover
+rules that name a text role. Outline column rows rest in `text-muted` and show `text-hover` on `surface-hover`
+with a `border-strong` rule segment under a pointer; the current row also takes medium weight. Root `word-break:
+keep-all` now applies in every interface language (Japanese and Chinese opt out), so Korean titles on English pages
+no longer break inside words. Collection grids keep exact track widths from `md` (`LayoutGrid columnGrowth`), and
+phone list thumbnails are square.
 
 ## 2026-10-17 — authoring settings column (unreleased)
 

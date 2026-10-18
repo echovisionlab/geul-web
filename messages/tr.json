@@ -3407,9 +3407,11 @@
           "inherit": "Işığı takip et"
         },
         "itemSize": {
+          "xs": "XS · Çok kompakt",
           "s": "S · Kompakt",
           "m": "M · Standart",
-          "l": "L · Büyük"
+          "l": "L · Büyük",
+          "xl": "XL · Çok büyük"
         }
       },
       "actions": {

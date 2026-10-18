@@ -160,6 +160,7 @@
   --geul-text-primary: #242622;
   --geul-text-secondary: #45443d;
   --geul-text-muted: #5c594f;
+  --geul-text-hover: #242622;
   --geul-border-default: #bbb7aa;
   --geul-border-strong: #807e72;
   --geul-action-ink: #242622;
@@ -250,6 +251,7 @@
     --geul-text-primary: #edeee7;
     --geul-text-secondary: #ced2c8;
     --geul-text-muted: #b4bcb0;
+    --geul-text-hover: #edeee7;
     --geul-border-default: #596257;
     --geul-border-strong: #939d92;
     --geul-action-ink: #edeee7;
@@ -334,6 +336,7 @@
   --geul-text-primary: #242622;
   --geul-text-secondary: #45443d;
   --geul-text-muted: #5c594f;
+  --geul-text-hover: #242622;
   --geul-border-default: #bbb7aa;
   --geul-border-strong: #807e72;
   --geul-action-ink: #242622;
@@ -417,6 +420,7 @@
   --geul-text-primary: #edeee7;
   --geul-text-secondary: #ced2c8;
   --geul-text-muted: #b4bcb0;
+  --geul-text-hover: #edeee7;
   --geul-border-default: #596257;
   --geul-border-strong: #939d92;
   --geul-action-ink: #edeee7;
@@ -502,6 +506,7 @@
     --geul-text-primary: #242622 !important;
     --geul-text-secondary: #45443d !important;
     --geul-text-muted: #5c594f !important;
+    --geul-text-hover: #242622 !important;
     --geul-border-default: #bbb7aa !important;
     --geul-border-strong: #807e72 !important;
     --geul-action-ink: #242622 !important;

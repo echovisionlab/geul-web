@@ -3407,9 +3407,11 @@
           "inherit": "Podążaj za światłem"
         },
         "itemSize": {
+          "xs": "XS · Bardzo kompaktowy",
           "s": "S · Kompaktowy",
           "m": "M · Standardowy",
-          "l": "L · Duży"
+          "l": "L · Duży",
+          "xl": "XL · Bardzo duży"
         }
       },
       "actions": {

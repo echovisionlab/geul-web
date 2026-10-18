@@ -364,9 +364,11 @@ const meta = {
         cards: 'pageEditor.blockEditor.options.layout.cards',
         minimal: 'pageEditor.blockEditor.options.layout.minimal',
         carousel: 'pageEditor.blockEditor.options.layout.carousel',
+        xs: 'pageEditor.blockEditor.options.itemSize.xs',
         s: 'pageEditor.blockEditor.options.itemSize.s',
         m: 'pageEditor.blockEditor.options.itemSize.m',
         l: 'pageEditor.blockEditor.options.itemSize.l',
+        xl: 'pageEditor.blockEditor.options.itemSize.xl',
         upcoming: 'pageEditor.blockEditor.options.timeWindow.upcoming',
         past: 'pageEditor.blockEditor.options.timeWindow.past',
       },
@@ -448,6 +450,10 @@ export const EventsPage: StoryObj<typeof EventsPageComposition> = {
   },
   play: assertSharedMediaScale,
 };
+export const EventsPageExtraSmall: StoryObj<typeof EventsPageComposition> = {
+  ...EventsPage,
+  args: { ...EventsPage.args, itemSize: 'xs' },
+};
 export const EventsPageSmall: StoryObj<typeof EventsPageComposition> = {
   ...EventsPage,
   args: { ...EventsPage.args, itemSize: 's' },
@@ -456,8 +462,11 @@ export const EventsPageLarge: StoryObj<typeof EventsPageComposition> = {
   ...EventsPage,
   args: { ...EventsPage.args, itemSize: 'l' },
 };
+export const EventsPageExtraLarge: StoryObj<typeof EventsPageComposition> = {
+  ...EventsPage,
+  args: { ...EventsPage.args, itemSize: 'xl' },
+};
 export const EventsPagePhone: StoryObj<typeof EventsPageComposition> = {
   ...EventsPage,
   globals: { viewport: { value: 'phone', isRotated: false } },
-  play: undefined,
 };

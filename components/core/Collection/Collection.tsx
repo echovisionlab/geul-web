@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, type CSSProperties } from 'react';
 import { presentationAttributes, type PresentationProps } from '../presentation-contract';
 import { getCollectionMetrics, type CollectionSize } from './collection-contract';
 import classes from './Collection.module.css';
@@ -35,7 +35,13 @@ export const CollectionMedia = forwardRef<HTMLDivElement, CollectionMediaProps>(
       data-width={width}
       data-backdrop={backdrop}
       data-hero={hero || undefined}
-      style={hero ? undefined : { aspectRatio: aspectRatio === 'auto' ? 'auto' : aspectRatio.replace(':', ' / ') }}
+      style={
+        hero
+          ? undefined
+          : ({
+              '--_collection-media-ratio': aspectRatio === 'auto' ? 'auto' : aspectRatio.replace(':', ' / '),
+            } as CSSProperties)
+      }
     >
       {children}
     </div>

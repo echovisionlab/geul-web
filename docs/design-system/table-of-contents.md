@@ -67,11 +67,11 @@ The owner approved three presentations of the same outline for reserved layouts.
 in the Notion/ChatGPT interaction family: a quiet indicator, a revealed title list and, when
 the screen has room, the same list kept visible. No floating launcher or search panel is added.
 
-| Viewport (reserved layout) | Presentation                                                                                                          | Reserved inline space                                               |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| `lg` (75em) and wider      | Persistent column: mono `xs` title label, one 1px line, `xs` secondary rows, current row in ink with a 2px ink marker | Column (15rem) + `xl` gap at the inline end                         |
-| `sm`–`lg`                  | Quiet rail; hover, keyboard focus or a press reveals the bounded title list                                           | Rail target width (28px; 44px on coarse pointers) at the inline end |
-| below `sm` (phones)        | The same rail, scrubbable by touch                                                                                    | Rail target width at the inline end only                            |
+| Viewport (reserved layout) | Presentation                                                                                                                                                                | Reserved inline space                                               |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `lg` (75em) and wider      | Persistent column: mono `xs` title label, one 1px line, `xs` muted rows (hover: `text-hover` on `surface-hover`), current row in ink at medium weight with a 2px ink marker | Column (15rem) + `xl` gap at the inline end                         |
+| `sm`–`lg`                  | Quiet rail; hover, keyboard focus or a press reveals the bounded title list                                                                                                 | Rail target width (28px; 44px on coarse pointers) at the inline end |
+| below `sm` (phones)        | The same rail, scrubbable by touch                                                                                                                                          | Rail target width at the inline end only                            |
 
 The column starts at `lg`. Every document starts at the frame's start edge and runs up to the reserve at
 the inline end (owner decision 2026-10-18, replacing the balanced 2026-10-13 reserve that centered the

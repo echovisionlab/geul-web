@@ -177,7 +177,7 @@
 }
 
 .link:hover {
-  color: var(--geul-text-primary);
+  color: var(--geul-text-hover);
   background: var(--geul-surface-hover);
 }
 
@@ -221,21 +221,36 @@
 
 .column .link {
   /* Compact rows for a fine pointer; the shared 44px minimum on coarse-pointer wide screens (tablets).
-     The persistent column is secondary navigation beside the text: one step below the revealed list. */
+     The persistent column is secondary navigation beside the text: one step below the revealed list,
+     in muted ink so the current row, its ancestors and a hovered row stand out in primary ink. */
   min-height: var(--geul-interaction-minimum);
+  color: var(--geul-text-muted);
   font-size: var(--geul-font-size-xs);
   line-height: var(--geul-line-height-xs);
   padding-block: var(--geul-spacing-xxs);
   padding-inline: calc(var(--geul-spacing-md) + var(--_toc-depth) * var(--geul-spacing-md)) var(--geul-spacing-xs);
   border-inline-start: var(--geul-border-thin) solid var(--geul-border-default);
+  transition:
+    color var(--geul-motion-normal) var(--geul-motion-easing),
+    background-color var(--geul-motion-normal) var(--geul-motion-easing),
+    border-color var(--geul-motion-normal) var(--geul-motion-easing);
 }
 
+/* A pointed row previews the jump: hover ink on the hover surface, its rule segment in strong ink. */
 .column .link:hover {
-  background: none;
+  color: var(--geul-text-hover);
+  background: var(--geul-surface-hover);
+  border-inline-start-color: var(--geul-border-strong);
 }
 
+.column .link[data-ancestor],
 .column .link[aria-current='location'] {
   color: var(--geul-text-primary);
+}
+
+/* "You are here" outranks a hover preview: the current row also takes medium weight. */
+.column .link[aria-current='location'] {
+  font-weight: var(--geul-font-weight-medium);
 }
 
 .columnMarker {
@@ -260,7 +275,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .columnMarker[data-placed] {
+  .columnMarker[data-placed],
+  .column .link {
     transition: none;
   }
 }
