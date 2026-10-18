@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.0](https://github.com/echovisionlab/geul-web/compare/v0.15.0...v0.16.0) (2026-10-18)
+
+
+### Features
+
+* five collection sizes, start-edge documents and a shared hover ink ([#145](https://github.com/echovisionlab/geul-web/issues/145)) ([f0c0edb](https://github.com/echovisionlab/geul-web/commit/f0c0edbb6db65dab6fe8484388eedef006bde9dd))
+
 ## [0.15.0](https://github.com/echovisionlab/geul-web/compare/v0.14.3...v0.15.0) (2026-10-17)
 
 
