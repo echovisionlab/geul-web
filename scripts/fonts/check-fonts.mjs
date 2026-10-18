@@ -77,6 +77,7 @@ const profileCoverage = new Map();
 for (const [profile, name] of Object.entries(manifest.stylesheets)) {
   const css = await readFile(dist + name, 'utf8');
   assert.equal(name.split('.')[1], createHash('sha256').update(css).digest('hex').slice(0, 16), `${profile}: CSS hash`);
+  assert.equal(await readFile(`${dist}geul-${profile}.css`, 'utf8'), css, `${profile}: stable alias`);
   const seen = new Map();
   const urls = new Set();
   postcss.parse(css).walkAtRules('font-face', (rule) => {

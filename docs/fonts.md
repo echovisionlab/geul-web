@@ -69,13 +69,15 @@ Storybook을 시작할 때 완전한 로컬 manifest와 생성 매핑의 CSS 파
 
 2026-10-18에 구성했다.
 
-| 항목          | 값                                                                                                                                     |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| bucket        | `rawsector-static` (계정 `9f0f8d06051d7a08312dab4f49650dbb`, r2.dev 공개 URL 미사용)                                                   |
-| custom domain | `static.rawsector.com` (zone `rawsector.com`, 최소 TLS 1.2)                                                                            |
-| 경로          | `dist/fonts/`의 상대 경로를 그대로 `fonts/` 아래 key로 사용                                                                            |
-| CORS          | GET·HEAD, origin `https://www.rawsector.com`, `https://rawsector.com`, `http://localhost:3000`, `http://localhost:6010`, max age 86400 |
-| 캐시          | 해시 CSS·WOFF2 `public, max-age=31536000, immutable`, `manifest.json`·`sources.json`·`licenses/` `public, max-age=300`                 |
+| 항목          | 값                                                                                                                                                                                                            |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| bucket        | `rawsector-static` (계정 `9f0f8d06051d7a08312dab4f49650dbb`, r2.dev 공개 URL 미사용)                                                                                                                          |
+| custom domain | `static.rawsector.com` (zone `rawsector.com`, 최소 TLS 1.2)                                                                                                                                                   |
+| 경로          | `dist/fonts/`의 상대 경로를 그대로 `fonts/` 아래 key로 사용                                                                                                                                                   |
+| CORS          | GET·HEAD, origin `https://www.rawsector.com`, `https://rawsector.com`, 도구 4곳(`hwp`·`portadj`·`transcode`·`youtube-audio.rawsector.com`), `http://localhost:3000`, `:6010`, `:5173`, `:8080`, max age 86400 |
+| 캐시          | 해시 CSS·WOFF2 `public, max-age=31536000, immutable`, 고정 별칭 `geul-<profile>.css`·`manifest.json`·`sources.json`·`licenses/` `public, max-age=300`                                                         |
+
+고정 별칭 `geul-<profile>.css`는 해시 stylesheet와 내용이 같다. 생성된 매핑을 가질 수 없는 소비자(geul-tools)가 쓴다. 존의 Browser Cache TTL(4시간)이 짧은 `max-age`를 덮어써서, 별칭 갱신은 브라우저에 최대 4시간 늦게 반영된다. 이전 별칭이 가리키는 해시 WOFF2는 지우지 않으므로 그동안에도 동작한다.
 
 Content-Type은 `.woff2` `font/woff2`, `.css` `text/css; charset=utf-8`, `.json` `application/json`, `.txt` `text/plain; charset=utf-8`이다.
 

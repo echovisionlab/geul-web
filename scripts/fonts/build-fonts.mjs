@@ -167,6 +167,8 @@ for (const [profile, keys] of Object.entries(stylesheets)) {
     .join('\n')}\n`;
   const name = `geul-${profile}.${digest('sha256', css).slice(0, 16)}.css`;
   await writeFile(join(outputDir, name), css);
+  // Stable alias for consumers without the generated mapping (geul-tools, email); served with a short cache.
+  await writeFile(join(outputDir, `geul-${profile}.css`), css);
   written[profile] = name;
   stylesheetSizes[profile] = { bytes: Buffer.byteLength(css), brotliBytes: brotliCompressSync(css).length };
   console.log(`${name}: ${(css.length / 1024).toFixed(0)} KiB`);
