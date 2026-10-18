@@ -257,7 +257,7 @@ jobs:
     timeout-minutes: 45
     env:
       # Reviewed renderer source, pinned to the merged API main commit.
-      EMAIL_PREVIEW_API_REVISION: d65f5f5105f36a01eb1866b493194be30648ec28
+      EMAIL_PREVIEW_API_REVISION: 6e0a343d99150d553e327ba00bc66168e0ba5d10
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
