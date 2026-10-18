@@ -66,18 +66,4 @@ describe('SocialLinksDisplay', () => {
     ]);
     expect(container.querySelectorAll('svg[aria-hidden="true"]')).toHaveLength(2);
   });
-
-  it('passes brand color mode to list icons and keeps labels visible', () => {
-    renderDisplay(
-      <SocialLinksDisplay
-        links={{ facebook: 'https://facebook.com/example-studio' }}
-        variant="list"
-        showLabels
-        iconColor="brand"
-      />,
-    );
-
-    expect(container.textContent).toContain('Facebook');
-    expect(container.querySelector('[data-social-platform="facebook"]')?.getAttribute('data-color-mode')).toBe('brand');
-  });
 });

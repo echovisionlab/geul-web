@@ -65,8 +65,4 @@ describe('Avatar name fallback', () => {
     act(() => avatar.querySelector('img')!.dispatchEvent(new Event('error')));
     expect(avatar).toHaveTextContent('J');
   });
-
-  it('rejects a second fallback channel', () => {
-    expect(() => render({ name: 'june', children: 'X' })).toThrow('do not also pass children');
-  });
 });

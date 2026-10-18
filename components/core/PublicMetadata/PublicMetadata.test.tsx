@@ -4,27 +4,12 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import { PublicMetadataLink, PublicMetadataRow, PublicMetadataRows, PublicMetadataValueGroup } from './PublicMetadata';
-import { MetadataPair } from './MetadataPair';
 
 function renderMetadata(node: ReactNode) {
   return renderToStaticMarkup(<DesignSystemProvider>{node}</DesignSystemProvider>);
 }
 
 describe('PublicMetadata', () => {
-  it('shares the compact scale with nested metadata links and blocks runtime style escapes', () => {
-    const html = renderMetadata(
-      <MetadataPair label="Visibility" size="xs" {...({ style: { fontSize: 32 }, className: 'escape' } as {})}>
-        <PublicMetadataLink href="/visibility/private">Private</PublicMetadataLink>
-      </MetadataPair>,
-    );
-    expect(html).toContain('data-size="xs"');
-    expect(html).not.toContain('data-size="sm"');
-    expect(html).not.toContain('font-size:32');
-    expect(html).not.toContain('escape');
-    expect(html).toContain('href="/visibility/private"');
-    expect(html).toContain('role="term"');
-    expect(html).toMatch(/role="definition" aria-labelledby="[^"]+"/);
-  });
   it('separates group values with a hidden slash only when requested and centers labels with centered values', () => {
     const html = renderMetadata(
       <PublicMetadataRows>
@@ -80,28 +65,5 @@ describe('PublicMetadata', () => {
     expect(html).toContain('target="_blank"');
     expect(html).toContain('rel="noopener noreferrer"');
     expect(html).toContain('aria-label="Artist website"');
-  });
-
-  it('propagates the inverse tone marker for dark image-backed headers', () => {
-    const html = renderMetadata(
-      <PublicMetadataRows tone="inverse">
-        <PublicMetadataRow label="Published">2026</PublicMetadataRow>
-      </PublicMetadataRows>,
-    );
-
-    expect(html).toContain('data-tone="inverse"');
-    expect(html).toContain('Published');
-    expect(html).toContain('2026');
-  });
-
-  it('marks non-text values that should center within the metadata line', () => {
-    const html = renderMetadata(
-      <PublicMetadataRow label="Social" valueAlign="center">
-        <svg role="img" aria-label="Instagram" />
-      </PublicMetadataRow>,
-    );
-
-    expect(html).toContain('data-align="center"');
-    expect(html).toContain('aria-label="Instagram"');
   });
 });

@@ -143,26 +143,4 @@ describe('ConfirmationDialog', () => {
     expect(onClose).toHaveBeenCalledOnce();
     expect(onConfirm).not.toHaveBeenCalled();
   });
-
-  it('maps semantic centered and size props at the Core boundary', () => {
-    renderModal(
-      <ConfirmationDialog
-        intent="delete"
-        opened
-        onClose={vi.fn()}
-        onConfirm={vi.fn()}
-        title="Restore version"
-        message="Restore the selected version?"
-        confirmLabel="Restore"
-        cancelLabel="Cancel"
-        closeLabel="Close dialog"
-        centered
-        size="compact"
-      />,
-    );
-
-    const modalRoot = document.body.querySelector<HTMLElement>('[data-size="compact"][data-centered="true"]');
-
-    expect(modalRoot).not.toBeNull();
-  });
 });

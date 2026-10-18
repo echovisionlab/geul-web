@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { Editor, Node } from '@tiptap/core';
 import { describe, expect, it } from 'vitest';
-import { richTextBlockKindByProtoCase } from '@echovisionlab/geul-proto/content/block_catalog.ts';
 import { materializeLocalizedRichTextTree } from '@/features/editor/contract/localized-rich-text';
 import { createPublicBlockComparisonDocument } from './public-block-comparison-fixtures';
 import { createTiptapPlaygroundRoom } from './TiptapPlayground.story-fixtures';
@@ -9,62 +8,6 @@ import { createTiptapWireExtensions } from './wire-schema';
 import { createTiptapTableExtensions } from './table';
 
 describe('public block comparison', () => {
-  it('projects both readable and wide authored math without changing the source', () => {
-    const room = createTiptapPlaygroundRoom(createPublicBlockComparisonDocument());
-    try {
-      const editorMath = room.controller.initialContent.content?.[0]?.content?.flatMap(
-        (block) => block.content?.filter((node) => node.type === 'math') ?? [],
-      );
-      const publishedMath = materializeLocalizedRichTextTree(room.controller.getLocalizedDocumentSnapshot()).filter(
-        (block) => block.kind === 'math',
-      );
-      expect(editorMath).toHaveLength(2);
-      expect(publishedMath.map((block) => block.base.props?.latex)).toEqual(
-        editorMath!.map((node) => node.attrs?.latex),
-      );
-      expect(editorMath![1]?.attrs?.latex.match(/\\frac/g)).toHaveLength(12);
-    } finally {
-      room.awareness.destroy();
-      room.document.destroy();
-    }
-  });
-  it('projects authored column headings in both table specimens while preserving the empty body state', () => {
-    const room = createTiptapPlaygroundRoom(createPublicBlockComparisonDocument());
-    try {
-      const tables = room.controller.initialContent.content?.[0]?.content?.flatMap(
-        (block) => block.content?.filter((node) => node.type === 'table') ?? [],
-      );
-      expect(tables).toHaveLength(2);
-      for (const table of tables!) {
-        const header = table.content?.[0]?.content;
-        expect(header?.map((cell) => cell.type)).toEqual(['tableHeader', 'tableHeader']);
-        expect(header?.map((cell) => cell.content?.[0]?.content?.[0]?.text)).toEqual(['열 1', '열 2']);
-      }
-      const bodies = tables!.map((table) => table.content?.slice(1).flatMap((row) => row.content ?? []) ?? []);
-      expect(bodies[0]!.every((cell) => cell.content?.[0]?.content?.[0]?.text?.startsWith('표 내용'))).toBe(true);
-      expect(bodies[1]).toHaveLength(4);
-      expect(bodies[1]!.every((cell) => (cell.content?.[0]?.content?.length ?? 0) === 0)).toBe(true);
-
-      const publishedTables = materializeLocalizedRichTextTree(room.controller.getLocalizedDocumentSnapshot()).filter(
-        (block) => block.kind === 'table',
-      );
-      expect(publishedTables).toHaveLength(2);
-      for (const table of publishedTables) {
-        expect(table.base.content?.headerRows).toBe(1);
-        expect(table.base.content?.rows[0]?.cells.every((cell) => cell.header)).toBe(true);
-        expect(table.locale.content?.rows[0]?.cells.every((cell) => cell.content.length > 0)).toBe(true);
-      }
-      expect(
-        publishedTables[1]?.locale.content?.rows
-          .slice(1)
-          .every((row) => row.cells.every((cell) => cell.content.length === 0)),
-      ).toBe(true);
-    } finally {
-      room.awareness.destroy();
-      room.document.destroy();
-    }
-  });
-
   it('keeps stored table proportions through projection, resizing and preview', () => {
     const source = createPublicBlockComparisonDocument();
     source.base!.nodes = source.base!.nodes.filter((node) => node.block?.value.case === 'table');
@@ -111,20 +54,6 @@ describe('public block comparison', () => {
     } finally {
       disconnect();
       editor.destroy();
-      room.awareness.destroy();
-      room.document.destroy();
-    }
-  });
-  it('covers every generated rich-text kind with a valid resident document', () => {
-    const room = createTiptapPlaygroundRoom(createPublicBlockComparisonDocument(true));
-    try {
-      const blocks = materializeLocalizedRichTextTree(room.controller.getLocalizedDocumentSnapshot());
-      expect(new Set(blocks.map((block) => block.kind))).toEqual(new Set(Object.values(richTextBlockKindByProtoCase)));
-      const headings = room.controller.initialContent.content?.[0]?.content?.filter(
-        (node) => node.content?.[0]?.type === 'heading',
-      );
-      expect(headings?.slice(0, 3).map((node) => node.content?.[0]?.attrs?.level)).toEqual([1, 2, 3]);
-    } finally {
       room.awareness.destroy();
       room.document.destroy();
     }

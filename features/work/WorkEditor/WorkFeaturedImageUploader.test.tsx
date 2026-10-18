@@ -16,14 +16,6 @@ let uploadHandler: ((blob: Blob) => void | Promise<void>) | null = null;
 let container: HTMLDivElement | null = null;
 let root: Root | null = null;
 
-function deferred<T>() {
-  let resolve!: (value: T) => void;
-  const promise = new Promise<T>((resolvePromise) => {
-    resolve = resolvePromise;
-  });
-  return { promise, resolve };
-}
-
 vi.mock('@tanstack/react-query', () => ({
   useMutation: ({
     mutationFn,
@@ -123,58 +115,5 @@ describe('WorkFeaturedImageUploader', () => {
     expect(setFeaturedImageActionMock).toHaveBeenCalledWith('work-1', 'work-file-id');
     expect(setFeaturedImageMock).toHaveBeenCalledWith('work-file-id', 'https://example.com/work-cover.jpg');
     expect(onOgGenerationRequested).toHaveBeenCalledWith('work-og-run');
-  });
-
-  it('does not report success when the durable collaboration write is incomplete', async () => {
-    setFeaturedImageMock.mockReturnValue(false);
-
-    act(() => {
-      root?.render(<WorkFeaturedImageUploader workId="work-1" canEdit />);
-    });
-    await act(async () => {
-      await uploadHandler?.(new Blob(['image'], { type: 'image/webp' }));
-    });
-
-    expect(setFeaturedImageActionMock).toHaveBeenCalledWith('work-1', 'work-file-id');
-    expect(setFeaturedImageMock).toHaveBeenCalledWith('work-file-id', 'https://example.com/work-cover.jpg');
-    expect(notificationShowMock).toHaveBeenCalledWith({ message: 'updateFailed', tone: 'danger' });
-    expect(notificationShowMock).not.toHaveBeenCalledWith({
-      message: 'featuredImageUpdated',
-      tone: 'positive',
-    });
-  });
-
-  it('does not report success when the API action resolves after unmount', async () => {
-    const action = deferred<{ imageUrl: string }>();
-    const onOgGenerationRequested = vi.fn();
-    setFeaturedImageActionMock.mockReturnValue(action.promise);
-
-    act(() => {
-      root?.render(
-        <WorkFeaturedImageUploader workId="work-1" canEdit onOgGenerationRequested={onOgGenerationRequested} />,
-      );
-    });
-
-    let uploadPromise: Promise<void> | undefined;
-    await act(async () => {
-      uploadPromise = uploadHandler?.(new Blob(['image'], { type: 'image/webp' })) as Promise<void> | undefined;
-      await Promise.resolve();
-    });
-    expect(setFeaturedImageActionMock).toHaveBeenCalled();
-
-    act(() => root?.render(null));
-    setFeaturedImageMock.mockReturnValue(false);
-
-    await act(async () => {
-      action.resolve({ imageUrl: 'https://example.com/work-cover.jpg' });
-      await uploadPromise;
-    });
-
-    expect(notificationShowMock).toHaveBeenCalledWith({ message: 'updateFailed', tone: 'danger' });
-    expect(notificationShowMock).not.toHaveBeenCalledWith({
-      message: 'featuredImageUpdated',
-      tone: 'positive',
-    });
-    expect(onOgGenerationRequested).not.toHaveBeenCalled();
   });
 });

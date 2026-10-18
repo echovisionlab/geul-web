@@ -106,17 +106,6 @@ function renderSecurityForm(overrides: Partial<ComponentProps<typeof SecurityFor
 }
 
 describe('SecurityForm', () => {
-  it('renders one canonical email and keeps social/passkey/session surfaces', () => {
-    renderSecurityForm();
-    expect(container.textContent).toContain('johndoe@example.com');
-    expect(container.querySelector('[data-testid="security-account-email"]')).not.toBeNull();
-    expect(container.querySelector('[data-testid="security-connected-emails"]')).toBeNull();
-    expect(container.querySelector('[data-testid="security-add-email"]')).toBeNull();
-    expect(container.querySelector('[data-testid="security-passkeys-section"]')).not.toBeNull();
-    expect(container.querySelector('[data-testid="settings-mcp-integration"]')).toBeNull();
-    expect(container.querySelector('[data-testid="security-provider-google"]')).not.toBeNull();
-  });
-
   it('starts the canonical email change verification flow without exposing the address in the URL', () => {
     renderSecurityForm();
     act(() => container.querySelector<HTMLButtonElement>('[data-testid="security-change-email"]')?.click());

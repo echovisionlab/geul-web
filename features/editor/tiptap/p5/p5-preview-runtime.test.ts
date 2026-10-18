@@ -5,12 +5,6 @@ import { buildP5SandboxDocument } from './p5-preview-document';
 import { DEFAULT_P5_SKETCH_SOURCE } from './p5-source';
 
 describe('p5.js sandbox render readiness', () => {
-  it('keeps the default sketch visibly centered until the pointer enters the canvas', () => {
-    expect(DEFAULT_P5_SKETCH_SOURCE).toContain('const pointerIsInside =');
-    expect(DEFAULT_P5_SKETCH_SOURCE).toContain('pointerIsInside ? mouseX : width / 2');
-    expect(DEFAULT_P5_SKETCH_SOURCE).toContain('pointerIsInside ? mouseY : height / 2');
-  });
-
   it('resolves the mount after document load and reports ready only after a canvas is attached', () => {
     const sandboxDocument = buildP5SandboxDocument(DEFAULT_P5_SKETCH_SOURCE, 'mount-contract', '/p5.js');
 

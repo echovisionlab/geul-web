@@ -81,38 +81,6 @@ function renderContent(context: unknown, sortConfig = '[]', maxSorts = '3') {
 }
 
 describe('DataTableContent', () => {
-  it('renders loading and empty states with reserved height', () => {
-    renderContent({
-      columns: [],
-      result: undefined,
-      loading: true,
-      query: {},
-      getRowKey: () => '',
-      onQueryChange: vi.fn(),
-      emptyMessage: 'No rows',
-    });
-
-    const loader = document.querySelector('[data-testid="page-loader"]');
-    expect(loader).not.toBeNull();
-    expect(loader?.getAttribute('data-min-height')).toBe('0');
-    expect(loader?.parentElement?.hasAttribute('data-datatable-loading')).toBe(true);
-    expect(loader?.parentElement?.getAttribute('aria-busy')).toBe('true');
-    expect(loader?.parentElement?.className).toContain('loading');
-    expect(loader?.parentElement?.style.minHeight).toBe('240px');
-
-    renderContent({
-      columns: [],
-      result: { data: [], total: 0, page: 1, pageSize: 10, totalPages: 0 },
-      loading: false,
-      query: {},
-      getRowKey: () => '',
-      onQueryChange: vi.fn(),
-      emptyMessage: 'No rows',
-    });
-
-    expect(document.body.textContent).toContain('No rows');
-  });
-
   it('renders cells, toggles row selection, and cycles supported sort fields', async () => {
     const onQueryChange = vi.fn();
     const onSelectedRowKeysChange = vi.fn();

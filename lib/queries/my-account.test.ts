@@ -1,6 +1,5 @@
-import { MySection } from '@echovisionlab/geul-proto/secure/member_pb.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { getMyProfile, getMySections } from './my-account';
+import { getMyProfile } from './my-account';
 
 const mocks = vi.hoisted(() => ({
   createMemberClient: vi.fn(),
@@ -21,32 +20,11 @@ describe('my account projections', () => {
     });
   });
 
-  it('returns the canonical MemberProfile instead of inventing another detail shape', async () => {
-    const profile = {
-      summary: { id: 'member-1', nickname: 'Member', deleted: false },
-      bio: 'Biography',
-      website: 'https://example.test',
-      socialLinks: { instagram: 'https://instagram.com/member' },
-    };
-    mocks.getMyProfile.mockResolvedValue({ member: profile });
-
-    await expect(getMyProfile()).resolves.toBe(profile);
-    expect(mocks.getMyProfile).toHaveBeenCalledWith({});
-  });
-
   it('rejects an incomplete profile projection', async () => {
     mocks.getMyProfile.mockResolvedValue({
       member: { summary: { id: 'member-1', nickname: '', deleted: false } },
     });
 
     await expect(getMyProfile()).resolves.toBeNull();
-  });
-
-  it('loads navigation capabilities only through the dedicated lazy read', async () => {
-    const sections = [MySection.PROFILE, MySection.POSTS];
-    mocks.getMySections.mockResolvedValue({ sections });
-
-    await expect(getMySections()).resolves.toEqual(sections);
-    expect(mocks.getMySections).toHaveBeenCalledWith({});
   });
 });

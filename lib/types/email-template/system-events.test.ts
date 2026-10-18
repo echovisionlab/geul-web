@@ -20,32 +20,6 @@ describe('system email event catalog', () => {
     expect(getEventVariables('registration_code')).not.toContain('request_url');
   });
 
-  it('matches the exact publisher-backed automatic-mail catalog', () => {
-    expect(SYSTEM_EMAIL_EVENT_KEYS).toEqual([
-      'account_deletion_confirm',
-      'account_deletion_scheduled',
-      'account_deletion_cancelled',
-      'account_deletion_complete',
-      'account_recovery_confirm',
-      'account_recovery_complete',
-      'primary_email_changed',
-      'email_added',
-      'email_removed',
-      'passkey_added',
-      'passkey_removed',
-      'social_login_added',
-      'social_login_removed',
-      'welcome',
-      'terms_update',
-      'terms_effective',
-      'privacy_update',
-      'privacy_effective',
-      'verification_code',
-      'login_code',
-      'registration_code',
-    ]);
-  });
-
   it('exposes only the runtime site origin placeholder', () => {
     for (const eventKey of SYSTEM_EMAIL_EVENT_KEYS) {
       expect(getEventVariables(eventKey)).toContain('site_origin');

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { act, useState, type ReactElement } from 'react';
+import { act, type ReactElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DesignSystemProvider } from '../lib/providers/DesignSystemProvider';
@@ -8,9 +8,8 @@ import { NextIntlClientProvider } from 'next-intl';
 import { Button } from '../components/core/Button';
 import { PageHeader } from '../components/core/PageHeader';
 import { TextInput } from '../components/core/Input';
-import enMessages from '../messages/en.json';
 import koMessages from '../messages/ko.json';
-import { createStorybookText, localizeFixtureArgs, localizeFixtureTree, useStorybookText } from './fixture-i18n';
+import { createStorybookText, localizeFixtureArgs, localizeFixtureTree } from './fixture-i18n';
 import { coreFixtureAliases } from './core-fixture-aliases';
 import { kitFixtureMessages } from './kit-fixture-messages';
 import { SUPPORTED_LOCALES } from '../lib/i18n/locale';
@@ -130,52 +129,5 @@ describe('Storybook fixture localization', () => {
     expect(action.props.children).toBe(koMessages.posts.createTooltip);
     expect(action.props.onClick).toBe(onClick);
     expect(args.actions[1]).toEqual({ label: saved, onClick });
-  });
-
-  it('switches mounted production controls between locale and theme while preserving the draft', () => {
-    const host = document.createElement('div');
-    document.body.appendChild(host);
-    const root = createRoot(host);
-    cleanup = () => {
-      act(() => root.unmount());
-      host.remove();
-    };
-    function ControlFixture() {
-      const [draft, setDraft] = useState('Archive');
-      const text = useStorybookText();
-      return localizeFixtureTree(
-        <>
-          <TextInput label="Name" value={draft} onChange={(event) => setDraft(event.currentTarget.value)} />
-          <Button>Save</Button>
-        </>,
-        text,
-      );
-    }
-    function render(locale: 'en' | 'ko', mode: 'light' | 'dark') {
-      act(() =>
-        root.render(
-          <NextIntlClientProvider locale={locale} messages={locale === 'en' ? enMessages : koMessages}>
-            <DesignSystemProvider locale={locale} forceColorScheme={mode}>
-              <ControlFixture />
-            </DesignSystemProvider>
-          </NextIntlClientProvider>,
-        ),
-      );
-    }
-    render('en', 'light');
-    const input = host.querySelector('input')!;
-    act(() => {
-      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input, 'Edited archive');
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-    });
-    render('ko', 'dark');
-    expect(host.querySelector('input')?.value).toBe('Edited archive');
-    expect(host.querySelector('label')?.textContent).toBe(koMessages.common.labels.name);
-    expect(host.querySelector('button')?.textContent).toBe(saved);
-    expect(document.documentElement.dataset.geulTheme).toBe('dark');
-    render('en', 'light');
-    expect(host.querySelector('input')?.value).toBe('Edited archive');
-    expect(host.querySelector('button')?.textContent).toBe('Save');
-    expect(document.documentElement.dataset.geulTheme).toBe('light');
   });
 });

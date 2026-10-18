@@ -2,7 +2,7 @@
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ToolbarCommand, type ToolbarCommandProps } from './ToolbarCommand';
+import { ToolbarCommand } from './ToolbarCommand';
 const media = vi.hoisted(() => ({ mobile: false, touch: false }));
 vi.mock('@mantine/hooks', () => ({
   useMediaQuery: (query: string) => (query === '(any-pointer: coarse)' ? media.touch : media.mobile),
@@ -42,23 +42,6 @@ describe('ToolbarCommand', () => {
     expect(click).toHaveBeenCalledOnce();
     await act(async () => root.unmount());
     host.remove();
-  });
-  it('projects native props without leaking style or changing the owned size', async () => {
-    const host = document.createElement('div');
-    const root = createRoot(host);
-    const hostile = {
-      style: { padding: 900 },
-      className: 'foreign',
-      size: 'xl',
-      rightSection: <span>Foreign</span>,
-    } as unknown as ToolbarCommandProps;
-    await act(async () => root.render(<ToolbarCommand {...hostile} label="Edit" />));
-    const button = host.querySelector('button')!;
-    expect(button.style.padding).toBe('');
-    expect(button.classList.contains('foreign')).toBe(false);
-    expect(button.dataset.controlSize).toBe('xs');
-    expect(button.textContent).toBe('Edit');
-    await act(async () => root.unmount());
   });
 
   it('retains a long visible label on touch at mobile widths', async () => {

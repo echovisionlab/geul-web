@@ -219,8 +219,8 @@ The local page preview owns simulated verification; component state stories neve
 Core Button defaults to `neutral / medium`: a transparent surface and medium-weight label.
 Supporting controls use a surface change on hover; they do not use a link underline.
 Quiet navigation (secondary or muted ink: links, tabs, side navigation, outline rows) takes the one
-`text-hover` ink under a pointer, with `surface-hover` where the item is a row; a Core test rejects a
-hover rule that names a text role directly.
+`text-hover` ink under a pointer, with `surface-hover` where the item is a row. Hover rules use that role,
+never a text role directly.
 `low` uses quieter ink. Ordinary secondary actions such as changing email or connecting an
 account remain borderless; `outline` is an explicit functional-boundary exception. Inline TextButton navigation retains glyph
 underline feedback. IconButton uses surface feedback and retains its accessible name and target

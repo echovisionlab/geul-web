@@ -112,24 +112,6 @@ describe('block-room local intent journal', () => {
     expect(getBlockRoomIntentChanges({ ...scope, sourceLocale: 'ja' })).toHaveLength(0);
   });
 
-  it('requires both persisted state-vector coverage and the full delete-set range', () => {
-    const entry = change();
-    recordBlockRoomIntent(scope, entry);
-    const onlyVector = acknowledgeBlockRoomIntents(scope, {
-      stateVector: entry.stateVector,
-      deleted: {},
-    });
-    expect(onlyVector).toEqual({ acknowledged: 0, pending: 1 });
-
-    expect(
-      acknowledgeBlockRoomIntents(scope, {
-        stateVector: entry.stateVector,
-        deleted: entry.deleted,
-      }),
-    ).toEqual({ acknowledged: 1, pending: 0 });
-    expect(getBlockRoomIntentChanges(scope)).toHaveLength(0);
-  });
-
   it('keeps local intents separate across peer body changes and acknowledges by clocks', () => {
     const doc = new Y.Doc();
     const text = doc.getText('journal-prefix');

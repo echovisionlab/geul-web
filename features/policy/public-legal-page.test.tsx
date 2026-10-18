@@ -153,25 +153,6 @@ describe.each(['privacy', 'terms'] as const)('%s initial public document', (kind
     expect(await renderServerScreen(screen(kind, snapshot()))).toContain('data-testid="loader"');
   });
 
-  it('mounts fresh server data without issuing another browser query', async () => {
-    const container = document.createElement('div');
-    const root = createRoot(container);
-    const client = new QueryClient({ defaultOptions: { queries: { staleTime: 60_000, retry: false } } });
-    try {
-      await act(async () => {
-        root.render(screen(kind, snapshot(), client));
-      });
-      await waitForPublishedBody(container);
-      expect(
-        mocks.getPage.mock.calls.length + mocks.getActive.mock.calls.length + mocks.getScheduled.mock.calls.length,
-      ).toBe(0);
-      expect(container.textContent).toContain('Published legal document');
-    } finally {
-      act(() => root.unmount());
-      client.clear();
-    }
-  });
-
   it('hydrates the server body without replacing it or fetching it again', async () => {
     const initialData = snapshot();
     const serverClient = new QueryClient();
@@ -272,20 +253,5 @@ describe.each(['privacy', 'terms'] as const)('%s initial public document', (kind
       effectiveFrom: new Date('2026-11-01T00:00:00Z'),
     };
     expect(await renderServerScreen(screen(kind, initialData))).toContain('active.upcomingAlert');
-  });
-
-  it('fetches one combined snapshot when server data is unavailable', async () => {
-    const container = document.createElement('div');
-    const root = createRoot(container);
-    const client = new QueryClient({ defaultOptions: { queries: { staleTime: 60_000, retry: false } } });
-    try {
-      await act(async () => root.render(screen(kind, undefined, client)));
-      expect(mocks.getPage).toHaveBeenCalledExactlyOnceWith('en');
-      expect(mocks.getActive).not.toHaveBeenCalled();
-      expect(mocks.getScheduled).not.toHaveBeenCalled();
-    } finally {
-      act(() => root.unmount());
-      client.clear();
-    }
   });
 });

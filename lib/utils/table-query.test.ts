@@ -1,14 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, filterSpecSchema, sortSpecSchema, tableQuerySchema } from './table-query';
-import * as defaults from './table-query-defaults';
+import { filterSpecSchema, sortSpecSchema, tableQuerySchema } from './table-query';
 
 describe('table query schema compatibility', () => {
-  it('retains original constant exports and schema defaults', () => {
-    expect(DEFAULT_PAGE).toBe(defaults.DEFAULT_PAGE);
-    expect(DEFAULT_PAGE_SIZE).toBe(defaults.DEFAULT_PAGE_SIZE);
-    expect(tableQuerySchema.parse({})).toEqual({ page: 1, pageSize: 20 });
-  });
-
   it('keeps bounds and fluent schema composition', () => {
     expect(tableQuerySchema.safeParse({ page: 0 }).success).toBe(false);
     expect(tableQuerySchema.safeParse({ pageSize: 101 }).success).toBe(false);

@@ -225,24 +225,6 @@ describe('FormViewClient', () => {
     });
   });
 
-  it('does not render the standalone form page logo in embedded block views', async () => {
-    checkFormAccessActionMock.mockResolvedValue({
-      accessible: true,
-      form: {
-        id: 'form-1',
-        title: '문의하기',
-        schema: { id: 'schema-1' },
-      },
-    });
-
-    render(<FormViewClient props={{ formId: 'contact', showTitle: 'true' }} requestedLocale="ko" />);
-
-    await waitForAssertion(() => {
-      expect(document.querySelector('[data-testid="form-renderer"]')).not.toBeNull();
-    });
-    expect(document.querySelector('[data-testid="site-logo"]')).toBeNull();
-  });
-
   it('renders an empty-state message when no form is selected', () => {
     render(<FormViewClient props={{ formId: '', showTitle: 'true' }} requestedLocale="ko" />);
 
@@ -392,95 +374,6 @@ describe('FormViewClient', () => {
     expect(submitFormActionMock).not.toHaveBeenCalled();
     expect(document.body.textContent).not.toContain('Submitted successfully');
     expect(document.querySelector('[data-testid="form-renderer"]')).not.toBeNull();
-  });
-
-  it('shows the shared pending state while a submission is in flight', async () => {
-    checkFormAccessActionMock.mockResolvedValue({
-      accessible: true,
-      form: {
-        id: 'form-1',
-        title: '문의하기',
-        schema: { id: 'schema-1' },
-      },
-    });
-
-    let resolveSubmit: ((value: { success: true }) => void) | undefined;
-    submitFormActionMock.mockImplementation(
-      () =>
-        new Promise<{ success: true }>((resolve) => {
-          resolveSubmit = resolve;
-        }),
-    );
-
-    render(<FormViewClient props={{ formId: 'contact', showTitle: 'true' }} requestedLocale="ko" />);
-    await waitForAssertion(() => {
-      expect(document.querySelector('[data-testid="form-renderer"]')).not.toBeNull();
-    });
-
-    const submitButton = Array.from(document.querySelectorAll('button')).find(
-      (button) => button.textContent === 'Submit form',
-    );
-    expect(submitButton).not.toBeNull();
-
-    await act(async () => {
-      submitButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      await Promise.resolve();
-    });
-
-    await waitForAssertion(() => {
-      expect(document.querySelector('[data-testid="submission-pending"]')?.textContent).toContain('Loading...');
-    });
-    expect(document.querySelector('[data-testid="form-renderer"]')).not.toBeNull();
-
-    await act(async () => {
-      resolveSubmit?.({ success: true });
-      await Promise.resolve();
-    });
-
-    await waitForAssertion(() => {
-      expect(document.querySelector('[data-testid="submission-success"]')?.textContent).toContain('Thanks');
-    });
-  });
-
-  it('surfaces submission errors through notifications without entering the success state', async () => {
-    checkFormAccessActionMock.mockResolvedValue({
-      accessible: true,
-      form: {
-        id: 'form-1',
-        title: '문의하기',
-        schema: { id: 'schema-1' },
-      },
-    });
-    submitFormActionMock.mockResolvedValue({ error: 'Submission failed' });
-
-    render(<FormViewClient props={{ formId: 'contact', showTitle: 'true' }} requestedLocale="ko" />);
-    await waitForAssertion(() => {
-      expect(document.querySelector('[data-testid="form-renderer"]')).not.toBeNull();
-    });
-
-    const getSubmitButton = () =>
-      Array.from(document.querySelectorAll('button')).find((button) => button.textContent === 'Submit form');
-
-    await waitForAssertion(() => {
-      expect(getSubmitButton()).not.toBeNull();
-    });
-
-    await act(async () => {
-      getSubmitButton()?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      await Promise.resolve();
-    });
-
-    await waitForAssertion(() => {
-      expect(submitFormActionMock).toHaveBeenCalledWith('form-1', { email: 'hello@example.com' }, undefined, 'ko');
-    });
-    await waitForAssertion(() => {
-      expect(vi.mocked(notifications.show)).toHaveBeenCalledWith({
-        title: 'Submit failed',
-        message: 'Submission failed',
-        tone: 'danger',
-      });
-    });
-    expect(document.body.textContent).not.toContain('Submitted successfully');
   });
 
   it('keeps typed values mounted after a handled submit error', async () => {

@@ -45,15 +45,4 @@ describe('Core EmptyState', () => {
     expect(root).toHaveAttribute('aria-describedby', 'context');
     expect(root.dataset.testid).toBe('state');
   });
-
-  it('owns the section inset unless an owning surface supplies it', () => {
-    render();
-    expect(container.firstElementChild).not.toHaveAttribute('data-empty-state');
-    render({ inset: 'none' });
-    expect(container.firstElementChild).toHaveAttribute('data-empty-state');
-  });
-
-  it('rejects unsupported insets', () => {
-    expect(() => render({ inset: 'lg' as 'none' })).toThrow('Invalid empty state inset');
-  });
 });

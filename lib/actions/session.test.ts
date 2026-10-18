@@ -76,18 +76,6 @@ describe('Account session actions', () => {
     expect(mocks.getMySecurity).toHaveBeenCalledWith({});
   });
 
-  it('revokes one non-current session through AccountService', async () => {
-    await expect(revokeSessionAction('session-other')).resolves.toEqual({});
-
-    expect(mocks.revokeMySession).toHaveBeenCalledWith({ sessionId: 'session-other' });
-  });
-
-  it('revokes every other session through the aggregate Account command', async () => {
-    await expect(revokeOtherSessionsAction()).resolves.toEqual({});
-
-    expect(mocks.revokeMyOtherSessions).toHaveBeenCalledWith({});
-  });
-
   it('does not create an Account client without an authenticated Member viewer', async () => {
     mocks.getSession.mockResolvedValue(null);
 

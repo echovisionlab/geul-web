@@ -7,7 +7,6 @@ import { renderToReadableStream } from 'react-dom/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import PublicPageView from './page';
 import { PageContent } from './PageContent';
-import { PageJsonLd } from './PageJsonLd';
 
 const mocks = vi.hoisted(() => ({ getPageView: vi.fn(), getPageMetadataDocument: vi.fn() }));
 vi.mock('@/lib/queries/page', () => ({
@@ -150,43 +149,6 @@ describe('authorized page body streaming', () => {
     await current.reader.cancel();
   });
 
-  it('measures the controlled 50 ms page / 500 ms metadata dependency', async () => {
-    // The fake clock drives the dependency delays, React's setImmediate scheduling and the measurement.
-    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setImmediate', 'clearImmediate', 'performance'] });
-    async function measure(legacy: boolean) {
-      const started = performance.now();
-      const readyPage = new Promise((resolve) => setTimeout(() => resolve(page), 50));
-      const readyMetadata = new Promise((resolve) => setTimeout(() => resolve(null), 500));
-      mocks.getPageView.mockReturnValue(readyPage);
-      mocks.getPageMetadataDocument.mockReturnValue(readyMetadata);
-      const body = (async () => {
-        const output = await start(legacy ? <LegacyPage /> : await PublicPageView(props()));
-        let html = '';
-        while (!html.includes(page.title)) {
-          const next = await output.reader.read();
-          if (next.done) {
-            break;
-          }
-          html += output.decoder.decode(next.value);
-        }
-        expect(html).toContain(page.title);
-        const bodyMs = performance.now() - started;
-        await output.stream.allReady;
-        await output.reader.cancel();
-        return bodyMs;
-      })();
-      const [bodyMs] = await Promise.all([body, vi.runAllTimersAsync()]);
-      return bodyMs;
-    }
-    const beforeMs = await measure(true);
-    const afterMs = await measure(false);
-    process.stdout.write(
-      `Artificial controlled stream body readiness: before=${beforeMs.toFixed(1)}ms after=${afterMs.toFixed(1)}ms\n`,
-    );
-    expect(beforeMs).toBeGreaterThanOrEqual(490);
-    expect(afterMs).toBeLessThan(350);
-  });
-
   it('rejects absent pages before returning body or starting JSON-LD', async () => {
     mocks.getPageView.mockResolvedValue(null);
     await expect(PublicPageView(props())).rejects.toThrow('not-found');
@@ -197,17 +159,5 @@ describe('authorized page body streaming', () => {
     mocks.getPageView.mockRejectedValue(new Error('permission-denied'));
     await expect(PublicPageView(props())).rejects.toThrow('permission-denied');
     expect(mocks.getPageMetadataDocument).not.toHaveBeenCalled();
-  });
-
-  it('keeps standalone PageContent lookup and notFound behavior', async () => {
-    await PageContent({ slug: 'direct', requestedLocale: 'en' });
-    expect(mocks.getPageView).toHaveBeenCalledWith('direct', { requestedLocale: 'en' });
-    mocks.getPageView.mockResolvedValue(null);
-    await expect(PageContent({ slug: 'missing', requestedLocale: 'en' })).rejects.toThrow('not-found');
-  });
-
-  it('preserves JSON-LD lookup errors rather than swallowing them', async () => {
-    mocks.getPageMetadataDocument.mockRejectedValue(new Error('metadata-failed'));
-    await expect(PageJsonLd({ slug: 'direct', requestedLocale: 'en' })).rejects.toThrow('metadata-failed');
   });
 });

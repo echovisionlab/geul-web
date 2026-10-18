@@ -31,15 +31,6 @@ function render(props: Partial<StatCardProps> = {}) {
 }
 
 describe('Core StatCard', () => {
-  it('owns the decorative glyph geometry', () => {
-    render();
-    const glyph = container.querySelector('svg')!;
-    expect(glyph).toHaveAttribute('width', '20');
-    expect(glyph).toHaveAttribute('stroke-width', '1.5');
-    expect(glyph).toHaveAttribute('aria-hidden', 'true');
-    expect(container.querySelector('a')).toBeNull();
-  });
-
   it('turns the whole card into one navigation link when href is supplied', () => {
     render({ href: '/admin/users' });
     const link = container.querySelector('a')!;

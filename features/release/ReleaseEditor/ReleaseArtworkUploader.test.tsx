@@ -74,15 +74,4 @@ describe('Release artwork configuration origin', () => {
     expect(onArtworkChange).toHaveBeenCalledExactlyOnceWith('https://cdn.example/artwork.webp');
     expect(hasAdoptedConfigurationOrigin(`release:${releaseId}`, owner, origin)).toBe(false);
   });
-
-  it('forwards an origin for artwork removal', async () => {
-    const releaseId = 'release-artwork-remove-origin';
-    const onArtworkChange = render(releaseId);
-    await act(async () => {
-      view.onRemove();
-      await vi.waitFor(() => expect(mocks.deleteArtwork).toHaveBeenCalled());
-    });
-    expect(mocks.deleteArtwork).toHaveBeenCalledExactlyOnceWith(releaseId, getEditorWriteOrigin());
-    expect(onArtworkChange).toHaveBeenCalledExactlyOnceWith(null);
-  });
 });

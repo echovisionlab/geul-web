@@ -72,15 +72,6 @@ describe('getManifest', () => {
     });
   });
 
-  it('passes the resolved locale to the authenticated manifest client', async () => {
-    const { getManifest } = await import('./manifest');
-
-    const manifest = await getManifest({ requestedLocale: 'en' });
-
-    expect(createManifestClient).toHaveBeenCalledWith('en');
-    expect(manifest.menus.header[0]?.label).toBe('Home');
-  });
-
   it('passes the resolved locale to the public fallback manifest client', async () => {
     getManifestRpcMock.mockRejectedValueOnce(new ConnectError('unauthenticated', Code.Unauthenticated));
     const { getManifest } = await import('./manifest');
@@ -141,16 +132,6 @@ describe('getManifest', () => {
     const { getManageSiteContext } = await import('./manifest');
 
     await expect(getManageSiteContext()).rejects.toThrow('Manifest site_origin is required');
-  });
-
-  it('passes the resolved locale to public settings reads', async () => {
-    const { getPublicSettings } = await import('./manifest');
-
-    const settings = await getPublicSettings({ requestedLocale: 'zh-CN' });
-
-    expect(createPublicManifestClient).toHaveBeenCalledWith('zh-CN');
-    expect(settings.site_title).toBe('Public Example Studio');
-    expect(settings.site_origin).toBe('https://public.example.com');
   });
 
   it('maps a complete favicon asset set to explicit versioned URLs', async () => {

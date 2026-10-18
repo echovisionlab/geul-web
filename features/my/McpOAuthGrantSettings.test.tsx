@@ -70,11 +70,6 @@ describe('McpOAuthGrantSettings', () => {
     expect(container.textContent).toContain('권한 해제');
   });
 
-  it('shows an explicit empty state', () => {
-    render([]);
-    expect(container.textContent).toContain('연결된 MCP 클라이언트가 없습니다.');
-  });
-
   it.each(['rejection', 'throw', 'resolved error'] as const)(
     'retains the grant and enables retry after an action %s',
     async (failure) => {

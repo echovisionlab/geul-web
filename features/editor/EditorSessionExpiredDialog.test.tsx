@@ -39,20 +39,6 @@ afterEach(async () => {
 });
 
 describe('EditorSessionExpiredDialog', () => {
-  it('does not render while closed', () => {
-    act(() => {
-      root.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceColorScheme="light">
-            <EditorSessionExpiredDialog opened={false} onConfirm={vi.fn()} />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-
-    expect(document.body.querySelector('[role="alertdialog"]')).toBeNull();
-  });
-
   it('renders a localized non-dismissible login action', async () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     let completed!: () => void;

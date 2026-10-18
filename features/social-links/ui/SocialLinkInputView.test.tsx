@@ -75,31 +75,6 @@ describe('responsive social platform picker', () => {
     act(() => within(host).getByRole('button', { name: 'Remove' }).click());
     expect(props.onRemove).toHaveBeenCalledOnce();
   });
-  it('opens a named icon picker with searchable options, selects a platform and restores trigger focus', async () => {
-    const props = render();
-    const trigger = host.querySelector<HTMLButtonElement>('#social-platform-picker')!;
-    expect(trigger).toHaveAccessibleName('Platform: GitHub');
-    expect(trigger.textContent).toBe('');
-    await act(async () => userEvent.click(trigger));
-    const dialog = within(document.body).getByRole('dialog', { name: 'Platform: GitHub' });
-    const search = within(dialog).getByRole('combobox', { name: 'Platform' });
-    expect(search).toHaveFocus();
-    await act(async () => {
-      await userEvent.clear(search);
-      await userEvent.type(search, 'Bandcamp');
-    });
-    const ids = [...document.querySelectorAll('[id]')].map((element) => element.id);
-    expect(new Set(ids).size).toBe(ids.length);
-    const option = within(document.body).getByRole('option', { name: 'Bandcamp' });
-    await act(async () => userEvent.click(option));
-    expect(props.onPlatformChange).toHaveBeenCalledWith('bandcamp');
-    expect(dialog).not.toBeInTheDocument();
-    // React Aria restores trigger focus on the next animation frame.
-    await act(async () => {
-      await waitFor(() => expect(trigger).toHaveFocus());
-    });
-    expect(host.querySelector('#social-url')).toHaveValue('https://github.com/monome');
-  });
   it('dismisses nested search before the picker and keeps permission changes effective', async () => {
     render();
     const trigger = host.querySelector<HTMLButtonElement>('#social-platform-picker')!;

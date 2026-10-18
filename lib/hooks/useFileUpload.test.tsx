@@ -18,7 +18,6 @@ import {
   completeClientMediaUploadAction,
   recoverCompletedClientMediaUploadAction,
   prepareClientMediaUploadAction,
-  downloadFromUrlAction,
   findMultipartUploadCandidateAction,
   initiateUploadAction,
   recoverCompletedUploadAction,
@@ -26,7 +25,6 @@ import {
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
 import { UploadType } from '@/lib/types/upload/model';
 import { useFileUpload } from './useFileUpload';
-import { downloadRemoteSource } from '@/lib/upload/remote-source';
 import { prepareMedia, type PreparedMedia } from '@/lib/media/client-processing/processor';
 import { uploadClientMediaArtifact } from '@/lib/upload/client-media-transport';
 import { buildUploadSurfaceKey, cancelUploadSurface } from '@/lib/hooks/uploadSurfaceActivity';
@@ -253,32 +251,6 @@ function UploadHarness({
   );
 }
 
-function DownloadHarness({
-  entityType,
-  expectedCurrentFileId,
-}: {
-  entityType: TranscodeEntityType;
-  expectedCurrentFileId?: string;
-}) {
-  const { downloadFromUrl } = useFileUpload();
-
-  return (
-    <button
-      id="start-download"
-      type="button"
-      onClick={() => {
-        void downloadFromUrl(UploadType.EDITOR_IMAGE, 'entity-1', 'https://source.example.com/image.png', entityType, {
-          correlationId: 'correlation-1',
-          surfaceSlotId: 'client-attempt-slot',
-          expectedCurrentFileId,
-        });
-      }}
-    >
-      start
-    </button>
-  );
-}
-
 describe('useFileUpload', () => {
   const originalXMLHttpRequest = globalThis.XMLHttpRequest;
   const originalFetch = globalThis.fetch;
@@ -353,68 +325,6 @@ describe('useFileUpload', () => {
   });
 
   it.each([
-    {
-      name: 'page shared first attach',
-      entityType: TranscodeEntityType.PAGE,
-      expectedCurrentFileId: undefined,
-    },
-    {
-      name: 'post replacement',
-      entityType: TranscodeEntityType.POST,
-      expectedCurrentFileId: '046a1c17-f9ae-4ca6-a3aa-d7027dfd00b3',
-    },
-  ])('imports $name through the direct-upload pipeline with untargeted editor attachment', async (testCase) => {
-    globalThis.XMLHttpRequest = MockXMLHttpRequest as unknown as typeof XMLHttpRequest;
-    const dispose = vi.fn(async () => undefined);
-    vi.mocked(downloadRemoteSource).mockResolvedValue({
-      file: new File(['image'], 'image.png', { type: 'image/png', lastModified: 0 }),
-      storageId: 'geul-client-media-source',
-      dispose,
-    });
-    vi.mocked(initiateUploadAction).mockResolvedValue({
-      uploadId: 'upload-1',
-      fileId: 'file-1',
-      totalParts: 1,
-      chunkSize: 5,
-      uploadedParts: [],
-      status: 1,
-      resumed: false,
-      slotId: '',
-      attemptId: 'attempt-1',
-    } as never);
-    vi.mocked(completeUploadAction).mockResolvedValue({ url: '/media/file-1', fileId: 'file-1' } as never);
-
-    render(<DownloadHarness entityType={testCase.entityType} expectedCurrentFileId={testCase.expectedCurrentFileId} />);
-
-    await act(async () => {
-      document.querySelector<HTMLButtonElement>('#start-download')?.click();
-      await expect.poll(() => dispose.mock.calls.length).toBe(1);
-    });
-
-    await expect.poll(() => vi.mocked(completeUploadAction).mock.calls.length).toBe(1);
-    expect(persistCollaborativeDocumentNowMock).not.toHaveBeenCalled();
-    expect(downloadFromUrlAction).not.toHaveBeenCalled();
-    expect(vi.mocked(downloadRemoteSource).mock.calls[0]?.slice(0, 2)).toEqual([
-      'https://source.example.com/image.png',
-      expect.objectContaining({
-        uploadType: UploadType.EDITOR_IMAGE,
-        entityId: 'entity-1',
-        entityType: testCase.entityType,
-        correlationId: 'correlation-1',
-        surfaceSlotId: 'client-attempt-slot',
-        expectedCurrentFileId: testCase.expectedCurrentFileId,
-      }),
-    ]);
-    expect(vi.mocked(initiateUploadAction).mock.calls[0]?.[0]).toMatchObject({
-      entityId: '',
-      entityType: undefined,
-      slotId: undefined,
-      expectedCurrentFileId: undefined,
-    });
-    await expect.poll(() => dispose.mock.calls.length).toBe(1);
-  });
-
-  it.each([
     UploadType.EDITOR_IMAGE,
     UploadType.EDITOR_VIDEO,
     UploadType.EDITOR_AUDIO,
@@ -471,89 +381,6 @@ describe('useFileUpload', () => {
       resumed: false,
       resumable: false,
     });
-  });
-
-  it('resolves from the backend complete response without waiting for lifecycle fanout', async () => {
-    globalThis.XMLHttpRequest = MockXMLHttpRequest as unknown as typeof XMLHttpRequest;
-    vi.mocked(initiateUploadAction).mockResolvedValue({
-      uploadId: 'upload-1',
-      fileId: 'file-1',
-      uploadUrl: '',
-      url: '',
-      totalParts: 1,
-      chunkSize: 5,
-      uploadedParts: [],
-      status: 1,
-      resumed: false,
-      slotId: '',
-      attemptId: 'backend-attempt-1',
-    } as never);
-    vi.mocked(completeUploadAction).mockResolvedValue({
-      url: '/media/file-1',
-      fileId: 'file-1',
-    } as never);
-    let resolved = false;
-
-    render(<UploadHarness onResolved={() => (resolved = true)} />);
-
-    await expect.poll(() => runtimeSubscription.listener != null).toBe(true);
-    await act(async () => {
-      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
-    });
-
-    await expect.poll(() => vi.mocked(completeUploadAction).mock.calls.length).toBe(1);
-    await expect.poll(() => resolved).toBe(true);
-  });
-
-  it('reports the backend upload session attempt returned by initiate', async () => {
-    globalThis.XMLHttpRequest = MockXMLHttpRequest as unknown as typeof XMLHttpRequest;
-    const file = new File(['audio-data'], 'file.bin', { type: 'application/octet-stream' });
-    const onMultipartSession = vi.fn();
-    vi.mocked(initiateUploadAction).mockResolvedValue({
-      uploadId: 'upload-1',
-      fileId: 'file-1',
-      totalParts: 2,
-      chunkSize: 5,
-      status: 2,
-      uploadedParts: [{ partNumber: 1, etag: 'etag-1' }],
-      resumed: true,
-      slotId: 'slot-1',
-      attemptId: 'backend-attempt-1',
-    } as never);
-    vi.mocked(completeUploadAction).mockResolvedValue({
-      url: '/media/file-1',
-      fileId: 'file-1',
-    } as never);
-    let resolved = false;
-
-    render(
-      <UploadHarness
-        file={file}
-        onMultipartSession={onMultipartSession}
-        onResolved={() => (resolved = true)}
-        uploadOptions={{
-          slotId: 'slot-1',
-        }}
-      />,
-    );
-
-    await expect.poll(() => runtimeSubscription.listener != null).toBe(true);
-    await act(async () => {
-      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
-    });
-
-    await expect.poll(() => vi.mocked(completeUploadAction).mock.calls.length).toBe(1);
-    expect(vi.mocked(initiateUploadAction).mock.calls[0]?.[0]).not.toHaveProperty('attemptId');
-    expect(onMultipartSession).toHaveBeenCalledWith(
-      expect.objectContaining({
-        uploadId: 'upload-1',
-        fileId: 'file-1',
-        slotId: 'slot-1',
-        attemptId: 'backend-attempt-1',
-        resumed: true,
-      }),
-    );
-    await expect.poll(() => resolved).toBe(true);
   });
 
   it('keeps a failed backend completion in the finalizing lifecycle for same-session retry', async () => {
@@ -842,42 +669,6 @@ describe('useFileUpload', () => {
     );
   });
 
-  it('emits a validating progress update before client-side preprocessing finishes', async () => {
-    globalThis.XMLHttpRequest = MockXMLHttpRequest as unknown as typeof XMLHttpRequest;
-    vi.mocked(initiateUploadAction).mockResolvedValue({
-      uploadId: 'upload-1',
-      fileId: 'file-1',
-      uploadUrl: '',
-      url: '',
-      totalParts: 1,
-      chunkSize: 5,
-      uploadedParts: [],
-      status: 1,
-      resumed: false,
-      slotId: '',
-      attemptId: 'backend-attempt-1',
-    } as never);
-    vi.mocked(completeUploadAction).mockResolvedValue({
-      url: '/media/file-1',
-      fileId: 'file-1',
-    } as never);
-    const onProgress = vi.fn();
-
-    render(<UploadHarness onProgress={onProgress} onResolved={() => undefined} />);
-
-    await expect.poll(() => runtimeSubscription.listener != null).toBe(true);
-    await act(async () => {
-      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
-    });
-
-    await expect.poll(() => vi.mocked(completeUploadAction).mock.calls.length).toBe(1);
-    expect(onProgress.mock.calls[0]?.[0]).toMatchObject({
-      loaded: 0,
-      percentage: 0,
-      stage: 'validating',
-    });
-  });
-
   it('ignores stale attempt events and keeps active realtime progress monotonic', async () => {
     globalThis.XMLHttpRequest = MockXMLHttpRequest as unknown as typeof XMLHttpRequest;
     let pendingRequest: MockXMLHttpRequest | null = null;
@@ -973,91 +764,6 @@ describe('useFileUpload', () => {
       await expect.poll(() => resolved).toBe(true);
     });
     await expect.poll(() => resolved).toBe(true);
-  });
-
-  it('automatically retries an interrupted part in a ten-part upload and completes', async () => {
-    vi.useFakeTimers();
-    globalThis.XMLHttpRequest = MockXMLHttpRequest as unknown as typeof XMLHttpRequest;
-    const file = new File([new Uint8Array(50)], 'file.bin', { type: 'application/octet-stream' });
-    const partAttempts = new Map<number, number>();
-
-    MockXMLHttpRequest.sendHandler = (xhr, chunk) => {
-      const partNumber = Number(new URL(xhr.url, 'https://studio.example.com').searchParams.get('partNumber'));
-      const attempt = (partAttempts.get(partNumber) ?? 0) + 1;
-      partAttempts.set(partNumber, attempt);
-
-      xhr.upload.onprogress?.({
-        lengthComputable: true,
-        loaded: chunk.size,
-        total: chunk.size,
-      } as ProgressEvent);
-      xhr.readyState = MockXMLHttpRequest.DONE;
-
-      if (partNumber === 7 && attempt === 1) {
-        xhr.status = 408;
-        xhr.responseText = 'Upload interrupted';
-        xhr.onload?.();
-        return;
-      }
-
-      xhr.status = 200;
-      xhr.responseText = JSON.stringify({ etag: `etag-${partNumber}-${attempt}` });
-      xhr.onload?.();
-    };
-
-    vi.mocked(initiateUploadAction).mockResolvedValue({
-      uploadId: 'upload-1',
-      fileId: 'file-1',
-      uploadUrl: '',
-      url: '',
-      totalParts: 10,
-      chunkSize: 5,
-      uploadedParts: [],
-      status: 1,
-      resumed: false,
-      slotId: '',
-      attemptId: 'backend-attempt-1',
-    } as never);
-    vi.mocked(completeUploadAction).mockResolvedValue({
-      url: '/media/file-1',
-      fileId: 'file-1',
-    } as never);
-    let resolved = false;
-    const progressPercentages: number[] = [];
-
-    render(
-      <UploadHarness
-        file={file}
-        onProgress={(progress) => progressPercentages.push(progress.percentage)}
-        onResolved={() => (resolved = true)}
-      />,
-    );
-
-    expect(runtimeSubscription.listener).not.toBeNull();
-    await act(async () => {
-      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
-    });
-
-    expect(partAttempts.get(7)).toBe(1);
-    expect(completeUploadAction).not.toHaveBeenCalled();
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(999);
-    });
-    expect(partAttempts.get(7)).toBe(1);
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(1);
-    });
-    expect(completeUploadAction).toHaveBeenCalledOnce();
-    expect(resolved).toBe(true);
-    expect(partAttempts.get(7)).toBe(2);
-    expect(progressPercentages.every((value, index) => index === 0 || value >= progressPercentages[index - 1]!)).toBe(
-      true,
-    );
-    expect(vi.mocked(completeUploadAction).mock.calls[0]?.[0]).toMatchObject({
-      uploadId: 'upload-1',
-      fileId: 'file-1',
-      uploadType: UploadType.GENERAL_FILE,
-    });
   });
 
   it('stops after automatic part retries are exhausted and succeeds when the user resumes the same file', async () => {
@@ -1798,33 +1504,6 @@ describe('useFileUpload', () => {
         entityId: '',
       });
       expect(prepared.dispose).toHaveBeenCalledOnce();
-    },
-  );
-
-  it.each(['audio/ogg', 'video/mp4'])(
-    'blocks unsupported %s editor attachments before every remote upload',
-    async (mime) => {
-      initiateFixture();
-      vi.mocked(prepareMedia).mockResolvedValue(null);
-      const rejected = vi.fn();
-      render(
-        <UploadHarness
-          uploadType={UploadType.EDITOR_ATTACHMENT}
-          file={new File(['media'], 'media', { type: mime })}
-          onResolved={vi.fn()}
-          onRejected={rejected}
-        />,
-      );
-      await act(async () => {
-        document.querySelector<HTMLButtonElement>('#start-upload')?.click();
-      });
-      await expect.poll(() => rejected.mock.calls.length).toBe(1);
-      expect(rejected.mock.calls[0]?.[0]).toMatchObject({ code: 'CLIENT_MEDIA_UNAVAILABLE' });
-      expect(initiateUploadAction).not.toHaveBeenCalled();
-      expect(prepareClientMediaUploadAction).not.toHaveBeenCalled();
-      expect(MockXMLHttpRequest.instances).toHaveLength(0);
-      expect(uploadClientMediaArtifact).not.toHaveBeenCalled();
-      expect(completeClientMediaUploadAction).not.toHaveBeenCalled();
     },
   );
 

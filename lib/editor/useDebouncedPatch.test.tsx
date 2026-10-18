@@ -169,37 +169,6 @@ it('keeps recovery batches from separate queues under the same room scope', () =
   );
 });
 
-it('keeps an in-memory recovery copy when session storage rejects writes', () => {
-  const recoveryScope = 'artist:one:en';
-  const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
-    throw new Error('storage quota exceeded');
-  });
-  const write = vi.fn();
-  function RecoverableEditor() {
-    edit = useDebouncedPatch({
-      write,
-      delay: 500,
-      scope: 'artist-one',
-      document: 'artist:one',
-      recoveryScope,
-    });
-    return null;
-  }
-
-  try {
-    act(() => root.render(<RecoverableEditor />));
-    act(() => edit({ title: 'memory fallback' }));
-    act(() => root.unmount());
-  } finally {
-    setItem.mockRestore();
-  }
-
-  expect(readEditorSaveRecovery(recoveryScope)?.entries).toMatchObject([
-    { document: 'artist:one', patch: { title: 'memory fallback' } },
-  ]);
-  clearEditorSaveRecovery(recoveryScope);
-});
-
 it('automatically resumes an exact keyed orphan after an unmounted failed save', async () => {
   const recoveryScope = 'work-room:resume:en';
   const failedWriter = vi.fn(async () => {

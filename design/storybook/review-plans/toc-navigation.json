@@ -8,22 +8,11 @@
     "components/core/Popover/Popover.test.tsx",
     "components/core/OverlayBehavior.test.tsx",
     "lib/toc-items.test.ts",
-    "features/post/PostViewContent.test.ts",
     "features/policy/public-legal-page.test.tsx",
     "features/page/PageView/PageContentView.test.tsx"
   ],
   "toolingTests": ["scripts/design-system"],
   "checks": [
-    {
-      "name": "core-types",
-      "command": [
-        "node",
-        "node_modules/typescript/bin/tsc",
-        "--noEmit",
-        "--project",
-        "components/core/tsconfig.type-test.json"
-      ]
-    },
     {
       "name": "toc-lint",
       "command": [

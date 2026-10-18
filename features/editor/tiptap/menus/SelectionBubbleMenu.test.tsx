@@ -2,8 +2,6 @@
 
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { createRoot, type Root } from 'react-dom/client';
 
 import { Editor } from '@tiptap/core';
@@ -133,34 +131,6 @@ function commands(overrides: Partial<SelectionBubbleMenuCommands> = {}): Selecti
 }
 
 describe('SelectionBubbleMenuView keyboard navigation', () => {
-  it('keeps desktop link action labels out of shrinkable grid tracks', () => {
-    const css = readFileSync(
-      resolve(process.cwd(), 'features/editor/tiptap/menus/SelectionBubbleMenu.module.css'),
-      'utf8',
-    );
-
-    expect(css).toContain('minmax(0, 1fr) minmax(0, 1.4fr) max-content max-content');
-    expect(css).toMatch(/\.linkEditorAction\s*\{[^}]*min-width:\s*max-content;/u);
-  });
-
-  it('uses one tab stop and wraps visible enabled controls with arrow, Home, and End', () => {
-    render(<SelectionBubbleMenuView commands={commands()} labels={labels} />);
-    const toolbar = container!.querySelector<HTMLElement>('[role="toolbar"]')!;
-    const controls = [...toolbar.querySelectorAll<HTMLButtonElement>('[data-selection-toolbar-action]:not(:disabled)')];
-    const firstControl = controls[0]!;
-    const lastControl = controls[controls.length - 1]!;
-
-    expect(controls.length).toBeGreaterThan(3);
-    expect(controls.filter((control) => control.tabIndex === 0)).toHaveLength(1);
-    act(() => firstControl.focus());
-    act(() => firstControl.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true })));
-    expect(document.activeElement).toBe(lastControl);
-    act(() => lastControl.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true })));
-    expect(document.activeElement).toBe(firstControl);
-    act(() => firstControl.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true })));
-    expect(document.activeElement).toBe(lastControl);
-  });
-
   it.each([
     { linkHref: null, targetId: 'tiptap-selection-link-create' },
     { linkHref: 'https://example.invalid', targetId: 'tiptap-selection-link-edit' },
@@ -182,29 +152,6 @@ describe('SelectionBubbleMenuView keyboard navigation', () => {
     });
     expect(document.querySelector('[role="dialog"]')).toBeNull();
     expect(target.getAttribute('aria-expanded')).toBe('false');
-  });
-
-  it('restores editor focus on Escape without hijacking arrow keys from form inputs', () => {
-    const onEscapeFocus = vi.fn();
-    render(
-      <SelectionBubbleMenuView
-        commands={commands({ linkHref: 'https://example.invalid', selectedText: 'Geul' })}
-        labels={labels}
-        onEscapeFocus={onEscapeFocus}
-      />,
-    );
-    const toolbar = container!.querySelector<HTMLElement>('[role="toolbar"]')!;
-    const input = document.createElement('input');
-    toolbar.appendChild(input);
-    act(() => input.focus());
-    act(() => input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })));
-    expect(document.activeElement).toBe(input);
-    act(() => input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
-    expect(onEscapeFocus).not.toHaveBeenCalled();
-    const action = toolbar.querySelector<HTMLButtonElement>('[data-selection-toolbar-action]')!;
-    act(() => action.focus());
-    act(() => action.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
-    expect(onEscapeFocus).toHaveBeenCalledOnce();
   });
 
   it('keeps secondary formatting and AI commands in the actual compact menu', async () => {

@@ -1,4 +1,4 @@
-import { createPageBlockFixtureSections, PAGE_BLOCK_TYPES } from '@echovisionlab/geul-common/page';
+import { createPageBlockFixtureSections } from '@echovisionlab/geul-common/page';
 import { pageBlockManifest } from '@/features/page/blocks/block-manifest';
 import { DEFAULT_SECTION_SETTINGS, parseSectionMetaSafe } from '@/features/page/blocks/section-schema';
 
@@ -21,10 +21,6 @@ function flattenSections(
 }
 
 describe('page section schema', () => {
-  it('keeps the shared block type list in sync with the fixture set', () => {
-    expect(createPageBlockFixtureSections().map((section) => section.type)).toEqual([...PAGE_BLOCK_TYPES]);
-  });
-
   it('accepts the current prop shape for every registered block type', () => {
     const sections = flattenSections(createPageBlockFixtureSections());
 

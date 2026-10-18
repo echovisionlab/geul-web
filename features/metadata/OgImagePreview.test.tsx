@@ -33,13 +33,6 @@ afterEach(() => {
 });
 
 describe('OgImagePreview lifecycle presentation', () => {
-  it('preserves the generated 1200:630 canvas without a minimum-height override', () => {
-    renderPreview({ src: '/generated-og.webp' });
-    const preview = host?.querySelector<HTMLImageElement>('img');
-    expect(preview?.parentElement?.style.aspectRatio).toBe('1200 / 630');
-    expect(preview?.parentElement?.style.minHeight).toBe('');
-    expect(preview?.style.objectFit).toBe('contain');
-  });
   it.each([
     ['queued', 'Queued'],
     ['processing', 'Processing'],
@@ -63,29 +56,6 @@ describe('OgImagePreview lifecycle presentation', () => {
     );
     expect(host?.querySelector('[data-testid="og-generation-status"]')).toBeNull();
     expect(host?.querySelector('[data-testid="og-generation-error"]')).toBeNull();
-  });
-
-  it('keeps the regenerate action before the status icon at the far right of the header', () => {
-    const onRegenerate = vi.fn();
-    renderPreview({
-      canRegenerate: true,
-      generationStatus: 'ready',
-      onRegenerate,
-    });
-
-    const actions = host?.querySelector('[data-testid="og-image-header-actions"]');
-    const regenerate = actions?.querySelector<HTMLButtonElement>('[aria-label="Regenerate OG Image"]');
-    const statusIcon = actions?.querySelector('[data-testid="og-generation-status-icon"]');
-
-    expect(regenerate).not.toBeNull();
-    expect(statusIcon).not.toBeNull();
-    if (!(actions && regenerate && statusIcon)) {
-      throw new Error('Expected regenerate and status actions in the OG image header');
-    }
-    expect(regenerate.compareDocumentPosition(statusIcon) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(actions.lastElementChild?.contains(statusIcon)).toBe(true);
-    act(() => regenerate.click());
-    expect(onRegenerate).toHaveBeenCalledTimes(1);
   });
 
   it('keeps the live region mounted while announcing lifecycle transitions', () => {

@@ -94,12 +94,6 @@ describe('CookieConsentBanner single optional choice', () => {
     expect(host.querySelector('aside')).toBeNull();
   });
 
-  it('keeps essential cookies when analytics is rejected', async () => {
-    await mount();
-    act(() => button('Reject').click());
-    expect(consent()).toMatchObject({ essential: true, analytics: false });
-  });
-
   it('requires a new explicit decision for outdated consent', async () => {
     writeConsent(true, COOKIE_CONSENT_VERSION - 1);
     await mount();

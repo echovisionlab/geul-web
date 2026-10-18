@@ -1,13 +1,10 @@
 // @vitest-environment jsdom
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { act, createRef } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MediaWaveformSeek, type MediaWaveformSeekProps } from './MediaWaveformSeek';
-import { applyAudioSeekPresentation, resolveMediaSeekKey } from './media-seek';
-import { applyAudioMediaPresentation } from './native-audio';
+import { applyAudioSeekPresentation } from './media-seek';
 import classes from './MediaControls.module.css';
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -150,30 +147,5 @@ describe('Core audio seek DOM adapter', () => {
     expect(second.getAttribute('aria-valuetext')).toBe('0:12 / 1:00');
     expect(second.getAttribute('aria-describedby')).toBe('failed');
     expect(second.classList.contains(classes.seek)).toBe(true);
-  });
-
-  it('projects exported structure onto Core-owned classes', () => {
-    const player = document.createElement('div');
-    player.innerHTML =
-      '<div class="audio-player__content"><div class="audio-player__wave-frame"><div data-audio-player-wave="true"></div><div data-audio-player-wave-loading="true"></div></div></div>' +
-      '<button data-audio-player-toggle="true"><span class="audio-player__icon audio-player__icon--play"></span></button>';
-    applyAudioMediaPresentation(player);
-    expect(player.querySelector('.audio-player__content')?.classList.contains(classes.content)).toBe(true);
-    expect(player.querySelector('.audio-player__wave-frame')?.classList.contains(classes.waveFrame)).toBe(true);
-    expect(player.querySelector('[data-audio-player-wave]')?.classList.contains(classes.wave)).toBe(true);
-    expect(player.querySelector('[data-audio-player-wave-loading]')?.classList.contains(classes.waveLoading)).toBe(
-      true,
-    );
-    expect(player.querySelector('button')?.classList.contains(classes.toggle)).toBe(true);
-    expect(player.querySelector('.audio-player__icon--play')?.classList.contains(classes.iconPlay)).toBe(true);
-  });
-
-  it('resolves the shared keyboard contract and keeps media CSS free of foreign class selectors', () => {
-    expect(resolveMediaSeekKey('ArrowLeft', 10, 60)).toEqual({ kind: 'seek', time: 5 });
-    expect(resolveMediaSeekKey('End', 10, 60)).toEqual({ kind: 'seek', time: 60 });
-    expect(resolveMediaSeekKey('Enter', 10, 60)).toEqual({ kind: 'toggle' });
-    expect(resolveMediaSeekKey('a', 10, 60)).toBeNull();
-    const css = readFileSync(resolve(process.cwd(), 'components/core/MediaControls/MediaControls.module.css'), 'utf8');
-    expect(css).not.toContain(':global(');
   });
 });

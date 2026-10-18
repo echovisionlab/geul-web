@@ -30,7 +30,6 @@ import { authorizeFileDownload } from '@/lib/queries/file-download-browser';
 import enMessages from '@/messages/en.json';
 import { ManifestProvider } from '@/lib/contexts/ManifestContext';
 import { siteVariableManifest } from '@/features/editor/tiptap/site-variables/site-variable.story-fixtures';
-import { resolvedSiteVariableLinkLabel, siteVariableLinkBlock } from '@/test/site-variable-link';
 import { TestProviders } from '@/test/TestProviders';
 import { GeneratedRichTextBlockView } from './GeneratedRichTextBlockViewRuntime';
 
@@ -93,18 +92,6 @@ function renderGenerated(block: LocalizedRichTextBlock): string {
 }
 
 describe('GeneratedRichTextBlockView external video', () => {
-  it('resolves the six exact link-label tokens in the runtime while preserving href and styles', () => {
-    const html = renderToStaticMarkup(
-      <ManifestProvider manifest={siteVariableManifest}>
-        <NextIntlClientProvider locale="en" timeZone="UTC" messages={enMessages}>
-          <GeneratedRichTextBlockView block={siteVariableLinkBlock} />
-        </NextIntlClientProvider>
-      </ManifestProvider>,
-    );
-    expect(html).toContain('href="/tools/hwp"');
-    expect(html).toContain(`<strong>${resolvedSiteVariableLinkLabel}</strong>`);
-  });
-
   it('escapes resolved link text once, keeps empty labels safe, and leaves ordinary text literal', () => {
     const block = generatedParagraph([
       { value: { case: 'text', value: { text: '{{site.title}}' } } },
@@ -130,26 +117,6 @@ describe('GeneratedRichTextBlockView external video', () => {
     expect(html).toContain('<span>{{site.title}}</span>');
     expect(html).toContain('<span>&lt;b&gt;&amp; {{site.url}}</span>');
     expect(html).toContain('href="/empty" target="_blank" rel="noopener noreferrer"><span></span></a>');
-  });
-
-  it('renders Callout icon, theme color, and nested rich-text children as one surface', () => {
-    const html = renderGenerated({
-      id: 'callout',
-      kind: 'callout',
-      base: { props: { icon: '⚠️', backgroundColor: 'yellow', textColor: 'default' } },
-      locale: {
-        props: {},
-        content: [{ value: { case: 'text', value: { text: 'Callout body' } } }],
-      },
-      children: [generatedParagraph([{ value: { case: 'text', value: { text: 'Clear the rights first.' } } }])],
-    } as unknown as LocalizedRichTextBlock);
-
-    expect(html).toContain('<aside data-callout="" data-bg-color="yellow" data-text-color="default">');
-    expect(html).toContain('<span data-callout-icon="" aria-hidden="true">⚠️</span>');
-    expect(html).toContain(
-      '<div data-callout-content=""><div data-callout-copy=""><span>Callout body</span></div><div data-document-block="paragraph"',
-    );
-    expect(html).toContain('Clear the rights first.');
   });
 
   it('renders the generated Post/Page standalone YouTube link as the canonical non-autoplay player', () => {

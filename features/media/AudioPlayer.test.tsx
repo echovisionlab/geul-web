@@ -193,19 +193,6 @@ describe('AudioPlayer', () => {
     expect(currentTime?.textContent).toBe('0:42');
   });
 
-  it('renders a caller action in the player toolbar', () => {
-    renderAudioPlayer({
-      action: (
-        <button type="button" data-player-action>
-          Download
-        </button>
-      ),
-    });
-
-    expect(document.querySelector('.audio-player__toolbar [data-player-action]')).not.toBeNull();
-    expect(document.querySelector('[data-audio-player-view-panel="spectrogram"]')).toBeNull();
-  });
-
   it('uses WaveSurfer readiness even when no waveform sidecar is provided', async () => {
     container = document.createElement('div');
     document.body.appendChild(container);

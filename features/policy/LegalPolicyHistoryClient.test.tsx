@@ -95,24 +95,6 @@ async function ssrAndHydrate(content: ReactNode, client: QueryClient) {
 }
 
 describe('legal history server snapshots', () => {
-  it('measures the unseeded history baseline: loader in SSR and two hydration queries', async () => {
-    const getActive = vi.fn().mockResolvedValue({ id: 'current', version: 3, effectiveFrom: null });
-    const listArchived = vi.fn().mockResolvedValue([{ id: 'old', version: 2, effectiveFrom: null }]);
-    const client = new QueryClient({ defaultOptions: { queries: { staleTime: 60000, retry: false } } });
-    const html = await ssrAndHydrate(
-      <LegalPolicyHistoryClient
-        policy="privacy"
-        labels={labels}
-        requestedLocale="ko"
-        getActive={getActive}
-        listArchived={listArchived}
-      />,
-      client,
-    );
-    expect(html).toContain('Loading policy');
-    expect(getActive).toHaveBeenCalledExactlyOnceWith('ko');
-    expect(listArchived).toHaveBeenCalledTimes(1);
-  });
   it('renders history links before hydration and hydrates without RPCs', async () => {
     const getActive = vi.fn();
     const listArchived = vi.fn();

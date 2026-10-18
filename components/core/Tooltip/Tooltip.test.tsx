@@ -3,9 +3,8 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { I18nProvider } from 'react-aria-components';
 import { IconButton } from '../IconButton';
-import { Tooltip, type TooltipProps } from './Tooltip';
+import { Tooltip } from './Tooltip';
 
 let container: HTMLDivElement;
 let root: Root;
@@ -20,20 +19,6 @@ afterEach(() => {
   act(() => root.unmount());
   container.remove();
 });
-
-function renderTooltip(props: Partial<TooltipProps> = {}) {
-  act(() => {
-    root.render(
-      <I18nProvider locale="en-US">
-        <Tooltip label="Tooltip label" withinPortal={false} {...props}>
-          <button type="button" aria-label="Tooltip target">
-            Target
-          </button>
-        </Tooltip>
-      </I18nProvider>,
-    );
-  });
-}
 
 describe('Tooltip', () => {
   it('keeps native sensor Space/Enter keys available without installing a press handler for a focus hint', () => {
@@ -64,29 +49,6 @@ describe('Tooltip', () => {
     } finally {
       document.removeEventListener('keydown', sensor);
     }
-  });
-
-  it('renders a controlled open tooltip through the Core boundary', () => {
-    renderTooltip({ opened: true });
-
-    const tooltip = container.querySelector('[role="tooltip"]');
-    expect(tooltip?.textContent).toContain('Tooltip label');
-    expect(container.querySelector('button')?.getAttribute('aria-label')).toBe('Tooltip target');
-  });
-
-  it('forwards multiline layout props', () => {
-    renderTooltip({ opened: true, multiline: true, size: 'compact' });
-
-    const tooltip = container.querySelector<HTMLElement>('[role="tooltip"]');
-    expect(tooltip?.getAttribute('data-multiline')).toBe('true');
-    expect(tooltip?.dataset.size).toBe('compact');
-  });
-
-  it('does not render tooltip content when disabled', () => {
-    renderTooltip({ opened: true, disabled: true });
-
-    expect(container.querySelector('[role="tooltip"]')).toBeNull();
-    expect(container.querySelector('button')).not.toBeNull();
   });
   it('allows passive non-action hints to remain outside a toolbar tab sequence', () => {
     act(() =>

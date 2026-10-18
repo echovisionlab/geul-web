@@ -61,21 +61,7 @@ function pointerEvent(type: string, init: MouseEventInit & { pointerId: number }
   return event as PointerEvent;
 }
 
-async function flushDomObserver(): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, 0));
-}
-
 describe('Tiptap table commands', () => {
-  it('renders table content without a separate outer selector control', async () => {
-    const mounted = createEditor();
-    expect(mounted.editor.commands.insertTable({ rows: 2, columns: 2 })).toBe(true);
-    await flushDomObserver();
-    const runtime = mounted.editor.view.dom.querySelector<HTMLElement>('[data-testid="tiptap-table-runtime"]');
-    expect(runtime?.querySelector('[data-testid="tiptap-table-selector"]')).toBeNull();
-    expect(runtime?.firstElementChild?.querySelector('table')).not.toBeNull();
-    mounted.destroy();
-  });
-
   it('creates a rectangular table with durable header, span, and colwidth attrs', () => {
     const errors: string[] = [];
     const mounted = createEditor((message) => errors.push(message));
@@ -130,25 +116,6 @@ describe('Tiptap table commands', () => {
       mounted.editor.view.dom.querySelector('[data-testid="tiptap-table-runtime"]')?.hasAttribute('data-selected'),
     ).toBe(false);
     expect(mounted.editor.view.dom.querySelectorAll('[data-testid$="drag-handle"]')).toHaveLength(0);
-    mounted.destroy();
-  });
-
-  it('does not create row, column, or extension controls on cell hover', async () => {
-    const mounted = createEditor();
-    expect(mounted.editor.commands.insertTable({ rows: 2, columns: 2 })).toBe(true);
-    await flushDomObserver();
-    const runtime = mounted.editor.view.dom.querySelector<HTMLElement>('[data-testid="tiptap-table-runtime"]');
-    const bodyCell = runtime?.querySelector<HTMLTableCellElement>('td');
-    if (!runtime || !bodyCell) {
-      throw new Error('Expected a rendered body cell.');
-    }
-    bodyCell.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: 120, clientY: 130 }));
-    await flushDomObserver();
-    expect(runtime.querySelector('[data-testid="tiptap-table-row-drag-handle"]')).toBeNull();
-    expect(runtime.querySelector('[data-testid="tiptap-table-column-drag-handle"]')).toBeNull();
-    expect(runtime.querySelector('[data-testid="tiptap-table-extend-row"]')).toBeNull();
-    expect(runtime.querySelector('[data-testid="tiptap-table-extend-column"]')).toBeNull();
-    expect(runtime.querySelectorAll('.column-resize-hit-zone').length).toBeGreaterThan(0);
     mounted.destroy();
   });
 

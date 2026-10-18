@@ -9,15 +9,6 @@ import {
 } from './shared';
 
 describe('media shared helpers', () => {
-  it('preserves the authored shared media name verbatim', () => {
-    expect(
-      resolveMediaDisplayName({
-        name: 'Birdsong version 1.2',
-        fallback: 'Untitled media',
-      }),
-    ).toBe('Birdsong version 1.2');
-  });
-
   it('does not derive or strip extensions from an authored shared name', () => {
     expect(
       resolveMediaDisplayName({

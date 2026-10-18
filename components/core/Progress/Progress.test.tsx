@@ -48,14 +48,6 @@ describe('Progress', () => {
     act(() => root.render(<Progress value={42} aria-label="Encoding recording" />));
     expect(container.querySelector('[role="progressbar"]')).not.toHaveAttribute('aria-describedby');
   });
-
-  it('projects the shared image contrast without accepting consumer appearance overrides', () => {
-    act(() => root.render(<Progress value={null} aria-label="Processing media" contrast="image" title="Processing" />));
-    const bar = container.querySelector('[role="progressbar"]')!;
-    expect(bar).toHaveAttribute('data-core-progress');
-    expect(bar).toHaveAttribute('data-contrast', 'image');
-    expect(bar.querySelector('[data-core-typography="text"]')).toHaveAttribute('data-tone', 'inverse');
-  });
   it('owns semantic tone and determinate accessibility attributes', () => {
     act(() => {
       root.render(

@@ -112,24 +112,6 @@ describe('shared selection surface contracts', () => {
     act(() => row.click());
     expect(select).toHaveBeenCalledOnce();
   });
-
-  it('rejects unsupported column counts and breakpoint names at runtime', () => {
-    expect(() => renderToStaticMarkup(<SelectionGrid label="Files" columns={13 as 3} />)).toThrow(RangeError);
-    expect(() => renderToStaticMarkup(<SelectionGrid label="Files" columns={{ phone: 3 } as unknown as 3} />)).toThrow(
-      RangeError,
-    );
-  });
-  it('rejects arbitrary icon sizing, spacing and appearance at runtime', () => {
-    expect(() => renderToStaticMarkup(<SelectionGrid label="Files" iconSize={64 as unknown as 'medium'} />)).toThrow(
-      RangeError,
-    );
-    expect(() => renderToStaticMarkup(<SelectionGrid label="Files" spacing={'wide' as 'compact'} />)).toThrow(
-      RangeError,
-    );
-    expect(() =>
-      renderToStaticMarkup(<SelectionSurface label="File" preview={null} appearance={'custom' as 'file'} />),
-    ).toThrow(RangeError);
-  });
   it('keeps the complete filename intact and selected file icons free of checkbox badges', () => {
     act(() =>
       root.render(<SelectionSurface label="field-recording-02.wav" preview={null} appearance="file" selected />),
@@ -173,22 +155,6 @@ describe('shared selection surface contracts', () => {
     });
     expect(click).toHaveBeenCalledOnce();
     expect(key).toHaveBeenCalledOnce();
-  });
-  it('rejects consumer CSS and owner state across runtime casts', () => {
-    const props = {
-      label: 'File',
-      preview: null,
-      style: { color: 'red' },
-      className: 'local',
-      'data-selected': true,
-      'data-density': 'workspace',
-    } as unknown as SelectionSurfaceProps;
-    act(() => root.render(<SelectionSurface {...props} />));
-    const option = container.querySelector('[role="option"]') as HTMLElement;
-    expect(option.style.color).toBe('');
-    expect(option.className).not.toContain('local');
-    expect(option.hasAttribute('data-selected')).toBe(false);
-    expect(option.dataset.density).toBe('compact');
   });
   it('uses a native action beside independent checkbox/menu controls and locks the action when disabled', () => {
     const action = vi.fn();

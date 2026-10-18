@@ -1,8 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   consumePersonalAccessTokenContinuation,
-  PERSONAL_ACCESS_TOKEN_CONTINUATION_PARAM,
-  personalAccessTokenReauthenticationReturnTo,
   rememberPersonalAccessTokenContinuation,
 } from './personal-access-token-reauthentication';
 
@@ -58,14 +56,5 @@ describe('personal access token reauthentication continuation', () => {
       }),
     );
     expect(consumePersonalAccessTokenContinuation('member-1', storage)).toBeNull();
-  });
-
-  it('uses a dedicated return marker on the settings route', () => {
-    expect(personalAccessTokenReauthenticationReturnTo()).toBe(
-      `/my/settings?${PERSONAL_ACCESS_TOKEN_CONTINUATION_PARAM}=1`,
-    );
-    expect(personalAccessTokenReauthenticationReturnTo('/admin/users/member-1')).toBe(
-      `/admin/users/member-1?${PERSONAL_ACCESS_TOKEN_CONTINUATION_PARAM}=1`,
-    );
   });
 });

@@ -5,66 +5,13 @@ import { act, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ExecutableBlockTitle, ExecutableRuntimeControls, ExecutableRuntimeStatus } from './ExecutableRuntimeControls';
+import { ExecutableBlockTitle, ExecutableRuntimeControls } from './ExecutableRuntimeControls';
 
 afterEach(() => {
   document.body.replaceChildren();
 });
 
 describe('ExecutableRuntimeControls', () => {
-  it('uses one explicit runtime status style independent of prose inheritance', () => {
-    const host = document.createElement('div');
-    document.body.append(host);
-    const root = createRoot(host);
-
-    act(() => {
-      root.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <ExecutableRuntimeStatus status="running" running="Running" stopped="Stopped" />
-        </DesignSystemProvider>,
-      );
-    });
-
-    const status = host.querySelector<HTMLElement>('[data-executable-runtime-status]');
-    expect(status?.tagName).toBe('SPAN');
-    expect(status?.textContent).toBe('Running');
-    expect(status?.dataset.placement).toBe('overlay-start');
-    expect(status?.getAttribute('aria-live')).toBe('polite');
-    expect(status?.style.padding).toBe('');
-
-    act(() => root.unmount());
-  });
-
-  it('renders authoring and public titles with the same title-row contract', () => {
-    const host = document.createElement('div');
-    document.body.append(host);
-    const root = createRoot(host);
-    const onChange = vi.fn();
-
-    act(() => {
-      root.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <ExecutableBlockTitle title="" fallback="Three.js scene" editable onChange={onChange} />
-          <ExecutableBlockTitle title="Localized scene" fallback="Three.js scene" editable={false} />
-        </DesignSystemProvider>,
-      );
-    });
-
-    const rows = host.querySelectorAll('[data-executable-title]');
-    expect(rows).toHaveLength(2);
-    const titleInput = host.querySelector<HTMLInputElement>('[data-executable-title-input]');
-    expect(titleInput?.value).toBe('');
-    expect(titleInput?.placeholder).toBe('Three.js scene');
-    expect(titleInput?.closest('[data-executable-title]')).not.toBeNull();
-    expect(host.querySelector('figcaption')?.textContent).toBe('Localized scene');
-    expect((rows[0] as HTMLElement).style.padding).toBe((rows[1] as HTMLElement).style.padding);
-    expect((rows[0] as HTMLElement).style.color).toBe((rows[1] as HTMLElement).style.color);
-    expect((rows[0] as HTMLElement).style.borderBottom).toBe('');
-    expect((rows[1] as HTMLElement).style.borderBottom).toBe('');
-
-    act(() => root.unmount());
-  });
-
   it('can clear and replace an authored title without persisting fallback copy', () => {
     function Titles() {
       const [title, setTitle] = useState('Original scene');

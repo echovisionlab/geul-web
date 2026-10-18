@@ -217,34 +217,6 @@ describe('PlaceEditor', () => {
     matchMedia.mockRestore();
   });
 
-  it('uses the canonical translated authoring header', () => {
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    root = createRoot(container);
-
-    act(() => {
-      root?.render(
-        <TestProviders locale="en">
-          <PlaceEditor
-            initialData={{ ...initialData, googlePlaceId: null, addressComponents: null }}
-            onSubmit={vi.fn().mockResolvedValue(true)}
-            onBack={vi.fn()}
-          />
-        </TestProviders>,
-      );
-    });
-
-    expect(document.querySelector('[data-testid="default-place-header"]')).not.toBeNull();
-    expect(authoringHeaderSpy).toHaveBeenCalled();
-    expect(authoringHeaderSpy.mock.calls.at(-1)?.[0]).toMatchObject({
-      title: 'Default header place',
-      isConnected: true,
-      isSynced: true,
-      hideConnectionStatus: true,
-      hideStatus: true,
-    });
-  });
-
   it('submits only fields changed from the initial baseline', async () => {
     const onSubmit = vi.fn().mockResolvedValue(true);
     renderPlaceEditor(onSubmit);

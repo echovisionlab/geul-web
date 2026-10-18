@@ -71,31 +71,6 @@ describe('PostSpotlight demand-loaded results', () => {
     expect(document.querySelector('[role="dialog"]')).toBeNull();
   });
 
-  it('opens its real input immediately and coalesces concurrent results imports', async () => {
-    let resolve!: (runtime: typeof Runtime) => void;
-    mocks.load.mockReturnValue(
-      new Promise<typeof Runtime>((done) => {
-        resolve = done;
-      }),
-    );
-    await mount();
-    await act(async () => {
-      openPostSpotlight();
-      openPostSpotlight();
-    });
-    expect(mocks.load).toHaveBeenCalledTimes(1);
-    expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1);
-    const input = document.querySelector('input[placeholder="searchPosts"]');
-    expect(input).not.toBeNull();
-    expect(mocks.render).not.toHaveBeenCalled();
-    await act(async () => resolve(Runtime));
-    expect(document.querySelector('[data-search-results]')).not.toBeNull();
-    expect(document.querySelector('input[placeholder="searchPosts"]')).toBe(input);
-    await act(async () => openPostSpotlight());
-    expect(mocks.load).toHaveBeenCalledTimes(1);
-    expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1);
-  });
-
   it('preserves a gesture before the listener mounts', async () => {
     openPostSpotlight();
     await mount();

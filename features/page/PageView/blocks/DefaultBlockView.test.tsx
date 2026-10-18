@@ -128,67 +128,6 @@ describe('DefaultBlockView', () => {
     expect(html).toContain('margin-left:auto');
   });
 
-  it('renders ordinary code percentage width and alignment without executable runtime markup', () => {
-    const html = renderToStaticMarkup(
-      <NextIntlClientProvider locale="en" timeZone="UTC" messages={enMessages}>
-        <DesignSystemProvider locale="en" forceColorScheme="light">
-          <DefaultBlockView
-            block={{
-              id: 'code',
-              type: 'codeBlock',
-              props: {
-                title: 'Localized example',
-                language: 'typescript',
-                previewWidth: '58',
-                textAlignment: 'center',
-              },
-              content: [{ type: 'text', text: 'const answer: number = 42;', styles: {} }],
-              children: [],
-            }}
-          />
-        </DesignSystemProvider>
-      </NextIntlClientProvider>,
-    );
-
-    expect(html).toContain('data-language="typescript"');
-    expect(html).toContain('data-preview-width="58"');
-    expect(html).toContain('data-text-alignment="center"');
-    expect(html).toContain('Localized example');
-    expect(html).toContain('TypeScript');
-    expect(html).toContain('aria-label="Copy"');
-    expect(html).toContain('data-code-block-surface');
-    expect(html).toContain('data-code-block-print-source');
-    expect(html).toContain('const answer: number = 42;');
-    expect(html).toContain('width:58%');
-    expect(html).toContain('margin-left:auto');
-    expect(html).toContain('margin-right:auto');
-    expect(html).not.toContain('data-runtime-surface');
-  });
-
-  it('renders inline and display math through the public renderer', () => {
-    const inlineHtml = renderToStaticMarkup(
-      <DefaultBlockView
-        block={{
-          id: 'inline-math',
-          type: 'paragraph',
-          props: {},
-          content: [{ type: 'mathInline', props: { latex: 'x^2' } }],
-          children: [],
-        }}
-      />,
-    );
-    const displayHtml = renderToStaticMarkup(
-      <DefaultBlockView
-        block={{ id: 'display-math', type: 'math', props: { latex: 'y^2' }, content: [], children: [] }}
-      />,
-    );
-
-    expect(inlineHtml).toContain('class="math-inline"');
-    expect(inlineHtml).toContain('class="katex"');
-    expect(displayHtml).toContain('class="math-block" data-latex="y^2"');
-    expect(displayHtml).toContain('class="katex"');
-  });
-
   it('renders Mermaid title and loading surface through the lazy public view', () => {
     const html = renderToStaticMarkup(
       <NextIntlClientProvider locale="en" timeZone="UTC" messages={enMessages}>
@@ -251,35 +190,6 @@ describe('DefaultBlockView', () => {
 
     expect(html).toContain('<blockquote style="text-align:center">');
     expect(html).toContain('<span>공간은 소리를 기억한다.</span>');
-  });
-
-  it('renders a materialized Callout around its nested Blocks', () => {
-    const html = renderToStaticMarkup(
-      <DefaultBlockView
-        block={{
-          id: 'callout',
-          type: 'callout',
-          props: { icon: '💡', backgroundColor: 'blue', textColor: 'default' },
-          content: [{ type: 'text', text: 'Callout body', styles: {} }],
-          children: [
-            {
-              id: 'callout-copy',
-              type: 'paragraph',
-              props: {},
-              content: [{ type: 'text', text: 'Nested Callout copy', styles: {} }],
-              children: [],
-            },
-          ],
-        }}
-      />,
-    );
-
-    expect(html).toContain('<aside data-callout="" data-bg-color="blue" data-text-color="default">');
-    expect(html).toContain('<span data-callout-icon="" aria-hidden="true">💡</span>');
-    expect(html).toContain(
-      '<div data-callout-content=""><div data-callout-copy=""><span>Callout body</span></div><div data-document-block="paragraph"',
-    );
-    expect(html).toContain('Nested Callout copy');
   });
 
   it('renders materialized table content and durable column widths', () => {
@@ -491,67 +401,6 @@ describe('DefaultBlockView', () => {
     expect(html).toContain('First line<br/>Second line<br/><br/>Fourth line');
   });
 
-  it('renders materialized divider blocks as horizontal rules', () => {
-    const block: Block = {
-      id: 'divider',
-      type: 'divider',
-      props: {},
-      content: [],
-      children: [],
-    };
-
-    const html = renderToStaticMarkup(<DefaultBlockView block={block} />);
-
-    expect(html).toContain('<hr/>');
-  });
-
-  it('renders attachment captions below the title row', () => {
-    const block: Block = {
-      id: 'attachment',
-      type: 'file',
-      props: {
-        fileId: 'file-pdf',
-        url: 'https://cdn.example.com/file.pdf',
-        caption: 'Recorded in the lower valley',
-        name: 'Field notes',
-        mimeType: 'application/pdf',
-        size: '2048',
-        previewWidth: '62',
-        textAlignment: 'left',
-      },
-      content: [],
-      children: [],
-    };
-
-    const html = renderToStaticMarkup(
-      <NextIntlClientProvider
-        locale="en"
-        timeZone="UTC"
-        messages={{
-          editorCommon: {
-            media: {
-              attachmentEditor: {
-                untitledFile: 'Untitled file',
-              },
-            },
-          },
-        }}
-      >
-        <DefaultBlockView block={block} />
-      </NextIntlClientProvider>,
-    );
-
-    expect(html).toContain('attachment-title');
-    expect(html).toContain('attachment-block__surface');
-    expect(html).not.toContain('data-control-size');
-    expect(html).not.toContain('href="https://cdn.example.com/file.pdf"');
-    expect(html).toContain('Field notes');
-    expect(html).toContain('media-block__caption');
-    expect(html).toContain('Recorded in the lower valley');
-    expect(html.indexOf('attachment-block__header')).toBeLessThan(html.indexOf('media-block__caption'));
-    expect(html).toContain('width:62%');
-  });
-
   it('renders the image original-download action from the exact Block runtime decision', () => {
     const blockId = '01b3db42-75f1-4bf1-8cb9-9b3baf57e795';
     const fileId = 'b67328c4-668c-5bf2-8f1e-41465149ded6';
@@ -597,32 +446,6 @@ describe('DefaultBlockView', () => {
     expect(html).toContain('<img');
     expect(html).toContain('data-authorized-download-action="icon"');
     expect(html).toContain('aria-label="Download Field recording still"');
-  });
-
-  it('renders image captions with the shared media shell classes', () => {
-    const block: Block = {
-      id: 'image',
-      type: 'file',
-      props: {
-        fileId: 'file-image',
-        mimeType: 'image/webp',
-        url: 'https://cdn.example.com/image.webp',
-        caption: 'Documented during setup',
-        name: 'setup.webp',
-        previewWidth: '54',
-        textAlignment: 'center',
-      },
-      content: [],
-      children: [],
-    };
-
-    const html = renderToStaticMarkup(<DefaultBlockView block={block} />);
-
-    expect(html).toContain('class="image-block"');
-    expect(html).toContain('media-block__caption');
-    expect(html).toContain('Documented during setup');
-    expect(html).toContain('width:54%');
-    expect(html).toContain('margin-left:auto');
   });
 
   it('keeps restored missing media blocks while rendering only kind-specific fallbacks', () => {

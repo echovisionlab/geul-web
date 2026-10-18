@@ -306,6 +306,7 @@ vi.mock('@/lib/i18n/locale', () => ({
 vi.mock('@/lib/queries/email-layout', () => ({ listEmailLayoutsSimple: vi.fn() }));
 vi.mock('@/lib/utils/not-found-guard', () => ({ guardNotFound: vi.fn() }));
 
+import { flushEditorSaves } from '@/lib/editor/editor-save-registry';
 import CampaignEditPage from './CampaignEditPage';
 
 function deferred<T>() {
@@ -433,6 +434,17 @@ describe('CampaignEditPage delivery target confirmation', () => {
       recipientScope: 'SUBSCRIBED_USERS',
     });
   });
+  it('sends nothing while unsaved campaign edits fail to save', async () => {
+    vi.mocked(flushEditorSaves).mockResolvedValueOnce(false);
+    await act(async () => root.render(createElement(CampaignEditPage)));
+    await act(async () => {
+      container.querySelector<HTMLButtonElement>('[data-testid="send-confirm"]')!.click();
+      await Promise.resolve();
+    });
+    expect(mocks.sendCampaign).not.toHaveBeenCalled();
+    expect(mocks.notificationsShow).toHaveBeenCalledWith(expect.objectContaining({ tone: 'danger' }));
+  });
+
   it('drops a peer read started before a configuration write after the write has settled', async () => {
     const staleRead = deferred<{ ok: true; value: Record<string, unknown> | null }>();
     const staleCampaign = { ...mocks.campaign };

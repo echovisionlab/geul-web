@@ -4,21 +4,7 @@ import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
-import {
-  AccountEmailOptionContent,
-  AccountEmailSelectRightSection,
-  getAccountEmailSelectRightSectionWidth,
-  type AccountEmailOptionSource,
-} from './AccountEmailOption';
-
-const providerOnly: AccountEmailOptionSource[] = [
-  {
-    key: 'google',
-    kind: 'provider',
-    label: 'Google account',
-    provider: 'google',
-  },
-];
+import { AccountEmailOptionContent, type AccountEmailOptionSource } from './AccountEmailOption';
 
 const currentAndProvider: AccountEmailOptionSource[] = [
   {
@@ -45,15 +31,5 @@ describe('AccountEmailOption', () => {
     expect(html).toContain('primary.email@example.com');
     expect(html).toContain('Current');
     expect(html).toContain('aria-label="GitHub account"');
-  });
-
-  it('keeps the select right section compact for provider-only sources', () => {
-    expect(getAccountEmailSelectRightSectionWidth(providerOnly)).toBe(48);
-    expect(getAccountEmailSelectRightSectionWidth(currentAndProvider)).toBe(132);
-
-    const html = render(<AccountEmailSelectRightSection sources={providerOnly} />);
-
-    expect(html).toContain('aria-label="Google account"');
-    expect(html).not.toContain('Current');
   });
 });

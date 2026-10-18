@@ -39,23 +39,6 @@ function render(domain: 'posts' | 'pages', state: 'ready' | 'empty' | 'error' = 
     ),
   );
 }
-describe('actual content administration page views', () => {
-  it.each(['posts', 'pages'] as const)(
-    'runs the actual %s creation controller and domain row rendering',
-    async (domain) => {
-      render(domain);
-      const button = await waitInAct(() => {
-        const match = Array.from(host.querySelectorAll('button')).find((node) => node.textContent?.startsWith('New '));
-        expect(match).toBeDefined();
-        return match!;
-      });
-      await act(async () => button.click());
-      await waitInAct(() =>
-        expect(host.querySelector(`a[href*="${domain === 'posts' ? 'post' : 'page'}-3"]`)).not.toBeNull(),
-      );
-    },
-  );
-});
 
 describe('content list accessibility states', () => {
   it.each(['posts', 'pages'] as const)(

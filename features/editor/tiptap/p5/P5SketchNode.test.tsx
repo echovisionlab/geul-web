@@ -197,18 +197,6 @@ describe('p5.js sketch source policy', () => {
     expect(sandboxDocument).not.toContain('</script><script>parent.pwned=true</script>');
   });
 
-  it('resolves the p5 mount after document load and reports ready only after a canvas is attached', () => {
-    const sandboxDocument = buildP5SandboxDocument(DEFAULT_P5_SKETCH_SOURCE, 'mount-contract', '/p5.js');
-    expect(sandboxDocument).toMatch(/new runnerWindow\.p5\(sketch, ["']sketch["']\)/u);
-    expect(sandboxDocument).not.toMatch(
-      /new runnerWindow\.p5\(sketch, runnerDocument\.getElementById\(["']sketch["']\)\)/u,
-    );
-    expect(sandboxDocument).toMatch(/runnerDocument\.querySelector\(["']#sketch canvas["']\)/u);
-    expect(sandboxDocument.indexOf('await program.draw?.(...args);')).toBeLessThan(
-      sandboxDocument.indexOf('signalReady();', sandboxDocument.indexOf('await program.draw?.(...args);')),
-    );
-  });
-
   it('terminates a preflight that exceeds the CPU budget before mounting a frame', () => {
     vi.useFakeTimers();
     const terminate = vi.fn();

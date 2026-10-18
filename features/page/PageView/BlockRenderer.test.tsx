@@ -340,45 +340,6 @@ describe('PageRenderer', () => {
     ]);
   });
 
-  it('passes Embed source settings and localized title into public rendering inside Columns', () => {
-    const props = {
-      uri: 'https://embed.example/app',
-      title: 'Translated app',
-      heightMode: 'fixed',
-      height: '640',
-      allowMicrophone: 'true',
-    };
-    const content: PageContent = {
-      sections: [
-        {
-          id: 'embed-columns',
-          type: 'columns',
-          settings: {},
-          props: {},
-          columns: [{ id: 'embed-column', sections: [{ id: 'nested-embed', type: 'embed', settings: {}, props }] }],
-        },
-      ],
-    };
-    renderToStaticMarkup(<PageRenderer content={content} requestedLocale="en" />);
-    expect(blockViewCalls.get('embed')).toEqual([
-      { sectionId: 'nested-embed', props, content: undefined, columns: undefined },
-    ]);
-  });
-
-  it('applies the shared document presentation to generated rich text at root and inside columns', () => {
-    const copy = { id: 'copy', kind: 'rich-text' as const, settings: {}, props: {}, richText: [], columns: [] };
-    const columns = {
-      id: 'columns',
-      kind: 'columns' as const,
-      settings: {},
-      props: {},
-      richText: null,
-      columns: [{ id: 'column', ratio: 1, sections: [{ ...copy, id: 'nested-copy' }] }],
-    };
-    const html = renderToStaticMarkup(<GeneratedPageRenderer sections={[copy, columns]} />);
-    expect(html.match(/class="rich-text-content prose"/g)).toHaveLength(2);
-  });
-
   it('renders generated canonical Embed sections at root and inside Columns', () => {
     const props = {
       uri: 'https://embed.example/app',
@@ -439,35 +400,6 @@ describe('PageRenderer', () => {
         sectionId: 'duplicate-child',
         props: {},
         content: [],
-        columns: undefined,
-      },
-    ]);
-  });
-
-  it('renders immersive sections without classifying page layout', () => {
-    const content: PageContent = {
-      sections: [
-        {
-          id: 'scene-1',
-          type: 'immersive-scene' as const,
-          settings: {},
-          props: {
-            unitsJson: '[{"id":"single","mesh":"sphere","color":"#ffffff"}]',
-            copyJson: '[{"id":"single","title":"Single","text":"Static copy"}]',
-          },
-        },
-      ],
-    };
-
-    const html = renderToStaticMarkup(<PageRenderer content={content} query={{}} />);
-
-    expect(html).not.toContain('data-viewport-fit-scene');
-    expect(html).not.toContain('data-fit-available-height');
-    expect(blockViewCalls.get('immersive-scene')).toEqual([
-      {
-        sectionId: 'scene-1',
-        props: content.sections[0]?.props,
-        content: undefined,
         columns: undefined,
       },
     ]);

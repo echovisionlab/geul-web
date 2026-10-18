@@ -4203,8 +4203,6 @@
         "Consumer: features/editor/toolbars/ContentBlockTypeSelect.tsx",
         "Consumer: features/editor/toolbars/EditorColorStyleButton.tsx",
         "Consumer: features/editor/toolbars/EditorToolbarAction.tsx",
-        "Consumer: features/editor/toolbars/ExternalVideoFormattingToolbar.tsx",
-        "Consumer: features/editor/toolbars/FileToolbarButtons.tsx",
         "Consumer: features/executable/ExecutableRuntimeControls.tsx",
         "Consumer: features/file-manager/FileManagerView.tsx",
         "Consumer: features/file-manager/ui/FileBrowserHeader.tsx",
@@ -48610,7 +48608,6 @@
         "Consumer: features/editor/tiptap/table/TiptapTableMenu.tsx",
         "Consumer: features/editor/tiptap/three/ThreeSceneNode.tsx",
         "Consumer: features/editor/toolbars/BlockAlignButton.tsx",
-        "Consumer: features/editor/toolbars/ExternalVideoFormattingToolbar.tsx",
         "Consumer: features/executable/ExecutableRuntimeControls.tsx",
         "Consumer: features/file-manager/FileManager.tsx",
         "Consumer: features/file-manager/FileManagerView.tsx",
@@ -50516,7 +50513,6 @@
         "Consumer: features/editor/tiptap/menus/SelectionBubbleMenu.tsx",
         "Consumer: features/editor/tiptap/menus/map-external/SelectionMenuPrimitives.tsx",
         "Consumer: features/editor/tiptap/table/TiptapTableMenu.tsx",
-        "Consumer: features/editor/toolbars/ExternalVideoFormattingToolbar.tsx",
         "Consumer: features/translation/TranslationLocaleRow.tsx"
       ],
       "accessibility": [
@@ -54742,7 +54738,6 @@
         "Consumer: features/editor/toolbars/ContentBlockTypeSelect.tsx",
         "Consumer: features/editor/toolbars/EditorColorStyleButton.tsx",
         "Consumer: features/editor/toolbars/EditorToolbarTooltip.tsx",
-        "Consumer: features/editor/toolbars/ExternalVideoFormattingToolbar.tsx",
         "Consumer: features/file-manager/FileManagerView.tsx",
         "Consumer: features/form/FormBuilder/ConditionEditor.tsx",
         "Consumer: features/form/FormBuilder/FieldEditor.tsx",

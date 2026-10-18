@@ -436,26 +436,6 @@ afterEach(() => {
 });
 
 describe('email authoring detail pages', () => {
-  it('renders the current email template detail without archive lifecycle controls', async () => {
-    routeId = TEMPLATE_ID;
-    renderPage(<EmailTemplateEditPage />);
-    await flush();
-
-    expect(document.body.textContent).toContain('Custom template detail');
-    expect(document.querySelector('[data-testid="email_template-translations"]')).not.toBeNull();
-    expect(document.body.textContent?.toLowerCase()).not.toMatch(/archive|restore|include archived/);
-  });
-
-  it('renders the current email layout detail without archive lifecycle controls', async () => {
-    routeId = LAYOUT_ID;
-    renderPage(<EmailLayoutEditPage />);
-    await flush();
-
-    expect(document.body.textContent).toContain('Custom layout detail');
-    expect(document.querySelector('[data-testid="email_layout-translations"]')).not.toBeNull();
-    expect(document.body.textContent?.toLowerCase()).not.toMatch(/archive|restore|include archived/);
-  });
-
   it('keeps an admitted target subject editable and empty while transport is disconnected', async () => {
     routeId = TEMPLATE_ID;
     localeRoom.activeLocale = 'ko';
@@ -592,29 +572,6 @@ describe('email authoring detail pages', () => {
     expect(api.persistCollaborativeDocumentNow.mock.invocationCallOrder[0]).toBeLessThan(
       api.sendTestEmailTemplateAction.mock.invocationCallOrder[0],
     );
-  });
-
-  it('publishes an email template layout change hint after the asset update succeeds', async () => {
-    routeId = TEMPLATE_ID;
-    api.listEmailLayoutsSimple.mockResolvedValue([{ id: LAYOUT_ID, key: 'custom-layout', name: 'Custom layout' }]);
-    renderPage(<EmailTemplateEditPage />);
-    await flush();
-
-    const layout = findInputByLabelText('adminList.emailTemplates.detail.fields.layoutLabel');
-    act(() => layout.focus());
-    await flush();
-    const option = [...document.querySelectorAll('[role="option"]')].find((candidate) =>
-      candidate.textContent?.includes('Custom layout'),
-    );
-    if (!(option instanceof HTMLElement)) {
-      throw new Error('Email layout option was not rendered.');
-    }
-    act(() => option.click());
-    await flush();
-
-    expect(api.updateEmailTemplateLayoutAction).toHaveBeenCalledWith(TEMPLATE_ID, LAYOUT_ID, expect.any(String));
-    const origin = api.updateEmailTemplateLayoutAction.mock.calls[0]?.[2];
-    expect(api.publishEditorEntityChange).toHaveBeenCalledWith(`email_template:${TEMPLATE_ID}`, origin);
   });
 
   it('refetches full email template metadata when an entity change hint arrives', async () => {

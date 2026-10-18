@@ -131,41 +131,4 @@ describe('server table page navigation', () => {
     ]);
     expect(host.querySelector('a[aria-label="Last page"]')?.getAttribute('href')).toBe('/admin/posts?page=8');
   });
-
-  it('renders nothing for empty data unless the footer slot is reserved', () => {
-    host = document.createElement('div');
-    document.body.append(host);
-    root = createRoot(host);
-    browserNavigation.attach(host);
-    const labels = {
-      firstPage: 'First page',
-      previousPage: 'Previous page',
-      page: (page: number) => `Page ${page}`,
-      nextPage: 'Next page',
-      lastPage: 'Last page',
-    };
-    act(() =>
-      root.render(
-        <TestProviders>
-          <ServerDataTablePaginationView currentPage={1} totalPages={0} getPageUrl={String} labels={labels} />
-        </TestProviders>,
-      ),
-    );
-    expect(host.querySelector('nav')).toBeNull();
-    act(() =>
-      root.render(
-        <TestProviders>
-          <ServerDataTablePaginationView
-            currentPage={1}
-            totalPages={0}
-            getPageUrl={String}
-            labels={labels}
-            reserveSpaceWhenHidden
-          />
-        </TestProviders>,
-      ),
-    );
-    expect(host.querySelector('nav')).toBeNull();
-    expect(host.querySelector('[aria-hidden="true"]')).not.toBeNull();
-  });
 });

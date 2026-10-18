@@ -221,23 +221,6 @@ describe('ShellView', () => {
     expect(container.querySelectorAll('[data-shell-login-action]')).toHaveLength(2);
   });
 
-  it('renders anonymous login actions as icon-free Core text buttons', () => {
-    renderView();
-
-    const loginActions = Array.from(container.querySelectorAll<HTMLAnchorElement>('[data-shell-login-action]'));
-
-    expect(loginActions).toHaveLength(2);
-    for (const [index, loginAction] of loginActions.entries()) {
-      expect(loginAction.textContent?.trim()).toBe('Sign in');
-      expect(loginAction.getAttribute('data-size')).toBe('xs');
-      expect(loginAction.getAttribute('data-density')).toBe('chrome');
-      expect(loginAction.getAttribute('data-weight')).toBe('medium');
-      expect(loginAction.getAttribute('data-shell-login-action')).toBe(index === 0 ? 'desktop' : 'mobile');
-      expect(loginAction.className).not.toContain('loginAction');
-      expect(loginAction.querySelector('svg')).toBeNull();
-    }
-  });
-
   it('keeps the phone account drawer open instead of opening the hidden desktop account menu', async () => {
     // The shared matchMedia stub reports a phone width, so only the mobile account drawer may open.
     vi.useFakeTimers();
@@ -363,25 +346,5 @@ describe('ShellView', () => {
 
     expect(disclosureToggle?.getAttribute('aria-expanded')).toBe('true');
     expect(disclosure?.textContent).toContain('Artists');
-  });
-
-  it('exposes navigation, account drawer, role-gated changelog, and theme state without owning them', () => {
-    renderView({
-      navigationOpened: true,
-      userMenuOpened: true,
-      themeMode: null,
-      user: authenticatedUser,
-      footer: { ...defaultProps.footer, showChangelog: true },
-    });
-
-    const shell = container.querySelector('[data-shell]');
-    expect(shell?.getAttribute('data-navigation-opened')).toBe('true');
-    expect(shell?.getAttribute('data-user-menu-opened')).toBe('true');
-    expect(shell?.getAttribute('data-theme-mode')).toBe('pending');
-    expect(document.body.querySelector('[data-shell-mobile-navigation]')).not.toBeNull();
-    expect(document.getElementById('shell-mobile-navigation')?.getAttribute('role')).toBe('dialog');
-    expect(document.body.textContent).toContain('Account');
-    expect(container.querySelector('a[href="/changelog"]')).not.toBeNull();
-    expect(container.querySelector('a[href="/changelog"]')?.getAttribute('data-control-kind')).toBe('text');
   });
 });

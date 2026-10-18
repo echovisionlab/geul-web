@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildRpcResponseHeaders,
-  isOpenApiPath,
   normalizeRpcTargets,
   shouldExpireSessionCookies,
   shouldRetryOpenApiWithoutSession,
@@ -36,16 +35,6 @@ describe('rpc-proxy helpers', () => {
       'x-request-id': 'request-1',
     });
     expect(upstream.get('Content-Encoding')).toBe('gzip');
-  });
-
-  describe('isOpenApiPath', () => {
-    it('returns true for open API paths', () => {
-      expect(isOpenApiPath('api.open.v1.TermsService/Get')).toBe(true);
-    });
-
-    it('returns false for manage API paths', () => {
-      expect(isOpenApiPath('api.manage.v1.TermsService/GetActiveTerms')).toBe(false);
-    });
   });
 
   describe('shouldRetryWithNextTarget', () => {

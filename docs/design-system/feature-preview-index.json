@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "sourceManifestHash": "25a3d1a20bf5ca0dfab844b6cd0937a051e3c795a1052b47a5693a3192ae3aef",
+  "sourceManifestHash": "bbcb1cea283a84bf22cc0f6c35cdadd48e811ace5982644b3070a7db7ae74f2b",
   "methodology": "All inventoried Feature component candidates. Direct value imports, literal lazy imports and transitive source relationships through production owners/local adapters are indexed separately. A dependency can be unused or render conditionally; neither relationship proves rendered states, route parity or design compliance. Empty JSX records include runtime/lazy/controller boundaries and must be inspected before treating them as visual gaps.",
-  "counts": { "domains": 53, "componentFiles": 770, "jsxWithoutStoryRelationship": 45 },
+  "counts": { "domains": 53, "componentFiles": 768, "jsxWithoutStoryRelationship": 43 },
   "domains": [
     {
       "domain": "account",
@@ -3394,18 +3394,6 @@
           ]
         },
         {
-          "file": "features/editor/toolbars/ExternalVideoFormattingToolbar.tsx",
-          "hasJsx": true,
-          "directStories": [],
-          "relatedStories": []
-        },
-        {
-          "file": "features/editor/toolbars/FileToolbarButtons.tsx",
-          "hasJsx": true,
-          "directStories": [],
-          "relatedStories": []
-        },
-        {
           "file": "features/editor/toolbars/FormattingButtons.tsx",
           "hasJsx": true,
           "directStories": [],
@@ -3468,9 +3456,7 @@
       "jsxWithoutStoryRelationship": [
         "features/editor/components/UnifiedFileAttachmentPagePreview.tsx",
         "features/editor/tiptap/ai/TiptapAIAssistant.tsx",
-        "features/editor/tiptap/p5/P5CapabilityStoryPreview.tsx",
-        "features/editor/toolbars/ExternalVideoFormattingToolbar.tsx",
-        "features/editor/toolbars/FileToolbarButtons.tsx"
+        "features/editor/tiptap/p5/P5CapabilityStoryPreview.tsx"
       ]
     },
     {

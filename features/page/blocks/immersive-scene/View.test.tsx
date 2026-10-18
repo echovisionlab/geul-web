@@ -1,7 +1,6 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { TestProviders } from '@/test/TestProviders';
-import { invariantTokens } from '@/components/core/design-tokens';
 import { getThemeDefinition, themeIds } from '@/lib/theme/themes';
 import { themeVariables } from '@/theme';
 import {
@@ -9,14 +8,12 @@ import {
   resolveAutoplayTimelineState,
   resolveLoadedMeshScale,
   applyParticleObjectTransform,
-  applyParticleObjectRotation,
   resolveMeshOffsetYAtProgress,
   resolveMeshOffsetYSignature,
   resolveParticleGeometryScale,
   resolveParticleSizeAtProgress,
   resolveRenderUnitSequence,
   resolveRendererUnitSignature,
-  resolveSceneColorScheme,
   resolveSceneTextColors,
   resolveThemedUnitTexture,
   resolveUnitMeshScale,
@@ -84,28 +81,6 @@ function textContrast(text: string, background: string) {
 }
 
 describe('ImmersiveSceneView', () => {
-  it('renders a static single-unit scene shell from one unit', () => {
-    const html = renderToStaticMarkup(
-      <TestProviders>
-        <ImmersiveSceneView
-          props={{
-            unitsJson: '[{"id":"single","mesh":"sphere","color":"#ffffff"}]',
-            copyJson: '[{"id":"single","title":"Single unit","text":"Static copy"}]',
-          }}
-        />
-      </TestProviders>,
-    );
-
-    expect(html).toContain('data-immersive-scene="true"');
-    expect(html).toContain('data-playback="static"');
-    expect(html).toContain('data-height-mode="intrinsic"');
-    expect(html).toContain('data-scroll-owner="document"');
-    expect(html).toContain('--_immersive-scene-intrinsic-height:720px');
-    expect(html).toContain(`background:${invariantTokens['paper-background']}`);
-    expect(html).toContain('Single unit');
-    expect(html).toContain('Static copy');
-  });
-
   it.each(themeIds)('keeps default scene title and body readable in %s without authored color overrides', (themeId) => {
     const config = parseImmersiveSceneConfig({});
     const { base } = getThemeDefinition(themeId);
@@ -117,97 +92,6 @@ describe('ImmersiveSceneView', () => {
       const resolved = variable ? variables[variable] : color;
       expect(textContrast(resolved, background)).toBeGreaterThanOrEqual(4.5);
     }
-  });
-
-  it('projects authored renderer controls onto the scene root for each color scheme', () => {
-    const sharedProps = {
-      unitsJson: '[{"id":"single","mesh":"sphere","color":"#ffffff"}]',
-      backgroundEnabled: 'false',
-      particleBrightness: '1.6',
-      darkParticleBrightness: '1.9',
-      rotationEnabled: 'false',
-      rotationX: '10',
-      rotationY: '20',
-      rotationZ: '30',
-      rotationSpeedX: '0.2',
-      rotationSpeedY: '0.42',
-      rotationSpeedZ: '-0.1',
-      scrollRotationEnabled: 'false',
-      scrollRotationTurnsX: '0.1',
-      scrollRotationTurnsY: '0.8',
-      scrollRotationTurnsZ: '-0.2',
-      hoverEnabled: 'false',
-      hoverRepelRadius: '0.7',
-    };
-    const lightHtml = renderToStaticMarkup(
-      <TestProviders>
-        <ImmersiveSceneView props={{ ...sharedProps, preferredScheme: 'light' }} />
-      </TestProviders>,
-    );
-    const darkHtml = renderToStaticMarkup(
-      <TestProviders>
-        <ImmersiveSceneView props={{ ...sharedProps, preferredScheme: 'dark' }} />
-      </TestProviders>,
-    );
-
-    expect(lightHtml).toContain('data-background-enabled="false"');
-    expect(lightHtml).toContain('data-particle-brightness="1.6"');
-    expect(lightHtml).toContain('data-rotation-enabled="false"');
-    expect(lightHtml).toContain('data-rotation-x="10"');
-    expect(lightHtml).toContain('data-rotation-y="20"');
-    expect(lightHtml).toContain('data-rotation-z="30"');
-    expect(lightHtml).toContain('data-rotation-speed-x="0.2"');
-    expect(lightHtml).toContain('data-rotation-speed-y="0.42"');
-    expect(lightHtml).toContain('data-rotation-speed-z="-0.1"');
-    expect(lightHtml).toContain('data-scroll-rotation-enabled="false"');
-    expect(lightHtml).toContain('data-scroll-rotation-turns-x="0.1"');
-    expect(lightHtml).toContain('data-scroll-rotation-turns-y="0.8"');
-    expect(lightHtml).toContain('data-scroll-rotation-turns-z="-0.2"');
-    expect(lightHtml).toContain('data-hover-enabled="false"');
-    expect(lightHtml).toContain('data-hover-repel-radius="0.7"');
-    expect(darkHtml).toContain('data-particle-brightness="1.9"');
-  });
-
-  it('preserves authored line breaks in unit descriptions', () => {
-    const html = renderToStaticMarkup(
-      <TestProviders>
-        <ImmersiveSceneView
-          props={{
-            unitsJson: '[{"id":"single","mesh":"sphere","color":"#ffffff"}]',
-            copyJson: JSON.stringify([
-              { id: 'single', title: 'Single unit', text: 'First line\nSecond line\n\nSeparate paragraph' },
-            ]),
-          }}
-        />
-      </TestProviders>,
-    );
-
-    expect(html).toContain('data-immersive-scene-description="true"');
-    expect(html).toContain('First line<br/>\nSecond line');
-    expect(html).toContain('<p>Separate paragraph</p>');
-  });
-
-  it('renders a scroll scene shell when multiple units use scroll playback', () => {
-    const html = renderToStaticMarkup(
-      <TestProviders>
-        <ImmersiveSceneView
-          props={{
-            playback: 'scroll',
-            unitsJson:
-              '[{"id":"intro","mesh":"sphere","color":"#d8dde5"},{"id":"goal","mesh":"cone","color":"#f97316"}]',
-            copyJson:
-              '[{"id":"intro","title":"Intro","text":"Intro copy"},{"id":"goal","title":"Goal","text":"Goal copy"}]',
-          }}
-        />
-      </TestProviders>,
-    );
-
-    expect(html).toContain('data-playback="scroll"');
-    expect(html).toContain('data-height-mode="scroll"');
-    expect(html).toContain('data-scroll-owner="document"');
-    expect(html).toContain('--_immersive-scene-scroll-document-height:360vh');
-    expect(html).toContain('data-immersive-scene-unit="intro"');
-    expect(html).toContain('data-immersive-scene-unit="goal"');
   });
 
   it('renders sparse shared unit attribution with safe links and inert inactive content', () => {
@@ -263,27 +147,6 @@ describe('ImmersiveSceneView', () => {
     } as unknown as HTMLElement;
 
     expect(resolveScrollProgress(element, scrollRoot)).toBe(0.5);
-  });
-
-  it('renders an autoplay scene shell when configured for time-based playback', () => {
-    const html = renderToStaticMarkup(
-      <TestProviders>
-        <ImmersiveSceneView
-          props={{
-            playback: 'autoplay',
-            loop: 'true',
-            unitsJson: '[{"id":"one","mesh":"box","color":"#60a5fa"},{"id":"two","mesh":"torus","color":"#f97316"}]',
-            copyJson:
-              '[{"id":"one","title":"One","text":"First copy"},{"id":"two","title":"Two","text":"Second copy"}]',
-          }}
-        />
-      </TestProviders>,
-    );
-
-    expect(html).toContain('data-playback="autoplay"');
-    expect(html).toContain('One');
-    expect(html).toContain('Two');
-    expect(html).not.toContain('transition:opacity 220ms ease');
   });
 
   it('closes the internal particle sequence only for looped scenes', () => {
@@ -490,11 +353,6 @@ describe('ImmersiveSceneView', () => {
     expect(resolveUnitPresentation(fadeEnd.textSegmentProgress, 1, 3, 0.22, true).opacity).toBe(1);
   });
 
-  it('resolves the configured scene color scheme before selecting themed particle textures', () => {
-    expect(resolveSceneColorScheme('auto', 'dark')).toBe('dark');
-    expect(resolveSceneColorScheme('light', 'dark')).toBe('light');
-  });
-
   it('resolves overlay text colors from the scene color scheme', () => {
     const themeTextConfig = {
       textColorSource: 'theme',
@@ -606,14 +464,6 @@ describe('ImmersiveSceneView', () => {
     expect(resolveMeshOffsetYAtProgress(units, 1, true)).toBe(-2);
   });
 
-  it('defaults and clamps mesh offsets through the unit schema resolver', () => {
-    expect(resolveMeshOffsetYAtProgress([], 0.5, false)).toBe(0);
-    expect(resolveMeshOffsetYAtProgress([{ ...testUnits[0] }], 0.5, false)).toBe(0);
-    expect(resolveMeshOffsetYAtProgress([{ ...testUnits[0], meshOffsetY: 'invalid' }], 0.5, false)).toBe(0);
-    expect(resolveMeshOffsetYAtProgress([{ ...testUnits[0], meshOffsetY: '20' }], 0.5, false)).toBe(5);
-    expect(resolveMeshOffsetYAtProgress([{ ...testUnits[0], meshOffsetY: '-20' }], 0.5, false)).toBe(-5);
-  });
-
   it('keeps live mesh offsets out of the engine signature', () => {
     const baseUnits = [{ ...testUnits[0], meshOffsetY: '0' }];
     const offsetUnits = [{ ...testUnits[0], meshOffsetY: '-1.5' }];
@@ -622,20 +472,6 @@ describe('ImmersiveSceneView', () => {
     expect(resolveRendererUnitSignature(offsetUnits)).toBe(resolveRendererUnitSignature(baseUnits));
     expect(resolveRendererUnitSignature(scaleUnits)).not.toBe(resolveRendererUnitSignature(baseUnits));
     expect(resolveMeshOffsetYSignature(offsetUnits)).not.toBe(resolveMeshOffsetYSignature(baseUnits));
-  });
-
-  it('updates the particle object world matrix immediately after applying rotation', () => {
-    const calls: unknown[][] = [];
-    const object = {
-      rotation: {
-        set: (...values: number[]) => calls.push(values),
-      },
-      updateMatrixWorld: (force?: boolean) => calls.push([force]),
-    };
-
-    applyParticleObjectRotation(object, { x: Math.PI / 6, y: Math.PI / 3, z: -Math.PI / 4 });
-
-    expect(calls).toEqual([[Math.PI / 6, Math.PI / 3, -Math.PI / 4], [true]]);
   });
 
   it('applies the unit mesh offset and rotation before updating the particle object world matrix', () => {

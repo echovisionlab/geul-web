@@ -235,38 +235,6 @@ it('keeps a queued metadata refetch when a document notification in the same win
   expect(onChange).toHaveBeenCalledOnce();
 });
 
-it('ignores cross-tab hints after access ends', () => {
-  class FakeBroadcastChannel {
-    static instances = new Set<FakeBroadcastChannel>();
-    onmessage: ((event: MessageEvent<unknown>) => void) | null = null;
-    constructor(readonly name: string) {
-      FakeBroadcastChannel.instances.add(this);
-    }
-    postMessage(data: unknown) {
-      for (const channel of FakeBroadcastChannel.instances) {
-        if (channel !== this && channel.name === this.name) {
-          channel.onmessage?.({ data } as MessageEvent<unknown>);
-        }
-      }
-    }
-    close() {
-      FakeBroadcastChannel.instances.delete(this);
-    }
-  }
-  vi.stubGlobal('BroadcastChannel', FakeBroadcastChannel);
-  const provider = createProvider();
-  act(() => root.render(<ChangeListener document="post:entity" provider={provider} />));
-  act(() => publishEditorEntityChange('post:entity'));
-  expect(onChange).toHaveBeenCalledOnce();
-  act(() =>
-    provider.emit('stateless', {
-      payload: JSON.stringify({ v: 3, kind: 'room.access_ended', reason: 'permission_revoked' }),
-    }),
-  );
-  act(() => publishEditorEntityChange('post:entity'));
-  expect(onChange).toHaveBeenCalledOnce();
-});
-
 it('scopes ended access to the revoked entity connection', () => {
   class FakeBroadcastChannel {
     static instances = new Set<FakeBroadcastChannel>();

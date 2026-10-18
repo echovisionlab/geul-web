@@ -2,13 +2,9 @@ import { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { AuthorizationRole } from '@echovisionlab/geul-proto/policy/access_pb.ts';
 import { describe, expect, it } from 'vitest';
-import { buildSegmentConfig, createEmptyConfig, SEGMENT_ROLE_OPTIONS } from './SegmentConfig';
+import { buildSegmentConfig, createEmptyConfig } from './SegmentConfig';
 
 describe('audience segment config helpers', () => {
-  it('uses short role strings for role filters', () => {
-    expect(SEGMENT_ROLE_OPTIONS.map((option) => option.value)).toEqual(['admin', 'author', 'user']);
-  });
-
   it('keeps each user-only Audience configuration scoped to its segment type', () => {
     const config = {
       ...createEmptyConfig(),

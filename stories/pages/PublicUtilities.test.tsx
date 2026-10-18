@@ -4,7 +4,6 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { TestProviders } from '@/test/TestProviders';
 import { LoginErrorPageView } from '@/features/auth/LoginErrorPageView';
-import { SitemapPageView } from '@/features/navigation/SitemapPageView';
 import { ChangelogPageView } from '@/features/changelog/ChangelogPageView';
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), prefetch: vi.fn() }),
@@ -36,12 +35,6 @@ describe('production public page previews', () => {
     );
     expect(host.querySelector('a[href="/account/recover"]')).toBeNull();
     expect(host.querySelector('a[href="/login"]')?.textContent).toContain('Back to Login');
-  });
-  it('uses actual sitemap navigation destinations', async () => {
-    await render(<SitemapPageView />);
-    expect(host.querySelector('a[href="/"]')?.textContent).toContain('Home');
-    expect(host.querySelector('a[href="/artists"]')?.textContent).toContain('Artists');
-    expect(host.querySelector('a[href="/privacy"]')?.textContent).toContain('Privacy Policy');
   });
   it('keeps authored changelog release anchors and safe external links', async () => {
     await render(

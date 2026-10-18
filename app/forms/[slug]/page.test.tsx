@@ -1,4 +1,3 @@
-import { renderToStaticMarkup } from 'react-dom/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -84,13 +83,5 @@ describe('Form canonical editor route', () => {
       `redirect:/forms/${FORM_ID}?edit=true&tab=settings&lang=ko`,
     );
     expect(mocks.getFormEditorInitialFields).not.toHaveBeenCalled();
-  });
-
-  it('renders the editor and tab navigation at the immutable ID', async () => {
-    const html = renderToStaticMarkup(await PublicFormPage(props(FORM_ID)));
-
-    expect(html).toContain(`data-form-id="${FORM_ID}"`);
-    expect(html).toContain('form-editor');
-    expect(mocks.getFormEditorInitialFields).toHaveBeenCalledWith(FORM_ID);
   });
 });

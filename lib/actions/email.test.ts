@@ -20,22 +20,6 @@ describe('email actions', () => {
     mocks.createAccountClient.mockResolvedValue(accountClient);
   });
 
-  it('requests email changes through the user service', async () => {
-    accountClient.requestEmailChange.mockResolvedValueOnce({
-      success: true,
-      message: 'Verification email sent',
-    });
-
-    await expect(requestEmailChangeAction('new@example.test')).resolves.toEqual({
-      success: true,
-      message: 'Verification email sent',
-    });
-
-    expect(accountClient.requestEmailChange).toHaveBeenCalledWith({
-      newEmail: 'new@example.test',
-    });
-  });
-
   it('returns connect errors without throwing', async () => {
     accountClient.requestEmailChange.mockRejectedValueOnce(
       new ConnectError('email already exists', Code.AlreadyExists),

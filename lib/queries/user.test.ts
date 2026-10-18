@@ -170,15 +170,6 @@ describe('user queries', () => {
     expect(get).not.toHaveBeenCalled();
   });
 
-  it('passes an ordered selected-author batch to ListAuthors', async () => {
-    const list = vi.fn().mockResolvedValue({ authors: [] });
-    mocks.createPublicMemberClient.mockReturnValue({ getPublicMember: vi.fn(), listAuthors: list });
-
-    await expect(listAuthors(24, ['author-2', 'author-1'])).resolves.toEqual([]);
-
-    expect(list).toHaveBeenCalledWith({ limit: 24, memberIds: ['author-2', 'author-1'] });
-  });
-
   it('loads published posts with the resolved request locale', async () => {
     const { getUserPublishedPosts } = await import('./user');
     mocks.createPublicPostClientWithAuth.mockResolvedValue({
@@ -251,46 +242,6 @@ describe('user queries', () => {
       page: 1,
       pageSize: 10,
       totalPages: 0,
-    });
-  });
-
-  it('preserves explicit multi-sort queries when listing user published posts table rows', async () => {
-    mocks.listPublishedPostsTable.mockResolvedValue({
-      data: [],
-      total: 0,
-      page: 1,
-      pageSize: 10,
-      totalPages: 0,
-    });
-
-    await listUserPublishedPostsTable(
-      'user-1',
-      {
-        page: 1,
-        pageSize: 10,
-        sorts: [
-          { field: 'title', direction: 'asc' },
-          { field: 'published_at', direction: 'desc' },
-        ],
-      },
-      'en',
-    );
-
-    expect(mocks.listPublishedPostsTable).toHaveBeenLastCalledWith({
-      query: {
-        page: 1,
-        pageSize: 10,
-        sorts: [
-          { field: 'title', direction: 'asc' },
-          { field: 'published_at', direction: 'desc' },
-        ],
-      },
-      pageSize: 10,
-      authorIds: ['user-1'],
-      allowedFilterFields: USER_PUBLISHED_POST_ALLOWED_FILTER_FIELDS,
-      allowedSortFields: USER_PUBLISHED_POST_ALLOWED_SORT_FIELDS,
-      rejectInvalidQuery: true,
-      requestedLocale: 'en',
     });
   });
 });

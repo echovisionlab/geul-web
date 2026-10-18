@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { themeVariables, theme } from './theme';
-import { primitiveTokens, semanticThemes } from './components/core/design-tokens';
-import { getThemeDefinition, getThemeTokens, themeIds } from './lib/theme/themes';
+import { semanticThemes } from './components/core/design-tokens';
+import { getThemeTokens, themeIds } from './lib/theme/themes';
 
 function luminance(hex: string) {
   const channels = hex
@@ -118,56 +117,5 @@ describe('design token contract', () => {
         }
       }
     }
-  });
-
-  it('preserves the logo red separately from interaction colors', () => {
-    expect(primitiveTokens.colors.brand).toBe('#b02d23');
-    expect(primitiveTokens.colors.red[500]).toBe(primitiveTokens.colors.brand);
-    expect(theme.palette).toBe(primitiveTokens.colors);
-    for (const mode of ['light', 'dark'] as const) {
-      expect(semanticThemes[mode]['action-ink']).not.toBe(primitiveTokens.colors.brand);
-      expect(semanticThemes[mode]['action-primary']).not.toBe(primitiveTokens.colors.brand);
-    }
-  });
-
-  it('keeps every named color grade ordered from light to dark', () => {
-    for (const family of ['neutral', 'graphite', 'red', 'green', 'blue', 'yellow', 'orange'] as const) {
-      const ramp = primitiveTokens.colors[family];
-      expect(Object.keys(ramp).map(Number)).toEqual([50, 100, 200, 300, 400, 500, 600, 700, 800, 900]);
-      const values = Object.values(ramp);
-      for (let index = 1; index < values.length; index++) {
-        expect(luminance(values[index]), `${family} grade ${Object.keys(ramp)[index]}`).toBeLessThan(
-          luminance(values[index - 1]),
-        );
-      }
-    }
-  });
-
-  it('retains the reviewed functional colors without adding another warning meaning', () => {
-    expect(primitiveTokens.colors.green[500]).toBe('#287a3f');
-    expect(primitiveTokens.colors.blue[500]).toBe('#235f96');
-    expect(primitiveTokens.colors.yellow[500]).toBe('#d5a900');
-    expect(primitiveTokens.colors.orange[500]).toBe('#ce5526');
-    for (const mode of ['light', 'dark'] as const) {
-      expect(Object.values(primitiveTokens.colors.yellow)).toContain(semanticThemes[mode]['status-warning']);
-      for (const role of ['status-accent', 'status-positive', 'status-warning', 'status-danger'] as const) {
-        expect(Object.values(primitiveTokens.colors.orange)).not.toContain(semanticThemes[mode][role]);
-      }
-    }
-  });
-
-  it('projects canonical roles without a second set of definitions', () => {
-    for (const themeId of themeIds) {
-      const variables = themeVariables(themeId);
-      const { base } = getThemeDefinition(themeId);
-      for (const [name, value] of Object.entries(getThemeTokens(themeId))) {
-        expect(variables[`--geul-${name}`]).toBe(value);
-      }
-      expect(theme[base]).toBe(semanticThemes[base]);
-    }
-    expect(theme.defaultRadius).toBe(0);
-    expect(theme.breakpoints).toBe(primitiveTokens.breakpoints);
-    expect(theme.fontWeights).toBe(primitiveTokens.fontWeight);
-    expect(theme.respectReducedMotion).toBe(true);
   });
 });

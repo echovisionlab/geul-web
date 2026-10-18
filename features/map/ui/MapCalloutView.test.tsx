@@ -49,24 +49,6 @@ afterEach(() => {
 });
 
 describe('MapCalloutView', () => {
-  it('renders its serializable view model and emits pointer intent', () => {
-    act(() => root.render(<MapCalloutView {...baseProps} />));
-
-    const callout = host.querySelector<HTMLElement>('.mgl-callout');
-    expect(callout?.dataset.placeId).toBe('studio');
-    expect(callout?.getAttribute('aria-label')).toBe('Studio');
-    expect(host.textContent).toContain('37.500000 / 127.100000');
-    expect(callout?.style.getPropertyValue('--_map-callout-line-color')).toBe(baseProps.colors.lineColor);
-    expect(callout?.style.getPropertyValue('--_map-callout-hover-bg-color')).toBe(
-      baseProps.colors.hoverBackgroundColor,
-    );
-    expect(callout?.style.getPropertyValue('--_map-callout-offset-x')).toBe('110px');
-    expect(callout?.style.getPropertyValue('--_map-callout-offset-y')).toBe('37px');
-    expect(host.querySelector('.mgl-callout__path')?.getAttribute('stroke')).toBe('var(--_map-callout-line-color)');
-
-    act(() => callout?.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })));
-    expect(baseProps.onClick).toHaveBeenCalledOnce();
-  });
   it('keeps inert callouts readable without exposing a dead button or tab stop', () => {
     act(() => root.render(<MapCalloutView {...baseProps} clickable={false} />));
     const callout = host.querySelector<HTMLElement>('.mgl-callout')!;

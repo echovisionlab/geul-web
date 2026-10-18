@@ -13,7 +13,6 @@ const { notificationShowMock, setFeaturedImageActionMock, setFeaturedImageMock, 
 }));
 
 let uploadHandler: ((blob: Blob) => void | Promise<void>) | null = null;
-let uploaderCanEdit = false;
 let container: HTMLDivElement | null = null;
 let root: Root | null = null;
 
@@ -56,14 +55,7 @@ vi.mock('@/components/core/Notification', () => ({
 }));
 
 vi.mock('@/features/upload/ImageUploadCropController', () => ({
-  ImageUploadCropController: ({
-    canEdit,
-    onUpload,
-  }: {
-    canEdit: boolean;
-    onUpload: (blob: Blob) => void | Promise<void>;
-  }) => {
-    uploaderCanEdit = canEdit;
+  ImageUploadCropController: ({ onUpload }: { canEdit: boolean; onUpload: (blob: Blob) => void | Promise<void> }) => {
     uploadHandler = onUpload;
     return <div />;
   },
@@ -107,7 +99,6 @@ afterEach(() => {
   container = null;
   root = null;
   uploadHandler = null;
-  uploaderCanEdit = false;
   uploadMock.mockReset();
   setFeaturedImageActionMock.mockReset();
   setFeaturedImageMock.mockReset();
@@ -128,22 +119,6 @@ describe('FeaturedImageUploader', () => {
     expect(setFeaturedImageActionMock).toHaveBeenCalledWith('post-1', 'post-file-id');
     expect(setFeaturedImageMock).toHaveBeenCalledWith('post-file-id', 'https://example.com/post-cover.jpg');
     expect(onOgGenerationRequested).toHaveBeenCalledWith('post-og-run');
-  });
-
-  it('does not gate the Post-owned featured image action on collaboration readiness', async () => {
-    act(() => {
-      root?.render(<FeaturedImageUploader postId="post-1" canEdit />);
-    });
-
-    expect(uploaderCanEdit).toBe(true);
-
-    await act(async () => {
-      await uploadHandler?.(new Blob(['image'], { type: 'image/webp' }));
-    });
-
-    expect(uploadMock).toHaveBeenCalledOnce();
-    expect(setFeaturedImageActionMock).toHaveBeenCalledWith('post-1', 'post-file-id');
-    expect(setFeaturedImageMock).toHaveBeenCalledOnce();
   });
 
   it('reports a local presentation update failure after the API action succeeds', async () => {

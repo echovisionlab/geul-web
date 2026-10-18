@@ -66,10 +66,4 @@ describe('client zod imports', () => {
     }
     expect(actual).toEqual(COMMON_CLASSIC_ZOD_IMPORTS);
   });
-
-  it('finds no classic zod inside Geul Common source', () => {
-    expect(packageReaches(root, `${COMMON}collaboration/runtime-events`, 'zod')).toBe(false);
-    expect(packageReaches(root, `${COMMON}collaboration/document`, 'zod')).toBe(false);
-    expect(packageReaches(root, `${COMMON}collaboration/block-room-codec`, 'zod')).toBe(false);
-  });
 });

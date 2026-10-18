@@ -1,7 +1,4 @@
-import { readFile } from 'node:fs/promises';
-import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { APP_VERSION } from '../site-version';
 import { parseChangelogMarkdown } from './changelog';
 
 describe('parseChangelogMarkdown', () => {
@@ -109,24 +106,5 @@ describe('parseChangelogMarkdown', () => {
     expect(releases.map((release) => release.version)).toEqual(['0.1.1', '0.1.2']);
     expect(releases[0].url).toBe('https://example.com/full');
     expect(releases[0].groups.flatMap((group) => group.items)).toHaveLength(3);
-  });
-
-  it('keeps the checked-in changelog aligned with the release manifest', async () => {
-    const [markdown, manifestSource] = await Promise.all([
-      readFile(path.join(process.cwd(), 'CHANGELOG.md'), 'utf8').catch(() => null),
-      readFile(path.join(process.cwd(), '.release-please-manifest.json'), 'utf8'),
-    ]);
-    expect(markdown).not.toBeNull();
-
-    const releases = parseChangelogMarkdown(markdown ?? '');
-    const manifest = JSON.parse(manifestSource) as Record<string, string>;
-
-    if (manifest['.']) {
-      expect(releases[0]?.version).toBe(APP_VERSION);
-      expect(manifest['.']).toBe(APP_VERSION);
-      return;
-    }
-
-    expect(releases).toEqual([]);
   });
 });

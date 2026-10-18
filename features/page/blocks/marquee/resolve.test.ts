@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildEntityMarqueeItem, getEntityMarqueeHref, reorderByIds } from './resolve';
+import { getEntityMarqueeHref, reorderByIds } from './resolve';
 
 describe('entity marquee resolver', () => {
   it('derives static public hrefs server-side for client and label items', () => {
@@ -20,25 +20,5 @@ describe('entity marquee resolver', () => {
     const items = [{ id: 'a' }, { id: 'b' }, { id: 'c' }];
 
     expect(reorderByIds(items, ['c', 'missing', 'a'])).toEqual([{ id: 'c' }, { id: 'a' }]);
-  });
-
-  it('builds static marquee DTOs with theme asset URLs', () => {
-    expect(
-      buildEntityMarqueeItem({
-        id: 'label-1',
-        name: 'Label',
-        href: '/labels/label',
-        logoUrl: 'https://cdn.example.com/default.png',
-        logoLightUrl: 'https://cdn.example.com/light.png',
-        logoDarkUrl: 'https://cdn.example.com/dark.png',
-      }),
-    ).toEqual({
-      id: 'label-1',
-      text: 'Label',
-      href: '/labels/label',
-      logoUrl: 'https://cdn.example.com/default.png',
-      logoLightUrl: 'https://cdn.example.com/light.png',
-      logoDarkUrl: 'https://cdn.example.com/dark.png',
-    });
   });
 });

@@ -153,23 +153,6 @@ for (const [index, domain] of domains.entries()) {
       expect(metadata).toMatchObject({ id: `${index === 5 ? 'series' : domain}-1` });
       expect(mocks.gets[index]).toHaveBeenCalledTimes(expectedCalls);
     });
-    it('measures the same serial 50ms transport fixture', async () => {
-      vi.useFakeTimers();
-      vi.setSystemTime(0);
-      mocks.gets[index].mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve(response(index)), 50)),
-      );
-      const r = await readers(index);
-      const start = Date.now();
-      const first = r.metadata();
-      await vi.runAllTimersAsync();
-      await first;
-      const second = r.body();
-      await vi.runAllTimersAsync();
-      await second;
-      expect(mocks.gets[index]).toHaveBeenCalledTimes(expectedCalls);
-      expect(Date.now() - start).toBe(expectedCalls * 50);
-    });
   });
 }
 

@@ -1,6 +1,4 @@
 // @vitest-environment jsdom
-
-import { I18nProvider as DesignSystemProvider } from 'react-aria-components';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -109,35 +107,6 @@ describe('Tabs', () => {
     expect(dark.getAttribute('aria-selected')).toBe('true');
     expect(document.activeElement).toBe(dark);
     expect(container.querySelectorAll('[role="tabpanel"]')).toHaveLength(1);
-  });
-
-  it('provides an accessible compound tab control through the Core boundary', () => {
-    const onChange = vi.fn();
-
-    act(() => {
-      root.render(
-        <DesignSystemProvider>
-          <Tabs value="first" onChange={onChange} tone="neutral" appearance="outline">
-            <Tabs.List aria-label="Example views">
-              <Tabs.Tab value="first">First</Tabs.Tab>
-              <Tabs.Tab value="second">Second</Tabs.Tab>
-            </Tabs.List>
-            <Tabs.Panel value="first">First panel</Tabs.Panel>
-            <Tabs.Panel value="second">Second panel</Tabs.Panel>
-          </Tabs>
-        </DesignSystemProvider>,
-      );
-    });
-
-    const tabs = container.querySelector('[data-appearance="outline"]');
-    const secondTab = container.querySelectorAll<HTMLButtonElement>('[role="tab"]')[1];
-
-    expect(tabs?.getAttribute('data-tone')).toBe('neutral');
-    expect(container.querySelector('[role="tablist"]')?.getAttribute('aria-label')).toBe('Example views');
-    expect(container.textContent).toContain('First panel');
-
-    act(() => secondTab.click());
-    expect(onChange).toHaveBeenCalledWith('second');
   });
   it('keeps inactive panel state mounted and removes it from reading and keyboard navigation', () => {
     act(() =>

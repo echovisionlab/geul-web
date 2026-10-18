@@ -3,7 +3,6 @@ import { act, useState } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it } from 'vitest';
 import { TestProviders } from '@/test/TestProviders';
-import koMessages from '@/messages/ko.json';
 import { IconViewModeControl } from './IconViewModeControl';
 
 let host: HTMLDivElement;
@@ -54,19 +53,5 @@ describe('icon view modes', () => {
     expect(choices[1].checked).toBe(true);
     expect(choices[0].checked).toBe(false);
     expect(host.textContent).not.toMatch(/Split|Code|Preview/);
-  });
-  it('uses the existing Korean view label as the group name without adding visible copy', async () => {
-    host = document.createElement('div');
-    document.body.append(host);
-    root = createRoot(host);
-    await act(async () =>
-      root.render(
-        <TestProviders locale="ko" messages={koMessages}>
-          <Modes />
-        </TestProviders>,
-      ),
-    );
-    expect(host.querySelector('[role="radiogroup"]')).toHaveAccessibleName(koMessages.common.actions.view);
-    expect(host.textContent).toBe('');
   });
 });

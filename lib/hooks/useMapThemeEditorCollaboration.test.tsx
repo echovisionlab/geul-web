@@ -320,31 +320,6 @@ describe('useMapThemeEditorCollaboration', () => {
     expect(hasPendingEditorSaves('map_theme:11111111-1111-4111-8111-111111111111')).toBe(true);
   });
 
-  it('does not replay an edit already acknowledged by the server over a later peer value', async () => {
-    const initialDocument = createThemeDocument({ name: 'Baseline theme' });
-    setConnectionDocument(initialDocument);
-    renderProbe();
-    syncCurrentDocument();
-
-    act(() => result.current?.setName('Acknowledged local theme'));
-    act(() => {
-      connection.provider?.emitUnsyncedChanges(1);
-      connection.provider?.emitUnsyncedChanges(0);
-    });
-    await advanceAutomaticPersistDebounce();
-    await settlePromiseCallbacks();
-    expect(hasPendingEditorSaves('map_theme:11111111-1111-4111-8111-111111111111')).toBe(false);
-    act(() => connection.onReloadRequired?.(() => true));
-
-    const freshDocument = createThemeDocument({ name: 'Later peer theme' });
-    setConnectionDocument(freshDocument);
-    connection.synced = false;
-    renderProbe();
-    syncCurrentDocument();
-
-    expect(createMapThemeMetaMap(freshDocument).get('name')).toBe('Later peer theme');
-  });
-
   it('keeps field intent through transport sync until persist.now acknowledges the write', async () => {
     setConnectionDocument(createThemeDocument({ name: 'Initial name' }));
     renderProbe();

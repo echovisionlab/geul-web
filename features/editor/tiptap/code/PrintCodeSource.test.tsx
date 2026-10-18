@@ -2,8 +2,6 @@
 
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { PrintCodeSource } from './PrintCodeSource';
 import { codeToHtml } from './print-code-highlighter';
@@ -92,13 +90,6 @@ describe('PrintCodeSource', () => {
     act(() => root.unmount());
     await act(async () => reject(new Error('late failure')));
     expect(host.childNodes).toHaveLength(0);
-  });
-
-  it('collapses Shiki separator newlines while preserving whitespace inside each code line', () => {
-    const css = readFileSync(resolve(process.cwd(), 'features/editor/tiptap/code/PrintCodeSource.module.css'), 'utf8');
-
-    expect(css).toMatch(/pre\.shiki\)[^{]*\{[^}]*white-space:\s*normal\s*!important/isu);
-    expect(css).toMatch(/pre\.shiki \.line\)[^{]*\{[^}]*white-space:\s*pre-wrap/isu);
   });
 
   it('keeps a plain source fallback and replaces it with highlighted, line-addressable markup', async () => {

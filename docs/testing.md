@@ -27,6 +27,27 @@ it('saves the profile', async () => {
   already covers an interaction in a real browser; do not duplicate it in jsdom.
 - Keep a test fast: a component test that needs more than ~300ms is a defect to fix, not a timeout to raise.
 
+## What not to test
+
+A bad test is worse than none: it passes while the behaviour is wrong and costs review and upkeep. Do not
+add, and delete when found:
+
+- tests that read source, CSS or config text (`readFileSync` + regex) to check how code is written;
+- golden or re-recorded outputs that pin current output instead of stating intended behaviour;
+- tests whose only assertion is that a mock received what the code passed it, or modules tested with every
+  collaborator mocked so only wiring is left;
+- constants, re-exports, type shapes and `*.type-test.tsx` prop-closedness checks, one-line getters,
+  "renders without crashing";
+- markup and styling details (class names, `data-*` attributes that are not a public contract, inline
+  styles, CSS custom property values, DOM nesting);
+- library behaviour (React, zod, next-intl, React Aria) and benchmarks inside the unit suite;
+- a second test for behaviour another test, layer or Storybook play test already covers.
+
+Keep the guards that matter: permissions and security, data loss and save ordering, consent, validation
+of stored data, contracts with other services, accessibility behaviour, and regressions for real bugs.
+When a change makes a test fail, decide whether the test states intended behaviour before touching it;
+never rewrite an assertion or re-record a golden just to go green.
+
 `eslint-plugin-testing-library` enforces the query, waiting and container rules wherever a test uses
 Testing Library or `@/test/render`. Older tests that render with `createRoot`/`act` move to this style when
 they are next changed.

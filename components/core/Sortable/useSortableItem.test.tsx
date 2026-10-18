@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { act, useState, type ReactNode } from 'react';
+import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DndContext } from '@dnd-kit/core';
@@ -134,31 +134,5 @@ describe('useSortableItem', () => {
     expect(row.style.transform).toBe('translate3d(4px, 32px, 0)');
     expect(row.getAttribute('data-dragging')).toBe('true');
     expect(row.getAttribute('style')).not.toContain('scale');
-  });
-
-  it('keeps returned bindings stable across unrelated parent renders', () => {
-    // A stable item collection, as in production lists; a changed collection may animate layout.
-    const ids = ['first'];
-    const bindings: SortableItemBinding[] = [];
-    let rerender: () => void = () => {};
-    function Parent() {
-      const [count, setCount] = useState(0);
-      rerender = () => setCount((value) => value + 1);
-      return (
-        <List ids={ids}>
-          <span data-count={count} />
-          <SurfaceItem id="first" onBinding={(binding) => bindings.push(binding)} />
-        </List>
-      );
-    }
-    render(<Parent />);
-    const before = bindings.at(-1)!;
-    act(() => rerender());
-    const after = bindings.at(-1)!;
-    expect(bindings.length).toBeGreaterThan(1);
-    expect(after).toBe(before);
-    expect(after.handle).toBe(before.handle);
-    expect(after.motion).toBe(before.motion);
-    expect(after.dragState).toBe(before.dragState);
   });
 });

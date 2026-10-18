@@ -1,7 +1,6 @@
 import { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { FileDownloadAudience } from '@echovisionlab/geul-proto/secure/file_pb.ts';
-import { FilterOp } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import { Code, ConnectError } from '@connectrpc/connect';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createAudienceClient, createFileClient } from '@/lib/api/server-client';
@@ -323,33 +322,6 @@ describe('file download access actions', () => {
       name: 'Audience 51',
       description: '',
       segmentType: SegmentType.MEMBER_TAGS,
-    });
-  });
-
-  it('passes normalized server search to the author-safe Audience RPC', async () => {
-    const listSegmentsForAuthenticatedAccess = vi.fn().mockResolvedValue({
-      segments: [],
-      pagination: { total: 0, hasMore: false },
-    });
-    vi.mocked(createAudienceClient).mockResolvedValue({
-      listSegmentsForAuthenticatedAccess,
-    } as never);
-
-    await listAudienceSegmentsForAuthenticatedAccessAction({
-      page: 2,
-      pageSize: 50,
-      search: '  Press  ',
-    });
-
-    expect(listSegmentsForAuthenticatedAccess).toHaveBeenCalledWith({
-      pagination: expect.objectContaining({ limit: 50, offset: 50 }),
-      filters: [
-        expect.objectContaining({
-          field: 'search',
-          op: FilterOp.ILIKE,
-          value: 'Press',
-        }),
-      ],
     });
   });
 });

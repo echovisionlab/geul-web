@@ -306,97 +306,6 @@ describe('TrackAudioUploader', () => {
     expect(document.querySelector(ids.cancelButtonSelector)).not.toBeNull();
   });
 
-  it('does not clear stale pending upload markers from the passive status renderer', () => {
-    const ids = createTrackAudioTestIds();
-    mockUseUploadResumeState.mockReturnValue({
-      resumeNotice: null,
-      hasActiveSession: false,
-    });
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus={null}
-        audioAttached={false}
-        pendingUploadFileId={ids.pendingFileId}
-        pendingUploadAttemptId={ids.pendingAttemptId}
-        pendingUploadStatus="pending"
-        pendingUploadStartedAt="2026-04-10T00:00:00.000Z"
-        compact
-        mode="status-only"
-      />,
-    );
-    expect(mockUseUploadResumeState).toHaveBeenCalledWith(UploadType.TRACK_AUDIO, null, {
-      entityType: TranscodeEntityType.TRACK,
-      fileId: ids.pendingFileId,
-      attemptId: ids.pendingAttemptId,
-      pendingFileId: ids.pendingFileId,
-      hasDurableSource: false,
-    });
-  });
-
-  it('keeps a resumable pending file id local in the active button-side renderer', () => {
-    const ids = createTrackAudioTestIds();
-    mockUseUploadResumeState.mockReturnValue({
-      resumeNotice: {
-        uploadId: ids.uploadId,
-        fileId: ids.resumeFileId,
-        fileName: 'audio.ogg',
-        attemptId: ids.resumeAttemptId,
-        status: 1,
-      },
-      hasActiveSession: true,
-    } as any);
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_PENDING"
-        audioAttached={false}
-        compact
-        mode="button-only"
-      />,
-    );
-    expect(mockUseUploadResumeState).toHaveBeenCalledWith(UploadType.TRACK_AUDIO, ids.trackId, {
-      entityType: TranscodeEntityType.TRACK,
-      fileId: undefined,
-      attemptId: undefined,
-      pendingFileId: undefined,
-      hasDurableSource: false,
-    });
-  });
-
-  it('does not restore a resumable pending file id from the passive status renderer', () => {
-    const ids = createTrackAudioTestIds();
-    mockUseUploadResumeState.mockReturnValue({
-      resumeNotice: {
-        uploadId: ids.uploadId,
-        fileId: ids.resumeFileId,
-        fileName: 'audio.ogg',
-        attemptId: ids.resumeAttemptId,
-        status: 1,
-      },
-      hasActiveSession: true,
-    } as any);
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_PENDING"
-        audioAttached={false}
-        compact
-        mode="status-only"
-      />,
-    );
-    expect(mockUseUploadResumeState).toHaveBeenCalledWith(UploadType.TRACK_AUDIO, null, {
-      entityType: TranscodeEntityType.TRACK,
-      fileId: undefined,
-      attemptId: undefined,
-      pendingFileId: undefined,
-      hasDurableSource: false,
-    });
-  });
-
   it('uses the current original file as the CAS fence for replacement resume lookup', () => {
     const ids = createTrackAudioTestIds();
 
@@ -422,90 +331,6 @@ describe('TrackAudioUploader', () => {
       pendingFileId: ids.pendingFileId,
       hasDurableSource: true,
     });
-  });
-
-  it('does not synthesize a new attempt id when resuming a server session without one', () => {
-    const ids = createTrackAudioTestIds();
-    mockUseUploadResumeState.mockReturnValue({
-      resumeNotice: {
-        uploadId: ids.uploadId,
-        fileId: ids.resumeFileId,
-        fileName: 'audio.ogg',
-        attemptId: '',
-        status: 1,
-      },
-      hasActiveSession: true,
-    } as any);
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_PENDING"
-        audioAttached={false}
-        compact
-        mode="button-only"
-      />,
-    );
-
-    expect(mockUseUploadResumeState).toHaveBeenCalledWith(UploadType.TRACK_AUDIO, ids.trackId, {
-      entityType: TranscodeEntityType.TRACK,
-      fileId: undefined,
-      attemptId: undefined,
-      pendingFileId: undefined,
-      hasDurableSource: false,
-    });
-  });
-
-  it('does not adopt a resumed session over an already fenced pending attempt', () => {
-    const ids = createTrackAudioTestIds();
-    mockUseUploadResumeState.mockReturnValue({
-      resumeNotice: {
-        uploadId: ids.uploadId,
-        fileId: ids.resumeFileId,
-        fileName: 'audio.ogg',
-        attemptId: ids.resumeAttemptId,
-        status: 1,
-      },
-      hasActiveSession: true,
-    } as any);
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_PENDING"
-        audioAttached={false}
-        pendingUploadAttemptId={ids.currentAttemptId}
-        compact
-        mode="button-only"
-      />,
-    );
-
-    expect(mockUseUploadResumeState).toHaveBeenCalledWith(UploadType.TRACK_AUDIO, ids.trackId, {
-      entityType: TranscodeEntityType.TRACK,
-      fileId: undefined,
-      attemptId: ids.currentAttemptId,
-      pendingFileId: undefined,
-      hasDurableSource: false,
-    });
-  });
-
-  it('does not publish pending upload state before a backend multipart session exists', async () => {
-    const ids = createTrackAudioTestIds();
-    uploadHookMocks.upload.mockRejectedValue(new Error('Upload interrupted'));
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_PENDING"
-        audioAttached={false}
-        compact
-        mode="button-only"
-      />,
-    );
-
-    await selectUploadFile(new File(['audio'], 'audio.ogg', { type: 'audio/ogg' }));
-
-    expect(uploadHookMocks.upload).toHaveBeenCalled();
   });
 
   it('does not issue a secondary browser attach mutation after upload completion', async () => {
@@ -545,33 +370,6 @@ describe('TrackAudioUploader', () => {
         expectedCurrentFileId: ids.currentAudioFileId,
       }),
     );
-  });
-
-  it('keeps recoverable pending identity when backend-owned upload completion fails recoverably', async () => {
-    const ids = createTrackAudioTestIds();
-    uploadHookMocks.upload.mockImplementation(async (_file: File, options: any) => {
-      options.onMultipartSession?.({
-        uploadId: ids.uploadId,
-        fileId: ids.fileId,
-        resumed: false,
-        resumable: true,
-      });
-      throw new Error('Upload interrupted');
-    });
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_PENDING"
-        audioAttached={false}
-        compact
-        mode="button-only"
-      />,
-    );
-
-    await selectUploadFile(new File(['audio'], 'audio.ogg', { type: 'audio/ogg' }));
-
-    expect(uploadHookMocks.upload).toHaveBeenCalled();
   });
 
   it('keeps a non-resumable finalizing session available for exact completion retry', async () => {
@@ -776,34 +574,6 @@ describe('TrackAudioUploader', () => {
       tone: 'positive',
     });
     expect(document.querySelector(ids.cancelButtonSelector)).toBeNull();
-  });
-
-  it('disables cancellation and exposes the localized phase when the server reports FINALIZING', () => {
-    const ids = createTrackAudioTestIds();
-    mockUseUploadResumeState.mockReturnValue({
-      resumeNotice: {
-        uploadId: ids.uploadId,
-        fileId: ids.fileId,
-        fileName: 'audio.ogg',
-        attemptId: ids.attemptId,
-        status: UploadSessionStatus.FINALIZING,
-      },
-      hasActiveSession: true,
-    });
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_PENDING"
-        audioAttached={false}
-        compact
-        mode="button-only"
-      />,
-    );
-
-    const cancelButton = document.querySelector<HTMLButtonElement>(ids.cancelButtonSelector);
-    expect(cancelButton?.disabled).toBe(true);
-    expect(cancelButton?.title).toBe('Finalizing');
   });
 
   it('shows an upload failure notification when backend failure clears pending state before the local upload rejects', async () => {

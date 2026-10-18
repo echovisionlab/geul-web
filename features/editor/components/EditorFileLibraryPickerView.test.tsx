@@ -154,22 +154,6 @@ describe('EditorFileLibraryPickerView', () => {
     }
   });
 
-  it('uses type icons for every list row and lowercase type labels', () => {
-    renderView([], { viewMode: 'list', labels: { ...editorFileLibraryPickerStoryLabels, folderType: 'Folder' } });
-    const rows = Array.from(host.querySelectorAll('[data-datatable-desktop-row]'));
-    expect(rows).toHaveLength(3);
-    expect(rows.every((row) => row.querySelector('svg'))).toBe(true);
-    expect(rows[0].textContent).toContain('folder');
-    expect(rows[0].textContent).not.toContain('—');
-    expect(
-      host.querySelector('[data-datatable-mobile-row="folder:story-folder-recordings"]')?.textContent,
-    ).not.toContain('—');
-    expect(rows[1].textContent).toContain('wav');
-    expect(rows[1].textContent).not.toContain('audio/wav');
-    expect(rows[2].textContent).toContain('png');
-    expect(rows[2].textContent).not.toContain('image/png');
-  });
-
   it('omits single-selection checkboxes in both responsive list layouts', () => {
     renderView([], { viewMode: 'list', allowMultiple: false });
     expect(host.querySelector('input[type="checkbox"]')).toBeNull();
@@ -277,16 +261,6 @@ describe('EditorFileLibraryPickerView', () => {
     const add = Array.from(host.querySelectorAll('button')).find((button) => button.textContent === '추가');
     act(() => add?.click());
     expect(onConfirmFiles).toHaveBeenCalledExactlyOnceWith([file]);
-  });
-
-  it('uses Finder-style highlighted grid selection without checkboxes', () => {
-    const onSelectedFilesChange = vi.fn();
-    const onActivateRow = vi.fn();
-    renderView([], { onSelectedFilesChange, onActivateRow });
-    expect(host.querySelector('input[type="checkbox"]')).toBeNull();
-    act(() => host.querySelector<HTMLElement>('[data-file-viewer-item="story-file-audio"]')?.click());
-    expect(onSelectedFilesChange).toHaveBeenCalledWith([editorFileLibraryBrowseRows[1]]);
-    expect(onActivateRow).not.toHaveBeenCalled();
   });
 
   it('toggles multiple grid files by touch without checkbox controls', () => {
@@ -413,13 +387,6 @@ describe('EditorFileLibraryPickerView', () => {
       expect(onSelectedFilesChange).toHaveBeenLastCalledWith([first, last]);
     },
   );
-
-  it('does not narrow the result surface with a persistent detail inspector', () => {
-    renderView();
-
-    expect(host.querySelector('[data-file-library-details]')).toBeNull();
-    expect(host.querySelector('[data-inspector-open]')).toBeNull();
-  });
 
   it('previews an eligible file on double click without submitting a partial multi-selection', () => {
     const onConfirmFiles = vi.fn();

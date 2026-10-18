@@ -1,13 +1,8 @@
-import { unwrapQueryResult } from '@/lib/api/query-result';
 import { Code, ConnectError } from '@connectrpc/connect';
 import { create } from '@bufbuild/protobuf';
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { FilterOp, FilterSpecSchema } from '@echovisionlab/geul-proto/common/common_pb.ts';
-import {
-  ProgramEventLocationMode,
-  ProgramEventSeriesStatus,
-  ProgramEventTypeStatus,
-} from '@echovisionlab/geul-proto/secure/program_event_pb.ts';
+import { ProgramEventLocationMode } from '@echovisionlab/geul-proto/secure/program_event_pb.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mediaDeliveryFixture } from '@/tests/helpers/media-delivery';
 import * as actions from './program-event';
@@ -120,15 +115,6 @@ const posterMedia = [
 ];
 
 describe('program event actions', () => {
-  it.each(['publishProgramEventAction', 'archiveProgramEventAction'] as const)(
-    'forwards lifecycle origin for %s',
-    async (action) => {
-      const origin = '40000000-0000-4000-8000-000000000001';
-      await expect(actions[action]('entity-1', origin)).resolves.toEqual({ success: true });
-      expect(mocks.createProgramEventClient).toHaveBeenCalledWith(origin);
-    },
-  );
-
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(Date, 'now').mockReturnValue(1000);
@@ -293,63 +279,6 @@ describe('program event actions', () => {
     });
   });
 
-  it('creates, updates, publishes, archives, and deletes program events', async () => {
-    await expect(actions.createProgramEventAction('Asia/Seoul')).resolves.toEqual({
-      data: { id: 'event-1' },
-    });
-    await expect(
-      actions.updateProgramEventAction('event-1', {
-        title: 'Show',
-        slug: ' Show Slug ',
-        summary: null,
-        seriesId: null,
-        seriesOrder: null,
-        startsAt: new Date('2026-01-01T10:00:00Z'),
-        endsAt: null,
-        timezone: 'Asia/Seoul',
-        allDay: true,
-        locationMode: 'hybrid',
-        mapPlaceId: null,
-        posterFileId: null,
-        ticketUrl: null,
-        streamUrl: null,
-        externalUrl: null,
-        locale: 'ko',
-        artists: [{ id: 'artist-1', role: 'performer' }],
-        labels: [{ id: 'label-1' }],
-        clients: [{ id: 'client-1' }],
-        credits: [{ artistId: 'artist-1', creditRole: 'Live' }],
-      }),
-    ).resolves.toEqual({ success: true });
-    await expect(actions.publishProgramEventAction('event-1')).resolves.toEqual({ success: true });
-    await expect(actions.archiveProgramEventAction('event-1')).resolves.toEqual({ success: true });
-    await expect(actions.deleteProgramEventAction('event-1')).resolves.toEqual({ success: true });
-
-    expect(eventClient.createProgramEvent).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sourceLocale: 'ko',
-        typeId: 'type-1',
-        timezone: 'Asia/Seoul',
-        locationMode: ProgramEventLocationMode.TBA,
-      }),
-    );
-    expect(eventClient.updateProgramEvent).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'event-1',
-        slug: ' Show Slug ',
-        seriesId: '',
-        clearSeriesOrder: true,
-        clearEndsAt: true,
-        locationMode: ProgramEventLocationMode.HYBRID,
-        replaceArtists: true,
-        replaceLabels: true,
-        replaceClients: true,
-        replaceCredits: true,
-      }),
-    );
-    expect(mocks.revalidatePath).toHaveBeenCalledWith('/admin/events');
-  });
-
   it('serializes a single Program Event relation replacement without replacing sibling collections', async () => {
     await expect(
       actions.updateProgramEventAction('event-1', {
@@ -370,18 +299,6 @@ describe('program event actions', () => {
     expect(update?.observedArtists?.artists).toMatchObject([{ artistId: 'artist-1', role: 'performer', sortOrder: 4 }]);
     expect(update?.observedLabels).toBeUndefined();
     expect(update?.observedClients).toBeUndefined();
-  });
-
-  it('preserves an explicitly empty observed Program Event collection snapshot', async () => {
-    await expect(
-      actions.updateProgramEventAction('event-1', {
-        artists: [{ id: 'artist-1', sortOrder: 0 }],
-        observed: { artists: [] },
-      }),
-    ).resolves.toEqual({ success: true });
-
-    const update = eventClient.updateProgramEvent.mock.lastCall?.[0];
-    expect(update?.observedArtists).toMatchObject({ artists: [] });
   });
 
   it('serializes presence-bearing observed snapshots for all Program Event relation collections', async () => {
@@ -445,87 +362,6 @@ describe('program event actions', () => {
       success: true,
     });
     await expect(actions.reorderProgramEventCreditsAction('event-1', ['credit-1'])).resolves.toEqual({ success: true });
-  });
-
-  it('creates event types and series records, searches artists, and maps series poster actions', async () => {
-    typeClient.listProgramEventTypesAdmin.mockResolvedValueOnce({ types: [] });
-    await expect(actions.createProgramEventAction()).resolves.toEqual({ data: { id: 'event-1' } });
-    expect(typeClient.createProgramEventType).toHaveBeenCalledWith({
-      slug: 'event',
-      locale: 'ko',
-      name: 'Event',
-      sortOrder: 0,
-    });
-
-    await expect(
-      actions.createProgramEventTypeAction({
-        name: ' Listening Party ',
-        slug: ' party ',
-        sortOrder: 2,
-      }),
-    ).resolves.toEqual({
-      data: { id: 'type-created', name: 'Listening Party', slug: 'party' },
-    });
-    await expect(
-      actions.updateProgramEventTypeAction('type-1', {
-        locale: 'ko',
-        name: '공연',
-        description: null,
-        slug: 'concert',
-        status: 'inactive',
-        sortOrder: 3,
-        requiresPlace: true,
-        requiresStreamUrl: false,
-      }),
-    ).resolves.toEqual({ success: true });
-    expect(typeClient.updateProgramEventType).toHaveBeenCalledWith({
-      id: 'type-1',
-      locale: 'ko',
-      name: '공연',
-      description: '',
-      slug: 'concert',
-      status: ProgramEventTypeStatus.INACTIVE,
-      sortOrder: 3,
-      requiresPlace: true,
-      requiresStreamUrl: false,
-    });
-    await expect(actions.deleteProgramEventTypeAction('type-1')).resolves.toEqual({ success: true });
-    expect(typeClient.deleteProgramEventType).toHaveBeenCalledWith({ id: 'type-1' });
-    await expect(actions.createProgramEventSeriesAction()).resolves.toEqual({
-      data: { id: 'series-1' },
-    });
-    await expect(
-      actions.updateProgramEventSeriesAction('series-1', {
-        title: 'Series',
-        summary: null,
-        description: null,
-        posterFileId: null,
-        status: 'published',
-      }),
-    ).resolves.toEqual({ success: true });
-    expect(seriesClient.updateProgramEventSeries).toHaveBeenCalledWith(
-      expect.objectContaining({
-        status: ProgramEventSeriesStatus.PUBLISHED,
-        summary: '',
-        description: '',
-        posterFileId: '',
-      }),
-    );
-    await expect(actions.setProgramEventSeriesPosterAction('series-1', 'file-1')).resolves.toEqual({
-      imageUrl: 'https://cdn.example/series.webp',
-    });
-    await expect(actions.removeProgramEventSeriesPosterAction('series-1')).resolves.toEqual({
-      success: true,
-    });
-    await expect(actions.deleteProgramEventSeriesAction('series-1')).resolves.toEqual({
-      success: true,
-    });
-    await expect(
-      actions.searchArtistsForProgramEventCreditAction('event-1', ' Artist ').then(unwrapQueryResult),
-    ).resolves.toEqual([{ id: 'artist-1', name: 'Artist', imageUrl: null }]);
-    await expect(
-      actions.searchArtistsForProgramEventCreditAction('event-1', '   ').then(unwrapQueryResult),
-    ).resolves.toEqual([]);
   });
 
   it('maps auth and permission failures to Unauthorized', async () => {

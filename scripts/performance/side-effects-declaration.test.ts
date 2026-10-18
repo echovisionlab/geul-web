@@ -53,10 +53,6 @@ function resolveLocal(from: string, specifier: string) {
 }
 
 describe('package.json sideEffects declaration', () => {
-  it('keeps CSS as a side effect', () => {
-    expect(sideEffects).toContain('*.css');
-  });
-
   it('declares every local module imported only for its side effects', () => {
     const undeclared: string[] = [];
     for (const file of sources) {

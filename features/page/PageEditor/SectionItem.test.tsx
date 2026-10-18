@@ -134,65 +134,6 @@ describe('SectionItem', () => {
     maxWidth: 'narrow',
   } as const;
 
-  const nonSplitSections: Array<{ type: 'rich-text' | 'columns'; section: SectionMeta }> = [
-    {
-      type: 'rich-text',
-      section: {
-        id: 'section-rich-text',
-        type: 'rich-text',
-        settings: styledSettings,
-      } satisfies SectionMeta,
-    },
-    {
-      type: 'columns',
-      section: {
-        id: 'section-columns',
-        type: 'columns',
-        props: {
-          columns: '2',
-          gap: '24',
-          columnRatios: '1:1',
-          mobileStack: 'true',
-        },
-        columns: [],
-        settings: styledSettings,
-      } satisfies SectionMeta,
-    },
-  ];
-
-  it.each(nonSplitSections)('applies section style to non-split $type editor preview content', ({ type, section }) => {
-    renderSection(section);
-
-    const toggle = container?.querySelector<HTMLButtonElement>('[data-page-section-toggle]');
-    expect(toggle).toBeTruthy();
-    // Rich-text and columns bodies start expanded so the SSR-painted content stays visible.
-    expect(toggle?.getAttribute('aria-expanded')).toBe('true');
-
-    const preview = container?.querySelector<HTMLElement>('[data-page-section-editor-preview]');
-    expect(preview).toBeTruthy();
-    expect(preview?.dataset.sectionType).toBe(type);
-    expect(preview?.style.paddingTop).toBe('12px');
-    expect(preview?.style.paddingBottom).toBe('16px');
-    expect(preview?.style.paddingLeft).toBe('20px');
-    expect(preview?.style.paddingRight).toBe('24px');
-    expect(preview?.style.maxWidth).toBe('800px');
-    expect(preview?.style.marginLeft).toBe('auto');
-    expect(preview?.style.marginRight).toBe('auto');
-    expect(container?.querySelector('[data-testid="mock-block-editor"]')).toBeTruthy();
-  });
-
-  it('binds the sortable handle without enabling native browser dragging', () => {
-    renderSection({ id: 'section-handle', type: 'rich-text' });
-    const handle = container?.querySelector<HTMLButtonElement>('[data-page-section-drag-handle]');
-    expect(handle?.draggable).toBe(false);
-    expect(handle?.disabled).toBe(false);
-    expect(handle?.getAttribute('data-control-size')).toBe('compact');
-    const header = handle?.parentElement;
-    const controls = Array.from(header?.querySelectorAll('button') ?? []);
-    expect(controls[0]).toBe(handle);
-    expect(controls.at(-1)?.hasAttribute('data-page-section-toggle')).toBe(true);
-  });
-
   it('disables structural actions while allowing section previews in translation mode', () => {
     pageEditorContext.allowStructuralEdits = false;
     renderSection({ id: 'section-translation', type: 'rich-text' });

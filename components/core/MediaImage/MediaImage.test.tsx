@@ -19,21 +19,4 @@ describe('MediaImage authored geometry and Core ownership', () => {
     expect(image.getAttribute('src')).toBe('/two.png');
     act(() => root.unmount());
   });
-  it('drops unknown styling and reserved attributes from JavaScript spreads', () => {
-    const host = document.createElement('div');
-    const root = createRoot(host);
-    const escape = {
-      style: { opacity: 0.2 },
-      className: 'external',
-      'data-geul-media-fill': true,
-      'data-document': 'cover',
-    };
-    act(() => root.render(<MediaImage {...(escape as {})} src="/cover.png" alt="Cover" />));
-    const image = host.querySelector('img')!;
-    expect(image.style.opacity).toBe('');
-    expect(image.className).not.toBe('external');
-    expect(image.hasAttribute('data-geul-media-fill')).toBe(false);
-    expect(image.dataset.document).toBe('cover');
-    act(() => root.unmount());
-  });
 });

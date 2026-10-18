@@ -5,7 +5,6 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { DndContextProps, DragOverEvent } from '@dnd-kit/core';
 import { SortableGroups, type SortableGroup, type SortableItem } from './SortableGroups';
-import { verticalKeyboardCoordinates } from './verticalKeyboardCoordinates';
 
 const motion = vi.hoisted(() => {
   const subscribers = new Set<() => void>();
@@ -123,23 +122,6 @@ describe('SortableGroups motion rendering', () => {
       }
     });
   }
-  it('keeps real sensor descriptors stable across parent renders without changing activation or keyboard policy', () => {
-    const { rerender, renderGroup, renderItem } = mount();
-    const sensors = motion.props!.sensors!;
-    expect(sensors).toHaveLength(2);
-    expect(sensors[0].options.activationConstraint).toEqual({ distance: 8 });
-    expect(sensors[1].options.coordinateGetter).toBe(verticalKeyboardCoordinates);
-    renderGroup.mockClear();
-    renderItem.mockClear();
-    rerender();
-    // Dnd Kit derives activators from these descriptors. Replacing unchanged
-    // options churns every listener map even when source content is identical.
-    expect(motion.props!.sensors).toBe(sensors);
-    expect(motion.props!.sensors![0]).toBe(sensors[0]);
-    expect(motion.props!.sensors![1]).toBe(sensors[1]);
-    expect(renderGroup).not.toHaveBeenCalled();
-    expect(renderItem).not.toHaveBeenCalled();
-  });
   it('updates live transforms without re-rendering unchanged domain content', () => {
     const { renderGroup, renderItem } = mount();
     expect(renderGroup).toHaveBeenCalledTimes(2);

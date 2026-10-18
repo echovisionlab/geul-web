@@ -247,31 +247,6 @@ async function flush(): Promise<void> {
 }
 
 describe('LoginContent', () => {
-  it('keeps legal links distinguishable within their surrounding login prose', async () => {
-    const transport: UnifiedLoginTransport = {
-      actionUrl: vi.fn(() => '/api/auth/login?flow=flow-1'),
-      browserUrl: vi.fn(() => '/api/auth/login'),
-      load: vi.fn().mockResolvedValue({ kind: 'continued', flow: codeFlow, ok: true }),
-      submit: vi.fn(),
-    };
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceTheme="ocean-dark">
-            <LoginContent transport={transport} />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
-    const terms = container?.querySelector<HTMLAnchorElement>('a[href="/terms"]');
-    const privacy = container?.querySelector<HTMLAnchorElement>('a[href="/privacy"]');
-    expect(terms?.textContent).toBe('Terms of Service');
-    expect(privacy?.textContent).toBe('Privacy Policy');
-    expect(terms?.dataset.appearance).toBe('content');
-    expect(privacy?.dataset.appearance).toBe('content');
-  });
-
   it('explains that a privileged refresh will automatically continue the security request', async () => {
     const refreshFlow = {
       ...codeFlow,
@@ -1037,38 +1012,6 @@ describe('LoginContent', () => {
     expect(emailButton?.disabled).toBe(false);
     expect(emailButton?.hasAttribute('data-loading')).toBe(false);
     expect(socialButtons.every((button) => !button.disabled)).toBe(true);
-  });
-
-  it('places passkey login after the email continue action', async () => {
-    vi.stubGlobal('PublicKeyCredential', class PublicKeyCredentialMock {});
-    Object.defineProperty(window.navigator, 'credentials', {
-      configurable: true,
-      value: { get: vi.fn() },
-    });
-    (window as unknown as Record<string, unknown>).__oryWebAuthnInitialized = true;
-    (window as unknown as Record<string, unknown>).oryPasskeyLogin = vi.fn();
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(jsonResponse(passkeyFlow)));
-
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceColorScheme="light">
-            <LoginContent />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
-
-    const emailButton = document.querySelector<HTMLButtonElement>('#login-email-code-submit');
-    const passkeyButton = document.querySelector<HTMLButtonElement>('[data-testid="login-passkey"]');
-    expect(emailButton).not.toBeNull();
-    expect(passkeyButton).not.toBeNull();
-    if (!emailButton || !passkeyButton) {
-      throw new Error('expected email and passkey login actions');
-    }
-    expect(emailButton.compareDocumentPosition(passkeyButton) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
-    expect(emailButton.style.height).toBe(passkeyButton.style.height);
   });
 
   it('shows only the email action as loading while disabling passkey and social alternatives', async () => {

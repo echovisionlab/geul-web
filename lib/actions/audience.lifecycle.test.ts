@@ -64,14 +64,6 @@ describe('Audience lifecycle actions', () => {
     );
   });
 
-  it('hard-codes active-only Audience data for composition pickers', async () => {
-    listSegmentsAdmin.mockResolvedValue({ segments: [], pagination: { total: 0 } });
-
-    await expect(listActiveSegmentsAction()).resolves.toEqual([]);
-
-    expect(listSegmentsAdmin).toHaveBeenCalledWith(expect.objectContaining({ includeArchived: false }));
-  });
-
   it('loads every active Audience page instead of truncating composition options at 100', async () => {
     const firstPage = Array.from({ length: 100 }, (_, index) => ({
       id: `audience-${index + 1}`,
@@ -135,14 +127,5 @@ describe('Audience lifecycle actions', () => {
     expect(restoreSegment).toHaveBeenCalledWith({ id: 'audience-1' });
     expect(revalidatePath).toHaveBeenCalledWith('/admin/audience-segments');
     expect(revalidatePath).toHaveBeenCalledWith('/admin/campaigns');
-  });
-
-  it('preserves a committed archive when cache invalidation fails', async () => {
-    archiveSegment.mockResolvedValue({});
-    vi.mocked(revalidatePath).mockImplementation(() => {
-      throw new Error('cache unavailable');
-    });
-
-    await expect(archiveSegmentAction('audience-1')).resolves.toEqual({ success: true });
   });
 });

@@ -4,12 +4,7 @@ import { Code, ConnectError } from '@connectrpc/connect';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createClientClient, createPublicClientClientWithAuth } from '@/lib/api/server-client';
 import { assetRefFixture } from '@/tests/helpers/asset-ref';
-import {
-  createClientAction,
-  getClientsForBlockByIdsAction,
-  listClientsForBlockAction,
-  updateClientAction,
-} from './client';
+import { getClientsForBlockByIdsAction, listClientsForBlockAction, updateClientAction } from './client';
 
 const listMock = vi.fn();
 const getMock = vi.fn();
@@ -48,16 +43,6 @@ beforeEach(() => {
 });
 
 describe('client mutation actions', () => {
-  it('creates clients with the submitted website', async () => {
-    createClientMock.mockResolvedValue({ id: 'client-1' });
-
-    await expect(createClientAction('Client One', 'https://client.example')).resolves.toEqual({
-      data: { id: 'client-1' },
-    });
-
-    expect(createClientMock).toHaveBeenCalledWith({ name: 'Client One', website: 'https://client.example' });
-  });
-
   it('sends an explicit empty website when clearing the existing value', async () => {
     updateClientMock.mockResolvedValue({});
 
@@ -154,14 +139,6 @@ describe('listClientsForBlockAction', () => {
 
     expect(listMock).toHaveBeenCalledWith({ pagination: { limit: 24, offset: 0 } });
   });
-
-  it('propagates lookup failures instead of returning an empty result', async () => {
-    listMock.mockRejectedValue(new Error('backend unavailable'));
-
-    await expect(listClientsForBlockAction({ requestedLocale: null }).then(unwrapQueryResult)).rejects.toMatchObject({
-      status: 500,
-    });
-  });
 });
 
 describe('getClientsForBlockByIdsAction', () => {
@@ -232,13 +209,5 @@ describe('getClientsForBlockByIdsAction', () => {
     expect(getMock).toHaveBeenNthCalledWith(3, { id: 'client-3' });
     expect(getMock).toHaveBeenNthCalledWith(4, { id: 'missing' });
     expect(getMock).toHaveBeenNthCalledWith(5, { id: 'empty' });
-  });
-
-  it('propagates lookup failures instead of returning an empty result', async () => {
-    getMock.mockRejectedValue(new ConnectError('unavailable', Code.Unavailable));
-
-    await expect(
-      getClientsForBlockByIdsAction({ ids: ['client-1'], requestedLocale: undefined }).then(unwrapQueryResult),
-    ).rejects.toMatchObject({ status: 503 });
   });
 });

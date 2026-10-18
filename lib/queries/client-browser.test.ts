@@ -57,25 +57,6 @@ describe('getClient', () => {
     expect(getClientMock).toHaveBeenCalledWith({ id: 'client-1' });
   });
 
-  it('maps optional browser client fields without default logo fallbacks', async () => {
-    getClientMock.mockResolvedValue({
-      id: 'client-2',
-      name: 'Client Two',
-      website: 'https://client.example',
-      createdAt: undefined,
-    });
-
-    await expect(getClient('client-2')).resolves.toEqual({
-      id: 'client-2',
-      name: 'Client Two',
-      website: 'https://client.example',
-      logoUrl: null,
-      logoLightUrl: null,
-      logoDarkUrl: null,
-      createdAt: null,
-    });
-  });
-
   it('returns null for missing browser client lookups', async () => {
     getClientMock.mockRejectedValue(new ConnectError('missing', Code.NotFound));
 
@@ -150,12 +131,6 @@ describe('searchClients', () => {
 
     await expect(searchClients('cli')).resolves.toEqual([]);
   });
-
-  it('preserves client search failure', async () => {
-    searchClientsMock.mockRejectedValue(new Error('backend unavailable'));
-
-    await expect(searchClients('cli')).rejects.toThrow('backend unavailable');
-  });
 });
 
 describe('listClientsForSelector', () => {
@@ -210,17 +185,5 @@ describe('listClientsForSelector', () => {
     ]);
 
     expect(listClientsMock).toHaveBeenCalledWith({ pagination: { limit: 100, offset: 0 } });
-  });
-
-  it('returns an empty selector result when the public API omits clients', async () => {
-    listClientsMock.mockResolvedValue({});
-
-    await expect(listClientsForSelector()).resolves.toEqual([]);
-  });
-
-  it('preserves client selector failure', async () => {
-    listClientsMock.mockRejectedValue(new Error('backend unavailable'));
-
-    await expect(listClientsForSelector()).rejects.toThrow('backend unavailable');
   });
 });

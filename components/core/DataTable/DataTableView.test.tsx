@@ -420,65 +420,6 @@ describe('DataTableView', () => {
     expect(onSelection).toHaveBeenCalledWith(['one']);
   });
 
-  it('rejects unsupported mobile presentation at runtime', () => {
-    expect(() => renderView({ ...baseProps, mobileLayout: 'custom' as 'inline' })).toThrow(
-      'Invalid data table mobile layout',
-    );
-    expect(() =>
-      renderView({
-        ...baseProps,
-        columns: [
-          { key: 'name', header: 'Name', renderCell: (row) => row.name, mobileVisibility: 'custom' as 'hidden' },
-        ],
-      }),
-    ).toThrow('Invalid data table column mobile visibility');
-  });
-  it('bounds fixed tracks by declared minimums while preserving full cell text', () => {
-    const name = 'a-very-long-unbroken-file-name.wav';
-    renderView({
-      ...baseProps,
-      columnSizing: 'fixed',
-      desktopMinWidth: 200,
-      rows: [{ id: 'one', name, count: 1 }],
-      columns: [
-        { key: 'name', header: 'Name', minWidth: 220, renderCell: (row) => row.name },
-        { key: 'count', header: 'Count', width: 130, renderCell: (row) => row.count },
-      ],
-      selection: { selectedRowKeys: [], onSelectedRowKeysChange: () => {}, selectAllRowsLabel: 'Select all' },
-    });
-    expect(document.querySelector('table')?.style.minWidth).toBe('394px');
-    expect(document.querySelector('table')?.getAttribute('data-column-sizing')).toBe('fixed');
-    const cols = [...document.querySelectorAll('col')];
-    expect(cols[0]?.classList.contains(classes.selectionTrack)).toBe(true);
-    expect(cols.map((col) => col.style.width)).toEqual(['', '', '130px']);
-    expect(document.body.textContent).toContain(name);
-  });
-
-  it('rejects unsupported sizing at runtime', () => {
-    expect(() => renderView({ ...baseProps, columnSizing: 'custom' as 'fixed' })).toThrow(
-      'Invalid data table column sizing',
-    );
-  });
-
-  it('renders caller-provided loading and empty content with reserved height', () => {
-    renderView({
-      ...baseProps,
-      loading: true,
-      loadingContent: <span data-testid="loader">Loading records</span>,
-      reservedRowCount: 2,
-    });
-
-    const loadingSurface = document.querySelector('[data-datatable-loading]');
-    expect(loadingSurface?.getAttribute('aria-busy')).toBe('true');
-    expect((loadingSurface as HTMLElement | null)?.style.minHeight).toBe('164px');
-    expect(document.querySelector('[data-testid="loader"]')?.textContent).toBe('Loading records');
-
-    renderView({ ...baseProps, reservedRowCount: 2 });
-
-    expect(document.body.textContent).toContain('No records');
-    expect(document.querySelector<HTMLElement>('[data-datatable-empty]')?.style.minHeight).toBe('164px');
-  });
-
   it('renders mapped cells and emits row, selection, and sort intent', async () => {
     const onRowActivate = vi.fn();
     const onSelectedRowKeysChange = vi.fn();
@@ -618,17 +559,6 @@ describe('DataTableView', () => {
     await act(async () => activationControls[0]!.dispatchEvent(modifiedClick));
     expect(onRowActivate).not.toHaveBeenCalled();
     expect(preventedByRowAction).toBe(false);
-  });
-
-  it('allows dense consumers to lower the desktop table minimum width', () => {
-    renderView({
-      ...baseProps,
-      rows: [{ id: 'row-1', name: 'Alpha', count: 2 }],
-      columns: [{ key: 'name', header: 'Name', renderCell: (row) => row.name }],
-      desktopMinWidth: 560,
-    });
-
-    expect(document.querySelector<HTMLElement>('[data-datatable-scroll] table')?.style.minWidth).toBe('560px');
   });
 
   it('keeps file-browser row interactions opt-in', () => {

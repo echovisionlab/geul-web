@@ -112,7 +112,7 @@ vi.mock('@monaco-editor/react', async () => {
 });
 
 import { MonacoSourceEditor, type MonacoSourceEditorProps } from './MonacoSourceEditor';
-import { getThemeTokens, themeIds, type ThemeId } from '@/lib/theme/themes';
+import { type ThemeId } from '@/lib/theme/themes';
 
 async function mountEditor(props: MonacoSourceEditorProps, themeId: ThemeId = 'light') {
   const host = document.createElement('div');
@@ -246,60 +246,6 @@ describe('MonacoSourceEditor', () => {
     expect(fakes.currentProps).toMatchObject({ options: { cursorSmoothCaretAnimation: 'on', smoothScrolling: true } });
     await mounted.unmount();
     expect(media.removeEventListener).toHaveBeenCalledWith('change', listener);
-  });
-
-  it.each(['ocean-light', 'ocean-dark'] as const)(
-    'mounts the actual %s editor preset and registers every available theme',
-    async (themeId) => {
-      const mounted = await mountEditor(
-        { value: 'const count = 1;', language: 'javascript', ariaLabel: 'Source', modelPath: 'preset.js' },
-        themeId,
-      );
-      expect(fakes.currentProps?.theme).toBe(`geul-source-${themeId}`);
-      for (const id of themeIds) {
-        expect(fakes.defineTheme).toHaveBeenCalledWith(
-          `geul-source-${id}`,
-          expect.objectContaining({
-            colors: expect.objectContaining({ 'editor.background': getThemeTokens(id).background }),
-          }),
-        );
-      }
-      await mounted.unmount();
-    },
-  );
-
-  it('emits range-based content changes and configures a stable in-memory model', async () => {
-    const onChange = vi.fn();
-    const mounted = await mountEditor({
-      value: 'const value = 1;',
-      onChange,
-      language: 'typescript',
-      ariaLabel: 'TypeScript source',
-      modelPath: 'code/example',
-    });
-    await changeInput(mounted.input, 'const answer = 1;');
-
-    expect(onChange).toHaveBeenCalledWith(
-      'const answer = 1;',
-      expect.objectContaining({
-        changes: [{ rangeOffset: 6, rangeLength: 5, text: 'answer' }],
-        versionId: 2,
-      }),
-    );
-    expect(fakes.currentProps).toMatchObject({
-      language: 'typescript',
-      path: 'inmemory://model/tiptap/code/example.ts',
-      keepCurrentModel: false,
-      saveViewState: false,
-      options: {
-        wordWrap: 'on',
-        wrappingIndent: 'indent',
-        accessibilitySupport: 'auto',
-        tabFocusMode: true,
-      },
-    });
-    expect(mounted.input.closest('[data-source-editor="monaco"]')).not.toBeNull();
-    await mounted.unmount();
   });
 
   it('normalizes legacy file model paths into the in-memory Monaco namespace', async () => {

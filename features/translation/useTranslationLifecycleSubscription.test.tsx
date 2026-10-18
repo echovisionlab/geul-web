@@ -126,20 +126,6 @@ afterEach(() => {
 });
 
 describe('useTranslationLifecycleSubscription', () => {
-  it('does not open a standalone lifecycle transport without a collab provider', () => {
-    globalThis.EventSource = FakeEventSource as unknown as typeof EventSource;
-
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    root = createRoot(container);
-
-    act(() => {
-      root?.render(<TestHarness onEvent={() => undefined} />);
-    });
-
-    expect(FakeEventSource.instances).toHaveLength(0);
-  });
-
   it('uses provider stateless events when a collab provider is available', async () => {
     const events: TranslationLifecycleRefetchHint[] = [];
     const provider = new FakeProvider();

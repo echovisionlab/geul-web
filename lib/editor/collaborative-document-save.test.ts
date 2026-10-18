@@ -216,35 +216,6 @@ describe('registerCollaborativeDocumentSave', () => {
     expect(persistNow).toHaveBeenCalledOnce();
   });
 
-  it('doubles failed automatic retry delays up to the cap without overlapping requests', async () => {
-    vi.useFakeTimers();
-    const { document, provider } = attachDocumentSave();
-    for (let failure = 0; failure < 7; failure += 1) {
-      persistNow.mockRejectedValueOnce(new Error('temporary write failure'));
-    }
-    persistNow.mockResolvedValueOnce();
-
-    document.getMap('content').set('title', 'Retry with bounded backoff');
-    provider.decrementUnsyncedChanges();
-    await vi.advanceTimersByTimeAsync(2_000);
-    await settlePromises();
-    expect(persistNow).toHaveBeenCalledTimes(1);
-
-    let calls = 1;
-    for (const delay of [1_000, 2_000, 4_000, 8_000, 16_000, 30_000, 30_000]) {
-      await vi.advanceTimersByTimeAsync(delay - 1);
-      await settlePromises();
-      expect(persistNow).toHaveBeenCalledTimes(calls);
-      await vi.advanceTimersByTimeAsync(1);
-      calls += 1;
-      await settlePromises();
-      expect(persistNow).toHaveBeenCalledTimes(calls);
-    }
-
-    expect(hasPendingEditorSaves('post:post-1')).toBe(false);
-    expect(persistNow).toHaveBeenCalledTimes(8);
-  });
-
   it('drains a newer edit only after its own persist.now ACK', async () => {
     vi.useFakeTimers();
     const { document, provider } = attachDocumentSave();

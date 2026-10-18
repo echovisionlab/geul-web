@@ -68,25 +68,6 @@ afterEach(() => {
   root = null;
 });
 
-function renderEditor() {
-  act(() => {
-    root?.render(
-      <DesignSystemProvider>
-        <MapLibreMapEditor
-          config={DEFAULT_MAP_CONFIG}
-          onConfigChange={vi.fn()}
-          places={[]}
-          settingsPanel={{ collapsed: false }}
-        />
-      </DesignSystemProvider>,
-    );
-  });
-
-  const target = container?.querySelector<HTMLElement>('button[aria-label*="Zoom"]');
-  expect(target).toBeTruthy();
-  return target as HTMLElement;
-}
-
 describe('MapLibreMapEditor interactions', () => {
   it.each([
     {
@@ -176,13 +157,5 @@ describe('MapLibreMapEditor interactions', () => {
     });
 
     expect(mocks.mapProps).toEqual(expect.objectContaining(expected));
-  });
-});
-
-describe('MapLibreMapEditor parameter copy localization', () => {
-  it.each(['en', 'ko'])('projects localized copy actions in %s', (locale) => {
-    mocks.locale = locale;
-    const target = renderEditor();
-    expect(target.getAttribute('aria-label')).toBe(locale === 'ko' ? 'Zoom 값 복사' : 'Click to copy Zoom value');
   });
 });

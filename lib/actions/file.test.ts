@@ -176,16 +176,6 @@ describe('File Manager site-wide search', () => {
     expect(listFileManagerItemsMock).toHaveBeenCalledWith(expect.objectContaining({ query: 'CoVeR', pageSize: 100 }));
     expect(listFileManagerItemsMock.mock.calls[0]?.[0]).not.toHaveProperty('folderId');
   });
-
-  it('passes a folder scope without changing the bounded search contract', async () => {
-    listFileManagerItemsMock.mockResolvedValueOnce({ items: [], total: BigInt(0) });
-
-    await searchFileManagerItemsAction({ query: 'recording', folderId: 'recordings' });
-
-    expect(listFileManagerItemsMock).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'recording', folderId: 'recordings', pageSize: 50 }),
-    );
-  });
 });
 
 describe('File Manager detail projection', () => {
@@ -296,30 +286,6 @@ describe('initiateUploadAction upload identity', () => {
     );
     expect(initiateMultipartUploadMock.mock.calls[0]?.[0]).not.toHaveProperty('blockId');
   });
-
-  it('keeps slot identity for a structured editor asset', async () => {
-    initiateMultipartUploadMock.mockResolvedValue({
-      uploadId: 'upload-1',
-      fileId: 'file-1',
-      uploadedParts: [],
-    });
-
-    await initiateUploadAction({
-      uploadType: UploadType.EDITOR_IMAGE,
-      entityId: 'page-1',
-      entityType: TranscodeEntityType.PAGE,
-      fileSize: 1024,
-      mimeType: 'image/webp',
-      fileName: 'structured.webp',
-      slotId: 'structured-slot-1',
-    });
-
-    expect(initiateMultipartUploadMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        slotId: 'structured-slot-1',
-      }),
-    );
-  });
 });
 
 describe('upload delivery selection', () => {
@@ -382,21 +348,6 @@ describe('upload delivery selection', () => {
 });
 
 describe('multipart completion recovery error classification', () => {
-  it('forwards the exact upload and file capability pair during candidate lookup', async () => {
-    findMultipartUploadCandidateMock.mockResolvedValue({});
-
-    await findMultipartUploadCandidateAction({
-      uploadType: UploadType.GENERAL_FILE,
-      entityId: '',
-      fileId: 'file-1',
-      uploadId: 'upload-1',
-    });
-
-    expect(findMultipartUploadCandidateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ fileId: 'file-1', uploadId: 'upload-1' }),
-    );
-  });
-
   it.each([
     [Code.InvalidArgument, 'Upload failed'],
     [Code.NotFound, 'Upload failed'],
@@ -512,27 +463,6 @@ describe('downloadFromUrlAction upload identity', () => {
     expect(downloadFromUrlMock.mock.calls[0]?.[0]).not.toHaveProperty('blockId');
   });
 
-  it('keeps structured slot identity for remote ingest', async () => {
-    downloadFromUrlMock.mockResolvedValue({
-      fileId: 'file-imported',
-      delivery: mediaDeliveryFixture({ fileId: 'file-imported', mimeType: 'image/webp' }),
-    });
-
-    await downloadFromUrlAction({
-      uploadType: UploadType.EDITOR_IMAGE,
-      entityId: 'page-1',
-      entityType: TranscodeEntityType.PAGE,
-      url: 'https://source.example.com/structured.webp',
-      slotId: 'structured-slot-1',
-    });
-
-    expect(downloadFromUrlMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        slotId: 'structured-slot-1',
-      }),
-    );
-  });
-
   it('uses the exact File and upload identities for multipart resume lookup', async () => {
     findMultipartUploadCandidateMock.mockResolvedValue({});
 
@@ -587,36 +517,6 @@ describe('getFileStatusAction', () => {
       durationSeconds: 180,
       processingStatus: MediaProcessingStatus.FAILED,
       processingPercentage: undefined,
-    });
-  });
-
-  it('keeps non-terminal media in processing when derivatives are still pending', async () => {
-    getMediaDeliveryMock.mockResolvedValue({
-      delivery: mediaDeliveryFixture({
-        fileId: 'file-video',
-        mimeType: 'video/mp4',
-        inlineUrl: 'https://cdn.example.com/original.mp4',
-        downloadUrl: 'https://cdn.example.com/original.mp4',
-        processingStatus: MediaProcessingStatus.PROCESSING,
-        processingPercentage: 0,
-        durationSeconds: 0,
-      }),
-    });
-
-    await expect(getFileStatusAction('file-video')).resolves.toEqual({
-      mimeType: 'video/mp4',
-      completed: false,
-      failed: false,
-      unavailable: false,
-      url: 'https://cdn.example.com/original.mp4',
-      originalUrl: 'https://cdn.example.com/original.mp4',
-      waveformUrl: '',
-      spectrogramUrl: '',
-      thumbnailUrl: '',
-      hlsUrl: '',
-      durationSeconds: 0,
-      processingStatus: MediaProcessingStatus.PROCESSING,
-      processingPercentage: 0,
     });
   });
 
@@ -689,13 +589,6 @@ describe('getFileStatusAction', () => {
 });
 
 describe('deleteFileAction', () => {
-  it('returns success when the backend deletes the file', async () => {
-    deleteFileMock.mockResolvedValue({ success: true });
-
-    await expect(deleteFileAction('file-1')).resolves.toEqual({ success: true });
-    expect(deleteFileMock).toHaveBeenCalledWith({ fileId: 'file-1' });
-  });
-
   it('treats already missing files as deleted', async () => {
     deleteFileMock.mockRejectedValue(new ConnectError('not found', Code.NotFound));
 

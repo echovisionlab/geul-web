@@ -4,7 +4,7 @@ import { act, useState, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { I18nProvider } from 'react-aria-components';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { Popover, type PopoverSize } from './Popover';
+import { Popover } from './Popover';
 
 let container: HTMLDivElement;
 let root: Root;
@@ -52,11 +52,6 @@ describe('Popover', () => {
     renderRole('alertdialog');
     expect(container.querySelector('[role="alertdialog"]')?.getAttribute('aria-label')).toBe('Notice');
     expect(() => renderRole('menu' as 'dialog')).toThrow('Invalid popover role');
-  });
-
-  it('exposes the required compound API', () => {
-    expect(Popover.Target).toBeDefined();
-    expect(Popover.Dropdown).toBeDefined();
   });
 
   it('opens and closes through the uncontrolled target interaction', () => {
@@ -140,24 +135,6 @@ describe('Popover', () => {
     expect(onOpenChange).toHaveBeenCalledWith(false);
     expect(onClose).toHaveBeenCalledOnce();
     expect(container.querySelector('[role="dialog"]')).toBeNull();
-  });
-
-  it.each(['compact', 'standard', 'wide'] satisfies PopoverSize[])('maps the %s size to a stable width', (size) => {
-    renderPopover(
-      <Popover defaultOpen size={size} placement="bottom-end" portal={false}>
-        <Popover.Target>
-          <button type="button">Open sized popover</button>
-        </Popover.Target>
-        <Popover.Dropdown padding="none" data-popover-surface={size}>
-          Sized content
-        </Popover.Dropdown>
-      </Popover>,
-    );
-
-    const dropdown = container.querySelector<HTMLElement>(`[data-popover-surface="${size}"]`);
-    expect(dropdown?.getAttribute('data-size')).toBe(size);
-    expect(dropdown?.querySelector('[role="dialog"]')?.getAttribute('data-padding')).toBe('none');
-    expect(dropdown?.dataset.position).toBe('bottom-end');
   });
 
   it('portals dropdown content by default', () => {

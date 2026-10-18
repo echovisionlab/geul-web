@@ -1,14 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { pageSectionKinds, richTextBlockKinds } from '@echovisionlab/geul-proto/content/block_catalog.ts';
-import { RichTextProfile } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import {
   assertPageContainerPlacement,
   assertRichTextProfileAllows,
-  contentBlockProfileForRichTextProfile,
   pageSectionRegistry,
   pageFieldOwnership,
   pageSectionDefaults,
-  profileSupportsParagraphExternalVideo,
   requireHeadingLevel,
   requirePageSectionKind,
   requireRichTextBlockKind,
@@ -57,15 +54,6 @@ describe('generated Block adapter registry', () => {
     expect(pageSectionDefaults('embed').get('allowScripts')).toBe(true);
     expect(pageSectionDefaults('embed').get('allowSameOrigin')).toBe(true);
     expect(pageSectionDefaults('embed').get('allowMicrophone')).toBe(false);
-  });
-
-  it('reads paragraph external-video availability from generated profile data', () => {
-    expect(contentBlockProfileForRichTextProfile(RichTextProfile.POST)).toBe('post');
-    expect(contentBlockProfileForRichTextProfile(RichTextProfile.PAGE)).toBe('page');
-    expect(profileSupportsParagraphExternalVideo('post')).toBe(true);
-    expect(profileSupportsParagraphExternalVideo('page')).toBe(true);
-    expect(profileSupportsParagraphExternalVideo('work')).toBe(false);
-    expect(profileSupportsParagraphExternalVideo('program_event')).toBe(false);
   });
 
   it('maps Page columns as the only nested section container', () => {

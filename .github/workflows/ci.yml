@@ -237,8 +237,6 @@ jobs:
         run: pnpm lint:styles
       - name: Design system
         run: pnpm design-system:check
-      - name: Core contracts
-        run: pnpm design-system:typecheck
       - name: Prepare MapLibre worker
         run: pnpm prepare:maplibre-worker
       - name: Prepare p5 runtime

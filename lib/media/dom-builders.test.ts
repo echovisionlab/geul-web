@@ -65,14 +65,4 @@ describe('media DOM builders', () => {
     expect(dom.getAttribute('data-media-name')).toBe('Field recording film');
     expect(dom.querySelector('.media-block__caption')?.textContent).toBe('Shot at sunrise');
   });
-
-  it('keeps blank canonical names distinct from rendered fallback titles', () => {
-    const audio = buildAudioMediaDom(resolveAudioViewModel({}));
-    const video = buildVideoMediaDom(resolveVideoViewModel({}));
-
-    expect(audio.getAttribute('data-media-name')).toBe('');
-    expect(audio.querySelector('.audio-block__title')?.textContent).toBe('Untitled audio');
-    expect(video.getAttribute('data-media-name')).toBe('');
-    expect(video.querySelector('.video-block__title')?.textContent).toBe('Untitled video');
-  });
 });

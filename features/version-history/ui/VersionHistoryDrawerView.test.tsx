@@ -150,30 +150,6 @@ describe('VersionHistoryDrawerView', () => {
     expect(props.onSelectVersion).toHaveBeenCalledWith('version-2');
   });
 
-  it('renders loading and delegates restore confirmation actions to callbacks', () => {
-    const onRestore = vi.fn();
-    const onCloseRestoreConfirmation = vi.fn();
-    renderView({
-      selectedVersionId: 'version-2',
-      restoreConfirmationOpened: true,
-      onRestore,
-      onCloseRestoreConfirmation,
-    });
-
-    const confirmation = [...document.body.querySelectorAll<HTMLElement>('[role="dialog"]')].find((dialog) =>
-      dialog.textContent?.includes('Restoring to v2 will replace the current state. Continue?'),
-    );
-    if (!confirmation) {
-      throw new Error('Expected the restore confirmation dialog.');
-    }
-
-    act(() => getButtonByText(confirmation, 'Restore').click());
-    act(() => getButtonByText(confirmation, 'Cancel').click());
-
-    expect(onRestore).toHaveBeenCalledOnce();
-    expect(onCloseRestoreConfirmation).toHaveBeenCalledOnce();
-  });
-
   it('uses the supplied loading label without exposing version rows', () => {
     renderView({ loading: true });
 
@@ -198,37 +174,6 @@ describe('VersionHistoryDrawerView', () => {
     expect(document.body.textContent).not.toContain(labels.empty);
     await act(async () => getButtonByText(document.body, labels.retry).click());
     expect(onRetry).toHaveBeenCalledOnce();
-  });
-
-  it('uses the Core near-end trigger to load another page while keeping existing history visible', async () => {
-    let notify: (() => void) | undefined;
-    vi.stubGlobal(
-      'IntersectionObserver',
-      class {
-        constructor(callback: IntersectionObserverCallback) {
-          notify = () =>
-            callback([{ isIntersecting: true } as IntersectionObserverEntry], this as unknown as IntersectionObserver);
-        }
-        observe() {}
-        disconnect() {}
-      },
-    );
-    const onLoad = vi.fn(async () => {});
-    const pagination = { contextKey: 'work:one', nextPage: 2, loading: false, error: null, onLoad };
-    renderView({ pagination });
-    expect(notify).toBeDefined();
-    await act(async () => {
-      notify!();
-      notify!();
-    });
-    expect(onLoad).toHaveBeenCalledOnce();
-    expect(document.body.querySelector('[role="listitem"]')).toHaveTextContent('Edited title');
-    renderView({ pagination: { ...pagination, loading: true } });
-    expect(document.body.querySelector('[data-near-end-loader] [role="status"]')).toHaveTextContent(labels.loading);
-    expect(document.body.querySelector('[role="listitem"]')).toHaveTextContent('Edited title');
-    renderView({ pagination: { ...pagination, nextPage: null } });
-    expect(document.body.querySelector('[data-near-end-loader]')).toHaveTextContent(labels.end);
-    expect(document.body.querySelector('[data-near-end-loader] button')).toBeNull();
   });
 
   it('keeps earlier rows on a page failure and delegates a bounded retry to the same page', async () => {

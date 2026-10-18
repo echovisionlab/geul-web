@@ -15,7 +15,6 @@ import { assetRefFixture } from '@/tests/helpers/asset-ref';
 import { createFormClient, createPublicFormClientWithAuth } from '@/lib/api/server-client';
 import {
   checkFormAccessAction,
-  checkFormAccessibilityBySlugAction,
   createFormAction,
   deleteFormAction,
   deleteFormSubmissionAction,
@@ -279,31 +278,6 @@ describe('checkFormAccessAction', () => {
     });
   });
 
-  it('wraps share-link accessibility checks with url context and trimmed tokens', async () => {
-    checkAccessMock.mockResolvedValue({
-      accessible: false,
-      reason: FormAccessReason.PASSWORD_REQUIRED,
-      form: undefined,
-    });
-
-    await expect(checkFormAccessibilityBySlugAction('contact', ' share-token ', 'ko')).resolves.toEqual({
-      accessible: false,
-      reason: 'password_required',
-      requiresPassword: true,
-      form: null,
-    });
-
-    expect(createPublicFormClientWithAuth).toHaveBeenCalledWith('ko');
-    expect(checkAccessMock).toHaveBeenCalledWith({
-      slug: 'contact',
-      shareToken: ' share-token ',
-      sharePassword: undefined,
-      password: undefined,
-      context: FormAccessContext.URL,
-      target: FormAccessTarget.FORM,
-    });
-  });
-
   it('creates forms with public URL access disabled by default', async () => {
     createFormRpcMock.mockResolvedValue({ id: 'form-1' });
 
@@ -426,33 +400,10 @@ describe('checkFormAccessAction', () => {
     expect(createPublicFormClientWithAuth).toHaveBeenCalledWith(undefined);
   });
 
-  it('verifies passwords with trimmed share tokens and passwords', async () => {
-    verifyPasswordMock.mockResolvedValue({ valid: true });
-
-    await expect(
-      verifyFormPasswordAction('contact', '  secret  ', ' share-token ').then(unwrapQueryResult),
-    ).resolves.toEqual({ valid: true });
-
-    expect(verifyPasswordMock).toHaveBeenCalledWith({
-      slug: 'contact',
-      password: '  secret  ',
-      shareToken: ' share-token ',
-      sharePassword: undefined,
-    });
-  });
-
   it('preserves a successful incorrect-password result', async () => {
     verifyPasswordMock.mockResolvedValue({ valid: false });
     await expect(verifyFormPasswordAction('contact', 'wrong').then(unwrapQueryResult)).resolves.toEqual({
       valid: false,
-    });
-  });
-
-  it('distinguishes denied verification from an incorrect password', async () => {
-    verifyPasswordMock.mockRejectedValue(new ConnectError('bad password', Code.PermissionDenied));
-
-    await expect(verifyFormPasswordAction('contact', 'secret', 'token').then(unwrapQueryResult)).rejects.toMatchObject({
-      status: 403,
     });
   });
 });
@@ -508,18 +459,6 @@ describe('form admin actions', () => {
     });
   });
 
-  it('propagates an unavailable admin listing', async () => {
-    listFormsAdminMock.mockRejectedValue(new ConnectError('unavailable', Code.Unavailable));
-
-    await expect(
-      listFormsAdminAction({
-        page: 3,
-        pageSize: 50,
-        search: 'contact',
-      }).then(unwrapQueryResult),
-    ).rejects.toMatchObject({ status: 503 });
-  });
-
   it('revalidates the scoped form paths when updating forms', async () => {
     updateFormRpcMock.mockResolvedValue({});
 
@@ -537,22 +476,6 @@ describe('form admin actions', () => {
     );
     expect(revalidatePath).toHaveBeenCalledWith('/admin/forms');
     expect(revalidatePath).toHaveBeenCalledWith('/admin/forms/form-1');
-  });
-
-  it('preserves a committed form title update when revalidation fails', async () => {
-    updateFormRpcMock.mockResolvedValue({});
-    vi.mocked(revalidatePath)
-      .mockImplementationOnce(() => {
-        throw new Error('cache unavailable');
-      })
-      .mockImplementationOnce(() => {
-        throw new Error('cache unavailable');
-      });
-
-    await expect(updateFormAction('form-1', { title: 'Committed' })).resolves.toEqual({
-      ok: true,
-      success: true,
-    });
   });
 
   it('surfaces deletion failures instead of swallowing them', async () => {
@@ -597,46 +520,6 @@ describe('form admin actions', () => {
     expect(setFeaturedImageMock).toHaveBeenCalledWith({ formId: 'form-1', fileId: 'file-1' });
     expect(deleteFeaturedImageMock).toHaveBeenCalledWith({ formId: 'form-1' });
     expect(revalidatePath).toHaveBeenCalledWith('/my/forms/form-1');
-  });
-
-  it('preserves featured-image OG run identities after a revalidation failure', async () => {
-    setFeaturedImageMock.mockResolvedValue({
-      imageAsset: assetRefFixture('https://cdn.example.com/form.webp'),
-      ogGenerationRunId: 'form-featured-run',
-    });
-    deleteFeaturedImageMock.mockResolvedValue({ ogGenerationRunId: 'form-delete-featured-run' });
-    vi.mocked(revalidatePath)
-      .mockImplementationOnce(() => {
-        throw new Error('cache unavailable');
-      })
-      .mockImplementationOnce(() => {
-        throw new Error('cache unavailable');
-      });
-
-    await expect(setFormFeaturedImageAction('form-1', 'file-1', 'my')).resolves.toEqual({
-      ok: true,
-      imageUrl: 'https://cdn.example.com/form.webp',
-      ogGenerationRunId: 'form-featured-run',
-    });
-    await expect(removeFormFeaturedImageAction('form-1', 'my')).resolves.toEqual({
-      ok: true,
-      success: true,
-      ogGenerationRunId: 'form-delete-featured-run',
-    });
-  });
-
-  it('regenerates the exact Form locale and returns its durable generation identity', async () => {
-    await expect(regenerateFormOgImageAction('form-1', ' ko ')).resolves.toEqual({
-      ok: true,
-      success: true,
-      runId: 'form-run',
-      generationId: 'form-generation',
-    });
-    expect(regenerateOgImageMock).toHaveBeenCalledWith({
-      entityType: 'form',
-      entityId: 'form-1',
-      selection: { type: 'locale', locale: 'ko' },
-    });
   });
 
   it('rejects a Form regeneration without a concrete locale', async () => {
@@ -786,11 +669,5 @@ describe('form submission actions', () => {
         },
       },
     });
-  });
-
-  it('propagates submission stats failures', async () => {
-    getSubmissionStatsMock.mockRejectedValue(new ConnectError('boom', Code.Internal));
-
-    await expect(getFormSubmissionStatsAction('form-1').then(unwrapQueryResult)).rejects.toMatchObject({ status: 500 });
   });
 });

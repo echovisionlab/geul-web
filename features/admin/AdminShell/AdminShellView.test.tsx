@@ -161,15 +161,6 @@ describe('AdminShellView', () => {
     expect(sectionContent?.hidden).toBe(true);
   });
 
-  it('exposes pending theme state without guessing the rendered color scheme', () => {
-    renderView({ colorScheme: null });
-
-    expect(container.querySelector('[data-admin-shell]')?.getAttribute('data-theme-mode')).toBe('pending');
-    expect(container.querySelector('button[aria-label="Toggle color scheme"]')?.getAttribute('data-tone')).toBe(
-      'neutral',
-    );
-  });
-
   it('omits the edge toggle when the responsive controller marks it unavailable', () => {
     renderView({ navigationMode: 'compact', navigationToggleVisible: false });
 

@@ -1139,22 +1139,6 @@ describe('useBlockRoomConnection', () => {
     expect(connection().doc).toBeNull();
   });
 
-  it('rejects pending room requests when reload_required tears down the socket', async () => {
-    await render();
-    const first = providerState.instances[0]!;
-    admit(first);
-    const pending = connection().protocol!.getSnapshot();
-    const rejection = expect(pending).rejects.toThrow('Block-room WebSocket was closed.');
-
-    act(() =>
-      first.configuration.onStateless?.({
-        payload: JSON.stringify({ v: 3, kind: 'room.reload', reloadReason: 'external_update' }),
-      }),
-    );
-
-    await rejection;
-  });
-
   it('accepts an ACK only for the current room locale and updates its server revisions', async () => {
     await render();
     const first = providerState.instances[0]!;

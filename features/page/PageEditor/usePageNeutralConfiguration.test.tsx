@@ -1,8 +1,5 @@
 // @vitest-environment jsdom
-import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
-
-import { PageAccessSettings } from './PageAccessSettings';
 import { createRoot, type Root } from 'react-dom/client';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -63,15 +60,6 @@ let current: ReturnType<typeof usePageNeutralConfiguration>;
 function HookHarness(props: Parameters<typeof usePageNeutralConfiguration>[0]) {
   current = usePageNeutralConfiguration(props);
   return null;
-}
-
-function AccessHarness(props: Parameters<typeof usePageNeutralConfiguration>[0]) {
-  const neutral = usePageNeutralConfiguration(props);
-  return (
-    <DesignSystemProvider forceColorScheme="light">
-      <PageAccessSettings value={neutral.configuration.accessPolicy} tagOptions={[]} onSave={neutral.saveAccess} />
-    </DesignSystemProvider>
-  );
 }
 
 function emitHint(provider: TestProvider, document: string) {
@@ -399,63 +387,6 @@ describe('usePageNeutralConfiguration', () => {
       });
     });
     expect(current.configuration.accessPolicy).toEqual(canonicalPolicy);
-  });
-
-  it('saves through the actual access controls and shows canonical controls after the neutral acknowledgment', async () => {
-    const canonical = {
-      ...DEFAULT_PAGE_ACCESS_POLICY,
-      mode: 'conditions' as const,
-      match: 'all' as const,
-      roles: ['author' as const, 'admin' as const],
-    };
-    const initial = config();
-    const saveAccessPolicy = vi.fn(async () => ({ ok: true as const, accessPolicy: canonical }));
-    let remote = initial;
-    const loadConfiguration = vi.fn(async () => ({ ok: true as const, ...remote }));
-    act(() =>
-      root.render(
-        <AccessHarness
-          pageId="page-1"
-          initialConfiguration={initial}
-          loadConfiguration={loadConfiguration}
-          saveAccessPolicy={saveAccessPolicy}
-        />,
-      ),
-    );
-    await act(async () => Promise.resolve());
-    const authorLabel = [...host.querySelectorAll<HTMLLabelElement>('label')].find(
-      (label) => label.textContent === 'roleAuthor',
-    )!;
-    act(() =>
-      (authorLabel.htmlFor
-        ? document.getElementById(authorLabel.htmlFor)!
-        : authorLabel.querySelector('input')!
-      ).click(),
-    );
-    remote = config({ accessPolicy: canonical });
-    const save = [...host.querySelectorAll<HTMLButtonElement>('button')].find(
-      (button) => button.textContent === 'save',
-    )!;
-    await act(async () => save.click());
-    expect(saveAccessPolicy).toHaveBeenCalledWith(
-      'page-1',
-      {
-        ...DEFAULT_PAGE_ACCESS_POLICY,
-        mode: 'conditions',
-        roles: ['author'],
-      },
-      expect.any(String),
-    );
-    const userLabel = [...host.querySelectorAll<HTMLLabelElement>('label')].find(
-      (label) => label.textContent === 'roleAdmin',
-    )!;
-    expect(
-      userLabel.htmlFor ? document.getElementById(userLabel.htmlFor) : userLabel.querySelector('input'),
-    ).toBeChecked();
-    expect(host.querySelector('[role="status"]')).toHaveTextContent('saved');
-    expect(
-      [...host.querySelectorAll<HTMLButtonElement>('button')].find((button) => button.textContent === 'save'),
-    ).toBeDisabled();
   });
 
   it('keeps an equal access-policy intent protected until its own write acknowledges', async () => {

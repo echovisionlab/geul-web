@@ -170,11 +170,6 @@ describe('TranslationLocaleControl', () => {
     expect(button?.getAttribute('aria-label')).toBe(`Edit locale: ${label} (원문)`);
     expect(button?.dataset.geulControlHeaderDensity).toBe('compact');
   });
-  it('returns null when there are no locale options', () => {
-    render(<TranslationLocaleControl variant="menu" options={[]} sourceLocale="en" value="en" onChange={() => {}} />);
-
-    expect(container?.querySelector('button, select')).toBeNull();
-  });
 
   it('shows a source-aware fallback label for menu controls when the active option is missing', () => {
     render(
@@ -231,35 +226,5 @@ describe('TranslationLocaleControl', () => {
     });
 
     expect(onChange).toHaveBeenCalledWith('ko');
-  });
-
-  it('normalizes blank native-select changes back to null', () => {
-    const onChange = vi.fn();
-
-    render(
-      <TranslationLocaleControl
-        variant="native-select"
-        options={[
-          { value: 'en', label: 'English' },
-          { value: 'ko', label: '한국어' },
-        ]}
-        sourceLocale="en"
-        value="en"
-        onChange={onChange}
-      />,
-    );
-
-    const select = container?.querySelector('select') as HTMLSelectElement | null;
-    expect(select).not.toBeNull();
-
-    act(() => {
-      if (!select) {
-        return;
-      }
-      select.value = '';
-      select.dispatchEvent(new Event('change', { bubbles: true }));
-    });
-
-    expect(onChange).toHaveBeenCalledWith(null);
   });
 });

@@ -6,13 +6,7 @@ import {
   createPublicMapPlaceClient,
   createPublicMapPlaceClientWithAuth,
 } from '@/lib/api/server-client';
-import {
-  getMapPlaceAction,
-  getMapPlacesByIdsAction,
-  getPublicMapPlacesByIdsAction,
-  listMapPlacesAdminAction,
-  updateMapPlaceAction,
-} from './map-place';
+import { listMapPlacesAdminAction, updateMapPlaceAction } from './map-place';
 
 const listMapPlacesAdminMock = vi.fn();
 const getMapPlaceMock = vi.fn();
@@ -85,36 +79,6 @@ describe('map place actions', () => {
     });
   });
 
-  it('maps Google place IDs from the admin detail response', async () => {
-    getMapPlaceMock.mockResolvedValue(mapPlaceResponse());
-
-    await expect(getMapPlaceAction('place-1')).resolves.toMatchObject({
-      id: 'place-1',
-      googlePlaceId: 'google-place-1',
-    });
-  });
-
-  it('forwards Google place IDs and explicit clears on update', async () => {
-    updateMapPlaceMock.mockResolvedValue({});
-
-    await expect(updateMapPlaceAction('place-1', { google_place_id: 'google-place-1' })).resolves.toEqual({
-      success: true,
-    });
-    await expect(updateMapPlaceAction('place-1', { google_place_id: null })).resolves.toEqual({
-      success: true,
-    });
-
-    expect(updateMapPlaceMock).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({ id: 'place-1', googlePlaceId: 'google-place-1' }),
-    );
-    expect(updateMapPlaceMock).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({ id: 'place-1', googlePlaceId: '' }),
-    );
-    expect(revalidatePath).toHaveBeenCalledWith('/admin/map/places');
-  });
-
   it('preserves sparse updates, zero coordinates, explicit clears, and image-clear presence', async () => {
     updateMapPlaceMock.mockResolvedValue({});
 
@@ -150,22 +114,5 @@ describe('map place actions', () => {
     const request = updateMapPlaceMock.mock.calls[0][0];
     expect(request.name).toBe('Updated name');
     expect(request.addressComponents).toBeUndefined();
-  });
-
-  it('maps Google place IDs for selected admin map places', async () => {
-    getMapPlacesByIdsMock.mockResolvedValue({ places: [mapPlaceResponse()] });
-
-    await expect(getMapPlacesByIdsAction(['place-1']).then(unwrapQueryResult)).resolves.toEqual([
-      expect.objectContaining({ id: 'place-1', googlePlaceId: 'google-place-1' }),
-    ]);
-  });
-
-  it('maps Google place IDs for public selected map places', async () => {
-    publicGetByIdsMock.mockResolvedValue({ places: [mapPlaceResponse()] });
-
-    await expect(getPublicMapPlacesByIdsAction(['place-1'], 'ko').then(unwrapQueryResult)).resolves.toEqual([
-      expect.objectContaining({ id: 'place-1', googlePlaceId: 'google-place-1' }),
-    ]);
-    expect(createPublicMapPlaceClientWithAuth).toHaveBeenCalledWith('ko');
   });
 });

@@ -255,61 +255,6 @@ describe('admin Member and profile actions', () => {
     );
   });
 
-  it('routes profile/avatar mutations to Member and auth lifecycle mutations to Account', async () => {
-    await expect(
-      actions.updateUserAction('member-1', {
-        nickname: 'Updated',
-        bio: null,
-        website: 'https://updated.example',
-        social_links: null,
-        role: 'admin',
-        tag_ids: ['tag-1'],
-      }),
-    ).resolves.toEqual({ success: true });
-    await expect(actions.banUserAction('member-1', 'spam', 60)).resolves.toEqual({ success: true });
-    await expect(actions.unbanUserAction('member-1')).resolves.toEqual({ success: true });
-    await expect(actions.setUserCanonicalEmailAction('member-1', 'main@example.com')).resolves.toEqual({
-      success: true,
-    });
-    await expect(actions.removeUserSsoProviderAction('member-1', 'github', 'gh-1')).resolves.toEqual({
-      success: true,
-    });
-    await expect(actions.deleteUserAction('member-1')).resolves.toEqual({ success: true });
-    await expect(actions.updateProfileAction({ nickname: 'Me', social_links: { x: 'me' } })).resolves.toEqual({
-      member: { id: 'member-1', nickname: 'Me', avatarUrl: null, deleted: false },
-    });
-    await expect(actions.setAvatarAction('file-1')).resolves.toEqual({
-      member: {
-        id: 'member-1',
-        nickname: 'Me',
-        avatarUrl: 'https://cdn.example/me.webp',
-        deleted: false,
-      },
-    });
-    await expect(actions.setAvatarForMemberAction('member-2', 'file-2')).resolves.toEqual({
-      url: 'https://cdn.example/member.webp',
-    });
-    await expect(actions.deleteAvatarAction()).resolves.toEqual({
-      member: { id: 'member-1', nickname: 'Me', avatarUrl: null, deleted: false },
-    });
-    await expect(actions.deleteAvatarForMemberAction('member-2')).resolves.toEqual({ success: true });
-
-    expect(accountClient.setAccountRole).toHaveBeenCalledWith({
-      memberId: 'member-1',
-      role: AuthorizationRole.ADMIN,
-    });
-    expect(accountClient.banAccount).toHaveBeenCalledWith(
-      expect.objectContaining({ memberId: 'member-1', reason: 'spam' }),
-    );
-    expect(memberClient.updateMemberProfile).toHaveBeenCalledWith(
-      expect.objectContaining({ memberId: 'member-1', nickname: 'Updated' }),
-    );
-    expect(memberClient.setMemberTags).toHaveBeenCalledWith({
-      memberId: 'member-1',
-      tagIds: ['tag-1'],
-    });
-  });
-
   it('sends only the changed admin profile, tag, or role request', async () => {
     await expect(actions.updateUserAction('member-1', { bio: 'Updated bio' })).resolves.toEqual({ success: true });
     expect(memberClient.updateMemberProfile).toHaveBeenCalledWith({
@@ -368,22 +313,6 @@ describe('admin Member and profile actions', () => {
       member: { id: 'member-1', nickname: 'Me', avatarUrl: null, deleted: false },
     });
     expect(memberClient.updateMyProfile).toHaveBeenLastCalledWith({ nickname: 'Self name only' });
-  });
-
-  it('keeps client-callable author actions on the single ListAuthors path', async () => {
-    await expect(actions.listAuthorOptionsAction()).resolves.toEqual([
-      { id: 'member-1', name: 'Author', image: null, postCount: 3 },
-    ]);
-    await expect(actions.listAuthorsAction(4)).resolves.toEqual([
-      { id: 'member-1', name: 'Author', image: null, bio: 'Public bio', postCount: 3 },
-    ]);
-    await expect(actions.listAuthorsAction(24, ['member-2', 'member-1'])).resolves.toEqual([
-      { id: 'member-1', name: 'Author', image: null, bio: 'Public bio', postCount: 3 },
-    ]);
-
-    expect(mocks.listAuthorOptions).toHaveBeenCalledWith(12);
-    expect(mocks.listAuthors).toHaveBeenCalledWith(4);
-    expect(mocks.listAuthors).toHaveBeenCalledWith(24, ['member-2', 'member-1']);
   });
 
   it('preserves RPC failure categories and stable mutation errors', async () => {

@@ -99,7 +99,6 @@ vi.mock('@/features/site/SiteLogo', () => ({ SiteLogo: () => null }));
 vi.mock('@/features/social-links/ServerSocialLinksDisplay', () => ({ ServerSocialLinksDisplay: () => null }));
 
 import { useShellState } from './ui/Shell/shell-state';
-import { ShellLayout } from './ui/Shell/ShellLayout';
 import { Shell } from './Shell';
 import { getManifest } from '@/lib/queries/manifest';
 import { siteVariableManifest } from '@/features/editor/tiptap/site-variables/site-variable.story-fixtures';
@@ -249,51 +248,6 @@ describe('ShellRuntime client state', () => {
     renderRuntime();
     expect(state().user).toMatchObject({ kind: 'authenticated', name: 'June Han', email: 'june@example.com' });
     expect(state().showChangelog).toBe(true);
-  });
-});
-
-describe('Shell server composition', () => {
-  it('renders the layout on the server with resolved menus, footer copy and translated labels', async () => {
-    const element = (await Shell({ children: <main>Page</main>, initialUserSnapshot: null })) as ReactElement<{
-      labels: typeof labels;
-      children: ReactElement<ShellLayoutProps>;
-    }>;
-    expect(element.type).toBe(ShellRuntime);
-    expect(element.props.labels).toEqual({
-      searchTooltipMac: 'shell.actions.searchTooltip:Cmd+K',
-      searchTooltipOther: 'shell.actions.searchTooltip:Ctrl+K',
-      lightMode: 'common.theme.lightMode',
-      darkMode: 'common.theme.darkMode',
-      toggleColorScheme: 'common.actions.toggleColorScheme',
-      signOutUnsavedTitle: 'shell.signOutUnsaved.title',
-      signOutUnsavedMessage: 'shell.signOutUnsaved.message',
-      signOutUnsavedConfirm: 'shell.signOutUnsaved.confirm',
-      cancel: 'common.actions.cancel',
-      close: 'common.actions.close',
-    });
-    const layout = element.props.children;
-    expect(layout.type).toBe(ShellLayout);
-    expect(layout.props.headerItems).toEqual([
-      { id: 'about', label: 'About', href: '/about', active: false, openInNewTab: false, children: [] },
-    ]);
-    expect(layout.props.footerItems[0]).toMatchObject({ href: '/privacy', openInNewTab: true });
-    expect(layout.props.accountItems[0]).toMatchObject({ href: '/my/profile', openInNewTab: false });
-    expect(layout.props.footer).toEqual({
-      siteTitle: 'Example Studio',
-      description: 'Independent publishing.',
-      copyright: `© ${new Date().getFullYear()} Example Company`,
-      taxId: '123-45-67890',
-      companyAddress: null,
-      version: 'v-test',
-    });
-    expect(layout.props.labels).toMatchObject({
-      navigation: 'Example Studio',
-      search: 'shell.actions.search',
-      changelog: 'Changelog',
-    });
-    expect((layout.props.slots.socialLinks as ReactElement<{ links: unknown }>).props.links).toEqual([
-      { platform: 'instagram', url: 'https://instagram.com/example' },
-    ]);
   });
 });
 

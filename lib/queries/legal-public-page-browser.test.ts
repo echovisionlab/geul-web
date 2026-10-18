@@ -3,8 +3,8 @@ import { Code, ConnectError } from '@connectrpc/connect';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createPublicPrivacyClient, createPublicPrivacyClientWithLocale } from '@/lib/api/browser/public-privacy';
 import { createPublicTermsClient, createPublicTermsClientWithLocale } from '@/lib/api/browser/public-terms';
-import { getActivePrivacy, getPrivacyPageData, getScheduledPrivacy } from './privacy-browser';
-import { getActiveTerms, getScheduledTerms, getTermsPageData } from './terms-browser';
+import { getPrivacyPageData } from './privacy-browser';
+import { getTermsPageData } from './terms-browser';
 
 const { localizedBlocks } = vi.hoisted(() => ({
   localizedBlocks: [{ id: 'localized-block', kind: 'paragraph' }] as const,
@@ -165,30 +165,5 @@ describe('public legal page browser queries', () => {
     expect(createPublicTermsClientWithLocale).toHaveBeenCalledWith('fr');
     expect(privacyGet).toHaveBeenCalledOnce();
     expect(termsGet).toHaveBeenCalledOnce();
-  });
-
-  it('keeps the active and scheduled compatibility wrappers mapped from their combined getters', async () => {
-    privacyGet.mockResolvedValue({
-      privacy: { id: 'privacy-current', version: 1, title: 'Privacy', document: null },
-      scheduled: { id: 'privacy-next', version: 2, title: 'Next Privacy' },
-    });
-    termsGet.mockResolvedValue({
-      terms: { id: 'terms-current', version: 1, title: 'Terms', document: null },
-      scheduled: { id: 'terms-next', version: 2, title: 'Next Terms' },
-    });
-
-    await expect(getActivePrivacy('ja')).resolves.toMatchObject({ id: 'privacy-current', status: 'active' });
-    await expect(getScheduledPrivacy('ja')).resolves.toMatchObject({ id: 'privacy-next', status: 'scheduled' });
-    await expect(getActiveTerms('ja')).resolves.toMatchObject({ id: 'terms-current', status: 'active' });
-    await expect(getScheduledTerms('ja')).resolves.toMatchObject({ id: 'terms-next', status: 'scheduled' });
-
-    expect(privacyGet).toHaveBeenCalledTimes(2);
-    expect(termsGet).toHaveBeenCalledTimes(2);
-    expect(privacyGet).toHaveBeenNthCalledWith(1, {});
-    expect(privacyGet).toHaveBeenNthCalledWith(2, {});
-    expect(termsGet).toHaveBeenNthCalledWith(1, {});
-    expect(termsGet).toHaveBeenNthCalledWith(2, {});
-    expect(createPublicPrivacyClientWithLocale).toHaveBeenCalledTimes(2);
-    expect(createPublicTermsClientWithLocale).toHaveBeenCalledTimes(2);
   });
 });

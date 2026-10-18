@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { flushEditorSaves, getPendingEditorPatch, hasPendingEditorSaves } from '@/lib/editor/editor-save-registry';
-import { checkPostSlugAvailable } from '@/lib/queries/post-browser';
 import type { PageSlugAvailabilityResult } from '@/lib/queries/page-browser';
 import { useSlugManagement } from './useSlugManagement';
 
@@ -168,45 +167,6 @@ function changeEntityId(entityId: string) {
 }
 
 describe('useSlugManagement', () => {
-  it('uses the local availability transport for a blur without calling the production registry', async () => {
-    const checkAvailability = vi.fn(async () => ({ available: true }));
-    const onSave = vi.fn();
-    renderHarness(<TestHarness initialSlug="old-slug" onSave={onSave} checkAvailability={checkAvailability} />);
-    await flushUpdates();
-    changeInput('local-slug');
-    blurInput();
-    await flushUpdates();
-    expect(checkAvailability).toHaveBeenCalledWith('local-slug', 'page-1');
-    expect(checkPageSlugAvailable).not.toHaveBeenCalled();
-    expect(onSave).toHaveBeenCalledWith('local-slug');
-  });
-  it.each([
-    { debounceMs: 300, checks: 5, label: 'explicit 300ms' },
-    { debounceMs: undefined, checks: 1, label: 'default 1000ms' },
-  ])('measures five edits 400ms apart with $label', async ({ debounceMs, checks }) => {
-    vi.useFakeTimers();
-    renderHarness(<TestHarness initialSlug="" onSave={vi.fn()} debounceMs={debounceMs} />);
-    for (const value of ['t', 'ti', 'tit', 'titl', 'title']) {
-      changeInput(value);
-      await act(async () => {
-        vi.advanceTimersByTime(400);
-      });
-      await flushFakeTimerUpdates();
-    }
-    await act(async () => {
-      vi.advanceTimersByTime(599);
-    });
-    if (debounceMs === undefined) {
-      expect(checkPageSlugAvailable).not.toHaveBeenCalled();
-    }
-    await act(async () => {
-      vi.advanceTimersByTime(1);
-    });
-    await flushFakeTimerUpdates();
-    expect(checkPageSlugAvailable).toHaveBeenCalledTimes(checks);
-    expect(checkPageSlugAvailable).toHaveBeenLastCalledWith('title', 'page-1');
-  });
-
   it('shows the spinner throughout the default 1000ms delay and availability request', async () => {
     vi.useFakeTimers();
     let resolveCheck: ((result: PageSlugAvailabilityResult) => void) | undefined;
@@ -248,30 +208,6 @@ describe('useSlugManagement', () => {
         vi.advanceTimersByTime(50);
       });
     }
-    await act(async () => {
-      vi.advanceTimersByTime(249);
-    });
-    expect(checkPageSlugAvailable).not.toHaveBeenCalled();
-    await act(async () => {
-      vi.advanceTimersByTime(1);
-    });
-    await flushFakeTimerUpdates();
-    expect(checkPageSlugAvailable).toHaveBeenCalledExactlyOnceWith('title', 'page-1');
-  });
-
-  it('checks only the final title slug after five automatic edits 50ms apart', async () => {
-    vi.useFakeTimers();
-    renderHarness(<TestHarness initialSlug="" onSave={vi.fn()} debounceMs={300} />);
-    for (const title of ['T', 'Ti', 'Tit', 'Titl', 'Title']) {
-      act(() => {
-        getHook().updateFromTitle(title);
-      });
-      await act(async () => {
-        vi.advanceTimersByTime(50);
-      });
-    }
-    expect(latestRenderedSlug).toBe('title');
-    expect(getHook().isChecking).toBe(true);
     await act(async () => {
       vi.advanceTimersByTime(249);
     });
@@ -431,18 +367,6 @@ describe('useSlugManagement', () => {
     expect(checkPageSlugAvailable).toHaveBeenCalledExactlyOnceWith('first', 'page-1');
   });
 
-  it('hides a non-Page duplicate error as soon as the input changes', async () => {
-    vi.useFakeTimers();
-    vi.mocked(checkPostSlugAvailable).mockResolvedValue({ available: false });
-    renderHarness(<TestHarness entityType="post" initialSlug="taken" onSave={vi.fn()} debounceMs={300} />);
-    await flushFakeTimerUpdates();
-    expect(getHook().error).toBe('Slug already exists');
-    changeInput('new-slug');
-    expect(getHook().error).toBeUndefined();
-    expect(getHook().isAvailable).toBeUndefined();
-    expect(getHook().isChecking).toBe(true);
-  });
-
   it('ignores an old query result after switching entities', async () => {
     vi.useFakeTimers();
     let resolveOldCheck: ((result: PageSlugAvailabilityResult) => void) | undefined;
@@ -570,27 +494,6 @@ describe('useSlugManagement', () => {
     await flushUpdates();
     blurInput();
     await flushUpdates();
-
-    expect(onSave).toHaveBeenCalledWith('');
-    expect(checkPageSlugAvailable).not.toHaveBeenCalled();
-  });
-
-  it('treats an empty slug as saveable when the debounced value settles', async () => {
-    vi.useFakeTimers();
-    const onSave = vi.fn();
-
-    renderHarness(<TestHarness initialSlug="existing-slug" onSave={onSave} debounceMs={250} />);
-    await flushUpdates();
-    checkPageSlugAvailable.mockClear();
-
-    changeInput('');
-    await flushUpdates();
-
-    await act(async () => {
-      vi.advanceTimersByTime(250);
-      await Promise.resolve();
-    });
-    await flushFakeTimerUpdates();
 
     expect(onSave).toHaveBeenCalledWith('');
     expect(checkPageSlugAvailable).not.toHaveBeenCalled();

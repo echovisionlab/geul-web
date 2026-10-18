@@ -108,32 +108,6 @@ describe('useEditorFileStatusBootstrap', () => {
     expect(node?.getAttribute('data-loading')).toBe('false');
   });
 
-  it('passes failed file-status responses through the mapper', async () => {
-    mockedGetFileStatusesAction.mockResolvedValue({
-      'file-123': {
-        completed: true,
-        failed: true,
-        unavailable: false,
-        url: 'https://cdn.example.com/original.mp3',
-        originalUrl: 'https://cdn.example.com/original.mp3',
-        waveformUrl: 'https://cdn.example.com/waveform.json',
-        spectrogramUrl: '',
-        thumbnailUrl: '',
-        hlsUrl: 'https://cdn.example.com/fresh.m3u8',
-        durationSeconds: 42,
-        processingStatus: MediaProcessingStatus.FAILED,
-        processingPercentage: undefined,
-      },
-    });
-
-    await renderProbe({ fileId: 'file-123', enabled: true });
-
-    const node = host?.querySelector('div');
-    expect(node?.getAttribute('data-hls-url')).toBe('https://cdn.example.com/fresh.m3u8');
-    expect(node?.getAttribute('data-waveform-url')).toBe('https://cdn.example.com/waveform.json');
-    expect(node?.getAttribute('data-loading')).toBe('false');
-  });
-
   it('falls back to persisted values when bootstrap request rejects', async () => {
     mockedGetFileStatusesAction.mockRejectedValue(new Error('network down'));
 

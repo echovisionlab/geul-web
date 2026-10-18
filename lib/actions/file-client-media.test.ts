@@ -5,9 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFileClient } from '@/lib/api/server-client';
 import { mediaDeliveryFixture } from '@/tests/helpers/media-delivery';
 import {
-  completeUploadAction,
   completeClientMediaUploadAction,
-  findMultipartUploadCandidateAction,
   prepareClientMediaUploadAction,
   recoverCompletedUploadAction,
   recoverCompletedClientMediaUploadAction,
@@ -87,16 +85,6 @@ describe('client media upload actions', () => {
         ],
       }),
     ).resolves.toMatchObject({ ok: false, error: 'Unauthorized', errorCode: Code.Unauthenticated });
-  });
-
-  it('passes the bundle identity to completion and exact candidate resume', async () => {
-    complete.mockResolvedValue({ fileId: identity.fileId, delivery: readyDelivery() });
-    await completeUploadAction(identity);
-    expect(complete).toHaveBeenCalledWith(expect.objectContaining({ clientMediaBundleId: 'bundle-1' }));
-    candidate.mockResolvedValue({ uploadId: 'upload-1', uploadedParts: [], clientMediaBundleId: 'bundle-1' });
-    await expect(findMultipartUploadCandidateAction({ ...identity, entityId: '' })).resolves.toMatchObject({
-      clientMediaBundleId: 'bundle-1',
-    });
   });
 
   it('recovers a lost ACK only for the same ready bundle with every required artifact', async () => {

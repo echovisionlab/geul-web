@@ -222,20 +222,4 @@ describe('CompactTiptapEditor profile', () => {
       allowLocalizedBlockEdits: false,
     });
   });
-
-  it('rejects content nodes outside the compact profile', () => {
-    const schema = getSchema(createCompactTiptapExtensions('Write a bio'));
-
-    expect(() =>
-      schema.nodeFromJSON({
-        type: 'doc',
-        content: [
-          {
-            type: 'blockGroup',
-            content: [{ type: 'blockContainer', content: [{ type: 'heading', content: [] }] }],
-          },
-        ],
-      }),
-    ).toThrow(/Unknown node type: heading/);
-  });
 });

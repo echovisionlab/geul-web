@@ -4,15 +4,15 @@ Run `node scripts/design-system/inventory.mjs` to regenerate; `--check` fails wh
 
 Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.
 
-Source manifest SHA-256: `25a3d1a20bf5ca0dfab844b6cd0937a051e3c795a1052b47a5693a3192ae3aef`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
+Source manifest SHA-256: `bbcb1cea283a84bf22cc0f6c35cdadd48e811ace5982644b3070a7db7ae74f2b`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
 
 ## Counts
 
 | Metric                | Count |
 | --------------------- | ----: |
-| sourceFiles           |  3795 |
-| productionSourceFiles |  2299 |
-| componentFiles        |   910 |
+| sourceFiles           |  3594 |
+| productionSourceFiles |  2287 |
+| componentFiles        |   908 |
 | coreFamilies          |    57 |
 | featureDomains        |    53 |
 | storyFiles            |   257 |
@@ -122,52 +122,52 @@ Counts include every production JS/TS file in the domain; component files are Pa
 | [admin](../../features/admin)                         |    176 |        147 |       4 |    24 |            31 |
 | [analytics](../../features/analytics)                 |      1 |          1 |       0 |     0 |             0 |
 | [application-error](../../features/application-error) |      9 |          5 |       2 |     5 |             1 |
-| [artist](../../features/artist)                       |      9 |          9 |       1 |     2 |             0 |
+| [artist](../../features/artist)                       |      9 |          9 |       1 |     1 |             0 |
 | [auth](../../features/auth)                           |     30 |         12 |       1 |    20 |             5 |
 | [authoring](../../features/authoring)                 |      7 |          5 |       0 |     2 |             0 |
-| [campaign](../../features/campaign)                   |     10 |          7 |       0 |     5 |             3 |
+| [campaign](../../features/campaign)                   |     10 |          7 |       0 |     3 |             3 |
 | [changelog](../../features/changelog)                 |      1 |          1 |       0 |     0 |             1 |
 | [client](../../features/client)                       |      2 |          2 |       0 |     1 |             0 |
 | [confirmation](../../features/confirmation)           |      5 |          1 |       1 |     2 |             0 |
 | [cookie-consent](../../features/cookie-consent)       |      2 |          2 |       0 |     2 |             0 |
-| [data-table](../../features/data-table)               |     33 |         27 |       0 |    14 |            20 |
+| [data-table](../../features/data-table)               |     33 |         27 |       0 |    13 |            20 |
 | [date-time](../../features/date-time)                 |      1 |          1 |       0 |     0 |             0 |
-| [document-layout](../../features/document-layout)     |     13 |          7 |       1 |     3 |             0 |
-| [draft-mode](../../features/draft-mode)               |      2 |          2 |       0 |     1 |             0 |
-| [editor](../../features/editor)                       |    235 |         77 |      11 |   145 |             0 |
-| [email](../../features/email)                         |      4 |          2 |       0 |     6 |             0 |
+| [document-layout](../../features/document-layout)     |     13 |          7 |       1 |     2 |             0 |
+| [draft-mode](../../features/draft-mode)               |      2 |          2 |       0 |     0 |             0 |
+| [editor](../../features/editor)                       |    227 |         75 |      11 |   129 |             0 |
+| [email](../../features/email)                         |      4 |          2 |       0 |     5 |             0 |
 | [executable](../../features/executable)               |      1 |          1 |       0 |     1 |             0 |
-| [file-manager](../../features/file-manager)           |     19 |         10 |       0 |     4 |             1 |
+| [file-manager](../../features/file-manager)           |     19 |         10 |       0 |     3 |             1 |
 | [form](../../features/form)                           |     53 |         38 |       2 |    18 |             9 |
 | [label](../../features/label)                         |      7 |          6 |       0 |     0 |             1 |
 | [location](../../features/location)                   |      4 |          4 |       1 |     2 |             0 |
-| [map](../../features/map)                             |     37 |         10 |       1 |    25 |             0 |
-| [media](../../features/media)                         |     29 |         20 |       5 |    14 |             0 |
+| [map](../../features/map)                             |     37 |         10 |       1 |    23 |             0 |
+| [media](../../features/media)                         |     29 |         20 |       5 |    12 |             0 |
 | [media-download](../../features/media-download)       |      5 |          3 |       1 |     4 |             0 |
 | [member](../../features/member)                       |      2 |          1 |       0 |     1 |             0 |
-| [menu](../../features/menu)                           |      7 |          4 |       0 |     4 |             1 |
+| [menu](../../features/menu)                           |      7 |          4 |       0 |     3 |             1 |
 | [mermaid](../../features/mermaid)                     |      4 |          2 |       1 |     4 |             0 |
 | [metadata](../../features/metadata)                   |     11 |          9 |       1 |     6 |            13 |
-| [my](../../features/my)                               |     38 |         26 |       8 |    20 |             7 |
+| [my](../../features/my)                               |     38 |         26 |       8 |    19 |             7 |
 | [navigation](../../features/navigation)               |      2 |          2 |       0 |     0 |             1 |
 | [newsletter](../../features/newsletter)               |      2 |          2 |       0 |     1 |             1 |
-| [page](../../features/page)                           |    251 |        165 |       8 |    90 |             4 |
+| [page](../../features/page)                           |    251 |        165 |       8 |    79 |             4 |
 | [participants](../../features/participants)           |      1 |          1 |       0 |     1 |             0 |
 | [place](../../features/place)                         |      7 |          7 |       0 |     3 |             0 |
 | [policy](../../features/policy)                       |     18 |         15 |       0 |     9 |             6 |
-| [post](../../features/post)                           |     41 |         26 |       0 |    27 |             2 |
-| [print](../../features/print)                         |      1 |          1 |       0 |     2 |             0 |
-| [program-event](../../features/program-event)         |     11 |          8 |       1 |     7 |             1 |
-| [release](../../features/release)                     |     21 |         16 |       0 |    11 |             1 |
+| [post](../../features/post)                           |     41 |         26 |       0 |    25 |             2 |
+| [print](../../features/print)                         |      1 |          1 |       0 |     1 |             0 |
+| [program-event](../../features/program-event)         |     11 |          8 |       1 |     6 |             1 |
+| [release](../../features/release)                     |     21 |         16 |       0 |    10 |             1 |
 | [search](../../features/search)                       |      1 |          1 |       0 |     0 |             0 |
-| [series](../../features/series)                       |      5 |          3 |       1 |     6 |             3 |
+| [series](../../features/series)                       |      5 |          3 |       1 |     5 |             3 |
 | [share](../../features/share)                         |      6 |          5 |       2 |     3 |             0 |
 | [shell](../../features/shell)                         |     14 |         10 |       1 |     3 |             0 |
-| [site](../../features/site)                           |     17 |         11 |       1 |     9 |            10 |
+| [site](../../features/site)                           |     17 |         11 |       1 |     7 |            10 |
 | [social-links](../../features/social-links)           |     10 |          6 |       2 |     6 |             1 |
-| [translation](../../features/translation)             |     42 |         18 |       1 |    22 |             1 |
+| [translation](../../features/translation)             |     42 |         18 |       1 |    20 |             1 |
 | [upload](../../features/upload)                       |      5 |          1 |       1 |     3 |             0 |
-| [user](../../features/user)                           |     18 |         12 |       2 |     6 |             1 |
+| [user](../../features/user)                           |     18 |         12 |       2 |     5 |             1 |
 | [version-history](../../features/version-history)     |      5 |          2 |       1 |     3 |             0 |
 | [work](../../features/work)                           |     17 |         11 |       0 |     9 |             0 |
 

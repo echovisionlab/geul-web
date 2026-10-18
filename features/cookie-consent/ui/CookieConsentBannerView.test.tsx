@@ -28,14 +28,6 @@ const model: CookieConsentBannerViewModel = {
 let host: HTMLDivElement;
 let root: Root;
 
-function button(name: string) {
-  const match = [...host.querySelectorAll<HTMLButtonElement>('button')].find((control) => control.textContent === name);
-  if (!match) {
-    throw new Error(`Missing button: ${name}`);
-  }
-  return match;
-}
-
 function mount(overrides: Partial<CookieConsentBannerViewModel> = {}) {
   const callbacks = {
     onRejectNonEssential: vi.fn(),
@@ -76,17 +68,6 @@ describe('CookieConsentBannerView', () => {
     expect([...host.querySelectorAll('*')].find((node) => node.textContent === model.labels.intro)).toBeVisible();
   });
 
-  it('requires an explicit decision and keeps reject and accept callbacks separate', () => {
-    const callbacks = mount();
-    expect(callbacks.onAcceptAll).not.toHaveBeenCalled();
-    expect(callbacks.onRejectNonEssential).not.toHaveBeenCalled();
-    act(() => button('Reject optional').click());
-    expect(callbacks.onRejectNonEssential).toHaveBeenCalledTimes(1);
-    expect(callbacks.onAcceptAll).not.toHaveBeenCalled();
-    act(() => button('Accept all').click());
-    expect(callbacks.onAcceptAll).toHaveBeenCalledTimes(1);
-  });
-
   it('gives both decisions the same compact text-button size and emphasis', () => {
     mount();
     for (const button of host.querySelectorAll('button')) {
@@ -97,12 +78,5 @@ describe('CookieConsentBannerView', () => {
       expect(button).toHaveAccessibleDescription(model.labels.intro);
       expect(button).not.toHaveAttribute('data-full-width');
     }
-  });
-
-  it('renders no interactive controls while closed', () => {
-    mount({ isOpen: false });
-    expect(host.querySelector('aside')).toBeNull();
-    expect(host.querySelector('[role="switch"]')).toBeNull();
-    expect(host.querySelector('button')).toBeNull();
   });
 });

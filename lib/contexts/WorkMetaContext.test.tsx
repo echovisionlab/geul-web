@@ -153,17 +153,6 @@ describe('WorkMetaProvider', () => {
     expect(latest?.doc).toBe(document);
     await act(async () => Promise.resolve());
   });
-  it('keeps global fields local while exposing the one resident Block Y.Doc', () => {
-    renderProvider('https://example.com/cover.jpg');
-
-    expect(latest?.doc).toBe(mockDoc);
-    expect(latest?.title).toBe(initialMeta.title);
-    expect(latest?.summary).toBe(initialMeta.summary);
-    expect(latest?.featuredImageUrl).toBe('https://example.com/cover.jpg');
-
-    act(() => latest?.setType('article'));
-    expect(latest?.type).toBe('article');
-  });
 
   it('persists the ordered client IDs through the owning Manage RPC', async () => {
     renderProvider();
@@ -340,19 +329,6 @@ describe('WorkMetaProvider', () => {
       { clients: ['peer-b', 'local-c'], observedClients: ['peer-b'] },
       expect.any(String),
     );
-  });
-
-  it('keeps featured-image presentation ephemeral and rejects stale setters', () => {
-    renderProvider();
-    const staleSetter = latest?.setFeaturedImage;
-
-    act(() => {
-      expect(latest?.setFeaturedImage('file-1', 'https://example.com/cover.jpg')).toBe(true);
-    });
-    expect(latest?.featuredImageUrl).toBe('https://example.com/cover.jpg');
-
-    act(() => root.render(null));
-    expect(staleSetter?.('late-file', 'https://example.com/late.jpg')).toBe(false);
   });
 });
 

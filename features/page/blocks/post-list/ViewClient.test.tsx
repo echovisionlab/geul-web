@@ -339,39 +339,6 @@ describe('PostListViewClient', () => {
     expect(heroSlide?.querySelector('[data-hero-bottom-layout="row"]')).not.toBeNull();
   });
 
-  it('uses dots only on mobile hero carousel and keeps arrows plus dots on desktop', () => {
-    render(
-      <PostListViewClient
-        posts={[post, { ...post, id: 'post-2', slug: 'second-post', title: 'Second Post' }]}
-        parsedProps={parsePostListProps({ layout: 'carousel', columns: '1', showMeta: 'true' })}
-      />,
-    );
-
-    const desktopCarousel = document.querySelector('.post-list-block [data-with-controls]');
-    expect(desktopCarousel?.getAttribute('data-with-controls')).toBe('true');
-    expect(desktopCarousel?.getAttribute('data-with-indicators')).toBe('true');
-
-    act(() => {
-      root?.unmount();
-    });
-    container?.remove();
-    root = null;
-    container = null;
-
-    installMatchMedia((query) => query === breakpointQuery('sm'));
-
-    render(
-      <PostListViewClient
-        posts={[post, { ...post, id: 'post-2', slug: 'second-post', title: 'Second Post' }]}
-        parsedProps={parsePostListProps({ layout: 'carousel', columns: '1', showMeta: 'true' })}
-      />,
-    );
-
-    const mobileCarousel = document.querySelector('.post-list-block [data-with-controls]');
-    expect(mobileCarousel?.getAttribute('data-with-controls')).toBe('false');
-    expect(mobileCarousel?.getAttribute('data-with-indicators')).toBe('true');
-  });
-
   it('renders cards layout with a dedicated side media region', () => {
     render(
       <PostListViewClient
@@ -418,23 +385,5 @@ describe('PostListViewClient', () => {
     expect(card?.textContent).toContain('Writer Two');
     expect(card?.textContent).not.toContain('Writer Three');
     expect(card?.textContent).toContain('+1');
-  });
-
-  it('renders carousel cards with a horizontal media-and-content layout', () => {
-    render(
-      <PostListViewClient
-        posts={[post, { ...post, id: 'post-2', slug: 'second-post', title: 'Second Post' }]}
-        parsedProps={parsePostListProps({ layout: 'carousel', columns: '2', showMeta: 'true' })}
-      />,
-    );
-
-    const card = document.querySelector('[data-post-list-item-layout="carousel-cards"]');
-    expect(card).not.toBeNull();
-    expect(card?.querySelector('[data-post-list-carousel-card-layout]')).not.toBeNull();
-    expect(card?.querySelector('[data-post-list-carousel-card-media]')).not.toBeNull();
-    expect(card?.querySelector('[data-post-list-carousel-card-content]')).not.toBeNull();
-    expect(card?.textContent).toContain('First Post');
-    expect(card?.textContent).not.toContain('Summary');
-    expect(card?.querySelector('a[href="/posts/first-post"]')).not.toBeNull();
   });
 });

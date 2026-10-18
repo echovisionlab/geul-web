@@ -8,7 +8,6 @@ import {
   TranscodeEntityType,
 } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import {
-  GenerateMeshOptimizationCandidateResponseSchema,
   ListMeshOptimizationCandidatesResponseSchema,
   MeshOptimizationCandidateSchema,
   MeshOptimizationCandidateStatus,
@@ -18,7 +17,6 @@ import { MESH_OPTIMIZATION_METHOD_DRACO } from '@/lib/types/mesh-optimization';
 import {
   clearImmersiveSceneMeshOptimizationCandidatesAction,
   generateImmersiveSceneMeshOptimizationCandidateAction,
-  isImmersiveSceneMeshOptimizationApiAvailableAction,
   listImmersiveSceneMeshOptimizationCandidatesAction,
   useImmersiveSceneMeshOptimizationCandidateAction,
 } from './immersive-scene-optimization';
@@ -69,16 +67,6 @@ function withMockFileClient<T>(fileClient: MeshOptimizationFileClient | Error, c
 }
 
 describe.concurrent('immersive scene mesh optimization actions', () => {
-  it('reports API availability when the generated file client can be created', async () => {
-    await withMockFileClient(new Error('missing session'), () =>
-      expect(isImmersiveSceneMeshOptimizationApiAvailableAction()).resolves.toBe(false),
-    );
-
-    await withMockFileClient(createMockFileClient(), () =>
-      expect(isImmersiveSceneMeshOptimizationApiAvailableAction()).resolves.toBe(true),
-    );
-  });
-
   it('normalizes completed DRACO candidates returned by the file client', async () => {
     const fileClient = createMockFileClient();
     vi.mocked(fileClient.listMeshOptimizationCandidates).mockResolvedValue(
@@ -211,59 +199,6 @@ describe.concurrent('immersive scene mesh optimization actions', () => {
         error: '[not_found] optimization candidate not found',
       }),
     );
-  });
-
-  it('pins generation to DRACO and one-percent target mesh ratio increments', async () => {
-    const fileClient = createMockFileClient();
-    vi.mocked(fileClient.generateMeshOptimizationCandidate).mockResolvedValue(
-      create(GenerateMeshOptimizationCandidateResponseSchema, {
-        candidate: create(MeshOptimizationCandidateSchema, {
-          id: 'candidate-1',
-          sourceFileId: 'mesh-file',
-          fileId: 'mesh-file-draco',
-          fileName: 'scene.draco.glb',
-          delivery: {
-            fileId: 'mesh-file-draco',
-            fileName: 'scene.draco.glb',
-            fileSize: BigInt(1024),
-            inline: {
-              fileId: 'mesh-file-draco',
-              url: '/media/token/mesh-file-draco.glb',
-              extension: 'glb',
-              mimeType: 'model/gltf-binary',
-            },
-          },
-          optimizedFileSize: BigInt(1024),
-          method: MeshOptimizationCompressionMethod.DRACO,
-          targetRatioPercent: 66,
-          status: MeshOptimizationCandidateStatus.READY,
-        }),
-      }),
-    );
-
-    await withMockFileClient(fileClient, () =>
-      expect(
-        generateImmersiveSceneMeshOptimizationCandidateAction({
-          ...meshOptimizationContext,
-          method: MESH_OPTIMIZATION_METHOD_DRACO,
-          targetRatioPercent: 66,
-        }),
-      ).resolves.toMatchObject({
-        candidate: {
-          id: 'candidate-1',
-          method: MESH_OPTIMIZATION_METHOD_DRACO,
-          targetRatioPercent: 66,
-        },
-      }),
-    );
-    expect(fileClient.generateMeshOptimizationCandidate).toHaveBeenCalledWith({
-      sourceFileId: 'mesh-file',
-      entityId: 'page-1',
-      entityType: TranscodeEntityType.PAGE,
-      method: MeshOptimizationCompressionMethod.DRACO,
-      targetRatioPercent: 66,
-      profile: MeshOptimizationProfile.PARTICLE_MESH_V1,
-    });
   });
 
   it('keeps stale source file not found errors visible for mutating actions', async () => {

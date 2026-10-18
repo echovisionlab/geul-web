@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createDebouncedPatch } from './debounced-patch';
-import { flushAllEditorSaves, flushEditorSaves, registerEditorSave } from './editor-save-registry';
+import { flushEditorSaves, registerEditorSave } from './editor-save-registry';
 import {
   clearEditorSaveRecovery,
   persistEditorSaveRecoveryEntry,
@@ -68,30 +68,6 @@ describe('locale transition saves', () => {
       cleanups.forEach((cleanup) => cleanup());
       a.cancel();
       b.cancel();
-    }
-  });
-
-  it('preserves an unkeyed legacy archive without blocking healthy navigation', async () => {
-    window.sessionStorage.clear();
-    persistEditorSaveRecoveryEntry('work:archived', 'old-queue', {
-      document: 'work:archived',
-      updatedAt: Date.now(),
-      patch: { title: 'old draft' },
-    });
-    const current = createDebouncedPatch<{ summary: string }>(500);
-    current.enqueue({ summary: 'current' }, async () => undefined);
-    const unregister = registerEditorSave('page:current', current);
-    try {
-      expect(await flushEditorSaves('page:current')).toBe(true);
-      expect(await flushAllEditorSaves()).toBe(true);
-      expect(await flushEditorSaves('work:archived')).toBe(true);
-      expect(readEditorSaveRecovery('work:archived')?.entries).toMatchObject([
-        { id: 'old-queue', document: 'work:archived', patch: { title: 'old draft' } },
-      ]);
-    } finally {
-      unregister();
-      current.cancel();
-      clearEditorSaveRecovery('work:archived', ['old-queue']);
     }
   });
 

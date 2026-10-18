@@ -287,29 +287,6 @@ describe('typed resident Page editor context', () => {
     expect(persistCollaborativeDocumentNow).toHaveBeenCalledWith(provider);
   });
 
-  it('inserts a configured Embed in the resident canonical room and persists it', async () => {
-    render();
-    act(() =>
-      context().addSection('embed', undefined, {
-        uri: 'https://embed.example/app',
-        title: 'Embedded app',
-        allowMicrophone: 'true',
-      }),
-    );
-    await flush();
-    expect(context().sections).toEqual([
-      expect.objectContaining({
-        type: 'embed',
-        props: expect.objectContaining({
-          uri: 'https://embed.example/app',
-          title: 'Embedded app',
-          allowMicrophone: 'true',
-        }),
-      }),
-    ]);
-    expect(persistCollaborativeDocumentNow).toHaveBeenCalledExactlyOnceWith(provider);
-  });
-
   it('holds locale-save flush until a Page section deletion is durably acknowledged', async () => {
     roomDocument.destroy();
     roomDocument = createRoom('ko', 'ko', true);

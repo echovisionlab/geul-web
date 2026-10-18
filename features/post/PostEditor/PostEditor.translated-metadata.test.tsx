@@ -418,25 +418,4 @@ describe('PostEditor translated metadata drafts', () => {
     );
     expect(getPendingEditorPatch(postSaveDocument)).toEqual({});
   });
-
-  it('updates the untouched title while preserving a pending summary through preview refresh', async () => {
-    await renderEditor();
-
-    await act(async () => {
-      editField('summary', 'Local Korean summary');
-    });
-    expect(getPendingEditorPatch(postSaveDocument)).toEqual({ locale: 'ko', summary: 'Local Korean summary' });
-
-    mocks.postMeta = metadataPreview({
-      displayTitle: 'Korean preview title 2',
-      displaySummary: 'Korean preview summary 2',
-      activeLocale: 'ko',
-    });
-    await renderEditor();
-
-    expect(container?.querySelector<HTMLInputElement>('[data-testid="title"]')?.value).toBe('Korean preview title 2');
-    expect(container?.querySelector<HTMLTextAreaElement>('[data-testid="summary"]')?.value).toBe(
-      'Local Korean summary',
-    );
-  });
 });

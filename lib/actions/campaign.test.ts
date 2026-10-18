@@ -11,7 +11,6 @@ import {
   createCampaignAction,
   getCampaignAction,
   getCampaignRecipientsAction,
-  getCampaignStatsAction,
   previewCampaignAction,
   scheduleCampaignAction,
   sendCampaignNowAction,
@@ -20,7 +19,6 @@ import {
 
 const createCampaignRpcMock = vi.fn();
 const getCampaignRpcMock = vi.fn();
-const getCampaignStatsRpcMock = vi.fn();
 const getCampaignRecipientsRpcMock = vi.fn();
 const previewCampaignRpcMock = vi.fn();
 const sendCampaignNowRpcMock = vi.fn();
@@ -111,21 +109,6 @@ describe('createCampaignAction', () => {
       subject: 'Launch Campaign',
     });
   });
-
-  it('forwards distinct shared name and localized subject when both are provided', async () => {
-    createCampaignRpcMock.mockResolvedValue({
-      campaign: { id: 'campaign-4' },
-    });
-
-    await expect(createCampaignAction('Admin Only Name', 'Public Subject')).resolves.toEqual({
-      data: { id: 'campaign-4' },
-    });
-
-    expect(createCampaignRpcMock).toHaveBeenCalledWith({
-      name: 'Admin Only Name',
-      subject: 'Public Subject',
-    });
-  });
 });
 
 describe('getCampaignAction', () => {
@@ -195,40 +178,6 @@ describe('getCampaignAction', () => {
   });
 });
 
-describe('getCampaignStatsAction', () => {
-  beforeEach(() => {
-    getCampaignStatsRpcMock.mockReset();
-    vi.mocked(createCampaignClient).mockReset();
-    vi.mocked(createCampaignClient).mockResolvedValue(
-      createCampaignClientStub({
-        getCampaignStats: getCampaignStatsRpcMock,
-      }),
-    );
-  });
-
-  it('maps campaign delivery counters from the campaign API', async () => {
-    getCampaignStatsRpcMock.mockResolvedValue({
-      stats: {
-        totalSent: 7,
-        totalSkipped: 2,
-        totalFailed: 1,
-        totalBlocked: 3,
-        totalSuppressed: 4,
-      },
-    });
-
-    await expect(getCampaignStatsAction('campaign-1').then(unwrapQueryResult)).resolves.toEqual({
-      totalSent: 7,
-      totalSkipped: 2,
-      totalFailed: 1,
-      totalBlocked: 3,
-      totalSuppressed: 4,
-    });
-
-    expect(getCampaignStatsRpcMock).toHaveBeenCalledWith({ id: 'campaign-1' });
-  });
-});
-
 describe('getCampaignRecipientsAction', () => {
   beforeEach(() => {
     getCampaignRecipientsRpcMock.mockReset();
@@ -288,61 +237,6 @@ describe('previewCampaignAction', () => {
         previewCampaign: previewCampaignRpcMock,
       }),
     );
-  });
-
-  it('forwards the active locale and selected layout to the preview API', async () => {
-    previewCampaignRpcMock.mockResolvedValue({
-      preview: {
-        subject: 'Subject',
-        htmlContent: '<p>HTML</p>',
-        textContent: 'Text',
-      },
-    });
-
-    await expect(
-      previewCampaignAction('campaign-1', {
-        locale: 'ko',
-        layoutId: 'layout-1',
-      }).then(unwrapQueryResult),
-    ).resolves.toEqual({
-      subject: 'Subject',
-      htmlContent: '<p>HTML</p>',
-      textContent: 'Text',
-    });
-
-    expect(previewCampaignRpcMock).toHaveBeenCalledWith({
-      id: 'campaign-1',
-      locale: 'ko',
-      layoutId: 'layout-1',
-      subject: undefined,
-      document: undefined,
-    });
-  });
-
-  it('forwards draft subject and typed document overrides to the preview API', async () => {
-    const document = { $typeName: 'api.content.v1.LocalizedRichTextDocument' } as never;
-    previewCampaignRpcMock.mockResolvedValue({
-      preview: {
-        subject: 'Draft subject',
-        htmlContent: '<p>Draft HTML</p>',
-        textContent: 'Draft text',
-      },
-    });
-
-    await previewCampaignAction('campaign-1', {
-      locale: 'ko',
-      layoutId: 'layout-1',
-      subject: 'Draft subject',
-      document,
-    }).then(unwrapQueryResult);
-
-    expect(previewCampaignRpcMock).toHaveBeenCalledWith({
-      id: 'campaign-1',
-      locale: 'ko',
-      layoutId: 'layout-1',
-      subject: 'Draft subject',
-      document,
-    });
   });
 
   it('forwards an explicit empty layout override when the selected layout is cleared', async () => {
@@ -448,15 +342,6 @@ describe('updateCampaignConfigurationAction field patches', () => {
     expect(updateCampaignConfigurationRpcMock).toHaveBeenCalledWith({
       id: 'campaign-1',
       layoutId: '',
-    });
-  });
-
-  it('sends a recipient-scope-only patch', async () => {
-    await updateCampaignConfigurationAction('campaign-1', { recipientScope: 'ALL_MATCHING_USERS' });
-
-    expect(updateCampaignConfigurationRpcMock).toHaveBeenCalledWith({
-      id: 'campaign-1',
-      recipientScope: CampaignRecipientScope.ALL_MATCHING_USERS,
     });
   });
 });

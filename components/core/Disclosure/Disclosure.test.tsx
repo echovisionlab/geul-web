@@ -64,30 +64,6 @@ describe('Disclosure', () => {
     expect(container.textContent).toContain('Additional details');
   });
 
-  it('maps presentation choices to Core-owned semantic state', () => {
-    renderDisclosure(
-      <Disclosure
-        label="Navigation group"
-        appearance="filled"
-        density="compact"
-        shape="square"
-        contentIndent="small"
-        defaultOpened
-      >
-        Nested links
-      </Disclosure>,
-    );
-
-    const disclosure = container.querySelector<HTMLElement>('[data-disclosure]');
-    const trigger = disclosure?.querySelector<HTMLButtonElement>('button');
-
-    expect(disclosure?.getAttribute('data-appearance')).toBe('filled');
-    expect(disclosure?.getAttribute('data-density')).toBe('compact');
-    expect(disclosure?.getAttribute('data-shape')).toBe('square');
-    expect(disclosure?.getAttribute('data-content-indent')).toBe('small');
-    expect(trigger?.getAttribute('aria-expanded')).toBe('true');
-  });
-
   it('does not change state when disabled', () => {
     const onChange = vi.fn();
     renderDisclosure(

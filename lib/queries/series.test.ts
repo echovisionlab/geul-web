@@ -111,20 +111,6 @@ describe('public Series queries', () => {
     } as never);
   });
 
-  it('consumes the localized List title projection for selectors', async () => {
-    listPublicSeriesMock.mockResolvedValue({
-      series: [{ id: 'series-1', title: '한국어 시리즈', slug: 'field-notes' }],
-    });
-
-    await expect(listPublicSeriesOptions()).resolves.toEqual([
-      { id: 'series-1', title: '한국어 시리즈', slug: 'field-notes' },
-    ]);
-    expect(listPublicSeriesMock).toHaveBeenCalledWith({
-      pagination: { limit: 100, offset: 0 },
-      sorts: [{ field: 'title', order: SortOrder.ASC }],
-    });
-  });
-
   it('loads every published Series page beyond 100 results and deduplicates rows', async () => {
     listPublicSeriesMock
       .mockResolvedValueOnce({

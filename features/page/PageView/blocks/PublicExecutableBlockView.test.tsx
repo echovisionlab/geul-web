@@ -3,8 +3,6 @@
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -177,47 +175,6 @@ afterEach(() => {
 });
 
 describe('PublicExecutableBlockView', () => {
-  it('uses one shared outer box without figure or body padding', () => {
-    const css = readFileSync(
-      resolve(process.cwd(), 'features/page/PageView/blocks/PublicExecutableBlockView.module.css'),
-      'utf8',
-    );
-    const rootRule = /\.root\s*\{([^}]*)\}/u.exec(css)?.[1];
-
-    expect(rootRule).toBeDefined();
-    expect(rootRule).not.toMatch(/border:|background:|padding:/u);
-    const owner = readFileSync(
-      resolve(process.cwd(), 'features/page/PageView/blocks/PublicExecutableBlockView.tsx'),
-      'utf8',
-    );
-    expect(owner).toContain('<ExecutableSurface padding="none" withBorder clip>');
-    expect(rootRule).toMatch(/margin:\s*0/u);
-  });
-
-  it('switches the executable body from flex to fragmentable block flow for print', () => {
-    const css = readFileSync(
-      resolve(process.cwd(), 'features/page/PageView/blocks/PublicExecutableBlockView.module.css'),
-      'utf8',
-    );
-    const printRules = /@media print\s*\{([\s\S]*)\}\s*\.canvas/u.exec(css)?.[1];
-
-    expect(printRules).toMatch(/\.header\s*\{[^}]*break-after:\s*avoid;/su);
-    expect(printRules).toMatch(/\.body\s*\{[^}]*display:\s*block;/su);
-  });
-
-  it('shows only the localized title in the header and moves source disclosure into the runtime row', async () => {
-    const { factories } = createFactories();
-    const mounted = await mountPublicExecutable({ type: 'threeScene', factories, title: 'Localized scene' });
-
-    expect(mounted.host.querySelector('figcaption')?.textContent).toBe('Localized scene');
-    const titleRow = mounted.host.querySelector('[data-executable-title]');
-    expect(titleRow?.parentElement?.children).toHaveLength(1);
-    expect(mounted.host.querySelector('[data-executable-mode-controls]')).toBeNull();
-    expect(buttonByText(mounted.host, 'Source')).toBeTruthy();
-
-    await mounted.destroy();
-  });
-
   it('names the p5 preview as a group without hiding its runtime-generated controls', async () => {
     const { factories, runtimes } = createFactories();
     factories.p5Sketch = vi.fn((mount) => {
@@ -286,45 +243,6 @@ describe('PublicExecutableBlockView', () => {
     await first.destroy();
     await second.destroy();
   });
-
-  it.each(['p5Sketch', 'threeScene', 'shader'] as const)(
-    'orders the public %s temporary editor after preview and runtime controls without remounting on scroll',
-    async (type) => {
-      const { factories } = createFactories();
-      const mounted = await mountPublicExecutable({ type, factories });
-
-      await act(async () => buttonByText(mounted.host, 'Source').click());
-      const preview = mounted.host.querySelector<HTMLElement>(`[data-runtime-surface="${type}"]`);
-      const controls = mounted.host.querySelector<HTMLElement>(`[data-runtime-controls="${type}"]`);
-      const editor = mounted.host.querySelector<HTMLElement>('textarea');
-      if (!preview || !controls || !editor) {
-        throw new Error('Public temporary editor layout did not mount');
-      }
-      expect(preview.compareDocumentPosition(controls) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
-      expect(controls.compareDocumentPosition(editor) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
-      expect([...controls.querySelectorAll('button')].map((button) => button.getAttribute('aria-label'))).toEqual([
-        'Stop',
-        'Restart',
-        'Source',
-        'Reset to original',
-        'Copy',
-        'Apply',
-      ]);
-      expect(
-        [...controls.querySelectorAll('button')].every((button) => button.getAttribute('data-emphasis') === 'low'),
-      ).toBe(true);
-      expect(mounted.host.querySelector('figure')?.getAttribute('data-preview-height')).toBe('360');
-      expect(mounted.host.querySelector('figure')?.getAttribute('style')).toContain('width: 48%');
-
-      await act(async () => {
-        mounted.host.scrollTop = 120;
-        mounted.host.dispatchEvent(new Event('scroll', { bubbles: true }));
-      });
-      expect(mounted.host.querySelector(`[data-runtime-surface="${type}"]`)).toBe(preview);
-
-      await mounted.destroy();
-    },
-  );
 
   it('waits for an explicit public Run before a device-capable p5 sketch requests access', async () => {
     const { factories, runtimes } = createFactories();

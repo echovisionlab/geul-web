@@ -4,7 +4,7 @@ import { act, type ComponentProps, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { beforeEach, afterEach, expect, describe, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { Avatar, ScrollArea, Separator, Skeleton, Spinner, Table, type AvatarProps } from './Display';
+import { Avatar, ScrollArea, Separator, Skeleton, Spinner, Table } from './Display';
 import { Pagination, type PaginationLabels } from './Pagination';
 
 const browserNavigation = mockBrowserNavigation();
@@ -24,37 +24,6 @@ function render(node: ReactNode) {
   act(() => root.render(node));
 }
 describe('native Core Display contracts', () => {
-  it('rejects unsupported row divider policies', () => {
-    expect(() => render(<Table rowDividers={'custom' as 'all'} />)).toThrow('Invalid table row dividers');
-  });
-
-  it('keeps a semantic table and explicit content widths, cell span, alignment and shared row states', () => {
-    render(
-      <Table bordered striped>
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th width={120} align="end">
-              Amount
-            </Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
-          <Table.Tr disabled dimmed dragState={{ transform: 'translateY(10px)', dragging: true }}>
-            <Table.Td colSpan={2}>Value</Table.Td>
-          </Table.Tr>
-        </Table.Tbody>
-      </Table>,
-    );
-    expect(container.querySelector('table')?.dataset.bordered).toBe('true');
-    expect(container.querySelector('th')?.scope).toBe('col');
-    expect(container.querySelector('th')?.style.width).toBe('120px');
-    expect(container.querySelector('th')?.dataset.align).toBe('end');
-    expect(container.querySelector('td')?.colSpan).toBe(2);
-    const row = container.querySelector('tbody tr') as HTMLElement;
-    expect(row.dataset.disabled).toBe('true');
-    expect(row.dataset.dimmed).toBe('true');
-    expect(row.style.transform).toBe('translateY(10px)');
-  });
   it('uses the avatar fallback when authored media fails and recovers when its source changes', () => {
     render(
       <Avatar src="/broken.png" alt="Artist" size="sm">
@@ -71,20 +40,6 @@ describe('native Core Display contracts', () => {
       </Avatar>,
     );
     expect(container.querySelector('img')?.getAttribute('src')).toBe('/other.png');
-  });
-  it('projects only native affordances and refuses caller presentation even across a runtime cast', () => {
-    const unsafe = {
-      style: { color: 'red' },
-      className: 'local',
-      styles: { root: {} },
-      'data-testid': 'avatar',
-      'data-core-tone': 'danger',
-    } as unknown as AvatarProps;
-    render(<Avatar {...unsafe}>A</Avatar>);
-    const avatar = container.querySelector('[data-testid="avatar"]') as HTMLElement;
-    expect(avatar.style.color).toBe('');
-    expect(avatar.className).not.toContain('local');
-    expect(avatar.hasAttribute('data-core-tone')).toBe(false);
   });
   it('renders named progress and decorative skeletons with finite owner variants', () => {
     render(

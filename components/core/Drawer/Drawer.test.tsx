@@ -70,40 +70,6 @@ describe('Drawer', () => {
     expect(onClose).toHaveBeenCalledOnce();
   });
 
-  it('maps semantic placement and size presets at the Core boundary', () => {
-    renderDrawer(
-      <Drawer
-        opened
-        onClose={vi.fn()}
-        title="Navigation"
-        closeLabel="Close navigation"
-        placement="left"
-        size="compact"
-        visibility="mobile-only"
-      >
-        Navigation links
-      </Drawer>,
-    );
-
-    const drawerRoot = document.body.querySelector<HTMLElement>('[data-placement="left"][data-size="compact"]');
-
-    expect(drawerRoot).not.toBeNull();
-    expect(drawerRoot?.getAttribute('data-mobile-only')).toBe('true');
-  });
-
-  it('defaults to compact density independently of width and supports standard chrome', () => {
-    const view = (density?: 'standard' | 'compact') => (
-      <Drawer opened onClose={vi.fn()} title="History" closeLabel="Close history" size="large" density={density}>
-        History entries
-      </Drawer>
-    );
-    renderDrawer(view());
-    expect(document.body.querySelector('[data-density="compact"][data-size="large"]')).not.toBeNull();
-    renderDrawer(view('standard'));
-    expect(document.body.querySelector('[data-density="standard"][data-size="large"]')).not.toBeNull();
-    expect(getDialog()).toHaveAccessibleName('History');
-  });
-
   it('locks close controls and marks the surface busy while loading', () => {
     const onClose = vi.fn();
     renderDrawer(

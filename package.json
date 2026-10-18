@@ -60,7 +60,6 @@
     "design-system:generate": "node scripts/design-system/validate.mjs --generate",
     "design-system:check": "node scripts/design-system/validate.mjs",
     "design-system:test": "node --test scripts/design-system/*.test.mjs",
-    "design-system:typecheck": "tsc --noEmit --project components/core/tsconfig.type-test.json",
     "storybook:local-contracts": "LOCAL_CONTRACTS=1 storybook dev -p 6010",
     "storybook:build:local-contracts": "LOCAL_CONTRACTS=1 storybook build",
     "i18n:sync-weblate": "python3 scripts/i18n/sync-weblate-messages.py",

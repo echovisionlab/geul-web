@@ -4,11 +4,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   createAccountPersonalAccessTokenAction,
   createMyPersonalAccessTokenAction,
-  deleteAccountPersonalAccessTokenAction,
   deleteMyPersonalAccessTokenAction,
-  listAccountPersonalAccessTokensAction,
   listMyPersonalAccessTokensAction,
-  regenerateAccountPersonalAccessTokenAction,
   regenerateMyPersonalAccessTokenAction,
 } from './personal-access-token';
 
@@ -61,55 +58,12 @@ describe('personal access token actions', () => {
     });
   });
 
-  it('creates the generic API token without a name or capability input', async () => {
-    mocks.client.createMyPersonalAccessToken.mockResolvedValue({
-      personalAccessToken: token,
-      secret: 'one-time-secret',
-    });
-
-    await expect(createMyPersonalAccessTokenAction()).resolves.toEqual({
-      personalAccessToken: { id: 'pat-1', createdAt: '2026-08-23T00:00:00.000Z' },
-      secret: 'one-time-secret',
-    });
-    expect(mocks.client.createMyPersonalAccessToken).toHaveBeenCalledWith({});
-  });
-
   it('maps the mutation freshness guard to reauthentication', async () => {
     mocks.client.regenerateMyPersonalAccessToken.mockRejectedValue(
       new ConnectError('Fresh browser authentication is required', Code.FailedPrecondition),
     );
 
     await expect(regenerateMyPersonalAccessTokenAction('pat-1')).resolves.toEqual({ error: 'reauth_required' });
-  });
-
-  it('uses the target Member RPCs for Admin management', async () => {
-    mocks.client.listAccountPersonalAccessTokens.mockResolvedValue({ personalAccessTokens: [token] });
-    mocks.client.createAccountPersonalAccessToken.mockResolvedValue({ personalAccessToken: token, secret: 'created' });
-    mocks.client.regenerateAccountPersonalAccessToken.mockResolvedValue({
-      personalAccessToken: token,
-      secret: 'regenerated',
-    });
-    mocks.client.deleteAccountPersonalAccessToken.mockResolvedValue({ deleted: true });
-
-    await expect(listAccountPersonalAccessTokensAction('member-2')).resolves.toMatchObject({
-      personalAccessTokens: [{ id: 'pat-1' }],
-    });
-    await expect(createAccountPersonalAccessTokenAction('member-2')).resolves.toMatchObject({ secret: 'created' });
-    await expect(regenerateAccountPersonalAccessTokenAction('member-2', 'pat-1')).resolves.toMatchObject({
-      secret: 'regenerated',
-    });
-    await expect(deleteAccountPersonalAccessTokenAction('member-2', 'pat-1')).resolves.toEqual({ deleted: true });
-
-    expect(mocks.client.listAccountPersonalAccessTokens).toHaveBeenCalledWith({ memberId: 'member-2' });
-    expect(mocks.client.createAccountPersonalAccessToken).toHaveBeenCalledWith({ memberId: 'member-2' });
-    expect(mocks.client.regenerateAccountPersonalAccessToken).toHaveBeenCalledWith({
-      memberId: 'member-2',
-      personalAccessTokenId: 'pat-1',
-    });
-    expect(mocks.client.deleteAccountPersonalAccessToken).toHaveBeenCalledWith({
-      memberId: 'member-2',
-      personalAccessTokenId: 'pat-1',
-    });
   });
 
   it('rejects malformed identifiers before creating a client', async () => {

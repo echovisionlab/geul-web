@@ -131,16 +131,4 @@ describe('Core PIN editing', () => {
         .join(''),
     ).toBe('123');
   });
-
-  it('rejects unsupported runtime alignment', () => {
-    expect(() => act(() => root.render(<PinInput {...({ align: 'left' } as unknown as PinInputProps)} />))).toThrow(
-      'Invalid PIN input alignment',
-    );
-  });
-
-  it('rejects unsupported runtime lengths rather than opening arbitrary grid geometry', () => {
-    expect(() => act(() => root.render(<PinInput {...({ length: 9 } as unknown as PinInputProps)} />))).toThrow(
-      'Invalid PIN input length',
-    );
-  });
 });

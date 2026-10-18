@@ -55,14 +55,6 @@ async function render(surface: 'overview' | 'settings' | 'jobs', state: 'ready' 
   );
 }
 describe('translation page preview controllers', () => {
-  it('outlines the overview as the page title followed by its sections', async () => {
-    await render('overview');
-    await expectEventually(() => expect(host.querySelectorAll('h2')).toHaveLength(2));
-    const sections = Array.from(host.querySelectorAll('h2'));
-    expect(sections.every((heading) => heading.getAttribute('data-level') === '4')).toBe(true);
-    expect(host.querySelector('h1')?.textContent).toBe('Translations');
-    expect(createTranslationClient).not.toHaveBeenCalled();
-  });
   it('cancels an active job through the local RPC and refreshes the production table', async () => {
     await render('jobs');
     await expectEventually(() => expect(host.textContent).toContain('night-signals'));
@@ -78,28 +70,6 @@ describe('translation page preview controllers', () => {
     await expectEventually(() => expect(host.textContent).not.toContain('night-signals'));
     expect(host.querySelector('[role="status"]')?.textContent).toBe('No translation jobs yet.');
     expect((document.activeElement as HTMLButtonElement).textContent).toContain('Refresh');
-    expect(createTranslationClient).not.toHaveBeenCalled();
-  });
-  it('toggles the actual provider switch and retains confirmed local state after refetch', async () => {
-    await render('settings');
-    await expectEventually(() => expect(host.querySelector('input[type="checkbox"]')).not.toBeNull());
-    const toggle = host.querySelector<HTMLInputElement>('input[type="checkbox"]')!;
-    expect(toggle.checked).toBe(true);
-    expect(host.querySelector('[role="group"][aria-label="Editorial translation"]')).not.toBeNull();
-    expect(host.querySelector('button[aria-label="Edit provider Editorial translation"]')).not.toBeNull();
-    expect(host.querySelector('input[role="switch"][aria-label="Active Editorial translation"]')).not.toBeNull();
-    await act(async () => toggle.click());
-    await expectEventually(() =>
-      expect(host.querySelector<HTMLInputElement>('input[type="checkbox"]')?.checked).toBe(false),
-    );
-    expect(host.textContent).toContain('Editorial translation');
-    expect(createTranslationClient).not.toHaveBeenCalled();
-  });
-  it('projects failed local reads onto the production settings error branch', async () => {
-    await render('settings', 'error');
-    await expectEventually(() => expect(host.querySelector('[role="alert"]')?.textContent).toMatch(/failed|unable/i));
-    expect(host.querySelector('input')).toBeNull();
-    expect(host.querySelector('[role="alert"]')?.textContent).toMatch(/failed|unable/i);
     expect(createTranslationClient).not.toHaveBeenCalled();
   });
 });

@@ -27,22 +27,6 @@ function render(props: Partial<ShareLinkSectionViewProps> = {}) {
   );
 }
 describe('share link keyboard and target context', () => {
-  it('moves focus into the opened form, exposes its relationship and returns focus after close', () => {
-    render();
-    const trigger = host.querySelector<HTMLButtonElement>('button[aria-label="New link"]')!;
-    expect(trigger).toHaveAccessibleName('New link');
-    expect(trigger.textContent).toBe('');
-    expect(trigger).toHaveAttribute('aria-expanded', 'false');
-    render({ formOpened: true });
-    expect(trigger).toHaveAttribute('aria-expanded', 'true');
-    const form = document.getElementById(trigger.getAttribute('aria-controls')!);
-    expect(form).toHaveAttribute('role', 'group');
-    expect(form).toHaveAttribute('aria-label', 'New link');
-    expect(document.activeElement).toBe(form?.querySelector('input'));
-    render({ formOpened: false });
-    expect(document.activeElement).toBe(trigger);
-    expect(trigger).not.toHaveAttribute('aria-controls');
-  });
   it('keeps the compact icon creation command connected and preserves the permission boundary', () => {
     const toggle = vi.fn();
     render({ onToggleForm: toggle });

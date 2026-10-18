@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { invariantTokens } from '@/components/core/design-tokens';
 import {
   diffRemovedImmersiveSceneAssetFileIds,
   parseImmersiveSceneConfig,
@@ -11,59 +10,6 @@ import {
 } from './schema';
 
 describe('immersive scene schema', () => {
-  it('applies defaults and treats one unit as a valid static scene', () => {
-    const config = parseImmersiveSceneConfig({
-      unitsJson: '[{"id":"single","mesh":"box","color":"#ffffff"}]',
-      copyJson: '[{"id":"single","title":"Single","text":"Only one unit"}]',
-    });
-
-    expect(config.playback).toBe('scroll');
-    expect(config.transitionWindow).toBe('0.22');
-    expect(config.unitHoldSeconds).toBe('5');
-    expect(config.unitGapSeconds).toBe('1.5');
-    expect(config.textColorSource).toBe('theme');
-    expect(config.backgroundColor).toBe(invariantTokens['paper-background']);
-    expect(config.lightTextColor).toBe('#111827');
-    expect(config.darkTextColorSource).toBe('inherit');
-    expect(config.darkTextColor).toBe('#f8fafc');
-    expect(config.rotationX).toBe('0');
-    expect(config.rotationY).toBe('0');
-    expect(config.rotationZ).toBe('0');
-    expect(config.rotationSpeedX).toBe('0');
-    expect(config.rotationSpeedY).toBe('0.18');
-    expect(config.rotationSpeedZ).toBe('0');
-    expect(config.scrollRotationTurnsX).toBe('0');
-    expect(config.scrollRotationTurnsY).toBe('0.35');
-    expect(config.scrollRotationTurnsZ).toBe('0');
-    expect(config.units).toEqual([
-      {
-        id: 'single',
-        mesh: 'box',
-        color: '#ffffff',
-        title: 'Single',
-        text: 'Only one unit',
-      },
-    ]);
-  });
-
-  it('preserves custom light and dark overlay text colors in shared props', () => {
-    const config = parseImmersiveSceneConfig({
-      textColorSource: 'custom',
-      lightTextColor: '#101010',
-      darkTextColorSource: 'custom',
-      darkTextColor: '#fefefe',
-      backgroundColor: '#070a0d',
-      darkBackgroundColor: '#102030',
-    });
-
-    expect(config.textColorSource).toBe('custom');
-    expect(config.lightTextColor).toBe('#101010');
-    expect(config.darkTextColorSource).toBe('custom');
-    expect(config.darkTextColor).toBe('#fefefe');
-    expect(config.backgroundColor).toBe('#070a0d');
-    expect(config.darkBackgroundColor).toBe('#102030');
-  });
-
   it('keeps visual units and localized copy separable by id', () => {
     const units = parseImmersiveSceneUnits(
       [
@@ -225,33 +171,6 @@ describe('immersive scene schema', () => {
         text: '',
       },
     ]);
-  });
-
-  it('defaults to visual units with blank copy when no props are provided', () => {
-    const config = parseImmersiveSceneConfig({});
-
-    expect(config.units[0]).toMatchObject({
-      id: 'who-we-are',
-      mesh: 'sphere',
-      color: '#d8dde5',
-      title: '',
-      text: '',
-    });
-  });
-
-  it('serializes shared visual props separately from localized copy props', () => {
-    const config = parseImmersiveSceneConfig({});
-
-    expect(JSON.parse(serializeImmersiveSceneVisualUnits(config.units))[0]).toEqual({
-      id: 'who-we-are',
-      mesh: 'sphere',
-      color: '#d8dde5',
-    });
-    expect(JSON.parse(serializeImmersiveSceneCopyUnits(config.units))[0]).toEqual({
-      id: 'who-we-are',
-      title: '',
-      text: '',
-    });
   });
 
   it('serializes asset references as durable IDs and authored settings only', () => {

@@ -4,16 +4,10 @@ import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
-  EditorAuthoringModeProvider,
   useEditorAuthoringMode,
   useOptionalEditorAuthoringMode,
   type EditorAuthoringMode,
 } from './EditorAuthoringMode';
-
-const grantedMode: EditorAuthoringMode = {
-  allowNeutralBlockEdits: false,
-  allowLocalizedBlockEdits: true,
-};
 
 let latest: { required: EditorAuthoringMode; optional: EditorAuthoringMode | null } | null = null;
 let root: Root | null = null;
@@ -62,16 +56,5 @@ describe('EditorAuthoringMode context', () => {
     const hooks = render(<Harness />);
 
     expect(hooks.optional).toBeNull();
-  });
-
-  it('returns the provider-owned mode from both hooks', () => {
-    const hooks = render(
-      <EditorAuthoringModeProvider value={grantedMode}>
-        <Harness />
-      </EditorAuthoringModeProvider>,
-    );
-
-    expect(hooks.required).toBe(grantedMode);
-    expect(hooks.optional).toBe(grantedMode);
   });
 });

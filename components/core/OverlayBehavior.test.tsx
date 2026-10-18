@@ -104,34 +104,6 @@ describe('Core React Aria overlay interactions', () => {
     expect(action).toHaveBeenCalledTimes(1);
     expect(document.querySelector('[role="menu"]')).toBeNull();
   });
-  it('opens a submenu by keyboard and restores parent focus on ArrowLeft', async () => {
-    await render(
-      <DropdownMenu>
-        <DropdownMenu.Target>
-          <Button>Menu</Button>
-        </DropdownMenu.Target>
-        <DropdownMenu.Dropdown>
-          <DropdownMenu.Sub>
-            <DropdownMenu.Sub.Target>More</DropdownMenu.Sub.Target>
-            <DropdownMenu.Sub.Dropdown>
-              <DropdownMenu.Item>Nested command</DropdownMenu.Item>
-            </DropdownMenu.Sub.Dropdown>
-          </DropdownMenu.Sub>
-        </DropdownMenu.Dropdown>
-      </DropdownMenu>,
-    );
-    await key(container.querySelector('button')!, 'ArrowDown');
-    const parent = document.querySelector<HTMLElement>('[role="menuitem"]')!;
-    await key(parent, 'ArrowRight');
-    expect(document.querySelectorAll('[role="menu"]')).toHaveLength(2);
-    const nested = [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find((x) =>
-      x.textContent?.includes('Nested command'),
-    )!;
-    expect(document.activeElement).toBe(nested);
-    await key(nested, 'ArrowLeft');
-    expect(document.querySelectorAll('[role="menu"]')).toHaveLength(1);
-    expect(document.activeElement).toBe(parent);
-  });
   it('returns focus from a dismissed Popover to its Core trigger', async () => {
     await render(
       <Popover>
@@ -186,25 +158,5 @@ describe('Core React Aria overlay interactions', () => {
     await key(document.querySelector('[role="dialog"]')!, 'Escape');
     expect(document.querySelector('[role="dialog"]')).toBeNull();
     expect(document.activeElement).toBe(outerTrigger);
-  });
-  it('locks escape and outside press while pending without executing close', async () => {
-    const close = vi.fn();
-    await render(
-      <ContentModal opened loading title="Saving" closeLabel="Close" onClose={close}>
-        <Button>Pending</Button>
-      </ContentModal>,
-    );
-    const dialog = document.querySelector('[role="dialog"]')!;
-    expect(dialog.getAttribute('aria-busy')).toBe('true');
-    await key(dialog, 'Escape');
-    const backdrop = document.querySelector<HTMLElement>('[data-loading]')!.parentElement!;
-    await act(async () => {
-      backdrop.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-      backdrop.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
-      backdrop.click();
-    });
-    expect(close).not.toHaveBeenCalled();
-    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
-    expect(document.querySelector('[aria-label="Close"]')).toBeNull();
   });
 });

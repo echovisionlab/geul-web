@@ -2,7 +2,6 @@ import { randomTestId, randomTestUuid } from '@echovisionlab/geul-common/test/ra
 import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
-  buildUploadResumeCandidateLookupKey,
   clearMultipartUploadCandidateLookupCache,
   findMultipartUploadCandidateShared,
 } from './upload-resume-candidate';
@@ -13,24 +12,6 @@ afterEach(() => {
 });
 
 describe('upload resume candidate lookup cache', () => {
-  it('builds a stable lookup key from upload identity fields', () => {
-    const entityId = randomTestUuid();
-    const slotId = randomTestId('slot');
-    const fileId = randomTestUuid();
-    const uploadId = randomTestId('upload');
-
-    expect(
-      buildUploadResumeCandidateLookupKey({
-        uploadType: UploadType.TRACK_AUDIO,
-        entityId,
-        entityType: 4 as never,
-        slotId,
-        fileId,
-        uploadId,
-      }),
-    ).toBe(`10:${entityId}:4:${slotId}::${fileId}:${uploadId}`);
-  });
-
   it('dedupes concurrent lookups for the same upload identity', async () => {
     const lookup = vi.fn().mockResolvedValue(null);
     const input = {

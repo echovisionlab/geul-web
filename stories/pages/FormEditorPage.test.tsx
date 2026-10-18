@@ -56,11 +56,4 @@ describe('complete form editing surfaces', () => {
       expect(canvas.getAllByRole('tabpanel')).toHaveLength(1);
     },
   );
-
-  it('renders schema-ordered submission details inside the actual editor tab', async () => {
-    await render('submissions', true);
-    await vi.waitFor(() => expect(host.textContent).toContain('June Han'));
-    expect(host.textContent).toContain('Metadata');
-    expect(within(host).getByRole('img', { name: 'True' })).toBeTruthy();
-  });
 });

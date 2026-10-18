@@ -8,8 +8,6 @@ import { SiteOgBackgroundUploader } from './SiteOgBackgroundUploader';
 const uploadMock = vi.fn();
 const setSiteAssetActionMock = vi.fn();
 const deleteSiteAssetActionMock = vi.fn();
-
-let uploadHandler: ((blob: Blob) => void | Promise<void>) | null = null;
 let removeHandler: (() => void | Promise<void>) | null = null;
 let container: HTMLDivElement | null = null;
 let root: Root | null = null;
@@ -49,14 +47,12 @@ vi.mock('@/components/core/Notification', () => ({
 vi.mock('@/features/upload/ImageUploadCropController', () => ({
   ImageUploadCropController: ({
     imageUrl,
-    onUpload,
     onRemove,
   }: {
     imageUrl: string | null;
     onUpload: (blob: Blob) => void | Promise<void>;
     onRemove: () => void | Promise<void>;
   }) => {
-    uploadHandler = onUpload;
     removeHandler = onRemove;
     return <div data-testid="featured-image-url">{imageUrl ?? ''}</div>;
   },
@@ -87,7 +83,6 @@ afterEach(() => {
   container?.remove();
   container = null;
   root = null;
-  uploadHandler = null;
   removeHandler = null;
   uploadMock.mockReset();
   setSiteAssetActionMock.mockReset();
@@ -95,30 +90,6 @@ afterEach(() => {
 });
 
 describe('SiteOgBackgroundUploader', () => {
-  it('refreshes the owning settings projection after upload succeeds', async () => {
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    root = createRoot(container);
-
-    const onSuccess = vi.fn();
-    act(() => {
-      root?.render(<SiteOgBackgroundUploader type="privacy_og_background" currentUrl={null} onSuccess={onSuccess} />);
-    });
-
-    await act(async () => {
-      await uploadHandler?.(new Blob(['image'], { type: 'image/webp' }));
-    });
-
-    expect(uploadMock).toHaveBeenCalledWith(expect.any(Blob), {
-      slotId: 'privacy_og_background',
-      fileName: 'privacy_og_background',
-      onProgress: expect.any(Function),
-    });
-    expect(setSiteAssetActionMock).toHaveBeenCalledWith('privacy_og_background', 'file-1');
-    expect(onSuccess).toHaveBeenCalledWith(undefined);
-    expect(container.textContent).not.toContain('/uploaded-source.webp');
-  });
-
   it('clears the current background immediately after delete succeeds', async () => {
     container = document.createElement('div');
     document.body.appendChild(container);

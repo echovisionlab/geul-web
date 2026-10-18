@@ -420,56 +420,6 @@ describe('EditorHeader', () => {
     expect(document.querySelector('[data-testid="editor-header-change-status"]')).toBeNull();
   });
 
-  it('keeps locale and collaboration together with compact commands in the same row', () => {
-    mockMatchMedia(true);
-
-    renderEditorHeader(
-      <EditorHeader
-        title="Mobile post"
-        status="draft"
-        statusOptions={[
-          { value: 'draft', label: 'Draft', actionLabel: 'Move to Draft', tone: 'neutral' },
-          { value: 'published', label: 'Published', actionLabel: 'Publish', tone: 'positive' },
-        ]}
-        isConnected
-        isSynced
-        onBack={vi.fn()}
-        onTitleChange={vi.fn()}
-        onStatusChange={vi.fn()}
-        groupStatusWithCollab
-        controls={<button type="button">Locale control</button>}
-        actionItems={[
-          {
-            key: 'fullscreen',
-            label: 'Fullscreen',
-            ariaLabel: 'Open fullscreen',
-            iconOnly: true,
-            icon: <IconHistory size={14} />,
-            onClick: vi.fn(),
-          },
-        ]}
-      />,
-    );
-
-    const mobileRoot = document.querySelector('[data-testid="editor-header-mobile"]');
-    const mobileActionBar = document.querySelector('[data-testid="editor-header-mobile-action-bar"]');
-
-    expect(mobileRoot).not.toBeNull();
-    expect(mobileActionBar).not.toBeNull();
-    expect(mobileActionBar?.textContent).toContain('Draft');
-    expect(document.querySelector('[data-testid="editor-header-collab-button"]')?.getAttribute('aria-label')).toContain(
-      'Draft · Collab',
-    );
-    expect(mobileActionBar?.textContent).toContain('Locale control');
-    expect(document.querySelector('[data-testid="editor-header"]')).toBeNull();
-    const toolbar = document.querySelector('[data-testid="editor-header-command-toolbar"]');
-    expect(toolbar?.getAttribute('role')).toBe('toolbar');
-    expect(toolbar?.textContent).not.toContain('Fullscreen');
-    expect(toolbar?.contains(document.querySelector('button[aria-label="Open fullscreen"]'))).toBe(true);
-    expect(mobileActionBar?.contains(toolbar)).toBe(true);
-    expect(document.querySelector('button[aria-label="Actions"]')).toBeNull();
-  });
-
   it('requires confirmation before invoking delete when deleteConfirmation is provided', async () => {
     const onDelete = vi.fn();
 

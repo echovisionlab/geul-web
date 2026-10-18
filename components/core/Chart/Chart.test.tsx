@@ -2,7 +2,7 @@
 import { act, cloneElement, type ReactElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
-import { Chart, type ChartKind, type ChartProps } from './Chart';
+import { Chart, type ChartKind } from './Chart';
 vi.mock('recharts', async (importActual) => ({
   ...(await importActual<typeof import('recharts')>()),
   ResponsiveContainer: ({ children }: { children: ReactElement }) =>
@@ -106,22 +106,5 @@ describe('Core chart accessibility and ownership', () => {
     const plot = container.querySelector('[aria-hidden="true"]')!;
     expect(plot.querySelector('svg')).not.toBeNull();
     expect(plot.querySelector('[tabindex="0"]')).toBeNull();
-  });
-  it('does not inject consumer appearance or reserved state attributes from runtime spreads', () => {
-    const unsafe = {
-      kind: 'line',
-      data: [{ name: 'A', value: Number.NaN }],
-      label: 'Response',
-      labels,
-      style: { color: 'red' },
-      className: 'local',
-      'data-size': 'large',
-    } as unknown as ChartProps;
-    act(() => root.render(<Chart {...unsafe} />));
-    const figure = container.querySelector('figure')!;
-    expect(figure.style.color).toBe('');
-    expect(figure.className).not.toContain('local');
-    expect(figure.dataset.size).toBe('standard');
-    expect(container.querySelector('table')?.textContent).toContain('A00%');
   });
 });

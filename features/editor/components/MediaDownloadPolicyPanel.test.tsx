@@ -44,20 +44,6 @@ function renderPanel(panel: React.ReactNode): string {
 const adapter = {} as FileDownloadPolicyEditorAdapter;
 
 describe('MediaDownloadPolicyPanel', () => {
-  it('is hidden without a media target', () => {
-    expect(
-      renderPanel(
-        <MediaDownloadPolicyPanel
-          fileId={null}
-          blockId={null}
-          blockType={null}
-          runtimeTarget={null}
-          adapter={adapter}
-        />,
-      ),
-    ).not.toContain('data-testid="download-policy"');
-  });
-
   it.each([TranscodeEntityType.POST, TranscodeEntityType.PAGE] as const)(
     'shows the policy editor for a persisted file on runtime target %s',
     (entityType) => {
@@ -77,23 +63,6 @@ describe('MediaDownloadPolicyPanel', () => {
       expect(html).toContain('data-reference-path="file"');
       expect(html).toContain('data-entity-id="entity-1"');
       expect(html).toContain('data-presentation="media-header"');
-    },
-  );
-
-  it.each([TranscodeEntityType.WORK, TranscodeEntityType.PROGRAM_EVENT] as const)(
-    'shows the exact relation policy for files on %s editors',
-    (entityType) => {
-      expect(
-        renderPanel(
-          <MediaDownloadPolicyPanel
-            fileId="persisted-file"
-            blockId="block-1"
-            blockType="file"
-            runtimeTarget={{ entityType, entityId: 'entity-1' }}
-            adapter={adapter}
-          />,
-        ),
-      ).toContain('data-testid="download-policy"');
     },
   );
 

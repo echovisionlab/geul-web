@@ -149,41 +149,4 @@ describe('Core emoji collection', () => {
       vi.unstubAllGlobals();
     }
   });
-
-  it('uses compact owned cells and a sparse grid for short search results', async () => {
-    const container = document.createElement('div');
-    document.body.append(container);
-    const root = createRoot(container);
-    const onSelect = vi.fn();
-    const item = { id: 'rocket', label: ':rocket:', value: '🚀' };
-    await act(async () =>
-      root.render(
-        <EmojiPickerPanel
-          density="compact"
-          title="Emoji"
-          searchPlaceholder="Search"
-          noResults="No results"
-          query="rocket"
-          items={[item]}
-          onQueryChange={() => {}}
-          onSelect={onSelect}
-        />,
-      ),
-    );
-    const grid = container.querySelector('[role="listbox"]');
-    expect(grid?.getAttribute('data-core-emoji-density')).toBe('compact');
-    expect(grid?.getAttribute('data-core-emoji-sparse')).toBe('true');
-    expect(container.querySelector('[data-geul-input-size]')?.getAttribute('data-geul-input-size')).toBe('xs');
-    const option = container.querySelector<HTMLElement>('[role="option"]');
-    expect(option?.getAttribute('data-control-size')).toBe('xs');
-    expect(option?.parentElement?.style.height).toBe('30px');
-    await act(async () => {
-      option?.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, button: 0 }));
-      option?.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, button: 0 }));
-      option?.click();
-    });
-    expect(onSelect).toHaveBeenCalledWith(item);
-    await act(async () => root.unmount());
-    container.remove();
-  });
 });

@@ -34,36 +34,6 @@ function renderAlert(node: React.ReactNode): HTMLElement {
 }
 
 describe('Alert', () => {
-  it('renders title and content with the default neutral notice treatment', () => {
-    const alert = renderAlert(<Alert title="Heads up">Review the latest changes.</Alert>);
-
-    expect(alert.textContent).toContain('Heads up');
-    expect(alert.textContent).toContain('Review the latest changes.');
-    expect(alert.getAttribute('data-tone')).toBe('neutral');
-    expect(alert.getAttribute('data-prominence')).toBe('standard');
-    expect(alert.hasAttribute('data-variant')).toBe(false);
-  });
-
-  it('preserves negative feedback semantics for the shared themed presentation', () => {
-    const alert = renderAlert(<Alert tone="danger">Unable to save.</Alert>);
-
-    expect(alert.getAttribute('data-tone')).toBe('danger');
-    expect(alert.textContent).toContain('Unable to save.');
-    expect(alert.hasAttribute('style')).toBe(false);
-  });
-
-  it('supports strong semantic prominence without exposing a raw variant', () => {
-    const alert = renderAlert(
-      <Alert tone="warning" prominence="strong">
-        Preview mode
-      </Alert>,
-    );
-
-    expect(alert.getAttribute('data-tone')).toBe('warning');
-    expect(alert.hasAttribute('data-variant')).toBe(false);
-    expect(alert.getAttribute('data-prominence')).toBe('strong');
-  });
-
   it('preserves close-button interaction behavior', () => {
     const onClose = vi.fn();
     renderAlert(

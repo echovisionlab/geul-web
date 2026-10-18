@@ -27,17 +27,6 @@ function render(node: ReactNode) {
   act(() => root.render(node));
 }
 describe('NavigationLink', () => {
-  it('wraps a logo or image in a named, content-sized graphic link', () => {
-    render(
-      <NavigationLink href="https://example.com" appearance="graphic" aria-label="Go home">
-        <img alt="" src="/logo.svg" />
-      </NavigationLink>,
-    );
-    const anchor = host.querySelector('a')!;
-    expect(anchor.dataset.appearance).toBe('graphic');
-    expect(anchor.getAttribute('aria-label')).toBe('Go home');
-    expect(anchor.getAttribute('href')).toBe('https://example.com');
-  });
   it('preserves an anchor ref, object href and routing options through the application guard', () => {
     const guard = vi.fn();
     const navigate = vi.fn();

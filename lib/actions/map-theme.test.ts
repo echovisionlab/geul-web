@@ -139,31 +139,6 @@ describe('map theme actions', () => {
     await expect(listMapThemesAction()).rejects.toThrow('missing its dark variant');
   });
 
-  it('creates light and dark variants in one request', async () => {
-    createMapThemeMock.mockResolvedValue({ id: 'theme-new' });
-    const lightVariant = { ...variant('ignored'), scheme: 'light' as const };
-    const darkVariant = { ...variant('ignored'), scheme: 'dark' as const };
-    const { id: _lightId, ...lightInput } = lightVariant;
-    const { id: _darkId, ...darkInput } = darkVariant;
-
-    await expect(
-      createMapThemeAction({
-        name: '  New Theme  ',
-        settings,
-        lightVariant: lightInput,
-        darkVariant: darkInput,
-      }),
-    ).resolves.toEqual({ data: { id: 'theme-new' } });
-
-    expect(createMapThemeMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'New Theme',
-        lightVariant: expect.objectContaining({ backgroundColor: '#ffffff' }),
-        darkVariant: expect.objectContaining({ backgroundColor: '#ffffff' }),
-      }),
-    );
-  });
-
   it('rejects an unsafe color before calling the API', async () => {
     const lightVariant = { ...variant('ignored'), scheme: 'light' as const };
     const darkVariant = { ...variant('ignored'), scheme: 'dark' as const };

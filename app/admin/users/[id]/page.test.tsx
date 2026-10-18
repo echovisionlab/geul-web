@@ -225,15 +225,4 @@ describe('Admin Member profile controller', () => {
 
     expect(mocks.setFormValues).not.toHaveBeenCalled();
   });
-
-  it('refreshes the exact Member after an avatar mutation without issuing a generic profile update', async () => {
-    expect(mocks.profileProps).not.toBeNull();
-
-    await act(async () => {
-      await mocks.profileProps!.onImageChange('https://cdn.example/member.webp');
-    });
-
-    expect(mocks.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['users', 'admin', 'member-1'] });
-    expect(mocks.updateUserAction).not.toHaveBeenCalled();
-  });
 });

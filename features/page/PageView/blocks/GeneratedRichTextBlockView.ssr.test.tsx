@@ -120,22 +120,6 @@ describe('GeneratedRichTextBlockView lazy SSR', () => {
     expect(html).not.toContain('<button');
   });
 
-  it('server-renders authored headings below the document title with the authored level and id', async () => {
-    const heading: LocalizedRichTextBlock = {
-      id: 'scope',
-      kind: 'heading',
-      base: { props: { level: 1 } },
-      locale: { props: {}, content: [{ value: { case: 'text', value: { text: 'Scope' } } }] },
-      children: [],
-    } as unknown as LocalizedRichTextBlock;
-    const titled = await renderGeneratedStream(heading, 1);
-    expect(titled).toMatch(/<h2[^>]*\bid="scope"[^>]*\bdata-heading-level="1"[^>]*><span>Scope<\/span><\/h2>/u);
-    expect(titled).not.toContain('<h1');
-    expect(await renderGeneratedStream(heading)).toMatch(
-      /<h1[^>]*\bdata-heading-level="1"[^>]*><span>Scope<\/span><\/h1>/u,
-    );
-  });
-
   it('renders inline and display math within nested structural rich text', async () => {
     const html = await renderGeneratedStream({
       id: 'math-callout',

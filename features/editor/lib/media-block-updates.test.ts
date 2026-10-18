@@ -135,37 +135,6 @@ describe('createTiptapEditorMediaCommandPort', () => {
     element.remove();
   });
 
-  it('captures a durable block anchor without a legacy Y-ProseMirror binding', () => {
-    const anchorBlockId = randomTestUuid();
-    const element = document.createElement('div');
-    document.body.append(element);
-    const editor = new Editor({
-      element,
-      extensions: createTiptapWireExtensions(),
-      content: {
-        type: 'doc',
-        content: [
-          {
-            type: 'blockGroup',
-            content: [
-              {
-                type: 'blockContainer',
-                attrs: { id: anchorBlockId },
-                content: [{ type: 'paragraph', content: [{ type: 'text', text: '/file' }] }],
-              },
-            ],
-          },
-        ],
-      },
-    });
-    const port = createTiptapEditorMediaCommandPort(editor);
-
-    expect(port.captureInsertPosition(anchorBlockId)).toEqual({ referenceBlockId: anchorBlockId });
-
-    editor.destroy();
-    element.remove();
-  });
-
   it('fails closed when deferred media work reaches a destroyed editor', () => {
     const blockId = randomTestUuid();
     const fileId = randomTestUuid();

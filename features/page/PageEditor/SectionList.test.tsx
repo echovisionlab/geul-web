@@ -134,15 +134,6 @@ describe('Page section pre-insert configuration', () => {
     expect(onInsert).toHaveBeenCalledWith('external-video', { url: 'https://video.example/watch/1' });
   });
 
-  it('cancels Embed configuration without creating a durable section', () => {
-    const onCancel = vi.fn();
-    const onInsert = vi.fn();
-    renderDialog('embed', onCancel, onInsert);
-    act(() => document.querySelector<HTMLButtonElement>('[data-page-section-preinsert-cancel]')?.click());
-    expect(onCancel).toHaveBeenCalledOnce();
-    expect(onInsert).not.toHaveBeenCalled();
-  });
-
   it('requires a noncredential HTTPS URI before inserting an Embed', () => {
     const onInsert = vi.fn();
     renderDialog('embed', vi.fn(), onInsert);

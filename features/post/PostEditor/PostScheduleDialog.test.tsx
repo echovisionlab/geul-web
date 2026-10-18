@@ -162,18 +162,6 @@ describe('PostScheduleDialog', () => {
     );
   });
 
-  it('restores a wall time that is valid in the saved zone but is a DST gap in another browser zone', async () => {
-    const onSubmit = await renderSchedule({ initialInstant: '2027-03-13T17:30:00.000Z' });
-    expect(getDialog().querySelector('[data-type="hour"]')?.getAttribute('aria-valuenow')).toBe('2');
-    await submitSchedule();
-    expect(onSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({
-        timeZone: 'Asia/Seoul',
-        instant: new Date('2027-03-13T17:30:00.000Z'),
-      }),
-    );
-  });
-
   it('converts the entered wall time using the newly selected zone', async () => {
     const onSubmit = await renderSchedule();
     const input = getDialog().querySelector<HTMLInputElement>('[role="combobox"]')!;

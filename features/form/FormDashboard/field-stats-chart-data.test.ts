@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fieldChartOptions, fieldChartRows } from './field-stats-chart-data';
+import { fieldChartRows } from './field-stats-chart-data';
 const base = { fieldId: 'field', fieldName: 'Field', fieldType: 'select' };
 describe('field statistics chart data', () => {
   it('retains authored categories, count and localized empty values', () => {
@@ -59,12 +59,5 @@ describe('field statistics chart data', () => {
     expect(fieldChartRows({ ...stat, histogram: [{ bucket: 5, count: 1 }] }, String, 'empty')).toEqual([
       { name: '5 – 6', value: 1 },
     ]);
-  });
-  it('offers all nine existing modes with a table option and preserves field-specific defaults', () => {
-    expect(new Set(Object.values(fieldChartOptions).flat()).size).toBe(9);
-    expect(Object.values(fieldChartOptions).every((options) => options.includes('table'))).toBe(true);
-    expect(fieldChartOptions.select[0]).toBe('donut');
-    expect(fieldChartOptions.number[0]).toBe('histogram');
-    expect(fieldChartOptions.date[0]).toBe('area');
   });
 });

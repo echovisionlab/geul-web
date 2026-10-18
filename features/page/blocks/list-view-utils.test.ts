@@ -1,5 +1,3 @@
-import { build } from 'esbuild';
-import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import * as z from '@/lib/zod-mini';
 import { imageAspectRatioSchema, listLayoutSchema, toAspectRatio as legacyToAspectRatio } from './list-shared';
@@ -30,18 +28,5 @@ describe('list view utilities', () => {
     expect(legacyToAspectRatio).toBe(toAspectRatio);
     expect(z._default(listLayoutSchema, 'grid').parse(undefined)).toBe('grid');
     expect(z._default(imageAspectRatioSchema, '16:9').parse(undefined)).toBe('16:9');
-  });
-
-  it('keeps the browser helper graph free of schema initialization and Zod', async () => {
-    const result = await build({
-      entryPoints: [resolve(process.cwd(), 'features/page/blocks/list-view-utils.ts')],
-      bundle: true,
-      platform: 'browser',
-      format: 'esm',
-      write: false,
-      metafile: true,
-    });
-    expect(Object.keys(result.metafile!.inputs)).toHaveLength(1);
-    expect(Object.keys(result.metafile!.inputs).some((path) => path.includes('zod'))).toBe(false);
   });
 });

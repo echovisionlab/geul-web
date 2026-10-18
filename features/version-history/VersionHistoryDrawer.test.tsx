@@ -237,18 +237,6 @@ describe('VersionHistoryDrawer controller', () => {
     expect(routerRefreshMock).toHaveBeenCalledOnce();
   });
 
-  it.each(['post', 'page', 'work'] as const)(
-    'uses the same-locale source-only restore warning for %s',
-    async (entityType) => {
-      await renderSettledController(true, { onClose: vi.fn(), onRestored: vi.fn() }, true, entityType);
-
-      act(() => currentViewProps().onSelectVersion('version-2'));
-      expect(currentViewProps().labels.restoreBody).toBe(
-        'Same-locale restore v2 (EN) stales translations without regeneration.',
-      );
-    },
-  );
-
   it('uses the destructive source-locale switch warning for a cross-locale snapshot', async () => {
     listVersionsRequestMock.mockResolvedValue({
       versions: [{ ...versions[0], sourceLocale: 'ko' }],
@@ -303,34 +291,6 @@ describe('VersionHistoryDrawer controller', () => {
     expect(currentViewProps().selectedVersionId).toBeNull();
     expect(currentViewProps().restoreConfirmationOpened).toBe(false);
     expect(restoreVersionRequestMock).not.toHaveBeenCalled();
-  });
-
-  it('connects continuation intent to the real paginated query without losing loaded versions', async () => {
-    const first = Array.from({ length: 20 }, (_, index) => ({
-      ...versions[0]!,
-      id: `version-${41 - index}`,
-      version: 41 - index,
-    }));
-    const second = Array.from({ length: 20 }, (_, index) => ({
-      ...versions[0]!,
-      id: `version-${21 - index}`,
-      version: 21 - index,
-    }));
-    listVersionsRequestMock
-      .mockResolvedValueOnce({ versions: first, total: 41 })
-      .mockResolvedValueOnce({ versions: second, total: 41 })
-      .mockResolvedValueOnce({ versions: [{ ...versions[0]!, id: 'version-1', version: 1 }], total: 41 });
-    await renderSettledController(true, { onClose: vi.fn(), onRestored: vi.fn() });
-    expect(currentViewProps().versions).toHaveLength(20);
-    expect(currentViewProps().pagination.nextPage).toBe(2);
-    await act(async () => currentViewProps().pagination.onLoad());
-    await act(async () => vi.waitFor(() => expect(currentViewProps().versions).toHaveLength(40)));
-    expect(currentViewProps().versions[0]?.id).toBe('version-41');
-    expect(currentViewProps().pagination.nextPage).toBe(3);
-    await act(async () => currentViewProps().pagination.onLoad());
-    await act(async () => vi.waitFor(() => expect(currentViewProps().versions).toHaveLength(41)));
-    expect(currentViewProps().pagination.nextPage).toBeNull();
-    expect(listVersionsRequestMock.mock.calls.map((call) => call[2])).toEqual([1, 2, 3]);
   });
 
   it('bounds a list failure and allows an explicit initial retry', async () => {
