@@ -18,6 +18,7 @@ vi.mock('@/lib/api/server-client', () => ({
   createClientClient: () => new Proxy({}, { get: (_, key) => (key === 'then' ? undefined : mocks.rpc) }),
   createPublicClientClientWithAuth: () => new Proxy({}, { get: (_, key) => (key === 'then' ? undefined : mocks.rpc) }),
   createCommentClient: () => new Proxy({}, { get: (_, key) => (key === 'then' ? undefined : mocks.rpc) }),
+  createPublicPostClientWithAuth: () => new Proxy({}, { get: (_, key) => (key === 'then' ? undefined : mocks.rpc) }),
   createEmailSuppressionClient: () => new Proxy({}, { get: (_, key) => (key === 'then' ? undefined : mocks.rpc) }),
   createFormClient: () => new Proxy({}, { get: (_, key) => (key === 'then' ? undefined : mocks.rpc) }),
   createPublicFormClientWithAuth: () => new Proxy({}, { get: (_, key) => (key === 'then' ? undefined : mocks.rpc) }),
@@ -58,7 +59,11 @@ const cases: Array<[string, string, unknown[]]> = [
   ['client', 'listClientsForBlockAction', [{}]],
   ['client', 'getClientsForBlockByIdsAction', [{ ids: ['00000000-0000-4000-8000-000000000001'] }]],
   ['comment', 'listCommentsAction', ['00000000-0000-4000-8000-000000000001', {}]],
-  ['comment', 'loadMoreRepliesAction', ['00000000-0000-4000-8000-000000000001', {}]],
+  [
+    'comment',
+    'loadMoreRepliesAction',
+    ['00000000-0000-4000-8000-000000000001', { postId: '00000000-0000-4000-8000-000000000002' }],
+  ],
   ['email-suppression', 'getEmailSuppressionAction', ['test@example.com']],
   ['form', 'listFormsAdminAction', [{}]],
   [

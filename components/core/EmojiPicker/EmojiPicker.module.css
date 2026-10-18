@@ -18,7 +18,7 @@
 }
 
 .item[data-control-kind='icon'] {
-  font-size: var(--geul-font-size-xl);
+  font-size: var(--geul-icon-size-xl);
   line-height: var(--geul-line-height-xs);
 }
 

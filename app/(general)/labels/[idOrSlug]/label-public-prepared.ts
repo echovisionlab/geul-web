@@ -13,6 +13,7 @@ const labelArtistListProps = parseArtistListProps({
   limit: '12',
   columns: '6',
   layout: 'grid',
+  itemSize: 'xs',
   imageAspectRatio: '1:1',
   showMeta: 'false',
 });

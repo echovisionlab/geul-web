@@ -5,7 +5,7 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 
 import { afterEach, describe, expect, it } from 'vitest';
-import { ClientPublicMark, type ClientPublicMarkProps } from './ClientPublicMark';
+import { ClientPublicMark, opticalLogoSize, type ClientPublicMarkProps } from './ClientPublicMark';
 
 let host: HTMLDivElement | null = null;
 let root: Root | null = null;
@@ -52,5 +52,14 @@ describe('ClientPublicMark', () => {
 
     expect(element.querySelector('img')).toBeNull();
     expect(element.querySelector('a')?.textContent).toBe('Text Client');
+  });
+
+  it.each([
+    ['a square symbol', 96, 96, { width: 24, height: 24 }],
+    ['a 3:1 wordmark', 240, 80, { width: 60, height: 20 }],
+    ['a 5:1 wordmark', 240, 48, { width: 77, height: 15 }],
+    ['a 12:1 strip', 480, 40, { width: 104, height: 9 }],
+  ])('sizes %s by area so marks of different shapes carry similar weight', (_shape, width, height, size) => {
+    expect(opticalLogoSize(width, height)).toEqual(size);
   });
 });

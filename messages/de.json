@@ -5041,7 +5041,6 @@
     }
   },
   "creditList": {
-    "groupAriaLabel": "Credits von {name}",
     "groupName": "Gruppe {index}"
   },
   "sitemapPage": {

@@ -1,0 +1,16 @@
+/* Logos stay in the neutral palette; their own colour returns when the website link is engaged. */
+.logo {
+  display: block;
+  filter: grayscale(1);
+  transition: filter var(--geul-motion-fast) var(--geul-motion-easing);
+}
+
+:global(a):is(:hover, :focus-visible) > .logo {
+  filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo {
+    transition: none;
+  }
+}

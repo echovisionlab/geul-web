@@ -1,12 +1,19 @@
-.root {
+.root,
+.overview {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--geul-spacing-xl);
   min-width: 0;
 }
 
-.media {
+.media,
+.body {
   min-width: 0;
+}
+
+/* The authored body opens a new reading part: a section step below the overview. */
+.body {
+  margin-block-start: var(--geul-spacing-role-section);
 }
 
 .main {
@@ -80,11 +87,15 @@
 }
 
 /* Running text keeps the reading measure from the start edge; lists, tables and media use the full width. */
+.body :global(.prose) > :global([data-document-block]),
+.body > :global(p),
 .sectionBody :global(.prose) > :global([data-document-block]),
 .sectionBody > :global(p) {
   max-width: var(--geul-content-width-reading);
 }
 
+.body :global(.prose) > :global([data-document-measure='standard']),
+.body :global(.prose) > :global([data-document-measure='wide']),
 .sectionBody :global(.prose) > :global([data-document-measure='standard']),
 .sectionBody :global(.prose) > :global([data-document-measure='wide']) {
   max-width: none;
@@ -106,7 +117,7 @@
 }
 
 @media (width >= $mantine-breakpoint-md) {
-  .root[data-has-media] {
+  .root[data-has-media] .overview {
     grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
     column-gap: var(--geul-spacing-xl);
   }
@@ -121,7 +132,8 @@
 
 @media print {
   .root,
-  .root[data-has-media] {
+  .overview,
+  .root[data-has-media] .overview {
     display: block;
   }
 
@@ -141,7 +153,8 @@
     display: block;
   }
 
-  .main > * + * {
+  .main > * + *,
+  .root > * + * {
     margin-top: 6mm;
   }
 
@@ -155,6 +168,7 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .root[data-print-media='overlay'] .overview,
   .root[data-print-media='overlay'] .main {
     display: contents;
   }

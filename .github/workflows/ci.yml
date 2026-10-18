@@ -350,9 +350,9 @@ jobs:
     name: Tests
     needs: [scope, format]
     if: needs.scope.outputs.run_full == 'true'
-    # Repo-scoped ARC scale set: one 8-CPU pod on mini (172.16.71.79).
-    runs-on: geul-web-mini
-    timeout-minutes: 45
+    # GitHub-hosted: the public repository no longer uses the mini ARC runner.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
     env:
       # Reviewed renderer source, pinned to the merged API main commit.
       EMAIL_PREVIEW_API_REVISION: 6e0a343d99150d553e327ba00bc66168e0ba5d10

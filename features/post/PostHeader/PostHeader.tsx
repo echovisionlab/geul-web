@@ -147,7 +147,7 @@ export function PostHeader({ post, onExport, languageControl }: PostHeaderProps)
           <UserInlineLinks
             users={post.authors}
             unknownLabel={unknownUserLabel}
-            avatarSize="sm"
+            avatarSize="xs"
             textSize="sm"
             textColor={inverse ? 'inverse' : undefined}
             separator="slash"

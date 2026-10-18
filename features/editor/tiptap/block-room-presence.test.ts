@@ -80,7 +80,7 @@ describe('typed Block-room presence', () => {
     applyAwarenessUpdate(second, encodeAwarenessUpdate(first, [first.clientID]), 'presence-test');
     vi.advanceTimersByTime(100);
     expect(secondEditor.view.dom.querySelector<HTMLElement>('.block-room-cursor')?.style.borderLeftColor).toBe(
-      'rgb(92, 89, 79)',
+      'rgb(93, 91, 86)',
     );
 
     firstEditor.destroy();
@@ -102,7 +102,7 @@ describe('typed Block-room presence', () => {
     applyAwarenessUpdate(local, encodeAwarenessUpdate(remote, [remote.clientID]), 'presence-test');
     const editor = createEditor(local, 'Alice', '#112233');
     const cursor = editor.view.dom.querySelector<HTMLElement>('.block-room-cursor');
-    expect(cursor?.style.borderLeftColor).toBe('rgb(92, 89, 79)');
+    expect(cursor?.style.borderLeftColor).toBe('rgb(93, 91, 86)');
     editor.destroy();
     remote.destroy();
     local.destroy();

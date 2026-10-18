@@ -10,6 +10,11 @@ html {
   box-sizing: border-box;
 }
 
+/* Line icons (Tabler) draw the shared hairline stroke instead of their 2-unit default. */
+svg.tabler-icon {
+  stroke-width: var(--geul-icon-stroke);
+}
+
 body {
   margin: 0;
   font-family: var(--font-family-sans), sans-serif;

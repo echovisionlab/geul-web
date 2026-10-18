@@ -138,6 +138,7 @@ function usePageEditorViewModel({
 }: PageEditorProps) {
   const t = useTranslations('pageEditor');
   const tLayout = useTranslations('contentLayout');
+  const tToc = useTranslations('tableOfContents');
   const tCommon = useTranslations('common');
   const tCommonLabels = useTranslations('common.labels');
   const router = useRouter();
@@ -586,6 +587,7 @@ function usePageEditorViewModel({
     layout,
     handleLayoutChange,
     tLayout,
+    tToc,
     displayedSummary,
     roomLocale,
     provider,
@@ -663,6 +665,7 @@ export function PageEditorView({ model }: { model: PageEditorViewModel }) {
     layout,
     handleLayoutChange,
     tLayout,
+    tToc,
     displayedSummary,
     roomLocale,
     provider,
@@ -772,6 +775,7 @@ export function PageEditorView({ model }: { model: PageEditorViewModel }) {
                   disabled={!canEditNeutral}
                   labels={{
                     contentHeight: tLayout('contentHeight'),
+                    tableOfContents: tToc('title'),
                     content: tLayout('content'),
                     viewport: tLayout('viewport'),
                     pageChrome: tLayout('chrome'),

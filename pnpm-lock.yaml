@@ -252,14 +252,14 @@ importers:
         specifier: https://registry.npmjs.org/@echovisionlab/audio-transcoder/-/audio-transcoder-0.2.1.tgz
         version: https://registry.npmjs.org/@echovisionlab/audio-transcoder/-/audio-transcoder-0.2.1.tgz
       '@echovisionlab/geul-common':
-        specifier: 0.8.1
-        version: 0.8.1(yjs@13.6.33)
+        specifier: 0.9.0
+        version: 0.9.0(yjs@13.6.33)
       '@echovisionlab/geul-event':
-        specifier: 0.11.0
-        version: 0.11.0(@echovisionlab/geul-proto@0.11.0)
+        specifier: 0.12.0
+        version: 0.12.0(@echovisionlab/geul-proto@0.12.0)
       '@echovisionlab/geul-proto':
-        specifier: 0.11.0
-        version: 0.11.0
+        specifier: 0.12.0
+        version: 0.12.0
       '@echovisionlab/geul-telemetry':
         specifier: 0.2.1
         version: 0.2.1
@@ -549,6 +549,9 @@ importers:
       eslint-plugin-testing-library:
         specifier: 7.16.2
         version: 7.16.2(eslint@9.39.5(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@7.0.2)
+      harfbuzzjs:
+        specifier: 1.6.3
+        version: 1.6.3
       playwright:
         specifier: 1.64.0
         version: 1.64.0
@@ -576,6 +579,9 @@ importers:
       stylelint-config-standard-scss:
         specifier: ^17.0.0
         version: 17.0.0(postcss@8.5.26)(stylelint@17.14.1(supports-color@10.2.2)(typescript@7.0.2))
+      subset-font:
+        specifier: 2.9.0
+        version: 2.9.0
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
@@ -1437,19 +1443,19 @@ packages:
     version: 0.2.1
     engines: {node: 24.21.0}
 
-  '@echovisionlab/geul-common@0.8.1':
-    resolution: {integrity: sha512-/9McJ5mPtCKJm/d3DM9rsoBb/cPBR55KBZZtR3XxGrXWOugSi9DixkemGhmAM/o8iHqgPM+L/D59UcjJ7LC5hw==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-common/0.8.1/47bf967079969aefa05cd0551b68ce1ac55cf26e}
+  '@echovisionlab/geul-common@0.9.0':
+    resolution: {integrity: sha512-EyEa93TzVTfXHF9qzgcuWlrTbfHZcd3Or9mTL3mzefR+IR4qErSfmVzTrUkzJMPy2bwRyElNboKBdC8luQKvig==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-common/0.9.0/b99aba4d11337bae44e03df111ac90d32575c604}
     engines: {node: 24.21.0}
     peerDependencies:
       yjs: ^13.6.33
 
-  '@echovisionlab/geul-event@0.11.0':
-    resolution: {integrity: sha512-EUKQMSQXWv/o3eNz7C6BnaM8u5yJWZPh0c5eOMJl/hJJtyy8pcV4X9IxTmeZo7DJZUnk2BXvN8p6EGQXhTzx0A==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-event/0.11.0/4933e9f22558ecc7e06aa061a7cd84e18e0d3a87}
+  '@echovisionlab/geul-event@0.12.0':
+    resolution: {integrity: sha512-QTp+R5fQjpH9urwKJJCIEJ6A8D2R0kSbr9k9+kFqhVYYFoSSRFlRXO8kFiuQEHEkEF1iEvKQ+napWKSJ9B0Y9w==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-event/0.12.0/4f25bb12207c0bd47748a65b90ce5e0bd99b05f2}
     peerDependencies:
-      '@echovisionlab/geul-proto': ^0.11.0
+      '@echovisionlab/geul-proto': ^0.12.0
 
-  '@echovisionlab/geul-proto@0.11.0':
-    resolution: {integrity: sha512-Nu2CLQ5cJVZD+2uU0Lej4EhtfaEZoD2YYoYZYQNIvA3/7tw5JPPXv0VPkcoYZCzU+Rya9y5pn+YYup6uncMpzg==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-proto/0.11.0/f6ed90b75b576d85036a3d7b178943a8c02fd1fd}
+  '@echovisionlab/geul-proto@0.12.0':
+    resolution: {integrity: sha512-PgCjfR2+8CCcBLgAIk2VBG9l7XlmqrM06Lx6MY36aFDQDOYhEUOrvlTSDYfW2HpNwGO94w8tlePuhefT+EW/ew==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-proto/0.12.0/84e75f954ad4b685f7c18c2335c072b8ea620368}
 
   '@echovisionlab/geul-telemetry@0.2.1':
     resolution: {integrity: sha512-b2anyVtbeuBZeCnGDm22YTTRgwyMLq5F/OxilDcmhQ4PPzMMHhNFc4PS7QgQ4+Ff4OtD5d8879/JgufwvCXeug==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-telemetry/0.2.1/01c157cd94c0401273b748adc4de74c61af58eb4}
@@ -5569,6 +5575,9 @@ packages:
       debug:
         optional: true
 
+  fontverter@2.0.0:
+    resolution: {integrity: sha512-DFVX5hvXuhi1Jven1tbpebYTCT9XYnvx6/Z+HFUPb7ZRMCW+pj2clU9VMhoTPgWKPhAs7JJDSk3CW1jNUvKCZQ==}
+
   for-each@0.3.5:
     resolution: {integrity: sha512-dKx12eRCVIzqCxFGplyFKJMPvLEWgmNtUrpTiJIR5u97zEhRG8ySrtboPHZXx7daLxQVrl643cTzbab2tkQjxg==}
     engines: {node: '>= 0.4'}
@@ -5739,6 +5748,9 @@ packages:
 
   hachure-fill@0.5.2:
     resolution: {integrity: sha512-3GKBOn+m2LX9iq+JC1064cSFprJY4jL1jCXTcpnfER5HYE2l/4EfWSGzkPa/ZDBmYI0ZOEj5VHV/eKnPGkHuOg==}
+
+  harfbuzzjs@1.6.3:
+    resolution: {integrity: sha512-R5Mfo1UUvQmZJmtScP7fBLKYKnYu82ZdtFT7WbQYeGb3Ut5PR3xfFCJ5/FjbcW5SAfb9cqCSny/KNjp+NJBx0w==}
 
   has-bigints@1.1.0:
     resolution: {integrity: sha512-R3pbpkcIqv2Pm3dUwgjclDRVmWpTJW2DcMzcIhEXEx1oh/CEMObMm3KLmRJOdvhM7o4uQBnwr8pzRK2sJWIqfg==}
@@ -8317,6 +8329,9 @@ packages:
   stylis@4.4.0:
     resolution: {integrity: sha512-5Z9ZpRzfuH6l/UAvCPAPUo3665Nk2wLaZU3x+TLHKVzIz33+sbJqbtrYoC3KD4/uVOr2Zp+L0LySezP9OHV9yA==}
 
+  subset-font@2.9.0:
+    resolution: {integrity: sha512-WJulQeFwbewrXIGcLJbSZFWI44fHW8gNRuPzLywfDL8w38IPRbN1JFxwG76aoohw9kcFdvjVIn2QmID1iy119A==}
+
   sugarss@5.0.1:
     resolution: {integrity: sha512-ctS5RYCBVvPoZAnzIaX5QSShK8ZiZxD5HUqSxlusvEMC+QZQIPCPOIJg6aceFX+K2rf4+SH89eu++h1Zmsr2nw==}
     engines: {node: '>=18.0'}
@@ -8853,6 +8868,10 @@ packages:
   wavesurfer.js@7.12.11:
     resolution: {integrity: sha512-Sx0yZIz7jRJ9J9p7UL+pl9y0UQBB6UN/XNo+R7Gy4tCR5xZI9jMyA0dnt1R8TMVSQ4LZ10SeB2HJYQ+dV2dPSA==}
 
+  wawoff2@2.0.1:
+    resolution: {integrity: sha512-r0CEmvpH63r4T15ebFqeOjGqU4+EgTx4I510NtK35EMciSdcTxCw3Byy3JnBonz7iyIFZ0AbVo0bbFpEVuhCYA==}
+    hasBin: true
+
   webidl-conversions@8.0.1:
     resolution: {integrity: sha512-BMhLD/Sw+GbJC21C/UgyaZX41nPt8bUTg+jWyDeg7e7YN4xOM05YPSIXceACnXVtqyEw/LMClUQMtMZ+PGGpqQ==}
     engines: {node: '>=20'}
@@ -8935,6 +8954,9 @@ packages:
     resolution: {integrity: sha512-Tb2FUhB4vUsGQlfSquQLYkApkuPAFQXGFzxWKHHumVz2dK+X1RUm/HnID4+TfIGYJ1kTcwOaCk/buYCEJr6YjQ==}
     engines: {node: '>=20.11'}
     hasBin: true
+
+  woff2sfnt-sfnt2woff@1.0.0:
+    resolution: {integrity: sha512-edK4COc1c1EpRfMqCZO1xJOvdUtM5dbVb9iz97rScvnTevqEB3GllnLWCmMVp1MfQBdF1DFg/11I0rSyAdS4qQ==}
 
   word-wrap@1.2.5:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
@@ -10069,20 +10091,20 @@ snapshots:
     dependencies:
       mediabunny: 1.61.3
 
-  '@echovisionlab/geul-common@0.8.1(yjs@13.6.33)':
+  '@echovisionlab/geul-common@0.9.0(yjs@13.6.33)':
     dependencies:
       '@bufbuild/protobuf': 2.16.0
-      '@echovisionlab/geul-proto': 0.11.0
+      '@echovisionlab/geul-proto': 0.12.0
       diff: 9.0.0
       yjs: 13.6.33
       zod: 4.6.5
 
-  '@echovisionlab/geul-event@0.11.0(@echovisionlab/geul-proto@0.11.0)':
+  '@echovisionlab/geul-event@0.12.0(@echovisionlab/geul-proto@0.12.0)':
     dependencies:
       '@bufbuild/protobuf': 2.16.0
-      '@echovisionlab/geul-proto': 0.11.0
+      '@echovisionlab/geul-proto': 0.12.0
 
-  '@echovisionlab/geul-proto@0.11.0':
+  '@echovisionlab/geul-proto@0.12.0':
     dependencies:
       '@bufbuild/protobuf': 2.16.0
 
@@ -14327,6 +14349,11 @@ snapshots:
     optionalDependencies:
       debug: 4.4.3(supports-color@10.2.2)
 
+  fontverter@2.0.0:
+    dependencies:
+      wawoff2: 2.0.1
+      woff2sfnt-sfnt2woff: 1.0.0
+
   for-each@0.3.5:
     dependencies:
       is-callable: 1.2.7
@@ -14527,6 +14554,8 @@ snapshots:
       duplexer: 0.1.2
 
   hachure-fill@0.5.2: {}
+
+  harfbuzzjs@1.6.3: {}
 
   has-bigints@1.1.0: {}
 
@@ -17891,6 +17920,12 @@ snapshots:
 
   stylis@4.4.0: {}
 
+  subset-font@2.9.0:
+    dependencies:
+      fontverter: 2.0.0
+      harfbuzzjs: 1.6.3
+      p-limit: 3.1.0
+
   sugarss@5.0.1(postcss@8.5.26):
     dependencies:
       postcss: 8.5.26
@@ -18452,6 +18487,10 @@ snapshots:
 
   wavesurfer.js@7.12.11: {}
 
+  wawoff2@2.0.1:
+    dependencies:
+      argparse: 2.0.1
+
   webidl-conversions@8.0.1: {}
 
   webpack-bundle-analyzer@4.10.1:
@@ -18599,6 +18638,10 @@ snapshots:
       isexe: 2.0.0
 
   why-is-node-running@3.2.1: {}
+
+  woff2sfnt-sfnt2woff@1.0.0:
+    dependencies:
+      pako: 1.0.11
 
   word-wrap@1.2.5: {}
 

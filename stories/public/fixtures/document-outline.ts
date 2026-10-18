@@ -16,6 +16,14 @@ export async function assertDocumentOutline({ canvasElement }: { canvasElement: 
   expect(skips).toEqual([]);
   assertOutlineClearance(canvasElement);
   assertReadingStartEdge(canvasElement);
+  const frame = canvasElement.querySelector<HTMLElement>('[data-content-layout]');
+  const controls = canvasElement.querySelector<HTMLElement>('[data-content-controls]');
+  if (frame && controls) {
+    const rtl = getComputedStyle(frame).direction === 'rtl';
+    const a = frame.getBoundingClientRect();
+    const b = controls.getBoundingClientRect();
+    expect(Math.abs(rtl ? a.left - b.left : a.right - b.right)).toBeLessThanOrEqual(1);
+  }
 }
 
 /** Running text starts where its title starts: the reading column sits on the document's start edge. */

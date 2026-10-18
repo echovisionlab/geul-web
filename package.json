@@ -73,7 +73,12 @@
     "postinstall": "pnpm prepare:client-media-codecs",
     "design-system:review": "node scripts/design-system/review.mjs",
     "perf:bundle": "node scripts/performance/route-bundle-budget.mjs . --check scripts/performance/route-bundle-budget.json",
-    "perf:bundle:update": "node scripts/performance/route-bundle-budget.mjs . --write-budget scripts/performance/route-bundle-budget.json"
+    "perf:bundle:update": "node scripts/performance/route-bundle-budget.mjs . --write-budget scripts/performance/route-bundle-budget.json",
+    "fonts:ranges": "node scripts/fonts/fetch-unicode-ranges.mjs",
+    "fonts:build": "node scripts/fonts/build-fonts.mjs",
+    "fonts:check": "node scripts/fonts/check-fonts.mjs",
+    "fonts:test": "node --test scripts/fonts/*.test.mjs",
+    "fonts:lint": "eslint --no-config-lookup --config scripts/fonts/eslint.config.mjs scripts/fonts/*.mjs --max-warnings=0"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.16.0",
@@ -83,9 +88,9 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@echovisionlab/audio-transcoder": "https://registry.npmjs.org/@echovisionlab/audio-transcoder/-/audio-transcoder-0.2.1.tgz",
-    "@echovisionlab/geul-common": "0.8.1",
-    "@echovisionlab/geul-event": "0.11.0",
-    "@echovisionlab/geul-proto": "0.11.0",
+    "@echovisionlab/geul-common": "0.9.0",
+    "@echovisionlab/geul-event": "0.12.0",
+    "@echovisionlab/geul-proto": "0.12.0",
     "@echovisionlab/geul-telemetry": "0.2.1",
     "@echovisionlab/ionian": "https://registry.npmjs.org/@echovisionlab/ionian/-/ionian-0.2.0.tgz",
     "@hocuspocus/provider": "^4.6.0",
@@ -184,6 +189,7 @@
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-testing-library": "7.16.2",
+    "harfbuzzjs": "1.6.3",
     "playwright": "1.64.0",
     "postcss": "8.5.26",
     "postcss-preset-mantine": "1.18.0",
@@ -193,6 +199,7 @@
     "storybook-addon-pseudo-states": "10.5.8",
     "stylelint": "^17.14.1",
     "stylelint-config-standard-scss": "^17.0.0",
+    "subset-font": "2.9.0",
     "typescript": "^7.0.2",
     "typescript-eslint": "workspace:*",
     "vitest": "^5.0.3"

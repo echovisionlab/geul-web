@@ -6,6 +6,7 @@ export interface DocumentLayoutViewModel {
   contentHeight: DocumentContentHeightViewModel;
   pageChrome: DocumentChromeLayoutViewModel;
   footer: DocumentChromeLayoutViewModel;
+  hideTableOfContents?: boolean;
 }
 
 /**

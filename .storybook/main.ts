@@ -1,10 +1,26 @@
 import type { StorybookConfig } from '@storybook/nextjs';
-import { existsSync, realpathSync } from 'node:fs';
+import { existsSync, readFileSync, realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+// Storybook evaluates this file with Node's own loader: explicit `.ts` specifiers, dependency-free modules only.
+import { geulFontStylesheets } from '../lib/styles/geul-fonts.generated.ts';
+import { readPublicRuntimeEnvironment } from '../lib/public-runtime-config.ts';
 import { prepareThreeRuntime } from '../scripts/prepare-three-runtime.mjs';
 
 const typeScriptLoader = fileURLToPath(new URL('./loaders/transpile-typescript.cjs', import.meta.url));
 const useLocalContracts = process.env.LOCAL_CONTRACTS === '1';
+const localFontRoot = new URL('../.artifacts/fonts/dist/fonts/', import.meta.url);
+const localManifestUrl = new URL('manifest.json', localFontRoot);
+const localFontManifest = existsSync(localManifestUrl) ? JSON.parse(readFileSync(localManifestUrl, 'utf8')) : null;
+const useLocalFonts = Boolean(
+  localFontManifest?.complete &&
+  Object.values(geulFontStylesheets).every(
+    (file) => Object.values(localFontManifest.stylesheets).includes(file) && existsSync(new URL(file, localFontRoot)),
+  ),
+);
+const fontBaseUrl = useLocalFonts ? '/fonts' : readPublicRuntimeEnvironment().fontBaseUrl;
+function htmlAttribute(value: string): string {
+  return value.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;');
+}
 
 function resolveLocalContractRoot(label: string, url: URL): string {
   const path = fileURLToPath(url);
@@ -29,7 +45,7 @@ const localContractRoots = useLocalContracts
     }
   : null;
 
-const config: StorybookConfig = {
+const config = {
   core: {
     disableWhatsNewNotifications: true,
     disableTelemetry: true,
@@ -42,13 +58,16 @@ const config: StorybookConfig = {
   ],
   staticDirs: [
     { from: '../tests/fixtures/media', to: '/storybook/media' },
-    { from: '../lib/assets/fonts', to: '/storybook/fonts' },
+    ...(useLocalFonts ? [{ from: fileURLToPath(localFontRoot), to: '/fonts' }] : []),
     { from: '../public/providers', to: '/providers' },
     { from: '../public/fixtures', to: '/fixtures' },
     { from: '../public/storybook-fixtures', to: '/storybook-fixtures' },
     { from: '../docs', to: '/ui-kit-docs' },
     { from: '../design/storybook', to: '/design-system-review' },
   ],
+  previewHead: (head) => `${head}
+    <link id="geul-font-stylesheet" rel="stylesheet" data-font-base-url="${htmlAttribute(fontBaseUrl)}"
+      href="${htmlAttribute(`${fontBaseUrl.replace(/\/+$/, '')}/${geulFontStylesheets.latin}`)}">`,
   addons: [
     '@storybook/addon-docs',
     '@storybook/addon-themes',
@@ -117,5 +136,5 @@ const config: StorybookConfig = {
     }
     return webpackConfig;
   },
-};
+} satisfies StorybookConfig;
 export default config;

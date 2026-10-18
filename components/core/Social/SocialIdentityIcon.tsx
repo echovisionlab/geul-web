@@ -53,10 +53,10 @@ function GoogleIdentityIcon({
   label,
   ...props
 }: Omit<SocialIdentityIconProps, 'platform'>) {
-  if (!Object.hasOwn(primitiveTokens.fontSize, size)) {
-    throw new RangeError('Social icons require a registered type scale size.');
+  if (!Object.hasOwn(primitiveTokens.iconSize, size)) {
+    throw new RangeError('Social icons require a registered icon size.');
   }
-  const dimension = primitiveTokens.fontSize[size];
+  const dimension = primitiveTokens.iconSize[size];
   return (
     <svg
       {...presentationAttributes(props)}

@@ -9,6 +9,7 @@ z.config(en());
 const url = z.url();
 const publicRuntimeConfigSchema = z.object({
   cdnUrl: url,
+  fontBaseUrl: url,
   apiUrl: url,
   p5RunnerUrl: z.optional(url),
   googleMapsApiKey: z.optional(z.string()),

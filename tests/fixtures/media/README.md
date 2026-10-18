@@ -8,5 +8,6 @@ These files are local-only Storybook fixtures and are not part of the production
 - `image-sample.heic`: small HEIC image used to verify browser decoding and crop previews.
 - `example-studio-logo.svg`: deterministic neutral logo used by public-shell stories.
 - `event-poster.svg`: deterministic 4:5 event poster used by public entity detail stories.
+- `client-wordmark.svg`, `client-symbol.svg`: fictional 5:1 wordmark and square symbol for client logo sizing.
 
 Storybook serves this directory at `/storybook/media` through `.storybook/main.ts`.

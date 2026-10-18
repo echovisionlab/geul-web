@@ -180,16 +180,10 @@ concurrency behavior. Design-system Node contracts also use the measured CPU
 limit. Vitest and Storybook run as sequential steps, so their worker pools do not
 compete with each other in that job.
 
-The workflow targets the repository-scoped ARC label `geul-web-mini` on node
-`mini`, with zero idle runners and at most one active runner. Its pod requests
-and limits eight CPUs and has a 12 GiB memory budget; the node's reported capacity
-is eight CPUs and about 15.5 GiB RAM. Deployment PR 372 was merged and Flux
-reported `InstallSucceeded`; scale set `geul-web-mini` is registered with ID 1
-and phase `Running`, and the listener controller is Ready with a 100m CPU request.
-Zero runner pods at the configured idle minimum of zero is expected. The active
-runner pod was observed with eight CPUs, 12 GiB memory and `Guaranteed` QoS, and
-its Node probe returned `os.availableParallelism() === 8`. Worker scheduling and
-individual test results are recorded separately by each run's logs and artifacts.
+The `Tests` job runs on the GitHub-hosted `ubuntu-24.04` runner since the
+repository became public (2026-10-19); it previously used the repository-scoped
+`geul-web-mini` ARC runner with eight CPUs. Worker counts follow the hosted
+runner's `os.availableParallelism()`, and the job timeout is 60 minutes.
 
 Measure changes using the complete `Tests` job and its individual step durations.
 Vitest phase percentages can include parallel or overlapping work and are not an
@@ -199,7 +193,7 @@ build time; the separate hosted `quality` job includes the Next build.
 ## Storybook browser isolation and CI parallelism
 
 The single `Tests` job depends on `scope` and `format` and starts alongside the
-hosted `quality` job. On `geul-web-mini`, it runs design-system Node contracts and
+hosted `quality` job. It runs design-system Node contracts and
 the full Vitest collection, then Storybook typechecking, MapLibre/p5 preparation,
 one Storybook build, one pinned Linux Go-helper compilation, Chromium setup and
 the `ci` browser suite. All steps use the same job workspace. There is no separate

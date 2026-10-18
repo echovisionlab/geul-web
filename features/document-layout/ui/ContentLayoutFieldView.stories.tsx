@@ -25,6 +25,7 @@ const meta = {
     withFeatureLabels({
       labels: {
         contentHeight: 'contentLayout.contentHeight',
+        tableOfContents: 'tableOfContents.title',
         content: 'contentLayout.content',
         viewport: 'contentLayout.viewport',
         pageChrome: 'contentLayout.chrome',
@@ -38,6 +39,7 @@ const meta = {
     value: { contentHeight: 'content', pageChrome: 'flow', footer: 'flow' },
     labels: {
       contentHeight: 'Content height',
+      tableOfContents: 'Table of contents',
       content: 'Content',
       viewport: 'Viewport',
       pageChrome: 'Content chrome',

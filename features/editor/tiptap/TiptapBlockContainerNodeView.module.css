@@ -1,5 +1,6 @@
 .container {
-  --_callout-icon-width: calc(var(--geul-font-size-lg) * 1.5);
+  /* Reserves the overlaid icon button's width, independent of the text size beside it. */
+  --_callout-icon-width: max(calc(var(--geul-font-size-lg) * 1.5), var(--geul-control-height-sm));
   position: relative;
   width: 100%;
 }

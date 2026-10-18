@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import * as Y from 'yjs';
+import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { PostAction } from '@echovisionlab/geul-proto/secure/post_pb.ts';
 import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 import { act, type ComponentProps, type ReactNode } from 'react';
@@ -68,7 +69,6 @@ vi.mock('@mantine/hooks', () => ({
   useWindowEvent: vi.fn(),
 }));
 vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
-vi.mock('@/components/core/Input', () => ({ Checkbox: () => null }));
 vi.mock('@/lib/contexts/EditorRuntimeContext', () => ({
   EditorRuntimeProvider: ({ children }: { children: ReactNode }) => children,
 }));
@@ -277,7 +277,11 @@ let container: HTMLDivElement | null = null;
 
 async function renderEditor(overrides: Partial<ComponentProps<typeof PostEditor>> = {}) {
   await act(async () => {
-    root?.render(<PostEditor {...editorProps} {...overrides} />);
+    root?.render(
+      <DesignSystemProvider locale="en" forceColorScheme="light">
+        <PostEditor {...editorProps} {...overrides} />
+      </DesignSystemProvider>,
+    );
   });
 }
 

@@ -1,0 +1,36 @@
+/* Roles align in one column across every group, so the list reads as a nested label/value table.
+   A long role wraps within at most 40% of the value width instead of squeezing the names. */
+.list {
+  display: grid;
+  grid-template-columns: fit-content(40%) minmax(0, 1fr);
+  column-gap: var(--geul-spacing-sm);
+  row-gap: var(--geul-spacing-xs);
+  min-width: 0;
+}
+
+.group,
+.rows {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  row-gap: var(--geul-spacing-xxs);
+  min-width: 0;
+}
+
+.groupName {
+  grid-column: 1 / -1;
+}
+
+.row {
+  display: contents;
+}
+
+.people,
+.row > :first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.row[data-roleless] .people {
+  grid-column: 1 / -1;
+}

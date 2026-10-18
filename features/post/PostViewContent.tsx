@@ -163,7 +163,7 @@ export function PostViewContent({
             </ContentChrome>
           }
         >
-          <TableOfContents items={tocItems}>
+          <TableOfContents items={tocItems} enabled={!post.documentLayout.hideTableOfContents}>
             <DsLayoutInset inline={post.featuredImageUrl ? 'md' : 'none'}>
               <div className={classes.contentFlow}>
                 {/* Content */}
@@ -242,6 +242,8 @@ export function PostViewContent({
                       listAction={commentBindings?.listAction}
                       sessionSnapshot={commentBindings?.sessionSnapshot}
                       postId={post.id}
+                      shareToken={shareToken}
+                      sharePassword={sharePassword}
                       commentsEnabled={post.commentsEnabled}
                       status={post.statusCode}
                       canModerate={allowedActions.includes(POST_ACTION.MODERATE_COMMENTS)}

@@ -29,14 +29,15 @@ describe('public catalog entity markup', () => {
     const markup = await render('artist');
     expect(markup.match(/<h1\b/g)).toHaveLength(1);
     expect(markup).toMatch(/<h1\b[^>]*>Mina Park<\/h1>/);
-    expect(markup.match(/data-entity-detail-section=""[^>]*><div[^>]*><h2\b/g)?.length).toBeGreaterThanOrEqual(4);
+    expect(markup.match(/data-entity-detail-section=""[^>]*><div[^>]*><h2\b/g)?.length).toBeGreaterThanOrEqual(3);
     expect(markup).toMatch(
       /<a\b[^>]*href="\/labels\/quiet-records"[^>]*>(?:(?!<\/a>)[\s\S])*Quiet Records(?:(?!<\/a>)[\s\S])*<\/a>/,
     );
     expect(markup).toMatch(
       /<a\b[^>]*href="\/works\/night-signals"[^>]*>(?:(?!<\/a>)[\s\S])*Night Signals(?:(?!<\/a>)[\s\S])*<\/a>/,
     );
-    expect(markup).toMatch(/<[^>]*class="[^"]*prose[^"]*"[^>]*lang="en"/);
+    expect(markup).toMatch(/data-entity-detail-body=""[^>]*><div[^>]*class="[^"]*prose[^"]*"[^>]*lang="en"/);
+    expect(markup).not.toMatch(/<h2[^>]*>Biography<\/h2>/);
   });
   it('marks the fallback language while retaining track titles and durations', async () => {
     const markup = await render('release', true);

@@ -1,28 +1,24 @@
 :root {
-  --font-family-sans: 'Noto Sans', 'Noto Color Emoji';
+  --font-family-sans: 'Geul Sans', 'Geul Emoji';
   --font-mono:
-    'Noto Sans Mono', ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono', 'Noto Color Emoji',
+    'Geul Mono', 'Geul Sans', ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono', 'Geul Emoji',
     monospace;
 }
 
 html[data-font-profile='korean'] {
-  --font-family-sans: 'Noto Sans KR', 'Noto Sans', 'Noto Color Emoji';
+  --font-family-sans: 'Geul Sans', 'Geul Sans Han TC', 'Geul Emoji';
 }
 
 html[data-font-profile='japanese'] {
-  --font-family-sans: 'Noto Sans JP', 'Noto Sans', 'Noto Color Emoji';
+  --font-family-sans: 'Geul Sans', 'Geul Sans Han JP', 'Geul Emoji';
 }
 
 html[data-font-profile='chinese-simplified'] {
-  --font-family-sans: 'Noto Sans SC', 'Noto Sans', 'Noto Color Emoji';
+  --font-family-sans: 'Geul Sans', 'Geul Sans Han SC', 'Geul Emoji';
 }
 
 html[data-font-profile='chinese-traditional'] {
-  --font-family-sans: 'Noto Sans TC', 'Noto Sans', 'Noto Color Emoji';
-}
-
-html[data-font-profile='arabic'] {
-  --font-family-sans: 'Noto Sans Arabic', 'Noto Sans', 'Noto Color Emoji';
+  --font-family-sans: 'Geul Sans', 'Geul Sans Han TC', 'Geul Emoji';
 }
 
 body {

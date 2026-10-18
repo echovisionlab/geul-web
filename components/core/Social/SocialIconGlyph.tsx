@@ -5,7 +5,7 @@ import type { SocialPlatform } from './platforms';
 import classes from './SocialIcon.module.css';
 
 export type SocialIconColorMode = 'currentColor' | 'brand' | 'hoverBrand';
-export type SocialIconSize = keyof typeof primitiveTokens.fontSize;
+export type SocialIconSize = keyof typeof primitiveTokens.iconSize;
 
 declare const preparedSocialIcon: unique symbol;
 
@@ -48,9 +48,9 @@ export function SocialIconGlyph({
   label,
   ...props
 }: SocialIconGlyphProps) {
-  const dimension = primitiveTokens.fontSize[size];
-  if (!Object.hasOwn(primitiveTokens.fontSize, size)) {
-    throw new RangeError('Social icons require a registered type scale size.');
+  const dimension = primitiveTokens.iconSize[size];
+  if (!Object.hasOwn(primitiveTokens.iconSize, size)) {
+    throw new RangeError('Social icons require a registered icon size.');
   }
   const iconStyle: SocialIconStyle = {
     '--_social-brand-light': light,

@@ -5,6 +5,7 @@
  */
 export interface PublicRuntimeConfig {
   cdnUrl: string;
+  fontBaseUrl: string;
   apiUrl: string;
   p5RunnerUrl: string | undefined;
   googleMapsApiKey: string | undefined;
@@ -16,6 +17,7 @@ export interface PublicRuntimeConfig {
 /** Development and test fallbacks. Production browsers must receive the server projection. */
 const developmentPublicRuntimeConfig: PublicRuntimeConfig = {
   cdnUrl: 'http://localhost:8081',
+  fontBaseUrl: 'https://static.rawsector.com/fonts',
   apiUrl: 'http://localhost:8000',
   p5RunnerUrl: undefined,
   googleMapsApiKey: undefined,
@@ -26,6 +28,7 @@ const developmentPublicRuntimeConfig: PublicRuntimeConfig = {
 
 interface RawPublicRuntimeConfig {
   cdnUrl?: string;
+  fontBaseUrl?: string;
   apiUrl?: string;
   p5RunnerUrl?: string;
   googleMapsApiKey?: string;
@@ -53,6 +56,7 @@ function decodePublicRuntimeConfig(raw: RawPublicRuntimeConfig): PublicRuntimeCo
   const defaults = developmentPublicRuntimeConfig;
   return {
     cdnUrl: withoutTrailingSlash(raw.cdnUrl) ?? defaults.cdnUrl,
+    fontBaseUrl: withoutTrailingSlash(raw.fontBaseUrl) ?? defaults.fontBaseUrl,
     apiUrl: withoutTrailingSlash(raw.apiUrl) ?? defaults.apiUrl,
     p5RunnerUrl: withoutTrailingSlash(raw.p5RunnerUrl),
     googleMapsApiKey: optionalText(raw.googleMapsApiKey),
@@ -69,6 +73,7 @@ function decodePublicRuntimeConfig(raw: RawPublicRuntimeConfig): PublicRuntimeCo
 export function readPublicRuntimeEnvironment(): PublicRuntimeConfig {
   return decodePublicRuntimeConfig({
     cdnUrl: process.env.PUBLIC_CDN_URL,
+    fontBaseUrl: process.env.PUBLIC_FONT_BASE_URL,
     apiUrl: process.env.PUBLIC_API_URL,
     p5RunnerUrl: process.env.PUBLIC_P5_RUNNER_URL,
     googleMapsApiKey: process.env.PUBLIC_GOOGLE_MAPS_API_KEY,
@@ -94,6 +99,7 @@ function readBrowserRuntimeConfig(): PublicRuntimeConfig {
   }
   cachedBrowserConfig = decodePublicRuntimeConfig({
     cdnUrl: dataset.geulCdnUrl,
+    fontBaseUrl: dataset.geulFontBaseUrl,
     apiUrl: dataset.geulApiUrl,
     p5RunnerUrl: dataset.geulP5RunnerUrl,
     googleMapsApiKey: dataset.geulGoogleMapsApiKey,
@@ -118,6 +124,10 @@ export function getPublicCollabUrl(): string {
 
 export function getPublicCdnUrl(): string {
   return getPublicRuntimeConfig().cdnUrl;
+}
+
+export function getPublicFontBaseUrl(): string {
+  return getPublicRuntimeConfig().fontBaseUrl;
 }
 
 export function getPublicApiUrl(): string {

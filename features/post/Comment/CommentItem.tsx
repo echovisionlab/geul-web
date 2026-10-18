@@ -36,6 +36,7 @@ import {
   loadMoreRepliesAction,
   updateCommentAction,
   type CommentNode,
+  type CommentReadAccess,
 } from '@/lib/actions/comment';
 import { useSession } from '@/lib/auth/client';
 import { useLocale } from '@/lib/providers/LocaleProvider';
@@ -43,7 +44,7 @@ import { formatRelativeTime } from '@/lib/utils/formatDate';
 import { CommentForm } from './CommentForm';
 import { resolveCommentActions } from './comment-permissions';
 
-interface CommentItemProps {
+interface CommentItemProps extends CommentReadAccess {
   comment: CommentNode;
   postId: string;
   depth?: number;
@@ -53,7 +54,15 @@ interface CommentItemProps {
 
 const MAX_DEPTH = 6;
 
-export function CommentItem({ comment, postId, depth = 0, canReply = true, canModerate = false }: CommentItemProps) {
+export function CommentItem({
+  comment,
+  postId,
+  depth = 0,
+  canReply = true,
+  canModerate = false,
+  shareToken,
+  sharePassword,
+}: CommentItemProps) {
   const replyPanelId = useId();
   const repliesPanelId = useId();
   const tModalActions = useTranslations('common.actions');
@@ -132,7 +141,13 @@ export function CommentItem({ comment, postId, depth = 0, canReply = true, canMo
       const lastReply = displayedReplies[displayedReplies.length - 1];
       const cursor = replyCursor || (lastReply ? lastReply.id : undefined);
 
-      const result = await loadMoreRepliesAction(comment.id, { limit: 10, cursor }).then(unwrapQueryResult);
+      const result = await loadMoreRepliesAction(comment.id, {
+        postId,
+        limit: 10,
+        cursor,
+        shareToken,
+        sharePassword,
+      }).then(unwrapQueryResult);
       setLoadedReplies((prev) => [...prev, ...result.replies]);
       setReplyCursor(result.nextCursor);
       setHasMoreReplies(result.hasMore);
@@ -348,6 +363,8 @@ export function CommentItem({ comment, postId, depth = 0, canReply = true, canMo
                         key={reply.id}
                         comment={reply}
                         postId={postId}
+                        shareToken={shareToken}
+                        sharePassword={sharePassword}
                         depth={depth + 1}
                         canReply={canReply}
                         canModerate={canModerate}

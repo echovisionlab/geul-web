@@ -16,9 +16,10 @@ All inventoried Feature component candidates. Direct value imports, literal lazy
 | [authoring](../../features/authoring)                 |                 5 |                                  0 |
 | [campaign](../../features/campaign)                   |                 7 |                                  0 |
 | [changelog](../../features/changelog)                 |                 1 |                                  0 |
-| [client](../../features/client)                       |                 2 |                                  0 |
+| [client](../../features/client)                       |                 3 |                                  0 |
 | [confirmation](../../features/confirmation)           |                 1 |                                  0 |
 | [cookie-consent](../../features/cookie-consent)       |                 2 |                                  1 |
+| [credits](../../features/credits)                     |                 2 |                                  0 |
 | [data-table](../../features/data-table)               |                27 |                                  0 |
 | [date-time](../../features/date-time)                 |                 1 |                                  0 |
 | [document-layout](../../features/document-layout)     |                 7 |                                  0 |
@@ -47,7 +48,7 @@ All inventoried Feature component candidates. Direct value imports, literal lazy
 | [post](../../features/post)                           |                26 |                                  4 |
 | [print](../../features/print)                         |                 1 |                                  0 |
 | [program-event](../../features/program-event)         |                 8 |                                  2 |
-| [release](../../features/release)                     |                16 |                                  1 |
+| [release](../../features/release)                     |                15 |                                  1 |
 | [search](../../features/search)                       |                 1 |                                  0 |
 | [series](../../features/series)                       |                 3 |                                  0 |
 | [share](../../features/share)                         |                 5 |                                  1 |
@@ -58,7 +59,7 @@ All inventoried Feature component candidates. Direct value imports, literal lazy
 | [upload](../../features/upload)                       |                 1 |                                  0 |
 | [user](../../features/user)                           |                12 |                                  2 |
 | [version-history](../../features/version-history)     |                 2 |                                  0 |
-| [work](../../features/work)                           |                11 |                                  1 |
+| [work](../../features/work)                           |                10 |                                  1 |
 
 ## Every candidate
 
@@ -312,6 +313,7 @@ Direct and transitive imports are source evidence, not visual approval. No compo
 | ---------------------------------------------------------------------- | -------------------- | ------------------------------ |
 | [ClientLogoUploader.tsx](../../features/client/ClientLogoUploader.tsx) | None                 | Pages/Admin/Client Editor      |
 | [ClientPublicMark.tsx](../../features/client/ClientPublicMark.tsx)     | None                 | Pages/Public/Entity Detail     |
+| [PublicClientMarks.tsx](../../features/client/PublicClientMarks.tsx)   | None                 | Pages/Public/Entity Detail     |
 
 ### confirmation
 
@@ -325,6 +327,13 @@ Direct and transitive imports are source evidence, not visual approval. No compo
 | ------------------------------------------------------------------------------------------- | ----------------------------- | ------------------------------ |
 | [CookieConsentBanner.tsx](../../features/cookie-consent/CookieConsentBanner.tsx)            | None                          | **Missing relationship**       |
 | [CookieConsentBannerView.tsx](../../features/cookie-consent/ui/CookieConsentBannerView.tsx) | Feature/Cookie Consent/Banner | Feature/Cookie Consent/Banner  |
+
+### credits
+
+| Production candidate                                                | Direct story imports | Transitive story relationships                                                              |
+| ------------------------------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------- |
+| [PublicCreditList.tsx](../../features/credits/PublicCreditList.tsx) | None                 | Pages/Public/Entities<br/>Pages/Public/Catalog Entity Detail<br/>Pages/Public/Entity Detail |
+| [PublicNameList.tsx](../../features/credits/PublicNameList.tsx)     | None                 | Pages/Public/Entity Detail                                                                  |
 
 ### data-table
 
@@ -945,7 +954,6 @@ Direct and transitive imports are source evidence, not visual approval. No compo
 
 | Production candidate                                                                                  | Direct story imports                  | Transitive story relationships                                  |
 | ----------------------------------------------------------------------------------------------------- | ------------------------------------- | --------------------------------------------------------------- |
-| [ReleaseCreditsList.tsx](../../features/release/ReleaseCreditsList.tsx)                               | None                                  | Pages/Public/Entities<br/>Pages/Public/Catalog Entity Detail    |
 | [LazyReleaseEditor.tsx](../../features/release/ReleaseEditor/LazyReleaseEditor.tsx)                   | None                                  | **Missing relationship**                                        |
 | [ReleaseArtistsSection.tsx](../../features/release/ReleaseEditor/ReleaseArtistsSection.tsx)           | None                                  | Pages/Editors/Release                                           |
 | [ReleaseArtistsSectionView.tsx](../../features/release/ReleaseEditor/ReleaseArtistsSectionView.tsx)   | Feature/Interaction/Reorder Consumers | Feature/Interaction/Reorder Consumers<br/>Pages/Editors/Release |
@@ -1085,7 +1093,6 @@ Direct and transitive imports are source evidence, not visual approval. No compo
 
 | Production candidate                                                                                  | Direct story imports                  | Transitive story relationships                                                                |
 | ----------------------------------------------------------------------------------------------------- | ------------------------------------- | --------------------------------------------------------------------------------------------- |
-| [CreditList.tsx](../../features/work/CreditList.tsx)                                                  | None                                  | Pages/Public/Entities<br/>Pages/Public/Catalog Entity Detail<br/>Pages/Public/Entity Detail   |
 | [LazyWorkEditor.tsx](../../features/work/WorkEditor/LazyWorkEditor.tsx)                               | None                                  | **Missing relationship**                                                                      |
 | [WorkClientsSection.tsx](../../features/work/WorkEditor/WorkClientsSection.tsx)                       | Feature/Interaction/Reorder Consumers | Feature/Interaction/Reorder Consumers<br/>Pages/Editors/Work                                  |
 | [WorkCreditsSection.tsx](../../features/work/WorkEditor/WorkCreditsSection.tsx)                       | None                                  | Pages/Editors/Work                                                                            |

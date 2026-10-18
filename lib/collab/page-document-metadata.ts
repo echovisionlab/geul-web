@@ -28,6 +28,7 @@ function toProtoDocumentLayout(layout: DocumentLayout) {
     contentHeight: layout.contentHeight === 'viewport' ? DocumentContentHeight.VIEWPORT : DocumentContentHeight.CONTENT,
     pageChrome: layout.pageChrome === 'pinned' ? DocumentRegionPlacement.PINNED : DocumentRegionPlacement.FLOW,
     footer: layout.footer === 'pinned' ? DocumentRegionPlacement.PINNED : DocumentRegionPlacement.FLOW,
+    hideTableOfContents: layout.hideTableOfContents ?? false,
   });
 }
 

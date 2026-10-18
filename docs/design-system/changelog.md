@@ -1,5 +1,73 @@
 # Design system changes
 
+## 2026-10-18 — self-hosted Geul fonts (unreleased)
+
+The shared sans/mono assignments now use the Noto-backed Geul families. Korean Hanja and
+Traditional Chinese use Han TC; Japanese uses Han JP and Simplified Chinese uses Han SC.
+The app resolves a generated hashed stylesheet from `PUBLIC_FONT_BASE_URL` (default
+`https://static.rawsector.com/fonts`) instead of constructing a Google Fonts proxy query.
+Storybook consumes the same complete local output when present and falls back to the static
+host without requiring font artifacts in CI. Its former Regular/Bold TTF declarations are removed;
+Geul provides normal 400/500/600. Existing Core/theme font variables remain the consumer API.
+
+Upload the matching artifacts before switching production. See [font migration and deployment](../fonts.md).
+Browser rendering remains unverified because the computer-use tool denied Chrome access.
+
+## 2026-10-18 — Braun palette, hairline geometry and quiet weights (unreleased)
+
+Neutral and graphite move to Braun light grey (background #efeeea, surface #f8f7f4, text #1b1b19) and a
+green-free anthracite (#141413, text #eceae5); secondary and muted ink step away from primary so labels
+recede. A new `signal` family replaces blue as `action-accent`, `status-accent` and the lead chart
+series (#9c3d18 light, #f28c52 dark); Ocean presets keep their blue accent. Every role pair still meets
+the theme contrast gates.
+
+Control heights move to 24/28/32/40/48px (compact 24, chrome 28; coarse pointers keep 44px). Line icons
+draw `icon-stroke` 1.5 instead of Tabler's 2. `font-weight-medium` resolves to 400 and `strong` to 500,
+so labels and selection read by ink and position. Field labels take secondary ink. Chrome commands
+(header, language and mobile navigation) no longer fill on hover or selection: secondary ink at rest,
+a 1px underline under the current item. The table-of-contents marker is 1px. Inline links (prose and
+`NavigationLink`) take `action-accent` whether visited or not; an authored text colour still wins.
+Chart guides run across the value axis only, categorical bars are at most 12px wide, histogram bins
+touch, and area fills are the accent at 12%.
+
+## 2026-10-18 — small, even type scale (unreleased)
+
+The text scale moves to 10/11/12/13/14px (`xs`–`xl`, was 12/14/16/18/20px), one pixel per step: running
+text, the editor body and interface text are 12px, metadata, supporting text and chrome 11px, captions,
+badges and field help 10px. Chrome roles now alias `font-size-sm` instead of `font-size-xs`. Document leading moves to
+1.6 (was 1.7). Headings follow: title 20/24px (was 32/40px), body h1–h3 16/15/14px below `sm` and
+18/16/14px from `sm` (was 28/24/20 and 34/26/22px), and every heading, in Core and in published and
+editor documents, uses the new `heading-weight` role (500) instead of `font-weight-strong` (600). Paper
+moves to 9pt running text with 15/12/11/10pt headings (was 10.5pt and 22/18/15.5/13.5pt). The reading measure narrows from 44rem to 32rem so lines
+stay near 85 Latin or 55 Hangul characters.
+
+New `icon-size` roles carry the previous 12–20px geometry: social icons and the site logo image no longer
+follow the text scale. Coarse-pointer text inputs keep 16px through the new `interaction-text-minimum`
+role instead of `font-size-md`. Work client logos are sized from a smaller optical area to sit with 11px
+metadata.
+
+## 2026-10-18 — document visibility options and entity bodies (unreleased)
+
+Page and Post authors can hide their table of contents through the shared layout field. Existing
+layouts retain the outline by default. Page language controls stay at the frame’s inline end.
+Post's Allow comments checkbox becomes the existing Core Switch; disabled comments no longer mount
+the thread or issue read requests. Pages gain no comment setting.
+
+`EntityDetailLayout` becomes overview → body → related collections, with a `listing` slot that completes
+the overview beside the media; releases put their numbered tracklist there. Work, Event, Artist, Label and
+Release move authored descriptions/biographies into `body`, remove the synthetic section heading and render
+authored H1 as h2 under the entity title; the content language control stays at the title row's end.
+Migrate running content from `children` into `body`; `children` always follow the body across the page
+width, including on Series and Event series details.
+
+Credits and clients become metadata rows on Work, Event and Release. `PublicCreditList` replaces
+`CreditList` and `ReleaseCreditsList`: roles align as nested labels, shared roles share a row, avatars
+and "Unknown" placeholders are gone. `PublicNameList` gives artists, labels and clients one slash grammar.
+Work client logos stay, sized by area and greyscale until their link is engaged. Label artists use an
+extra-small roster grid. Event dates read as one range phrase, Work's
+updated date drops its time, long addresses show their host, Tech values use slashes, location rows omit
+coordinates and a label's catalog number is not repeated when it equals the release's.
+
 ## 2026-10-18 — start-edge documents and one media scale per item size (unreleased)
 
 Posts, legal documents and the changelog start at the start edge like entity details and pages: title, hero

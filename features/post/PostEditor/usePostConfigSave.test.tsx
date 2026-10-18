@@ -201,6 +201,36 @@ describe('Post config saves', () => {
     ).toEqual({ layoutPageChrome: 'pinned' });
   });
 
+  it('persists outline visibility in both directions with the latest configuration revision', async () => {
+    const hidden = { ...initialLayout, hideTableOfContents: true };
+    mocks.updatePostAction.mockResolvedValueOnce(updateSuccess(nextRevision, { documentLayout: hidden }));
+    act(() => update(diffPostLayout(initialLayout, hidden)));
+    await act(async () => {
+      expect(await update.flush()).toBe(true);
+    });
+    expect(update.configuration.documentLayout).toEqual(hidden);
+    mocks.updatePostAction.mockResolvedValueOnce(updateSuccess(finalRevision, { documentLayout: initialLayout }));
+    act(() => update(diffPostLayout(hidden, initialLayout)));
+    await act(async () => {
+      expect(await update.flush()).toBe(true);
+    });
+    expect(mocks.updatePostAction).toHaveBeenNthCalledWith(
+      1,
+      postId,
+      { documentLayout: hidden },
+      initialRevision,
+      expect.any(String),
+    );
+    expect(mocks.updatePostAction).toHaveBeenNthCalledWith(
+      2,
+      postId,
+      { documentLayout: initialLayout },
+      nextRevision,
+      expect.any(String),
+    );
+    expect(update.configuration.documentLayout).toEqual(initialLayout);
+  });
+
   it('waits for A acknowledgement and uses its revision for the next latest-field write', async () => {
     const requests: Array<{
       patch: PostConfigPatch;
@@ -502,8 +532,18 @@ describe('Post config saves', () => {
   });
 
   it('merges only changed layout keys over the latest server layout', async () => {
-    const currentLayout: DocumentLayout = { contentHeight: 'viewport', pageChrome: 'flow', footer: 'pinned' };
-    const expectedMergedLayout: DocumentLayout = { contentHeight: 'viewport', pageChrome: 'pinned', footer: 'pinned' };
+    const currentLayout: DocumentLayout = {
+      contentHeight: 'viewport',
+      pageChrome: 'flow',
+      footer: 'pinned',
+      hideTableOfContents: true,
+    };
+    const expectedMergedLayout: DocumentLayout = {
+      contentHeight: 'viewport',
+      pageChrome: 'pinned',
+      footer: 'pinned',
+      hideTableOfContents: true,
+    };
     mocks.updatePostAction
       .mockResolvedValueOnce(actionFailure('A newer version was saved', Code.Aborted))
       .mockResolvedValueOnce(updateSuccess(nextRevision, { documentLayout: expectedMergedLayout }));

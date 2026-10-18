@@ -198,7 +198,7 @@ export const pageContracts: Record<string, PageContract> = {
   'Pages/Editors/Post': contract(
     'editor',
     'Edit post title, content, metadata and translation state.',
-    'Author title and content → zen, media and preview → translation request, progress, cancellation and recovery → disconnected or read-only. Separate local fixture behavior from service behavior.',
+    'Author title and content → per-Post comment switch and document outline visibility → zen, media and preview → translation request, progress, cancellation and recovery → disconnected or read-only. Separate local fixture behavior from service behavior.',
   ),
   'Pages/Editors/Artist': contract(
     'editor',

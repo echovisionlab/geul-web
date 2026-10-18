@@ -157,11 +157,12 @@ describe('post actions', () => {
 
   it.each([
     {
-      layout: { contentHeight: 'viewport', pageChrome: 'pinned', footer: 'flow' } as const,
+      layout: { contentHeight: 'viewport', pageChrome: 'pinned', footer: 'flow', hideTableOfContents: true } as const,
       expected: {
         contentHeight: DocumentContentHeight.VIEWPORT,
         pageChrome: DocumentRegionPlacement.PINNED,
         footer: DocumentRegionPlacement.FLOW,
+        hideTableOfContents: true,
       },
     },
     {
@@ -170,6 +171,7 @@ describe('post actions', () => {
         contentHeight: DocumentContentHeight.CONTENT,
         pageChrome: DocumentRegionPlacement.FLOW,
         footer: DocumentRegionPlacement.PINNED,
+        hideTableOfContents: false,
       },
     },
   ])('saves the document layout $layout as the matching wire placement', async ({ layout, expected }) => {

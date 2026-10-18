@@ -111,6 +111,7 @@ export function PublicDocumentPagePreview({
   domain = 'post',
   state = 'ready',
   pagePath = '/quiet-studio',
+  hideTableOfContents = false,
 }: {
   domain?: 'post' | 'page';
   state?:
@@ -124,6 +125,7 @@ export function PublicDocumentPagePreview({
     | 'untitled-long-document'
     | 'heading-hierarchy';
   pagePath?: string;
+  hideTableOfContents?: boolean;
 }) {
   const locale = useLocale();
   const { longContent, untitledLongContent } = longDocumentsFor(locale);
@@ -157,7 +159,11 @@ export function PublicDocumentPagePreview({
           availableLocales: ['en', 'ko', 'ja'],
         }
       : null;
-  const layout = { ...DEFAULT_DOCUMENT_LAYOUT, ...(state === 'pinned' ? { pageChrome: 'pinned' as const } : {}) };
+  const layout = {
+    ...DEFAULT_DOCUMENT_LAYOUT,
+    ...(hideTableOfContents ? { hideTableOfContents: true } : {}),
+    ...(state === 'pinned' ? { pageChrome: 'pinned' as const } : {}),
+  };
   return (
     <QueryClientProvider client={client}>
       {domain === 'post' ? (
@@ -404,3 +410,19 @@ export const EventsIndex: Story = { args: { domain: 'page', pagePath: '/events' 
 export const PostsIndex: Story = { args: { domain: 'page', pagePath: '/posts' } };
 export const FormsIndex: Story = { args: { domain: 'page', pagePath: '/forms' } };
 export const Phone: Story = { globals: { viewport: { value: 'phone', isRotated: false } } };
+
+export const PostWithoutOutline: Story = {
+  args: { domain: 'post', state: 'long-document', hideTableOfContents: true },
+  decorators: PostLongDocument.decorators,
+  play: async (context) => {
+    await assertDocumentOutline(context);
+    await expect(
+      within(context.canvasElement).queryByRole('navigation', { name: /table of contents|목차/i }),
+    ).not.toBeInTheDocument();
+  },
+};
+export const PageWithoutOutline: Story = {
+  args: { domain: 'page', pagePath: '/quiet-studio', state: 'untitled-long-document', hideTableOfContents: true },
+  decorators: PageLongDocument.decorators,
+  play: PostWithoutOutline.play,
+};

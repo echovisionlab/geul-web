@@ -141,14 +141,31 @@ button.root[data-display='inline'] {
   width: calc(100% - var(--_text-hierarchy-inset));
 }
 
-.root[data-control-kind='text'][data-density='chrome']:not([data-disabled]):is(:hover, [data-hovered]) {
-  background: var(--geul-surface-hover);
-  text-decoration: none;
-}
-
 .root[data-selected] {
   background: var(--geul-surface-muted);
   color: var(--geul-text-primary);
+}
+
+/*
+ * Chrome commands (header, language and mobile navigation) stay unfilled: quiet ink at rest, primary
+ * ink under a pointer, and a hairline under the current item's text in either orientation.
+ */
+.root[data-control-kind='text'][data-density='chrome'][data-tone='neutral'] {
+  color: var(--geul-text-secondary);
+}
+
+.root[data-control-kind='text'][data-density='chrome']:not([data-disabled]):is(:hover, [data-hovered]) {
+  background: transparent;
+  color: var(--geul-text-hover);
+  text-decoration: none;
+}
+
+.root[data-control-kind='text'][data-density='chrome'][data-selected] {
+  background: transparent;
+  color: var(--geul-text-primary);
+  text-decoration: underline;
+  text-decoration-thickness: var(--geul-border-thin);
+  text-underline-offset: 0.4em;
 }
 
 .root[data-tone='primary'] {

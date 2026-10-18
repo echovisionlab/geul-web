@@ -58,7 +58,10 @@ export function PageContentView({ page, pathname, query, requestedLocale }: Page
           .join(' ')}
       >
         {/* Sections keep their authored widths; Core reserves the outline at their inline end. */}
-        <TableOfContents items={buildGeneratedPageTocItems(page.content)}>
+        <TableOfContents
+          items={buildGeneratedPageTocItems(page.content)}
+          enabled={!page.documentLayout.hideTableOfContents}
+        >
           <GeneratedPageRenderer sections={page.content ?? []} query={query} requestedLocale={requestedLocale} />
         </TableOfContents>
       </ContentLayoutView>

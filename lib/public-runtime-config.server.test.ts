@@ -4,6 +4,7 @@ afterEach(() => {
 });
 
 function stubValidEnvironment() {
+  vi.stubEnv('PUBLIC_FONT_BASE_URL', ' https://fonts.example.test/fonts/// ');
   vi.stubEnv('PUBLIC_CDN_URL', ' https://server-cdn.example.test/// ');
   vi.stubEnv('PUBLIC_API_URL', 'https://server-api.example.test/');
   vi.stubEnv('PUBLIC_P5_RUNNER_URL', 'https://server-runner.example.test/path/');
@@ -21,6 +22,7 @@ describe('server public runtime validation', () => {
     expect(server.getServerPublicRuntimeConfig()).toEqual(shared.readPublicRuntimeEnvironment());
     expect(server.getServerPublicRuntimeConfig()).toEqual({
       cdnUrl: 'https://server-cdn.example.test',
+      fontBaseUrl: 'https://fonts.example.test/fonts',
       apiUrl: 'https://server-api.example.test',
       p5RunnerUrl: 'https://server-runner.example.test/path',
       googleMapsApiKey: 'server-maps-key',
@@ -32,6 +34,7 @@ describe('server public runtime validation', () => {
 
   it.each([
     ['PUBLIC_CDN_URL', 'cdnUrl'],
+    ['PUBLIC_FONT_BASE_URL', 'fontBaseUrl'],
     ['PUBLIC_API_URL', 'apiUrl'],
     ['PUBLIC_P5_RUNNER_URL', 'p5RunnerUrl'],
   ])('rejects an invalid %s with a URL issue and a useful message', async (name, field) => {

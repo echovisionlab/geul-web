@@ -5,7 +5,6 @@ import '../lib/styles/variables.css';
 import '../lib/styles/document-content.css';
 import '../lib/styles/print.css';
 import '../lib/styles/font-assignment.css';
-import './preview-fonts.css';
 
 import {
   createContext,
