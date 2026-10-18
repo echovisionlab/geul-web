@@ -4,14 +4,14 @@ Run `node scripts/design-system/inventory.mjs` to regenerate; `--check` fails wh
 
 Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.
 
-Source manifest SHA-256: `5f055757280a3216d014cfc734a7513b24ff9ac01650e8f601de502dc0544ef8`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
+Source manifest SHA-256: `52282cb0a01792870c8eb6b39673e97ac6a9909333c8b1693d6d0d36ef998a59`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
 
 ## Counts
 
 | Metric                | Count |
 | --------------------- | ----: |
-| sourceFiles           |  3805 |
-| productionSourceFiles |  2298 |
+| sourceFiles           |  3807 |
+| productionSourceFiles |  2300 |
 | componentFiles        |   908 |
 | coreFamilies          |    57 |
 | featureDomains        |    53 |
@@ -134,7 +134,7 @@ Counts include every production JS/TS file in the domain; component files are Pa
 | [date-time](../../features/date-time)                 |      1 |          1 |       0 |     0 |             0 |
 | [document-layout](../../features/document-layout)     |     13 |          7 |       1 |     3 |             0 |
 | [draft-mode](../../features/draft-mode)               |      2 |          2 |       0 |     0 |             0 |
-| [editor](../../features/editor)                       |    228 |         75 |      11 |   156 |             0 |
+| [editor](../../features/editor)                       |    229 |         75 |      11 |   157 |             0 |
 | [email](../../features/email)                         |      4 |          2 |       0 |     6 |             0 |
 | [executable](../../features/executable)               |      1 |          1 |       0 |     1 |             0 |
 | [file-manager](../../features/file-manager)           |     19 |         10 |       0 |     5 |             1 |
@@ -151,7 +151,7 @@ Counts include every production JS/TS file in the domain; component files are Pa
 | [my](../../features/my)                               |     38 |         26 |       8 |    20 |             7 |
 | [navigation](../../features/navigation)               |      2 |          2 |       0 |     0 |             1 |
 | [newsletter](../../features/newsletter)               |      2 |          2 |       0 |     1 |             1 |
-| [page](../../features/page)                           |    252 |        165 |       8 |   106 |             4 |
+| [page](../../features/page)                           |    253 |        165 |       8 |   106 |             4 |
 | [participants](../../features/participants)           |      1 |          1 |       0 |     1 |             0 |
 | [place](../../features/place)                         |      7 |          7 |       0 |     3 |             0 |
 | [policy](../../features/policy)                       |     18 |         15 |       0 |     9 |             6 |
@@ -165,7 +165,7 @@ Counts include every production JS/TS file in the domain; component files are Pa
 | [shell](../../features/shell)                         |     14 |         10 |       1 |     3 |             0 |
 | [site](../../features/site)                           |     17 |         11 |       1 |    10 |            10 |
 | [social-links](../../features/social-links)           |     10 |          6 |       2 |     6 |             1 |
-| [translation](../../features/translation)             |     43 |         18 |       1 |    26 |             1 |
+| [translation](../../features/translation)             |     43 |         18 |       1 |    25 |             1 |
 | [upload](../../features/upload)                       |      5 |          1 |       1 |     4 |             0 |
 | [user](../../features/user)                           |     18 |         12 |       2 |     6 |             1 |
 | [version-history](../../features/version-history)     |      5 |          2 |       1 |     3 |             0 |

@@ -32,10 +32,8 @@ import {
   getTranslationEntryPresenceKey,
   getTranslationJobBadgeLabel,
 } from '@/features/translation/translation-entry-status';
-import {
-  selectActiveTranslationJobsByLocale,
-  useActiveTranslationJobsByLocale,
-} from '@/features/translation/useActiveTranslationJobsByLocale';
+import { useActiveTranslationJobsByLocale } from '@/features/translation/useActiveTranslationJobsByLocale';
+import { selectActiveTranslationJobsByLocale } from './translation-job-polling';
 import { useEntityTranslationData } from '@/features/translation/useEntityTranslationData';
 import { useTranslationLocaleCommands } from '@/features/translation/useTranslationLocaleCommands';
 import {

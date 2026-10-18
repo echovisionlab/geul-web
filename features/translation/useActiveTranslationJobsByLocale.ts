@@ -5,7 +5,7 @@ import { type TranslationJob } from '@echovisionlab/geul-proto/secure/translatio
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import { useTranslationLifecycleSubscription } from '@/features/translation/useTranslationLifecycleSubscription';
 import type { TranslationEntityTypeKey, TranslationLifecycleRefetchHint } from '@/lib/translation/lifecycle';
-import { isActiveTranslationJobStatus } from './translation-job-polling';
+import { selectActiveTranslationJobsByLocale } from './translation-job-polling';
 
 interface UseActiveTranslationJobsByLocaleInput {
   enabled?: boolean;
@@ -15,19 +15,6 @@ interface UseActiveTranslationJobsByLocaleInput {
   jobs: TranslationJob[] | undefined;
   onLifecycleHint?: (hint: TranslationLifecycleRefetchHint) => Promise<void> | void;
   onReconnect?: () => Promise<void> | void;
-}
-
-export function selectActiveTranslationJobsByLocale(jobs: TranslationJob[] | undefined): Map<string, TranslationJob> {
-  const activeJobByLocale = new Map<string, TranslationJob>();
-
-  for (const job of jobs ?? []) {
-    if (!job.targetLocale || !isActiveTranslationJobStatus(job.status) || activeJobByLocale.has(job.targetLocale)) {
-      continue;
-    }
-    activeJobByLocale.set(job.targetLocale, job);
-  }
-
-  return activeJobByLocale;
 }
 
 export function useActiveTranslationJobsByLocale({

@@ -148,6 +148,17 @@ variable insertion, slash menus, keyboard handling, and rejected transactions;
 the corresponding standalone policy/normalization cases are no longer repeated
 inside those mounted suites.
 
+Page lifecycle save-barrier tests import the lifecycle operation without loading
+the Page editor UI. Media filename/style helpers run in Node, and active-job
+selection shares the existing translation polling test file. Their assertions
+remain; these cases need no DOM environment. Column insertion tests keep the
+real menu, dialog, cancellation/reopening, and remote-column updates. The
+cancellation fixture omits existing child chrome, which is covered by insertion
+and authority cases.
+Slash query/range cases use real ProseMirror documents and selections without
+mounting an EditorView. Coordinate calculation, keyboard, focus, and IME cases
+retain their editor fixtures.
+
 Policy profile contracts retain editor disposal and replacement-controller
 recovery. Media runtime contracts use deferred responses to cover stale ready
 success/failure, resync completion after a newer event, and disabled subscriptions.

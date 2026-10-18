@@ -170,73 +170,68 @@ custom image loader; changing request-time image handling does not address the
 observed TypeScript phase. No application imports, rendering behavior, or bundle
 budgets are changed on the strength of those recommendations alone.
 
-## Comparing CI caches
+## Local measurements and CI cache checks
 
-Compare no cache, TypeScript build-info caches, and the complete Next build
-cache. Record cache restore/save time and job elapsed time as well as command
-elapsed time. A faster build with a slower cache transfer can increase total CI
-time.
+Measure build changes locally. Keep the commit, lockfile, environment, output
+directory, and cache state explicit. A build after a source change and an
+unchanged warm build answer different questions; do not report their difference
+as the effect of a configuration change. Run one build at a time and retain its
+logs before running the next one.
 
-Use the same commit, lockfile, configuration, runner, and environment for each
-comparison. Run benchmarks sequentially on `geul-web-mini`, which has one runner
-pod at most. Keep benchmark caches separate from normal quality caches and from
-other benchmark modes. A second build in the same job proves filesystem reuse;
-a separate job restoring the saved cache is needed to measure GitHub transfer
-and a cache hit.
+The test-boundary refactor was checked locally on 2026-10-18 using `.next`
+throughout. The first row reused the existing cache; the second reflects the
+changed source; the third immediately reused that changed build's cache.
 
-GitHub cache entries are immutable and scoped by branch/ref. A pull-request merge
-ref and a manual feature-branch dispatch do not necessarily share accessible
-caches. See [GitHub's cache reference](https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching).
-Never skip a required check because a cache was restored.
+| Local build state                          | Wall time | Compile | TypeScript | Maximum resident memory |
+| ------------------------------------------ | --------: | ------: | ---------: | ----------------------: |
+| Before the refactor, unchanged source      |   17.75 s |   7.3 s |    1.250 s |                2,509 MB |
+| After the refactor, source changes present |   41.19 s |  28.3 s |    2.600 s |                6,854 MB |
+| Immediate repeat, unchanged source         |   11.81 s |   2.9 s |    1.087 s |                2,648 MB |
 
-Normal quality runs preserve the full and app TypeScript build-info files.
-`quality_turbo_cache` opts into the larger Turbopack cache for a manual run while
-its net benefit is being measured. All jobs explicitly cache the pnpm store and
-still run `pnpm install --frozen-lockfile`.
+These single samples include filesystem and OS cache effects. They verify local
+build completion and reuse; they do not isolate a configuration speedup.
 
-The existing `CI` workflow exposes a terminal benchmark after `Validate`:
+On macOS, the existing build wrapper supplies test-only runtime configuration and
+rejects dotenv files. It does not forward application secrets:
 
 ```sh
-gh workflow run ci.yml --repo echovisionlab/geul-web \
-  --ref feat/collection-sizes-and-reading-layout \
-  -f benchmark_cache=all \
-  -f benchmark_runner=both \
-  -f benchmark_series=build-cache-20261018 \
-  -f quality_turbo_cache=false
+/usr/bin/time -l node scripts/performance/next-client-build.mjs . build \
+  > .artifacts/build-performance/build.log \
+  2> .artifacts/build-performance/resources.log
 ```
 
-`benchmark_cache` selects `off`, `none`, `types`, `full`, or `all`.
-`benchmark_runner` selects `ubuntu-24.04`, `geul-web-mini`, or `both`.
-The matrix runs one job at a time. Use a new series for a first-miss experiment;
-reuse that series and SHA when rerunning a completed types/full job to measure
-an exact cache hit. Series names contain 1–40 letters, digits, underscores, or
-hyphens. The benchmark namespace has no restore prefix and is separate from
-normal quality caches. `none` clears build caches; all modes use the same pnpm
-store cache, so this is not a dependency-installation cold-cache experiment.
+Record total wall time, maximum resident memory, compile time, and TypeScript
+time. Preserve the production trace immediately when investigating cache writes;
+Next overwrites it on the next build. Keep the selected output's cache for a
+warm comparison, or use a fresh output for a first-build measurement. The local
+measurements above describe their actual starting cache state.
 
-Find the completed benchmark job's database ID, then rerun only that terminal
-job. This preserves its original SHA/ref/inputs and does not repeat upstream
-tests. Wait for each rerun to finish before starting another. See [GitHub's job
-rerun API](https://docs.github.com/en/rest/actions/workflow-runs#re-run-a-job-from-a-workflow-run).
+CI runs the normal required checks and build. It preserves the pnpm store, the
+full TypeScript build info, Next's application build info, and the Turbopack
+filesystem cache. It has no runner-comparison or build-benchmark matrix.
+The build-cache summary records each restore outcome, exact-hit output, matched
+key, and save outcome. Cache action logs contain payload sizes and transfer
+steps. Cache failures remain best effort; every required check still runs.
+
+Build-cache keys include the OS, architecture, dependency/configuration hash,
+and commit SHA. A compatible prefix can restore an earlier commit's cache.
+`cache-hit: false` with a matched key means a compatible restore, not an empty
+cache. An exact hit for the current SHA skips saving the same immutable key.
+
+After a successful quality job, rerun that job once at the same SHA to check
+actual remote restoration on a fresh runner:
 
 ```sh
 gh run view RUN_ID --repo echovisionlab/geul-web --json headSha,jobs
-gh run rerun --repo echovisionlab/geul-web --job JOB_DATABASE_ID
+gh run rerun --repo echovisionlab/geul-web --job QUALITY_JOB_DATABASE_ID
 ```
 
-The `build-performance-*` artifacts contain context, command logs, GNU time
-results, and before/after resource snapshots. Run the same measurement wrapper
-on Linux with:
+Confirm that the first run saved all three build caches and the rerun reports
+exact hits. Compare the restored keys and action outcomes, and verify that the
+full checker, Next build, and bundle budget still ran. A cache hit alone does
+not prove a correct build or a speedup after a source change.
 
-```sh
-node scripts/performance/measure-build-command.mjs --help
-node scripts/performance/measure-build-command.mjs typecheck -- pnpm typecheck
-```
-
-The wrapper preserves command failures and forwards cancellation to the process
-group. GNU time's maximum RSS is a maximum over the command and children, not
-their summed simultaneous RSS. `/proc` observations can describe the host;
-cgroup v2 snapshots separately record the current container's limits and events.
-Cgroup `memory.peak` is cumulative and is not reset. Other group members and
-ancestor limits can affect these observations. Unsupported or inaccessible
-cgroup data is recorded as unavailable, rather than inferred.
+GitHub caches are immutable and scoped by branch/ref. A pull-request merge ref
+and a manual feature-branch dispatch do not necessarily share accessible caches.
+See [GitHub's cache reference](https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching)
+and [job reruns](https://docs.github.com/en/rest/actions/workflow-runs#re-run-a-job-from-a-workflow-run).

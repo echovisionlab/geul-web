@@ -27,11 +27,19 @@ function walk(directory: string): string[] {
   });
 }
 
+const resolvedModules = new Map<string, string | null>();
+
 function resolveLocal(from: string, specifier: string) {
   const base = specifier.startsWith('@/') ? join(root, specifier.slice(2)) : resolve(dirname(from), specifier);
+  const cached = resolvedModules.get(base);
+  if (cached !== undefined) return cached;
   for (const candidate of [base, `${base}.ts`, `${base}.tsx`, join(base, 'index.ts'), join(base, 'index.tsx')]) {
-    if (existsSync(candidate) && statSync(candidate).isFile()) return candidate;
+    if (existsSync(candidate) && statSync(candidate).isFile()) {
+      resolvedModules.set(base, candidate);
+      return candidate;
+    }
   }
+  resolvedModules.set(base, null);
   return null;
 }
 

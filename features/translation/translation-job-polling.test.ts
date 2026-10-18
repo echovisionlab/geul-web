@@ -8,6 +8,7 @@ import {
 import {
   ACTIVE_TRANSLATION_JOB_REFETCH_INTERVAL_MS,
   filterActiveTranslationJobs,
+  selectActiveTranslationJobsByLocale,
   shouldRefreshTranslationEntries,
   translationJobsRefetchInterval,
   translationOverviewRefetchInterval,
@@ -18,6 +19,23 @@ function createJob(id: string, status: TranslationJobStatus): TranslationJob {
 }
 
 describe('translation job polling', () => {
+  it('exposes only one active job per locale', () => {
+    const jobs = [
+      create(TranslationJobSchema, { id: 'queued', targetLocale: 'ko', status: TranslationJobStatus.QUEUED }),
+      create(TranslationJobSchema, {
+        id: 'running-same-locale',
+        targetLocale: 'ko',
+        status: TranslationJobStatus.RUNNING,
+      }),
+      create(TranslationJobSchema, { id: 'running', targetLocale: 'ja', status: TranslationJobStatus.RUNNING }),
+    ];
+
+    expect([...selectActiveTranslationJobsByLocale(jobs).entries()].map(([locale, job]) => [locale, job.id])).toEqual([
+      ['ko', 'queued'],
+      ['ja', 'running'],
+    ]);
+  });
+
   it('polls entity jobs only while they are active and healthy', () => {
     expect(translationJobsRefetchInterval([createJob('queued', TranslationJobStatus.QUEUED)])).toBe(
       ACTIVE_TRANSLATION_JOB_REFETCH_INTERVAL_MS,

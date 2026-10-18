@@ -1,8 +1,6 @@
-// @vitest-environment jsdom
-
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { registerEditorSave } from '@/lib/editor/editor-save-registry';
-import { runPageStatusChangeAfterSave } from './PageEditor';
+import { runPageStatusChangeAfterSave } from './page-lifecycle';
 
 const pageId = 'page-lifecycle-1';
 let unregisterSave: (() => void) | null = null;

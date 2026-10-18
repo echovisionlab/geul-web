@@ -29,12 +29,18 @@ function setup(section: ColumnsSection) {
     <ColumnsEditor section={value} SectionRenderer={() => <p>Child content</p>} />
   );
   const view = render(editor(section));
-  return { ...view, refresh: (value: ColumnsSection) => view.rerender(editor(value)) };
+  const firstColumn = within(screen.getByRole('group', { name: 'columnsEditor.column 1' }));
+  return {
+    ...view,
+    addButton: firstColumn.getByRole('button', { name: 'columnsEditor.actions.addSectionToColumn 1' }),
+    refresh: (value: ColumnsSection) => view.rerender(editor(value)),
+  };
 }
 
-async function openEmbed(user: ReturnType<typeof render>['user']) {
-  await user.click(screen.getByRole('button', { name: 'columnsEditor.actions.addSectionToColumn 1' }));
-  await user.click(await screen.findByRole('menuitem', { name: 'Embed' }));
+async function openEmbed(user: ReturnType<typeof render>['user'], addButton: HTMLElement) {
+  await user.click(addButton);
+  const menu = within(await screen.findByRole('menu'));
+  await user.click(menu.getByRole('menuitem', { name: 'Embed' }));
   return screen.findByRole('dialog', { name: 'Embed' });
 }
 
@@ -51,8 +57,11 @@ describe('ColumnsEditor authority', () => {
   it('leaves cancelled Embed input unsaved and resets it when reopened', async () => {
     state.editable = true;
     state.allowStructuralEdits = true;
-    const { user } = setup(section);
-    const cancelled = within(await openEmbed(user));
+    const { user, addButton } = setup({
+      ...section,
+      columns: section.columns.map((column) => ({ ...column, sections: [] })),
+    });
+    const cancelled = within(await openEmbed(user, addButton));
     expect(state.updateSection).not.toHaveBeenCalled();
     const cancelledUrl = cancelled.getByRole('textbox', { name: 'embed.urlLabel' });
     await user.clear(cancelledUrl);
@@ -62,7 +71,7 @@ describe('ColumnsEditor authority', () => {
     await user.click(cancelled.getByRole('button', { name: 'cancel' }));
     expect(screen.queryByRole('dialog', { name: 'Embed' })).not.toBeInTheDocument();
     expect(state.updateSection).not.toHaveBeenCalled();
-    const insertion = within(await openEmbed(user));
+    const insertion = within(await openEmbed(user, addButton));
     const url = insertion.getByRole('textbox', { name: 'embed.urlLabel' });
     expect(url).toHaveValue('');
     expect(insertion.getByRole('button', { name: 'add' })).toBeDisabled();
@@ -72,8 +81,8 @@ describe('ColumnsEditor authority', () => {
   it('configures Embed before adding a column child', async () => {
     state.editable = true;
     state.allowStructuralEdits = true;
-    const { user } = setup(section);
-    const insertion = within(await openEmbed(user));
+    const { user, addButton } = setup(section);
+    const insertion = within(await openEmbed(user, addButton));
     const url = insertion.getByRole('textbox', { name: 'embed.urlLabel' });
     expect(url).toHaveValue('');
     expect(insertion.getByRole('button', { name: 'add' })).toBeDisabled();
@@ -106,8 +115,8 @@ describe('ColumnsEditor authority', () => {
     async (change) => {
       state.editable = true;
       state.allowStructuralEdits = true;
-      const { user, refresh } = setup(section);
-      const insertion = within(await openEmbed(user));
+      const { user, addButton, refresh } = setup(section);
+      const insertion = within(await openEmbed(user, addButton));
       const url = insertion.getByRole('textbox', { name: 'embed.urlLabel' });
       await user.clear(url);
       await user.paste('https://embed.example/app');

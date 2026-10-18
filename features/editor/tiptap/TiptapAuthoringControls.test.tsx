@@ -178,45 +178,6 @@ describe('Tiptap authoring controls', () => {
     mounted.destroy();
   });
 
-  it('detects the exact slash range after inline math source and after a hard break', () => {
-    for (const prefix of [
-      [
-        { type: 'mathInline', content: [{ type: 'text', text: 'x' }] },
-        { type: 'text', text: ' /p5' },
-      ],
-      [{ type: 'text', text: 'Hello' }, { type: 'hardBreak' }, { type: 'text', text: '/p5' }],
-    ]) {
-      const mounted = createEditorWithBlock({ type: 'paragraph', content: prefix });
-      const paragraph = mounted.editor.state.doc.nodeAt(2);
-      if (!paragraph) {
-        throw new Error('Slash detection paragraph is missing');
-      }
-      const cursor = 3 + paragraph.content.size;
-      mounted.editor.commands.setTextSelection(cursor);
-
-      expect(getSlashMenuState(mounted.editor)).toMatchObject({
-        from: cursor - '/p5'.length,
-        to: cursor,
-        contentPosition: 2,
-        blockId: 'target-block',
-        query: 'p5',
-      });
-      mounted.destroy();
-    }
-  });
-
-  it('does not treat a slash inside ordinary text as a command boundary', () => {
-    const mounted = createEditor('x/heading');
-    const paragraph = mounted.editor.state.doc.nodeAt(2);
-    if (!paragraph) {
-      throw new Error('Ordinary-text paragraph is missing');
-    }
-    mounted.editor.commands.setTextSelection(3 + paragraph.content.size);
-
-    expect(getSlashMenuState(mounted.editor)).toBeNull();
-    mounted.destroy();
-  });
-
   it('executes a block slash item after a hard break without deleting the prefix block', () => {
     const mounted = createEditorWithBlock({
       type: 'paragraph',
