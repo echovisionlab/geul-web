@@ -174,7 +174,8 @@ export function PostHeader({ post, onExport, languageControl }: PostHeaderProps)
       )}
       {post.publishedAt &&
         post.updatedAt &&
-        post.updatedAt !== post.publishedAt &&
+        // Dates arrive as separate objects; compare the instants, not the references.
+        post.updatedAt.getTime() !== post.publishedAt.getTime() &&
         renderDetailRow(tCommon('labels.updated'), dateTime.dateTime(post.updatedAt))}
       {!post.publishedAt &&
         post.updatedAt &&

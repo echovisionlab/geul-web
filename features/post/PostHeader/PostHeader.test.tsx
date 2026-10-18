@@ -170,6 +170,26 @@ describe('PostHeader action row and metadata grammar', () => {
   );
 });
 
+describe('PostHeader edit date', () => {
+  it('shows an Updated row only when the post changed after it was published', () => {
+    renderHeader({
+      ...BASE_POST,
+      publishedAt: new Date('2026-07-20T12:00:00.000Z'),
+      updatedAt: new Date('2026-07-20T12:00:00.000Z'),
+    });
+    expect(container?.textContent).not.toContain('Updated');
+
+    act(() => root?.unmount());
+    container?.remove();
+    renderHeader({
+      ...BASE_POST,
+      publishedAt: new Date('2026-07-20T12:00:00.000Z'),
+      updatedAt: new Date('2026-07-22T09:30:00.000Z'),
+    });
+    expect(container?.textContent).toContain('Updated');
+  });
+});
+
 describe('PostHeader author identities', () => {
   it('keeps the Featured Image hero overlay as one print fragment', () => {
     const css = readFileSync(resolve(process.cwd(), 'features/post/PostHeader/PostHeader.module.css'), 'utf8');
