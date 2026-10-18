@@ -18,9 +18,13 @@ export default class StorybookEnvironment extends PlaywrightEnvironment {
     this.blockedRequests = [];
     if (process.env.STORYBOOK_ISOLATED_CI === 'true') {
       const origin = new URL(process.env.TARGET_URL).origin;
+      const fontBase = new URL(process.env.PUBLIC_FONT_BASE_URL || 'https://static.rawsector.com/fonts');
       await this.global.context.route('**/*', async (route) => {
         const url = new URL(route.request().url());
-        if (['http:', 'https:'].includes(url.protocol) && url.origin !== origin) {
+        if (url.origin === fontBase.origin && url.pathname.startsWith(fontBase.pathname)) {
+          // Fonts are presentation, not a service: stories stay offline and use the fallback stack.
+          await route.fulfill({ status: 200, contentType: 'text/css; charset=utf-8', body: '' });
+        } else if (['http:', 'https:'].includes(url.protocol) && url.origin !== origin) {
           this.blockedRequests.push(`${route.request().method()} ${url.origin}${url.pathname}`);
           await route.abort('blockedbyclient');
         } else {
