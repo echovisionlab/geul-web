@@ -309,8 +309,10 @@ field schemas and `TypedMetaMap`, the bootstrap envelope, upload session storage
 run against the classic schemas and recorded in `equivalence.golden.json`: `success`, parsed data, every issue
 (code, path, message, extra fields) and thrown messages. `equivalence.test.ts` replays the table against the
 migrated code and requires the same outcomes (time zone and clock pinned for the date validators). It passed
-unchanged after the migration and stays as the behavior test; its outcomes include 931 issues with zod's default English messages (60 distinct, such as "Invalid input: expected string, received number"), so a missing locale
-fails it. Two fixture edits after recording were identity changes: color strings renamed to non-color strings
+unchanged after the migration; its outcomes included 931 issues with zod's default English messages (60 distinct, such as "Invalid input: expected string, received number"), so a missing locale
+failed it. On 2026-10-18 the table and its 20,000-line golden file were retired: a recorded output that size could
+not be reviewed, and it pinned the classic schemas' output rather than the stored contracts. Parse tests next to
+each block, section and form schema now take their expected defaults and rejections from the shared block catalog. Two fixture edits after recording were identity changes: color strings renamed to non-color strings
 (design-token scan) and a random-length Yjs update size removed from one snapshot. The existing suites
 (`validation-zod`, `build`, page blocks, block-room protocol/bootstrap, upload store, map theme) pass unchanged.
 

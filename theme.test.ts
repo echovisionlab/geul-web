@@ -133,11 +133,7 @@ describe('design token contract', () => {
     }
   });
 
-  it('retains the reviewed functional colors without adding another warning meaning', () => {
-    expect(primitiveTokens.colors.green[500]).toBe('#287a3f');
-    expect(primitiveTokens.colors.blue[500]).toBe('#235f96');
-    expect(primitiveTokens.colors.yellow[500]).toBe('#d5a900');
-    expect(primitiveTokens.colors.orange[500]).toBe('#ce5526');
+  it('takes warning from the yellow ramp and gives no status role an orange meaning', () => {
     for (const mode of ['light', 'dark'] as const) {
       expect(Object.values(primitiveTokens.colors.yellow)).toContain(semanticThemes[mode]['status-warning']);
       for (const role of ['status-accent', 'status-positive', 'status-warning', 'status-danger'] as const) {

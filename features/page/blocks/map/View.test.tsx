@@ -3,6 +3,7 @@
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { render, screen } from '@/test/render';
 import { TestProviders } from '@/test/TestProviders';
 import { MapView } from './ViewRuntime';
 
@@ -144,24 +145,9 @@ describe('MapView', () => {
     expect(mapViewEmbeddedSpy).toHaveBeenCalledWith(expect.objectContaining({ blockAlignment: 'right' }));
   });
 
-  it('keeps the public caption compact and left-aligned like authoring', () => {
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    root = createRoot(container);
+  it('shows the authored caption start-aligned even when the map block is centred', () => {
+    render(<MapView props={{ caption: 'Stored viewport', textAlignment: 'center' }} />);
 
-    act(() => {
-      root?.render(
-        <TestProviders>
-          <MapView props={{ caption: 'Stored viewport', textAlignment: 'center' }} />
-        </TestProviders>,
-      );
-    });
-
-    const caption = container?.querySelector<HTMLElement>('[data-public-map-caption]');
-    expect(caption?.textContent).toBe('Stored viewport');
-    expect(caption).toHaveAttribute('data-align', 'start');
-    expect(caption).toHaveAttribute('data-size', 'xs');
-    expect(caption).toHaveAttribute('data-tone', 'muted');
-    expect(caption?.parentElement).toHaveAttribute('data-geul-layout', 'inset');
+    expect(screen.getByText('Stored viewport')).toHaveAttribute('data-align', 'start');
   });
 });

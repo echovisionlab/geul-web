@@ -87,9 +87,31 @@ afterEach(() => {
   container = null;
 });
 
+const HEADER_VARIANTS = [
+  ['plain', null],
+  ['hero', HERO_IMAGE],
+] as const;
+
+/** Text a screen reader announces: the element's text without `aria-hidden` subtrees. */
+function accessibleText(element: Element): string {
+  const clone = element.cloneNode(true) as Element;
+  clone.querySelectorAll('[aria-hidden="true"]').forEach((node) => node.remove());
+  return clone.textContent ?? '';
+}
+
+/** The value of the metadata row whose term reads `label`. */
+function getMetadataValue(label: string): HTMLElement {
+  const term = Array.from(document.querySelectorAll('[role="term"]')).find((node) => node.textContent === label);
+  expect(term).toBeDefined();
+  const value = document.querySelector<HTMLElement>(`[role="definition"][aria-labelledby="${term!.id}"]`);
+  expect(value).not.toBeNull();
+  return value!;
+}
+
 describe('PostHeader action row and metadata grammar', () => {
-  it('places the content language control in the same header action row', () => {
-    for (const featuredImageUrl of [null, HERO_IMAGE]) {
+  it.each(HEADER_VARIANTS)(
+    'keeps the content language control with the %s header actions, excluded from print',
+    (_variant, featuredImageUrl) => {
       render(
         <PostHeader
           post={{ ...BASE_POST, featuredImageUrl }}
@@ -97,24 +119,27 @@ describe('PostHeader action row and metadata grammar', () => {
           languageControl={<button type="button">English</button>}
         />,
       );
-      const markdown = document.querySelector('[aria-label="Export post as Markdown"]')!;
-      const language = Array.from(document.querySelectorAll('button')).find((node) => node.textContent === 'English')!;
-      expect(language.parentElement).toBe(markdown.closest('[data-geul-layout]'));
-      expect(language.closest('.print-hide')).not.toBeNull();
-      act(() => root?.unmount());
-      container?.remove();
-      root = null;
-      container = null;
-    }
-  });
+      const markdown = document.querySelector('button[aria-label="Export post as Markdown"]');
+      const language = Array.from(document.querySelectorAll('button')).find((node) => node.textContent === 'English');
+      const printExcludedActions = markdown?.closest('.print-hide');
 
-  it('renders the same metadata rows with slash-separated values in plain and hero headers', () => {
-    for (const featuredImageUrl of [null, HERO_IMAGE]) {
+      expect(printExcludedActions).not.toBeNull();
+      expect(printExcludedActions).toContainElement(language ?? null);
+    },
+  );
+
+  it.each(HEADER_VARIANTS)(
+    'shows category, tag and collaborator values in the %s header with slashes hidden from assistive technology',
+    (_variant, featuredImageUrl) => {
       render(
         <PostHeader
           post={{
             ...BASE_POST,
             featuredImageUrl,
+            collaborators: [
+              ...BASE_POST.collaborators,
+              { id: 'collaborator-2', name: 'Second Collaborator', image: null, role: 'editor' },
+            ],
             categories: [
               { id: 'cat-1', name: 'Listening' },
               { id: 'cat-2', name: 'Field work' },
@@ -127,19 +152,22 @@ describe('PostHeader action row and metadata grammar', () => {
           onExport={vi.fn()}
         />,
       );
+
       expect(getUserLink('Text Collaborator')).toHaveAttribute('href', '/user/collaborator-1');
-      const separators = Array.from(document.querySelectorAll('[aria-hidden="true"]')).filter(
-        (node) => node.textContent === '/',
-      );
-      // Single collaborator: none; two categories and two tags: one hidden slash each.
-      expect(separators).toHaveLength(2);
-      expect(document.querySelector('h1')).toHaveAttribute('data-level', 'title');
-      act(() => root?.unmount());
-      container?.remove();
-      root = null;
-      container = null;
-    }
-  });
+      for (const [label, names] of [
+        ['Collaborators', ['Text Collaborator', 'Second Collaborator']],
+        ['Categories', ['Listening', 'Field work']],
+        ['Tags', ['Field recording', 'Archival notes']],
+      ] as const) {
+        const value = getMetadataValue(label);
+        // Sighted readers see a slash between the values; assistive technology announces only the values.
+        expect(value).toHaveTextContent(`${names[0]}/${names[1]}`);
+        expect(accessibleText(value)).toContain(names[0]);
+        expect(accessibleText(value)).toContain(names[1]);
+        expect(accessibleText(value)).not.toContain('/');
+      }
+    },
+  );
 });
 
 describe('PostHeader author identities', () => {
@@ -155,23 +183,26 @@ describe('PostHeader author identities', () => {
     expect(invariantTokens['text-on-image']).toBe('#ffffff');
   });
 
-  it('renders every standard-header author as an avatar link and keeps collaborators text-only', () => {
-    renderHeader(BASE_POST);
+  it.each(HEADER_VARIANTS)(
+    'renders every %s-header author as an avatar link and keeps collaborators text-only',
+    (_variant, featuredImageUrl) => {
+      renderHeader({ ...BASE_POST, featuredImageUrl });
 
-    const imageAuthor = getUserLink('Image Author');
-    const fallbackAuthor = getUserLink('Fallback Author');
-    const unknownAuthor = getUserLink('Unknown');
-    const collaborator = getUserLink('Text Collaborator');
+      const imageAuthor = getUserLink('Image Author');
+      const fallbackAuthor = getUserLink('Fallback Author');
+      const unknownAuthor = getUserLink('Unknown');
+      const collaborator = getUserLink('Text Collaborator');
 
-    expect(imageAuthor).toHaveAttribute('href', '/user/author-image');
-    expect(imageAuthor.querySelector('img')).toHaveAttribute('src', AVATAR_IMAGE);
-    expect(fallbackAuthor.querySelector('[data-interactive][data-shape="circle"]')).toHaveTextContent('F');
-    expect(unknownAuthor).toHaveAttribute('href', '/user/author-unknown');
-    expect(document.querySelectorAll('[data-interactive][data-shape="circle"]')).toHaveLength(3);
-    expect(collaborator).toHaveAttribute('href', '/user/collaborator-1');
-    expect(collaborator.querySelector('[data-interactive][data-shape="circle"]')).toBeNull();
-    expect(imageAuthor.closest('[data-align="center"]')).not.toBeNull();
-  });
+      expect(imageAuthor).toHaveAttribute('href', '/user/author-image');
+      expect(imageAuthor.querySelector('img')).toHaveAttribute('src', AVATAR_IMAGE);
+      expect(fallbackAuthor).toHaveAttribute('href', '/user/author-fallback');
+      expect(fallbackAuthor.querySelector('[data-interactive][data-shape="circle"]')).toHaveTextContent('F');
+      expect(unknownAuthor).toHaveAttribute('href', '/user/author-unknown');
+      expect(document.querySelectorAll('[data-interactive][data-shape="circle"]')).toHaveLength(3);
+      expect(collaborator).toHaveAttribute('href', '/user/collaborator-1');
+      expect(collaborator.querySelector('[data-interactive][data-shape="circle"]')).toBeNull();
+    },
+  );
 
   it('preserves the featured image and all long-title metadata in growing flow chrome', () => {
     const title = 'A long field journal title that continues across lines on narrow screens';
@@ -191,21 +222,5 @@ describe('PostHeader author identities', () => {
     expect(hero.querySelector('h1')?.closest('[data-placement]')).toHaveAttribute('data-placement', 'flow');
     expect(hero.style.marginLeft).toBe('');
     expect(hero.style.marginRight).toBe('');
-  });
-
-  it('uses the same avatar identities in inverse hero metadata', () => {
-    renderHeader({
-      ...BASE_POST,
-      featuredImageUrl: HERO_IMAGE,
-      collaborators: [],
-    });
-
-    const imageAuthor = getUserLink('Image Author');
-
-    expect(imageAuthor).toHaveAttribute('href', '/user/author-image');
-    expect(imageAuthor.querySelector('[data-interactive][data-shape="circle"]')).not.toBeNull();
-    expect(invariantTokens['text-inverse-secondary']).toBe('rgb(255 255 255 / 72%)');
-    expect(imageAuthor.closest('[data-tone="inverse"]')).not.toBeNull();
-    expect(document.querySelectorAll('[data-interactive][data-shape="circle"]')).toHaveLength(3);
   });
 });

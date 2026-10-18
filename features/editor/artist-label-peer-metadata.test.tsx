@@ -33,6 +33,7 @@ const mocks = vi.hoisted(() => ({
   title: '',
   titleChange: null as null | ((value: string) => void),
   labelCancel: null as null | (() => void | Promise<void>),
+  updateFromTitle: vi.fn(),
 }));
 
 vi.mock('next/navigation', () => ({
@@ -163,7 +164,7 @@ vi.mock('@/lib/hooks/useSlugManagement', () => ({
     isChecking: false,
     handleChange: vi.fn(),
     handleBlur: vi.fn(),
-    updateFromTitle: vi.fn(),
+    updateFromTitle: mocks.updateFromTitle,
   }),
 }));
 vi.mock('@/lib/hooks/useOgImage', () => ({
@@ -375,6 +376,24 @@ describe('Artist and Label peer metadata adoption', () => {
       act(() => mocks.inputChanges[`${kind}-${kind}-1-website`]?.('https://denied.example'));
       expect(mocks.writes).toHaveLength(writes);
       expect(container.querySelector('[data-testid="editor-title"]')).toBe(title);
+    },
+  );
+
+  it.each(['artist', 'label'] as const)(
+    'routes %s title edits through the shared slug hook instead of writing the slug directly',
+    (kind) => {
+      if (kind === 'artist') {
+        renderArtist();
+      } else {
+        renderLabel();
+      }
+      expect(mocks.titleChange).toBeTypeOf('function');
+
+      act(() => mocks.titleChange?.('Renamed title'));
+
+      expect(mocks.updateFromTitle).toHaveBeenCalledWith('Renamed title');
+      expect(mocks.writes).toContainEqual({ locale: 'en', title: 'Renamed title' });
+      expect(mocks.writes).not.toContainEqual(expect.objectContaining({ slug: expect.anything() }));
     },
   );
 

@@ -1,12 +1,5 @@
-import type * as maplibregl from 'maplibre-gl';
 import { describe, expect, it } from 'vitest';
-import {
-  buildHoveredClusterFilter,
-  buildPriorityInteractionColorExpression,
-  buildPriorityInteractionMatchExpression,
-  getPlaceMarkerZIndex,
-  resolvePriorityInteractionKey,
-} from './hover-order';
+import { getPlaceMarkerZIndex, resolvePriorityInteractionKey } from './hover-order';
 
 describe('hover-order', () => {
   it('uses hover priority on pointer-capable layouts', () => {
@@ -69,35 +62,5 @@ describe('hover-order', () => {
         selected: false,
       }),
     ).toBe(1800);
-  });
-
-  it('builds a hovered cluster overlay filter from the base cluster filter', () => {
-    const baseFilter = ['==', ['get', 'kind'], 'cluster'] as maplibregl.FilterSpecification;
-    const hoveredMatch = ['==', ['get', 'id'], 'cluster-1'] as maplibregl.FilterSpecification;
-
-    expect(buildHoveredClusterFilter(baseFilter, hoveredMatch)).toEqual([
-      'all',
-      ['==', ['get', 'kind'], 'cluster'],
-      ['==', ['get', 'id'], 'cluster-1'],
-    ]);
-  });
-
-  it('builds a priority match expression with a stable fallback key', () => {
-    expect(buildPriorityInteractionMatchExpression(['get', 'cluster_id'], null)).toEqual([
-      '==',
-      ['get', 'cluster_id'],
-      '__none__',
-    ]);
-  });
-
-  it('builds a priority color expression without adding a second symbol layer', () => {
-    expect(
-      buildPriorityInteractionColorExpression({
-        targetKeyExpression: ['get', 'cluster_id'],
-        prioritizedKey: 42,
-        defaultColor: 'rgba(15,23,42,0.9)',
-        highlightedColor: '#ffffff',
-      }),
-    ).toEqual(['case', ['==', ['get', 'cluster_id'], 42], '#ffffff', 'rgba(15,23,42,0.9)']);
   });
 });

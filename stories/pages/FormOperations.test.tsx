@@ -48,13 +48,11 @@ function render(
   );
 }
 describe('actual form operations page previews', () => {
-  it('renders submission metadata/responses and actual delete modal', async () => {
+  // The confirmation flow behind the delete action is covered in features/form/SubmissionDeleteButton.test.tsx.
+  it('renders submission metadata/responses with its delete action', () => {
     render('detail');
     expect(host.textContent).toContain('June Han');
     expect(host.textContent).toContain('192.0.2.1');
-    const button = host.querySelector<HTMLButtonElement>('button[aria-label="Delete"]');
-    expect(button).not.toBeNull();
-    await act(async () => button!.click());
-    expect(document.body.querySelector('[role=dialog]')).not.toBeNull();
+    expect(host.querySelector('button[aria-label="Delete"]')).not.toBeNull();
   });
 });

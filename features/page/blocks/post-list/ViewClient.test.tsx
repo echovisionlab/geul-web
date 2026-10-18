@@ -420,7 +420,7 @@ describe('PostListViewClient', () => {
     expect(card?.textContent).toContain('+1');
   });
 
-  it('renders carousel cards with a horizontal media-and-content layout', () => {
+  it('renders each multi-column carousel post as a linked card without its summary', () => {
     render(
       <PostListViewClient
         posts={[post, { ...post, id: 'post-2', slug: 'second-post', title: 'Second Post' }]}
@@ -428,13 +428,10 @@ describe('PostListViewClient', () => {
       />,
     );
 
-    const card = document.querySelector('[data-post-list-item-layout="carousel-cards"]');
-    expect(card).not.toBeNull();
-    expect(card?.querySelector('[data-post-list-carousel-card-layout]')).not.toBeNull();
-    expect(card?.querySelector('[data-post-list-carousel-card-media]')).not.toBeNull();
-    expect(card?.querySelector('[data-post-list-carousel-card-content]')).not.toBeNull();
-    expect(card?.textContent).toContain('First Post');
-    expect(card?.textContent).not.toContain('Summary');
-    expect(card?.querySelector('a[href="/posts/first-post"]')).not.toBeNull();
+    const firstPostLinks = [...document.querySelectorAll('a[href="/posts/first-post"]')];
+    expect(firstPostLinks.some((link) => link.textContent === 'First Post')).toBe(true);
+    const secondPostLinks = [...document.querySelectorAll('a[href="/posts/second-post"]')];
+    expect(secondPostLinks.some((link) => link.textContent === 'Second Post')).toBe(true);
+    expect(document.body.textContent).not.toContain('Summary');
   });
 });

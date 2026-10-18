@@ -2,10 +2,13 @@
 
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
+import { QueryClient, QueryObserver, type QueryObserverOptions } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  invalidateQueries: vi.fn(),
+  queryClient: null as QueryClient | null,
+  queryOptions: [] as QueryObserverOptions[],
+  getUserAdminAction: vi.fn(),
   updateUserAction: vi.fn(),
   updateMutate: vi.fn(),
   updateSuccess: null as
@@ -54,9 +57,14 @@ vi.mock('react', async (importOriginal) => {
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
-vi.mock('@tanstack/react-query', () => ({
-  useQueryClient: () => ({ invalidateQueries: mocks.invalidateQueries }),
-  useQuery: ({ queryKey }: { queryKey: string[] }) => {
+// Rendering reads stubbed query results, while the page's own query options are recorded and its invalidations
+// reach a real QueryClient, so a refresh is observable through the page's real query key and Member loader.
+vi.mock('@tanstack/react-query', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@tanstack/react-query')>()),
+  useQueryClient: () => mocks.queryClient,
+  useQuery: (options: QueryObserverOptions & { queryKey: string[] }) => {
+    mocks.queryOptions.push(options);
+    const { queryKey } = options;
     if (queryKey[0] === 'users') {
       return { data: mocks.user, isLoading: false };
     }
@@ -118,7 +126,7 @@ vi.mock('@/lib/actions/email-suppression', () => ({
 vi.mock('@/lib/actions/personal-access-token', () => ({ listAccountPersonalAccessTokensAction: vi.fn() }));
 vi.mock('@/lib/actions/user', () => ({
   banUserAction: vi.fn(),
-  getUserAdminAction: vi.fn(),
+  getUserAdminAction: mocks.getUserAdminAction,
   removeUserSsoProviderAction: vi.fn(),
   setUserCanonicalEmailAction: vi.fn(),
   unbanUserAction: vi.fn(),
@@ -140,7 +148,9 @@ beforeEach(() => {
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
-  mocks.invalidateQueries.mockReset();
+  mocks.queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  mocks.queryOptions = [];
+  mocks.getUserAdminAction.mockReset().mockImplementation(async () => ({ ok: true, value: mocks.user }));
   mocks.updateUserAction.mockReset();
   mocks.updateMutate.mockReset();
   mocks.updateSuccess = null;
@@ -174,6 +184,7 @@ beforeEach(() => {
 afterEach(() => {
   act(() => root.unmount());
   container.remove();
+  mocks.queryClient?.clear();
 });
 
 describe('Admin Member profile controller', () => {
@@ -226,14 +237,21 @@ describe('Admin Member profile controller', () => {
     expect(mocks.setFormValues).not.toHaveBeenCalled();
   });
 
-  it('refreshes the exact Member after an avatar mutation without issuing a generic profile update', async () => {
-    expect(mocks.profileProps).not.toBeNull();
+  it('refetches the exact Member after an avatar change without issuing a generic profile update', async () => {
+    const memberQuery = mocks.queryOptions.findLast((options) => options.queryKey[0] === 'users');
+    expect(memberQuery).toBeDefined();
+    const unsubscribe = new QueryObserver(mocks.queryClient!, memberQuery!).subscribe(() => undefined);
+    // An avatar change happens on a loaded profile; a refetch of a still-pending load would join it.
+    await vi.waitFor(() => expect(mocks.queryClient!.getQueryState(memberQuery!.queryKey)?.status).toBe('success'));
+    expect(mocks.getUserAdminAction).toHaveBeenCalledTimes(1);
 
     await act(async () => {
       await mocks.profileProps!.onImageChange('https://cdn.example/member.webp');
     });
 
-    expect(mocks.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['users', 'admin', 'member-1'] });
+    expect(mocks.getUserAdminAction).toHaveBeenCalledTimes(2);
+    expect(mocks.getUserAdminAction).toHaveBeenLastCalledWith('member-1');
     expect(mocks.updateUserAction).not.toHaveBeenCalled();
+    unsubscribe();
   });
 });

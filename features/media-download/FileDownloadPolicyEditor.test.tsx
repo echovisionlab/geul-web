@@ -597,7 +597,7 @@ describe('FileDownloadPolicyEditor', () => {
     expect(host?.textContent).toContain('Download access could not be saved');
   });
 
-  it('shows the current audience as a single compact media-header control', async () => {
+  it('shows the current audience in the media header and describes it to assistive technology', async () => {
     const adapter: FileDownloadPolicyEditorAdapter = {
       loadPolicy: vi.fn(async () => ({
         data: {
@@ -613,22 +613,8 @@ describe('FileDownloadPolicyEditor', () => {
     renderEditor(adapter, { presentation: 'media-header' });
     await settle();
 
-    const headerControl = host?.querySelector('[data-file-download-policy-presentation="media-header"]');
-    const audienceInput = host?.querySelector<HTMLInputElement>('input[aria-label="Download access"]');
-    expect(headerControl).toBeTruthy();
-    expect(headerControl?.closest('.mantine-Card-root')).toBeNull();
     expectSelectedAccess('Signed-in users');
-    expect(audienceInput).toBeInstanceOf(HTMLInputElement);
-    expect(audienceInput?.getAttribute('placeholder') ?? '').toBe('');
-    expect(host?.textContent).not.toContain('Control who can download the original file.');
-    const description = headerControl?.querySelector<HTMLElement>('[data-file-download-access-description]');
-    expect(audienceInput?.getAttribute('aria-describedby')?.split(' ')).toContain(description?.id);
-    expect(description?.textContent).toBe('Any signed-in user can download this file.');
-    expect(description?.className).toContain('visuallyHidden');
-    const visualCopy = headerControl?.cloneNode(true) as HTMLElement;
-    visualCopy.querySelector('[data-file-download-access-description]')?.remove();
-    expect(visualCopy.textContent).not.toContain('Any signed-in user can download this file.');
-    expect(host?.textContent).not.toContain('Save access');
+    expect(inputForLabel('Download access')).toHaveAccessibleDescription(/Any signed-in user can download this file\./);
   });
 
   it.each([

@@ -608,12 +608,21 @@ describe('Tiptap block commands', () => {
     mounted.destroy();
   });
 
-  it('matches the established clamped alignment shortcut order', () => {
-    expect(resolveNextTextAlignment('left', 'backward')).toBe('left');
-    expect(resolveNextTextAlignment('left', 'forward')).toBe('center');
-    expect(resolveNextTextAlignment('center', 'forward')).toBe('right');
-    expect(resolveNextTextAlignment('right', 'forward')).toBe('right');
-  });
+  it.each([
+    ['left', 'forward', 'center'],
+    ['center', 'forward', 'right'],
+    ['right', 'forward', 'right'],
+    ['right', 'backward', 'center'],
+    ['center', 'backward', 'left'],
+    ['left', 'backward', 'left'],
+    ['justify', 'forward', 'center'],
+    [undefined, 'backward', 'left'],
+  ] as const)(
+    'moves %s alignment %s to %s, clamping at the ends and treating unsupported values as left',
+    (current, direction, expected) => {
+      expect(resolveNextTextAlignment(current, direction)).toBe(expected);
+    },
+  );
 
   it('updates only the selected block content alignment', () => {
     const mounted = createEditor();
@@ -854,6 +863,20 @@ describe('Tiptap block commands', () => {
       new KeyboardEvent('keydown', { key: 'ArrowRight', ctrlKey: true, shiftKey: true, bubbles: true }),
     );
     expect(mounted.editor.state.doc.firstChild?.child(0).firstChild?.attrs.textAlignment).toBe('center');
+    mounted.editor.view.dom.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowLeft', ctrlKey: true, shiftKey: true, bubbles: true }),
+    );
+    expect(mounted.editor.state.doc.firstChild?.child(0).firstChild?.attrs.textAlignment).toBe('left');
+    const nativeSelectionExtend = new KeyboardEvent('keydown', {
+      key: 'ArrowRight',
+      altKey: true,
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    mounted.editor.view.dom.dispatchEvent(nativeSelectionExtend);
+    expect(nativeSelectionExtend.defaultPrevented).toBe(false);
+    expect(mounted.editor.state.doc.firstChild?.child(0).firstChild?.attrs.textAlignment).toBe('left');
     mounted.editor.view.dom.dispatchEvent(
       new KeyboardEvent('keydown', { key: 'ArrowDown', altKey: true, shiftKey: true, bubbles: true }),
     );

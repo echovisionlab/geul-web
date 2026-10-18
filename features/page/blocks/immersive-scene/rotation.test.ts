@@ -1,7 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import {
-  DEFAULT_ROTATION_SPEED,
-  DEFAULT_SCROLL_ROTATION_TURNS,
   ZERO_ROTATION_VECTOR,
   addRotationVectors,
   advanceRotation,
@@ -20,9 +18,9 @@ describe('immersive scene rotation', () => {
   it('keeps the previous Y-axis defaults while exposing every axis', () => {
     const config = parseImmersiveSceneConfig({});
 
-    expect(resolveSceneInitialRotation(config)).toEqual(ZERO_ROTATION_VECTOR);
-    expect(resolveSceneRotationSpeed(config)).toEqual(DEFAULT_ROTATION_SPEED);
-    expect(resolveSceneScrollRotationTurns(config)).toEqual(DEFAULT_SCROLL_ROTATION_TURNS);
+    expect(resolveSceneInitialRotation(config)).toEqual({ x: 0, y: 0, z: 0 });
+    expect(resolveSceneRotationSpeed(config)).toEqual({ x: 0, y: 0.18, z: 0 });
+    expect(resolveSceneScrollRotationTurns(config)).toEqual({ x: 0, y: 0.35, z: 0 });
   });
 
   it('inherits scene axes per field and keeps explicit zero item overrides', () => {

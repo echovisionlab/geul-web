@@ -331,7 +331,7 @@ describe('WorkMetaProvider', () => {
     );
   });
 
-  it('keeps featured-image presentation ephemeral and rejects stale setters', () => {
+  it('shows a newly set featured image and rejects the setter of an unmounted provider', () => {
     renderProvider();
     const staleSetter = latest?.setFeaturedImage;
 

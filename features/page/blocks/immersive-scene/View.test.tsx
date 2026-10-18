@@ -21,6 +21,7 @@ import {
   resolveUnitMeshScale,
   resolveUnitPresentation,
 } from './scene-renderer-model';
+import { resolveSceneRotationSpeed, resolveSceneScrollRotationTurns } from './rotation';
 import { resolveScrollProgress, resolveUnitMeshAsset } from './SceneRenderer';
 import { parseImmersiveSceneConfig, type ImmersiveSceneUnit } from './schema';
 import { ImmersiveSceneView } from './ViewRuntime';
@@ -118,53 +119,18 @@ describe('ImmersiveSceneView', () => {
     }
   });
 
-  it('projects authored renderer controls onto the scene root for each color scheme', () => {
-    const sharedProps = {
-      unitsJson: '[{"id":"single","mesh":"sphere","color":"#ffffff"}]',
-      backgroundEnabled: 'false',
-      particleBrightness: '1.6',
-      darkParticleBrightness: '1.9',
-      rotationEnabled: 'false',
-      rotationX: '10',
-      rotationY: '20',
-      rotationZ: '30',
+  it('resolves the authored per-axis rotation speed and scroll turns for the renderer', () => {
+    const config = parseImmersiveSceneConfig({
       rotationSpeedX: '0.2',
       rotationSpeedY: '0.42',
       rotationSpeedZ: '-0.1',
-      scrollRotationEnabled: 'false',
       scrollRotationTurnsX: '0.1',
       scrollRotationTurnsY: '0.8',
       scrollRotationTurnsZ: '-0.2',
-      hoverEnabled: 'false',
-      hoverRepelRadius: '0.7',
-    };
-    const lightHtml = renderToStaticMarkup(
-      <TestProviders>
-        <ImmersiveSceneView props={{ ...sharedProps, preferredScheme: 'light' }} />
-      </TestProviders>,
-    );
-    const darkHtml = renderToStaticMarkup(
-      <TestProviders>
-        <ImmersiveSceneView props={{ ...sharedProps, preferredScheme: 'dark' }} />
-      </TestProviders>,
-    );
+    });
 
-    expect(lightHtml).toContain('data-background-enabled="false"');
-    expect(lightHtml).toContain('data-particle-brightness="1.6"');
-    expect(lightHtml).toContain('data-rotation-enabled="false"');
-    expect(lightHtml).toContain('data-rotation-x="10"');
-    expect(lightHtml).toContain('data-rotation-y="20"');
-    expect(lightHtml).toContain('data-rotation-z="30"');
-    expect(lightHtml).toContain('data-rotation-speed-x="0.2"');
-    expect(lightHtml).toContain('data-rotation-speed-y="0.42"');
-    expect(lightHtml).toContain('data-rotation-speed-z="-0.1"');
-    expect(lightHtml).toContain('data-scroll-rotation-enabled="false"');
-    expect(lightHtml).toContain('data-scroll-rotation-turns-x="0.1"');
-    expect(lightHtml).toContain('data-scroll-rotation-turns-y="0.8"');
-    expect(lightHtml).toContain('data-scroll-rotation-turns-z="-0.2"');
-    expect(lightHtml).toContain('data-hover-enabled="false"');
-    expect(lightHtml).toContain('data-hover-repel-radius="0.7"');
-    expect(darkHtml).toContain('data-particle-brightness="1.9"');
+    expect(resolveSceneRotationSpeed(config)).toEqual({ x: 0.2, y: 0.42, z: -0.1 });
+    expect(resolveSceneScrollRotationTurns(config)).toEqual({ x: 0.1, y: 0.8, z: -0.2 });
   });
 
   it('renders a scroll scene shell when multiple units use scroll playback', () => {

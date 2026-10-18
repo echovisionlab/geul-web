@@ -432,6 +432,85 @@ describe('Block-room Tiptap codec', () => {
     editor.destroy();
   });
 
+  it('projects header-row cells to table headers and publishes them back without inventing body content', () => {
+    const rowIds = ['10000000-0000-4000-8000-000000000231', '10000000-0000-4000-8000-000000000232'];
+    const cellIds = [
+      ['10000000-0000-4000-8000-000000000233', '10000000-0000-4000-8000-000000000234'],
+      ['10000000-0000-4000-8000-000000000235', '10000000-0000-4000-8000-000000000236'],
+    ];
+    const input = documentToTiptap([
+      descriptor(
+        'table',
+        '10000000-0000-4000-8000-000000000230',
+        {
+          props: {},
+          content: {
+            rows: rowIds.map((id, row) => ({
+              id,
+              cells: cellIds[row]!.map((cellId) => ({ id: cellId, header: row === 0, props: {} })),
+            })),
+          },
+        },
+        {
+          props: {},
+          content: {
+            rows: [
+              {
+                rowId: rowIds[0]!,
+                cells: [
+                  { cellId: cellIds[0]![0]!, content: [{ text: { text: 'Column 1', styles: {} } }] },
+                  { cellId: cellIds[0]![1]!, content: [{ text: { text: 'Column 2', styles: {} } }] },
+                ],
+              },
+              { rowId: rowIds[1]!, cells: cellIds[1]!.map((cellId) => ({ cellId, content: [] })) },
+            ],
+          },
+        },
+      ),
+    ]);
+    const editor = new Editor({
+      element: document.createElement('div'),
+      extensions: createTiptapWireExtensions(),
+      content: input,
+    });
+
+    const json = editor.getJSON() as JSONContent;
+    let table: JSONContent | undefined;
+    const findTable = (node: JSONContent) => {
+      if (node.type === 'table') {
+        table ??= node;
+      }
+      node.content?.forEach(findTable);
+    };
+    findTable(json);
+    expect(table?.content?.map((row) => row.content?.map((cell) => cell.type))).toEqual([
+      ['tableHeader', 'tableHeader'],
+      ['tableCell', 'tableCell'],
+    ]);
+
+    const published = splitPayload(parseDocument(json)[0]!);
+    expect(published.base).toMatchObject({
+      content: {
+        rows: [
+          { id: rowIds[0], cells: [{ header: true }, { header: true }] },
+          { id: rowIds[1], cells: [{ header: false }, { header: false }] },
+        ],
+      },
+    });
+    expect(published.locale).toMatchObject({
+      content: {
+        rows: [
+          {
+            rowId: rowIds[0],
+            cells: [{ content: [{ text: { text: 'Column 1' } }] }, { content: [{ text: { text: 'Column 2' } }] }],
+          },
+          { rowId: rowIds[1], cells: [{ content: [] }, { content: [] }] },
+        ],
+      },
+    });
+    editor.destroy();
+  });
+
   it('rejects tables that do not have durable row and cell identities', () => {
     const legacy = descriptor(
       'table',

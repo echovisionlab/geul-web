@@ -6,7 +6,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MediaWaveformSeek, type MediaWaveformSeekProps } from './MediaWaveformSeek';
-import { applyAudioSeekPresentation, resolveMediaSeekKey } from './media-seek';
+import { applyAudioSeekPresentation } from './media-seek';
 import { applyAudioMediaPresentation } from './native-audio';
 import classes from './MediaControls.module.css';
 
@@ -92,6 +92,9 @@ describe('Core MediaWaveformSeek', () => {
 
   it('toggles playback with Enter/Space and seeks from native value changes and pointer position', () => {
     const { host, input, onSeek, onTogglePlayback } = renderSeek();
+    key(input, 'a');
+    expect(onSeek).not.toHaveBeenCalled();
+    expect(onTogglePlayback).not.toHaveBeenCalled();
     key(input, 'Enter');
     key(input, ' ');
     expect(onTogglePlayback).toHaveBeenCalledTimes(2);
@@ -168,11 +171,9 @@ describe('Core audio seek DOM adapter', () => {
     expect(player.querySelector('.audio-player__icon--play')?.classList.contains(classes.iconPlay)).toBe(true);
   });
 
-  it('resolves the shared keyboard contract and keeps media CSS free of foreign class selectors', () => {
-    expect(resolveMediaSeekKey('ArrowLeft', 10, 60)).toEqual({ kind: 'seek', time: 5 });
-    expect(resolveMediaSeekKey('End', 10, 60)).toEqual({ kind: 'seek', time: 60 });
-    expect(resolveMediaSeekKey('Enter', 10, 60)).toEqual({ kind: 'toggle' });
-    expect(resolveMediaSeekKey('a', 10, 60)).toBeNull();
+  // Stylesheet ownership: Core media CSS styles only its own classes. Move to a design-system policy rule
+  // (scripts/design-system/framework-policy.mjs) once that policy records the existing Core :global adapters.
+  it('keeps media CSS free of foreign class selectors', () => {
     const css = readFileSync(resolve(process.cwd(), 'components/core/MediaControls/MediaControls.module.css'), 'utf8');
     expect(css).not.toContain(':global(');
   });

@@ -348,23 +348,22 @@ describe('ShellView', () => {
     expect(disclosure?.textContent).toContain('Artists');
   });
 
-  it('exposes navigation, account drawer, role-gated changelog, and theme state without owning them', () => {
+  it('links the changelog when the runtime grants it and opens the phone account drawer from props', () => {
     renderView({
-      navigationOpened: true,
       userMenuOpened: true,
-      themeMode: null,
       user: authenticatedUser,
       footer: { ...defaultProps.footer, showChangelog: true },
     });
 
-    const shell = container.querySelector('[data-shell]');
-    expect(shell?.getAttribute('data-navigation-opened')).toBe('true');
-    expect(shell?.getAttribute('data-user-menu-opened')).toBe('true');
-    expect(shell?.getAttribute('data-theme-mode')).toBe('pending');
-    expect(document.body.querySelector('[data-shell-mobile-navigation]')).not.toBeNull();
-    expect(document.getElementById('shell-mobile-navigation')?.getAttribute('role')).toBe('dialog');
-    expect(document.body.textContent).toContain('Account');
-    expect(container.querySelector('a[href="/changelog"]')).not.toBeNull();
-    expect(container.querySelector('a[href="/changelog"]')?.getAttribute('data-control-kind')).toBe('text');
+    const changelogLinks = Array.from(container.querySelectorAll<HTMLAnchorElement>('a')).filter(
+      (link) => link.textContent?.trim() === 'Changelog',
+    );
+    // Desktop and phone footers each carry the link; CSS shows one of them.
+    expect(changelogLinks.length).toBeGreaterThan(0);
+    for (const link of changelogLinks) {
+      expect(link.getAttribute('href')).toBe('/changelog');
+    }
+    // The shared matchMedia stub reports a phone width, so the account opens as a drawer.
+    expect(document.querySelector('[role="dialog"]')?.textContent).toContain('Account');
   });
 });

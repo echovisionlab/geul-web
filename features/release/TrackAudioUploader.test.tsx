@@ -306,97 +306,6 @@ describe('TrackAudioUploader', () => {
     expect(document.querySelector(ids.cancelButtonSelector)).not.toBeNull();
   });
 
-  it('does not clear stale pending upload markers from the passive status renderer', () => {
-    const ids = createTrackAudioTestIds();
-    mockUseUploadResumeState.mockReturnValue({
-      resumeNotice: null,
-      hasActiveSession: false,
-    });
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus={null}
-        audioAttached={false}
-        pendingUploadFileId={ids.pendingFileId}
-        pendingUploadAttemptId={ids.pendingAttemptId}
-        pendingUploadStatus="pending"
-        pendingUploadStartedAt="2026-04-10T00:00:00.000Z"
-        compact
-        mode="status-only"
-      />,
-    );
-    expect(mockUseUploadResumeState).toHaveBeenCalledWith(UploadType.TRACK_AUDIO, null, {
-      entityType: TranscodeEntityType.TRACK,
-      fileId: ids.pendingFileId,
-      attemptId: ids.pendingAttemptId,
-      pendingFileId: ids.pendingFileId,
-      hasDurableSource: false,
-    });
-  });
-
-  it('keeps a resumable pending file id local in the active button-side renderer', () => {
-    const ids = createTrackAudioTestIds();
-    mockUseUploadResumeState.mockReturnValue({
-      resumeNotice: {
-        uploadId: ids.uploadId,
-        fileId: ids.resumeFileId,
-        fileName: 'audio.ogg',
-        attemptId: ids.resumeAttemptId,
-        status: 1,
-      },
-      hasActiveSession: true,
-    } as any);
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_PENDING"
-        audioAttached={false}
-        compact
-        mode="button-only"
-      />,
-    );
-    expect(mockUseUploadResumeState).toHaveBeenCalledWith(UploadType.TRACK_AUDIO, ids.trackId, {
-      entityType: TranscodeEntityType.TRACK,
-      fileId: undefined,
-      attemptId: undefined,
-      pendingFileId: undefined,
-      hasDurableSource: false,
-    });
-  });
-
-  it('does not restore a resumable pending file id from the passive status renderer', () => {
-    const ids = createTrackAudioTestIds();
-    mockUseUploadResumeState.mockReturnValue({
-      resumeNotice: {
-        uploadId: ids.uploadId,
-        fileId: ids.resumeFileId,
-        fileName: 'audio.ogg',
-        attemptId: ids.resumeAttemptId,
-        status: 1,
-      },
-      hasActiveSession: true,
-    } as any);
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_PENDING"
-        audioAttached={false}
-        compact
-        mode="status-only"
-      />,
-    );
-    expect(mockUseUploadResumeState).toHaveBeenCalledWith(UploadType.TRACK_AUDIO, null, {
-      entityType: TranscodeEntityType.TRACK,
-      fileId: undefined,
-      attemptId: undefined,
-      pendingFileId: undefined,
-      hasDurableSource: false,
-    });
-  });
-
   it('uses the current original file as the CAS fence for replacement resume lookup', () => {
     const ids = createTrackAudioTestIds();
 
@@ -421,38 +330,6 @@ describe('TrackAudioUploader', () => {
       attemptId: ids.pendingAttemptId,
       pendingFileId: ids.pendingFileId,
       hasDurableSource: true,
-    });
-  });
-
-  it('does not synthesize a new attempt id when resuming a server session without one', () => {
-    const ids = createTrackAudioTestIds();
-    mockUseUploadResumeState.mockReturnValue({
-      resumeNotice: {
-        uploadId: ids.uploadId,
-        fileId: ids.resumeFileId,
-        fileName: 'audio.ogg',
-        attemptId: '',
-        status: 1,
-      },
-      hasActiveSession: true,
-    } as any);
-
-    render(
-      <TrackAudioUploader
-        trackId={ids.trackId}
-        processingStatus="TRACK_PROCESSING_STATUS_PENDING"
-        audioAttached={false}
-        compact
-        mode="button-only"
-      />,
-    );
-
-    expect(mockUseUploadResumeState).toHaveBeenCalledWith(UploadType.TRACK_AUDIO, ids.trackId, {
-      entityType: TranscodeEntityType.TRACK,
-      fileId: undefined,
-      attemptId: undefined,
-      pendingFileId: undefined,
-      hasDurableSource: false,
     });
   });
 

@@ -32,13 +32,17 @@ describe('translation job polling', () => {
     expect(translationJobsRefetchInterval(undefined, new Error('unavailable'))).toBe(false);
   });
 
-  it('keeps only active rows at the client query boundary', () => {
+  it('shows only queued and running jobs, in their original order', () => {
     expect(
       filterActiveTranslationJobs([
+        createJob('unspecified', TranslationJobStatus.UNSPECIFIED),
         createJob('queued', TranslationJobStatus.QUEUED),
+        // A terminal status from a newer API that this client's enum does not name.
+        createJob('finished', 3 as TranslationJobStatus),
         createJob('running', TranslationJobStatus.RUNNING),
       ]).map((job) => job.id),
     ).toEqual(['queued', 'running']);
+    expect(filterActiveTranslationJobs(undefined)).toEqual([]);
   });
 
   it('polls the overview only while jobs are active', () => {

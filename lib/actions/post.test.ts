@@ -1,10 +1,11 @@
 import { Code, ConnectError } from '@connectrpc/connect';
-import { create } from '@bufbuild/protobuf';
+import { create, fromJson } from '@bufbuild/protobuf';
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { DocumentContentHeight, DocumentRegionPlacement } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
 import { RichTextDocumentSchema, RichTextProfile } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { OgEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
+import { ShareLinkEntityType } from '@echovisionlab/geul-proto/secure/share_link_pb.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { assetRefFixture } from '@/tests/helpers/asset-ref';
 import * as actions from './post';
@@ -49,6 +50,11 @@ vi.mock('@/lib/api/server-client', () => ({
   createAdminClient: mocks.createAdminClient,
   createPostClient: mocks.createPostClient,
 }));
+
+vi.mock('@/lib/queries/manifest', async () => {
+  const { DEFAULT_SITE_SETTINGS_VIEW } = await import('@/lib/types/site-setting/config');
+  return { getSettings: async () => DEFAULT_SITE_SETTINGS_VIEW };
+});
 
 vi.mock('@/lib/actions/share-link', () => ({
   createShareLinkAction: mocks.createShareLinkAction,
@@ -138,79 +144,45 @@ describe('post actions', () => {
       }),
     });
     mocks.createShareLinkAction.mockResolvedValue({ ok: true, shareLink: { id: 'share-1' } });
-    mocks.deleteShareLinkAction.mockResolvedValue({ ok: true, success: true });
-    mocks.listShareLinksAction.mockResolvedValue({ ok: true, value: [{ id: 'share-1' }] });
   });
 
-  it('maps CRUD and status server actions to the post service', async () => {
+  it('creates a new post as an untitled draft with comments enabled', async () => {
     await expect(actions.createPostAction()).resolves.toEqual({ ok: true, data: { id: 'post-1' } });
-    await expect(
-      actions.updatePostAction(
-        'post-1',
-        {
-          slug: 'new-title',
-          commentsEnabled: false,
-          mapPlaceId: '',
-          documentLayout: {
-            contentHeight: 'viewport',
-            pageChrome: 'pinned',
-            footer: 'flow',
-          },
-        },
-        initialConfigurationRevision,
-      ),
-    ).resolves.toEqual({
-      ok: true,
-      success: true,
-      configurationRevision: acknowledgedConfigurationRevision,
-      configuration: {
-        configurationRevision: acknowledgedConfigurationRevision,
-        slug: 'new-title',
-        commentsEnabled: false,
-        mapPlaceId: null,
-        documentLayout: { contentHeight: 'content', pageChrome: 'flow', footer: 'flow' },
-      },
-    });
-    await expect(actions.publishPostAction('post-1')).resolves.toEqual({ ok: true, success: true });
-    await expect(actions.unpublishPostAction('post-1')).resolves.toEqual({ ok: true, success: true });
-    await expect(actions.archivePostAction('post-1')).resolves.toEqual({ ok: true, success: true });
-    await expect(
-      actions.schedulePostAction('post-1', new Date('2026-08-05T06:30:00.000Z'), 'Asia/Seoul'),
-    ).resolves.toEqual({ ok: true, success: true });
-    await expect(actions.cancelPostScheduleAction('post-1')).resolves.toEqual({ ok: true, success: true });
-    await expect(actions.republishPostAction('post-1')).resolves.toEqual({ ok: true, success: true });
-    await expect(actions.deletePostAdminAction('post-1')).resolves.toEqual({ ok: true, success: true });
-    await expect(actions.deletePostAction('post-2')).resolves.toEqual({ ok: true, success: true });
 
     expect(postClient.createPost).toHaveBeenCalledWith({
       title: 'Untitled Post',
       commentsEnabled: true,
     });
-    expect(postClient.updatePost).toHaveBeenCalledWith({
-      id: 'post-1',
-      expectedConfigurationRevision: initialConfigurationRevision,
-      slug: 'new-title',
-      commentsEnabled: false,
-      mapPlaceId: '',
-      documentLayout: {
+  });
+
+  it.each([
+    {
+      layout: { contentHeight: 'viewport', pageChrome: 'pinned', footer: 'flow' } as const,
+      expected: {
         contentHeight: DocumentContentHeight.VIEWPORT,
         pageChrome: DocumentRegionPlacement.PINNED,
         footer: DocumentRegionPlacement.FLOW,
       },
-    });
-    expect(postClient.publishPost).toHaveBeenCalledWith({ id: 'post-1' });
-    expect(postClient.unpublishPost).toHaveBeenCalledWith({ id: 'post-1' });
-    expect(postClient.archivePost).toHaveBeenCalledWith({ id: 'post-1' });
-    expect(postClient.schedulePost).toHaveBeenCalledWith({
-      id: 'post-1',
-      scheduledAt: expect.objectContaining({ seconds: BigInt(1785911400) }),
-      scheduledTimeZone: 'Asia/Seoul',
-    });
-    expect(postClient.cancelPostSchedule).toHaveBeenCalledWith({ id: 'post-1' });
-    expect(postClient.republishPost).toHaveBeenCalledWith({ id: 'post-1' });
-    expect(postClient.deletePost).toHaveBeenCalledWith({ id: 'post-1' });
-    expect(postClient.deletePost).toHaveBeenCalledWith({ id: 'post-2' });
-    expect(mocks.revalidatePath).toHaveBeenCalledWith('/admin/posts');
+    },
+    {
+      layout: { contentHeight: 'content', pageChrome: 'flow', footer: 'pinned' } as const,
+      expected: {
+        contentHeight: DocumentContentHeight.CONTENT,
+        pageChrome: DocumentRegionPlacement.FLOW,
+        footer: DocumentRegionPlacement.PINNED,
+      },
+    },
+  ])('saves the document layout $layout as the matching wire placement', async ({ layout, expected }) => {
+    await actions.updatePostAction('post-1', { documentLayout: layout }, initialConfigurationRevision);
+
+    expect(postClient.updatePost).toHaveBeenCalledWith(expect.objectContaining({ documentLayout: expected }));
+  });
+
+  it('clears the post map place and reports it as unset', async () => {
+    const result = await actions.updatePostAction('post-1', { mapPlaceId: '' }, initialConfigurationRevision);
+
+    expect(postClient.updatePost).toHaveBeenCalledWith(expect.objectContaining({ id: 'post-1', mapPlaceId: '' }));
+    expect(result).toMatchObject({ ok: true, configuration: { mapPlaceId: null } });
   });
 
   it('loads the current Post configuration for a stale settings save retry', async () => {
@@ -227,7 +199,7 @@ describe('post actions', () => {
     expect(postClient.getPost).toHaveBeenCalledWith({ id: 'post-1' });
   });
 
-  it('maps media, taxonomy, member, share-link, OG, and markdown actions', async () => {
+  it('returns the OG run started by a featured image change', async () => {
     await expect(actions.setPostFeaturedImageAction('post-1', 'file-1')).resolves.toEqual({
       ok: true,
       imageUrl: 'https://cdn.example/post.webp',
@@ -238,65 +210,76 @@ describe('post actions', () => {
       success: true,
       ogGenerationRunId: 'delete-featured-run',
     });
-    await expect(actions.addPostAuthorAction('post-1', 'member-1')).resolves.toEqual({
-      ok: true,
-      success: true,
-    });
-    await expect(actions.addPostCollaboratorAction('post-1', 'member-2')).resolves.toEqual({
-      ok: true,
-      success: true,
-    });
-    await expect(actions.removePostAuthorAction('post-1', 'member-1')).resolves.toEqual({
-      ok: true,
-      success: true,
-    });
-    await expect(actions.removePostCollaboratorAction('post-1', 'member-2')).resolves.toEqual({
-      ok: true,
-      success: true,
-    });
-    await expect(actions.listPostShareLinksAction('post-1')).resolves.toEqual([{ id: 'share-1' }]);
+    expect(postClient.setPostFeaturedImage).toHaveBeenCalledWith({ postId: 'post-1', fileId: 'file-1' });
+    expect(postClient.deletePostFeaturedImage).toHaveBeenCalledWith({ postId: 'post-1' });
+  });
+
+  it.each([
+    { action: 'addPostAuthorAction', rpc: 'addPostAuthor', other: 'addPostCollaborator' },
+    { action: 'addPostCollaboratorAction', rpc: 'addPostCollaborator', other: 'addPostAuthor' },
+    { action: 'removePostAuthorAction', rpc: 'removePostAuthor', other: 'removePostCollaborator' },
+    { action: 'removePostCollaboratorAction', rpc: 'removePostCollaborator', other: 'removePostAuthor' },
+  ] as const)('$action changes only the $rpc membership', async ({ action, rpc, other }) => {
+    await expect(actions[action]('post-1', 'member-1')).resolves.toEqual({ ok: true, success: true });
+
+    expect(postClient[rpc]).toHaveBeenCalledWith({ postId: 'post-1', memberId: 'member-1' });
+    expect(postClient[other]).not.toHaveBeenCalled();
+  });
+
+  it('creates a password-protected share link for the post', async () => {
     await expect(
-      actions.createPostShareLinkAction({
-        postId: 'post-1',
-        label: 'Preview',
-        password: 'preview-secret',
-      }),
+      actions.createPostShareLinkAction({ postId: 'post-1', label: 'Preview', password: 'preview-secret' }),
     ).resolves.toEqual({ ok: true, shareLink: { id: 'share-1' } });
-    await expect(actions.deletePostShareLinkAction('share-1')).resolves.toEqual({ ok: true, success: true });
+
+    expect(mocks.createShareLinkAction).toHaveBeenCalledWith(
+      ShareLinkEntityType.POST,
+      'post-1',
+      expect.objectContaining({ label: 'Preview', password: 'preview-secret' }),
+    );
+  });
+
+  it('regenerates the OG image for the trimmed requested locale', async () => {
     await expect(actions.regeneratePostOgImageAction('post-1', ' ko ')).resolves.toEqual({
       ok: true,
       success: true,
       runId: 'run-1',
       generationId: 'generation-1',
     });
-    await expect(actions.getPostMarkdownAction('post-1')).resolves.toEqual({
-      ok: true,
-      title: 'Post',
-      markdown: '',
-    });
-    await expect(actions.exportPostMarkdownAction('post-1')).resolves.toEqual({ ok: true, markdown: '' });
 
-    expect(postClient.setPostFeaturedImage).toHaveBeenCalledWith({
-      postId: 'post-1',
-      fileId: 'file-1',
-    });
-    expect(postClient.addPostAuthor).toHaveBeenCalledWith({
-      postId: 'post-1',
-      memberId: 'member-1',
-    });
-    expect(postClient.addPostCollaborator).toHaveBeenCalledWith({
-      postId: 'post-1',
-      memberId: 'member-2',
-    });
-    expect(mocks.createShareLinkAction).toHaveBeenCalledWith(
-      expect.any(Number),
-      'post-1',
-      expect.objectContaining({ password: 'preview-secret' }),
-    );
     expect(mocks.regenerateOgImage).toHaveBeenCalledWith({
       entityType: OgEntityType.POST,
       entityId: 'post-1',
       selection: { target: { case: 'locale', value: 'ko' } },
+    });
+  });
+
+  it('exports the stored post document as markdown', async () => {
+    const blockId = '10000000-0000-4000-8000-000000000501';
+    postClient.getPost.mockResolvedValue({
+      id: 'post-1',
+      title: 'Post',
+      document: fromJson(RichTextDocumentSchema, {
+        blockCatalogFingerprint: contentBlockCatalogFingerprint,
+        profile: RichTextProfile.POST,
+        sourceLocale: 'ko',
+        base: { nodes: [{ block: { id: blockId, paragraph: { props: {} } }, placement: { index: 0 } }] },
+        localeOverlays: [
+          {
+            locale: 'ko',
+            blocks: [{ blockId, paragraph: { props: {}, content: [{ text: { text: 'Hello world' } }] } }],
+          },
+        ],
+      }),
+    });
+
+    await expect(actions.getPostMarkdownAction('post-1')).resolves.toEqual({
+      ok: true,
+      title: 'Post',
+      markdown: 'Hello world\n',
+    });
+    await expect(actions.exportPostMarkdownAction('post-1')).resolves.toEqual({
+      ok: true,
+      markdown: 'Hello world\n',
     });
   });
 

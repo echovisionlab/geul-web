@@ -16,6 +16,9 @@ const mocks = vi.hoisted(() => ({
   settleArtists: null as ((success: boolean) => void) | null,
   patch: {} as Record<string, unknown>,
   write: null as ((patch: Record<string, unknown>) => Promise<void>) | null,
+  doc: null as object | null,
+  updateFromTitle: vi.fn(),
+  updateSlug: vi.fn(),
 }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ back: vi.fn(), push: vi.fn() }) }));
 vi.mock('next-intl', () => ({ useTranslations: () => Object.assign((key: string) => key, { rich: () => null }) }));
@@ -33,7 +36,7 @@ vi.mock('@/lib/actions/release', () => ({
   deleteReleaseAction: vi.fn(),
   publishReleaseAction: vi.fn(),
   unpublishReleaseAction: vi.fn(),
-  updateReleaseSlugAction: vi.fn(),
+  updateReleaseSlugAction: mocks.updateSlug,
 }));
 vi.mock('@/lib/actions/track', () => ({ getReleaseTrackSnapshotAction: vi.fn(async () => ({ ok: true, value: [] })) }));
 vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
@@ -115,12 +118,14 @@ vi.mock('@/lib/editor/useDebouncedPatch', () => ({
     };
   },
 }));
-vi.mock('@/lib/hooks/useSlugManagement', () => ({ useSlugManagement: () => ({ updateFromTitle: vi.fn() }) }));
+vi.mock('@/lib/hooks/useSlugManagement', () => ({
+  useSlugManagement: () => ({ updateFromTitle: mocks.updateFromTitle }),
+}));
 vi.mock('@/features/editor/hooks/useBlockRoomTiptapController', () => ({ useRichTextBlockRoomController: () => null }));
 vi.mock('@/lib/collab/useBlockRoomConnection', () => ({
   useBlockRoomConnection: () => ({
     provider: mocks.provider,
-    doc: null,
+    doc: mocks.doc,
     bootstrap: null,
     protocol: null,
     isConnected: true,
@@ -229,6 +234,9 @@ describe('Release authoritative configuration', () => {
     mocks.settleArtists = null;
     mocks.patch = {};
     mocks.write = null;
+    mocks.doc = null;
+    mocks.updateFromTitle.mockReset();
+    mocks.updateSlug.mockReset();
     container = document.createElement('div');
     document.body.append(container);
     root = createRoot(container);
@@ -253,6 +261,17 @@ describe('Release authoritative configuration', () => {
     expect(url.disabled).toBe(true);
     expect(mocks.header.mock.lastCall?.[0].onDelete).toBeUndefined();
     expect(container.querySelector('[data-testid="artists"]')).toBe(artists);
+  });
+
+  it('routes title edits through the shared slug hook instead of writing the slug directly', async () => {
+    mocks.doc = {};
+    await act(async () => root.render(<ReleaseEditor {...props} />));
+
+    act(() => mocks.header.mock.lastCall?.[0].onTitleChange('Renamed release'));
+
+    expect(mocks.updateFromTitle).toHaveBeenCalledWith('Renamed release');
+    expect(mocks.updateSlug).not.toHaveBeenCalled();
+    expect(mocks.patch).not.toHaveProperty('slug');
   });
 
   it('preserves a pending scalar draft across an authoritative peer refresh', async () => {

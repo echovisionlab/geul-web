@@ -3,11 +3,11 @@
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
+import { render, screen } from '@/test/render';
 
 import {
   AccountEmailOptionContent,
   AccountEmailSelectRightSection,
-  getAccountEmailSelectRightSectionWidth,
   type AccountEmailOptionSource,
 } from './AccountEmailOption';
 
@@ -34,26 +34,32 @@ const currentAndProvider: AccountEmailOptionSource[] = [
   },
 ];
 
-function render(node: React.ReactNode) {
+function renderMarkup(node: React.ReactNode) {
   return renderToStaticMarkup(<DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>);
 }
 
 describe('AccountEmailOption', () => {
   it('renders email text with source labels and provider accessible names', () => {
-    const html = render(<AccountEmailOptionContent email="primary.email@example.com" sources={currentAndProvider} />);
+    const html = renderMarkup(
+      <AccountEmailOptionContent email="primary.email@example.com" sources={currentAndProvider} />,
+    );
 
     expect(html).toContain('primary.email@example.com');
     expect(html).toContain('Current');
     expect(html).toContain('aria-label="GitHub account"');
   });
 
-  it('keeps the select right section compact for provider-only sources', () => {
-    expect(getAccountEmailSelectRightSectionWidth(providerOnly)).toBe(48);
-    expect(getAccountEmailSelectRightSectionWidth(currentAndProvider)).toBe(132);
+  it('shows a provider-only selection as a named provider mark', () => {
+    render(<AccountEmailSelectRightSection sources={providerOnly} />);
 
-    const html = render(<AccountEmailSelectRightSection sources={providerOnly} />);
+    expect(screen.getByRole('img', { name: 'Google account' })).toBeInTheDocument();
+    expect(screen.queryByText('Current')).not.toBeInTheDocument();
+  });
 
-    expect(html).toContain('aria-label="Google account"');
-    expect(html).not.toContain('Current');
+  it('shows only the primary source of the selected email', () => {
+    render(<AccountEmailSelectRightSection sources={currentAndProvider} />);
+
+    expect(screen.getByText('Current')).toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: 'GitHub account' })).not.toBeInTheDocument();
   });
 });

@@ -19,6 +19,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import koMessages from '@/messages/ko.json';
+import type { TranslationLifecycleRefetchHint } from '@/lib/translation/lifecycle';
 import { EntityTranslationsPanel } from './EntityTranslationsPanel';
 
 const mocks = vi.hoisted(() => ({
@@ -73,8 +74,20 @@ vi.mock('@mantine/hooks', async (importOriginal) => ({
   useMounted: () => true,
 }));
 
+// The live lifecycle stream is the external boundary; tests deliver its events through the captured handlers.
+const lifecycle = vi.hoisted(() => ({
+  onEvent: null as ((hint: TranslationLifecycleRefetchHint) => Promise<void> | void) | null,
+  onReconnect: null as (() => Promise<void> | void) | null,
+}));
+
 vi.mock('@/features/translation/useTranslationLifecycleSubscription', () => ({
-  useTranslationLifecycleSubscription: () => undefined,
+  useTranslationLifecycleSubscription: (input: {
+    onEvent?: (hint: TranslationLifecycleRefetchHint) => Promise<void> | void;
+    onReconnect?: () => Promise<void> | void;
+  }) => {
+    lifecycle.onEvent = input.onEvent ?? null;
+    lifecycle.onReconnect = input.onReconnect ?? null;
+  },
 }));
 
 vi.mock('@/lib/contexts/EditorRuntimeContext', () => ({
@@ -170,6 +183,8 @@ afterEach(() => {
   container.remove();
   document.body.innerHTML = '';
   vi.clearAllMocks();
+  lifecycle.onEvent = null;
+  lifecycle.onReconnect = null;
 });
 
 function renderPanel(options?: Partial<ComponentProps<typeof EntityTranslationsPanel>>) {
@@ -474,5 +489,56 @@ describe('EntityTranslationsPanel API commands', () => {
     });
     expect(container.textContent).not.toContain('secret upstream detail');
     expect(container.textContent).not.toContain('provider credential raw detail');
+  });
+});
+
+describe('EntityTranslationsPanel lifecycle refresh', () => {
+  const runningJaHint: TranslationLifecycleRefetchHint = {
+    jobId: 'running-ja',
+    entityType: 'post',
+    entityId: 'post-1',
+    targetLocale: 'ja',
+    timestampMs: 1,
+  };
+
+  async function waitForPanel(assertion: () => void) {
+    await act(async () => {
+      await vi.waitFor(assertion);
+    });
+  }
+
+  it.each([
+    ['a lifecycle event', () => lifecycle.onEvent?.(runningJaHint)],
+    ['a reconnect', () => lifecycle.onReconnect?.()],
+  ])('shows the refetched entries and jobs after %s', async (_trigger, deliver) => {
+    mocks.listTranslationJobs.mockResolvedValue({ jobs: [job('running-ja', 'ja', TranslationJobStatus.RUNNING)] });
+    await renderReady();
+    await waitForPanel(() => expect(document.getElementById('entity-translations-panel-cancel-ja')).not.toBeNull());
+    const entryRequests = mocks.listEntityTranslations.mock.calls.length;
+    const jobRequests = mocks.listTranslationJobs.mock.calls.length;
+
+    // The server has finished the job and stored its target.
+    mocks.listEntityTranslations.mockResolvedValue({ sourceLocale: 'en', entries: [entry('fr'), entry('ja')] });
+    mocks.listTranslationJobs.mockResolvedValue({ jobs: [] });
+    await act(async () => deliver());
+
+    await waitForPanel(() => expect(document.getElementById('entity-translations-panel-cancel-ja')).toBeNull());
+    expect(mocks.listEntityTranslations.mock.calls.length).toBeGreaterThan(entryRequests);
+    expect(mocks.listTranslationJobs.mock.calls.length).toBeGreaterThan(jobRequests);
+    expect(container.querySelector('[data-testid="translation-locale-row-ja"]')?.textContent).not.toContain(
+      '대상 문서가 아직 없습니다',
+    );
+  });
+
+  it('keeps a job active after its lifecycle event while the server still reports it running', async () => {
+    mocks.listTranslationJobs.mockResolvedValue({ jobs: [job('running-ja', 'ja', TranslationJobStatus.RUNNING)] });
+    await renderReady();
+    await waitForPanel(() => expect(document.getElementById('entity-translations-panel-cancel-ja')).not.toBeNull());
+    const jobRequests = mocks.listTranslationJobs.mock.calls.length;
+
+    await act(async () => lifecycle.onEvent?.(runningJaHint));
+
+    await waitForPanel(() => expect(mocks.listTranslationJobs.mock.calls.length).toBeGreaterThan(jobRequests));
+    expect(document.getElementById('entity-translations-panel-cancel-ja')).not.toBeNull();
   });
 });

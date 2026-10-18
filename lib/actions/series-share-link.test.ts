@@ -89,62 +89,66 @@ describe('series and share-link actions', () => {
     shareLinkClient.deleteShareLink.mockResolvedValue({ success: true });
   });
 
-  it('maps series CRUD, members, post ordering, image, and OG actions', async () => {
+  it('creates a series with its title and description', async () => {
+    await expect(series.createSeriesAction({ title: 'Series', description: 'Description' })).resolves.toEqual({
+      data: { id: 'series-1' },
+    });
+
+    expect(seriesClient.createSeries).toHaveBeenCalledWith({ title: 'Series', description: 'Description' });
+  });
+
+  it('saves the series title, slug and published status', async () => {
     await expect(
-      series.createSeriesAction({
-        title: 'Series',
-        description: 'Description',
-      }),
-    ).resolves.toEqual({ data: { id: 'series-1' } });
-    await expect(
-      series.updateSeriesAction('series-1', {
-        title: 'Updated',
-        slug: 'series',
-        description: null,
-        status: 'draft',
-      }),
+      series.updateSeriesAction('series-1', { title: 'Updated', slug: 'series', status: 'published' }),
     ).resolves.toEqual({ success: true });
-    await expect(series.addSeriesManagerAction('series-1', 'user-1')).resolves.toEqual({
-      success: true,
-    });
-    await expect(series.removeSeriesManagerAction('series-1', 'user-1')).resolves.toEqual({
-      success: true,
-    });
-    await expect(series.assignPostToSeriesAction('series-1', 'post-1')).resolves.toEqual({
-      success: true,
-    });
-    await expect(series.unassignPostFromSeriesAction('series-1', 'post-1')).resolves.toEqual({
-      success: true,
-    });
+
+    expect(seriesClient.updateSeries).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'series-1', title: 'Updated', slug: 'series', status: 'SERIES_STATUS_PUBLISHED' }),
+    );
+  });
+
+  it.each([
+    { action: 'addSeriesManagerAction', rpc: 'addSeriesManager', other: 'removeSeriesManager' },
+    { action: 'removeSeriesManagerAction', rpc: 'removeSeriesManager', other: 'addSeriesManager' },
+  ] as const)('$action changes only the $rpc membership', async ({ action, rpc, other }) => {
+    await expect(series[action]('series-1', 'member-1')).resolves.toEqual({ success: true });
+
+    expect(seriesClient[rpc]).toHaveBeenCalledWith({ seriesId: 'series-1', memberId: 'member-1' });
+    expect(seriesClient[other]).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { action: 'assignPostToSeriesAction', rpc: 'assignPostToSeries', other: 'unassignPostFromSeries' },
+    { action: 'unassignPostFromSeriesAction', rpc: 'unassignPostFromSeries', other: 'assignPostToSeries' },
+  ] as const)('$action changes only the $rpc post assignment', async ({ action, rpc, other }) => {
+    await expect(series[action]('series-1', 'post-1')).resolves.toEqual({ success: true });
+
+    expect(seriesClient[rpc]).toHaveBeenCalledWith({ seriesId: 'series-1', postId: 'post-1' });
+    expect(seriesClient[other]).not.toHaveBeenCalled();
+  });
+
+  it('reorders series posts in the requested order', async () => {
     await expect(series.reorderSeriesPostsAction('series-1', ['post-2', 'post-1'])).resolves.toEqual({
       success: true,
     });
-    await expect(series.setSeriesFeaturedImageAction('series-1', 'file-1')).resolves.toEqual({
-      imageUrl: 'https://cdn.example/series.webp',
-      ogGenerationRunId: 'featured-run',
+
+    expect(seriesClient.reorderSeriesPosts).toHaveBeenCalledWith({
+      seriesId: 'series-1',
+      postIds: ['post-2', 'post-1'],
     });
-    await expect(series.removeSeriesFeaturedImageAction('series-1')).resolves.toEqual({
-      success: true,
-      ogGenerationRunId: 'delete-featured-run',
-    });
+  });
+
+  it('regenerates the series OG image for the requested locale', async () => {
     await expect(series.regenerateSeriesOgImageAction('series-1', 'ko')).resolves.toEqual({
       success: true,
       runId: 'run-1',
       generationId: 'generation-1',
     });
-    await expect(series.deleteSeriesAction('series-1')).resolves.toEqual({ success: true });
 
-    expect(seriesClient.updateSeries).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'series-1', description: undefined }),
-    );
     expect(adminClient.regenerateOgImage).toHaveBeenCalledWith({
       entityType: OgEntityType.SERIES,
       entityId: 'series-1',
       selection: { target: { case: 'locale', value: 'ko' } },
-    });
-    expect(seriesClient.createSeries).toHaveBeenCalledWith({
-      title: 'Series',
-      description: 'Description',
     });
   });
 

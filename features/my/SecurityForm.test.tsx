@@ -1,12 +1,9 @@
 // @vitest-environment jsdom
 
-import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
-import { act, type ComponentProps } from 'react';
-import { NextIntlClientProvider } from 'next-intl';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ComponentProps } from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import koMessages from '@/messages/ko.json';
+import { render, screen, within } from '@/test/render';
 import type { SessionInfo } from '@/lib/types/user/model';
 import { SecurityForm } from './SecurityForm';
 
@@ -33,21 +30,7 @@ vi.mock('@/features/auth/login-redirect', () => ({
   clearAuthRedirect: vi.fn(),
   startPrivilegedReauthentication: reauthenticationMock.startPrivilegedReauthentication,
 }));
-vi.mock('./PasskeySettingsSection', () => ({
-  PasskeySettingsSection: () => <div data-testid="security-passkeys-section" />,
-}));
 
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: () => ({
-    matches: false,
-    addListener() {},
-    removeListener() {},
-    addEventListener() {},
-    removeEventListener() {},
-  }),
-});
 class ResizeObserverMock {
   observe() {}
   unobserve() {}
@@ -62,13 +45,8 @@ const currentSession: SessionInfo = {
   authenticated_at: new Date().toISOString(),
   devices: [],
 };
-let container: HTMLDivElement;
-let root: Root;
 
 beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
   navigationMock.router.push.mockReset();
   navigationMock.router.refresh.mockReset();
   navigationMock.router.replace.mockReset();
@@ -81,45 +59,41 @@ beforeEach(() => {
   sessionStorage.clear();
 });
 
-afterEach(() => {
-  act(() => root.unmount());
-  container.remove();
-});
+// The passkey section loads its Kratos settings flow; keep it pending so only its static surface renders.
+const pendingPasskeyFlow = () => new Promise<never>(() => {});
 
 function renderSecurityForm(overrides: Partial<ComponentProps<typeof SecurityForm>> = {}) {
-  act(() => {
-    root.render(
-      <NextIntlClientProvider locale="ko" messages={koMessages}>
-        <DesignSystemProvider locale="ko" forceColorScheme="light">
-          <SecurityForm
-            subjectId="user-1"
-            initialSessions={[currentSession]}
-            initialProviders={[{ provider: 'google', identifier: 'google-subject' }]}
-            initialCanonicalEmail="johndoe@example.com"
-            initialEmailCodeAvailable
-            {...overrides}
-          />
-        </DesignSystemProvider>
-      </NextIntlClientProvider>,
-    );
-  });
+  return render(
+    <SecurityForm
+      subjectId="user-1"
+      initialSessions={[currentSession]}
+      initialProviders={[{ provider: 'google', identifier: 'google-subject' }]}
+      initialCanonicalEmail="johndoe@example.com"
+      initialEmailCodeAvailable
+      requestPasskeyFlow={pendingPasskeyFlow}
+      {...overrides}
+    />,
+  );
 }
 
 describe('SecurityForm', () => {
-  it('renders one canonical email and keeps social/passkey/session surfaces', () => {
+  it('shows one canonical email with the passkey, social login and session sections and no MCP surface', () => {
     renderSecurityForm();
-    expect(container.textContent).toContain('johndoe@example.com');
-    expect(container.querySelector('[data-testid="security-account-email"]')).not.toBeNull();
-    expect(container.querySelector('[data-testid="security-connected-emails"]')).toBeNull();
-    expect(container.querySelector('[data-testid="security-add-email"]')).toBeNull();
-    expect(container.querySelector('[data-testid="security-passkeys-section"]')).not.toBeNull();
-    expect(container.querySelector('[data-testid="settings-mcp-integration"]')).toBeNull();
-    expect(container.querySelector('[data-testid="security-provider-google"]')).not.toBeNull();
+
+    expect(screen.getAllByText('johndoe@example.com')).toHaveLength(1);
+    expect(screen.queryByRole('button', { name: /add email/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Set as primary email' })).toBeNull();
+    expect(screen.getByRole('heading', { level: 2, name: 'Passkeys' })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 2, name: 'Connected social logins' })).toBeTruthy();
+    expect(screen.getByRole('group', { name: 'Google' })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 2, name: 'Active sessions' })).toBeTruthy();
+    expect(within(screen.getByRole('group', { name: 'Unknown · Unknown' })).getByText('This device')).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/MCP/i);
   });
 
-  it('starts the canonical email change verification flow without exposing the address in the URL', () => {
-    renderSecurityForm();
-    act(() => container.querySelector<HTMLButtonElement>('[data-testid="security-change-email"]')?.click());
+  it('starts the canonical email change verification flow without exposing the address in the URL', async () => {
+    const { user } = renderSecurityForm();
+    await user.click(screen.getByRole('button', { name: 'Change primary email' }));
     expect(navigationMock.router.push).toHaveBeenCalledWith('/verify');
     expect(navigationMock.router.push.mock.calls[0]?.[0]).not.toContain('johndoe@example.com');
   });

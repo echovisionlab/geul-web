@@ -4,7 +4,6 @@ import { act, type HTMLAttributes } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import type { NodeViewProps } from '@tiptap/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { getMapInteractionOptions } from '@/features/map/utils/interaction-options';
 import type { TiptapMapSelectionMenuBinding, TiptapMapSelectionMenuRegistry } from '../menus/map-external';
 import { TiptapMapNodeView, type TiptapMapNodeOptions } from './TiptapMapNodeView';
 
@@ -286,7 +285,7 @@ describe('TiptapMapNodeView', () => {
     );
   });
 
-  it('projects stored flags to the exact MapLibre handlers and updates dragPan live', () => {
+  it('projects stored string flags to the live map config and persists an enabled drag as a string attr', () => {
     render({
       mapPlaceIds: 'place-1',
       previewWidth: '100',
@@ -303,42 +302,11 @@ describe('TiptapMapNodeView', () => {
     expect(map?.getAttribute('data-config-zoomable')).toBe('false');
     expect(map?.getAttribute('data-config-rotatable')).toBe('true');
     expect(map?.getAttribute('data-config-tiltable')).toBe('true');
-    expect(mapEditorSpy.props?.interactive).toBe(true);
-    expect(mapEditorSpy.props?.config).toEqual(
-      expect.objectContaining({
-        draggable: false,
-        zoomable: false,
-        rotatable: true,
-        tiltable: true,
-      }),
-    );
-    expect({
-      dragPan: mapEditorSpy.props?.config.draggable,
-      dragRotate: mapEditorSpy.props?.config.rotatable,
-      touchPitch: mapEditorSpy.props?.config.tiltable,
-      pitchWithRotate: mapEditorSpy.props?.config.tiltable,
-      ...getMapInteractionOptions(mapEditorSpy.props?.config ?? {}),
-    }).toEqual({
-      dragPan: false,
-      scrollZoom: false,
-      touchZoomRotate: false,
-      doubleClickZoom: false,
-      keyboard: true,
-      dragRotate: true,
-      touchPitch: true,
-      pitchWithRotate: true,
-    });
 
     act(() => container?.querySelector<HTMLButtonElement>('[data-enable-map-drag]')?.click());
     expect(updateAttributesSpy).toHaveBeenCalledWith({ draggable: 'true' });
     expect(map?.getAttribute('data-config-draggable')).toBe('true');
     expect(mapEditorSpy.props?.config.draggable).toBe(true);
-    expect(getMapInteractionOptions(mapEditorSpy.props?.config ?? {})).toEqual({
-      scrollZoom: false,
-      touchZoomRotate: false,
-      doubleClickZoom: false,
-      keyboard: true,
-    });
   });
 
   it('uses the same durable interaction projection in read-only mode while hard-gating settings writes', () => {

@@ -5,8 +5,17 @@ import { describe, expect, it } from 'vitest';
 import { buildSegmentConfig, createEmptyConfig, SEGMENT_ROLE_OPTIONS } from './SegmentConfig';
 
 describe('audience segment config helpers', () => {
-  it('uses short role strings for role filters', () => {
-    expect(SEGMENT_ROLE_OPTIONS.map((option) => option.value)).toEqual(['admin', 'author', 'user']);
+  it('turns every offered role option into exactly one segment role', () => {
+    const roles = SEGMENT_ROLE_OPTIONS.map(({ value }) => {
+      const { accountRoles } = buildSegmentConfig(SegmentType.MEMBERS_BY_FILTER, {
+        ...createEmptyConfig(),
+        accountRoles: [value],
+      });
+      expect(accountRoles, value).toHaveLength(1);
+      return accountRoles[0];
+    });
+
+    expect(roles).toEqual([AuthorizationRole.ADMIN, AuthorizationRole.AUTHOR, AuthorizationRole.USER]);
   });
 
   it('keeps each user-only Audience configuration scoped to its segment type', () => {

@@ -57,10 +57,10 @@ describe('complete form editing surfaces', () => {
     },
   );
 
-  it('renders schema-ordered submission details inside the actual editor tab', async () => {
+  // Response order and rendering are covered in features/form/SubmissionDetail.test.tsx.
+  it('renders submission details inside the actual editor tab', async () => {
     await render('submissions', true);
     await vi.waitFor(() => expect(host.textContent).toContain('June Han'));
     expect(host.textContent).toContain('Metadata');
-    expect(within(host).getByRole('img', { name: 'True' })).toBeTruthy();
   });
 });

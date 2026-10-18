@@ -61,31 +61,25 @@ describe('media view components', () => {
     expect(html).toContain('Dawn chorus recording');
   });
 
-  it('renders attachment metadata and caption in the shared shell', () => {
+  it('renders the authored attachment title, file metadata, caption, action and width', () => {
     const html = renderToStaticMarkup(
       <AttachmentMediaView
-        title={<span className="attachment-title">Field notes</span>}
+        title={<span>Field notes</span>}
         meta="PDF · 2.0 KB"
         caption="Recorded in the lower valley"
         style={{ width: '62%', marginLeft: '0', marginRight: 'auto' }}
-        action={
-          <button type="button" data-attachment-download-action>
-            Download file
-          </button>
-        }
+        action={<button type="button">Download file</button>}
       />,
     );
 
-    expect(html).toContain('attachment-block__content');
-    expect(html).toContain('attachment-title');
-    expect(html).toContain('Field notes');
-    expect(html).toContain('PDF · 2.0 KB');
-    expect(html).toContain('media-block__caption');
-    expect(html).toContain('Recorded in the lower valley');
-    expect(html).toContain('width:62%');
+    expect(html).toMatch(/^<div[^>]*style="width:62%/);
+    expect(html).toContain('>Field notes<');
+    expect(html).toContain('>PDF · 2.0 KB<');
+    expect(html).toContain('>Recorded in the lower valley<');
+    expect(html).toContain('<button type="button">Download file</button>');
   });
 
-  it('renders image captions with the shared caption class', () => {
+  it('renders the authored image, alt text, caption and width', () => {
     const html = renderToStaticMarkup(
       <ImageMediaView
         src="https://cdn.example.com/image.webp"
@@ -95,9 +89,8 @@ describe('media view components', () => {
       />,
     );
 
-    expect(html).toContain('class="image-block"');
-    expect(html).toContain('media-block__caption');
-    expect(html).toContain('Shot at sunrise');
-    expect(html).toContain('width:48%');
+    expect(html).toMatch(/<figure[^>]*style="width:48%/);
+    expect(html).toMatch(/<img src="https:\/\/cdn\.example\.com\/image\.webp" alt="Cover art"/);
+    expect(html).toContain('>Shot at sunrise<');
   });
 });

@@ -96,6 +96,7 @@ describe('EditorColorStyleButton', () => {
     EDITOR_COLOR_VALUES.forEach((color, index) => {
       expect(textSwatches[index]?.dataset.color).toBe(color);
       expect(textSwatches[index]?.style.color).toBe(`var(--editor-text-color-${color})`);
+      expect(textSwatches[index]?.hasAttribute('data-transparent'), `text ${color}`).toBe(false);
     });
     await act(async () => menu.querySelector<HTMLElement>('[data-test="text-color-default"]')!.click());
     await act(async () => container.querySelector<HTMLButtonElement>('button[aria-label="Background"]')!.click());
@@ -107,6 +108,10 @@ describe('EditorColorStyleButton', () => {
     EDITOR_COLOR_VALUES.forEach((color, index) => {
       expect(backgroundSwatches[index]?.dataset.color).toBe(color);
       expect(backgroundSwatches[index]?.style.backgroundColor).toBe(`var(--editor-background-color-${color})`);
+      // Only the transparent default background is drawn as transparency instead of a fake fill.
+      expect(backgroundSwatches[index]?.hasAttribute('data-transparent'), `background ${color}`).toBe(
+        color === 'default',
+      );
     });
   });
 

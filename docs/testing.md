@@ -29,7 +29,7 @@ it('saves the profile', async () => {
 
 ## Deciding whether a test earns its place
 
-This section applies the shared testing guide (`shared-ai-testing/v1`,
+This section applies the shared testing guide (`shared-ai-testing/v2`,
 `~/.config/ai-guides/guides/testing-guide.md`) to this repository.
 
 - Tie each test to a requirement, a public contract or a reproduced defect, and name the wrong behaviour it

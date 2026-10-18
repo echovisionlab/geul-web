@@ -181,16 +181,13 @@ describe('SectionItem', () => {
     expect(container?.querySelector('[data-testid="mock-block-editor"]')).toBeTruthy();
   });
 
-  it('binds the sortable handle without enabling native browser dragging', () => {
+  it('keeps the enabled section drag handle out of native browser dragging', () => {
+    pageEditorContext.allowStructuralEdits = true;
     renderSection({ id: 'section-handle', type: 'rich-text' });
-    const handle = container?.querySelector<HTMLButtonElement>('[data-page-section-drag-handle]');
+    const handle = container?.querySelector<HTMLButtonElement>('[aria-label^="sectionItem.actions.drag"]');
+    expect(handle).toBeTruthy();
     expect(handle?.draggable).toBe(false);
     expect(handle?.disabled).toBe(false);
-    expect(handle?.getAttribute('data-control-size')).toBe('compact');
-    const header = handle?.parentElement;
-    const controls = Array.from(header?.querySelectorAll('button') ?? []);
-    expect(controls[0]).toBe(handle);
-    expect(controls.at(-1)?.hasAttribute('data-page-section-toggle')).toBe(true);
   });
 
   it('disables structural actions while allowing section previews in translation mode', () => {

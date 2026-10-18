@@ -1,4 +1,12 @@
 import '@testing-library/jest-dom/vitest';
+import { cleanup } from '@testing-library/react';
+import { afterEach } from 'vitest';
+
+// Testing Library registers its automatic cleanup when its module first loads. Shared-runtime projects reuse that
+// module across files, so later files would keep earlier renders; register cleanup for every file here.
+afterEach(() => {
+  cleanup();
+});
 
 // React test runs expect this flag in environments that drive state updates via act().
 // Some tests set it inline today; keep the default enabled for the entire suite

@@ -69,10 +69,6 @@ describe('admin Member and profile actions', () => {
     vi.clearAllMocks();
     mocks.createMemberClient.mockResolvedValue(memberClient);
     mocks.createAccountClient.mockResolvedValue(accountClient);
-    mocks.listAuthorOptions.mockResolvedValue([{ id: 'member-1', name: 'Author', image: null, postCount: 3 }]);
-    mocks.listAuthors.mockResolvedValue([
-      { id: 'member-1', name: 'Author', image: null, bio: 'Public bio', postCount: 3 },
-    ]);
 
     memberClient.listMembersAdmin.mockResolvedValue({
       members: [
@@ -255,29 +251,59 @@ describe('admin Member and profile actions', () => {
     );
   });
 
-  it('routes profile/avatar mutations to Member and auth lifecycle mutations to Account', async () => {
-    await expect(
-      actions.updateUserAction('member-1', {
-        nickname: 'Updated',
-        bio: null,
-        website: 'https://updated.example',
-        social_links: null,
-        role: 'admin',
-        tag_ids: ['tag-1'],
-      }),
-    ).resolves.toEqual({ success: true });
-    await expect(actions.banUserAction('member-1', 'spam', 60)).resolves.toEqual({ success: true });
-    await expect(actions.unbanUserAction('member-1')).resolves.toEqual({ success: true });
-    await expect(actions.setUserCanonicalEmailAction('member-1', 'main@example.com')).resolves.toEqual({
-      success: true,
+  it('bans an account with the reason until the chosen duration in seconds elapses', async () => {
+    const now = vi.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-01-01T00:00:00Z'));
+    try {
+      await expect(actions.banUserAction('member-1', 'spam', 86400)).resolves.toEqual({ success: true });
+    } finally {
+      now.mockRestore();
+    }
+
+    expect(accountClient.banAccount).toHaveBeenCalledWith({
+      memberId: 'member-1',
+      reason: 'spam',
+      until: timestampFromDate(new Date('2026-01-02T00:00:00Z')),
     });
-    await expect(actions.removeUserSsoProviderAction('member-1', 'github', 'gh-1')).resolves.toEqual({
-      success: true,
-    });
-    await expect(actions.deleteUserAction('member-1')).resolves.toEqual({ success: true });
-    await expect(actions.updateProfileAction({ nickname: 'Me', social_links: { x: 'me' } })).resolves.toEqual({
-      member: { id: 'member-1', nickname: 'Me', avatarUrl: null, deleted: false },
-    });
+  });
+
+  it('bans an account permanently when no duration is chosen', async () => {
+    await expect(actions.banUserAction('member-1', 'spam')).resolves.toEqual({ success: true });
+
+    expect(accountClient.banAccount).toHaveBeenCalledWith({ memberId: 'member-1', reason: 'spam', until: undefined });
+  });
+
+  it.each([
+    {
+      name: 'unban',
+      run: () => actions.unbanUserAction('member-1'),
+      rpc: accountClient.unbanAccount,
+      expected: { memberId: 'member-1' },
+    },
+    {
+      name: 'set canonical email',
+      run: () => actions.setUserCanonicalEmailAction('member-1', 'main@example.com'),
+      rpc: accountClient.setAccountCanonicalEmail,
+      expected: { memberId: 'member-1', email: 'main@example.com' },
+    },
+    {
+      name: 'remove SSO provider',
+      run: () => actions.removeUserSsoProviderAction('member-1', 'github', 'gh-1'),
+      rpc: accountClient.removeAccountSsoProvider,
+      expected: { memberId: 'member-1', provider: 'github', identifier: 'gh-1' },
+    },
+    {
+      name: 'delete',
+      run: () => actions.deleteUserAction('member-1'),
+      rpc: accountClient.deleteAccount,
+      expected: { memberId: 'member-1' },
+    },
+  ])('applies the $name account command to the target member', async ({ run, rpc, expected }) => {
+    await expect(run()).resolves.toEqual({ success: true });
+
+    expect(rpc).toHaveBeenCalledWith(expected);
+  });
+
+  it("changes the caller's own avatar without touching another member", async () => {
     await expect(actions.setAvatarAction('file-1')).resolves.toEqual({
       member: {
         id: 'member-1',
@@ -286,28 +312,26 @@ describe('admin Member and profile actions', () => {
         deleted: false,
       },
     });
-    await expect(actions.setAvatarForMemberAction('member-2', 'file-2')).resolves.toEqual({
-      url: 'https://cdn.example/member.webp',
-    });
     await expect(actions.deleteAvatarAction()).resolves.toEqual({
       member: { id: 'member-1', nickname: 'Me', avatarUrl: null, deleted: false },
     });
+
+    expect(memberClient.setMyAvatar).toHaveBeenCalledWith({ fileId: 'file-1' });
+    expect(memberClient.deleteMyAvatar).toHaveBeenCalled();
+    expect(memberClient.setMemberAvatar).not.toHaveBeenCalled();
+    expect(memberClient.deleteMemberAvatar).not.toHaveBeenCalled();
+  });
+
+  it("changes another member's avatar without touching the caller's own", async () => {
+    await expect(actions.setAvatarForMemberAction('member-2', 'file-2')).resolves.toEqual({
+      url: 'https://cdn.example/member.webp',
+    });
     await expect(actions.deleteAvatarForMemberAction('member-2')).resolves.toEqual({ success: true });
 
-    expect(accountClient.setAccountRole).toHaveBeenCalledWith({
-      memberId: 'member-1',
-      role: AuthorizationRole.ADMIN,
-    });
-    expect(accountClient.banAccount).toHaveBeenCalledWith(
-      expect.objectContaining({ memberId: 'member-1', reason: 'spam' }),
-    );
-    expect(memberClient.updateMemberProfile).toHaveBeenCalledWith(
-      expect.objectContaining({ memberId: 'member-1', nickname: 'Updated' }),
-    );
-    expect(memberClient.setMemberTags).toHaveBeenCalledWith({
-      memberId: 'member-1',
-      tagIds: ['tag-1'],
-    });
+    expect(memberClient.setMemberAvatar).toHaveBeenCalledWith({ memberId: 'member-2', fileId: 'file-2' });
+    expect(memberClient.deleteMemberAvatar).toHaveBeenCalledWith({ memberId: 'member-2' });
+    expect(memberClient.setMyAvatar).not.toHaveBeenCalled();
+    expect(memberClient.deleteMyAvatar).not.toHaveBeenCalled();
   });
 
   it('sends only the changed admin profile, tag, or role request', async () => {
@@ -370,20 +394,15 @@ describe('admin Member and profile actions', () => {
     expect(memberClient.updateMyProfile).toHaveBeenLastCalledWith({ nickname: 'Self name only' });
   });
 
-  it('keeps client-callable author actions on the single ListAuthors path', async () => {
-    await expect(actions.listAuthorOptionsAction()).resolves.toEqual([
-      { id: 'member-1', name: 'Author', image: null, postCount: 3 },
-    ]);
-    await expect(actions.listAuthorsAction(4)).resolves.toEqual([
-      { id: 'member-1', name: 'Author', image: null, bio: 'Public bio', postCount: 3 },
-    ]);
-    await expect(actions.listAuthorsAction(24, ['member-2', 'member-1'])).resolves.toEqual([
-      { id: 'member-1', name: 'Author', image: null, bio: 'Public bio', postCount: 3 },
-    ]);
+  it('scopes client-callable author lists by member only when IDs are given', async () => {
+    await actions.listAuthorsAction(24, ['member-2', 'member-1']);
+    expect(mocks.listAuthors).toHaveBeenLastCalledWith(24, ['member-2', 'member-1']);
 
+    await actions.listAuthorsAction(4);
+    expect(mocks.listAuthors).toHaveBeenLastCalledWith(4);
+
+    await actions.listAuthorOptionsAction();
     expect(mocks.listAuthorOptions).toHaveBeenCalledWith(12);
-    expect(mocks.listAuthors).toHaveBeenCalledWith(4);
-    expect(mocks.listAuthors).toHaveBeenCalledWith(24, ['member-2', 'member-1']);
   });
 
   it('preserves RPC failure categories and stable mutation errors', async () => {

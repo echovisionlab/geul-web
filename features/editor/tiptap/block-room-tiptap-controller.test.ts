@@ -269,6 +269,9 @@ function tableDocument(): LocalizedRichTextDocument {
   } as JsonValue);
 }
 
+// Backslashes and braces must survive every projection unchanged.
+const authoredMathLatex = String.raw`\frac{a}{b} + \frac{c}{d}`;
+
 function allKindsDocument(): LocalizedRichTextDocument {
   const ids = Array.from(
     { length: 16 },
@@ -315,7 +318,7 @@ function allKindsDocument(): LocalizedRichTextDocument {
     { p5Sketch: { props: { source: 'p5-source', capabilities: [1] } } },
     { threeScene: { props: { source: 'three-source', language: 2 } } },
     { shader: { props: { stages: shaderStages } } },
-    { math: { props: { latex: 'x^2' } } },
+    { math: { props: { latex: authoredMathLatex } } },
     {
       map: {
         props: {
@@ -827,6 +830,7 @@ describe('PostBlockRoomTiptapController', () => {
     expect(blocks[9]?.content?.[0]?.content?.[0]?.text).toBe('p5-source');
     expect(blocks[10]?.content?.[0]?.content?.[0]?.text).toBe('three-source');
     expect(blocks[11]?.content?.[0]?.content).toHaveLength(9);
+    expect(blocks[12]?.content?.[0]?.attrs?.latex).toBe(authoredMathLatex);
     expect(blocks[14]?.content?.[0]?.attrs?.fileId).toBe('20000000-0000-4000-8000-000000000001');
     expect(blocks[15]?.content?.[0]?.attrs).toMatchObject({ icon: '⚠️', backgroundColor: 'yellow' });
   });
@@ -927,6 +931,8 @@ describe('PostBlockRoomTiptapController', () => {
     const shaderValue = materialized.base?.nodes[11]?.block?.value;
     expect(p5Value?.case === 'p5Sketch' ? p5Value.value.props?.source : undefined).toBe('p5-next');
     expect(shaderValue?.case === 'shader' ? shaderValue.value.props?.stages[8]?.source : undefined).toBe('image-next');
+    const mathValue = materialized.base?.nodes[12]?.block?.value;
+    expect(mathValue?.case === 'math' ? mathValue.value.props?.latex : undefined).toBe(authoredMathLatex);
     disconnect();
     editor.destroy();
   });

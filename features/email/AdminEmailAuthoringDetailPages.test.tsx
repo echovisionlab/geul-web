@@ -271,12 +271,14 @@ vi.mock('@/features/email/EmailTemplateEditor/EmailTemplateEditor', () => ({
 }));
 
 vi.mock('@/features/translation/EmailEntityTranslationsPanel', () => ({
-  EmailEntityTranslationsPanel: () => <div data-testid="email_layout-translations" />,
+  EmailEntityTranslationsPanel: ({ entityId }: { entityId: string }) => (
+    <div data-testid="email_layout-translations" data-entity-id={entityId} />
+  ),
 }));
 
 vi.mock('@/features/translation/EntityTranslationsPanel', () => ({
-  EntityTranslationsPanel: ({ entityType }: { entityType: string }) => (
-    <div data-testid={`${entityType}-translations`} />
+  EntityTranslationsPanel: ({ entityType, entityId }: { entityType: string; entityId: string }) => (
+    <div data-testid={`${entityType}-translations`} data-entity-id={entityId} />
   ),
 }));
 
@@ -436,24 +438,26 @@ afterEach(() => {
 });
 
 describe('email authoring detail pages', () => {
-  it('renders the current email template detail without archive lifecycle controls', async () => {
+  it('mounts the email template translations panel for the open template', async () => {
     routeId = TEMPLATE_ID;
     renderPage(<EmailTemplateEditPage />);
     await flush();
 
-    expect(document.body.textContent).toContain('Custom template detail');
-    expect(document.querySelector('[data-testid="email_template-translations"]')).not.toBeNull();
-    expect(document.body.textContent?.toLowerCase()).not.toMatch(/archive|restore|include archived/);
+    expect(document.querySelector('[data-testid="email_template-translations"]')).toHaveAttribute(
+      'data-entity-id',
+      TEMPLATE_ID,
+    );
   });
 
-  it('renders the current email layout detail without archive lifecycle controls', async () => {
+  it('mounts the email layout translations panel for the open layout', async () => {
     routeId = LAYOUT_ID;
     renderPage(<EmailLayoutEditPage />);
     await flush();
 
-    expect(document.body.textContent).toContain('Custom layout detail');
-    expect(document.querySelector('[data-testid="email_layout-translations"]')).not.toBeNull();
-    expect(document.body.textContent?.toLowerCase()).not.toMatch(/archive|restore|include archived/);
+    expect(document.querySelector('[data-testid="email_layout-translations"]')).toHaveAttribute(
+      'data-entity-id',
+      LAYOUT_ID,
+    );
   });
 
   it('keeps an admitted target subject editable and empty while transport is disconnected', async () => {

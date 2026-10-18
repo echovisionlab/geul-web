@@ -9,6 +9,9 @@ const mocks = vi.hoisted(() => ({
   onBack: null as null | (() => void | Promise<void>),
   onStatusChange: null as null | ((status: string) => void | Promise<void>),
   onDelete: null as null | (() => void | Promise<void>),
+  onTitleChange: null as null | ((value: string) => void),
+  updateFromTitle: vi.fn(),
+  debouncedPatch: vi.fn(),
   routerBack: vi.fn(),
   notification: vi.fn(),
   lifecycleChangeStatus: vi.fn(),
@@ -32,13 +35,16 @@ vi.mock('@/features/editor/EditorHeader', () => ({
     onBack,
     onStatusChange,
     onDelete,
+    onTitleChange,
   }: {
     titleDisabled?: boolean;
     onBack?: () => void | Promise<void>;
     onStatusChange?: (status: string) => void | Promise<void>;
     onDelete?: () => void | Promise<void>;
+    onTitleChange?: (value: string) => void;
   }) => {
     mocks.onBack = onBack ?? null;
+    mocks.onTitleChange = onTitleChange ?? null;
     mocks.onStatusChange = onStatusChange ?? null;
     mocks.onDelete = onDelete ?? null;
     return <header data-testid="work-header" data-readonly={String(titleDisabled)} />;
@@ -94,7 +100,7 @@ vi.mock('@/lib/hooks/useSlugManagement', () => ({
     isChecking: false,
     handleChange: vi.fn(),
     handleBlur: vi.fn(),
-    updateFromTitle: vi.fn(),
+    updateFromTitle: mocks.updateFromTitle,
   }),
 }));
 vi.mock('@/lib/collab/block-room-metadata', () => ({ updateBlockRoomLocaleMetadata: vi.fn() }));
@@ -103,7 +109,7 @@ vi.mock('@/lib/editor/editor-entity-changes', () => ({
   useEditorEntityChanges: vi.fn(),
 }));
 vi.mock('@/lib/editor/useBlockRoomMetadataUpdates', () => ({ useBlockRoomMetadataUpdates: vi.fn() }));
-vi.mock('@/lib/editor/useDebouncedPatch', () => ({ useDebouncedPatch: () => vi.fn() }));
+vi.mock('@/lib/editor/useDebouncedPatch', () => ({ useDebouncedPatch: () => mocks.debouncedPatch }));
 vi.mock('@/lib/editor/useDebouncedRoomMetadata', () => ({ useDebouncedRoomMetadata: () => vi.fn() }));
 vi.mock('@/features/work/WorkEditor/WorkCreditsSection', () => ({ WorkCreditsSection: () => null }));
 vi.mock('@/features/work/WorkEditor/WorkClientsSection', () => ({ WorkClientsSection: () => null }));
@@ -165,6 +171,7 @@ beforeEach(() => {
   mocks.onBack = null;
   mocks.onStatusChange = null;
   mocks.onDelete = null;
+  mocks.onTitleChange = null;
   mocks.meta = {
     slug: 'work-title',
     type: 'project',
@@ -244,6 +251,16 @@ describe('WorkEditor navigation save barriers', () => {
     expect(mocks.onDelete).toBeNull();
     expect(header?.getAttribute('data-readonly')).toBe('true');
     expect(container.querySelector('[data-testid="work-header"]')).toBe(header);
+  });
+  it('routes title edits through the shared slug hook instead of writing the slug directly', () => {
+    renderWork();
+    expect(mocks.onTitleChange).toBeTypeOf('function');
+
+    act(() => mocks.onTitleChange?.('Renamed work'));
+
+    expect(mocks.updateFromTitle).toHaveBeenCalledWith('Renamed work');
+    expect(mocks.meta!.setSlug).not.toHaveBeenCalled();
+    expect(mocks.debouncedPatch).not.toHaveBeenCalledWith(expect.objectContaining({ slug: expect.anything() }));
   });
   it('waits for registered Work saves before navigating back', async () => {
     let resolveFlush: ((result: boolean) => void) | undefined;

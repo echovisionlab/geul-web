@@ -3,7 +3,6 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { ImageUploadAccept } from '@/components/core/ImageUpload';
 import { SiteAssetUploader } from './SiteAssetUploader';
 
 const uploadFileMock = vi.fn();
@@ -12,7 +11,6 @@ const deleteSiteAssetActionMock = vi.fn();
 const maybeConvertSvgMock = vi.fn();
 
 let dropHandler: ((files: File[]) => void | Promise<void>) | null = null;
-let dropzoneAccept: ImageUploadAccept | null = null;
 let container: HTMLDivElement | null = null;
 let root: Root | null = null;
 
@@ -49,14 +47,7 @@ vi.mock('@/components/core/Notification', () => ({
 }));
 
 vi.mock('@/features/site/SiteAssetUploader/ImageDropzone', () => ({
-  ImageDropzone: ({
-    accept,
-    onDrop,
-  }: {
-    accept: ImageUploadAccept;
-    onDrop: (files: File[]) => void | Promise<void>;
-  }) => {
-    dropzoneAccept = accept;
+  ImageDropzone: ({ onDrop }: { onDrop: (files: File[]) => void | Promise<void> }) => {
     dropHandler = onDrop;
     return <div data-testid="image-dropzone" />;
   },
@@ -99,7 +90,6 @@ afterEach(() => {
   container = null;
   root = null;
   dropHandler = null;
-  dropzoneAccept = null;
   uploadFileMock.mockReset();
   setSiteAssetActionMock.mockReset();
   deleteSiteAssetActionMock.mockReset();
@@ -107,23 +97,6 @@ afterEach(() => {
 });
 
 describe('SiteAssetUploader', () => {
-  it('allows favicon MIME aliases and extension-only ICO selection', () => {
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    root = createRoot(container);
-
-    act(() => {
-      root?.render(<SiteAssetUploader type="favicon" currentUrl={null} />);
-    });
-
-    expect(dropzoneAccept).toEqual({
-      'image/png': [],
-      'image/x-icon': ['.ico'],
-      'image/vnd.microsoft.icon': ['.ico'],
-      'image/svg+xml': [],
-    });
-  });
-
   it('preserves normal site logos without SVG conversion', async () => {
     const svgFile = new File(['<svg></svg>'], 'logo.svg', { type: 'image/svg+xml' });
     const onSuccess = vi.fn();

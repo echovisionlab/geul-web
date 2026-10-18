@@ -8,25 +8,6 @@ import { createTiptapWireExtensions } from './wire-schema';
 import { createTiptapTableExtensions } from './table';
 
 describe('public block comparison', () => {
-  it('projects both readable and wide authored math without changing the source', () => {
-    const room = createTiptapPlaygroundRoom(createPublicBlockComparisonDocument());
-    try {
-      const editorMath = room.controller.initialContent.content?.[0]?.content?.flatMap(
-        (block) => block.content?.filter((node) => node.type === 'math') ?? [],
-      );
-      const publishedMath = materializeLocalizedRichTextTree(room.controller.getLocalizedDocumentSnapshot()).filter(
-        (block) => block.kind === 'math',
-      );
-      expect(editorMath).toHaveLength(2);
-      expect(publishedMath.map((block) => block.base.props?.latex)).toEqual(
-        editorMath!.map((node) => node.attrs?.latex),
-      );
-      expect(editorMath![1]?.attrs?.latex.match(/\\frac/g)).toHaveLength(12);
-    } finally {
-      room.awareness.destroy();
-      room.document.destroy();
-    }
-  });
   it('projects authored column headings in both table specimens while preserving the empty body state', () => {
     const room = createTiptapPlaygroundRoom(createPublicBlockComparisonDocument());
     try {

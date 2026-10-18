@@ -13,6 +13,7 @@ import { createMermaidExtension } from './mermaid/mermaid-extension';
 import { createShaderExtension } from './shader';
 import { createThreeSceneExtension, KOREAN_THREE_SCENE_LABELS } from './three';
 import { createTiptapWireExtensions } from './wire-schema';
+import { EDITOR_TOOLBAR_SHORTCUTS } from '../toolbars/EditorToolbarTooltip';
 
 function attributeDefaults(attributes: Record<string, { default?: unknown }>) {
   return Object.fromEntries(Object.entries(attributes).map(([name, attribute]) => [name, attribute.default]));
@@ -552,17 +553,16 @@ describe('Tiptap wire schema', () => {
       to: paragraphPosition + 1 + 'Format me'.length,
     });
 
-    for (const shortcut of [
-      { key: 'b', mark: 'bold' },
-      { key: 'i', mark: 'italic' },
-      { key: 'u', mark: 'underline' },
-      { key: 's', mark: 'strike', shiftKey: true },
-      { key: 'e', mark: 'code' },
-    ]) {
-      expect(pressModShortcut(mounted.editor, shortcut.key, shortcut.shiftKey).defaultPrevented).toBe(true);
-      expect(mounted.editor.isActive(shortcut.mark)).toBe(true);
-      pressModShortcut(mounted.editor, shortcut.key, shortcut.shiftKey);
-      expect(mounted.editor.isActive(shortcut.mark)).toBe(false);
+    // The toolbar tooltips advertise these strings; each must toggle its mark in the editor.
+    for (const mark of ['bold', 'italic', 'underline', 'strike', 'code'] as const) {
+      const parts = EDITOR_TOOLBAR_SHORTCUTS[mark].split('-');
+      expect(parts[0], `${mark} uses Mod`).toBe('Mod');
+      const key = parts.at(-1)!;
+      const shiftKey = parts.includes('Shift');
+      expect(pressModShortcut(mounted.editor, key, shiftKey).defaultPrevented, mark).toBe(true);
+      expect(mounted.editor.isActive(mark), mark).toBe(true);
+      pressModShortcut(mounted.editor, key, shiftKey);
+      expect(mounted.editor.isActive(mark), mark).toBe(false);
     }
 
     mounted.destroy();

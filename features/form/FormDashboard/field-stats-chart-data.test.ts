@@ -60,11 +60,14 @@ describe('field statistics chart data', () => {
       { name: '5 – 6', value: 1 },
     ]);
   });
-  it('offers all nine existing modes with a table option and preserves field-specific defaults', () => {
-    expect(new Set(Object.values(fieldChartOptions).flat()).size).toBe(9);
-    expect(Object.values(fieldChartOptions).every((options) => options.includes('table'))).toBe(true);
-    expect(fieldChartOptions.select[0]).toBe('donut');
-    expect(fieldChartOptions.number[0]).toBe('histogram');
-    expect(fieldChartOptions.date[0]).toBe('area');
+  it.each(Object.entries(fieldChartOptions))('offers a table alternative for %s fields', (_fieldType, options) => {
+    expect(options).toContain('table');
+  });
+  it.each([
+    ['select', 'donut'],
+    ['number', 'histogram'],
+    ['date', 'area'],
+  ])('opens %s fields in their field-specific %s chart', (fieldType, defaultMode) => {
+    expect(fieldChartOptions[fieldType][0]).toBe(defaultMode);
   });
 });

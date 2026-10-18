@@ -120,7 +120,9 @@ describe('GeneratedRichTextBlockView external video', () => {
   });
 
   it('renders Callout icon, theme color, and nested rich-text children as one surface', () => {
-    const html = renderGenerated({
+    // Parse into this document so the elements have a window (DOMParser and template documents have none).
+    const page = document.createElement('div');
+    page.innerHTML = renderGenerated({
       id: 'callout',
       kind: 'callout',
       base: { props: { icon: '⚠️', backgroundColor: 'yellow', textColor: 'default' } },
@@ -131,12 +133,14 @@ describe('GeneratedRichTextBlockView external video', () => {
       children: [generatedParagraph([{ value: { case: 'text', value: { text: 'Clear the rights first.' } } }])],
     } as unknown as LocalizedRichTextBlock);
 
-    expect(html).toContain('<aside data-callout="" data-bg-color="yellow" data-text-color="default">');
-    expect(html).toContain('<span data-callout-icon="" aria-hidden="true">⚠️</span>');
-    expect(html).toContain(
-      '<div data-callout-content=""><div data-callout-copy=""><span>Callout body</span></div><div data-document-block="paragraph"',
-    );
-    expect(html).toContain('Clear the rights first.');
+    const callouts = page.querySelectorAll('aside');
+    expect(callouts).toHaveLength(1);
+    const callout = callouts[0];
+    expect(callout).toHaveAttribute('data-bg-color', 'yellow');
+    const icon = [...callout.getElementsByTagName('*')].find((element) => element.textContent === '⚠️');
+    expect(icon).toHaveAttribute('aria-hidden', 'true');
+    expect(callout.textContent).toContain('Callout body');
+    expect(callout.textContent).toContain('Clear the rights first.');
   });
 
   it('renders the generated Post/Page standalone YouTube link as the canonical non-autoplay player', () => {

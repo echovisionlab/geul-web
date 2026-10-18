@@ -17,6 +17,8 @@ const mocks = vi.hoisted(() => {
     deleteEvent: vi.fn(),
     getNeutralConfiguration: vi.fn(),
     activeLocale: 'en',
+    isSynced: true,
+    bodyEditorProps: null as Record<string, unknown> | null,
     displayTitle: 'Event',
     displaySummary: '',
     sourceLocale: 'en',
@@ -88,14 +90,32 @@ vi.mock('@/features/editor/EditorHeader', () => ({
 }));
 vi.mock('@/components/core/Input', () => ({
   useInputCombobox: () => ({ dropdownOpened: false, openDropdown: vi.fn(), closeDropdown: vi.fn() }),
-  MultiSelect: ({ label, onChange }: { label: string; onChange: (values: string[]) => void }) => {
+  MultiSelect: ({
+    label,
+    disabled,
+    onChange,
+  }: {
+    label: string;
+    disabled?: boolean;
+    onChange: (values: string[]) => void;
+  }) => {
     const field = label.endsWith('artists') ? 'artists' : label.endsWith('labels') ? 'labels' : 'clients';
     return (
       <>
-        <button type="button" data-testid={`relation-${field}`} onClick={() => onChange([`${field}-next`])}>
+        <button
+          type="button"
+          data-testid={`relation-${field}`}
+          disabled={disabled}
+          onClick={() => onChange([`${field}-next`])}
+        >
           {field}
         </button>
-        <button type="button" data-testid={`relation-${field}-latest`} onClick={() => onChange([`${field}-latest`])}>
+        <button
+          type="button"
+          data-testid={`relation-${field}-latest`}
+          disabled={disabled}
+          onClick={() => onChange([`${field}-latest`])}
+        >
           {field} latest
         </button>
       </>
@@ -115,10 +135,21 @@ vi.mock('@/components/core/Section', () => ({
   SectionHeader: ({ title }: { title: ReactNode }) => <h2>{title}</h2>,
 }));
 vi.mock('@/features/metadata/UrlSection', () => ({
-  UrlSection: ({ onChange }: { onChange: (value: string) => void }) => (
-    <button type="button" data-testid="slug-change" onClick={() => onChange('next-slug')}>
-      Change slug
-    </button>
+  UrlSection: ({
+    slug,
+    disabled,
+    onChange,
+  }: {
+    slug: string;
+    disabled?: boolean;
+    onChange: (value: string) => void;
+  }) => (
+    <>
+      <output data-testid="slug">{slug}</output>
+      <button type="button" data-testid="slug-change" disabled={disabled} onClick={() => onChange('next-slug')}>
+        Change slug
+      </button>
+    </>
   ),
 }));
 vi.mock('@/features/site/PageLoader', () => ({ PageLoader: () => null }));
@@ -140,7 +171,11 @@ vi.mock('@/features/post/PostEditor/LocationSelector', () => ({ LocationSelector
 vi.mock('@/features/translation/EditorActiveLocaleControl', () => ({ EditorActiveLocaleControl: () => null }));
 vi.mock('@/features/translation/EntityTranslationsPanel', () => ({ EntityTranslationsPanel: () => null }));
 vi.mock('@/features/translation/LocalizedRichTextFragmentEditor', () => ({
-  LocalizedRichTextFragmentEditor: () => null,
+  // Its own tests cover how these permissions lock the editor; here only what the Event grants matters.
+  LocalizedRichTextFragmentEditor: (props: Record<string, unknown>) => {
+    mocks.bodyEditorProps = props;
+    return null;
+  },
 }));
 vi.mock('@/features/translation/useLocaleDocumentSession', () => ({
   useLocaleDocumentSession: () => ({
@@ -172,7 +207,7 @@ vi.mock('@/features/editor/hooks/useRichTextBlockRoomEditor', () => ({
     controller: {},
     doc: {},
     isConnected: true,
-    isSynced: true,
+    isSynced: mocks.isSynced,
     protocol: mocks.protocol,
     provider: mocks.provider,
     reloadCanonical: vi.fn(),
@@ -272,11 +307,15 @@ beforeEach(() => {
   vi.clearAllMocks();
   queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
   mocks.activeLocale = 'en';
+  mocks.isSynced = true;
+  mocks.bodyEditorProps = null;
   mocks.sourceLocale = 'en';
   mocks.displayTitle = 'Event';
   mocks.displaySummary = '';
   mocks.protocol.documentName = `program_event:${eventId}:en`;
   mocks.updateEvent.mockResolvedValue({ success: true });
+  mocks.publishEvent.mockResolvedValue({ success: true });
+  mocks.deleteEvent.mockResolvedValue({ success: true });
   mocks.getNeutralConfiguration.mockResolvedValue({
     ok: true,
     configuration: {
@@ -556,5 +595,96 @@ describe('ProgramEventEditor relation saves and navigation', () => {
     );
     expect(mocks.updateEvent).toHaveBeenCalled();
     expect(mocks.back).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['a status change', 'publish', () => mocks.publishEvent],
+    ['delete', 'delete', () => mocks.deleteEvent],
+  ])('does not run %s while a queued relation save fails', async (_command, control, lifecycleAction) => {
+    mocks.updateEvent.mockResolvedValue({ error: 'save failed' });
+    await act(async () => renderEditor());
+
+    await act(async () => container.querySelector<HTMLButtonElement>('[data-testid="relation-labels"]')?.click());
+    await act(async () => container.querySelector<HTMLButtonElement>(`[data-testid="${control}"]`)?.click());
+    await vi.waitFor(() =>
+      expect(mocks.notification).toHaveBeenCalledWith({ message: 'notifications.saveFailed', tone: 'danger' }),
+    );
+    expect(mocks.updateEvent).toHaveBeenCalled();
+    expect(lifecycleAction()).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['a status change', 'publish', () => mocks.publishEvent],
+    ['delete', 'delete', () => mocks.deleteEvent],
+  ])('runs %s once the queued relation save has completed', async (_command, control, lifecycleAction) => {
+    let resolveUpdate: ((result: { success?: boolean }) => void) | undefined;
+    mocks.updateEvent.mockReturnValue(
+      new Promise((resolve) => {
+        resolveUpdate = resolve;
+      }),
+    );
+    await act(async () => renderEditor());
+
+    await act(async () => container.querySelector<HTMLButtonElement>('[data-testid="relation-labels"]')?.click());
+    await act(async () => container.querySelector<HTMLButtonElement>(`[data-testid="${control}"]`)?.click());
+    await vi.waitFor(() => expect(mocks.updateEvent).toHaveBeenCalled());
+    expect(lifecycleAction()).not.toHaveBeenCalled();
+
+    await act(async () => {
+      resolveUpdate?.({ success: true });
+      await vi.waitFor(() => expect(lifecycleAction()).toHaveBeenCalledOnce());
+    });
+    expect(lifecycleAction().mock.calls[0]?.[0]).toBe(eventId);
+  });
+});
+
+describe('ProgramEventEditor locale and sync rules', () => {
+  it('locks slug, relations and body structure in a target locale while its localized text stays editable', async () => {
+    mocks.sourceLocale = 'ko';
+    mocks.activeLocale = 'en';
+    await act(async () => renderEditor());
+
+    expect(mocks.bodyEditorProps).toMatchObject({
+      editable: true,
+      allowNeutralBlockEdits: false,
+      allowStructuralEdits: false,
+      aiTarget: { type: 'program-event', id: eventId, locale: 'en' },
+    });
+
+    expect(container.querySelector<HTMLButtonElement>('[data-testid="slug-change"]')?.disabled).toBe(true);
+    for (const relation of ['artists', 'labels', 'clients']) {
+      expect(container.querySelector<HTMLButtonElement>(`[data-testid="relation-${relation}"]`)?.disabled).toBe(true);
+    }
+    const title = container.querySelector<HTMLInputElement>('[data-testid="event-title-input"]')!;
+    expect(title.disabled).toBe(false);
+
+    await act(async () => setInputValue(title, 'English event title'));
+
+    expect(container.querySelector('[data-testid="event-title"]')?.textContent).toBe('English event title');
+    expect(container.querySelector('[data-testid="slug"]')?.textContent).toBe('event');
+    expect(getPendingEditorPatch(`program_event:${eventId}`)).toMatchObject({
+      locale: 'en',
+      title: 'English event title',
+    });
+    expect(getPendingEditorPatch(`program_event:${eventId}`)).not.toHaveProperty('slug');
+  });
+
+  it('lets the source locale edit body structure', async () => {
+    await act(async () => renderEditor());
+
+    expect(mocks.bodyEditorProps).toMatchObject({ allowNeutralBlockEdits: true, allowStructuralEdits: true });
+  });
+
+  it('keeps the title read-only until the locale room has synced', async () => {
+    mocks.isSynced = false;
+    await act(async () => renderEditor());
+    const title = container.querySelector<HTMLInputElement>('[data-testid="event-title-input"]')!;
+
+    expect(title.disabled).toBe(true);
+
+    mocks.isSynced = true;
+    await act(async () => renderEditor());
+
+    expect(title.disabled).toBe(false);
   });
 });

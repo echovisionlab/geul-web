@@ -25,9 +25,11 @@ import {
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
 import { UploadType } from '@/lib/types/upload/model';
 import { useFileUpload } from './useFileUpload';
+import { useUpload } from './useUpload';
 import { prepareMedia, type PreparedMedia } from '@/lib/media/client-processing/processor';
 import { uploadClientMediaArtifact } from '@/lib/upload/client-media-transport';
 import { buildUploadSurfaceKey, cancelUploadSurface } from '@/lib/hooks/uploadSurfaceActivity';
+import { downloadRemoteSource } from '@/lib/upload/remote-source';
 import { createUploadPartError } from '@/lib/upload/upload-errors';
 import {
   disposePreparedSession,
@@ -1564,5 +1566,55 @@ describe('useFileUpload', () => {
       uploadType: UploadType.EDITOR_ATTACHMENT,
     });
     expect(vi.mocked(completeUploadAction).mock.calls[0]?.[0]).not.toHaveProperty('clientMediaBundleId');
+  });
+
+  it('resumes the given multipart session when a poster URL import is retried', async () => {
+    globalThis.XMLHttpRequest = MockXMLHttpRequest as unknown as typeof XMLHttpRequest;
+    const resumeSession = { fileId: 'file-1', uploadId: 'multipart-1' };
+    const poster = new File(['poster'], 'poster.webp', { type: 'image/webp' });
+    vi.mocked(downloadRemoteSource).mockResolvedValue({
+      file: poster,
+      storageId: 'geul-client-media-source',
+      dispose: vi.fn(async () => undefined),
+    });
+    vi.mocked(findMultipartUploadCandidateAction).mockResolvedValue({
+      ...resumeSession,
+      totalParts: 1,
+      chunkSize: poster.size,
+      uploadedParts: [],
+      status: UploadSessionStatus.UPLOADING,
+      slotId: '',
+      attemptId: 'attempt-1',
+    } as never);
+    vi.mocked(completeUploadAction).mockResolvedValue({ url: '/media/file-1', fileId: 'file-1' } as never);
+    let importFromUrl: ReturnType<typeof useUpload>['downloadFromUrl'] | undefined;
+    function PosterImportHarness() {
+      importFromUrl = useUpload(UploadType.PROGRAM_EVENT_POSTER).downloadFromUrl;
+      return null;
+    }
+    const resolved = vi.fn();
+    const rejected = vi.fn();
+    render(<PosterImportHarness />);
+
+    await act(async () => {
+      void importFromUrl?.('event-1', 'https://source.example/poster.webp', TranscodeEntityType.PAGE, {
+        resumeSession,
+        attemptId: 'attempt-1',
+      }).then(resolved, rejected);
+    });
+
+    await expect.poll(() => resolved.mock.calls.length + rejected.mock.calls.length).toBe(1);
+    expect(rejected).not.toHaveBeenCalled();
+    expect(resolved).toHaveBeenCalledWith(expect.objectContaining({ fileId: 'file-1' }));
+    expect(initiateUploadAction).not.toHaveBeenCalled();
+    expect(findMultipartUploadCandidateAction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        uploadType: UploadType.PROGRAM_EVENT_POSTER,
+        entityId: 'event-1',
+        entityType: TranscodeEntityType.PAGE,
+        ...resumeSession,
+      }),
+    );
+    expect(vi.mocked(completeUploadAction).mock.calls[0]?.[0]).toMatchObject(resumeSession);
   });
 });

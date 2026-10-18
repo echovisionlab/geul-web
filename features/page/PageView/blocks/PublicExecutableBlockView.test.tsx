@@ -258,39 +258,27 @@ describe('PublicExecutableBlockView', () => {
   });
 
   it.each(['p5Sketch', 'threeScene', 'shader'] as const)(
-    'orders the public %s temporary editor after preview and runtime controls without remounting on scroll',
+    'keeps the running public %s runtime through Source and scroll, reading preview, controls, then editor',
     async (type) => {
       const { factories } = createFactories();
       const mounted = await mountPublicExecutable({ type, factories });
 
-      await act(async () => buttonByText(mounted.host, 'Source').click());
       const preview = mounted.host.querySelector<HTMLElement>(`[data-runtime-surface="${type}"]`);
-      const controls = mounted.host.querySelector<HTMLElement>(`[data-runtime-controls="${type}"]`);
-      const editor = mounted.host.querySelector<HTMLElement>('textarea');
-      if (!preview || !controls || !editor) {
-        throw new Error('Public temporary editor layout did not mount');
-      }
-      expect(preview.compareDocumentPosition(controls) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
-      expect(controls.compareDocumentPosition(editor) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
-      expect([...controls.querySelectorAll('button')].map((button) => button.getAttribute('aria-label'))).toEqual([
-        'Stop',
-        'Restart',
-        'Source',
-        'Reset to original',
-        'Copy',
-        'Apply',
-      ]);
-      expect(
-        [...controls.querySelectorAll('button')].every((button) => button.getAttribute('data-emphasis') === 'low'),
-      ).toBe(true);
-      expect(mounted.host.querySelector('figure')?.getAttribute('data-preview-height')).toBe('360');
-      expect(mounted.host.querySelector('figure')?.getAttribute('style')).toContain('width: 48%');
-
+      await act(async () => buttonByText(mounted.host, 'Source').click());
       await act(async () => {
         mounted.host.scrollTop = 120;
         mounted.host.dispatchEvent(new Event('scroll', { bubbles: true }));
       });
+
+      expect(factories[type]).toHaveBeenCalledOnce();
       expect(mounted.host.querySelector(`[data-runtime-surface="${type}"]`)).toBe(preview);
+      const runtimeControl = buttonByText(mounted.host, 'Stop');
+      const editor = mounted.host.querySelector<HTMLElement>('textarea');
+      if (!preview || !editor) {
+        throw new Error('Public temporary editor layout did not mount');
+      }
+      expect(preview.compareDocumentPosition(runtimeControl) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
+      expect(runtimeControl.compareDocumentPosition(editor) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
 
       await mounted.destroy();
     },

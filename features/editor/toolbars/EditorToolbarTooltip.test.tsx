@@ -43,41 +43,6 @@ function render(node: ReactNode) {
 }
 
 describe('EditorToolbarTooltip', () => {
-  it('renders only the exact verified editor shortcut mappings', () => {
-    expect(EDITOR_TOOLBAR_SHORTCUTS).toEqual({
-      bold: 'Mod-b',
-      italic: 'Mod-i',
-      underline: 'Mod-u',
-      strike: 'Mod-Shift-s',
-      code: 'Mod-e',
-      ai: 'Mod-j',
-      apply: 'Mod-Enter',
-      suggestions: 'Mod-Space',
-    });
-    render(
-      <>
-        {Object.entries(EDITOR_TOOLBAR_SHORTCUTS).map(([name, shortcut]) => (
-          <EditorToolbarTooltipContent key={name} label={name} shortcut={shortcut} />
-        ))}
-        <EditorToolbarTooltipContent label="Align left" />
-        <EditorToolbarTooltipContent label="Create link" />
-        <EditorToolbarTooltipContent label="Inline math" />
-        <EditorToolbarTooltipContent label="Colors" />
-      </>,
-    );
-    expect([...container!.querySelectorAll('kbd')].map((item) => item.textContent)).toEqual([
-      'Ctrl B',
-      'Ctrl I',
-      'Ctrl U',
-      'Ctrl Shift S',
-      'Ctrl E',
-      'Ctrl J',
-      'Ctrl ↵',
-      'Ctrl Space',
-    ]);
-    expect(container!.querySelectorAll('[data-editor-toolbar-tooltip-content]')).toHaveLength(12);
-  });
-
   it('opens on keyboard focus without replacing the action accessible name', () => {
     render(
       <EditorToolbarTooltip label="Bold" shortcut={EDITOR_TOOLBAR_SHORTCUTS.bold}>

@@ -10,6 +10,7 @@ import enMessages from '@/messages/en.json';
 import { RequestTimeZoneProvider } from '@/lib/providers/RequestTimeZoneProvider';
 import { PostScheduleDialog, type PostScheduleDialogProps } from './PostScheduleDialog';
 
+const originalTimeZone = process.env.TZ;
 let container: HTMLDivElement | null = null;
 let root: Root | null = null;
 
@@ -54,6 +55,11 @@ afterEach(() => {
   root = null;
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
+  if (originalTimeZone === undefined) {
+    delete process.env.TZ;
+  } else {
+    process.env.TZ = originalTimeZone;
+  }
 });
 
 async function renderSchedule({
@@ -162,7 +168,11 @@ describe('PostScheduleDialog', () => {
     );
   });
 
-  it('restores a wall time that is valid in the saved zone but is a DST gap in another browser zone', async () => {
+  it('restores a wall time that is valid in the saved zone but is a DST gap in the browser zone', async () => {
+    // 2027-03-14 02:30 does not exist in New York (clocks jump 02:00 → 03:00) but is 17:30Z in Seoul.
+    process.env.TZ = 'America/New_York';
+    expect(new Date(2027, 2, 14, 2, 30).getHours()).toBe(3);
+
     const onSubmit = await renderSchedule({ initialInstant: '2027-03-13T17:30:00.000Z' });
     expect(getDialog().querySelector('[data-type="hour"]')?.getAttribute('aria-valuenow')).toBe('2');
     await submitSchedule();
