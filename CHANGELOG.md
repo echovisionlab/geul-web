@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.1](https://github.com/echovisionlab/geul-web/compare/v0.16.0...v0.16.1) (2026-10-18)
+
+
+### Bug Fixes
+
+* trust direct tool subdomains for embeds ([#147](https://github.com/echovisionlab/geul-web/issues/147)) ([0482686](https://github.com/echovisionlab/geul-web/commit/04826867d41f21a48f2344d4f69ae533a6fb23a1))
+
 ## [0.16.0](https://github.com/echovisionlab/geul-web/compare/v0.15.0...v0.16.0) (2026-10-18)
 
 
