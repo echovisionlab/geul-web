@@ -126,7 +126,7 @@
 
 .heading {
   line-height: var(--geul-heading-line-height);
-  font-weight: var(--geul-font-weight-strong);
+  font-weight: var(--geul-heading-weight);
 }
 
 .heading[data-level='title'] {

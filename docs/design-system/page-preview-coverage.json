@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "methodology": "All App Router visual entry files indexed by TypeScript imports/JSX; exact reviewed route/boundary maps count separately from mere Feature story overlap. Unmapped entrypoints remain explicit gaps. Static source census is not a browser pass.",
-  "sourceManifestHash": "3480d0429253ff61f9b4c63ced1f1f73111782f501a23cd0faa182cf73d324a9",
+  "sourceManifestHash": "bb4595e774cf3aca14bbd4b145e6fe9c71cdaa8ff6c4dc5ec27ba2b1c8ccd3bd",
   "counts": {
     "queryEditorBranches": 12,
     "editorBranchPreviews": 12,
@@ -1286,6 +1286,14 @@
             {
               "variant": "Phone",
               "preview": "http://localhost:6010/?path=/story/pages-public-documents--phone"
+            },
+            {
+              "variant": "PostWithoutOutline",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--post-without-outline"
+            },
+            {
+              "variant": "PageWithoutOutline",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-without-outline"
             }
           ]
         }
@@ -4868,6 +4876,14 @@
             {
               "variant": "Phone",
               "preview": "http://localhost:6010/?path=/story/pages-public-documents--phone"
+            },
+            {
+              "variant": "PostWithoutOutline",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--post-without-outline"
+            },
+            {
+              "variant": "PageWithoutOutline",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-without-outline"
             }
           ]
         }
@@ -10173,6 +10189,8 @@
         "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "features/authoring/EditorSettingsSection.tsx",
         "features/confirmation/ui/ConfirmationDialog.tsx",
+        "features/credits/PublicCreditList.tsx",
+        "features/credits/PublicNameList.tsx",
         "features/data-table/DataTable.tsx",
         "features/data-table/DataTableContent.tsx",
         "features/data-table/DataTableContext.tsx",
@@ -10540,7 +10558,6 @@
         "features/user/ui/UserInlineLinks/UserInlineLinksView.tsx",
         "features/version-history/VersionHistoryDrawer.tsx",
         "features/version-history/ui/VersionHistoryDrawerView.tsx",
-        "features/work/CreditList.tsx",
         "features/work/WorkEditor/credits/SortableCreditRow.tsx"
       ],
       "dependencyGraph": [
@@ -10568,6 +10585,8 @@
         "features/confirmation/ui/ConfirmationDialog.tsx",
         "features/confirmation/ui/confirmation-intent.ts",
         "features/confirmation/useBulkDeletion.ts",
+        "features/credits/PublicCreditList.tsx",
+        "features/credits/PublicNameList.tsx",
         "features/data-table/DataTable.tsx",
         "features/data-table/DataTableContent.tsx",
         "features/data-table/DataTableContext.tsx",
@@ -11217,7 +11236,6 @@
         "features/version-history/ui/VersionHistoryDrawerView.tsx",
         "features/version-history/ui/index.ts",
         "features/version-history/useVersionHistoryQuery.ts",
-        "features/work/CreditList.tsx",
         "features/work/WorkEditor/credits/SortableCreditRow.tsx"
       ],
       "inheritedBoundaries": [
@@ -11294,6 +11312,10 @@
             {
               "variant": "WorkLongDocument",
               "preview": "http://localhost:6010/?path=/story/pages-public-entity-detail--work-long-document"
+            },
+            {
+              "variant": "WorkLongDocumentWithImage",
+              "preview": "http://localhost:6010/?path=/story/pages-public-entity-detail--work-long-document-with-image"
             },
             {
               "variant": "WorkPhone",
@@ -12843,6 +12865,14 @@
             {
               "variant": "Phone",
               "preview": "http://localhost:6010/?path=/story/pages-public-documents--phone"
+            },
+            {
+              "variant": "PostWithoutOutline",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--post-without-outline"
+            },
+            {
+              "variant": "PageWithoutOutline",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-without-outline"
             }
           ]
         }
@@ -15983,6 +16013,14 @@
             {
               "variant": "Phone",
               "preview": "http://localhost:6010/?path=/story/pages-public-documents--phone"
+            },
+            {
+              "variant": "PostWithoutOutline",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--post-without-outline"
+            },
+            {
+              "variant": "PageWithoutOutline",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-without-outline"
             }
           ]
         }
@@ -18856,6 +18894,14 @@
             {
               "variant": "Phone",
               "preview": "http://localhost:6010/?path=/story/pages-public-documents--phone"
+            },
+            {
+              "variant": "PostWithoutOutline",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--post-without-outline"
+            },
+            {
+              "variant": "PageWithoutOutline",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-without-outline"
             }
           ]
         }
@@ -19110,6 +19156,10 @@
           {
             "variant": "Ready",
             "preview": "http://localhost:6010/?path=/story/pages-editors-post--ready"
+          },
+          {
+            "variant": "CommentSetting",
+            "preview": "http://localhost:6010/?path=/story/pages-editors-post--comment-setting"
           },
           {
             "variant": "KeyboardAuthoring",
@@ -20329,6 +20379,10 @@
               "preview": "http://localhost:6010/?path=/story/pages-editors-post--ready"
             },
             {
+              "variant": "CommentSetting",
+              "preview": "http://localhost:6010/?path=/story/pages-editors-post--comment-setting"
+            },
+            {
               "variant": "KeyboardAuthoring",
               "preview": "http://localhost:6010/?path=/story/pages-editors-post--keyboard-authoring"
             },
@@ -20522,6 +20576,14 @@
             {
               "variant": "Phone",
               "preview": "http://localhost:6010/?path=/story/pages-public-documents--phone"
+            },
+            {
+              "variant": "PostWithoutOutline",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--post-without-outline"
+            },
+            {
+              "variant": "PageWithoutOutline",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-without-outline"
             }
           ]
         }
@@ -22033,6 +22095,14 @@
             {
               "variant": "Phone",
               "preview": "http://localhost:6010/?path=/story/pages-public-documents--phone"
+            },
+            {
+              "variant": "PostWithoutOutline",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--post-without-outline"
+            },
+            {
+              "variant": "PageWithoutOutline",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-without-outline"
             }
           ]
         }
@@ -23651,6 +23721,7 @@
         "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "features/authoring/EditorSettingsSection.tsx",
         "features/confirmation/ui/ConfirmationDialog.tsx",
+        "features/credits/PublicCreditList.tsx",
         "features/data-table/DataTable.tsx",
         "features/data-table/DataTableContent.tsx",
         "features/data-table/DataTableContext.tsx",
@@ -23990,7 +24061,6 @@
         "features/place/PlaceListRow.tsx",
         "features/place/PlacesAutocomplete.tsx",
         "features/place/PlacesManageModal.tsx",
-        "features/release/ReleaseCreditsList.tsx",
         "features/release/ReleaseEditor/LazyReleaseEditor.tsx",
         "features/release/ReleaseEditor/ReleaseArtistsSection.tsx",
         "features/release/ReleaseEditor/ReleaseArtistsSectionView.tsx",
@@ -24031,8 +24101,7 @@
         "features/user/UserInlineLinks.tsx",
         "features/user/ui/UserInlineLinks/UserInlineLinksView.tsx",
         "features/version-history/VersionHistoryDrawer.tsx",
-        "features/version-history/ui/VersionHistoryDrawerView.tsx",
-        "features/work/CreditList.tsx"
+        "features/version-history/ui/VersionHistoryDrawerView.tsx"
       ],
       "dependencyGraph": [
         "app/(general)/[...slug]/PageContent.tsx",
@@ -24062,6 +24131,7 @@
         "features/confirmation/ui/ConfirmationDialog.tsx",
         "features/confirmation/ui/confirmation-intent.ts",
         "features/confirmation/useBulkDeletion.ts",
+        "features/credits/PublicCreditList.tsx",
         "features/data-table/DataTable.tsx",
         "features/data-table/DataTableContent.tsx",
         "features/data-table/DataTableContext.tsx",
@@ -24656,7 +24726,6 @@
         "features/place/PlaceListRow.tsx",
         "features/place/PlacesAutocomplete.tsx",
         "features/place/PlacesManageModal.tsx",
-        "features/release/ReleaseCreditsList.tsx",
         "features/release/ReleaseEditor/LazyReleaseEditor.tsx",
         "features/release/ReleaseEditor/ReleaseArtistsSection.tsx",
         "features/release/ReleaseEditor/ReleaseArtistsSectionView.tsx",
@@ -24727,8 +24796,7 @@
         "features/version-history/index.ts",
         "features/version-history/ui/VersionHistoryDrawerView.tsx",
         "features/version-history/ui/index.ts",
-        "features/version-history/useVersionHistoryQuery.ts",
-        "features/work/CreditList.tsx"
+        "features/version-history/useVersionHistoryQuery.ts"
       ],
       "inheritedBoundaries": [
         "app/(general)/error.tsx",
@@ -26350,6 +26418,14 @@
             {
               "variant": "Phone",
               "preview": "http://localhost:6010/?path=/story/pages-public-documents--phone"
+            },
+            {
+              "variant": "PostWithoutOutline",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--post-without-outline"
+            },
+            {
+              "variant": "PageWithoutOutline",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-without-outline"
             }
           ]
         }
@@ -30162,7 +30238,9 @@
         "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "features/authoring/EditorSettingsSection.tsx",
         "features/client/ClientPublicMark.tsx",
+        "features/client/PublicClientMarks.tsx",
         "features/confirmation/ui/ConfirmationDialog.tsx",
+        "features/credits/PublicCreditList.tsx",
         "features/data-table/DataTable.tsx",
         "features/data-table/DataTableContent.tsx",
         "features/data-table/DataTableContext.tsx",
@@ -30531,7 +30609,6 @@
         "features/user/ui/UserInlineLinks/UserInlineLinksView.tsx",
         "features/version-history/VersionHistoryDrawer.tsx",
         "features/version-history/ui/VersionHistoryDrawerView.tsx",
-        "features/work/CreditList.tsx",
         "features/work/WorkEditor/LazyWorkEditor.tsx",
         "features/work/WorkEditor/WorkClientsSection.tsx",
         "features/work/WorkEditor/WorkCreditsSection.tsx",
@@ -30568,11 +30645,13 @@
         "features/authoring/EditorHeader/status-options.ts",
         "features/authoring/EditorSettingsSection.tsx",
         "features/client/ClientPublicMark.tsx",
+        "features/client/PublicClientMarks.tsx",
         "features/confirmation/confirmation-dialogs.ts",
         "features/confirmation/index.ts",
         "features/confirmation/ui/ConfirmationDialog.tsx",
         "features/confirmation/ui/confirmation-intent.ts",
         "features/confirmation/useBulkDeletion.ts",
+        "features/credits/PublicCreditList.tsx",
         "features/data-table/DataTable.tsx",
         "features/data-table/DataTableContent.tsx",
         "features/data-table/DataTableContext.tsx",
@@ -31220,7 +31299,6 @@
         "features/version-history/ui/VersionHistoryDrawerView.tsx",
         "features/version-history/ui/index.ts",
         "features/version-history/useVersionHistoryQuery.ts",
-        "features/work/CreditList.tsx",
         "features/work/WorkEditor/LazyWorkEditor.tsx",
         "features/work/WorkEditor/WorkClientsSection.tsx",
         "features/work/WorkEditor/WorkCreditsSection.tsx",
@@ -31308,6 +31386,10 @@
             {
               "variant": "WorkLongDocument",
               "preview": "http://localhost:6010/?path=/story/pages-public-entity-detail--work-long-document"
+            },
+            {
+              "variant": "WorkLongDocumentWithImage",
+              "preview": "http://localhost:6010/?path=/story/pages-public-entity-detail--work-long-document-with-image"
             },
             {
               "variant": "WorkPhone",
@@ -32865,6 +32947,14 @@
             {
               "variant": "Phone",
               "preview": "http://localhost:6010/?path=/story/pages-public-documents--phone"
+            },
+            {
+              "variant": "PostWithoutOutline",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--post-without-outline"
+            },
+            {
+              "variant": "PageWithoutOutline",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-without-outline"
             }
           ]
         }
@@ -50284,6 +50374,14 @@
             {
               "variant": "Phone",
               "preview": "http://localhost:6010/?path=/story/pages-public-documents--phone"
+            },
+            {
+              "variant": "PostWithoutOutline",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--post-without-outline"
+            },
+            {
+              "variant": "PageWithoutOutline",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-without-outline"
             }
           ]
         }
@@ -50702,7 +50800,7 @@
     },
     {
       "file": "app/layout.tsx",
-      "sha256": "cce1d94e0616c47139949337c69c65498a5d8ef398d525f0a5afba67f6dc7ec3",
+      "sha256": "cc01c268dc2bb9939669324004519d2864caf9773acd014109cae7e0c30cd020",
       "kind": "layout",
       "route": "/",
       "family": "Public",

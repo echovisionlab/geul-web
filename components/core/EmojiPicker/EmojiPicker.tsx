@@ -61,7 +61,13 @@ export function EmojiPickerPanel({
   const controlSize = density === 'compact' ? 'xs' : 'md';
   const rootFontSize =
     typeof document === 'undefined' ? 16 : parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-  const itemSize = parseFloat(primitiveTokens.controlHeight[controlSize]) * rootFontSize;
+  // Coarse pointers lay out cells at the shared touch minimum so neighbouring 44px targets never overlap.
+  const coarse = typeof window !== 'undefined' && window.matchMedia?.('(any-pointer: coarse)').matches;
+  const itemSize =
+    Math.max(
+      parseFloat(primitiveTokens.controlHeight[controlSize]),
+      coarse ? parseFloat(primitiveTokens.interaction.touch) : 0,
+    ) * rootFontSize;
   const spacing = parseFloat(primitiveTokens.spacing.xxs) * rootFontSize;
   return (
     <DsLayoutStack gap={density === 'compact' ? 'xs' : 'sm'}>

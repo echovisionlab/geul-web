@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "sourceManifestHash": "c9956cd7d315e760c923ec48d20e731256e335930afb9fe7cb420dc4bf95a791",
+  "sourceManifestHash": "21e4be9a947c2bdec144cf07b59faa519571d7880499508a6b7fae0b7a4d2365",
   "methodology": "All inventoried Feature component candidates. Direct value imports, literal lazy imports and transitive source relationships through production owners/local adapters are indexed separately. A dependency can be unused or render conditionally; neither relationship proves rendered states, route parity or design compliance. Empty JSX records include runtime/lazy/controller boundaries and must be inspected before treating them as visual gaps.",
-  "counts": { "domains": 53, "componentFiles": 768, "jsxWithoutStoryRelationship": 43 },
+  "counts": { "domains": 54, "componentFiles": 769, "jsxWithoutStoryRelationship": 43 },
   "domains": [
     {
       "domain": "account",
@@ -1343,6 +1343,12 @@
           "hasJsx": true,
           "directStories": [],
           "relatedStories": ["Pages/Public/Entity Detail"]
+        },
+        {
+          "file": "features/client/PublicClientMarks.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": ["Pages/Public/Entity Detail"]
         }
       ],
       "jsxWithoutStoryRelationship": []
@@ -1420,6 +1426,29 @@
         }
       ],
       "jsxWithoutStoryRelationship": ["features/cookie-consent/CookieConsentBanner.tsx"]
+    },
+    {
+      "domain": "credits",
+      "category": "content",
+      "components": [
+        {
+          "file": "features/credits/PublicCreditList.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": [
+            "Pages/Public/Entities",
+            "Pages/Public/Catalog Entity Detail",
+            "Pages/Public/Entity Detail"
+          ]
+        },
+        {
+          "file": "features/credits/PublicNameList.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": ["Pages/Public/Entity Detail"]
+        }
+      ],
+      "jsxWithoutStoryRelationship": []
     },
     {
       "domain": "data-table",
@@ -7117,12 +7146,6 @@
       "category": "content",
       "components": [
         {
-          "file": "features/release/ReleaseCreditsList.tsx",
-          "hasJsx": true,
-          "directStories": [],
-          "relatedStories": ["Pages/Public/Entities", "Pages/Public/Catalog Entity Detail"]
-        },
-        {
           "file": "features/release/ReleaseEditor/LazyReleaseEditor.tsx",
           "hasJsx": true,
           "directStories": [],
@@ -8026,16 +8049,6 @@
       "domain": "work",
       "category": "content",
       "components": [
-        {
-          "file": "features/work/CreditList.tsx",
-          "hasJsx": true,
-          "directStories": [],
-          "relatedStories": [
-            "Pages/Public/Entities",
-            "Pages/Public/Catalog Entity Detail",
-            "Pages/Public/Entity Detail"
-          ]
-        },
         {
           "file": "features/work/WorkEditor/LazyWorkEditor.tsx",
           "hasJsx": true,

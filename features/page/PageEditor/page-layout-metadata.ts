@@ -9,7 +9,7 @@ import { mapProtoDocumentLayout } from '@/lib/queries/document-layout';
 
 type LayoutField = keyof DocumentLayout;
 
-const layoutFields: readonly LayoutField[] = ['contentHeight', 'pageChrome', 'footer'];
+const layoutFields: readonly LayoutField[] = ['contentHeight', 'pageChrome', 'footer', 'hideTableOfContents'];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -43,6 +43,7 @@ export function applyPageLayoutMetadataUpdate(
         current.contentHeight === 'viewport' ? DocumentContentHeight.VIEWPORT : DocumentContentHeight.CONTENT,
       pageChrome: current.pageChrome === 'pinned' ? DocumentRegionPlacement.PINNED : DocumentRegionPlacement.FLOW,
       footer: current.footer === 'pinned' ? DocumentRegionPlacement.PINNED : DocumentRegionPlacement.FLOW,
+      hideTableOfContents: current.hideTableOfContents ?? false,
     }),
   ) as Record<string, JsonValue>;
   try {

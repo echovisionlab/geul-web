@@ -2350,7 +2350,6 @@
     }
   },
   "creditList": {
-    "groupAriaLabel": "Crédits de {name}",
     "groupName": "Groupe {index}"
   },
   "sitemapPage": {

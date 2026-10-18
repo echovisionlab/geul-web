@@ -14,7 +14,13 @@ stylesheet boundary and consumer evidence required for system changes. The
 A passing token check does not approve every component or page.
 
 Geul uses a quiet, text-led interface: neutral surfaces, aligned labels and values, square controls,
-and color reserved for interaction or status. Product body text and dense tool chrome have distinct
+and color reserved for interaction or status. It aims for the order and calm of Ryoji Ikeda's printed
+work and Tadao Ando's concrete: hairline joins (1px borders, a 1px current-item rule, 1.5-unit line
+icons), regular weights with emphasis carried by ink and position, and wide quiet space. Colour follows
+Rams-era Braun: warm light-grey housings and near-black print in light mode, anthracite in dark mode,
+and one signal orange (`signal`, `action-accent`) for links, selection, accent actions and the lead data
+series. Data views follow Ableton: slim meter-like bars, hairline guides across the value axis only, a
+single accent line over a faint fill. Product body text and dense tool chrome have distinct
 scales. Existing locale fonts, right-to-left layouts and readable content typography remain part of
 the system. The reference direction is Monome/norns, TX–6, Rams/Braun, Ableton and Valhalla; these
 references guide hierarchy and repetition rather than introduce hardware-shaped controls. Reference
@@ -52,6 +58,14 @@ Core Hierarchy. Title alignment and reorder tracks retain their own roles.
 
 The [token contract](./design-system/token-contract.md) records foundations, derived roles,
 the boundary for new tokens and the checks that prevent a derived role from drifting.
+
+The shared text scale is small and even, one pixel per step: `xs/sm/md/lg/xl` are 10/11/12/13/14px.
+Running text, the editor body and interface text sit at `md` (12px) with a 1.6 document leading;
+metadata, supporting text and chrome (navigation, section labels) at `sm` (11px); captions, badges and
+field help at `xs` (10px). Contrast comes
+from position and a few quiet heading steps (title 20px below `sm`, 24px from `sm`; body h1–h3 16/15/14px
+and 18/16/14px), all at one medium `heading-weight` (500) rather than bold. Paper uses 9pt running text. Icon and logo geometry uses the separate
+`icon-size` roles (12/14/16/18/20px), so icons keep their size when text shrinks.
 
 The shared spacing scale is compact: `xxs/xs/sm/md/lg/xl` are 4/8/10/12/16/24px
 at the default root size. Layout gaps, insets and component padding consume this same
@@ -105,16 +119,16 @@ and assistive technology integration remain separate acceptance steps.
 
 | Role                        | Fine pointer geometry             | Composition / coarse pointer              |
 | --------------------------- | --------------------------------- | ----------------------------------------- |
-| General controls            | xs/sm/md/lg/xl = 30/36/42/50/60px | Same named scale, minimum 44px            |
-| Compact commands and inputs | compact = 28px                    | Minimum 44px; glyph remains 16px          |
-| Chrome icon commands        | chrome = 32px                     | Minimum 44px                              |
+| General controls            | xs/sm/md/lg/xl = 24/28/32/40/48px | Same named scale, minimum 44px            |
+| Compact commands and inputs | compact = 24px                    | Minimum 44px; glyph remains 16px          |
+| Chrome icon commands        | chrome = 28px                     | Minimum 44px                              |
 | Menu row                    | 26px minimum                      | Minimum 44px                              |
 | Prose link                  | Natural text line                 | Content typography, no command row sizing |
 
 `ActionRowSizeProvider` owns the row size across Button, IconButton and chrome TextButton.
 A compact Toolbar owns compact geometry before the row context; a standalone command uses its named size.
 Do not use the retired `compact-xs` or `touch` sizes. Input density controls compact geometry;
-font size remains its own role. Coarse text inputs use at least 16px text. `any-pointer: coarse`
+font size remains its own role. Coarse text inputs use at least `interaction-text-minimum` (16px) text, independent of `md`. `any-pointer: coarse`
 sets the shared interaction minimum, including hybrid devices. Targets occupy layout space.
 ToolbarSurface wraps by default; explicit nowrap provides horizontal scrolling. Responsive toolbar
 commands retain labels for touch input. ReorderGutter reserves a leading track on touch and the existing
@@ -129,7 +143,7 @@ and readOnly behavior. Read-only text remains selectable; style/className escape
 CSS media/container rules consume generated `$mantine-breakpoint-*` compatibility variables.
 JavaScript and image sizes consume `breakpointQuery(name, 'below' | 'at-least')`.
 Below uses `<` and at-least uses `>=`, so exact boundaries have one owner.
-LayoutContainer's reading/compact/standard/wide widths use separate contentWidth roles (36/48/62/75rem);
+LayoutContainer's reading/compact/standard/wide widths use separate contentWidth roles (32/48/62/75rem);
 `reading` is the running-prose screen measure; paper keeps the page measure ([table of contents and reading measure](design-system/table-of-contents.md#reading-measure)).
 A layout transition and a content maximum are independent decisions.
 
@@ -145,14 +159,33 @@ with pagination on continues in place: the server renders the first page and nea
 one; the "Load more" button is the same action for keyboard and assistive technology and the retry after a
 failure, which pauses automatic loading.
 
-Public entity details (event, work, release, artist, label, series, event series) share `EntityDetailLayout`:
-it spans the page width; from `md` the media (poster, cover, portrait, logo) keeps the start third in view and
-the title, metadata and `EntityDetailSection`s (`h2`, the mono label voice of the metadata rows) share the
-rest; below `md` it stacks. Running text keeps the reading measure from the start edge, never centered;
-lists and tables use the full width. A detail with media keeps its table of contents as the rail
-(`outlinePresentation="rail"`). Posts, legal documents and the changelog read the same way (owner decision
-2026-10-18): the title, hero text and running text start at the start edge, the outline sits at the inline
-end, and wide blocks (images, tables, code) use the full document box.
+Public entity details (event, work, release, artist, label, series, event series) share `EntityDetailLayout`,
+in three parts. The overview identifies the entity: from `md` media takes the start third and the title,
+interface controls, metadata and an optional `listing` the rest; below `md` they stack. A release's
+tracklist is that listing, beside its artwork as on Bandcamp, Warp and Boomkat release pages: numbered
+rows ("01", "2-01" across discs), title and duration. Content language, edit and print controls
+stay at the title row's inline end. Authored descriptions and biographies use the `body` slot and read
+like a Post body: running content starts at the page's start edge at the reading measure, authored H1
+renders as h2 under the entity title, and no generated Description/Biography label precedes it. A body
+spanning the page uses the responsive outline even when the overview has media. Related collections
+(`EntityDetailSection`: releases, artists, posts, events) follow across the page width. A label lists its
+releases as cover cards and its artists as an extra-small roster grid, so the catalogue leads.
+
+Entity facts stay in the overview's metadata rows. Work, Event and Release show credits through
+`PublicCreditList`: the role reads as a nested label, people who share a role share one row, named
+credit groups appear only when more than one group has credits, and credits without a public name are
+omitted. Related names (artists, labels, Event clients) use `PublicNameList`, the slash grammar with an
+optional role. Work clients use `PublicClientMarks`: each logo is sized by area (`opticalLogoSize`) so
+wordmarks and square symbols carry similar weight, stays greyscale until its website link is hovered or
+focused, and a client without a logo shows its name. Long addresses show their host (`formatDisplayUrl`), date ranges use one locale phrase
+(`formatDateTimeRange`) and Work's updated date has no time. Location rows show the place, not coordinates.
+
+Page and Post options expose a shared Table of Contents switch. It controls navigation for that
+document across locales; existing documents keep their outline unless explicitly hidden. Turning it
+off also removes the reserved outline column/rail. Page language controls remain at the frame's
+inline end independently of that reserve. Post's existing Allow comments setting uses the Core
+`Switch` and remains exclusive to Posts. Turning comments off hides the whole thread and prevents
+its queries; saved comments remain available when the author enables the feature again.
 
 Every authoring screen (Post, Page, Work, Event, Release, Series) composes `DocumentEditorPanels`: from `lg`
 the primary content (body, or a release's information and tracks, or a series' posts) takes the main column
@@ -741,3 +774,16 @@ execution environment; this is pending visual review, not design approval.
 ## Site header and branding
 
 Core `ApplicationFrame/SiteHeader` owns responsive public header placement. See the [site branding contract](design-system/site-branding.md) and [change record](design-system/changelog.md).
+
+## Self-hosted Geul fonts
+
+`lib/styles/font-assignment.css` owns the sans and mono stacks consumed by Core, theme,
+production layouts and Storybook. Geul Sans and Geul Mono use the pinned Noto system; locale
+profiles select Han TC for Korean/Traditional Chinese, Han JP for Japanese and Han SC for
+Simplified Chinese. No new font token is required.
+
+The root layout consumes `lib/styles/geul-fonts.generated.ts` through the font stylesheet helper.
+`PUBLIC_FONT_BASE_URL` defaults to `https://static.rawsector.com/fonts`, independently of the asset
+CDN. Storybook serves matching complete local artifacts when available and otherwise uses that
+host. Build, migration, deployment order and pending browser checks are documented in
+[Geul fonts](fonts.md). This change is prepared locally and has not been deployed.

@@ -93,7 +93,8 @@ export function Chart({
   );
   const axes = (horizontal = false) => (
     <>
-      <CartesianGrid stroke="var(--geul-border-default)" vertical={!horizontal} horizontal={horizontal} />
+      {/* Hairline guides run across the value axis only, never through the marks. */}
+      <CartesianGrid stroke="var(--geul-border-default)" vertical={horizontal} horizontal={!horizontal} />
       <XAxis
         type={horizontal ? 'number' : 'category'}
         dataKey={horizontal ? undefined : 'name'}
@@ -108,6 +109,7 @@ export function Chart({
         width={horizontal ? 100 : 60}
         tick={{ fill: 'var(--geul-text-secondary)', fontSize: 'var(--geul-font-size-xs)' }}
         stroke="var(--geul-border-default)"
+        axisLine={false}
         tickLine={false}
         tickFormatter={horizontal ? undefined : formatValue}
       />
@@ -166,8 +168,10 @@ export function Chart({
           dataKey="value"
           name={labels.value}
           type="monotone"
-          fill={palette[2]}
+          fill={palette[0]}
+          fillOpacity={0.12}
           stroke={palette[0]}
+          strokeWidth={1}
           isAnimationActive={false}
         />
       </AreaChart>
@@ -182,17 +186,30 @@ export function Chart({
           name={labels.value}
           type="monotone"
           stroke={palette[0]}
-          dot={{ fill: palette[0] }}
+          strokeWidth={1}
+          dot={{ fill: palette[0], r: 2, strokeWidth: 0 }}
           isAnimationActive={false}
         />
       </LineChart>
     );
   } else {
     plot = (
-      <BarChart accessibilityLayer={false} data={rows} layout={kind === 'bar-horizontal' ? 'vertical' : 'horizontal'}>
+      <BarChart
+        accessibilityLayer={false}
+        data={rows}
+        layout={kind === 'bar-horizontal' ? 'vertical' : 'horizontal'}
+        // A histogram's bins touch; categorical bars stay slim, meter-like strokes.
+        barCategoryGap={kind === 'histogram' ? 2 : '30%'}
+      >
         {axes(kind === 'bar-horizontal')}
         {tooltip}
-        <Bar dataKey="value" name={labels.value} fill={palette[0]} isAnimationActive={false} />
+        <Bar
+          dataKey="value"
+          name={labels.value}
+          fill={palette[0]}
+          maxBarSize={kind === 'histogram' ? undefined : 12}
+          isAnimationActive={false}
+        />
       </BarChart>
     );
   }

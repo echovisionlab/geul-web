@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "c9956cd7d315e760c923ec48d20e731256e335930afb9fe7cb420dc4bf95a791",
+  "manifestHash": "21e4be9a947c2bdec144cf07b59faa519571d7880499508a6b7fae0b7a4d2365",
   "counts": {
-    "sourceFiles": 3807,
-    "productionSourceFiles": 2300,
-    "componentFiles": 908,
+    "sourceFiles": 3816,
+    "productionSourceFiles": 2303,
+    "componentFiles": 909,
     "coreFamilies": 57,
-    "featureDomains": 53,
+    "featureDomains": 54,
     "storyFiles": 257,
-    "storyVariants": 1465,
+    "storyVariants": 1469,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -28,6 +28,7 @@
     ".storybook/fixture-i18n.tsx",
     ".storybook/kit-fixture-messages.ts",
     ".storybook/loaders/transpile-typescript.cjs",
+    ".storybook/main.test.ts",
     ".storybook/main.ts",
     ".storybook/manager.ts",
     ".storybook/middleware.mjs",
@@ -1182,6 +1183,7 @@
     "features/client/ClientLogoUploader.tsx",
     "features/client/ClientPublicMark.test.tsx",
     "features/client/ClientPublicMark.tsx",
+    "features/client/PublicClientMarks.tsx",
     "features/confirmation/ConfirmationDialog.stories.tsx",
     "features/confirmation/ConfirmationDialog.test.tsx",
     "features/confirmation/confirmation-dialogs.ts",
@@ -1194,6 +1196,9 @@
     "features/cookie-consent/CookieConsentBanner.tsx",
     "features/cookie-consent/ui/CookieConsentBannerView.test.tsx",
     "features/cookie-consent/ui/CookieConsentBannerView.tsx",
+    "features/credits/PublicCreditList.test.tsx",
+    "features/credits/PublicCreditList.tsx",
+    "features/credits/PublicNameList.tsx",
     "features/data-table/DataTable.tsx",
     "features/data-table/DataTableContent.test.tsx",
     "features/data-table/DataTableContent.tsx",
@@ -2429,6 +2434,7 @@
     "features/post/Comment/CommentForm.tsx",
     "features/post/Comment/CommentItem.test.ts",
     "features/post/Comment/CommentItem.tsx",
+    "features/post/Comment/CommentSection.test.tsx",
     "features/post/Comment/CommentSection.tsx",
     "features/post/Comment/comment-permissions.ts",
     "features/post/CreatePostButton.tsx",
@@ -2516,7 +2522,6 @@
     "features/program-event/ProgramEventSeriesPublicView.stories.tsx",
     "features/program-event/ProgramEventSeriesPublicView.test.tsx",
     "features/program-event/ProgramEventSeriesPublicView.tsx",
-    "features/release/ReleaseCreditsList.tsx",
     "features/release/ReleaseEditor/LazyReleaseEditor.tsx",
     "features/release/ReleaseEditor/ReleaseArtistsSection.test.tsx",
     "features/release/ReleaseEditor/ReleaseArtistsSection.tsx",
@@ -2754,7 +2759,6 @@
     "features/version-history/ui/index.ts",
     "features/version-history/useVersionHistoryQuery.test.tsx",
     "features/version-history/useVersionHistoryQuery.ts",
-    "features/work/CreditList.tsx",
     "features/work/WorkEditor/LazyWorkEditor.tsx",
     "features/work/WorkEditor/WorkClientsSection.tsx",
     "features/work/WorkEditor/WorkCreditsSection.test.tsx",
@@ -2796,6 +2800,7 @@
     "lib/actions/category.ts",
     "lib/actions/client.test.ts",
     "lib/actions/client.ts",
+    "lib/actions/comment.test.ts",
     "lib/actions/comment.ts",
     "lib/actions/cookie-consent.test.ts",
     "lib/actions/cookie-consent.ts",
@@ -3406,6 +3411,7 @@
     "lib/site-version.ts",
     "lib/styles/font-stylesheet.test.ts",
     "lib/styles/font-stylesheet.ts",
+    "lib/styles/geul-fonts.generated.ts",
     "lib/styles/print.test.ts",
     "lib/theme/color-scheme.test.ts",
     "lib/theme/color-scheme.ts",
@@ -3579,6 +3585,8 @@
     "lib/utils/asset-ref.ts",
     "lib/utils/client-logger.ts",
     "lib/utils/color.ts",
+    "lib/utils/date-range.test.ts",
+    "lib/utils/date-range.ts",
     "lib/utils/entity-edit-route.test.ts",
     "lib/utils/entity-edit-route.ts",
     "lib/utils/export.ts",
@@ -3656,6 +3664,7 @@
     "lib/utils/upload.test.ts",
     "lib/utils/upload.ts",
     "lib/utils/url.server.ts",
+    "lib/utils/url.test.ts",
     "lib/utils/url.ts",
     "lib/utils/validation.test.ts",
     "lib/utils/validation.ts",
@@ -6521,7 +6530,6 @@
         "features/user/ui/UserInlineLinks/UserInlineLinksView.tsx",
         "features/user/ui/UserProfile/UserProfileView.tsx",
         "features/version-history/ui/VersionHistoryDrawerView.tsx",
-        "features/work/CreditList.tsx",
         "features/work/WorkEditor/WorkClientsSection.tsx",
         "features/work/WorkEditor/WorkCreditsSection.tsx",
         "features/work/WorkEditor/credits/CreditSkeletons.tsx",
@@ -8581,8 +8589,7 @@
         "features/admin/email-template/EmailTemplateEditPage.tsx",
         "features/menu/MenuTargetItemsEditor.tsx",
         "features/post/Comment/CommentItem.tsx",
-        "features/release/ReleaseEditor/ReleaseTracksSection.tsx",
-        "features/work/CreditList.tsx"
+        "features/release/ReleaseEditor/ReleaseTracksSection.tsx"
       ],
       "catalogAdapters": [],
       "tests": ["components/core/Hierarchy/Hierarchy.test.tsx"],
@@ -9993,7 +10000,6 @@
         "features/page/PageEditor/PageEditor.tsx",
         "features/page/blocks/embed/SettingsForm.tsx",
         "features/page/blocks/marquee/MarqueeEditorFields.tsx",
-        "features/post/PostEditor/PostEditor.tsx",
         "features/program-event/ProgramEventEditor/ProgramEventEditor.tsx"
       ],
       "catalogAdapters": [
@@ -10006,7 +10012,8 @@
         "components/core/Field/Field.test.tsx",
         "components/core/Input/ChoiceContracts.test.tsx",
         "components/core/Input/InputBehavior.test.tsx",
-        "components/core/Input/InputSizeProvider.test.tsx"
+        "components/core/Input/InputSizeProvider.test.tsx",
+        "features/post/Comment/CommentSection.test.tsx"
       ],
       "stories": [
         "components/core/Input/Checkbox.stories.tsx",
@@ -12363,6 +12370,7 @@
         "features/admin/MapThemeEditor/ThemeEditorCanvas.tsx",
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/segment/AudienceArchiveFilter.tsx",
+        "features/document-layout/ui/ContentLayoutFieldView.tsx",
         "features/form/FormField/fields/SwitchField.tsx",
         "features/form/FormSettingsContent.tsx",
         "features/my/CookieConsentSettings.tsx",
@@ -12379,6 +12387,7 @@
         "features/page/blocks/work-map/Editor.tsx",
         "features/page/blocks/work-table/Editor.tsx",
         "features/page/blocks/works-gallery/Editor.tsx",
+        "features/post/PostEditor/PostEditor.tsx",
         "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
         "features/translation/admin/TranslationSettingsPage.tsx",
         "features/translation/settings/TranslationProviderModal.tsx",
@@ -13109,7 +13118,6 @@
       "productionConsumers": [
         "app/(general)/artists/[idOrSlug]/ArtistPublicView.tsx",
         "app/(general)/artists/[idOrSlug]/ArtistWorkSection.tsx",
-        "app/(general)/events/[idOrSlug]/ProgramEventViewClient.tsx",
         "app/(general)/labels/[idOrSlug]/LabelPublicView.tsx",
         "app/(general)/my/security/page.tsx",
         "app/(general)/onboarding/nickname/NicknameOnboardingPage.tsx",
@@ -13232,6 +13240,7 @@
         "features/campaign/CampaignScheduleForm.tsx",
         "features/campaign/CampaignTargetControl.tsx",
         "features/changelog/ChangelogPageView.tsx",
+        "features/client/PublicClientMarks.tsx",
         "features/cookie-consent/ui/CookieConsentBannerView.tsx",
         "features/data-table/DataTable.tsx",
         "features/data-table/DataTablePagination.tsx",
@@ -13428,7 +13437,6 @@
         "features/program-event/ProgramEventEditor/ProgramEventEditor.tsx",
         "features/program-event/ProgramEventEditor/ProgramEventPosterUploader.tsx",
         "features/program-event/ProgramEventSeriesEditor/ProgramEventSeriesEditor.tsx",
-        "features/release/ReleaseCreditsList.tsx",
         "features/release/ReleaseEditor/ReleaseArtistsSectionView.tsx",
         "features/release/ReleaseEditor/ReleaseCreditsSection.tsx",
         "features/release/ReleaseEditor/ReleaseEditor.tsx",
@@ -13474,7 +13482,6 @@
         "features/user/ui/UserProfile/UserProfileView.tsx",
         "features/user/ui/UserShell/UserShellView.tsx",
         "features/version-history/ui/VersionHistoryDrawerView.tsx",
-        "features/work/CreditList.tsx",
         "features/work/WorkEditor/WorkClientsSection.tsx",
         "features/work/WorkEditor/WorkCreditsSection.tsx",
         "features/work/WorkEditor/WorkEditor.tsx",
@@ -15295,7 +15302,6 @@
         "features/post/Comment/CommentSection.tsx",
         "features/shell/ui/Shell/ShellIslands.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
-        "features/work/CreditList.tsx",
         "lib/utils/parse-markdown.tsx"
       ],
       "catalogAdapters": [],
@@ -16262,6 +16268,8 @@
         "app/(general)/releases/[idOrSlug]/ReleasePublicView.tsx",
         "app/(general)/works/[idOrSlug]/WorkViewClient.tsx",
         "features/admin/user/auth/shared.tsx",
+        "features/credits/PublicCreditList.tsx",
+        "features/credits/PublicNameList.tsx",
         "features/location/LocationPlaceMetadataRows.tsx",
         "features/post/PostHeader/PostHeader.tsx"
       ],
@@ -17678,7 +17686,7 @@
         },
         {
           "name": "SocialIconSize",
-          "type": "keyof typeof primitiveTokens.fontSize"
+          "type": "keyof typeof primitiveTokens.iconSize"
         },
         {
           "name": "SocialIconStyle",
@@ -19573,6 +19581,8 @@
         "features/changelog/ChangelogPageView.tsx",
         "features/client/ClientPublicMark.tsx",
         "features/cookie-consent/ui/CookieConsentBannerView.tsx",
+        "features/credits/PublicCreditList.tsx",
+        "features/credits/PublicNameList.tsx",
         "features/data-table/DataTableSelectableSection.tsx",
         "features/data-table/MultiFilterEditorView.tsx",
         "features/data-table/MultiSortView.tsx",
@@ -19765,7 +19775,6 @@
         "features/user/ui/UserProfile/UserProfileView.tsx",
         "features/user/ui/UserShell/UserShellView.tsx",
         "features/version-history/ui/VersionHistoryDrawerView.tsx",
-        "features/work/CreditList.tsx",
         "features/work/WorkEditor/WorkClientsSection.tsx",
         "features/work/WorkEditor/WorkCreditsSection.tsx",
         "features/work/WorkEditor/WorkEditor.tsx",
@@ -31522,26 +31531,34 @@
               "name": "logoDarkUrl",
               "optional": true,
               "type": "string | null"
-            },
-            {
-              "name": "height",
-              "optional": true,
-              "type": "number"
-            },
-            {
-              "name": "maxWidth",
-              "optional": true,
-              "type": "number"
             }
           ]
         }
       ],
       "typeAliasEvidence": [],
-      "productionConsumers": ["app/(general)/works/[idOrSlug]/WorkViewClient.tsx"],
+      "productionConsumers": ["features/client/PublicClientMarks.tsx"],
       "catalogAdapters": [],
       "tests": ["features/client/ClientPublicMark.test.tsx"],
       "stories": [],
-      "composedJsx": ["Anchor", "DsText", "ThemedAssetImage"]
+      "composedJsx": ["Anchor", "DsText", "OpticalLogo", "ThemedAssetImage", "span"]
+    },
+    {
+      "file": "features/client/PublicClientMarks.tsx",
+      "owner": "Feature/client",
+      "exports": [
+        {
+          "name": "PublicClientMarks",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["app/(general)/works/[idOrSlug]/WorkViewClient.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["ClientPublicMark", "LayoutInline"]
     },
     {
       "file": "features/confirmation/ui/ConfirmationDialog.tsx",
@@ -31735,6 +31752,163 @@
         "aside",
         "span"
       ]
+    },
+    {
+      "file": "features/credits/PublicCreditList.tsx",
+      "owner": "Feature/credits",
+      "exports": [
+        {
+          "name": "PublicCreditList",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "PublicCreditEntry",
+          "extends": [],
+          "properties": [
+            {
+              "name": "id",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "optional": false,
+              "type": "string | null"
+            },
+            {
+              "name": "role",
+              "optional": true,
+              "type": "string | null"
+            },
+            {
+              "name": "note",
+              "optional": true,
+              "type": "string | null"
+            },
+            {
+              "name": "href",
+              "optional": true,
+              "type": "string | null"
+            }
+          ]
+        },
+        {
+          "name": "PublicCreditGroup",
+          "extends": [],
+          "properties": [
+            {
+              "name": "id",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "optional": true,
+              "type": "string | null"
+            },
+            {
+              "name": "entries",
+              "optional": false,
+              "type": "PublicCreditEntry[]"
+            }
+          ]
+        },
+        {
+          "name": "PublicCreditListProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "groups",
+              "optional": false,
+              "type": "PublicCreditGroup[]"
+            },
+            {
+              "name": "label",
+              "optional": false,
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "CreditRow",
+          "extends": [],
+          "properties": [
+            {
+              "name": "role",
+              "optional": false,
+              "type": "string | null"
+            },
+            {
+              "name": "people",
+              "optional": false,
+              "type": "(PublicCreditEntry & { name: string })[]"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": [
+        "app/(general)/events/[idOrSlug]/ProgramEventViewClient.tsx",
+        "app/(general)/releases/[idOrSlug]/ReleasePublicView.tsx",
+        "app/(general)/works/[idOrSlug]/WorkViewClient.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": ["features/credits/PublicCreditList.test.tsx"],
+      "stories": [],
+      "composedJsx": ["Fragment", "PublicMetadataLink", "Text", "div", "span"]
+    },
+    {
+      "file": "features/credits/PublicNameList.tsx",
+      "owner": "Feature/credits",
+      "exports": [
+        {
+          "name": "PublicNameList",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "PublicNameListItem",
+          "extends": [],
+          "properties": [
+            {
+              "name": "id",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "href",
+              "optional": true,
+              "type": "string | null"
+            },
+            {
+              "name": "external",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
+              "name": "role",
+              "optional": true,
+              "type": "string | null"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["app/(general)/events/[idOrSlug]/ProgramEventViewClient.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["DsText", "PublicMetadataLink", "PublicMetadataValueGroup", "span"]
     },
     {
       "file": "features/data-table/DataTable.tsx",
@@ -33683,6 +33857,11 @@
               "type": "string"
             },
             {
+              "name": "tableOfContents",
+              "optional": false,
+              "type": "string"
+            },
+            {
               "name": "content",
               "optional": false,
               "type": "string"
@@ -33746,7 +33925,7 @@
       "catalogAdapters": [],
       "tests": ["features/document-layout/ContentLayoutFieldView.naming.test.tsx"],
       "stories": ["features/document-layout/ui/ContentLayoutFieldView.stories.tsx"],
-      "composedJsx": ["DsText", "LayoutInline", "LayoutStack", "SegmentedControl"]
+      "composedJsx": ["DsText", "LayoutInline", "LayoutStack", "SegmentedControl", "Switch"]
     },
     {
       "file": "features/document-layout/ui/ContentLayoutView.tsx",
@@ -33904,7 +34083,17 @@
               "type": "ReactNode"
             },
             {
+              "name": "listing",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
               "name": "children",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
+              "name": "body",
               "optional": true,
               "type": "ReactNode"
             },
@@ -52637,6 +52826,11 @@
               "type": "TocItem[]"
             },
             {
+              "name": "enabled",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
               "name": "children",
               "optional": false,
               "type": "ReactNode"
@@ -62762,7 +62956,7 @@
       "propsEvidence": [
         {
           "name": "CommentItemProps",
-          "extends": [],
+          "extends": ["extends CommentReadAccess"],
           "properties": [
             {
               "name": "comment",
@@ -62839,7 +63033,7 @@
       "propsEvidence": [
         {
           "name": "CommentSectionProps",
-          "extends": [],
+          "extends": ["extends CommentReadAccess"],
           "properties": [
             {
               "name": "listAction",
@@ -62877,7 +63071,7 @@
       "typeAliasEvidence": [],
       "productionConsumers": ["features/post/PostViewContent.tsx"],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["features/post/Comment/CommentSection.test.tsx"],
       "stories": [],
       "composedJsx": [
         "Alert",
@@ -62888,6 +63082,7 @@
         "DsHeading",
         "DsLayoutStack",
         "DsText",
+        "EnabledCommentSection",
         "IconAlertCircle",
         "PageLoader",
         "div"
@@ -63307,7 +63502,6 @@
       "composedJsx": [
         "AuthoringExtension",
         "CategorySelector",
-        "Checkbox",
         "ContentLayoutField",
         "CreatePlaceModal",
         "DocumentEditorPanels",
@@ -63335,6 +63529,7 @@
         "SeriesSelector",
         "ShareLinkSection",
         "SummaryFieldCard",
+        "Switch",
         "TagSelector",
         "UrlSection",
         "VersionHistoryDrawer",
@@ -65760,93 +65955,6 @@
         "stories/pages/EventSeries.stories.tsx"
       ],
       "composedJsx": ["DsText", "EntityDetailImage", "EntityDetailLayout", "EntityDetailSection"]
-    },
-    {
-      "file": "features/release/ReleaseCreditsList.tsx",
-      "owner": "Feature/release",
-      "exports": [
-        {
-          "name": "ReleaseCreditsList",
-          "kind": "function"
-        }
-      ],
-      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [
-        {
-          "name": "ReleaseCreditEntry",
-          "extends": [],
-          "properties": [
-            {
-              "name": "id",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "name",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "href",
-              "optional": false,
-              "type": "string | null"
-            },
-            {
-              "name": "imageUrl",
-              "optional": false,
-              "type": "string | null"
-            },
-            {
-              "name": "note",
-              "optional": true,
-              "type": "string | null"
-            }
-          ]
-        },
-        {
-          "name": "ReleaseCreditGroup",
-          "extends": [],
-          "properties": [
-            {
-              "name": "id",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "name",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "entries",
-              "optional": false,
-              "type": "ReleaseCreditEntry[]"
-            }
-          ]
-        },
-        {
-          "name": "ReleaseCreditsListProps",
-          "extends": [],
-          "properties": [
-            {
-              "name": "groups",
-              "optional": false,
-              "type": "ReleaseCreditGroup[]"
-            },
-            {
-              "name": "unknownLabel",
-              "optional": false,
-              "type": "string"
-            }
-          ]
-        }
-      ],
-      "typeAliasEvidence": [],
-      "productionConsumers": ["app/(general)/releases/[idOrSlug]/ReleasePublicView.tsx"],
-      "catalogAdapters": [],
-      "tests": [],
-      "stories": [],
-      "composedJsx": ["CreditList.Group", "CreditList.Item", "DsLayoutStack"]
     },
     {
       "file": "features/release/ReleaseEditor/LazyReleaseEditor.tsx",
@@ -73252,87 +73360,6 @@
       ]
     },
     {
-      "file": "features/work/CreditList.tsx",
-      "owner": "Feature/work",
-      "exports": [
-        {
-          "name": "CreditList",
-          "kind": "value"
-        }
-      ],
-      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [
-        {
-          "name": "CreditListItemProps",
-          "extends": [],
-          "properties": [
-            {
-              "name": "name",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "role",
-              "optional": true,
-              "type": "string | null"
-            },
-            {
-              "name": "note",
-              "optional": true,
-              "type": "string | null"
-            },
-            {
-              "name": "href",
-              "optional": true,
-              "type": "string | null"
-            },
-            {
-              "name": "imageUrl",
-              "optional": true,
-              "type": "string | null"
-            }
-          ]
-        },
-        {
-          "name": "CreditListGroupProps",
-          "extends": [],
-          "properties": [
-            {
-              "name": "name",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "children",
-              "optional": false,
-              "type": "React.ReactNode"
-            }
-          ]
-        },
-        {
-          "name": "CreditListRootProps",
-          "extends": [],
-          "properties": [
-            {
-              "name": "children",
-              "optional": false,
-              "type": "React.ReactNode"
-            }
-          ]
-        }
-      ],
-      "typeAliasEvidence": [],
-      "productionConsumers": [
-        "app/(general)/events/[idOrSlug]/ProgramEventViewClient.tsx",
-        "app/(general)/works/[idOrSlug]/WorkViewClient.tsx",
-        "features/release/ReleaseCreditsList.tsx"
-      ],
-      "catalogAdapters": [],
-      "tests": [],
-      "stories": [],
-      "composedJsx": ["Anchor", "Avatar", "DsLayoutInline", "DsLayoutStack", "DsText", "HierarchyIndent"]
-    },
-    {
       "file": "features/work/WorkEditor/LazyWorkEditor.tsx",
       "owner": "Feature/work",
       "exports": [
@@ -74629,6 +74656,7 @@
         "artist",
         "authoring",
         "client",
+        "credits",
         "document-layout",
         "draft-mode",
         "editor",
@@ -75342,8 +75370,16 @@
     {
       "domain": "client",
       "category": "content",
-      "sourceFiles": ["features/client/ClientLogoUploader.tsx", "features/client/ClientPublicMark.tsx"],
-      "components": ["features/client/ClientLogoUploader.tsx", "features/client/ClientPublicMark.tsx"],
+      "sourceFiles": [
+        "features/client/ClientLogoUploader.tsx",
+        "features/client/ClientPublicMark.tsx",
+        "features/client/PublicClientMarks.tsx"
+      ],
+      "components": [
+        "features/client/ClientLogoUploader.tsx",
+        "features/client/ClientPublicMark.tsx",
+        "features/client/PublicClientMarks.tsx"
+      ],
       "stories": [],
       "tests": ["features/client/ClientPublicMark.test.tsx"],
       "directlyImportingRoutes": []
@@ -75379,6 +75415,15 @@
         "features/cookie-consent/CookieConsentBanner.test.tsx",
         "features/cookie-consent/ui/CookieConsentBannerView.test.tsx"
       ],
+      "directlyImportingRoutes": []
+    },
+    {
+      "domain": "credits",
+      "category": "content",
+      "sourceFiles": ["features/credits/PublicCreditList.tsx", "features/credits/PublicNameList.tsx"],
+      "components": ["features/credits/PublicCreditList.tsx", "features/credits/PublicNameList.tsx"],
+      "stories": [],
+      "tests": ["features/credits/PublicCreditList.test.tsx"],
       "directlyImportingRoutes": []
     },
     {
@@ -77437,6 +77482,7 @@
       "stories": [],
       "tests": [
         "features/post/Comment/CommentItem.test.ts",
+        "features/post/Comment/CommentSection.test.tsx",
         "features/post/PostEditor/FeaturedImageUploader.test.tsx",
         "features/post/PostEditor/PostEditor.translated-metadata.test.tsx",
         "features/post/PostEditor/PostEditorBody.test.tsx",
@@ -77517,7 +77563,6 @@
       "domain": "release",
       "category": "content",
       "sourceFiles": [
-        "features/release/ReleaseCreditsList.tsx",
         "features/release/ReleaseEditor/LazyReleaseEditor.tsx",
         "features/release/ReleaseEditor/ReleaseArtistsSection.tsx",
         "features/release/ReleaseEditor/ReleaseArtistsSectionView.tsx",
@@ -77541,7 +77586,6 @@
         "features/release/track-audio-upload-policy.ts"
       ],
       "components": [
-        "features/release/ReleaseCreditsList.tsx",
         "features/release/ReleaseEditor/LazyReleaseEditor.tsx",
         "features/release/ReleaseEditor/ReleaseArtistsSection.tsx",
         "features/release/ReleaseEditor/ReleaseArtistsSectionView.tsx",
@@ -77970,7 +78014,6 @@
       "domain": "work",
       "category": "content",
       "sourceFiles": [
-        "features/work/CreditList.tsx",
         "features/work/WorkEditor/LazyWorkEditor.tsx",
         "features/work/WorkEditor/WorkClientsSection.tsx",
         "features/work/WorkEditor/WorkCreditsSection.tsx",
@@ -77989,7 +78032,6 @@
         "features/work/work-view-model.ts"
       ],
       "components": [
-        "features/work/CreditList.tsx",
         "features/work/WorkEditor/LazyWorkEditor.tsx",
         "features/work/WorkEditor/WorkClientsSection.tsx",
         "features/work/WorkEditor/WorkCreditsSection.tsx",
@@ -87450,6 +87492,11 @@
           "preview": "http://localhost:6010/?path=/story/pages-editors-post--ready"
         },
         {
+          "name": "CommentSetting",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/pages-editors-post--comment-setting"
+        },
+        {
           "name": "KeyboardAuthoring",
           "args": null,
           "preview": "http://localhost:6010/?path=/story/pages-editors-post--keyboard-authoring"
@@ -87905,6 +87952,16 @@
           "name": "Phone",
           "args": null,
           "preview": "http://localhost:6010/?path=/story/pages-public-documents--phone"
+        },
+        {
+          "name": "PostWithoutOutline",
+          "args": "{ domain: 'post', state: 'long-document', hideTableOfContents: true }",
+          "preview": "http://localhost:6010/?path=/story/pages-public-documents--post-without-outline"
+        },
+        {
+          "name": "PageWithoutOutline",
+          "args": "{ domain: 'page', pagePath: '/quiet-studio', state: 'untitled-long-document', hideTableOfContents: true }",
+          "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-without-outline"
         }
       ],
       "importedSources": [
@@ -87942,6 +87999,11 @@
           "name": "WorkLongDocument",
           "args": "{ long: true }",
           "preview": "http://localhost:6010/?path=/story/pages-public-entity-detail--work-long-document"
+        },
+        {
+          "name": "WorkLongDocumentWithImage",
+          "args": "{ long: true, media: true }",
+          "preview": "http://localhost:6010/?path=/story/pages-public-entity-detail--work-long-document-with-image"
         },
         {
           "name": "WorkPhone",

@@ -153,6 +153,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       data-geul-theme={initialHtmlColorScheme}
       data-font-profile={localeContext.definition.fontProfile}
       data-geul-cdn-url={publicRuntimeConfig.cdnUrl}
+      data-geul-font-base-url={publicRuntimeConfig.fontBaseUrl}
       data-geul-api-url={publicRuntimeConfig.apiUrl}
       data-geul-p5-runner-url={publicRuntimeConfig.p5RunnerUrl}
       data-geul-google-maps-api-key={publicRuntimeConfig.googleMapsApiKey}
@@ -166,10 +167,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           data-geul-color-scheme-script
           dangerouslySetInnerHTML={{ __html: buildInitialColorSchemeScript(cookieColorScheme) }}
         />
-        <link rel="preconnect" href={publicRuntimeConfig.cdnUrl} crossOrigin="anonymous" />
+        <link rel="preconnect" href={new URL(publicRuntimeConfig.fontBaseUrl).origin} crossOrigin="anonymous" />
         <link
           rel="stylesheet"
-          href={buildFontStylesheetHref(publicRuntimeConfig.cdnUrl, localeContext.definition.fontProfile)}
+          href={buildFontStylesheetHref(publicRuntimeConfig.fontBaseUrl, localeContext.definition.fontProfile)}
         />
         {site.logoUrl ? <meta property="og:logo" content={site.logoUrl} /> : null}
         <meta name="theme-color" content={semanticThemes.light.background} media="(prefers-color-scheme: light)" />

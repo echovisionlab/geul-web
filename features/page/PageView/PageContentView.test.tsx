@@ -111,7 +111,10 @@ describe('PageContentView', () => {
         }}
       />,
     );
-    expect(tocSpy).toHaveBeenCalledWith({ items: [{ id: 'about-heading', label: 'About this project', level: 2 }] });
+    expect(tocSpy).toHaveBeenCalledWith({
+      enabled: true,
+      items: [{ id: 'about-heading', label: 'About this project', level: 2 }],
+    });
     expect(pageRendererSpy.mock.calls[0][0].sections[0].richText[0].id).toBe('about-heading');
   });
   it('uses the canonical layout and shared content chrome', () => {

@@ -18,6 +18,13 @@
   font: inherit;
 }
 
+/* Mobile browsers zoom into focused fields below 16px; search keeps the shared coarse-pointer floor. */
+@media (any-pointer: coarse) {
+  .input {
+    font-size: var(--geul-interaction-text-minimum);
+  }
+}
+
 .search[data-focus-within] {
   border-color: var(--geul-focus);
 }
@@ -66,6 +73,6 @@
 }
 
 .icon svg {
-  width: var(--geul-font-size-xl);
-  height: var(--geul-font-size-xl);
+  width: var(--geul-icon-size-xl);
+  height: var(--geul-icon-size-xl);
 }

@@ -97,6 +97,32 @@ export function PublicCatalogEntityPreview({
         ],
     tracks: sparse ? [] : [{ id: 'harbor', title: 'Harbor', roleName: 'Composer' }],
   };
+  const labelArtists = ['Mina Park', 'June Han', 'Kai Rhee', 'Ara Seo', 'Studio Lumen', 'Night Radio', 'Hana Cho'].map(
+    (name) => ({
+      id: name.toLowerCase().replace(/ /g, '-'),
+      name,
+      slug: name.toLowerCase().replace(/ /g, '-'),
+      imageUrl: null,
+    }),
+  );
+  const labelReleases = [
+    ['signals', 'Night Signals', 'album', '2026-10-01', 'Mina Park'],
+    ['rooms', 'Small Rooms', 'ep', '2026-06-12', 'June Han'],
+    ['harbor', 'Harbor', 'single', '2026-03-20', 'Kai Rhee'],
+    ['field', 'Field Notes', 'album', '2025-11-08', 'Ara Seo'],
+    ['lumen', 'Lumen', 'ep', '2025-07-01', 'Studio Lumen'],
+  ].map(([id, title, type, date, artist]) => ({
+    id: id!,
+    title: title!,
+    slug: id === 'signals' ? 'night-signals' : id!,
+    type: type!,
+    artworkUrl: id === 'signals' ? '/storybook/media/video-poster.jpg' : null,
+    releaseDate: new Date(`${date}T00:00:00Z`),
+    publishedAt: new Date(`${date}T00:00:00Z`),
+    artists: [
+      { id: artist!.toLowerCase().replace(/ /g, '-'), name: artist!, slug: artist!.toLowerCase().replace(/ /g, '-') },
+    ],
+  }));
   const label: LabelPublicViewProps['label'] = {
     id: 'quiet',
     name: 'Quiet Records',
@@ -104,31 +130,18 @@ export function PublicCatalogEntityPreview({
     descriptionText: null,
     content,
     ogImageUrl: null,
-    imageUrl: null,
+    imageUrl: sparse ? null : '/storybook/media/example-studio-logo.svg',
     imageLightUrl: null,
     imageDarkUrl: null,
     website: sparse ? null : 'https://example.com/quiet',
     countryCode: sparse ? null : 'KR',
     socialLinks: {},
     status: 'published',
-    releaseCount: sparse ? 0 : 1,
-    artistCount: sparse ? 0 : 1,
+    releaseCount: sparse ? 0 : labelReleases.length,
+    artistCount: sparse ? 0 : labelArtists.length,
     parentLabel: null,
-    artists: sparse ? [] : [{ id: 'mina', name: 'Mina Park', slug: 'mina-park', imageUrl: null }],
-    releases: sparse
-      ? []
-      : [
-          {
-            id: 'signals',
-            title: 'Night Signals',
-            slug: 'night-signals',
-            type: 'album',
-            artworkUrl: null,
-            releaseDate: new Date('2026-10-01T00:00:00Z'),
-            publishedAt: new Date('2026-10-01T00:00:00Z'),
-            artists: [{ id: 'mina', name: 'Mina Park', slug: 'mina-park' }],
-          },
-        ],
+    artists: sparse ? [] : labelArtists,
+    releases: sparse ? [] : labelReleases,
     createdAt: null,
     updatedAt: null,
     publishedAt: null,
@@ -156,7 +169,23 @@ export function PublicCatalogEntityPreview({
     genres: [],
     styles: [],
     formats: [],
-    credits: [],
+    credits: sparse
+      ? []
+      : [
+          ['producer', 'June Han', 'Producer', null],
+          ['mastering', 'Kai Rhee', 'Mastering', 'Tape transfer'],
+          ['mix-a', 'Mina Park', 'Mix', null],
+          ['mix-b', 'Ara Seo', 'Mix', null],
+        ].map(([id, name, creditRole, note]) => ({
+          id: id!,
+          name: name!,
+          slug: null,
+          creditRole,
+          artistId: null,
+          memberId: null,
+          imageUrl: null,
+          note,
+        })),
     artists: sparse ? [] : [{ id: 'mina', name: 'Mina Park', slug: 'mina-park', imageUrl: null, role: 'main' }],
     tracks: sparse
       ? []

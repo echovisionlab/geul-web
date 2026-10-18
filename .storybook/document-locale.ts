@@ -1,3 +1,4 @@
+import { buildFontStylesheetHref } from '../lib/styles/font-stylesheet';
 import { getLocaleDirection, getLocaleFontProfile, type SupportedLocale } from '../lib/i18n/locale';
 
 interface LocaleOwner {
@@ -9,6 +10,7 @@ interface LocaleOwner {
 interface DocumentLocaleState {
   owners: LocaleOwner[];
   initialAttributes: Map<string, string | null>;
+  initialFontHref: string | null;
 }
 
 const documentLocales = new WeakMap<Document, DocumentLocaleState>();
@@ -25,7 +27,13 @@ function projectLocale(document: Document, state: DocumentLocaleState) {
   if (owner) {
     root.lang = owner.locale;
     root.dir = getLocaleDirection(owner.locale);
-    root.dataset.fontProfile = getLocaleFontProfile(owner.locale);
+    const profile = getLocaleFontProfile(owner.locale);
+    root.dataset.fontProfile = profile;
+    const fontLink = document.getElementById('geul-font-stylesheet');
+    const fontBaseUrl = fontLink?.dataset.fontBaseUrl;
+    if (fontBaseUrl) {
+      fontLink.setAttribute('href', buildFontStylesheetHref(fontBaseUrl, profile));
+    }
     return;
   }
   for (const [name, value] of state.initialAttributes) {
@@ -34,6 +42,10 @@ function projectLocale(document: Document, state: DocumentLocaleState) {
     } else {
       root.setAttribute(name, value);
     }
+  }
+  const fontLink = document.getElementById('geul-font-stylesheet');
+  if (fontLink && state.initialFontHref !== null) {
+    fontLink.setAttribute('href', state.initialFontHref);
   }
   documentLocales.delete(document);
 }
@@ -44,6 +56,7 @@ export function applyStorybookDocumentLocale(document: Document, locale: Support
   if (!state) {
     state = {
       owners: [],
+      initialFontHref: document.getElementById('geul-font-stylesheet')?.getAttribute('href') ?? null,
       initialAttributes: new Map(localeAttributes.map((name) => [name, document.documentElement.getAttribute(name)])),
     };
     documentLocales.set(document, state);

@@ -19,7 +19,10 @@ type PostConfigUpdate = Parameters<typeof updatePostAction>[1];
 
 function hasLayoutIntent(patch: PostConfigPatch): boolean {
   return (
-    patch.layoutContentHeight !== undefined || patch.layoutPageChrome !== undefined || patch.layoutFooter !== undefined
+    patch.layoutContentHeight !== undefined ||
+    patch.layoutPageChrome !== undefined ||
+    patch.layoutFooter !== undefined ||
+    patch.layoutHideTableOfContents !== undefined
   );
 }
 
@@ -29,6 +32,9 @@ function buildPostConfigUpdate(patch: PostConfigPatch, base: PostConfigurationSn
         contentHeight: patch.layoutContentHeight ?? base.documentLayout.contentHeight,
         pageChrome: patch.layoutPageChrome ?? base.documentLayout.pageChrome,
         footer: patch.layoutFooter ?? base.documentLayout.footer,
+        ...((patch.layoutHideTableOfContents ?? base.documentLayout.hideTableOfContents)
+          ? { hideTableOfContents: true }
+          : {}),
       }
     : undefined;
 
@@ -48,7 +54,9 @@ function patchChangesConfiguration(patch: PostConfigPatch, configuration: PostCo
     (patch.layoutContentHeight !== undefined &&
       patch.layoutContentHeight !== configuration.documentLayout.contentHeight) ||
     (patch.layoutPageChrome !== undefined && patch.layoutPageChrome !== configuration.documentLayout.pageChrome) ||
-    (patch.layoutFooter !== undefined && patch.layoutFooter !== configuration.documentLayout.footer)
+    (patch.layoutFooter !== undefined && patch.layoutFooter !== configuration.documentLayout.footer) ||
+    (patch.layoutHideTableOfContents !== undefined &&
+      patch.layoutHideTableOfContents !== Boolean(configuration.documentLayout.hideTableOfContents))
   );
 }
 
@@ -62,6 +70,7 @@ function flatten(configuration: PostConfigurationSnapshot): FlatPostConfiguratio
     layoutContentHeight: configuration.documentLayout.contentHeight,
     layoutPageChrome: configuration.documentLayout.pageChrome,
     layoutFooter: configuration.documentLayout.footer,
+    layoutHideTableOfContents: Boolean(configuration.documentLayout.hideTableOfContents),
   };
 }
 function expand(configuration: FlatPostConfiguration): PostConfigurationSnapshot {
@@ -74,6 +83,7 @@ function expand(configuration: FlatPostConfiguration): PostConfigurationSnapshot
       contentHeight: configuration.layoutContentHeight!,
       pageChrome: configuration.layoutPageChrome!,
       footer: configuration.layoutFooter!,
+      ...(configuration.layoutHideTableOfContents ? { hideTableOfContents: true } : {}),
     },
   };
 }

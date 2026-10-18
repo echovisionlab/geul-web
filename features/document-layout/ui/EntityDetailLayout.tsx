@@ -12,8 +12,12 @@ export interface EntityDetailLayoutProps {
   meta?: ReactNode;
   /** Interface controls at the title's end (content language, print). */
   actions?: ReactNode;
-  /** `EntityDetailSection`s, in reading order. */
+  /** A listing that completes the overview beside the media, after the metadata (a release's tracklist). */
+  listing?: ReactNode;
+  /** Related collections (releases, artists, posts) after the body, across the page width. */
   children?: ReactNode;
+  /** Authored running content, read like a post body after the overview. */
+  body?: ReactNode;
   /**
    * On paper the media either precedes the header as a bounded block (`block`, default) or becomes the
    * header's darkened background with the title and metadata over it (`overlay`).
@@ -22,10 +26,11 @@ export interface EntityDetailLayoutProps {
 }
 
 /**
- * Public detail of a catalog or program entity (event, work, release, artist, label, series). It spans the
- * page width: from `md` the media keeps the start third in view while the title, metadata and sections
- * share the remaining two thirds; below `md` everything stacks. Running text inside sections keeps the
- * reading measure from the section's start edge, never centered.
+ * Public detail of a catalog or program entity (event, work, release, artist, label, series), in three
+ * parts. The overview identifies the entity: from `md` the media takes the start third and the title,
+ * interface controls, metadata and an optional listing the rest; below `md` they stack. The authored body
+ * follows like a post body, keeping its reading measure at the start edge, and related collections close
+ * the page.
  */
 export function EntityDetailLayout({
   media,
@@ -33,7 +38,9 @@ export function EntityDetailLayout({
   titleLang,
   meta,
   actions,
+  listing,
   children,
+  body,
   printMedia = 'block',
 }: EntityDetailLayoutProps) {
   return (
@@ -43,23 +50,31 @@ export function EntityDetailLayout({
       data-has-media={media ? '' : undefined}
       data-print-media={media ? printMedia : undefined}
     >
-      {media ? (
-        <div className={classes.media} data-entity-detail-media="">
-          {media}
+      <div className={classes.overview}>
+        {media ? (
+          <div className={classes.media} data-entity-detail-media="">
+            {media}
+          </div>
+        ) : null}
+        <div className={classes.main}>
+          <header className={classes.header}>
+            <div className={classes.titleRow}>
+              <Heading level={1} scale="title" wrap="anywhere" lang={titleLang}>
+                {title}
+              </Heading>
+              {actions ? <div className={`${classes.actions} print-hide`}>{actions}</div> : null}
+            </div>
+            {meta}
+          </header>
+          {listing}
+        </div>
+      </div>
+      {body ? (
+        <div className={classes.body} data-entity-detail-body="">
+          {body}
         </div>
       ) : null}
-      <div className={classes.main}>
-        <header className={classes.header}>
-          <div className={classes.titleRow}>
-            <Heading level={1} scale="title" wrap="anywhere" lang={titleLang}>
-              {title}
-            </Heading>
-            {actions ? <div className={`${classes.actions} print-hide`}>{actions}</div> : null}
-          </div>
-          {meta}
-        </header>
-        {children}
-      </div>
+      {children}
     </article>
   );
 }

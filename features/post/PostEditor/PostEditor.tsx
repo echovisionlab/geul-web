@@ -15,7 +15,7 @@ import { PostAction } from '@echovisionlab/geul-proto/secure/post_pb.ts';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
-import { Checkbox } from '@/components/core/Input';
+import { Switch } from '@/components/core/Input';
 import { useDisclosure, useWindowEvent } from '@mantine/hooks';
 import { notifications } from '@/components/core/Notification';
 import { useEditorPermissionRevocation } from '@/features/editor/useEditorPermissionRevocation';
@@ -165,6 +165,7 @@ function usePostEditorViewModel({
   const tCommonNotifications = useTranslations('common.notifications');
   const t = useTranslations('postEditor');
   const tLayout = useTranslations('contentLayout');
+  const tToc = useTranslations('tableOfContents');
   const router = useRouter();
   const navigateWithSave = useEditorNavigation(`post:${postId}`);
   const [isZenMode, setIsZenMode] = useState(false);
@@ -615,6 +616,7 @@ function usePostEditorViewModel({
     layout,
     handleLayoutChange,
     tLayout,
+    tToc,
     displayedSummary,
     editorAiTarget,
     currentDoc,
@@ -714,6 +716,7 @@ export function PostEditorView({ model }: { model: PostEditorViewModel }) {
     layout,
     handleLayoutChange,
     tLayout,
+    tToc,
     displayedSummary,
     editorAiTarget,
     currentDoc,
@@ -863,7 +866,7 @@ export function PostEditorView({ model }: { model: PostEditorViewModel }) {
                     {/* Options */}
                     {showEditorChrome && (
                       <EditorSettingsSection title={tCommonLabels('options')}>
-                        <Checkbox
+                        <Switch
                           id={`post-${postId}-comments-enabled`}
                           label={t('allowComments')}
                           checked={commentsEnabled}
@@ -877,6 +880,7 @@ export function PostEditorView({ model }: { model: PostEditorViewModel }) {
                           disabled={!canMutateSourceDocument}
                           labels={{
                             contentHeight: tLayout('contentHeight'),
+                            tableOfContents: tToc('title'),
                             content: tLayout('content'),
                             viewport: tLayout('viewport'),
                             pageChrome: tLayout('chrome'),

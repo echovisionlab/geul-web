@@ -78,7 +78,7 @@
   background-color: transparent;
   color: var(--geul-text-secondary);
   font-size: var(--geul-chrome-font-size);
-  font-weight: var(--geul-font-weight-medium);
+  font-weight: var(--geul-font-weight-regular);
   line-height: var(--geul-line-height-xs);
   text-decoration: none;
   transition:
@@ -102,7 +102,7 @@
   background-color: transparent;
   border-inline-start-color: var(--geul-focus);
   color: var(--geul-text-primary);
-  font-weight: var(--geul-font-weight-strong);
+  font-weight: var(--geul-font-weight-medium);
 }
 
 .itemIcon {

@@ -1,13 +1,23 @@
 const spacingScale = { xxs: '0.25rem', xs: '0.5rem', sm: '0.625rem', md: '0.75rem', lg: '1rem', xl: '1.5rem' } as const;
-const fontSizeScale = { xs: '0.75rem', sm: '0.875rem', md: '1rem', lg: '1.125rem', xl: '1.25rem' } as const;
+/**
+ * Text scale (10/11/12/13/14px), one pixel per step. Body text sits at 12px, metadata, supporting text and
+ * chrome at 11px, captions and badges at 10px; contrast comes from the title step rather than from large
+ * running text.
+ */
+const fontSizeScale = { xs: '0.625rem', sm: '0.6875rem', md: '0.75rem', lg: '0.8125rem', xl: '0.875rem' } as const;
+/** Icon and logo geometry named like the text roles it sits beside, kept independent of the text scale. */
+const iconSizeScale = { xs: '0.75rem', sm: '0.875rem', md: '1rem', lg: '1.125rem', xl: '1.25rem' } as const;
+/** Line icons draw a 1.5 unit stroke (24-unit grid): hairline enough to sit beside 11–12px text. */
+const iconStroke = { stroke: '1.5' } as const;
+/** Control geometry sized to the 12px text scale (24/28/32/40/48px); coarse pointers keep the 44px minimum. */
 const controlHeightScale = {
-  compact: '1.75rem',
-  chrome: '2rem',
-  xs: '1.875rem',
-  sm: '2.25rem',
-  md: '2.625rem',
-  lg: '3.125rem',
-  xl: '3.75rem',
+  compact: '1.5rem',
+  chrome: '1.75rem',
+  xs: '1.5rem',
+  sm: '1.75rem',
+  md: '2rem',
+  lg: '2.5rem',
+  xl: '3rem',
 } as const;
 
 /** Shared visual authority. Grades 50–900 increase in darkness; modes select roles from this palette.
@@ -21,29 +31,40 @@ export const primitiveTokens = {
       return this.red[500];
     },
     annotation: '#3b82f6',
+    /** Braun light: warm light-grey housings, hairline joins, near-black print. */
     neutral: {
-      50: '#faf9f5',
-      100: '#f2f1eb',
-      200: '#eae8df',
-      300: '#e2dfd5',
-      400: '#d6d2c7',
-      500: '#bbb7aa',
-      600: '#807e72',
-      700: '#5c594f',
-      800: '#45443d',
-      900: '#242622',
+      50: '#f8f7f4',
+      100: '#efeeea',
+      200: '#e8e6e1',
+      300: '#e1dfd9',
+      400: '#dcd9d3',
+      500: '#cfccc5',
+      600: '#85827c',
+      700: '#5d5b56',
+      800: '#4f4d48',
+      900: '#1b1b19',
     },
+    /** Braun dark: anthracite housings without a green cast. */
     graphite: {
-      50: '#edeee7',
-      100: '#ced2c8',
-      200: '#b4bcb0',
-      300: '#939d92',
-      400: '#596257',
-      500: '#3b433d',
-      600: '#303632',
-      700: '#252a27',
-      800: '#202422',
-      900: '#161918',
+      50: '#eceae5',
+      100: '#c2c0ba',
+      200: '#a6a49e',
+      300: '#75736e',
+      400: '#3a3936',
+      500: '#323230',
+      600: '#2a2a28',
+      700: '#222220',
+      800: '#1b1b1a',
+      900: '#141413',
+    },
+    /** Braun signal orange: the one interactive accent (selection, accent actions, the lead data series). */
+    signal: {
+      100: '#f7b895',
+      200: '#f5a273',
+      300: '#f28c52',
+      700: '#9c3d18',
+      800: '#853414',
+      900: '#6f2b10',
     },
     blue: {
       50: '#edf5fb',
@@ -146,7 +167,7 @@ export const primitiveTokens = {
     get ink() {
       return this.graphite[900];
     },
-    canvas: '#101311',
+    canvas: '#0f0f0e',
     sourceText: '#24292f',
     sourceBackground: '#f6f8fa',
   },
@@ -177,14 +198,20 @@ export const primitiveTokens = {
   /**
    * Content maximums. `form` is single-column authentication/account forms; `reading` is the
    * running-prose measure of long documents, one width for every language and script (owner decision:
-   * wide and open; at the md body size about 92 Latin, 60 Hangul or 120 Arabic characters per line);
+   * open but bounded; at the md body size about 85 Latin, 55 Hangul or 110 Arabic characters per line);
    * compact/standard/wide are LayoutContainer surfaces and document breakout widths.
    */
-  contentWidth: { form: '28rem', reading: '44rem', compact: '48rem', standard: '62rem', wide: '75rem' },
+  contentWidth: { form: '28rem', reading: '32rem', compact: '48rem', standard: '62rem', wide: '75rem' },
   /** Existing responsive thresholds, shared by theme, Core Layout and generated PostCSS variables. */
   breakpoints: { xs: '36em', sm: '48em', md: '62em', lg: '75em', xl: '88em' },
   fontSize: fontSizeScale,
-  fontWeight: { regular: '400', medium: '500', strong: '600' },
+  iconSize: iconSizeScale,
+  icon: iconStroke,
+  /**
+   * Labels and selection read by ink, tone and position rather than weight: `medium` resolves to regular
+   * and `strong` (inline emphasis) is one quiet step above it. Headings use `heading-weight`.
+   */
+  fontWeight: { regular: '400', medium: '400', strong: '500' },
   /** Small uppercase labels open slightly so capitals stay legible at `xs`; other text keeps normal tracking. */
   letterSpacing: { caps: '0.04em' },
   /**
@@ -194,24 +221,27 @@ export const primitiveTokens = {
    * above an authored body `h1` at every width; h4–h6 follow the text scale at every width.
    */
   heading: {
-    title: '2rem',
-    h1: '1.75rem',
-    h2: '1.5rem',
-    h3: '1.25rem',
+    title: '1.25rem',
+    h1: '1rem',
+    h2: '0.9375rem',
+    h3: '0.875rem',
     h4: fontSizeScale.lg,
     h5: fontSizeScale.md,
     h6: fontSizeScale.sm,
     'line-height': '1.3',
+    /** Headings lead by size and position at one medium weight; `strong` stays for inline emphasis. */
+    weight: '500',
   },
   /**
    * xs–xl pair with the text sizes of interface text. `document` is the leading of running text in
    * document bodies (published `.prose`, the editor body, legal/changelog release notes), one value for
    * every script; headings keep `heading-line-height`.
    */
-  lineHeight: { xs: '1.4', sm: '1.45', md: '1.55', lg: '1.6', xl: '1.65', document: '1.7' },
+  lineHeight: { xs: '1.4', sm: '1.45', md: '1.55', lg: '1.6', xl: '1.65', document: '1.6' },
   controlHeight: controlHeightScale,
-  /** Minimum hit area follows input capability, independently of visual density. */
-  interaction: { minimum: '0px', touch: '2.75rem' },
+  /** Minimum hit area follows input capability, independently of visual density. `text-minimum` is the
+   * smallest text a coarse-pointer text field may use, so mobile browsers do not zoom on focus. */
+  interaction: { minimum: '0px', touch: '2.75rem', 'text-minimum': '1rem' },
   /** `sm` (0.375rem, 6px) is a documented off-scale exception: TextButton's middle density
    * sits between the xxs and xs spacing steps. xs/md follow the spacing scale. */
   textControlPadding: { xs: spacingScale.xxs, sm: '0.375rem', md: spacingScale.xs },
@@ -235,9 +265,9 @@ export const primitiveTokens = {
   },
   motion: { fast: '100ms', normal: '140ms', slow: '300ms', spin: '1000ms', easing: 'ease-out' },
   chrome: {
-    'font-size': fontSizeScale.xs,
+    'font-size': fontSizeScale.sm,
     /** Section labels share the chrome text size; 10px was hard to read in Hangul, Kana and Han. */
-    'section-font-size': fontSizeScale.xs,
+    'section-font-size': fontSizeScale.sm,
     'row-height': controlHeightScale.chrome,
     'section-row-height': controlHeightScale.compact,
     'menu-row-height': '1.625rem',
@@ -261,10 +291,10 @@ export const responsiveTokens = {
   sm: {
     /** Anchor clearance follows the responsive ApplicationFrame header. */
     'chrome-scroll-offset': 'var(--geul-chrome-header-height-sm)',
-    'heading-title': '2.5rem',
-    'heading-h1': '2.125rem',
-    'heading-h2': '1.625rem',
-    'heading-h3': '1.375rem',
+    'heading-title': '1.5rem',
+    'heading-h1': '1.125rem',
+    'heading-h2': '1rem',
+    'heading-h3': '0.875rem',
   },
 } as const;
 
@@ -275,19 +305,19 @@ export const responsiveTokens = {
  * screen order: title > h1 > h2 > h3 > h4 (lg) > h5 (md) > h6 (sm).
  */
 export const printTokens = {
-  'font-size-xs': '8pt',
-  'font-size-sm': '9pt',
-  'font-size-md': '10.5pt',
-  'font-size-lg': '11.5pt',
-  'font-size-xl': '12.5pt',
-  'heading-title': '22pt',
-  'heading-h1': '18pt',
-  'heading-h2': '15.5pt',
-  'heading-h3': '13.5pt',
+  'font-size-xs': '7.5pt',
+  'font-size-sm': '8pt',
+  'font-size-md': '9pt',
+  'font-size-lg': '9.5pt',
+  'font-size-xl': '10.5pt',
+  'heading-title': '15pt',
+  'heading-h1': '12pt',
+  'heading-h2': '11pt',
+  'heading-h3': '10pt',
   /** Interface and dense text on paper (tables, metadata): slightly tighter than on screen. */
   'line-height-md': '1.5',
   /**
-   * Running document text on paper (10.5pt): one step tighter than the screen 1.7 but kept above the
+   * Running document text on paper (9pt): the screen's document leading, kept above the
    * dense role, because the A4 measure is long (about 95 Latin characters) and Hangul fills the em box.
    */
   'line-height-document': '1.6',
@@ -307,7 +337,7 @@ export const derivedTokenRoles = {
   'control-padding-xs': 'spacing-sm',
   'control-padding-standard': 'spacing-md',
   'control-padding-large': 'spacing-lg',
-  'chrome-font-size': 'font-size-xs',
+  'chrome-font-size': 'font-size-sm',
   'chrome-row-height': 'control-height-chrome',
   'chrome-section-row-height': 'control-height-compact',
   'heading-h4': 'font-size-lg',
@@ -391,8 +421,8 @@ function blendPaletteColors(first: PaletteColor, second: PaletteColor, firstWeig
 export const semanticThemes = {
   light: {
     background: colors.neutral[100],
-    'chart-series-primary': colors.neutral[900],
-    'chart-series-secondary': colors.neutral[700],
+    'chart-series-primary': colors.signal[700],
+    'chart-series-secondary': colors.neutral[900],
     'chart-series-tertiary': colors.neutral[600],
     surface: colors.neutral[50],
     'surface-muted': colors.neutral[200],
@@ -413,9 +443,9 @@ export const semanticThemes = {
     'text-on-action': colors.neutral[50],
     'action-primary-hover': colors.neutral[800],
     'action-primary-pressed': colors.neutral[700],
-    'action-accent': colors.blue[700],
-    'action-accent-hover': colors.blue[800],
-    'action-accent-pressed': colors.blue[900],
+    'action-accent': colors.signal[700],
+    'action-accent-hover': colors.signal[800],
+    'action-accent-pressed': colors.signal[900],
     'action-positive': colors.green[700],
     'action-positive-hover': colors.green[800],
     'action-positive-pressed': colors.green[900],
@@ -426,7 +456,7 @@ export const semanticThemes = {
     'action-danger-hover': colors.red[800],
     'action-danger-pressed': colors.red[900],
     focus: colors.neutral[900],
-    'status-accent': colors.blue[700],
+    'status-accent': colors.signal[700],
     'status-positive': colors.green[700],
     'status-warning': colors.yellow[800],
     'status-danger': colors.red[700],
@@ -451,15 +481,15 @@ export const semanticThemes = {
     'document-background-blue': colors.blue[50],
     'document-background-purple': colors.purple[50],
     'document-background-pink': colors.pink[50],
-    'wave-muted': 'rgb(36 38 34 / 14%)',
-    'wave-cursor': 'rgb(36 38 34 / 88%)',
+    'wave-muted': 'rgb(27 27 25 / 14%)',
+    'wave-cursor': 'rgb(27 27 25 / 88%)',
     'embed-overlay': 'rgb(255 255 255 / 20%)',
   },
   dark: {
     background: colors.ink,
-    'chart-series-primary': colors.graphite[50],
-    'chart-series-secondary': colors.graphite[100],
-    'chart-series-tertiary': colors.graphite[200],
+    'chart-series-primary': colors.signal[300],
+    'chart-series-secondary': colors.graphite[50],
+    'chart-series-tertiary': colors.graphite[300],
     surface: colors.graphite[800],
     'surface-muted': colors.graphite[700],
     'surface-hover': colors.graphite[600],
@@ -478,9 +508,9 @@ export const semanticThemes = {
     'text-on-action': colors.ink,
     'action-primary-hover': colors.graphite[100],
     'action-primary-pressed': colors.graphite[200],
-    'action-accent': colors.blue[300],
-    'action-accent-hover': colors.blue[200],
-    'action-accent-pressed': colors.blue[100],
+    'action-accent': colors.signal[300],
+    'action-accent-hover': colors.signal[200],
+    'action-accent-pressed': colors.signal[100],
     'action-positive': colors.green[300],
     'action-positive-hover': colors.green[200],
     'action-positive-pressed': colors.green[100],
@@ -491,7 +521,7 @@ export const semanticThemes = {
     'action-danger-hover': colors.red[200],
     'action-danger-pressed': colors.red[100],
     focus: colors.graphite[50],
-    'status-accent': colors.blue[300],
+    'status-accent': colors.signal[300],
     'status-positive': colors.green[300],
     'status-warning': colors.yellow[300],
     'status-danger': colors.red[300],
@@ -517,8 +547,8 @@ export const semanticThemes = {
     'document-background-blue': colors.blue[900],
     'document-background-purple': colors.purple[900],
     'document-background-pink': colors.pink[900],
-    'wave-muted': 'rgb(237 238 231 / 18%)',
-    'wave-cursor': 'rgb(237 238 231 / 90%)',
+    'wave-muted': 'rgb(236 234 229 / 18%)',
+    'wave-cursor': 'rgb(236 234 229 / 90%)',
     'embed-overlay': 'rgb(0 0 0 / 20%)',
   },
 } as const;

@@ -76,6 +76,7 @@ function Preview({ state = 'ready' }: { state?: EditorPreviewState }) {
     layout: local.layout,
     handleLayoutChange: local.setLayout,
     tLayout: local.tLayout,
+    tToc: local.tToc,
     displayedSummary: local.summary,
     roomLocale: local.locale,
     provider: local.room.provider,

@@ -93,10 +93,22 @@ export function LabelPublicView({
 
   const contentLang = label.localizationInfo?.displayedLocale || label.localizationInfo?.sourceLocale || contentLocale;
 
+  const body =
+    label.content && label.content.length > 0 ? (
+      <div className="prose" lang={contentLang}>
+        <DocumentHeadingScope parentLevel={1}>
+          {label.content.map((block) => (
+            <GeneratedRichTextBlockView key={block.id} block={block} requestedLocale={contentLocale} />
+          ))}
+        </DocumentHeadingScope>
+      </div>
+    ) : null;
+
   return (
     <>
       {labelMetadata ? <JsonLdScript data={buildLabelJsonLd(labelMetadata)} /> : null}
       <EntityDetailLayout
+        body={body}
         media={
           label.imageUrl || label.imageLightUrl || label.imageDarkUrl ? (
             <ThemedAssetImage
@@ -163,22 +175,6 @@ export function LabelPublicView({
           </PublicMetadataRows>
         }
       >
-        {label.content && label.content.length > 0 ? (
-          <EntityDetailSection title={tCommonLabels('description')}>
-            <div
-              className="prose"
-              lang={label.localizationInfo?.displayedLocale || label.localizationInfo?.sourceLocale || contentLocale}
-            >
-              {/* The authored body sits under the level-2 section label: authored H1 → h3. */}
-              <DocumentHeadingScope parentLevel={2}>
-                {label.content.map((block) => (
-                  <GeneratedRichTextBlockView key={block.id} block={block} requestedLocale={contentLocale} />
-                ))}
-              </DocumentHeadingScope>
-            </div>
-          </EntityDetailSection>
-        ) : null}
-
         {label.releases.length > 0 ? (
           <EntityDetailSection title={t('sections.releases', { count: label.releaseCount })}>
             <ReleaseListViewClient

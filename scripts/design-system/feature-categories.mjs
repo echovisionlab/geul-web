@@ -12,6 +12,7 @@ export const featureCategories = [
       'artist',
       'authoring',
       'client',
+      'credits',
       'document-layout',
       'draft-mode',
       'editor',

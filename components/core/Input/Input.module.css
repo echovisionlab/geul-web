@@ -50,8 +50,9 @@
   display: none !important;
 }
 
+/* Labels step back in tone so entered values carry the ink. */
 .label {
-  color: var(--geul-text-primary);
+  color: var(--geul-text-secondary);
   font-size: inherit;
   font-weight: var(--geul-font-weight-medium);
 }
@@ -1004,7 +1005,7 @@
 
 @media (any-pointer: coarse) {
   .input {
-    font-size: max(var(--_input-font, var(--geul-font-size-sm)), var(--geul-font-size-md));
+    font-size: max(var(--_input-font, var(--geul-font-size-sm)), var(--geul-interaction-text-minimum));
   }
 
   .choice {
@@ -1069,7 +1070,7 @@
 
 @media (any-pointer: coarse) {
   .contentWidth {
-    font-size: max(var(--_input-font), var(--geul-font-size-md));
+    font-size: max(var(--_input-font), var(--geul-interaction-text-minimum));
   }
 
   .tagRemove {

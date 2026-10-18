@@ -62,16 +62,18 @@ phones, duplicate every heading selector and let the editor drift from the publi
 phones interface headings that use scale 1–3 therefore shrink by 2–6px with the documents. A
 responsive `scale` object remains for changing the role itself per breakpoint.
 
-| Role                                      | Below `sm`               | `sm`+ | Paper (A4/Letter)                         |
-| ----------------------------------------- | ------------------------ | ----- | ----------------------------------------- |
-| `heading-title` (Heading `scale="title"`) | 32px                     | 40px  | 22pt                                      |
-| `heading-h1`                              | 28px                     | 34px  | 18pt                                      |
-| `heading-h2`                              | 24px                     | 26px  | 15.5pt                                    |
-| `heading-h3`                              | 20px                     | 22px  | 13.5pt                                    |
-| `heading-h4` / `h5` / `h6`                | 18 / 16 / 14px           | same  | 11.5 / 10.5 / 9pt (follow `lg`/`md`/`sm`) |
-| `font-size-xs/sm/md/lg/xl`                | 12 / 14 / 16 / 18 / 20px | same  | 8 / 9 / 10.5 / 11.5 / 12.5pt              |
-| `line-height-md` (interface, dense text)  | 1.55                     | 1.55  | 1.5                                       |
-| `line-height-document` (document text)    | 1.7                      | 1.7   | 1.6                                       |
+| Role                                      | Below `sm`               | `sm`+ | Paper (A4/Letter)                     |
+| ----------------------------------------- | ------------------------ | ----- | ------------------------------------- |
+| `heading-title` (Heading `scale="title"`) | 20px                     | 24px  | 15pt                                  |
+| `heading-h1`                              | 16px                     | 18px  | 12pt                                  |
+| `heading-h2`                              | 15px                     | 16px  | 11pt                                  |
+| `heading-h3`                              | 14px                     | 14px  | 10pt                                  |
+| `heading-h4` / `h5` / `h6`                | 13 / 12 / 11px           | same  | 9.5 / 9 / 8pt (follow `lg`/`md`/`sm`) |
+| `font-size-xs/sm/md/lg/xl`                | 10 / 11 / 12 / 13 / 14px | same  | 7.5 / 8 / 9 / 9.5 / 10.5pt            |
+| `heading-weight` (every heading)          | 500                      | 500   | 500                                   |
+| `icon-size-xs/sm/md/lg/xl` (geometry)     | 12 / 14 / 16 / 18 / 20px | same  | same                                  |
+| `line-height-md` (interface, dense text)  | 1.55                     | 1.55  | 1.5                                   |
+| `line-height-document` (document text)    | 1.6                      | 1.6   | 1.6                                   |
 
 `heading-title` is the document title role: Post (plain and hero), Page chrome and public
 document details (Work, Event, Release, Artist, Label, Terms/Privacy and their history detail,
@@ -112,15 +114,13 @@ artwork, the immersive scene title artwork and the error-code particle canvas.
 
 ### Document leading and block rhythm
 
-`line-height-document` (1.7, owner decision 2026-10-13) is the leading of running text in document
+`line-height-document` (1.6, owner decision 2026-10-18; it was 1.7) is the leading of running text in document
 bodies, one value for every language and script: published `.prose` paragraphs, list items and their
 markers, quotes, callout copy and check-list items, the same Tiptap editor blocks, and Core
 `List leading="document"` (changelog release notes). Interface text keeps `line-height-xs`–`xl`
 paired with its size, dense document content (tables, code, captions) keeps its interface role, and
-headings keep `heading-line-height`. Paper uses 1.6 at 10.5pt: one step tighter than the screen, as
-print reads closer and sharper, but above the dense 1.5 because the A4 measure is long (about 95
-Latin characters per line) and Hangul glyphs fill the em box, so the return sweep needs the extra
-leading. A Core `Heading` inside a `.prose` region (for example the legal editor's preview title)
+headings keep `heading-line-height`. Paper uses the same 1.6 at 9pt, above the dense 1.5 because the
+A4 measure is long and Hangul glyphs fill the em box, so the return sweep needs the extra leading. A Core `Heading` inside a `.prose` region (for example the legal editor's preview title)
 keeps its own role: the `.prose` heading element fallbacks have class-level specificity (`:where`).
 
 Blocks of a document body are `spacing-md` (12px) apart: paragraph → paragraph, paragraph ↔ quote,
@@ -134,21 +134,26 @@ published blocks, materialized HTML, nested children and callout content, and Ti
 (its flex gap stays `xs`; margins add the difference), so the editor and the published view measure
 equal (`typography-audit.mjs gaps`, and the `Feature/Editor/Public Block Comparison` plays).
 
-`chrome-section-font-size` aliases `font-size-xs` (12px) for section overlines (SideNavigation,
-DropdownMenu). There is no text step below 12px: 10px was hard to read in Hangul, Kana and Han.
+`chrome-font-size` and `chrome-section-font-size` alias `font-size-sm` (11px) for navigation and section
+overlines (SideNavigation, DropdownMenu), so chrome Hangul, Kana and Han never drop below 11px. The text
+scale steps one pixel (owner decision 2026-10-18): `xs` (10px) is reserved for captions, badges and
+field help, never for navigation or running text.
+Geometry that sits beside text (icons, logo defaults, check-list boxes, emoji choices) uses `icon-size-*`,
+so it keeps its size when the text scale changes. Coarse-pointer text fields keep 16px through
+`interaction-text-minimum`.
 Uppercase labels separate from running text by `letter-spacing-caps` (0.04em) and weight, not size.
 
 ## Content widths
 
 `contentWidth` roles are content maximums, not breakpoints: `form` (28rem) single-column
-account forms; `reading` (44rem) the running-prose measure of long documents; `compact`,
+account forms; `reading` (32rem) the running-prose measure of long documents; `compact`,
 `standard` and `wide` (48/62/75rem) LayoutContainer surfaces and document breakout widths.
 `reading` was added on 2026-10-13 for a repeated meaning: running text and the chrome that shares
 its column. Posts, legal documents (current, preview, history, share), the changelog and work/event
 detail pages read on it; CMS page sections keep their own widths and do not offer it (their
 `narrow` width serves bounded text sections). One width serves every language and script (owner
-decision 2026-10-13: wide, open text; it was 36rem): at the 16px body size a full line measures
-about 92 Latin, 60 Hangul and 120 Arabic characters, spaces included (typography audit, Noto Sans).
+decision 2026-10-18: it narrowed from 44rem with the 12px body): a full line measures about 85 Latin,
+55 Hangul and 110 Arabic characters, spaces included.
 CSS consumes `--geul-content-width-reading`; React
 layout uses `LayoutContainer size="reading"` and `ContentChrome measure="reading"`. It is a screen
 measure: `LayoutContainer size="reading"` drops its maximum on paper, where the print page measure

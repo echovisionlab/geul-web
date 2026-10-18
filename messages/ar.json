@@ -3143,7 +3143,6 @@
     }
   },
   "creditList": {
-    "groupAriaLabel": "اعتمادات {name}",
     "groupName": "المجموعة {index}"
   },
   "sitemapPage": {

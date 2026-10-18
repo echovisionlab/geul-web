@@ -67,9 +67,18 @@ export function UserInlineLinksView({
     }
     items.push(
       <span key={user.id} role="presentation" onClick={stopCardNavigation}>
-        <TextButton href={user.href} size={textSize} tone={textColor ?? 'inherit'} aria-label={user.label}>
+        {/* An inline link in running metadata: its line box follows the text, like the neighbouring rows. */}
+        <TextButton
+          href={user.href}
+          size={textSize}
+          tone={textColor ?? 'inherit'}
+          display="inline"
+          aria-label={user.label}
+        >
           {showAvatars ? (
-            <Avatar src={user.avatarSrc} size={avatarSize} shape="circle" interactive name={user.avatarName} />
+            <>
+              <Avatar src={user.avatarSrc} size={avatarSize} shape="circle" interactive name={user.avatarName} />{' '}
+            </>
           ) : null}
           <Text as="span" size={textSize} tone="inherit" nowrap>
             {user.label}

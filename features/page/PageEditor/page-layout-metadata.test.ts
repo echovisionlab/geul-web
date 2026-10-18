@@ -8,16 +8,20 @@ describe('applyPageLayoutMetadataUpdate', () => {
 
     expect(
       applyPageLayoutMetadataUpdate(current, {
-        documentLayout: { contentHeight: 'DOCUMENT_CONTENT_HEIGHT_VIEWPORT' },
+        documentLayout: { contentHeight: 'DOCUMENT_CONTENT_HEIGHT_VIEWPORT', hideTableOfContents: true },
       }),
-    ).toEqual({ ...current, contentHeight: 'viewport' });
+    ).toEqual({ ...current, contentHeight: 'viewport', hideTableOfContents: true });
   });
 
   it('accepts a flattened changed-field update', () => {
     expect(
-      applyPageLayoutMetadataUpdate(DEFAULT_DOCUMENT_LAYOUT, {
-        'documentLayout.footer': 'DOCUMENT_REGION_PLACEMENT_PINNED',
-      }),
+      applyPageLayoutMetadataUpdate(
+        { ...DEFAULT_DOCUMENT_LAYOUT, hideTableOfContents: true },
+        {
+          'documentLayout.hideTableOfContents': false,
+          'documentLayout.footer': 'DOCUMENT_REGION_PLACEMENT_PINNED',
+        },
+      ),
     ).toEqual({ ...DEFAULT_DOCUMENT_LAYOUT, footer: 'pinned' });
   });
 

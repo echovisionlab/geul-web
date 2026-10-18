@@ -160,6 +160,7 @@ function Preview({
     handleCommentsEnabledChange: setCommentsEnabled,
     layout: local.layout,
     handleLayoutChange: local.setLayout,
+    tToc: local.tToc,
     tLayout: local.tLayout,
     displayedSummary: local.summary,
     editorAiTarget: undefined,
@@ -286,6 +287,18 @@ async function openTranslations(canvasElement: HTMLElement, globals: Record<stri
 }
 
 export const Ready: Story = {};
+export const CommentSetting: Story = {
+  play: async ({ canvasElement, globals }) => {
+    const canvas = within(canvasElement);
+    const t = await scenarioTranslations(globals);
+    const toggle = await canvas.findByRole('switch', { name: t('postEditor.allowComments') });
+    await expect(toggle).toBeChecked();
+    await userEvent.click(toggle);
+    await expect(toggle).not.toBeChecked();
+    await userEvent.click(toggle);
+    await expect(toggle).toBeChecked();
+  },
+};
 export const KeyboardAuthoring: Story = {
   tags: ['a11y-author'],
   play: async ({ canvasElement, globals, step }) => {

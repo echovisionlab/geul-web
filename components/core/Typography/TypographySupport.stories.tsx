@@ -53,7 +53,7 @@ export const DocumentLeading: StoryObj<typeof meta> = {
       return Number.parseFloat(style.lineHeight) / Number.parseFloat(style.fontSize);
     };
     await expect(ratio('interface-list')).toBeCloseTo(1.45, 2);
-    await expect(ratio('document-list')).toBeCloseTo(1.7, 2);
+    await expect(ratio('document-list')).toBeCloseTo(1.6, 2);
   },
 };
 

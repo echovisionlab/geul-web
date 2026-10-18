@@ -14,7 +14,7 @@ describe('updatePageDocumentMetadata', () => {
     await expect(
       updatePageDocumentMetadata(
         { updateMetadata } as never,
-        { contentHeight: 'viewport', pageChrome: 'pinned', footer: 'flow' },
+        { contentHeight: 'viewport', pageChrome: 'pinned', footer: 'flow', hideTableOfContents: true },
         { contentHeight: 'content', pageChrome: 'flow', footer: 'flow' },
       ),
     ).resolves.toMatchObject({ changed: true });
@@ -25,6 +25,7 @@ describe('updatePageDocumentMetadata', () => {
           contentHeight: 'DOCUMENT_CONTENT_HEIGHT_VIEWPORT',
           pageChrome: 'DOCUMENT_REGION_PLACEMENT_PINNED',
           footer: 'DOCUMENT_REGION_PLACEMENT_FLOW',
+          hideTableOfContents: true,
         },
         observedLayout: {
           contentHeight: 'DOCUMENT_CONTENT_HEIGHT_CONTENT',

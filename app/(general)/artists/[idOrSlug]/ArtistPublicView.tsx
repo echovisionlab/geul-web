@@ -92,10 +92,22 @@ export function ArtistPublicView({
   const contentLang =
     artist.localizationInfo?.displayedLocale || artist.localizationInfo?.sourceLocale || contentLocale;
 
+  const body =
+    artist.content && artist.content.length > 0 ? (
+      <div className="prose" lang={contentLang}>
+        <DocumentHeadingScope parentLevel={1}>
+          {artist.content.map((block) => (
+            <GeneratedRichTextBlockView key={block.id} block={block} requestedLocale={contentLocale} />
+          ))}
+        </DocumentHeadingScope>
+      </div>
+    ) : null;
+
   return (
     <>
       {artistMetadata && <JsonLdScript data={buildArtistJsonLd(artistMetadata)} />}
       <EntityDetailLayout
+        body={body}
         media={
           artist.imageUrl ? (
             <EntityDetailImage
@@ -177,21 +189,6 @@ export function ArtistPublicView({
             </DsLayoutGrid>
           </EntityDetailSection>
         ) : null}
-        {artist.content && artist.content.length > 0 && (
-          <EntityDetailSection title={t('sections.biography')}>
-            <div
-              className="prose"
-              lang={artist.localizationInfo?.displayedLocale || artist.localizationInfo?.sourceLocale || contentLocale}
-            >
-              {/* The authored body sits under the level-2 section label: authored H1 → h3. */}
-              <DocumentHeadingScope parentLevel={2}>
-                {artist.content.map((block) => (
-                  <GeneratedRichTextBlockView key={block.id} block={block} requestedLocale={contentLocale} />
-                ))}
-              </DocumentHeadingScope>
-            </div>
-          </EntityDetailSection>
-        )}
         <EntityDetailSection title={tCommonEntities('releases')}>
           {artist.releases.length > 0 ? (
             <ReleaseListViewClient

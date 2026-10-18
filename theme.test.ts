@@ -47,6 +47,16 @@ describe('design token contract', () => {
     }
   });
 
+  it.each(themeIds)('%s keeps every chart series distinguishable from the surfaces charts sit on', (mode) => {
+    const roles = getThemeTokens(mode);
+    // Series marks and legend swatches are graphics: WCAG 1.4.11 asks 3:1 against adjacent colours.
+    for (const surface of ['background', 'surface'] as const) {
+      for (const series of ['chart-series-primary', 'chart-series-secondary', 'chart-series-tertiary'] as const) {
+        expect(contrast(roles[series], roles[surface]), `${mode} ${series} on ${surface}`).toBeGreaterThanOrEqual(3);
+      }
+    }
+  });
+
   it.each(themeIds)('%s keeps action labels readable while hovered and pressed', (mode) => {
     const roles = getThemeTokens(mode);
     // Unfilled hover/pressed commands use surface-hover/surface-active, covered by the surface-state test above.

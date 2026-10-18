@@ -7,7 +7,7 @@ import { isConnectError } from '@/lib/api/connect-error';
 import { timestampDate, type Timestamp } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
 import type { MemberSummary } from '@echovisionlab/geul-proto/common/common_pb.ts';
-import { createCommentClient } from '@/lib/api/server-client';
+import { createPublicPostClientWithAuth, createCommentClient } from '@/lib/api/server-client';
 import { createLogger } from '@/lib/utils/logger';
 
 const logger = createLogger('comment-actions');
@@ -40,6 +40,11 @@ export interface CommentWithAuthor {
   updatedAt: Date;
   authorName?: string;
   authorImageUrl?: string;
+}
+
+export interface CommentReadAccess {
+  shareToken?: string;
+  sharePassword?: string;
 }
 
 export interface ListCommentsResult {
@@ -114,53 +119,48 @@ function mapCommentWithAuthor(c: {
 
 export async function listCommentsAction(
   postId: string,
-  options?: { limit?: number; cursor?: string; replyLimit?: number },
+  options?: { limit?: number; cursor?: string; replyLimit?: number } & CommentReadAccess,
 ): Promise<QueryResult<ListCommentsResult>> {
   return queryResult(async () => {
-    try {
-      const client = await createCommentClient();
-      const response = await client.listCommentsByPost({
-        postId,
-        limit: options?.limit ?? 20,
-        cursor: options?.cursor,
-        replyLimit: options?.replyLimit ?? 3,
-      });
-      return {
-        comments: (response.comments ?? []).map(mapCommentNode),
-        nextCursor: response.nextCursor,
-        hasMore: response.hasMore,
-        totalCount: response.totalCount,
-      };
-    } catch (err) {
-      logger.error('Failed to list comments', { error: err });
-      throw err;
-    }
-  });
+    const client = await createPublicPostClientWithAuth();
+    const response = await client.listComments({
+      postId,
+      limit: options?.limit ?? 20,
+      cursor: options?.cursor,
+      replyLimit: options?.replyLimit ?? 3,
+      shareToken: options?.shareToken,
+      sharePassword: options?.sharePassword,
+    });
+    return {
+      comments: (response.comments ?? []).map(mapCommentNode),
+      nextCursor: response.nextCursor,
+      hasMore: response.hasMore,
+      totalCount: response.totalCount,
+    };
+  }, [options?.shareToken, options?.sharePassword]);
 }
 
 export async function loadMoreRepliesAction(
   commentId: string,
-  options?: { limit?: number; cursor?: string },
+  options: { postId: string; limit?: number; cursor?: string } & CommentReadAccess,
 ): Promise<QueryResult<LoadMoreRepliesResult>> {
   return queryResult(async () => {
-    try {
-      const client = await createCommentClient();
-      const response = await client.loadMoreReplies({
-        commentId,
-        limit: options?.limit ?? 10,
-        cursor: options?.cursor,
-      });
-      return {
-        replies: (response.replies ?? []).map(mapCommentNode),
-        nextCursor: response.nextCursor,
-        hasMore: response.hasMore,
-        totalCount: response.totalCount,
-      };
-    } catch (err) {
-      logger.error('Failed to load more replies', { error: err });
-      throw err;
-    }
-  });
+    const client = await createPublicPostClientWithAuth();
+    const response = await client.loadMoreCommentReplies({
+      postId: options.postId,
+      shareToken: options.shareToken,
+      sharePassword: options.sharePassword,
+      commentId,
+      limit: options.limit ?? 10,
+      cursor: options.cursor,
+    });
+    return {
+      replies: (response.comments ?? []).map(mapCommentNode),
+      nextCursor: response.nextCursor,
+      hasMore: response.hasMore,
+      totalCount: response.totalCount,
+    };
+  }, [options.shareToken, options.sharePassword]);
 }
 
 export async function createCommentAction(

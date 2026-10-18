@@ -1,4 +1,5 @@
 const env = {
+  PUBLIC_FONT_BASE_URL: ' https://fonts.example.test/fonts/// ',
   PUBLIC_CDN_URL: ' https://server-cdn.example.test/// ',
   PUBLIC_API_URL: ' https://server-api.example.test/ ',
   PUBLIC_P5_RUNNER_URL: ' https://server-runner.example.test/path/ ',
@@ -33,6 +34,7 @@ describe('public runtime config in the browser', () => {
     const runtime = await import('./public-runtime-config');
     expect(runtime.getPublicAuthUrl()).toBe('/api/auth');
     expect(runtime.getPublicCollabUrl()).toBe('/collab');
+    expect(runtime.getPublicFontBaseUrl()).toBe('https://static.rawsector.com/fonts');
     expect(runtime.getPublicCdnUrl()).toBe('https://cdn.example.test');
     expect(runtime.getPublicApiUrl()).toBe('https://api.example.test');
     expect(runtime.getPublicP5RunnerUrl()).toBe('https://runtime.example.run/tools/p5-runner');
@@ -74,6 +76,17 @@ describe('public runtime config in the browser', () => {
     });
     const runtime = await import('./public-runtime-config');
     expect(runtime.getPublicEditorImageMaxSizeBytes()).toBe(Number(value));
+  });
+
+  it('reads a font base independently of the existing asset CDN', async () => {
+    browserDataset({
+      geulCdnUrl: 'https://cdn.example.test',
+      geulApiUrl: 'https://api.example.test',
+      geulFontBaseUrl: ' https://static.example.test/fonts/// ',
+    });
+    const runtime = await import('./public-runtime-config');
+    expect(runtime.getPublicFontBaseUrl()).toBe('https://static.example.test/fonts');
+    expect(runtime.getPublicCdnUrl()).toBe('https://cdn.example.test');
   });
 
   it('caches the first complete projection', async () => {
@@ -119,6 +132,7 @@ describe('public runtime config during server rendering', () => {
     const runtime = await import('./public-runtime-config');
     expect(runtime.readPublicRuntimeEnvironment()).toEqual({
       cdnUrl: 'https://server-cdn.example.test',
+      fontBaseUrl: 'https://fonts.example.test/fonts',
       apiUrl: 'https://server-api.example.test',
       p5RunnerUrl: 'https://server-runner.example.test/path',
       googleMapsApiKey: 'server-maps-key',

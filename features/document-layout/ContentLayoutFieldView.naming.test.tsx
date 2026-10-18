@@ -29,7 +29,11 @@ it.each([
   await act(async () =>
     root.render(
       <TestProviders locale={locale} messages={messages}>
-        <ContentLayoutFieldView value={value} onChange={change} labels={{ ...labels, pageChrome: labels.chrome }} />
+        <ContentLayoutFieldView
+          value={value}
+          onChange={change}
+          labels={{ ...labels, pageChrome: labels.chrome, tableOfContents: 'Table of contents' }}
+        />
       </TestProviders>,
     ),
   );

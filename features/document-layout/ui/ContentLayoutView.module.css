@@ -6,11 +6,11 @@
   min-width: 0;
 }
 
-/* Document controls end at the document box: left of (LTR) the space a table of contents reserves. */
+/* Document controls stay at the frame edge independently of the outline reserve. */
 .controls {
   position: absolute;
   inset-block-start: 0;
-  inset-inline-end: var(--_table-of-contents-inset-end, 0px);
+  inset-inline-end: 0;
   z-index: 6;
 }
 

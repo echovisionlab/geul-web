@@ -13,13 +13,13 @@ import { NavigationLink as Anchor } from '@/components/core/Navigation';
 import { Alert } from '@/components/core/Alert';
 import { Button } from '@/components/core/Button';
 import { PageLoader } from '@/features/site/PageLoader';
-import { listCommentsAction, type CommentNode } from '@/lib/actions/comment';
+import { listCommentsAction, type CommentNode, type CommentReadAccess } from '@/lib/actions/comment';
 import { useSessionContext } from '@/lib/providers/SessionProvider';
 import type { SessionData } from '@/lib/session-data';
 import { CommentForm } from './CommentForm';
 import { CommentItem } from './CommentItem';
 
-interface CommentSectionProps {
+interface CommentSectionProps extends CommentReadAccess {
   listAction?: typeof listCommentsAction;
   sessionSnapshot?: SessionData | null;
   postId: string;
@@ -28,13 +28,22 @@ interface CommentSectionProps {
   canModerate?: boolean;
 }
 
-export function CommentSection({
+export function CommentSection(props: CommentSectionProps) {
+  if (!props.commentsEnabled) {
+    return null;
+  }
+  return <EnabledCommentSection {...props} />;
+}
+
+function EnabledCommentSection({
   postId,
   commentsEnabled,
   status,
   canModerate = false,
   listAction = listCommentsAction,
   sessionSnapshot,
+  shareToken,
+  sharePassword,
 }: CommentSectionProps) {
   const t = useTranslations('comments.section');
   const tCommonLabels = useTranslations('common.labels');
@@ -46,8 +55,9 @@ export function CommentSection({
   const [localComments, setLocalComments] = useState<CommentNode[]>([]);
 
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: ['comment', 'list', postId],
-    queryFn: ({ pageParam }) => listAction(postId, { cursor: pageParam }).then(unwrapQueryResult),
+    queryKey: ['comment', 'list', postId, { shareToken, sharePassword }],
+    queryFn: ({ pageParam }) =>
+      listAction(postId, { cursor: pageParam, shareToken, sharePassword }).then(unwrapQueryResult),
     getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.nextCursor : undefined),
     initialPageParam: undefined as string | undefined,
   });
@@ -121,6 +131,8 @@ export function CommentSection({
               key={comment.id}
               comment={comment}
               postId={postId}
+              shareToken={shareToken}
+              sharePassword={sharePassword}
               canReply={canComment}
               canModerate={canModerate}
             />

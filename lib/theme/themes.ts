@@ -30,6 +30,12 @@ export const themePresets = {
       'action-primary-pressed': colors.blue[900],
       focus: colors.blue[900],
       'status-warning': colors.yellow[900],
+      // Ocean keeps its blue accent where the default theme uses Braun signal orange.
+      'status-accent': colors.blue[700],
+      'action-accent': colors.blue[700],
+      'action-accent-hover': colors.blue[800],
+      'action-accent-pressed': colors.blue[900],
+      'chart-series-primary': colors.blue[700],
     },
   },
   'ocean-dark': {
@@ -45,6 +51,16 @@ export const themePresets = {
       'action-primary-hover': colors.blue[200],
       'action-primary-pressed': colors.blue[100],
       focus: colors.blue[100],
+      'status-accent': colors.blue[300],
+      'action-accent': colors.blue[300],
+      'action-accent-hover': colors.blue[200],
+      'action-accent-pressed': colors.blue[100],
+      'chart-series-primary': colors.blue[300],
+      'chart-series-tertiary': colors.graphite[200],
+      // The blue surfaces are lighter than anthracite, so muted ink and outlines step up once.
+      'text-muted': colors.graphite[100],
+      'border-strong': colors.graphite[200],
+      'action-boundary': colors.graphite[200],
     },
   },
 } as const satisfies Record<string, ThemePreset>;

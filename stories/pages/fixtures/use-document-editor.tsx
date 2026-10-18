@@ -64,7 +64,8 @@ export function useDocumentEditor(entity: Parameters<typeof localDocumentRoom>[0
   const router = useRouter(),
     tCommon = useTranslations('common'),
     tCommonLabels = useTranslations('common.labels'),
-    tLayout = useTranslations('contentLayout');
+    tLayout = useTranslations('contentLayout'),
+    tToc = useTranslations('tableOfContents');
   const connected = state !== 'disconnected',
     canEdit = state === 'ready';
   const activeEditLocale = {
@@ -101,6 +102,7 @@ export function useDocumentEditor(entity: Parameters<typeof localDocumentRoom>[0
     tCommon,
     tCommonLabels,
     tLayout,
+    tToc,
     connected,
     canEdit,
     activeEditLocale,

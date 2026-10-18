@@ -39,7 +39,7 @@ export function SiteLogoView({ src, darkSrc, alt, size = 'md', height, fallbackT
   }
 
   const imageStyle: CSSProperties = {
-    height: height === 'intrinsic' ? 'auto' : (height ?? primitiveTokens.fontSize[size]),
+    height: height === 'intrinsic' ? 'auto' : (height ?? primitiveTokens.iconSize[size]),
     maxWidth: height === 'intrinsic' ? '100%' : undefined,
     ...style,
   };

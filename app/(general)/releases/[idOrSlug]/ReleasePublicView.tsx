@@ -25,7 +25,7 @@ import {
   EntityDetailSection,
 } from '@/features/document-layout/ui/EntityDetailLayout';
 import { GeneratedRichTextBlockView } from '@/features/page/PageView/blocks/GeneratedRichTextBlockView';
-import { ReleaseCreditsList } from '@/features/release/ReleaseCreditsList';
+import { hasPublicCredits, PublicCreditList } from '@/features/credits/PublicCreditList';
 import {
   SocialLinksDisplayView,
   type SocialLinkDisplayViewModel,
@@ -40,19 +40,13 @@ import { ReleaseTrackAudioPlayer } from './ReleaseTrackAudioPlayer';
 import classes from './page.module.css';
 
 const releaseDateFallbackLabel = 'TBA';
-const releaseArtistFallbackLabel = 'Unknown';
 
-interface CreditGroup {
-  id: string;
-  name: string;
-  entries: {
-    id: string;
-    name: string;
-    href: string | null;
-    imageUrl: string | null;
-    note: string | null;
-  }[];
+/** Track position in the listing: "01", or "2-01" when the release spans several discs. */
+function formatTrackPosition(track: { trackNumber: number; discNumber: number | null }, multipleDiscs: boolean) {
+  const number = String(track.trackNumber).padStart(2, '0');
+  return multipleDiscs ? `${track.discNumber ?? 1}-${number}` : number;
 }
+const releaseArtistFallbackLabel = 'Unknown';
 
 function dedupeReleaseArtists<T extends { id: string; role?: string | null }>(artists: T[]): T[] {
   const seen = new Set<string>();
@@ -147,41 +141,54 @@ export function ReleasePublicView({
   const t = useTranslations('releasePage');
   const tCommonEntities = useTranslations('common.entities');
   const tCommonLabels = useTranslations('common.labels');
-  const tCommonStates = useTranslations('common.states');
 
   const releaseDate = formatReleaseDate(release.releaseDate, uiLocale);
   const hasLinks = streamingLinkEntries.length > 0;
   const pathname = `/releases/${release.slug || release.id}`;
   const releaseArtists = dedupeReleaseArtists(release.artists);
-  const creditGroups = release.credits.reduce<CreditGroup[]>((groups, credit) => {
-    const groupName = credit.creditRole?.trim() || tCommonEntities('credit');
-    const entry = {
-      id: credit.id,
-      name: credit.name,
-      href:
-        credit.slug || credit.artistId
-          ? `/artists/${credit.slug || credit.artistId}`
-          : credit.memberId
-            ? `/user/${credit.memberId}`
-            : null,
-      imageUrl: credit.imageUrl,
-      note: credit.note,
-    };
-    const existing = groups.find((group) => group.name === groupName);
-    if (existing) {
-      existing.entries.push(entry);
-      return groups;
-    }
-    return [...groups, { id: groupName, name: groupName, entries: [entry] }];
-  }, []);
+  const creditGroups = [
+    {
+      id: 'credits',
+      entries: release.credits.map((credit) => ({
+        id: credit.id,
+        name: credit.name,
+        role: credit.creditRole,
+        note: credit.note,
+        href:
+          credit.slug || credit.artistId
+            ? `/artists/${credit.slug || credit.artistId}`
+            : credit.memberId
+              ? `/user/${credit.memberId}`
+              : null,
+      })),
+    },
+  ];
+
+  const hasMultipleDiscs = new Set(release.tracks.map((track) => track.discNumber ?? 1)).size > 1;
 
   const contentLang =
     release.localizationInfo?.displayedLocale || release.localizationInfo?.sourceLocale || requestedLocale;
+
+  const body =
+    release.content && release.content.length > 0 ? (
+      <div className="prose" lang={contentLang}>
+        <DocumentHeadingScope parentLevel={1}>
+          {release.content.map((block) => (
+            <GeneratedRichTextBlockView key={block.id} block={block} requestedLocale={requestedLocale} />
+          ))}
+        </DocumentHeadingScope>
+      </div>
+    ) : release.descriptionText ? (
+      <DsText wrap="preserve" lang={contentLang}>
+        {release.descriptionText}
+      </DsText>
+    ) : null;
 
   return (
     <>
       {releaseMetadata && <JsonLdScript data={buildReleaseJsonLd(releaseMetadata)} />}
       <EntityDetailLayout
+        body={body}
         media={
           release.artworkUrl ? (
             <EntityDetailImage
@@ -204,6 +211,62 @@ export function ReleasePublicView({
             requestedLocale={requestedLocale}
             localizationInfo={release.localizationInfo}
           />
+        }
+        listing={
+          release.tracks.length > 0 ? (
+            <EntityDetailSection title={tCommonEntities('tracks')}>
+              <DsLayoutStack gap="none">
+                {release.tracks.map((track, index) => (
+                  <DsSectionCard
+                    key={track.id}
+                    role="group"
+                    aria-label={track.title}
+                    padding="none"
+                    appearance="plain"
+                    border={index === 0 ? 'none' : 'block-start'}
+                  >
+                    <DsLayoutInset block="sm">
+                      <DsLayoutStack gap="xs">
+                        <div className={classes.trackMeta}>
+                          <DsLayoutInline justify="between" wrap="nowrap" gap="md">
+                            <DsLayoutInline wrap="nowrap" gap="sm" align="baseline">
+                              <DsText size="sm" tone="secondary" font="mono" numeric="tabular">
+                                {formatTrackPosition(track, hasMultipleDiscs)}
+                              </DsText>
+                              <DsText size="sm" weight="medium" lines={1}>
+                                {track.title}
+                              </DsText>
+                            </DsLayoutInline>
+                            <DsText tone="secondary" size="xs">
+                              {formatDuration(track.durationMs)}
+                            </DsText>
+                          </DsLayoutInline>
+                        </div>
+                        <ReleaseTrackAudioPlayer
+                          releaseId={release.id}
+                          trackId={track.id}
+                          title={track.title}
+                          fileId={track.fileId}
+                          fileName={track.fileName}
+                          durationSeconds={track.durationMs ? Math.floor(track.durationMs / 1000) : 0}
+                          hlsUrl={track.hlsUrl}
+                          waveform={track.waveformData}
+                          spectrogramUrl={track.spectrogramUrl}
+                          downloadAvailability={track.downloadAvailability}
+                          downloadAction={track.downloadAction}
+                          downloadUrl={track.downloadUrl}
+                          downloadExpiresAt={track.downloadExpiresAt}
+                          requestedLocale={requestedLocale}
+                          shareToken={shareToken}
+                          sharePassword={sharePassword}
+                        />
+                      </DsLayoutStack>
+                    </DsLayoutInset>
+                  </DsSectionCard>
+                ))}
+              </DsLayoutStack>
+            </EntityDetailSection>
+          ) : undefined
         }
         meta={
           <PublicMetadataRows>
@@ -253,7 +316,10 @@ export function ReleasePublicView({
                   {joinInlineValues(
                     release.labels.map((label) => (
                       <PublicMetadataLink key={label.id} href={`/labels/${label.slug || label.id}`}>
-                        {label.catalogNumber ? `${label.name} (${label.catalogNumber})` : label.name}
+                        {/* A label's own number only when it differs from the release's catalog number row. */}
+                        {label.catalogNumber && label.catalogNumber !== release.catalogNumber
+                          ? `${label.name} (${label.catalogNumber})`
+                          : label.name}
                       </PublicMetadataLink>
                     )),
                   )}
@@ -312,11 +378,9 @@ export function ReleasePublicView({
                 </PublicMetadataValueGroup>
               </PublicMetadataRow>
             )}
-            {creditGroups.length > 0 && (
+            {hasPublicCredits(creditGroups) && (
               <PublicMetadataRow label={tCommonEntities('credits')}>
-                <div className={classes.detailCredits}>
-                  <ReleaseCreditsList groups={creditGroups} unknownLabel={tCommonStates('unknown')} />
-                </div>
+                <PublicCreditList groups={creditGroups} label={tCommonEntities('credits')} />
               </PublicMetadataRow>
             )}
             {hasLinks && (
@@ -326,86 +390,7 @@ export function ReleasePublicView({
             )}
           </PublicMetadataRows>
         }
-      >
-        {release.content && release.content.length > 0 ? (
-          <EntityDetailSection title={tCommonLabels('description')}>
-            <div
-              className="prose"
-              lang={
-                release.localizationInfo?.displayedLocale || release.localizationInfo?.sourceLocale || requestedLocale
-              }
-            >
-              {/* The authored body sits under the level-2 section label: authored H1 → h3. */}
-              <DocumentHeadingScope parentLevel={2}>
-                {release.content.map((block) => (
-                  <GeneratedRichTextBlockView key={block.id} block={block} requestedLocale={requestedLocale} />
-                ))}
-              </DocumentHeadingScope>
-            </div>
-          </EntityDetailSection>
-        ) : release.descriptionText ? (
-          <EntityDetailSection title={tCommonLabels('description')}>
-            <DsText
-              wrap="preserve"
-              lang={
-                release.localizationInfo?.displayedLocale || release.localizationInfo?.sourceLocale || requestedLocale
-              }
-            >
-              {release.descriptionText}
-            </DsText>
-          </EntityDetailSection>
-        ) : null}
-
-        {release.tracks.length > 0 && (
-          <EntityDetailSection title={tCommonEntities('tracks')}>
-            <DsLayoutStack gap="none">
-              {release.tracks.map((track, index) => (
-                <DsSectionCard
-                  key={track.id}
-                  role="group"
-                  aria-label={track.title}
-                  padding="none"
-                  appearance="plain"
-                  border={index === 0 ? 'none' : 'block-start'}
-                >
-                  <DsLayoutInset block="sm">
-                    <DsLayoutStack gap="xs">
-                      <div className={classes.trackMeta}>
-                        <DsLayoutInline justify="between" wrap="nowrap" gap="md">
-                          <DsText size="sm" weight="medium" lines={1}>
-                            {track.title}
-                          </DsText>
-                          <DsText tone="secondary" size="xs">
-                            {formatDuration(track.durationMs)}
-                          </DsText>
-                        </DsLayoutInline>
-                      </div>
-                      <ReleaseTrackAudioPlayer
-                        releaseId={release.id}
-                        trackId={track.id}
-                        title={track.title}
-                        fileId={track.fileId}
-                        fileName={track.fileName}
-                        durationSeconds={track.durationMs ? Math.floor(track.durationMs / 1000) : 0}
-                        hlsUrl={track.hlsUrl}
-                        waveform={track.waveformData}
-                        spectrogramUrl={track.spectrogramUrl}
-                        downloadAvailability={track.downloadAvailability}
-                        downloadAction={track.downloadAction}
-                        downloadUrl={track.downloadUrl}
-                        downloadExpiresAt={track.downloadExpiresAt}
-                        requestedLocale={requestedLocale}
-                        shareToken={shareToken}
-                        sharePassword={sharePassword}
-                      />
-                    </DsLayoutStack>
-                  </DsLayoutInset>
-                </DsSectionCard>
-              ))}
-            </DsLayoutStack>
-          </EntityDetailSection>
-        )}
-      </EntityDetailLayout>
+      />
     </>
   );
 }

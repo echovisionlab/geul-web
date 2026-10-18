@@ -45,7 +45,9 @@ describe('shared source editor presentation', () => {
       cursorSmoothCaretAnimation: 'off',
       smoothScrolling: false,
     });
-    expect(sourceEditorOptions({ density: 'compact' }).fontSize).toBe(12);
+    expect(sourceEditorOptions({ density: 'compact' }).fontSize).toBe(
+      Number.parseFloat(primitiveTokens.fontSize.xs) * 16,
+    );
   });
 
   it('retains editing behavior while rejecting presentation overrides at runtime', () => {

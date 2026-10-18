@@ -187,7 +187,11 @@
 
 .outline .link[aria-current='location'] {
   color: var(--geul-text-primary);
-  font-weight: var(--geul-font-weight-strong);
+  font-weight: var(--geul-font-weight-medium);
+  /* Weight no longer separates the current row from its ancestors: the chrome hairline does. */
+  text-decoration: underline;
+  text-decoration-thickness: var(--geul-border-thin);
+  text-underline-offset: 0.4em;
 }
 
 .link[data-scrub-target],
@@ -257,7 +261,7 @@
   position: absolute;
   inset-block-start: 0;
   inset-inline-start: 0;
-  width: 2px;
+  width: var(--geul-border-thin);
   background: var(--geul-text-primary);
   pointer-events: none;
 }

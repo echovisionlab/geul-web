@@ -4,15 +4,15 @@ This report is generated from production source by `node scripts/design-system/c
 
 ## Current measured scope
 
-- 2431 production CSS/TS/TSX files scanned under app, components, features and lib, plus the central theme.ts.
-- 214 known semantic and font tokens in shared CSS definition files.
+- 2436 production CSS/TS/TSX files scanned under app, components, features and lib, plus the central theme.ts.
+- 222 known semantic and font tokens in shared CSS definition files.
 - 0 remaining interface/runtime literal color occurrences in 0 files, excluding central definitions and the authored-color exceptions below.
 - 0 remaining authored editor palette literals in legacy variables.css. Their exact document colors belong to the shared authored palette source.
 - 20 authored editor color definitions are owned by the shared token source and generated into the same durable document roles.
 - 0 existing literal CSS spacing/typography occurrences covered by the migration baseline.
 - 0 existing custom-property declarations/inline assignments outside central files (private `--_*` implementation variables are permitted).
-- 177 literal CSS dimension occurrences in spacing, typography and geometry properties; 71 distinct values. These are audit findings, not blanket errors: canvas dimensions, geometry and responsive layouts require context.
-- 767 CSS custom-property declarations, 295 distinct names, 143 names declared more than once. Theme/state/media overrides are expected; equal values alone do not establish semantic duplication.
+- 175 literal CSS dimension occurrences in spacing, typography and geometry properties; 71 distinct values. These are audit findings, not blanket errors: canvas dimensions, geometry and responsive layouts require context.
+- 774 CSS custom-property declarations, 303 distinct names, 143 names declared more than once. Theme/state/media overrides are expected; equal values alone do not establish semantic duplication.
 - 0 findings match the reviewed migration baseline; 0 new violations; 0 obsolete baseline keys eligible for removal.
 
 ## Enforcement contract
@@ -58,11 +58,11 @@ Authored typography exceptions (artwork, not interface roles):
 | ---------- | ----------: |
 | `1px`      |          15 |
 | `1rem`     |           9 |
-| `0px`      |           8 |
 | `120px`    |           8 |
 | `3rem`     |           8 |
+| `0px`      |           7 |
 | `20rem`    |           7 |
-| `2px`      |           7 |
+| `2px`      |           6 |
 | `3.5rem`   |           6 |
 | `10rem`    |           5 |
 | `15rem`    |           5 |
@@ -228,7 +228,7 @@ Authored typography exceptions (artwork, not interface roles):
 | `--editor-background-color-blue`     |            5 | `lib/styles/design-tokens.css`                                                                         |
 | `--editor-background-color-purple`   |            5 | `lib/styles/design-tokens.css`                                                                         |
 | `--editor-background-color-pink`     |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--font-family-sans`                 |            6 | `lib/styles/font-assignment.css`                                                                       |
+| `--font-family-sans`                 |            5 | `lib/styles/font-assignment.css`                                                                       |
 
 ## Authored-color exceptions
 

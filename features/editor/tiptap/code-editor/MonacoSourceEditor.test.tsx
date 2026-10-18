@@ -236,7 +236,7 @@ describe('MonacoSourceEditor', () => {
       theme: 'geul-source-dark',
       options: {
         fontFamily: 'Fixture mono, monospace',
-        fontSize: 17.5,
+        fontSize: 13.75,
         cursorSmoothCaretAnimation: 'off',
         smoothScrolling: false,
       },

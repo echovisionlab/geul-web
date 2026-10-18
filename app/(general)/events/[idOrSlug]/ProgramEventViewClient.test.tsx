@@ -156,7 +156,7 @@ describe('ProgramEventViewClient', () => {
 
     expect(html).toContain('Gangdong University');
     expect(html).not.toContain('locationModes.');
-    expect(mocks.renderPlace).toHaveBeenCalledWith({ place, textSize: 'sm', coordinateVisibility: 'desktop' });
+    expect(mocks.renderPlace).toHaveBeenCalledWith({ place, textSize: 'sm', coordinateVisibility: 'never' });
   });
 });
 
@@ -174,7 +174,7 @@ function credit(overrides: Partial<Credit>): Credit {
 
 describe('ProgramEventViewClient credits', () => {
   it.each([null, 'https://example.com/poster.jpg'])(
-    'renders ordered Work credit items with profile avatars, roles, and notes (poster %s)',
+    'lists credits by role with their notes and profile links (poster %s)',
     (posterUrl) => {
       const container = renderCredits(
         [
@@ -189,61 +189,44 @@ describe('ProgramEventViewClient credits', () => {
             id: 'artist',
             creditRole: 'Performer',
             description: 'Live set',
-            artist: {
-              id: 'artist-1',
-              name: 'Artist name',
-              slug: 'artist-slug',
-              imageUrl: 'https://example.com/artist.jpg',
-            },
-            member: { id: 'other-member', name: 'Other member', image: 'https://example.com/other.jpg' },
+            artist: { id: 'artist-1', name: 'Artist name', slug: 'artist-slug', imageUrl: null },
+            member: { id: 'other-member', name: 'Other member', image: null },
           }),
-          credit({ id: 'plain', name: 'Guest', description: 'Guest contribution' }),
+          credit({ id: 'second-sound', name: 'Guest', creditRole: 'Sound' }),
         ],
         posterUrl,
       );
       const list = container.querySelector('[role="list"][aria-label="public.credits"]')!;
       const items = Array.from(list.querySelectorAll('[role="listitem"]'));
-      expect(items).toHaveLength(3);
-      expect(items[0]).toHaveTextContent('Display name — Sound');
-      expect(items[0]).toHaveTextContent('Recorded on location');
+      expect(items.map((item) => item.textContent)).toEqual([
+        'SoundDisplay name (Recorded on location), Guest',
+        'PerformerArtist name (Live set)',
+      ]);
       expect(items[0].querySelector('a')).toHaveAttribute('href', '/user/member-1');
-      expect(items[0].querySelector('img')).toHaveAttribute('src', 'https://example.com/member.jpg');
-      expect(items[0].querySelector('[role="img"]')).toHaveAttribute('aria-label', 'Display name');
-      expect(items[0].querySelector('img')).toHaveAttribute('alt', '');
-      expect(items[1]).toHaveTextContent('Artist name — Performer');
-      expect(items[1]).toHaveTextContent('Live set');
       expect(items[1].querySelector('a')).toHaveAttribute('href', '/artists/artist-slug');
-      expect(items[1].querySelector('img')).toHaveAttribute('src', 'https://example.com/artist.jpg');
-      expect(items[2]).toHaveTextContent('Guest');
-      expect(items[2]).toHaveTextContent('Guest contribution');
-      expect(items[2].querySelector('a')).toBeNull();
-      expect(items[2].querySelector('img')).toBeNull();
-      // Work's initial avatar is used for entries without an image.
-      expect(items[2].firstElementChild).toHaveTextContent('G');
       expect(container.textContent?.match(/public\.credits/g)).toHaveLength(1);
     },
   );
 
-  it('falls back to member or unknown names and artist ids without changing link precedence', () => {
+  it('falls back to member names, omits nameless credits and keeps artist link precedence', () => {
     const container = renderCredits([
       credit({ id: 'member', name: '', member: { id: 'member-1', name: 'Member name', image: null } }),
-      credit({ id: 'unknown' }),
+      credit({ id: 'unknown', creditRole: 'Lighting' }),
       credit({
         id: 'artist',
         artist: { id: 'artist-1', name: 'Artist name', slug: null, imageUrl: null },
-        member: { id: 'member-2', name: 'Member 2', image: 'https://example.com/member.jpg' },
+        member: { id: 'member-2', name: 'Member 2', image: null },
       }),
     ]);
-    const items = container.querySelectorAll('[role="listitem"]');
-    expect(items[0]).toHaveTextContent('Member name');
-    expect(items[1]).toHaveTextContent('unknown');
-    expect(items[1].querySelector('a')).toBeNull();
-    expect(items[2].querySelector('a')).toHaveAttribute('href', '/artists/artist-1');
-    expect(items[2].querySelector('img')).toHaveAttribute('src', 'https://example.com/member.jpg');
+    const item = container.querySelector('[role="listitem"]')!;
+    expect(container.querySelectorAll('[role="listitem"]')).toHaveLength(1);
+    expect(item).toHaveTextContent('Member name, Artist name');
+    expect(container.textContent).not.toContain('Lighting');
+    expect(item.querySelectorAll('a')[1]).toHaveAttribute('href', '/artists/artist-1');
   });
 
-  it('hides the Credits label and list when no credits exist', () => {
-    const container = renderCredits([]);
+  it('hides the Credits label and list when no credit has a public name', () => {
+    const container = renderCredits([credit({ id: 'unknown', creditRole: 'Sound' })]);
     expect(container.textContent).not.toContain('public.credits');
     expect(container.querySelector('[role="list"]')).toBeNull();
   });

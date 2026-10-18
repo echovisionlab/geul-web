@@ -12,7 +12,9 @@ vi.mock('next/navigation', () => ({
 it('names label relationship links and retains its body and section headings', async () => {
   render(<PublicCatalogEntityPreview entity="label" />);
   expect(screen.getByRole('heading', { level: 1, name: 'Quiet Records' })).toBeInTheDocument();
-  expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(3);
+  expect(screen.getByRole('heading', { level: 2, name: /^Releases/ })).toBeVisible();
+  expect(screen.getByRole('heading', { level: 2, name: /^Artists/ })).toBeVisible();
+  expect(screen.queryByRole('heading', { name: 'Description' })).not.toBeInTheDocument();
   for (const link of await screen.findAllByRole('link', { name: 'Night Signals' })) {
     expect(link).toHaveAttribute('href', '/releases/night-signals');
   }

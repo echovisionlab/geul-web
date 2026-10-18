@@ -6,6 +6,7 @@ export function toDocumentLayoutViewModel(layout: DocumentLayout): DocumentLayou
     contentHeight: layout.contentHeight,
     pageChrome: layout.pageChrome,
     footer: layout.footer,
+    ...(layout.hideTableOfContents ? { hideTableOfContents: true } : {}),
   };
 }
 
@@ -14,5 +15,6 @@ export function toDocumentLayout(viewModel: DocumentLayoutViewModel): DocumentLa
     contentHeight: viewModel.contentHeight,
     pageChrome: viewModel.pageChrome,
     footer: viewModel.footer,
+    ...(viewModel.hideTableOfContents ? { hideTableOfContents: true } : {}),
   };
 }

@@ -44,5 +44,6 @@ export function mapProtoDocumentLayout(layout: ProtoDocumentLayout | null | unde
     contentHeight: mapContentHeight(layout.contentHeight),
     pageChrome: mapRegionPlacement('pageChrome', layout.pageChrome),
     footer: mapRegionPlacement('footer', layout.footer),
+    ...(layout.hideTableOfContents ? { hideTableOfContents: true } : {}),
   };
 }

@@ -191,14 +191,22 @@
   line-height: var(--geul-line-height-document);
 }
 
-:is(.prose, .tiptap-editor) a {
-  color: var(--geul-action-primary);
+/*
+ * Links take the signal accent, visited or not. An authored text colour wins: inline colour marks sit
+ * inside the link, and a link inside a coloured block follows that block.
+ */
+:is(.prose, .tiptap-editor) :is(a, a:visited) {
+  color: var(--geul-action-accent);
   text-decoration-color: currentcolor;
   text-underline-offset: 0.125em;
 }
 
 :is(.prose, .tiptap-editor) a:hover {
-  color: var(--geul-action-primary-hover);
+  color: var(--geul-action-accent-hover);
+}
+
+:is(.prose, .tiptap-editor) [data-text-color]:not([data-text-color='default']) :is(a, a:visited, a:hover) {
+  color: inherit;
 }
 
 :is(.prose blockquote, .tiptap-editor [data-content-type='quote']) {
@@ -248,14 +256,14 @@
   .tiptap-editor [data-content-type='heading'][data-level='1']
 ) {
   font-size: var(--geul-heading-h1);
-  font-weight: var(--geul-font-weight-strong);
+  font-weight: var(--geul-heading-weight);
   line-height: var(--geul-heading-line-height);
 }
 
 /* Element fallback for HTML without the attribute; class-level specificity, so Core headings keep their role. */
 .prose :where(h1:not([data-heading-level])) {
   font-size: var(--geul-heading-h1);
-  font-weight: var(--geul-font-weight-strong);
+  font-weight: var(--geul-heading-weight);
   line-height: var(--geul-heading-line-height);
 }
 
@@ -264,13 +272,13 @@
   .tiptap-editor [data-content-type='heading'][data-level='2']
 ) {
   font-size: var(--geul-heading-h2);
-  font-weight: var(--geul-font-weight-strong);
+  font-weight: var(--geul-heading-weight);
   line-height: var(--geul-heading-line-height);
 }
 
 .prose :where(h2:not([data-heading-level])) {
   font-size: var(--geul-heading-h2);
-  font-weight: var(--geul-font-weight-strong);
+  font-weight: var(--geul-heading-weight);
   line-height: var(--geul-heading-line-height);
 }
 
@@ -279,13 +287,13 @@
   .tiptap-editor [data-content-type='heading'][data-level='3']
 ) {
   font-size: var(--geul-heading-h3);
-  font-weight: var(--geul-font-weight-strong);
+  font-weight: var(--geul-heading-weight);
   line-height: var(--geul-heading-line-height);
 }
 
 .prose :where(h3:not([data-heading-level])) {
   font-size: var(--geul-heading-h3);
-  font-weight: var(--geul-font-weight-strong);
+  font-weight: var(--geul-heading-weight);
   line-height: var(--geul-heading-line-height);
 }
 
@@ -294,13 +302,13 @@
   .tiptap-editor [data-content-type='heading'][data-level='4']
 ) {
   font-size: var(--geul-heading-h4);
-  font-weight: var(--geul-font-weight-strong);
+  font-weight: var(--geul-heading-weight);
   line-height: var(--geul-heading-line-height);
 }
 
 .prose :where(h4:not([data-heading-level])) {
   font-size: var(--geul-heading-h4);
-  font-weight: var(--geul-font-weight-strong);
+  font-weight: var(--geul-heading-weight);
   line-height: var(--geul-heading-line-height);
 }
 
@@ -309,13 +317,13 @@
   .tiptap-editor [data-content-type='heading'][data-level='5']
 ) {
   font-size: var(--geul-heading-h5);
-  font-weight: var(--geul-font-weight-strong);
+  font-weight: var(--geul-heading-weight);
   line-height: var(--geul-heading-line-height);
 }
 
 .prose :where(h5:not([data-heading-level])) {
   font-size: var(--geul-heading-h5);
-  font-weight: var(--geul-font-weight-strong);
+  font-weight: var(--geul-heading-weight);
   line-height: var(--geul-heading-line-height);
 }
 
@@ -324,13 +332,13 @@
   .tiptap-editor [data-content-type='heading'][data-level='6']
 ) {
   font-size: var(--geul-heading-h6);
-  font-weight: var(--geul-font-weight-strong);
+  font-weight: var(--geul-heading-weight);
   line-height: var(--geul-heading-line-height);
 }
 
 .prose :where(h6:not([data-heading-level])) {
   font-size: var(--geul-heading-h6);
-  font-weight: var(--geul-font-weight-strong);
+  font-weight: var(--geul-heading-weight);
   line-height: var(--geul-heading-line-height);
 }
 
@@ -444,13 +452,13 @@
 .prose .check-list-item input,
 .prose ul > li[data-checked]::before {
   box-sizing: border-box;
-  width: var(--geul-font-size-sm);
-  height: var(--geul-font-size-sm);
+  width: var(--geul-icon-size-sm);
+  height: var(--geul-icon-size-sm);
   border: 1px solid var(--geul-border-default);
   border-radius: var(--geul-radius-square);
   background-position: center;
   background-repeat: no-repeat;
-  background-size: calc(var(--geul-font-size-sm) - 2px);
+  background-size: calc(var(--geul-icon-size-sm) - 2px);
 }
 
 .tiptap-editor [data-content-type='checkListItem']::before {

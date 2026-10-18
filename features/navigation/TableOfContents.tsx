@@ -8,6 +8,7 @@ export type { TocItem };
 
 export interface TableOfContentsProps {
   items: TocItem[];
+  enabled?: boolean;
   /** The document beside which Core reserves the outline (persistent column, rail and phone scrubber). */
   children: ReactNode;
   /** `rail` keeps the compact outline at every width, beside a document that shares the page width. */
@@ -15,11 +16,11 @@ export interface TableOfContentsProps {
 }
 
 /** Supplies application copy to the Core view. */
-export function TableOfContents({ items, children, outlinePresentation }: TableOfContentsProps) {
+export function TableOfContents({ items, children, outlinePresentation, enabled = true }: TableOfContentsProps) {
   const t = useTranslations('tableOfContents');
 
   return (
-    <TableOfContentsView items={items} title={t('title')} outlinePresentation={outlinePresentation}>
+    <TableOfContentsView items={enabled ? items : []} title={t('title')} outlinePresentation={outlinePresentation}>
       {children}
     </TableOfContentsView>
   );

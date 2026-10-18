@@ -50,7 +50,7 @@ function typeRoles(state: 'base' | 'sm' | 'print') {
 }
 
 const states = ['base', 'sm', 'print'] as const;
-/** One step on the shared text scale (md 16 → lg 18). */
+/** The title's minimum step above body h1 (one 1.125 ratio). */
 const STEP = 1.125;
 
 describe('shared type scale', () => {
@@ -73,10 +73,10 @@ describe('shared type scale', () => {
   it('uses the approved screen and paper sizes', () => {
     const names = ['heading-title', 'heading-h1', 'heading-h2', 'heading-h3', 'font-size-md'];
     const sizes = (state: (typeof states)[number]) => names.map((name) => typeRoles(state)(name));
-    expect(sizes('base')).toEqual([32, 28, 24, 20, 16]);
-    expect(sizes('sm')).toEqual([40, 34, 26, 22, 16]);
-    // Paper: 22 / 18 / 15.5 / 13.5 / 10.5pt.
-    expect(sizes('print').map((value) => (value * 3) / 4)).toEqual([22, 18, 15.5, 13.5, 10.5]);
+    expect(sizes('base')).toEqual([20, 16, 15, 14, 12]);
+    expect(sizes('sm')).toEqual([24, 18, 16, 14, 12]);
+    // Paper: 15 / 12 / 11 / 10 / 9pt.
+    expect(sizes('print').map((value) => (value * 3) / 4)).toEqual([15, 12, 11, 10, 9]);
   });
 
   it('renders authored headings with the same roles in the published view and the editor', () => {
@@ -118,7 +118,7 @@ describe('shared type scale', () => {
   });
 
   it('leads running document text with one document role for every script, on screen and paper', () => {
-    expect(primitiveTokens.lineHeight.document).toBe('1.7');
+    expect(primitiveTokens.lineHeight.document).toBe('1.6');
     expect(printTokens['line-height-document']).toBe('1.6');
     const css = readFileSync(resolve(process.cwd(), 'lib/styles/document-content.css'), 'utf8');
     const lineHeights = new Map<string, string>();

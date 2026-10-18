@@ -1,12 +1,23 @@
-.root {
-  color: var(--geul-text-primary);
+/*
+ * An inline link takes the signal accent in every state, visited included; quiet links stay in ink.
+ * State selectors use :where() so an explicit tone (inverse over images, inherit) always wins.
+ */
+.root,
+.root:where(:visited) {
+  color: var(--geul-action-accent);
   font: inherit;
   text-decoration: underline;
   text-underline-offset: var(--geul-spacing-xxs);
   text-decoration-thickness: var(--geul-border-thin);
 }
 
-.root[data-appearance='quiet'] {
+.root:where(:hover, [data-hovered]) {
+  color: var(--geul-action-accent-hover);
+}
+
+.root[data-appearance='quiet'],
+.root[data-appearance='quiet']:where(:visited, :hover, [data-hovered]) {
+  color: var(--geul-text-primary);
   text-decoration: none;
 }
 
