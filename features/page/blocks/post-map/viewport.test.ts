@@ -4,12 +4,25 @@ import {
   buildFeatureSourceData,
   getCenterFromBounds,
   getClusterRadiusPxForZoom,
+  getDefaultPostMapViewport,
+  getFullWorldZoomForDimensions,
+  getResponsivePostMapViewport,
   parseViewportFromQuery,
   stripViewportSearchParams,
   writeViewportToSearchParams,
 } from './viewport';
 
 describe('post-map viewport normalization', () => {
+  it('uses full-world longitude for default world view', () => {
+    const viewport = getDefaultPostMapViewport('16:9');
+
+    expect(viewport.zoom).toBeCloseTo(getFullWorldZoomForDimensions(1280, 720), 3);
+    expect(viewport.bounds.west).toBe(-180);
+    expect(viewport.bounds.south).toBe(-85);
+    expect(viewport.bounds.east).toBe(180);
+    expect(viewport.bounds.north).toBe(85);
+  });
+
   it('normalizes wrapped world-view query bounds back to full-world longitude', () => {
     const viewport = parseViewportFromQuery(
       'section-1',
@@ -54,6 +67,20 @@ describe('post-map viewport normalization', () => {
     );
 
     expect(stripViewportSearchParams(params).toString()).toBe('foo=bar');
+  });
+
+  it('fits world-view zoom to the measured width', () => {
+    const desktopViewport = getDefaultPostMapViewport('16:9');
+    const responsiveViewport = getResponsivePostMapViewport(desktopViewport, 390, 219);
+
+    expect(desktopViewport.zoom).toBeCloseTo(getFullWorldZoomForDimensions(1280, 720), 3);
+    expect(responsiveViewport.zoom).toBeCloseTo(getFullWorldZoomForDimensions(390, 219), 3);
+    expect(responsiveViewport.bounds.west).toBe(-180);
+    expect(responsiveViewport.bounds.south).toBe(-85);
+    expect(responsiveViewport.bounds.east).toBe(180);
+    expect(responsiveViewport.bounds.north).toBe(85);
+    expect(responsiveViewport.widthPx).toBe(390);
+    expect(responsiveViewport.heightPx).toBe(219);
   });
 
   it('uses a smaller cluster radius on narrow mobile widths', () => {

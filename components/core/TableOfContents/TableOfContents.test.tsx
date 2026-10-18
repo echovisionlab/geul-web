@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 
 import { I18nProvider as DesignSystemProvider } from 'react-aria-components';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -79,6 +81,27 @@ describe('TableOfContentsView', () => {
     await flushTocSchedule();
 
     expect(container?.querySelectorAll('[data-toc-index]')).toHaveLength(4);
+  });
+
+  it('owns print omission of the outline and its reserved space instead of exposing its module class to global print CSS', () => {
+    const css = readFileSync(
+      resolve(process.cwd(), 'components/core/TableOfContents/TableOfContents.module.css'),
+      'utf8',
+    );
+    const printCss = readFileSync(resolve(process.cwd(), 'lib/styles/print.css'), 'utf8');
+    expect(css).toMatch(/@media print\s*\{\s*\.wrapper,\s*\.track\s*\{\s*display: none;/);
+    expect(css).toMatch(/@media print[\s\S]*--_table-of-contents-inset-end: 0px;/);
+    expect(printCss).not.toContain('TableOfContents_');
+  });
+
+  it('publishes the reserved inline space to a document scope and keeps coarse-pointer rows at the shared minimum', () => {
+    const css = readFileSync(
+      resolve(process.cwd(), 'components/core/TableOfContents/TableOfContents.module.css'),
+      'utf8',
+    );
+    expect(css).toContain(':global([data-table-of-contents-scope]):has(.layout[data-outline])');
+    expect(css).toMatch(/\.layout\[data-outline\] \{\s*padding-inline-end: var\(--_table-of-contents-inset-end\);/);
+    expect(css).toMatch(/\.column \.link \{[^}]*min-height: var\(--geul-interaction-minimum\);/);
   });
 
   it('puts the outline before the document in reading order and fits it below the sticky line from the start', async () => {
@@ -355,6 +378,68 @@ describe('TableOfContentsView reserved layout', () => {
     expect(container!.querySelector('#document')).not.toBeNull();
     expect(container!.querySelector('[data-outline]')).toBeNull();
     expect(container!.querySelector('[role="navigation"]')).toBeNull();
+  });
+
+  it('presents a labelled persistent column on wide screens', async () => {
+    vi.spyOn(window, 'matchMedia').mockImplementation(
+      (query: string) =>
+        ({
+          matches: query.includes('>='),
+          media: query,
+          addEventListener: vi.fn(),
+          removeEventListener: vi.fn(),
+          addListener: vi.fn(),
+          removeListener: vi.fn(),
+        }) as unknown as MediaQueryList,
+    );
+    renderToc(
+      <TableOfContentsView items={items(5)} title="Contents">
+        <p>Document</p>
+      </TableOfContentsView>,
+    );
+    await flushTocSchedule();
+    const navigation = container!.querySelector<HTMLElement>('[role="navigation"]')!;
+    expect(navigation.getAttribute('data-presentation')).toBe('column');
+    expect(navigation.hasAttribute('aria-label')).toBe(false);
+    expect(document.getElementById(navigation.getAttribute('aria-labelledby')!)?.textContent).toBe('Contents');
+    expect(navigation.querySelector('[aria-expanded]')).toBeNull();
+    expect(navigation.querySelector('ol')!.hidden).toBe(false);
+  });
+
+  it('renders a nested list and marks the parents of the current heading', async () => {
+    const nested: TocItem[] = [
+      { id: 'section-1', label: 'One', level: 2 },
+      { id: 'section-2', label: 'Two', level: 3 },
+      { id: 'section-3', label: 'Three', level: 4 },
+      { id: 'section-4', label: 'Four', level: 6 },
+      { id: 'section-5', label: 'Five', level: 2 },
+    ];
+    renderToc(
+      <>
+        {nested.map((item) => (
+          <h2 key={item.id} id={item.id}>
+            {item.label}
+          </h2>
+        ))}
+        <TableOfContentsView items={nested} title="Contents">
+          <p>Document</p>
+        </TableOfContentsView>
+      </>,
+    );
+    [-300, -200, -100, 50, 400].forEach((top, index) => {
+      vi.spyOn(document.getElementById(`section-${index + 1}`)!, 'getBoundingClientRect').mockReturnValue({
+        top,
+      } as DOMRect);
+    });
+    await flushTocSchedule();
+    const link = (index: number) => container!.querySelector<HTMLAnchorElement>(`[data-toc-index="${index}"]`)!;
+    expect(link(3).getAttribute('aria-current')).toBe('location');
+    expect([0, 1, 2].map((index) => link(index).hasAttribute('data-ancestor'))).toEqual([true, true, true]);
+    expect(link(4).hasAttribute('data-ancestor')).toBe(false);
+    expect(link(3).closest('ol')!.closest('li')!.firstElementChild).toBe(link(2));
+    // h6 under h4 nests one step deeper, and visual depth stops at the cap.
+    expect(link(3).style.getPropertyValue('--_toc-depth')).toBe('2');
+    expect(link(1).style.getPropertyValue('--_toc-depth')).toBe('1');
   });
 });
 

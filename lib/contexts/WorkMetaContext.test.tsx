@@ -330,6 +330,19 @@ describe('WorkMetaProvider', () => {
       expect.any(String),
     );
   });
+
+  it('keeps featured-image presentation ephemeral and rejects stale setters', () => {
+    renderProvider();
+    const staleSetter = latest?.setFeaturedImage;
+
+    act(() => {
+      expect(latest?.setFeaturedImage('file-1', 'https://example.com/cover.jpg')).toBe(true);
+    });
+    expect(latest?.featuredImageUrl).toBe('https://example.com/cover.jpg');
+
+    act(() => root.render(null));
+    expect(staleSetter?.('late-file', 'https://example.com/late.jpg')).toBe(false);
+  });
 });
 
 describe('client save failures', () => {

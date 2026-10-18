@@ -4,7 +4,8 @@ import { I18nProvider as DesignSystemProvider } from 'react-aria-components';
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { PasswordInput } from '.';
+import { LayoutStack as Stack } from '../Layout';
+import { PasswordInput, TagsInput, ValidatingTextInput } from '.';
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -53,5 +54,21 @@ describe('Core input wrappers', () => {
     expect(toggle.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
     expect(toggle).toHaveAttribute('aria-pressed', 'true');
     expect(toggle).toHaveFocus();
+  });
+
+  it('renders tag values and validation state without a browser story test', () => {
+    render(
+      <Stack>
+        <TagsInput label="Keywords" defaultValue={['ambient', 'installation']} />
+        <ValidatingTextInput label="Nickname" value="studio" required status="checking" readOnly />
+      </Stack>,
+    );
+    expect(document.body.textContent).toContain('ambient');
+    expect(document.body.textContent).toContain('installation');
+    const nickname = Array.from(document.querySelectorAll<HTMLInputElement>('input')).find(
+      ({ value }) => value === 'studio',
+    );
+    expect(nickname?.required).toBe(true);
+    expect(document.querySelector('[aria-busy="true"]')).not.toBeNull();
   });
 });

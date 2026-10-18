@@ -7,7 +7,9 @@ import { DateInput, DateRangeInput, DateTimePicker, MonthPickerInput, TimePicker
 import { Select } from './Select';
 import { useInputCombobox } from './useInputCombobox';
 import { ColorInput } from './ColorInput';
+import { TextInput } from './TextInput';
 import { Checkbox } from './Checkbox';
+import classes from './Input.module.css';
 let container: HTMLDivElement;
 let root: Root;
 beforeEach(() => {
@@ -234,6 +236,38 @@ describe('closed React Aria input behavior', () => {
     expect(Array.from(document.querySelectorAll('[role="option"]')).map((option) => option.textContent)).toEqual([
       'Old series',
     ]);
+  });
+  it('keeps keyboard focus and associated error available when motion is disabled', () => {
+    render(<TextInput label="Name" animate={false} error="Name required" />);
+    const input = container.querySelector<HTMLInputElement>('input')!;
+    act(() => input.focus());
+    expect(document.activeElement).toBe(input);
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(
+      input
+        .getAttribute('aria-describedby')
+        ?.split(' ')
+        .map((id) => document.getElementById(id)?.textContent)
+        .join(' '),
+    ).toContain('Name required');
+    expect(container.querySelector(`.${classes.root}`)?.getAttribute('data-geul-input-animate')).toBe('false');
+    expect(container.querySelector(`.${classes.wrapper}`)).not.toBeNull();
+  });
+  it('projects JS attributes without allowing consumer skins or reserved state overrides', () => {
+    const bypass = {
+      style: { color: 'red' },
+      className: 'replacement',
+      classNames: () => ({ input: 'replacement' }),
+      'data-geul-input-size': 'xl',
+      'data-core-input-size': 'xl',
+      'data-view': 'test',
+    };
+    render(<TextInput {...(bypass as Record<string, unknown>)} label="Name" size="sm" />);
+    expect(container.querySelector('[style]')).toBeNull();
+    expect(container.querySelector('.replacement')).toBeNull();
+    expect(container.querySelector('[data-geul-input-size]')?.getAttribute('data-geul-input-size')).toBe('sm');
+    expect(container.querySelector('[data-view="test"]')).not.toBeNull();
+    expect(container.querySelector('[data-core-input-size]')).toBeNull();
   });
   it('edits calendar days and clears uncontrolled selections through real pressables', () => {
     const onChange = vi.fn();

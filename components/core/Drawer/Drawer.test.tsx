@@ -70,6 +70,19 @@ describe('Drawer', () => {
     expect(onClose).toHaveBeenCalledOnce();
   });
 
+  it('defaults to compact density independently of width and supports standard chrome', () => {
+    const view = (density?: 'standard' | 'compact') => (
+      <Drawer opened onClose={vi.fn()} title="History" closeLabel="Close history" size="large" density={density}>
+        History entries
+      </Drawer>
+    );
+    renderDrawer(view());
+    expect(document.body.querySelector('[data-density="compact"][data-size="large"]')).not.toBeNull();
+    renderDrawer(view('standard'));
+    expect(document.body.querySelector('[data-density="standard"][data-size="large"]')).not.toBeNull();
+    expect(getDialog()).toHaveAccessibleName('History');
+  });
+
   it('locks close controls and marks the surface busy while loading', () => {
     const onClose = vi.fn();
     renderDrawer(

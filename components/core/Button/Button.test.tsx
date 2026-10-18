@@ -7,7 +7,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { IconButton } from '../IconButton';
 import { TextButton } from '../TextButton';
-import { Button } from './Button';
+import { Button, type ButtonActionProps } from './Button';
 
 let container: HTMLDivElement | null = null;
 let root: Root | null = null;
@@ -88,6 +88,12 @@ describe('Button', () => {
     expect(pending).toHaveAccessibleName(name);
     expect(container?.querySelector('[role="progressbar"]')).toHaveAccessibleName(progress);
     expect(renderButton(example(false))).toHaveAccessibleName(name);
+  });
+
+  it('defaults to a neutral secondary action', () => {
+    const button = renderButton(<Button>Save</Button>);
+    expect(button.getAttribute('data-tone')).toBe('neutral');
+    expect(button.getAttribute('data-emphasis')).toBe('medium');
   });
 
   it('runs an ordinary action once and blocks disabled actions', () => {
@@ -291,4 +297,27 @@ describe('Button', () => {
       expect(onNavigate).not.toHaveBeenCalled();
     },
   );
+
+  it('projects runtime spread props through the closed owner contract', () => {
+    const escape = {
+      style: { color: 'magenta' },
+      className: 'caller-style',
+      color: 'pink',
+      radius: 'xl',
+      'data-tone': 'danger',
+      'data-geul-theme': 'dark',
+      'data-core-owner': 'foreign',
+      'data-active': 'true',
+      'data-testid': 'native-affordance',
+    };
+    const button = renderButton(<Button {...(escape as unknown as ButtonActionProps)}>Save</Button>);
+    expect(button.hasAttribute('style')).toBe(false);
+    expect(button.classList.contains('caller-style')).toBe(false);
+    expect(button.getAttribute('data-tone')).toBe('neutral');
+    expect(button.hasAttribute('radius')).toBe(false);
+    expect(button.hasAttribute('data-geul-theme')).toBe(false);
+    expect(button.hasAttribute('data-core-owner')).toBe(false);
+    expect(button.hasAttribute('data-active')).toBe(false);
+    expect(button.getAttribute('data-testid')).toBe('native-affordance');
+  });
 });

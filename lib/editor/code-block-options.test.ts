@@ -1,7 +1,21 @@
 import { describe, expect, it } from 'vitest';
-import { resolveCodeBlockLanguage } from './code-block-options';
+import { CODE_BLOCK_AUTHORING_LANGUAGES, resolveCodeBlockLanguage } from './code-block-options';
 
 describe('code block options', () => {
+  it('limits authoring choices to the agreed searchable language set', () => {
+    expect(CODE_BLOCK_AUTHORING_LANGUAGES).toEqual([
+      'cpp',
+      'c',
+      'javascript',
+      'typescript',
+      'glsl',
+      'go',
+      'python',
+      'shellscript',
+      'html',
+    ]);
+  });
+
   it('maps durable languages to Monaco ids and model extensions with a truthful plaintext fallback', () => {
     expect(resolveCodeBlockLanguage('js')).toEqual({
       durableLanguage: 'javascript',

@@ -1,4 +1,8 @@
 import { revalidatePath } from 'next/cache';
+import { fromJson } from '@bufbuild/protobuf';
+import { ValueSchema } from '@bufbuild/protobuf/wkt';
+import { Code, ConnectError } from '@connectrpc/connect';
+import { OgEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   createAdminClient,
@@ -9,10 +13,17 @@ import {
   createSiteSettingClient,
 } from '@/lib/api/server-client';
 import {
+  addSiteLoaderAssetAction,
   deleteSiteAssetAction,
+  getLegalOgImageAction,
+  getSiteOgStatusAction,
+  regenerateAllOgImagesAction,
   regenerateLegalOgImageAction,
   regenerateSiteOgImageAction,
+  removeSiteLoaderAssetAction,
   setSiteAssetAction,
+  updateContentOgConfigAction,
+  updateHomeOgConfigAction,
   updateSiteSettingsAction,
 } from './site-setting';
 
@@ -128,6 +139,31 @@ describe('site setting asset actions', () => {
     expect(revalidatePath).toHaveBeenCalledWith('/admin/privacy');
   });
 
+  it('queues homepage OG refresh after site background upload completes', async () => {
+    setSettingMock.mockResolvedValueOnce({ success: true, ogGenerationRunId: 'site-run' });
+    await expect(setSiteAssetAction('site_og_background', 'file-1')).resolves.toEqual({
+      success: true,
+      ogGenerationRunId: 'site-run',
+    });
+
+    expect(setSettingMock).toHaveBeenCalledWith({
+      key: 'site_og_background_file_id',
+      value: { kind: { case: 'stringValue', value: 'file-1' } },
+    });
+    expect(revalidatePath).toHaveBeenCalledWith('/');
+  });
+
+  it('replaces a site asset through the owning settings mutation without consulting generic File delivery', async () => {
+    setSettingMock.mockResolvedValueOnce({ success: true, ogGenerationRunId: 'site-run' });
+
+    await expect(setSiteAssetAction('site_og_background', 'file-1')).resolves.toEqual({
+      success: true,
+      ogGenerationRunId: 'site-run',
+    });
+    expect(getSettingMock).not.toHaveBeenCalled();
+    expect(createFileClient).not.toHaveBeenCalled();
+  });
+
   it('queues all-locale terms OG refresh after terms background removal completes', async () => {
     getSettingMock.mockResolvedValue({
       setting: {
@@ -167,6 +203,46 @@ describe('site setting asset actions', () => {
     expect(createFileClient).not.toHaveBeenCalled();
   });
 
+  it('returns the automatic full-regeneration run for the full light logo', async () => {
+    setSettingMock.mockResolvedValueOnce({ success: true, ogGenerationRunId: 'logo-run' });
+    await expect(setSiteAssetAction('logo_full_light', 'file-1')).resolves.toEqual({
+      success: true,
+      ogGenerationRunId: 'logo-run',
+    });
+
+    expect(setSettingMock).toHaveBeenCalledWith({
+      key: 'logo_full_light_file_id',
+      value: { kind: { case: 'stringValue', value: 'file-1' } },
+    });
+    expect(createFileClient).not.toHaveBeenCalled();
+    expect(revalidatePath).toHaveBeenCalledWith('/', 'layout');
+  });
+
+  it('updates settings with targeted cache invalidation', async () => {
+    setManySettingsMock.mockResolvedValueOnce({ success: true, ogGenerationRunId: 'settings-run' });
+    await expect(
+      updateSiteSettingsAction({
+        site_title: 'Example Studio',
+        homepage_page_id: 'page-1',
+        meta_description: 'Description',
+      } as never),
+    ).resolves.toEqual({ success: true, ogGenerationRunId: 'settings-run' });
+    await expect(updateSiteSettingsAction({} as never)).resolves.toEqual({ success: true });
+    await expect(updateSiteSettingsAction(null as never)).resolves.toEqual({
+      error: 'Invalid settings payload',
+    });
+
+    expect(setManySettingsMock).toHaveBeenCalledWith({
+      settings: expect.arrayContaining([
+        expect.objectContaining({ key: 'site_title' }),
+        expect.objectContaining({ key: 'homepage_page_id' }),
+        expect.objectContaining({ key: 'meta_description' }),
+      ]),
+    });
+    expect(revalidatePath).toHaveBeenCalledWith('/', 'layout');
+    expect(revalidatePath).toHaveBeenCalledWith('/');
+  });
+
   it('rejects malformed settings before SetMany', async () => {
     for (const payload of [{ future_setting: 'not-writable' }, { site_title: undefined }, []]) {
       await expect(updateSiteSettingsAction(payload as never)).resolves.toEqual({
@@ -204,5 +280,97 @@ describe('site setting asset actions', () => {
       runId: 'manual-run',
       generationId: 'generation-1',
     });
+  });
+
+  it('updates and regenerates OG image configs through the admin service', async () => {
+    setSettingMock.mockResolvedValue({ success: true, ogGenerationRunId: 'config-run' });
+
+    await expect(updateHomeOgConfigAction({ title: 'Home' } as never)).resolves.toEqual({
+      success: true,
+      ogGenerationRunId: 'config-run',
+    });
+    await expect(updateContentOgConfigAction({ title: 'Content' } as never)).resolves.toEqual({
+      success: true,
+      ogGenerationRunId: 'config-run',
+    });
+    await expect(regenerateSiteOgImageAction()).resolves.toEqual({
+      success: true,
+      runId: 'manual-run',
+      generationId: 'generation-1',
+    });
+    await expect(regenerateAllOgImagesAction()).resolves.toEqual({
+      success: true,
+      runId: 'global-run',
+      generationCount: 12,
+    });
+
+    expect(setSettingMock).toHaveBeenNthCalledWith(1, {
+      key: 'og_image_config.home',
+      value: fromJson(ValueSchema, { title: 'Home' }),
+    });
+    expect(setSettingMock).toHaveBeenNthCalledWith(2, {
+      key: 'og_image_config.content',
+      value: fromJson(ValueSchema, { title: 'Content' }),
+    });
+    expect(getSettingMock).not.toHaveBeenCalled();
+    expect(regenerateOgImageMock).toHaveBeenCalledWith({
+      entityType: OgEntityType.SITE,
+      entityId: undefined,
+      selection: { target: { case: 'primary', value: {} } },
+    });
+    expect(regenerateAllOgImagesMock).toHaveBeenCalledWith({});
+  });
+
+  it('surfaces an atomic OG config section update failure without a stale pre-read', async () => {
+    setSettingMock.mockRejectedValue(new ConnectError('stored counterpart is malformed', Code.FailedPrecondition));
+
+    await expect(updateContentOgConfigAction({ title: 'Content' } as never)).resolves.toEqual({
+      error: '[failed_precondition] stored counterpart is malformed',
+    });
+    expect(getSettingMock).not.toHaveBeenCalled();
+  });
+
+  it('loads and regenerates site and legal OG image status', async () => {
+    await expect(getSiteOgStatusAction()).resolves.toEqual({
+      data: {
+        assetId: 'site-og-asset',
+        url: 'https://cdn.example.com/asset/site-og-asset/og.webp',
+      },
+    });
+    await expect(getLegalOgImageAction('privacy', 'ko')).resolves.toEqual({
+      data: {
+        assetId: 'privacy-og-asset',
+        url: 'https://cdn.example.com/asset/privacy-og-asset/og.webp',
+      },
+    });
+    await expect(getLegalOgImageAction('terms')).resolves.toEqual({
+      data: {
+        assetId: 'terms-og-asset',
+        url: 'https://cdn.example.com/asset/terms-og-asset/og.webp',
+      },
+    });
+    await expect(regenerateLegalOgImageAction('privacy')).resolves.toEqual({
+      success: true,
+      runId: 'manual-run',
+      generationId: 'generation-1',
+    });
+
+    expect(createPublicPrivacyClientWithAuth).toHaveBeenCalledWith('ko');
+    expect(createPublicTermsClientWithAuth).toHaveBeenCalledWith(null);
+    expect(regenerateOgImageMock).toHaveBeenCalledWith({
+      entityType: OgEntityType.PRIVACY,
+      entityId: undefined,
+      selection: { target: { case: 'primary', value: {} } },
+    });
+  });
+
+  it('adds and removes loader references without deleting the original file', async () => {
+    await expect(addSiteLoaderAssetAction('file-1')).resolves.toEqual({ success: true });
+    await expect(removeSiteLoaderAssetAction('file-1')).resolves.toEqual({ success: true });
+
+    expect(addSiteLoaderAssetMock).toHaveBeenCalledWith({ fileId: 'file-1' });
+    expect(removeSiteLoaderAssetMock).toHaveBeenCalledWith({ fileId: 'file-1' });
+    expect(createFileClient).not.toHaveBeenCalled();
+    expect(revalidatePath).toHaveBeenCalledWith('/', 'layout');
   });
 });

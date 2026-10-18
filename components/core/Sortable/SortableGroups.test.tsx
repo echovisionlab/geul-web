@@ -96,4 +96,12 @@ describe('SortableGroups', () => {
       { id: 'step-two', items: [{ id: 'field-email' }, { id: 'field-name' }] },
     ]);
   });
+
+  it('uses a geometric collision fallback when keyboard dragging has no pointer', () => {
+    renderSorting([{ id: 'details', items: [{ id: 'name' }] }]);
+    const collision = dnd.props!.collisionDetection!;
+    expect(collision({ pointerCoordinates: null } as Parameters<typeof collision>[0])).toEqual([
+      { id: 'keyboard-target' },
+    ]);
+  });
 });

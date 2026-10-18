@@ -2,6 +2,7 @@ import { createConnectTransport } from '@connectrpc/connect-web';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { authenticatedBrowserFetch } from '@/lib/auth/session-events';
 import { createPublicBrowserTransport } from './public-transport';
+import { createBrowserTransport } from './secure-transport';
 
 vi.mock('@connectrpc/connect-web', () => ({
   createConnectTransport: vi.fn(() => ({})),
@@ -25,6 +26,14 @@ function lastOptions() {
 }
 
 describe('browser RPC transports', () => {
+  it('keeps the authenticated session fetch on the secure transport', () => {
+    createBrowserTransport();
+    expect(lastOptions()).toMatchObject({
+      baseUrl: '/api/rpc',
+      fetch: authenticatedBrowserFetch,
+    });
+  });
+
   it('overrides locale without mutating request headers or other fetch options', async () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response());
     vi.stubGlobal('fetch', fetchMock);

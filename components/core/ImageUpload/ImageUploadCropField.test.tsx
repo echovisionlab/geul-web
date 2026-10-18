@@ -81,6 +81,15 @@ describe('ImageUploadCropField', () => {
     expect(preview?.parentElement?.style.aspectRatio).toBe(`${16 / 9} / 1`);
   });
 
+  it('keeps a supplied social-card ratio without a minimum height or letterboxing', () => {
+    renderField({ imageUrl: '/featured.webp', aspectRatio: 1200 / 630 });
+    const preview = container.querySelector<HTMLImageElement>('img');
+    expect(preview?.parentElement?.style.aspectRatio).toBe(`${1200 / 630} / 1`);
+    expect(preview?.parentElement?.style.minHeight).toBe('');
+    expect(preview?.style.objectFit).toBe('cover');
+    expect(preview?.style.position).toBe('absolute');
+  });
+
   it('renders injected copy and forwards file-selection intent', () => {
     const onFileSelect = vi.fn();
     renderField({ idPrefix: 'cover', onFileSelect });

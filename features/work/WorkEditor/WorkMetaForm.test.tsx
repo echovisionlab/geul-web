@@ -4,6 +4,8 @@ import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { STRING_LIST_SPLIT_CHARS } from './stringList';
 import { WorkMetaForm } from './WorkMetaForm';
 
 const tagsInputMock = vi.fn();
@@ -100,6 +102,32 @@ describe('WorkMetaForm', () => {
     });
     root = null;
     container.remove();
+  });
+
+  it('configures technologies input to split on commas, newlines, and spaces', async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(
+        <DesignSystemProvider forceColorScheme="light">
+          <WorkMetaForm
+            workId="work-1"
+            type="portfolio"
+            year={2026}
+            month={4}
+            untilYear={null}
+            untilMonth={null}
+            isPresent
+            metadata={{ technologies: ['React', 'Next.js'] }}
+            featured={false}
+            onChange={() => {}}
+          />
+        </DesignSystemProvider>,
+      );
+    });
+
+    const lastCall = tagsInputMock.mock.calls.at(-1)?.[0];
+    expect(lastCall?.splitChars).toEqual(STRING_LIST_SPLIT_CHARS);
+    expect(lastCall?.value).toEqual(['React', 'Next.js']);
   });
 
   it('normalizes technologies when the tags input changes', async () => {

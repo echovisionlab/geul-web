@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { act } from 'react';
+import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ImageUploadCropFieldProps, ImageUploadRejectionReason } from '@/components/core/ImageUpload';
@@ -132,4 +133,53 @@ describe('ImageUploadCropController rejection policy', () => {
       });
     },
   );
+});
+
+describe('ImageUploadCropController aspect ratio', () => {
+  it('passes named crop handles and current selection values without adding visible guidance', () => {
+    renderController();
+    const props = getRenderedCropFieldProps();
+    expect(Object.keys(props.cropAccessibility?.labels ?? {})).toHaveLength(9);
+    expect(props.cropAccessibility?.labels.cropArea).toBe('featuredImage.cropTitle');
+    expect(props.cropAccessibility?.labels.nwDragHandle).toContain('common.labels.top');
+    expect(props.cropAccessibility?.labels.nwDragHandle).toContain('common.labels.left');
+    expect(props.cropAccessibility?.describeSelection({ unit: '%', x: 10, y: 20, width: 30, height: 40 })).toContain(
+      'common.labels.width: 30%',
+    );
+    expect(props.labels.emptyDescription).toBe('');
+    expect(props.labels.constraints).toBeUndefined();
+  });
+
+  it('keeps the social-card crop without persistent size captions or help controls', () => {
+    renderController();
+    const props = getRenderedCropFieldProps();
+    expect(props.aspectRatio).toBe(1200 / 630);
+    expect(props.previewMinHeight).toBeUndefined();
+    expect(props.labels.emptyDescription).toBe('');
+    expect(props.labels.readOnlyDescription).toBe('');
+    expect(props.labels.constraints).toBeUndefined();
+    expect(props.labels.changeHint).toBeUndefined();
+  });
+
+  it.each([16 / 9, 1, 4 / 3, 9 / 16, 1.234, { min: 9 / 16, max: 1.234 }, 'free'] as const)(
+    'keeps crop geometry %j without persistent captions or constraint controls',
+    (aspectRatio) => {
+      renderController({ aspectRatio });
+      const props = getRenderedCropFieldProps();
+      expect(props.aspectRatio).toEqual(aspectRatio);
+      expect(props.labels.emptyDescription).toBe('');
+      expect(props.labels.constraints).toBeUndefined();
+      expect(props.labels.constraintsLabel).toBeUndefined();
+      expect(props.labels.changeHint).toBeUndefined();
+    },
+  );
+
+  it('filters artwork selection to its supported source formats without rejecting by original byte size', () => {
+    renderController({ uploadType: UploadType.RELEASE_ARTWORK, aspectRatio: 1 });
+    const props = getRenderedCropFieldProps();
+    expect(props.accept).toHaveProperty('image/heic');
+    expect(props.accept).toHaveProperty('image/png');
+    expect(props.accept).not.toHaveProperty('image/gif');
+    expect(props.maxSize).toBeUndefined();
+  });
 });

@@ -5,6 +5,8 @@ import { describe, expect, it } from 'vitest';
 
 import { resolveAudioViewModel } from '@/lib/media/audio-view-model';
 import { AudioMediaView } from './AudioMediaView';
+import { AttachmentMediaView } from './ui/AttachmentMediaView';
+import { ImageMediaView } from './ui/ImageMediaView';
 
 describe('media view components', () => {
   it('renders audio labels without eager download actions', () => {
@@ -57,5 +59,45 @@ describe('media view components', () => {
     expect(html).not.toContain('data-audio-player-view-panel="spectrogram"');
     expect(html).toContain('Birdsong');
     expect(html).toContain('Dawn chorus recording');
+  });
+
+  it('renders attachment metadata and caption in the shared shell', () => {
+    const html = renderToStaticMarkup(
+      <AttachmentMediaView
+        title={<span className="attachment-title">Field notes</span>}
+        meta="PDF · 2.0 KB"
+        caption="Recorded in the lower valley"
+        style={{ width: '62%', marginLeft: '0', marginRight: 'auto' }}
+        action={
+          <button type="button" data-attachment-download-action>
+            Download file
+          </button>
+        }
+      />,
+    );
+
+    expect(html).toContain('attachment-block__content');
+    expect(html).toContain('attachment-title');
+    expect(html).toContain('Field notes');
+    expect(html).toContain('PDF · 2.0 KB');
+    expect(html).toContain('media-block__caption');
+    expect(html).toContain('Recorded in the lower valley');
+    expect(html).toContain('width:62%');
+  });
+
+  it('renders image captions with the shared caption class', () => {
+    const html = renderToStaticMarkup(
+      <ImageMediaView
+        src="https://cdn.example.com/image.webp"
+        alt="Cover art"
+        caption="Shot at sunrise"
+        style={{ width: '48%', marginLeft: 'auto', marginRight: '0' }}
+      />,
+    );
+
+    expect(html).toContain('class="image-block"');
+    expect(html).toContain('media-block__caption');
+    expect(html).toContain('Shot at sunrise');
+    expect(html).toContain('width:48%');
   });
 });

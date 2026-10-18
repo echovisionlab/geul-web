@@ -150,6 +150,30 @@ describe('VersionHistoryDrawerView', () => {
     expect(props.onSelectVersion).toHaveBeenCalledWith('version-2');
   });
 
+  it('renders loading and delegates restore confirmation actions to callbacks', () => {
+    const onRestore = vi.fn();
+    const onCloseRestoreConfirmation = vi.fn();
+    renderView({
+      selectedVersionId: 'version-2',
+      restoreConfirmationOpened: true,
+      onRestore,
+      onCloseRestoreConfirmation,
+    });
+
+    const confirmation = [...document.body.querySelectorAll<HTMLElement>('[role="dialog"]')].find((dialog) =>
+      dialog.textContent?.includes('Restoring to v2 will replace the current state. Continue?'),
+    );
+    if (!confirmation) {
+      throw new Error('Expected the restore confirmation dialog.');
+    }
+
+    act(() => getButtonByText(confirmation, 'Restore').click());
+    act(() => getButtonByText(confirmation, 'Cancel').click());
+
+    expect(onRestore).toHaveBeenCalledOnce();
+    expect(onCloseRestoreConfirmation).toHaveBeenCalledOnce();
+  });
+
   it('uses the supplied loading label without exposing version rows', () => {
     renderView({ loading: true });
 

@@ -118,6 +118,32 @@ function setElementRect(element: Element, rect: Pick<DOMRect, 'width' | 'height'
 }
 
 describe('MarqueeView', () => {
+  it('applies render variants through data attributes and CSS variables', () => {
+    const html = renderToStaticMarkup(
+      <TestProviders>
+        <MarqueeView
+          items={[{ id: 'text-1', text: 'Variant item' }]}
+          options={{
+            ...baseOptions,
+            direction: 'right',
+            pauseOnHover: false,
+            logoScale: 'fill-height',
+            gap: 'sm',
+            itemHeightPx: 22,
+            speedPxPerSecond: 8,
+          }}
+        />
+      </TestProviders>,
+    );
+
+    expect(html).toContain('data-direction="right"');
+    expect(html).toContain('data-pause-on-hover="false"');
+    expect(html).toContain('data-logo-scale="fill-height"');
+    expect(html).toContain('--_marquee-gap:16px');
+    expect(html).toContain('--_marquee-item-height:22px');
+    expect(html).toContain('--_marquee-text-size:14px');
+  });
+
   it('bounds lane group repetition for sparse items without unbounded item cloning', () => {
     expect(resolveMarqueeGroupRepeatCount(1200, 120, 1)).toBe(20);
     expect(resolveMarqueeGroupRepeatCount(1200, 0, 1)).toBe(1);

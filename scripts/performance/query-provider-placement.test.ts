@@ -20,6 +20,10 @@ const rows: Row[] = analyzeRoutes({ root, packages: ['@tanstack/react-query'], e
 const read = (path: string) => readFileSync(join(root, path), 'utf8');
 
 describe('React Query provider placement', () => {
+  it('keeps the provider out of the root layout', () => {
+    expect(read('app/layout.tsx')).not.toMatch(providerImport);
+  });
+
   it('gives every route that renders React Query clients a provider in its layout chain', () => {
     const missing = rows
       .filter((row) => row.reach === 'static')

@@ -24,7 +24,12 @@ vi.mock('@/lib/api/server-client', () => ({
 vi.mock('@/lib/i18n/default-entity-name.server', () => ({ getLocalizedNewEntityName: vi.fn() }));
 vi.mock('@/lib/actions/og-generation', () => ({ regenerateOgImageAction: mocks.regenerateOgImageAction }));
 
-import { listArtistsAdminAction, getArtistAdminAction, listArtistParentOptionsAction } from './artist';
+import {
+  listArtistsAdminAction,
+  getArtistAdminAction,
+  listArtistParentOptionsAction,
+  regenerateArtistOgImageAction,
+} from './artist';
 
 describe('Artist edit target lookup', () => {
   beforeEach(() => {
@@ -90,5 +95,18 @@ describe('Artist edit target lookup', () => {
       { id: 'artist-draft', name: 'Draft' },
       { id: 'artist-public', name: 'Public' },
     ]);
+  });
+
+  it('requests the exact Artist locale OG target and returns its generation identity', async () => {
+    await expect(regenerateArtistOgImageAction('artist-1', 'fr')).resolves.toEqual({
+      success: true,
+      runId: 'run-1',
+      generationId: 'generation-1',
+    });
+    expect(mocks.regenerateOgImageAction).toHaveBeenCalledWith({
+      entityType: 'artist',
+      entityId: 'artist-1',
+      selection: { type: 'locale', locale: 'fr' },
+    });
   });
 });

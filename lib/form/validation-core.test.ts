@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest';
 import type { FormFieldSchema } from '@/lib/types/form/schema';
-import { getRequiredMessage, isEmpty, validateWithZod } from './validation-core';
+import { getRequiredMessage, hasRequired, isEmpty, validateWithZod } from './validation-core';
 import { defaultFormValidationMessages } from './validation-messages';
 
 // =============================================================================
@@ -24,11 +24,21 @@ describe('isEmpty', () => {
       expect(isEmpty('\t')).toBe(true);
       expect(isEmpty('\n')).toBe(true);
     });
+
+    it('returns false for non-empty string', () => {
+      expect(isEmpty('hello')).toBe(false);
+      expect(isEmpty('  hello  ')).toBe(false);
+    });
   });
 
   describe('arrays', () => {
     it('returns true for empty array', () => {
       expect(isEmpty([])).toBe(true);
+    });
+
+    it('returns false for non-empty array', () => {
+      expect(isEmpty([1])).toBe(false);
+      expect(isEmpty(['a', 'b'])).toBe(false);
     });
   });
 
@@ -38,6 +48,40 @@ describe('isEmpty', () => {
       expect(isEmpty(42)).toBe(false);
       expect(isEmpty(-1)).toBe(false);
     });
+  });
+});
+
+// =============================================================================
+// hasRequired Tests
+// =============================================================================
+
+describe('hasRequired', () => {
+  it('returns true when required validator is among other validators', () => {
+    const field: FormFieldSchema = {
+      id: 'field-1',
+      name: 'password',
+      type: 'text',
+      validation: {
+        validators: [
+          { id: 'v1', name: 'Min Length', predicate: 'gte', value: 8 },
+          { id: 'v2', name: 'Required', predicate: 'required' },
+          { id: 'v3', name: 'Max Length', predicate: 'lte', value: 50 },
+        ],
+      },
+    };
+    expect(hasRequired(field)).toBe(true);
+  });
+
+  it('returns false when field has no required validator', () => {
+    const field: FormFieldSchema = {
+      id: 'field-1',
+      name: 'nickname',
+      type: 'text',
+      validation: {
+        validators: [{ id: 'v1', name: 'Max Length', predicate: 'lte', value: 20 }],
+      },
+    };
+    expect(hasRequired(field)).toBe(false);
   });
 });
 

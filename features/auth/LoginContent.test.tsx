@@ -247,6 +247,31 @@ async function flush(): Promise<void> {
 }
 
 describe('LoginContent', () => {
+  it('keeps legal links distinguishable within their surrounding login prose', async () => {
+    const transport: UnifiedLoginTransport = {
+      actionUrl: vi.fn(() => '/api/auth/login?flow=flow-1'),
+      browserUrl: vi.fn(() => '/api/auth/login'),
+      load: vi.fn().mockResolvedValue({ kind: 'continued', flow: codeFlow, ok: true }),
+      submit: vi.fn(),
+    };
+    await act(async () => {
+      root?.render(
+        <NextIntlClientProvider locale="en" messages={enMessages}>
+          <DesignSystemProvider locale="en" forceTheme="ocean-dark">
+            <LoginContent transport={transport} />
+          </DesignSystemProvider>
+        </NextIntlClientProvider>,
+      );
+    });
+    await flush();
+    const terms = container?.querySelector<HTMLAnchorElement>('a[href="/terms"]');
+    const privacy = container?.querySelector<HTMLAnchorElement>('a[href="/privacy"]');
+    expect(terms?.textContent).toBe('Terms of Service');
+    expect(privacy?.textContent).toBe('Privacy Policy');
+    expect(terms?.dataset.appearance).toBe('content');
+    expect(privacy?.dataset.appearance).toBe('content');
+  });
+
   it('explains that a privileged refresh will automatically continue the security request', async () => {
     const refreshFlow = {
       ...codeFlow,

@@ -7,4 +7,8 @@ describe('ensureShareLinkMutationSucceeded', () => {
       'No permission to create share link',
     );
   });
+
+  it('keeps a successful result available to the mutation caller', () => {
+    expect(ensureShareLinkMutationSucceeded({ success: true })).toEqual({ success: true });
+  });
 });

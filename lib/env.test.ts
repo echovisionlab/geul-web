@@ -36,6 +36,13 @@ afterEach(() => {
 });
 
 describe('server environment contract', () => {
+  it('uses SESSION_COOKIE_NAME as the only internal session cookie field', async () => {
+    const { env, getSessionCookieName } = await import('./env');
+
+    expect(env.SESSION_COOKIE_NAME).toBe('__Host-test-session');
+    expect(getSessionCookieName()).toBe('__Host-test-session');
+  });
+
   it.each(['', 'session name', 'session;name', 'session/name'])(
     'rejects an invalid session cookie name: %j',
     async (value) => {

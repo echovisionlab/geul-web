@@ -35,6 +35,16 @@
   "toolingTests": ["scripts/design-system"],
   "checks": [
     {
+      "name": "core-types",
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "components/core/tsconfig.type-test.json"
+      ]
+    },
+    {
       "name": "input-styles",
       "command": ["node", "node_modules/stylelint/bin/stylelint.mjs", "components/core/Input/Input.module.css"]
     }

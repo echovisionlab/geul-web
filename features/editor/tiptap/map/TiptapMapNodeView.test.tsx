@@ -4,6 +4,7 @@ import { act, type HTMLAttributes } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import type { NodeViewProps } from '@tiptap/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { getMapInteractionOptions } from '@/features/map/utils/interaction-options';
 import type { TiptapMapSelectionMenuBinding, TiptapMapSelectionMenuRegistry } from '../menus/map-external';
 import { TiptapMapNodeView, type TiptapMapNodeOptions } from './TiptapMapNodeView';
 
@@ -285,6 +286,61 @@ describe('TiptapMapNodeView', () => {
     );
   });
 
+  it('projects stored flags to the exact MapLibre handlers and updates dragPan live', () => {
+    render({
+      mapPlaceIds: 'place-1',
+      previewWidth: '100',
+      aspectRatio: '16:9',
+      draggable: 'false',
+      zoomable: 'false',
+      rotatable: 'true',
+      tiltable: 'true',
+    });
+
+    const map = container?.querySelector<HTMLElement>('[data-map-place-count="1"]');
+    expect(map?.getAttribute('data-interactive')).toBe('true');
+    expect(map?.getAttribute('data-config-draggable')).toBe('false');
+    expect(map?.getAttribute('data-config-zoomable')).toBe('false');
+    expect(map?.getAttribute('data-config-rotatable')).toBe('true');
+    expect(map?.getAttribute('data-config-tiltable')).toBe('true');
+    expect(mapEditorSpy.props?.interactive).toBe(true);
+    expect(mapEditorSpy.props?.config).toEqual(
+      expect.objectContaining({
+        draggable: false,
+        zoomable: false,
+        rotatable: true,
+        tiltable: true,
+      }),
+    );
+    expect({
+      dragPan: mapEditorSpy.props?.config.draggable,
+      dragRotate: mapEditorSpy.props?.config.rotatable,
+      touchPitch: mapEditorSpy.props?.config.tiltable,
+      pitchWithRotate: mapEditorSpy.props?.config.tiltable,
+      ...getMapInteractionOptions(mapEditorSpy.props?.config ?? {}),
+    }).toEqual({
+      dragPan: false,
+      scrollZoom: false,
+      touchZoomRotate: false,
+      doubleClickZoom: false,
+      keyboard: true,
+      dragRotate: true,
+      touchPitch: true,
+      pitchWithRotate: true,
+    });
+
+    act(() => container?.querySelector<HTMLButtonElement>('[data-enable-map-drag]')?.click());
+    expect(updateAttributesSpy).toHaveBeenCalledWith({ draggable: 'true' });
+    expect(map?.getAttribute('data-config-draggable')).toBe('true');
+    expect(mapEditorSpy.props?.config.draggable).toBe(true);
+    expect(getMapInteractionOptions(mapEditorSpy.props?.config ?? {})).toEqual({
+      scrollZoom: false,
+      touchZoomRotate: false,
+      doubleClickZoom: false,
+      keyboard: true,
+    });
+  });
+
   it('uses the same durable interaction projection in read-only mode while hard-gating settings writes', () => {
     render(
       {
@@ -311,6 +367,36 @@ describe('TiptapMapNodeView', () => {
     expect(updateAttributesSpy).not.toHaveBeenCalled();
   });
 
+  it('passes Tiptap selection to the resize frame', () => {
+    resizeDirection = 'right';
+    render({ mapPlaceIds: 'place-1', previewWidth: '100', aspectRatio: '16:9', caption: '' }, {}, true);
+
+    expect(container?.querySelector('[data-map-frame][data-selected="true"]')).toBeTruthy();
+    expect(container?.querySelector('[data-map-frame][data-resizing="true"]')).toBeTruthy();
+  });
+
+  it('keeps the selected static map surface separate from the text-selectable caption editor', () => {
+    render({ mapPlaceIds: 'place-1', previewWidth: '100', aspectRatio: '16:9', caption: '' }, {}, true);
+
+    const staticSurface = container?.querySelector<HTMLElement>('[data-map-static-surface]');
+    const caption = container?.querySelector<HTMLButtonElement>('[data-testid="tiptap-map-caption"]');
+    expect(staticSurface).toBeTruthy();
+    expect(caption).toBeTruthy();
+    expect(caption?.hasAttribute('data-editor-media-caption')).toBe(false);
+    expect(container?.querySelector('[data-map-frame]')?.getAttribute('data-suppress-static-text-selection')).toBe(
+      'true',
+    );
+    expect(staticSurface?.querySelector('.maplibregl-ctrl-attrib')).toBeTruthy();
+    expect(staticSurface?.querySelector('[data-map-label]')).toBeTruthy();
+    expect(staticSurface?.querySelector('[data-map-settings]')).toBeTruthy();
+    expect(staticSurface?.contains(caption ?? null)).toBe(false);
+
+    act(() => caption?.click());
+    const captionInput = container?.querySelector<HTMLInputElement>('input');
+    expect(captionInput).toBeTruthy();
+    expect(staticSurface?.contains(captionInput ?? null)).toBe(false);
+  });
+
   it('hides read-only authoring controls while preserving durable map interactions', () => {
     render(
       { mapPlaceIds: 'place-1', previewWidth: '100', aspectRatio: '16:9', caption: '' },
@@ -329,6 +415,24 @@ describe('TiptapMapNodeView', () => {
     expect(dispatch).not.toHaveBeenCalled();
     expect(container?.textContent).not.toContain('clickToAddCaption');
     expect(container?.querySelector('[data-testid="tiptap-map-caption"]')).toBeNull();
+  });
+
+  it('keeps the selected read-only display caption inside static selection suppression', () => {
+    const mounted = render(
+      { mapPlaceIds: 'place-1', previewWidth: '100', aspectRatio: '16:9', caption: 'Seoul map' },
+      { allowNeutralBlockEdits: false, allowLocalizedBlockEdits: false },
+      true,
+    );
+    mounted.rerender({ allowNeutralBlockEdits: false, allowLocalizedBlockEdits: false }, false);
+
+    const caption = [...(container?.querySelectorAll<HTMLElement>('div') ?? [])].find(
+      (element) => element.textContent === 'Seoul map' && element.children.length === 0,
+    );
+    expect(caption).toBeTruthy();
+    expect(caption?.tagName).not.toBe('BUTTON');
+    expect(caption?.hasAttribute('data-editor-media-caption')).toBe(false);
+    expect(container?.querySelector('[data-content-type="map"]')?.hasAttribute('data-selected')).toBe(false);
+    expect(container?.querySelector('[data-map-frame]')?.hasAttribute('data-selected')).toBe(false);
   });
 
   it('ANDs localized and neutral permissions with the editor editable state', () => {

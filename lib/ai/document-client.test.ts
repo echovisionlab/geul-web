@@ -1,6 +1,7 @@
 import { create } from '@bufbuild/protobuf';
 import {
   AIDocumentAcceptedMutationSchema,
+  AIDocumentDomain,
   AIDocumentLocaleRole,
   AIDocumentMetadataSchema,
   AIDocumentOperationSchema,
@@ -19,6 +20,7 @@ vi.mock('@/lib/api/browser/secure-ai', () => ({
 import {
   createAIDocumentMutation,
   createAIDocumentRequestIdentity,
+  createBrowserAIDocumentClient,
   DCDP_PROTOCOL_VERSION,
   mutateAIDocumentTargetTranslation,
 } from './document-client';
@@ -49,6 +51,23 @@ beforeEach(() => {
 });
 
 describe('browser DCDP client', () => {
+  it('maps the transport-neutral target to the generated document reference', async () => {
+    const client = createBrowserAIDocumentClient();
+
+    await client.open(target);
+
+    expect(generated.openAIDocument).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          domain: AIDocumentDomain.AI_DOCUMENT_DOMAIN_POST,
+          reference: 'post-1',
+        }),
+        locale: expect.objectContaining({ code: 'en' }),
+      }),
+      undefined,
+    );
+  });
+
   it('omits a target CAS token when the server reports a missing target', () => {
     const operation = create(AIDocumentOperationSchema, {
       operation: { case: 'createTranslation', value: {} },

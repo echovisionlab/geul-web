@@ -99,4 +99,71 @@ describe('MapSelectionMenu', () => {
     act(() => finalItems.find((item) => item.textContent === 'Remove place')?.click());
     expect(onRemovePlace).toHaveBeenCalledWith('place-1');
   });
+
+  it('uses the shared toolbar navigation contract and preserves the editor selection on pointer input', async () => {
+    const onEscape = vi.fn();
+    act(() => {
+      root.render(
+        <DesignSystemProvider forceColorScheme="light">
+          <MapSelectionMenu
+            labels={labels}
+            places={[]}
+            textAlignment="left"
+            previewWidth="100"
+            editorElement={editorElement}
+            navigationEnabled
+            onAddPlace={() => undefined}
+            onChangeAlignment={() => undefined}
+            onFocusCaption={() => undefined}
+            onDelete={() => undefined}
+            onEscape={onEscape}
+          />
+        </DesignSystemProvider>,
+      );
+    });
+
+    const toolbar = container.querySelector<HTMLElement>('[role="toolbar"]');
+    const controls = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('button[data-selection-toolbar-action]:not(:disabled)'),
+    );
+    expect(toolbar?.hasAttribute('tabindex')).toBe(false);
+    expect(controls.filter((control) => control.tabIndex === 0)).toHaveLength(1);
+    expect(controls[0]?.tabIndex).toBe(0);
+
+    const tab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+    act(() => editorElement.dispatchEvent(tab));
+    expect(tab.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(controls[0]);
+
+    act(() => {
+      controls[0]?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }));
+    });
+    expect(document.activeElement).toBe(controls[1]);
+    expect(controls[0]?.tabIndex).toBe(-1);
+    expect(controls[1]?.tabIndex).toBe(0);
+
+    act(() => {
+      controls[1]?.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true }));
+    });
+    expect(document.activeElement).toBe(controls.at(-1));
+    act(() => {
+      controls.at(-1)?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true }));
+    });
+    expect(document.activeElement).toBe(controls[0]);
+    act(() => {
+      controls[0]?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }));
+    });
+    expect(document.activeElement).toBe(controls.at(-1));
+    act(() => {
+      controls.at(-1)?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+    });
+    expect(onEscape).toHaveBeenCalledOnce();
+
+    const pointerDown = new Event('pointerdown', { bubbles: true, cancelable: true });
+    const mouseDown = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+    await act(async () => {
+      expect(toolbar?.dispatchEvent(pointerDown)).toBe(false);
+      expect(toolbar?.dispatchEvent(mouseDown)).toBe(false);
+    });
+  });
 });

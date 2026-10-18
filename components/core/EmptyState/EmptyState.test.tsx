@@ -45,4 +45,8 @@ describe('Core EmptyState', () => {
     expect(root).toHaveAttribute('aria-describedby', 'context');
     expect(root.dataset.testid).toBe('state');
   });
+
+  it('rejects unsupported insets', () => {
+    expect(() => render({ inset: 'lg' as 'none' })).toThrow('Invalid empty state inset');
+  });
 });

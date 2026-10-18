@@ -2,6 +2,7 @@ import { unwrapQueryResult } from '@/lib/api/query-result';
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { Code, ConnectError } from '@connectrpc/connect';
 import { WorkType as PublicWorkType } from '@echovisionlab/geul-proto/public/work_pb.ts';
+import { OgEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { MyCreditedWorkCreditType, WorkStatus, WorkType } from '@echovisionlab/geul-proto/secure/work_pb.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { assetRefFixture } from '@/tests/helpers/asset-ref';
@@ -211,6 +212,18 @@ describe('work actions', () => {
     expect(result).not.toHaveProperty('data');
   });
 
+  it('preserves a committed Work update when cache revalidation fails', async () => {
+    workClient.updateWork.mockResolvedValue({ success: true });
+    mocks.revalidatePath.mockImplementationOnce(() => {
+      throw new Error('cache unavailable');
+    });
+
+    await expect(actions.updateWorkAction('work-1', { mapPlaceId: 'place-1' })).resolves.toEqual({
+      success: true,
+    });
+    expect(mocks.loggerWarn).toHaveBeenCalledTimes(1);
+  });
+
   it('does not report a committed Work delete as failed when cache revalidation throws', async () => {
     mocks.revalidatePath.mockImplementationOnce(() => {
       throw new Error('cache unavailable');
@@ -269,6 +282,91 @@ describe('work actions', () => {
     ).resolves.toMatchObject({
       data: [{ id: 'work-1', status: 'archived', creditType: 'artist' }],
       total: 1,
+    });
+  });
+
+  it('maps work mutations, credits, share links, and OG refreshes', async () => {
+    await expect(
+      actions.createWorkAction({
+        title: 'Work',
+        type: 'music_project',
+        year: 2026,
+        month: 1,
+        untilYear: null,
+        untilMonth: null,
+        isPresent: true,
+        summary: 'Summary',
+        metadata: { role: 'sound' },
+        featured: true,
+      }),
+    ).resolves.toEqual({ data: { id: 'work-1' } });
+    await expect(actions.updateWorkAction('work-1', { mapPlaceId: null })).resolves.toEqual({
+      success: true,
+    });
+    await expect(actions.updateWorkSlugAction('work-1', ' New Slug ')).resolves.toEqual({
+      success: true,
+      slug: ' New Slug ',
+    });
+    await expect(actions.publishWorkAction('work-1')).resolves.toEqual({ success: true });
+    await expect(actions.unpublishWorkAction('work-1')).resolves.toEqual({ success: true });
+    await expect(actions.deleteWorkAction('work-1')).resolves.toEqual({ success: true });
+    await expect(actions.setWorkFeaturedImageAction('work-1', 'file-1')).resolves.toEqual({
+      success: true,
+      imageUrl: 'https://cdn.example/work.webp',
+      ogGenerationRunId: 'featured-run',
+    });
+    await expect(actions.removeWorkFeaturedImageAction('work-1')).resolves.toEqual({
+      success: true,
+      ogGenerationRunId: 'delete-featured-run',
+    });
+    await expect(actions.getWorkGroupsWithCreditsAction('work-1')).resolves.toMatchObject({
+      groups: [{ id: 'group-1' }],
+      credits: [{ id: 'credit-1', artist: { id: 'artist-1' } }],
+    });
+    await expect(actions.addWorkCreditAction({ workId: 'work-1', name: 'Guest' })).resolves.toEqual({
+      success: true,
+      creditId: 'credit-1',
+    });
+    await expect(actions.updateWorkCreditAction('credit-1', { groupId: null })).resolves.toEqual({
+      success: true,
+    });
+    await expect(actions.removeWorkCreditAction('credit-1')).resolves.toEqual({ success: true });
+    await expect(actions.regenerateWorkOgImageAction('work-1', 'ko')).resolves.toEqual({
+      success: true,
+      runId: 'run-1',
+      generationId: 'generation-1',
+    });
+    await expect(actions.createWorkCreditGroupAction({ workId: 'work-1', name: 'Band' })).resolves.toEqual({
+      success: true,
+      group: { id: 'group-1', name: 'Band' },
+    });
+    await expect(actions.updateWorkCreditGroupAction('group-1', { name: 'Crew' })).resolves.toEqual({
+      success: true,
+    });
+    await expect(actions.deleteWorkCreditGroupAction('group-1')).resolves.toEqual({
+      success: true,
+    });
+    await expect(actions.searchArtistsForCreditAction('work-1', ' Artist ').then(unwrapQueryResult)).resolves.toEqual([
+      { id: 'artist-1', name: 'Artist', imageUrl: null },
+    ]);
+    await expect(actions.searchArtistsForCreditAction('work-1', '   ').then(unwrapQueryResult)).resolves.toEqual([]);
+    await expect(actions.listWorkShareLinksAction('work-1')).resolves.toEqual([{ id: 'share-1' }]);
+    await expect(actions.createWorkShareLinkAction({ workId: 'work-1', label: 'Preview' })).resolves.toEqual({
+      shareLink: { id: 'share-1' },
+    });
+    await expect(actions.deleteWorkShareLinkAction('share-1')).resolves.toEqual({ success: true });
+
+    expect(workClient.createWork).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Work', type: WorkType.MUSIC_PROJECT, isPresent: true }),
+    );
+    expect(workClient.updateWork).toHaveBeenCalledWith({
+      id: 'work-1',
+      mapPlaceId: '',
+    });
+    expect(mocks.regenerateOgImage).toHaveBeenCalledWith({
+      entityType: OgEntityType.WORK,
+      entityId: 'work-1',
+      selection: { target: { case: 'locale', value: 'ko' } },
     });
   });
 

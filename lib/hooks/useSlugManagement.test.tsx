@@ -499,6 +499,27 @@ describe('useSlugManagement', () => {
     expect(checkPageSlugAvailable).not.toHaveBeenCalled();
   });
 
+  it('treats an empty slug as saveable when the debounced value settles', async () => {
+    vi.useFakeTimers();
+    const onSave = vi.fn();
+
+    renderHarness(<TestHarness initialSlug="existing-slug" onSave={onSave} debounceMs={250} />);
+    await flushUpdates();
+    checkPageSlugAvailable.mockClear();
+
+    changeInput('');
+    await flushUpdates();
+
+    await act(async () => {
+      vi.advanceTimersByTime(250);
+      await Promise.resolve();
+    });
+    await flushFakeTimerUpdates();
+
+    expect(onSave).toHaveBeenCalledWith('');
+    expect(checkPageSlugAvailable).not.toHaveBeenCalled();
+  });
+
   it('normalizes each Page segment without replacing an interior slash', async () => {
     vi.useFakeTimers();
     const onSave = vi.fn();

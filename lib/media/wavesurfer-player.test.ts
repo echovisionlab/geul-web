@@ -100,4 +100,26 @@ describe('mountWaveSurferPlayer', () => {
     await Promise.resolve();
     expect(setOptionsSpy).toHaveBeenCalledTimes(callsBeforeDestroy);
   });
+
+  it('creates a waveform player from the audio url even without precomputed peaks', async () => {
+    const container = document.createElement('div');
+    const audio = document.createElement('audio');
+    document.body.appendChild(container);
+
+    const mounted = await mountWaveSurferPlayer({
+      audio,
+      container,
+      src: 'https://cdn.example.com/audio.mp3',
+    });
+
+    expect(mounted).not.toBeNull();
+    expect(createSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: 'https://cdn.example.com/audio.mp3',
+        media: audio,
+      }),
+    );
+    const lastCall = createSpy.mock.calls.at(-1) as [Record<string, unknown>] | undefined;
+    expect(lastCall?.[0]).not.toHaveProperty('peaks');
+  });
 });

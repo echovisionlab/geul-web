@@ -41,6 +41,15 @@ describe('evaluateConditionLogic', () => {
       };
       expect(evaluateConditionLogic(condition, { status: 'inactive' })).toBe(true);
     });
+
+    it('returns false when field value equals condition value', () => {
+      const condition: FormStepCondition = {
+        field: 'status',
+        operator: 'neq',
+        value: 'active',
+      };
+      expect(evaluateConditionLogic(condition, { status: 'active' })).toBe(false);
+    });
   });
 
   describe('gt operator', () => {
@@ -124,6 +133,15 @@ describe('evaluateConditionLogic', () => {
       };
       expect(evaluateConditionLogic(condition, { age: 18 })).toBe(true);
       expect(evaluateConditionLogic(condition, { age: 16 })).toBe(true);
+    });
+
+    it('returns false when field value is greater than condition value', () => {
+      const condition: FormStepCondition = {
+        field: 'age',
+        operator: 'lte',
+        value: 18,
+      };
+      expect(evaluateConditionLogic(condition, { age: 21 })).toBe(false);
     });
   });
 

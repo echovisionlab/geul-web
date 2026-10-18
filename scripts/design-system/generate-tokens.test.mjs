@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import postcss from 'postcss';
-import { primitiveTokens, semanticThemes } from '../../components/core/design-tokens.ts';
+import { authoredEditorPalettes, primitiveTokens, semanticThemes } from '../../components/core/design-tokens.ts';
 
 const repository = new URL('../../', import.meta.url);
 const css = readFileSync(new URL('lib/styles/design-tokens.css', repository), 'utf8');
@@ -10,6 +10,22 @@ const rules = [];
 postcss.parse(css).walkRules((rule) => rules.push(rule));
 const values = (rule) =>
   Object.fromEntries(rule.nodes.filter((node) => node.type === 'decl').map(({ prop, value }) => [prop, value]));
+
+test('generated authored palettes preserve durable names in explicit and system themes', () => {
+  for (const [selector, mode] of [
+    [':root', 'light'],
+    ["html:not([data-geul-theme='light'])", 'dark'],
+    ["[data-geul-theme='light']", 'light'],
+    ["[data-geul-theme='dark']", 'dark'],
+  ]) {
+    const rule = rules.find((candidate) => candidate.selector === selector);
+    assert.ok(rule, selector);
+    const declarations = values(rule);
+    for (const [name, color] of Object.entries(authoredEditorPalettes[mode])) {
+      assert.equal(declarations[`--editor-${name}`], color, `${selector}: ${name}`);
+    }
+  }
+});
 
 test('print projects the light semantic roles over explicit dark themes and custom presets', () => {
   const print = rules.find((rule) => rule.parent.type === 'atrule' && rule.parent.params === 'print');

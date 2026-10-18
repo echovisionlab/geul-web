@@ -55,6 +55,14 @@ async function render(surface: 'overview' | 'settings' | 'jobs', state: 'ready' 
   );
 }
 describe('translation page preview controllers', () => {
+  it('outlines the overview as the page title followed by its sections', async () => {
+    await render('overview');
+    await expectEventually(() => expect(host.querySelectorAll('h2')).toHaveLength(2));
+    const sections = Array.from(host.querySelectorAll('h2'));
+    expect(sections.every((heading) => heading.getAttribute('data-level') === '4')).toBe(true);
+    expect(host.querySelector('h1')?.textContent).toBe('Translations');
+    expect(createTranslationClient).not.toHaveBeenCalled();
+  });
   it('cancels an active job through the local RPC and refreshes the production table', async () => {
     await render('jobs');
     await expectEventually(() => expect(host.textContent).toContain('night-signals'));
@@ -70,6 +78,13 @@ describe('translation page preview controllers', () => {
     await expectEventually(() => expect(host.textContent).not.toContain('night-signals'));
     expect(host.querySelector('[role="status"]')?.textContent).toBe('No translation jobs yet.');
     expect((document.activeElement as HTMLButtonElement).textContent).toContain('Refresh');
+    expect(createTranslationClient).not.toHaveBeenCalled();
+  });
+  it('projects failed local reads onto the production settings error branch', async () => {
+    await render('settings', 'error');
+    await expectEventually(() => expect(host.querySelector('[role="alert"]')?.textContent).toMatch(/failed|unable/i));
+    expect(host.querySelector('input')).toBeNull();
+    expect(host.querySelector('[role="alert"]')?.textContent).toMatch(/failed|unable/i);
     expect(createTranslationClient).not.toHaveBeenCalled();
   });
 });

@@ -7,6 +7,7 @@ import {
 } from '@echovisionlab/geul-proto/secure/translation_pb.ts';
 import {
   ACTIVE_TRANSLATION_JOB_REFETCH_INTERVAL_MS,
+  filterActiveTranslationJobs,
   shouldRefreshTranslationEntries,
   translationJobsRefetchInterval,
   translationOverviewRefetchInterval,
@@ -29,6 +30,15 @@ describe('translation job polling', () => {
       translationJobsRefetchInterval([createJob('running', TranslationJobStatus.RUNNING)], new Error('unavailable')),
     ).toBe(false);
     expect(translationJobsRefetchInterval(undefined, new Error('unavailable'))).toBe(false);
+  });
+
+  it('keeps only active rows at the client query boundary', () => {
+    expect(
+      filterActiveTranslationJobs([
+        createJob('queued', TranslationJobStatus.QUEUED),
+        createJob('running', TranslationJobStatus.RUNNING),
+      ]).map((job) => job.id),
+    ).toEqual(['queued', 'running']);
   });
 
   it('polls the overview only while jobs are active', () => {

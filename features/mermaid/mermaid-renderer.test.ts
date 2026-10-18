@@ -90,6 +90,40 @@ describe('Mermaid rendering boundary', () => {
 });
 
 describe('Mermaid site-owned theme defaults', () => {
+  it.each(['light', 'dark'] as const)('uses canonical %s colors even without a DOM appearance', async (theme) => {
+    const { semanticThemes } = await import('@/components/core/design-tokens');
+    const { renderMermaid } = await import('./mermaid-renderer');
+    await renderMermaid('flowchart LR\n A --> B', theme, new AbortController().signal);
+    const colors = semanticThemes[theme];
+    expect(engine.initialize).toHaveBeenCalledWith(
+      expect.objectContaining({
+        theme: 'base',
+        themeVariables: expect.objectContaining({
+          darkMode: theme === 'dark',
+          actorBkg: colors.surface,
+          attributeBackgroundColorEven: colors['surface-muted'],
+          stateBkg: colors.surface,
+          critBorderColor: colors['status-danger'],
+          activeTaskBorderColor: colors['status-accent'],
+          doneTaskBorderColor: colors['status-positive'],
+          pie1: colors.surface,
+          pieSectionTextColor: colors['text-primary'],
+          cScale11: colors['surface-muted'],
+          git7: colors['chart-series-secondary'],
+          xyChart: expect.objectContaining({
+            plotColorPalette: [
+              colors['chart-series-primary'],
+              colors['chart-series-secondary'],
+              colors['chart-series-tertiary'],
+            ].join(','),
+          }),
+        }),
+      }),
+    );
+    const source = engine.render.mock.calls[0][1];
+    expect(source).toBe('flowchart LR\n A --> B');
+  });
+
   it('preserves explicit authored diagram styles and locks only global presentation configuration', async () => {
     const { renderMermaid } = await import('./mermaid-renderer');
     const source = 'flowchart LR\n A --> B\n classDef authored fill:#336699,color:#fff\n class A authored';

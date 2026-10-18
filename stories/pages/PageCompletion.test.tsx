@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestProviders } from '@/test/TestProviders';
 import { navigatePreview } from '../shared/preview-navigation';
 import { MailAdaptersPreview } from './MailAdapters.stories';
+import { CampaignAnalyticsPreview } from './CampaignAnalytics.stories';
 import { OgImageSettingsPreview } from './OgImageSettings.stories';
 import { waitInAct } from '@/test/act-wait';
 
@@ -62,5 +63,23 @@ describe('complete production page preview controllers', () => {
     await waitInAct(() => expect(host.querySelector('[role=alert]')).not.toBeNull());
     expect(host.textContent).not.toContain('No adapters configured');
     expect(host.querySelector('[role=switch]')).toBeNull();
+  });
+  it('persists an adapter switch update after the real query invalidation/refetch', async () => {
+    await render(<MailAdaptersPreview />);
+    await waitInAct(() => expect(host.querySelector('input[role=switch]')).not.toBeNull());
+    const control = host.querySelector<HTMLInputElement>('input[role=switch]')!;
+    expect(control.checked).toBe(true);
+    await act(async () => control.click());
+    await waitInAct(() => expect(host.querySelector<HTMLInputElement>('input[role=switch]')!.checked).toBe(false));
+    expect(host.textContent).toContain('Local logging');
+  });
+  it('loads the next recipient page through the actual analytics pagination', async () => {
+    await render(<CampaignAnalyticsPreview />);
+    await waitInAct(() => expect(host.textContent).toContain('listener-1@example.com'));
+    const next = host.querySelector<HTMLButtonElement>('button[aria-label="Next page"]')!;
+    expect(next).not.toBeNull();
+    await act(async () => next.click());
+    await waitInAct(() => expect(host.textContent).toContain('listener-51@example.com'));
+    expect(host.textContent).not.toContain('listener-1@example.com');
   });
 });

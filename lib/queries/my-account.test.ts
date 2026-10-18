@@ -20,6 +20,19 @@ describe('my account projections', () => {
     });
   });
 
+  it('returns the canonical MemberProfile instead of inventing another detail shape', async () => {
+    const profile = {
+      summary: { id: 'member-1', nickname: 'Member', deleted: false },
+      bio: 'Biography',
+      website: 'https://example.test',
+      socialLinks: { instagram: 'https://instagram.com/member' },
+    };
+    mocks.getMyProfile.mockResolvedValue({ member: profile });
+
+    await expect(getMyProfile()).resolves.toBe(profile);
+    expect(mocks.getMyProfile).toHaveBeenCalledWith({});
+  });
+
   it('rejects an incomplete profile projection', async () => {
     mocks.getMyProfile.mockResolvedValue({
       member: { summary: { id: 'member-1', nickname: '', deleted: false } },

@@ -139,6 +139,18 @@ describe('PostViewPage', () => {
     expect(mocks.renderPostEditRoute).not.toHaveBeenCalled();
   });
 
+  it.each(['published', 'draft', 'archived'])(
+    'passes an accessible %s post into the pending-render boundary',
+    async (status) => {
+      mocks.getPostView.mockResolvedValue({ id: 'post-1', status });
+
+      const html = renderToStaticMarkup(await renderPage());
+
+      expect(html).toContain('public:post-1');
+      expect(mocks.notFound).not.toHaveBeenCalled();
+    },
+  );
+
   it('falls back to the nested Page route for an invalid share token', async () => {
     mocks.getPostViewWithToken.mockResolvedValue(null);
 

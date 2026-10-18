@@ -97,6 +97,14 @@ describe('upload-pipeline', () => {
       }
     });
 
+    it('accepts AIFF files via filename fallback when file.type is empty', () => {
+      const result = validateUploadFile(makeFile('track.aif', '', 1024), UploadType.TRACK_AUDIO);
+      expect(result.valid).toBe(true);
+      if (result.valid) {
+        expect(result.mimeType).toBe('audio/aiff');
+      }
+    });
+
     it('accepts GLB mesh files via filename fallback when file.type is empty', () => {
       const result = validateUploadFile(makeFile('scene.glb', '', 1024), UploadType.EDITOR_MESH);
       expect(result.valid).toBe(true);
@@ -134,11 +142,27 @@ describe('upload-pipeline', () => {
       }
     });
 
+    it('accepts large editor audio files up to 4GB', () => {
+      const result = validateUploadFile(makeFile('ambient.wav', 'audio/wav', 370_200_000), UploadType.EDITOR_AUDIO);
+      expect(result.valid).toBe(true);
+      if (result.valid) {
+        expect(result.mimeType).toBe('audio/wav');
+      }
+    });
+
     it('accepts favicon ico uploads via MIME alias canonicalization', () => {
       const result = validateUploadFile(
         makeFile('favicon.ico', 'image/vnd.microsoft.icon', 1024),
         UploadType.SITE_FAVICON,
       );
+      expect(result.valid).toBe(true);
+      if (result.valid) {
+        expect(result.mimeType).toBe('image/x-icon');
+      }
+    });
+
+    it('accepts favicon ico uploads via filename fallback when file.type is empty', () => {
+      const result = validateUploadFile(makeFile('favicon.ico', '', 1024), UploadType.SITE_FAVICON);
       expect(result.valid).toBe(true);
       if (result.valid) {
         expect(result.mimeType).toBe('image/x-icon');

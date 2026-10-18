@@ -9,6 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { IconButton, type IconButtonActionProps } from './IconButton';
 import { DropdownMenu } from '../DropdownMenu';
 import classes from '../Control.module.css';
+import { ActionRowSizeProvider, ToolbarDensityProvider } from '../control-context';
 import { ReorderRow } from '../Sortable';
 
 let container: HTMLDivElement | null = null;
@@ -56,6 +57,19 @@ function renderIconButton(node: React.ReactNode): HTMLButtonElement {
 }
 
 describe('IconButton', () => {
+  it('keeps sensor geometry compact across parent sizes and unsafe runtime spreads', () => {
+    const unsafe = { size: 'touch' } as unknown as { size?: never };
+    const button = renderIconButton(
+      <ActionRowSizeProvider size="md">
+        <ToolbarDensityProvider density="comfortable">
+          <IconButton {...unsafe} interaction="drag-handle" label="Move">
+            M
+          </IconButton>
+        </ToolbarDensityProvider>
+      </ActionRowSizeProvider>,
+    );
+    expect(button.getAttribute('data-control-size')).toBe('compact');
+  });
   it('uses the actual native reorder row as the drag image and preserves consumer callbacks', () => {
     const onDragStart = vi.fn();
     const button = renderIconButton(
@@ -238,6 +252,14 @@ describe('IconButton', () => {
       expect(onClick).toHaveBeenCalledOnce();
     },
   );
+
+  it('uses low-emphasis neutral treatment by default', () => {
+    const button = renderIconButton(<IconButton label="Edit">E</IconButton>);
+
+    expect(button.getAttribute('data-control-kind')).toBe('icon');
+    expect(button.getAttribute('data-tone')).toBe('neutral');
+    expect(button.getAttribute('data-emphasis')).toBe('low');
+  });
 
   it.each([
     {},

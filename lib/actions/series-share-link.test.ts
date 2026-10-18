@@ -1,5 +1,6 @@
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import { Code, ConnectError } from '@connectrpc/connect';
+import { OgEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { ShareLinkEntityType } from '@echovisionlab/geul-proto/secure/share_link_pb.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { assetRefFixture } from '@/tests/helpers/asset-ref';
@@ -88,6 +89,65 @@ describe('series and share-link actions', () => {
     shareLinkClient.deleteShareLink.mockResolvedValue({ success: true });
   });
 
+  it('maps series CRUD, members, post ordering, image, and OG actions', async () => {
+    await expect(
+      series.createSeriesAction({
+        title: 'Series',
+        description: 'Description',
+      }),
+    ).resolves.toEqual({ data: { id: 'series-1' } });
+    await expect(
+      series.updateSeriesAction('series-1', {
+        title: 'Updated',
+        slug: 'series',
+        description: null,
+        status: 'draft',
+      }),
+    ).resolves.toEqual({ success: true });
+    await expect(series.addSeriesManagerAction('series-1', 'user-1')).resolves.toEqual({
+      success: true,
+    });
+    await expect(series.removeSeriesManagerAction('series-1', 'user-1')).resolves.toEqual({
+      success: true,
+    });
+    await expect(series.assignPostToSeriesAction('series-1', 'post-1')).resolves.toEqual({
+      success: true,
+    });
+    await expect(series.unassignPostFromSeriesAction('series-1', 'post-1')).resolves.toEqual({
+      success: true,
+    });
+    await expect(series.reorderSeriesPostsAction('series-1', ['post-2', 'post-1'])).resolves.toEqual({
+      success: true,
+    });
+    await expect(series.setSeriesFeaturedImageAction('series-1', 'file-1')).resolves.toEqual({
+      imageUrl: 'https://cdn.example/series.webp',
+      ogGenerationRunId: 'featured-run',
+    });
+    await expect(series.removeSeriesFeaturedImageAction('series-1')).resolves.toEqual({
+      success: true,
+      ogGenerationRunId: 'delete-featured-run',
+    });
+    await expect(series.regenerateSeriesOgImageAction('series-1', 'ko')).resolves.toEqual({
+      success: true,
+      runId: 'run-1',
+      generationId: 'generation-1',
+    });
+    await expect(series.deleteSeriesAction('series-1')).resolves.toEqual({ success: true });
+
+    expect(seriesClient.updateSeries).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'series-1', description: undefined }),
+    );
+    expect(adminClient.regenerateOgImage).toHaveBeenCalledWith({
+      entityType: OgEntityType.SERIES,
+      entityId: 'series-1',
+      selection: { target: { case: 'locale', value: 'ko' } },
+    });
+    expect(seriesClient.createSeries).toHaveBeenCalledWith({
+      title: 'Series',
+      description: 'Description',
+    });
+  });
+
   it('maps post and target Series authority failures without exposing server messages', async () => {
     seriesClient.assignPostToSeries.mockRejectedValueOnce(
       new ConnectError('raw post permission detail', Code.PermissionDenied),
@@ -106,6 +166,54 @@ describe('series and share-link actions', () => {
     await expect(series.reorderSeriesPostsAction('series-1', ['post-1'])).resolves.toEqual({
       error: 'failed',
     });
+  });
+
+  it('preserves featured-image OG run identities after a revalidation failure', async () => {
+    mocks.revalidatePath
+      .mockImplementationOnce(() => {
+        throw new Error('cache unavailable');
+      })
+      .mockImplementationOnce(() => undefined)
+      .mockImplementationOnce(() => {
+        throw new Error('cache unavailable');
+      });
+
+    await expect(series.setSeriesFeaturedImageAction('series-1', 'file-1')).resolves.toEqual({
+      imageUrl: 'https://cdn.example/series.webp',
+      ogGenerationRunId: 'featured-run',
+    });
+    await expect(series.removeSeriesFeaturedImageAction('series-1')).resolves.toEqual({
+      success: true,
+      ogGenerationRunId: 'delete-featured-run',
+    });
+    expect(mocks.loggerWarn).toHaveBeenCalledTimes(2);
+  });
+
+  it('preserves a committed Series title update after revalidation failures', async () => {
+    mocks.revalidatePath
+      .mockImplementationOnce(() => {
+        throw new Error('cache unavailable');
+      })
+      .mockImplementationOnce(() => {
+        throw new Error('cache unavailable');
+      })
+      .mockImplementationOnce(() => {
+        throw new Error('cache unavailable');
+      })
+      .mockImplementationOnce(() => {
+        throw new Error('cache unavailable');
+      });
+
+    await expect(series.updateSeriesAction('series-1', { title: 'Committed' })).resolves.toEqual({
+      success: true,
+    });
+    expect(seriesClient.updateSeries).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'series-1',
+        title: 'Committed',
+      }),
+    );
+    expect(mocks.loggerWarn).toHaveBeenCalledTimes(4);
   });
 
   it('does not report a committed Series delete as failed when revalidation throws', async () => {

@@ -5,13 +5,36 @@ import { act, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ExecutableBlockTitle, ExecutableRuntimeControls } from './ExecutableRuntimeControls';
+import { ExecutableBlockTitle, ExecutableRuntimeControls, ExecutableRuntimeStatus } from './ExecutableRuntimeControls';
 
 afterEach(() => {
   document.body.replaceChildren();
 });
 
 describe('ExecutableRuntimeControls', () => {
+  it('uses one explicit runtime status style independent of prose inheritance', () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    const root = createRoot(host);
+
+    act(() => {
+      root.render(
+        <DesignSystemProvider forceColorScheme="light">
+          <ExecutableRuntimeStatus status="running" running="Running" stopped="Stopped" />
+        </DesignSystemProvider>,
+      );
+    });
+
+    const status = host.querySelector<HTMLElement>('[data-executable-runtime-status]');
+    expect(status?.tagName).toBe('SPAN');
+    expect(status?.textContent).toBe('Running');
+    expect(status?.dataset.placement).toBe('overlay-start');
+    expect(status?.getAttribute('aria-live')).toBe('polite');
+    expect(status?.style.padding).toBe('');
+
+    act(() => root.unmount());
+  });
+
   it('can clear and replace an authored title without persisting fallback copy', () => {
     function Titles() {
       const [title, setTitle] = useState('Original scene');

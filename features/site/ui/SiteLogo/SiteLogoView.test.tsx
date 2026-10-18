@@ -4,7 +4,7 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DesignSystemTestProvider } from '@/test/TestProviders';
-import { SiteLogoView } from './SiteLogoView';
+import { SiteLogoView, type SiteLogoSize } from './SiteLogoView';
 
 let host: HTMLDivElement;
 let root: Root;
@@ -22,6 +22,18 @@ function render(content: React.ReactNode) {
 }
 
 describe('SiteLogoView fallback', () => {
+  it.each<SiteLogoSize>(['xs', 'sm', 'md', 'lg', 'xl'])(
+    'uses the existing %s typography role for the site title',
+    (size) => {
+      render(<SiteLogoView src={null} alt="Site logo" fallbackText="Example Studio" size={size} />);
+      const wordmark = host.querySelector('[data-core-typography="text"]');
+      expect(wordmark?.textContent).toBe('Example Studio');
+      expect(wordmark).toHaveAttribute('data-size', size);
+      expect(wordmark).toHaveAttribute('data-weight', 'medium');
+      expect(host.querySelector('img')).toBeNull();
+    },
+  );
+
   it('uses LOGO when site identity is absent and does not display the image alt description as identity', () => {
     render(<SiteLogoView src={null} alt="Site logo" fallbackText={null} size="xl" />);
     expect(host.textContent).toBe('LOGO');

@@ -128,4 +128,13 @@ describe('Audience lifecycle actions', () => {
     expect(revalidatePath).toHaveBeenCalledWith('/admin/audience-segments');
     expect(revalidatePath).toHaveBeenCalledWith('/admin/campaigns');
   });
+
+  it('preserves a committed archive when cache invalidation fails', async () => {
+    archiveSegment.mockResolvedValue({});
+    vi.mocked(revalidatePath).mockImplementation(() => {
+      throw new Error('cache unavailable');
+    });
+
+    await expect(archiveSegmentAction('audience-1')).resolves.toEqual({ success: true });
+  });
 });

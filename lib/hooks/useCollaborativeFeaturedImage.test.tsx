@@ -134,6 +134,27 @@ describe('useCollaborativeFeaturedImage', () => {
     expect(latest?.featuredImageUrl).toBe('https://example.com/manage-cover.jpg');
   });
 
+  it('keeps the current URL and logs when hydration fails', async () => {
+    getMediaDeliveryMock.mockRejectedValue(new Error('delivery unavailable'));
+
+    act(() => {
+      root.render(
+        <Harness entityKey="post:post-1" fileId="file-a" initialUrl="https://example.com/manage-cover.jpg" enabled />,
+      );
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1_250);
+    });
+
+    expect(latest?.featuredImageUrl).toBeNull();
+    expect(getMediaDeliveryMock).toHaveBeenCalledTimes(3);
+    expect(loggerWarnMock).toHaveBeenCalledWith('Failed to hydrate collaborative featured image', {
+      entityKey: 'post:post-1',
+      fileId: 'file-a',
+      error: 'delivery unavailable',
+    });
+  });
+
   it('does not let an in-flight remote response replace a locally hydrated image', async () => {
     const remote = deferred<ReturnType<typeof delivery>>();
     getMediaDeliveryMock.mockReturnValue(remote.promise);

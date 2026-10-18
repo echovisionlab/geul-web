@@ -3,6 +3,7 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
+import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -139,5 +140,31 @@ describe('useUpload Blob filename contract', () => {
       entityId: 'release-1',
       slotId: 'master-audio',
     });
+  });
+});
+
+describe('useUpload URL import contract', () => {
+  it('forwards entity type and exact retry options unchanged', async () => {
+    const options = {
+      resumeSession: { fileId: 'file-1', uploadId: 'multipart-1' },
+      onMultipartSession: vi.fn(),
+      surfaceSlotId: 'poster-surface',
+      attemptId: 'attempt-1',
+    };
+    await act(async () => {
+      await current?.downloadFromUrl(
+        'event-1',
+        'https://source.example/poster.webp',
+        TranscodeEntityType.PAGE,
+        options,
+      );
+    });
+    expect(mocks.downloadFromUrl).toHaveBeenCalledWith(
+      UploadType.PROGRAM_EVENT_POSTER,
+      'event-1',
+      'https://source.example/poster.webp',
+      TranscodeEntityType.PAGE,
+      options,
+    );
   });
 });

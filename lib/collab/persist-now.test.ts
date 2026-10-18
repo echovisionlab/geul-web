@@ -54,6 +54,12 @@ function providerFixture() {
 afterEach(() => vi.useRealTimers());
 
 describe('persistCollaborativeDocumentNow', () => {
+  it.each([null, undefined])('fails when the collaboration provider is %s', async (provider) => {
+    await expect(persistCollaborativeDocumentNow(provider)).rejects.toThrow(
+      'collaborative document provider is unavailable',
+    );
+  });
+
   it('waits for synchronization and the matching durable persistence acknowledgement', async () => {
     const { provider, emit, ack, persist, listeners } = providerFixture();
     const completed = vi.fn();

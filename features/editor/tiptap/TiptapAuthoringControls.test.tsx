@@ -147,6 +147,39 @@ async function flushMenuUpdate() {
 }
 
 describe('Tiptap authoring controls', () => {
+  it('keeps promised but unbound capabilities visible as explicit unavailable items', () => {
+    const unavailableItems = createTiptapSlashItems(enEditorMessages, {
+      ai: true,
+      externalVideo: true,
+      map: true,
+      table: true,
+    });
+    for (const key of ['ai', 'external-video', 'map']) {
+      expect(unavailableItems.find((item) => item.key === key)).toMatchObject({
+        enabled: false,
+        unavailableReason: expect.any(String),
+      });
+    }
+    expect(unavailableItems.find((item) => item.key === 'table')).toMatchObject({ enabled: true });
+
+    const boundItems = createTiptapSlashItems(
+      enEditorMessages,
+      { ai: true, externalVideo: true, map: true, table: true },
+      {
+        onAIAssistantActivate: vi.fn(),
+        onExternalVideoActivate: vi.fn(),
+        onMapActivate: vi.fn(),
+        onTableActivate: vi.fn(),
+      },
+    );
+    for (const key of ['ai', 'external-video', 'map', 'table']) {
+      expect(boundItems.find((item) => item.key === key)).toMatchObject({
+        enabled: true,
+        unavailableReason: undefined,
+      });
+    }
+  });
+
   it('replaces the slash query and changes only the current durable block content node', () => {
     const mounted = createEditor();
     const heading = createTiptapSlashItems(enEditorMessages).find((item) => item.key === 'heading');

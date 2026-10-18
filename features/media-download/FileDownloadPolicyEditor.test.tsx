@@ -597,6 +597,40 @@ describe('FileDownloadPolicyEditor', () => {
     expect(host?.textContent).toContain('Download access could not be saved');
   });
 
+  it('shows the current audience as a single compact media-header control', async () => {
+    const adapter: FileDownloadPolicyEditorAdapter = {
+      loadPolicy: vi.fn(async () => ({
+        data: {
+          fileId: 'file-1',
+          audience: 'authenticated' as const,
+          audienceSegments: [],
+        },
+      })),
+      loadSegments: vi.fn(async () => page([])),
+      savePolicy: vi.fn(),
+    };
+
+    renderEditor(adapter, { presentation: 'media-header' });
+    await settle();
+
+    const headerControl = host?.querySelector('[data-file-download-policy-presentation="media-header"]');
+    const audienceInput = host?.querySelector<HTMLInputElement>('input[aria-label="Download access"]');
+    expect(headerControl).toBeTruthy();
+    expect(headerControl?.closest('.mantine-Card-root')).toBeNull();
+    expectSelectedAccess('Signed-in users');
+    expect(audienceInput).toBeInstanceOf(HTMLInputElement);
+    expect(audienceInput?.getAttribute('placeholder') ?? '').toBe('');
+    expect(host?.textContent).not.toContain('Control who can download the original file.');
+    const description = headerControl?.querySelector<HTMLElement>('[data-file-download-access-description]');
+    expect(audienceInput?.getAttribute('aria-describedby')?.split(' ')).toContain(description?.id);
+    expect(description?.textContent).toBe('Any signed-in user can download this file.');
+    expect(description?.className).toContain('visuallyHidden');
+    const visualCopy = headerControl?.cloneNode(true) as HTMLElement;
+    visualCopy.querySelector('[data-file-download-access-description]')?.remove();
+    expect(visualCopy.textContent).not.toContain('Any signed-in user can download this file.');
+    expect(host?.textContent).not.toContain('Save access');
+  });
+
   it.each([
     ['missing selector echo', {}],
     ['mismatched selector echo', { blockId: 'other-block' }],

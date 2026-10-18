@@ -1,12 +1,46 @@
 // @vitest-environment jsdom
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { describe, expect, it } from 'vitest';
-import { ToolbarSurface } from './ToolbarSurface';
+import { describe, expect, it, vi } from 'vitest';
+import { ToolbarSurface, type ToolbarSurfaceProps } from './ToolbarSurface';
 import { IconButton } from '../IconButton';
 import { TextInput } from '../Input/TextInput';
 import { I18nProvider } from 'react-aria-components';
 describe('shared contextual toolbar contract', () => {
+  it('owns compact control sizing and embedded appearance without leaking caller skin props', async () => {
+    const element = document.createElement('div');
+    document.body.append(element);
+    const root = createRoot(element);
+    const onClick = vi.fn();
+    const hostile = { style: { height: 900 }, className: 'foreign', 'data-geul-toolbar-density': 'comfortable' };
+    await act(async () =>
+      root.render(
+        <ToolbarSurface
+          {...(hostile as unknown as ToolbarSurfaceProps)}
+          label="Formatting"
+          density="compact"
+          appearance="embedded"
+          width="full"
+        >
+          <IconButton label="Bold" size="chrome" onClick={onClick}>
+            B
+          </IconButton>
+        </ToolbarSurface>,
+      ),
+    );
+    const toolbar = element.querySelector<HTMLElement>('[role="toolbar"]')!;
+    expect(toolbar.dataset.geulToolbarDensity).toBe('compact');
+    expect(toolbar.dataset.geulToolbarAppearance).toBe('embedded');
+    expect(toolbar.dataset.geulToolbarWidth).toBe('full');
+    expect(toolbar.classList.contains('foreign')).toBe(false);
+    expect(toolbar.style.height).toBe('');
+    const button = element.querySelector<HTMLButtonElement>('button')!;
+    expect(button.dataset.controlSize).toBe('compact');
+    await act(async () => button.click());
+    expect(onClick).toHaveBeenCalledOnce();
+    await act(async () => root.unmount());
+    element.remove();
+  });
   it('moves keyboard focus past disabled controls and respects RTL', async () => {
     const element = document.createElement('div');
     document.body.append(element);

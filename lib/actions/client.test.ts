@@ -4,7 +4,12 @@ import { Code, ConnectError } from '@connectrpc/connect';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createClientClient, createPublicClientClientWithAuth } from '@/lib/api/server-client';
 import { assetRefFixture } from '@/tests/helpers/asset-ref';
-import { getClientsForBlockByIdsAction, listClientsForBlockAction, updateClientAction } from './client';
+import {
+  createClientAction,
+  getClientsForBlockByIdsAction,
+  listClientsForBlockAction,
+  updateClientAction,
+} from './client';
 
 const listMock = vi.fn();
 const getMock = vi.fn();
@@ -43,6 +48,16 @@ beforeEach(() => {
 });
 
 describe('client mutation actions', () => {
+  it('creates clients with the submitted website', async () => {
+    createClientMock.mockResolvedValue({ id: 'client-1' });
+
+    await expect(createClientAction('Client One', 'https://client.example')).resolves.toEqual({
+      data: { id: 'client-1' },
+    });
+
+    expect(createClientMock).toHaveBeenCalledWith({ name: 'Client One', website: 'https://client.example' });
+  });
+
   it('sends an explicit empty website when clearing the existing value', async () => {
     updateClientMock.mockResolvedValue({});
 

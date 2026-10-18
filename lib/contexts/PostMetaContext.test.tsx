@@ -252,6 +252,25 @@ describe('PostMetaProvider', () => {
     expect(latest?.categoryIds).toEqual(['local-category']);
     expect(latest?.tagIds).toEqual(['remote-tag']);
   });
+
+  it('keeps non-Block presentation state local and survives StrictMode replay', async () => {
+    await renderProvider(true);
+    let updated = false;
+    act(() => {
+      latest?.setLayout({ contentHeight: 'viewport', pageChrome: 'pinned', footer: 'flow' });
+      updated = latest?.setFeaturedImage('file-1', 'https://example.com/new-cover.jpg') ?? false;
+    });
+    expect(updated).toBe(true);
+    expect(latest?.featuredImageUrl).toBe('https://example.com/new-cover.jpg');
+    expect(latest?.layout).toEqual({ contentHeight: 'viewport', pageChrome: 'pinned', footer: 'flow' });
+  });
+
+  it('rejects a stale presentation setter after unmount', async () => {
+    await renderProvider();
+    const staleSetFeaturedImage = latest?.setFeaturedImage;
+    act(() => root.render(null));
+    expect(staleSetFeaturedImage?.('late', 'https://example.com/late.jpg')).toBe(false);
+  });
 });
 
 it('reports taxonomy failure and retries the retained fields together with the next edit', async () => {

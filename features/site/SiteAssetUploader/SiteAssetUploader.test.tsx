@@ -12,6 +12,7 @@ const deleteSiteAssetActionMock = vi.fn();
 const maybeConvertSvgMock = vi.fn();
 
 let dropHandler: ((files: File[]) => void | Promise<void>) | null = null;
+let dropzoneAccept: ImageUploadAccept | null = null;
 let container: HTMLDivElement | null = null;
 let root: Root | null = null;
 
@@ -48,7 +49,14 @@ vi.mock('@/components/core/Notification', () => ({
 }));
 
 vi.mock('@/features/site/SiteAssetUploader/ImageDropzone', () => ({
-  ImageDropzone: ({ onDrop }: { accept: ImageUploadAccept; onDrop: (files: File[]) => void | Promise<void> }) => {
+  ImageDropzone: ({
+    accept,
+    onDrop,
+  }: {
+    accept: ImageUploadAccept;
+    onDrop: (files: File[]) => void | Promise<void>;
+  }) => {
+    dropzoneAccept = accept;
     dropHandler = onDrop;
     return <div data-testid="image-dropzone" />;
   },
@@ -91,6 +99,7 @@ afterEach(() => {
   container = null;
   root = null;
   dropHandler = null;
+  dropzoneAccept = null;
   uploadFileMock.mockReset();
   setSiteAssetActionMock.mockReset();
   deleteSiteAssetActionMock.mockReset();
@@ -98,6 +107,51 @@ afterEach(() => {
 });
 
 describe('SiteAssetUploader', () => {
+  it('allows favicon MIME aliases and extension-only ICO selection', () => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    root = createRoot(container);
+
+    act(() => {
+      root?.render(<SiteAssetUploader type="favicon" currentUrl={null} />);
+    });
+
+    expect(dropzoneAccept).toEqual({
+      'image/png': [],
+      'image/x-icon': ['.ico'],
+      'image/vnd.microsoft.icon': ['.ico'],
+      'image/svg+xml': [],
+    });
+  });
+
+  it('preserves normal site logos without SVG conversion', async () => {
+    const svgFile = new File(['<svg></svg>'], 'logo.svg', { type: 'image/svg+xml' });
+    const onSuccess = vi.fn();
+    setSiteAssetActionMock.mockResolvedValue({
+      success: true,
+      ogGenerationRunId: 'site-logo-run',
+    });
+
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    root = createRoot(container);
+
+    act(() => {
+      root?.render(<SiteAssetUploader type="logo_full_light" currentUrl={null} onSuccess={onSuccess} />);
+    });
+
+    expect(dropHandler).toBeTruthy();
+
+    await act(async () => {
+      await dropHandler?.([svgFile]);
+    });
+
+    expect(maybeConvertSvgMock).not.toHaveBeenCalled();
+    expect(uploadFileMock).toHaveBeenCalledWith(svgFile, { slotId: 'logo_full_light' });
+    expect(setSiteAssetActionMock).toHaveBeenCalledWith('logo_full_light', 'file-1');
+    expect(onSuccess).toHaveBeenCalledWith('site-logo-run');
+  });
+
   it('converts email logos to a raster format before upload', async () => {
     const svgFile = new File(['<svg></svg>'], 'logo-email.svg', { type: 'image/svg+xml' });
     const pngFile = new File(['png'], 'logo-email.png', { type: 'image/png' });

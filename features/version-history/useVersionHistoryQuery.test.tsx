@@ -192,6 +192,26 @@ describe('useVersionHistoryQuery', () => {
     expect(current.hasNextPage).toBe(false);
   });
 
+  it('loads histories beyond one hundred versions without an overall count cap', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo) => {
+      const page = Number(new URL(String(input), 'http://localhost').searchParams.get('page'));
+      return response({ versions: versions((page - 1) * 20 + 1, page === 6 ? 1 : 20), total: 101 });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await renderQuery();
+    await waitFor(() => expect(current.versions).toHaveLength(20));
+    for (let page = 2; page <= 6; page += 1) {
+      await act(async () => {
+        await current.fetchNextPage();
+      });
+      await waitFor(() => expect(current.versions).toHaveLength(Math.min(page * 20, 101)));
+    }
+    expect(current.versions.at(-1)?.id).toBe('version-101');
+    expect(current.nextPage).toBeNull();
+    expect(requestedPages(fetchMock)).toEqual([1, 2, 3, 4, 5, 6]);
+  });
+
   it('reuses an in-flight next-page request when requested twice and keeps loaded rows stable', async () => {
     let finish!: (value: Response) => void;
     const fetchMock = vi

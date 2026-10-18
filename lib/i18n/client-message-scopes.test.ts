@@ -1,8 +1,11 @@
+import { readdirSync, readFileSync } from 'node:fs';
+import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import enMessages from '@/messages/en.json';
 import { isMessagePathCovered } from '@/scripts/i18n/client-namespace-graph.mjs';
 import {
   AMBIGUOUS_ROUTE_PROBES,
+  EDIT_MODE_MODULES,
   REPO_ROOT,
   analyzeClientMessageScopes,
   clientMessageRouteTable,
@@ -79,6 +82,43 @@ describe('client message scopes', () => {
     }
     expect(CLIENT_MESSAGE_SCOPE_PATHS.editor).toEqual(expect.arrayContaining(['pageEditor', 'postEditor']));
     expect(CLIENT_MESSAGE_SCOPE_PATHS.admin).toEqual(expect.arrayContaining(['adminList', 'adminShell']));
+  });
+});
+
+describe('edit-mode modules', () => {
+  const sourceFiles = (directory: string, out: string[] = []): string[] => {
+    for (const entry of readdirSync(join(REPO_ROOT, directory), { withFileTypes: true })) {
+      const path = `${directory}/${entry.name}`;
+      if (entry.isDirectory()) {
+        sourceFiles(path, out);
+      } else if (/\.tsx?$/.test(entry.name) && !/\.(test|stories|story)\.tsx?$/.test(entry.name)) {
+        out.push(path);
+      }
+    }
+    return out;
+  };
+  const files = ['app', 'features', 'lib', 'components'].flatMap((directory) => sourceFiles(directory));
+
+  it.each(EDIT_MODE_MODULES)('%s is rendered only by routes that branch on ?edit=true', (module) => {
+    const specifier = module.replace(/\.tsx?$/, '');
+    const basename = specifier.split('/').at(-1);
+    const importers = files.filter((file) => {
+      if (file === module) {
+        return false;
+      }
+      const source = readFileSync(join(REPO_ROOT, file), 'utf8');
+      const pattern = new RegExp(`from '([^']*/)?${basename}'|import\\('([^']*/)?${basename}'\\)`);
+      return pattern.test(source) && (source.includes(`@/${specifier}'`) || source.includes(`./${basename}'`));
+    });
+    expect(importers.length, `${module} has no importer`).toBeGreaterThan(0);
+    for (const importer of importers) {
+      const source = readFileSync(join(REPO_ROOT, importer), 'utf8');
+      expect(
+        importer.startsWith('app/') && /isEntityEditView\(|\.edit\b/.test(source),
+        `${importer} imports ${module} but does not branch on the edit query`,
+      ).toBe(true);
+    }
+    expect(relative(REPO_ROOT, join(REPO_ROOT, module))).toBe(module);
   });
 });
 

@@ -2,6 +2,17 @@ import { describe, expect, it } from 'vitest';
 import { mapBlockPropSchema, mapBlockWirePropSchema, parseMapBlockProps } from './schema';
 
 describe('durable map block schema', () => {
+  it('keeps critical persisted fields and defaults in the Tiptap attribute schema', () => {
+    expect(mapBlockPropSchema).toMatchObject({
+      mapPlaceIds: { default: '' },
+      aspectRatio: { default: '16:9', values: ['16:9', '4:3', '1:1'] },
+      previewWidth: { default: '100' },
+      url: { default: 'map' },
+      showPreview: { default: 'true', values: ['true', 'false'] },
+      textAlignment: { default: 'left', values: ['left', 'center', 'right'] },
+    });
+  });
+
   it('parses persisted values with the same validation defaults', () => {
     expect(parseMapBlockProps({})).toMatchObject({
       mapPlaceIds: '',

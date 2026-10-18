@@ -27,26 +27,26 @@ it('saves the profile', async () => {
   already covers an interaction in a real browser; do not duplicate it in jsdom.
 - Keep a test fast: a component test that needs more than ~300ms is a defect to fix, not a timeout to raise.
 
-## What not to test
+## Deciding whether a test earns its place
 
-A bad test is worse than none: it passes while the behaviour is wrong and costs review and upkeep. Do not
-add, and delete when found:
+This section applies the shared testing guide (`shared-ai-testing/v1`,
+`~/.config/ai-guides/guides/testing-guide.md`) to this repository.
 
-- tests that read source, CSS or config text (`readFileSync` + regex) to check how code is written;
-- golden or re-recorded outputs that pin current output instead of stating intended behaviour;
-- tests whose only assertion is that a mock received what the code passed it, or modules tested with every
-  collaborator mocked so only wiring is left;
-- constants, re-exports, type shapes and `*.type-test.tsx` prop-closedness checks, one-line getters,
-  "renders without crashing";
-- markup and styling details (class names, `data-*` attributes that are not a public contract, inline
-  styles, CSS custom property values, DOM nesting);
-- library behaviour (React, zod, next-intl, React Aria) and benchmarks inside the unit suite;
-- a second test for behaviour another test, layer or Storybook play test already covers.
-
-Keep the guards that matter: permissions and security, data loss and save ordering, consent, validation
-of stored data, contracts with other services, accessibility behaviour, and regressions for real bugs.
-When a change makes a test fail, decide whether the test states intended behaviour before touching it;
-never rewrite an assertion or re-record a golden just to go green.
+- Tie each test to a requirement, a public contract or a reproduced defect, and name the wrong behaviour it
+  catches. Take expected values from that source, not from the current output, and do not copy production
+  branches or formulas into the test.
+- Run the real code under test. Mock external boundaries only; a test that mocks the logic it claims to
+  check, or only asserts that a mock received what the code passed it, verifies nothing.
+- Pin source text, markup, CSS values or a whole output only when that is the contract being protected.
+  Test framework behaviour (React, zod, next-intl, React Aria) only when the test checks our configuration,
+  wiring, extension or compatibility, or a past defect.
+- A bug fix gets a regression test that fails before the fix and passes after it. For a new test, check
+  that it fails when the behaviour is wrong; a controlled change to the code is enough where in doubt.
+- Delete a test only after reading what it verifies and confirming that a remaining test asserts the same
+  expectation, or that it protects no requirement. Never delete by category, name, length or coverage count.
+- When a test fails, separate an implementation defect, a wrong test, a changed requirement and an
+  environment problem. Do not change assertions, inputs or recorded outputs, or skip and mock the failure
+  away, until the cause is understood.
 
 `eslint-plugin-testing-library` enforces the query, waiting and container rules wherever a test uses
 Testing Library or `@/test/render`. Older tests that render with `createRoot`/`act` move to this style when

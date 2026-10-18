@@ -237,6 +237,8 @@ jobs:
         run: pnpm lint:styles
       - name: Design system
         run: pnpm design-system:check
+      - name: Core contracts
+        run: pnpm design-system:typecheck
       - name: Prepare MapLibre worker
         run: pnpm prepare:maplibre-worker
       - name: Prepare p5 runtime
@@ -295,8 +297,8 @@ jobs:
         run: |
           pnpm install --frozen-lockfile
           echo 'NPM_CONFIG_USERCONFIG=/dev/null' >> "$GITHUB_ENV"
-      - name: Design system tests
-        run: node --test --test-concurrency="$CI_TEST_WORKERS" scripts/design-system/*.test.mjs
+      - name: Tooling tests
+        run: node --test --test-concurrency="$CI_TEST_WORKERS" scripts/design-system/*.test.mjs scripts/i18n/*.test.mjs
       - name: Vitest
         # Includes node-unit, both former component shards, server-contract,
         # editor-integration, and theme.test.ts's light/dark contrast contracts.

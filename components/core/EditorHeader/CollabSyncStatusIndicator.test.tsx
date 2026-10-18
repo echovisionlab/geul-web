@@ -6,7 +6,7 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { CollabSyncStatusIndicator } from './CollabSyncStatusIndicator';
+import { CollabSyncStatusIndicator, type CollabSyncStatusIndicatorProps } from './CollabSyncStatusIndicator';
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -57,6 +57,25 @@ describe('CollabSyncStatusIndicator', () => {
     expect(indicator?.getAttribute('role')).toBe('img');
   });
 
+  it('renders syncing state without a tooltip wrapper when disabled', () => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    root = createRoot(container);
+
+    act(() => {
+      root?.render(
+        <DesignSystemProvider>
+          <CollabSyncStatusIndicator isConnected isSynced={false} label="Syncing..." withTooltip={false} />
+        </DesignSystemProvider>,
+      );
+    });
+
+    const indicator = document.querySelector('[data-collab-status="saving"]');
+
+    expect(indicator).not.toBeNull();
+    expect(indicator?.getAttribute('aria-label')).toBe('Syncing...');
+  });
+
   it.each(['saved', 'saving', 'offline', 'error', 'reload'] as const)(
     'exposes durable %s state with its accessible label',
     (state) => {
@@ -70,4 +89,14 @@ describe('CollabSyncStatusIndicator', () => {
       expect(container.querySelector('[role="img"]')?.getAttribute('aria-label')).toBe(`Save state: ${state}`);
     },
   );
+
+  it('rejects runtime dimensions from untyped consumers', () => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    root = createRoot(container);
+    const props = { isConnected: true, isSynced: true, label: 'Synced', size: 20 };
+    expect(() =>
+      act(() => root?.render(<CollabSyncStatusIndicator {...(props as CollabSyncStatusIndicatorProps)} />)),
+    ).toThrow('Collaboration indicator size is owned by Core');
+  });
 });

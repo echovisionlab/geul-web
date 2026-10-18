@@ -215,4 +215,11 @@ describe('MyArtistsTable controller', () => {
       search: 'mina',
     });
   });
+
+  it('forwards the query loading state to the table controller', () => {
+    mocks.isLoading = true;
+    renderController();
+
+    expect(getDataTableProps().loading).toBe(true);
+  });
 });

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, describe, it, expect, vi } from 'vitest';
+import { afterEach, beforeAll, describe, it, expect, vi } from 'vitest';
 import { within, userEvent } from 'storybook/test';
 import { TestProviders } from '@/test/TestProviders';
 import { AdminContentPreview } from './AdminContent.stories';
@@ -23,6 +23,15 @@ class ResizeObserverMock {
 }
 vi.stubGlobal('ResizeObserver', ResizeObserverMock);
 let host: HTMLDivElement, root: Root;
+// The table toolbar fields are dynamic imports. Load them once so each test measures its own behaviour
+// instead of whichever test happens to run first paying the cold import on a loaded CI worker.
+beforeAll(async () => {
+  await Promise.all([
+    import('@/features/data-table/ServerDataTable/ServerDataTableSearchRuntime'),
+    import('@/features/data-table/ServerDataTable/ServerDataTableMultiFilterRuntime'),
+    import('@/features/data-table/ServerDataTable/ServerDataTableMultiSortRuntime'),
+  ]);
+}, 60_000);
 afterEach(() => {
   act(() => root?.unmount());
   host?.remove();
@@ -78,7 +87,7 @@ describe('content list accessibility states', () => {
       render(domain);
       const canvas = within(host);
       const name = domain === 'posts' ? 'Listening Notes' : 'Listening Room';
-      const trigger = canvas.getAllByRole('button', { name: `Actions for ${name}` })[0];
+      const trigger = await waitInAct(() => canvas.getAllByRole('button', { name: `Actions for ${name}` })[0]);
       act(() => trigger.focus());
       await act(async () => {
         await userEvent.click(trigger);

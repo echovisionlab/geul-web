@@ -4,7 +4,9 @@ import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { I18nProvider } from 'react-aria-components';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { SearchComboboxView } from './SearchComboboxView';
 import { SearchInput } from './SearchInput';
+import type { InputComboboxController } from './useInputCombobox';
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -32,5 +34,34 @@ describe('Core SearchInput', () => {
     expect(input).toHaveAttribute('inputmode', 'search');
     expect(input).toHaveAccessibleName('Search users');
     expect(container.querySelector('[data-search-glyph] svg')).toHaveAttribute('aria-hidden', 'true');
+  });
+});
+
+describe('SearchComboboxView leading glyph', () => {
+  const combobox = {
+    dropdownOpened: false,
+    openDropdown: vi.fn(),
+    closeDropdown: vi.fn(),
+    toggleDropdown: vi.fn(),
+  } as unknown as InputComboboxController;
+  const base = {
+    combobox,
+    search: '',
+    onSearchChange: vi.fn(),
+    placeholder: 'Search clients',
+    items: [] as string[],
+    debouncedSearch: '',
+    onSelect: vi.fn(),
+    renderItem: (item: string) => item,
+    getItemId: (item: string) => item,
+    getItemText: (item: string) => item,
+    minimumQueryMessage: 'Type more',
+    noResultsMessage: 'No results',
+  };
+
+  it('rejects a second leading slot', () => {
+    expect(() => render(<SearchComboboxView {...base} leadingGlyph="search" leftSection={<span />} />)).toThrow(
+      'cannot be combined with leftSection',
+    );
   });
 });

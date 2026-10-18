@@ -254,4 +254,19 @@ describe.each(['privacy', 'terms'] as const)('%s initial public document', (kind
     };
     expect(await renderServerScreen(screen(kind, initialData))).toContain('active.upcomingAlert');
   });
+
+  it('fetches one combined snapshot when server data is unavailable', async () => {
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    const client = new QueryClient({ defaultOptions: { queries: { staleTime: 60_000, retry: false } } });
+    try {
+      await act(async () => root.render(screen(kind, undefined, client)));
+      expect(mocks.getPage).toHaveBeenCalledExactlyOnceWith('en');
+      expect(mocks.getActive).not.toHaveBeenCalled();
+      expect(mocks.getScheduled).not.toHaveBeenCalled();
+    } finally {
+      act(() => root.unmount());
+      client.clear();
+    }
+  });
 });

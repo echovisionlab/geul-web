@@ -1,5 +1,6 @@
 import { toProtoPageAccessPolicy, DEFAULT_PAGE_ACCESS_POLICY } from '@/lib/types/page-access';
 import { Code, ConnectError } from '@connectrpc/connect';
+import { OgEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { PageStatus } from '@echovisionlab/geul-proto/secure/page_pb.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
@@ -11,6 +12,7 @@ import {
   regeneratePageOgImageAction,
   setPageFeaturedImageAction,
   unpublishPageAction,
+  updatePageShowTitleAction,
   updatePageSlugAction,
 } from './page';
 
@@ -55,6 +57,21 @@ describe('page actions', () => {
     mocks.createAdminClient.mockResolvedValue({ regenerateOgImage: mocks.regenerateOgImage });
     mocks.createPageClient.mockResolvedValue(pageClient);
     mocks.createMemberClient.mockResolvedValue({ listMemberTagsAdmin: mocks.listMemberTagsAdmin });
+  });
+
+  it('regenerates the OG image for the active locale only', async () => {
+    await expect(regeneratePageOgImageAction('page-1', ' ja ')).resolves.toEqual({
+      ok: true,
+      success: true,
+      runId: 'run-1',
+      generationId: 'generation-1',
+    });
+
+    expect(mocks.regenerateOgImage).toHaveBeenCalledWith({
+      entityType: OgEntityType.PAGE,
+      entityId: 'page-1',
+      selection: { target: { case: 'locale', value: 'ja' } },
+    });
   });
 
   it('does not queue an unscoped OG regeneration', async () => {
@@ -204,6 +221,16 @@ describe('page actions', () => {
     await expect(updatePageSlugAction('page-1', 'requested-path')).resolves.toMatchObject({
       ok: true,
       slug: 'canonical-path',
+    });
+  });
+
+  it('returns the canonical show-title value after a successful update', async () => {
+    pageClient.updatePage.mockResolvedValueOnce({ showTitle: false });
+
+    await expect(updatePageShowTitleAction('page-1', true)).resolves.toEqual({
+      ok: true,
+      success: true,
+      showTitle: false,
     });
   });
 

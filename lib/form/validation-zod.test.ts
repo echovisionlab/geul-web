@@ -482,6 +482,19 @@ describe('buildFieldValidator', () => {
       expect(validator.safeParse(true).success).toBe(true);
       expect(validator.safeParse(false).success).toBe(true);
     });
+
+    it('validates optional switch', () => {
+      const field: FormFieldSchema = {
+        id: 'switch-1',
+        name: 'newsletter',
+        type: 'switch',
+      };
+      const validator = buildFieldValidator(field);
+
+      expect(validator.safeParse(true).success).toBe(true);
+      expect(validator.safeParse(false).success).toBe(true);
+      expect(validator.safeParse(undefined).success).toBe(true);
+    });
   });
 
   // =============================================================================

@@ -94,4 +94,37 @@ describe.each(SUPPORTED_LOCALES)('%s accessibility message runtime', (locale) =>
     expect(withoutPage).not.toContain('991337');
     expect(withoutPage).not.toMatch(/[{}]/);
   });
+
+  it('announces the new link position and collection size after keyboard reordering', () => {
+    const errors: unknown[] = [];
+    const translate = createTranslator({
+      locale,
+      messages: loadRawMessages(locale),
+      onError: (error) => errors.push(error),
+    });
+    const moved = translate('socialLinks.positionChanged', { position: 2, count: 7 });
+    const otherPosition = translate('socialLinks.positionChanged', { position: 4, count: 7 });
+    const otherCount = translate('socialLinks.positionChanged', { position: 2, count: 11 });
+    expect(errors).toEqual([]);
+    expect(moved).not.toMatch(/[{}]/);
+    expect(moved).not.toBe(otherPosition);
+    expect(moved).not.toBe(otherCount);
+  });
+
+  it('reports a real result count and the actual page position when pages exist', () => {
+    const errors: unknown[] = [];
+    const translate = createTranslator({
+      locale,
+      messages: loadRawMessages(locale),
+      onError: (error) => errors.push(error),
+    });
+    const actual = translate('dataTable.aria.resultSummary', { count: 731, totalPages: 29, page: 3 });
+    const otherPage = translate('dataTable.aria.resultSummary', { count: 731, totalPages: 29, page: 5 });
+    const otherCount = translate('dataTable.aria.resultSummary', { count: 911, totalPages: 29, page: 3 });
+    const otherTotal = translate('dataTable.aria.resultSummary', { count: 731, totalPages: 37, page: 3 });
+    expect(errors).toEqual([]);
+    expect(actual).not.toBe(otherPage);
+    expect(actual).not.toBe(otherCount);
+    expect(actual).not.toBe(otherTotal);
+  });
 });

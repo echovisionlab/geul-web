@@ -30,4 +30,8 @@ describe('ContentBlockMediaRuntimeProvider', () => {
       ),
     ).toBe('<span>field-notes.pdf</span>');
   });
+
+  it('fails closed when a renderer is not wrapped by the runtime provider', () => {
+    expect(() => renderToStaticMarkup(<Probe />)).toThrow('runtime context is required');
+  });
 });

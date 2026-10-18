@@ -45,6 +45,20 @@ function renderModal(node: ReactNode) {
 }
 
 describe('ContentModal', () => {
+  it('owns the fitted body layout and rejects unknown runtime layout values', () => {
+    const renderLayout = (bodyLayout: 'scroll' | 'fit') =>
+      renderModal(
+        <ContentModal opened onClose={() => undefined} title="Crop" closeLabel="Close" bodyLayout={bodyLayout}>
+          <p>Resizable media</p>
+        </ContentModal>,
+      );
+    renderLayout('fit');
+    expect(document.body.querySelector('[data-body-layout="fit"]')).not.toBeNull();
+    renderLayout('hidden' as 'fit');
+    expect(document.body.querySelector('[data-body-layout="scroll"]')).not.toBeNull();
+    expect(document.body.querySelector('[data-body-layout="hidden"]')).toBeNull();
+  });
+
   it('owns accessible generic content-modal semantics without imposing a footer', () => {
     const onClose = vi.fn();
     renderModal(
@@ -73,5 +87,21 @@ describe('ContentModal', () => {
     );
     expect(modalRoot).not.toBeNull();
     expect(dialog?.querySelector('form')).toBeNull();
+  });
+
+  it('defaults to compact density while keeping width and standard density independent', () => {
+    const view = (density?: 'standard' | 'compact') => (
+      <ContentModal opened onClose={() => {}} title="Details" closeLabel="Close details" size="large" density={density}>
+        Details body
+      </ContentModal>
+    );
+    renderModal(view());
+    expect(document.body.querySelector('[data-density="compact"][data-size="large"]')).not.toBeNull();
+    renderModal(view('standard'));
+    expect(document.body.querySelector('[data-density="standard"][data-size="large"]')).not.toBeNull();
+    expect(document.body.querySelector('[role="dialog"]')).toHaveAccessibleName('Details');
+    renderModal(view('roomy' as 'compact'));
+    expect(document.body.querySelector('[data-density="compact"][data-size="large"]')).not.toBeNull();
+    expect(document.body.querySelector('[data-density="roomy"]')).toBeNull();
   });
 });

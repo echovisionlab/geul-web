@@ -144,6 +144,33 @@ describe('error number recovery', () => {
     expect(host.querySelector('canvas')).toBeNull();
   });
 
+  it('follows the pointer outside the number and clears input when the page loses it', async () => {
+    const { pointerPosition } = mockGraphics();
+    await mount();
+    const number = host.querySelector<HTMLElement>('[data-error-code]')!;
+    vi.spyOn(number, 'getBoundingClientRect').mockReturnValue({
+      left: 200,
+      top: 100,
+      width: 480,
+      height: 200,
+    } as DOMRect);
+    expect(number.getAttribute('data-particles-ready')).toBe('true');
+    window.dispatchEvent(new MouseEvent('pointermove', { clientX: 760, clientY: 220 }));
+    expect(pointerPosition).toHaveBeenLastCalledWith({ x: 1, y: expect.closeTo(-0.2) });
+    window.dispatchEvent(new Event('blur'));
+    expect(pointerPosition).toHaveBeenLastCalledWith(null);
+    window.dispatchEvent(new MouseEvent('pointermove', { clientX: 100, clientY: 0 }));
+    expect(pointerPosition).toHaveBeenLastCalledWith({ x: -1, y: 1 });
+    window.dispatchEvent(new MouseEvent('pointerout', { relatedTarget: document.body }));
+    expect(pointerPosition).toHaveBeenLastCalledWith({ x: -1, y: 1 });
+    window.dispatchEvent(new MouseEvent('pointerout', { relatedTarget: null }));
+    expect(pointerPosition).toHaveBeenLastCalledWith(null);
+    await act(async () => root.unmount());
+    pointerPosition.mockClear();
+    window.dispatchEvent(new MouseEvent('pointermove', { clientX: 760, clientY: 220 }));
+    expect(pointerPosition).not.toHaveBeenCalled();
+  });
+
   it('stops drift, following, and continuous rendering when reduced motion changes', async () => {
     const mediaEvents = new EventTarget();
     const motion = Object.assign(mediaEvents, { matches: false });

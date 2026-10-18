@@ -154,6 +154,22 @@ describe('EditorFileLibraryPickerView', () => {
     }
   });
 
+  it('uses type icons for every list row and lowercase type labels', () => {
+    renderView([], { viewMode: 'list', labels: { ...editorFileLibraryPickerStoryLabels, folderType: 'Folder' } });
+    const rows = Array.from(host.querySelectorAll('[data-datatable-desktop-row]'));
+    expect(rows).toHaveLength(3);
+    expect(rows.every((row) => row.querySelector('svg'))).toBe(true);
+    expect(rows[0].textContent).toContain('folder');
+    expect(rows[0].textContent).not.toContain('—');
+    expect(
+      host.querySelector('[data-datatable-mobile-row="folder:story-folder-recordings"]')?.textContent,
+    ).not.toContain('—');
+    expect(rows[1].textContent).toContain('wav');
+    expect(rows[1].textContent).not.toContain('audio/wav');
+    expect(rows[2].textContent).toContain('png');
+    expect(rows[2].textContent).not.toContain('image/png');
+  });
+
   it('omits single-selection checkboxes in both responsive list layouts', () => {
     renderView([], { viewMode: 'list', allowMultiple: false });
     expect(host.querySelector('input[type="checkbox"]')).toBeNull();

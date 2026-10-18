@@ -12,6 +12,38 @@ interface Row {
 }
 
 describe('data table content view model', () => {
+  it('describes each active multi-sort priority and localized direction in the mapped view model', () => {
+    const viewColumns = createDataTableViewColumns<Row>({
+      columns: [
+        { key: 'displayName', header: 'Name', accessor: 'displayName' },
+        { key: 'count', header: 'Count', accessor: 'count' },
+      ],
+      currentSorts: [
+        { field: 'display_name', direction: 'desc' },
+        { field: 'count', direction: 'asc' },
+      ],
+      sortConfig: [
+        { field: 'display_name', label: 'Name' },
+        { field: 'count', label: 'Count' },
+      ],
+      getSortAriaLabel: (label) => `Sort by ${label}`,
+      getSortPriorityLabel: (priority, total) => `Priority ${priority}/${total}`,
+      getSortDirectionLabel: (direction) => (direction === 'asc' ? 'Currently ascending' : 'Currently descending'),
+      onSort: vi.fn(),
+    });
+
+    expect(viewColumns[0]?.sort).toMatchObject({
+      direction: 'desc',
+      order: 1,
+      description: 'Priority 1/2. Currently descending',
+    });
+    expect(viewColumns[1]?.sort).toMatchObject({
+      direction: 'asc',
+      order: 2,
+      description: 'Priority 2/2. Currently ascending',
+    });
+  });
+
   it('preserves explicit accessible names for image and action headers without changing visible copy', () => {
     const viewColumns = createDataTableViewColumns<Row>({
       columns: [

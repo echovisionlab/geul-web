@@ -114,6 +114,84 @@ describe('PageContentView', () => {
     expect(tocSpy).toHaveBeenCalledWith({ items: [{ id: 'about-heading', label: 'About this project', level: 2 }] });
     expect(pageRendererSpy.mock.calls[0][0].sections[0].richText[0].id).toBe('about-heading');
   });
+  it('uses the canonical layout and shared content chrome', () => {
+    render(
+      <PageContentView
+        pathname="/about"
+        requestedLocale="en"
+        page={{
+          title: 'About',
+          showTitle: true,
+          documentLayout: { contentHeight: 'viewport', pageChrome: 'pinned', footer: 'pinned' },
+          content: [{ id: 'scene-1', kind: 'immersive-scene', props: {} }] as never,
+          blockMedia: [],
+          localizationInfo: {
+            requestedLocale: 'en',
+            displayedLocale: 'en',
+            sourceLocale: 'ko',
+            isFallback: false,
+            isOriginal: false,
+            machineGenerated: false,
+            fallbackReason: 0,
+          },
+        }}
+      />,
+    );
+
+    const layout = document.querySelector('[data-content-layout]');
+    expect(layout?.getAttribute('data-content-height')).toBe('viewport');
+    expect(layout?.getAttribute('data-page-chrome')).toBe('pinned');
+    expect(layout?.getAttribute('data-footer-layout')).toBe('pinned');
+    expect(document.querySelector('[data-content-scroll-root]')).toBeNull();
+    expect(document.querySelector('[data-content-body]')).not.toBeNull();
+    expect(document.querySelector('[data-content-chrome] h1')?.textContent).toBe('About');
+    expect(document.querySelector('[data-content-chrome] [data-testid="content-language-menu"]')).toBeNull();
+    expect(layout?.querySelector('[data-testid="content-language-menu"]')).not.toBeNull();
+    expect(contentLanguageMenuSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ pathname: '/about', requestedLocale: 'en' }),
+    );
+    expect(pageRendererSpy).toHaveBeenCalledWith(expect.objectContaining({ sections: expect.any(Array) }));
+  });
+
+  it('uses explicit document flow without inspecting block type', () => {
+    render(
+      <PageContentView
+        pathname="/"
+        requestedLocale="en"
+        page={{
+          title: '',
+          showTitle: false,
+          documentLayout: { contentHeight: 'content', pageChrome: 'flow', footer: 'flow' },
+          content: [
+            {
+              id: 'scene-1',
+              kind: 'immersive-scene',
+              props: { playback: 'autoplay', unitsJson: '[{"id":"one"},{"id":"two"}]' },
+            },
+          ] as never,
+          blockMedia: [],
+          localizationInfo: {
+            requestedLocale: 'en',
+            displayedLocale: 'en',
+            sourceLocale: 'en',
+            isFallback: false,
+            isOriginal: true,
+            machineGenerated: false,
+            fallbackReason: 0,
+          },
+        }}
+      />,
+    );
+
+    const layout = document.querySelector('[data-content-layout]');
+    expect(layout?.getAttribute('data-content-height')).toBe('content');
+    expect(layout?.getAttribute('data-page-chrome')).toBe('flow');
+    expect(layout?.getAttribute('data-footer-layout')).toBe('flow');
+    expect(layout?.getAttribute('data-has-chrome')).toBe('false');
+    expect(layout?.querySelector('[data-testid="content-language-menu"]')).not.toBeNull();
+    expect(document.querySelector('[data-content-chrome]')).toBeNull();
+    expect(document.querySelector('[data-content-scroll-root]')).toBeNull();
+  });
 
   it('renders chrome for an empty page instead of returning null', () => {
     render(

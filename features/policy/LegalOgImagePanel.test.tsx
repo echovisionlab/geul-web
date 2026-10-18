@@ -144,6 +144,43 @@ async function flush() {
 }
 
 describe('LegalOgImagePanel', () => {
+  it('tracks the concrete legal locale target and renders server status', async () => {
+    renderPanel('privacy');
+    await flush();
+
+    expect(mocks.useOgImage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entityType: 'privacy',
+        entityId: '00000000-0000-0000-0000-000000000101',
+        locale: 'ko',
+        provider: null,
+      }),
+    );
+    const preview = container?.querySelector('[data-testid="og-preview"]');
+    expect(preview?.getAttribute('data-status')).toBe('processing');
+  });
+
+  it('tracks the generation returned by a manual retry', async () => {
+    renderPanel('terms');
+    await flush();
+    await act(async () => {
+      (container?.querySelector('[data-testid="og-preview"]') as HTMLButtonElement).click();
+    });
+
+    expect(mocks.regenerateLegalOgImageAction).toHaveBeenCalledWith('terms', 'ko');
+    expect(mocks.trackRequestedGeneration).toHaveBeenCalledWith('generation-1', 'privacy:ko');
+  });
+
+  it('locates the latest generation after an automatic background change', async () => {
+    renderPanel('privacy');
+    await flush();
+    act(() => {
+      (container?.querySelector('[data-testid="background-success"]') as HTMLButtonElement).click();
+    });
+
+    expect(mocks.trackLatest).toHaveBeenCalledTimes(1);
+  });
+
   it('uses the active content locale instead of the UI locale', async () => {
     renderPanel('privacy', { runId: 'translation-run-ja', locale: 'ja', sequence: 1 }, 'ja');
     await flush();
@@ -156,6 +193,13 @@ describe('LegalOgImagePanel', () => {
       (container?.querySelector('[data-testid="og-preview"]') as HTMLButtonElement).click();
     });
     expect(mocks.regenerateLegalOgImageAction).toHaveBeenCalledWith('privacy', 'ja');
+  });
+
+  it('recovers a source-title generation even when its lifecycle event was missed', async () => {
+    renderPanel('privacy', undefined, 'ko', { locale: 'ko', sequence: 1 });
+    await flush();
+
+    expect(mocks.trackLatest).toHaveBeenCalledTimes(1);
   });
 
   it('refetches the canonical legal asset when a generation becomes ready', async () => {

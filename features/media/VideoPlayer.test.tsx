@@ -279,6 +279,53 @@ describe('VideoPlayer', () => {
     expect(mockMountVideoJsPlayer).toHaveBeenCalledTimes(1);
     expect(mockDisposeVideoJsPlayer).toHaveBeenCalledTimes(0);
   });
+
+  it('mounts a caller action beside the native video controls', async () => {
+    host = document.createElement('div');
+    document.body.appendChild(host);
+    root = createRoot(host);
+    mockMountVideoJsPlayer.mockImplementationOnce((videoElement) => {
+      const playerElement = document.createElement('div');
+      const controlBar = document.createElement('div');
+      const fullscreen = document.createElement('button');
+      controlBar.className = 'vjs-control-bar';
+      fullscreen.className = 'vjs-fullscreen-control';
+      videoElement?.parentElement?.replaceChild(playerElement, videoElement);
+      if (videoElement) {
+        playerElement.appendChild(videoElement);
+      }
+      controlBar.appendChild(fullscreen);
+      playerElement.appendChild(controlBar);
+      return {
+        dispose: vi.fn(),
+        error: vi.fn(),
+        one: vi.fn(),
+        el: () => playerElement,
+      };
+    });
+
+    await act(async () => {
+      root!.render(
+        <DesignSystemProvider forceColorScheme="light">
+          <NextIntlClientProvider locale="en" messages={messages}>
+            <VideoPlayer
+              src="https://cdn.example.com/original.mp4"
+              action={
+                <button type="button" data-player-action>
+                  Download
+                </button>
+              }
+            />
+          </NextIntlClientProvider>
+        </DesignSystemProvider>,
+      );
+      await new Promise((resolve) => window.requestAnimationFrame(() => resolve(undefined)));
+    });
+
+    const actionSlot = host.querySelector('[data-video-player-action-slot]');
+    expect(actionSlot?.querySelector('[data-player-action]')).not.toBeNull();
+    expect(actionSlot?.nextElementSibling?.classList.contains('vjs-fullscreen-control')).toBe(true);
+  });
   async function renderPlayer(props: Parameters<typeof VideoPlayer>[0] = {}) {
     if (!host) {
       host = document.createElement('div');

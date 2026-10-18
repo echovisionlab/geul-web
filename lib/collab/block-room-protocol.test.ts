@@ -554,6 +554,36 @@ it('projects initial metadata to early and late subscribers and ignores reordere
   runtime.document.destroy();
 });
 
+it('requires metadata update details in successful metadata ACKs', async () => {
+  const runtime = setup();
+  admit(runtime);
+  runtime.sendStateless.mockClear();
+  const pending = runtime.protocol.updateMetadata('locale', {
+    locale: 'ko',
+    title: 'updated',
+  });
+  const request = JSON.parse(runtime.sendStateless.mock.calls[0]![0]);
+  runtime.protocol.handleStateless(
+    JSON.stringify({
+      kind: 'room.metadata_result',
+      v: 3,
+      requestId: request.requestId,
+      ok: true,
+      ack: {
+        documentRevision: '44444444-4444-4444-8444-444444444444',
+        changed: true,
+        sourceChanged: true,
+        changedLocales: ['ko'],
+        locale: 'ko',
+      },
+    }),
+  );
+  await expect(pending).rejects.toMatchObject({ reloadRequired: true });
+  expect(runtime.onReloadRequired).toHaveBeenCalledOnce();
+  runtime.protocol.destroy();
+  runtime.document.destroy();
+});
+
 it('accepts durability hints only for the admitted exact room and valid clocks', () => {
   const runtime = setup();
   const listener = vi.fn();

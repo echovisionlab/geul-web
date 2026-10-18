@@ -382,6 +382,31 @@ describe('useHocuspocusConnection request identity', () => {
     expect(persistNowMock).not.toHaveBeenCalled();
   });
 
+  it.each([
+    [`menu:${entityId}:ko`, 'menu'],
+    [`post-series:${entityId}:ko`, 'post_series'],
+    [`email-layout:${entityId}:ko`, 'email_layout'],
+  ])('automatically rebuilds the current %s editor on reload-required', async (documentName, _saveKey) => {
+    await act(async () => {
+      root?.render(<ReloadHarness documentName={documentName} />);
+      await Promise.resolve();
+    });
+
+    const first = providerState.instances[0]!;
+    act(() =>
+      first.emit('stateless', {
+        payload: JSON.stringify({ v: 3, kind: 'room.reload', reloadReason: 'external_update' }),
+      }),
+    );
+
+    const second = providerState.instances[1]!;
+    expect(first.disconnect).toHaveBeenCalledOnce();
+    expect(providerState.instances).toHaveLength(2);
+    expect(second.configuration.name).toBe(documentName);
+    expect(second.configuration.document).not.toBe(first.configuration.document);
+    expect(snapshots.at(-1)?.connection.provider).toBe(second);
+  });
+
   it('rebuilds an exact document room on an epoch mismatch', async () => {
     const documentName = `email-layout:${entityId}:ko`;
     await act(async () => {

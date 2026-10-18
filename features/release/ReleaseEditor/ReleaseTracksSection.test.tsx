@@ -12,6 +12,7 @@ import type { ReleaseTrackItem } from '@/lib/collab/schemas/release-fields.schem
 import { DEFAULT_MEDIA_STATUS_LABELS } from '@/lib/media/status';
 import { TestProviders } from '@/test/TestProviders';
 import { ReleaseTracksSection } from './ReleaseTracksSection';
+import { RELEASE_TRACK_PROCESSING_STATUS } from './track-processing-status';
 import { resolveTrackProgressIndicator } from './track-runtime';
 
 const deleteTrackActionMock = vi.fn();
@@ -382,6 +383,40 @@ describe('ReleaseTracksSection', () => {
     expect(onTracksChange).not.toHaveBeenCalled();
     expect(reorderTracksActionMock).not.toHaveBeenCalled();
   });
+  it('passes failed processing state to the mobile uploader status view', () => {
+    setMobileViewport(true);
+    const trackId = randomTestUuid();
+    const fileId = randomTestUuid();
+    const tracks: ReleaseTrackItem[] = [
+      {
+        id: trackId,
+        track_number: 1,
+        title: 'Failed processing',
+        duration_seconds: null,
+        audio_attached: false,
+        audio_original_file_id: fileId,
+        processing_status: null,
+        credits: [],
+      },
+    ];
+
+    useMediaProcessingRuntimeStateMock.mockReturnValue({
+      value: {
+        processing_status: RELEASE_TRACK_PROCESSING_STATUS.failed,
+        processing_progress: 0,
+        duration_seconds: null,
+      },
+      isLoading: false,
+    });
+
+    render(<ReleaseTracksSection releaseId={randomTestUuid()} tracks={tracks} onTracksChange={vi.fn()} />);
+
+    expect(document.querySelector('table')).toBeNull();
+    expect(document.querySelector(`[data-testid="audio-uploader-${trackId}-status-only"]`)).toHaveAttribute(
+      'data-processing-status',
+      RELEASE_TRACK_PROCESSING_STATUS.failed,
+    );
+  });
 
   it('renders upload progress in the mobile track layout', () => {
     setMobileViewport(true);
@@ -477,6 +512,18 @@ describe('ReleaseTracksSection', () => {
       label: 'Validating 18%',
       progress: 18,
       color: 'blue',
+    });
+  });
+
+  it('uses aggregate processing labels for backend-owned track processing', () => {
+    expect(
+      resolveTrackProgressIndicator(DEFAULT_MEDIA_STATUS_LABELS, null, {
+        progress: 67,
+      }),
+    ).toEqual({
+      label: 'Processing 67%',
+      progress: 67,
+      color: 'cyan',
     });
   });
 

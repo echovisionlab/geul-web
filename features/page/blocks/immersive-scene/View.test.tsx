@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { TestProviders } from '@/test/TestProviders';
+import { invariantTokens } from '@/components/core/design-tokens';
 import { getThemeDefinition, themeIds } from '@/lib/theme/themes';
 import { themeVariables } from '@/theme';
 import {
@@ -14,6 +15,7 @@ import {
   resolveParticleSizeAtProgress,
   resolveRenderUnitSequence,
   resolveRendererUnitSignature,
+  resolveSceneColorScheme,
   resolveSceneTextColors,
   resolveThemedUnitTexture,
   resolveUnitMeshScale,
@@ -81,6 +83,28 @@ function textContrast(text: string, background: string) {
 }
 
 describe('ImmersiveSceneView', () => {
+  it('renders a static single-unit scene shell from one unit', () => {
+    const html = renderToStaticMarkup(
+      <TestProviders>
+        <ImmersiveSceneView
+          props={{
+            unitsJson: '[{"id":"single","mesh":"sphere","color":"#ffffff"}]',
+            copyJson: '[{"id":"single","title":"Single unit","text":"Static copy"}]',
+          }}
+        />
+      </TestProviders>,
+    );
+
+    expect(html).toContain('data-immersive-scene="true"');
+    expect(html).toContain('data-playback="static"');
+    expect(html).toContain('data-height-mode="intrinsic"');
+    expect(html).toContain('data-scroll-owner="document"');
+    expect(html).toContain('--_immersive-scene-intrinsic-height:720px');
+    expect(html).toContain(`background:${invariantTokens['paper-background']}`);
+    expect(html).toContain('Single unit');
+    expect(html).toContain('Static copy');
+  });
+
   it.each(themeIds)('keeps default scene title and body readable in %s without authored color overrides', (themeId) => {
     const config = parseImmersiveSceneConfig({});
     const { base } = getThemeDefinition(themeId);
@@ -92,6 +116,78 @@ describe('ImmersiveSceneView', () => {
       const resolved = variable ? variables[variable] : color;
       expect(textContrast(resolved, background)).toBeGreaterThanOrEqual(4.5);
     }
+  });
+
+  it('projects authored renderer controls onto the scene root for each color scheme', () => {
+    const sharedProps = {
+      unitsJson: '[{"id":"single","mesh":"sphere","color":"#ffffff"}]',
+      backgroundEnabled: 'false',
+      particleBrightness: '1.6',
+      darkParticleBrightness: '1.9',
+      rotationEnabled: 'false',
+      rotationX: '10',
+      rotationY: '20',
+      rotationZ: '30',
+      rotationSpeedX: '0.2',
+      rotationSpeedY: '0.42',
+      rotationSpeedZ: '-0.1',
+      scrollRotationEnabled: 'false',
+      scrollRotationTurnsX: '0.1',
+      scrollRotationTurnsY: '0.8',
+      scrollRotationTurnsZ: '-0.2',
+      hoverEnabled: 'false',
+      hoverRepelRadius: '0.7',
+    };
+    const lightHtml = renderToStaticMarkup(
+      <TestProviders>
+        <ImmersiveSceneView props={{ ...sharedProps, preferredScheme: 'light' }} />
+      </TestProviders>,
+    );
+    const darkHtml = renderToStaticMarkup(
+      <TestProviders>
+        <ImmersiveSceneView props={{ ...sharedProps, preferredScheme: 'dark' }} />
+      </TestProviders>,
+    );
+
+    expect(lightHtml).toContain('data-background-enabled="false"');
+    expect(lightHtml).toContain('data-particle-brightness="1.6"');
+    expect(lightHtml).toContain('data-rotation-enabled="false"');
+    expect(lightHtml).toContain('data-rotation-x="10"');
+    expect(lightHtml).toContain('data-rotation-y="20"');
+    expect(lightHtml).toContain('data-rotation-z="30"');
+    expect(lightHtml).toContain('data-rotation-speed-x="0.2"');
+    expect(lightHtml).toContain('data-rotation-speed-y="0.42"');
+    expect(lightHtml).toContain('data-rotation-speed-z="-0.1"');
+    expect(lightHtml).toContain('data-scroll-rotation-enabled="false"');
+    expect(lightHtml).toContain('data-scroll-rotation-turns-x="0.1"');
+    expect(lightHtml).toContain('data-scroll-rotation-turns-y="0.8"');
+    expect(lightHtml).toContain('data-scroll-rotation-turns-z="-0.2"');
+    expect(lightHtml).toContain('data-hover-enabled="false"');
+    expect(lightHtml).toContain('data-hover-repel-radius="0.7"');
+    expect(darkHtml).toContain('data-particle-brightness="1.9"');
+  });
+
+  it('renders a scroll scene shell when multiple units use scroll playback', () => {
+    const html = renderToStaticMarkup(
+      <TestProviders>
+        <ImmersiveSceneView
+          props={{
+            playback: 'scroll',
+            unitsJson:
+              '[{"id":"intro","mesh":"sphere","color":"#d8dde5"},{"id":"goal","mesh":"cone","color":"#f97316"}]',
+            copyJson:
+              '[{"id":"intro","title":"Intro","text":"Intro copy"},{"id":"goal","title":"Goal","text":"Goal copy"}]',
+          }}
+        />
+      </TestProviders>,
+    );
+
+    expect(html).toContain('data-playback="scroll"');
+    expect(html).toContain('data-height-mode="scroll"');
+    expect(html).toContain('data-scroll-owner="document"');
+    expect(html).toContain('--_immersive-scene-scroll-document-height:360vh');
+    expect(html).toContain('data-immersive-scene-unit="intro"');
+    expect(html).toContain('data-immersive-scene-unit="goal"');
   });
 
   it('renders sparse shared unit attribution with safe links and inert inactive content', () => {
@@ -351,6 +447,11 @@ describe('ImmersiveSceneView', () => {
     expect(resolveUnitPresentation(fadeMiddle.textSegmentProgress, 1, 3, 0.22, true).opacity).toBeGreaterThan(0);
     expect(resolveUnitPresentation(fadeMiddle.textSegmentProgress, 1, 3, 0.22, true).opacity).toBeLessThan(1);
     expect(resolveUnitPresentation(fadeEnd.textSegmentProgress, 1, 3, 0.22, true).opacity).toBe(1);
+  });
+
+  it('resolves the configured scene color scheme before selecting themed particle textures', () => {
+    expect(resolveSceneColorScheme('auto', 'dark')).toBe('dark');
+    expect(resolveSceneColorScheme('light', 'dark')).toBe('light');
   });
 
   it('resolves overlay text colors from the scene color scheme', () => {

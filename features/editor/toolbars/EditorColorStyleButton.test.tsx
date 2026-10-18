@@ -71,6 +71,45 @@ describe('EditorColorStyleButton', () => {
     expect(document.querySelector('[role="tooltip"]')).toBeNull();
   });
 
+  it('shows semantic previews for every text and background value, including truthful defaults', async () => {
+    act(() => {
+      root.render(
+        <DesignSystemProvider forceColorScheme="light">
+          <EditorColorStyleButton
+            labels={labels}
+            textColor="default"
+            backgroundColor="default"
+            onTextColorChange={vi.fn()}
+            onBackgroundColorChange={vi.fn()}
+          />
+        </DesignSystemProvider>,
+      );
+    });
+
+    await act(async () => container.querySelector<HTMLButtonElement>('button[aria-label="Text"]')?.click());
+
+    let menu = container.querySelector<HTMLElement>('[role="menu"]')!;
+    expect(menu.querySelector('[role="group"]')?.getAttribute('aria-label')).toBe(labels.text);
+    const textSwatches = menu.querySelectorAll<HTMLElement>('[data-editor-color-swatch="text"]');
+    expect(textSwatches).toHaveLength(EDITOR_COLOR_VALUES.length);
+    expect(menu.querySelector('[data-editor-color-swatch="background"]')).toBeNull();
+    EDITOR_COLOR_VALUES.forEach((color, index) => {
+      expect(textSwatches[index]?.dataset.color).toBe(color);
+      expect(textSwatches[index]?.style.color).toBe(`var(--editor-text-color-${color})`);
+    });
+    await act(async () => menu.querySelector<HTMLElement>('[data-test="text-color-default"]')!.click());
+    await act(async () => container.querySelector<HTMLButtonElement>('button[aria-label="Background"]')!.click());
+    menu = container.querySelector<HTMLElement>('[role="menu"]')!;
+    expect(menu.querySelector('[role="group"]')?.getAttribute('aria-label')).toBe(labels.background);
+    const backgroundSwatches = menu.querySelectorAll<HTMLElement>('[data-editor-color-swatch="background"]');
+    expect(backgroundSwatches).toHaveLength(EDITOR_COLOR_VALUES.length);
+    expect(menu.querySelector('[data-editor-color-swatch="text"]')).toBeNull();
+    EDITOR_COLOR_VALUES.forEach((color, index) => {
+      expect(backgroundSwatches[index]?.dataset.color).toBe(color);
+      expect(backgroundSwatches[index]?.style.backgroundColor).toBe(`var(--editor-background-color-${color})`);
+    });
+  });
+
   it('keeps selected durable colors while the site changes between light and dark', async () => {
     const onTextColorChange = vi.fn();
     function SelectedColors() {

@@ -43,6 +43,53 @@ describe('videojs-player', () => {
     });
   });
 
+  it('mounts video.js with the resolved playback source', () => {
+    const player = {
+      addClass: vi.fn(),
+      width: vi.fn(),
+      el: vi.fn(() => document.createElement('div')),
+      on: vi.fn(),
+      one: vi.fn(),
+      error: vi.fn(),
+      dispose: vi.fn(),
+    };
+    const existing = {
+      dispose: vi.fn(),
+    };
+    const video = document.createElement('video');
+    document.body.appendChild(video);
+
+    mockGetPlayer.mockReturnValue(existing);
+    mockVideoJs.mockReturnValue(player);
+
+    const mounted = mountVideoJsPlayer(video, {
+      hlsSrc: 'https://cdn.example.com/master.m3u8',
+      src: 'https://cdn.example.com/original.mp4',
+      poster: 'https://cdn.example.com/thumb.webp',
+    });
+
+    expect(existing.dispose).toHaveBeenCalled();
+    expect(mockVideoJs).toHaveBeenCalledWith(
+      video,
+      expect.objectContaining({
+        fluid: true,
+        poster: 'https://cdn.example.com/thumb.webp',
+        sources: [
+          {
+            src: 'https://cdn.example.com/master.m3u8',
+            type: 'application/x-mpegURL',
+          },
+        ],
+      }),
+    );
+    expect(registeredHooks.get('beforeerror')).toHaveLength(1);
+    expect(player.width).toHaveBeenCalledWith('100%');
+    expect(player.addClass).toHaveBeenCalledWith('geul-video-js');
+    expect(video.classList.contains('video-js')).toBe(true);
+    expect(video.getAttribute('playsinline')).toBe('true');
+    expect(mounted).toBe(player);
+  });
+
   it('clears the built-in video.js error state when the caller handles playback recovery', () => {
     let onError: (() => void) | undefined;
     const player = {

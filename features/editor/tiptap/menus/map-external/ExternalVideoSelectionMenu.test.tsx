@@ -77,4 +77,58 @@ describe('ExternalVideoSelectionMenu', () => {
     act(() => ratioItem?.click());
     expect(onChangeAspectRatio).toHaveBeenCalledWith('4:3');
   });
+
+  it('bridges editor Tab to the first eligible action and exposes one toolbar tab stop', () => {
+    const onEscape = vi.fn();
+    act(() => {
+      root.render(
+        <DesignSystemProvider forceColorScheme="light">
+          <ExternalVideoSelectionMenu
+            labels={labels}
+            aspectRatio="auto"
+            textAlignment="left"
+            previewWidth="100"
+            editorElement={editorElement}
+            navigationEnabled
+            onChangeAspectRatio={() => undefined}
+            onChangeAlignment={() => undefined}
+            onEscape={onEscape}
+          />
+        </DesignSystemProvider>,
+      );
+    });
+
+    const toolbar = container.querySelector<HTMLElement>('[role="toolbar"]')!;
+    const marked = [...toolbar.querySelectorAll<HTMLButtonElement>('[data-selection-toolbar-action]')];
+    const eligible = marked.filter((action) => !action.disabled);
+    expect(toolbar.hasAttribute('tabindex')).toBe(false);
+    expect(marked[0]?.disabled).toBe(true);
+    expect(marked[0]?.tabIndex).toBe(-1);
+    expect(eligible.filter((action) => action.tabIndex === 0)).toHaveLength(1);
+
+    const nativeTabStops = [
+      ...toolbar.querySelectorAll<HTMLElement>('button, a[href], input, select, textarea, [tabindex]'),
+    ].filter((element) => element.tabIndex === 0);
+    expect(nativeTabStops).toEqual([eligible[0]]);
+
+    const tab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+    act(() => editorElement.dispatchEvent(tab));
+    expect(tab.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(eligible[0]);
+
+    act(() => {
+      eligible[0]?.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true }));
+    });
+    expect(document.activeElement).toBe(eligible.at(-1));
+    act(() => {
+      eligible
+        .at(-1)
+        ?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }));
+    });
+    expect(document.activeElement).toBe(eligible.at(-2));
+    act(() => {
+      eligible.at(-2)?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+    });
+    expect(onEscape).toHaveBeenCalledOnce();
+  });
 });

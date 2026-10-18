@@ -9,6 +9,7 @@ import { semanticThemes } from '../design-tokens';
 import { applyNativeRange, updateNativeRangeValue } from '../Input/native-range';
 import { MediaTransport, MediaAudioFrame } from './MediaTransport';
 import { MediaVideoFrame } from './MediaVideoFrame';
+import { applyAudioMediaPresentation } from './native-audio';
 import { applyVideoMediaPresentation } from './native-video';
 import videoClasses from './VideoControls.module.css';
 
@@ -133,6 +134,65 @@ describe('Core media contracts', () => {
     updateNativeRangeValue(input, Number.NaN);
     expect(input.value).toBe('0');
     expect(() => applyNativeRange(input, { min: 1, max: 1, value: 1, label: 'Invalid' })).toThrow(RangeError);
+  });
+  it('projects exported audio controls and typography without changing event behavior', () => {
+    const host = document.createElement('div');
+    host.innerHTML =
+      '<button data-audio-player-toggle="true"></button><input data-audio-player-volume="true" value="0.5" aria-label="Volume"><span data-audio-player-current-time="true">0:42</span><span data-audio-player-duration="true">2:00</span>';
+    const onPlay = vi.fn();
+    host.querySelector('button')!.onclick = onPlay;
+    applyAudioMediaPresentation(host);
+    host.querySelector('button')!.click();
+    expect(onPlay).toHaveBeenCalledOnce();
+    expect(host.dataset.border).toBe('all');
+    expect(host.querySelector('button')?.dataset.controlSize).toBe('chrome');
+    expect(host.querySelector('[data-audio-player-current-time]')?.getAttribute('data-tone')).toBe('primary');
+    expect(host.querySelector('[data-audio-player-duration]')?.getAttribute('data-tone')).toBe('muted');
+  });
+  it('adapts SDK late controls, selected state and keyboard focus while retaining SDK handlers', async () => {
+    const root = makeSdkDom();
+    const play = vi.fn();
+    const button = root.querySelector('button')!;
+    button.onclick = play;
+    button.click();
+    expect(play).toHaveBeenCalledOnce();
+    expect(button.dataset.contrast).toBe('inverse');
+    const item = root.querySelector<HTMLElement>('.vjs-menu-item')!;
+    item.focus();
+    expect(item.dataset.focused).toBe('true');
+    item.classList.remove('vjs-selected');
+    const late = document.createElement('button');
+    late.className = 'vjs-button';
+    root.appendChild(late);
+    await vi.waitFor(() => expect(late.dataset.controlKind).toBe('icon'));
+    expect(item.dataset.coreSelected).toBeUndefined();
+    const stop = disposers.pop()!;
+    stop();
+    late.classList.add('vjs-selected');
+    root.appendChild(document.createElement('button'));
+    await Promise.resolve();
+    expect(root.lastElementChild?.getAttribute('data-control-kind')).toBeNull();
+    expect(() => applyVideoMediaPresentation(root, { kind: 'unknown' as 'video-js' })).toThrow(RangeError);
+  });
+  it('keeps SDK caption option nodes and callbacks while bridging their native inputs and dialog actions', async () => {
+    const root = makeSdkDom();
+    const dialog = document.createElement('div');
+    dialog.className = 'vjs-modal-dialog vjs-text-track-settings';
+    dialog.innerHTML =
+      '<div class="vjs-modal-dialog-content"><label for="caption-font">Font</label><select id="caption-font"><option value="sans">Sans</option><option value="mono">Mono</option></select><button class="vjs-button vjs-done-button">Done</button></div>';
+    const select = dialog.querySelector('select')!;
+    const callback = vi.fn();
+    select.onchange = callback;
+    root.appendChild(dialog);
+    await vi.waitFor(() => expect(select.closest('[data-geul-media-input]')).not.toBeNull());
+    select.value = 'mono';
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(callback).toHaveBeenCalledOnce();
+    expect(select.querySelectorAll('option')).toHaveLength(2);
+    expect(dialog.querySelector('button')?.dataset.contrast).toBe('standard');
+    expect(dialog.querySelector('button')?.dataset.controlKind).toBe('button');
+    await Promise.resolve();
+    expect(dialog.querySelectorAll('[data-geul-media-input]')).toHaveLength(1);
   });
   for (const mode of ['light', 'dark'] as const) {
     it(`renders a readable selected SDK popup row on the ${mode} shared surface`, () => {

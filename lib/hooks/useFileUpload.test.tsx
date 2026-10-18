@@ -669,6 +669,42 @@ describe('useFileUpload', () => {
     );
   });
 
+  it('emits a validating progress update before client-side preprocessing finishes', async () => {
+    globalThis.XMLHttpRequest = MockXMLHttpRequest as unknown as typeof XMLHttpRequest;
+    vi.mocked(initiateUploadAction).mockResolvedValue({
+      uploadId: 'upload-1',
+      fileId: 'file-1',
+      uploadUrl: '',
+      url: '',
+      totalParts: 1,
+      chunkSize: 5,
+      uploadedParts: [],
+      status: 1,
+      resumed: false,
+      slotId: '',
+      attemptId: 'backend-attempt-1',
+    } as never);
+    vi.mocked(completeUploadAction).mockResolvedValue({
+      url: '/media/file-1',
+      fileId: 'file-1',
+    } as never);
+    const onProgress = vi.fn();
+
+    render(<UploadHarness onProgress={onProgress} onResolved={() => undefined} />);
+
+    await expect.poll(() => runtimeSubscription.listener != null).toBe(true);
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>('#start-upload')?.click();
+    });
+
+    await expect.poll(() => vi.mocked(completeUploadAction).mock.calls.length).toBe(1);
+    expect(onProgress.mock.calls[0]?.[0]).toMatchObject({
+      loaded: 0,
+      percentage: 0,
+      stage: 'validating',
+    });
+  });
+
   it('ignores stale attempt events and keeps active realtime progress monotonic', async () => {
     globalThis.XMLHttpRequest = MockXMLHttpRequest as unknown as typeof XMLHttpRequest;
     let pendingRequest: MockXMLHttpRequest | null = null;

@@ -436,6 +436,13 @@ describe('post server queries', () => {
 });
 
 describe('authorized Post SSR snapshot', () => {
+  it('preserves the source locale used when the edit URL has no language override', async () => {
+    mocks.createPostClient.mockResolvedValue(postClient);
+    postClient.getPost.mockResolvedValue(adminPost());
+    const post = await queries.getPostForEdit('00000000-0000-4000-8000-000000000001');
+    expect(post?.sourceLocale).toBe('pt-BR');
+  });
+
   it('preserves revision, fallback locale, read-only permission, media and body', async () => {
     const blockMedia = [
       create(ContentBlockMediaItemSchema, {

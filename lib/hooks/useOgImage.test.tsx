@@ -537,6 +537,30 @@ describe('useOgImage', () => {
     });
   });
 
+  it('polls every second for 30 seconds and every three seconds afterward', async () => {
+    mocks.getGeneration.mockResolvedValue({
+      generation: generation('generation-a', 'queued'),
+    });
+
+    await renderProbe();
+    await click('track');
+    expect(mocks.getGeneration).toHaveBeenCalledTimes(1);
+
+    await advance(999);
+    expect(mocks.getGeneration).toHaveBeenCalledTimes(1);
+    await advance(1);
+    expect(mocks.getGeneration).toHaveBeenCalledTimes(2);
+
+    vi.setSystemTime(new Date('2026-07-16T00:00:31.000Z'));
+    await advance(1_000);
+    expect(mocks.getGeneration).toHaveBeenCalledTimes(3);
+
+    await advance(2_999);
+    expect(mocks.getGeneration).toHaveBeenCalledTimes(3);
+    await advance(1);
+    expect(mocks.getGeneration).toHaveBeenCalledTimes(4);
+  });
+
   it('keeps generation polling alive after a rejected browser request', async () => {
     mocks.getGeneration
       .mockRejectedValueOnce(new Error('transport disconnected'))

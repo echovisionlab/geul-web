@@ -40,6 +40,36 @@ function binding(): ExecutableSelectionMenuBinding {
 }
 
 describe('executable selection menu', () => {
+  it('uses compact shared chrome and keeps runtime/source commands on the executable surface', () => {
+    const element = document.createElement('div');
+    document.body.append(element);
+    const root = createRoot(element);
+    act(() =>
+      root.render(
+        <DesignSystemProvider forceColorScheme="light">
+          <ExecutableSelectionMenu
+            binding={binding()}
+            editorElement={document.createElement('div')}
+            onEscape={() => {}}
+          />
+        </DesignSystemProvider>,
+      ),
+    );
+    const toolbar = element.querySelector('[role="toolbar"]')!;
+    expect(toolbar.getAttribute('data-geul-toolbar-density')).toBe('compact');
+    expect([...toolbar.querySelectorAll('button')].map((button) => button.getAttribute('aria-label'))).toEqual([
+      'Align left',
+      'Align center',
+      'Align right',
+      'Delete',
+    ]);
+    expect(
+      [...toolbar.querySelectorAll('button')].every((button) => button.getAttribute('data-control-size') === 'compact'),
+    ).toBe(true);
+    act(() => root.unmount());
+    element.remove();
+  });
+
   it('keeps registry bindings editor-instance local and cleans the exact binding only', () => {
     const registry = createExecutableSelectionMenuRegistry();
     const first = binding();
@@ -86,5 +116,40 @@ describe('executable selection menu', () => {
       await act(async () => root.unmount());
       element.remove();
     }
+  });
+
+  it('cycles actions with arrows, lets Tab leave, and Escape restores the editor callback', async () => {
+    const onEscape = vi.fn();
+    const editorElement = document.createElement('div');
+    const element = document.createElement('div');
+    document.body.append(element);
+    const root = createRoot(element);
+    await act(async () => {
+      root.render(
+        <DesignSystemProvider forceColorScheme="light">
+          <ExecutableSelectionMenu binding={binding()} editorElement={editorElement} onEscape={onEscape} />
+        </DesignSystemProvider>,
+      );
+    });
+    const actions = [...element.querySelectorAll<HTMLButtonElement>('button:not([disabled])')];
+    await act(async () => actions[0]!.focus());
+    await act(async () => actions[0]?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
+    expect(onEscape).toHaveBeenCalledTimes(1);
+    const tab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+    await act(async () => actions[0]?.dispatchEvent(tab));
+    expect(tab.defaultPrevented).toBe(false);
+    expect(document.activeElement).toBe(actions[0]);
+    await act(async () =>
+      actions[0]?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })),
+    );
+    expect(document.activeElement).toBe(actions[1]);
+    for (let index = 1; index < actions.length; index += 1) {
+      await act(async () =>
+        document.activeElement?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })),
+      );
+    }
+    expect(document.activeElement).toBe(actions[0]);
+    await act(async () => root.unmount());
+    element.remove();
   });
 });

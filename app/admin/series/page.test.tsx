@@ -54,6 +54,15 @@ describe('AdminSeriesPage query controls', () => {
     });
   });
 
+  it('only exposes filters and sorts supported by the current Series API', async () => {
+    const element = await AdminSeriesPage({ searchParams: Promise.resolve({}) });
+    renderToStaticMarkup(element);
+
+    expect(mocks.tableProps?.filterFields.map((field) => field.field)).toEqual(['status']);
+    expect(mocks.tableProps?.filterFields[0]?.operators).toEqual(['eq']);
+    expect(mocks.tableProps?.sortFields.map((field) => field.field)).toEqual(['title', 'status', 'created_at']);
+  });
+
   it('forwards title search and status without forwarding unsupported filters', async () => {
     const query = JSON.stringify({
       search: 'sessions',

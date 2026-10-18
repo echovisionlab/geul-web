@@ -54,6 +54,14 @@ describe('production legal page state fixtures', () => {
     expect(host.querySelector('.terms-content')).toHaveTextContent('이 문서는 원문 언어로 제공됩니다.');
     expect(host.querySelector('h1')).toHaveTextContent('Terms of Service');
   });
+  it('renders the actual scheduled preview branch from the locally scoped preview key', async () => {
+    await render('preview');
+    expect(host.querySelector('[data-legal-document="terms-preview"]')).not.toBeNull();
+    expect(host.querySelector('.terms-content')).toHaveTextContent(
+      'This policy explains the current conditions and effective period.',
+    );
+    expect(host.textContent).toContain('Version 4');
+  });
   it('offers the current policy after an invalid preview without presenting unpublished body', async () => {
     await render('invalid-preview');
     expect(host.querySelector('[role="alert"]')).not.toBeNull();

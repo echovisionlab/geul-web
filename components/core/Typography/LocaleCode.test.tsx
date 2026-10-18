@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { LocaleCode } from './LocaleCode';
+import { LocaleCode, type LocaleCodeProps } from './LocaleCode';
 import { formatLocaleCode } from './locale-code';
 
 describe('locale code display contract', () => {
@@ -25,5 +25,24 @@ describe('locale code display contract', () => {
     expect(text.dataset.tone).toBe('secondary');
     expect(text.getAttribute('dir')).toBe('ltr');
     expect(text.getAttribute('aria-label')).toBe('Portuguese (Brazil)');
+  });
+  it('rejects runtime visual and direction overrides', () => {
+    const html = renderToStaticMarkup(
+      <LocaleCode
+        {...({
+          code: 'en',
+          size: 'lg',
+          dir: 'rtl',
+          children: 'Wrong',
+          style: { fontSize: 36 },
+          className: 'escape',
+        } as unknown as LocaleCodeProps)}
+      />,
+    );
+    expect(html).toContain('data-size="xs"');
+    expect(html).toContain('dir="ltr"');
+    expect(html).not.toContain('Wrong');
+    expect(html).not.toContain('escape');
+    expect(html).not.toContain('font-size');
   });
 });

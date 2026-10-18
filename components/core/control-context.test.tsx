@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { ActionRowSizeProvider, ToolbarDensityProvider } from './control-context';
+import { ActionRowSizeProvider, ToolbarDensityProvider, resolveActionSize } from './control-context';
 import { Button } from './Button';
 import { IconButton } from './IconButton';
 import { TextButton } from './TextButton';
@@ -28,5 +28,8 @@ describe('action composition geometry', () => {
     );
     expect(html.match(/data-control-size="compact"/g)).toHaveLength(3);
     expect(renderToStaticMarkup(<TextButton href="/about">About</TextButton>)).not.toContain('data-control-size');
+  });
+  it('rejects raw geometry even in JS and cast callers', () => {
+    expect(() => resolveActionSize('44px', undefined, 'comfortable')).toThrow(RangeError);
   });
 });

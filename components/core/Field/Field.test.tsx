@@ -161,6 +161,25 @@ describe('Field', () => {
     expect(input?.getAttribute('aria-describedby')).toContain('field-display-name-error');
     expect(input?.getAttribute('aria-invalid')).toBe('true');
   });
+
+  it('wires native inputs to description and error text', () => {
+    render(
+      <Field
+        label="Native email"
+        htmlFor="field-native-email"
+        description="Used for receipts"
+        error="Email is required"
+      >
+        <input />
+      </Field>,
+    );
+
+    const input = document.querySelector('input#field-native-email');
+
+    expect(input?.getAttribute('aria-describedby')).toContain('field-native-email-description');
+    expect(input?.getAttribute('aria-describedby')).toContain('field-native-email-error');
+    expect(input?.getAttribute('aria-invalid')).toBe('true');
+  });
   it('associates a field label and validation copy with the native React Aria checkbox', () => {
     render(
       <Field label="Consent" htmlFor="consent" error="Required" required>

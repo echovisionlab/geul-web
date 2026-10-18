@@ -596,6 +596,40 @@ describe('getHomeMetadataDocument', () => {
     });
   });
 
+  it('keeps archived Post metadata public while private Post metadata stays hidden', async () => {
+    const { getPostMetadataDocument } = await import('./metadata');
+    getPublicPostRpcMock.mockResolvedValue({
+      post: {
+        id: 'post-1',
+        status: PostStatus.ARCHIVED,
+        slug: 'archived-post',
+        title: 'Archived Post',
+        summary: 'Read-only public Post',
+        authorMembers: [],
+        categories: [],
+        tags: [],
+      },
+    });
+
+    await expect(getPostMetadataDocument('archived-post', { requestedLocale: 'en' })).resolves.toMatchObject({
+      id: 'post-1',
+      routePath: '/posts/archived-post',
+      title: 'Archived Post',
+    });
+
+    getPublicPostRpcMock.mockResolvedValueOnce({
+      post: {
+        id: 'post-2',
+        status: PostStatus.DRAFT,
+        title: 'Draft Post',
+        authorMembers: [],
+        categories: [],
+        tags: [],
+      },
+    });
+    await expect(getPostMetadataDocument('draft-post', { requestedLocale: 'en' })).resolves.toBeNull();
+  });
+
   it('fails closed when manifest settings are absent', async () => {
     const { getSiteMetadataDocument } = await import('./metadata');
     getManifestRpcMock.mockResolvedValueOnce({});

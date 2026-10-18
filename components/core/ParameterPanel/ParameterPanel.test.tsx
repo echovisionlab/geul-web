@@ -60,6 +60,17 @@ describe('ParameterPanel Core contract', () => {
     act(() => button.click());
     expect(writeText).toHaveBeenCalledWith('rgba(17, 34, 51, 0.5)');
   });
+  it('projects styling escape props out of the runtime boundary', () => {
+    render({
+      title: 'Settings',
+      model: {},
+      style: { background: 'red' },
+      className: 'foreign',
+    } as unknown as ParameterPanelProps);
+    const panel = host.querySelector('[data-geul-parameter-placement]') as HTMLElement;
+    expect(panel.style.cssText).toBe('');
+    expect(panel.className).not.toContain('foreign');
+  });
   it('fails closed for an unregistered schema control', () => {
     expect(() =>
       render({ title: 'Settings', model: { Wrong: { kind: 'slider', value: 1 } } } as unknown as ParameterPanelProps),

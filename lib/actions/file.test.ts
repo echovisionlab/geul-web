@@ -176,6 +176,16 @@ describe('File Manager site-wide search', () => {
     expect(listFileManagerItemsMock).toHaveBeenCalledWith(expect.objectContaining({ query: 'CoVeR', pageSize: 100 }));
     expect(listFileManagerItemsMock.mock.calls[0]?.[0]).not.toHaveProperty('folderId');
   });
+
+  it('passes a folder scope without changing the bounded search contract', async () => {
+    listFileManagerItemsMock.mockResolvedValueOnce({ items: [], total: BigInt(0) });
+
+    await searchFileManagerItemsAction({ query: 'recording', folderId: 'recordings' });
+
+    expect(listFileManagerItemsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'recording', folderId: 'recordings', pageSize: 50 }),
+    );
+  });
 });
 
 describe('File Manager detail projection', () => {
@@ -520,6 +530,36 @@ describe('getFileStatusAction', () => {
     });
   });
 
+  it('keeps non-terminal media in processing when derivatives are still pending', async () => {
+    getMediaDeliveryMock.mockResolvedValue({
+      delivery: mediaDeliveryFixture({
+        fileId: 'file-video',
+        mimeType: 'video/mp4',
+        inlineUrl: 'https://cdn.example.com/original.mp4',
+        downloadUrl: 'https://cdn.example.com/original.mp4',
+        processingStatus: MediaProcessingStatus.PROCESSING,
+        processingPercentage: 0,
+        durationSeconds: 0,
+      }),
+    });
+
+    await expect(getFileStatusAction('file-video')).resolves.toEqual({
+      mimeType: 'video/mp4',
+      completed: false,
+      failed: false,
+      unavailable: false,
+      url: 'https://cdn.example.com/original.mp4',
+      originalUrl: 'https://cdn.example.com/original.mp4',
+      waveformUrl: '',
+      spectrogramUrl: '',
+      thumbnailUrl: '',
+      hlsUrl: '',
+      durationSeconds: 0,
+      processingStatus: MediaProcessingStatus.PROCESSING,
+      processingPercentage: 0,
+    });
+  });
+
   it('does not infer media readiness from derivative URLs without backend ready status', async () => {
     getMediaDeliveryMock.mockResolvedValue({
       delivery: mediaDeliveryFixture({
@@ -589,6 +629,13 @@ describe('getFileStatusAction', () => {
 });
 
 describe('deleteFileAction', () => {
+  it('returns success when the backend deletes the file', async () => {
+    deleteFileMock.mockResolvedValue({ success: true });
+
+    await expect(deleteFileAction('file-1')).resolves.toEqual({ success: true });
+    expect(deleteFileMock).toHaveBeenCalledWith({ fileId: 'file-1' });
+  });
+
   it('treats already missing files as deleted', async () => {
     deleteFileMock.mockRejectedValue(new ConnectError('not found', Code.NotFound));
 
