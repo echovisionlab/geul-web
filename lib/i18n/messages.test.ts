@@ -597,12 +597,16 @@ describe('getMessagesForLocale', () => {
   });
 
   it('does not contain machine placeholder artifacts in any supported locale', async () => {
+    const artifacts: Array<{ locale: string; key: string; value: string }> = [];
     for (const locale of SUPPORTED_LOCALES) {
       const messages = await getMessagesForLocale(locale);
 
       for (const [key, value] of collectStringEntries(messages)) {
-        expect(value, `${locale}:${key}`).not.toMatch(/__P\d+__/);
+        if (/__P\d+__/.test(value)) {
+          artifacts.push({ locale, key, value });
+        }
       }
     }
+    expect(artifacts).toEqual([]);
   });
 });

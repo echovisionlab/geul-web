@@ -20,6 +20,9 @@ export function isToolModuleUrl(url: URL): boolean {
   return /\.(?:m?js)$/.test(url.pathname);
 }
 
+/** geul-tools origins, each served directly under the site's base host (see docs/page-embed.md). */
+const TOOL_SUBDOMAINS = ['hwp', 'portadj', 'transcode', 'youtube-audio'];
+
 export function isTrustedToolModuleUrl(url: URL, parentOrigin: string): boolean {
   const parent = new URL(parentOrigin);
   if (url.username || url.password) {
@@ -32,12 +35,10 @@ export function isTrustedToolModuleUrl(url: URL, parentOrigin: string): boolean 
     return url.protocol === 'https:' || url.protocol === 'http:';
   }
   const baseHostname = parent.hostname.replace(/^www\./, '');
-  const prefix = url.hostname.slice(0, -(baseHostname.length + 1));
   return (
     url.protocol === 'https:' &&
     !url.port &&
-    url.hostname.endsWith(`.${baseHostname}`) &&
-    /^tools-[a-z0-9-]+$/.test(prefix)
+    TOOL_SUBDOMAINS.some((subdomain) => url.hostname === `${subdomain}.${baseHostname}`)
   );
 }
 
