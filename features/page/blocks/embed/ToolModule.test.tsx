@@ -10,7 +10,7 @@ vi.mock('./loadToolModule', () => ({ loadToolModule: vi.fn() }));
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 let container: HTMLDivElement;
 let root: Root;
-const uri = 'https://tools-anything.dsub.io/embed/index.js';
+const uri = 'https://portadj.dsub.io/embed/index.js';
 function render(options: { uri?: string; locale?: string; colorScheme?: 'light' | 'dark'; preview?: boolean } = {}) {
   act(() =>
     root.render(
@@ -79,7 +79,7 @@ describe('tool module lifecycle', () => {
     vi.mocked(loadToolModule).mockResolvedValue({ mount });
     render();
     await settle();
-    render({ uri: 'https://tools-new.dsub.io/embed/index.js' });
+    render({ uri: 'https://hwp.dsub.io/embed/index.js' });
     await settle();
     expect(signals[0].aborted).toBe(true);
     expect(first.destroy).toHaveBeenCalledTimes(1);

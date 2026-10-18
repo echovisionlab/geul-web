@@ -52,14 +52,14 @@ afterEach(() => {
 });
 
 describe('EmbedFrame security and lifecycle', () => {
-  it('mounts a newly named trusted tool directly without iframe permissions or height styling', async () => {
+  it('mounts a trusted tool directly without iframe permissions or height styling', async () => {
     const destroy = vi.fn();
     const mount = vi.fn(async (host: HTMLElement) => {
       host.attachShadow({ mode: 'open' }).textContent = 'Native content';
       return { update: vi.fn(), destroy };
     });
     vi.mocked(loadToolModule).mockResolvedValue({ mount });
-    const uri = 'https://tools-just-added.parent.example/embed/index.js';
+    const uri = 'https://transcode.parent.example/embed/index.js';
     render({ uri, heightMode: 'viewport', allowScripts: 'false' });
     await act(async () => {
       await Promise.resolve();

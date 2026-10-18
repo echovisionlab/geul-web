@@ -39,7 +39,7 @@ const permissions = [
 
 describe('Embed settings persistence boundaries', () => {
   it('shows module execution information instead of iframe height and permissions', () => {
-    const { refresh } = setup({ uri: 'https://tools-new.dsub.io/embed/index.js' }, false);
+    const { refresh } = setup({ uri: 'https://hwp.dsub.io/embed/index.js' }, false);
     expect(screen.getByText('toolDescription')).toBeInTheDocument();
     expect(screen.queryByRole('combobox', { name: 'heightModeLabel' })).toBeNull();
     expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
