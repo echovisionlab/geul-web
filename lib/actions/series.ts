@@ -73,7 +73,6 @@ export async function updateSeriesAction(
   data: {
     title?: string;
     slug?: string;
-    description?: string | null;
     status?: SeriesStatus;
   },
 ): Promise<{ success?: boolean; error?: string }> {
@@ -83,7 +82,6 @@ export async function updateSeriesAction(
       id,
       title: data.title,
       slug: data.slug,
-      description: data.description ?? undefined,
       status: toApiSeriesStatus(data.status),
     });
     revalidateSeriesAfterCommit('/admin/series');

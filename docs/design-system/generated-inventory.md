@@ -4,13 +4,13 @@ Run `node scripts/design-system/inventory.mjs` to regenerate; `--check` fails wh
 
 Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.
 
-Source manifest SHA-256: `bfc4ad9e85d71221373659e45d6a3508e9e60372e8a0c8491aad1bb09500d7ae`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
+Source manifest SHA-256: `9aa5db37404014c1d60d395a016e175898a6f807276d62607219c2c7c4fb1af7`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
 
 ## Counts
 
 | Metric                | Count |
 | --------------------- | ----: |
-| sourceFiles           |  3731 |
+| sourceFiles           |  3732 |
 | productionSourceFiles |  2286 |
 | componentFiles        |   908 |
 | coreFamilies          |    57 |
@@ -148,7 +148,7 @@ Counts include every production JS/TS file in the domain; component files are Pa
 | [menu](../../features/menu)                           |      7 |          4 |       0 |     4 |             1 |
 | [mermaid](../../features/mermaid)                     |      4 |          2 |       1 |     4 |             0 |
 | [metadata](../../features/metadata)                   |     11 |          9 |       1 |     6 |            13 |
-| [my](../../features/my)                               |     38 |         26 |       8 |    19 |             7 |
+| [my](../../features/my)                               |     38 |         26 |       8 |    20 |             7 |
 | [navigation](../../features/navigation)               |      2 |          2 |       0 |     0 |             1 |
 | [newsletter](../../features/newsletter)               |      2 |          2 |       0 |     1 |             1 |
 | [page](../../features/page)                           |    251 |        165 |       8 |   102 |             4 |

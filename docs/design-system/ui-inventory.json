@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "bfc4ad9e85d71221373659e45d6a3508e9e60372e8a0c8491aad1bb09500d7ae",
+  "manifestHash": "9aa5db37404014c1d60d395a016e175898a6f807276d62607219c2c7c4fb1af7",
   "counts": {
-    "sourceFiles": 3731,
+    "sourceFiles": 3732,
     "productionSourceFiles": 2286,
     "componentFiles": 908,
     "coreFamilies": 57,
@@ -1916,6 +1916,7 @@
     "features/my/McpOAuthGrantSettings.tsx",
     "features/my/MyArtistsDataTable.test.tsx",
     "features/my/MyArtistsDataTable.tsx",
+    "features/my/MyArtistsTable.query.test.tsx",
     "features/my/MyArtistsTable.test.tsx",
     "features/my/MyArtistsTable.tsx",
     "features/my/MyPostsPageView.tsx",
@@ -50322,7 +50323,7 @@
             {
               "name": "result",
               "optional": false,
-              "type": "MyArtistsDataTableResult"
+              "type": "MyArtistsDataTableResult | undefined"
             },
             {
               "name": "labels",
@@ -50489,7 +50490,7 @@
       "typeAliasEvidence": [],
       "productionConsumers": ["app/(general)/my/artists/page.tsx"],
       "catalogAdapters": [],
-      "tests": ["features/my/MyArtistsTable.test.tsx"],
+      "tests": ["features/my/MyArtistsTable.query.test.tsx", "features/my/MyArtistsTable.test.tsx"],
       "stories": ["stories/pages/MyLists.stories.tsx"],
       "composedJsx": ["MyArtistsDataTable", "QueryErrorAlert"]
     },
@@ -76605,6 +76606,7 @@
         "features/my/LocalBackups.test.tsx",
         "features/my/McpOAuthGrantSettings.test.tsx",
         "features/my/MyArtistsDataTable.test.tsx",
+        "features/my/MyArtistsTable.query.test.tsx",
         "features/my/MyArtistsTable.test.tsx",
         "features/my/PasskeySettingsSection.test.ts",
         "features/my/PersonalAccessTokenSettings.test.tsx",
@@ -104511,11 +104513,6 @@
             {
               "exported": "createSelectionBubbleMenuLabels",
               "imported": "createSelectionBubbleMenuLabels",
-              "typeOnly": false
-            },
-            {
-              "exported": "SELECTION_BUBBLE_MENU_CONTROL_ORDER",
-              "imported": "SELECTION_BUBBLE_MENU_CONTROL_ORDER",
               "typeOnly": false
             },
             {

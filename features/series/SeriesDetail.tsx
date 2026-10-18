@@ -196,13 +196,8 @@ function useSeriesDetailModel({ initialData, scope }: SeriesDetailProps) {
     return posts.slice(start, start + postsPerPage);
   }, [posts, safePostsPage]);
   const updateSeries = useMutation({
-    mutationFn: (data: {
-      id: string;
-      title?: string;
-      slug?: string;
-      description?: string | null;
-      status?: SeriesStatus;
-    }) => updateSeriesAction(data.id, data),
+    mutationFn: (data: { id: string; title?: string; slug?: string; status?: SeriesStatus }) =>
+      updateSeriesAction(data.id, data),
     onSuccess: (result, variables) => {
       if (result.error) {
         notifications.show({ message: t('notifications.updateFailed'), tone: 'danger' });
