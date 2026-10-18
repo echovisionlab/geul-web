@@ -7714,10 +7714,10 @@
           "name": "--geul-border-default",
           "registered": true,
           "sources": [
-            { "file": "components/core/Display/Display.module.css", "line": 124, "property": "border-block-start" },
-            { "file": "components/core/Display/Display.module.css", "line": 138, "property": "border-inline-start" },
-            { "file": "components/core/Display/Display.module.css", "line": 351, "property": "border-block-end" },
-            { "file": "components/core/Display/Display.module.css", "line": 433, "property": "border" }
+            { "file": "components/core/Display/Display.module.css", "line": 125, "property": "border-block-start" },
+            { "file": "components/core/Display/Display.module.css", "line": 139, "property": "border-inline-start" },
+            { "file": "components/core/Display/Display.module.css", "line": 352, "property": "border-block-end" },
+            { "file": "components/core/Display/Display.module.css", "line": 434, "property": "border" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 172, "value": "#cfccc5", "context": ":root" },
@@ -7751,11 +7751,11 @@
           "name": "--geul-border-focus",
           "registered": true,
           "sources": [
-            { "file": "components/core/Display/Display.module.css", "line": 12, "property": "border" },
-            { "file": "components/core/Display/Display.module.css", "line": 331, "property": "outline" },
-            { "file": "components/core/Display/Display.module.css", "line": 332, "property": "outline-offset" },
-            { "file": "components/core/Display/Display.module.css", "line": 417, "property": "outline" },
-            { "file": "components/core/Display/Display.module.css", "line": 418, "property": "outline-offset" },
+            { "file": "components/core/Display/Display.module.css", "line": 13, "property": "border" },
+            { "file": "components/core/Display/Display.module.css", "line": 332, "property": "outline" },
+            { "file": "components/core/Display/Display.module.css", "line": 333, "property": "outline-offset" },
+            { "file": "components/core/Display/Display.module.css", "line": 418, "property": "outline" },
+            { "file": "components/core/Display/Display.module.css", "line": 419, "property": "outline-offset" },
             { "file": "components/core/Spinner.module.css", "line": 5, "property": "border" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 131, "value": "2px", "context": ":root" }]
@@ -7763,7 +7763,7 @@
         {
           "name": "--geul-border-strong",
           "registered": true,
-          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 58, "property": "border-color" }],
+          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 59, "property": "border-color" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 173, "value": "#85827c", "context": ":root" },
             {
@@ -7796,10 +7796,10 @@
           "name": "--geul-border-thin",
           "registered": true,
           "sources": [
-            { "file": "components/core/Display/Display.module.css", "line": 124, "property": "border-block-start" },
-            { "file": "components/core/Display/Display.module.css", "line": 138, "property": "border-inline-start" },
-            { "file": "components/core/Display/Display.module.css", "line": 351, "property": "border-block-end" },
-            { "file": "components/core/Display/Display.module.css", "line": 433, "property": "border" }
+            { "file": "components/core/Display/Display.module.css", "line": 125, "property": "border-block-start" },
+            { "file": "components/core/Display/Display.module.css", "line": 139, "property": "border-inline-start" },
+            { "file": "components/core/Display/Display.module.css", "line": 352, "property": "border-block-end" },
+            { "file": "components/core/Display/Display.module.css", "line": 434, "property": "border" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 130, "value": "1px", "context": ":root" }]
         },
@@ -7807,15 +7807,15 @@
           "name": "--geul-chrome-icon-size",
           "registered": true,
           "sources": [
-            { "file": "components/core/Display/Display.module.css", "line": 71, "property": "width" },
-            { "file": "components/core/Display/Display.module.css", "line": 72, "property": "height" }
+            { "file": "components/core/Display/Display.module.css", "line": 72, "property": "width" },
+            { "file": "components/core/Display/Display.module.css", "line": 73, "property": "height" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 153, "value": "1rem", "context": ":root" }]
         },
         {
           "name": "--geul-control-height-compact",
           "registered": true,
-          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 458, "property": "width" }],
+          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 459, "property": "width" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 115, "value": "1.5rem", "context": ":root" }
           ]
@@ -7823,15 +7823,15 @@
         {
           "name": "--geul-control-height-md",
           "registered": true,
-          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 209, "property": "height" }],
+          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 210, "property": "height" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 119, "value": "2rem", "context": ":root" }]
         },
         {
           "name": "--geul-focus",
           "registered": true,
           "sources": [
-            { "file": "components/core/Display/Display.module.css", "line": 331, "property": "outline" },
-            { "file": "components/core/Display/Display.module.css", "line": 417, "property": "outline" }
+            { "file": "components/core/Display/Display.module.css", "line": 332, "property": "outline" },
+            { "file": "components/core/Display/Display.module.css", "line": 418, "property": "outline" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 193, "value": "#1b1b19", "context": ":root" },
@@ -7864,7 +7864,7 @@
         {
           "name": "--geul-font-size-md",
           "registered": true,
-          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 195, "property": "height" }],
+          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 196, "property": "height" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 87, "value": "0.75rem", "context": ":root" },
             { "file": "lib/styles/design-tokens.css", "line": 604, "value": "9pt", "context": "@media print → :root" }
@@ -7874,8 +7874,8 @@
           "name": "--geul-font-size-sm",
           "registered": true,
           "sources": [
-            { "file": "components/core/Display/Display.module.css", "line": 11, "property": "font-size" },
-            { "file": "components/core/Display/Display.module.css", "line": 343, "property": "font-size" }
+            { "file": "components/core/Display/Display.module.css", "line": 12, "property": "font-size" },
+            { "file": "components/core/Display/Display.module.css", "line": 344, "property": "font-size" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 86, "value": "0.6875rem", "context": ":root" },
@@ -7886,9 +7886,9 @@
           "name": "--geul-font-size-xs",
           "registered": true,
           "sources": [
-            { "file": "components/core/Display/Display.module.css", "line": 25, "property": "font-size" },
-            { "file": "components/core/Display/Display.module.css", "line": 116, "property": "font-size" },
-            { "file": "components/core/Display/Display.module.css", "line": 188, "property": "height" }
+            { "file": "components/core/Display/Display.module.css", "line": 26, "property": "font-size" },
+            { "file": "components/core/Display/Display.module.css", "line": 117, "property": "font-size" },
+            { "file": "components/core/Display/Display.module.css", "line": 189, "property": "height" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 85, "value": "0.625rem", "context": ":root" },
@@ -7898,13 +7898,13 @@
         {
           "name": "--geul-font-weight-medium",
           "registered": true,
-          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 356, "property": "font-weight" }],
+          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 357, "property": "font-weight" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 97, "value": "400", "context": ":root" }]
         },
         {
           "name": "--geul-interaction-minimum",
           "registered": true,
-          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 458, "property": "width" }],
+          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 459, "property": "width" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 122, "value": "0px", "context": ":root" },
             {
@@ -7918,19 +7918,19 @@
         {
           "name": "--geul-line-height-sm",
           "registered": true,
-          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 344, "property": "line-height" }],
+          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 345, "property": "line-height" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 110, "value": "1.45", "context": ":root" }]
         },
         {
           "name": "--geul-line-height-xs",
           "registered": true,
-          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 117, "property": "line-height" }],
+          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 118, "property": "line-height" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 109, "value": "1.4", "context": ":root" }]
         },
         {
           "name": "--geul-motion-easing",
           "registered": true,
-          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 191, "property": "animation" }],
+          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 192, "property": "animation" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 147, "value": "ease-out", "context": ":root" }
           ]
@@ -7938,7 +7938,7 @@
         {
           "name": "--geul-motion-normal",
           "registered": true,
-          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 191, "property": "animation" }],
+          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 192, "property": "animation" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 144, "value": "140ms", "context": ":root" }]
         },
         {
@@ -7953,8 +7953,8 @@
           "name": "--geul-opacity-drag-preview",
           "registered": true,
           "sources": [
-            { "file": "components/core/Display/Display.module.css", "line": 252, "property": "opacity" },
-            { "file": "components/core/Display/Display.module.css", "line": 411, "property": "opacity" }
+            { "file": "components/core/Display/Display.module.css", "line": 253, "property": "opacity" },
+            { "file": "components/core/Display/Display.module.css", "line": 412, "property": "opacity" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 133, "value": "0.72", "context": ":root" }]
         },
@@ -7962,8 +7962,8 @@
           "name": "--geul-radius-circle",
           "registered": true,
           "sources": [
-            { "file": "components/core/Display/Display.module.css", "line": 13, "property": "border-radius" },
-            { "file": "components/core/Display/Display.module.css", "line": 247, "property": "border-radius" },
+            { "file": "components/core/Display/Display.module.css", "line": 14, "property": "border-radius" },
+            { "file": "components/core/Display/Display.module.css", "line": 248, "property": "border-radius" },
             { "file": "components/core/Spinner.module.css", "line": 7, "property": "border-radius" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 129, "value": "50%", "context": ":root" }]
@@ -7972,8 +7972,8 @@
           "name": "--geul-radius-square",
           "registered": true,
           "sources": [
-            { "file": "components/core/Display/Display.module.css", "line": 49, "property": "border-radius" },
-            { "file": "components/core/Display/Display.module.css", "line": 190, "property": "border-radius" }
+            { "file": "components/core/Display/Display.module.css", "line": 50, "property": "border-radius" },
+            { "file": "components/core/Display/Display.module.css", "line": 191, "property": "border-radius" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 128, "value": "0", "context": ":root" }]
         },
@@ -7981,9 +7981,9 @@
           "name": "--geul-spacing-lg",
           "registered": true,
           "sources": [
-            { "file": "components/core/Display/Display.module.css", "line": 159, "property": "margin-block-start" },
-            { "file": "components/core/Display/Display.module.css", "line": 179, "property": "margin-block-end" },
-            { "file": "components/core/Display/Display.module.css", "line": 323, "property": "padding" }
+            { "file": "components/core/Display/Display.module.css", "line": 160, "property": "margin-block-start" },
+            { "file": "components/core/Display/Display.module.css", "line": 180, "property": "margin-block-end" },
+            { "file": "components/core/Display/Display.module.css", "line": 324, "property": "padding" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 63, "value": "1rem", "context": ":root" }]
         },
@@ -7991,10 +7991,10 @@
           "name": "--geul-spacing-md",
           "registered": true,
           "sources": [
-            { "file": "components/core/Display/Display.module.css", "line": 155, "property": "margin-block-start" },
-            { "file": "components/core/Display/Display.module.css", "line": 175, "property": "margin-block-end" },
-            { "file": "components/core/Display/Display.module.css", "line": 319, "property": "padding" },
-            { "file": "components/core/Display/Display.module.css", "line": 443, "property": "padding" }
+            { "file": "components/core/Display/Display.module.css", "line": 156, "property": "margin-block-start" },
+            { "file": "components/core/Display/Display.module.css", "line": 176, "property": "margin-block-end" },
+            { "file": "components/core/Display/Display.module.css", "line": 320, "property": "padding" },
+            { "file": "components/core/Display/Display.module.css", "line": 444, "property": "padding" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 62, "value": "0.75rem", "context": ":root" }
@@ -8004,11 +8004,11 @@
           "name": "--geul-spacing-sm",
           "registered": true,
           "sources": [
-            { "file": "components/core/Display/Display.module.css", "line": 151, "property": "margin-block-start" },
-            { "file": "components/core/Display/Display.module.css", "line": 171, "property": "margin-block-end" },
-            { "file": "components/core/Display/Display.module.css", "line": 315, "property": "padding" },
-            { "file": "components/core/Display/Display.module.css", "line": 350, "property": "padding" },
-            { "file": "components/core/Display/Display.module.css", "line": 443, "property": "padding" }
+            { "file": "components/core/Display/Display.module.css", "line": 152, "property": "margin-block-start" },
+            { "file": "components/core/Display/Display.module.css", "line": 172, "property": "margin-block-end" },
+            { "file": "components/core/Display/Display.module.css", "line": 316, "property": "padding" },
+            { "file": "components/core/Display/Display.module.css", "line": 351, "property": "padding" },
+            { "file": "components/core/Display/Display.module.css", "line": 444, "property": "padding" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 61, "value": "0.625rem", "context": ":root" }
@@ -8018,9 +8018,9 @@
           "name": "--geul-spacing-xl",
           "registered": true,
           "sources": [
-            { "file": "components/core/Display/Display.module.css", "line": 163, "property": "margin-block-start" },
-            { "file": "components/core/Display/Display.module.css", "line": 183, "property": "margin-block-end" },
-            { "file": "components/core/Display/Display.module.css", "line": 327, "property": "padding" }
+            { "file": "components/core/Display/Display.module.css", "line": 164, "property": "margin-block-start" },
+            { "file": "components/core/Display/Display.module.css", "line": 184, "property": "margin-block-end" },
+            { "file": "components/core/Display/Display.module.css", "line": 328, "property": "padding" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 64, "value": "1.5rem", "context": ":root" }]
         },
@@ -8028,12 +8028,12 @@
           "name": "--geul-spacing-xs",
           "registered": true,
           "sources": [
-            { "file": "components/core/Display/Display.module.css", "line": 114, "property": "gap" },
-            { "file": "components/core/Display/Display.module.css", "line": 147, "property": "margin-block-start" },
-            { "file": "components/core/Display/Display.module.css", "line": 167, "property": "margin-block-end" },
-            { "file": "components/core/Display/Display.module.css", "line": 311, "property": "padding" },
-            { "file": "components/core/Display/Display.module.css", "line": 350, "property": "padding" },
-            { "file": "components/core/Display/Display.module.css", "line": 438, "property": "padding" }
+            { "file": "components/core/Display/Display.module.css", "line": 115, "property": "gap" },
+            { "file": "components/core/Display/Display.module.css", "line": 148, "property": "margin-block-start" },
+            { "file": "components/core/Display/Display.module.css", "line": 168, "property": "margin-block-end" },
+            { "file": "components/core/Display/Display.module.css", "line": 312, "property": "padding" },
+            { "file": "components/core/Display/Display.module.css", "line": 351, "property": "padding" },
+            { "file": "components/core/Display/Display.module.css", "line": 439, "property": "padding" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 60, "value": "0.5rem", "context": ":root" }]
         },
@@ -8041,8 +8041,8 @@
           "name": "--geul-spacing-xxs",
           "registered": true,
           "sources": [
-            { "file": "components/core/Display/Display.module.css", "line": 438, "property": "padding" },
-            { "file": "components/core/Display/Display.module.css", "line": 463, "property": "padding-block" }
+            { "file": "components/core/Display/Display.module.css", "line": 439, "property": "padding" },
+            { "file": "components/core/Display/Display.module.css", "line": 464, "property": "padding-block" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 59, "value": "0.25rem", "context": ":root" }
@@ -8051,7 +8051,7 @@
         {
           "name": "--geul-status-accent",
           "registered": true,
-          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 103, "property": "color" }],
+          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 104, "property": "color" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 194, "value": "#9c3d18", "context": ":root" },
             {
@@ -8083,7 +8083,7 @@
         {
           "name": "--geul-status-danger",
           "registered": true,
-          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 95, "property": "color" }],
+          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 96, "property": "color" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 197, "value": "#802019", "context": ":root" },
             {
@@ -8115,7 +8115,7 @@
         {
           "name": "--geul-status-positive",
           "registered": true,
-          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 107, "property": "color" }],
+          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 108, "property": "color" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 195, "value": "#245936", "context": ":root" },
             {
@@ -8147,7 +8147,7 @@
         {
           "name": "--geul-status-warning",
           "registered": true,
-          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 99, "property": "color" }],
+          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 100, "property": "color" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 196, "value": "#70540a", "context": ":root" },
             {
@@ -8180,8 +8180,8 @@
           "name": "--geul-surface-active",
           "registered": true,
           "sources": [
-            { "file": "components/core/Display/Display.module.css", "line": 389, "property": "background" },
-            { "file": "components/core/Display/Display.module.css", "line": 453, "property": "background" }
+            { "file": "components/core/Display/Display.module.css", "line": 390, "property": "background" },
+            { "file": "components/core/Display/Display.module.css", "line": 454, "property": "background" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 167, "value": "#dcd9d3", "context": ":root" },
@@ -8215,9 +8215,9 @@
           "name": "--geul-surface-muted",
           "registered": true,
           "sources": [
-            { "file": "components/core/Display/Display.module.css", "line": 9, "property": "background" },
-            { "file": "components/core/Display/Display.module.css", "line": 189, "property": "background" },
-            { "file": "components/core/Display/Display.module.css", "line": 385, "property": "background" }
+            { "file": "components/core/Display/Display.module.css", "line": 10, "property": "background" },
+            { "file": "components/core/Display/Display.module.css", "line": 190, "property": "background" },
+            { "file": "components/core/Display/Display.module.css", "line": 386, "property": "background" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 165, "value": "#e8e6e1", "context": ":root" },
@@ -8251,9 +8251,9 @@
           "name": "--geul-text-muted",
           "registered": true,
           "sources": [
-            { "file": "components/core/Display/Display.module.css", "line": 336, "property": "color" },
-            { "file": "components/core/Display/Display.module.css", "line": 403, "property": "color" },
-            { "file": "components/core/Display/Display.module.css", "line": 407, "property": "color" }
+            { "file": "components/core/Display/Display.module.css", "line": 337, "property": "color" },
+            { "file": "components/core/Display/Display.module.css", "line": 404, "property": "color" },
+            { "file": "components/core/Display/Display.module.css", "line": 408, "property": "color" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 170, "value": "#5d5b56", "context": ":root" },
@@ -8286,7 +8286,7 @@
         {
           "name": "--geul-text-primary",
           "registered": true,
-          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 345, "property": "color" }],
+          "sources": [{ "file": "components/core/Display/Display.module.css", "line": 346, "property": "color" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 168, "value": "#1b1b19", "context": ":root" },
             {
@@ -8319,10 +8319,10 @@
           "name": "--geul-text-secondary",
           "registered": true,
           "sources": [
-            { "file": "components/core/Display/Display.module.css", "line": 10, "property": "color" },
-            { "file": "components/core/Display/Display.module.css", "line": 67, "property": "color" },
-            { "file": "components/core/Display/Display.module.css", "line": 115, "property": "color" },
-            { "file": "components/core/Display/Display.module.css", "line": 357, "property": "color" }
+            { "file": "components/core/Display/Display.module.css", "line": 11, "property": "color" },
+            { "file": "components/core/Display/Display.module.css", "line": 68, "property": "color" },
+            { "file": "components/core/Display/Display.module.css", "line": 116, "property": "color" },
+            { "file": "components/core/Display/Display.module.css", "line": 358, "property": "color" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 169, "value": "#4f4d48", "context": ":root" },

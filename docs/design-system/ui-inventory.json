@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "21e4be9a947c2bdec144cf07b59faa519571d7880499508a6b7fae0b7a4d2365",
+  "manifestHash": "d6b4160003e0fcca4c9dab76d8f480d3bac468e42bc7eb5019dd2003603f1aee",
   "counts": {
     "sourceFiles": 3816,
     "productionSourceFiles": 2303,

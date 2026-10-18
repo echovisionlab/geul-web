@@ -40,7 +40,7 @@ function toRows(entries: PublicCreditEntry[]): CreditRow[] {
       continue;
     }
     const role = entry.role?.trim() || null;
-    const key = role?.toLocaleLowerCase() ?? '';
+    const key = role?.toLowerCase() ?? '';
     const row = rows.get(key) ?? { role, people: [] };
     row.people.push({ ...entry, name });
     rows.set(key, row);
