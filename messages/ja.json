@@ -1610,17 +1610,12 @@
       "cookiePreferencesTitle": "Cookie設定"
     },
     "languagePreference": {
-      "intro": "アカウントの言語設定は、ログインしたすべての場所に適用されます。新しいアカウントでは、初回認証時のブラウザ言語が初期値になります",
       "label": "優先言語",
       "save": "言語を保存",
-      "successTitle": "言語を更新しました",
-      "successMessage": "この設定はアカウントに保存され、ログイン中のすべてのデバイスに適用されます",
       "errorTitle": "エラー",
-      "errorMessage": "言語設定を更新できませんでした",
-      "helper": "この設定はアカウントに保存され、初回ログイン時に使用したブラウザ言語より優先されます。"
+      "errorMessage": "言語設定を更新できませんでした"
     },
     "newsletter": {
-      "subscribedTitle": "購読中",
       "subscribedAlert": "ニュースレターとキャンペーンメールを購読しています",
       "unsubscribedAlert": "ニュースレターを購読していません",
       "subscribe": "ニュースレターを購読",
@@ -1629,12 +1624,10 @@
     },
     "cookieConsent": {
       "syncError": "同意内容をアカウント設定に同期できませんでした",
-      "savedAccount": "設定を保存し、アカウントにも同期しました",
-      "savedBrowser": "このブラウザに設定を保存しました",
       "versionWarning": "Cookieポリシーをv{version}に更新しました。以前の選択を便宜上読み込んでいます。確認のためもう一度保存してください",
       "essentialIntro": "認証とサイトの基本動作に必要な必須Cookieは常に有効です",
       "lastSynced": "最終同期: {value}",
-      "noRecord": "サーバー側の同意記録はまだありません"
+      "savedBrowser": "このブラウザに保存しました"
     }
   },
   "cookieConsentCommon": {
@@ -1655,10 +1648,6 @@
     "submitFailed": "初期設定を完了できませんでした。もう一度お試しください。"
   },
   "profile": {
-    "notifications": {
-      "successTitle": "完了",
-      "updated": "プロフィールを更新しました"
-    },
     "fields": {
       "uid": "UID",
       "bio": "自己紹介"
@@ -1678,14 +1667,11 @@
       "disconnectionFailed": "連携解除に失敗しました",
       "disconnected": "連携を解除しました",
       "cannotUnlink": "連携を解除できません",
-      "success": "完了",
-      "sessionRevoked": "セッションを無効化しました",
+      "sessionRevoked": "セッションを解除しました",
       "sessionsRevoked": "他のすべてのセッションをログアウトしました",
       "failedToRevokeSession": "セッションを無効化できませんでした",
       "failedToRevokeSessions": "セッションを無効化できませんでした",
       "failedToRequestDeletion": "アカウント削除をリクエストできませんでした",
-      "connectedMessage": "{provider}アカウントを連携しました",
-      "disconnectedMessage": "{provider}の連携を解除しました",
       "failedToUpdateMainEmail": "メインのメールアドレスを更新できませんでした",
       "failedToLoad": "セキュリティ設定を読み込めませんでした"
     },
@@ -1699,12 +1685,10 @@
       "disconnectFailed": "{provider}の連携解除に失敗しました"
     },
     "connectedAccounts": {
-      "title": "連携済みのソーシャルログイン",
-      "description": "このアカウントに連携しているソーシャルログインを管理します"
+      "title": "連携済みのソーシャルログイン"
     },
     "sessions": {
       "title": "アクティブなセッション",
-      "description": "このアカウントがどこでログインしているかを確認し、信頼できないセッションを無効化します",
       "thisDevice": "このデバイス",
       "logoutOthers": "他のすべてのセッションをログアウト",
       "activeNow": "現在アクティブ",
@@ -1754,12 +1738,11 @@
       }
     },
     "mcpIntegration": {
-      "description": "対応する AI クライアントをこのエンドポイントに接続します。ログインと同意のためにブラウザが開きます。",
       "consentDescription": "このクライアントは、現在のアカウント権限の範囲でコンテンツの閲覧・編集とファイルの管理ができます。コンテンツの作成・更新・削除や既存の添付ファイルの変更ができます。接続によってアカウントに追加の権限が付与されることはありません。",
       "consentOfflineAccess": "この接続は、現在のブラウザーセッションが終了した後も、取り消すまで継続できます。",
       "consentRevoke": "{settings} → Remote MCPでこの接続を取り消せます。",
       "connectionsTitle": "接続中のMCPクライアント",
-      "connectionsDescription": "これらのOAuth認可はブラウザーセッションとは別です。認可を取り消すと、ログアウトせずにそのMCPクライアントの接続を解除できます。",
+      "connectionsDescription": "アクセスを取り消すと、ログアウトせずにその MCP クライアントだけが切断されます。",
       "connectionsEmpty": "接続中のMCPクライアントはありません。",
       "connectedAt": "接続日時 {date}",
       "revoke": "Revoke",
@@ -1771,7 +1754,7 @@
     },
     "personalAccessTokens": {
       "title": "個人アクセストークン",
-      "description": "この1つの個人アクセストークンを{siteName}が提供するAPIで使用します。各リクエストには現在のアカウント権限が適用されます。",
+      "description": "API リクエストには現在のアカウント権限が適用されます。",
       "empty": "個人アクセストークンはまだ作成されていません。",
       "regenerate": "再生成",
       "regenerateTitle": "個人アクセストークンを再生成",
@@ -1788,7 +1771,6 @@
     },
     "passkeys": {
       "title": "パスキー",
-      "description": "この端末またはセキュリティキーでログインできます。複数のパスキーを登録できます。",
       "loading": "パスキーを読み込み中...",
       "empty": "登録済みのパスキーはありません。",
       "add": "パスキーを追加",
@@ -5369,8 +5351,8 @@
   },
   "localBackups": {
     "title": "ローカルバックアップ",
-    "description": "このデバイスで閉じたタブの未保存の変更です。エディターを開くと復元できます。バックアップは30日後に期限切れとなり、ログアウトすると削除されます。",
-    "empty": "復元できるローカルバックアップはありません。開いているタブの変更はここには表示されません。",
+    "description": "このデバイスで閉じたタブの未保存の編集です。30日間保持され、サインアウトすると削除されます。",
+    "empty": "閉じたタブから復元できるバックアップはありません。",
     "unavailable": "ローカルバックアップには、このデバイスのブラウザーストレージとWeb Locksが必要です。",
     "loading": "ローカルバックアップを検索中…",
     "error": "操作を完了できませんでした。一覧を更新して、もう一度お試しください。",

@@ -56,7 +56,6 @@ describe('MCP consent explanation', () => {
     expect(html).toContain('You can revoke this connection in Settings → Remote MCP.');
     expect(html).toContain('Example AI client on behalf of Test Author');
     expect(html).toContain('Example AI client');
-    expect(html).not.toContain(messages.security.mcpIntegration.description);
     expect(html).not.toContain(messages.security.mcpIntegration.consentOfflineAccess);
     expect(mocks.assertRequest).toHaveBeenCalledOnce();
     expect(mocks.approve).not.toHaveBeenCalled();

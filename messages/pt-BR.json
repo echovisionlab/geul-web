@@ -1610,17 +1610,12 @@
       "cookiePreferencesTitle": "Preferências de cookies"
     },
     "languagePreference": {
-      "intro": "O idioma da sua conta acompanha você em qualquer lugar onde entrar. Novas contas são criadas a partir do idioma do navegador na primeira autenticação.",
       "label": "Idioma preferido",
       "save": "Salvar idioma",
-      "successTitle": "Idioma atualizado",
-      "successMessage": "Essa preferência agora está salva na sua conta em todos os dispositivos conectados.",
       "errorTitle": "Erro",
-      "errorMessage": "Falha ao atualizar a preferência de idioma",
-      "helper": "Essa configuração é salva na sua conta e tem prioridade sobre o idioma do navegador usado na primeira vez que você entrou."
+      "errorMessage": "Falha ao atualizar a preferência de idioma"
     },
     "newsletter": {
-      "subscribedTitle": "Inscrito",
       "subscribedAlert": "Você está inscrito na nossa newsletter e nos e-mails de campanha.",
       "unsubscribedAlert": "Você não está inscrito na nossa newsletter.",
       "subscribe": "Inscrever-se na newsletter",
@@ -1629,12 +1624,10 @@
     },
     "cookieConsent": {
       "syncError": "Falha ao sincronizar o consentimento com as configurações da conta.",
-      "savedAccount": "Preferências salvas e sincronizadas com sua conta.",
-      "savedBrowser": "Preferências salvas para este navegador.",
       "versionWarning": "Atualizamos a política de cookies para a versão v{version}. Sua escolha anterior foi carregada para conveniência. Salve novamente para confirmar.",
       "essentialIntro": "Cookies essenciais ficam sempre ativos para autenticação e funcionamento principal do site.",
       "lastSynced": "Última sincronização: {value}",
-      "noRecord": "Ainda não há registro de consentimento no servidor"
+      "savedBrowser": "Salvo neste navegador"
     }
   },
   "cookieConsentCommon": {
@@ -1655,10 +1648,6 @@
     "submitFailed": "Não foi possível concluir a configuração. Tente novamente."
   },
   "profile": {
-    "notifications": {
-      "successTitle": "Sucesso",
-      "updated": "Perfil atualizado com sucesso"
-    },
     "fields": {
       "uid": "UID",
       "bio": "Biografia"
@@ -1678,14 +1667,11 @@
       "disconnectionFailed": "Falha ao desconectar",
       "disconnected": "Desconectado",
       "cannotUnlink": "Não é possível desvincular",
-      "success": "Sucesso",
-      "sessionRevoked": "Sessão revogada com sucesso",
+      "sessionRevoked": "Sessão revogada",
       "sessionsRevoked": "Todas as outras sessões foram encerradas",
       "failedToRevokeSession": "Falha ao revogar a sessão",
       "failedToRevokeSessions": "Falha ao revogar as sessões",
       "failedToRequestDeletion": "Falha ao solicitar exclusão da conta",
-      "connectedMessage": "Conta {provider} conectada com sucesso.",
-      "disconnectedMessage": "{provider} foi desconectado.",
       "failedToUpdateMainEmail": "Não foi possível atualizar o e-mail principal",
       "failedToLoad": "Não foi possível carregar as configurações de segurança"
     },
@@ -1699,12 +1685,10 @@
       "disconnectFailed": "Falha ao desconectar {provider}."
     },
     "connectedAccounts": {
-      "title": "Logins sociais conectados",
-      "description": "Gerencie os logins sociais vinculados a esta conta."
+      "title": "Logins sociais conectados"
     },
     "sessions": {
       "title": "Sessões ativas",
-      "description": "Revise onde esta conta está conectada e revogue sessões em que você não confia.",
       "thisDevice": "Este dispositivo",
       "logoutOthers": "Sair de todas as outras sessões",
       "activeNow": "Ativa agora",
@@ -1754,12 +1738,11 @@
       }
     },
     "mcpIntegration": {
-      "description": "Conecte um cliente de IA compatível a este endpoint. O navegador será aberto para login e consentimento.",
       "consentDescription": "Este cliente pode ler e editar conteúdo e gerenciar arquivos dentro das permissões atuais da sua conta. Ele pode criar, atualizar ou excluir conteúdo e alterar anexos existentes. A conexão não concede permissões adicionais à conta.",
       "consentOfflineAccess": "Esta conexão pode continuar após o término da sessão atual do navegador, até que você a revogue.",
       "consentRevoke": "Você pode revogar esta conexão em {settings} → Remote MCP.",
       "connectionsTitle": "Clientes MCP conectados",
-      "connectionsDescription": "Estas autorizações OAuth são separadas das sessões do navegador. Revogar uma delas desconecta esse cliente MCP sem sair da sua conta.",
+      "connectionsDescription": "Revogar o acesso desconecta esse cliente MCP sem sair da sua conta.",
       "connectionsEmpty": "Nenhum cliente MCP conectado.",
       "connectedAt": "Conectado em {date}",
       "revoke": "Revoke",
@@ -1771,7 +1754,7 @@
     },
     "personalAccessTokens": {
       "title": "Token de acesso pessoal",
-      "description": "Use este único token de acesso pessoal com as APIs fornecidas pela {siteName}. Cada solicitação usa as permissões atuais da sua conta.",
+      "description": "As solicitações à API usam as permissões atuais da sua conta.",
       "empty": "Nenhum token de acesso pessoal foi criado.",
       "regenerate": "Gerar novamente",
       "regenerateTitle": "Gerar novamente o token de acesso pessoal",
@@ -1788,7 +1771,6 @@
     },
     "passkeys": {
       "title": "Chaves de acesso",
-      "description": "Use este dispositivo ou uma chave de segurança para entrar. Você pode manter várias chaves de acesso.",
       "loading": "Carregando chaves de acesso...",
       "empty": "Nenhuma chave de acesso registrada.",
       "add": "Adicionar chave de acesso",
@@ -5369,8 +5351,8 @@
   },
   "localBackups": {
     "title": "Backups locais",
-    "description": "Alterações não salvas de abas fechadas neste dispositivo. Abra o editor para recuperá-las. Os backups expiram após 30 dias e são removidos quando você sai da conta.",
-    "empty": "Nenhum backup local para recuperar. As alterações em abas abertas não são listadas aqui.",
+    "description": "Edições não salvas de abas fechadas neste dispositivo, mantidas por 30 dias e apagadas ao sair.",
+    "empty": "Não há backups de abas fechadas para recuperar.",
     "unavailable": "Os backups locais exigem armazenamento do navegador e Web Locks neste dispositivo.",
     "loading": "Buscando backups locais…",
     "error": "Não foi possível concluir esta ação. Atualize a lista e tente novamente.",

@@ -1610,17 +1610,12 @@
       "cookiePreferencesTitle": "Cookie 偏好设置"
     },
     "languagePreference": {
-      "intro": "您的账户语言会跟随您在任何地方登录。新账户会在您第一次验证时按浏览器语言初始化",
       "label": "首选语言",
       "save": "保存语言",
-      "successTitle": "语言已更新",
-      "successMessage": "此偏好设置现已保存到您所有登录设备的账户中",
       "errorTitle": "错误",
-      "errorMessage": "无法更新语言偏好设置",
-      "helper": "此设置会保存到您的账户，并优先于您首次登录时使用的浏览器语言。"
+      "errorMessage": "无法更新语言偏好设置"
     },
     "newsletter": {
-      "subscribedTitle": "已订阅",
       "subscribedAlert": "您已订阅我们的新闻通讯和活动邮件",
       "unsubscribedAlert": "您尚未订阅我们的新闻通讯",
       "subscribe": "订阅新闻通讯",
@@ -1629,12 +1624,10 @@
     },
     "cookieConsent": {
       "syncError": "无法将同意同步到账户设置",
-      "savedAccount": "偏好设置已保存并同步到您的账户",
-      "savedBrowser": "偏好设置已保存在此浏览器中",
       "versionWarning": "我们已将 cookie 政策更新为 v{version}。为方便起见，已加载您之前的选择。请再次保存以确认",
       "essentialIntro": "必要 cookie 始终启用，用于身份验证和核心站点运行",
       "lastSynced": "上次同步：{value}",
-      "noRecord": "尚无服务器端同意记录"
+      "savedBrowser": "已保存在此浏览器中"
     }
   },
   "cookieConsentCommon": {
@@ -1655,10 +1648,6 @@
     "submitFailed": "无法完成初始设置，请重试。"
   },
   "profile": {
-    "notifications": {
-      "successTitle": "成功",
-      "updated": "个人资料更新成功"
-    },
     "fields": {
       "uid": "UID",
       "bio": "简介"
@@ -1678,14 +1667,11 @@
       "disconnectionFailed": "断开连接失败",
       "disconnected": "已断开连接",
       "cannotUnlink": "无法取消关联",
-      "success": "成功",
-      "sessionRevoked": "会话已成功撤销",
+      "sessionRevoked": "会话已撤销",
       "sessionsRevoked": "所有其他会话均已注销",
       "failedToRevokeSession": "撤销会话失败",
       "failedToRevokeSessions": "撤销会话失败",
       "failedToRequestDeletion": "请求删除帐户失败",
-      "connectedMessage": "{provider} 账户已成功连接",
-      "disconnectedMessage": "{provider} 已断开连接",
       "failedToUpdateMainEmail": "无法更新主邮箱",
       "failedToLoad": "无法加载安全设置"
     },
@@ -1699,12 +1685,10 @@
       "disconnectFailed": "无法断开 {provider} 的连接"
     },
     "connectedAccounts": {
-      "title": "已连接的社交登录",
-      "description": "管理连接到此账户的社交登录方式"
+      "title": "已连接的社交登录"
     },
     "sessions": {
       "title": "活动会话",
-      "description": "查看此账户的登录位置，并注销您不信任的会话",
       "thisDevice": "此设备",
       "logoutOthers": "注销其他所有会话",
       "activeNow": "当前活跃",
@@ -1754,12 +1738,11 @@
       }
     },
     "mcpIntegration": {
-      "description": "将兼容的 AI 客户端连接到此端点。浏览器将打开以完成登录和授权。",
       "consentDescription": "此客户端可以在您现有的账户权限范围内读取和编辑内容以及管理文件。它可以创建、更新或删除内容，并更改现有附件。连接不会授予任何额外的账户权限。",
       "consentOfflineAccess": "当前浏览器会话结束后，此连接仍可继续，直到您撤销它。",
       "consentRevoke": "您可以在{settings} → Remote MCP中撤销此连接。",
       "connectionsTitle": "已连接的MCP客户端",
-      "connectionsDescription": "这些OAuth授权与浏览器会话相互独立。撤销其中一项会断开相应MCP客户端的连接，而不会让您登出。",
+      "connectionsDescription": "撤销访问权限会断开该 MCP 客户端的连接，但不会将您退出登录。",
       "connectionsEmpty": "没有已连接的MCP客户端。",
       "connectedAt": "连接时间 {date}",
       "revoke": "Revoke",
@@ -1771,7 +1754,7 @@
     },
     "personalAccessTokens": {
       "title": "个人访问令牌",
-      "description": "使用这一个人访问令牌调用 {siteName} 提供的 API。每个请求都会使用您账户的当前权限。",
+      "description": "API 请求使用您当前的账户权限。",
       "empty": "尚未创建个人访问令牌。",
       "regenerate": "重新生成",
       "regenerateTitle": "重新生成个人访问令牌",
@@ -1788,7 +1771,6 @@
     },
     "passkeys": {
       "title": "通行密钥",
-      "description": "使用此设备或安全密钥登录。你可以保存多个通行密钥。",
       "loading": "正在加载通行密钥...",
       "empty": "尚未注册通行密钥。",
       "add": "添加通行密钥",
@@ -5369,8 +5351,8 @@
   },
   "localBackups": {
     "title": "本地备份",
-    "description": "此设备上已关闭标签页中未保存的编辑内容。打开编辑器即可恢复。备份会在30天后过期，登出时会被移除。",
-    "empty": "没有可恢复的本地备份。打开的标签页中的编辑内容不会在此列出。",
+    "description": "此设备上已关闭标签页中未保存的编辑，保留 30 天，退出登录后清除。",
+    "empty": "没有可恢复的已关闭标签页备份。",
     "unavailable": "本地备份需要此设备上的浏览器存储和Web Locks支持。",
     "loading": "正在查找本地备份…",
     "error": "无法完成此操作。请刷新列表后重试。",

@@ -56,7 +56,6 @@ export function MySettingsPageView({
   localBackups,
 }: Props) {
   const t = useTranslations('settings.page');
-  const tSecurity = useTranslations('security');
   const tCommonActions = useTranslations('common.actions');
   const tCommonLabels = useTranslations('common.labels');
   const tCommonStates = useTranslations('common.states');
@@ -130,7 +129,6 @@ export function MySettingsPageView({
             setupGuideUrl={setupGuideUrl}
             labels={{
               title: 'Remote MCP',
-              description: tSecurity('mcpIntegration.description'),
               endpoint: tCommonLabels('url'),
               openGuide: tCommonActions('openInNewTab'),
             }}

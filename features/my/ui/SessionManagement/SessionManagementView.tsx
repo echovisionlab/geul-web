@@ -18,7 +18,6 @@ type OsKind = 'android' | 'ios' | 'linux' | 'macos' | 'windows' | 'unknown';
 export interface SessionManagementLabels {
   activeNow: string;
   browser: (browser: BrowserKind) => string;
-  description: string;
   device: (device: DeviceKind) => string;
   logOutOthers: string;
   os: (os: OsKind) => string;
@@ -162,7 +161,6 @@ export function SessionManagementView({
             {labels.title}
           </span>
         }
-        description={labels.description}
       />
       <DsLayoutStack gap="sm">
         {sessions.map((session) => {

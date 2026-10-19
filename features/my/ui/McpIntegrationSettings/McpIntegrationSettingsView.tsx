@@ -13,7 +13,6 @@ interface McpIntegrationSettingsViewProps {
   setupGuideUrl: string;
   labels: {
     title: string;
-    description: string;
     endpoint: string;
     openGuide: string;
   };
@@ -28,13 +27,10 @@ export function McpIntegrationSettingsView({ endpoint, setupGuideUrl, labels }: 
             {labels.title}
           </span>
         }
-        description={
-          <DsLayoutStack gap="xxs">
-            <span>{labels.description}</span>
-            <TextButton href={setupGuideUrl} target="_blank" rel="noreferrer" size="xs" appearance="accent">
-              {labels.openGuide}
-            </TextButton>
-          </DsLayoutStack>
+        actions={
+          <TextButton href={setupGuideUrl} target="_blank" rel="noreferrer" size="xs" appearance="accent">
+            {labels.openGuide}
+          </TextButton>
         }
       />
       <SectionCard appearance="plain" padding="none">

@@ -1610,17 +1610,12 @@
       "cookiePreferencesTitle": "Çerez Tercihleri"
     },
     "languagePreference": {
-      "intro": "Hesap diliniz, oturum açtığınız her yerde sizi takip eder. Yeni hesaplar, ilk kimlik doğrulama işleminizde tarayıcı dilinizden oluşturulur.",
       "label": "Tercih edilen dil",
       "save": "Dili kaydet",
-      "successTitle": "Dil güncellendi",
-      "successMessage": "Bu tercih artık oturum açtığınız her cihaz için hesabınıza kaydediliyor.",
       "errorTitle": "Hata",
-      "errorMessage": "Dil tercihi güncellenemedi",
-      "helper": "Bu ayar hesabınıza kaydedilir ve ilk oturum açtığınızda kullandığınız tarayıcı diline göre önceliklidir."
+      "errorMessage": "Dil tercihi güncellenemedi"
     },
     "newsletter": {
-      "subscribedTitle": "Abone olundu",
       "subscribedAlert": "Bülten ve kampanya e-postalarımıza abone oldunuz.",
       "unsubscribedAlert": "Bültenimize abone değilsiniz.",
       "subscribe": "Bültene abone olun",
@@ -1629,12 +1624,10 @@
     },
     "cookieConsent": {
       "syncError": "Onay, hesap ayarlarıyla senkronize edilemedi.",
-      "savedAccount": "Tercihler kaydedildi ve hesabınızla senkronize edildi.",
-      "savedBrowser": "Bu tarayıcı için kaydedilen tercihler.",
       "versionWarning": "Çerez politikasını v{version} olarak güncelledik. Önceki seçiminiz kolaylık olması açısından yüklendi. Onaylamak için lütfen tekrar kaydedin.",
       "essentialIntro": "Temel çerezler, kimlik doğrulama ve ana sitenin çalışması için her zaman etkindir.",
       "lastSynced": "Son senkronizasyon: {value}",
-      "noRecord": "Henüz sunucu tarafı izin kaydı yok"
+      "savedBrowser": "Bu tarayıcıya kaydedildi"
     }
   },
   "cookieConsentCommon": {
@@ -1655,10 +1648,6 @@
     "submitFailed": "Katılım tamamlanamadı. Tekrar deneyin."
   },
   "profile": {
-    "notifications": {
-      "successTitle": "Başarı",
-      "updated": "Profil başarıyla güncellendi"
-    },
     "fields": {
       "uid": "UID",
       "bio": "Biyografi"
@@ -1678,14 +1667,11 @@
       "disconnectionFailed": "Bağlantı Kesilemedi",
       "disconnected": "Bağlantı kesildi",
       "cannotUnlink": "Bağlantı kaldırılamıyor",
-      "success": "Başarı",
-      "sessionRevoked": "Oturum başarıyla iptal edildi",
+      "sessionRevoked": "Oturum iptal edildi",
       "sessionsRevoked": "Diğer tüm oturumlardan çıkış yapıldı",
       "failedToRevokeSession": "Oturum iptal edilemedi",
       "failedToRevokeSessions": "Oturumlar iptal edilemedi",
       "failedToRequestDeletion": "Hesabın silinmesi isteği başarısız oldu",
-      "connectedMessage": "{provider} hesabı başarıyla bağlandı.",
-      "disconnectedMessage": "{provider} bağlantısı kesildi.",
       "failedToUpdateMainEmail": "Birincil e-posta güncellenemedi",
       "failedToLoad": "Güvenlik ayarları yüklenemedi"
     },
@@ -1699,16 +1685,14 @@
       "disconnectFailed": "{provider} bağlantısı kesilemedi."
     },
     "connectedAccounts": {
-      "title": "Bağlantılı sosyal girişler",
-      "description": "Bu hesaba bağlı sosyal oturum açma işlemlerini yönetin."
+      "title": "Bağlantılı sosyal girişler"
     },
     "mcpIntegration": {
-      "description": "Uyumlu bir yapay zekâ istemcisini bu uç noktaya bağlayın. Oturum açma ve onay için tarayıcınız açılır.",
       "consentDescription": "Bu istemci, hesabınızın mevcut izinleri kapsamında içerikleri okuyup düzenleyebilir ve dosyaları yönetebilir. İçerik oluşturabilir, güncelleyebilir veya silebilir ve mevcut dosya eklerini değiştirebilir. Bağlantı, hesaba ek izinler vermez.",
       "consentOfflineAccess": "Bu bağlantı, mevcut tarayıcı oturumunuz sona erdikten sonra siz iptal edene kadar devam edebilir.",
       "consentRevoke": "Bu bağlantıyı {settings} → Remote MCP bölümünden iptal edebilirsiniz.",
       "connectionsTitle": "Bağlı MCP istemcileri",
-      "connectionsDescription": "Bu OAuth izinleri tarayıcı oturumlarından ayrıdır. Birini iptal etmek, oturumunuzu kapatmadan ilgili MCP istemcisinin bağlantısını keser.",
+      "connectionsDescription": "Erişimi iptal etmek, hesabınızdan çıkış yapmadan ilgili MCP istemcisinin bağlantısını keser.",
       "connectionsEmpty": "Bağlı MCP istemcisi yok.",
       "connectedAt": "Bağlanma tarihi: {date}",
       "revoke": "Revoke",
@@ -1720,7 +1704,7 @@
     },
     "personalAccessTokens": {
       "title": "Kişisel erişim belirteci",
-      "description": "Bu tek kişisel erişim belirtecini {siteName} tarafından sunulan API’lerle kullanın. Her istek mevcut hesap izinlerinizi kullanır.",
+      "description": "API istekleri hesabınızın mevcut izinlerini kullanır.",
       "empty": "Henüz kişisel erişim belirteci oluşturulmadı.",
       "regenerate": "Yeniden oluştur",
       "regenerateTitle": "Kişisel erişim belirtecini yeniden oluştur",
@@ -1737,7 +1721,6 @@
     },
     "passkeys": {
       "title": "Geçiş anahtarları",
-      "description": "Parola olmadan oturum açmak için bu cihazı veya bir güvenlik anahtarını kullanın. Birden fazla şifreyi saklayabilirsiniz.",
       "loading": "Şifre anahtarları yükleniyor...",
       "empty": "Kayıtlı şifre anahtarı yok.",
       "add": "Şifre anahtarı ekle",
@@ -1752,7 +1735,6 @@
     },
     "sessions": {
       "title": "Aktif oturumlar",
-      "description": "Bu hesabın nerede oturum açtığını inceleyin ve güvenmediğiniz oturumları iptal edin.",
       "thisDevice": "Bu cihaz",
       "logoutOthers": "Diğer tüm oturumlardan çıkış yapın",
       "activeNow": "Şu anda aktif",
@@ -5369,8 +5351,8 @@
   },
   "localBackups": {
     "title": "Yerel yedekler",
-    "description": "Bu cihazdaki kapatılmış sekmelerden kalan kaydedilmemiş düzenlemeler. Kurtarmak için düzenleyiciyi açın. Yedekler 30 gün sonra geçerliliğini yitirir ve oturumu kapattığınızda silinir.",
-    "empty": "Kurtarılacak yerel yedek yok. Açık sekmelerdeki düzenlemeler burada listelenmez.",
+    "description": "Bu cihazdaki kapatılmış sekmelerden kaydedilmemiş düzenlemeler; 30 gün saklanır ve oturum kapatıldığında silinir.",
+    "empty": "Kapalı sekmelerden kurtarılacak yedek yok.",
     "unavailable": "Yerel yedekler için bu cihazda tarayıcı depolaması ve Web Locks gerekir.",
     "loading": "Yerel yedekler aranıyor…",
     "error": "Bu işlem tamamlanamadı. Listeyi yenileyip tekrar deneyin.",

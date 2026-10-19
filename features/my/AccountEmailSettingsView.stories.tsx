@@ -19,7 +19,6 @@ const meta = {
       labels: {
         canonical: 'security.email.canonical',
         change: 'security.email.changeAction',
-        description: 'security.email.description',
         emailCode: 'security.email.sources.emailCode',
         title: 'security.email.title',
       },
@@ -36,7 +35,6 @@ const meta = {
     labels: {
       canonical: 'Primary email',
       change: 'Change',
-      description: 'Choose the address used for account messages.',
       emailCode: 'Email code',
       title: 'Account email',
     },

@@ -1610,17 +1610,12 @@
       "cookiePreferencesTitle": "Cookievoorkeuren"
     },
     "languagePreference": {
-      "intro": "Je accounttaal volgt je overal waar je inlogt. Nieuwe accounts krijgen bij de eerste authenticatie de taal van je browser als basis.",
       "label": "Voorkeurstaal",
       "save": "Taal opslaan",
-      "successTitle": "Taal bijgewerkt",
-      "successMessage": "Deze voorkeur is nu opgeslagen in je account voor elk aangemeld apparaat.",
       "errorTitle": "Fout",
-      "errorMessage": "Taalvoorkeur bijwerken mislukt",
-      "helper": "Deze instelling wordt opgeslagen in je account en krijgt voorrang op de browsertaal die je gebruikte toen je voor het eerst inlogde."
+      "errorMessage": "Taalvoorkeur bijwerken mislukt"
     },
     "newsletter": {
-      "subscribedTitle": "Ingeschreven",
       "subscribedAlert": "Je bent ingeschreven op onze nieuwsbrief en campagnemails.",
       "unsubscribedAlert": "Je bent niet ingeschreven op onze nieuwsbrief.",
       "subscribe": "Inschrijven voor nieuwsbrief",
@@ -1629,12 +1624,10 @@
     },
     "cookieConsent": {
       "syncError": "Toestemming synchroniseren met accountinstellingen mislukt.",
-      "savedAccount": "Voorkeuren opgeslagen en gesynchroniseerd met je account.",
-      "savedBrowser": "Voorkeuren opgeslagen voor deze browser.",
       "versionWarning": "We hebben het cookiebeleid bijgewerkt naar v{version}. Je vorige keuze is voor het gemak geladen. Sla opnieuw op om te bevestigen.",
       "essentialIntro": "Essentiële cookies zijn altijd actief voor authenticatie en kernwerking van de site.",
       "lastSynced": "Laatst gesynchroniseerd: {value}",
-      "noRecord": "Nog geen server-side toestemmingsregistratie"
+      "savedBrowser": "Opgeslagen in deze browser"
     }
   },
   "cookieConsentCommon": {
@@ -1655,10 +1648,6 @@
     "submitFailed": "De configuratie kon niet worden voltooid. Probeer het opnieuw."
   },
   "profile": {
-    "notifications": {
-      "successTitle": "Succes",
-      "updated": "Profiel succesvol bijgewerkt"
-    },
     "fields": {
       "uid": "UID",
       "bio": "Biografie"
@@ -1678,14 +1667,11 @@
       "disconnectionFailed": "Ontkoppelen mislukt",
       "disconnected": "Ontkoppeld",
       "cannotUnlink": "Kan niet ontkoppelen",
-      "success": "Succes",
-      "sessionRevoked": "Sessie succesvol ingetrokken",
+      "sessionRevoked": "Sessie ingetrokken",
       "sessionsRevoked": "Alle andere sessies zijn uitgelogd",
       "failedToRevokeSession": "Sessie intrekken mislukt",
       "failedToRevokeSessions": "Sessies intrekken mislukt",
       "failedToRequestDeletion": "Accountverwijdering aanvragen mislukt",
-      "connectedMessage": "{provider}-account succesvol gekoppeld.",
-      "disconnectedMessage": "{provider} is ontkoppeld.",
       "failedToUpdateMainEmail": "Primair e-mailadres bijwerken mislukt",
       "failedToLoad": "Kan beveiligingsinstellingen niet laden"
     },
@@ -1699,12 +1685,10 @@
       "disconnectFailed": "Ontkoppelen van {provider} mislukt."
     },
     "connectedAccounts": {
-      "title": "Gekoppelde sociale aanmeldingen",
-      "description": "Beheer de sociale aanmeldingen die aan dit account zijn gekoppeld."
+      "title": "Gekoppelde sociale aanmeldingen"
     },
     "sessions": {
       "title": "Actieve sessies",
-      "description": "Bekijk waar dit account is aangemeld en trek sessies in die je niet vertrouwt.",
       "thisDevice": "Dit apparaat",
       "logoutOthers": "Andere sessies uitloggen",
       "activeNow": "Nu actief",
@@ -1754,12 +1738,11 @@
       }
     },
     "mcpIntegration": {
-      "description": "Verbind een compatibele AI-client met dit eindpunt. Je browser wordt geopend om in te loggen en toestemming te geven.",
       "consentDescription": "Deze client kan binnen uw bestaande accountrechten inhoud lezen en bewerken en bestanden beheren. Hij kan inhoud maken, bijwerken of verwijderen en bestaande bestandsbijlagen wijzigen. De verbinding verleent geen extra accountrechten.",
       "consentOfflineAccess": "Deze verbinding kan na het einde van uw huidige browsersessie doorgaan, totdat u haar intrekt.",
       "consentRevoke": "U kunt deze verbinding intrekken via {settings} → Remote MCP.",
       "connectionsTitle": "Verbonden MCP-clients",
-      "connectionsDescription": "Deze OAuth-toestemmingen staan los van browsersessies. Als je er een intrekt, wordt de bijbehorende MCP-client losgekoppeld zonder dat je wordt uitgelogd.",
+      "connectionsDescription": "Als je de toegang intrekt, wordt die MCP-client losgekoppeld zonder dat je wordt uitgelogd.",
       "connectionsEmpty": "Er zijn geen MCP-clients verbonden.",
       "connectedAt": "Verbonden op {date}",
       "revoke": "Revoke",
@@ -1771,7 +1754,7 @@
     },
     "personalAccessTokens": {
       "title": "Persoonlijk toegangstoken",
-      "description": "Gebruik dit ene persoonlijke toegangstoken voor API’s van {siteName}. Elke aanvraag gebruikt je huidige accountrechten.",
+      "description": "API-verzoeken gebruiken je huidige accountrechten.",
       "empty": "Er zijn nog geen persoonlijke toegangstokens gemaakt.",
       "regenerate": "Opnieuw genereren",
       "regenerateTitle": "Persoonlijk toegangstoken opnieuw genereren",
@@ -1788,7 +1771,6 @@
     },
     "passkeys": {
       "title": "Passkeys",
-      "description": "Gebruik dit apparaat of een beveiligingssleutel om je aan te melden. Je kunt meerdere passkeys bewaren.",
       "loading": "Passkeys laden...",
       "empty": "Geen passkeys geregistreerd.",
       "add": "Passkey toevoegen",
@@ -5369,8 +5351,8 @@
   },
   "localBackups": {
     "title": "Lokale back-ups",
-    "description": "Niet-opgeslagen wijzigingen uit gesloten tabbladen op dit apparaat. Open de editor om ze te herstellen. Back-ups verlopen na 30 dagen en worden verwijderd wanneer je uitlogt.",
-    "empty": "Geen lokale back-ups om te herstellen. Wijzigingen in open tabbladen worden hier niet weergegeven.",
+    "description": "Niet-opgeslagen bewerkingen uit gesloten tabbladen op dit apparaat, 30 dagen bewaard en gewist bij afmelden.",
+    "empty": "Geen back-ups van gesloten tabbladen om te herstellen.",
     "unavailable": "Lokale back-ups vereisen browseropslag en Web Locks op dit apparaat.",
     "loading": "Zoeken naar lokale back-ups…",
     "error": "Deze actie kon niet worden voltooid. Vernieuw de lijst en probeer het opnieuw.",

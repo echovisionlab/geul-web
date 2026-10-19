@@ -1610,17 +1610,12 @@
       "cookiePreferencesTitle": "Preferências de cookies"
     },
     "languagePreference": {
-      "intro": "O idioma da sua conta segue-o em qualquer lugar em que inicie sessão. As novas contas são propagadas a partir do idioma do seu browser na primeira vez que se autentica.",
       "label": "Idioma preferido",
       "save": "Guardar idioma",
-      "successTitle": "Idioma atualizado",
-      "successMessage": "Esta preferência é agora guardada na sua conta para cada dispositivo ligado.",
       "errorTitle": "Erro",
-      "errorMessage": "Falha ao atualizar a preferência de idioma",
-      "helper": "Esta configuração é guardada na sua conta e tem prioridade sobre o idioma do browser que utilizou na primeira vez que fez login."
+      "errorMessage": "Falha ao atualizar a preferência de idioma"
     },
     "newsletter": {
-      "subscribedTitle": "Inscrito",
       "subscribedAlert": "Está inscrito na nossa newsletter e e-mails de campanha.",
       "unsubscribedAlert": "Não está inscrito na nossa newsletter.",
       "subscribe": "Subscreva o boletim informativo",
@@ -1629,12 +1624,10 @@
     },
     "cookieConsent": {
       "syncError": "Falha ao sincronizar o consentimento com as definições da conta.",
-      "savedAccount": "Preferências guardadas e sincronizadas com a sua conta.",
-      "savedBrowser": "Preferências guardadas para este navegador.",
       "versionWarning": "Atualizámos a política de cookies para v{version}. A sua escolha anterior é carregada por conveniência. Guarde novamente para confirmar.",
       "essentialIntro": "Os cookies essenciais estão sempre ativos para a autenticação e operação principal do website.",
       "lastSynced": "Última sincronização: {value}",
-      "noRecord": "Ainda não há registo de consentimento do lado do servidor"
+      "savedBrowser": "Guardado neste navegador"
     }
   },
   "cookieConsentCommon": {
@@ -1655,10 +1648,6 @@
     "submitFailed": "Não foi possível concluir a integração. Tente novamente."
   },
   "profile": {
-    "notifications": {
-      "successTitle": "Sucesso",
-      "updated": "Perfil atualizado com sucesso"
-    },
     "fields": {
       "uid": "UID",
       "bio": "Biografia"
@@ -1678,14 +1667,11 @@
       "disconnectionFailed": "Falha na desconexão",
       "disconnected": "Desconectado",
       "cannotUnlink": "Não é possível desvincular",
-      "success": "Sucesso",
-      "sessionRevoked": "Sessão revogada com sucesso",
+      "sessionRevoked": "Sessão revogada",
       "sessionsRevoked": "Todas as outras sessões foram desligadas",
       "failedToRevokeSession": "Falha ao revogar sessão",
       "failedToRevokeSessions": "Falha ao revogar sessões",
       "failedToRequestDeletion": "Falha ao solicitar a eliminação da conta",
-      "connectedMessage": "Conta {provider} ligada com sucesso.",
-      "disconnectedMessage": "{provider} foi desligado.",
       "failedToUpdateMainEmail": "Falha ao atualizar o e-mail principal",
       "failedToLoad": "Falha ao carregar as definições de segurança"
     },
@@ -1699,16 +1685,14 @@
       "disconnectFailed": "Falha ao desligar {provider}."
     },
     "connectedAccounts": {
-      "title": "Logins sociais conectados",
-      "description": "Faça a gestão dos logins sociais ligados a esta conta."
+      "title": "Logins sociais conectados"
     },
     "mcpIntegration": {
-      "description": "Ligue um cliente de IA compatível a este endpoint. O navegador será aberto para iniciar sessão e dar consentimento.",
       "consentDescription": "Este cliente pode ler e editar conteúdo e gerir ficheiros dentro das permissões atuais da sua conta. Pode criar, atualizar ou eliminar conteúdo e alterar anexos existentes. A ligação não concede permissões adicionais à conta.",
       "consentOfflineAccess": "Esta ligação pode continuar após o fim da sessão atual do navegador, até que a revogue.",
       "consentRevoke": "Pode revogar esta ligação em {settings} → Remote MCP.",
       "connectionsTitle": "Clientes MCP ligados",
-      "connectionsDescription": "Estas autorizações OAuth são independentes das sessões do navegador. Revogar uma delas desliga esse cliente MCP sem terminar a sua sessão.",
+      "connectionsDescription": "Revogar o acesso desliga esse cliente MCP sem terminar a sua sessão.",
       "connectionsEmpty": "Não há clientes MCP ligados.",
       "connectedAt": "Ligado em {date}",
       "revoke": "Revoke",
@@ -1720,7 +1704,7 @@
     },
     "personalAccessTokens": {
       "title": "Token de acesso pessoal",
-      "description": "Utilize este único token de acesso pessoal com as APIs fornecidas pela {siteName}. Cada pedido utiliza as permissões atuais da sua conta.",
+      "description": "Os pedidos à API usam as permissões atuais da sua conta.",
       "empty": "Ainda não foi criado nenhum token de acesso pessoal.",
       "regenerate": "Gerar novamente",
       "regenerateTitle": "Gerar novamente o token de acesso pessoal",
@@ -1737,7 +1721,6 @@
     },
     "passkeys": {
       "title": "Chaves de acesso",
-      "description": "Utilize este dispositivo ou uma chave de segurança para iniciar sessão sem palavra-passe. Pode manter várias chaves de acesso.",
       "loading": "Carregamento de senhas...",
       "empty": "Nenhuma senha registada.",
       "add": "Adicionar chave de acesso",
@@ -1752,7 +1735,6 @@
     },
     "sessions": {
       "title": "Sessões ativas",
-      "description": "Reveja onde esta conta está ligada e revogue sessões nas quais não confia.",
       "thisDevice": "Este dispositivo",
       "logoutOthers": "Sair de todas as outras sessões",
       "activeNow": "Ativo agora",
@@ -5369,8 +5351,8 @@
   },
   "localBackups": {
     "title": "Cópias de segurança locais",
-    "description": "Alterações não guardadas de separadores fechados neste dispositivo. Abra o editor para as recuperar. As cópias de segurança expiram após 30 dias e são removidas quando termina a sessão.",
-    "empty": "Não há cópias de segurança locais para recuperar. As alterações em separadores abertos não são listadas aqui.",
+    "description": "Edições não guardadas de separadores fechados neste dispositivo, mantidas durante 30 dias e apagadas ao terminar sessão.",
+    "empty": "Não há cópias de segurança de separadores fechados para recuperar.",
     "unavailable": "As cópias de segurança locais requerem armazenamento do navegador e Web Locks neste dispositivo.",
     "loading": "A procurar cópias de segurança locais…",
     "error": "Não foi possível concluir esta ação. Atualize a lista e tente novamente.",

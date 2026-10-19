@@ -34,7 +34,6 @@ const meta = {
       labels: {
         connect: 'common.actions.connect',
         connected: 'common.states.connected',
-        description: 'security.connectedAccounts.description',
         disconnect: 'common.actions.disconnect',
         lastMethod: 'security.providerErrors.mustKeepMethod',
         notConnected: 'common.states.notConnected',
@@ -54,7 +53,6 @@ const meta = {
     labels: {
       connect: 'Connect',
       connected: 'Connected',
-      description: 'Manage providers that can sign in to this account.',
       disconnect: 'Disconnect',
       lastMethod: 'Keep at least one sign-in method.',
       notConnected: 'Not connected',

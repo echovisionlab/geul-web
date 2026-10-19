@@ -1610,17 +1610,12 @@
       "cookiePreferencesTitle": "Tùy chọn cookie"
     },
     "languagePreference": {
-      "intro": "Ngôn ngữ tài khoản của bạn sẽ theo bạn bất cứ nơi nào bạn đăng nhập. Các tài khoản mới được tạo từ ngôn ngữ trình duyệt của bạn vào lần đầu tiên bạn xác thực.",
       "label": "Ngôn ngữ ưa thích",
       "save": "Lưu ngôn ngữ",
-      "successTitle": "Đã cập nhật ngôn ngữ",
-      "successMessage": "Tùy chọn này hiện được lưu vào tài khoản của bạn cho mọi thiết bị đã đăng nhập.",
       "errorTitle": "Lỗi",
-      "errorMessage": "Không thể cập nhật tùy chọn ngôn ngữ",
-      "helper": "Cài đặt này được lưu vào tài khoản của bạn và được ưu tiên hơn ngôn ngữ trình duyệt bạn đã sử dụng khi đăng nhập lần đầu."
+      "errorMessage": "Không thể cập nhật tùy chọn ngôn ngữ"
     },
     "newsletter": {
-      "subscribedTitle": "Đã đăng ký",
       "subscribedAlert": "Bạn đã đăng ký nhận bản tin và email chiến dịch của chúng tôi.",
       "unsubscribedAlert": "Bạn chưa đăng ký nhận bản tin của chúng tôi.",
       "subscribe": "Đăng ký nhận bản tin",
@@ -1629,12 +1624,10 @@
     },
     "cookieConsent": {
       "syncError": "Không thể đồng bộ hóa sự đồng ý với cài đặt tài khoản.",
-      "savedAccount": "Tùy chọn được lưu và đồng bộ hóa với tài khoản của bạn.",
-      "savedBrowser": "Đã lưu tùy chọn cho trình duyệt này.",
       "versionWarning": "Chúng tôi đã cập nhật chính sách cookie thành v{version}. Lựa chọn trước đó của bạn được tải để thuận tiện. Vui lòng lưu lại để xác nhận.",
       "essentialIntro": "Các cookie thiết yếu luôn hoạt động để xác thực và vận hành trang web cốt lõi.",
       "lastSynced": "Đồng bộ hóa lần cuối: {value}",
-      "noRecord": "Chưa có bản ghi sự đồng ý phía máy chủ nào"
+      "savedBrowser": "Đã lưu trong trình duyệt này"
     }
   },
   "cookieConsentCommon": {
@@ -1655,10 +1648,6 @@
     "submitFailed": "Không thể hoàn tất quá trình giới thiệu. Hãy thử lại."
   },
   "profile": {
-    "notifications": {
-      "successTitle": "Thành công",
-      "updated": "Hồ sơ được cập nhật thành công"
-    },
     "fields": {
       "uid": "UID",
       "bio": "Tiểu sử"
@@ -1678,14 +1667,11 @@
       "disconnectionFailed": "Ngắt kết nối không thành công",
       "disconnected": "Đã ngắt kết nối",
       "cannotUnlink": "Không thể hủy liên kết",
-      "success": "Thành công",
-      "sessionRevoked": "Đã thu hồi phiên thành công",
+      "sessionRevoked": "Đã thu hồi phiên",
       "sessionsRevoked": "Tất cả các phiên khác đã được đăng xuất",
       "failedToRevokeSession": "Không thể thu hồi phiên",
       "failedToRevokeSessions": "Không thể thu hồi phiên",
       "failedToRequestDeletion": "Không thể yêu cầu xóa tài khoản",
-      "connectedMessage": "Tài khoản {provider} đã được kết nối thành công.",
-      "disconnectedMessage": "{provider} đã bị ngắt kết nối.",
       "failedToUpdateMainEmail": "Không cập nhật được email chính",
       "failedToLoad": "Không tải được cài đặt bảo mật"
     },
@@ -1699,16 +1685,14 @@
       "disconnectFailed": "Không ngắt kết nối được {provider}."
     },
     "connectedAccounts": {
-      "title": "Thông tin đăng nhập xã hội được kết nối",
-      "description": "Quản lý các đăng nhập xã hội được kết nối với tài khoản này."
+      "title": "Thông tin đăng nhập xã hội được kết nối"
     },
     "mcpIntegration": {
-      "description": "Kết nối ứng dụng AI tương thích với điểm cuối này. Trình duyệt sẽ mở để đăng nhập và cấp quyền.",
       "consentDescription": "Ứng dụng khách này có thể đọc và chỉnh sửa nội dung, cũng như quản lý tệp trong phạm vi quyền hiện có của tài khoản bạn. Ứng dụng có thể tạo, cập nhật hoặc xóa nội dung và thay đổi tệp đính kèm hiện có. Việc kết nối không cấp thêm quyền cho tài khoản.",
       "consentOfflineAccess": "Kết nối này có thể tiếp tục sau khi phiên trình duyệt hiện tại kết thúc, cho đến khi bạn thu hồi.",
       "consentRevoke": "Bạn có thể thu hồi kết nối này tại {settings} → Remote MCP.",
       "connectionsTitle": "Ứng dụng khách MCP đã kết nối",
-      "connectionsDescription": "Các quyền OAuth này độc lập với phiên trình duyệt. Thu hồi một quyền sẽ ngắt kết nối ứng dụng khách MCP tương ứng mà không đăng xuất bạn.",
+      "connectionsDescription": "Thu hồi quyền truy cập sẽ ngắt kết nối ứng dụng MCP đó mà không đăng xuất bạn.",
       "connectionsEmpty": "Không có ứng dụng khách MCP nào được kết nối.",
       "connectedAt": "Đã kết nối {date}",
       "revoke": "Revoke",
@@ -1720,7 +1704,7 @@
     },
     "personalAccessTokens": {
       "title": "Mã truy cập cá nhân",
-      "description": "Dùng một mã truy cập cá nhân này với các API do {siteName} cung cấp. Mỗi yêu cầu sử dụng quyền hiện tại của tài khoản.",
+      "description": "Các yêu cầu API sử dụng quyền hiện tại của tài khoản bạn.",
       "empty": "Chưa có mã truy cập cá nhân nào được tạo.",
       "regenerate": "Tạo lại",
       "regenerateTitle": "Tạo lại mã truy cập cá nhân",
@@ -1737,7 +1721,6 @@
     },
     "passkeys": {
       "title": "Mật mã",
-      "description": "Sử dụng thiết bị này hoặc khóa bảo mật để đăng nhập mà không cần mật khẩu. Bạn có thể giữ nhiều mật mã.",
       "loading": "Đang tải mật mã...",
       "empty": "Không có mật mã nào được đăng ký.",
       "add": "Thêm mật mã",
@@ -1752,7 +1735,6 @@
     },
     "sessions": {
       "title": "Phiên hoạt động",
-      "description": "Xem lại nơi tài khoản này được đăng nhập và thu hồi các phiên bạn không tin cậy.",
       "thisDevice": "Thiết bị này",
       "logoutOthers": "Đăng xuất tất cả các phiên khác",
       "activeNow": "Đang hoạt động",
@@ -5369,8 +5351,8 @@
   },
   "localBackups": {
     "title": "Bản sao lưu cục bộ",
-    "description": "Các chỉnh sửa chưa lưu từ những thẻ đã đóng trên thiết bị này. Mở trình chỉnh sửa để khôi phục chúng. Bản sao lưu hết hạn sau 30 ngày và bị xóa khi bạn đăng xuất.",
-    "empty": "Không có bản sao lưu cục bộ để khôi phục. Các chỉnh sửa trong thẻ đang mở không được liệt kê ở đây.",
+    "description": "Các chỉnh sửa chưa lưu từ những tab đã đóng trên thiết bị này, được giữ 30 ngày và bị xóa khi đăng xuất.",
+    "empty": "Không có bản sao lưu từ các thẻ đã đóng để khôi phục.",
     "unavailable": "Bản sao lưu cục bộ cần bộ nhớ trình duyệt và Web Locks trên thiết bị này.",
     "loading": "Đang tìm bản sao lưu cục bộ…",
     "error": "Không thể hoàn tất thao tác này. Làm mới danh sách và thử lại.",

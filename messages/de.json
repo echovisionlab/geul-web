@@ -780,17 +780,12 @@
       "cookiePreferencesTitle": "Cookie-Einstellungen"
     },
     "languagePreference": {
-      "intro": "Die Sprache Ihres Kontos begleitet Sie überall, wo Sie sich anmelden. Neue Konten werden beim ersten Login aus der Sprache Ihres Browsers initialisiert.",
       "label": "Bevorzugte Sprache",
       "save": "Sprache speichern",
-      "successTitle": "Sprache aktualisiert",
-      "successMessage": "Diese Einstellung ist jetzt für jedes angemeldete Gerät in Ihrem Konto gespeichert.",
       "errorTitle": "Fehler",
-      "errorMessage": "Spracheinstellung konnte nicht aktualisiert werden",
-      "helper": "Diese Einstellung wird in deinem Konto gespeichert und hat Vorrang vor der Browsersprache, die du bei deiner ersten Anmeldung verwendet hast."
+      "errorMessage": "Spracheinstellung konnte nicht aktualisiert werden"
     },
     "newsletter": {
-      "subscribedTitle": "Abonniert",
       "subscribedAlert": "Sie haben unseren Newsletter und unsere Kampagnen-E-Mails abonniert.",
       "unsubscribedAlert": "Sie haben unseren Newsletter nicht abonniert.",
       "subscribe": "Newsletter abonnieren",
@@ -799,12 +794,10 @@
     },
     "cookieConsent": {
       "syncError": "Einwilligung konnte nicht mit den Kontoeinstellungen synchronisiert werden.",
-      "savedAccount": "Einstellungen gespeichert und mit Ihrem Konto synchronisiert.",
-      "savedBrowser": "Einstellungen für diesen Browser gespeichert.",
       "versionWarning": "Wir haben die Cookie-Richtlinie auf v{version} aktualisiert. Ihre vorherige Auswahl wurde zu Ihrer Erleichterung geladen. Bitte speichern Sie erneut, um zu bestätigen.",
       "essentialIntro": "Essenzielle Cookies sind für die Authentifizierung und den Kernbetrieb der Website immer aktiv.",
       "lastSynced": "Zuletzt synchronisiert: {value}",
-      "noRecord": "Noch kein serverseitiger Einwilligungsdatensatz"
+      "savedBrowser": "In diesem Browser gespeichert"
     }
   },
   "cookieConsentCommon": {
@@ -825,10 +818,6 @@
     "submitFailed": "Die Einrichtung konnte nicht abgeschlossen werden. Versuche es erneut."
   },
   "profile": {
-    "notifications": {
-      "successTitle": "Erfolg",
-      "updated": "Profil erfolgreich aktualisiert"
-    },
     "fields": {
       "uid": "UID",
       "bio": "Biografie"
@@ -848,14 +837,11 @@
       "disconnectionFailed": "Trennung fehlgeschlagen",
       "disconnected": "Getrennt",
       "cannotUnlink": "Kann nicht getrennt werden",
-      "success": "Erfolg",
-      "sessionRevoked": "Sitzung erfolgreich widerrufen",
+      "sessionRevoked": "Sitzung widerrufen",
       "sessionsRevoked": "Alle anderen Sitzungen wurden abgemeldet",
       "failedToRevokeSession": "Sitzung konnte nicht widerrufen werden",
       "failedToRevokeSessions": "Sitzungen konnten nicht widerrufen werden",
       "failedToRequestDeletion": "Kontolöschung konnte nicht angefordert werden",
-      "connectedMessage": "Das {provider}-Konto wurde erfolgreich verbunden.",
-      "disconnectedMessage": "{provider} wurde getrennt.",
       "failedToUpdateMainEmail": "Primäre E-Mail-Adresse konnte nicht aktualisiert werden",
       "failedToLoad": "Sicherheitseinstellungen konnten nicht geladen werden"
     },
@@ -869,12 +855,10 @@
       "disconnectFailed": "Verbindung zu {provider} konnte nicht getrennt werden."
     },
     "connectedAccounts": {
-      "title": "Verknüpfte Social-Logins",
-      "description": "Verwalten Sie die mit diesem Konto verknüpften Social-Logins."
+      "title": "Verknüpfte Social-Logins"
     },
     "sessions": {
       "title": "Aktive Sitzungen",
-      "description": "Prüfen Sie, wo dieses Konto angemeldet ist, und widerrufen Sie Sitzungen, denen Sie nicht vertrauen.",
       "thisDevice": "Dieses Gerät",
       "logoutOthers": "Alle anderen Sitzungen abmelden",
       "activeNow": "Jetzt aktiv",
@@ -924,12 +908,11 @@
       }
     },
     "mcpIntegration": {
-      "description": "Verbinde einen kompatiblen KI-Client mit diesem Endpunkt. Für Anmeldung und Zustimmung wird dein Browser geöffnet.",
       "consentDescription": "Dieser Client kann innerhalb Ihrer bestehenden Kontoberechtigungen Inhalte lesen und bearbeiten und Dateien verwalten. Er kann Inhalte erstellen, aktualisieren oder löschen und bestehende Dateianhänge ändern. Die Verbindung gewährt keine zusätzlichen Kontoberechtigungen.",
       "consentOfflineAccess": "Diese Verbindung kann nach dem Ende Ihrer aktuellen Browsersitzung fortbestehen, bis Sie sie widerrufen.",
       "consentRevoke": "Sie können diese Verbindung unter {settings} → Remote MCP widerrufen.",
       "connectionsTitle": "Verbundene MCP-Clients",
-      "connectionsDescription": "Diese OAuth-Berechtigungen sind von Browsersitzungen getrennt. Durch den Widerruf wird der jeweilige MCP-Client getrennt, ohne Sie abzumelden.",
+      "connectionsDescription": "Wenn du den Zugriff widerrufst, wird der MCP-Client getrennt, ohne dich abzumelden.",
       "connectionsEmpty": "Keine MCP-Clients verbunden.",
       "connectedAt": "Verbunden am {date}",
       "revoke": "Revoke",
@@ -941,7 +924,7 @@
     },
     "personalAccessTokens": {
       "title": "Persönliches Zugriffstoken",
-      "description": "Verwende dieses eine persönliche Zugriffstoken für die von {siteName} bereitgestellten APIs. Für jede Anfrage gelten deine aktuellen Kontoberechtigungen.",
+      "description": "API-Anfragen verwenden deine aktuellen Kontoberechtigungen.",
       "empty": "Es wurden noch keine persönlichen Zugriffstoken erstellt.",
       "regenerate": "Neu erzeugen",
       "regenerateTitle": "Persönliches Zugriffstoken neu erzeugen",
@@ -958,7 +941,6 @@
     },
     "passkeys": {
       "title": "Passkeys",
-      "description": "Melden Sie sich mit diesem Gerät oder einem Sicherheitsschlüssel an. Sie können mehrere Passkeys speichern.",
       "loading": "Passkeys werden geladen...",
       "empty": "Keine Passkeys registriert.",
       "add": "Passkey hinzufügen",
@@ -5369,8 +5351,8 @@
   },
   "localBackups": {
     "title": "Lokale Sicherungen",
-    "description": "Ungespeicherte Änderungen aus geschlossenen Tabs auf diesem Gerät. Öffnen Sie den Editor, um sie wiederherzustellen. Sicherungen laufen nach 30 Tagen ab und werden bei der Abmeldung entfernt.",
-    "empty": "Keine lokalen Sicherungen zum Wiederherstellen. Änderungen in offenen Tabs werden hier nicht aufgeführt.",
+    "description": "Nicht gespeicherte Änderungen aus geschlossenen Tabs auf diesem Gerät, 30 Tage aufbewahrt und beim Abmelden gelöscht.",
+    "empty": "Keine Backups aus geschlossenen Tabs zum Wiederherstellen.",
     "unavailable": "Lokale Sicherungen erfordern Browserspeicher und Web Locks auf diesem Gerät.",
     "loading": "Lokale Sicherungen werden gesucht…",
     "error": "Diese Aktion konnte nicht abgeschlossen werden. Aktualisieren Sie die Liste und versuchen Sie es erneut.",

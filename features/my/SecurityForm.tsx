@@ -286,7 +286,6 @@ export function SecurityForm({
         setSessions((prev) => prev.filter((session) => session.id !== sessionId));
         router.refresh();
         notifications.show({
-          title: t('notifications.success'),
           message: t('notifications.sessionRevoked'),
           tone: 'positive',
         });
@@ -319,7 +318,6 @@ export function SecurityForm({
       setSessions((prev) => prev.filter((session) => session.id === currentSessionId));
       router.refresh();
       notifications.show({
-        title: t('notifications.success'),
         message: t('notifications.sessionsRevoked'),
         tone: 'positive',
       });
@@ -471,10 +469,7 @@ export function SecurityForm({
         if (!connectedResult.error && connectedResult.providers.some((connected) => connected.provider === provider)) {
           applySecurityResult(connectedResult);
           notifications.show({
-            title: tCommonStates('connected'),
-            message: t('notifications.connectedMessage', {
-              provider: getProviderName(provider, tCommonProviders),
-            }),
+            message: tCommonStates('connected'),
             tone: 'positive',
           });
           clearFlowState(attemptKey, handledKey, PENDING_LINK_PROVIDER_KEY);
@@ -572,10 +567,7 @@ export function SecurityForm({
 
         if (!connectedResult.error && !connectedResult.providers.some((p) => p.provider === provider)) {
           notifications.show({
-            title: t('notifications.disconnected'),
-            message: t('notifications.disconnectedMessage', {
-              provider: getProviderName(provider, tCommonProviders),
-            }),
+            message: t('notifications.disconnected'),
             tone: 'positive',
           });
           clearFlowState(attemptKey, handledKey, PENDING_UNLINK_PROVIDER_KEY);
@@ -633,7 +625,6 @@ export function SecurityForm({
         labels={{
           canonical: t('email.canonical'),
           change: t('email.changeAction'),
-          description: t('email.description'),
           emailCode: t('email.sources.emailCode'),
           title: t('email.title'),
         }}
@@ -646,7 +637,6 @@ export function SecurityForm({
           labels={{
             connect: tCommonActions('connect'),
             connected: tCommonStates('connected'),
-            description: t('connectedAccounts.description'),
             disconnect: tCommonActions('disconnect'),
             lastMethod: t('providerErrors.mustKeepMethod'),
             notConnected: tCommonStates('notConnected'),
@@ -678,7 +668,6 @@ export function SecurityForm({
         labels={{
           activeNow: t('sessions.activeNow'),
           browser: (browser) => (browser === 'unknown' ? tCommonStates('unknown') : t(`sessions.browser.${browser}`)),
-          description: t('sessions.description'),
           device: (device) => (device === 'unknown' ? tCommonStates('unknown') : t(`sessions.device.${device}`)),
           logOutOthers: t('sessions.logoutOthers'),
           os: (os) => (os === 'unknown' ? tCommonStates('unknown') : t(`sessions.os.${os}`)),

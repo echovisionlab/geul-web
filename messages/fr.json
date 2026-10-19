@@ -1610,17 +1610,12 @@
       "cookiePreferencesTitle": "Préférences de cookies"
     },
     "languagePreference": {
-      "intro": "La langue de votre compte vous suit partout où vous vous connectez. Les nouveaux comptes sont initialisés à partir de la langue de votre navigateur lors de la première authentification.",
       "label": "Langue préférée",
       "save": "Enregistrer la langue",
-      "successTitle": "Langue mise à jour",
-      "successMessage": "Cette préférence est maintenant enregistrée dans votre compte pour tous les appareils connectés.",
       "errorTitle": "Erreur",
-      "errorMessage": "Échec de la mise à jour de la préférence de langue",
-      "helper": "Ce paramètre est enregistré dans votre compte et prime sur la langue du navigateur utilisée lors de votre première connexion."
+      "errorMessage": "Échec de la mise à jour de la préférence de langue"
     },
     "newsletter": {
-      "subscribedTitle": "Abonné",
       "subscribedAlert": "Vous êtes abonné à notre infolettre et aux e-mails de campagne.",
       "unsubscribedAlert": "Vous n'êtes pas abonné à notre infolettre.",
       "subscribe": "Vous abonner à l'infolettre",
@@ -1629,12 +1624,10 @@
     },
     "cookieConsent": {
       "syncError": "Échec de la synchronisation du consentement avec les paramètres du compte.",
-      "savedAccount": "Préférences enregistrées et synchronisées avec votre compte.",
-      "savedBrowser": "Préférences enregistrées pour ce navigateur.",
       "versionWarning": "Nous avons mis à jour la politique de cookies vers la version v{version}. Votre choix précédent a été chargé pour vous simplifier la tâche. Veuillez enregistrer à nouveau pour confirmer.",
       "essentialIntro": "Les cookies essentiels sont toujours actifs pour l'authentification et le fonctionnement principal du site.",
       "lastSynced": "Dernière synchronisation : {value}",
-      "noRecord": "Aucun consentement enregistré côté serveur pour le moment"
+      "savedBrowser": "Enregistré dans ce navigateur"
     }
   },
   "cookieConsentCommon": {
@@ -1655,10 +1648,6 @@
     "submitFailed": "Impossible de terminer la configuration. Réessayez."
   },
   "profile": {
-    "notifications": {
-      "successTitle": "Succès",
-      "updated": "Profil mis à jour avec succès"
-    },
     "fields": {
       "uid": "UID",
       "bio": "Biographie"
@@ -1678,14 +1667,11 @@
       "disconnectionFailed": "Échec de la déconnexion",
       "disconnected": "Déconnecté",
       "cannotUnlink": "Impossible de dissocier",
-      "success": "Succès",
-      "sessionRevoked": "Session révoquée avec succès",
+      "sessionRevoked": "Session révoquée",
       "sessionsRevoked": "Toutes les autres sessions ont été déconnectées",
       "failedToRevokeSession": "Échec de la révocation de la session",
       "failedToRevokeSessions": "Échec de la révocation des sessions",
       "failedToRequestDeletion": "Échec de la demande de suppression du compte",
-      "connectedMessage": "Le compte {provider} a été connecté avec succès.",
-      "disconnectedMessage": "{provider} a été déconnecté.",
       "failedToUpdateMainEmail": "Impossible de mettre à jour l’adresse e-mail principale",
       "failedToLoad": "Impossible de charger les paramètres de sécurité"
     },
@@ -1699,12 +1685,10 @@
       "disconnectFailed": "Échec de la déconnexion de {provider}."
     },
     "connectedAccounts": {
-      "title": "Connexions sociales associées",
-      "description": "Gérez les connexions sociales associées à ce compte."
+      "title": "Connexions sociales associées"
     },
     "sessions": {
       "title": "Sessions actives",
-      "description": "Vérifiez où ce compte est connecté et révoquez les sessions auxquelles vous ne faites pas confiance.",
       "thisDevice": "Cet appareil",
       "logoutOthers": "Déconnecter toutes les autres sessions",
       "activeNow": "Actif maintenant",
@@ -1754,12 +1738,11 @@
       }
     },
     "mcpIntegration": {
-      "description": "Connectez un client IA compatible à ce point de terminaison. Votre navigateur s’ouvrira pour la connexion et le consentement.",
       "consentDescription": "Ce client peut lire et modifier du contenu et gérer des fichiers dans les limites des autorisations actuelles de votre compte. Il peut créer, mettre à jour ou supprimer du contenu et modifier les pièces jointes existantes. La connexion n’accorde aucune autorisation supplémentaire au compte.",
       "consentOfflineAccess": "Cette connexion peut continuer après la fin de votre session de navigateur actuelle, jusqu’à sa révocation.",
       "consentRevoke": "Vous pouvez révoquer cette connexion dans {settings} → Remote MCP.",
       "connectionsTitle": "Clients MCP connectés",
-      "connectionsDescription": "Ces autorisations OAuth sont distinctes des sessions du navigateur. En révoquer une déconnecte le client MCP concerné sans vous déconnecter.",
+      "connectionsDescription": "Révoquer l’accès déconnecte ce client MCP sans vous déconnecter de votre compte.",
       "connectionsEmpty": "Aucun client MCP connecté.",
       "connectedAt": "Connecté le {date}",
       "revoke": "Revoke",
@@ -1771,7 +1754,7 @@
     },
     "personalAccessTokens": {
       "title": "Jeton d’accès personnel",
-      "description": "Utilisez cet unique jeton d’accès personnel avec les API fournies par {siteName}. Chaque requête applique les autorisations actuelles de votre compte.",
+      "description": "Les requêtes API utilisent les autorisations actuelles de votre compte.",
       "empty": "Aucun jeton d’accès personnel n’a été créé.",
       "regenerate": "Régénérer",
       "regenerateTitle": "Régénérer le jeton d’accès personnel",
@@ -1788,7 +1771,6 @@
     },
     "passkeys": {
       "title": "Clés d’accès",
-      "description": "Utilisez cet appareil ou une clé de sécurité pour vous connecter. Vous pouvez conserver plusieurs clés d’accès.",
       "loading": "Chargement des clés d’accès...",
       "empty": "Aucune clé d’accès enregistrée.",
       "add": "Ajouter une clé d’accès",
@@ -5369,8 +5351,8 @@
   },
   "localBackups": {
     "title": "Sauvegardes locales",
-    "description": "Modifications non enregistrées provenant d’onglets fermés sur cet appareil. Ouvrez l’éditeur pour les récupérer. Les sauvegardes expirent au bout de 30 jours et sont supprimées à la déconnexion.",
-    "empty": "Aucune sauvegarde locale à récupérer. Les modifications des onglets ouverts ne sont pas répertoriées ici.",
+    "description": "Modifications non enregistrées des onglets fermés sur cet appareil, conservées 30 jours et effacées à la déconnexion.",
+    "empty": "Aucune sauvegarde d’onglet fermé à récupérer.",
     "unavailable": "Les sauvegardes locales nécessitent le stockage du navigateur et Web Locks sur cet appareil.",
     "loading": "Recherche de sauvegardes locales…",
     "error": "Impossible d’effectuer cette action. Actualisez la liste et réessayez.",

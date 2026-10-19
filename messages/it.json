@@ -1610,17 +1610,12 @@
       "cookiePreferencesTitle": "Preferenze sui cookie"
     },
     "languagePreference": {
-      "intro": "La lingua del tuo account ti segue ovunque accedi. I nuovi account vengono inizializzati dalla lingua del tuo browser la prima volta che ti autentichi.",
       "label": "Lingua preferita",
       "save": "Salva lingua",
-      "successTitle": "Lingua aggiornata",
-      "successMessage": "Questa preferenza è ora salvata nel tuo account per ogni dispositivo su cui hai eseguito l'accesso.",
       "errorTitle": "Errore",
-      "errorMessage": "Impossibile aggiornare la preferenza della lingua",
-      "helper": "Questa impostazione viene salvata nel tuo account e ha la priorità sulla lingua del browser usata al primo accesso."
+      "errorMessage": "Impossibile aggiornare la preferenza della lingua"
     },
     "newsletter": {
-      "subscribedTitle": "Sottoscritto",
       "subscribedAlert": "Sei iscritto alla nostra newsletter e alle e-mail della campagna.",
       "unsubscribedAlert": "Non sei iscritto alla nostra newsletter.",
       "subscribe": "Iscriviti alla newsletter",
@@ -1629,12 +1624,10 @@
     },
     "cookieConsent": {
       "syncError": "Impossibile sincronizzare il consenso con le impostazioni dell'account.",
-      "savedAccount": "Preferenze salvate e sincronizzate con il tuo account.",
-      "savedBrowser": "Preferenze salvate per questo browser.",
       "versionWarning": "Abbiamo aggiornato la politica sui cookie a v{version}. La tua scelta precedente viene caricata per comodità. Si prega di salvare di nuovo per confermare.",
       "essentialIntro": "I cookie essenziali sono sempre attivi per l'autenticazione e il funzionamento principale del sito.",
       "lastSynced": "Ultima sincronizzazione: {value}",
-      "noRecord": "Nessun record di consenso lato server ancora"
+      "savedBrowser": "Salvato in questo browser"
     }
   },
   "cookieConsentCommon": {
@@ -1655,10 +1648,6 @@
     "submitFailed": "Impossibile completare la configurazione. Riprova."
   },
   "profile": {
-    "notifications": {
-      "successTitle": "Successo",
-      "updated": "Profilo aggiornato con successo"
-    },
     "fields": {
       "uid": "UID",
       "bio": "Biografia"
@@ -1678,14 +1667,11 @@
       "disconnectionFailed": "Disconnessione non riuscita",
       "disconnected": "Disconnesso",
       "cannotUnlink": "Impossibile scollegare",
-      "success": "Successo",
-      "sessionRevoked": "Sessione revocata con successo",
+      "sessionRevoked": "Sessione revocata",
       "sessionsRevoked": "Tutte le altre sessioni sono state disconnesse",
       "failedToRevokeSession": "Impossibile revocare la sessione",
       "failedToRevokeSessions": "Impossibile revocare le sessioni",
       "failedToRequestDeletion": "Impossibile richiedere la cancellazione dell'account",
-      "connectedMessage": "L'account {provider} è stato collegato correttamente.",
-      "disconnectedMessage": "{provider} è stato disconnesso.",
       "failedToUpdateMainEmail": "Impossibile aggiornare l’e-mail principale",
       "failedToLoad": "Impossibile caricare le impostazioni di sicurezza"
     },
@@ -1699,12 +1685,10 @@
       "disconnectFailed": "Impossibile disconnettersi {provider}."
     },
     "connectedAccounts": {
-      "title": "Accessi social collegati",
-      "description": "Gestisci gli accessi social collegati a questo account."
+      "title": "Accessi social collegati"
     },
     "sessions": {
       "title": "Sessioni attive",
-      "description": "Controlla dove è stato effettuato l'accesso a questo account e revoca le sessioni di cui non ti fidi.",
       "thisDevice": "Questo dispositivo",
       "logoutOthers": "Disconnettersi da tutte le altre sessioni",
       "activeNow": "Attivo adesso",
@@ -1754,12 +1738,11 @@
       }
     },
     "mcpIntegration": {
-      "description": "Collega un client AI compatibile a questo endpoint. Il browser si aprirà per l’accesso e il consenso.",
       "consentDescription": "Questo client può leggere e modificare contenuti e gestire file entro i permessi attuali del tuo account. Può creare, aggiornare o eliminare contenuti e modificare gli allegati esistenti. La connessione non concede permessi aggiuntivi all’account.",
       "consentOfflineAccess": "Questa connessione può continuare dopo la fine della sessione attuale del browser, finché non la revochi.",
       "consentRevoke": "Puoi revocare questa connessione in {settings} → Remote MCP.",
       "connectionsTitle": "Client MCP connessi",
-      "connectionsDescription": "Queste autorizzazioni OAuth sono separate dalle sessioni del browser. Revocarne una disconnette il client MCP corrispondente senza farti uscire dall’account.",
+      "connectionsDescription": "Revocando l’accesso, disconnetti quel client MCP senza uscire dal tuo account.",
       "connectionsEmpty": "Nessun client MCP connesso.",
       "connectedAt": "Connesso il {date}",
       "revoke": "Revoke",
@@ -1771,7 +1754,7 @@
     },
     "personalAccessTokens": {
       "title": "Token di accesso personale",
-      "description": "Usa questo unico token di accesso personale con le API fornite da {siteName}. Ogni richiesta applica le autorizzazioni correnti del tuo account.",
+      "description": "Le richieste API usano le autorizzazioni attuali del tuo account.",
       "empty": "Non è stato creato alcun token di accesso personale.",
       "regenerate": "Rigenera",
       "regenerateTitle": "Rigenera token di accesso personale",
@@ -1788,7 +1771,6 @@
     },
     "passkeys": {
       "title": "Passkey",
-      "description": "Usa questo dispositivo o una chiave di sicurezza per accedere. Puoi conservare più passkey.",
       "loading": "Caricamento passkey...",
       "empty": "Nessuna passkey registrata.",
       "add": "Aggiungi passkey",
@@ -5369,8 +5351,8 @@
   },
   "localBackups": {
     "title": "Backup locali",
-    "description": "Modifiche non salvate da schede chiuse su questo dispositivo. Apri l’editor per recuperarle. I backup scadono dopo 30 giorni e vengono rimossi quando esci dall’account.",
-    "empty": "Nessun backup locale da recuperare. Le modifiche nelle schede aperte non sono elencate qui.",
+    "description": "Modifiche non salvate delle schede chiuse su questo dispositivo, conservate per 30 giorni ed eliminate all'uscita.",
+    "empty": "Nessun backup di schede chiuse da recuperare.",
     "unavailable": "I backup locali richiedono l’archiviazione del browser e Web Locks su questo dispositivo.",
     "loading": "Ricerca di backup locali…",
     "error": "Impossibile completare questa azione. Aggiorna l’elenco e riprova.",

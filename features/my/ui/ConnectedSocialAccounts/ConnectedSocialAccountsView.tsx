@@ -15,7 +15,6 @@ export type SocialUnlinkBlockedReason = 'last_method' | 'primary_email';
 export interface ConnectedSocialAccountsLabels {
   connect: string;
   connected: string;
-  description: string;
   disconnect: string;
   lastMethod: string;
   notConnected: string;
@@ -56,7 +55,6 @@ export function ConnectedSocialAccountsView({
             {labels.title}
           </span>
         }
-        description={labels.description}
       />
 
       <DsLayoutStack gap="sm" data-testid="security-connected-accounts-section">

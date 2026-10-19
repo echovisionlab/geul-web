@@ -50,6 +50,7 @@ export function ProfileForm({
   checkNickname,
 }: ProfileFormProps) {
   const t = useTranslations('profile');
+  const tNotifications = useTranslations('common.notifications');
   const tCommon = useTranslations('common.actions');
   const tCommonLabels = useTranslations('common.labels');
   const tCommonPlaceholders = useTranslations('common.placeholders');
@@ -87,8 +88,7 @@ export function ProfileForm({
 
       setErrors({});
       notifications.show({
-        title: t('notifications.successTitle'),
-        message: t('notifications.updated'),
+        message: tNotifications('saveSuccess'),
         tone: 'positive',
       });
       if (result.member) {

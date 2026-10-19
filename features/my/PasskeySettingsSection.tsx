@@ -118,7 +118,6 @@ export function PasskeySettingsView({
             {t('title')}
           </span>
         }
-        description={t('description')}
       />
 
       <DsLayoutStack gap="sm" data-testid="security-passkeys-section">

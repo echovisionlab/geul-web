@@ -1610,17 +1610,12 @@
       "cookiePreferencesTitle": "Cookie Preferences"
     },
     "languagePreference": {
-      "intro": "Your account language follows you anywhere you sign in. New accounts are seeded from your browser language the first time you authenticate.",
       "label": "Preferred language",
       "save": "Save language",
-      "successTitle": "Language updated",
-      "successMessage": "This preference is now saved to your account for every signed-in device.",
       "errorTitle": "Error",
-      "errorMessage": "Failed to update language preference",
-      "helper": "This setting is saved to your account and takes priority over the browser language you used the first time you signed in."
+      "errorMessage": "Failed to update language preference"
     },
     "newsletter": {
-      "subscribedTitle": "Subscribed",
       "subscribedAlert": "You are subscribed to our newsletter and campaign emails.",
       "unsubscribedAlert": "You are not subscribed to our newsletter.",
       "subscribe": "Subscribe to newsletter",
@@ -1629,12 +1624,10 @@
     },
     "cookieConsent": {
       "syncError": "Failed to sync consent to account settings.",
-      "savedAccount": "Preferences saved and synced to your account.",
-      "savedBrowser": "Preferences saved for this browser.",
       "versionWarning": "We updated the cookie policy to v{version}. Your previous choice is loaded for convenience. Please save again to confirm.",
       "essentialIntro": "Essential cookies are always active for authentication and core site operation.",
       "lastSynced": "Last synced: {value}",
-      "noRecord": "No server-side consent record yet"
+      "savedBrowser": "Saved in this browser"
     }
   },
   "cookieConsentCommon": {
@@ -1655,10 +1648,6 @@
     "submitFailed": "Could not finish onboarding. Try again."
   },
   "profile": {
-    "notifications": {
-      "successTitle": "Success",
-      "updated": "Profile updated successfully"
-    },
     "fields": {
       "uid": "UID",
       "bio": "Bio"
@@ -1678,14 +1667,11 @@
       "disconnectionFailed": "Disconnection Failed",
       "disconnected": "Disconnected",
       "cannotUnlink": "Cannot unlink",
-      "success": "Success",
-      "sessionRevoked": "Session revoked successfully",
+      "sessionRevoked": "Session revoked",
       "sessionsRevoked": "All other sessions have been logged out",
       "failedToRevokeSession": "Failed to revoke session",
       "failedToRevokeSessions": "Failed to revoke sessions",
       "failedToRequestDeletion": "Failed to request account deletion",
-      "connectedMessage": "{provider} account connected successfully.",
-      "disconnectedMessage": "{provider} has been disconnected.",
       "failedToUpdateMainEmail": "Failed to update primary email",
       "failedToLoad": "Failed to load security settings"
     },
@@ -1699,16 +1685,14 @@
       "disconnectFailed": "Failed to disconnect {provider}."
     },
     "connectedAccounts": {
-      "title": "Connected social logins",
-      "description": "Manage the social sign-ins connected to this account."
+      "title": "Connected social logins"
     },
     "mcpIntegration": {
-      "description": "Connect a compatible AI client to this endpoint. Your browser will open for sign-in and consent.",
       "consentDescription": "This client can read and edit content and manage files within your existing account permissions. It can create, update or delete content and change existing file attachments. Connecting does not grant any additional account permissions.",
       "consentOfflineAccess": "This connection can continue after your current browser session ends, until you revoke it.",
       "consentRevoke": "You can revoke this connection in {settings} → Remote MCP.",
       "connectionsTitle": "Connected MCP clients",
-      "connectionsDescription": "These OAuth grants are separate from browser sessions. Revoking one disconnects that MCP client without signing you out.",
+      "connectionsDescription": "Revoking access disconnects that MCP client without signing you out.",
       "connectionsEmpty": "No MCP clients are connected.",
       "connectedAt": "Connected {date}",
       "revoke": "Revoke",
@@ -1720,7 +1704,7 @@
     },
     "personalAccessTokens": {
       "title": "Personal access token",
-      "description": "Use this single personal access token with APIs provided by {siteName}. Every request uses your current account permissions.",
+      "description": "API requests use your current account permissions.",
       "empty": "No personal access tokens have been created.",
       "regenerate": "Regenerate",
       "regenerateTitle": "Regenerate personal access token",
@@ -1737,7 +1721,6 @@
     },
     "passkeys": {
       "title": "Passkeys",
-      "description": "Use this device or a security key to sign in without a password. You can keep multiple passkeys.",
       "loading": "Loading passkeys...",
       "empty": "No passkeys registered.",
       "add": "Add passkey",
@@ -1752,7 +1735,6 @@
     },
     "sessions": {
       "title": "Active sessions",
-      "description": "Review where this account is signed in and revoke sessions you do not trust.",
       "thisDevice": "This device",
       "logoutOthers": "Log out all other sessions",
       "activeNow": "Active now",
@@ -5369,8 +5351,8 @@
   },
   "localBackups": {
     "title": "Local backups",
-    "description": "Unsaved edits from closed tabs on this device. Open the editor to recover them. Backups expire after 30 days and are removed when you sign out.",
-    "empty": "No local backups to recover. Edits in open tabs are not listed here.",
+    "description": "Unsaved edits from closed tabs on this device, kept for 30 days and cleared on sign-out.",
+    "empty": "No backups from closed tabs to recover.",
     "unavailable": "Local backups require browser storage and Web Locks on this device.",
     "loading": "Looking for local backups…",
     "error": "Could not complete this action. Refresh the list and try again.",

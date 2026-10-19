@@ -40,8 +40,7 @@ export function SettingsForm({
       setError(null);
       setIsSubscribed(subscribed);
       notifications.show({
-        title: subscribed ? t('subscribedTitle') : tCommonStatuses('unsubscribed'),
-        message: result.message,
+        message: tCommonStatuses(subscribed ? 'subscribed' : 'unsubscribed'),
         tone: 'positive',
         ...(subscribed && { icon: <IconCheck size={16} /> }),
       });

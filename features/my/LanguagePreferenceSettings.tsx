@@ -1,16 +1,14 @@
 'use client';
-import { SupportingText } from '@/components/core/Typography';
 
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 
 import { startTransition, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { IconCheck, IconLanguage } from '@tabler/icons-react';
+import { IconCheck } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
 import { notifications } from '@/components/core/Notification';
-import { Alert } from '@/components/core/Alert';
 import { Button } from '@/components/core/Button';
 import { Select } from '@/components/core/Input';
 import { updatePreferredLocaleAction } from '@/lib/actions/user-preference';
@@ -30,6 +28,7 @@ export function LanguagePreferenceSettings({
 }: LanguagePreferenceSettingsProps) {
   const router = useRouter();
   const t = useTranslations('settings.languagePreference');
+  const tNotifications = useTranslations('common.notifications');
   const initialValue = normalizeLocale(initialLocale) ?? DEFAULT_LOCALE;
   const [savedLocale, setSavedLocale] = useState<SupportedLocale>(initialValue);
   const [selectedLocale, setSelectedLocale] = useState<string | null>(initialValue);
@@ -43,8 +42,7 @@ export function LanguagePreferenceSettings({
         setSelectedLocale(nextLocale);
         writeLocaleCookie(nextLocale);
         notifications.show({
-          title: t('successTitle'),
-          message: t('successMessage'),
+          message: tNotifications('saveSuccess'),
           tone: 'positive',
           icon: <IconCheck size={16} />,
         });
@@ -64,10 +62,6 @@ export function LanguagePreferenceSettings({
 
   return (
     <DsLayoutStack gap="md">
-      <Alert icon={<IconLanguage size={16} />} tone="neutral">
-        {t('intro')}
-      </Alert>
-
       <Select
         label={t('label')}
         data={getSupportedLocaleOptions()}
@@ -77,8 +71,6 @@ export function LanguagePreferenceSettings({
         searchable={false}
         disabled={updateLocaleMutation.isPending}
       />
-
-      <SupportingText tone="secondary">{t('helper')}</SupportingText>
 
       <Button
         emphasis="medium"

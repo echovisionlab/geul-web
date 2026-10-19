@@ -1610,17 +1610,12 @@
       "cookiePreferencesTitle": "Cookie 偏好設定"
     },
     "languagePreference": {
-      "intro": "無論您在何處登錄，您的帳戶語言都會跟隨您。當您第一次進行身份驗證時，新帳戶將從您的瀏覽器語言中播種",
       "label": "首選語言",
       "save": "儲存語言",
-      "successTitle": "語言已更新",
-      "successMessage": "現在，此首選項已儲存到您的每個登入裝置的帳戶中",
       "errorTitle": "錯誤",
-      "errorMessage": "無法更新語言首選項",
-      "helper": "此設定會儲存在您的帳戶中，並優先於您首次登入時使用的瀏覽器語言。"
+      "errorMessage": "無法更新語言首選項"
     },
     "newsletter": {
-      "subscribedTitle": "已訂閱",
       "subscribedAlert": "您已訂閱我們的電子報和活動電子郵件",
       "unsubscribedAlert": "您還沒有訂閱我們的電子報",
       "subscribe": "訂閱時事通訊",
@@ -1629,12 +1624,10 @@
     },
     "cookieConsent": {
       "syncError": "無法將同意同步到帳戶設定",
-      "savedAccount": "首選項已儲存並同步到您的帳戶",
-      "savedBrowser": "為此瀏覽器儲存的首選項",
       "versionWarning": "我們將 cookie 策略更新為 v{version}。為了方便起見，您先前的選擇已載入。請再次儲存以確認",
       "essentialIntro": "基本 cookie 始終處於活動狀態，用於身份驗證和核心網站操作",
       "lastSynced": "上次同步：{value}",
-      "noRecord": "尚無伺服器端同意記錄"
+      "savedBrowser": "已儲存在此瀏覽器中"
     }
   },
   "cookieConsentCommon": {
@@ -1655,10 +1648,6 @@
     "submitFailed": "無法完成初始設定，請再試一次。"
   },
   "profile": {
-    "notifications": {
-      "successTitle": "成功",
-      "updated": "個人資料更新成功"
-    },
     "fields": {
       "uid": "使用者識別碼",
       "bio": "簡介"
@@ -1678,14 +1667,11 @@
       "disconnectionFailed": "斷開連線失敗",
       "disconnected": "已斷開連接",
       "cannotUnlink": "無法取消連結",
-      "success": "成功",
-      "sessionRevoked": "會話已成功撤銷",
+      "sessionRevoked": "工作階段已撤銷",
       "sessionsRevoked": "所有其他會話均已註銷",
       "failedToRevokeSession": "撤銷會話失敗",
       "failedToRevokeSessions": "撤銷會話失敗",
       "failedToRequestDeletion": "請求刪除帳戶失敗",
-      "connectedMessage": "{provider} 帳戶連接成功",
-      "disconnectedMessage": "{provider} 已斷開連接",
       "failedToUpdateMainEmail": "無法更新主要電子郵件",
       "failedToLoad": "無法載入安全性設定"
     },
@@ -1699,12 +1685,10 @@
       "disconnectFailed": "無法斷開 {provider} 的連接"
     },
     "connectedAccounts": {
-      "title": "已連結的社群登入",
-      "description": "管理連結至此帳號的社群登入方式"
+      "title": "已連結的社群登入"
     },
     "sessions": {
       "title": "活躍會話",
-      "description": "檢查此帳戶的登入位置並撤銷您不信任的會話",
       "thisDevice": "這個裝置",
       "logoutOthers": "註銷所有其他會話",
       "activeNow": "現在活躍",
@@ -1754,12 +1738,11 @@
       }
     },
     "mcpIntegration": {
-      "description": "將相容的 AI 用戶端連線至此端點。瀏覽器將開啟以完成登入與授權。",
       "consentDescription": "此用戶端可以在您現有的帳戶權限範圍內讀取和編輯內容以及管理檔案。它可以建立、更新或刪除內容，並變更現有附件。連線不會授予任何額外的帳戶權限。",
       "consentOfflineAccess": "目前的瀏覽器工作階段結束後，此連線仍可繼續，直到您撤銷它。",
       "consentRevoke": "您可以在{settings} → Remote MCP中撤銷此連線。",
       "connectionsTitle": "已連線的MCP用戶端",
-      "connectionsDescription": "這些OAuth授權與瀏覽器工作階段相互獨立。撤銷其中一項會中斷相應MCP用戶端的連線，而不會讓您登出。",
+      "connectionsDescription": "撤銷存取權會中斷該 MCP 用戶端的連線，但不會將您登出。",
       "connectionsEmpty": "沒有已連線的MCP用戶端。",
       "connectedAt": "連線時間 {date}",
       "revoke": "Revoke",
@@ -1771,7 +1754,7 @@
     },
     "personalAccessTokens": {
       "title": "個人存取權杖",
-      "description": "使用這一個人存取權杖呼叫 {siteName} 提供的 API。每個請求都會使用您帳戶目前的權限。",
+      "description": "API 請求使用您目前的帳戶權限。",
       "empty": "尚未建立個人存取權杖。",
       "regenerate": "重新產生",
       "regenerateTitle": "重新產生個人存取權杖",
@@ -1788,7 +1771,6 @@
     },
     "passkeys": {
       "title": "通行密鑰",
-      "description": "使用此裝置或安全金鑰登入。你可以保存多個通行密鑰。",
       "loading": "正在載入通行密鑰...",
       "empty": "尚未註冊通行密鑰。",
       "add": "新增通行密鑰",
@@ -5369,8 +5351,8 @@
   },
   "localBackups": {
     "title": "本機備份",
-    "description": "此裝置上已關閉分頁中未儲存的編輯內容。開啟編輯器即可還原。備份會在30天後過期，登出時會被移除。",
-    "empty": "沒有可還原的本機備份。開啟的分頁中的編輯內容不會在此列出。",
+    "description": "此裝置上已關閉分頁中未儲存的編輯，保留 30 天，登出後清除。",
+    "empty": "沒有可復原的已關閉分頁備份。",
     "unavailable": "本機備份需要此裝置上的瀏覽器儲存空間和Web Locks支援。",
     "loading": "正在尋找本機備份…",
     "error": "無法完成此操作。請重新整理清單後重試。",

@@ -211,8 +211,7 @@ describe('ProfileForm controller', () => {
     });
 
     expect(mocks.notificationsShow).toHaveBeenCalledWith({
-      title: 'profile.notifications.successTitle',
-      message: 'profile.notifications.updated',
+      message: 'common.notifications.saveSuccess',
       tone: 'positive',
     });
     expect(mocks.updateMemberSummary).toHaveBeenCalledWith(member);

@@ -1610,17 +1610,12 @@
       "cookiePreferencesTitle": "Preferencje dotyczące plików cookie"
     },
     "languagePreference": {
-      "intro": "Język Twojego konta podąża za Tobą, gdziekolwiek się zalogujesz. Nowe konta są tworzone na podstawie języka Twojej przeglądarki przy pierwszym uwierzytelnieniu.",
       "label": "Preferowany język",
       "save": "Zapisz język",
-      "successTitle": "Język zaktualizowany",
-      "successMessage": "Ta preferencja jest teraz zapisywana na Twoim koncie dla każdego zalogowanego urządzenia.",
       "errorTitle": "Błąd",
-      "errorMessage": "Nie udało się zaktualizować preferencji językowych",
-      "helper": "To ustawienie jest zapisywane na Twoim koncie i ma pierwszeństwo przed językiem przeglądarki, którego użyłeś przy pierwszym logowaniu."
+      "errorMessage": "Nie udało się zaktualizować preferencji językowych"
     },
     "newsletter": {
-      "subscribedTitle": "Zasubskrybowano",
       "subscribedAlert": "Subskrybujesz nasz biuletyn i e-maile dotyczące kampanii.",
       "unsubscribedAlert": "Nie jesteś zapisany do naszego newslettera.",
       "subscribe": "Zapisz się do newslettera",
@@ -1629,12 +1624,10 @@
     },
     "cookieConsent": {
       "syncError": "Nie udało się zsynchronizować zgody z ustawieniami konta.",
-      "savedAccount": "Preferencje zapisane i zsynchronizowane z Twoim kontem.",
-      "savedBrowser": "Preferencje zapisane dla tej przeglądarki.",
       "versionWarning": "Zaktualizowaliśmy politykę dotyczącą plików cookie do wersji v{version}. Twój poprzedni wybór został załadowany dla wygody. Zapisz ponownie, aby potwierdzić.",
       "essentialIntro": "Niezbędne pliki cookie są zawsze aktywne do celów uwierzytelniania i podstawowego działania witryny.",
       "lastSynced": "Ostatnia synchronizacja: {value}",
-      "noRecord": "Nie ma jeszcze rekordu zgody po stronie serwera"
+      "savedBrowser": "Zapisano w tej przeglądarce"
     }
   },
   "cookieConsentCommon": {
@@ -1655,10 +1648,6 @@
     "submitFailed": "Nie udało się dokończyć wdrażania. Spróbuj ponownie."
   },
   "profile": {
-    "notifications": {
-      "successTitle": "Sukces",
-      "updated": "Profil został pomyślnie zaktualizowany"
-    },
     "fields": {
       "uid": "UID",
       "bio": "Bio"
@@ -1676,16 +1665,13 @@
       "confirmationEmailSent": "E-mail z potwierdzeniem został wysłany",
       "connectionFailed": "Połączenie nie powiodło się",
       "disconnectionFailed": "Rozłączenie nie powiodło się",
-      "disconnected": "Bezładny",
+      "disconnected": "Rozłączono",
       "cannotUnlink": "Nie można odłączyć",
-      "success": "Sukces",
-      "sessionRevoked": "Sesja została pomyślnie odwołana",
+      "sessionRevoked": "Sesja unieważniona",
       "sessionsRevoked": "Wszystkie pozostałe sesje zostały wylogowane",
       "failedToRevokeSession": "Nie udało się odwołać sesji",
       "failedToRevokeSessions": "Nie udało się odwołać sesji",
       "failedToRequestDeletion": "Nie udało się poprosić o usunięcie konta",
-      "connectedMessage": "Konto {provider} zostało pomyślnie połączone.",
-      "disconnectedMessage": "{provider} został rozłączony.",
       "failedToUpdateMainEmail": "Nie udało się zaktualizować głównego adresu e-mail",
       "failedToLoad": "Nie udało się wczytać ustawień zabezpieczeń"
     },
@@ -1699,16 +1685,14 @@
       "disconnectFailed": "Nie udało się rozłączyć {provider}."
     },
     "connectedAccounts": {
-      "title": "Połączone loginy społecznościowe",
-      "description": "Zarządzaj logowaniami społecznościowymi połączonymi z tym kontem."
+      "title": "Połączone loginy społecznościowe"
     },
     "mcpIntegration": {
-      "description": "Połącz zgodnego klienta AI z tym punktem końcowym. Przeglądarka otworzy się w celu logowania i wyrażenia zgody.",
       "consentDescription": "Ten klient może czytać i edytować treści oraz zarządzać plikami w ramach obecnych uprawnień Twojego konta. Może tworzyć, aktualizować lub usuwać treści i zmieniać istniejące załączniki. Połączenie nie przyznaje kontu dodatkowych uprawnień.",
       "consentOfflineAccess": "To połączenie może działać po zakończeniu bieżącej sesji przeglądarki, dopóki go nie cofniesz.",
       "consentRevoke": "Możesz cofnąć to połączenie w {settings} → Remote MCP.",
       "connectionsTitle": "Połączeni klienci MCP",
-      "connectionsDescription": "Te uprawnienia OAuth są niezależne od sesji przeglądarki. Cofnięcie jednego z nich odłącza danego klienta MCP bez wylogowywania Cię.",
+      "connectionsDescription": "Cofnięcie dostępu odłącza tego klienta MCP bez wylogowywania Cię z konta.",
       "connectionsEmpty": "Brak połączonych klientów MCP.",
       "connectedAt": "Połączono {date}",
       "revoke": "Revoke",
@@ -1720,7 +1704,7 @@
     },
     "personalAccessTokens": {
       "title": "Osobisty token dostępu",
-      "description": "Używaj tego jednego osobistego tokenu dostępu z interfejsami API udostępnianymi przez {siteName}. Każde żądanie korzysta z bieżących uprawnień konta.",
+      "description": "Żądania API korzystają z bieżących uprawnień Twojego konta.",
       "empty": "Nie utworzono jeszcze żadnego osobistego tokenu dostępu.",
       "regenerate": "Wygeneruj ponownie",
       "regenerateTitle": "Wygeneruj ponownie osobisty token dostępu",
@@ -1737,7 +1721,6 @@
     },
     "passkeys": {
       "title": "Klucze",
-      "description": "Użyj tego urządzenia lub klucza bezpieczeństwa, aby zalogować się bez hasła. Możesz zachować wiele kluczy dostępu.",
       "loading": "Ładowanie kluczy...",
       "empty": "Nie zarejestrowano żadnych kluczy.",
       "add": "Dodaj hasło",
@@ -1752,7 +1735,6 @@
     },
     "sessions": {
       "title": "Aktywne sesje",
-      "description": "Sprawdź, gdzie jest zalogowane to konto i unieważnij sesje, którym nie ufasz.",
       "thisDevice": "To urządzenie",
       "logoutOthers": "Wyloguj się ze wszystkich pozostałych sesji",
       "activeNow": "Aktywny teraz",
@@ -5369,8 +5351,8 @@
   },
   "localBackups": {
     "title": "Lokalne kopie zapasowe",
-    "description": "Niezapisane zmiany z zamkniętych kart na tym urządzeniu. Otwórz edytor, aby je odzyskać. Kopie zapasowe wygasają po 30 dniach i są usuwane po wylogowaniu.",
-    "empty": "Brak lokalnych kopii zapasowych do odzyskania. Zmiany w otwartych kartach nie są tutaj wymienione.",
+    "description": "Niezapisane zmiany z zamkniętych kart na tym urządzeniu, przechowywane przez 30 dni i usuwane po wylogowaniu.",
+    "empty": "Brak kopii zapasowych z zamkniętych kart do przywrócenia.",
     "unavailable": "Lokalne kopie zapasowe wymagają pamięci przeglądarki i Web Locks na tym urządzeniu.",
     "loading": "Wyszukiwanie lokalnych kopii zapasowych…",
     "error": "Nie udało się wykonać tej czynności. Odśwież listę i spróbuj ponownie.",
