@@ -66,6 +66,13 @@ notifications and session updates remain intact. Check Empty and WithImage in th
 
 ## Legal history status
 
+Public terms and privacy headings use the localized document title in current, scheduled-preview and history-detail views.
+The heading follows the displayed content language, including source-language fallback, and carries that language's
+`lang` with `dir="auto"`. The surrounding notices and controls use the site UI language. The entity label is the
+fallback when no document title is available. Core Heading owns the existing title typography; no new tokens or styles
+are required. Review [Arabic privacy content](http://localhost:6010/?path=/story/pages-legal-public-document--arabic-privacy-content)
+and SourceLanguageFallback in the [public legal stories](../../stories/pages/Legal.stories.tsx).
+
 [LegalPolicyHistoryClient](../../features/policy/LegalPolicyHistoryClient.tsx) renders Current/Archived using sm Core Text.
 These are plain status labels without a colored badge surface.
 Version links, language query parameters, effective dates, table headers, server snapshots, loading and error behavior remain unchanged.

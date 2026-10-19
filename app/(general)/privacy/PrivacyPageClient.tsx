@@ -135,8 +135,19 @@ function PrivacyActive({
           ) : null}
           <DsLayoutInline printFlow="stack" justify="between" align="start">
             <DsLayoutStack gap="xs" flexible>
-              <DsHeading level={1} scale="title">
-                {tCommonEntities('privacy')}
+              <DsHeading
+                level={1}
+                scale="title"
+                lang={
+                  activePrivacy?.title
+                    ? activePrivacy.localizationInfo?.displayedLocale ||
+                      activePrivacy.localizationInfo?.sourceLocale ||
+                      requestedLocale
+                    : undefined
+                }
+                dir="auto"
+              >
+                {activePrivacy?.title || tCommonEntities('privacy')}
               </DsHeading>
               {activePrivacy ? (
                 <LegalDocumentMetadata version={activePrivacy.version} effectiveFrom={activePrivacy.effectiveFrom} />
@@ -267,8 +278,19 @@ function PrivacyPreview({
           ) : null}
           <DsLayoutInline printFlow="stack" justify="between" align="start">
             <DsLayoutStack gap="xs" flexible>
-              <DsHeading level={1} scale="title">
-                {tCommonEntities('privacy')}
+              <DsHeading
+                level={1}
+                scale="title"
+                lang={
+                  previewPrivacy?.title
+                    ? previewPrivacy.localizationInfo?.displayedLocale ||
+                      previewPrivacy.localizationInfo?.sourceLocale ||
+                      requestedLocale
+                    : undefined
+                }
+                dir="auto"
+              >
+                {previewPrivacy?.title || tCommonEntities('privacy')}
               </DsHeading>
               <LegalDocumentMetadata version={previewPrivacy.version} effectiveFrom={previewPrivacy.effectiveFrom} />
             </DsLayoutStack>

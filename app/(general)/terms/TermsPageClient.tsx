@@ -129,8 +129,19 @@ function TermsActive({
           ) : null}
           <DsLayoutInline printFlow="stack" justify="between" align="start">
             <DsLayoutStack gap="xs" flexible>
-              <DsHeading level={1} scale="title">
-                {tCommonEntities('terms')}
+              <DsHeading
+                level={1}
+                scale="title"
+                lang={
+                  activeTerms?.title
+                    ? activeTerms.localizationInfo?.displayedLocale ||
+                      activeTerms.localizationInfo?.sourceLocale ||
+                      requestedLocale
+                    : undefined
+                }
+                dir="auto"
+              >
+                {activeTerms?.title || tCommonEntities('terms')}
               </DsHeading>
               {activeTerms ? (
                 <LegalDocumentMetadata version={activeTerms.version} effectiveFrom={activeTerms.effectiveFrom} />
@@ -255,8 +266,19 @@ function TermsPreview({
           ) : null}
           <DsLayoutInline printFlow="stack" justify="between" align="start">
             <DsLayoutStack gap="xs" flexible>
-              <DsHeading level={1} scale="title">
-                {tCommonEntities('terms')}
+              <DsHeading
+                level={1}
+                scale="title"
+                lang={
+                  previewTerms?.title
+                    ? previewTerms.localizationInfo?.displayedLocale ||
+                      previewTerms.localizationInfo?.sourceLocale ||
+                      requestedLocale
+                    : undefined
+                }
+                dir="auto"
+              >
+                {previewTerms?.title || tCommonEntities('terms')}
               </DsHeading>
               <LegalDocumentMetadata version={previewTerms.version} effectiveFrom={previewTerms.effectiveFrom} />
             </DsLayoutStack>

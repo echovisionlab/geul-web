@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "0e49cfc29b0a7ef8f08a2f43c49c823fe2a15a2fdd54ed6ea0a695c98bd1507a",
+  "manifestHash": "73a28f5a0d0c8b86692fd7b44d745d8d85e9e63538d9c1c355a0223dabc70d29",
   "counts": {
     "sourceFiles": 3816,
     "productionSourceFiles": 2303,
@@ -10,7 +10,7 @@
     "coreFamilies": 57,
     "featureDomains": 54,
     "storyFiles": 257,
-    "storyVariants": 1469,
+    "storyVariants": 1470,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -86604,6 +86604,11 @@
           "preview": "http://localhost:6010/?path=/story/pages-legal-public-document--source-language-fallback"
         },
         {
+          "name": "ArabicPrivacyContent",
+          "args": "{ document: 'privacy', state: 'body' }",
+          "preview": "http://localhost:6010/?path=/story/pages-legal-public-document--arabic-privacy-content"
+        },
+        {
           "name": "ScheduledPreview",
           "args": "{ state: 'preview' }",
           "preview": "http://localhost:6010/?path=/story/pages-legal-public-document--scheduled-preview"
@@ -86638,10 +86643,10 @@
         "app/(general)/privacy/PrivacyPageClient.tsx",
         "app/(general)/terms/TermsPageClient.tsx",
         "components/core/Layout/index.ts",
+        "lib/i18n/locale.ts",
         "stories/public/fixtures/PublicShellStoryHarness.tsx",
         "stories/public/fixtures/document-outline.ts",
-        "stories/public/fixtures/long-rich-text.ts",
-        "stories/shared/public-accessibility.ts"
+        "stories/public/fixtures/long-rich-text.ts"
       ]
     },
     {
