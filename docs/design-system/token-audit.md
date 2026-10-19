@@ -12,7 +12,7 @@ This report is generated from production source by `node scripts/design-system/c
 - 0 existing literal CSS spacing/typography occurrences covered by the migration baseline.
 - 0 existing custom-property declarations/inline assignments outside central files (private `--_*` implementation variables are permitted).
 - 173 literal CSS dimension occurrences in spacing, typography and geometry properties; 67 distinct values. These are audit findings, not blanket errors: canvas dimensions, geometry and responsive layouts require context.
-- 774 CSS custom-property declarations, 303 distinct names, 143 names declared more than once. Theme/state/media overrides are expected; equal values alone do not establish semantic duplication.
+- 771 CSS custom-property declarations, 301 distinct names, 143 names declared more than once. Theme/state/media overrides are expected; equal values alone do not establish semantic duplication.
 - 0 findings match the reviewed migration baseline; 0 new violations; 0 obsolete baseline keys eligible for removal.
 
 ## Enforcement contract
@@ -123,7 +123,7 @@ Authored typography exceptions (artwork, not interface roles):
 | `--_selection-status-inset`          |            3 | `components/core/SelectionSurface/SelectionSurface.module.css`                                         |
 | `--_navigation-leading-track`        |            2 | `components/core/SideNavigation/SideNavigation.module.css`                                             |
 | `--_social-brand-color`              |            2 | `components/core/Social/SocialIcon.module.css`                                                         |
-| `--_table-of-contents-inset-end`     |            3 | `components/core/TableOfContents/TableOfContents.module.css`                                           |
+| `--_table-of-contents-inset-end`     |            2 | `components/core/TableOfContents/TableOfContents.module.css`                                           |
 | `--_tab-active-ink`                  |            5 | `components/core/Tabs/Tabs.module.css`                                                                 |
 | `--_tab-active-fill`                 |            5 | `components/core/Tabs/Tabs.module.css`                                                                 |
 | `--_text-hierarchy-inset`            |            2 | `components/core/TextButton/TextButton.module.css`                                                     |

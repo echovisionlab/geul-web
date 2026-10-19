@@ -102,7 +102,9 @@ describe('TableOfContentsView', () => {
     );
     expect(css).toContain(':global([data-table-of-contents-scope]):has(.layout[data-outline])');
     expect(css).toMatch(/\.layout\[data-outline\] \{\s*padding-inline-end: var\(--_table-of-contents-inset-end\);/);
-    expect(css).toMatch(/\.column \.link \{[^}]*min-height: var\(--geul-interaction-minimum\);/);
+    expect(css).toMatch(
+      /\.link \{[^}]*min-height: max\(var\(--geul-control-height-compact\), var\(--geul-interaction-minimum\)\);/,
+    );
   });
 
   it('puts the outline before the document in reading order and fits it below the sticky line from the start', async () => {
@@ -366,7 +368,7 @@ describe('TableOfContentsView reserved layout', () => {
     expect(layout.querySelector('#document')).not.toBeNull();
     expect(container!.querySelector('[role="navigation"]')).toBeNull();
     await flushTocSchedule();
-    expect(layout.querySelector('[role="navigation"]')?.getAttribute('data-presentation')).toBe('rail');
+    expect(layout.querySelector('[role="navigation"] a[aria-expanded]')).not.toBeNull();
   });
 
   it('keeps children without reserving space for three or fewer headings', async () => {
@@ -381,7 +383,7 @@ describe('TableOfContentsView reserved layout', () => {
     expect(container!.querySelector('[role="navigation"]')).toBeNull();
   });
 
-  it('presents a labelled persistent column on wide screens', async () => {
+  it('keeps the closed rail on wide screens', async () => {
     vi.spyOn(window, 'matchMedia').mockImplementation(
       (query: string) =>
         ({
@@ -400,11 +402,9 @@ describe('TableOfContentsView reserved layout', () => {
     );
     await flushTocSchedule();
     const navigation = container!.querySelector<HTMLElement>('[role="navigation"]')!;
-    expect(navigation.getAttribute('data-presentation')).toBe('column');
-    expect(navigation.hasAttribute('aria-label')).toBe(false);
-    expect(document.getElementById(navigation.getAttribute('aria-labelledby')!)?.textContent).toBe('Contents');
-    expect(navigation.querySelector('[aria-expanded]')).toBeNull();
-    expect(navigation.querySelector('ol')!.hidden).toBe(false);
+    expect(navigation.getAttribute('aria-label')).toBe('Contents');
+    expect(navigation.querySelector('a[aria-expanded]')?.getAttribute('aria-expanded')).toBe('false');
+    expect(navigation.querySelector('ol')!.hidden).toBe(true);
   });
 
   it('renders a nested list and marks the parents of the current heading', async () => {
@@ -581,6 +581,19 @@ describe('TableOfContentsView rail scrubbing', () => {
     expect(target()).toBeDefined();
     act(() => {
       rail.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    });
+    expect(target()).toBeUndefined();
+    expect(rail.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('ends a hover preview when the pointer leaves the outline from the list', async () => {
+    const { rail, pointer, target } = await renderScrubbable();
+    pointer('pointermove', 300, 1020, 'mouse');
+    expect(target()).toBeDefined();
+    // The pointer crossed from the rail into the list without a rail leave, then left the outline.
+    const link = container!.querySelector<HTMLAnchorElement>('[data-toc-index]')!;
+    act(() => {
+      link.dispatchEvent(new MouseEvent('pointerout', { bubbles: true, relatedTarget: document.body }));
     });
     expect(target()).toBeUndefined();
     expect(rail.getAttribute('aria-expanded')).toBe('false');

@@ -1,5 +1,14 @@
 # Design system changes
 
+## 2026-10-19 — outline rail at every width (unreleased)
+
+Core `TableOfContentsView` uses the quiet rail at every width. The persistent outline column from `lg` is
+removed: a long outline gave it a second scroll area beside the document. Wide documents now reserve only
+the rail width at the inline end instead of 15rem plus the `xl` gap, and the document box gains that space. The `outlinePresentation` prop is removed from Core and from the navigation Feature; no
+consumer passed it. The rail also keeps a preview started as the outline appears, ends a hover preview when
+the pointer leaves the outline from the list, and keeps a previewed row whole at the list's edges. See
+[Table of contents](table-of-contents.md).
+
 ## 2026-10-18 — self-hosted Geul fonts (unreleased)
 
 The shared sans/mono assignments now use the Noto-backed Geul families. Korean Hanja and

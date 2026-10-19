@@ -65,34 +65,33 @@ evidence. No claim is made about untested hover timing or overscroll behavior.
 
 Page and Post authors can turn the outline off in Options. The persisted shared document layout
 uses `hideTableOfContents`; absent/false retains the existing automatic heading threshold. Hidden
-outlines reserve no column or rail and provide no navigation targets. This setting does not change
+outlines reserve no rail and provide no navigation targets. This setting does not change
 the authored headings or the content language menu. The menu stays at the page frame’s inline end.
 The comment setting is a separate Post-only feature.
 
-## Presentations (2026-10-13 owner decision)
+## Presentation (2026-10-19 owner decision)
 
-The owner approved three presentations of the same outline for reserved layouts. They stay
-in the Notion/ChatGPT interaction family: a quiet indicator, a revealed title list and, when
-the screen has room, the same list kept visible. No floating launcher or search panel is added.
+Every width uses one presentation: the quiet rail. It replaces the three presentations approved on
+2026-10-13, which kept the title list open as a persistent column from `lg`. A long outline gave
+that column a second scroll area beside the document, and the rail is more compact. The rail stays
+in the Notion/ChatGPT interaction family: a quiet indicator and a revealed title list. No floating
+launcher or search panel is added.
 
-| Viewport (reserved layout) | Presentation                                                                                                                                                                | Reserved inline space                                               |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| `lg` (75em) and wider      | Persistent column: mono `xs` title label, one 1px line, `xs` muted rows (hover: `text-hover` on `surface-hover`), current row in ink at medium weight with a 2px ink marker | Column (15rem) + `xl` gap at the inline end                         |
-| `sm`–`lg`                  | Quiet rail; hover, keyboard focus or a press reveals the bounded title list                                                                                                 | Rail target width (28px; 44px on coarse pointers) at the inline end |
-| below `sm` (phones)        | The same rail, scrubbable by touch                                                                                                                                          | Rail target width at the inline end only                            |
+| Viewport (reserved layout) | Presentation                                                                                                            | Reserved inline space                                               |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Every width                | Quiet rail; hover, keyboard focus or a press reveals the bounded title list; touch, pen or a mouse drag scrubs the rail | Rail target width (28px; 44px on coarse pointers) at the inline end |
 
-The column starts at `lg`. Every document starts at the frame's start edge and runs up to the reserve at
-the inline end (owner decision 2026-10-18, replacing the balanced 2026-10-13 reserve that centered the
-reading column): the title, hero text and running text share the start edge, and the outline column
-sits at the inline end. The column and rail are sticky inside the reserved track, below the site header,
-and stop at the end of the document box, so the footer boundary needs no measurement. The document
+Every document starts at the frame's start edge and runs up to the reserve at the inline end (owner
+decision 2026-10-18, replacing the balanced 2026-10-13 reserve that centered the reading column): the
+title, hero text and running text share the start edge, and the rail sits at the inline end. The rail
+is sticky inside the reserved track, below the site header, and stops at the end of the document box, so the footer boundary needs no measurement. The document
 plays (`stories/public/fixtures/document-outline.ts`) assert that no reading block or reading chrome
 reaches the outline (`assertOutlineClearance`) and that the first reading block starts where the title
 starts.
 
 The outline is never taller than the viewport below the sticky line. Until the document has
 scrolled the outline up to that line (it starts below a title or hero), Core also subtracts the
-remaining distance, so the column and the revealed list fit the first screen with their own scroll
+remaining distance, so the revealed list fits the first screen with its own scroll
 instead of running off its bottom (written per frame as a style property, no re-render). At the
 document end the outline leaves with the document box like any sticky element.
 
@@ -102,9 +101,6 @@ There is one placement: the document starts at the start edge and only the inlin
 Running text (posts, legal documents, the changelog) keeps the reading measure from that edge; CMS
 pages and entity details keep their section composition. The `center` placement was removed on
 2026-10-18.
-
-`outlinePresentation="rail"` keeps the rail at every width for a body that shares the page width with
-another column: an entity detail with media. The persistent column needs a full-width body.
 
 ### Chrome outside the outline layout
 
@@ -116,17 +112,14 @@ measure ends, and `ContentLayoutView` anchors its page language controls at the 
 The control row sits above the outline instead of inheriting the outline's horizontal reserve.
 Every title keeps the first body line's start edge at every width.
 
-Persistent column details: the label is the `tableOfContents.title` copy and names the
-landmark (`aria-labelledby`). Rows are real links in a nested list, compact for a fine pointer and
-at the shared 44px `interaction-minimum` on coarse pointers (tablets in landscape reach `lg`). The
-marker moves to the current row with `motion-normal` (instant with reduced motion). When the current
-row leaves the column's own scroll area it is scrolled into view inside the column only, never while
-the pointer or focus is in the column. The column scrolls independently and contains overscroll.
+Revealed list details: the `tableOfContents.title` copy names the landmark and the rail link
+(`aria-label`). Rows are real links in a nested list, at the rail target height (28px; the shared
+44px `interaction-minimum` on coarse pointers). The list scrolls independently and contains overscroll.
 
 Reading and focus order: the outline precedes the document in the DOM (its track is out of flow,
-so this does not change the layout). Tab reaches the outline right after the document chrome — one
-rail stop below `lg`, the column's links from `lg` — then continues into the document, as the column
-is seen beside the document's first lines. Links follow authored document order and nesting.
+so this does not change the layout). Tab reaches the rail right after the document chrome; focusing
+the rail reveals the list and ArrowDown moves into its links. Tab then continues into the document,
+as the rail is seen beside the document's first lines. Links follow authored document order and nesting.
 
 ### Rail scrubbing
 
@@ -150,8 +143,8 @@ Rows indent one `md` step per outline level, capped at three visual levels so de
 neither drift nor squeeze their titles. Long titles wrap with a hanging indent and clamp at
 three lines; the complete title remains the link's accessible name. The current row's
 containing sections are shown in ink (`data-ancestor`) so the reader keeps the parent context.
-The current row itself is ink in every presentation: strong weight in the floating list, the
-2px marker in the column. No presentation uses the accent color for location.
+The current row itself is ink at medium weight with a hairline underline in the revealed list.
+Location never uses the accent color.
 Rail marks encode depth by length on one end-aligned axis (`md`, `xs`, `xxs`).
 Each title keeps its authored direction inside a `<bdi>` isolate while its row keeps the interface
 alignment, so an English title in an Arabic interface reads left to right with its punctuation in
@@ -226,8 +219,8 @@ current meaning but must not override manual outline scrolling.
 
 ## Public contract and content
 
-Props are `items: TocItem[]`, `title`, `children` (required: the document the outline navigates)
-and `outlinePresentation` (`responsive` default, `rail` beside another column).
+Props are `items: TocItem[]`, `title` and `children` (required: the document the outline navigates).
+`outlinePresentation` was removed on 2026-10-19 with the persistent column.
 `hasTableOfContents(items)` exposes the threshold and `tableOfContentsScope` marks the ancestor
 that shares the reserved insets with outside chrome. Items remain `{ id, label, level }`. IDs must
 match rendered headings in document order.
@@ -256,24 +249,24 @@ Theme changes use the existing semantic roles. Heading language stays authored.
 
 ## User scenarios and acceptance
 
-| ID     | Scenario                            | Steps                                                                 | Expected result                                                                                                                          | Story / consumer                                                              |
-| ------ | ----------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| TOC-01 | Read without interruption           | Open a normal document; scroll the article                            | Only compact marks; current position changes; article width and scroll remain stable                                                     | Default; PostView/PageView                                                    |
-| TOC-02 | Inspect destinations                | Enter rail, then move into floating list, then leave                  | One adjacent list; no hover gap; close only after leaving both                                                                           | Default                                                                       |
-| TOC-03 | Browse a long outline               | Open 60/120 entries; scroll to the bottom                             | List stays within viewport; last entry reachable; article does not scroll; wheel does not chain into article                             | LongDocument; ManyTopLevelSections                                            |
-| TOC-04 | Reopen after navigation             | Navigate to a middle section, leave and reopen                        | List begins at the start; current meaning preserved; no forced list movement while browsing                                              | LongDocument                                                                  |
-| TOC-05 | Navigate to a distant section       | Select a late heading from the outline                                | Actual heading receives focus; pointer selection keeps the outline open while the pointer remains inside; reduced-motion respected       | LongDocument; post/page fixtures                                              |
-| TOC-06 | Use keyboard only                   | Tab to rail; ArrowDown; Tab between entries; Enter; reopen and Escape | Visible focus and readable names; heading focus on selection; no focus trap; Escape returns to rail                                      | KeyboardNavigation                                                            |
-| TOC-07 | Read long and nested titles         | Open a mixed H2/H3/H4 outline with a long name                        | Titles wrap; hierarchy remains based on levels; no horizontal scrollbar                                                                  | LongLabels                                                                    |
-| TOC-08 | Change theme and UI language        | Select Korean/English and light/dark/custom themes                    | Rail, surface, text and focus use current theme; title stays authored; navigation name localized                                         | All examples                                                                  |
-| TOC-09 | Reach footer / short viewport       | Open at the top; scroll to footer; inspect a short-height viewport    | Column/list fit the first screen below the title; the outline ends with the document box; internal scrollbar exposes all entries         | FooterBoundary; MouseNavigation                                               |
-| TOC-10 | Use mobile/tablet page              | Inspect 390px and 834px                                               | The rail sits beside, never over, the text; no floating button                                                                           | PhoneRail; MediumRail                                                         |
-| TOC-12 | Read on a wide screen               | Open a long post at 1280–1920; scroll                                 | Persistent column beside the reading column; ink marker follows; current row stays visible in a long column                              | ReadingColumn; PostLongDocument                                               |
-| TOC-13 | Scrub on a phone                    | Press the rail, drag vertically, release; repeat and drag sideways    | Highlighted heading follows the finger; release navigates and focuses the heading; sideways/cancel does not navigate                     | ScrubNavigation; PhoneRail                                                    |
-| TOC-14 | Read nested sections                | Open an h2–h6 outline with long titles; scroll to a deep section      | Nested list; indentation capped at three steps; titles wrap/clamp; parents of the current row shown in ink                               | DeepNesting                                                                   |
-| TOC-15 | Align document chrome               | Hero/plain post and untitled page with a language menu at 390–1920    | Title and first body line share a start edge; page language controls stay at the frame’s inline end, independently of the outline column | PostHeroLongDocument; PageLongDocumentUntitled                                |
-| TOC-16 | Read legal, changelog, work, event  | Open each long document at 390–1920, light/dark, ar; print A4         | Reading column on the start edge, outline at the end, same header order; paper has no outline                                            | TermsLongDocument; ChangelogLongDocument; WorkLongDocument; EventLongDocument |
-| TOC-11 | Document changes or IDs are missing | Replace items; supply a missing target                                | Three-or-fewer clears navigation; pending work cleaned up; remaining heading indices intact                                              | Core unit tests                                                               |
+| ID     | Scenario                            | Steps                                                                 | Expected result                                                                                                                         | Story / consumer                                                              |
+| ------ | ----------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| TOC-01 | Read without interruption           | Open a normal document; scroll the article                            | Only compact marks; current position changes; article width and scroll remain stable                                                    | Default; PostView/PageView                                                    |
+| TOC-02 | Inspect destinations                | Enter rail, then move into floating list, then leave                  | One adjacent list; no hover gap; close only after leaving both                                                                          | Default                                                                       |
+| TOC-03 | Browse a long outline               | Open 60/120 entries; scroll to the bottom                             | List stays within viewport; last entry reachable; article does not scroll; wheel does not chain into article                            | LongDocument; ManyTopLevelSections                                            |
+| TOC-04 | Reopen after navigation             | Navigate to a middle section, leave and reopen                        | List begins at the start; current meaning preserved; no forced list movement while browsing                                             | LongDocument                                                                  |
+| TOC-05 | Navigate to a distant section       | Select a late heading from the outline                                | Actual heading receives focus; pointer selection keeps the outline open while the pointer remains inside; reduced-motion respected      | LongDocument; post/page fixtures                                              |
+| TOC-06 | Use keyboard only                   | Tab to rail; ArrowDown; Tab between entries; Enter; reopen and Escape | Visible focus and readable names; heading focus on selection; no focus trap; Escape returns to rail                                     | KeyboardNavigation                                                            |
+| TOC-07 | Read long and nested titles         | Open a mixed H2/H3/H4 outline with a long name                        | Titles wrap; hierarchy remains based on levels; no horizontal scrollbar                                                                 | LongLabels                                                                    |
+| TOC-08 | Change theme and UI language        | Select Korean/English and light/dark/custom themes                    | Rail, surface, text and focus use current theme; title stays authored; navigation name localized                                        | All examples                                                                  |
+| TOC-09 | Reach footer / short viewport       | Open at the top; scroll to footer; inspect a short-height viewport    | The revealed list fits the first screen below the title; the outline ends with the document box; internal scrollbar exposes all entries | FooterBoundary; MouseNavigation                                               |
+| TOC-10 | Use mobile/tablet page              | Inspect 390px and 834px                                               | The rail sits beside, never over, the text; no floating button                                                                          | PhoneRail; MediumRail                                                         |
+| TOC-12 | Read on a wide screen               | Open a long post at 1280–1920; scroll                                 | The closed rail sits beside the reading column; the current mark and row follow the reading position; no second scroll area             | WideRail; PostLongDocument                                                    |
+| TOC-13 | Scrub on a phone                    | Press the rail, drag vertically, release; repeat and drag sideways    | Highlighted heading follows the finger; release navigates and focuses the heading; sideways/cancel does not navigate                    | ScrubNavigation; PhoneRail                                                    |
+| TOC-14 | Read nested sections                | Open an h2–h6 outline with long titles; scroll to a deep section      | Nested list; indentation capped at three steps; titles wrap/clamp; parents of the current row shown in ink                              | DeepNesting                                                                   |
+| TOC-15 | Align document chrome               | Hero/plain post and untitled page with a language menu at 390–1920    | Title and first body line share a start edge; page language controls stay at the frame’s inline end, independently of the outline rail  | PostHeroLongDocument; PageLongDocumentUntitled                                |
+| TOC-16 | Read legal, changelog, work, event  | Open each long document at 390–1920, light/dark, ar; print A4         | Reading column on the start edge, outline at the end, same header order; paper has no outline                                           | TermsLongDocument; ChangelogLongDocument; WorkLongDocument; EventLongDocument |
+| TOC-11 | Document changes or IDs are missing | Replace items; supply a missing target                                | Three-or-fewer clears navigation; pending work cleaned up; remaining heading indices intact                                             | Core unit tests                                                               |
 
 ## Verification and migration
 
@@ -292,11 +285,10 @@ Run `node scripts/design-system/review.mjs run toc-navigation`.
 Browser screenshots and observations must identify exact scenarios, viewport, theme,
 locale and production View fixture. Automatic tests and visual checks are separate.
 The review examples stay at their initial position for manual inspection. Dedicated
-MouseNavigation, KeyboardNavigation, ScrubNavigation, ReadingColumn and DeepNesting examples
-run automated scenarios. The Storybook test runner uses a 1280px page, so those plays assert the
-column presentation there (links, focus order, fit to the first screen, aria-current) and the rail
-behavior below `lg`; rail scrubbing in the browser is covered by the 390/834 review captures and
-by Core unit tests. LongDocument, ManyTopLevelSections, LongLabels, FooterBoundary, MediumRail and
+MouseNavigation, KeyboardNavigation, ScrubNavigation, WideRail and DeepNesting examples run
+automated scenarios against the rail on the Storybook test runner's 1280px page (hover, keyboard,
+scrubbing, fit to the first screen, aria-current). Touch scrubbing on devices is covered by the
+390/834 review captures and by Core unit tests. LongDocument, ManyTopLevelSections, LongLabels, FooterBoundary, MediumRail and
 PhoneRail are manual review surfaces; Storybook's viewport toolbar sets their width.
 Production consumers are Pages / Public / Documents / PostLongDocument, PostHeroLongDocument,
 PageLongDocument and PageLongDocumentUntitled; Pages / Legal / Public Document /
@@ -312,7 +304,7 @@ or native VoiceOver/Orca acceptance. Read the recorded review for executed scope
 
 ## Print omission
 
-The rail and column are screen chrome. `TableOfContents.module.css` hides them, removes the
+The rail is screen chrome. `TableOfContents.module.css` hides them, removes the
 reserved inline space and sets the published insets to 0 under `@media print`, so chrome outside
 the layout prints on the page measure too; global print styles (`lib/styles/print.css`) must not
 select the generated CSS-module class (such as `TableOfContents_wrapper`) or reserved Core markers.

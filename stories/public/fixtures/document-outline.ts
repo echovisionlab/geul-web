@@ -40,12 +40,12 @@ function assertReadingStartEdge(canvasElement: HTMLElement) {
 }
 
 /**
- * The reading column, its breakouts and the reading chrome never reach the outline beside them (the
- * persistent column from `lg`, the rail below): Core reserves the outline's inline space and the
- * `reading` measure is bounded by the document box that ends at the reserve.
+ * The reading column, its breakouts and the reading chrome never reach the outline rail beside them:
+ * Core reserves the rail's inline space and the `reading` measure is bounded by the document box that
+ * ends at the reserve.
  */
 export function assertOutlineClearance(canvasElement: HTMLElement) {
-  const navigation = canvasElement.querySelector<HTMLElement>('[data-presentation]');
+  const navigation = canvasElement.querySelector<HTMLElement>('[data-outline] > div > [role="navigation"]');
   if (!navigation) {
     return;
   }

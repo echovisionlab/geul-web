@@ -384,12 +384,12 @@ function measureInPage() {
     })),
   };
   // Outline clearance: the reading column (first running-text block), the widest breakout and the
-  // persistent outline column or rail, in the inline direction of the document.
+  // outline rail, in the inline direction of the document.
   const readingBlock =
     [...document.querySelectorAll('.prose[data-reading-measure] > [data-document-block="paragraph"]')].find(visible) ??
     [...document.querySelectorAll('[data-geul-layout-size="reading"]')].find(visible) ??
     null;
-  const navigation = [...document.querySelectorAll('[data-presentation]')].find(visible) ?? null;
+  const navigation = [...document.querySelectorAll('[data-outline] > div > [role="navigation"]')].find(visible) ?? null;
   const box = (element) => {
     if (!element) return null;
     const rect = element.getBoundingClientRect();
@@ -406,7 +406,6 @@ function measureInPage() {
   };
   const body = box(readingBlock);
   const layout = {
-    presentation: navigation?.getAttribute('data-presentation') ?? null,
     body,
     navigation: box(navigation),
     bodyCenterOffset: body ? round((body.left + body.right) / 2 - innerWidth / 2) : null,
@@ -505,9 +504,7 @@ async function runMeasure(args) {
                 )
                 .join(', ');
               const clearance =
-                entry.layout?.clearance == null
-                  ? ''
-                  : `; outline ${entry.layout.presentation} clearance ${entry.layout.clearance}px`;
+                entry.layout?.clearance == null ? '' : `; outline clearance ${entry.layout.clearance}px`;
               console.log(
                 `${mode} ${width} ${theme} ${locale} ${id}: ${
                   entry.error ??
