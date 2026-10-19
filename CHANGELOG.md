@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.18.0](https://github.com/echovisionlab/geul-web/compare/v0.17.2...v0.18.0) (2026-10-19)
+
+
+### Features
+
+* use the outline rail at every width ([f81297c](https://github.com/echovisionlab/geul-web/commit/f81297ca1e2483ea43e7d79e570ba7b7221c3268))
+
+
+### Bug Fixes
+
+* tell readers in their language when a document is shown in another one ([b709b1f](https://github.com/echovisionlab/geul-web/commit/b709b1fe050bd717b7cf5ce8f5f351db590d9109))
+
 ## [0.17.2](https://github.com/echovisionlab/geul-web/compare/v0.17.1...v0.17.2) (2026-10-19)
 
 
