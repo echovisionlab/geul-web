@@ -10,7 +10,8 @@ import { LegalPolicyHistoryClient } from '@/features/policy/LegalPolicyHistoryCl
 // (token preview, missing or stale server data).
 const loadTermsQueries = () => import('@/lib/queries/terms-browser');
 const getActiveTerms = async (requestedLocale?: string) => (await loadTermsQueries()).getActiveTerms(requestedLocale);
-const listArchivedTerms = async () => (await loadTermsQueries()).listArchivedTerms();
+const listArchivedTerms = async (requestedLocale?: string) =>
+  (await loadTermsQueries()).listArchivedTerms(requestedLocale);
 
 export function TermsHistoryClient({ initialData }: { initialData?: PublicLegalHistoryInitialData }) {
   const requestedLocale = resolveContentRequestedLocale(useLocale(), Object.fromEntries(useSearchParams().entries()));

@@ -4303,7 +4303,8 @@
       "description": "Cette version localisée est affichée en {displayed} ; l’original en {source} fait toujours référence."
     },
     "fallback": {
-      "title": "Langue de secours"
+      "title": "Langue de secours",
+      "description": "Ce contenu n’est pas encore disponible en {requested} ; il est affiché en {displayed}."
     },
     "actions": {
       "viewOriginal": "Voir l'original ({source})"

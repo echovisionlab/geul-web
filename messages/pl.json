@@ -4303,7 +4303,8 @@
       "description": "Ta zlokalizowana wersja jest wyświetlana w języku {displayed}; oryginał w języku {source} pozostaje wersją wiążącą."
     },
     "fallback": {
-      "title": "Język zastępczy"
+      "title": "Język zastępczy",
+      "description": "Ta treść nie ma jeszcze wersji: {requested}. Wyświetlana jest wersja: {displayed}."
     },
     "actions": {
       "viewOriginal": "Zobacz oryginał ({source})"

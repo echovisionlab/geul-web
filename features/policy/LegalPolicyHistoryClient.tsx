@@ -8,7 +8,8 @@ import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
 import Link from '@/components/core/Navigation';
 import type { PublicLegalHistoryInitialData } from '@/lib/queries/legal-history';
-import { buildContentLanguageHref } from '@/lib/translation/content-language';
+import { buildContentLanguageHref, readContentLocaleOverride } from '@/lib/translation/content-language';
+import { useSearchParams } from 'next/navigation';
 import { IconArrowLeft, IconFileText } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 
@@ -46,7 +47,7 @@ interface LegalPolicyHistoryClientProps {
   initialData?: PublicLegalHistoryInitialData;
   labels: LegalPolicyHistoryLabels;
   getActive: (requestedLocale?: string) => Promise<LegalPolicyHistoryItem | null>;
-  listArchived: () => Promise<LegalPolicyHistoryItem[]>;
+  listArchived: (requestedLocale?: string) => Promise<LegalPolicyHistoryItem[]>;
 }
 
 export function LegalPolicyHistoryClient({
@@ -60,7 +61,9 @@ export function LegalPolicyHistoryClient({
   const dateTime = useDateTimeFormatter();
   const basePath = `/${policy}`;
   const matchingInitialData = initialData?.requestedLocale === requestedLocale ? initialData : undefined;
-  const href = (path: string) => buildContentLanguageHref(path, undefined, { requestedLocale });
+  // Links keep only a language the reader chose in the URL; otherwise they follow the site language.
+  const explicitLocale = readContentLocaleOverride(Object.fromEntries(useSearchParams().entries()));
+  const href = (path: string) => buildContentLanguageHref(path, undefined, { requestedLocale: explicitLocale });
   const queriedActiveQuery = useQuery({
     queryKey: [policy, 'active', requestedLocale],
     queryFn: () => getActive(requestedLocale),
@@ -69,8 +72,8 @@ export function LegalPolicyHistoryClient({
   });
   const { data: queriedActive, dataUpdatedAt: activeUpdatedAt, isLoading: isLoadingActive } = queriedActiveQuery;
   const queriedArchivedQuery = useQuery({
-    queryKey: [policy, 'archived', 'list'],
-    queryFn: listArchived,
+    queryKey: [policy, 'archived', 'list', requestedLocale],
+    queryFn: () => listArchived(requestedLocale),
     initialData: matchingInitialData?.archived,
     initialDataUpdatedAt: matchingInitialData?.updatedAt,
   });

@@ -531,7 +531,8 @@
       "description": "Diese lokalisierte Version wird auf {displayed} angezeigt; das Original auf {source} bleibt maßgeblich."
     },
     "fallback": {
-      "title": "Ersatzsprache"
+      "title": "Ersatzsprache",
+      "description": "Eine Fassung auf {requested} gibt es noch nicht, deshalb wird sie auf {displayed} angezeigt."
     },
     "actions": {
       "viewOriginal": "Original anzeigen ({source})"

@@ -4303,7 +4303,8 @@
       "description": "현재 {displayed} 번역본을 표시하며 {source} 원문이 우선합니다."
     },
     "fallback": {
-      "title": "대체 언어"
+      "title": "대체 언어",
+      "description": "{requested} 번역이 아직 없어 {displayed}로 표시합니다."
     },
     "actions": {
       "viewOriginal": "원문 보기 ({source})"

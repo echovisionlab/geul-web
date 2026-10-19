@@ -4303,7 +4303,8 @@
       "description": "Deze gelokaliseerde versie wordt weergegeven in {displayed}; het origineel in {source} blijft leidend."
     },
     "fallback": {
-      "title": "Fallback-taal"
+      "title": "Fallback-taal",
+      "description": "Deze inhoud is nog niet beschikbaar in het {requested}, daarom wordt hij in het {displayed} getoond."
     },
     "actions": {
       "viewOriginal": "Origineel bekijken ({source})"

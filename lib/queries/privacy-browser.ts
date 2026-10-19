@@ -68,9 +68,9 @@ export async function getScheduledPrivacyPreview(
   }
 }
 
-export async function listArchivedPrivacy() {
+export async function listArchivedPrivacy(requestedLocale?: string | null) {
   try {
-    const client = createPublicPrivacyClient();
+    const client = requestedLocale ? createPublicPrivacyClientWithLocale(requestedLocale) : createPublicPrivacyClient();
     const response = await client.list({ limit: 100, offset: 0 });
 
     return (response.items ?? []).map((v) => ({

@@ -4303,7 +4303,8 @@
       "description": "Versi lokal ini ditampilkan dalam {displayed}; versi asli dalam {source} tetap menjadi acuan resmi."
     },
     "fallback": {
-      "title": "Bahasa pengganti"
+      "title": "Bahasa pengganti",
+      "description": "Konten ini belum tersedia dalam bahasa {requested}, jadi ditampilkan dalam bahasa {displayed}."
     },
     "actions": {
       "viewOriginal": "Lihat yang asli ({source})"

@@ -44,7 +44,7 @@ vi.mock('@/lib/queries/terms-browser', () => ({ getArchivedTerms: mocks.get }));
 vi.mock('@/features/date-time/DateTime', () => ({
   useDateTimeFormatter: () => ({ date: (date: Date) => date.toISOString() }),
 }));
-vi.mock('@/features/policy/LegalTranslationNotice', () => ({ LegalTranslationNotice: () => null }));
+vi.mock('@/features/translation/ContentLocaleNotice', () => ({ ContentLocaleNotice: () => null }));
 vi.mock('@/features/translation/ContentLanguageMenu', () => ({ ContentLanguageMenu: () => null }));
 vi.mock('@/features/navigation/TableOfContents', () => ({
   // The navigation owner wraps the document so Core can reserve the outline beside it.
@@ -119,7 +119,35 @@ describe('legal history server snapshots', () => {
     );
     expect(container!.textContent).not.toContain('Loading policy');
     expect(getActive).toHaveBeenCalledExactlyOnceWith('ko');
-    expect(listArchived).toHaveBeenCalledTimes(1);
+    expect(listArchived).toHaveBeenCalledExactlyOnceWith('ko');
+  });
+  it('links without a content language when only the site language chose it', async () => {
+    mocks.query = new URLSearchParams();
+    const client = new QueryClient({ defaultOptions: { queries: { staleTime: 60000, retry: false } } });
+    try {
+      await ssrAndHydrate(
+        <LegalPolicyHistoryClient
+          policy="privacy"
+          labels={labels}
+          requestedLocale="nl"
+          getActive={vi.fn()}
+          listArchived={vi.fn()}
+          initialData={{
+            requestedLocale: 'nl',
+            updatedAt: Date.now(),
+            active: { id: 'current', version: 3, effectiveFrom: null },
+            archived: [{ id: 'old', version: 2, effectiveFrom: null }],
+          }}
+        />,
+        client,
+      );
+      expect(Array.from(container!.querySelectorAll('tbody a'), (link) => link.getAttribute('href'))).toEqual([
+        '/privacy',
+        '/privacy/history/old',
+      ]);
+    } finally {
+      mocks.query = new URLSearchParams('lang=ko');
+    }
   });
   it('renders history links before hydration and hydrates without RPCs', async () => {
     const getActive = vi.fn();

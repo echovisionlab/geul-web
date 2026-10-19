@@ -66,7 +66,7 @@ vi.mock('@/features/navigation/TableOfContents', () => ({
   // The navigation owner wraps the document so Core can reserve the outline beside it.
   TableOfContents: ({ children }: { children: React.ReactNode }) => children,
 }));
-vi.mock('@/features/policy/LegalTranslationNotice', () => ({ LegalTranslationNotice: () => null }));
+vi.mock('@/features/translation/ContentLocaleNotice', () => ({ ContentLocaleNotice: () => null }));
 vi.mock('@/features/translation/ContentLanguageMenu', () => ({ ContentLanguageMenu: () => null }));
 vi.mock('@/features/print/PrintButton', () => ({ PrintButton: () => <button type="button">Print</button> }));
 vi.mock('@/features/site/PageLoader', () => ({ PageLoader: () => <span data-testid="loader">Loading</span> }));

@@ -18,7 +18,7 @@ import { IconButton } from '@/components/core/IconButton';
 import { Tooltip } from '@/components/core/Tooltip';
 import { PageLoader } from '@/features/site/PageLoader';
 import { LegalDocumentMetadata } from '@/features/policy/LegalDocumentMetadata';
-import { LegalTranslationNotice } from '@/features/policy/LegalTranslationNotice';
+import { ContentLocaleNotice } from '@/features/translation/ContentLocaleNotice';
 import { PrintButton } from '@/features/print/PrintButton';
 import { LegalDocumentLayout } from '@/features/policy/LegalDocumentLayout';
 import { ContentLanguageMenu } from '@/features/translation/ContentLanguageMenu';
@@ -125,7 +125,12 @@ function TermsActive({
         <DsLayoutStack gap="md">
           {/* Header */}
           {activeTerms?.localizationInfo ? (
-            <LegalTranslationNotice pathname="/terms" query={query} localizationInfo={activeTerms.localizationInfo} />
+            <ContentLocaleNotice
+              announceTranslation
+              pathname="/terms"
+              query={query}
+              localizationInfo={activeTerms.localizationInfo}
+            />
           ) : null}
           <DsLayoutInline printFlow="stack" justify="between" align="start">
             <DsLayoutStack gap="xs" flexible>
@@ -262,7 +267,12 @@ function TermsPreview({
 
           {/* Header */}
           {previewTerms?.localizationInfo ? (
-            <LegalTranslationNotice pathname="/terms" query={query} localizationInfo={previewTerms.localizationInfo} />
+            <ContentLocaleNotice
+              announceTranslation
+              pathname="/terms"
+              query={query}
+              localizationInfo={previewTerms.localizationInfo}
+            />
           ) : null}
           <DsLayoutInline printFlow="stack" justify="between" align="start">
             <DsLayoutStack gap="xs" flexible>

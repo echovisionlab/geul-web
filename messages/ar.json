@@ -531,7 +531,8 @@
       "description": "تُعرض هذه النسخة المترجمة بلغة {displayed}؛ وتبقى النسخة الأصلية بلغة {source} هي المرجع المعتمد."
     },
     "fallback": {
-      "title": "لغة بديلة"
+      "title": "لغة بديلة",
+      "description": "هذا المحتوى غير متوفر بعد باللغة {requested}، لذا يُعرض باللغة {displayed}."
     },
     "actions": {
       "viewOriginal": "عرض الأصل ({source})"

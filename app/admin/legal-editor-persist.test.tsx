@@ -457,7 +457,7 @@ describe('LegalPolicyEditor target locale collaboration', () => {
     expect(mocks.policyEditor).toHaveBeenCalledWith(
       expect.objectContaining({ readOnly: false, structureLocked: true }),
     );
-    expect(container.textContent).toContain('참고 번역이며 원문이 우선합니다');
+    expect(container.textContent).toContain('translated.description');
   });
 });
 

@@ -13,6 +13,7 @@ import { updatePreferredLocaleAction } from '@/lib/actions/user-preference';
 import { useSession } from '@/lib/auth/client';
 import { getSupportedLocaleOptions, type SupportedLocale } from '@/lib/i18n/locale';
 import { writeLocaleCookie } from '@/lib/i18n/locale-cookie';
+import { CONTENT_LANGUAGE_QUERY_PARAM } from '@/lib/translation/content-language';
 import { useLocale } from '@/lib/providers/LocaleProvider';
 
 interface LanguageMenuProps {
@@ -46,8 +47,17 @@ export function LanguageMenu({ variant = 'icon', size = 'chrome', textSize = 'xs
         writeLocaleCookie(nextLocale);
       }
       writeLocaleCookie(resolvedLocale);
+      // A content language in the URL (`?lang=`) outranks the site language; changing the site
+      // language drops it so the document follows the new choice.
+      const url = new URL(window.location.href);
+      const pinned = url.searchParams.has(CONTENT_LANGUAGE_QUERY_PARAM);
+      url.searchParams.delete(CONTENT_LANGUAGE_QUERY_PARAM);
       startTransition(() => {
-        router.refresh();
+        if (pinned) {
+          router.replace(`${url.pathname}${url.search}${url.hash}`, { scroll: false });
+        } else {
+          router.refresh();
+        }
       });
     } catch (error) {
       notifications.show({

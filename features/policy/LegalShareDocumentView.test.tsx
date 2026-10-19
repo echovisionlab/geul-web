@@ -22,6 +22,9 @@ vi.mock('next-intl', () => ({
     if (namespace === 'legalHistoryDetailCommon' && key === 'effectiveUntil') {
       return `Effective until ${String(values?.date ?? '')}`;
     }
+    if (namespace === 'localizationNotice' && key === 'translated.description') {
+      return `Shown in ${String(values?.displayed)}; the ${String(values?.source)} original prevails.`;
+    }
     if (namespace === 'legalPageCommon' && key === 'preview.upcomingAlert') {
       return `Scheduled for ${String(values?.date ?? '')}`;
     }
@@ -102,11 +105,12 @@ describe('LegalShareDocumentView', () => {
       );
     });
 
+    // The notice speaks the interface language (English here) and names both languages.
     const disclaimer = Array.from(container.querySelectorAll('*')).find(
-      (node) => node.textContent === '참고 번역이며 원문이 우선합니다',
+      (node) => node.textContent === 'Shown in English; the Korean original prevails.',
     );
     expect(disclaimer).toBeTruthy();
-    expect(disclaimer).toHaveAttribute('lang', 'ko');
+    expect(disclaimer?.closest('[lang]')?.getAttribute('lang')).not.toBe('ko');
     expect(container.querySelector('.terms-content')).toHaveAttribute('lang', 'en');
     expect(disclaimer?.closest('.print-hide')).toBeNull();
     expect(container.querySelector('a[href="/s/share-token?lang=ko"]')).toBeTruthy();
