@@ -870,135 +870,147 @@ describe('PostBlockRoomTiptapController', () => {
     editor.destroy();
   });
 
-  it('tracks Return and text input through peer deletion until the Post room ACK covers the emitted Yjs updates', async () => {
-    const entityId = '22222222-2222-4222-8222-222222222222';
-    const documentName = `post:${entityId}:ko`;
-    const seedRoom = new Y.Doc();
-    const bRoom = new Y.Doc();
-    const aRoom = new Y.Doc();
-    const serverRoom = new Y.Doc();
-    hydrateCanonicalBlockRoom(seedRoom, 'post', 'ko', postDocument(), []);
-    const bootstrapUpdate = Y.encodeStateAsUpdate(seedRoom);
-    Y.applyUpdate(bRoom, bootstrapUpdate);
-    Y.applyUpdate(aRoom, bootstrapUpdate);
-    Y.applyUpdate(serverRoom, bootstrapUpdate);
-    const initialPersistedState = currentDurabilityState(serverRoom);
-    const protocol = createReadyPostProtocol(bRoom, entityId);
-    const provider = { document: bRoom, on: vi.fn(), off: vi.fn() } as unknown as HocuspocusProvider;
-    const tracker = createCollaborativeDocumentSaveTracker(provider, { kind: 'block-room', protocol });
-    const unregisterSave = tracker.register(`post:${entityId}`);
-    const bBridge = createBlockRoomProseMirrorBridge({ document: bRoom, documentType: 'post', locale: 'ko' });
-    const bController = createPostBlockRoomTiptapController(bBridge);
-    const bEditor = new Editor({
-      element: document.createElement('div'),
-      extensions: [...createTiptapWireExtensions(), bController.extension],
-      content: bController.initialContent,
-    });
-    const disconnectB = bController.connect(bEditor);
-    const bUpdates: Uint8Array[] = [];
-    const captureBUpdate = (update: Uint8Array, origin: unknown) => {
-      if (origin === bBridge.transactionOrigin) {
-        bUpdates.push(Uint8Array.from(update));
+  it.each([
+    { insertedBlockId: '00000000-0000-4000-8000-000000000001', idOrder: 'before' },
+    { insertedBlockId: '10000000-0000-4000-8000-000000000001', idOrder: 'after' },
+  ] as const)(
+    'tracks Return and text input through peer deletion until the Post room ACK covers the emitted Yjs updates (new ID sorts $idOrder the original)',
+    async ({ insertedBlockId }) => {
+      const entityId = '22222222-2222-4222-8222-222222222222';
+      const documentName = `post:${entityId}:ko`;
+      const seedRoom = new Y.Doc();
+      const bRoom = new Y.Doc();
+      const aRoom = new Y.Doc();
+      const serverRoom = new Y.Doc();
+      hydrateCanonicalBlockRoom(seedRoom, 'post', 'ko', postDocument(), []);
+      const bootstrapUpdate = Y.encodeStateAsUpdate(seedRoom);
+      Y.applyUpdate(bRoom, bootstrapUpdate);
+      Y.applyUpdate(aRoom, bootstrapUpdate);
+      Y.applyUpdate(serverRoom, bootstrapUpdate);
+      const initialPersistedState = currentDurabilityState(serverRoom);
+      const protocol = createReadyPostProtocol(bRoom, entityId);
+      const provider = { document: bRoom, on: vi.fn(), off: vi.fn() } as unknown as HocuspocusProvider;
+      const tracker = createCollaborativeDocumentSaveTracker(provider, { kind: 'block-room', protocol });
+      const unregisterSave = tracker.register(`post:${entityId}`);
+      const bBridge = createBlockRoomProseMirrorBridge({ document: bRoom, documentType: 'post', locale: 'ko' });
+      const bController = createPostBlockRoomTiptapController(bBridge);
+      const bEditor = new Editor({
+        element: document.createElement('div'),
+        extensions: [...createTiptapWireExtensions(), bController.extension],
+        content: bController.initialContent,
+      });
+      const disconnectB = bController.connect(bEditor);
+      const bUpdates: Uint8Array[] = [];
+      const captureBUpdate = (update: Uint8Array, origin: unknown) => {
+        if (origin === bBridge.transactionOrigin) {
+          bUpdates.push(Uint8Array.from(update));
+        }
+      };
+      bRoom.on('update', captureBUpdate);
+
+      const textEnd = nodePosition(bEditor, 'paragraph') + 1 + '안녕'.length;
+      bEditor.commands.setTextSelection(textEnd);
+      const enter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+      const randomUUID = vi.spyOn(globalThis.crypto, 'randomUUID').mockReturnValueOnce(insertedBlockId);
+      try {
+        bEditor.view.dom.dispatchEvent(enter);
+      } finally {
+        randomUUID.mockRestore();
       }
-    };
-    bRoom.on('update', captureBUpdate);
+      typeText(bEditor, 'local-marker');
+      expect(enter.defaultPrevented).toBe(true);
 
-    const textEnd = nodePosition(bEditor, 'paragraph') + 1 + '안녕'.length;
-    bEditor.commands.setTextSelection(textEnd);
-    const enter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
-    bEditor.view.dom.dispatchEvent(enter);
-    typeText(bEditor, 'local-marker');
-    expect(enter.defaultPrevented).toBe(true);
-
-    const bDocument = materializeCanonicalBlockRoom(bRoom, 'post');
-    if (bDocument.$typeName !== 'api.content.v1.LocalizedRichTextDocument') {
-      throw new Error('Expected Post document.');
-    }
-    expect(bDocument.base?.nodes).toHaveLength(2);
-    const peerDeletedBlockId = bDocument.base?.nodes[1]?.block?.id;
-    expect(peerDeletedBlockId).toBeTruthy();
-    expect(bUpdates.length).toBeGreaterThan(0);
-    expect(tracker.hasPending()).toBe(true);
-    expect(hasPendingEditorSaves(`post:${entityId}`)).toBe(true);
-
-    const localStateVector = Y.decodeStateVector(Y.encodeStateVector(bRoom));
-    for (const update of bUpdates) {
-      Y.applyUpdate(aRoom, update, 'B-to-A');
-      Y.applyUpdate(serverRoom, update, 'B-to-server');
-    }
-    const serverAfterBVector = Y.decodeStateVector(Y.encodeStateVector(serverRoom));
-    expect(serverAfterBVector.get(bRoom.clientID)).toBe(localStateVector.get(bRoom.clientID));
-
-    const aBridge = createBlockRoomProseMirrorBridge({ document: aRoom, documentType: 'post', locale: 'ko' });
-    const aController = createPostBlockRoomTiptapController(aBridge);
-    const aEditor = new Editor({
-      element: document.createElement('div'),
-      extensions: [...createTiptapWireExtensions(), aController.extension],
-      content: aController.initialContent,
-    });
-    const disconnectA = aController.connect(aEditor);
-    const aUpdates: Uint8Array[] = [];
-    const captureAUpdate = (update: Uint8Array, origin: unknown) => {
-      if (origin === aBridge.transactionOrigin) {
-        aUpdates.push(Uint8Array.from(update));
+      const bDocument = materializeCanonicalBlockRoom(bRoom, 'post');
+      if (bDocument.$typeName !== 'api.content.v1.LocalizedRichTextDocument') {
+        throw new Error('Expected Post document.');
       }
-    };
-    aRoom.on('update', captureAUpdate);
-    const aDocument = aEditor.getJSON() as TestJsonNode;
-    const aBlockGroup = aDocument.content?.[0];
-    if (!aBlockGroup?.content) {
-      throw new Error('Expected Post Block group.');
-    }
-    aBlockGroup.content = aBlockGroup.content.filter((block) => block.attrs?.id !== peerDeletedBlockId);
-    aEditor.commands.setContent(aDocument as JSONContent);
-    expect(aUpdates.length).toBeGreaterThan(0);
+      expect(bDocument.base?.nodes).toHaveLength(2);
+      // Canonical nodes are sorted by ID; placement identifies the block created by Return.
+      const peerDeletedBlockId = bDocument.base?.nodes.find((node) => node.placement?.index === 1)?.block?.id;
+      expect(peerDeletedBlockId).toBe(insertedBlockId);
+      expect(bUpdates.length).toBeGreaterThan(0);
+      expect(tracker.hasPending()).toBe(true);
+      expect(hasPendingEditorSaves(`post:${entityId}`)).toBe(true);
 
-    const bLocalUpdateCount = bUpdates.length;
-    for (const update of aUpdates) {
-      Y.applyUpdate(serverRoom, update, 'A-to-server');
-      Y.applyUpdate(bRoom, update, provider);
-    }
-    await vi.waitFor(() => expect(bEditor.state.doc.firstChild?.childCount).toBe(1));
-    const bAfterPeerDelete = materializeCanonicalBlockRoom(bRoom, 'post');
-    if (bAfterPeerDelete.$typeName !== 'api.content.v1.LocalizedRichTextDocument') {
-      throw new Error('Expected Post document.');
-    }
-    expect(bAfterPeerDelete.base?.nodes.map((node) => node.block?.id)).toEqual([BLOCK_ID]);
-    expect(bUpdates).toHaveLength(bLocalUpdateCount);
-    expect(tracker.hasPending()).toBe(true);
+      const localStateVector = Y.decodeStateVector(Y.encodeStateVector(bRoom));
+      for (const update of bUpdates) {
+        Y.applyUpdate(aRoom, update, 'B-to-A');
+        Y.applyUpdate(serverRoom, update, 'B-to-server');
+      }
+      const serverAfterBVector = Y.decodeStateVector(Y.encodeStateVector(serverRoom));
+      expect(serverAfterBVector.get(bRoom.clientID)).toBe(localStateVector.get(bRoom.clientID));
 
-    persistNow.mockClear();
-    const flushing = tracker.flush();
-    await Promise.resolve();
-    expect(persistNow).toHaveBeenCalledOnce();
-    protocol.handleStateless(
-      JSON.stringify({
-        kind: 'room.persisted',
-        v: 3,
-        documentName,
-        stateVector: Buffer.from(initialPersistedState.stateVector).toString('base64'),
-        deleted: initialPersistedState.deleted,
-      }),
-    );
-    expect(tracker.hasPending()).toBe(true);
-    protocol.handleStateless(persistedMessage(documentName, serverRoom));
-    await expect(flushing).resolves.toBe(true);
-    expect(tracker.hasPending()).toBe(false);
-    expect(hasPendingEditorSaves(`post:${entityId}`)).toBe(false);
+      const aBridge = createBlockRoomProseMirrorBridge({ document: aRoom, documentType: 'post', locale: 'ko' });
+      const aController = createPostBlockRoomTiptapController(aBridge);
+      const aEditor = new Editor({
+        element: document.createElement('div'),
+        extensions: [...createTiptapWireExtensions(), aController.extension],
+        content: aController.initialContent,
+      });
+      const disconnectA = aController.connect(aEditor);
+      const aUpdates: Uint8Array[] = [];
+      const captureAUpdate = (update: Uint8Array, origin: unknown) => {
+        if (origin === aBridge.transactionOrigin) {
+          aUpdates.push(Uint8Array.from(update));
+        }
+      };
+      aRoom.on('update', captureAUpdate);
+      const aDocument = aEditor.getJSON() as TestJsonNode;
+      const aBlockGroup = aDocument.content?.[0];
+      if (!aBlockGroup?.content) {
+        throw new Error('Expected Post Block group.');
+      }
+      aBlockGroup.content = aBlockGroup.content.filter((block) => block.attrs?.id !== peerDeletedBlockId);
+      aEditor.commands.setContent(aDocument as JSONContent);
+      expect(aUpdates.length).toBeGreaterThan(0);
 
-    bRoom.off('update', captureBUpdate);
-    aRoom.off('update', captureAUpdate);
-    disconnectA();
-    aEditor.destroy();
-    disconnectB();
-    bEditor.destroy();
-    unregisterSave();
-    protocol.destroy();
-    seedRoom.destroy();
-    bRoom.destroy();
-    aRoom.destroy();
-    serverRoom.destroy();
-  });
+      const bLocalUpdateCount = bUpdates.length;
+      for (const update of aUpdates) {
+        Y.applyUpdate(serverRoom, update, 'A-to-server');
+        Y.applyUpdate(bRoom, update, provider);
+      }
+      await vi.waitFor(() => expect(bEditor.state.doc.firstChild?.childCount).toBe(1));
+      const bAfterPeerDelete = materializeCanonicalBlockRoom(bRoom, 'post');
+      if (bAfterPeerDelete.$typeName !== 'api.content.v1.LocalizedRichTextDocument') {
+        throw new Error('Expected Post document.');
+      }
+      expect(bAfterPeerDelete.base?.nodes.map((node) => node.block?.id)).toEqual([BLOCK_ID]);
+      expect(bUpdates).toHaveLength(bLocalUpdateCount);
+      expect(tracker.hasPending()).toBe(true);
+
+      persistNow.mockClear();
+      const flushing = tracker.flush();
+      await Promise.resolve();
+      expect(persistNow).toHaveBeenCalledOnce();
+      protocol.handleStateless(
+        JSON.stringify({
+          kind: 'room.persisted',
+          v: 3,
+          documentName,
+          stateVector: Buffer.from(initialPersistedState.stateVector).toString('base64'),
+          deleted: initialPersistedState.deleted,
+        }),
+      );
+      expect(tracker.hasPending()).toBe(true);
+      protocol.handleStateless(persistedMessage(documentName, serverRoom));
+      await expect(flushing).resolves.toBe(true);
+      expect(tracker.hasPending()).toBe(false);
+      expect(hasPendingEditorSaves(`post:${entityId}`)).toBe(false);
+
+      bRoom.off('update', captureBUpdate);
+      aRoom.off('update', captureAUpdate);
+      disconnectA();
+      aEditor.destroy();
+      disconnectB();
+      bEditor.destroy();
+      unregisterSave();
+      protocol.destroy();
+      seedRoom.destroy();
+      bRoom.destroy();
+      aRoom.destroy();
+      serverRoom.destroy();
+    },
+  );
 });
 
 function performanceBoundaryFixture(nested = false) {
