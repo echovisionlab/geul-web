@@ -6,6 +6,17 @@ export function tocRailIndices(count: number): number[] {
   );
 }
 
+/** Position of the mark that stands for a heading when the rail samples a long outline. */
+export function tocNearestMark(marks: readonly number[], index: number): number {
+  let nearest = -1;
+  for (let position = 0; position < marks.length; position += 1) {
+    if (nearest < 0 || Math.abs(marks[position] - index) < Math.abs(marks[nearest] - index)) {
+      nearest = position;
+    }
+  }
+  return nearest;
+}
+
 /** Visual nesting stops at three levels so deep headings neither drift nor squeeze their titles. */
 export const TOC_MAX_VISUAL_DEPTH = 2;
 

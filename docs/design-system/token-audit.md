@@ -11,7 +11,7 @@ This report is generated from production source by `node scripts/design-system/c
 - 20 authored editor color definitions are owned by the shared token source and generated into the same durable document roles.
 - 0 existing literal CSS spacing/typography occurrences covered by the migration baseline.
 - 0 existing custom-property declarations/inline assignments outside central files (private `--_*` implementation variables are permitted).
-- 175 literal CSS dimension occurrences in spacing, typography and geometry properties; 67 distinct values. These are audit findings, not blanket errors: canvas dimensions, geometry and responsive layouts require context.
+- 173 literal CSS dimension occurrences in spacing, typography and geometry properties; 67 distinct values. These are audit findings, not blanket errors: canvas dimensions, geometry and responsive layouts require context.
 - 774 CSS custom-property declarations, 303 distinct names, 143 names declared more than once. Theme/state/media overrides are expected; equal values alone do not establish semantic duplication.
 - 0 findings match the reviewed migration baseline; 0 new violations; 0 obsolete baseline keys eligible for removal.
 
@@ -63,13 +63,13 @@ Authored typography exceptions (artwork, not interface roles):
 | `0px`      |           7 |
 | `20rem`    |           7 |
 | `1.75rem`  |           6 |
-| `2px`      |           6 |
 | `1.25rem`  |           5 |
 | `10rem`    |           5 |
 | `15rem`    |           5 |
 | `4rem`     |           5 |
 | `1.5rem`   |           4 |
 | `1em`      |           4 |
+| `2px`      |           4 |
 | `3.5rem`   |           4 |
 | `12rem`    |           3 |
 | `0.875rem` |           2 |

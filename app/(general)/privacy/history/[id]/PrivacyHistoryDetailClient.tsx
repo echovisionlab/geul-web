@@ -113,8 +113,19 @@ export function PrivacyHistoryDetailClient({
                         <IconArrowLeft size={20} />
                       </IconButton>
                     </Tooltip>
-                    <DsHeading level={1} scale="title">
-                      {tCommonEntities('privacy')}
+                    <DsHeading
+                      level={1}
+                      scale="title"
+                      lang={
+                        archived.title
+                          ? archived.localizationInfo?.displayedLocale ||
+                            archived.localizationInfo?.sourceLocale ||
+                            requestedLocale
+                          : undefined
+                      }
+                      dir="auto"
+                    >
+                      {archived.title || tCommonEntities('privacy')}
                     </DsHeading>
                     <StatusBadge tone={archived.status === 'active' ? 'positive' : 'neutral'}>
                       {tCommonStatuses(archived.status)}

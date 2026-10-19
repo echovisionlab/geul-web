@@ -7,6 +7,7 @@ import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { tocRailIndices, tocScrubIndex } from './toc-rail';
 import { TableOfContentsView, type TocItem } from './TableOfContentsView';
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -444,15 +445,15 @@ describe('TableOfContentsView reserved layout', () => {
 });
 
 describe('TableOfContentsView rail scrubbing', () => {
-  async function renderScrubbable() {
+  async function renderScrubbable(count = 5) {
     renderToc(
       <>
-        {items(5).map((item) => (
+        {items(count).map((item) => (
           <h2 key={item.id} id={item.id}>
             {item.label}
           </h2>
         ))}
-        <TableOfContents items={items(5)} />
+        <TableOfContents items={items(count)} />
       </>,
     );
     await flushTocSchedule();
@@ -530,6 +531,59 @@ describe('TableOfContentsView rail scrubbing', () => {
     expect(target()).toBe('#section-4');
     pointer('pointerup', 400, 1020, 'mouse');
     expect(document.activeElement?.id).toBe('section-4');
+  });
+
+  it('points at the heading under a hovering mouse and opens it on click', async () => {
+    const { rail, pointer, target } = await renderScrubbable();
+    const mark = (attribute: string) =>
+      [...container!.querySelectorAll('[data-depth]')].findIndex((element) => element.hasAttribute(attribute));
+    const reading = mark('data-current');
+    expect(reading).toBeGreaterThanOrEqual(0);
+    pointer('pointermove', 200, 1020, 'mouse');
+    expect(target()).toBe('#section-2');
+    expect(mark('data-preview')).toBe(1);
+    // The hovered mark and the outline row agree; the reading position stays lit on its own mark.
+    expect(mark('data-current')).toBe(reading);
+    act(() => {
+      rail.dispatchEvent(Object.assign(new MouseEvent('pointerover', { bubbles: true }), { pointerType: 'mouse' }));
+    });
+    pointer('pointerdown', 200, 1020, 'mouse');
+    pointer('pointerup', 200, 1020, 'mouse');
+    act(() => {
+      rail.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }));
+    });
+    expect(document.activeElement?.id).toBe('section-2');
+    expect(mark('data-current')).toBe(1);
+    act(() => {
+      rail.dispatchEvent(
+        Object.assign(new MouseEvent('pointerout', { bubbles: true, relatedTarget: document.body }), {
+          pointerType: 'mouse',
+        }),
+      );
+    });
+    expect(target()).toBeUndefined();
+  });
+
+  it('maps a hovered bar to the one heading it stands for when a long outline is sampled', async () => {
+    const { pointer, target } = await renderScrubbable(60);
+    const marks = tocRailIndices(60);
+    // The marks box spans 100..500; pick a height where the proportional heading differs from the bar's.
+    const clientY = [...Array(400).keys()]
+      .map((offset) => 100 + offset)
+      .find((y) => marks[tocScrubIndex(y, 100, 400, marks.length)] !== tocScrubIndex(y, 100, 400, 60))!;
+    pointer('pointermove', clientY, 1020, 'mouse');
+    expect(target()).toBe(`#section-${marks[tocScrubIndex(clientY, 100, 400, marks.length)] + 1}`);
+  });
+
+  it('dismisses a hover preview with Escape', async () => {
+    const { rail, pointer, target } = await renderScrubbable();
+    pointer('pointermove', 300, 1020, 'mouse');
+    expect(target()).toBeDefined();
+    act(() => {
+      rail.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    });
+    expect(target()).toBeUndefined();
+    expect(rail.getAttribute('aria-expanded')).toBe('false');
   });
 
   it('cancels a scrub with Escape', async () => {

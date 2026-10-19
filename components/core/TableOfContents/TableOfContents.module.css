@@ -88,40 +88,42 @@
 }
 
 .marks {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-end;
+  display: grid;
+  grid-template-rows: repeat(var(--_toc-mark-count), minmax(0, 1fr));
+  align-items: center;
+  justify-items: end;
   height: 100%;
   width: var(--geul-spacing-xl);
 }
 
-/* Depth is encoded by length on one end-aligned axis: outer sections are longest. */
+/* One hairline per heading on a shared end edge; length encodes depth (outer sections are longest).
+   The reading position and the pointed-at heading darken their own mark, so marks never misalign. */
 .mark {
   display: block;
-  flex: none;
-  width: var(--geul-spacing-md);
-  height: 2px;
-  background: var(--geul-text-muted);
-  opacity: 0.55;
+  width: var(--geul-spacing-lg);
+  height: var(--geul-border-thin);
+  background: var(--geul-border-strong);
+  transition: background-color var(--geul-motion-fast) var(--geul-motion-easing);
 }
 
 .mark[data-depth='1'] {
-  width: var(--geul-spacing-xs);
+  width: var(--geul-spacing-sm);
 }
 
 .mark[data-depth='2'] {
   width: var(--geul-spacing-xxs);
 }
 
-.currentMark {
-  position: absolute;
-  inset-inline-end: 0;
-  width: var(--geul-spacing-xl);
-  height: 2px;
+.mark[data-current] {
   background: var(--geul-text-primary);
-  transform: translateY(-50%);
+}
+
+.mark[data-preview] {
+  background: var(--geul-text-primary);
+}
+
+.wrapper[data-scrubbing] .mark[data-current]:not([data-preview]) {
+  background: var(--geul-text-secondary);
 }
 
 .outline,

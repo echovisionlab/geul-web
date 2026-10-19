@@ -1,8 +1,8 @@
-import { publicAccessibilityLabels } from '@/stories/shared/public-accessibility';
 import { useMemo } from 'react';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useLocale } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import { create } from '@bufbuild/protobuf';
 import { expect, within } from 'storybook/test';
 import {
@@ -13,6 +13,7 @@ import { LayoutContainer } from '@/components/core/Layout';
 import { TermsPageClient } from '@/app/(general)/terms/TermsPageClient';
 import { PrivacyPageClient } from '@/app/(general)/privacy/PrivacyPageClient';
 import type { PublicLegalPageInitialData } from '@/lib/queries/legal-public-page';
+import { normalizeLocale } from '@/lib/i18n/locale';
 import { PublicShellStoryHarness } from '@/stories/public/fixtures/PublicShellStoryHarness';
 import { assertDocumentOutline } from '@/stories/public/fixtures/document-outline';
 import {
@@ -74,9 +75,17 @@ export function LegalPagePreview({
   state?: 'empty' | 'body' | 'long' | 'fallback' | 'preview' | 'invalid-preview' | 'loading' | 'error';
 }) {
   const locale = useLocale();
-  const contentLocale = longRichTextLocale(locale);
+  const searchParams = useSearchParams();
+  const selectedLocale = normalizeLocale(searchParams.get('lang'));
+  const requestedLocale = selectedLocale ?? locale;
+  const contentLocale = longRichTextLocale(requestedLocale);
   // The long terms are authored in the review content language; other states keep their fixed text.
-  const displayedLocale = state === 'fallback' ? 'ko' : state === 'long' ? contentLocale : 'en';
+  const displayedLocale = state === 'fallback' ? 'ko' : (selectedLocale ?? (state === 'long' ? contentLocale : 'en'));
+  const title = {
+    en: { terms: 'Terms of Service', privacy: 'Privacy Policy' },
+    ko: { terms: '이용약관', privacy: '개인정보처리방침' },
+    ar: { terms: 'شروط الخدمة', privacy: 'سياسة الخصوصية' },
+  }[longRichTextLocale(displayedLocale)][document];
   const content = useMemo(
     () =>
       state === 'long'
@@ -95,7 +104,9 @@ export function LegalPagePreview({
                         text:
                           state === 'fallback'
                             ? '이 문서는 원문 언어로 제공됩니다.'
-                            : 'This policy explains the current conditions and effective period.',
+                            : displayedLocale === 'ar'
+                              ? LEGAL_CLAUSE.ar
+                              : 'This policy explains the current conditions and effective period.',
                       },
                     },
                   },
@@ -104,20 +115,20 @@ export function LegalPagePreview({
               children: [],
             },
           ],
-    [state, contentLocale],
+    [state, contentLocale, displayedLocale],
   );
   const localizationInfo = useMemo(
     () => ({
-      requestedLocale: locale,
+      requestedLocale,
       displayedLocale,
-      sourceLocale: displayedLocale,
-      isFallback: locale !== displayedLocale,
-      isOriginal: true,
+      sourceLocale: selectedLocale ? 'en' : displayedLocale,
+      isFallback: requestedLocale !== displayedLocale,
+      isOriginal: !selectedLocale,
       machineGenerated: false,
       fallbackReason: 0,
-      availableLocales: [displayedLocale],
+      availableLocales: selectedLocale ? ['en', displayedLocale] : [displayedLocale],
     }),
-    [locale, displayedLocale],
+    [requestedLocale, displayedLocale, selectedLocale],
   );
   const client = useMemo(() => {
     const client = new QueryClient({
@@ -125,13 +136,13 @@ export function LegalPagePreview({
     });
     if (state === 'preview' || state === 'invalid-preview') {
       client.setQueryData(
-        [document, 'preview', 'preview-next', 'local-token', locale],
+        [document, 'preview', 'preview-next', 'local-token', requestedLocale],
         state === 'invalid-preview'
           ? null
           : {
               id: 'preview-next',
               version: 4,
-              title: 'Upcoming policy',
+              title,
               content,
               localizationInfo,
               status: 'scheduled',
@@ -141,7 +152,7 @@ export function LegalPagePreview({
     } else if (state === 'loading' || state === 'error') {
       client
         .getQueryCache()
-        .build(client, { queryKey: [document, 'page', locale] })
+        .build(client, { queryKey: [document, 'page', requestedLocale] })
         .setState(
           state === 'loading'
             ? { status: 'pending', fetchStatus: 'fetching' }
@@ -149,15 +160,15 @@ export function LegalPagePreview({
         );
     }
     return client;
-  }, [locale, document, scheduled, state, content, localizationInfo]);
+  }, [requestedLocale, title, document, scheduled, state, content, localizationInfo]);
   const initialData: PublicLegalPageInitialData = {
-    requestedLocale: locale,
+    requestedLocale,
     updatedAt: 1,
     data: {
       active: {
         id: 'preview-current',
         version: 3,
-        title: 'Current policy',
+        title,
         content: state === 'empty' ? null : content,
         localizationInfo: state === 'empty' ? null : localizationInfo,
         status: 'active',
@@ -231,14 +242,22 @@ export const PrivacyBody: Story = { args: { document: 'privacy', state: 'body' }
 export const SourceLanguageFallback: Story = {
   args: { state: 'fallback' },
   tags: ['a11y-public'],
-  play: async ({ canvasElement, globals }) => {
-    const t = await publicAccessibilityLabels(globals);
+  play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect((await canvas.findByText('이 문서는 원문 언어로 제공됩니다.')).closest('[lang]')).toHaveAttribute(
       'lang',
       'ko',
     );
-    await expect(canvas.getByRole('heading', { level: 1, name: t('common.entities.terms') })).toBeInTheDocument();
+    await expect(canvas.getByRole('heading', { level: 1, name: '이용약관' })).toHaveAttribute('lang', 'ko');
+  },
+};
+export const ArabicPrivacyContent: Story = {
+  args: { document: 'privacy', state: 'body' },
+  parameters: { nextjs: { navigation: { pathname: '/privacy', query: { lang: 'ar' } } } },
+  play: async ({ canvasElement }) => {
+    const heading = within(canvasElement).getByRole('heading', { level: 1, name: 'سياسة الخصوصية' });
+    await expect(heading).toHaveAttribute('lang', 'ar');
+    await expect(heading).toHaveAttribute('dir', 'auto');
   },
 };
 const previewParameters = {

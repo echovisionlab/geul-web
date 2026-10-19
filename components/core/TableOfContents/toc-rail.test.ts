@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { tocAncestors, tocOutline, tocRailIndices, tocScrubIndex } from './toc-rail';
+import { tocAncestors, tocNearestMark, tocOutline, tocRailIndices, tocScrubIndex } from './toc-rail';
 
 describe('decorative reading rail density', () => {
   it('keeps short outlines complete', () => {
@@ -41,5 +41,15 @@ describe('rail scrubbing position', () => {
     expect(tocScrubIndex(-50, 100, 400, 5)).toBe(0);
     expect(tocScrubIndex(300, 100, 0, 5)).toBe(0);
     expect(tocScrubIndex(300, 100, 400, 1)).toBe(0);
+  });
+});
+
+describe('tocNearestMark', () => {
+  it('lights the sampled mark closest to a heading in a long outline', () => {
+    const marks = tocRailIndices(100);
+    expect(tocNearestMark(marks, 0)).toBe(0);
+    expect(tocNearestMark(marks, 99)).toBe(marks.length - 1);
+    expect(marks[tocNearestMark(marks, 50)]).toBeCloseTo(50, -1);
+    expect(tocNearestMark([], 3)).toBe(-1);
   });
 });

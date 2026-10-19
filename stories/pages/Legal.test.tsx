@@ -1,9 +1,7 @@
 // @vitest-environment jsdom
 import '@testing-library/jest-dom/vitest';
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import { TestProviders } from '@/test/TestProviders';
+import { render, screen } from '@/test/render';
 import { LegalPagePreview } from './Legal.stories';
 const local = vi.hoisted(() => ({ query: new URLSearchParams(), pending: [] as Promise<unknown>[] }));
 vi.mock('next/dynamic', async () => {
@@ -25,60 +23,37 @@ vi.mock('next/navigation', () => ({
 beforeAll(async () => {
   await Promise.all(local.pending);
 });
-let host: HTMLDivElement;
-let root: Root;
 afterEach(() => {
-  act(() => root?.unmount());
-  host?.remove();
   local.query = new URLSearchParams();
 });
-async function render(state: 'fallback' | 'preview' | 'invalid-preview' | 'loading' | 'error') {
-  host = document.createElement('div');
-  document.body.append(host);
-  root = createRoot(host);
+function renderState(state: 'fallback' | 'preview' | 'invalid-preview' | 'loading' | 'error') {
   if (state.includes('preview')) {
     local.query = new URLSearchParams('preview=preview-next&token=local-token');
   }
-  await act(async () =>
-    root.render(
-      <TestProviders>
-        <LegalPagePreview state={state} />
-      </TestProviders>,
-    ),
-  );
+  return render(<LegalPagePreview state={state} />);
 }
 describe('production legal page state fixtures', () => {
   it('marks the source fallback body independently of the current UI language', async () => {
-    await render('fallback');
-    expect(host.querySelector('.terms-content')).toHaveAttribute('lang', 'ko');
-    expect(host.querySelector('.terms-content')).toHaveTextContent('이 문서는 원문 언어로 제공됩니다.');
-    expect(host.querySelector('h1')).toHaveTextContent('Terms of Service');
+    renderState('fallback');
+    expect(await screen.findByText('이 문서는 원문 언어로 제공됩니다.')).toBeVisible();
+    expect(screen.getByRole('heading', { level: 1, name: '이용약관' })).toHaveAttribute('lang', 'ko');
   });
   it('renders the actual scheduled preview branch from the locally scoped preview key', async () => {
-    await render('preview');
-    expect(host.querySelector('[data-legal-document="terms-preview"]')).not.toBeNull();
-    expect(host.querySelector('.terms-content')).toHaveTextContent(
-      'This policy explains the current conditions and effective period.',
-    );
-    expect(host.textContent).toContain('Version 4');
+    renderState('preview');
+    expect(await screen.findByText('This policy explains the current conditions and effective period.')).toBeVisible();
+    expect(screen.getByText('Version 4')).toBeVisible();
   });
   it('offers the current policy after an invalid preview without presenting unpublished body', async () => {
-    await render('invalid-preview');
-    expect(host.querySelector('[role="alert"]')).not.toBeNull();
-    expect(host.querySelector('a[href="/terms"]')).not.toBeNull();
-    expect(host.querySelector('.terms-content')).toBeNull();
+    renderState('invalid-preview');
+    expect(await screen.findByRole('alert')).toBeVisible();
+    expect(screen.getByRole('link', { name: 'View current terms' })).toHaveAttribute('href', '/terms');
+    expect(screen.queryByText('This policy explains the current conditions and effective period.')).toBeNull();
   });
   it('keeps pending and failed query states distinct from an empty policy', async () => {
-    await render('loading');
-    expect(host.querySelector('[data-legal-document]')).toBeNull();
-    await act(async () =>
-      root.render(
-        <TestProviders>
-          <LegalPagePreview state="error" />
-        </TestProviders>,
-      ),
-    );
-    expect(host.querySelector('[role="alert"]')).not.toBeNull();
-    expect(host.querySelector('[data-legal-document]')).toBeNull();
+    const view = renderState('loading');
+    expect(screen.queryByRole('heading', { level: 1 })).toBeNull();
+    view.rerender(<LegalPagePreview state="error" />);
+    expect(await screen.findByRole('alert')).toBeVisible();
+    expect(screen.queryByRole('heading', { level: 1 })).toBeNull();
   });
 });

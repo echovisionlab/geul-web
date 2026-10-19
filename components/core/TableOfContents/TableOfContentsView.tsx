@@ -18,6 +18,7 @@ import {
   TOC_MAX_VISUAL_DEPTH,
   tocAncestors,
   tocOutline,
+  tocNearestMark,
   tocRailIndices,
   tocScrubIndex,
   type TocOutlineNode,
@@ -127,6 +128,7 @@ export function TableOfContentsView({
   const pointerInside = useRef(false);
   const scrub = useRef<ScrubState | null>(null);
   const scrubIndexRef = useRef<number | null>(null);
+  const scrubY = useRef(0);
   const suppressClick = useRef(false);
   const markerPlaced = useRef(false);
   const [items, setItems] = useState<TocItem[]>([]);
@@ -266,6 +268,19 @@ export function TableOfContentsView({
     }
   }, [open]);
 
+  // A preview points into the previous outline once the headings change.
+  useEffect(() => {
+    setScrubIndex(null);
+  }, [items, setScrubIndex]);
+
+  // The outline opens in the same render as the first pointed-at heading, so it is aligned once
+  // visible: the previewed row then sits level with the pointer.
+  useLayoutEffect(() => {
+    if (open && scrubIndex !== null) {
+      alignInList(list.current, scrubIndex, scrubY.current);
+    }
+  }, [open, scrubIndex]);
+
   // Persistent column: one ink marker follows the current entry on the outline's line, and the
   // current entry stays visible in a long outline unless the reader is browsing the column.
   useLayoutEffect(() => {
@@ -295,6 +310,9 @@ export function TableOfContentsView({
   const outline = useMemo(() => tocOutline(items.map((item) => item.level)), [items]);
   const ancestors = useMemo(() => new Set(tocAncestors(outline.parents, activeIndex)), [outline, activeIndex]);
   const marks = useMemo(() => tocRailIndices(items.length), [items.length]);
+  // The reading position and the pointed-at heading light their own marks, so nothing is overlaid.
+  const currentMark = tocNearestMark(marks, activeIndex);
+  const previewMark = scrubIndex === null ? -1 : tocNearestMark(marks, scrubIndex);
 
   function focusFirst() {
     list.current?.querySelector<HTMLAnchorElement>('a')?.focus({ preventScroll: true });
@@ -303,11 +321,24 @@ export function TableOfContentsView({
   function closeOutline() {
     setHovered(false);
     setKeyboardOpen(false);
+    setScrubIndex(null);
   }
 
   function cancelScrub() {
-    if (scrub.current && scrub.current.pointerType !== 'mouse') {
+    const state = scrub.current;
+    if (state && state.pointerType !== 'mouse') {
       suppressClick.current = true;
+    }
+    if (state) {
+      // A canceled drag must not keep steering the rail (or revive as a hover preview).
+      try {
+        rail.current?.releasePointerCapture?.(state.pointerId);
+      } catch {
+        // The pointer may already be released.
+      }
+      if (state.pointerType === 'mouse' && state.active) {
+        suppressClick.current = true;
+      }
     }
     scrub.current = null;
     setScrubIndex(null);
@@ -327,7 +358,11 @@ export function TableOfContentsView({
   }
 
   function navigateTo(index: number, close: boolean) {
-    const heading = document.getElementById(items[index].id);
+    const item = items[index];
+    if (!item) {
+      return;
+    }
+    const heading = document.getElementById(item.id);
     if (!heading) {
       return;
     }
@@ -349,12 +384,16 @@ export function TableOfContentsView({
     navigateTo(index, event.detail === 0);
   }
 
-  function scrubTo(clientY: number) {
+  function scrubTo(clientY: number, snapToMark = false) {
     const box = marksRef.current?.getBoundingClientRect();
     if (!box) {
       return;
     }
-    const index = tocScrubIndex(clientY, box.top, box.height, items.length);
+    // A hovering mouse picks the bar under it, so every bar stands for exactly one heading.
+    const index = snapToMark
+      ? (marks[tocScrubIndex(clientY, box.top, box.height, marks.length)] ?? 0)
+      : tocScrubIndex(clientY, box.top, box.height, items.length);
+    scrubY.current = clientY;
     if (index !== scrubIndexRef.current) {
       setScrubIndex(index);
     }
@@ -391,6 +430,14 @@ export function TableOfContentsView({
 
   function moveScrub(event: React.PointerEvent<HTMLAnchorElement>) {
     const state = scrub.current;
+    if (!state && event.pointerType === 'mouse') {
+      // Hovering the rail points at a heading directly; a click then opens it. A held button is a
+      // drag that was canceled, not a hover.
+      if (event.buttons === 0) {
+        scrubTo(event.clientY, true);
+      }
+      return;
+    }
     if (!state || state.pointerId !== event.pointerId) {
       return;
     }
@@ -413,6 +460,10 @@ export function TableOfContentsView({
       return;
     }
     scrub.current = null;
+    if (!state.active && state.pointerType === 'mouse') {
+      // A plain click keeps the hovered heading; the click handler opens it.
+      return;
+    }
     const index = scrubIndexRef.current;
     setScrubIndex(null);
     if (state.active && index !== null) {
@@ -519,6 +570,8 @@ export function TableOfContentsView({
             if (event.detail === 0 || !pointerInside.current) {
               setKeyboardOpen(true);
               focusFirst();
+            } else if (scrubIndexRef.current !== null) {
+              navigateTo(scrubIndexRef.current, false);
             }
           }}
           onKeyDown={(event) => {
@@ -532,6 +585,11 @@ export function TableOfContentsView({
           onPointerMove={moveScrub}
           onPointerUp={endScrub}
           onPointerCancel={cancelScrub}
+          onPointerLeave={(event) => {
+            if (!scrub.current && event.pointerType === 'mouse') {
+              setScrubIndex(null);
+            }
+          }}
           onContextMenu={(event) => {
             if (scrub.current) {
               event.preventDefault();
@@ -539,17 +597,15 @@ export function TableOfContentsView({
           }}
         >
           <span ref={marksRef} className={classes.marks} aria-hidden="true">
-            {marks.map((index) => (
+            {marks.map((index, position) => (
               <span
                 key={index}
                 className={classes.mark}
                 data-depth={Math.min(TOC_MAX_VISUAL_DEPTH, outline.depths[index])}
+                data-current={position === currentMark || undefined}
+                data-preview={position === previewMark || undefined}
               />
             ))}
-            <span
-              className={classes.currentMark}
-              style={{ top: `${((scrubIndex ?? activeIndex) / Math.max(1, items.length - 1)) * 100}%` }}
-            />
           </span>
         </a>
       )}
