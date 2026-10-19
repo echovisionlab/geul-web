@@ -18,7 +18,7 @@ import { IconButton } from '@/components/core/IconButton';
 import { Tooltip } from '@/components/core/Tooltip';
 import { PageLoader } from '@/features/site/PageLoader';
 import { LegalDocumentMetadata } from '@/features/policy/LegalDocumentMetadata';
-import { LegalTranslationNotice } from '@/features/policy/LegalTranslationNotice';
+import { ContentLocaleNotice } from '@/features/translation/ContentLocaleNotice';
 import { PrintButton } from '@/features/print/PrintButton';
 import { LegalDocumentLayout } from '@/features/policy/LegalDocumentLayout';
 import { ContentLanguageMenu } from '@/features/translation/ContentLanguageMenu';
@@ -127,7 +127,8 @@ function PrivacyActive({
         <DsLayoutStack gap="md">
           {/* Header */}
           {activePrivacy?.localizationInfo ? (
-            <LegalTranslationNotice
+            <ContentLocaleNotice
+              announceTranslation
               pathname="/privacy"
               query={query}
               localizationInfo={activePrivacy.localizationInfo}
@@ -270,7 +271,8 @@ function PrivacyPreview({
 
           {/* Header */}
           {previewPrivacy?.localizationInfo ? (
-            <LegalTranslationNotice
+            <ContentLocaleNotice
+              announceTranslation
               pathname="/privacy"
               query={query}
               localizationInfo={previewPrivacy.localizationInfo}

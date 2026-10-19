@@ -14,6 +14,17 @@
   z-index: 6;
 }
 
+/* The notice reads in the interface language above the document and clears the controls beside it. */
+.notice {
+  margin-block-end: var(--geul-spacing-md);
+  padding-inline-end: var(--_document-layout-controls-space);
+}
+
+/* The notice decides on the client whether it applies; nothing to say leaves no gap. */
+.notice:empty {
+  display: none;
+}
+
 .root[data-content-height='viewport'],
 .root[data-footer-layout='pinned'] {
   display: flex;

@@ -4303,7 +4303,8 @@
       "description": "此本地化版本以{displayed}显示，{source}原文仍具有权威性。"
     },
     "fallback": {
-      "title": "后备语言"
+      "title": "后备语言",
+      "description": "暂无{requested}版本，因此以{displayed}显示。"
     },
     "actions": {
       "viewOriginal": "查看原文 ({source})"

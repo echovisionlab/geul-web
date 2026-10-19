@@ -11,7 +11,8 @@ import { LegalPolicyHistoryClient } from '@/features/policy/LegalPolicyHistoryCl
 const loadPrivacyQueries = () => import('@/lib/queries/privacy-browser');
 const getActivePrivacy = async (requestedLocale?: string) =>
   (await loadPrivacyQueries()).getActivePrivacy(requestedLocale);
-const listArchivedPrivacy = async () => (await loadPrivacyQueries()).listArchivedPrivacy();
+const listArchivedPrivacy = async (requestedLocale?: string) =>
+  (await loadPrivacyQueries()).listArchivedPrivacy(requestedLocale);
 
 export function PrivacyHistoryClient({ initialData }: { initialData?: PublicLegalHistoryInitialData }) {
   const requestedLocale = resolveContentRequestedLocale(useLocale(), Object.fromEntries(useSearchParams().entries()));

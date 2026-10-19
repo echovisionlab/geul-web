@@ -12,7 +12,7 @@ import { LegalDocumentMetadata } from '@/features/policy/LegalDocumentMetadata';
 import { PrintButton } from '@/features/print/PrintButton';
 import type { PublicLocalizationInfoLike } from '@/lib/queries/localized-public';
 import { LegalDocumentLayout } from './LegalDocumentLayout';
-import { LegalTranslationNotice } from './LegalTranslationNotice';
+import { ContentLocaleNotice } from '@/features/translation/ContentLocaleNotice';
 import classes from './LegalDocumentView.module.css';
 
 export interface LegalShareDocument {
@@ -39,7 +39,7 @@ export function LegalShareDocumentView({ document, pathname }: { document: Legal
       empty={null}
       header={
         <DsLayoutStack printFlow="stack" gap="md">
-          <LegalTranslationNotice pathname={pathname} localizationInfo={document.localizationInfo} />
+          <ContentLocaleNotice announceTranslation pathname={pathname} localizationInfo={document.localizationInfo} />
           {document.effectiveFrom && !document.effectiveUntil ? (
             <div className={classes.notice}>
               <Alert icon={<IconCalendar size={16} />} tone="accent">

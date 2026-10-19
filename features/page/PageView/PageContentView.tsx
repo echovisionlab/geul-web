@@ -4,6 +4,7 @@ import type { ContentBlockMediaItem } from '@echovisionlab/geul-proto/content/bl
 import type { LocalizedPageSection } from '@/features/editor/contract/localized-page';
 import { ContentBlockMediaRuntimeProvider } from '@/features/media/ContentBlockMediaRuntimeContext';
 import { ContentLanguageMenu } from '@/features/translation/ContentLanguageMenu';
+import { ContentLocaleNotice } from '@/features/translation/ContentLocaleNotice';
 import { TableOfContents } from '@/features/navigation/TableOfContents';
 import { buildGeneratedPageTocItems } from '@/lib/toc-items';
 import { GeneratedPageRenderer } from './GeneratedPageRenderer';
@@ -41,6 +42,10 @@ export function PageContentView({ page, pathname, query, requestedLocale }: Page
       localizationInfo={page.localizationInfo}
     />
   ) : null;
+  // Pages stay quiet about translations; they only say when the requested language is unavailable.
+  const notice = page.localizationInfo ? (
+    <ContentLocaleNotice pathname={pathname} query={query} localizationInfo={page.localizationInfo} />
+  ) : null;
   const showTitle = page.showTitle && !!page.title;
   const chrome = showTitle ? (
     <ContentChrome title={page.title} className={controls ? classes.chromeWithControls : undefined} />
@@ -53,6 +58,7 @@ export function PageContentView({ page, pathname, query, requestedLocale }: Page
         contentLanguage={page.localizationInfo?.displayedLocale || requestedLocale}
         chrome={chrome}
         controls={controls}
+        notice={notice}
         className={['page-content', !showTitle && controls ? classes.withoutTitle : undefined]
           .filter(Boolean)
           .join(' ')}

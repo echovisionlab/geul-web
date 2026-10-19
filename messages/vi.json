@@ -4303,7 +4303,8 @@
       "description": "Phiên bản bản địa hóa này được hiển thị bằng {displayed}; bản gốc bằng {source} vẫn là căn cứ chính thức."
     },
     "fallback": {
-      "title": "Ngôn ngữ dự phòng"
+      "title": "Ngôn ngữ dự phòng",
+      "description": "Nội dung này chưa có bản {requested} nên đang hiển thị bằng {displayed}."
     },
     "actions": {
       "viewOriginal": "Xem bản gốc ({source})"

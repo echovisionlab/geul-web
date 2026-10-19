@@ -34,7 +34,7 @@ import { LegalOgImagePanel } from '@/features/policy/LegalOgImagePanel';
 import { LegalRichTextContent } from '@/features/policy/LegalRichTextContent';
 import { DOCUMENT_TITLE_HEADING_LEVEL } from '@/features/document-layout/ui/document-heading-level';
 import { DocumentHeadingScope } from '@/features/document-layout/ui/DocumentHeadingScope';
-import { LegalTranslationNotice } from '@/features/policy/LegalTranslationNotice';
+import { ContentLocaleNotice } from '@/features/translation/ContentLocaleNotice';
 import { materializeLocalizedRichTextTree } from '@/features/editor/contract/localized-rich-text';
 import { PolicyEditor, type PolicyEditorInstance } from '@/features/policy/PolicyEditor/PolicyEditor';
 import { policyTiptapDocumentToHtml } from '@/features/editor/tiptap/profiles/policy-document';
@@ -646,7 +646,8 @@ export function LegalPolicyEditorView({ model }: { model: LegalPolicyEditorViewM
         ) : null}
 
         {isEditingTranslation ? (
-          <LegalTranslationNotice
+          <ContentLocaleNotice
+            announceTranslation
             pathname={strategy.entityType === 'terms' ? '/terms' : '/privacy'}
             localizationInfo={{
               displayedLocale: activeEditLocale.activeLocale,

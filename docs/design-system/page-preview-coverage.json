@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "methodology": "All App Router visual entry files indexed by TypeScript imports/JSX; exact reviewed route/boundary maps count separately from mere Feature story overlap. Unmapped entrypoints remain explicit gaps. Static source census is not a browser pass.",
-  "sourceManifestHash": "2686a24842217537d2e519e586d59b794575aabefcd0f3879cca38fa05af7dba",
+  "sourceManifestHash": "e273cc3142c71c7f4ed30afb7f2c4ee17261e2ec4975a5c0b17c3d5c680048bc",
   "counts": {
     "queryEditorBranches": 12,
     "editorBranchPreviews": 12,
@@ -445,6 +445,7 @@
         "features/site/PageLoader/PageLoader.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -1082,6 +1083,7 @@
         "features/social-links/prepare-social-links-display.ts",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -1242,6 +1244,10 @@
             {
               "variant": "PageHeadingHierarchy",
               "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-heading-hierarchy"
+            },
+            {
+              "variant": "PageUnavailableLanguage",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-unavailable-language"
             },
             {
               "variant": "PageEmpty",
@@ -2549,6 +2555,7 @@
         "features/translation/ActiveEditLocaleContentPreview.tsx",
         "features/translation/ActiveEditLocaleContentPreviewView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -3218,6 +3225,7 @@
         "features/translation/ActiveEditLocaleContentPreview.tsx",
         "features/translation/ActiveEditLocaleContentPreviewView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -4077,6 +4085,7 @@
         "features/site/PageLoader/PageLoader.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -4715,6 +4724,7 @@
         "features/social-links/prepare-social-links-display.ts",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -4832,6 +4842,10 @@
             {
               "variant": "PageHeadingHierarchy",
               "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-heading-hierarchy"
+            },
+            {
+              "variant": "PageUnavailableLanguage",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-unavailable-language"
             },
             {
               "variant": "PageEmpty",
@@ -5595,6 +5609,7 @@
         "features/site/PageLoader/PageLoader.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -6235,6 +6250,7 @@
         "features/social-links/prepare-social-links-display.ts",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -7106,6 +7122,7 @@
         "features/site/PageLoader/PageLoader.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -7760,6 +7777,7 @@
         "features/social-links/prepare-social-links-display.ts",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -8996,6 +9014,7 @@
         "features/site/PageLoader/PageLoader.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -9642,6 +9661,7 @@
         "features/social-links/prepare-social-links-display.ts",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -10542,6 +10562,7 @@
         "features/site/PageLoader/PageLoader.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -11200,6 +11221,7 @@
         "features/social-links/prepare-social-links-display.ts",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -12066,6 +12088,7 @@
         "features/site/PageLoader/PageLoader.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -12704,6 +12727,7 @@
         "features/social-links/prepare-social-links-display.ts",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -12821,6 +12845,10 @@
             {
               "variant": "PageHeadingHierarchy",
               "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-heading-hierarchy"
+            },
+            {
+              "variant": "PageUnavailableLanguage",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-unavailable-language"
             },
             {
               "variant": "PageEmpty",
@@ -13677,6 +13705,7 @@
         "features/translation/ActiveEditLocaleContentPreview.tsx",
         "features/translation/ActiveEditLocaleContentPreviewView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -14346,6 +14375,7 @@
         "features/translation/ActiveEditLocaleContentPreview.tsx",
         "features/translation/ActiveEditLocaleContentPreviewView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -15214,6 +15244,7 @@
         "features/site/PageLoader/PageLoader.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -15852,6 +15883,7 @@
         "features/social-links/prepare-social-links-display.ts",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -15969,6 +16001,10 @@
             {
               "variant": "PageHeadingHierarchy",
               "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-heading-hierarchy"
+            },
+            {
+              "variant": "PageUnavailableLanguage",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-unavailable-language"
             },
             {
               "variant": "PageEmpty",
@@ -18462,6 +18498,7 @@
         "features/site/PageLoader/PageLoader.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/user/UserInlineLinks.tsx",
         "features/user/ui/UserInlineLinks/UserInlineLinksView.tsx"
       ],
@@ -18767,6 +18804,7 @@
         "features/social-links/prepare-social-links-display.ts",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/user/UserInlineLinks.tsx",
         "features/user/ui/UserInlineLinks/UserInlineLinksView.tsx"
       ],
@@ -18850,6 +18888,10 @@
             {
               "variant": "PageHeadingHierarchy",
               "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-heading-hierarchy"
+            },
+            {
+              "variant": "PageUnavailableLanguage",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-unavailable-language"
             },
             {
               "variant": "PageEmpty",
@@ -19630,6 +19672,7 @@
         "features/translation/ActiveEditLocaleContentPreview.tsx",
         "features/translation/ActiveEditLocaleContentPreviewView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -20311,6 +20354,7 @@
         "features/translation/ActiveEditLocaleContentPreview.tsx",
         "features/translation/ActiveEditLocaleContentPreviewView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -20532,6 +20576,10 @@
             {
               "variant": "PageHeadingHierarchy",
               "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-heading-hierarchy"
+            },
+            {
+              "variant": "PageUnavailableLanguage",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-unavailable-language"
             },
             {
               "variant": "PageEmpty",
@@ -21296,6 +21344,7 @@
         "features/site/PageLoader/PageLoader.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -21934,6 +21983,7 @@
         "features/social-links/prepare-social-links-display.ts",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -22051,6 +22101,10 @@
             {
               "variant": "PageHeadingHierarchy",
               "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-heading-hierarchy"
+            },
+            {
+              "variant": "PageUnavailableLanguage",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-unavailable-language"
             },
             {
               "variant": "PageEmpty",
@@ -22621,7 +22675,6 @@
         "features/policy/LegalOgImagePanel.tsx",
         "features/policy/LegalPolicyEditor.tsx",
         "features/policy/LegalRichTextContent.tsx",
-        "features/policy/LegalTranslationNotice.tsx",
         "features/policy/PolicyEditor/PolicyEditor.tsx",
         "features/policy/PrivacyEditor.tsx",
         "features/print/PrintButton.tsx",
@@ -22631,6 +22684,7 @@
         "features/site/PageLoader/PageLoader.tsx",
         "features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
         "features/translation/TranslationLocaleControl.tsx",
@@ -22912,7 +22966,6 @@
         "features/policy/LegalOgImagePanel.tsx",
         "features/policy/LegalPolicyEditor.tsx",
         "features/policy/LegalRichTextContent.tsx",
-        "features/policy/LegalTranslationNotice.tsx",
         "features/policy/PolicyEditor/PolicyEditor.tsx",
         "features/policy/PrivacyEditor.tsx",
         "features/policy/useLegalPolicyCommands.ts",
@@ -22925,6 +22978,7 @@
         "features/site/PageLoader/loader-image.ts",
         "features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
         "features/translation/TranslationLocaleControl.tsx",
@@ -23378,10 +23432,10 @@
         "features/policy/LegalDocumentLayout.tsx",
         "features/policy/LegalDocumentMetadata.tsx",
         "features/policy/LegalRichTextContent.tsx",
-        "features/policy/LegalTranslationNotice.tsx",
         "features/print/PrintButton.tsx",
         "features/site/PageLoader/PageLoader.tsx",
-        "features/translation/ContentLanguageMenu.tsx"
+        "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx"
       ],
       "dependencyGraph": [
         "app/(general)/privacy/PrivacyPageClient.tsx",
@@ -23499,13 +23553,13 @@
         "features/policy/LegalDocumentLayout.tsx",
         "features/policy/LegalDocumentMetadata.tsx",
         "features/policy/LegalRichTextContent.tsx",
-        "features/policy/LegalTranslationNotice.tsx",
         "features/policy/public-legal-page.server.ts",
         "features/print/PrintButton.tsx",
         "features/site/PageLoader/PageLoader.tsx",
         "features/site/PageLoader/index.ts",
         "features/site/PageLoader/loader-image.ts",
-        "features/translation/ContentLanguageMenu.tsx"
+        "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx"
       ],
       "inheritedBoundaries": [
         "app/(general)/error.tsx",
@@ -24090,6 +24144,7 @@
         "features/translation/ActiveEditLocaleContentPreview.tsx",
         "features/translation/ActiveEditLocaleContentPreviewView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -24765,6 +24820,7 @@
         "features/translation/ActiveEditLocaleContentPreview.tsx",
         "features/translation/ActiveEditLocaleContentPreviewView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -25623,6 +25679,7 @@
         "features/site/PageLoader/PageLoader.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -26261,6 +26318,7 @@
         "features/social-links/prepare-social-links-display.ts",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -26378,6 +26436,10 @@
             {
               "variant": "PageHeadingHierarchy",
               "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-heading-hierarchy"
+            },
+            {
+              "variant": "PageUnavailableLanguage",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-unavailable-language"
             },
             {
               "variant": "PageEmpty",
@@ -27142,6 +27204,7 @@
         "features/site/PageLoader/PageLoader.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -27783,6 +27846,7 @@
         "features/social-links/prepare-social-links-display.ts",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -28650,7 +28714,6 @@
         "features/policy/LegalOgImagePanel.tsx",
         "features/policy/LegalPolicyEditor.tsx",
         "features/policy/LegalRichTextContent.tsx",
-        "features/policy/LegalTranslationNotice.tsx",
         "features/policy/PolicyEditor/PolicyEditor.tsx",
         "features/policy/TermsEditor.tsx",
         "features/print/PrintButton.tsx",
@@ -28660,6 +28723,7 @@
         "features/site/PageLoader/PageLoader.tsx",
         "features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
         "features/translation/TranslationLocaleControl.tsx",
@@ -28941,7 +29005,6 @@
         "features/policy/LegalOgImagePanel.tsx",
         "features/policy/LegalPolicyEditor.tsx",
         "features/policy/LegalRichTextContent.tsx",
-        "features/policy/LegalTranslationNotice.tsx",
         "features/policy/PolicyEditor/PolicyEditor.tsx",
         "features/policy/TermsEditor.tsx",
         "features/policy/useLegalPolicyCommands.ts",
@@ -28954,6 +29017,7 @@
         "features/site/PageLoader/loader-image.ts",
         "features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
         "features/translation/TranslationLocaleControl.tsx",
@@ -29407,10 +29471,10 @@
         "features/policy/LegalDocumentLayout.tsx",
         "features/policy/LegalDocumentMetadata.tsx",
         "features/policy/LegalRichTextContent.tsx",
-        "features/policy/LegalTranslationNotice.tsx",
         "features/print/PrintButton.tsx",
         "features/site/PageLoader/PageLoader.tsx",
-        "features/translation/ContentLanguageMenu.tsx"
+        "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx"
       ],
       "dependencyGraph": [
         "app/(general)/terms/TermsPageClient.tsx",
@@ -29528,13 +29592,13 @@
         "features/policy/LegalDocumentLayout.tsx",
         "features/policy/LegalDocumentMetadata.tsx",
         "features/policy/LegalRichTextContent.tsx",
-        "features/policy/LegalTranslationNotice.tsx",
         "features/policy/public-legal-page.server.ts",
         "features/print/PrintButton.tsx",
         "features/site/PageLoader/PageLoader.tsx",
         "features/site/PageLoader/index.ts",
         "features/site/PageLoader/loader-image.ts",
-        "features/translation/ContentLanguageMenu.tsx"
+        "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx"
       ],
       "inheritedBoundaries": [
         "app/(general)/error.tsx",
@@ -30601,6 +30665,7 @@
         "features/site/PageLoader/PageLoader.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -31270,6 +31335,7 @@
         "features/social-links/prepare-social-links-display.ts",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -32156,6 +32222,7 @@
         "features/site/PageLoader/PageLoader.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -32794,6 +32861,7 @@
         "features/social-links/prepare-social-links-display.ts",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -32911,6 +32979,10 @@
             {
               "variant": "PageHeadingHierarchy",
               "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-heading-hierarchy"
+            },
+            {
+              "variant": "PageUnavailableLanguage",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-unavailable-language"
             },
             {
               "variant": "PageEmpty",
@@ -43456,6 +43528,7 @@
         "features/site/ui/SiteLogo/SiteLogoView.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -44103,6 +44176,7 @@
         "features/social-links/prepare-social-links-display.ts",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -45028,6 +45102,7 @@
         "features/site/ui/SiteLogo/SiteLogoView.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -45693,6 +45768,7 @@
         "features/social-links/prepare-social-links-display.ts",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -46615,6 +46691,7 @@
         "features/site/ui/SiteLogo/SiteLogoView.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -47260,6 +47337,7 @@
         "features/social-links/prepare-social-links-display.ts",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -48098,6 +48176,7 @@
         "features/site/ui/SiteLogo/SiteLogoView.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -48743,6 +48822,7 @@
         "features/social-links/prepare-social-links-display.ts",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -49590,6 +49670,7 @@
         "features/site/PageLoader/PageLoader.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -50228,6 +50309,7 @@
         "features/social-links/prepare-social-links-display.ts",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
@@ -50338,6 +50420,10 @@
             {
               "variant": "PageHeadingHierarchy",
               "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-heading-hierarchy"
+            },
+            {
+              "variant": "PageUnavailableLanguage",
+              "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-unavailable-language"
             },
             {
               "variant": "PageEmpty",
@@ -51186,7 +51272,6 @@
         "features/policy/LegalDocumentMetadata.tsx",
         "features/policy/LegalRichTextContent.tsx",
         "features/policy/LegalShareDocumentView.tsx",
-        "features/policy/LegalTranslationNotice.tsx",
         "features/post/Comment/CommentForm.tsx",
         "features/post/Comment/CommentItem.tsx",
         "features/post/Comment/CommentSection.tsx",
@@ -51201,6 +51286,7 @@
         "features/site/ui/SiteLogo/SiteLogoView.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/user/UserInlineLinks.tsx",
         "features/user/ui/UserInlineLinks/UserInlineLinksView.tsx"
       ],
@@ -51525,7 +51611,6 @@
         "features/policy/LegalDocumentMetadata.tsx",
         "features/policy/LegalRichTextContent.tsx",
         "features/policy/LegalShareDocumentView.tsx",
-        "features/policy/LegalTranslationNotice.tsx",
         "features/post/Comment/CommentForm.tsx",
         "features/post/Comment/CommentItem.tsx",
         "features/post/Comment/CommentSection.tsx",
@@ -51549,6 +51634,7 @@
         "features/social-links/prepare-social-links-display.ts",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/user/UserInlineLinks.tsx",
         "features/user/ui/UserInlineLinks/UserInlineLinksView.tsx"
       ],

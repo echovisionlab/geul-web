@@ -28,6 +28,10 @@ vi.mock('@/features/translation/ContentLanguageMenu', () => ({
   },
 }));
 
+vi.mock('@/features/translation/ContentLocaleNotice', () => ({
+  ContentLocaleNotice: () => <div data-testid="content-locale-notice" />,
+}));
+
 vi.mock('./GeneratedPageRenderer', () => ({
   GeneratedPageRenderer: (props: Record<string, unknown>) => {
     pageRendererSpy(props);
@@ -243,6 +247,8 @@ describe('Page content language', () => {
     expect(document.querySelector('[data-content-body]')).toHaveAttribute('lang', 'ko');
     expect(document.querySelector('[data-content-chrome]')?.parentElement).toHaveAttribute('lang', 'ko');
     expect(document.querySelector('[data-content-controls]')?.closest('[lang]')).toBeNull();
+    // The notice about the unavailable language reads in the interface language, outside the content.
+    expect(document.querySelector('[data-testid="content-locale-notice"]')?.closest('[lang]')).toBeNull();
     expect(document.querySelector('h1')).toHaveTextContent('한국어 원본');
   });
 });

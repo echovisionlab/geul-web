@@ -302,6 +302,7 @@ export const CLIENT_MESSAGE_SCOPE_PATHS: Record<ClientMessageScope, readonly str
     'formRenderer',
     'formSuccessPage',
     'formValidation',
+    'localizationNotice',
     'map',
     'mapView',
     'mediaCommon.missing',

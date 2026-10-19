@@ -4303,7 +4303,8 @@
       "description": "Bu yerelleştirilmiş sürüm {displayed} dilinde gösterilir; {source} dilindeki özgün metin esas alınır."
     },
     "fallback": {
-      "title": "Geri dönüş dili"
+      "title": "Geri dönüş dili",
+      "description": "Bu içerik henüz {requested} dilinde yok; {displayed} olarak gösteriliyor."
     },
     "actions": {
       "viewOriginal": "Orijinali görüntüle ({source})"

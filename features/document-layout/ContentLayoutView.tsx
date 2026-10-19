@@ -7,6 +7,7 @@ export interface ContentLayoutViewProps {
   layout: DocumentLayout;
   chrome?: ReactNode;
   controls?: ReactNode;
+  notice?: ReactNode;
   children: ReactNode;
   className?: string;
   /** Language of the document content; interface controls retain their own language. */
@@ -18,6 +19,7 @@ export function ContentLayoutView({
   layout,
   chrome,
   controls,
+  notice,
   children,
   className,
   contentLanguage,
@@ -27,6 +29,7 @@ export function ContentLayoutView({
       layout={toDocumentLayoutViewModel(layout)}
       chrome={chrome}
       controls={controls}
+      notice={notice}
       className={className}
       contentLanguage={contentLanguage}
     >

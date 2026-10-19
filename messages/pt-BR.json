@@ -4303,7 +4303,8 @@
       "description": "Esta versão localizada é exibida em {displayed}; o original em {source} continua sendo a versão de referência."
     },
     "fallback": {
-      "title": "Idioma de fallback"
+      "title": "Idioma de fallback",
+      "description": "Este conteúdo ainda não está disponível em {requested}, por isso é exibido em {displayed}."
     },
     "actions": {
       "viewOriginal": "Ver original ({source})"

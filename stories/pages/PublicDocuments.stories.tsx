@@ -123,7 +123,8 @@ export function PublicDocumentPagePreview({
     | 'pinned'
     | 'long-document'
     | 'untitled-long-document'
-    | 'heading-hierarchy';
+    | 'heading-hierarchy'
+    | 'unavailable-language';
   pagePath?: string;
   hideTableOfContents?: boolean;
 }) {
@@ -158,7 +159,18 @@ export function PublicDocumentPagePreview({
           fallbackReason: 0,
           availableLocales: ['en', 'ko', 'ja'],
         }
-      : null;
+      : state === 'unavailable-language'
+        ? {
+            requestedLocale: 'nl',
+            displayedLocale: 'en',
+            sourceLocale: 'ko',
+            isFallback: true,
+            isOriginal: false,
+            machineGenerated: false,
+            fallbackReason: 2,
+            availableLocales: ['ko', 'en', 'ja'],
+          }
+        : null;
   const layout = {
     ...DEFAULT_DOCUMENT_LAYOUT,
     ...(hideTableOfContents ? { hideTableOfContents: true } : {}),
@@ -299,7 +311,9 @@ async function assertHeroReadingLayout({ canvasElement }: { canvasElement: HTMLE
   const hero = canvasElement.querySelector<HTMLElement>('[data-post-hero]')!;
   const image = hero.querySelector<HTMLImageElement>('[data-geul-media-image]')!;
   await waitFor(() => expect(image.naturalWidth).toBeGreaterThan(0));
-  // The body's first block is the reading column; `.prose` itself spans the breakout width.
+  // The body's first block is the reading column; `.prose` itself spans the breakout width. The body
+  // can render after the title and image.
+  await waitFor(() => expect(canvasElement.querySelector('.prose > [data-document-block]')).not.toBeNull());
   const body = canvasElement.querySelector<HTMLElement>('.prose > [data-document-block]')!;
   const heading = canvas.getByRole('heading', { level: 1 });
   const heroBounds = hero.getBoundingClientRect();
@@ -398,6 +412,22 @@ export const PageLongDocumentUntitled: Story = {
 export const PageHeadingHierarchy: Story = {
   args: { domain: 'page', state: 'heading-hierarchy' },
   play: assertDocumentHeadingHierarchy,
+};
+/**
+ * Dutch was requested and the page has no Dutch version: it is shown in the default language (English)
+ * with a notice in the interface language, outside the document's own language, linking to the original.
+ */
+export const PageUnavailableLanguage: Story = {
+  args: { domain: 'page', state: 'unavailable-language' },
+  play: async ({ canvasElement }) => {
+    const notice = await within(canvasElement).findByText(/Dutch/);
+    await expect(notice.closest('[data-content-body]')).toBeNull();
+    await expect(canvasElement.querySelector('[data-content-body]')).toHaveAttribute('lang', 'en');
+    await expect(canvasElement.querySelector('[data-content-notice] a')).toHaveAttribute(
+      'href',
+      '/quiet-studio?lang=ko',
+    );
+  },
 };
 export const PageEmpty: Story = { args: { domain: 'page', state: 'empty' } };
 export const PagePinned: Story = { args: { domain: 'page', state: 'pinned' } };

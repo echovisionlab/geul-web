@@ -4303,7 +4303,8 @@
       "description": "Questa versione localizzata è mostrata in {displayed}; l’originale in {source} resta autorevole."
     },
     "fallback": {
-      "title": "Linguaggio di riserva"
+      "title": "Linguaggio di riserva",
+      "description": "Questo contenuto non è ancora disponibile in {requested}, quindi viene mostrato in {displayed}."
     },
     "actions": {
       "viewOriginal": "Visualizza originale ({source})"

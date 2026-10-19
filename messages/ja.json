@@ -4303,7 +4303,8 @@
       "description": "この翻訳版は{displayed}で表示されています。{source}の原文が優先されます。"
     },
     "fallback": {
-      "title": "代替言語"
+      "title": "代替言語",
+      "description": "{requested}版はまだないため、{displayed}で表示しています。"
     },
     "actions": {
       "viewOriginal": "原文を表示 ({source})"

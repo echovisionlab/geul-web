@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceManifestHash": "7f0979404b131b81e217c9c22c071af695ff932c786ac3b8bef308c4855b06cf",
+  "sourceManifestHash": "a511452d44484dd488fbc649ef2be8edd630d6e3120e583a3437e31fa2a5b22d",
   "methodology": "All inventoried Feature component candidates. Direct value imports, literal lazy imports and transitive source relationships through production owners/local adapters are indexed separately. A dependency can be unused or render conditionally; neither relationship proves rendered states, route parity or design compliance. Empty JSX records include runtime/lazy/controller boundaries and must be inspected before treating them as visual gaps.",
   "counts": { "domains": 54, "componentFiles": 769, "jsxWithoutStoryRelationship": 43 },
   "domains": [
@@ -6861,17 +6861,6 @@
           "relatedStories": []
         },
         {
-          "file": "features/policy/LegalTranslationNotice.tsx",
-          "hasJsx": true,
-          "directStories": [],
-          "relatedStories": [
-            "Pages/Legal/Public Document",
-            "Pages/Admin/Legal Policies",
-            "Pages/Editors/Legal",
-            "Pages/Legal/History Detail"
-          ]
-        },
-        {
           "file": "features/policy/PolicyEditor/PolicyEditor.tsx",
           "hasJsx": true,
           "directStories": [],
@@ -7700,6 +7689,19 @@
             "Pages/Public/Catalog Entity Detail",
             "Pages/Public/Documents",
             "Pages/Public/Entity Detail"
+          ]
+        },
+        {
+          "file": "features/translation/ContentLocaleNotice.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": [
+            "Feature/Page/Embed",
+            "Pages/Legal/Public Document",
+            "Pages/Admin/Legal Policies",
+            "Pages/Editors/Legal",
+            "Pages/Legal/History Detail",
+            "Pages/Public/Documents"
           ]
         },
         {

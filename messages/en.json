@@ -4303,7 +4303,8 @@
       "description": "This localized version is shown in {displayed}; the {source} original remains authoritative."
     },
     "fallback": {
-      "title": "Fallback language"
+      "title": "Fallback language",
+      "description": "There is no {requested} version yet, so this is shown in {displayed}."
     },
     "actions": {
       "viewOriginal": "View original ({source})"

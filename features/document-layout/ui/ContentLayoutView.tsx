@@ -14,6 +14,8 @@ export interface ContentLayoutViewProps {
    */
   chrome?: ReactNode;
   controls?: ReactNode;
+  /** A note about the document in the interface language (e.g. no version in the requested language). */
+  notice?: ReactNode;
   children: ReactNode;
   className?: string;
   /** Language of the document content; interface controls retain their own language. */
@@ -24,6 +26,7 @@ export function ContentLayoutView({
   layout,
   chrome,
   controls,
+  notice,
   children,
   className,
   contentLanguage,
@@ -44,6 +47,11 @@ export function ContentLayoutView({
       {controls ? (
         <div className={`${classes.controls} print-hide`} data-content-controls>
           {controls}
+        </div>
+      ) : null}
+      {notice ? (
+        <div className={`${classes.notice} print-hide`} data-content-notice>
+          {notice}
         </div>
       ) : null}
       {chrome && chromeIsPinned ? (

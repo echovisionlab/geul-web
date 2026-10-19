@@ -4303,7 +4303,8 @@
       "description": "ฉบับแปลนี้แสดงเป็น {displayed} โดยยังยึดต้นฉบับภาษา {source} เป็นหลัก"
     },
     "fallback": {
-      "title": "ภาษาทางเลือก"
+      "title": "ภาษาทางเลือก",
+      "description": "เนื้อหานี้ยังไม่มีฉบับภาษา{requested} จึงแสดงเป็นภาษา{displayed}"
     },
     "actions": {
       "viewOriginal": "ดูต้นฉบับ ({source})"

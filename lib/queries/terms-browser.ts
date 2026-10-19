@@ -68,9 +68,9 @@ export async function getScheduledTermsPreview(
   }
 }
 
-export async function listArchivedTerms() {
+export async function listArchivedTerms(requestedLocale?: string | null) {
   try {
-    const client = createPublicTermsClient();
+    const client = requestedLocale ? createPublicTermsClientWithLocale(requestedLocale) : createPublicTermsClient();
     const response = await client.list({ limit: 100, offset: 0 });
 
     return (response.items ?? []).map((v) => ({

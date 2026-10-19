@@ -23,7 +23,7 @@ import { IconButton } from '@/components/core/IconButton';
 import { Tooltip } from '@/components/core/Tooltip';
 import { PageLoader } from '@/features/site/PageLoader';
 import { LegalDocumentMetadata } from '@/features/policy/LegalDocumentMetadata';
-import { LegalTranslationNotice } from '@/features/policy/LegalTranslationNotice';
+import { ContentLocaleNotice } from '@/features/translation/ContentLocaleNotice';
 import { PrintButton } from '@/features/print/PrintButton';
 import { LegalDocumentLayout } from '@/features/policy/LegalDocumentLayout';
 import { ContentLanguageMenu } from '@/features/translation/ContentLanguageMenu';
@@ -100,7 +100,8 @@ export function PrivacyHistoryDetailClient({
           }
           header={
             <DsLayoutStack gap="lg">
-              <LegalTranslationNotice
+              <ContentLocaleNotice
+                announceTranslation
                 pathname={`/privacy/history/${id}`}
                 query={query}
                 localizationInfo={archived.localizationInfo}

@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "7f0979404b131b81e217c9c22c071af695ff932c786ac3b8bef308c4855b06cf",
+  "manifestHash": "a511452d44484dd488fbc649ef2be8edd630d6e3120e583a3437e31fa2a5b22d",
   "counts": {
-    "sourceFiles": 3816,
+    "sourceFiles": 3817,
     "productionSourceFiles": 2303,
     "componentFiles": 909,
     "coreFamilies": 57,
     "featureDomains": 54,
     "storyFiles": 257,
-    "storyVariants": 1470,
+    "storyVariants": 1471,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -2418,7 +2418,6 @@
     "features/policy/LegalRichTextContent.tsx",
     "features/policy/LegalShareDocumentView.test.tsx",
     "features/policy/LegalShareDocumentView.tsx",
-    "features/policy/LegalTranslationNotice.tsx",
     "features/policy/PolicyEditor/PolicyEditor.tsx",
     "features/policy/PolicyVersionCreationPage.test.tsx",
     "features/policy/PolicyVersionCreationPage.tsx",
@@ -2650,6 +2649,8 @@
     "features/translation/ActiveEditLocaleContentPreviewView.tsx",
     "features/translation/ContentLanguageMenu.test.tsx",
     "features/translation/ContentLanguageMenu.tsx",
+    "features/translation/ContentLocaleNotice.test.tsx",
+    "features/translation/ContentLocaleNotice.tsx",
     "features/translation/EditorActiveLocaleControl.tsx",
     "features/translation/EditorActiveLocaleMenu.tsx",
     "features/translation/EmailEntityTranslationsPanel.tsx",
@@ -3943,9 +3944,9 @@
         "features/page/blocks/author-list/Editor.tsx",
         "features/policy/LegalPolicyEditor.tsx",
         "features/policy/LegalShareDocumentView.tsx",
-        "features/policy/LegalTranslationNotice.tsx",
         "features/post/Comment/CommentSection.tsx",
         "features/post/PostSpotlight/PostSpotlight.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/version-history/ui/VersionHistoryDrawerView.tsx",
         "lib/providers/ClientMessagesProvider.tsx"
       ],
@@ -4622,7 +4623,6 @@
         "features/place/PlaceEditor.tsx",
         "features/policy/LegalPolicyEditor.tsx",
         "features/policy/LegalPolicyListClient.tsx",
-        "features/policy/LegalTranslationNotice.tsx",
         "features/post/Comment/CommentForm.tsx",
         "features/post/Comment/CommentItem.tsx",
         "features/post/Comment/CommentSection.tsx",
@@ -4642,6 +4642,7 @@
         "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
         "features/social-links/ui/SocialLinksEditorView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/TranslationLocaleControl.tsx",
         "features/translation/TranslationPanelSectionCard.tsx",
         "features/translation/admin/TranslationJobsPage.tsx",
@@ -13416,7 +13417,6 @@
         "features/policy/LegalPolicyEditor.tsx",
         "features/policy/LegalPolicyHistoryClient.tsx",
         "features/policy/LegalShareDocumentView.tsx",
-        "features/policy/LegalTranslationNotice.tsx",
         "features/post/Comment/CommentForm.tsx",
         "features/post/Comment/CommentItem.tsx",
         "features/post/Comment/CommentSection.tsx",
@@ -13462,6 +13462,7 @@
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/social-links/ui/SocialLinksEditorView.tsx",
         "features/translation/ActiveEditLocaleContentPreviewView.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
         "features/translation/PageSectionLocalePropFields.tsx",
         "features/translation/TranslationLocaleRow.tsx",
@@ -19711,7 +19712,6 @@
         "features/policy/LegalPolicyHistoryClient.tsx",
         "features/policy/LegalPolicyListClient.tsx",
         "features/policy/LegalShareDocumentView.tsx",
-        "features/policy/LegalTranslationNotice.tsx",
         "features/post/Comment/CommentForm.tsx",
         "features/post/Comment/CommentItem.tsx",
         "features/post/Comment/CommentSection.tsx",
@@ -19753,6 +19753,7 @@
         "features/social-links/ui/SocialLinksEditorView.tsx",
         "features/translation/ActiveEditLocaleContentPreview.tsx",
         "features/translation/ActiveEditLocaleContentPreviewView.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
         "features/translation/TranslationLocaleRow.tsx",
         "features/translation/admin/TranslationJobsPage.tsx",
@@ -33749,6 +33750,11 @@
               "type": "ReactNode"
             },
             {
+              "name": "notice",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
               "name": "children",
               "optional": false,
               "type": "ReactNode"
@@ -33946,6 +33952,11 @@
             },
             {
               "name": "controls",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
+              "name": "notice",
               "optional": true,
               "type": "ReactNode"
             },
@@ -54280,6 +54291,7 @@
         "ContentChrome",
         "ContentLanguageMenu",
         "ContentLayoutView",
+        "ContentLocaleNotice",
         "GeneratedPageRenderer",
         "TableOfContents"
       ]
@@ -62124,6 +62136,7 @@
         "AuthoringExtension",
         "Button",
         "ConfirmationDialog",
+        "ContentLocaleNotice",
         "ContentModal",
         "DateTimePicker",
         "DialogActions",
@@ -62147,7 +62160,6 @@
         "LegalOgImagePanel",
         "LegalPolicyEditorView",
         "LegalRichTextContent",
-        "LegalTranslationNotice",
         "Link",
         "PolicyEditor",
         "ScrollArea",
@@ -62289,7 +62301,7 @@
             {
               "name": "listArchived",
               "optional": false,
-              "type": "() => Promise<LegalPolicyHistoryItem[]>"
+              "type": "(requestedLocale?: string) => Promise<LegalPolicyHistoryItem[]>"
             }
           ]
         }
@@ -62617,58 +62629,16 @@
       "stories": [],
       "composedJsx": [
         "Alert",
+        "ContentLocaleNotice",
         "DsHeading",
         "DsLayoutInline",
         "DsLayoutStack",
         "IconCalendar",
         "LegalDocumentLayout",
         "LegalDocumentMetadata",
-        "LegalTranslationNotice",
         "PrintButton",
         "div"
       ]
-    },
-    {
-      "file": "features/policy/LegalTranslationNotice.tsx",
-      "owner": "Feature/policy",
-      "exports": [
-        {
-          "name": "LegalTranslationNotice",
-          "kind": "function"
-        }
-      ],
-      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [
-        {
-          "name": "LegalLocalizationInfoLike",
-          "extends": [],
-          "properties": [
-            {
-              "name": "displayedLocale",
-              "optional": true,
-              "type": "string | null"
-            },
-            {
-              "name": "sourceLocale",
-              "optional": true,
-              "type": "string | null"
-            }
-          ]
-        }
-      ],
-      "typeAliasEvidence": [],
-      "productionConsumers": [
-        "app/(general)/privacy/PrivacyPageClient.tsx",
-        "app/(general)/privacy/history/[id]/PrivacyHistoryDetailClient.tsx",
-        "app/(general)/terms/TermsPageClient.tsx",
-        "app/(general)/terms/history/[id]/TermsHistoryDetailClient.tsx",
-        "features/policy/LegalPolicyEditor.tsx",
-        "features/policy/LegalShareDocumentView.tsx"
-      ],
-      "catalogAdapters": [],
-      "tests": [],
-      "stories": [],
-      "composedJsx": ["Alert", "Button", "DsLayoutInline", "DsText", "IconLanguage"]
     },
     {
       "file": "features/policy/PolicyEditor/PolicyEditor.tsx",
@@ -70694,6 +70664,80 @@
       ]
     },
     {
+      "file": "features/translation/ContentLocaleNotice.tsx",
+      "owner": "Feature/translation",
+      "exports": [
+        {
+          "name": "ContentLocaleNotice",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "LocalizationInfoLike",
+          "extends": [],
+          "properties": [
+            {
+              "name": "requestedLocale",
+              "optional": true,
+              "type": "string | null"
+            },
+            {
+              "name": "displayedLocale",
+              "optional": true,
+              "type": "string | null"
+            },
+            {
+              "name": "sourceLocale",
+              "optional": true,
+              "type": "string | null"
+            }
+          ]
+        },
+        {
+          "name": "ContentLocaleNoticeProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "pathname",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "query",
+              "optional": true,
+              "type": "Record<string, string | string[] | undefined>"
+            },
+            {
+              "name": "localizationInfo",
+              "optional": true,
+              "type": "LocalizationInfoLike | null"
+            },
+            {
+              "name": "announceTranslation",
+              "optional": true,
+              "type": "boolean"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": [
+        "app/(general)/privacy/PrivacyPageClient.tsx",
+        "app/(general)/privacy/history/[id]/PrivacyHistoryDetailClient.tsx",
+        "app/(general)/terms/TermsPageClient.tsx",
+        "app/(general)/terms/history/[id]/TermsHistoryDetailClient.tsx",
+        "features/page/PageView/PageContentView.tsx",
+        "features/policy/LegalPolicyEditor.tsx",
+        "features/policy/LegalShareDocumentView.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": ["features/translation/ContentLocaleNotice.test.tsx"],
+      "stories": [],
+      "composedJsx": ["Alert", "Button", "IconLanguage", "LayoutInline", "Text"]
+    },
+    {
       "file": "features/translation/EditorActiveLocaleControl.tsx",
       "owner": "Feature/translation",
       "exports": [
@@ -77330,7 +77374,6 @@
         "features/policy/LegalPolicyListClient.tsx",
         "features/policy/LegalRichTextContent.tsx",
         "features/policy/LegalShareDocumentView.tsx",
-        "features/policy/LegalTranslationNotice.tsx",
         "features/policy/PolicyEditor/PolicyEditor.tsx",
         "features/policy/PolicyVersionCreationPage.tsx",
         "features/policy/PrivacyEditor.tsx",
@@ -77350,7 +77393,6 @@
         "features/policy/LegalPolicyListClient.tsx",
         "features/policy/LegalRichTextContent.tsx",
         "features/policy/LegalShareDocumentView.tsx",
-        "features/policy/LegalTranslationNotice.tsx",
         "features/policy/PolicyEditor/PolicyEditor.tsx",
         "features/policy/PolicyVersionCreationPage.tsx",
         "features/policy/PrivacyEditor.tsx",
@@ -77798,6 +77840,7 @@
         "features/translation/ActiveEditLocaleContentPreview.tsx",
         "features/translation/ActiveEditLocaleContentPreviewView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EmailEntityTranslationsPanel.tsx",
@@ -77843,6 +77886,7 @@
         "features/translation/ActiveEditLocaleContentPreview.tsx",
         "features/translation/ActiveEditLocaleContentPreviewView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
+        "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EditorActiveLocaleControl.tsx",
         "features/translation/EditorActiveLocaleMenu.tsx",
         "features/translation/EmailEntityTranslationsPanel.tsx",
@@ -77863,6 +77907,7 @@
       "tests": [
         "features/translation/ActiveEditLocaleContentPreview.test.tsx",
         "features/translation/ContentLanguageMenu.test.tsx",
+        "features/translation/ContentLocaleNotice.test.tsx",
         "features/translation/EntityTranslationsPanel.test.tsx",
         "features/translation/LocalizedCollaborativeRichTextEditor.runtime.test.tsx",
         "features/translation/LocalizedCollaborativeRichTextEditor.test.tsx",
@@ -87874,6 +87919,11 @@
           "name": "PageHeadingHierarchy",
           "args": "{ domain: 'page', state: 'heading-hierarchy' }",
           "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-heading-hierarchy"
+        },
+        {
+          "name": "PageUnavailableLanguage",
+          "args": "{ domain: 'page', state: 'unavailable-language' }",
+          "preview": "http://localhost:6010/?path=/story/pages-public-documents--page-unavailable-language"
         },
         {
           "name": "PageEmpty",
