@@ -79,11 +79,6 @@ const meta: Meta<typeof TableOfContentsView> = {
 export default meta;
 type Story = StoryObj<typeof TableOfContentsView>;
 
-/** The persistent column is the wide-screen (lg, 75em) presentation; the rail is used below it. */
-function isWide() {
-  return window.innerWidth >= 1200;
-}
-
 function outlineParts(canvasElement: HTMLElement) {
   const navigation = canvasElement.querySelector<HTMLElement>('[role="navigation"]')!;
   const link = (id: string) => navigation.querySelector<HTMLAnchorElement>(`a[href="#${id}"][data-toc-index]`)!;
@@ -142,52 +137,28 @@ export const FooterBoundary: Story = {
 };
 
 /**
- * Wide screens (lg and up) with a reserved layout: a persistent outline column beside the
- * reading column. The ink marker follows the current section; a long outline keeps it in view.
+ * Wide screens keep the same quiet rail in the reserved margin: the outline stays closed while
+ * reading, and the current mark and row follow the reading position.
  */
-export const ReadingColumn: Story = {
+export const WideRail: Story = {
   args: { items: longDocumentItems },
   tags: ['a11y-core-structure'],
   play: async ({ canvasElement }) => {
     await waitFor(() => expect(canvasElement.querySelector('[role="navigation"]')).not.toBeNull());
     const { navigation, link } = outlineParts(canvasElement);
-    if (!isWide()) {
-      // Below lg the same reserved layout presents the rail; ScrubNavigation covers it.
-      await expect(navigation).toHaveAttribute('data-presentation', 'rail');
-      return;
-    }
-    await expect(navigation).toHaveAttribute('data-presentation', 'column');
-    await expect(navigation.querySelector('[aria-expanded]')).toBeNull();
-    const labelId = navigation.getAttribute('aria-labelledby')!;
-    await expect(canvasElement.ownerDocument.getElementById(labelId)).toBeVisible();
-    const list = navigation.querySelector('ol')!;
-    await expect(list.scrollHeight).toBeGreaterThan(list.clientHeight);
+    const rail = navigation.querySelector<HTMLAnchorElement>('a[aria-expanded]')!;
+    await expect(rail).toHaveAttribute('aria-expanded', 'false');
+    await expect(navigation.querySelector('ol')).not.toBeVisible();
     await readHeading(canvasElement, 'long-section-42');
-    const current = link('long-section-42');
-    await waitFor(() => expect(current).toHaveAttribute('aria-current', 'location'));
+    await waitFor(() => expect(link('long-section-42')).toHaveAttribute('aria-current', 'location'));
     await expect(link('long-section-41')).toHaveAttribute('data-ancestor');
-    await waitFor(() => {
-      const listBounds = list.getBoundingClientRect();
-      const bounds = current.getBoundingClientRect();
-      expect(bounds.top).toBeGreaterThanOrEqual(listBounds.top - 1);
-      expect(bounds.bottom).toBeLessThanOrEqual(listBounds.bottom + 1);
-    });
-    const marker = list.querySelector<HTMLElement>('li[aria-hidden="true"]')!;
-    await waitFor(() =>
-      expect(Math.abs(marker.getBoundingClientRect().top - current.getBoundingClientRect().top)).toBeLessThan(2),
-    );
-    await readHeading(canvasElement, 'long-section-5');
-    await waitFor(() => expect(link('long-section-5')).toHaveAttribute('aria-current', 'location'));
-    await waitFor(() =>
-      expect(
-        Math.abs(marker.getBoundingClientRect().top - link('long-section-5').getBoundingClientRect().top),
-      ).toBeLessThan(2),
-    );
+    await expect(rail).toHaveAttribute('href', '#long-section-42');
+    await expect(rail.querySelectorAll('[data-current]')).toHaveLength(1);
     window.scrollTo({ top: 0, behavior: 'instant' });
   },
 };
 
-/** Medium widths (sm–lg): the quiet rail sits in the reserved margin and never covers text. */
+/** Medium widths: the quiet rail sits in the reserved margin and never covers text. */
 export const MediumRail: Story = {
   args: { items: longDocumentItems },
   globals: { viewport: { value: 'tablet', isRotated: false } },
@@ -238,11 +209,6 @@ export const ScrubNavigation: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const navigation = await canvas.findByRole('navigation');
-    if (isWide()) {
-      // Scrubbing belongs to the rail (below lg); wide screens show the persistent column.
-      await expect(navigation).toHaveAttribute('data-presentation', 'column');
-      return;
-    }
     const rail = navigation.querySelector<HTMLAnchorElement>('a[aria-expanded]')!;
     const marks = rail.firstElementChild as HTMLElement;
     const box = () => marks.getBoundingClientRect();
@@ -300,29 +266,9 @@ export const KeyboardNavigation: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const navigation = await canvas.findByRole('navigation');
-    // The outline precedes the document in reading and focus order in every presentation.
+    // The outline precedes the document in reading and focus order.
     const article = canvasElement.querySelector('article')!;
     await expect(navigation.compareDocumentPosition(article) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    if (isWide()) {
-      // Column: ordinary links in document order; Enter moves focus to the heading.
-      await expect(navigation).toHaveAttribute('data-presentation', 'column');
-      await expect(navigation.querySelector('[aria-expanded]')).toBeNull();
-      const firstName = canvasElement.querySelector('#overview')!.textContent!;
-      within(navigation).getByRole('link', { name: firstName }).focus();
-      await userEvent.keyboard('{Tab}{Enter}');
-      const selectedName = canvasElement.querySelector('#principles')!.textContent!;
-      const heading = canvas.getByRole('heading', { name: selectedName });
-      await expect(heading).toHaveFocus();
-      await expect(heading).toHaveAttribute('tabindex', '-1');
-      await waitFor(() =>
-        expect(within(navigation).getByRole('link', { name: selectedName })).toHaveAttribute(
-          'aria-current',
-          'location',
-        ),
-      );
-      window.scrollTo({ top: 0, behavior: 'instant' });
-      return;
-    }
     const rail = within(navigation).getByRole('link', { name: navigation.getAttribute('aria-label')! });
     rail.focus();
     await waitFor(() => expect(rail).toHaveAttribute('aria-expanded', 'true'));
@@ -350,24 +296,6 @@ export const MouseNavigation: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const navigation = await canvas.findByRole('navigation');
-    if (isWide()) {
-      // Column: fits the viewport before any scroll, scrolls on its own, and a click navigates.
-      await expect(navigation).toHaveAttribute('data-presentation', 'column');
-      const list = navigation.querySelector('ol')!;
-      await waitFor(() => expect(list.getBoundingClientRect().bottom).toBeLessThanOrEqual(window.innerHeight));
-      await expect(list.scrollHeight).toBeGreaterThan(list.clientHeight);
-      await expect(getComputedStyle(list).overscrollBehaviorY).toBe('contain');
-      const pageTop = window.scrollY;
-      list.scrollTop = list.scrollHeight;
-      await expect(window.scrollY).toBe(pageTop);
-      const last = within(navigation).getByRole('link', { name: 'Section 60' });
-      await expect(last.getBoundingClientRect().bottom).toBeLessThanOrEqual(list.getBoundingClientRect().bottom + 1);
-      await userEvent.click(last);
-      await waitFor(() => expect(canvas.getByRole('heading', { name: 'Section 60' })).toHaveFocus());
-      await waitFor(() => expect(last).toHaveAttribute('aria-current', 'location'), { timeout: 3000 });
-      window.scrollTo({ top: 0, behavior: 'instant' });
-      return;
-    }
     const rail = within(navigation).getByRole('link', { name: navigation.getAttribute('aria-label')! });
     await userEvent.hover(rail);
     await waitFor(() => expect(rail).toHaveAttribute('aria-expanded', 'true'));
@@ -384,11 +312,10 @@ export const MouseNavigation: Story = {
     await expect(getComputedStyle(list).overscrollBehaviorY).toBe('contain');
     await expect(getComputedStyle(list).overflowY).toBe('auto');
     await userEvent.click(last);
+    // Activation moves focus at once; the smooth scroll is not awaited. The current location after
+    // navigation, including a short last section at the page end, is covered by Core unit tests.
     await waitFor(() => expect(canvas.getByRole('heading', { name: 'Section 60' })).toHaveFocus());
     await expect(rail).toHaveAttribute('aria-expanded', 'true');
-    // Focus moves before smooth scrolling finishes; current location follows the
-    // actual reading position, including a short last section at the page edge.
-    await waitFor(() => expect(last).toHaveAttribute('aria-current', 'location'), { timeout: 3000 });
     await userEvent.unhover(last);
     await waitFor(() => expect(rail).toHaveAttribute('aria-expanded', 'false'));
     await userEvent.hover(rail);

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "4945db1c71b4af1040230650bf015a7e1640d2f601bd17e063ac821c72506368",
+  "manifestHash": "7f0979404b131b81e217c9c22c071af695ff932c786ac3b8bef308c4855b06cf",
   "counts": {
     "sourceFiles": 3816,
     "productionSourceFiles": 2303,
@@ -18183,11 +18183,6 @@
               "name": "children",
               "optional": false,
               "type": "ReactNode"
-            },
-            {
-              "name": "outlinePresentation",
-              "optional": true,
-              "type": "'responsive' | 'rail'"
             }
           ]
         },
@@ -18228,7 +18223,7 @@
       "catalogAdapters": [],
       "tests": ["components/core/TableOfContents/TableOfContents.test.tsx"],
       "stories": ["components/core/TableOfContents/TableOfContentsView.stories.tsx"],
-      "composedJsx": ["Text", "a", "bdi", "div", "li", "ol", "span"]
+      "composedJsx": ["a", "bdi", "div", "li", "ol", "span"]
     },
     {
       "file": "components/core/Tabs/Tabs.tsx",
@@ -19499,7 +19494,6 @@
         "components/core/Section/SectionHeader.tsx",
         "components/core/Section/StatCard.tsx",
         "components/core/SelectionSurface/SelectionSurface.tsx",
-        "components/core/TableOfContents/TableOfContentsView.tsx",
         "components/core/Typography/LocaleCode.tsx",
         "components/core/Typography/SupportingText.tsx",
         "features/account-email/AccountEmailOption.tsx",
@@ -52817,11 +52811,6 @@
               "name": "children",
               "optional": false,
               "type": "ReactNode"
-            },
-            {
-              "name": "outlinePresentation",
-              "optional": true,
-              "type": "'responsive' | 'rail'"
             }
           ]
         }
@@ -81476,9 +81465,9 @@
           "preview": "http://localhost:6010/?path=/story/core-navigation-tableofcontents--footer-boundary"
         },
         {
-          "name": "ReadingColumn",
+          "name": "WideRail",
           "args": "{ items: longDocumentItems }",
-          "preview": "http://localhost:6010/?path=/story/core-navigation-tableofcontents--reading-column"
+          "preview": "http://localhost:6010/?path=/story/core-navigation-tableofcontents--wide-rail"
         },
         {
           "name": "MediumRail",

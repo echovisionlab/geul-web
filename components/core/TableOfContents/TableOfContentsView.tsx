@@ -11,9 +11,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { useMediaQuery, useThrottledCallback, useWindowEvent } from '@mantine/hooks';
-import { breakpointQuery } from '../Layout/breakpoints';
-import { Text } from '../Typography';
+import { useThrottledCallback, useWindowEvent } from '@mantine/hooks';
 import {
   TOC_MAX_VISUAL_DEPTH,
   tocAncestors,
@@ -34,16 +32,8 @@ export interface TocItem {
 export interface TableOfContentsViewProps {
   items: TocItem[];
   title: string;
-  /**
-   * The document the outline navigates. Core reserves the outline's space beside it: a persistent
-   * column on wide screens and the quiet, scrubbable rail elsewhere (phones included).
-   */
+  /** The document the outline navigates. Core reserves the rail's space beside it at every width. */
   children: ReactNode;
-  /**
-   * `responsive` (default) shows the persistent column from `lg`. `rail` keeps the rail at every width,
-   * for a document that shares the page width with another column (an entity detail's media).
-   */
-  outlinePresentation?: 'responsive' | 'rail';
 }
 
 /** Three or fewer headings do not need navigation. */
@@ -64,26 +54,10 @@ function scrollToHeading(element: HTMLElement) {
   element.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' });
 }
 
-/** Scrolls only the outline (never the page) so `index` is fully visible. */
-function revealInList(list: HTMLElement | null, index: number, behavior: ScrollBehavior) {
-  const link = list?.querySelector<HTMLElement>(`[data-toc-index="${index}"]`);
-  if (!list || !link) {
-    return;
-  }
-  const listBox = list.getBoundingClientRect();
-  const linkBox = link.getBoundingClientRect();
-  const top = linkBox.top - listBox.top + list.scrollTop;
-  const bottom = top + linkBox.height;
-  if (top < list.scrollTop) {
-    list.scrollTo?.({ top, behavior });
-  } else if (bottom > list.scrollTop + list.clientHeight) {
-    list.scrollTo?.({ top: bottom - list.clientHeight, behavior });
-  }
-}
-
 /**
  * Scrolls only the outline so the scrubbed entry sits level with the pointer: the preview stays beside
- * the finger, above the hand, instead of collecting at the list's lower edge.
+ * the finger, above the hand, instead of collecting at the list's lower edge. Near the list's edges the
+ * entry stays whole inside the list's padding instead of following the pointer out of view.
  */
 function alignInList(list: HTMLElement | null, index: number, clientY: number) {
   const link = list?.querySelector<HTMLElement>(`[data-toc-index="${index}"]`);
@@ -92,9 +66,13 @@ function alignInList(list: HTMLElement | null, index: number, clientY: number) {
   }
   const listBox = list.getBoundingClientRect();
   const linkBox = link.getBoundingClientRect();
-  const linkCenter = linkBox.top - listBox.top + list.scrollTop + linkBox.height / 2;
-  const top = linkCenter - (clientY - listBox.top);
-  list.scrollTop = Math.min(Math.max(0, top), Math.max(0, list.scrollHeight - list.clientHeight));
+  // Measured from the list's padding edge, the origin of its scroll position.
+  const edge = listBox.top + list.clientTop;
+  const linkTop = linkBox.top - edge + list.scrollTop;
+  const level = linkTop + linkBox.height / 2 - (clientY - edge);
+  const padding = Number.parseFloat(getComputedStyle(list).paddingTop) || 0;
+  const whole = Math.min(Math.max(level, linkTop + linkBox.height + padding - list.clientHeight), linkTop - padding);
+  list.scrollTop = Math.min(Math.max(0, whole), Math.max(0, list.scrollHeight - list.clientHeight));
 }
 
 interface ScrubState {
@@ -107,19 +85,11 @@ interface ScrubState {
 }
 
 /**
- * Reserves an outline beside a document: a persistent column on wide screens and, elsewhere, a quiet
- * rail that reveals one bounded, nonmodal scrolling outline (hover, focus, press or scrub).
+ * Reserves a quiet rail beside a document at every width. The rail reveals one bounded, nonmodal
+ * scrolling outline on hover, focus, press or scrub.
  */
-export function TableOfContentsView({
-  items: sourceItems,
-  title,
-  children,
-  outlinePresentation = 'responsive',
-}: TableOfContentsViewProps) {
+export function TableOfContentsView({ items: sourceItems, title, children }: TableOfContentsViewProps) {
   const listId = useId();
-  const titleId = useId();
-  const wide = Boolean(useMediaQuery(breakpointQuery('lg', 'at-least')));
-  const presentation = wide && outlinePresentation === 'responsive' ? 'column' : 'rail';
   const wrapper = useRef<HTMLDivElement>(null);
   const rail = useRef<HTMLAnchorElement>(null);
   const marksRef = useRef<HTMLSpanElement>(null);
@@ -130,32 +100,40 @@ export function TableOfContentsView({
   const scrubIndexRef = useRef<number | null>(null);
   const scrubY = useRef(0);
   const suppressClick = useRef(false);
-  const markerPlaced = useRef(false);
   const [items, setItems] = useState<TocItem[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [hovered, setHovered] = useState(false);
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   const [scrubIndex, setScrubIndexState] = useState<number | null>(null);
-  const [layoutVersion, setLayoutVersion] = useState(0);
-  const [marker, setMarker] = useState<{ top: number; height: number } | null>(null);
-  const open = presentation === 'rail' && (hovered || keyboardOpen || scrubIndex !== null);
+  const open = hovered || keyboardOpen || scrubIndex !== null;
 
   const setScrubIndex = useCallback((index: number | null) => {
     scrubIndexRef.current = index;
     setScrubIndexState(index);
   }, []);
 
+  // A preview points into the outline it was started on, so it is dropped together with that outline:
+  // when the headings change and when the new ones replace them. A later effect would also drop a
+  // preview started on the new outline before the effect ran.
   useEffect(() => {
     setHovered(false);
     setKeyboardOpen(false);
     setActiveIndex(0);
+    setScrubIndex(null);
     if (!hasTableOfContents(sourceItems)) {
       setItems([]);
       return;
     }
     let timeout: number | undefined;
     const frame = window.requestAnimationFrame(() => {
-      timeout = window.setTimeout(() => startTransition(() => setItems(sourceItems)), 0);
+      timeout = window.setTimeout(
+        () =>
+          startTransition(() => {
+            setScrubIndex(null);
+            setItems(sourceItems);
+          }),
+        0,
+      );
     });
     return () => {
       window.cancelAnimationFrame(frame);
@@ -163,7 +141,7 @@ export function TableOfContentsView({
         window.clearTimeout(timeout);
       }
     };
-  }, [sourceItems]);
+  }, [sourceItems, setScrubIndex]);
 
   const updateActiveHeading = useCallback(() => {
     const headings = targets.current;
@@ -200,7 +178,6 @@ export function TableOfContentsView({
       .map((target) => ({ ...target, top: target.element.getBoundingClientRect().top }))
       .sort((left, right) => left.top - right.top || left.index - right.index);
     updateActiveHeading();
-    setLayoutVersion((version) => version + 1);
   }, [updateActiveHeading]);
   useWindowEvent('resize', refreshHeadingGeometry);
 
@@ -224,7 +201,7 @@ export function TableOfContentsView({
 
   // The sticky outline is as tall as the viewport below the site header. Until the document has
   // scrolled it to that line it starts lower (below a title or hero), so it also subtracts that
-  // distance: the column and the revealed list fit the screen, with their own scroll, from the start.
+  // distance: the revealed list fits the screen, with its own scroll, from the start.
   // Written as a style property per frame (no re-render); unchanged values are not written.
   const hasOutline = items.length > 0;
   useEffect(() => {
@@ -258,7 +235,7 @@ export function TableOfContentsView({
       window.removeEventListener('resize', schedule);
       observer?.disconnect();
     };
-  }, [hasOutline, presentation]);
+  }, [hasOutline]);
 
   // Match the inspected reference: reopening begins at the first title. Only the
   // outline scrolls; current-section updates never override an open list's position.
@@ -268,11 +245,6 @@ export function TableOfContentsView({
     }
   }, [open]);
 
-  // A preview points into the previous outline once the headings change.
-  useEffect(() => {
-    setScrubIndex(null);
-  }, [items, setScrubIndex]);
-
   // The outline opens in the same render as the first pointed-at heading, so it is aligned once
   // visible: the previewed row then sits level with the pointer.
   useLayoutEffect(() => {
@@ -280,32 +252,6 @@ export function TableOfContentsView({
       alignInList(list.current, scrubIndex, scrubY.current);
     }
   }, [open, scrubIndex]);
-
-  // Persistent column: one ink marker follows the current entry on the outline's line, and the
-  // current entry stays visible in a long outline unless the reader is browsing the column.
-  useLayoutEffect(() => {
-    if (presentation !== 'column' || !items.length) {
-      markerPlaced.current = false;
-      setMarker(null);
-      return;
-    }
-    const link = list.current?.querySelector<HTMLElement>(`[data-toc-index="${activeIndex}"]`);
-    if (!link || !list.current) {
-      return;
-    }
-    const listBox = list.current.getBoundingClientRect();
-    const linkBox = link.getBoundingClientRect();
-    setMarker({ top: linkBox.top - listBox.top + list.current.scrollTop, height: linkBox.height });
-    const browsing = pointerInside.current || list.current.contains(document.activeElement);
-    if (!browsing) {
-      revealInList(list.current, activeIndex, markerPlaced.current && !reducedMotion() ? 'smooth' : 'auto');
-    }
-  }, [activeIndex, items, presentation, layoutVersion]);
-  useEffect(() => {
-    if (marker) {
-      markerPlaced.current = true;
-    }
-  }, [marker]);
 
   const outline = useMemo(() => tocOutline(items.map((item) => item.level)), [items]);
   const ancestors = useMemo(() => new Set(tocAncestors(outline.parents, activeIndex)), [outline, activeIndex]);
@@ -352,7 +298,7 @@ export function TableOfContentsView({
       event.preventDefault();
       rail.current?.focus({ preventScroll: true });
       closeOutline();
-    } else if (presentation === 'rail' && (event.key === 'Tab' || event.key === 'ArrowDown')) {
+    } else if (event.key === 'Tab' || event.key === 'ArrowDown') {
       setKeyboardOpen(true);
     }
   }
@@ -508,10 +454,8 @@ export function TableOfContentsView({
     <div
       ref={wrapper}
       role="navigation"
-      aria-label={presentation === 'column' ? undefined : title}
-      aria-labelledby={presentation === 'column' ? titleId : undefined}
+      aria-label={title}
       className={classes.wrapper}
-      data-presentation={presentation}
       data-open={open || undefined}
       data-scrubbing={scrubIndex !== null || undefined}
       style={{ '--_toc-mark-count': marks.length } as React.CSSProperties}
@@ -524,6 +468,10 @@ export function TableOfContentsView({
       onPointerLeave={() => {
         pointerInside.current = false;
         setHovered(false);
+        // Leaving the outline ends a hover preview even when the rail did not report its own leave.
+        if (!scrub.current) {
+          setScrubIndex(null);
+        }
       }}
       onPointerDown={(event) => {
         if (event.pointerType !== 'touch') {
@@ -536,107 +484,82 @@ export function TableOfContentsView({
         }
       }}
     >
-      {presentation === 'column' ? (
-        <div className={classes.columnTitle}>
-          <Text id={titleId} size="xs" weight="medium" font="mono" tone="secondary">
-            {title}
-          </Text>
-        </div>
-      ) : (
-        <a
-          ref={rail}
-          className={classes.rail}
-          href={`#${items[activeIndex]?.id}`}
-          aria-label={title}
-          aria-expanded={open}
-          aria-controls={listId}
-          // A native link drag would cancel a mouse scrub (pointercancel).
-          draggable={false}
-          onFocus={() => {
-            if (!pointerInside.current && !scrub.current) {
-              setKeyboardOpen(true);
-            }
-          }}
-          onClick={(event) => {
-            if (suppressClick.current) {
-              suppressClick.current = false;
-              event.preventDefault();
-              return;
-            }
-            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-              return;
-            }
+      <a
+        ref={rail}
+        className={classes.rail}
+        href={`#${items[activeIndex]?.id}`}
+        aria-label={title}
+        aria-expanded={open}
+        aria-controls={listId}
+        // A native link drag would cancel a mouse scrub (pointercancel).
+        draggable={false}
+        onFocus={() => {
+          if (!pointerInside.current && !scrub.current) {
+            setKeyboardOpen(true);
+          }
+        }}
+        onClick={(event) => {
+          if (suppressClick.current) {
+            suppressClick.current = false;
             event.preventDefault();
-            if (event.detail === 0 || !pointerInside.current) {
-              setKeyboardOpen(true);
-              focusFirst();
-            } else if (scrubIndexRef.current !== null) {
-              navigateTo(scrubIndexRef.current, false);
-            }
-          }}
-          onKeyDown={(event) => {
-            handleNavigationKey(event);
-            if (event.key === 'ArrowDown' && open) {
-              event.preventDefault();
-              focusFirst();
-            }
-          }}
-          onPointerDown={startScrub}
-          onPointerMove={moveScrub}
-          onPointerUp={endScrub}
-          onPointerCancel={cancelScrub}
-          onPointerLeave={(event) => {
-            if (!scrub.current && event.pointerType === 'mouse') {
-              setScrubIndex(null);
-            }
-          }}
-          onContextMenu={(event) => {
-            if (scrub.current) {
-              event.preventDefault();
-            }
-          }}
-        >
-          <span ref={marksRef} className={classes.marks} aria-hidden="true">
-            {marks.map((index, position) => (
-              <span
-                key={index}
-                className={classes.mark}
-                data-depth={Math.min(TOC_MAX_VISUAL_DEPTH, outline.depths[index])}
-                data-current={position === currentMark || undefined}
-                data-preview={position === previewMark || undefined}
-              />
-            ))}
-          </span>
-        </a>
-      )}
-      <ol
-        id={presentation === 'rail' ? listId : undefined}
-        ref={list}
-        className={presentation === 'column' ? classes.column : classes.outline}
-        hidden={presentation === 'rail' && !open}
+            return;
+          }
+          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+            return;
+          }
+          event.preventDefault();
+          if (event.detail === 0 || !pointerInside.current) {
+            setKeyboardOpen(true);
+            focusFirst();
+          } else if (scrubIndexRef.current !== null) {
+            navigateTo(scrubIndexRef.current, false);
+          }
+        }}
+        onKeyDown={(event) => {
+          handleNavigationKey(event);
+          if (event.key === 'ArrowDown' && open) {
+            event.preventDefault();
+            focusFirst();
+          }
+        }}
+        onPointerDown={startScrub}
+        onPointerMove={moveScrub}
+        onPointerUp={endScrub}
+        onPointerCancel={cancelScrub}
+        onPointerLeave={(event) => {
+          if (!scrub.current && event.pointerType === 'mouse') {
+            setScrubIndex(null);
+          }
+        }}
+        onContextMenu={(event) => {
+          if (scrub.current) {
+            event.preventDefault();
+          }
+        }}
       >
+        <span ref={marksRef} className={classes.marks} aria-hidden="true">
+          {marks.map((index, position) => (
+            <span
+              key={index}
+              className={classes.mark}
+              data-depth={Math.min(TOC_MAX_VISUAL_DEPTH, outline.depths[index])}
+              data-current={position === currentMark || undefined}
+              data-preview={position === previewMark || undefined}
+            />
+          ))}
+        </span>
+      </a>
+      <ol id={listId} ref={list} className={classes.outline} hidden={!open}>
         {renderNodes(outline.roots)}
-        {presentation === 'column' && marker ? (
-          <li
-            aria-hidden="true"
-            className={classes.columnMarker}
-            data-placed={markerPlaced.current || undefined}
-            style={{ transform: `translateY(${marker.top}px)`, height: marker.height }}
-          />
-        ) : null}
       </ol>
     </div>
   ) : null;
 
   const outlined = hasTableOfContents(sourceItems);
-  // The outline precedes the document in reading and focus order (as the column is seen beside the
+  // The outline precedes the document in reading and focus order (the rail sits beside the
   // document's first lines); the track is out of flow, so the visual layout does not depend on it.
   return (
-    <div
-      className={classes.layout}
-      data-outline={outlined || undefined}
-      data-outline-presentation={outlinePresentation === 'rail' ? 'rail' : undefined}
-    >
+    <div className={classes.layout} data-outline={outlined || undefined}>
       {outlined ? <div className={classes.track}>{navigation}</div> : null}
       {children}
     </div>
