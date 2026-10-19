@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.2](https://github.com/echovisionlab/geul-web/compare/v0.17.1...v0.17.2) (2026-10-19)
+
+
+### Bug Fixes
+
+* legal titles in the content language and a cleaner outline rail ([#153](https://github.com/echovisionlab/geul-web/issues/153)) ([85088dc](https://github.com/echovisionlab/geul-web/commit/85088dcf4bdcb5272df20bce78cb94fbcb38794e))
+
 ## [0.17.1](https://github.com/echovisionlab/geul-web/compare/v0.17.0...v0.17.1) (2026-10-19)
 
 
