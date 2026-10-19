@@ -60,6 +60,8 @@ export function CookieConsentSettings({
   persistAction = persistCurrentUserCookieConsentAction,
 }: CookieConsentSettingsProps) {
   const t = useTranslations('settings.cookieConsent');
+  const tNotifications = useTranslations('common.notifications');
+  const tMessages = useTranslations('common.messages');
   const tSettingsPage = useTranslations('settings.page');
   const tCookieConsentCommon = useTranslations('cookieConsentCommon');
   const tCommon = useTranslations('common.actions');
@@ -93,13 +95,13 @@ export function CookieConsentSettings({
 
   const updatedAtLabel = useMemo(() => {
     if (!lastUpdatedAt) {
-      return t('noRecord');
+      return tMessages('noUpdateRecorded');
     }
     const date = new Date(lastUpdatedAt);
     return Number.isNaN(date.getTime())
-      ? t('noRecord')
+      ? tMessages('noUpdateRecorded')
       : dateTime.dateTime(date, { dateStyle: 'medium', timeStyle: 'short' });
-  }, [dateTime, lastUpdatedAt, t]);
+  }, [dateTime, lastUpdatedAt, tMessages]);
   const controlsDisabled = !isHydrated || isPending;
 
   const saveConsent = (analytics: boolean) => {
@@ -130,8 +132,8 @@ export function CookieConsentSettings({
       }
 
       notifications.show({
-        title: tSettingsPage('cookiePreferencesTitle'),
-        message: result.persisted ? t('savedAccount') : t('savedBrowser'),
+        // Without a session the choice stays in this browser and is not synced to the account.
+        message: result.persisted ? tNotifications('saveSuccess') : t('savedBrowser'),
         tone: 'positive',
       });
     });

@@ -450,8 +450,8 @@
       "deleted": "Eliminado",
       "pending": "Pendiente",
       "verified": "Verificado",
-      "unsubscribed": "Cancelar suscripción",
-      "subscribed": "suscrito",
+      "unsubscribed": "Suscripción cancelada",
+      "subscribed": "Suscrito",
       "onboardingPending": "Incorporación pendiente"
     },
     "motion": {
@@ -1610,17 +1610,12 @@
       "cookiePreferencesTitle": "Preferencias de cookies"
     },
     "languagePreference": {
-      "intro": "El idioma de su cuenta lo sigue a cualquier lugar donde inicie sesión. Las cuentas nuevas se generan a partir del idioma de su navegador la primera vez que se autentica.",
       "label": "Idioma preferido",
       "save": "Guardar idioma",
-      "successTitle": "Idioma actualizado",
-      "successMessage": "Esta preferencia ahora se guarda en su cuenta para cada dispositivo en el que haya iniciado sesión.",
       "errorTitle": "error",
-      "errorMessage": "No se pudo actualizar la preferencia de idioma",
-      "helper": "Esta configuración se guarda en su cuenta y tiene prioridad sobre el idioma del navegador que utilizó la primera vez que inició sesión."
+      "errorMessage": "No se pudo actualizar la preferencia de idioma"
     },
     "newsletter": {
-      "subscribedTitle": "suscrito",
       "subscribedAlert": "Está suscrito a nuestro boletín informativo y a los correos electrónicos de la campaña.",
       "unsubscribedAlert": "No estás suscrito a nuestro boletín.",
       "subscribe": "Suscríbete al boletín",
@@ -1629,12 +1624,10 @@
     },
     "cookieConsent": {
       "syncError": "No se pudo sincronizar el consentimiento con la configuración de la cuenta.",
-      "savedAccount": "Preferencias guardadas y sincronizadas con su cuenta.",
-      "savedBrowser": "Preferencias guardadas para este navegador.",
       "versionWarning": "Actualizamos la política de cookies a v{version}. Su elección anterior se carga para su comodidad. Guarde nuevamente para confirmar.",
       "essentialIntro": "Las cookies esenciales siempre están activas para la autenticación y el funcionamiento principal del sitio.",
       "lastSynced": "Última sincronización: {value}",
-      "noRecord": "Aún no hay registro de consentimiento del lado del servidor"
+      "savedBrowser": "Guardado en este navegador"
     }
   },
   "cookieConsentCommon": {
@@ -1655,10 +1648,6 @@
     "submitFailed": "No se pudo finalizar la incorporación. Intentar otra vez."
   },
   "profile": {
-    "notifications": {
-      "successTitle": "Éxito",
-      "updated": "Perfil actualizado exitosamente"
-    },
     "fields": {
       "uid": "UID",
       "bio": "Biografía"
@@ -1678,14 +1667,11 @@
       "disconnectionFailed": "Error de desconexión",
       "disconnected": "Desconectado",
       "cannotUnlink": "No se puede desvincular",
-      "success": "Éxito",
-      "sessionRevoked": "Sesión revocada exitosamente",
+      "sessionRevoked": "Sesión revocada",
       "sessionsRevoked": "Todas las demás sesiones han sido cerradas",
       "failedToRevokeSession": "No se pudo revocar la sesión",
       "failedToRevokeSessions": "No se pudieron revocar sesiones",
       "failedToRequestDeletion": "No se pudo solicitar la eliminación de la cuenta",
-      "connectedMessage": "{provider} cuenta conectada correctamente.",
-      "disconnectedMessage": "{provider} ha sido desconectado.",
       "failedToUpdateMainEmail": "No se pudo actualizar el correo electrónico principal",
       "failedToLoad": "No se pudo cargar la configuración de seguridad"
     },
@@ -1699,16 +1685,14 @@
       "disconnectFailed": "No se pudo desconectar {provider}."
     },
     "connectedAccounts": {
-      "title": "Inicios de sesión sociales conectados",
-      "description": "Administre los inicios de sesión sociales conectados a esta cuenta."
+      "title": "Inicios de sesión sociales conectados"
     },
     "mcpIntegration": {
-      "description": "Conecta un cliente de IA compatible a este endpoint. Se abrirá el navegador para iniciar sesión y dar tu consentimiento.",
       "consentDescription": "Este cliente puede leer y editar contenido y administrar archivos dentro de los permisos actuales de tu cuenta. Puede crear, actualizar o eliminar contenido y modificar los archivos adjuntos existentes. La conexión no otorga permisos adicionales a la cuenta.",
       "consentOfflineAccess": "Esta conexión puede continuar después de que termine tu sesión actual del navegador, hasta que la revoques.",
       "consentRevoke": "Puedes revocar esta conexión en {settings} → Remote MCP.",
       "connectionsTitle": "Clientes MCP conectados",
-      "connectionsDescription": "Estas autorizaciones de OAuth son independientes de las sesiones del navegador. Revocar una desconecta ese cliente MCP sin cerrar tu sesión.",
+      "connectionsDescription": "Revocar el acceso desconecta ese cliente MCP sin cerrar tu sesión.",
       "connectionsEmpty": "No hay clientes MCP conectados.",
       "connectedAt": "Conectado {date}",
       "revoke": "Revoke",
@@ -1720,7 +1704,7 @@
     },
     "personalAccessTokens": {
       "title": "Token de acceso personal",
-      "description": "Usa este único token de acceso personal con las API que ofrece {siteName}. Cada solicitud usa los permisos actuales de tu cuenta.",
+      "description": "Las solicitudes a la API usan los permisos actuales de tu cuenta.",
       "empty": "No se ha creado ningún token de acceso personal.",
       "regenerate": "Regenerar",
       "regenerateTitle": "Regenerar token de acceso personal",
@@ -1737,7 +1721,6 @@
     },
     "passkeys": {
       "title": "Claves de acceso",
-      "description": "Utilice este dispositivo o una clave de seguridad para iniciar sesión sin contraseña. Puede conservar varias claves de acceso.",
       "loading": "Cargando claves de acceso...",
       "empty": "No hay claves registradas.",
       "add": "Agregar clave de acceso",
@@ -1752,7 +1735,6 @@
     },
     "sessions": {
       "title": "Sesiones activas",
-      "description": "Revise dónde inició sesión esta cuenta y revoque las sesiones en las que no confíe.",
       "thisDevice": "este dispositivo",
       "logoutOthers": "Cerrar sesión en todas las demás sesiones",
       "activeNow": "Activo ahora",
@@ -5369,8 +5351,8 @@
   },
   "localBackups": {
     "title": "Copias de seguridad locales",
-    "description": "Cambios sin guardar de pestañas cerradas en este dispositivo. Abre el editor para recuperarlos. Las copias caducan a los 30 días y se eliminan al cerrar sesión.",
-    "empty": "No hay copias de seguridad locales que recuperar. Los cambios de las pestañas abiertas no se muestran aquí.",
+    "description": "Ediciones sin guardar de pestañas cerradas en este dispositivo; se conservan 30 días y se borran al cerrar sesión.",
+    "empty": "No hay copias de seguridad de pestañas cerradas para recuperar.",
     "unavailable": "Las copias de seguridad locales requieren almacenamiento del navegador y Web Locks en este dispositivo.",
     "loading": "Buscando copias de seguridad locales…",
     "error": "No se pudo completar esta acción. Actualiza la lista e inténtalo de nuevo.",

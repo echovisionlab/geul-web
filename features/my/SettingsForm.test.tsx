@@ -134,8 +134,7 @@ describe('SettingsForm controller', () => {
     expect(getViewProps().subscribed).toBe(true);
     expect(getViewProps().error).toBeNull();
     expect(mocks.notificationsShow).toHaveBeenLastCalledWith({
-      title: 'settings.newsletter.subscribedTitle',
-      message: 'Subscription enabled.',
+      message: 'common.statuses.subscribed',
       tone: 'positive',
       icon: expect.any(Object),
     });
@@ -145,8 +144,7 @@ describe('SettingsForm controller', () => {
     });
     expect(getViewProps().subscribed).toBe(false);
     expect(mocks.notificationsShow).toHaveBeenLastCalledWith({
-      title: 'common.statuses.unsubscribed',
-      message: 'Subscription disabled.',
+      message: 'common.statuses.unsubscribed',
       tone: 'positive',
     });
   });

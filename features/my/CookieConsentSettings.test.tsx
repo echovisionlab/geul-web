@@ -75,6 +75,10 @@ describe('CookieConsentSettings single optional choice', () => {
     await act(async () => button('Save preferences').click());
     expect(persist).toHaveBeenCalledWith({ analytics: true, source: 'my_settings', version: COOKIE_CONSENT_VERSION });
     expect(consent()).toMatchObject({ essential: true, analytics: true });
+    // Without an account session the choice is not synced, and the confirmation says so.
+    expect(notifications.show).toHaveBeenCalledWith(
+      expect.objectContaining({ tone: 'positive', message: 'Saved in this browser' }),
+    );
   });
 
   it('rejects a selected draft while retaining browser persistence and the account error notice', async () => {

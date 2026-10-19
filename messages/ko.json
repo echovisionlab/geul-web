@@ -1610,17 +1610,12 @@
       "cookiePreferencesTitle": "쿠키 설정"
     },
     "languagePreference": {
-      "intro": "계정 언어는 로그인하는 모든 기기에서 동일하게 적용됩니다. 새 계정은 처음 로그인할 때 브라우저 언어를 기준으로 초기값이 설정됩니다.",
       "label": "선호 언어",
       "save": "언어 저장",
-      "successTitle": "언어가 업데이트되었습니다",
-      "successMessage": "이 설정은 계정에 저장되어 로그인한 모든 기기에서 적용됩니다.",
       "errorTitle": "오류",
-      "errorMessage": "언어 설정을 업데이트하지 못했습니다",
-      "helper": "이 설정은 계정에 저장되며, 처음 로그인할 때 사용된 브라우저 언어보다 우선합니다."
+      "errorMessage": "언어 설정을 업데이트하지 못했습니다"
     },
     "newsletter": {
-      "subscribedTitle": "구독 중",
       "subscribedAlert": "뉴스레터와 캠페인 이메일을 구독 중입니다.",
       "unsubscribedAlert": "뉴스레터를 구독하고 있지 않습니다.",
       "subscribe": "뉴스레터 구독",
@@ -1629,12 +1624,10 @@
     },
     "cookieConsent": {
       "syncError": "계정 설정에 동기화하지 못했습니다.",
-      "savedAccount": "설정이 저장되었고 계정에도 동기화되었습니다.",
-      "savedBrowser": "이 브라우저에 설정이 저장되었습니다.",
       "versionWarning": "쿠키 정책이 v{version}(으)로 업데이트되었습니다. 이전 선택을 편의를 위해 불러왔습니다. 다시 저장하여 확인해 주세요.",
       "essentialIntro": "인증과 핵심 사이트 동작을 위해 필수 쿠키는 항상 활성화됩니다.",
       "lastSynced": "마지막 동기화: {value}",
-      "noRecord": "서버에 저장된 동의 기록이 아직 없습니다"
+      "savedBrowser": "이 브라우저에 저장했습니다"
     }
   },
   "cookieConsentCommon": {
@@ -1655,10 +1648,6 @@
     "submitFailed": "온보딩을 완료하지 못했습니다. 다시 시도하세요."
   },
   "profile": {
-    "notifications": {
-      "successTitle": "성공",
-      "updated": "프로필이 성공적으로 업데이트되었습니다"
-    },
     "fields": {
       "uid": "UID",
       "bio": "소개"
@@ -1678,14 +1667,11 @@
       "disconnectionFailed": "연결 해제 실패",
       "disconnected": "연결 해제됨",
       "cannotUnlink": "연결 해제 불가",
-      "success": "성공",
-      "sessionRevoked": "세션이 성공적으로 해제되었습니다",
+      "sessionRevoked": "세션이 해제되었습니다",
       "sessionsRevoked": "다른 모든 세션이 로그아웃되었습니다",
       "failedToRevokeSession": "세션 해제에 실패했습니다",
       "failedToRevokeSessions": "세션 해제에 실패했습니다",
       "failedToRequestDeletion": "계정 삭제 요청에 실패했습니다",
-      "connectedMessage": "{provider} 계정이 성공적으로 연결되었습니다.",
-      "disconnectedMessage": "{provider} 연결이 해제되었습니다.",
       "failedToUpdateMainEmail": "대표 이메일을 변경하지 못했습니다",
       "failedToLoad": "보안 설정을 불러오지 못했습니다"
     },
@@ -1699,16 +1685,14 @@
       "disconnectFailed": "{provider} 연결 해제에 실패했습니다."
     },
     "connectedAccounts": {
-      "title": "연결된 소셜 로그인",
-      "description": "이 계정에 연결된 소셜 로그인 수단을 관리합니다."
+      "title": "연결된 소셜 로그인"
     },
     "mcpIntegration": {
-      "description": "호환되는 AI 클라이언트에 이 엔드포인트를 연결하세요. 로그인과 동의를 위해 브라우저가 열립니다.",
       "consentDescription": "이 클라이언트는 현재 계정 권한 범위에서 콘텐츠를 읽고 수정하며 파일을 관리할 수 있습니다. 콘텐츠를 생성·수정·삭제하거나 기존 첨부 파일을 변경할 수 있습니다. 연결해도 계정에 추가 권한이 부여되지는 않습니다.",
       "consentOfflineAccess": "이 연결은 현재 브라우저 세션이 끝난 뒤에도 취소할 때까지 유지될 수 있습니다.",
       "consentRevoke": "{settings} → Remote MCP에서 이 연결을 취소할 수 있습니다.",
       "connectionsTitle": "연결된 MCP 클라이언트",
-      "connectionsDescription": "OAuth 권한은 브라우저 세션과 별개입니다. 권한을 해제하면 로그아웃하지 않고 해당 MCP 클라이언트만 연결이 끊어집니다.",
+      "connectionsDescription": "권한을 해제하면 로그아웃하지 않고 해당 MCP 클라이언트만 연결이 끊어집니다.",
       "connectionsEmpty": "연결된 MCP 클라이언트가 없습니다.",
       "connectedAt": "{date}에 연결됨",
       "revoke": "권한 해제",
@@ -1720,7 +1704,7 @@
     },
     "personalAccessTokens": {
       "title": "개인 액세스 토큰",
-      "description": "{siteName}에서 제공하는 여러 API 서비스에서 이 단일 개인 액세스 토큰을 사용합니다. 모든 요청에는 현재 계정 권한이 적용됩니다.",
+      "description": "API 요청에는 현재 계정 권한이 적용됩니다.",
       "empty": "생성된 개인 액세스 토큰이 없습니다.",
       "regenerate": "재생성",
       "regenerateTitle": "개인 액세스 토큰 재생성",
@@ -1737,7 +1721,6 @@
     },
     "passkeys": {
       "title": "패스키",
-      "description": "이 기기나 보안 키를 이용해 비밀번호 없이 로그인합니다. 패스키를 여러 개 등록할 수 있습니다.",
       "loading": "패스키를 불러오는 중...",
       "empty": "등록된 패스키가 없습니다.",
       "add": "패스키 추가",
@@ -1752,7 +1735,6 @@
     },
     "sessions": {
       "title": "활성 세션",
-      "description": "어디에서 로그인되어 있는지 확인하고 신뢰하지 않는 세션을 해제하세요.",
       "thisDevice": "이 기기",
       "logoutOthers": "다른 모든 세션 로그아웃",
       "activeNow": "방금 활동함",
@@ -5369,8 +5351,8 @@
   },
   "localBackups": {
     "title": "로컬 백업",
-    "description": "이 기기에서 닫힌 탭의 저장되지 않은 수정 사항입니다. 편집기를 열면 복구됩니다. 백업은 30일 후 만료되며 로그아웃하면 삭제됩니다.",
-    "empty": "복구할 로컬 백업이 없습니다. 열려 있는 탭의 수정 사항은 여기에 표시되지 않습니다.",
+    "description": "이 기기에서 닫힌 탭의 저장되지 않은 편집입니다. 30일간 보관되며 로그아웃하면 삭제됩니다.",
+    "empty": "닫힌 탭에서 복구할 백업이 없습니다.",
     "unavailable": "이 기기의 브라우저 저장소와 Web Locks 지원이 필요합니다.",
     "loading": "로컬 백업을 찾는 중…",
     "error": "작업을 완료하지 못했습니다. 목록을 새로고침하고 다시 시도하세요.",

@@ -10,7 +10,6 @@ import { SectionCard, SectionHeader } from '@/components/core/Section';
 export interface AccountEmailSettingsLabels {
   canonical: string;
   change: string;
-  description: string;
   emailCode: string;
   title: string;
 }
@@ -37,7 +36,6 @@ export function AccountEmailSettingsView({
             {labels.title}
           </span>
         }
-        description={labels.description}
       />
 
       <SectionCard appearance="plain" padding="none" data-testid="security-account-email">

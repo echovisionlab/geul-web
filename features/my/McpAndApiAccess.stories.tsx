@@ -62,7 +62,6 @@ function McpAndApiAccessContent({ showSecret = false }: { showSecret?: boolean }
             setupGuideUrl="/fixtures/remote-mcp-preview.md"
             labels={{
               title: 'Remote MCP',
-              description: t('security.mcpIntegration.description'),
               endpoint: t('common.labels.url'),
               openGuide: t('common.actions.openInNewTab'),
             }}

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "11cfceffd82156733c5f85ecf27ada698de2ffe9a8486bab883c36d0086785b3",
+  "manifestHash": "0e49cfc29b0a7ef8f08a2f43c49c823fe2a15a2fdd54ed6ea0a695c98bd1507a",
   "counts": {
     "sourceFiles": 3816,
     "productionSourceFiles": 2303,
@@ -3931,7 +3931,6 @@
         "features/media-download/FileDownloadPolicyEditor.tsx",
         "features/media/ui/MissingMediaView.tsx",
         "features/my/CookieConsentSettings.tsx",
-        "features/my/LanguagePreferenceSettings.tsx",
         "features/my/LocalBackupsView.tsx",
         "features/my/McpOAuthGrantSettings.tsx",
         "features/my/MySecurityPageView.tsx",
@@ -19240,7 +19239,6 @@
         "features/menu/AdminMenusPage.tsx",
         "features/metadata/MetadataPanel/MetadataPanel.tsx",
         "features/metadata/ui/OgGenerationRunProgressView.tsx",
-        "features/my/LanguagePreferenceSettings.tsx",
         "features/my/McpOAuthGrantSettings.tsx",
         "features/my/MySeriesPageView.tsx",
         "features/my/MyWorksPageView.tsx",
@@ -50362,7 +50360,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": ["Alert", "Button", "DsLayoutStack", "IconCheck", "IconLanguage", "Select", "SupportingText"]
+      "composedJsx": ["Button", "DsLayoutStack", "IconCheck", "Select"]
     },
     {
       "file": "features/my/LocalBackups.tsx",
@@ -51554,11 +51552,6 @@
               "type": "string"
             },
             {
-              "name": "description",
-              "optional": false,
-              "type": "string"
-            },
-            {
               "name": "emailCode",
               "optional": false,
               "type": "string"
@@ -51637,11 +51630,6 @@
             },
             {
               "name": "connected",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "description",
               "optional": false,
               "type": "string"
             },
@@ -51787,7 +51775,7 @@
             {
               "name": "labels",
               "optional": false,
-              "type": "{ title: string; description: string; endpoint: string; openGuide: string; }"
+              "type": "{ title: string; endpoint: string; openGuide: string; }"
             }
           ]
         }
@@ -52505,11 +52493,6 @@
               "name": "browser",
               "optional": false,
               "type": "(browser: BrowserKind) => string"
-            },
-            {
-              "name": "description",
-              "optional": false,
-              "type": "string"
             },
             {
               "name": "device",

@@ -65,7 +65,6 @@ const meta = {
       localeProp: true,
       labels: {
         activeNow: 'security.sessions.activeNow',
-        description: 'security.sessions.description',
         logOutOthers: 'security.sessions.logoutOthers',
         revoke: 'security.sessions.revoke',
         thisDevice: 'security.sessions.thisDevice',
@@ -90,7 +89,6 @@ const meta = {
     labels: {
       activeNow: 'Active now',
       browser: (value) => value,
-      description: 'Review and revoke active sessions.',
       device: (value) => value,
       logOutOthers: 'Log out other sessions',
       os: (value) => value,

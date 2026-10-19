@@ -33,7 +33,6 @@ describe('McpIntegrationSettingsView', () => {
             setupGuideUrl="https://site.example/guides/remote-mcp.md"
             labels={{
               title: 'Remote MCP',
-              description: 'Connect supported AI clients with browser sign-in and consent.',
               endpoint: 'Endpoint',
               openGuide: 'Open setup guide',
             }}
@@ -44,7 +43,6 @@ describe('McpIntegrationSettingsView', () => {
 
     expect(document.body.textContent).toContain('Remote MCP');
     expect(document.body.textContent).toContain('OAuth 2.1');
-    expect(document.body.textContent).toContain('browser sign-in and consent');
     expect(document.body.textContent).toContain('https://site.example/mcp');
     const endpoint = container.querySelector('[role="definition"]')!;
     expect(endpoint).toHaveAccessibleName('Endpoint');

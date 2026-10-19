@@ -1610,17 +1610,12 @@
       "cookiePreferencesTitle": "Preferensi Kue"
     },
     "languagePreference": {
-      "intro": "Bahasa akun Anda mengikuti Anda di mana pun Anda masuk. Akun baru diunggulkan dari bahasa browser Anda saat pertama kali Anda mengautentikasi.",
       "label": "Bahasa pilihan",
       "save": "Simpan bahasa",
-      "successTitle": "Bahasa diperbarui",
-      "successMessage": "Preferensi ini sekarang disimpan ke akun Anda untuk setiap perangkat yang masuk.",
       "errorTitle": "Kesalahan",
-      "errorMessage": "Gagal memperbarui preferensi bahasa",
-      "helper": "Setelan ini disimpan ke akun Anda dan lebih diprioritaskan daripada bahasa browser yang Anda gunakan saat pertama kali masuk."
+      "errorMessage": "Gagal memperbarui preferensi bahasa"
     },
     "newsletter": {
-      "subscribedTitle": "Berlangganan",
       "subscribedAlert": "Anda berlangganan buletin dan email kampanye kami.",
       "unsubscribedAlert": "Anda tidak berlangganan buletin kami.",
       "subscribe": "Berlangganan buletin",
@@ -1629,12 +1624,10 @@
     },
     "cookieConsent": {
       "syncError": "Gagal menyinkronkan persetujuan ke setelan akun.",
-      "savedAccount": "Preferensi disimpan dan disinkronkan ke akun Anda.",
-      "savedBrowser": "Preferensi disimpan untuk browser ini.",
       "versionWarning": "Kami memperbarui kebijakan cookie menjadi v{version}. Pilihan Anda sebelumnya dimuat untuk kenyamanan. Silakan simpan lagi untuk mengonfirmasi.",
       "essentialIntro": "Cookie penting selalu aktif untuk otentikasi dan operasi situs inti.",
       "lastSynced": "Terakhir disinkronkan: {value}",
-      "noRecord": "Belum ada catatan izin sisi server"
+      "savedBrowser": "Disimpan di browser ini"
     }
   },
   "cookieConsentCommon": {
@@ -1655,10 +1648,6 @@
     "submitFailed": "Tidak dapat menyelesaikan orientasi. Coba lagi."
   },
   "profile": {
-    "notifications": {
-      "successTitle": "Kesuksesan",
-      "updated": "Profil berhasil diperbarui"
-    },
     "fields": {
       "uid": "UID",
       "bio": "Biografi"
@@ -1678,14 +1667,11 @@
       "disconnectionFailed": "Pemutusan Gagal",
       "disconnected": "Terputus",
       "cannotUnlink": "Tidak dapat membatalkan tautan",
-      "success": "Kesuksesan",
-      "sessionRevoked": "Sesi berhasil dicabut",
+      "sessionRevoked": "Sesi dicabut",
       "sessionsRevoked": "Semua sesi lainnya telah logout",
       "failedToRevokeSession": "Gagal mencabut sesi",
       "failedToRevokeSessions": "Gagal mencabut sesi",
       "failedToRequestDeletion": "Gagal meminta penghapusan akun",
-      "connectedMessage": "{provider} akun berhasil terhubung.",
-      "disconnectedMessage": "{provider} telah terputus.",
       "failedToUpdateMainEmail": "Gagal memperbarui email utama",
       "failedToLoad": "Gagal memuat pengaturan keamanan"
     },
@@ -1699,16 +1685,14 @@
       "disconnectFailed": "Gagal memutuskan sambungan {provider}."
     },
     "connectedAccounts": {
-      "title": "Login sosial yang terhubung",
-      "description": "Kelola login sosial yang terhubung ke akun ini."
+      "title": "Login sosial yang terhubung"
     },
     "mcpIntegration": {
-      "description": "Hubungkan klien AI yang kompatibel ke endpoint ini. Browser akan terbuka untuk masuk dan memberikan persetujuan.",
       "consentDescription": "Klien ini dapat membaca dan mengedit konten serta mengelola file sesuai izin akun Anda saat ini. Klien dapat membuat, memperbarui, atau menghapus konten dan mengubah lampiran file yang sudah ada. Koneksi tidak memberikan izin tambahan pada akun.",
       "consentOfflineAccess": "Koneksi ini dapat berlanjut setelah sesi browser Anda saat ini berakhir, hingga Anda mencabutnya.",
       "consentRevoke": "Anda dapat mencabut koneksi ini di {settings} → Remote MCP.",
       "connectionsTitle": "Klien MCP yang terhubung",
-      "connectionsDescription": "Otorisasi OAuth ini terpisah dari sesi browser. Mencabut salah satunya akan memutus koneksi klien MCP tersebut tanpa mengeluarkan Anda dari akun.",
+      "connectionsDescription": "Mencabut akses akan memutus koneksi klien MCP tersebut tanpa mengeluarkan Anda dari akun.",
       "connectionsEmpty": "Tidak ada klien MCP yang terhubung.",
       "connectedAt": "Terhubung {date}",
       "revoke": "Revoke",
@@ -1720,7 +1704,7 @@
     },
     "personalAccessTokens": {
       "title": "Token akses pribadi",
-      "description": "Gunakan satu token akses pribadi ini dengan API yang disediakan {siteName}. Setiap permintaan memakai izin akun Anda saat ini.",
+      "description": "Permintaan API menggunakan izin akun Anda saat ini.",
       "empty": "Belum ada token akses pribadi yang dibuat.",
       "regenerate": "Buat ulang",
       "regenerateTitle": "Buat ulang token akses pribadi",
@@ -1737,7 +1721,6 @@
     },
     "passkeys": {
       "title": "Kunci sandi",
-      "description": "Gunakan perangkat ini atau kunci keamanan untuk masuk tanpa kata sandi. Anda dapat menyimpan banyak kunci sandi.",
       "loading": "Memuat kunci sandi...",
       "empty": "Tidak ada kunci sandi yang terdaftar.",
       "add": "Tambahkan kunci sandi",
@@ -1752,7 +1735,6 @@
     },
     "sessions": {
       "title": "Sesi aktif",
-      "description": "Tinjau di mana akun ini masuk dan cabut sesi yang tidak Anda percayai.",
       "thisDevice": "Perangkat ini",
       "logoutOthers": "Keluar dari semua sesi lainnya",
       "activeNow": "Aktif sekarang",
@@ -5369,8 +5351,8 @@
   },
   "localBackups": {
     "title": "Cadangan lokal",
-    "description": "Suntingan yang belum tersimpan dari tab yang ditutup di perangkat ini. Buka editor untuk memulihkannya. Cadangan kedaluwarsa setelah 30 hari dan dihapus saat Anda keluar dari akun.",
-    "empty": "Tidak ada cadangan lokal untuk dipulihkan. Suntingan di tab yang masih terbuka tidak ditampilkan di sini.",
+    "description": "Suntingan yang belum disimpan dari tab yang ditutup di perangkat ini, disimpan selama 30 hari dan dihapus saat keluar.",
+    "empty": "Tidak ada cadangan dari tab yang ditutup untuk dipulihkan.",
     "unavailable": "Cadangan lokal memerlukan penyimpanan browser dan Web Locks di perangkat ini.",
     "loading": "Mencari cadangan lokal…",
     "error": "Tidak dapat menyelesaikan tindakan ini. Muat ulang daftar dan coba lagi.",

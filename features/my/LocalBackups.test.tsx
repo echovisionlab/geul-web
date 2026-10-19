@@ -108,14 +108,14 @@ describe('LocalBackups account surface', () => {
     });
     await click('Discard', document.body.querySelector('[role="dialog"]')!);
     expect(mocks.discard).toHaveBeenCalledExactlyOnceWith(entry);
-    expect(host.textContent).toContain('No local backups to recover');
+    expect(host.textContent).toContain('No backups from closed tabs to recover');
   });
   it('refreshes instead of opening a stale row claimed by a live tab', async () => {
     await render();
     mocks.list.mockResolvedValue([]);
     await click('Open editor');
     expect(mocks.push).not.toHaveBeenCalled();
-    expect(host.textContent).toContain('No local backups to recover');
+    expect(host.textContent).toContain('No backups from closed tabs to recover');
   });
   it('removes the member’s rows immediately on sign-out', async () => {
     await render();

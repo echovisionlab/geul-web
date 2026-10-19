@@ -148,7 +148,6 @@ export function AccountPreview({
                   labels={{
                     canonical: 'Primary email',
                     change: 'Change email',
-                    description: 'Used for account recovery and security notices.',
                     emailCode: 'Email verification',
                     title: 'Account email',
                   }}
@@ -175,7 +174,6 @@ export function AccountPreview({
                     browser: (value) => value,
                     device: (value) => fixtureText(value ? value[0].toUpperCase() + value.slice(1) : value),
                     os: (value) => value,
-                    description: 'Review the devices signed in to your account.',
                     logOutOthers: 'Log out other devices',
                     revoke: 'Revoke session',
                     thisDevice: 'This device',
