@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.1](https://github.com/echovisionlab/geul-web/compare/v0.17.0...v0.17.1) (2026-10-19)
+
+
+### Bug Fixes
+
+* trim explanatory copy in the member area ([#151](https://github.com/echovisionlab/geul-web/issues/151)) ([ec65af3](https://github.com/echovisionlab/geul-web/commit/ec65af3bdd56588cc0c476f3d7b4db1ebf1191a9))
+
 ## [0.17.0](https://github.com/echovisionlab/geul-web/compare/v0.16.1...v0.17.0) (2026-10-18)
 
 
