@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "ab39623bf0faee4e70d2d15666b25da99db2871e0204a0c87c32dfb7a232c800",
+  "manifestHash": "2a788c7966ec637a1d6b77b23e2e425436b2ac4b17fe3b4b2388146f35e9950a",
   "counts": {
-    "sourceFiles": 3817,
-    "productionSourceFiles": 2303,
-    "componentFiles": 909,
+    "sourceFiles": 3819,
+    "productionSourceFiles": 2304,
+    "componentFiles": 910,
     "coreFamilies": 57,
     "featureDomains": 54,
     "storyFiles": 257,
@@ -335,6 +335,8 @@
     "components/core/ApplicationFrame/ApplicationFrame.tsx",
     "components/core/ApplicationFrame/ApplicationFrame.type-test.tsx",
     "components/core/ApplicationFrame/SiteHeader.tsx",
+    "components/core/ApplicationFrame/SiteNavigationPanel.test.tsx",
+    "components/core/ApplicationFrame/SiteNavigationPanel.tsx",
     "components/core/ApplicationFrame/index.ts",
     "components/core/Badge/LabelBadge.stories.tsx",
     "components/core/Badge/LabelBadge.tsx",
@@ -4039,16 +4041,6 @@
               "type": "string"
             },
             {
-              "name": "navigationTitle",
-              "optional": true,
-              "type": "ReactNode"
-            },
-            {
-              "name": "closeLabel",
-              "optional": false,
-              "type": "string"
-            },
-            {
               "name": "navigationId",
               "optional": true,
               "type": "string"
@@ -4090,17 +4082,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": ["components/core/ApplicationFrame/ApplicationFrame.stories.tsx"],
-      "composedJsx": [
-        "AriaButton",
-        "OnDemandDrawer",
-        "VisuallyHidden",
-        "aside",
-        "div",
-        "footer",
-        "header",
-        "main",
-        "span"
-      ]
+      "composedJsx": ["AriaButton", "SiteNavigationPanel", "aside", "div", "footer", "header", "main"]
     },
     {
       "file": "components/core/ApplicationFrame/SiteHeader.tsx",
@@ -4151,6 +4133,56 @@
       "tests": [],
       "stories": ["components/core/ApplicationFrame/ApplicationFrame.stories.tsx"],
       "composedJsx": ["LayoutVisibility", "div"]
+    },
+    {
+      "file": "components/core/ApplicationFrame/SiteNavigationPanel.tsx",
+      "owner": "Core/ApplicationFrame",
+      "exports": [
+        {
+          "name": "SiteNavigationPanel",
+          "kind": "function"
+        }
+      ],
+      "classification": "core",
+      "propsEvidence": [
+        {
+          "name": "SiteNavigationPanelProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "id",
+              "optional": true,
+              "type": "string"
+            },
+            {
+              "name": "opened",
+              "optional": false,
+              "type": "boolean"
+            },
+            {
+              "name": "onClose",
+              "optional": false,
+              "type": "() => void"
+            },
+            {
+              "name": "label",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "children",
+              "optional": true,
+              "type": "ReactNode"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["components/core/ApplicationFrame/ApplicationFrame.tsx"],
+      "catalogAdapters": [],
+      "tests": ["components/core/ApplicationFrame/SiteNavigationPanel.test.tsx"],
+      "stories": [],
+      "composedJsx": ["nav"]
     },
     {
       "file": "components/core/Badge/LabelBadge.tsx",
@@ -7146,11 +7178,7 @@
       "classification": "core",
       "propsEvidence": [],
       "typeAliasEvidence": [],
-      "productionConsumers": [
-        "components/core/ApplicationFrame/ApplicationFrame.tsx",
-        "components/core/on-demand-overlays.ts",
-        "features/shell/ui/Shell/ShellIslands.tsx"
-      ],
+      "productionConsumers": ["components/core/on-demand-overlays.ts", "features/shell/ui/Shell/ShellIslands.tsx"],
       "catalogAdapters": [],
       "tests": [],
       "stories": ["components/core/Drawer/Drawer.stories.tsx"],
@@ -19102,7 +19130,6 @@
       ],
       "typeAliasEvidence": [],
       "productionConsumers": [
-        "components/core/ApplicationFrame/ApplicationFrame.tsx",
         "components/core/CopyButton/CopyButton.tsx",
         "components/core/DataTable/DataTableView.tsx",
         "components/core/SelectionSurface/SelectionSurface.tsx",
@@ -74176,7 +74203,8 @@
       "owner": "Core/ApplicationFrame",
       "components": [
         "components/core/ApplicationFrame/ApplicationFrame.tsx",
-        "components/core/ApplicationFrame/SiteHeader.tsx"
+        "components/core/ApplicationFrame/SiteHeader.tsx",
+        "components/core/ApplicationFrame/SiteNavigationPanel.tsx"
       ],
       "stories": ["components/core/ApplicationFrame/ApplicationFrame.stories.tsx"]
     },
@@ -78116,7 +78144,7 @@
       "variants": [
         {
           "name": "Site",
-          "args": "{ kind: 'site', header: 'Geul', navigationOpened: false, onCloseNavigation: () => {}, navigationLabel: 'Navigation', closeLabel: 'Close', children: 'Content', }",
+          "args": "{ kind: 'site', header: 'Geul', navigationOpened: false, onCloseNavigation: () => {}, navigationLabel: 'Navigation', children: 'Content', }",
           "preview": "http://localhost:6010/?path=/story/core-layout-applicationframe--site"
         },
         {

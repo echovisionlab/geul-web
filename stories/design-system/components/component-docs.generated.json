@@ -45740,6 +45740,11 @@
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
               "line": 184,
               "property": "background"
+            },
+            {
+              "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
+              "line": 231,
+              "property": "background"
             }
           ],
           "definitions": [
@@ -45880,6 +45885,11 @@
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
               "line": 94,
               "property": "padding-block-start"
+            },
+            {
+              "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
+              "line": 226,
+              "property": "inset-block"
             }
           ],
           "definitions": [
@@ -45986,6 +45996,18 @@
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 135, "value": "200", "context": ":root" }]
         },
         {
+          "name": "--geul-layer-floating",
+          "registered": true,
+          "sources": [
+            {
+              "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
+              "line": 225,
+              "property": "z-index"
+            }
+          ],
+          "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 138, "value": "260", "context": ":root" }]
+        },
+        {
           "name": "--geul-motion-easing",
           "registered": true,
           "sources": [
@@ -46034,6 +46056,11 @@
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
               "line": 185,
               "property": "padding-inline"
+            },
+            {
+              "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
+              "line": 230,
+              "property": "padding"
             }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 63, "value": "1rem", "context": ":root" }]
@@ -46075,6 +46102,11 @@
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
               "line": 9,
               "property": "padding-inline"
+            },
+            {
+              "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
+              "line": 230,
+              "property": "padding"
             }
           ],
           "definitions": [
@@ -46095,6 +46127,11 @@
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
               "line": 105,
+              "property": "padding"
+            },
+            {
+              "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
+              "line": 230,
               "property": "padding"
             }
           ],
@@ -46167,12 +46204,6 @@
       "api": [
         { "name": "children", "type": "ReactNode", "required": true },
         { "name": "kind", "type": "'site' | 'workspace'", "required": true },
-        {
-          "name": "closeLabel",
-          "type": "string",
-          "required": false,
-          "description": "Allowed combinations vary by union branch. Check the complete action/link, name and geometry contracts."
-        },
         { "name": "dir", "type": "'ltr' | 'rtl' | 'auto'", "required": false },
         {
           "name": "footer",
@@ -46200,7 +46231,7 @@
           "name": "navigationLabel",
           "type": "string",
           "required": false,
-          "description": "Allowed combinations vary by union branch. Check the complete action/link, name and geometry contracts."
+          "description": "Accessible name of the phone navigation panel; the header's MenuToggle opens and closes it. Allowed combinations vary by union branch. Check the complete action/link, name and geometry contracts."
         },
         {
           "name": "navigationMode",
@@ -46213,12 +46244,6 @@
           "type": "boolean",
           "required": false,
           "description": "Allowed combinations vary by union branch. Check the complete action/link, name and geometry contracts."
-        },
-        {
-          "name": "navigationTitle",
-          "type": "ReactNode",
-          "required": false,
-          "description": "Visible drawer heading; branded content must retain the navigation accessible name. Allowed combinations vary by union branch. Check the complete action/link, name and geometry contracts."
         },
         {
           "name": "navigationToggle",
@@ -62258,7 +62283,6 @@
       ],
       "usage": [
         "Use ordered lists when order matters. Check Code wrapping/scrolling with long code. Reserve VisuallyHidden for necessary descriptions.",
-        "Consumer: components/core/ApplicationFrame/ApplicationFrame.tsx",
         "Consumer: components/core/CopyButton/CopyButton.tsx",
         "Consumer: components/core/DataTable/DataTableView.tsx",
         "Consumer: components/core/SelectionSurface/SelectionSurface.tsx",

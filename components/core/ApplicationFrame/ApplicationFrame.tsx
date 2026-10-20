@@ -1,10 +1,9 @@
 'use client';
 import type { ReactNode } from 'react';
 import { Button as AriaButton } from 'react-aria-components';
-import { VisuallyHidden } from '../Typography';
-import { OnDemandDrawer, preloadDrawer } from '../Drawer/OnDemandDrawer';
 import { presentationAttributes, type PresentationProps } from '../presentation-contract';
 import classes from './ApplicationFrame.module.css';
+import { SiteNavigationPanel } from './SiteNavigationPanel';
 interface FrameBaseProps extends PresentationProps {
   children: ReactNode;
   navigation?: ReactNode;
@@ -15,10 +14,8 @@ export interface SiteFrameProps extends FrameBaseProps {
   footer?: ReactNode;
   navigationOpened: boolean;
   onCloseNavigation: () => void;
+  /** Accessible name of the phone navigation panel; the header's MenuToggle opens and closes it. */
   navigationLabel: string;
-  /** Visible drawer heading; branded content must retain the navigation accessible name. */
-  navigationTitle?: ReactNode;
-  closeLabel: string;
   navigationId?: string;
 }
 export interface WorkspaceFrameProps extends FrameBaseProps {
@@ -27,12 +24,6 @@ export interface WorkspaceFrameProps extends FrameBaseProps {
   navigationToggle?: { label: string; onToggle: () => void };
 }
 export type ApplicationFrameProps = SiteFrameProps | WorkspaceFrameProps;
-/** The site navigation drawer loads on demand; start when the pointer or focus reaches its toggle. */
-function preloadNavigationOnIntent(event: { target: EventTarget }) {
-  if (event.target instanceof Element && event.target.closest('[data-menu-toggle]')) {
-    preloadDrawer();
-  }
-}
 
 /** Owns application chrome, safe areas, responsive geometry and print flow. */
 export function ApplicationFrame(props: ApplicationFrameProps) {
@@ -47,13 +38,7 @@ export function ApplicationFrame(props: ApplicationFrameProps) {
       data-navigation-mode={kind === 'workspace' ? props.navigationMode : undefined}
     >
       {kind === 'site' ? (
-        <header
-          className={classes.header}
-          data-shell-header
-          onPointerOverCapture={preloadNavigationOnIntent}
-          onFocusCapture={preloadNavigationOnIntent}
-          onPointerDownCapture={preloadNavigationOnIntent}
-        >
+        <header className={classes.header} data-shell-header>
           {props.header}
         </header>
       ) : (
@@ -80,27 +65,14 @@ export function ApplicationFrame(props: ApplicationFrameProps) {
               {props.footer}
             </footer>
           ) : null}
-          <OnDemandDrawer
+          <SiteNavigationPanel
             id={props.navigationId}
             opened={props.navigationOpened}
             onClose={props.onCloseNavigation}
-            placement="left"
-            size="compact"
-            visibility="mobile-only"
-            title={
-              props.navigationTitle != null ? (
-                <>
-                  <span aria-hidden="true">{props.navigationTitle}</span>
-                  <VisuallyHidden>{props.navigationLabel}</VisuallyHidden>
-                </>
-              ) : (
-                props.navigationLabel
-              )
-            }
-            closeLabel={props.closeLabel}
+            label={props.navigationLabel}
           >
             {navigation}
-          </OnDemandDrawer>
+          </SiteNavigationPanel>
         </>
       ) : null}
     </div>

@@ -209,7 +209,6 @@ export function ShellLayout({
           }
         />
       }
-      navigationTitle={slots.logo}
       navigationFooter={slots.languageNavigation}
       headerItems={headerItems}
       secondaryItems={secondaryItems}

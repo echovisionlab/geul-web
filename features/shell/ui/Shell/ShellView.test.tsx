@@ -305,16 +305,18 @@ describe('ShellView', () => {
     expect(hydratedThemeButtons.map((button) => button.innerHTML)).toEqual(iconMarkup);
   });
 
-  it('shows the same brand in the mobile drawer while preserving its accessible heading', () => {
+  it('opens the phone navigation below the header it keeps, without a second brand', () => {
     renderView({
       navigationOpened: true,
       slots: { ...defaultProps.slots, logo: <img src="/stacked.svg" alt="Example Studio" /> },
     });
-    const drawer = document.getElementById('shell-mobile-navigation');
-    const title = document.getElementById(drawer?.getAttribute('aria-labelledby') ?? '');
-    expect(title?.querySelector('img')?.getAttribute('src')).toBe('/stacked.svg');
-    expect(title?.querySelector('img')?.closest('[aria-hidden="true"]')).not.toBeNull();
-    expect(title?.textContent).toBe(defaultProps.labels.navigation);
+    const panel = document.getElementById('shell-mobile-navigation');
+    expect(panel?.tagName).toBe('NAV');
+    expect(panel?.getAttribute('aria-label')).toBe(defaultProps.labels.navigation);
+    expect(panel?.hidden).toBe(false);
+    expect(panel?.querySelector('img')).toBeNull();
+    expect(container.querySelector('[data-site-header] img')?.getAttribute('src')).toBe('/stacked.svg');
+    expect(container.querySelector('main')?.hasAttribute('inert')).toBe(true);
   });
 
   it('moves the language control from the phone header into the navigation drawer', () => {
