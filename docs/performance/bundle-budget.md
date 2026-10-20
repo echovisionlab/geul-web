@@ -222,6 +222,16 @@ lowered 213 budget values and raised none.
 - Public collection blocks (artists, labels, releases) use public `common.messages.no*Found` copy.
   The reduced anonymous catalogue omits `adminList`, which previously left their empty states untranslated.
 
+## Full-screen phone navigation (2026-10-21)
+
+PR #160 replaced the on-demand navigation drawer in `ApplicationFrame` with a static
+`SiteNavigationPanel` that opens full screen below the header. The drawer used to load its
+component on demand; the panel is a small component in the frame's first load, so every route
+using `ApplicationFrame` grew slightly. CI run 39462745745 measured
+`/admin/settings/og-image` at 426.3 KiB against its 426 KiB limit, the route with the least
+headroom. Only that JS limit is raised, to 440 KiB (standard headroom, max(3%, 4 KiB), rounded up
+to 1 KiB). Shared JS, CSS and every other route budget are unchanged.
+
 ## Not done
 
 - Mantine leftovers are small. `@mantine/hooks` (71 importers) measured about 1–3 kB gzip

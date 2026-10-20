@@ -3,9 +3,11 @@
 Core `ApplicationFrame/SiteHeader` owns the public header grid, shared insets and responsive placement.
 `ShellLayout` supplies the site logo link, navigation toggle, search, language, theme and account actions.
 Pages consume that shell; they do not position their own copies of header controls.
-The mobile navigation drawer receives the same branded `SiteLogo` through Core
-`ApplicationFrame.navigationTitle`; Core preserves `navigationLabel` as the accessible heading name.
-Consumers without branding keep the existing `navigationLabel` text heading.
+Below `sm` the menu toggle opens Core's phone navigation panel: a `nav` named by `navigationLabel` that
+fills the screen below the header. The header stays in place, so the brand keeps its position and is
+not repeated in the panel, and the toggle that opened it (now a close glyph) closes it. While open,
+the page behind is inert and does not scroll, Escape closes it and returns focus to the toggle, and
+the panel covers the consent banner while staying below popups such as its language menu.
 
 Below the shared `sm` breakpoint, the menu toggle is visible and equal flexible tracks keep the brand
 at the center of the header viewport. The theme toggle sits beside the menu toggle; search and account
@@ -13,10 +15,11 @@ occupy the opposite track. Both groups hold two controls (signed-in: two icons; 
 the "Sign in" text), so the space on either side of the brand stays close to even down to 280px.
 The group widths do not change the brand center, but uneven groups leave visibly uneven space at
 320px, so keep `mobileLeadingActions` about as wide as `mobileActions`. The language menu is not in the
-phone header: it is the last row of the navigation drawer (`LanguageMenu variant="navigation"`, a
-full-width row matching the drawer links) and remains in the mobile footer. At `sm` and above, the
+phone header: it is the last row of the navigation panel (`LanguageMenu variant="navigation"`, a
+full-width row matching the panel links) and remains in the mobile footer. At `sm` and above, the
 brand sits at the start beside the desktop navigation/actions. This uses the same breakpoint as Core
-`MenuToggle` and the navigation drawer, including narrow windows on desktop computers.
+`MenuToggle` and the navigation panel, including narrow windows on desktop computers; widening past it
+closes an open panel.
 
 Use `SiteHeader` in the `header` slot of `ApplicationFrame kind="site"`. Pass semantic content through
 `logo`, `navigationToggle`, `mobileLeadingActions`, `mobileActions` and `desktopActions`. Styling props
@@ -27,11 +30,11 @@ menus continue to own interaction geometry, focus and hover states. No new visua
 
 Site settings store six logo slots, each with a light and a dark variant:
 
-| Slot                                     | Artwork                         | Used by                                                                                           |
-| ---------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `logo_full_light` / `logo_full_dark`     | Horizontal symbol + wordmark    | Public header (all widths), navigation drawer, expanded admin navigation, forms, print, OG images |
-| `logo_symbol_light` / `logo_symbol_dark` | Symbol only                     | Compact admin navigation rail                                                                     |
-| `logo_email_light` / `logo_email_dark`   | PNG (SVG uploads are converted) | Email layouts (`{{logo_email_url}}`, `{{logo_email_dark_url}}`)                                   |
+| Slot                                     | Artwork                         | Used by                                                                        |
+| ---------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------ |
+| `logo_full_light` / `logo_full_dark`     | Horizontal symbol + wordmark    | Public header (all widths), expanded admin navigation, forms, print, OG images |
+| `logo_symbol_light` / `logo_symbol_dark` | Symbol only                     | Compact admin navigation rail                                                  |
+| `logo_email_light` / `logo_email_dark`   | PNG (SVG uploads are converted) | Email layouts (`{{logo_email_url}}`, `{{logo_email_dark_url}}`)                |
 
 The API resolves display fallbacks once for every consumer: a missing theme uses the other theme of the
 same form, then the other form. `SiteLogo form="full" | "symbol"` reads the resolved manifest pair, so

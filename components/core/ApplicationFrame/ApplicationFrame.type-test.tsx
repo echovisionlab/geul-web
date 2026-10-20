@@ -9,7 +9,6 @@ const actions = { label: 'Toggle navigation', onToggle() {} };
   navigationOpened={false}
   onCloseNavigation={() => {}}
   navigationLabel="Navigation"
-  closeLabel="Close"
   navigationId="site-menu"
 >
   Content

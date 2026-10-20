@@ -8,7 +8,13 @@ interface SampleFeature {
   properties: Record<string, unknown>;
 }
 
-const colors = { color: '#111111', hoverColor: '#222222', textColor: '#333333', textHoverColor: '#ffffff' };
+const colors = {
+  color: '#111111',
+  hoverColor: '#222222',
+  textColor: '#333333',
+  textHoverColor: '#ffffff',
+  mapBackgroundColor: '#000000',
+};
 
 const clusterOne: SampleFeature = { name: 'cluster-1', properties: { kind: 'cluster', id: 'cluster-1', count: 3 } };
 const clusterTwo: SampleFeature = { name: 'cluster-2', properties: { kind: 'cluster', id: 'cluster-2', count: 12 } };
@@ -107,5 +113,17 @@ describe('cluster layer model', () => {
     const model = buildModel('hover', 'cluster-1', null);
 
     expect(Object.values(model).filter((layer) => layer.type === 'symbol')).toEqual([model.countLayer]);
+  });
+
+  it('outlines the translucent bubble and haloes its count with the map background so labels cannot hide it', () => {
+    const model = buildModel('hover', null, null);
+
+    expect(model.haloLayer.paint).toMatchObject({
+      'circle-color': colors.color,
+      'circle-stroke-color': colors.textColor,
+    });
+    expect(model.haloLayer.paint?.['circle-stroke-width']).toBeGreaterThan(0);
+    expect(model.countLayer.paint).toMatchObject({ 'text-halo-color': colors.mapBackgroundColor });
+    expect(model.countLayer.paint?.['text-halo-width']).toBeGreaterThan(0);
   });
 });

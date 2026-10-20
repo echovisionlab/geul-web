@@ -387,7 +387,7 @@ There is no item disabled prop. The component does not choose mode automatically
 
 **Geometry and states.** Expanded items use chrome-row-height 32px, icon=16px, gap=xs 8px; item icons (or labels without icons) start on the section label's xs 8px edge, the 2px active boundary inside that inset; without icons, section children step in by one hierarchy step;
 chrome text 12px/medium. Compact items are 40px square or at least 44px for touch.
-Group headings follow the Disclosure nested-list spec shared by the form editor and the public mobile drawer:
+Group headings follow the Disclosure nested-list spec shared by the form editor and the public phone navigation panel:
 28px, sentence-case 12px primary label, trailing chevron that turns over when open, hover fill, no rules between
 expanded groups (the compact rail keeps rules). The label starts on the same xs 8px edge as the items.
 Hover uses surface-hover/primary; active is unfilled primary/strong with a leading 2px focus boundary.

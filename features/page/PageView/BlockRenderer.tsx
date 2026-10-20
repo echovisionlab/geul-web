@@ -184,7 +184,7 @@ function ColumnsSection({ section, query, requestedLocale }: SectionViewProps) {
   const gap = (props.gap as string) || '24';
 
   const ratios = columnRatios.split(':').map(Number);
-  const gridTemplateColumns = ratios.map((r) => `${r}fr`).join(' ');
+  const gridTemplateColumns = ratios.map((r) => `minmax(0, ${r}fr)`).join(' ');
 
   const dedupedColumns =
     section.columns?.map((column) => ({
@@ -194,12 +194,8 @@ function ColumnsSection({ section, query, requestedLocale }: SectionViewProps) {
 
   return (
     <div
-      className="columns-section"
-      style={{
-        display: 'grid',
-        gridTemplateColumns,
-        gap: `${gap}px`,
-      }}
+      className={`columns-section ${classes.columns}`}
+      style={{ '--_page-columns': gridTemplateColumns, gap: `${gap}px` } as React.CSSProperties}
     >
       {dedupedColumns.map((column) => (
         <div key={column.id} className="column-content">

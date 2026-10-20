@@ -558,52 +558,67 @@ describe('DefaultBlockView', () => {
     ).not.toContain('https://cdn.example.com/file.pdf');
   });
 
-  it('renders the image original-download action from the exact Block runtime decision', () => {
-    const blockId = '01b3db42-75f1-4bf1-8cb9-9b3baf57e795';
-    const fileId = 'b67328c4-668c-5bf2-8f1e-41465149ded6';
-    const item = create(ContentBlockMediaItemSchema, {
-      selector: { blockId, referencePath: 'file' },
-      attachment: { state: { case: 'activeFileId', value: fileId } },
-      delivery: {
-        fileId,
-        fileName: 'field-recording',
-        extension: 'png',
-        mimeType: 'image/png',
-        fileSize: 1024n,
-        asset: { url: 'https://cdn.example/field-recording.png' },
-      },
-      downloadAvailability: ContentBlockDownloadAvailability.AVAILABLE,
-      downloadAction: ContentBlockDownloadAction.DOWNLOAD,
-    });
-    const block: Block = {
-      id: blockId,
-      type: 'file',
-      props: {
-        fileId,
-        mimeType: 'image/png',
-        url: 'https://cdn.example/field-recording.png',
-        name: 'Field recording still',
-        downloadAvailability: 2,
-        downloadAction: 3,
-      },
-    };
+  it.each([
+    {
+      availability: ContentBlockDownloadAvailability.AVAILABLE,
+      action: ContentBlockDownloadAction.DOWNLOAD,
+      shown: true,
+    },
+    // A reader can do nothing about an unavailable image original, so no disabled icon is drawn.
+    {
+      availability: ContentBlockDownloadAvailability.UNAVAILABLE,
+      action: ContentBlockDownloadAction.NONE,
+      shown: false,
+    },
+  ])(
+    'renders the image original-download action from the exact Block runtime decision (%o)',
+    ({ availability, action, shown }) => {
+      const blockId = '01b3db42-75f1-4bf1-8cb9-9b3baf57e795';
+      const fileId = 'b67328c4-668c-5bf2-8f1e-41465149ded6';
+      const item = create(ContentBlockMediaItemSchema, {
+        selector: { blockId, referencePath: 'file' },
+        attachment: { state: { case: 'activeFileId', value: fileId } },
+        delivery: {
+          fileId,
+          fileName: 'field-recording',
+          extension: 'png',
+          mimeType: 'image/png',
+          fileSize: 1024n,
+          asset: { url: 'https://cdn.example/field-recording.png' },
+        },
+        downloadAvailability: availability,
+        downloadAction: action,
+      });
+      const block: Block = {
+        id: blockId,
+        type: 'file',
+        props: {
+          fileId,
+          mimeType: 'image/png',
+          url: 'https://cdn.example/field-recording.png',
+          name: 'Field recording still',
+          downloadAvailability: 2,
+          downloadAction: 3,
+        },
+      };
 
-    const html = renderToStaticMarkup(
-      <NextIntlClientProvider locale="en" timeZone="UTC" messages={enMessages}>
-        <DesignSystemProvider locale="en" forceColorScheme="light">
-          <PageMediaDeliveryProvider idOrSlug="page-1" requestedLocale="en">
-            <ContentBlockMediaRuntimeProvider items={[item]}>
-              <DefaultBlockView block={block} />
-            </ContentBlockMediaRuntimeProvider>
-          </PageMediaDeliveryProvider>
-        </DesignSystemProvider>
-      </NextIntlClientProvider>,
-    );
+      const html = renderToStaticMarkup(
+        <NextIntlClientProvider locale="en" timeZone="UTC" messages={enMessages}>
+          <DesignSystemProvider locale="en" forceColorScheme="light">
+            <PageMediaDeliveryProvider idOrSlug="page-1" requestedLocale="en">
+              <ContentBlockMediaRuntimeProvider items={[item]}>
+                <DefaultBlockView block={block} />
+              </ContentBlockMediaRuntimeProvider>
+            </PageMediaDeliveryProvider>
+          </DesignSystemProvider>
+        </NextIntlClientProvider>,
+      );
 
-    expect(html).toContain('<img');
-    expect(html).toContain('data-authorized-download-action="icon"');
-    expect(html).toContain('aria-label="Download Field recording still"');
-  });
+      expect(html).toContain('<img');
+      expect(html.includes('data-authorized-download-action="icon"')).toBe(shown);
+      expect(html.includes('aria-label="Download Field recording still"')).toBe(shown);
+    },
+  );
 
   it('shows an image caption in its figure at the authored width and alignment', () => {
     const block: Block = {

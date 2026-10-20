@@ -13,6 +13,8 @@ interface ClusterLayerColors {
   hoverColor: string;
   textColor: string;
   textHoverColor: string;
+  /** Map background colour, used as the count halo so place labels cannot cover it. */
+  mapBackgroundColor: string;
 }
 
 interface ClusterLayerModelInput {
@@ -79,10 +81,13 @@ export function buildClusterLayerModel({
       type: 'circle',
       source: sourceId,
       filter: clusterFilter,
+      // A ring in the count colour keeps a translucent bubble visible over busy land and labels.
       paint: {
         'circle-color': colors.color,
         'circle-radius': radius,
-        'circle-stroke-width': 0,
+        'circle-stroke-width': 1,
+        'circle-stroke-color': colors.textColor,
+        'circle-stroke-opacity': 0.45,
         'circle-blur': 0.08,
       },
       layout: { visibility: 'visible' },
@@ -120,7 +125,7 @@ export function buildClusterLayerModel({
         ] as never,
         'text-font': ['Noto Sans Bold'] as never,
       },
-      paint: { 'text-color': countColor },
+      paint: { 'text-color': countColor, 'text-halo-color': colors.mapBackgroundColor, 'text-halo-width': 1.5 },
     },
     unclusteredLayer: {
       id: unclusteredLayerId,

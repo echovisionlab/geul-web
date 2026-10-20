@@ -156,12 +156,13 @@ function GeneratedSectionContent({
       const gap = Number(props.gap ?? 24);
       return (
         <div
-          className="columns-section"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: section.columns.map((column) => `${column.ratio}fr`).join(' '),
-            gap: `${Number.isFinite(gap) ? gap : 24}px`,
-          }}
+          className={`columns-section ${classes.columns}`}
+          style={
+            {
+              '--_page-columns': section.columns.map((column) => `minmax(0, ${column.ratio}fr)`).join(' '),
+              gap: `${Number.isFinite(gap) ? gap : 24}px`,
+            } as React.CSSProperties
+          }
         >
           {section.columns.map((column) => (
             <div key={column.id} className="column-content">

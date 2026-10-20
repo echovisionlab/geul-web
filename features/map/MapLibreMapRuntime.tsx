@@ -73,6 +73,7 @@ interface ClusterColors {
   hoverColor: string;
   textColor: string;
   textHoverColor: string;
+  mapBackgroundColor: string;
 }
 
 interface RuntimeCalloutLayout extends MapCalloutLayout {
@@ -416,6 +417,7 @@ export function MapLibreMapRuntime({
       hoverColor: themeConfig.clusterHoverColor,
       textColor: themeConfig.clusterTextColor,
       textHoverColor: themeConfig.clusterTextHoverColor,
+      mapBackgroundColor: themeConfig.backgroundColor,
     };
   }, [themeConfig]);
 

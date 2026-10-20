@@ -149,7 +149,10 @@ describe('PageRenderer', () => {
     expect(html).toContain('data-block-view="client-marquee"');
     expect(html).toContain('data-block-view="label-marquee"');
     expect(html).toContain('data-block-view="external-video"');
-    expect(html).toContain('class="columns-section"');
+    // Columns stack on phones; the ratio applies from the sm breakpoint through the CSS variable.
+    expect(html).toMatch(
+      /class="columns-section [^"]*columns[^"]*" style="--_page-columns:minmax\(0, 1fr\) minmax\(0, 1fr\)/,
+    );
     expect(html).toContain('data-section-id="fixture-column-rich-text"');
     expect(html).toContain('data-section-id="fixture-column-external-video"');
 

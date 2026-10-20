@@ -29,6 +29,18 @@
   flex-direction: column;
 }
 
+/* Authored column ratios apply from sm; phones stack the columns in order, as on paper. */
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (width >= $mantine-breakpoint-sm) {
+  .columns {
+    grid-template-columns: var(--_page-columns);
+  }
+}
+
 @media print {
   .sections,
   :global([data-footer-layout='pinned']) .sections,

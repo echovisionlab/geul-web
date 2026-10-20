@@ -54,7 +54,6 @@ function SitePreview() {
       navigationOpened={opened}
       onCloseNavigation={() => setOpened(false)}
       navigationLabel={text('Navigation')}
-      closeLabel={text('Close')}
       footer={<Text size="sm">Geul</Text>}
     >
       <Heading id="content" level={1}>
@@ -95,7 +94,6 @@ export const Site: Story = {
     navigationOpened: false,
     onCloseNavigation: () => {},
     navigationLabel: 'Navigation',
-    closeLabel: 'Close',
     children: 'Content',
   },
   render: () => <SitePreview />,

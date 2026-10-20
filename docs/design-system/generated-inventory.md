@@ -4,15 +4,15 @@ Run `node scripts/design-system/inventory.mjs` to regenerate; `--check` fails wh
 
 Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.
 
-Source manifest SHA-256: `ab39623bf0faee4e70d2d15666b25da99db2871e0204a0c87c32dfb7a232c800`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
+Source manifest SHA-256: `ab773029019c54f97d1bca3fc6a469eb3478f556ec4edf06ef50606f7c5b67c3`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
 
 ## Counts
 
 | Metric                | Count |
 | --------------------- | ----: |
-| sourceFiles           |  3817 |
-| productionSourceFiles |  2303 |
-| componentFiles        |   909 |
+| sourceFiles           |  3821 |
+| productionSourceFiles |  2305 |
+| componentFiles        |   910 |
 | coreFamilies          |    57 |
 | featureDomains        |    54 |
 | storyFiles            |   257 |
@@ -37,7 +37,7 @@ Each family below names its ownership directory. The JSON lists every component 
 | Owner                                                                           | Component files | Story files |
 | ------------------------------------------------------------------------------- | --------------: | ----------: |
 | [Core/Alert](../../components/core/Alert)                                       |               1 |           1 |
-| [Core/ApplicationFrame](../../components/core/ApplicationFrame)                 |               2 |           1 |
+| [Core/ApplicationFrame](../../components/core/ApplicationFrame)                 |               3 |           1 |
 | [Core/Badge](../../components/core/Badge)                                       |               2 |           2 |
 | [Core/Button](../../components/core/Button)                                     |               1 |           1 |
 | [Core/Carousel](../../components/core/Carousel)                                 |               1 |           1 |
@@ -152,7 +152,7 @@ Counts include every production JS/TS file in the domain; component files are Pa
 | [my](../../features/my)                               |     38 |         26 |       8 |    20 |             7 |
 | [navigation](../../features/navigation)               |      2 |          2 |       0 |     0 |             1 |
 | [newsletter](../../features/newsletter)               |      2 |          2 |       0 |     1 |             1 |
-| [page](../../features/page)                           |    253 |        165 |       8 |   106 |             4 |
+| [page](../../features/page)                           |    254 |        165 |       8 |   107 |             4 |
 | [participants](../../features/participants)           |      1 |          1 |       0 |     1 |             0 |
 | [place](../../features/place)                         |      7 |          7 |       0 |     3 |             0 |
 | [policy](../../features/policy)                       |     17 |         14 |       0 |     9 |             6 |

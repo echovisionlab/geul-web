@@ -212,7 +212,35 @@
 
   .header,
   .navigation,
+  .siteNavigation,
   .footer {
+    display: none;
+  }
+}
+
+/* Phone navigation fills the screen below the header, which stays in place with its toggle. It sits
+ * above the consent banner while open and below popups such as the language menu it contains. */
+.siteNavigation {
+  position: fixed;
+  z-index: var(--geul-layer-floating);
+  inset-block: calc(var(--geul-chrome-header-height-base) + env(safe-area-inset-top)) 0;
+  inset-inline: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--geul-spacing-xs) var(--geul-spacing-sm) calc(var(--geul-spacing-lg) + env(safe-area-inset-bottom));
+  background: var(--geul-background);
+}
+
+.siteNavigation[hidden] {
+  display: none;
+}
+
+:global(html[data-site-navigation-open]) {
+  overflow: hidden;
+}
+
+@media (width >= $mantine-breakpoint-sm) {
+  .siteNavigation {
     display: none;
   }
 }

@@ -1,5 +1,15 @@
 # Design system changes
 
+## 2026-10-21 — phone navigation fills the screen below the header (unreleased)
+
+Core `ApplicationFrame kind="site"` replaces the phone navigation drawer with a full-screen panel below
+the header. The drawer covered nearly the whole width yet left a sliver of the page, and repeated the
+logo at its top left while the header showed it in the center. The header now stays in place: the
+brand keeps its position and the menu toggle turns into the close control. The panel is a disclosure
+region (`nav`), not a modal: the page behind is inert and does not scroll, Escape closes it and
+returns focus to the toggle, and it covers the consent banner while open. `navigationTitle` and the
+site frame's `closeLabel` are removed. See [Site branding](site-branding.md).
+
 ## 2026-10-19 — outline rail at every width (unreleased)
 
 Core `TableOfContentsView` uses the quiet rail at every width. The persistent outline column from `lg` is

@@ -485,7 +485,14 @@ function ImageBlock({ block }: { block: Block }) {
       alt={alt || name || caption || 'Image'}
       caption={caption}
       style={getContainerStyle(block)}
-      action={<BlockDownloadAction block={block} title={name || alt || caption || 'Image'} presentation="icon" />}
+      action={
+        <BlockDownloadAction
+          block={block}
+          title={name || alt || caption || 'Image'}
+          presentation="icon"
+          hideWhenUnavailable
+        />
+      }
     />
   );
 }
@@ -612,10 +619,13 @@ function BlockDownloadAction({
   block,
   title,
   presentation = 'button',
+  hideWhenUnavailable = false,
 }: {
   block: Block;
   title: string;
   presentation?: 'button' | 'icon';
+  /** An image needs no "download unavailable" notice when the reader can do nothing about it. */
+  hideWhenUnavailable?: boolean;
 }) {
   const contentMedia = useContentMediaDelivery();
   const runtimeIndex = useOptionalContentBlockMediaRuntime();
@@ -644,6 +654,13 @@ function BlockDownloadAction({
         : runtime.downloadAction === ContentBlockDownloadAction.NONE
           ? FileDownloadAction.NONE
           : FileDownloadAction.UNSPECIFIED;
+  if (
+    hideWhenUnavailable &&
+    availability === FileDownloadAvailability.UNAVAILABLE &&
+    action === FileDownloadAction.NONE
+  ) {
+    return null;
+  }
 
   return (
     <AuthorizedDownloadAction
