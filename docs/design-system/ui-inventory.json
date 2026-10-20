@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "2a788c7966ec637a1d6b77b23e2e425436b2ac4b17fe3b4b2388146f35e9950a",
+  "manifestHash": "ab773029019c54f97d1bca3fc6a469eb3478f556ec4edf06ef50606f7c5b67c3",
   "counts": {
-    "sourceFiles": 3819,
-    "productionSourceFiles": 2304,
+    "sourceFiles": 3821,
+    "productionSourceFiles": 2305,
     "componentFiles": 910,
     "coreFamilies": 57,
     "featureDomains": 54,
@@ -2126,6 +2126,8 @@
     "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
     "features/page/PageView/blocks/PublicSiteVariable.tsx",
     "features/page/PageView/blocks/PublicTextAccessibility.test.tsx",
+    "features/page/PageView/page-localized-text.test.ts",
+    "features/page/PageView/page-localized-text.ts",
     "features/page/blocks/CarouselSkeleton.loading.test.tsx",
     "features/page/blocks/CollectionBlocks.stories.tsx",
     "features/page/blocks/CollectionSettings.permissions.test.tsx",
@@ -46776,6 +46778,11 @@
               "name": "textHoverColor",
               "optional": false,
               "type": "string"
+            },
+            {
+              "name": "mapBackgroundColor",
+              "optional": false,
+              "type": "string"
             }
           ]
         },
@@ -76870,6 +76877,7 @@
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
         "features/page/PageView/blocks/PublicSiteVariable.tsx",
+        "features/page/PageView/page-localized-text.ts",
         "features/page/blocks/CollectionSizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
@@ -77276,6 +77284,7 @@
         "features/page/PageView/blocks/PublicHeadingOutline.test.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.test.tsx",
         "features/page/PageView/blocks/PublicTextAccessibility.test.tsx",
+        "features/page/PageView/page-localized-text.test.ts",
         "features/page/blocks/CarouselSkeleton.loading.test.tsx",
         "features/page/blocks/CollectionSettings.permissions.test.tsx",
         "features/page/blocks/EntityListView.test.tsx",

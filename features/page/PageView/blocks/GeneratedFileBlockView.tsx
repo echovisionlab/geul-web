@@ -78,6 +78,17 @@ function downloadAvailability(value: ContentBlockDownloadAvailability): FileDown
       : FileDownloadAvailability.UNSPECIFIED;
 }
 
+/** An image needs no "download unavailable" notice when the reader can do nothing about it. */
+function imageDownloadUnavailable(runtime: {
+  downloadAvailability: ContentBlockDownloadAvailability;
+  downloadAction: ContentBlockDownloadAction;
+}): boolean {
+  return (
+    runtime.downloadAvailability === ContentBlockDownloadAvailability.UNAVAILABLE &&
+    runtime.downloadAction === ContentBlockDownloadAction.NONE
+  );
+}
+
 function downloadAction(value: ContentBlockDownloadAction): FileDownloadAction {
   switch (value) {
     case ContentBlockDownloadAction.DOWNLOAD:
@@ -166,7 +177,7 @@ export function GeneratedFileBlockView({
         alt={block.locale.props?.alt || name || caption}
         caption={caption}
         style={style}
-        action={action}
+        action={imageDownloadUnavailable(runtime) ? undefined : action}
       />
     );
   }

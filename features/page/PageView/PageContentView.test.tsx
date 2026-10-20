@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { create } from '@bufbuild/protobuf';
 import { HeadingBlockSchema, HeadingBlockLocaleSchema } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 
+import type { LocalizedPageSection } from '@/features/editor/contract/localized-page';
 import { PageContentView } from './PageContentView';
 
 const contentLanguageMenuSpy = vi.fn();
@@ -229,7 +230,24 @@ describe('Page content language', () => {
         page={{
           title: '한국어 원본',
           showTitle: true,
-          content: [],
+          content: [
+            {
+              id: 'section-1',
+              kind: 'rich-text',
+              settings: {},
+              props: {},
+              richText: [
+                {
+                  id: 'paragraph-1',
+                  kind: 'paragraph',
+                  base: {},
+                  locale: { content: [{ value: { case: 'text', value: { text: '한국어 본문' } } }] },
+                  children: [],
+                },
+              ] as unknown as LocalizedPageSection['richText'],
+              columns: [],
+            },
+          ],
           blockMedia: [],
           documentLayout: { contentHeight: 'content', pageChrome: 'pinned', footer: 'flow' },
           localizationInfo: {

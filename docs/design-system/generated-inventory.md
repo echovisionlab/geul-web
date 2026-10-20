@@ -4,14 +4,14 @@ Run `node scripts/design-system/inventory.mjs` to regenerate; `--check` fails wh
 
 Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.
 
-Source manifest SHA-256: `2a788c7966ec637a1d6b77b23e2e425436b2ac4b17fe3b4b2388146f35e9950a`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
+Source manifest SHA-256: `ab773029019c54f97d1bca3fc6a469eb3478f556ec4edf06ef50606f7c5b67c3`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
 
 ## Counts
 
 | Metric                | Count |
 | --------------------- | ----: |
-| sourceFiles           |  3819 |
-| productionSourceFiles |  2304 |
+| sourceFiles           |  3821 |
+| productionSourceFiles |  2305 |
 | componentFiles        |   910 |
 | coreFamilies          |    57 |
 | featureDomains        |    54 |
@@ -152,7 +152,7 @@ Counts include every production JS/TS file in the domain; component files are Pa
 | [my](../../features/my)                               |     38 |         26 |       8 |    20 |             7 |
 | [navigation](../../features/navigation)               |      2 |          2 |       0 |     0 |             1 |
 | [newsletter](../../features/newsletter)               |      2 |          2 |       0 |     1 |             1 |
-| [page](../../features/page)                           |    253 |        165 |       8 |   106 |             4 |
+| [page](../../features/page)                           |    254 |        165 |       8 |   107 |             4 |
 | [participants](../../features/participants)           |      1 |          1 |       0 |     1 |             0 |
 | [place](../../features/place)                         |      7 |          7 |       0 |     3 |             0 |
 | [policy](../../features/policy)                       |     17 |         14 |       0 |     9 |             6 |
