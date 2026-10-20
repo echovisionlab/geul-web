@@ -250,10 +250,11 @@ export async function getLatestOgGenerationAction(input: {
     }
     return actionSuccess({ generation: toGenerationState(response.generation) });
   } catch (error) {
-    logServerFailure('og-generation-actions', 'getLatestOgGenerationAction', error);
+    // A target without a generation yet is the normal state of a new document, not a failure.
     if (isConnectErrorCode(error, Code.NotFound)) {
       return actionSuccess<{}>({});
     }
+    logServerFailure('og-generation-actions', 'getLatestOgGenerationAction', error);
     return ogActionFailure(error, 'Failed to load the latest OG generation', 'OG_LATEST_GENERATION_LOAD_FAILED');
   }
 }
