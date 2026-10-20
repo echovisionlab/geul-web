@@ -3,6 +3,7 @@ import { OgGenerationRunStatus } from '@echovisionlab/geul-proto/secure/admin_pb
 import { OgEntityType, OgGenerationStatus } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createAdminClient } from '@/lib/api/server-client';
+import { logServerFailure } from '@/lib/logging/logger';
 import {
   getLatestOgGenerationAction,
   getOgGenerationAction,
@@ -19,6 +20,10 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@/lib/api/server-client', () => ({
   createAdminClient: vi.fn(),
+}));
+
+vi.mock('@/lib/logging/logger', () => ({
+  logServerFailure: vi.fn(),
 }));
 
 beforeEach(() => {
@@ -277,7 +282,7 @@ describe('OG generation actions', () => {
     ).resolves.toEqual({ ok: false, error: 'Failed to regenerate OG image', errorCode: Code.Internal });
   });
 
-  it('treats an absent latest generation as a successful absence', async () => {
+  it('treats an absent latest generation as a successful absence without logging a failure', async () => {
     mocks.getLatestOgGeneration
       .mockResolvedValueOnce({})
       .mockRejectedValueOnce(new ConnectError('none', Code.NotFound));
@@ -291,5 +296,6 @@ describe('OG generation actions', () => {
     ).resolves.toEqual({
       ok: true,
     });
+    expect(logServerFailure).not.toHaveBeenCalled();
   });
 });
