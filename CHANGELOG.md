@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.2](https://github.com/echovisionlab/geul-web/compare/v0.18.1...v0.18.2) (2026-10-20)
+
+
+### Bug Fixes
+
+* phone navigation and quieter public pages ([#160](https://github.com/echovisionlab/geul-web/issues/160)) ([c041c4c](https://github.com/echovisionlab/geul-web/commit/c041c4c05de241b4b2fd8490967fbd4a3aa848e2))
+
 ## [0.18.1](https://github.com/echovisionlab/geul-web/compare/v0.18.0...v0.18.1) (2026-10-20)
 
 
