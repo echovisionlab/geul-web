@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.1](https://github.com/echovisionlab/geul-web/compare/v0.18.0...v0.18.1) (2026-10-20)
+
+
+### Bug Fixes
+
+* stop logging an absent latest OG generation as a failure ([#158](https://github.com/echovisionlab/geul-web/issues/158)) ([674db8b](https://github.com/echovisionlab/geul-web/commit/674db8b92daf0d36ffd23d1f8d8286cb506c07d9))
+
 ## [0.18.0](https://github.com/echovisionlab/geul-web/compare/v0.17.2...v0.18.0) (2026-10-19)
 
 
