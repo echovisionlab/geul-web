@@ -3569,7 +3569,8 @@
       "importingExternalImages": "Importation des images externes..."
     },
     "notifications": {
-      "uploadFailedMessage": "Échec du téléversement de {name} : {message}"
+      "uploadFailedMessage": "Échec du téléversement de {name} : {message}",
+      "markdownImagesKeptAsLinks": "{count, plural, one {# image n’a pas pu être importée et reste} many {# images n’ont pas pu être importées et restent} other {# images n’ont pas pu être importées et restent}} sous forme de lien."
     },
     "media": {
       "statuses": {

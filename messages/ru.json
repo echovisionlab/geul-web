@@ -3569,7 +3569,8 @@
       "importingExternalImages": "Импорт внешних изображений..."
     },
     "notifications": {
-      "uploadFailedMessage": "Не удалось загрузить {name}: {message}."
+      "uploadFailedMessage": "Не удалось загрузить {name}: {message}.",
+      "markdownImagesKeptAsLinks": "Не удалось импортировать {count, plural, one {# изображение, оно оставлено} few {# изображения, они оставлены} many {# изображений, они оставлены} other {# изображения, они оставлены}} ссылкой."
     },
     "media": {
       "statuses": {

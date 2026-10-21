@@ -3569,7 +3569,8 @@
       "importingExternalImages": "正在匯入外部圖片..."
     },
     "notifications": {
-      "uploadFailedMessage": "上傳 {name} 失敗：{message}"
+      "uploadFailedMessage": "上傳 {name} 失敗：{message}",
+      "markdownImagesKeptAsLinks": "有 {count} 張圖片無法匯入，已保留為連結。"
     },
     "media": {
       "statuses": {

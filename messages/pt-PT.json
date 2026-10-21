@@ -3569,7 +3569,8 @@
       "importingExternalImages": "Importação de imagens externas..."
     },
     "notifications": {
-      "uploadFailedMessage": "Falha ao enviar {name}: {message}"
+      "uploadFailedMessage": "Falha ao enviar {name}: {message}",
+      "markdownImagesKeptAsLinks": "{count, plural, one {Não foi possível importar # imagem, que foi mantida} many {Não foi possível importar # imagens, que foram mantidas} other {Não foi possível importar # imagens, que foram mantidas}} como ligação."
     },
     "media": {
       "statuses": {

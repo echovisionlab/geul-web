@@ -8,14 +8,16 @@ import { siteVariableContext } from '@/lib/site-variables';
 import { create, fromJson, type JsonValue } from '@bufbuild/protobuf';
 import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
 import {
+  ContentBlockMediaItemSchema,
   RichTextDocumentSchema,
   RichTextProfile,
   type RichTextDocument,
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
+import { randomTestUuid } from '@echovisionlab/geul-common/test/random-id';
 import { describe, expect, it } from 'vitest';
 import { getSchema } from '@tiptap/core';
 import { createTiptapWireExtensions } from '@/features/editor/tiptap/wire-schema';
-import { markdownBlocks } from '@/features/editor/tiptap/markdown-paste';
+import { markdownBlocks, type MarkdownImagePlaceholder } from '@/features/editor/tiptap/markdown-paste';
 import { generatedRichTextDocumentMarkdown } from './generated-rich-text-markdown';
 
 describe('generatedRichTextDocumentMarkdown', () => {
@@ -193,6 +195,50 @@ describe('generatedRichTextDocumentMarkdown', () => {
     expect(generatedRichTextDocumentMarkdown(document, 'post-1')).toBe(
       `[field recording.wav](/files/post/post-1/${activeId}/field%20recording.wav)\n`,
     );
+  });
+
+  it('exports image Files as absolute images that paste back as image imports', () => {
+    const imageId = '019cd0f1-b8e3-7b27-9b6a-53d6ddd83d73';
+    const fileId = '019cd0f1-b8e3-7b27-9b6a-53d6ddd83d74';
+    const file = (id: string, name: string) => ({
+      block: { id, file: { props: { attachment: { activeFileId: randomTestUuid() }, name } } },
+      placement: { index: id === imageId ? 0 : 1 },
+    });
+    const document = fromJson(RichTextDocumentSchema, {
+      blockCatalogFingerprint: contentBlockCatalogFingerprint,
+      profile: RichTextProfile.POST,
+      sourceLocale: 'ko',
+      base: { nodes: [file(imageId, 'stage'), file(fileId, 'set list [final].pdf')] },
+      localeOverlays: [
+        {
+          locale: 'ko',
+          blocks: [
+            { blockId: imageId, file: { props: { alt: 'Stage [left]' } } },
+            { blockId: fileId, file: { props: {} } },
+          ],
+        },
+      ],
+    }) as RichTextDocument;
+    const media = (blockId: string, mimeType: string) =>
+      fromJson(ContentBlockMediaItemSchema, {
+        selector: { blockId, referencePath: 'file' },
+        delivery: { mimeType, asset: { url: `/asset/${blockId}/original` } },
+      });
+
+    const markdown = generatedRichTextDocumentMarkdown(document, 'post-1', undefined, {
+      blockMedia: [media(imageId, 'image/png'), media(fileId, 'application/pdf')],
+      absoluteUrl: (path) => `https://site.example${path}`,
+    });
+
+    expect(markdown).toBe(
+      `![Stage \\[left\\]](https://site.example/asset/${imageId}/original)\n\n` +
+        `[set list \\[final\\].pdf](https://site.example/files/post/post-1/${fileId}/set%20list%20%5Bfinal%5D.pdf)\n`,
+    );
+    const images: MarkdownImagePlaceholder[] = [];
+    markdownBlocks(markdown, getSchema(createTiptapWireExtensions()), { images });
+    expect(images.map(({ alt, url }) => [alt, url])).toEqual([
+      ['Stage [left]', `https://site.example/asset/${imageId}/original`],
+    ]);
   });
 
   it('exports inline math and standalone external video links as ordinary Markdown', () => {

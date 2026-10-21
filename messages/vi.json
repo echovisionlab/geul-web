@@ -3569,7 +3569,8 @@
       "importingExternalImages": "Đang nhập hình ảnh bên ngoài..."
     },
     "notifications": {
-      "uploadFailedMessage": "Không tải lên được {name}: {message}"
+      "uploadFailedMessage": "Không tải lên được {name}: {message}",
+      "markdownImagesKeptAsLinks": "Không thể nhập {count} hình ảnh nên đã giữ lại dưới dạng liên kết."
     },
     "media": {
       "statuses": {

@@ -66,7 +66,7 @@ export function collectSupportedMediaFiles(
   return mediaFiles;
 }
 
-function createVerifiedFileBlock(file: File, result: MediaFileUploadResult): EditorMediaBlock {
+export function createVerifiedFileBlock(file: File, result: MediaFileUploadResult): EditorMediaBlock {
   return {
     type: 'file',
     props: {

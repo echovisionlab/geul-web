@@ -1,7 +1,7 @@
-import { getSchema } from '@tiptap/core';
+import { getSchema, type JSONContent } from '@tiptap/core';
 import { describe, expect, it } from 'vitest';
 import { createTiptapWireExtensions } from './wire-schema';
-import { markdownBlocks } from './markdown-paste';
+import { markdownBlocks, type MarkdownImagePlaceholder } from './markdown-paste';
 
 const schema = getSchema(createTiptapWireExtensions());
 const sample =
@@ -41,8 +41,39 @@ describe('markdownBlocks', () => {
   });
 });
 
-it('preserves unsupported image references by falling back to plain text', () => {
-  expect(markdownBlocks('# Heading\n\n![diagram](https://example.com/a.png)', schema)).toBeNull();
+const blockText = (block: JSONContent) =>
+  (block.content![0].content ?? []).map((node) => (node.type === 'text' ? node.text : '\n')).join('');
+const linkTarget = (block: JSONContent) =>
+  block.content![0].content?.[0]?.marks?.find((mark) => mark.type === 'link')?.attrs?.href;
+
+it('keeps images as links so the surrounding Markdown still converts', () => {
+  const blocks = markdownBlocks(
+    '# Heading\n\n![diagram](https://example.com/a.png) and [![logo](https://example.com/l.png)](https://example.com)\n\n![](https://example.com/b.png)',
+    schema,
+  )!;
+  expect(blocks.map((block) => block.content![0].type)).toEqual(['heading', 'paragraph', 'paragraph']);
+  expect(blocks[1].content![0].content).toEqual([
+    { type: 'text', text: 'diagram', marks: [{ type: 'link', attrs: { href: 'https://example.com/a.png' } }] },
+    { type: 'text', text: ' and ' },
+    { type: 'text', text: 'logo', marks: [{ type: 'link', attrs: { href: 'https://example.com' } }] },
+  ]);
+  expect(blockText(blocks[2])).toBe('https://example.com/b.png');
+});
+
+it('collects only HTTPS images written on their own line as import placeholders', () => {
+  const images: MarkdownImagePlaceholder[] = [];
+  const blocks = markdownBlocks(
+    'Intro\n![A](https://example.com/a.png)\nafter\n\n- item ![B](https://example.com/b.png)\n\n![C](./c.png) ![D](https://example.com/d.png)\n\n![E](http://example.com/e.png)',
+    schema,
+    { images },
+  )!;
+  expect(blocks.map(blockText)).toEqual(['Intro', 'A', 'after', 'item B', 'C', 'D', 'E']);
+  expect(images.map(({ alt, url }) => [alt, url])).toEqual([
+    ['A', 'https://example.com/a.png'],
+    ['D', 'https://example.com/d.png'],
+  ]);
+  expect(images.map((image) => image.blockId)).toEqual([blocks[1].attrs!.id, blocks[5].attrs!.id]);
+  expect(linkTarget(blocks[4])).toBe('./c.png');
 });
 it('keeps loose-list paragraphs and nested fenced code as child blocks', () => {
   const blocks = markdownBlocks('- first paragraph\n\n  second paragraph\n\n  ```js\n  const x = 1\n  ```', schema)!;

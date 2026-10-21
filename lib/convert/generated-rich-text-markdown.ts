@@ -8,12 +8,14 @@ import {
   CodeBlockProps_Language,
   ShaderProps_StagesItem_Kind,
   ThreeSceneProps_Language,
+  type ContentBlockMediaItem,
   type RichTextBlock,
   type RichTextBlockLocale,
   type RichTextDocument,
   type RichTextInline,
   type RichTextStyledText,
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
+import { findContentBlockMediaBySelector } from '@/lib/media/content-block-media-server';
 import { buildContentScopedFileUrl } from '@/lib/media/content-scoped-file-url';
 
 function styledText(value: Pick<RichTextStyledText, 'text' | 'styles'>): string {
@@ -135,12 +137,24 @@ function localeValue<TCase extends LocaleValue['case']>(pair: Pair, kind: TCase)
   return pair.locale.value.value as unknown as LocaleValueByCase[TCase];
 }
 
+/** Media read with the document; without it Files export as relative download links. */
+export interface GeneratedMarkdownMedia {
+  blockMedia?: readonly ContentBlockMediaItem[];
+  /** Resolves a site-relative path so the exported file works outside the site. */
+  absoluteUrl?: (path: string) => string;
+}
+
+const markdownLabel = (value: string) => value.replace(/[\\[\]]/gu, '\\$&');
+const markdownUrl = (value: string) => value.replaceAll(' ', '%20').replaceAll('(', '%28').replaceAll(')', '%29');
+
 function blockMarkdown(
   pair: Pair,
   descendants: readonly string[],
   entityId: string,
-  context?: SiteVariableContext,
+  context: SiteVariableContext | undefined,
+  media: GeneratedMarkdownMedia,
 ): string {
+  const absoluteUrl = media.absoluteUrl ?? ((path: string) => path);
   if (pair.block.value.case !== pair.locale.value.case) {
     throw new Error(`Localized Block ${pair.block.id} kind does not match its base Block.`);
   }
@@ -238,12 +252,27 @@ function blockMarkdown(
         break;
       }
       const name = props?.name || 'file';
-      markdown = `[${name}](${buildContentScopedFileUrl({
-        ownerType: 'post',
-        ownerId: entityId,
+      const delivery = findContentBlockMediaBySelector(media.blockMedia ?? [], {
         blockId: pair.block.id,
-        fileName: name,
-      })})`;
+        referencePath: 'file',
+      })?.delivery;
+      // The public asset is the image itself; a File link stays the download route.
+      const imageAsset = delivery?.mimeType.toLowerCase().startsWith('image/') ? delivery.asset?.url : undefined;
+      if (imageAsset) {
+        const alt = localeValue(pair, 'file').props?.alt || name;
+        markdown = `![${markdownLabel(alt)}](${markdownUrl(absoluteUrl(imageAsset))})`;
+        break;
+      }
+      markdown = `[${markdownLabel(name)}](${markdownUrl(
+        absoluteUrl(
+          buildContentScopedFileUrl({
+            ownerType: 'post',
+            ownerId: entityId,
+            blockId: pair.block.id,
+            fileName: name,
+          }),
+        ),
+      )})`;
       break;
     }
     case undefined:
@@ -258,6 +287,7 @@ export function generatedRichTextDocumentMarkdown(
   document: RichTextDocument,
   entityId: string,
   context?: SiteVariableContext,
+  media: GeneratedMarkdownMedia = {},
 ): string {
   const localized = materializeLocalizedRichTextDocument(document, document.sourceLocale);
   const localeById = new Map(localized.localeOverlay?.blocks.map((block) => [block.blockId, block]));
@@ -287,6 +317,6 @@ export function generatedRichTextDocumentMarkdown(
   }
 
   const render = (pair: Pair): string =>
-    blockMarkdown(pair, (byParent.get(pair.block.id) ?? []).map(render), entityId, context);
+    blockMarkdown(pair, (byParent.get(pair.block.id) ?? []).map(render), entityId, context, media);
   return (byParent.get(null) ?? []).map(render).filter(Boolean).join('\n\n') + (pairs.length ? '\n' : '');
 }

@@ -132,5 +132,7 @@ it('keeps a pasted Markdown heading as a block inside an existing paragraph', ()
     'paragraph',
   ]);
   expect(pastedParagraphs(editor)[1].content).toEqual([{ type: 'text', text: 'Heading' }]);
+  const ids = (editor.getJSON() as JSONContent).content![0].content!.map((block) => block.attrs!.id);
+  expect(new Set(ids).size).toBe(ids.length);
   editor.destroy();
 });

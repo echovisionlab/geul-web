@@ -165,6 +165,7 @@ function LocalizedCollaborativeRichTextEditorSurface({
     selectLibraryFilesAtBlock,
     selectLibraryFilesAtSavedPosition,
     externalImageProgress,
+    importMarkdownImagesInto,
     mediaTiptapExtensions,
     uploadProgress,
   } = useEntityMediaSurface({
@@ -188,7 +189,18 @@ function LocalizedCollaborativeRichTextEditorSurface({
         tone: 'danger',
       });
     },
+    onMarkdownImagesKept: (count) => {
+      notifications.show({
+        title: tCommonNotifications('uploadFailed'),
+        message: tEditorCommon('notifications.markdownImagesKeptAsLinks', { count }),
+        tone: 'warning',
+      });
+    },
   });
+  const markdownImageImporter = useMemo(
+    () => (localizedMediaPort ? importMarkdownImagesInto(localizedMediaPort) : undefined),
+    [importMarkdownImagesInto, localizedMediaPort],
+  );
   const additionalExtensions = mediaTiptapExtensions;
   const map = useMemo(
     () => ({
@@ -350,6 +362,7 @@ function LocalizedCollaborativeRichTextEditorSurface({
             onEditorReady={handleLocalizedEditorReady}
             onFileActivate={canEditNeutral ? activateFile : undefined}
             mediaRuntimeStore={mediaRuntimeStore}
+            markdownImageImporter={markdownImageImporter}
             externalVideo={blockRoomController.paragraphExternalVideo ? undefined : false}
             map={map}
             ai={canEditLocalized && aiTarget ? { target: aiTarget } : false}

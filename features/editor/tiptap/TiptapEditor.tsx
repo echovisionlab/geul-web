@@ -1,6 +1,6 @@
 'use client';
 
-import { createMarkdownPasteExtension } from './markdown-paste';
+import { createMarkdownPasteExtension, type MarkdownImageImporter } from './markdown-paste';
 import { EditorRuntimeOptions } from './live-node-view';
 import {
   memo,
@@ -113,6 +113,8 @@ interface TiptapEditorSharedProps {
   editable?: boolean;
   onFileActivate?: TiptapAuthoringControlsCallbacks['onFileActivate'];
   mediaRuntimeStore?: EditorMediaRuntimeStore;
+  /** Imports standalone images from pasted Markdown; without it they paste as links. */
+  markdownImageImporter?: MarkdownImageImporter;
   externalVideo?: TiptapExternalVideoOptions | false;
   ai?: TiptapEditorAIOptions | false;
   map?: TiptapMapNodeOptions;
@@ -357,6 +359,7 @@ export function TiptapEditor({
   editable = true,
   onFileActivate,
   mediaRuntimeStore,
+  markdownImageImporter,
   externalVideo,
   ai,
   map,
@@ -557,6 +560,8 @@ export function TiptapEditor({
   onFileActivateRef.current = onFileActivate;
   const structureLockedRef = useRef(structureLocked);
   structureLockedRef.current = structureLocked;
+  const markdownImageImporterRef = useRef(markdownImageImporter);
+  markdownImageImporterRef.current = markdownImageImporter;
   const extensions = useMemo(() => {
     const fileNode = createTiptapFileNode({
       onActivate: (blockId) => onFileActivateRef.current?.(blockId),
@@ -620,6 +625,7 @@ export function TiptapEditor({
           blockRoomController.canChangeStructure &&
           liveAuthoringMode.allowNeutralBlockEdits &&
           !structureLockedRef.current,
+        () => markdownImageImporterRef.current ?? null,
       ),
       BlockBoundaryNavigation,
       createAuthoringShortcutGuard(liveAuthoringMode),

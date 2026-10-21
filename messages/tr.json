@@ -3569,7 +3569,8 @@
       "importingExternalImages": "Harici görüntüler içe aktarılıyor..."
     },
     "notifications": {
-      "uploadFailedMessage": "{name} yüklenemedi: {message}"
+      "uploadFailedMessage": "{name} yüklenemedi: {message}",
+      "markdownImagesKeptAsLinks": "{count, plural, one {# görsel} other {# görsel}} içe aktarılamadı ve bağlantı olarak bırakıldı."
     },
     "media": {
       "statuses": {

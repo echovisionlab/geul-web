@@ -3569,7 +3569,8 @@
       "importingExternalImages": "正在导入外部图片..."
     },
     "notifications": {
-      "uploadFailedMessage": "上传 {name} 失败：{message}"
+      "uploadFailedMessage": "上传 {name} 失败：{message}",
+      "markdownImagesKeptAsLinks": "有 {count} 张图片无法导入，已保留为链接。"
     },
     "media": {
       "statuses": {

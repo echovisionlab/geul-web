@@ -26,6 +26,7 @@ import { createPostClient } from '@/lib/api/server-client';
 import { resolvePostFeaturedImageUrl } from '@/lib/media/post-featured-image';
 import { mapProtoDocumentLayout } from '@/lib/queries/document-layout';
 import type { PostConfigurationSnapshot } from '@/lib/types/post/model';
+import { toCdnUrl } from '@/lib/utils/file-url';
 import { normalizeOgRegenerationLocale } from '@/lib/utils/og-regeneration';
 
 const revalidatePostAfterCommit = createCommittedMutationRevalidator('post-actions', 'post');
@@ -396,9 +397,18 @@ async function getGeneratedPostMarkdown(postId: string): Promise<{ title: string
     throw new Error('Post Block document is missing.');
   }
   const { generatedRichTextDocumentMarkdown } = await import('@/lib/convert/generated-rich-text-markdown');
+  const settings = await getSettings();
   return {
     title: post.title,
-    markdown: generatedRichTextDocumentMarkdown(post.document, post.id, siteVariableContext(await getSettings())),
+    markdown: generatedRichTextDocumentMarkdown(post.document, post.id, siteVariableContext(settings), {
+      blockMedia: post.blockMedia,
+      absoluteUrl: (path) => {
+        const url = toCdnUrl(path);
+        return url.startsWith('/') && URL.canParse(url, settings.site_origin)
+          ? new URL(url, settings.site_origin).href
+          : url;
+      },
+    }),
   };
 }
 

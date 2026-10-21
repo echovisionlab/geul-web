@@ -4016,7 +4016,8 @@
       "importingExternalImages": "Externe Bilder werden importiert..."
     },
     "notifications": {
-      "uploadFailedMessage": "Hochladen von {name} fehlgeschlagen: {message}"
+      "uploadFailedMessage": "Hochladen von {name} fehlgeschlagen: {message}",
+      "markdownImagesKeptAsLinks": "{count, plural, one {# Bild konnte} other {# Bilder konnten}} nicht importiert werden und {count, plural, one {bleibt} other {bleiben}} als Link erhalten."
     },
     "media": {
       "statuses": {
