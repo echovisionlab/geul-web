@@ -802,7 +802,7 @@
     }
   },
   "cookieConsentCommon": {
-    "analyticsLabel": "ملفات تعريف الارتباط التحليلية (Google Analytics)"
+    "analyticsLabel": "التحليلات والوسائط الخارجية (Google Analytics وYouTube وVimeo)"
   },
   "nicknameField": {
     "label": "الاسم المستعار",
@@ -3259,8 +3259,8 @@
     }
   },
   "cookieConsentBanner": {
-    "renewalNotice": "لقد حدّثنا سياسة ملفات تعريف الارتباط لدينا. يرجى تأكيد تفضيلاتك لمتابعة التحليلات الاختيارية",
-    "intro": "نستخدم ملفات تعريف ارتباط أساسية للمصادقة وتشغيل الموقع، وملفات تعريف ارتباط تحليلية اختيارية لفهم كيفية استخدام الموقع",
+    "renewalNotice": "حدّثنا سياسة ملفات تعريف الارتباط. يُرجى تأكيد تفضيلاتك للتحليلات الاختيارية والوسائط الخارجية.",
+    "intro": "نستخدم ملفات تعريف الارتباط الضرورية للمصادقة وتشغيل الموقع. وبموافقتك نستخدم أيضًا ملفات تعريف الارتباط التحليلية لفهم استخدام الموقع، ونحمّل مقاطع YouTube وVimeo المضمّنة مباشرةً.",
     "learnMore": "راجع <privacy>سياسة الخصوصية</privacy> و<terms>شروط الخدمة</terms>",
     "actions": {
       "customize": "تخصيص"
@@ -3774,6 +3774,17 @@
           "alignRight": "محاذاة لليمين",
           "youtubeTitle": "فيديو YouTube",
           "vimeoTitle": "فيديو Vimeo"
+        },
+        "linkPresentation": {
+          "menu": "طريقة عرض الرابط",
+          "asLink": "رابط",
+          "asCard": "بطاقة",
+          "asVideo": "فيديو",
+          "refreshPreview": "تحديث المعاينة",
+          "loadingPreview": "جارٍ تحميل المعاينة…",
+          "previewUnavailable": "تعذّر تحميل معاينة هذا الرابط.",
+          "playVideo": "تشغيل {title}",
+          "playNotice": "يؤدي التشغيل إلى التحميل من {provider}."
         },
         "shader": {
           "title": "تظليل GLSL",

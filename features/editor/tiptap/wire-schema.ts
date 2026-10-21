@@ -164,12 +164,41 @@ export const WireBlockContainer = TiptapNode.create({
   },
 });
 
+/**
+ * How a standalone paragraph link is presented, plus the preview a card or
+ * video keeps. Post and Page editors add these to Paragraph as global
+ * attributes alongside the external-video layout.
+ */
+export const linkPresentationProps = {
+  linkPresentation: { default: 'auto' },
+  linkSiteName: { default: '' },
+  linkDescription: { default: '' },
+  linkThumbnailFileId: { default: '' },
+} as const;
+
 export const WireParagraph = createBlockContentNode({
   name: 'paragraph',
   content: 'inline*',
   propSchema: defaultTextBlockProps,
   tag: 'p',
 });
+
+function standaloneLinkAttributes() {
+  return {
+    ...propSchemaToAttributes({
+      ...defaultTextBlockProps,
+      previewWidth: { default: 100, type: 'number' },
+      aspectRatio: { default: 'auto' },
+      ...linkPresentationProps,
+      url: { default: '' },
+      label: { default: '' },
+    }),
+    sourceContent: {
+      default: [],
+      rendered: false,
+    },
+  };
+}
 
 /**
  * Editor-only projection of a durable standalone paragraph link. The Block
@@ -184,21 +213,7 @@ export const WireExternalVideo = TiptapNode.create({
   isolating: true,
   selectable: true,
   addAttributes() {
-    return {
-      ...propSchemaToAttributes({
-        backgroundColor: { default: 'default' },
-        textColor: { default: 'default' },
-        textAlignment: { default: 'left' },
-        previewWidth: { default: 100, type: 'number' },
-        aspectRatio: { default: 'auto' },
-        url: { default: '' },
-        label: { default: '' },
-      }),
-      sourceContent: {
-        default: [],
-        rendered: false,
-      },
-    };
+    return standaloneLinkAttributes();
   },
   parseHTML() {
     return [{ tag: '[data-content-type="externalVideo"]' }];
@@ -211,6 +226,25 @@ export const WireExternalVideo = TiptapNode.create({
         'data-external-video-node': '',
       }),
     ];
+  },
+});
+
+/** Editor-only card projection of a standalone paragraph link; persisted as that Paragraph. */
+export const WireLinkCard = TiptapNode.create({
+  name: 'linkCard',
+  group: 'blockContent',
+  atom: true,
+  defining: true,
+  isolating: true,
+  selectable: true,
+  addAttributes() {
+    return standaloneLinkAttributes();
+  },
+  parseHTML() {
+    return [{ tag: '[data-content-type="linkCard"]' }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes, { 'data-content-type': 'linkCard', 'data-link-card-node': '' })];
   },
 });
 
@@ -517,6 +551,7 @@ export type TiptapWireSchemaOptions = {
   blockContainerNode?: Extensions[number];
   codeBlockNode?: Extensions[number];
   externalVideoNode?: Extensions[number];
+  linkCardNode?: Extensions[number];
   fileNode?: Extensions[number];
   mapNode?: Extensions[number];
 };
@@ -536,6 +571,7 @@ export function createTiptapWireExtensions(options: TiptapWireSchemaOptions = {}
     options.codeBlockNode ?? WireCodeBlock,
     WireDivider,
     options.externalVideoNode ?? WireExternalVideo,
+    options.linkCardNode ?? WireLinkCard,
     options.fileNode ?? WireFile,
     WireMath,
     options.mapNode ?? WireMap,

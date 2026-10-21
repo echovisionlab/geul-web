@@ -42,6 +42,7 @@ import { EmailLayoutService } from '@echovisionlab/geul-proto/secure/email_layou
 import { EmailSuppressionService } from '@echovisionlab/geul-proto/secure/email_suppression_pb.ts';
 import { EmailTemplateService } from '@echovisionlab/geul-proto/secure/email_template_pb.ts';
 import { FileService } from '@echovisionlab/geul-proto/secure/file_pb.ts';
+import { LinkPreviewService } from '@echovisionlab/geul-proto/secure/link_preview_pb.ts';
 import { FormService } from '@echovisionlab/geul-proto/secure/form_pb.ts';
 import { FormatService } from '@echovisionlab/geul-proto/secure/format_pb.ts';
 import { GenreService } from '@echovisionlab/geul-proto/secure/genre_pb.ts';
@@ -318,6 +319,10 @@ export async function createArtistClient() {
 
 export async function createFileClient(editorOrigin?: string) {
   return createClient(FileService, await createServerTransport({ editorOrigin }));
+}
+
+export async function createLinkPreviewClient() {
+  return createClient(LinkPreviewService, await createServerTransport());
 }
 
 export async function createLabelClient() {

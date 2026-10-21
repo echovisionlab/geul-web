@@ -25,6 +25,7 @@ const mediaSurfaceSpy = vi.fn((_options?: unknown) => ({
   selectLibraryFilesAtSavedPosition: vi.fn(() => false),
   externalImageProgress: null,
   importMarkdownImagesInto: vi.fn(() => undefined),
+  importRemoteImage: vi.fn(async () => null),
   mediaTiptapExtensions: [],
   uploadProgress: null,
 }));

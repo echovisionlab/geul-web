@@ -1631,7 +1631,7 @@
     }
   },
   "cookieConsentCommon": {
-    "analyticsLabel": "Analytische cookies (Google Analytics)"
+    "analyticsLabel": "Analyse en externe media (Google Analytics, YouTube, Vimeo)"
   },
   "nicknameField": {
     "label": "Schermnaam",
@@ -2489,8 +2489,8 @@
     }
   },
   "cookieConsentBanner": {
-    "renewalNotice": "We hebben ons cookiebeleid bijgewerkt. Bevestig je voorkeuren om door te gaan met optionele analytics",
-    "intro": "We gebruiken essentiële cookies voor authenticatie en sitewerking, en optionele analysecookies om het gebruik van de site te begrijpen",
+    "renewalNotice": "We hebben ons cookiebeleid bijgewerkt. Bevestig je voorkeuren voor optionele analyse en externe media.",
+    "intro": "We gebruiken noodzakelijke cookies voor aanmelding en de werking van de site. Met je toestemming gebruiken we ook analysecookies om het gebruik van de site te begrijpen en laden we ingesloten YouTube- en Vimeo-video’s direct.",
     "learnMore": "Bekijk ons <privacy>Privacybeleid</privacy> en onze <terms>Servicevoorwaarden</terms>",
     "actions": {
       "customize": "Aanpassen"
@@ -4039,6 +4039,17 @@
           "alignRight": "Rechts uitlijnen",
           "youtubeTitle": "YouTube-video",
           "vimeoTitle": "Vimeo-video"
+        },
+        "linkPresentation": {
+          "menu": "Linkweergave",
+          "asLink": "Link",
+          "asCard": "Kaart",
+          "asVideo": "Video",
+          "refreshPreview": "Voorbeeld vernieuwen",
+          "loadingPreview": "Voorbeeld laden…",
+          "previewUnavailable": "Kan geen voorbeeld van deze link laden.",
+          "playVideo": "{title} afspelen",
+          "playNotice": "Bij afspelen wordt het geladen van {provider}."
         },
         "shader": {
           "title": "GLSL-shader",

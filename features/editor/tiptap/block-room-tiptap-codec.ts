@@ -152,6 +152,10 @@ function blockPropsToTiptap(kind: RichTextBlockKind, payload: JsonObject | undef
       delete props.attachment;
     }
   }
+  if (kind === 'paragraph' && Object.hasOwn(props, 'linkThumbnail')) {
+    props.linkThumbnailFileId = attachmentToTiptap(props.linkThumbnail);
+    delete props.linkThumbnail;
+  }
   if (kind === 'map' && Array.isArray(props.mapPlaceIds)) {
     props.mapPlaceIds = props.mapPlaceIds.join(',');
   }
@@ -303,7 +307,8 @@ function inlineToTiptap(value: JsonValue): readonly JSONContent[] {
   throw new Error('Unsupported generated rich-text inline payload.');
 }
 
-function standaloneExternalVideoSource(
+/** The single link a standalone paragraph holds; card and video projections both present it. */
+function standaloneLinkSource(
   content: readonly JSONContent[],
 ): { readonly url: string; readonly label: string } | null {
   let url: string | null = null;
@@ -334,7 +339,7 @@ function standaloneExternalVideoSource(
     url = candidate;
     hasLinkedText = true;
   }
-  if (!url || !hasLinkedText || !resolveExternalVideo(url)) {
+  if (!url || !hasLinkedText) {
     return null;
   }
   return {
@@ -345,6 +350,23 @@ function standaloneExternalVideoSource(
         .join('')
         .trim() || url,
   };
+}
+
+/**
+ * Chooses the editor-only atom for a standalone link paragraph. An explicit
+ * link keeps the paragraph; `auto` keeps the earlier URL-based video detection.
+ */
+export function linkPresentationNodeType(presentation: unknown, url: string): 'externalVideo' | 'linkCard' | null {
+  if (presentation === 'card') {
+    return 'linkCard';
+  }
+  if (
+    (presentation === 'video' || presentation === 'auto' || presentation === undefined) &&
+    resolveExternalVideo(url)
+  ) {
+    return 'externalVideo';
+  }
+  return null;
 }
 
 function requireTableIdentity(value: unknown, description: string): string {
@@ -481,10 +503,13 @@ function descriptorToTiptap(
         return [];
     }
   })();
-  const externalVideo =
+  const standaloneLink =
     options.paragraphExternalVideo && depth === 0 && block.adapter.kind === 'paragraph'
-      ? standaloneExternalVideoSource(content)
+      ? standaloneLinkSource(content)
       : null;
+  const presentation = standaloneLink
+    ? linkPresentationNodeType((attrs as JsonObject).linkPresentation, standaloneLink.url)
+    : null;
   const childGroup: JSONContent[] = block.children.length
     ? [
         {
@@ -493,17 +518,18 @@ function descriptorToTiptap(
         },
       ]
     : [];
-  const contentNode: JSONContent = externalVideo
-    ? {
-        type: 'externalVideo',
-        attrs: {
-          ...Object.fromEntries(Object.entries(attrs).filter(([field]) => field !== 'id')),
-          url: externalVideo.url,
-          label: externalVideo.label,
-          sourceContent: content,
-        },
-      }
-    : { type: block.adapter.nodeType, attrs, content };
+  const contentNode: JSONContent =
+    standaloneLink && presentation
+      ? {
+          type: presentation,
+          attrs: {
+            ...Object.fromEntries(Object.entries(attrs).filter(([field]) => field !== 'id')),
+            url: standaloneLink.url,
+            label: standaloneLink.label,
+            sourceContent: content,
+          },
+        }
+      : { type: block.adapter.nodeType, attrs, content };
   return {
     type: 'blockContainer',
     attrs: { id: block.id },
@@ -641,11 +667,12 @@ function parseBlocks(
     if (!blockNode?.type) {
       throw new Error(`Tiptap Block ${container.attrs.id} has no content node.`);
     }
-    if (blockNode.type === 'externalVideo' && !options.paragraphExternalVideo) {
+    if ((blockNode.type === 'externalVideo' || blockNode.type === 'linkCard') && !options.paragraphExternalVideo) {
       throw new Error('This rich-text profile does not allow standalone external video Blocks.');
     }
     const nextGroup = container.content?.[1];
-    const generatedCase = blockNode.type === 'externalVideo' ? 'paragraph' : protoCase(blockNode.type);
+    const generatedCase =
+      blockNode.type === 'externalVideo' || blockNode.type === 'linkCard' ? 'paragraph' : protoCase(blockNode.type);
     return {
       id: container.attrs.id,
       nodeType: blockNode.type,
@@ -665,8 +692,8 @@ function externalVideoSourceContent(block: TiptapBlockSnapshot): readonly JSONCo
     return block.attrs.sourceContent as unknown as readonly JSONContent[];
   }
   const url = typeof block.attrs.url === 'string' ? block.attrs.url.trim() : '';
-  if (!url || !resolveExternalVideo(url)) {
-    throw new Error(`Tiptap external-video Block ${block.id} has no supported source URL.`);
+  if (!url || (block.nodeType === 'externalVideo' && !resolveExternalVideo(url))) {
+    throw new Error(`Tiptap ${block.nodeType} Block ${block.id} has no supported source URL.`);
   }
   const label = typeof block.attrs.label === 'string' && block.attrs.label.trim() ? block.attrs.label.trim() : url;
   return [{ type: 'text', text: label, marks: [{ type: 'link', attrs: { href: url } }] }];
@@ -847,6 +874,13 @@ export function splitPayload(block: TiptapBlockSnapshot): { base: JsonObject; lo
     const catalogValue = wireValueToCatalog(block.kind, canonicalField, spec, value);
     (owner === 'locale' ? localeProps : baseProps)[canonicalField] = encodeCatalogValue(spec, catalogValue);
   }
+  if (
+    block.kind === 'paragraph' &&
+    typeof block.attrs.linkThumbnailFileId === 'string' &&
+    block.attrs.linkThumbnailFileId
+  ) {
+    baseProps.linkThumbnail = { activeFileId: block.attrs.linkThumbnailFileId };
+  }
   if (block.kind === 'file') {
     if (typeof block.attrs.fileId === 'string' && block.attrs.fileId) {
       baseProps.attachment = { activeFileId: block.attrs.fileId };
@@ -862,7 +896,9 @@ export function splitPayload(block: TiptapBlockSnapshot): { base: JsonObject; lo
   const shape = richTextProseMirrorAdapterForProtoCase(block.protoCase).contentShape;
   if (shape === 'inline') {
     locale.content = inlineFromTiptap(
-      block.nodeType === 'externalVideo' ? externalVideoSourceContent(block) : block.content,
+      block.nodeType === 'externalVideo' || block.nodeType === 'linkCard'
+        ? externalVideoSourceContent(block)
+        : block.content,
     );
   }
   if (shape === 'plain-text') {

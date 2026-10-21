@@ -1631,7 +1631,7 @@
     }
   },
   "cookieConsentCommon": {
-    "analyticsLabel": "Cookie phân tích (Google Analytics)"
+    "analyticsLabel": "Phân tích và nội dung bên ngoài (Google Analytics, YouTube, Vimeo)"
   },
   "nicknameField": {
     "label": "Biệt hiệu",
@@ -2489,8 +2489,8 @@
     }
   },
   "cookieConsentBanner": {
-    "renewalNotice": "Chúng tôi đã cập nhật chính sách cookie của mình. Vui lòng xác nhận tùy chọn của bạn để tiếp tục phân tích tùy chọn.",
-    "intro": "Chúng tôi sử dụng các cookie cần thiết để xác thực và vận hành trang web cũng như các cookie phân tích tùy chọn để hiểu cách sử dụng trang web.",
+    "renewalNotice": "Chúng tôi đã cập nhật chính sách cookie. Vui lòng xác nhận lại tùy chọn phân tích và nội dung bên ngoài.",
+    "intro": "Chúng tôi dùng cookie thiết yếu để xác thực và vận hành trang web. Nếu bạn đồng ý, chúng tôi cũng dùng cookie phân tích để hiểu cách trang được sử dụng và tải trực tiếp video YouTube, Vimeo được nhúng.",
     "learnMore": "Xem <privacy>Chính sách quyền riêng tư</privacy> và <terms>Điều khoản dịch vụ</terms> của chúng tôi.",
     "actions": {
       "customize": "Tùy chỉnh"
@@ -4039,6 +4039,17 @@
           "alignRight": "Căn phải",
           "youtubeTitle": "Video YouTube",
           "vimeoTitle": "Video Vimeo"
+        },
+        "linkPresentation": {
+          "menu": "Cách hiển thị liên kết",
+          "asLink": "Liên kết",
+          "asCard": "Thẻ",
+          "asVideo": "Video",
+          "refreshPreview": "Làm mới bản xem trước",
+          "loadingPreview": "Đang tải bản xem trước…",
+          "previewUnavailable": "Không tải được bản xem trước của liên kết này.",
+          "playVideo": "Phát {title}",
+          "playNotice": "Khi phát, video sẽ được tải từ {provider}."
         },
         "shader": {
           "title": "Shader GLSL",

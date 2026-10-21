@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BlockSelectionTarget } from '@/components/core/SelectionSurface';
 import { TextButton } from '@/components/core/TextButton';
-import { ExternalVideoView, type ExternalVideoViewProps } from '@/features/media/ExternalVideoView';
+import {
+  ExternalVideoView,
+  type ExternalVideoPlaybackLabelFormatter,
+  type ExternalVideoViewProps,
+} from '@/features/media/ExternalVideoView';
 import type { StandaloneExternalVideoLink } from '@/features/media/standalone-external-video';
 import { EditorMediaBlockFrame } from './ui/EditorMediaBlockShell';
 import classes from './ui/ExternalVideoEditorPreview.module.css';
@@ -29,6 +33,8 @@ interface ExternalVideoEditorPreviewProps {
   onShowPreview: () => void;
   onPreviewWidthChange: (previewWidth: string) => void;
   videoView?: React.ComponentType<ExternalVideoViewProps>;
+  thumbnailUrl?: string | null;
+  playbackLabels?: ExternalVideoPlaybackLabelFormatter;
 }
 
 export function ExternalVideoEditorPreview({
@@ -42,6 +48,8 @@ export function ExternalVideoEditorPreview({
   onShowPreview,
   onPreviewWidthChange,
   videoView: VideoView = ExternalVideoView,
+  thumbnailUrl,
+  playbackLabels,
 }: ExternalVideoEditorPreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const resizeSessionRef = useRef<{
@@ -240,7 +248,14 @@ export function ExternalVideoEditorPreview({
         onResizeLeftKeyDown={handleResizeKeyDown}
         onResizeRightKeyDown={handleResizeKeyDown}
       >
-        <VideoView url={video.url} title={video.title} aspectRatio={video.aspectRatio} className={classes.player} />
+        <VideoView
+          url={video.url}
+          title={video.title}
+          aspectRatio={video.aspectRatio}
+          thumbnailUrl={thumbnailUrl}
+          playbackLabels={playbackLabels}
+          className={classes.player}
+        />
         {editable && !selected ? (
           <BlockSelectionTarget
             pointer="capture"

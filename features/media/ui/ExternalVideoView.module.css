@@ -43,3 +43,26 @@
     display: inline;
   }
 }
+
+.facade {
+  position: relative;
+  overflow: hidden;
+  background: var(--geul-surface-muted);
+  border-radius: var(--geul-radius-square);
+}
+
+.facadeControl {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.facadeNotice {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  padding: var(--geul-spacing-xs) var(--geul-spacing-sm);
+  text-align: start;
+  background: var(--geul-overlay-control);
+}

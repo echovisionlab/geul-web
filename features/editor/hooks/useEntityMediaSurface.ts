@@ -10,7 +10,7 @@ import {
   type EditorLibraryFileSelection,
 } from '@/features/editor/lib/editor-library-file-selection';
 import type { EditorMediaCommandPort } from '@/features/editor/lib/media-block-updates';
-import { importMarkdownImages } from '@/features/editor/lib/markdown-image-import';
+import { importMarkdownImages, importRemoteImageFile } from '@/features/editor/lib/markdown-image-import';
 import type { MarkdownImageImporter } from '@/features/editor/tiptap/markdown-paste';
 import {
   captureInsertPosition,
@@ -197,6 +197,27 @@ export function useEntityMediaSurface({
     [allowInsertEdits, entityId, entityType, insertBlockAtPosition],
   );
 
+  /** Imports one external image (a link card or video thumbnail) as an editor File. */
+  const importRemoteImage = useCallback(
+    async (url: string): Promise<{ fileId: string; url: string } | null> => {
+      if (!allowInsertEdits) {
+        return null;
+      }
+      try {
+        const { uploaded } = await importRemoteImageFile(url, {
+          entityType,
+          entityId,
+          download: async (...args) => (await import('@/lib/upload/remote-source')).downloadRemoteSource(...args),
+          upload: (file, options) => uploadRef.current(file, options),
+        });
+        return { fileId: uploaded.fileId, url: uploaded.url };
+      } catch {
+        return null;
+      }
+    },
+    [allowInsertEdits, entityId, entityType],
+  );
+
   const selectLibraryFilesAtBlock = useCallback(
     (editor: EditorMediaCommandPort, referenceBlockId: string, files: EditorLibraryFileSelection[]) => {
       if (!allowInsertEdits || files.length === 0) {
@@ -215,6 +236,7 @@ export function useEntityMediaSurface({
   return {
     externalImageProgress,
     importMarkdownImagesInto,
+    importRemoteImage,
     mediaTiptapExtensions: NO_MEDIA_EXTENSIONS,
     dropFilesAtBlock,
     dropFilesAtTarget,

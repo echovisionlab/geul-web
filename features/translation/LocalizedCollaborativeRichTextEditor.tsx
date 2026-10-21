@@ -19,6 +19,8 @@ import { useOptionalEditorMediaServices } from '@/features/editor/contexts/Edito
 import { EditorAuthoringModeProvider, type EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
 import { MapInsertModal } from '@/features/editor/MapInsertModal';
 import { useEntityMediaSurface } from '@/features/editor/hooks/useEntityMediaSurface';
+import type { LinkPresentationRuntime } from '@/features/editor/tiptap/link-presentation/LinkCardTiptapExtension';
+import { getLinkPreviewAction } from '@/lib/actions/link-preview';
 import { createMapBlock } from '@/features/editor/hooks/useEditorFeatures';
 import { isFileDragTransfer, isMediaPlaceholderDropTarget } from '@/features/editor/lib/file-drag';
 import { createEditorMediaRuntimeStore } from '@/features/editor/lib/editor-media-runtime-store';
@@ -166,6 +168,7 @@ function LocalizedCollaborativeRichTextEditorSurface({
     selectLibraryFilesAtSavedPosition,
     externalImageProgress,
     importMarkdownImagesInto,
+    importRemoteImage,
     mediaTiptapExtensions,
     uploadProgress,
   } = useEntityMediaSurface({
@@ -197,6 +200,22 @@ function LocalizedCollaborativeRichTextEditorSurface({
       });
     },
   });
+  const linkPresentation = useMemo<LinkPresentationRuntime>(
+    () => ({
+      loadPreview: async (url) => {
+        const result = await getLinkPreviewAction(url);
+        return result.ok ? result.preview : null;
+      },
+      importThumbnail: async (source) => {
+        const imported = await importRemoteImage(source);
+        if (imported) {
+          mediaRuntimeStore.patchFile(imported.fileId, { url: imported.url });
+        }
+        return imported?.fileId ?? null;
+      },
+    }),
+    [importRemoteImage, mediaRuntimeStore],
+  );
   const markdownImageImporter = useMemo(
     () => (localizedMediaPort ? importMarkdownImagesInto(localizedMediaPort) : undefined),
     [importMarkdownImagesInto, localizedMediaPort],
@@ -363,6 +382,7 @@ function LocalizedCollaborativeRichTextEditorSurface({
             onFileActivate={canEditNeutral ? activateFile : undefined}
             mediaRuntimeStore={mediaRuntimeStore}
             markdownImageImporter={markdownImageImporter}
+            linkPresentation={canEditNeutral ? linkPresentation : undefined}
             externalVideo={blockRoomController.paragraphExternalVideo ? undefined : false}
             map={map}
             ai={canEditLocalized && aiTarget ? { target: aiTarget } : false}

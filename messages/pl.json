@@ -1631,7 +1631,7 @@
     }
   },
   "cookieConsentCommon": {
-    "analyticsLabel": "Analityczne pliki cookie (Google Analytics)"
+    "analyticsLabel": "Analityka i media zewnętrzne (Google Analytics, YouTube, Vimeo)"
   },
   "nicknameField": {
     "label": "Przydomek",
@@ -2489,8 +2489,8 @@
     }
   },
   "cookieConsentBanner": {
-    "renewalNotice": "Zaktualizowaliśmy naszą politykę dotyczącą plików cookie. Potwierdź swoje preferencje, aby kontynuować opcjonalne analizy.",
-    "intro": "Używamy niezbędnych plików cookie do uwierzytelniania i działania witryny oraz opcjonalnych analitycznych plików cookie, aby zrozumieć sposób korzystania z witryny.",
+    "renewalNotice": "Zaktualizowaliśmy politykę plików cookie. Potwierdź ustawienia opcjonalnej analityki i mediów zewnętrznych.",
+    "intro": "Używamy niezbędnych plików cookie do uwierzytelniania i działania witryny. Za Twoją zgodą używamy też analitycznych plików cookie, aby zrozumieć korzystanie z witryny, i od razu wczytujemy osadzone filmy z YouTube i Vimeo.",
     "learnMore": "Zapoznaj się z naszą <privacy>Polityką prywatności</privacy> i <terms>Warunkami korzystania z usługi</terms>.",
     "actions": {
       "customize": "Dostosuj"
@@ -4039,6 +4039,17 @@
           "alignRight": "Wyrównaj w prawo",
           "youtubeTitle": "Film YouTube",
           "vimeoTitle": "Film Vimeo"
+        },
+        "linkPresentation": {
+          "menu": "Sposób wyświetlania linku",
+          "asLink": "Link",
+          "asCard": "Karta",
+          "asVideo": "Wideo",
+          "refreshPreview": "Odśwież podgląd",
+          "loadingPreview": "Wczytywanie podglądu…",
+          "previewUnavailable": "Nie udało się wczytać podglądu tego linku.",
+          "playVideo": "Odtwórz {title}",
+          "playNotice": "Odtworzenie wczytuje wideo z serwisu {provider}."
         },
         "shader": {
           "title": "Shader GLSL",

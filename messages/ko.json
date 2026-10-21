@@ -1631,7 +1631,7 @@
     }
   },
   "cookieConsentCommon": {
-    "analyticsLabel": "분석 쿠키 (Google Analytics)"
+    "analyticsLabel": "분석 및 외부 미디어 (Google Analytics, YouTube, Vimeo)"
   },
   "nicknameField": {
     "label": "닉네임",
@@ -2489,8 +2489,8 @@
     }
   },
   "cookieConsentBanner": {
-    "renewalNotice": "쿠키 정책이 업데이트되었습니다. 선택형 분석을 계속 사용하려면 설정을 다시 확인해 주세요.",
-    "intro": "인증과 사이트 운영을 위해 필수 쿠키를 사용하며, 사이트 이용 현황을 이해하기 위해 선택형 분석 쿠키를 사용합니다.",
+    "renewalNotice": "쿠키 정책이 업데이트되었습니다. 선택형 분석과 외부 미디어 설정을 다시 확인해 주세요.",
+    "intro": "인증과 사이트 운영을 위해 필수 쿠키를 사용합니다. 동의하시면 사이트 이용 현황을 파악하는 분석 쿠키도 사용하고, 페이지에 넣은 YouTube·Vimeo 영상을 바로 불러옵니다.",
     "learnMore": "<privacy>개인정보 처리방침</privacy> 및 <terms>서비스 약관</terms>을(를) 확인하세요.",
     "actions": {
       "customize": "사용자 지정"
@@ -4039,6 +4039,17 @@
           "alignRight": "오른쪽 정렬",
           "youtubeTitle": "YouTube 영상",
           "vimeoTitle": "Vimeo 영상"
+        },
+        "linkPresentation": {
+          "menu": "링크 보기 방식",
+          "asLink": "링크",
+          "asCard": "카드",
+          "asVideo": "영상",
+          "refreshPreview": "미리보기 새로고침",
+          "loadingPreview": "미리보기를 가져오는 중…",
+          "previewUnavailable": "이 링크의 미리보기를 가져오지 못했습니다.",
+          "playVideo": "{title} 재생",
+          "playNotice": "재생하면 {provider}에서 불러옵니다."
         },
         "shader": {
           "title": "GLSL 셰이더",

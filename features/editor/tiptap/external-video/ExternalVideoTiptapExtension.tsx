@@ -18,14 +18,17 @@ import {
   ExternalVideoEditorPreview,
   type ExternalVideoEditorPreviewLabels,
 } from '@/features/editor/ExternalVideoEditorPreview';
-import type { ExternalVideoViewProps } from '@/features/media/ExternalVideoView';
+import type { ExternalVideoPlaybackLabelFormatter, ExternalVideoViewProps } from '@/features/media/ExternalVideoView';
 import {
   resolveStandaloneExternalVideoTitle,
   type ExternalVideoProviderTitleLabels,
 } from '@/features/media/standalone-external-video';
 import { resolveExternalVideo } from '@/lib/media/external-video';
 import enMessages from '@/messages/en.json';
-import { WireExternalVideo } from '../wire-schema';
+import type { EditorMediaRuntimeStore } from '@/features/editor/lib/editor-media-runtime-store';
+import { linkPresentationNodeType } from '../block-room-tiptap-codec';
+import { useEditorLinkThumbnail } from '../link-presentation/LinkCardTiptapExtension';
+import { linkPresentationProps, WireExternalVideo } from '../wire-schema';
 import { useExactTiptapNodeSelection } from '../useExactTiptapNodeSelection';
 import { useTiptapEditorEditable } from '../useTiptapEditorEditable';
 
@@ -48,6 +51,9 @@ export interface TiptapExternalVideoLabels extends ExternalVideoEditorPreviewLab
 export interface TiptapExternalVideoOptions {
   labels?: TiptapExternalVideoLabels;
   videoView?: ComponentType<ExternalVideoViewProps>;
+  /** Resolves the stored thumbnail File shown before consent or an explicit play. */
+  runtimeStore?: EditorMediaRuntimeStore;
+  playbackLabels?: ExternalVideoPlaybackLabelFormatter;
 }
 
 export interface TiptapStandaloneExternalVideo {
@@ -219,14 +225,18 @@ function rootParagraphBlocks(state: Pick<EditorState, 'doc'>): RootParagraphBloc
   return blocks;
 }
 
-function standaloneParagraphVideo(block: RootParagraphBlock): StandaloneParagraphVideo | null {
+function standaloneParagraphLink(
+  block: RootParagraphBlock,
+): (StandaloneParagraphVideo & { nodeType: 'externalVideo' | 'linkCard' }) | null {
   const url = sourceLinkHref(block.paragraph);
-  if (!url || !resolveExternalVideo(url)) {
+  const nodeType = url ? linkPresentationNodeType(block.paragraph.attrs.linkPresentation, url) : null;
+  if (!url || !nodeType) {
     return null;
   }
   return {
     ...block,
     url,
+    nodeType,
     label: block.paragraph.textContent.trim() || url,
   };
 }
@@ -415,23 +425,20 @@ export function replaceParagraphWithTiptapExternalVideo(
   return true;
 }
 
+/** Projects standalone link paragraphs into the atom their presentation asks for. */
 function promotionTransaction(state: EditorState) {
-  const externalVideo = state.schema.nodes.externalVideo;
-  if (!externalVideo) {
-    return null;
-  }
-  const videos = rootParagraphBlocks(state)
-    .map(standaloneParagraphVideo)
-    .filter((video): video is StandaloneParagraphVideo => video !== null);
-  if (!videos.length) {
+  const links = rootParagraphBlocks(state)
+    .map(standaloneParagraphLink)
+    .filter((link) => link !== null && Boolean(state.schema.nodes[link.nodeType]));
+  if (!links.length) {
     return null;
   }
   const transaction = state.tr;
-  for (const video of videos.reverse()) {
+  for (const link of links.reverse()) {
     transaction.replaceWith(
-      video.paragraphPosition,
-      video.paragraphPosition + video.paragraph.nodeSize,
-      externalVideo.create(externalVideoAttributes(video)),
+      link!.paragraphPosition,
+      link!.paragraphPosition + link!.paragraph.nodeSize,
+      state.schema.nodes[link!.nodeType]!.create(externalVideoAttributes(link!)),
     );
   }
   return transaction.setMeta('addToHistory', false);
@@ -474,8 +481,21 @@ function TiptapExternalVideoNodeView({
   updateAttributes,
   labels,
   videoView,
-}: NodeViewProps & { labels: TiptapExternalVideoLabels; videoView?: ComponentType<ExternalVideoViewProps> }) {
+  runtimeStore,
+  playbackLabels,
+}: NodeViewProps & {
+  labels: TiptapExternalVideoLabels;
+  videoView?: ComponentType<ExternalVideoViewProps>;
+  runtimeStore?: EditorMediaRuntimeStore;
+  playbackLabels?: ExternalVideoPlaybackLabelFormatter;
+}) {
   const editorEditable = useTiptapEditorEditable(editor);
+  const thumbnailUrl = useEditorLinkThumbnail(
+    editor,
+    getPos,
+    String(node.attrs.linkThumbnailFileId ?? ''),
+    runtimeStore,
+  );
   const exactNodeSelected = useExactTiptapNodeSelection({ editor, getPos });
   const url = typeof node.attrs.url === 'string' ? node.attrs.url.trim() : '';
   const resolved = resolveExternalVideo(url);
@@ -528,6 +548,8 @@ function TiptapExternalVideoNodeView({
         video={video}
         labels={labels}
         videoView={videoView}
+        thumbnailUrl={thumbnailUrl}
+        playbackLabels={playbackLabels}
         editable={editorEditable}
         selected={editorEditable && exactNodeSelected}
         canSelect={canSelect}
@@ -547,7 +569,12 @@ export function createTiptapExternalVideoExtension(options: TiptapExternalVideoO
   const labels = requireExternalVideoLabels(options.labels, 'TiptapExternalVideoOptions.labels');
   return WireExternalVideo.extend<TiptapExternalVideoOptions>({
     addOptions() {
-      return { labels, videoView: options.videoView };
+      return {
+        labels,
+        videoView: options.videoView,
+        runtimeStore: options.runtimeStore,
+        playbackLabels: options.playbackLabels,
+      };
     },
     addGlobalAttributes() {
       return [
@@ -556,6 +583,9 @@ export function createTiptapExternalVideoExtension(options: TiptapExternalVideoO
           attributes: {
             previewWidth: { default: Number(EXTERNAL_VIDEO_PREVIEW_WIDTH_DEFAULT) },
             aspectRatio: { default: 'auto' as ExternalVideoAspectRatio },
+            ...Object.fromEntries(
+              Object.entries(linkPresentationProps).map(([name, spec]) => [name, { default: spec.default }]),
+            ),
           },
         },
       ];
@@ -571,6 +601,8 @@ export function createTiptapExternalVideoExtension(options: TiptapExternalVideoO
             {...props}
             labels={requireExternalVideoLabels(current.labels, 'TiptapExternalVideoOptions.labels')}
             videoView={current.videoView}
+            runtimeStore={current.runtimeStore}
+            playbackLabels={current.playbackLabels}
           />
         )),
       );

@@ -1631,7 +1631,7 @@
     }
   },
   "cookieConsentCommon": {
-    "analyticsLabel": "Analytics cookies (Google Analytics)"
+    "analyticsLabel": "Analytics and external media (Google Analytics, YouTube, Vimeo)"
   },
   "nicknameField": {
     "label": "Nickname",
@@ -2489,8 +2489,8 @@
     }
   },
   "cookieConsentBanner": {
-    "renewalNotice": "We updated our cookie policy. Please confirm your preferences to continue optional analytics.",
-    "intro": "We use essential cookies for authentication and site operation, and optional analytics cookies to understand site usage.",
+    "renewalNotice": "We updated our cookie policy. Please confirm your preferences for optional analytics and external media.",
+    "intro": "We use essential cookies for authentication and site operation. With your consent, we also use analytics cookies to understand site usage and load embedded YouTube and Vimeo videos.",
     "learnMore": "See our <privacy>Privacy Policy</privacy> and <terms>Terms of Service</terms>.",
     "actions": {
       "customize": "Customize"
@@ -4039,6 +4039,17 @@
           "alignRight": "Align right",
           "youtubeTitle": "YouTube video",
           "vimeoTitle": "Vimeo video"
+        },
+        "linkPresentation": {
+          "menu": "Link display",
+          "asLink": "Link",
+          "asCard": "Card",
+          "asVideo": "Video",
+          "refreshPreview": "Refresh preview",
+          "loadingPreview": "Loading preview…",
+          "previewUnavailable": "Couldn't load a preview for this link.",
+          "playVideo": "Play {title}",
+          "playNotice": "Playing loads it from {provider}."
         },
         "shader": {
           "title": "GLSL shader",

@@ -1631,7 +1631,7 @@
     }
   },
   "cookieConsentCommon": {
-    "analyticsLabel": "Cookie analitici (Google Analytics)"
+    "analyticsLabel": "Analisi e contenuti esterni (Google Analytics, YouTube, Vimeo)"
   },
   "nicknameField": {
     "label": "Soprannome",
@@ -2489,8 +2489,8 @@
     }
   },
   "cookieConsentBanner": {
-    "renewalNotice": "Abbiamo aggiornato la nostra politica sui cookie. Conferma le preferenze per continuare con le analisi opzionali",
-    "intro": "Usiamo cookie essenziali per l’autenticazione e il funzionamento del sito, e cookie di analisi opzionali per capire come viene usato il sito",
+    "renewalNotice": "Abbiamo aggiornato la nostra cookie policy. Conferma le tue preferenze per l’analisi e i contenuti esterni facoltativi.",
+    "intro": "Utilizziamo cookie essenziali per l’autenticazione e il funzionamento del sito. Con il tuo consenso utilizziamo anche cookie di analisi per capire l’uso del sito e carichiamo direttamente i video incorporati di YouTube e Vimeo.",
     "learnMore": "Consulta la nostra <privacy>Informativa sulla privacy</privacy> e i <terms>Termini di servizio</terms>",
     "actions": {
       "customize": "Personalizza"
@@ -4039,6 +4039,17 @@
           "alignRight": "Allinea a destra",
           "youtubeTitle": "Video YouTube",
           "vimeoTitle": "Video Vimeo"
+        },
+        "linkPresentation": {
+          "menu": "Visualizzazione del link",
+          "asLink": "Link",
+          "asCard": "Scheda",
+          "asVideo": "Video",
+          "refreshPreview": "Aggiorna anteprima",
+          "loadingPreview": "Caricamento dell’anteprima…",
+          "previewUnavailable": "Impossibile caricare l’anteprima di questo link.",
+          "playVideo": "Riproduci {title}",
+          "playNotice": "La riproduzione lo carica da {provider}."
         },
         "shader": {
           "title": "Shader GLSL",

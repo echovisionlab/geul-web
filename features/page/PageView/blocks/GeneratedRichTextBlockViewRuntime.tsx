@@ -11,7 +11,16 @@ import type { LocalizedRichTextBlock } from '@/features/editor/contract/localize
 import { localizedRichTextInlinePlainText } from '@/features/editor/contract/localized-rich-text-text';
 import { documentHeadingTag } from '@/features/document-layout/ui/document-heading-level';
 import { useDocumentHeadingParentLevel } from '@/features/document-layout/ui/DocumentHeadingScope';
-import { resolveGeneratedStandaloneExternalVideoLink } from '@/features/media/standalone-external-video';
+import {
+  LINK_THUMBNAIL_REFERENCE_PATH,
+  resolveGeneratedStandaloneExternalVideoLink,
+  resolveGeneratedStandaloneLinkCard,
+} from '@/features/media/standalone-external-video';
+import { useOptionalContentBlockMediaRuntime } from '@/features/media/ContentBlockMediaRuntimeContext';
+import { LinkCardView } from '@/features/media/ui/LinkCardView';
+import { useExternalVideoPlaybackLabels } from '@/features/media/useExternalVideoPlaybackLabels';
+import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
+import { isBlockId } from '@/lib/editor/block-id';
 import { mediaContainerStyleToReact, resolveMediaContainerStyle } from '@/lib/media/shared';
 import { isPublicListItemKind, PublicDocumentBlock, PublicListItem } from './PublicDocumentBlock';
 import {
@@ -125,6 +134,15 @@ function inlineContent(content: readonly RichTextInline[]): ReactNode {
   });
 }
 
+/** The stored thumbnail File of a link card or video, delivered like other content images. */
+function useLinkThumbnailUrl(blockId: string): string | null {
+  const runtime = useOptionalContentBlockMediaRuntime();
+  const source = isBlockId(blockId)
+    ? runtime?.get(blockId, LINK_THUMBNAIL_REFERENCE_PATH)?.delivery?.asset?.url
+    : undefined;
+  return source ? (buildManagedImageUrl(source, MANAGED_IMAGE_PRESET.LINK_THUMBNAIL) ?? source) : null;
+}
+
 function GeneratedParagraphBlock({
   block,
   allowStandaloneExternalVideo,
@@ -149,15 +167,38 @@ function GeneratedParagraphBlock({
           },
         )
       : null;
+  const linkCard =
+    allowStandaloneExternalVideo && isTopLevel && !externalVideo
+      ? resolveGeneratedStandaloneLinkCard({
+          content: block.locale.content,
+          props: block.base.props,
+          hasChildren: block.children.length > 0,
+        })
+      : null;
+  const thumbnailUrl = useLinkThumbnailUrl(block.id);
+  const playbackLabels = useExternalVideoPlaybackLabels();
   if (externalVideo) {
     return (
       <ExternalVideoView
         url={externalVideo.url}
         title={externalVideo.title}
         aspectRatio={externalVideo.aspectRatio}
+        thumbnailUrl={thumbnailUrl}
+        playbackLabels={playbackLabels}
         style={mediaContainerStyleToReact(
           resolveMediaContainerStyle(externalVideo.previewWidth, externalVideo.textAlignment),
         )}
+      />
+    );
+  }
+  if (linkCard) {
+    return (
+      <LinkCardView
+        url={linkCard.url}
+        title={linkCard.title}
+        description={block.locale.props?.linkDescription}
+        siteName={linkCard.siteName}
+        thumbnailUrl={thumbnailUrl}
       />
     );
   }

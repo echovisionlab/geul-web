@@ -4,14 +4,14 @@ This report is generated from production source by `node scripts/design-system/c
 
 ## Current measured scope
 
-- 2439 production CSS/TS/TSX files scanned under app, components, features and lib, plus the central theme.ts.
+- 2449 production CSS/TS/TSX files scanned under app, components, features and lib, plus the central theme.ts.
 - 222 known semantic and font tokens in shared CSS definition files.
 - 0 remaining interface/runtime literal color occurrences in 0 files, excluding central definitions and the authored-color exceptions below.
 - 0 remaining authored editor palette literals in legacy variables.css. Their exact document colors belong to the shared authored palette source.
 - 20 authored editor color definitions are owned by the shared token source and generated into the same durable document roles.
 - 0 existing literal CSS spacing/typography occurrences covered by the migration baseline.
 - 0 existing custom-property declarations/inline assignments outside central files (private `--_*` implementation variables are permitted).
-- 173 literal CSS dimension occurrences in spacing, typography and geometry properties; 67 distinct values. These are audit findings, not blanket errors: canvas dimensions, geometry and responsive layouts require context.
+- 174 literal CSS dimension occurrences in spacing, typography and geometry properties; 67 distinct values. These are audit findings, not blanket errors: canvas dimensions, geometry and responsive layouts require context.
 - 771 CSS custom-property declarations, 301 distinct names, 143 names declared more than once. Theme/state/media overrides are expected; equal values alone do not establish semantic duplication.
 - 0 findings match the reviewed migration baseline; 0 new violations; 0 obsolete baseline keys eligible for removal.
 
@@ -63,9 +63,9 @@ Authored typography exceptions (artwork, not interface roles):
 | `0px`      |           7 |
 | `20rem`    |           7 |
 | `1.75rem`  |           6 |
+| `15rem`    |           6 |
 | `1.25rem`  |           5 |
 | `10rem`    |           5 |
-| `15rem`    |           5 |
 | `4rem`     |           5 |
 | `1.5rem`   |           4 |
 | `1em`      |           4 |

@@ -1,0 +1,39 @@
+.root {
+  width: 100%;
+  min-width: 0;
+}
+
+.link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  border-radius: var(--geul-radius-square);
+}
+
+.link:hover .layout {
+  background: var(--geul-surface-hover);
+}
+
+.link:focus-visible {
+  outline: var(--geul-border-thin) solid var(--geul-border-focus);
+  outline-offset: var(--geul-spacing-xxs);
+}
+
+.layout {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.body {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--geul-spacing-sm);
+}
+
+.thumbnail {
+  position: relative;
+  flex: 0 0 30%;
+  max-width: 15rem;
+  border-inline-start: var(--geul-border-thin) solid var(--geul-border-default);
+}

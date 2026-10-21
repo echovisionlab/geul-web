@@ -11,6 +11,14 @@ import {
   type TiptapStandaloneExternalVideo,
 } from '../../external-video/ExternalVideoTiptapExtension';
 import { ExternalVideoSelectionMenu, type ExternalVideoSelectionMenuLabels } from './ExternalVideoSelectionMenu';
+import {
+  chooseLinkPresentation,
+  dismissPastedLink,
+  getLinkPresentationState,
+  type LinkPresentationRuntime,
+} from '../../link-presentation/LinkCardTiptapExtension';
+import { availableLinkPresentations } from '../../link-presentation/link-presentation';
+import { LinkPresentationActions, type LinkPresentationLabels } from './LinkPresentationActions';
 
 const EXTERNAL_VIDEO_BUBBLE_OPTIONS = { placement: 'top', offset: 8, flip: true, shift: true } as const;
 
@@ -30,6 +38,8 @@ export interface TiptapExternalVideoSelectionBubbleMenuProps {
   editor: Editor;
   labels: ExternalVideoSelectionMenuLabels;
   onEditLink?: (video: TiptapStandaloneExternalVideo) => void;
+  /** Offers link / card / video when the editor supports link cards. */
+  presentation?: { labels: LinkPresentationLabels; runtime?: LinkPresentationRuntime };
 }
 
 /** Mount-ready adapter for the existing durable standalone paragraph-link contract. */
@@ -37,6 +47,7 @@ export function TiptapExternalVideoSelectionBubbleMenu({
   editor,
   labels,
   onEditLink,
+  presentation,
 }: TiptapExternalVideoSelectionBubbleMenuProps) {
   const [, setRevision] = useState(0);
   const menu = useTiptapBubbleMenu(editor, 'tiptap-external-video-selection-menu');
@@ -83,7 +94,26 @@ export function TiptapExternalVideoSelectionBubbleMenu({
         onChangeAlignment={(textAlignment) => {
           updateTiptapExternalVideoLayout(editor, { textAlignment }, selected.blockId);
         }}
-        onEscape={menu.hide}
+        onEscape={() => {
+          dismissPastedLink(editor);
+          menu.hide();
+        }}
+        presentationActions={
+          presentation && editor.schema.nodes.linkCard ? (
+            <LinkPresentationActions
+              labels={presentation.labels}
+              presentations={availableLinkPresentations(selected.url, editor.schema)}
+              current="video"
+              onChange={(next) => {
+                void chooseLinkPresentation(editor, presentation.runtime, selected, next);
+              }}
+              onRefresh={() => {
+                void chooseLinkPresentation(editor, presentation.runtime, selected, 'video', { refresh: true });
+              }}
+              refreshing={getLinkPresentationState(editor.state).pending.includes(selected.blockId)}
+            />
+          ) : null
+        }
       />
     </BubbleMenu>
   );

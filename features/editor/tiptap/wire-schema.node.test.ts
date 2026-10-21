@@ -22,6 +22,20 @@ const wireSchema = getSchema([
 
 describe('Tiptap wire schema', () => {
   it('matches the durable editor node names, content expressions, and attributes', () => {
+    const standaloneLinkAttrs = {
+      backgroundColor: 'default',
+      textColor: 'default',
+      textAlignment: 'left',
+      previewWidth: 100,
+      aspectRatio: 'auto',
+      linkPresentation: 'auto',
+      linkSiteName: '',
+      linkDescription: '',
+      linkThumbnailFileId: '',
+      url: '',
+      label: '',
+      sourceContent: [],
+    };
     const structuralNodes = {
       doc: { group: '', content: 'blockGroup', attrs: {} },
       blockGroup: { group: 'childContainer', content: 'blockGroupChild+', attrs: {} },
@@ -63,20 +77,8 @@ describe('Tiptap wire schema', () => {
       siteVariable: { group: 'inline', content: '', attrs: { key: 'site.title', linked: false } },
       mathInline: { group: 'inline', content: 'text*', attrs: {} },
       emoji: { group: 'inline', content: '', attrs: { name: null } },
-      externalVideo: {
-        group: 'blockContent',
-        content: '',
-        attrs: {
-          backgroundColor: 'default',
-          textColor: 'default',
-          textAlignment: 'left',
-          previewWidth: 100,
-          aspectRatio: 'auto',
-          url: '',
-          label: '',
-          sourceContent: [],
-        },
-      },
+      externalVideo: { group: 'blockContent', content: '', attrs: standaloneLinkAttrs },
+      linkCard: { group: 'blockContent', content: '', attrs: standaloneLinkAttrs },
       shaderCommon: { group: '', content: 'text*', attrs: {} },
       shaderVertex: { group: '', content: 'text*', attrs: {} },
       shaderBufferA: { group: '', content: 'text*', attrs: { channels: null } },

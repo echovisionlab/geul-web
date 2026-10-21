@@ -1631,7 +1631,7 @@
     }
   },
   "cookieConsentCommon": {
-    "analyticsLabel": "分析Cookie（Google Analytics）"
+    "analyticsLabel": "分析と外部メディア (Google Analytics、YouTube、Vimeo)"
   },
   "nicknameField": {
     "label": "ニックネーム",
@@ -2489,8 +2489,8 @@
     }
   },
   "cookieConsentBanner": {
-    "renewalNotice": "Cookie ポリシーを更新しました。任意の解析を引き続き利用するには設定を確認してください",
-    "intro": "認証とサイト運営のために必須 Cookie を使用し、サイト利用状況の把握のために任意の解析 Cookie を使用します",
+    "renewalNotice": "Cookie ポリシーを更新しました。任意の分析と外部メディアの設定をもう一度ご確認ください。",
+    "intro": "認証とサイト運営のために必須 Cookie を使用します。同意いただくと、サイトの利用状況を把握する分析 Cookie も使用し、埋め込まれた YouTube・Vimeo の動画をすぐに読み込みます。",
     "learnMore": "<privacy>プライバシーポリシー</privacy> と <terms>利用規約</terms>をご確認ください",
     "actions": {
       "customize": "カスタマイズ"
@@ -4039,6 +4039,17 @@
           "alignRight": "右揃え",
           "youtubeTitle": "YouTube 動画",
           "vimeoTitle": "Vimeo 動画"
+        },
+        "linkPresentation": {
+          "menu": "リンクの表示",
+          "asLink": "リンク",
+          "asCard": "カード",
+          "asVideo": "動画",
+          "refreshPreview": "プレビューを更新",
+          "loadingPreview": "プレビューを読み込み中…",
+          "previewUnavailable": "このリンクのプレビューを読み込めませんでした。",
+          "playVideo": "{title} を再生",
+          "playNotice": "再生すると {provider} から読み込みます。"
         },
         "shader": {
           "title": "GLSLシェーダー",

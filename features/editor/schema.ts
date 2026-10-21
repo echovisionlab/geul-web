@@ -11,6 +11,7 @@ import {
 } from '@/lib/types/editor/schema';
 import { fileBlockPropSchema } from '@/lib/media/block-schemas';
 import { mapBlockPropSchema } from '@/lib/types/map-block/schema';
+import { linkPresentationProps } from '@/features/editor/tiptap/wire-schema';
 
 const textBlockProps = {
   backgroundColor: { default: 'default' },
@@ -70,7 +71,7 @@ export const editorSchema = defineEditorSchema({
   styleSchema: defaultStyleSpecs,
 });
 
-/** Post/Page contract adds durable external-video layout to paragraph nodes. */
+/** Post/Page contract adds durable external-video layout and link presentation to paragraph nodes. */
 export const externalVideoEditorSchema = defineEditorSchema({
   blockSchema: {
     ...editorBlockSpecs,
@@ -79,6 +80,7 @@ export const externalVideoEditorSchema = defineEditorSchema({
       props: {
         ...textBlockProps,
         ...externalVideoLinkLayoutPropSchema,
+        ...linkPresentationProps,
       },
     },
   },

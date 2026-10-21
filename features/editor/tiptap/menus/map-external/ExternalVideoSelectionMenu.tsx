@@ -1,5 +1,5 @@
 'use client';
-import { useId } from 'react';
+import { useId, type ReactNode } from 'react';
 
 import { LayoutInline as DsLayoutInline, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
 import { Text as DsText } from '@/components/core/Typography';
@@ -40,6 +40,8 @@ export interface ExternalVideoSelectionMenuProps {
   onChangeAspectRatio?: (aspectRatio: ExternalVideoAspectRatio) => void;
   onChangeAlignment?: (alignment: ContextualBlockAlignment) => void;
   onEscape?: () => void;
+  /** Link / card / video choices placed before the video controls. */
+  presentationActions?: ReactNode;
 }
 
 /** Pure contextual controls for the durable standalone-link external-video block. */
@@ -55,6 +57,7 @@ export function ExternalVideoSelectionMenu({
   onChangeAspectRatio,
   onChangeAlignment,
   onEscape,
+  presentationActions,
 }: ExternalVideoSelectionMenuProps) {
   const resizeHintId = useId();
   return (
@@ -65,6 +68,7 @@ export function ExternalVideoSelectionMenu({
       navigationEnabled={navigationEnabled}
       onEscape={onEscape}
     >
+      {presentationActions}
       <SelectionMenuAction
         label={labels.editLink}
         disabled={disabled}

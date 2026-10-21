@@ -1,8 +1,17 @@
 'use client';
 
 import { createMarkdownPasteExtension, type MarkdownImageImporter } from './markdown-paste';
+import {
+  createTiptapLinkCardExtension,
+  LinkPresentationPaste,
+  type LinkPresentationRuntime,
+} from './link-presentation/LinkCardTiptapExtension';
+import type { LinkPresentationLabels } from './menus/map-external/LinkPresentationActions';
+import type { ExternalVideoPlaybackLabelFormatter } from '@/features/media/ExternalVideoView';
+import { TiptapLinkPresentationBubbleMenu } from './menus/map-external/TiptapLinkPresentationBubbleMenu';
 import { EditorRuntimeOptions } from './live-node-view';
 import {
+  useCallback,
   memo,
   useEffect,
   useMemo,
@@ -115,6 +124,8 @@ interface TiptapEditorSharedProps {
   mediaRuntimeStore?: EditorMediaRuntimeStore;
   /** Imports standalone images from pasted Markdown; without it they paste as links. */
   markdownImageImporter?: MarkdownImageImporter;
+  /** Reads previews and imports thumbnails when a link becomes a card or video. */
+  linkPresentation?: LinkPresentationRuntime;
   externalVideo?: TiptapExternalVideoOptions | false;
   ai?: TiptapEditorAIOptions | false;
   map?: TiptapMapNodeOptions;
@@ -179,6 +190,7 @@ interface EditorChromeProps {
   onFileActivate?: TiptapAuthoringControlsCallbacks['onFileActivate'];
   externalVideo: TiptapExternalVideoOptions | false | undefined;
   externalVideoRuntimeLabels: TiptapExternalVideoLabels;
+  linkPresentation: { labels: LinkPresentationLabels; runtime: LinkPresentationRuntime };
   codeBlockLabels: CodeBlockSelectionMenuLabels;
   ai: TiptapEditorProps['ai'];
   mapSelectionRegistry: TiptapMapSelectionMenuRegistry;
@@ -197,6 +209,7 @@ function EditorChrome({
   onFileActivate,
   externalVideo,
   externalVideoRuntimeLabels,
+  linkPresentation,
   codeBlockLabels,
   ai,
   mapSelectionRegistry,
@@ -316,9 +329,17 @@ function EditorChrome({
         <TiptapMapSelectionBubbleMenu editor={editor} labels={mapMenuLabels} registry={mapSelectionRegistry} />
       ) : null}
       {canMutateStructure && externalVideo !== false ? (
+        <TiptapLinkPresentationBubbleMenu
+          editor={editor}
+          labels={linkPresentation.labels}
+          runtime={linkPresentation.runtime}
+        />
+      ) : null}
+      {canMutateStructure && externalVideo !== false ? (
         <TiptapExternalVideoSelectionBubbleMenu
           editor={editor}
           labels={externalMenuLabels}
+          presentation={linkPresentation}
           onEditLink={(video) => {
             const label = typeof video.node.attrs.label === 'string' ? video.node.attrs.label.trim() : '';
             setExternalVideoContext({
@@ -360,6 +381,7 @@ export function TiptapEditor({
   onFileActivate,
   mediaRuntimeStore,
   markdownImageImporter,
+  linkPresentation,
   externalVideo,
   ai,
   map,
@@ -526,6 +548,36 @@ export function TiptapEditor({
           },
     [externalVideo, externalVideoRuntimeLabels],
   );
+  const linkPresentationLabels = useMemo<LinkPresentationLabels>(
+    () => ({
+      menu: runtimeLabels('linkPresentation.menu'),
+      asLink: runtimeLabels('linkPresentation.asLink'),
+      asCard: runtimeLabels('linkPresentation.asCard'),
+      asVideo: runtimeLabels('linkPresentation.asVideo'),
+      refreshPreview: runtimeLabels('linkPresentation.refreshPreview'),
+      loadingPreview: runtimeLabels('linkPresentation.loadingPreview'),
+      previewUnavailable: runtimeLabels('linkPresentation.previewUnavailable'),
+      playVideo: runtimeLabels('linkPresentation.playVideo'),
+      playNotice: runtimeLabels('linkPresentation.playNotice'),
+    }),
+    [runtimeLabels],
+  );
+  const externalVideoPlaybackLabels = useCallback<ExternalVideoPlaybackLabelFormatter>(
+    ({ title, provider }) => ({
+      play: runtimeLabels('linkPresentation.playVideo', { title }),
+      notice: runtimeLabels('linkPresentation.playNotice', { provider }),
+    }),
+    [runtimeLabels],
+  );
+  const linkPresentationRef = useRef(linkPresentation);
+  linkPresentationRef.current = linkPresentation;
+  const linkPresentationRuntime = useMemo<LinkPresentationRuntime>(
+    () => ({
+      loadPreview: (url) => linkPresentationRef.current?.loadPreview(url) ?? Promise.resolve(null),
+      importThumbnail: (source) => linkPresentationRef.current?.importThumbnail?.(source) ?? Promise.resolve(null),
+    }),
+    [],
+  );
   const mapSelectionRegistry = useMemo(() => createTiptapMapSelectionMenuRegistry(), []);
   const executableSelectionRegistry = useMemo(() => createExecutableSelectionMenuRegistry(), []);
   const executableSelectionLabels = useMemo(
@@ -588,7 +640,17 @@ export function TiptapEditor({
             blockContainerNode: createTiptapBlockContainer(liveAuthoringMode),
             codeBlockNode: createTiptapCodeBlock(liveAuthoringMode, codeBlockLabels),
             externalVideoNode:
-              effectiveExternalVideo === false ? undefined : createTiptapExternalVideoExtension(effectiveExternalVideo),
+              effectiveExternalVideo === false
+                ? undefined
+                : createTiptapExternalVideoExtension({
+                    ...effectiveExternalVideo,
+                    runtimeStore: mediaRuntimeStore,
+                    playbackLabels: externalVideoPlaybackLabels,
+                  }),
+            linkCardNode:
+              effectiveExternalVideo === false
+                ? undefined
+                : createTiptapLinkCardExtension({ labels: linkPresentationLabels, runtimeStore: mediaRuntimeStore }),
             fileNode,
             mapNode: createTiptapMapNode(effectiveMapOptions),
           }).filter((extension) => !['table', 'tableRow', 'tableCell', 'tableHeader'].includes(extension.name)),
@@ -620,6 +682,7 @@ export function TiptapEditor({
         filePicker: shaderFilePicker,
         resolveAsset: resolveShaderAsset,
       }),
+      ...(effectiveExternalVideo === false ? [] : [LinkPresentationPaste]),
       createMarkdownPasteExtension(
         () =>
           blockRoomController.canChangeStructure &&
@@ -643,6 +706,8 @@ export function TiptapEditor({
     awareness,
     blockRoomController,
     effectiveExternalVideo,
+    linkPresentationLabels,
+    externalVideoPlaybackLabels,
     executableSelectionLabels,
     executableSelectionRegistry,
     codeBlockLabels,
@@ -766,6 +831,7 @@ export function TiptapEditor({
               externalVideoRuntimeLabels={
                 effectiveExternalVideo === false ? externalVideoRuntimeLabels : effectiveExternalVideo.labels
               }
+              linkPresentation={{ labels: linkPresentationLabels, runtime: linkPresentationRuntime }}
               ai={ai}
               mapSelectionRegistry={mapSelectionRegistry}
               executableSelectionRegistry={executableSelectionRegistry}

@@ -1,12 +1,12 @@
 # Cookie consent choice
 
-The product currently has one optional consent category: analytics, connected to Google Analytics.
-Essential cookies remain active for authentication and site operation.
+The product has one optional consent category: analytics and external media. It covers Google Analytics
+and embedded YouTube and Vimeo players. Essential cookies remain active for authentication and site operation.
 
 ## Interface and behavior
 
-The [banner View](../../features/cookie-consent/ui/CookieConsentBannerView.tsx) names Google Analytics as the single
-optional category and exposes two decisions immediately: **Reject** and **Accept all**.
+The [banner View](../../features/cookie-consent/ui/CookieConsentBannerView.tsx) names that single optional category
+and exposes two decisions immediately: **Reject** and **Accept all**.
 Reject persists analytics=false; Accept all persists analytics=true. Essential operation cookies remain active.
 Neither reading the notice, scrolling, navigation nor inactivity enables optional analytics.
 Renewal and explicit reopening require another explicit decision; old-version acceptance is not current consent.
@@ -40,6 +40,20 @@ The [Google Analytics loader](../../features/analytics/GoogleAnalyticsLoader.tsx
 and analytics=true at the current consent version. A previous-version choice alone does not enable it.
 Rejection still disables the provider and clears its analytics cookies through the existing integration.
 No tracker, consent category, service, cookie schema or version was added.
+
+## External media
+
+[ExternalVideoView](../../features/media/ExternalVideoView.tsx) reads the same consent through
+[useOptionalCookieConsent](../../features/cookie-consent/useOptionalCookieConsent.ts). With current consent the
+provider player loads with the page, without autoplay permission. Without it, including before a decision and
+during server rendering, the stored thumbnail File, the title, a Core IconButton play control and a notice that
+playing loads the provider stand in. Pressing play loads and starts that one player with autoplay permission; it
+does not record consent. The thumbnail is delivered from our storage, so nothing reaches the provider before consent
+or a play press. Public documents, Page sections and the editor pass localized playback labels; a caller without
+them gets the player directly.
+
+The category kept consent version 1. Visitors who accepted analytics before the category included external media
+see players load directly.
 
 Explicit `geul:cookie-consent-open` reopening focuses rejection and returns focus to the invoking control after a decision.
 The banner remains excluded from account/login/verification routes and `/my/settings`.

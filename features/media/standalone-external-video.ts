@@ -8,6 +8,7 @@ import {
 } from '@echovisionlab/geul-common/media/block-schemas';
 import {
   ParagraphProps_AspectRatio,
+  ParagraphProps_LinkPresentation,
   ParagraphProps_TextAlignment,
   type ParagraphProps,
   type RichTextInline,
@@ -160,19 +161,11 @@ function generatedAspectRatio(value: ParagraphProps_AspectRatio | undefined): Ex
   }
 }
 
-/**
- * Generated Post/Page documents preserve the same durable external-video
- * shape as the editor: one standalone paragraph link and paragraph layout.
- * Only that exact shape becomes an embedded player.
- */
-export function resolveGeneratedStandaloneExternalVideoLink(
-  input: {
-    content: readonly RichTextInline[];
-    props?: ParagraphProps;
-    hasChildren: boolean;
-  },
-  providerTitleLabels?: ExternalVideoProviderTitleLabels,
-): StandaloneExternalVideoLink | null {
+/** The one link a generated standalone paragraph holds, or null for any other shape. */
+function generatedStandaloneLink(input: {
+  content: readonly RichTextInline[];
+  hasChildren: boolean;
+}): { url: string; label: string } | null {
   if (input.hasChildren) {
     return null;
   }
@@ -202,21 +195,68 @@ export function resolveGeneratedStandaloneExternalVideoLink(
   if (!link) {
     return null;
   }
-  const url = normalizeRichTextHref(link.href);
-  const resolved = resolveExternalVideo(url);
-  if (!resolved) {
+  return {
+    url: normalizeRichTextHref(link.href),
+    label: link.content
+      .map((item) => item.text)
+      .join('')
+      .trim(),
+  };
+}
+
+/**
+ * Generated Post/Page documents preserve the same durable external-video
+ * shape as the editor: one standalone paragraph link and paragraph layout.
+ * Only that exact shape becomes an embedded player, unless the author chose
+ * to present it as a plain link or a card.
+ */
+export function resolveGeneratedStandaloneExternalVideoLink(
+  input: {
+    content: readonly RichTextInline[];
+    props?: ParagraphProps;
+    hasChildren: boolean;
+  },
+  providerTitleLabels?: ExternalVideoProviderTitleLabels,
+): StandaloneExternalVideoLink | null {
+  const presentation = input.props?.linkPresentation;
+  if (presentation === ParagraphProps_LinkPresentation.LINK || presentation === ParagraphProps_LinkPresentation.CARD) {
     return null;
   }
-
-  const label = link.content
-    .map((item) => item.text)
-    .join('')
-    .trim();
+  const link = generatedStandaloneLink(input);
+  const resolved = link ? resolveExternalVideo(link.url) : null;
+  if (!link || !resolved) {
+    return null;
+  }
   return {
-    url,
-    title: resolveStandaloneExternalVideoTitle(label, url, resolved.provider, providerTitleLabels),
+    url: link.url,
+    title: resolveStandaloneExternalVideoTitle(link.label, link.url, resolved.provider, providerTitleLabels),
     previewWidth: normalizePreviewWidth(input.props?.previewWidth),
     textAlignment: generatedTextAlignment(input.props?.textAlignment),
     aspectRatio: generatedAspectRatio(input.props?.aspectRatio),
   };
+}
+
+/** Storage reference path of a paragraph link's thumbnail File (see the content block catalog). */
+export const LINK_THUMBNAIL_REFERENCE_PATH = 'paragraph.linkThumbnail';
+
+export interface StandaloneLinkCard {
+  url: string;
+  /** Empty when the link text is the bare URL; the card then shows the host. */
+  title: string;
+  siteName: string;
+}
+
+/** A generated standalone paragraph link the author chose to present as a card. */
+export function resolveGeneratedStandaloneLinkCard(input: {
+  content: readonly RichTextInline[];
+  props?: ParagraphProps;
+  hasChildren: boolean;
+}): StandaloneLinkCard | null {
+  if (input.props?.linkPresentation !== ParagraphProps_LinkPresentation.CARD) {
+    return null;
+  }
+  const link = generatedStandaloneLink(input);
+  return link
+    ? { url: link.url, title: link.label === link.url ? '' : link.label, siteName: input.props.linkSiteName ?? '' }
+    : null;
 }
