@@ -156,3 +156,6 @@ export const TableSelection: Story = {
   },
 };
 export const CodeSelection: Story = { render: () => <EditorRuntimePreview initialScenario="code" /> };
+
+/** A selected image: replace, alignment, XS–XL sizes, settings and delete in its one menu. */
+export const FileControls: Story = { render: () => <EditorRuntimePreview initialScenario="image" /> };

@@ -472,7 +472,8 @@ export function SelectionBubbleMenuView({
   );
 }
 
-function hasFocusedOwnedPopup(element: HTMLElement): boolean {
+/** True while focus is in a popup that a control inside `element` opened, e.g. a portaled listbox. */
+export function hasFocusedOwnedPopup(element: HTMLElement): boolean {
   const focused = element.ownerDocument.activeElement;
   if (!focused) {
     return false;

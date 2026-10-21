@@ -59244,7 +59244,6 @@
         "Consumer: components/core/ImageUpload/ImageUploadCropField.tsx",
         "Consumer: features/data-table/MultiFilterEditorView.tsx",
         "Consumer: features/data-table/MultiSortView.tsx",
-        "Consumer: features/editor/tiptap/TiptapAuthoringControls.tsx",
         "Consumer: features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
         "Consumer: features/editor/tiptap/menus/SelectionBubbleMenu.tsx",
         "Consumer: features/editor/tiptap/p5/P5CapabilityControl.tsx",

@@ -30,7 +30,7 @@ import { insertLocalPreviewFiles } from './local-media-insert';
 import { localFilePreviewLabel } from './local-file-labels';
 import { createLocalFileLibrarySource } from './local-file-library';
 
-type RuntimeScenario = 'table' | 'code' | 'p5' | 'three' | 'shader' | 'callout' | 'file';
+type RuntimeScenario = 'table' | 'code' | 'p5' | 'three' | 'shader' | 'callout' | 'file' | 'image';
 type PlaygroundRoom = ReturnType<typeof createTiptapPlaygroundRoom>;
 const authoringMode = { allowNeutralBlockEdits: true, allowLocalizedBlockEdits: true };
 const localUser = { name: 'Playground', color: semanticThemes.light['action-primary'] };
@@ -177,6 +177,44 @@ function ResidentPlayground({
       if (code !== undefined) {
         editor.chain().focus().setNodeSelection(code).run();
       }
+    } else if (initialScenario === 'image') {
+      // A portrait phone screenshot, the case the display size height cap is for.
+      const canvas = document.createElement('canvas');
+      canvas.width = 390;
+      canvas.height = 844;
+      const context = canvas.getContext('2d');
+      if (context) {
+        const tokens = getComputedStyle(document.documentElement);
+        context.fillStyle = tokens.getPropertyValue('--geul-border-default');
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = tokens.getPropertyValue('--geul-text-secondary');
+        context.fillRect(24, 96, canvas.width - 48, 360);
+      }
+      const lifetime = uploadLifetime.current;
+      canvas.toBlob((blob) => {
+        if (!blob || !lifetime || lifetime.signal.aborted || editor.isDestroyed) {
+          return;
+        }
+        editor.chain().focus('end').run();
+        void insertLocalPreviewFiles({
+          editor,
+          runtimeStore,
+          signal: lifetime.signal,
+          files: [new File([blob], 'screenshot.png', { type: 'image/png' })],
+          retainUrl: (url) => localUrls.current.push(url),
+          onError: (name, message) => setFileError(`${name}: ${message}`),
+        }).then(() => {
+          let filePosition: number | undefined;
+          editor.state.doc.descendants((node, position) => {
+            if (filePosition === undefined && node.type.name === 'file') {
+              filePosition = position;
+            }
+          });
+          if (filePosition !== undefined && !editor.isDestroyed) {
+            editor.chain().focus().setNodeSelection(filePosition).run();
+          }
+        });
+      }, 'image/png');
     } else if (initialScenario !== 'file') {
       editor.chain().focus('end').run();
       if (initialScenario === 'p5') {

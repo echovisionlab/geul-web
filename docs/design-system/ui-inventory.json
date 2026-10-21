@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "359199cf13eaf140163bdab20ce4e91970692065fde6e3c9dea0c0321acb2ad1",
+  "manifestHash": "dde71a87c9b73e5c744bad331962900a392e814ec65a78deb1b6b18b0ab315bd",
   "counts": {
     "sourceFiles": 3847,
     "productionSourceFiles": 2322,
@@ -10,7 +10,7 @@
     "coreFamilies": 57,
     "featureDomains": 54,
     "storyFiles": 259,
-    "storyVariants": 1489,
+    "storyVariants": 1490,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -15984,7 +15984,6 @@
         "components/core/ImageUpload/ImageUploadCropField.tsx",
         "features/data-table/MultiFilterEditorView.tsx",
         "features/data-table/MultiSortView.tsx",
-        "features/editor/tiptap/TiptapAuthoringControls.tsx",
         "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
         "features/editor/tiptap/menus/SelectionBubbleMenu.tsx",
         "features/editor/tiptap/p5/P5CapabilityControl.tsx",
@@ -36408,15 +36407,14 @@
         "IconTrash",
         "IconX",
         "MathBubbleMenu",
-        "Popover",
-        "Popover.Dropdown",
         "Separator",
         "SiteVariablePicker",
         "TextInput",
         "TiptapEmojiPicker",
         "ToolbarSurface",
         "VisuallyHidden",
-        "div"
+        "div",
+        "section"
       ]
     },
     {
@@ -38323,7 +38321,10 @@
         }
       ],
       "typeAliasEvidence": [],
-      "productionConsumers": ["features/editor/tiptap/integration/contextual-menu-router.tsx"],
+      "productionConsumers": [
+        "features/editor/tiptap/TiptapAuthoringControls.tsx",
+        "features/editor/tiptap/integration/contextual-menu-router.tsx"
+      ],
       "catalogAdapters": ["stories/shared/EditorMenusPreview.tsx"],
       "tests": [
         "features/editor/tiptap/integration/contextual-menu-router.test.tsx",
@@ -83454,6 +83455,11 @@
           "name": "CodeSelection",
           "args": null,
           "preview": "http://localhost:6010/?path=/story/feature-editor-menus--code-selection"
+        },
+        {
+          "name": "FileControls",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/feature-editor-menus--file-controls"
         }
       ],
       "importedSources": ["stories/shared/EditorMenusPreview.tsx", "stories/shared/EditorRuntimePreview.tsx"]

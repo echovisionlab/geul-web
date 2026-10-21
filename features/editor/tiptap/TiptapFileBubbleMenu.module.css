@@ -1,0 +1,19 @@
+/* The menu is positioned by its toolbar alone; the settings panel hangs below it. */
+.menu {
+  position: relative;
+}
+
+/* The Core popover surface, opened in place below the File menu. */
+.settings {
+  position: absolute;
+  top: calc(100% + var(--geul-spacing-xxs));
+  left: 0;
+  box-sizing: border-box;
+  width: min(31.25rem, calc(100vw - var(--geul-spacing-xl)));
+  padding: var(--geul-spacing-sm);
+  border: var(--geul-border-thin) solid var(--geul-border-default);
+  border-radius: var(--geul-radius-square);
+  background: var(--geul-surface);
+  color: var(--geul-text-primary);
+  box-shadow: var(--geul-shadow-panel);
+}
