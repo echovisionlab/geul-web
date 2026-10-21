@@ -10,6 +10,8 @@ import {
   type EditorLibraryFileSelection,
 } from '@/features/editor/lib/editor-library-file-selection';
 import type { EditorMediaCommandPort } from '@/features/editor/lib/media-block-updates';
+import { importMarkdownImages } from '@/features/editor/lib/markdown-image-import';
+import type { MarkdownImageImporter } from '@/features/editor/tiptap/markdown-paste';
 import {
   captureInsertPosition,
   captureInsertPositionFromDomTarget,
@@ -32,6 +34,8 @@ interface UseEntityMediaSurfaceOptions {
   insertBlockAtPosition?: DeferredBlockInsert;
   onUploadCancel?: (fileName: string) => void;
   onUploadError?: (fileName: string, message: string) => void;
+  /** Reports pasted Markdown images that stayed links because their import failed. */
+  onMarkdownImagesKept?: (count: number) => void;
 }
 
 const NO_MEDIA_EXTENSIONS: readonly TiptapAnyExtension[] = Object.freeze([]);
@@ -45,6 +49,7 @@ export function useEntityMediaSurface({
   insertBlockAtPosition,
   onUploadCancel,
   onUploadError,
+  onMarkdownImagesKept,
 }: UseEntityMediaSurfaceOptions) {
   const { upload } = useFileUpload({
     provider: mediaCommandProvider ?? provider,
@@ -59,6 +64,14 @@ export function useEntityMediaSurface({
     percentage: number;
     stage?: string;
   } | null>(null);
+  const [externalImageProgress, setExternalImageProgress] = useState<{
+    percentage?: number;
+    stage?: string;
+  } | null>(null);
+  // Pastes import one after another so one progress surface describes one batch.
+  const markdownImageQueue = useRef<Promise<void>>(Promise.resolve());
+  const onMarkdownImagesKeptRef = useRef(onMarkdownImagesKept);
+  onMarkdownImagesKeptRef.current = onMarkdownImagesKept;
 
   const insertFiles = useCallback(
     async (
@@ -156,6 +169,34 @@ export function useEntityMediaSurface({
     [allowInsertEdits, insertBlockAtPosition],
   );
 
+  const importMarkdownImagesInto = useCallback(
+    (editor: EditorMediaCommandPort): MarkdownImageImporter | undefined =>
+      allowInsertEdits
+        ? (images, isIntact) => {
+            markdownImageQueue.current = markdownImageQueue.current.then(async () => {
+              setExternalImageProgress({ percentage: 0, stage: 'downloading' });
+              try {
+                const failed = await importMarkdownImages(editor, images, isIntact, {
+                  entityType,
+                  entityId,
+                  download: async (...args) =>
+                    (await import('@/lib/upload/remote-source')).downloadRemoteSource(...args),
+                  upload: (file, options) => uploadRef.current(file, options),
+                  insertBlockAtPosition,
+                  onProgress: (percentage, stage) => setExternalImageProgress({ percentage, stage }),
+                });
+                if (failed > 0) {
+                  onMarkdownImagesKeptRef.current?.(failed);
+                }
+              } finally {
+                setExternalImageProgress(null);
+              }
+            });
+          }
+        : undefined,
+    [allowInsertEdits, entityId, entityType, insertBlockAtPosition],
+  );
+
   const selectLibraryFilesAtBlock = useCallback(
     (editor: EditorMediaCommandPort, referenceBlockId: string, files: EditorLibraryFileSelection[]) => {
       if (!allowInsertEdits || files.length === 0) {
@@ -172,7 +213,8 @@ export function useEntityMediaSurface({
   );
 
   return {
-    externalImageProgress: null as { percentage?: number; stage?: string } | null,
+    externalImageProgress,
+    importMarkdownImagesInto,
     mediaTiptapExtensions: NO_MEDIA_EXTENSIONS,
     dropFilesAtBlock,
     dropFilesAtTarget,

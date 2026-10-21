@@ -3569,7 +3569,8 @@
       "importingExternalImages": "กำลังนำเข้ารูปภาพภายนอก..."
     },
     "notifications": {
-      "uploadFailedMessage": "ไม่สามารถอัปโหลด {name}: {message}"
+      "uploadFailedMessage": "ไม่สามารถอัปโหลด {name}: {message}",
+      "markdownImagesKeptAsLinks": "นำเข้ารูปภาพไม่ได้ {count} รูป จึงเก็บไว้เป็นลิงก์"
     },
     "media": {
       "statuses": {

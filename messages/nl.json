@@ -3569,7 +3569,8 @@
       "importingExternalImages": "Externe afbeeldingen importeren..."
     },
     "notifications": {
-      "uploadFailedMessage": "Uploaden van {name} mislukt: {message}"
+      "uploadFailedMessage": "Uploaden van {name} mislukt: {message}",
+      "markdownImagesKeptAsLinks": "{count, plural, one {# afbeelding kon} other {# afbeeldingen konden}} niet worden geïmporteerd en {count, plural, one {blijft} other {blijven}} een link."
     },
     "media": {
       "statuses": {

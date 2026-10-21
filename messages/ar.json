@@ -3304,7 +3304,8 @@
       "importingExternalImages": "جارٍ استيراد الصور الخارجية..."
     },
     "notifications": {
-      "uploadFailedMessage": "فشل رفع {name}: {message}"
+      "uploadFailedMessage": "فشل رفع {name}: {message}",
+      "markdownImagesKeptAsLinks": "تعذّر استيراد {count, plural, zero {أي صورة} one {صورة واحدة} two {صورتين} few {# صور} many {# صورة} other {# صورة}}، لذا تُركت كروابط."
     },
     "media": {
       "statuses": {

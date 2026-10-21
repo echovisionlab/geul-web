@@ -3569,7 +3569,8 @@
       "importingExternalImages": "Importowanie obrazów zewnętrznych..."
     },
     "notifications": {
-      "uploadFailedMessage": "Nie udało się przesłać {name}: {message}"
+      "uploadFailedMessage": "Nie udało się przesłać {name}: {message}",
+      "markdownImagesKeptAsLinks": "Nie udało się zaimportować {count, plural, one {# obrazu, więc pozostawiono go} few {# obrazów, więc pozostawiono je} many {# obrazów, więc pozostawiono je} other {# obrazu, więc pozostawiono je}} jako link."
     },
     "media": {
       "statuses": {

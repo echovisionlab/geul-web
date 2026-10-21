@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "ab773029019c54f97d1bca3fc6a469eb3478f556ec4edf06ef50606f7c5b67c3",
+  "manifestHash": "ba1ffeabab0cad8174e52bcb3bab40a62fc7dac556ca571a9daa9516ddec9de8",
   "counts": {
-    "sourceFiles": 3821,
-    "productionSourceFiles": 2305,
+    "sourceFiles": 3823,
+    "productionSourceFiles": 2306,
     "componentFiles": 910,
     "coreFamilies": 57,
     "featureDomains": 54,
@@ -1353,6 +1353,8 @@
     "features/editor/lib/editor-media-runtime-store.ts",
     "features/editor/lib/external-container-style.ts",
     "features/editor/lib/file-drag.ts",
+    "features/editor/lib/markdown-image-import.test.ts",
+    "features/editor/lib/markdown-image-import.ts",
     "features/editor/lib/media-block-updates.test.ts",
     "features/editor/lib/media-block-updates.ts",
     "features/editor/lib/media-file-insert.test.ts",
@@ -36592,6 +36594,11 @@
               "name": "mediaRuntimeStore",
               "optional": true,
               "type": "EditorMediaRuntimeStore"
+            },
+            {
+              "name": "markdownImageImporter",
+              "optional": true,
+              "type": "MarkdownImageImporter"
             },
             {
               "name": "externalVideo",
@@ -75689,6 +75696,7 @@
         "features/editor/lib/editor-media-runtime-store.ts",
         "features/editor/lib/external-container-style.ts",
         "features/editor/lib/file-drag.ts",
+        "features/editor/lib/markdown-image-import.ts",
         "features/editor/lib/media-block-updates.ts",
         "features/editor/lib/media-file-insert.ts",
         "features/editor/lib/media-test-ids.ts",
@@ -75996,6 +76004,7 @@
         "features/editor/lib/block-insert.test.ts",
         "features/editor/lib/editor-library-file-selection.test.ts",
         "features/editor/lib/editor-media-runtime-store.test.ts",
+        "features/editor/lib/markdown-image-import.test.ts",
         "features/editor/lib/media-block-updates.test.ts",
         "features/editor/lib/media-file-insert.test.ts",
         "features/editor/tiptap/TiptapAuthoringControls.catalog.test.ts",

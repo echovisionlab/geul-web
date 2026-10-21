@@ -49,6 +49,7 @@ vi.mock('@/features/editor/hooks/useEntityMediaSurface', () => ({
     selectLibraryFilesAtBlock: vi.fn(() => false),
     selectLibraryFilesAtSavedPosition: vi.fn(() => false),
     externalImageProgress: null,
+    importMarkdownImagesInto: vi.fn(() => undefined),
     mediaTiptapExtensions: [],
     uploadProgress: null,
   }),

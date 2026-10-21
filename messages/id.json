@@ -3569,7 +3569,8 @@
       "importingExternalImages": "Mengimpor gambar eksternal..."
     },
     "notifications": {
-      "uploadFailedMessage": "Gagal mengunggah {name}: {message}"
+      "uploadFailedMessage": "Gagal mengunggah {name}: {message}",
+      "markdownImagesKeptAsLinks": "{count} gambar tidak dapat diimpor sehingga dibiarkan sebagai tautan."
     },
     "media": {
       "statuses": {

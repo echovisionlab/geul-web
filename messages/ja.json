@@ -3569,7 +3569,8 @@
       "importingExternalImages": "外部画像を取り込み中..."
     },
     "notifications": {
-      "uploadFailedMessage": "{name} のアップロードに失敗しました: {message}"
+      "uploadFailedMessage": "{name} のアップロードに失敗しました: {message}",
+      "markdownImagesKeptAsLinks": "{count}件の画像を取り込めなかったため、リンクのまま残しました。"
     },
     "media": {
       "statuses": {
