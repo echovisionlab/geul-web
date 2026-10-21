@@ -73,6 +73,10 @@ export function renderMermaid(
       securityLevel: 'strict',
       suppressErrorRendering: true,
       theme: 'base',
+      // Mermaid 12 defaults to ELK and the neo look; keep the established
+      // dagre layout and classic look unless a diagram asks otherwise.
+      layout: 'dagre',
+      look: 'classic',
       fontFamily: resolvedAppearance.fontFamily,
       themeVariables: getMermaidThemeVariables(theme, resolvedAppearance),
       htmlLabels: false,

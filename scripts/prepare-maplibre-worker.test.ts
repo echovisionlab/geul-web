@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 import { prepareMapLibreWorker } from './prepare-maplibre-worker.mjs';
 
 describe('prepareMapLibreWorker', () => {
-  it('emits one self-contained ESM worker, preserves runtime plugin imports and ships the license', async () => {
+  it('publishes the self-contained upstream ESM worker unchanged, preserves runtime plugin imports and ships the license', async () => {
     const outputDirectory = await mkdtemp(resolve(tmpdir(), 'maplibre-worker-test-'));
     const mapLibreDistDirectory = dirname(fileURLToPath(import.meta.resolve('maplibre-gl')));
 
@@ -16,33 +16,23 @@ describe('prepareMapLibreWorker', () => {
       await writeFile(staleSharedModule, 'stale generated artifact');
 
       const report = await prepareMapLibreWorker(outputDirectory);
-      const [worker, license] = await Promise.all([
-        readFile(resolve(outputDirectory, 'maplibre-gl-worker.mjs'), 'utf8'),
+      const [worker, upstreamWorker, license] = await Promise.all([
+        readFile(resolve(outputDirectory, 'maplibre-gl-worker.mjs')),
+        readFile(resolve(mapLibreDistDirectory, 'maplibre-gl-worker.mjs')),
         readFile(resolve(outputDirectory, 'LICENSE.txt')),
       ]);
+      const source = worker.toString('utf8');
 
       expect((await readdir(outputDirectory)).sort()).toEqual(['LICENSE.txt', 'maplibre-gl-worker.mjs']);
-      expect(report.outputImports).toEqual([]);
-      expect(worker).not.toContain('maplibre-gl-shared.mjs');
-      expect([...worker.matchAll(/\bimport\s*\(/g)]).toHaveLength(2);
-      expect(worker).toContain('registerRTLTextPlugin');
-      expect(worker).toContain('addProtocol');
-
-      expect(report.bundledInputs.map(({ path }) => path)).toEqual(
-        expect.arrayContaining(['maplibre-gl-worker.mjs', 'maplibre-gl-shared.mjs']),
-      );
-      const sourceFiles = await Promise.all(
-        ['maplibre-gl-worker.mjs', 'maplibre-gl-shared.mjs'].map((filename) =>
-          readFile(resolve(mapLibreDistDirectory, filename)),
-        ),
-      );
-      expect(report.originalBytes).toBe(sourceFiles.reduce((total, source) => total + source.byteLength, 0));
-      expect(report.originalGzipBytes).toBe(
-        sourceFiles.reduce((total, source) => total + gzipSync(source, { level: 9 }).byteLength, 0),
-      );
-      expect(report.bundleBytes).toBeLessThan(report.originalBytes);
-      expect(report.bundleGzipBytes).toBe(gzipSync(Buffer.from(worker), { level: 9 }).byteLength);
-      expect(report.bundleGzipBytes).toBeLessThan(report.originalGzipBytes);
+      expect(worker.equals(upstreamWorker)).toBe(true);
+      expect(source).not.toContain('maplibre-gl-shared.mjs');
+      expect([...source.matchAll(/\bimport\s*\(/g)]).toHaveLength(2);
+      expect(source).toContain('registerRTLTextPlugin');
+      expect(source).toContain('addProtocol');
+      expect(report).toEqual({
+        bytes: worker.byteLength,
+        gzipBytes: gzipSync(worker, { level: 9 }).byteLength,
+      });
       expect(license).toEqual(await readFile(resolve(mapLibreDistDirectory, '../LICENSE.txt')));
     } finally {
       await rm(outputDirectory, { recursive: true, force: true });

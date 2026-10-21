@@ -154,17 +154,21 @@ describe('TableOfContentsView', () => {
       </>,
     );
     await flushTocSchedule();
+    const rail = container!.querySelector<HTMLAnchorElement>('[aria-expanded]')!;
     const link = container!.querySelector<HTMLAnchorElement>('[href="#section-2"]')!;
     const heading = container!.querySelector<HTMLElement>('#section-2')!;
     expect(container!.querySelector('[role="navigation"]')?.getAttribute('aria-label')).toBe('Contents');
     expect(container!.querySelector('[aria-current="location"]')).not.toBeNull();
+    // Keyboard focus reveals the outline; a hidden link cannot take focus.
+    act(() => rail.focus());
+    expect(link.closest('ol')!.hidden).toBe(false);
     act(() => {
       link.focus();
       link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 0 }));
     });
     expect(document.activeElement).toBe(heading);
     expect(heading.tabIndex).toBe(-1);
-    act(() => link.focus());
+    act(() => rail.focus());
     expect(heading.hasAttribute('tabindex')).toBe(false);
   });
 
