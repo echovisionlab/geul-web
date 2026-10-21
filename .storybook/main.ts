@@ -7,6 +7,7 @@ import { readPublicRuntimeEnvironment } from '../lib/public-runtime-config.ts';
 import { prepareThreeRuntime } from '../scripts/prepare-three-runtime.mjs';
 
 const typeScriptLoader = fileURLToPath(new URL('./loaders/transpile-typescript.cjs', import.meta.url));
+const serverActionStubLoader = fileURLToPath(new URL('./loaders/stub-server-actions.cjs', import.meta.url));
 const useLocalContracts = process.env.LOCAL_CONTRACTS === '1';
 const localFontRoot = new URL('../.artifacts/fonts/dist/fonts/', import.meta.url);
 const localManifestUrl = new URL('manifest.json', localFontRoot);
@@ -121,6 +122,13 @@ const config = {
       // Client stories inject local adapters; never bundle Next's server-only guard.
       'server-only': false,
     };
+    // Like Next's client build, never bundle server action implementations.
+    webpackConfig.module.rules.push({
+      test: /\.tsx?$/,
+      exclude: /node_modules/,
+      enforce: 'pre',
+      use: serverActionStubLoader,
+    });
     webpackConfig.module.rules.push({
       test: /node_modules[/\\]@echovisionlab[/\\](?:geul-common|geul-event|geul-proto|geul-telemetry)[/\\].*\.tsx?$/,
       exclude: /\.d\.ts$/,

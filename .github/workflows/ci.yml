@@ -16,7 +16,7 @@ permissions:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
-  PNPM_VERSION: 12.9.1
+  PNPM_VERSION: 12.14.0
   OATHKEEPER_URL: http://localhost:8000
   KRATOS_URL: http://localhost:4433
   KRATOS_ADMIN_URL: http://localhost:4434
@@ -355,7 +355,7 @@ jobs:
     timeout-minutes: 60
     env:
       # Reviewed renderer source, pinned to the merged API main commit.
-      EMAIL_PREVIEW_API_REVISION: 6e0a343d99150d553e327ba00bc66168e0ba5d10
+      EMAIL_PREVIEW_API_REVISION: 8685a4421fbca76f0483fce9719d29b231534fe1
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

@@ -1,8 +1,8 @@
-# syntax=docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
+# syntax=docker/dockerfile:1.28.0@sha256:bb22d9815c728170f72750f4e5b0d672e06176142e1d602c7e66c050100b7e5b
 
-FROM node:24.21.0-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1 AS base
+FROM node:24.22.0-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f AS base
 RUN apk add --no-cache bash git libc6-compat font-noto-arabic font-noto-thai
-ARG PNPM_VERSION=12.9.1
+ARG PNPM_VERSION=12.14.0
 RUN corepack enable pnpm && corepack prepare pnpm@${PNPM_VERSION} --activate
 ENV PNPM_HOME=/pnpm
 ENV PNPM_STORE_DIR=/pnpm/store
@@ -49,7 +49,7 @@ RUN --mount=type=secret,id=NEXT_SERVER_ACTIONS_ENCRYPTION_KEY,env=NEXT_SERVER_AC
     fi; \
     pnpm exec next build
 
-FROM node:24.21.0-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1 AS runner
+FROM node:24.22.0-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f AS runner
 WORKDIR /app
 RUN apk add --no-cache libc6-compat font-noto-arabic font-noto-thai
 RUN addgroup -S -g 1001 nodejs \
