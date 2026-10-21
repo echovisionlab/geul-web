@@ -152,9 +152,13 @@ function blockPropsToTiptap(kind: RichTextBlockKind, payload: JsonObject | undef
       delete props.attachment;
     }
   }
-  if (kind === 'paragraph' && Object.hasOwn(props, 'linkThumbnail')) {
-    props.linkThumbnailFileId = attachmentToTiptap(props.linkThumbnail);
-    delete props.linkThumbnail;
+  if (kind === 'paragraph') {
+    for (const [field, attr] of LINK_MEDIA_ATTRIBUTES) {
+      if (Object.hasOwn(props, field)) {
+        props[attr] = attachmentToTiptap(props[field]);
+        delete props[field];
+      }
+    }
   }
   if (kind === 'map' && Array.isArray(props.mapPlaceIds)) {
     props.mapPlaceIds = props.mapPlaceIds.join(',');
@@ -185,6 +189,12 @@ function blockPropsToTiptap(kind: RichTextBlockKind, payload: JsonObject | undef
   delete props.stages;
   return props;
 }
+
+/** Paragraph link media Files and the editor attributes holding their File IDs. */
+const LINK_MEDIA_ATTRIBUTES = [
+  ['linkThumbnail', 'linkThumbnailFileId'],
+  ['linkIcon', 'linkIconFileId'],
+] as const;
 
 function attachmentToTiptap(value: JsonValue | undefined): string {
   const attachment = object(value);
@@ -874,12 +884,13 @@ export function splitPayload(block: TiptapBlockSnapshot): { base: JsonObject; lo
     const catalogValue = wireValueToCatalog(block.kind, canonicalField, spec, value);
     (owner === 'locale' ? localeProps : baseProps)[canonicalField] = encodeCatalogValue(spec, catalogValue);
   }
-  if (
-    block.kind === 'paragraph' &&
-    typeof block.attrs.linkThumbnailFileId === 'string' &&
-    block.attrs.linkThumbnailFileId
-  ) {
-    baseProps.linkThumbnail = { activeFileId: block.attrs.linkThumbnailFileId };
+  if (block.kind === 'paragraph') {
+    for (const [field, attr] of LINK_MEDIA_ATTRIBUTES) {
+      const fileId = block.attrs[attr];
+      if (typeof fileId === 'string' && fileId) {
+        baseProps[field] = { activeFileId: fileId };
+      }
+    }
   }
   if (block.kind === 'file') {
     if (typeof block.attrs.fileId === 'string' && block.attrs.fileId) {

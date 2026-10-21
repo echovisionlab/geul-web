@@ -4049,7 +4049,9 @@
           "loadingPreview": "正在載入預覽…",
           "previewUnavailable": "無法載入此連結的預覽。",
           "playVideo": "播放 {title}",
-          "playNotice": "播放時會從 {provider} 載入。"
+          "playNotice": "播放時會從 {provider} 載入。",
+          "addCaption": "點擊新增說明文字",
+          "captionPlaceholder": "新增說明文字..."
         },
         "shader": {
           "title": "GLSL 著色器",

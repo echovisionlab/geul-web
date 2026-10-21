@@ -4049,7 +4049,9 @@
           "loadingPreview": "プレビューを読み込み中…",
           "previewUnavailable": "このリンクのプレビューを読み込めませんでした。",
           "playVideo": "{title} を再生",
-          "playNotice": "再生すると {provider} から読み込みます。"
+          "playNotice": "再生すると {provider} から読み込みます。",
+          "addCaption": "クリックしてキャプションを追加",
+          "captionPlaceholder": "キャプションを追加..."
         },
         "shader": {
           "title": "GLSLシェーダー",

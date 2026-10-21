@@ -4049,7 +4049,9 @@
           "loadingPreview": "Chargement de l’aperçu…",
           "previewUnavailable": "Impossible de charger l’aperçu de ce lien.",
           "playVideo": "Lire {title}",
-          "playNotice": "La lecture charge la vidéo depuis {provider}."
+          "playNotice": "La lecture charge la vidéo depuis {provider}.",
+          "addCaption": "Cliquer pour ajouter une légende",
+          "captionPlaceholder": "Ajouter une légende..."
         },
         "shader": {
           "title": "Shader GLSL",

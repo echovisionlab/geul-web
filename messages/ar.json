@@ -3784,7 +3784,9 @@
           "loadingPreview": "جارٍ تحميل المعاينة…",
           "previewUnavailable": "تعذّر تحميل معاينة هذا الرابط.",
           "playVideo": "تشغيل {title}",
-          "playNotice": "يؤدي التشغيل إلى التحميل من {provider}."
+          "playNotice": "يؤدي التشغيل إلى التحميل من {provider}.",
+          "addCaption": "انقر لإضافة تسمية توضيحية",
+          "captionPlaceholder": "أضف تسمية توضيحية..."
         },
         "shader": {
           "title": "تظليل GLSL",

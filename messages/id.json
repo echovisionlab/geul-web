@@ -4049,7 +4049,9 @@
           "loadingPreview": "Memuat pratinjau…",
           "previewUnavailable": "Pratinjau tautan ini tidak dapat dimuat.",
           "playVideo": "Putar {title}",
-          "playNotice": "Saat diputar, video dimuat dari {provider}."
+          "playNotice": "Saat diputar, video dimuat dari {provider}.",
+          "addCaption": "Klik untuk menambahkan keterangan",
+          "captionPlaceholder": "Tambahkan keterangan..."
         },
         "shader": {
           "title": "Shader GLSL",

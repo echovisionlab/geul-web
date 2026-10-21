@@ -168,17 +168,14 @@ describe('GeneratedRichTextBlockView external video', () => {
     expect(html).toContain('href="https://youtu.be/dQw4w9WgXcQ?autoplay=1"');
   });
 
-  it('renders a standalone link the author chose to show as a card with its stored thumbnail', () => {
+  it('renders a standalone link the author chose to show as a card with its stored media and caption', () => {
     const blockId = '10000000-0000-4000-8000-000000000021';
-    const thumbnail = create(ContentBlockMediaItemSchema, {
-      selector: { blockId, referencePath: 'paragraph.linkThumbnail' },
-      attachment: { state: { case: 'activeFileId', value: '10000000-0000-4000-8000-000000000022' } },
-      delivery: {
-        fileId: '10000000-0000-4000-8000-000000000022',
-        mimeType: 'image/jpeg',
-        asset: { url: '/asset/cover.jpg' },
-      },
-    });
+    const media = (referencePath: string, fileId: string, url: string) =>
+      create(ContentBlockMediaItemSchema, {
+        selector: { blockId, referencePath },
+        attachment: { state: { case: 'activeFileId', value: fileId } },
+        delivery: { fileId, mimeType: 'image/png', asset: { url } },
+      });
     const block = {
       ...generatedParagraph([
         {
@@ -189,13 +186,18 @@ describe('GeneratedRichTextBlockView external video', () => {
         },
       ]),
       id: blockId,
-      base: { props: { linkPresentation: ParagraphProps_LinkPresentation.CARD, linkSiteName: 'YouTube' } },
+      base: { props: { linkPresentation: ParagraphProps_LinkPresentation.CARD } },
     } as LocalizedRichTextBlock;
-    (block.locale as { props?: unknown }).props = { linkDescription: 'A full set.' };
+    (block.locale as { props?: unknown }).props = { linkDescription: 'A full set.', linkCaption: 'Recorded in 2026.' };
 
     const html = renderToStaticMarkup(
       <NextIntlClientProvider locale="en" timeZone="UTC" messages={enMessages}>
-        <ContentBlockMediaRuntimeProvider items={[thumbnail]}>
+        <ContentBlockMediaRuntimeProvider
+          items={[
+            media('paragraph.linkThumbnail', '10000000-0000-4000-8000-000000000022', '/asset/cover.jpg'),
+            media('paragraph.linkIcon', '10000000-0000-4000-8000-000000000023', '/asset/icon.png'),
+          ]}
+        >
           <GeneratedRichTextBlockView block={block} allowStandaloneExternalVideo />
         </ContentBlockMediaRuntimeProvider>
       </NextIntlClientProvider>,
@@ -205,8 +207,10 @@ describe('GeneratedRichTextBlockView external video', () => {
     expect(html).toContain('href="https://youtu.be/dQw4w9WgXcQ"');
     expect(html).toContain('>Live at the Hall<');
     expect(html).toContain('>A full set.<');
-    expect(html).toContain('YouTube · youtu.be');
+    expect(html).toContain('>https://youtu.be/dQw4w9WgXcQ<');
     expect(html).toContain('cover.jpg');
+    expect(html).toContain('icon.png');
+    expect(html).toContain('>Recorded in 2026.<');
   });
 
   it('keeps a generated mixed paragraph as ordinary content', () => {

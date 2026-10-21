@@ -32,6 +32,8 @@ describe('Tiptap wire schema', () => {
       linkSiteName: '',
       linkDescription: '',
       linkThumbnailFileId: '',
+      linkIconFileId: '',
+      linkCaption: '',
       url: '',
       label: '',
       sourceContent: [],

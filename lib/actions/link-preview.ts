@@ -10,8 +10,9 @@ export interface LinkPreview {
   title: string;
   description: string;
   siteName: string;
-  /** External image the editor imports as the thumbnail File; never shown directly. */
+  /** External images the editor imports as the thumbnail and icon Files; never shown directly. */
   imageSource: string;
+  iconSource: string;
 }
 
 /** Reads the preview a linked page declares about itself, for an author presenting it as a card or video. */
@@ -25,6 +26,7 @@ export async function getLinkPreviewAction(url: string): Promise<ActionResult<{ 
         description: response.description,
         siteName: response.siteName,
         imageSource: response.imageSource,
+        iconSource: response.iconSource,
       },
     });
   } catch (error) {

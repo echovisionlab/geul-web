@@ -14,6 +14,8 @@ export interface LinkPresentationLabels {
   previewUnavailable: string;
   playVideo: string;
   playNotice: string;
+  addCaption: string;
+  captionPlaceholder: string;
 }
 
 const PRESENTATION_ACTIONS = {

@@ -4049,7 +4049,9 @@
           "loadingPreview": "Wczytywanie podglądu…",
           "previewUnavailable": "Nie udało się wczytać podglądu tego linku.",
           "playVideo": "Odtwórz {title}",
-          "playNotice": "Odtworzenie wczytuje wideo z serwisu {provider}."
+          "playNotice": "Odtworzenie wczytuje wideo z serwisu {provider}.",
+          "addCaption": "Kliknij, aby dodać podpis",
+          "captionPlaceholder": "Dodaj podpis..."
         },
         "shader": {
           "title": "Shader GLSL",

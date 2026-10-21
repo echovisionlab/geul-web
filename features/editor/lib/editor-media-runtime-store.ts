@@ -28,6 +28,12 @@ export interface EditorMediaRuntimeStore {
   getSnapshot: (blockId: string, fileId?: string) => EditorMediaRuntimeSnapshot;
   patchFile: (fileId: string, patch: Partial<EditorMediaFileRuntime>) => void;
   subscribe: (blockId: string, listener: RuntimeListener) => () => void;
+  /**
+   * File-keyed access for attachments that are not their Block's single File,
+   * such as a link card's thumbnail and icon.
+   */
+  getFile: (fileId: string) => Readonly<EditorMediaFileRuntime> | undefined;
+  subscribeFile: (fileId: string, listener: RuntimeListener) => () => void;
 }
 
 const EMPTY_RUNTIME_SNAPSHOT: EditorMediaRuntimeSnapshot = Object.freeze({});
@@ -64,6 +70,7 @@ export function createEditorMediaRuntimeStore(): EditorMediaRuntimeStore {
   const blockIdsByFileId = new Map<string, Set<string>>();
   const bindingOwnerByBlockId = new Map<string, symbol>();
   const snapshots = new Map<string, EditorMediaRuntimeSnapshot>();
+  const listenersByFileId = new Map<string, Set<RuntimeListener>>();
 
   const emit = (blockId: string) => {
     snapshots.delete(blockId);
@@ -164,6 +171,24 @@ export function createEditorMediaRuntimeStore(): EditorMediaRuntimeStore {
       for (const blockId of blockIdsByFileId.get(normalizedFileId) ?? []) {
         emit(blockId);
       }
+      for (const listener of listenersByFileId.get(normalizedFileId) ?? []) {
+        listener();
+      }
+    },
+    getFile(fileId) {
+      return files.get(requireUuid(fileId, 'Editor media runtime File identity'));
+    },
+    subscribeFile(fileId, listener) {
+      const normalizedFileId = requireUuid(fileId, 'Editor media runtime File identity');
+      const listeners = listenersByFileId.get(normalizedFileId) ?? new Set<RuntimeListener>();
+      listeners.add(listener);
+      listenersByFileId.set(normalizedFileId, listeners);
+      return () => {
+        listeners.delete(listener);
+        if (listeners.size === 0) {
+          listenersByFileId.delete(normalizedFileId);
+        }
+      };
     },
     subscribe(blockId, listener) {
       const normalizedBlockId = requireUuid(blockId, 'Editor media runtime Block identity');

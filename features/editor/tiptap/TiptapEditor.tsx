@@ -559,6 +559,8 @@ export function TiptapEditor({
       previewUnavailable: runtimeLabels('linkPresentation.previewUnavailable'),
       playVideo: runtimeLabels('linkPresentation.playVideo'),
       playNotice: runtimeLabels('linkPresentation.playNotice'),
+      addCaption: runtimeLabels('linkPresentation.addCaption'),
+      captionPlaceholder: runtimeLabels('linkPresentation.captionPlaceholder'),
     }),
     [runtimeLabels],
   );
@@ -574,7 +576,7 @@ export function TiptapEditor({
   const linkPresentationRuntime = useMemo<LinkPresentationRuntime>(
     () => ({
       loadPreview: (url) => linkPresentationRef.current?.loadPreview(url) ?? Promise.resolve(null),
-      importThumbnail: (source) => linkPresentationRef.current?.importThumbnail?.(source) ?? Promise.resolve(null),
+      importImage: (source) => linkPresentationRef.current?.importImage?.(source) ?? Promise.resolve(null),
     }),
     [],
   );
@@ -646,6 +648,7 @@ export function TiptapEditor({
                     ...effectiveExternalVideo,
                     runtimeStore: mediaRuntimeStore,
                     playbackLabels: externalVideoPlaybackLabels,
+                    captionLabels: linkPresentationLabels,
                   }),
             linkCardNode:
               effectiveExternalVideo === false

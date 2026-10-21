@@ -1,18 +1,23 @@
 'use client';
 
-import { useCallback, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useSyncExternalStore } from 'react';
 import { Extension, type Editor } from '@tiptap/core';
 import { NodeSelection, Plugin, PluginKey, type EditorState } from '@tiptap/pm/state';
 import { NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from '@tiptap/react';
-import { useEditorMediaRuntimeBinding } from '@/features/editor/hooks/useEditorMediaRuntimeBinding';
-import type {
-  EditorMediaRuntimeSnapshot,
-  EditorMediaRuntimeStore,
-} from '@/features/editor/lib/editor-media-runtime-store';
+import type { EditorMediaFileRuntime, EditorMediaRuntimeStore } from '@/features/editor/lib/editor-media-runtime-store';
+import { useOptionalEditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
+import { isBlockId } from '@/lib/editor/block-id';
+import {
+  resolveEditorFileStatusRuntime,
+  type EditorFileStatusRuntimeState,
+} from '@/lib/media/editor-file-status-runtime';
+import { useMediaProcessingRuntimeState } from '@/lib/media/use-media-processing-runtime-state';
 import { LinkCardView } from '@/features/media/ui/LinkCardView';
 import { liveNodeView } from '../live-node-view';
 import type { LinkPresentationLabels } from '../menus/map-external/LinkPresentationActions';
 import { useExactTiptapNodeSelection } from '../useExactTiptapNodeSelection';
+import { useTiptapEditorEditable } from '../useTiptapEditorEditable';
+import { StandaloneLinkCaption } from './StandaloneLinkCaption';
 import { WireLinkCard } from '../wire-schema';
 import {
   applyLinkPreview,
@@ -27,12 +32,14 @@ export interface LinkPreviewSource {
   description: string;
   siteName: string;
   imageSource: string;
+  iconSource: string;
 }
 
-/** Entity-owned services: the server preview read and the thumbnail File import. */
+/** Entity-owned services: the server preview read and the thumbnail and icon File import. */
 export interface LinkPresentationRuntime {
   loadPreview: (url: string) => Promise<LinkPreviewSource | null>;
-  importThumbnail?: (imageSource: string) => Promise<string | null>;
+  /** Imports an external image as an editor File and resolves its File ID. */
+  importImage?: (source: string) => Promise<string | null>;
 }
 
 export interface TiptapLinkCardOptions {
@@ -51,7 +58,6 @@ type LinkPresentationMeta = { pasted: LinkPresentationState['pasted'] } | { pend
 
 export const linkPresentationPluginKey = new PluginKey<LinkPresentationState>('linkPresentation');
 const SINGLE_URL = /^https?:\/\/\S+$/iu;
-const EMPTY_SNAPSHOT: EditorMediaRuntimeSnapshot = Object.freeze({});
 
 export function getLinkPresentationState(state: EditorState): LinkPresentationState {
   return linkPresentationPluginKey.getState(state) ?? { pasted: null, pending: [] };
@@ -95,7 +101,9 @@ export async function chooseLinkPresentation(
   }
   const entry = findStandaloneLink(editor.state, blockId);
   const attrs = entry?.node.attrs ?? {};
-  const hasPreview = Boolean(attrs.linkSiteName || attrs.linkDescription || attrs.linkThumbnailFileId);
+  const hasPreview = Boolean(
+    attrs.linkSiteName || attrs.linkDescription || attrs.linkThumbnailFileId || attrs.linkIconFileId,
+  );
   if (!runtime || !entry || presentation === 'link' || (hasPreview && !refresh)) {
     return true;
   }
@@ -105,15 +113,18 @@ export async function chooseLinkPresentation(
     if (!preview || editor.isDestroyed) {
       return true;
     }
-    const thumbnailFileId =
-      preview.imageSource && runtime.importThumbnail
-        ? await runtime.importThumbnail(preview.imageSource).catch(() => null)
-        : null;
+    const importImage = (source: string) =>
+      source && runtime.importImage ? runtime.importImage(source).catch(() => null) : Promise.resolve(null);
+    const [thumbnailFileId, iconFileId] = await Promise.all([
+      importImage(preview.imageSource),
+      importImage(preview.iconSource),
+    ]);
     applyLinkPreview(editor, blockId, entry.url, {
       title: preview.title,
       description: preview.description,
       siteName: preview.siteName,
       ...(thumbnailFileId ? { thumbnailFileId } : {}),
+      ...(iconFileId ? { iconFileId } : {}),
     });
     return true;
   } finally {
@@ -191,26 +202,37 @@ function getParentBlockId(editor: Editor, getPos: NodeViewProps['getPos']): stri
   return typeof position === 'number' ? String(editor.state.doc.resolve(position).parent.attrs.id ?? '') : '';
 }
 
-/** The stored thumbnail File's delivery URL for a card or video atom in the editor. */
-export function useEditorLinkThumbnail(
-  editor: Editor,
-  getPos: NodeViewProps['getPos'],
-  fileId: string,
-  runtimeStore?: EditorMediaRuntimeStore,
-): string | null {
-  const blockId = getParentBlockId(editor, getPos);
-  useEditorMediaRuntimeBinding({ blockId, fileId, runtimeStore });
+const EMPTY_FILE_RUNTIME = Object.freeze({}) as Readonly<EditorMediaFileRuntime>;
+
+/**
+ * Delivery URL of a link card or video's thumbnail or icon File in the
+ * editor. These Files are attachments of their Block, not its single File,
+ * so they are read by File identity.
+ */
+export function useEditorLinkMediaUrl(fileId: string, runtimeStore?: EditorMediaRuntimeStore): string | null {
+  const enabled = Boolean(runtimeStore && isBlockId(fileId));
+  const runtime = useMediaProcessingRuntimeState<EditorFileStatusRuntimeState>({
+    fileId,
+    enabled,
+    bootstrapEnabled: enabled && !runtimeStore?.getFile(fileId)?.url,
+    mapStatus: resolveEditorFileStatusRuntime,
+  });
+  useEffect(() => {
+    if (enabled && runtimeStore && runtime.value) {
+      runtimeStore.patchFile(fileId, runtime.value);
+    }
+  }, [enabled, fileId, runtime.value, runtimeStore]);
   const subscribe = useCallback(
-    (listener: () => void) => runtimeStore?.subscribe(blockId, listener) ?? (() => {}),
-    [blockId, runtimeStore],
+    (listener: () => void) => (enabled && runtimeStore ? runtimeStore.subscribeFile(fileId, listener) : () => {}),
+    [enabled, fileId, runtimeStore],
   );
-  const snapshot = useCallback(
-    () => (fileId ? (runtimeStore?.getSnapshot(blockId, fileId) ?? EMPTY_SNAPSHOT) : EMPTY_SNAPSHOT),
-    [blockId, fileId, runtimeStore],
+  const read = useCallback(
+    () => (enabled ? (runtimeStore?.getFile(fileId) ?? EMPTY_FILE_RUNTIME) : EMPTY_FILE_RUNTIME),
+    [enabled, fileId, runtimeStore],
   );
-  const runtime = useSyncExternalStore(subscribe, snapshot, snapshot);
-  const url = runtime.file?.thumbnailUrl || runtime.file?.url;
-  return typeof url === 'string' && url ? url : null;
+  const file = useSyncExternalStore(subscribe, read, read);
+  const url = file.thumbnailUrl || file.url;
+  return url || null;
 }
 
 function usePreviewPending(editor: Editor, blockId: string): boolean {
@@ -230,18 +252,29 @@ function usePreviewPending(editor: Editor, blockId: string): boolean {
   );
 }
 
-function TiptapLinkCardNodeView({ editor, getPos, node, labels, runtimeStore }: NodeViewProps & TiptapLinkCardOptions) {
+/** Locale-owned caption editing follows the editor's localized authoring permission. */
+export function useCanEditLinkCaption(editor: Editor): boolean {
+  const editable = useTiptapEditorEditable(editor);
+  const authoringMode = useOptionalEditorAuthoringMode();
+  return editable && (authoringMode?.allowLocalizedBlockEdits ?? true);
+}
+
+function TiptapLinkCardNodeView({
+  editor,
+  getPos,
+  node,
+  labels,
+  runtimeStore,
+  updateAttributes,
+}: NodeViewProps & TiptapLinkCardOptions) {
   const url = String(node.attrs.url ?? '');
   const label = String(node.attrs.label ?? '');
   const blockId = getParentBlockId(editor, getPos);
-  const thumbnailUrl = useEditorLinkThumbnail(
-    editor,
-    getPos,
-    String(node.attrs.linkThumbnailFileId ?? ''),
-    runtimeStore,
-  );
+  const thumbnailUrl = useEditorLinkMediaUrl(String(node.attrs.linkThumbnailFileId ?? ''), runtimeStore);
+  const iconUrl = useEditorLinkMediaUrl(String(node.attrs.linkIconFileId ?? ''), runtimeStore);
   const pending = usePreviewPending(editor, blockId);
   const selected = useExactTiptapNodeSelection({ editor, getPos });
+  const canEditCaption = useCanEditLinkCaption(editor);
   return (
     <NodeViewWrapper
       data-link-card-node=""
@@ -253,10 +286,19 @@ function TiptapLinkCardNodeView({ editor, getPos, node, labels, runtimeStore }: 
         url={url}
         title={label === url ? '' : label}
         description={String(node.attrs.linkDescription ?? '')}
-        siteName={String(node.attrs.linkSiteName ?? '')}
         thumbnailUrl={thumbnailUrl}
+        iconUrl={iconUrl}
         loadingLabel={pending ? labels.loadingPreview : undefined}
         interactive={false}
+        caption={
+          <StandaloneLinkCaption
+            caption={String(node.attrs.linkCaption ?? '')}
+            labels={labels}
+            editable={canEditCaption}
+            showPrompt={selected}
+            onChange={(linkCaption) => updateAttributes({ linkCaption })}
+          />
+        }
       />
     </NodeViewWrapper>
   );

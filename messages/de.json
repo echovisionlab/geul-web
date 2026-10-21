@@ -4496,7 +4496,9 @@
           "loadingPreview": "Vorschau wird geladen…",
           "previewUnavailable": "Für diesen Link konnte keine Vorschau geladen werden.",
           "playVideo": "{title} abspielen",
-          "playNotice": "Beim Abspielen wird das Video von {provider} geladen."
+          "playNotice": "Beim Abspielen wird das Video von {provider} geladen.",
+          "addCaption": "Klicken, um eine Beschriftung hinzuzufügen",
+          "captionPlaceholder": "Beschriftung hinzufügen..."
         },
         "shader": {
           "title": "GLSL-Shader",

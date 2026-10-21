@@ -4049,7 +4049,9 @@
           "loadingPreview": "미리보기를 가져오는 중…",
           "previewUnavailable": "이 링크의 미리보기를 가져오지 못했습니다.",
           "playVideo": "{title} 재생",
-          "playNotice": "재생하면 {provider}에서 불러옵니다."
+          "playNotice": "재생하면 {provider}에서 불러옵니다.",
+          "addCaption": "클릭하여 캡션 추가",
+          "captionPlaceholder": "캡션 추가..."
         },
         "shader": {
           "title": "GLSL 셰이더",

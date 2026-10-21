@@ -4049,7 +4049,9 @@
           "loadingPreview": "Loading preview…",
           "previewUnavailable": "Couldn't load a preview for this link.",
           "playVideo": "Play {title}",
-          "playNotice": "Playing loads it from {provider}."
+          "playNotice": "Playing loads it from {provider}.",
+          "addCaption": "Click to add caption",
+          "captionPlaceholder": "Add a caption..."
         },
         "shader": {
           "title": "GLSL shader",

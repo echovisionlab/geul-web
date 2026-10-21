@@ -236,14 +236,14 @@ export function resolveGeneratedStandaloneExternalVideoLink(
   };
 }
 
-/** Storage reference path of a paragraph link's thumbnail File (see the content block catalog). */
+/** Storage reference paths of a paragraph link's thumbnail and icon Files (see the content block catalog). */
 export const LINK_THUMBNAIL_REFERENCE_PATH = 'paragraph.linkThumbnail';
+export const LINK_ICON_REFERENCE_PATH = 'paragraph.linkIcon';
 
 export interface StandaloneLinkCard {
   url: string;
   /** Empty when the link text is the bare URL; the card then shows the host. */
   title: string;
-  siteName: string;
 }
 
 /** A generated standalone paragraph link the author chose to present as a card. */
@@ -256,7 +256,5 @@ export function resolveGeneratedStandaloneLinkCard(input: {
     return null;
   }
   const link = generatedStandaloneLink(input);
-  return link
-    ? { url: link.url, title: link.label === link.url ? '' : link.label, siteName: input.props.linkSiteName ?? '' }
-    : null;
+  return link ? { url: link.url, title: link.label === link.url ? '' : link.label } : null;
 }

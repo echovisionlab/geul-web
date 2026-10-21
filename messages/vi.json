@@ -4049,7 +4049,9 @@
           "loadingPreview": "Đang tải bản xem trước…",
           "previewUnavailable": "Không tải được bản xem trước của liên kết này.",
           "playVideo": "Phát {title}",
-          "playNotice": "Khi phát, video sẽ được tải từ {provider}."
+          "playNotice": "Khi phát, video sẽ được tải từ {provider}.",
+          "addCaption": "Bấm để thêm chú thích",
+          "captionPlaceholder": "Thêm chú thích..."
         },
         "shader": {
           "title": "Shader GLSL",

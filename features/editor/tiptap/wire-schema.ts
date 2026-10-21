@@ -174,6 +174,8 @@ export const linkPresentationProps = {
   linkSiteName: { default: '' },
   linkDescription: { default: '' },
   linkThumbnailFileId: { default: '' },
+  linkIconFileId: { default: '' },
+  linkCaption: { default: '' },
 } as const;
 
 export const WireParagraph = createBlockContentNode({

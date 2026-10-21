@@ -4049,7 +4049,9 @@
           "loadingPreview": "Cargando vista previa…",
           "previewUnavailable": "No se pudo cargar la vista previa de este enlace.",
           "playVideo": "Reproducir {title}",
-          "playNotice": "Al reproducir, se carga desde {provider}."
+          "playNotice": "Al reproducir, se carga desde {provider}.",
+          "addCaption": "Haz clic para añadir un pie de foto",
+          "captionPlaceholder": "Añadir un pie de foto..."
         },
         "shader": {
           "title": "Shader GLSL",

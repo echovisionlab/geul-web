@@ -4049,7 +4049,9 @@
           "loadingPreview": "Caricamento dell’anteprima…",
           "previewUnavailable": "Impossibile caricare l’anteprima di questo link.",
           "playVideo": "Riproduci {title}",
-          "playNotice": "La riproduzione lo carica da {provider}."
+          "playNotice": "La riproduzione lo carica da {provider}.",
+          "addCaption": "Fai clic per aggiungere una didascalia",
+          "captionPlaceholder": "Aggiungi una didascalia..."
         },
         "shader": {
           "title": "Shader GLSL",

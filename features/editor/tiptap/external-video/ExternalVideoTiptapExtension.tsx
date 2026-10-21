@@ -27,7 +27,8 @@ import { resolveExternalVideo } from '@/lib/media/external-video';
 import enMessages from '@/messages/en.json';
 import type { EditorMediaRuntimeStore } from '@/features/editor/lib/editor-media-runtime-store';
 import { linkPresentationNodeType } from '../block-room-tiptap-codec';
-import { useEditorLinkThumbnail } from '../link-presentation/LinkCardTiptapExtension';
+import { useCanEditLinkCaption, useEditorLinkMediaUrl } from '../link-presentation/LinkCardTiptapExtension';
+import { StandaloneLinkCaption, type StandaloneLinkCaptionLabels } from '../link-presentation/StandaloneLinkCaption';
 import { linkPresentationProps, WireExternalVideo } from '../wire-schema';
 import { useExactTiptapNodeSelection } from '../useExactTiptapNodeSelection';
 import { useTiptapEditorEditable } from '../useTiptapEditorEditable';
@@ -54,6 +55,8 @@ export interface TiptapExternalVideoOptions {
   /** Resolves the stored thumbnail File shown before consent or an explicit play. */
   runtimeStore?: EditorMediaRuntimeStore;
   playbackLabels?: ExternalVideoPlaybackLabelFormatter;
+  /** Labels of the translatable caption under the video. */
+  captionLabels?: StandaloneLinkCaptionLabels;
 }
 
 export interface TiptapStandaloneExternalVideo {
@@ -483,19 +486,17 @@ function TiptapExternalVideoNodeView({
   videoView,
   runtimeStore,
   playbackLabels,
+  captionLabels,
 }: NodeViewProps & {
   labels: TiptapExternalVideoLabels;
   videoView?: ComponentType<ExternalVideoViewProps>;
   runtimeStore?: EditorMediaRuntimeStore;
   playbackLabels?: ExternalVideoPlaybackLabelFormatter;
+  captionLabels?: StandaloneLinkCaptionLabels;
 }) {
   const editorEditable = useTiptapEditorEditable(editor);
-  const thumbnailUrl = useEditorLinkThumbnail(
-    editor,
-    getPos,
-    String(node.attrs.linkThumbnailFileId ?? ''),
-    runtimeStore,
-  );
+  const thumbnailUrl = useEditorLinkMediaUrl(String(node.attrs.linkThumbnailFileId ?? ''), runtimeStore);
+  const canEditCaption = useCanEditLinkCaption(editor);
   const exactNodeSelected = useExactTiptapNodeSelection({ editor, getPos });
   const url = typeof node.attrs.url === 'string' ? node.attrs.url.trim() : '';
   const resolved = resolveExternalVideo(url);
@@ -557,6 +558,15 @@ function TiptapExternalVideoNodeView({
         onShowPreview={select}
         onPreviewWidthChange={updatePreviewWidth}
       />
+      {captionLabels ? (
+        <StandaloneLinkCaption
+          caption={String(node.attrs.linkCaption ?? '')}
+          labels={captionLabels}
+          editable={canEditCaption}
+          showPrompt={editorEditable && exactNodeSelected}
+          onChange={(linkCaption) => updateAttributes({ linkCaption })}
+        />
+      ) : null}
     </NodeViewWrapper>
   );
 }
@@ -574,6 +584,7 @@ export function createTiptapExternalVideoExtension(options: TiptapExternalVideoO
         videoView: options.videoView,
         runtimeStore: options.runtimeStore,
         playbackLabels: options.playbackLabels,
+        captionLabels: options.captionLabels,
       };
     },
     addGlobalAttributes() {
@@ -603,6 +614,7 @@ export function createTiptapExternalVideoExtension(options: TiptapExternalVideoO
             videoView={current.videoView}
             runtimeStore={current.runtimeStore}
             playbackLabels={current.playbackLabels}
+            captionLabels={current.captionLabels}
           />
         )),
       );

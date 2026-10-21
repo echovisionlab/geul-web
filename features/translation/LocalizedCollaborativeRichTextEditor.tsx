@@ -206,7 +206,7 @@ function LocalizedCollaborativeRichTextEditorSurface({
         const result = await getLinkPreviewAction(url);
         return result.ok ? result.preview : null;
       },
-      importThumbnail: async (source) => {
+      importImage: async (source) => {
         const imported = await importRemoteImage(source);
         if (imported) {
           mediaRuntimeStore.patchFile(imported.fileId, { url: imported.url });

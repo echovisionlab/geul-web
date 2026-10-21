@@ -4049,7 +4049,9 @@
           "loadingPreview": "A carregar a pré-visualização…",
           "previewUnavailable": "Não foi possível carregar a pré-visualização desta ligação.",
           "playVideo": "Reproduzir {title}",
-          "playNotice": "Ao reproduzir, o vídeo é carregado do {provider}."
+          "playNotice": "Ao reproduzir, o vídeo é carregado do {provider}.",
+          "addCaption": "Clique para adicionar legenda",
+          "captionPlaceholder": "Adicione uma legenda..."
         },
         "shader": {
           "title": "Shader GLSL",

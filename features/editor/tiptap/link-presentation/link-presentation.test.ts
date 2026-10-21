@@ -28,6 +28,7 @@ import { applyLinkPreview, isolateLinkBlock, setLinkPresentation } from './link-
 
 const BLOCK_ID = '10000000-0000-4000-8000-000000000011';
 const FILE_ID = '10000000-0000-4000-8000-000000000012';
+const ICON_ID = '10000000-0000-4000-8000-000000000013';
 const URL = 'https://youtu.be/dQw4w9WgXcQ';
 const labels = {
   menu: 'Link display',
@@ -39,6 +40,8 @@ const labels = {
   previewUnavailable: 'Unavailable',
   playVideo: 'Play {title}',
   playNotice: 'From {provider}',
+  addCaption: 'Click to add caption',
+  captionPlaceholder: 'Add a caption...',
 };
 const extensions = () =>
   createTiptapWireExtensions({
@@ -120,15 +123,22 @@ it('keeps one durable Paragraph link while switching between video, card and lin
       description: 'A full set.',
       siteName: 'YouTube',
       thumbnailFileId: FILE_ID,
+      iconFileId: ICON_ID,
     }),
   ).toBe(true);
+  // The caption is the card's own translatable text, set like any atom attribute.
+  const card = post.editor.state.doc.firstChild!.firstChild!.firstChild!;
+  post.editor.view.dispatch(
+    post.editor.state.tr.setNodeMarkup(2, undefined, { ...card.attrs, linkCaption: 'Recorded live.' }),
+  );
   expect(post.stored()).toMatchObject({
     props: {
       linkPresentation: ParagraphProps_LinkPresentation.CARD,
       linkSiteName: 'YouTube',
       linkThumbnail: { state: { case: 'activeFileId', value: FILE_ID } },
+      linkIcon: { state: { case: 'activeFileId', value: ICON_ID } },
     },
-    localeProps: { linkDescription: 'A full set.' },
+    localeProps: { linkDescription: 'A full set.', linkCaption: 'Recorded live.' },
   });
   // A bare URL label takes the page title; the link itself is unchanged.
   const [inline] = post.stored().content ?? [];

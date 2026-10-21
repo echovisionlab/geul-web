@@ -4049,7 +4049,9 @@
           "loadingPreview": "Voorbeeld laden…",
           "previewUnavailable": "Kan geen voorbeeld van deze link laden.",
           "playVideo": "{title} afspelen",
-          "playNotice": "Bij afspelen wordt het geladen van {provider}."
+          "playNotice": "Bij afspelen wordt het geladen van {provider}.",
+          "addCaption": "Klik om een bijschrift toe te voegen",
+          "captionPlaceholder": "Bijschrift toevoegen..."
         },
         "shader": {
           "title": "GLSL-shader",

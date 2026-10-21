@@ -1,6 +1,7 @@
 .root {
   width: 100%;
   min-width: 0;
+  margin: 0;
 }
 
 .link {
@@ -19,21 +20,37 @@
   outline-offset: var(--geul-spacing-xxs);
 }
 
+/*
+ * Text and thumbnail start from the same basis and share the rest 4:1. When
+ * the card is too narrow for both, the thumbnail wraps to a row of its own
+ * where its absolutely placed image has no height, so it gives way to the
+ * text without a breakpoint.
+ */
 .layout {
   display: flex;
+  flex-wrap: wrap-reverse;
   align-items: stretch;
   min-width: 0;
 }
 
 .body {
-  flex: 1 1 auto;
+  flex: 4 1 11.25rem;
   min-width: 0;
-  padding: var(--geul-spacing-sm);
+  padding: var(--geul-spacing-sm) var(--geul-spacing-md) var(--geul-spacing-md);
 }
 
 .thumbnail {
   position: relative;
-  flex: 0 0 30%;
-  max-width: 15rem;
-  border-inline-start: var(--geul-border-thin) solid var(--geul-border-default);
+  flex: 1 1 11.25rem;
+}
+
+.icon {
+  position: relative;
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+}
+
+.caption {
+  padding-block-start: var(--geul-spacing-xxs);
 }

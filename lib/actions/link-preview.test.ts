@@ -11,13 +11,14 @@ vi.mock('@/lib/logging/logger', () => ({ logServerFailure: vi.fn() }));
 
 beforeEach(() => vi.clearAllMocks());
 
-it('returns the preview a page declares, including the image source to import', async () => {
+it('returns the preview a page declares, including the image and icon sources to import', async () => {
   mocks.getLinkPreview.mockResolvedValue({
     resolvedUrl: 'https://www.example.com/video',
     title: 'A video',
     description: 'Live set',
     siteName: 'Video Site',
     imageSource: 'https://i.example.com/v.jpg',
+    iconSource: 'https://www.example.com/favicon.ico',
   });
 
   await expect(getLinkPreviewAction('https://example.com/watch')).resolves.toEqual({
@@ -28,6 +29,7 @@ it('returns the preview a page declares, including the image source to import', 
       description: 'Live set',
       siteName: 'Video Site',
       imageSource: 'https://i.example.com/v.jpg',
+      iconSource: 'https://www.example.com/favicon.ico',
     },
   });
   expect(mocks.getLinkPreview).toHaveBeenCalledWith({ url: 'https://example.com/watch' });

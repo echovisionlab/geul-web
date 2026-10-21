@@ -24,6 +24,7 @@ export interface LinkPreviewResult {
   description?: string;
   siteName?: string;
   thumbnailFileId?: string;
+  iconFileId?: string;
 }
 
 const ATOM_PRESENTATION: Record<string, LinkPresentation> = { linkCard: 'card', externalVideo: 'video' };
@@ -142,6 +143,7 @@ export function applyLinkPreview(editor: Editor, blockId: string, url: string, p
     linkSiteName: preview.siteName?.trim() ?? entry.node.attrs.linkSiteName,
     linkDescription: preview.description?.trim() ?? entry.node.attrs.linkDescription,
     ...(preview.thumbnailFileId === undefined ? {} : { linkThumbnailFileId: preview.thumbnailFileId }),
+    ...(preview.iconFileId === undefined ? {} : { linkIconFileId: preview.iconFileId }),
     label,
     sourceContent: [{ type: 'text', text: label, marks: [{ type: 'link', attrs: { href: entry.url } }] }],
   };

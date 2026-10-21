@@ -4049,7 +4049,9 @@
           "loadingPreview": "Загрузка превью…",
           "previewUnavailable": "Не удалось загрузить превью этой ссылки.",
           "playVideo": "Воспроизвести {title}",
-          "playNotice": "При воспроизведении видео загружается с {provider}."
+          "playNotice": "При воспроизведении видео загружается с {provider}.",
+          "addCaption": "Нажмите, чтобы добавить подпись",
+          "captionPlaceholder": "Добавьте подпись..."
         },
         "shader": {
           "title": "GLSL-шейдер",

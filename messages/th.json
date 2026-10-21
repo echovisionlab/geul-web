@@ -4049,7 +4049,9 @@
           "loadingPreview": "กำลังโหลดตัวอย่าง…",
           "previewUnavailable": "โหลดตัวอย่างของลิงก์นี้ไม่ได้",
           "playVideo": "เล่น {title}",
-          "playNotice": "เมื่อเล่น ระบบจะโหลดจาก {provider}"
+          "playNotice": "เมื่อเล่น ระบบจะโหลดจาก {provider}",
+          "addCaption": "คลิกเพื่อเพิ่มคำบรรยาย",
+          "captionPlaceholder": "เพิ่มคำบรรยาย..."
         },
         "shader": {
           "title": "เชเดอร์ GLSL",

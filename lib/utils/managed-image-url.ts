@@ -63,6 +63,8 @@ export const MANAGED_IMAGE_PRESET = {
   CONTENT_IMAGE: { width: 1600 },
   /** Link card and video thumbnails shown beside or behind the link text. */
   LINK_THUMBNAIL: { width: 960 },
+  /** Site icons shown at 16px beside a link card's URL. */
+  LINK_ICON: { width: 64 },
 } as const satisfies Record<string, ManagedImagePreset>;
 
 export type ManagedImagePresetName = keyof typeof MANAGED_IMAGE_PRESET;

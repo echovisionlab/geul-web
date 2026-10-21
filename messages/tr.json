@@ -4049,7 +4049,9 @@
           "loadingPreview": "Önizleme yükleniyor…",
           "previewUnavailable": "Bu bağlantının önizlemesi yüklenemedi.",
           "playVideo": "{title} oynat",
-          "playNotice": "Oynatınca {provider} üzerinden yüklenir."
+          "playNotice": "Oynatınca {provider} üzerinden yüklenir.",
+          "addCaption": "Başlık eklemek için tıklayın",
+          "captionPlaceholder": "Bir başlık ekleyin..."
         },
         "shader": {
           "title": "GLSL gölgelendiricisi",

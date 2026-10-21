@@ -4049,7 +4049,9 @@
           "loadingPreview": "Cargando vista previa…",
           "previewUnavailable": "No se pudo cargar la vista previa de este enlace.",
           "playVideo": "Reproducir {title}",
-          "playNotice": "Al reproducir, se carga desde {provider}."
+          "playNotice": "Al reproducir, se carga desde {provider}.",
+          "addCaption": "Haga clic para agregar título",
+          "captionPlaceholder": "Añade un título..."
         },
         "shader": {
           "title": "Shader GLSL",
