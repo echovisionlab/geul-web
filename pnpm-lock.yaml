@@ -223,7 +223,7 @@ patchedDependencies:
   '@tiptap/react@3.32.0': c60cf9483f9d77c6da08c6dd88a67ac5a18b518fe7cf3596afb2bc747c76aae4
   '@types/dom-webcodecs@0.1.13': 515def00b47b46578b49043120b8a0828f64345f53cb085dc3594624872e0590
   ast-types@0.16.1: fb67e3798a74e742467ecc2b3d06ce2d1a0153b446804bcc8cf0ead419334c17
-  react-aria@3.53.1: adf6fa13734064b2be434e08faf306627091c2ee248dfd4be32bac11ee35de37
+  react-aria@3.53.1: 4a9ededd7befb284650528d15bc3c7788e8e46c9cdf651eae5511279d0a6d02c
   simple-icons@16.35.0: c5ec5a23dd75757e5f3761f077cde410419d5f9ec71d97feff7e3fee5e6af78c
 
 importers:
@@ -394,7 +394,7 @@ importers:
         version: 19.3.1
       react-aria:
         specifier: 3.53.1
-        version: 3.53.1(patch_hash=adf6fa13734064b2be434e08faf306627091c2ee248dfd4be32bac11ee35de37)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+        version: 3.53.1(patch_hash=4a9ededd7befb284650528d15bc3c7788e8e46c9cdf651eae5511279d0a6d02c)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       react-aria-components:
         specifier: 1.22.1
         version: 1.22.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -16974,12 +16974,12 @@ snapshots:
       '@swc/helpers': 0.5.23
       client-only: 0.0.1
       react: 19.3.1
-      react-aria: 3.53.1(patch_hash=adf6fa13734064b2be434e08faf306627091c2ee248dfd4be32bac11ee35de37)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      react-aria: 3.53.1(patch_hash=4a9ededd7befb284650528d15bc3c7788e8e46c9cdf651eae5511279d0a6d02c)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       react-dom: 19.3.1(react@19.3.1)
       react-stately: 3.51.0(react@19.3.1)
       use-sync-external-store: 1.6.0(react@19.3.1)
 
-  react-aria@3.53.1(patch_hash=adf6fa13734064b2be434e08faf306627091c2ee248dfd4be32bac11ee35de37)(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
+  react-aria@3.53.1(patch_hash=4a9ededd7befb284650528d15bc3c7788e8e46c9cdf651eae5511279d0a6d02c)(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
     dependencies:
       '@internationalized/date': 3.12.4
       '@internationalized/number': 3.6.9
@@ -16988,7 +16988,6 @@ snapshots:
       '@swc/helpers': 0.5.23
       aria-hidden: 1.2.6
       clsx: 2.1.1
-      dom-accessibility-api: 0.6.3
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
       react-stately: 3.51.0(react@19.3.1)

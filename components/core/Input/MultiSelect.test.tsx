@@ -166,4 +166,18 @@ describe('MultiSelect React Aria selected-value contract', () => {
     act(() => input.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Backspace' })));
     expect(onChange).toHaveBeenLastCalledWith(values.slice(0, -1));
   });
+
+  it('keeps updating inside a focused rich-text editor', () => {
+    // React reads the selection of the focused editable host before each
+    // commit, walking every node inside it, including the hidden collection.
+    container.contentEditable = 'true';
+    container.tabIndex = 0;
+    render({ value: ['Ambient'] });
+    container.focus();
+    getSelection()!.collapse(container, 0);
+
+    render({ value: ['Ambient', 'Installation'] });
+
+    expect(pills().map((pill) => pill.textContent)).toEqual(['Ambient', 'Installation']);
+  });
 });

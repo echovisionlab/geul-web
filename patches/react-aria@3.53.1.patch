@@ -1,3 +1,69 @@
+diff --git a/dist/private/collections/Hidden.cjs b/dist/private/collections/Hidden.cjs
+index 52f2399f1048daf518e61d1e2abd7fc458deb2b9..3ceb682488daaf6942ba0331bdb483c916cd4c0f 100644
+--- a/dist/private/collections/Hidden.cjs
++++ b/dist/private/collections/Hidden.cjs
+@@ -34,7 +34,16 @@ if (typeof HTMLTemplateElement !== 'undefined') {
+         configurable: true,
+         enumerable: true,
+         get: function() {
+-            return this.content.firstChild;
++            // The content fragment stands in for this element's children. Walks that
++            // climb back through parentNode, such as React reading the selection of a
++            // focused contenteditable host before each commit, must return here rather
++            // than stop at a parentless fragment.
++            let content = this.content;
++            if (content.parentNode !== this) Object.defineProperty(content, 'parentNode', {
++                configurable: true,
++                get: ()=>this
++            });
++            return content.firstChild;
+         }
+     });
+     Object.defineProperty(HTMLTemplateElement.prototype, 'appendChild', {
+diff --git a/dist/private/collections/Hidden.js b/dist/private/collections/Hidden.js
+index 52832df07df07935b7024792ca61ccda153c4dca..3a1f01d0f6af402f04b27dc586f897707426cac7 100644
+--- a/dist/private/collections/Hidden.js
++++ b/dist/private/collections/Hidden.js
+@@ -22,7 +22,16 @@ if (typeof HTMLTemplateElement !== 'undefined') {
+         configurable: true,
+         enumerable: true,
+         get: function() {
+-            return this.content.firstChild;
++            // The content fragment stands in for this element's children. Walks that
++            // climb back through parentNode, such as React reading the selection of a
++            // focused contenteditable host before each commit, must return here rather
++            // than stop at a parentless fragment.
++            let content = this.content;
++            if (content.parentNode !== this) Object.defineProperty(content, 'parentNode', {
++                configurable: true,
++                get: ()=>this
++            });
++            return content.firstChild;
+         }
+     });
+     Object.defineProperty(HTMLTemplateElement.prototype, 'appendChild', {
+diff --git a/dist/private/collections/Hidden.mjs b/dist/private/collections/Hidden.mjs
+index 26027552076cb7cdfd2b2d25bbf12573c0e20e53..76e493022f4c688546a2b91dbdb6af53c2adf5f3 100644
+--- a/dist/private/collections/Hidden.mjs
++++ b/dist/private/collections/Hidden.mjs
+@@ -22,7 +22,16 @@ if (typeof HTMLTemplateElement !== 'undefined') {
+         configurable: true,
+         enumerable: true,
+         get: function() {
+-            return this.content.firstChild;
++            // The content fragment stands in for this element's children. Walks that
++            // climb back through parentNode, such as React reading the selection of a
++            // focused contenteditable host before each commit, must return here rather
++            // than stop at a parentless fragment.
++            let content = this.content;
++            if (content.parentNode !== this) Object.defineProperty(content, 'parentNode', {
++                configurable: true,
++                get: ()=>this
++            });
++            return content.firstChild;
+         }
+     });
+     Object.defineProperty(HTMLTemplateElement.prototype, 'appendChild', {
 diff --git a/dist/private/live-announcer/LiveAnnouncer.cjs b/dist/private/live-announcer/LiveAnnouncer.cjs
 index 9875ec59c1e0219c3f6ecf64c610621e5c16e873..0dde51ef5384f293af2d3534bb0b02fb09441e57 100644
 --- a/dist/private/live-announcer/LiveAnnouncer.cjs
