@@ -19,7 +19,7 @@ import { useTiptapEditorEditable } from '../useTiptapEditorEditable';
 import { useExactTiptapNodeSelection } from '../useExactTiptapNodeSelection';
 import { WireCodeBlock } from '../wire-schema';
 import { replaceCodeBlockSource } from './code-source-transaction';
-import { normalizeCodeBlockPreviewWidth, updateCodeBlockNeutralAttrsAtPosition } from './code-block-commands';
+import { normalizeCodeBlockDisplaySize, updateCodeBlockNeutralAttrsAtPosition } from './code-block-commands';
 import { CodeBlockSurface } from './CodeBlockSurface';
 import classes from './CodeBlockNode.module.css';
 
@@ -132,7 +132,7 @@ function CodeBlockNodeView({
   const title = typeof node.attrs.title === 'string' ? node.attrs.title : '';
   const alignment =
     node.attrs.textAlignment === 'center' || node.attrs.textAlignment === 'right' ? node.attrs.textAlignment : 'left';
-  const previewWidth = normalizeCodeBlockPreviewWidth(node.attrs.previewWidth);
+  const displaySize = normalizeCodeBlockDisplaySize(node.attrs.displaySize);
   const blockId = blockIdForPosition({ editor, getPos });
   const frameRef = useRef<HTMLDivElement>(null);
   const select = useCallback(() => {
@@ -149,7 +149,7 @@ function CodeBlockNodeView({
   const exitSourceEditor = useCallback(() => {
     selectCodeBlockAtPosition(editor, getPos);
   }, [editor, getPos]);
-  const persistPreviewWidth = useCallback(
+  const persistDisplaySize = useCallback(
     (width: number) => {
       const position = getPos();
       if (typeof position !== 'number') {
@@ -159,7 +159,7 @@ function CodeBlockNodeView({
         editor,
         position,
         blockId: blockId.startsWith('position-') || blockId === 'detached' ? '' : blockId,
-        attributes: { previewWidth: normalizeCodeBlockPreviewWidth(width) },
+        attributes: { displaySize: normalizeCodeBlockDisplaySize(width) },
         authoringMode,
       });
     },
@@ -179,9 +179,9 @@ function CodeBlockNodeView({
   );
   const resize = useBlockResize({
     containerRef: frameRef,
-    previewWidth,
+    displaySize,
     enabled: canEditNeutral && exactNodeSelected,
-    onResize: persistPreviewWidth,
+    onResize: persistDisplaySize,
   });
 
   return (
@@ -189,7 +189,7 @@ function CodeBlockNodeView({
       className={classes.node}
       data-content-type="codeBlock"
       data-language={language.durableLanguage}
-      data-preview-width={previewWidth}
+      data-display-size={displaySize}
       data-text-alignment={alignment}
       data-selected={exactNodeSelected || undefined}
     >

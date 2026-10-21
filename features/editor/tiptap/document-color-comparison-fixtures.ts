@@ -42,7 +42,7 @@ export function createDocumentColorComparisonDocument() {
           block: {
             id: colorBlockId(20),
             table: {
-              props: { previewWidth: 100 },
+              props: { displaySize: 100 },
               content: {
                 columnWidths: [100],
                 rows: DOCUMENT_COLOR_VALUES.map((color, index) => ({

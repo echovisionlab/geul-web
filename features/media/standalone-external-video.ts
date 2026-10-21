@@ -1,9 +1,9 @@
 import { normalizeRichTextHref } from '@echovisionlab/geul-common/editor/link-normalization';
 import {
   EXTERNAL_VIDEO_ASPECT_RATIO_VALUES,
-  EXTERNAL_VIDEO_PREVIEW_WIDTH_DEFAULT,
-  EXTERNAL_VIDEO_PREVIEW_WIDTH_MAX_PERCENT,
-  EXTERNAL_VIDEO_PREVIEW_WIDTH_MIN_PERCENT,
+  EXTERNAL_VIDEO_DISPLAY_SIZE_DEFAULT,
+  EXTERNAL_VIDEO_DISPLAY_SIZE_MAX_PERCENT,
+  EXTERNAL_VIDEO_DISPLAY_SIZE_MIN_PERCENT,
   type ExternalVideoAspectRatio,
 } from '@echovisionlab/geul-common/media/block-schemas';
 import {
@@ -19,7 +19,7 @@ import { resolveExternalVideo } from '@/lib/media/external-video';
 export interface StandaloneExternalVideoLink {
   url: string;
   title: string;
-  previewWidth: string;
+  displaySize: string;
   textAlignment: 'left' | 'center' | 'right';
   aspectRatio: ExternalVideoAspectRatio;
 }
@@ -65,17 +65,17 @@ function inlineText(content: InlineContent[] | undefined): string {
     .join('');
 }
 
-function normalizePreviewWidth(value: unknown): string {
+function normalizeDisplaySize(value: unknown): string {
   const parsed =
     typeof value === 'string' || typeof value === 'number'
       ? Number.parseInt(String(value), 10)
-      : Number.parseInt(EXTERNAL_VIDEO_PREVIEW_WIDTH_DEFAULT, 10);
+      : Number.parseInt(EXTERNAL_VIDEO_DISPLAY_SIZE_DEFAULT, 10);
   return String(
     Math.max(
-      EXTERNAL_VIDEO_PREVIEW_WIDTH_MIN_PERCENT,
+      EXTERNAL_VIDEO_DISPLAY_SIZE_MIN_PERCENT,
       Math.min(
-        EXTERNAL_VIDEO_PREVIEW_WIDTH_MAX_PERCENT,
-        Number.isFinite(parsed) ? parsed : Number.parseInt(EXTERNAL_VIDEO_PREVIEW_WIDTH_DEFAULT, 10),
+        EXTERNAL_VIDEO_DISPLAY_SIZE_MAX_PERCENT,
+        Number.isFinite(parsed) ? parsed : Number.parseInt(EXTERNAL_VIDEO_DISPLAY_SIZE_DEFAULT, 10),
       ),
     ),
   );
@@ -125,7 +125,7 @@ export function resolveStandaloneExternalVideoLink(
   return {
     url,
     title: resolveStandaloneExternalVideoTitle(label, url, resolved.provider, providerTitleLabels),
-    previewWidth: normalizePreviewWidth(block.props.previewWidth),
+    displaySize: normalizeDisplaySize(block.props.displaySize),
     textAlignment: normalizeTextAlignment(block.props.textAlignment),
     aspectRatio: normalizeAspectRatio(block.props.aspectRatio),
   };
@@ -230,7 +230,7 @@ export function resolveGeneratedStandaloneExternalVideoLink(
   return {
     url: link.url,
     title: resolveStandaloneExternalVideoTitle(link.label, link.url, resolved.provider, providerTitleLabels),
-    previewWidth: normalizePreviewWidth(input.props?.previewWidth),
+    displaySize: normalizeDisplaySize(input.props?.displaySize),
     textAlignment: generatedTextAlignment(input.props?.textAlignment),
     aspectRatio: generatedAspectRatio(input.props?.aspectRatio),
   };

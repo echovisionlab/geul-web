@@ -3140,7 +3140,7 @@
       "primaryLabelLabel": "Primary label",
       "primaryLabelDescription": "Controls the first line of each map callout.",
       "aspectRatioLabel": "Aspect ratio",
-      "previewWidthLabel": "Preview width (%)",
+      "displaySizeLabel": "Preview width (%)",
       "defaultThemePlaceholder": "Default theme",
       "sortByLabel": "Sort by"
     },

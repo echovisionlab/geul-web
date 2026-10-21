@@ -74,7 +74,7 @@ async function mount({ sole = false, authoringMode }: { sole?: boolean; authorin
               content: [
                 {
                   type: 'codeBlock',
-                  attrs: { language: 'javascript', previewWidth: '100', textAlignment: 'left' },
+                  attrs: { language: 'javascript', displaySize: '100', textAlignment: 'left' },
                   content: [{ type: 'text', text: 'let x = 1;' }],
                 },
               ],

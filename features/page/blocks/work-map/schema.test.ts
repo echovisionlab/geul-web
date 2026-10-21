@@ -9,7 +9,7 @@ describe('parseWorkMapProps', () => {
       sortBy: 'published_at',
       sortOrder: 'desc',
       aspectRatio: '16:9',
-      previewWidth: '100',
+      displaySize: '100',
       minZoom: '-2',
       maxZoom: '22',
       primaryLabel: 'content_title',

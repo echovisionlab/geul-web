@@ -129,7 +129,7 @@ export function GeneratedExecutableBlockView({
     blockId: block.id,
     title: block.locale.props?.title ?? '',
     previewHeight: block.base.props?.previewHeight ?? 360,
-    style: containerStyle(block.base.props?.previewWidth, block.base.props?.textAlignment),
+    style: containerStyle(block.base.props?.displaySize, block.base.props?.textAlignment),
   };
   if (block.kind === 'shader') {
     const program = shaderProgram(block);

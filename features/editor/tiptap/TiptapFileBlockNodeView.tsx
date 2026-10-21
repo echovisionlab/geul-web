@@ -117,11 +117,11 @@ function TiptapFileBlockNodeView({
     Boolean(downloadPolicyTarget && hasSource && blockId);
   const resize = useBlockResize({
     containerRef,
-    previewWidth: readString(attributes, 'previewWidth') || '100',
+    displaySize: readString(attributes, 'displaySize') || '100',
     enabled: editorEditable && hasSource,
-    onResize: (previewWidth) => {
+    onResize: (displaySize) => {
       if (editor.isEditable) {
-        updateAttributes({ previewWidth: String(previewWidth) });
+        updateAttributes({ displaySize: String(displaySize) });
       }
     },
   });

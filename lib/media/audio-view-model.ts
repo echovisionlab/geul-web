@@ -29,7 +29,7 @@ export interface AudioViewModelInput {
   uploadStage?: string;
   duration?: string;
   waveformData?: WaveformPeaks;
-  previewWidth?: string;
+  displaySize?: string;
   textAlignment?: string;
 }
 
@@ -74,7 +74,7 @@ export function resolveAudioViewModel(input: AudioViewModelInput): AudioViewMode
   const actions: AudioActionLink[] = [];
 
   const containerStyle = mediaContainerStyleToReact(
-    resolveMediaContainerStyle(input.previewWidth, input.textAlignment),
+    resolveMediaContainerStyle(input.displaySize, input.textAlignment),
   );
   const domAttrs = {
     ...buildAudioMediaHydrationAttrs({
@@ -157,7 +157,7 @@ export function resolveAudioViewModelFromBlock(block: Pick<Block, 'props'>): Aud
     processingProgress: getBlockPropString(block.props, 'processingProgress'),
     uploadStage: getBlockPropString(block.props, 'uploadStage'),
     duration: getBlockPropString(block.props, 'duration'),
-    previewWidth: getBlockPropString(block.props, 'previewWidth', '100'),
+    displaySize: getBlockPropString(block.props, 'displaySize', '100'),
     textAlignment: getBlockPropString(block.props, 'textAlignment', 'left'),
   });
 }

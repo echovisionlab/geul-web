@@ -189,7 +189,7 @@ function GeneratedParagraphBlock({
         thumbnailUrl={thumbnailUrl}
         playbackLabels={playbackLabels}
         style={mediaContainerStyleToReact(
-          resolveMediaContainerStyle(externalVideo.previewWidth, externalVideo.textAlignment),
+          resolveMediaContainerStyle(externalVideo.displaySize, externalVideo.textAlignment),
         )}
       />
     );
@@ -366,7 +366,7 @@ function GeneratedRichTextBlockContent({
         throw new Error(`Generated table Block ${block.id} shape mismatch.`);
       }
       return (
-        <table style={containerStyle(block.base.props?.previewWidth, block.base.props?.textAlignment)}>
+        <table style={containerStyle(block.base.props?.displaySize, block.base.props?.textAlignment)}>
           {base.columnWidths.length ? (
             <colgroup>
               {base.columnWidths.map((width, index) => (

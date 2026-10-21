@@ -89,7 +89,7 @@ export const baseBlockSpecs = {
     props: {
       title: { default: '' },
       language: { default: 'javascript' },
-      previewWidth: { default: '100' },
+      displaySize: { default: '100' },
       textAlignment: { default: 'left', values: ['left', 'center', 'right'] },
     },
   },
@@ -110,7 +110,7 @@ export const baseBlockSpecs = {
       caption: { default: '' },
       width: { default: '0' },
       height: { default: '0' },
-      previewWidth: { default: '100' },
+      displaySize: { default: '100' },
       textAlignment: { default: 'left', values: ['left', 'center', 'right'] },
     },
   },
@@ -126,7 +126,7 @@ export const baseBlockSpecs = {
     content: 'tableRow+',
     props: {
       textColor: { default: 'default' },
-      previewWidth: { default: 100, type: 'number' },
+      displaySize: { default: 100, type: 'number' },
       textAlignment: { default: 'left', values: ['left', 'center', 'right'] },
     },
   },

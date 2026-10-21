@@ -8,7 +8,7 @@ export interface P5NodeAttributes {
   mode: P5SketchMode;
   capabilities: string;
   previewHeight: number;
-  previewWidth: string;
+  displaySize: string;
   textAlignment: ContextualBlockAlignment;
 }
 
@@ -28,7 +28,7 @@ export function normalizeP5PreviewHeight(value: unknown): number {
   return Number.isFinite(parsed) ? Math.min(720, Math.max(180, Math.round(parsed))) : 360;
 }
 
-export function normalizeP5PreviewWidth(value: unknown): string {
+export function normalizeP5DisplaySize(value: unknown): string {
   const parsed = Number.parseInt(String(value ?? '100'), 10);
   return String(Math.min(100, Math.max(10, Number.isFinite(parsed) ? parsed : 100)));
 }
@@ -62,10 +62,10 @@ const ATTRIBUTE_SPECS = {
     normalize: normalizeP5PreviewHeight,
     serialize: String,
   },
-  previewWidth: {
+  displaySize: {
     default: '100',
-    dataAttribute: 'data-preview-width',
-    normalize: normalizeP5PreviewWidth,
+    dataAttribute: 'data-display-size',
+    normalize: normalizeP5DisplaySize,
     serialize: (value) => value,
   },
   textAlignment: {

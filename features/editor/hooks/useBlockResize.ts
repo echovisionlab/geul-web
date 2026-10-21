@@ -17,7 +17,7 @@ export type TextAlignment = 'left' | 'center' | 'right';
 
 interface UseBlockResizeOptions {
   containerRef: RefObject<HTMLElement | null>;
-  previewWidth: string;
+  displaySize: string;
   onResize: (newWidthPercent: number) => void;
   keyboardSession?: {
     owner: object;
@@ -139,7 +139,7 @@ function clearKeyboardResizeStart(
 /** Shared feature adapter for pointer and keyboard media-width authoring. */
 export function useBlockResize({
   containerRef,
-  previewWidth,
+  displaySize,
   onResize,
   keyboardSession,
   enabled = true,
@@ -149,7 +149,7 @@ export function useBlockResize({
 }: UseBlockResizeOptions): UseBlockResizeReturn {
   const keyboardSessionOwner = keyboardSession?.owner;
   const keyboardSessionKey = keyboardSession?.key;
-  const persistedWidth = clamp(Number.parseInt(previewWidth, 10) || maxWidth, minWidth, maxWidth);
+  const persistedWidth = clamp(Number.parseInt(displaySize, 10) || maxWidth, minWidth, maxWidth);
   const [draftWidth, setDraftWidth] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState<ResizeDirection>(null);
   const sessionRef = useRef<{

@@ -3153,7 +3153,7 @@
       "primaryLabelLabel": "Libellé principal",
       "primaryLabelDescription": "Contrôle la première ligne de chaque encart de carte.",
       "aspectRatioLabel": "Format d’image",
-      "previewWidthLabel": "Largeur d’aperçu (%)",
+      "displaySizeLabel": "Largeur d’aperçu (%)",
       "defaultThemePlaceholder": "Thème par défaut",
       "sortByLabel": "Trier par"
     },

@@ -155,7 +155,7 @@ export interface InsertThreeSceneOptions {
   source?: string;
   mode?: ThreeSceneMode;
   previewHeight?: number;
-  previewWidth?: string;
+  displaySize?: string;
   textAlignment?: ContextualBlockAlignment;
   blockId?: string;
 }
@@ -177,7 +177,7 @@ function normalizePreviewHeight(value: unknown): number {
   return Number.isFinite(parsed) ? Math.min(720, Math.max(180, Math.round(parsed))) : 360;
 }
 
-function normalizePreviewWidth(value: unknown): string {
+function normalizeDisplaySize(value: unknown): string {
   const parsed = Number.parseInt(String(value ?? ''), 10);
   return String(Number.isFinite(parsed) ? Math.min(100, Math.max(10, Math.round(parsed))) : 100);
 }
@@ -313,7 +313,7 @@ export function ThreeSceneNodeView({
   const originalSource = node.textContent;
   const durableMode = normalizeMode(node.attrs.mode);
   const previewHeight = normalizePreviewHeight(node.attrs.previewHeight);
-  const previewWidth = normalizePreviewWidth(node.attrs.previewWidth);
+  const displaySize = normalizeDisplaySize(node.attrs.displaySize);
   const textAlignment = normalizeAlignment(node.attrs.textAlignment);
   const blockId = executableBlockIdForPosition({ editor, getPos });
   const containerRef = useRef<HTMLDivElement>(null);
@@ -338,19 +338,19 @@ export function ThreeSceneNodeView({
   const codeVisible = mode !== 'preview';
   const previewVisible = true;
   const previousSource = useRef(source);
-  const persistPreviewWidth = useCallback(
+  const persistDisplaySize = useCallback(
     (width: number) => {
       if (editor.isEditable && authoringMode?.allowNeutralBlockEdits === true) {
-        updateAttributes({ previewWidth: String(width) });
+        updateAttributes({ displaySize: String(width) });
       }
     },
     [authoringMode, editor, updateAttributes],
   );
   const resize = useBlockResize({
     containerRef,
-    previewWidth,
+    displaySize,
     enabled: authoringSelected,
-    onResize: persistPreviewWidth,
+    onResize: persistDisplaySize,
     keyboardSession: { owner: editor, key: `threeScene:${blockId}` },
   });
 
@@ -604,7 +604,7 @@ export function ThreeSceneNodeView({
       data-content-type="threeScene"
       data-selected={authoringSelected || undefined}
       data-editor-mode={editable ? 'authoring' : 'public'}
-      data-preview-width={previewWidth}
+      data-display-size={displaySize}
       data-text-alignment={textAlignment}
       contentEditable={false}
     >
@@ -742,10 +742,10 @@ export function createThreeSceneExtension(options: ThreeSceneOptions = {}): Exte
           parseHTML: (element) => normalizePreviewHeight(element.getAttribute('data-preview-height')),
           renderHTML: ({ previewHeight }) => ({ 'data-preview-height': normalizePreviewHeight(previewHeight) }),
         },
-        previewWidth: {
+        displaySize: {
           default: '100',
-          parseHTML: (element) => normalizePreviewWidth(element.getAttribute('data-preview-width')),
-          renderHTML: ({ previewWidth }) => ({ 'data-preview-width': normalizePreviewWidth(previewWidth) }),
+          parseHTML: (element) => normalizeDisplaySize(element.getAttribute('data-display-size')),
+          renderHTML: ({ displaySize }) => ({ 'data-display-size': normalizeDisplaySize(displaySize) }),
         },
         textAlignment: {
           default: 'left',
@@ -791,7 +791,7 @@ export function createThreeSceneExtension(options: ThreeSceneOptions = {}): Exte
                     language: 'typescript',
                     mode: normalizeMode(input.mode),
                     previewHeight: normalizePreviewHeight(input.previewHeight),
-                    previewWidth: normalizePreviewWidth(input.previewWidth),
+                    displaySize: normalizeDisplaySize(input.displaySize),
                     textAlignment: normalizeAlignment(input.textAlignment),
                   },
                   content: [{ type: 'text', text: input.source ?? DEFAULT_THREE_SCENE_SOURCE }],

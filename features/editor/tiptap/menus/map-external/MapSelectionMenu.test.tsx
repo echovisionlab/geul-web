@@ -59,7 +59,7 @@ describe('MapSelectionMenu', () => {
             labels={labels}
             places={[{ id: 'place-1', name: 'Studio', centered: true }]}
             textAlignment="center"
-            previewWidth="64"
+            displaySize="64"
             isResizing
             onAddPlace={onAddPlace}
             onRemovePlace={onRemovePlace}
@@ -109,7 +109,7 @@ describe('MapSelectionMenu', () => {
             labels={labels}
             places={[]}
             textAlignment="left"
-            previewWidth="100"
+            displaySize="100"
             editorElement={editorElement}
             navigationEnabled
             onAddPlace={() => undefined}

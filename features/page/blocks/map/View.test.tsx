@@ -113,7 +113,7 @@ describe('MapView', () => {
                 pitch: 0,
                 bearing: 0,
                 aspectRatio: '16:9',
-                previewWidth: 60,
+                displaySize: 60,
                 draggable: true,
                 zoomable: true,
                 rotatable: false,

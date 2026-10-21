@@ -43,7 +43,7 @@ function externalVideoDocument(profile = RichTextProfile.POST) {
         {
           block: {
             id: VIDEO_BLOCK_ID,
-            paragraph: { props: { textAlignment: 2, previewWidth: 64, aspectRatio: 3 } },
+            paragraph: { props: { textAlignment: 2, displaySize: 64, aspectRatio: 3 } },
           },
           placement: { index: 0 },
         },
@@ -98,7 +98,7 @@ function pageExternalVideoDocument() {
                   {
                     block: {
                       id: VIDEO_BLOCK_ID,
-                      paragraph: { props: { textAlignment: 2, previewWidth: 64, aspectRatio: 3 } },
+                      paragraph: { props: { textAlignment: 2, displaySize: 64, aspectRatio: 3 } },
                     },
                     placement: { index: 0 },
                   },
@@ -216,13 +216,13 @@ describe('Block-room external-video projection', () => {
     expect(video).toMatchObject({
       blockId: VIDEO_BLOCK_ID,
       url: YOUTUBE_URL,
-      previewWidth: '64',
+      displaySize: '64',
       textAlignment: 'center',
       aspectRatio: '4:3',
     });
     expect(video?.node.type.name).toBe('externalVideo');
 
-    expect(updateTiptapExternalVideoLayout(mounted.editor, { previewWidth: '72' }, VIDEO_BLOCK_ID)).toBe(true);
+    expect(updateTiptapExternalVideoLayout(mounted.editor, { displaySize: '72' }, VIDEO_BLOCK_ID)).toBe(true);
 
     const materialized = materializeCanonicalBlockRoom(mounted.room, 'post');
     if (materialized.$typeName !== 'api.content.v1.LocalizedRichTextDocument') {
@@ -233,7 +233,7 @@ describe('Block-room external-video projection', () => {
     expect(base?.case).toBe('paragraph');
     expect(base?.case === 'paragraph' ? base.value.props : undefined).toMatchObject({
       textAlignment: 2,
-      previewWidth: 72,
+      displaySize: 72,
       aspectRatio: 3,
     });
     expect(locale?.case).toBe('paragraph');
@@ -247,7 +247,7 @@ describe('Block-room external-video projection', () => {
       ],
     });
     const ordinary = materialized.base?.nodes[1]?.block?.value;
-    expect(ordinary?.case === 'paragraph' ? ordinary.value.props?.previewWidth : undefined).toBeUndefined();
+    expect(ordinary?.case === 'paragraph' ? ordinary.value.props?.displaySize : undefined).toBeUndefined();
 
     mounted.destroy();
   });

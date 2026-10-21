@@ -181,7 +181,7 @@ function tableAlignment(table: ProseMirrorNode): 'left' | 'center' | 'right' {
 }
 
 function applyTableLayout(table: ProseMirrorNode, tableElement: HTMLTableElement): void {
-  const width = normalizedTableWidth(table.attrs.previewWidth);
+  const width = normalizedTableWidth(table.attrs.displaySize);
   const alignment = tableAlignment(table);
   tableElement.style.width = `${width}%`;
   tableElement.style.marginInlineStart = alignment === 'left' ? '0px' : 'auto';
@@ -335,7 +335,7 @@ function currentTableElement(view: EditorView, target: ResizeTarget): HTMLTableE
   );
 }
 
-function setPreviewWidths(session: ResizeSession, widths: readonly number[]): void {
+function setDisplaySizes(session: ResizeSession, widths: readonly number[]): void {
   session.colgroup.forEach((column, index) => {
     column.style.width = `${widths[index] ?? 0}%`;
   });
@@ -433,7 +433,7 @@ function closeSession(view: EditorView, commit: boolean): void {
     positionResizeHitZones(
       session,
       readTableColumnWidths(session.table),
-      normalizedTableWidth(session.table.attrs.previewWidth),
+      normalizedTableWidth(session.table.attrs.displaySize),
     );
     view.dispatch(view.state.tr.setMeta(columnResizingPluginKey, clearResizeState));
     return;
@@ -447,10 +447,10 @@ function closeSession(view: EditorView, commit: boolean): void {
   const transaction = view.state.tr.setMeta(columnResizingPluginKey, clearResizeState);
   if (session.boundary === 'internal') {
     writeColumnWidths(transaction, currentTable, session.tableStart, session.currentWidths);
-  } else if (normalizedTableWidth(currentTable.attrs.previewWidth) !== session.currentTableWidthPercent) {
+  } else if (normalizedTableWidth(currentTable.attrs.displaySize) !== session.currentTableWidthPercent) {
     transaction.setNodeMarkup(session.tableStart - 1, undefined, {
       ...currentTable.attrs,
-      previewWidth: session.currentTableWidthPercent,
+      displaySize: session.currentTableWidthPercent,
     });
   }
   if (transaction.docChanged) {
@@ -513,7 +513,7 @@ export function startTableResize(view: EditorView, event: MouseEvent | PointerEv
     }
     if (session.boundary === 'internal') {
       session.currentWidths = resizeWidths(session, moveEvent.clientX);
-      setPreviewWidths(session, session.currentWidths);
+      setDisplaySizes(session, session.currentWidths);
     } else {
       setPreviewTableWidth(session, resizedTableWidth(session, moveEvent.clientX));
     }
@@ -570,11 +570,11 @@ export function startTableResize(view: EditorView, event: MouseEvent | PointerEv
     basePixels,
     baseContainerWidth: containerRect.width,
     baseContainerScrollWidth: Math.max(container.scrollWidth, containerRect.width),
-    baseTableWidthPercent: normalizedTableWidth(table.attrs.previewWidth),
+    baseTableWidthPercent: normalizedTableWidth(table.attrs.displaySize),
     ...(pointerId === undefined ? {} : { pointerId }),
     ...(captureTarget ? { captureTarget } : {}),
     currentWidths: stored,
-    currentTableWidthPercent: normalizedTableWidth(table.attrs.previewWidth),
+    currentTableWidthPercent: normalizedTableWidth(table.attrs.displaySize),
     startX: event.clientX,
     cleanup,
   };

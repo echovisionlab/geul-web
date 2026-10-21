@@ -6,7 +6,7 @@ describe('durable map block schema', () => {
     expect(mapBlockPropSchema).toMatchObject({
       mapPlaceIds: { default: '' },
       aspectRatio: { default: '16:9', values: ['16:9', '4:3', '1:1'] },
-      previewWidth: { default: '100' },
+      displaySize: { default: '100' },
       url: { default: 'map' },
       showPreview: { default: 'true', values: ['true', 'false'] },
       textAlignment: { default: 'left', values: ['left', 'center', 'right'] },
@@ -17,7 +17,7 @@ describe('durable map block schema', () => {
     expect(parseMapBlockProps({})).toMatchObject({
       mapPlaceIds: '',
       aspectRatio: '16:9',
-      previewWidth: '100',
+      displaySize: '100',
       zoom: '15',
       url: 'map',
       showPreview: 'true',

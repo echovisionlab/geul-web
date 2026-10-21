@@ -3153,7 +3153,7 @@
       "primaryLabelLabel": "Etichetta principale",
       "primaryLabelDescription": "Controlla la prima riga di ogni callout della mappa.",
       "aspectRatioLabel": "Proporzioni",
-      "previewWidthLabel": "Larghezza anteprima (%)",
+      "displaySizeLabel": "Larghezza anteprima (%)",
       "defaultThemePlaceholder": "Tema predefinito",
       "sortByLabel": "Ordina per"
     },

@@ -322,7 +322,7 @@ export function deleteCurrentAndNeutralBlock(editor: EditorMediaCommandPort, blo
 }
 
 export function pickNeutralPropsFromBlock(block: SelectedFileBlock): Record<string, unknown> {
-  return pick(block.props, ['fileId', 'name', 'width', 'height', 'previewWidth', 'textAlignment']);
+  return pick(block.props, ['fileId', 'name', 'width', 'height', 'displaySize', 'textAlignment']);
 }
 
 function pick(props: Record<string, unknown>, names: string[]) {

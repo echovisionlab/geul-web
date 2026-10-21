@@ -3153,7 +3153,7 @@
       "primaryLabelLabel": "Primair label",
       "primaryLabelDescription": "Bepaalt de eerste regel van elke kaartvermelding.",
       "aspectRatioLabel": "Beeldverhouding",
-      "previewWidthLabel": "Voorbeeldbreedte (%)",
+      "displaySizeLabel": "Voorbeeldbreedte (%)",
       "defaultThemePlaceholder": "Standaardthema",
       "sortByLabel": "Sorteren op"
     },

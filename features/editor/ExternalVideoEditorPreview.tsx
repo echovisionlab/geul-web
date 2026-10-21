@@ -31,7 +31,7 @@ interface ExternalVideoEditorPreviewProps {
   canSelect?: () => boolean;
   onSelect: () => void;
   onShowPreview: () => void;
-  onPreviewWidthChange: (previewWidth: string) => void;
+  onDisplaySizeChange: (displaySize: string) => void;
   videoView?: React.ComponentType<ExternalVideoViewProps>;
   thumbnailUrl?: string | null;
   playbackLabels?: ExternalVideoPlaybackLabelFormatter;
@@ -46,7 +46,7 @@ export function ExternalVideoEditorPreview({
   canSelect = () => editable,
   onSelect,
   onShowPreview,
-  onPreviewWidthChange,
+  onDisplaySizeChange,
   videoView: VideoView = ExternalVideoView,
   thumbnailUrl,
   playbackLabels,
@@ -64,8 +64,8 @@ export function ExternalVideoEditorPreview({
   const editableRef = useRef(editable);
   editableRef.current = editable;
   const persistedWidth = useMemo(
-    () => Math.max(10, Math.min(100, Number.parseInt(video.previewWidth, 10) || 100)),
-    [video.previewWidth],
+    () => Math.max(10, Math.min(100, Number.parseInt(video.displaySize, 10) || 100)),
+    [video.displaySize],
   );
   const [draftWidth, setDraftWidth] = useState<number | null>(null);
   const [isResizing, setIsResizing] = useState(false);
@@ -179,9 +179,9 @@ export function ExternalVideoEditorPreview({
       resizeSessionRef.current = null;
       setIsResizing(false);
       setDraftWidth(session.latestWidth);
-      onPreviewWidthChange(String(session.latestWidth));
+      onDisplaySizeChange(String(session.latestWidth));
     },
-    [canSelect, cancelResize, onPreviewWidthChange],
+    [canSelect, cancelResize, onDisplaySizeChange],
   );
 
   const handleResizeKeyDown = useCallback(
@@ -201,9 +201,9 @@ export function ExternalVideoEditorPreview({
       event.preventDefault();
       const nextWidth = Math.max(10, Math.min(100, widthPercent + delta));
       setDraftWidth(nextWidth);
-      onPreviewWidthChange(String(nextWidth));
+      onDisplaySizeChange(String(nextWidth));
     },
-    [canSelect, onPreviewWidthChange, widthPercent],
+    [canSelect, onDisplaySizeChange, widthPercent],
   );
 
   const margin = useMemo(() => {

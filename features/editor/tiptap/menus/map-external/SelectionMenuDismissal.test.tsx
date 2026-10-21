@@ -58,7 +58,7 @@ const paragraph = (id: string, content?: Record<string, unknown>[]) => ({
         backgroundColor: 'default',
         textColor: 'default',
         textAlignment: 'left',
-        previewWidth: '100',
+        displaySize: '100',
         aspectRatio: 'auto',
       },
       content,
@@ -166,7 +166,7 @@ describe('map and external-video selection menu dismissal', () => {
               mapPlaceIds: '',
               centerLat: '',
               centerLng: '',
-              previewWidth: '72',
+              displaySize: '72',
               textAlignment: 'center',
               caption: '',
               aspectRatio: '16:9',
@@ -184,7 +184,7 @@ describe('map and external-video selection menu dismissal', () => {
     const registry = createTiptapMapSelectionMenuRegistry();
     registrations.push(
       registry.register('map', {
-        snapshot: { places: [], textAlignment: 'center', previewWidth: '72' },
+        snapshot: { places: [], textAlignment: 'center', displaySize: '72' },
         commands: { deleteBlock: () => undefined },
       }),
     );
@@ -217,7 +217,7 @@ describe('map and external-video selection menu dismissal', () => {
             attrs: {
               url: 'https://youtu.be/dQw4w9WgXcQ',
               label: 'Video',
-              previewWidth: '100',
+              displaySize: '100',
               aspectRatio: 'auto',
               textAlignment: 'left',
               sourceContent: [

@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 
-export function getExternalContainerStyle(previewWidth: string, textAlignment: string): CSSProperties {
-  const widthPercent = Math.max(10, Math.min(100, parseInt(previewWidth, 10) || 100));
+export function getExternalContainerStyle(displaySize: string, textAlignment: string): CSSProperties {
+  const widthPercent = Math.max(10, Math.min(100, parseInt(displaySize, 10) || 100));
   if (widthPercent >= 100) {
     return {};
   }

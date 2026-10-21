@@ -15,17 +15,17 @@ function ResizeHarness({
   enabled = true,
   keyboardSession,
   onResize,
-  previewWidth = '60',
+  displaySize = '60',
   sessionBlock,
 }: {
   enabled?: boolean;
   keyboardSession?: { owner: object; key: string };
   onResize: (width: number) => void;
-  previewWidth?: string;
+  displaySize?: string;
   sessionBlock?: { id: string; type: string };
 }) {
   const containerRef = createRef<HTMLDivElement>();
-  const controls = useBlockResize({ containerRef, previewWidth, enabled, onResize, keyboardSession });
+  const controls = useBlockResize({ containerRef, displaySize, enabled, onResize, keyboardSession });
   const frame = (
     <EditorMediaBlockFrame
       containerRef={containerRef}
@@ -121,7 +121,7 @@ describe('useBlockResize', () => {
           key="after-transaction"
           keyboardSession={{ owner: {}, key: keyboardSessionKey }}
           onResize={onResize}
-          previewWidth="65"
+          displaySize="65"
         />,
       );
     });
@@ -200,7 +200,7 @@ describe('useBlockResize', () => {
           key="after-map-transaction"
           sessionBlock={{ id: 'map-1', type: 'map' }}
           onResize={onResize}
-          previewWidth="65"
+          displaySize="65"
         />,
       );
     });

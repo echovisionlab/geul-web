@@ -52,7 +52,7 @@ describe('ExternalVideoSelectionMenu', () => {
             labels={labels}
             aspectRatio="16:9"
             textAlignment="left"
-            previewWidth="72"
+            displaySize="72"
             onEditLink={onEditLink}
             onChangeAspectRatio={onChangeAspectRatio}
             onChangeAlignment={onChangeAlignment}
@@ -87,7 +87,7 @@ describe('ExternalVideoSelectionMenu', () => {
             labels={labels}
             aspectRatio="auto"
             textAlignment="left"
-            previewWidth="100"
+            displaySize="100"
             editorElement={editorElement}
             navigationEnabled
             onChangeAspectRatio={() => undefined}

@@ -3153,7 +3153,7 @@
       "primaryLabelLabel": "主标签",
       "primaryLabelDescription": "控制每个地图标注的第一行。",
       "aspectRatioLabel": "宽高比",
-      "previewWidthLabel": "预览宽度 (%)",
+      "displaySizeLabel": "预览宽度 (%)",
       "defaultThemePlaceholder": "默认主题",
       "sortByLabel": "排序方式"
     },

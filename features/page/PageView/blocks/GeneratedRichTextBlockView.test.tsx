@@ -64,7 +64,7 @@ function generatedParagraph(
     kind: 'paragraph',
     base: {
       props: {
-        previewWidth: 42,
+        displaySize: 42,
         textAlignment: ParagraphProps_TextAlignment.CENTER,
         aspectRatio: ParagraphProps_AspectRatio.X_4_3,
       },

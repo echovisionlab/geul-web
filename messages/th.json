@@ -3140,7 +3140,7 @@
       "primaryLabelLabel": "ป้ายกำกับหลัก",
       "primaryLabelDescription": "ควบคุมบรรทัดแรกของแต่ละคำบรรยายแผนที่",
       "aspectRatioLabel": "อัตราส่วนภาพ",
-      "previewWidthLabel": "ดูตัวอย่างความกว้าง (%)",
+      "displaySizeLabel": "ดูตัวอย่างความกว้าง (%)",
       "defaultThemePlaceholder": "ธีมเริ่มต้น",
       "sortByLabel": "เรียงตาม"
     },

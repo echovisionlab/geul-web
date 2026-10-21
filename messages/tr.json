@@ -3140,7 +3140,7 @@
       "primaryLabelLabel": "Birincil etiket",
       "primaryLabelDescription": "Her harita bilgisinin ilk satırını kontrol eder.",
       "aspectRatioLabel": "En boy oranı",
-      "previewWidthLabel": "Önizleme genişliği (%)",
+      "displaySizeLabel": "Önizleme genişliği (%)",
       "defaultThemePlaceholder": "Varsayılan tema",
       "sortByLabel": "Sırala"
     },

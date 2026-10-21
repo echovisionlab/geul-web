@@ -168,9 +168,9 @@ function TiptapMapNodeView({
   const { widthPercent, isDragging, startResizeLeft, startResizeRight, onResizeKeyDown, onResizeBlur, getMarginStyle } =
     useBlockResize({
       containerRef,
-      previewWidth: readString(attributes, 'previewWidth'),
+      displaySize: readString(attributes, 'displaySize'),
       enabled: canEditNeutral,
-      onResize: (width) => updateNeutralAttrs({ previewWidth: String(width) }),
+      onResize: (width) => updateNeutralAttrs({ displaySize: String(width) }),
       keyboardSession: { owner: editor, key: `map:${blockId}` },
     });
 
@@ -322,7 +322,7 @@ function TiptapMapNodeView({
         textAlignment: ['left', 'center', 'right'].includes(textAlignment)
           ? (textAlignment as ContextualBlockAlignment)
           : 'left',
-        previewWidth: widthPercent,
+        displaySize: widthPercent,
         isResizing: isDragging !== null,
         disabled: !canEditNeutral && !canEditLocalized,
       },

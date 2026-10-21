@@ -9,9 +9,9 @@ import type { EditorView } from '@tiptap/pm/view';
 import { NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from '@tiptap/react';
 import {
   EXTERNAL_VIDEO_ASPECT_RATIO_VALUES,
-  EXTERNAL_VIDEO_PREVIEW_WIDTH_DEFAULT,
-  EXTERNAL_VIDEO_PREVIEW_WIDTH_MAX_PERCENT,
-  EXTERNAL_VIDEO_PREVIEW_WIDTH_MIN_PERCENT,
+  EXTERNAL_VIDEO_DISPLAY_SIZE_DEFAULT,
+  EXTERNAL_VIDEO_DISPLAY_SIZE_MAX_PERCENT,
+  EXTERNAL_VIDEO_DISPLAY_SIZE_MIN_PERCENT,
   type ExternalVideoAspectRatio,
 } from '@echovisionlab/geul-common/media/block-schemas';
 import {
@@ -68,13 +68,13 @@ export interface TiptapStandaloneExternalVideo {
   node: ProseMirrorNode;
   url: string;
   title: string;
-  previewWidth: string;
+  displaySize: string;
   textAlignment: 'left' | 'center' | 'right';
   aspectRatio: ExternalVideoAspectRatio;
 }
 
 export interface TiptapExternalVideoLayout {
-  previewWidth?: string;
+  displaySize?: string;
   textAlignment?: 'left' | 'center' | 'right';
   aspectRatio?: ExternalVideoAspectRatio;
 }
@@ -142,14 +142,14 @@ export const DEFAULT_TIPTAP_EXTERNAL_VIDEO_LABELS = {
   vimeoTitle: enMessages.editorCommon.editor.runtimeLabels.externalVideo.vimeoTitle,
 } satisfies TiptapExternalVideoLabels;
 
-function normalizePreviewWidth(value: unknown): string {
-  const parsed = Number.parseInt(String(value ?? EXTERNAL_VIDEO_PREVIEW_WIDTH_DEFAULT), 10);
+function normalizeDisplaySize(value: unknown): string {
+  const parsed = Number.parseInt(String(value ?? EXTERNAL_VIDEO_DISPLAY_SIZE_DEFAULT), 10);
   return String(
     Math.max(
-      EXTERNAL_VIDEO_PREVIEW_WIDTH_MIN_PERCENT,
+      EXTERNAL_VIDEO_DISPLAY_SIZE_MIN_PERCENT,
       Math.min(
-        EXTERNAL_VIDEO_PREVIEW_WIDTH_MAX_PERCENT,
-        Number.isFinite(parsed) ? parsed : Number.parseInt(EXTERNAL_VIDEO_PREVIEW_WIDTH_DEFAULT, 10),
+        EXTERNAL_VIDEO_DISPLAY_SIZE_MAX_PERCENT,
+        Number.isFinite(parsed) ? parsed : Number.parseInt(EXTERNAL_VIDEO_DISPLAY_SIZE_DEFAULT, 10),
       ),
     ),
   );
@@ -277,7 +277,7 @@ function getTiptapStandaloneExternalVideosFromState(
         node,
         url,
         title: resolveStandaloneExternalVideoTitle(label || url, url, resolved.provider, providerTitleLabels),
-        previewWidth: normalizePreviewWidth(node.attrs.previewWidth),
+        displaySize: normalizeDisplaySize(node.attrs.displaySize),
         textAlignment: normalizeAlignment(node.attrs.textAlignment),
         aspectRatio: normalizeAspectRatio(node.attrs.aspectRatio),
       });
@@ -307,7 +307,7 @@ export function assertTiptapExternalVideoSupport(editor: Pick<Editor, 'schema'>)
     !externalVideo?.spec.attrs?.url && 'externalVideo.url',
     !externalVideo?.spec.attrs?.label && 'externalVideo.label',
     !externalVideo?.spec.attrs?.sourceContent && 'externalVideo.sourceContent',
-    !paragraph?.spec.attrs?.previewWidth && 'paragraph.previewWidth',
+    !paragraph?.spec.attrs?.displaySize && 'paragraph.displaySize',
     !paragraph?.spec.attrs?.aspectRatio && 'paragraph.aspectRatio',
   ].filter(Boolean);
   if (missing.length) {
@@ -371,7 +371,7 @@ export function updateTiptapExternalVideoLayout(
   }
   const attrs = {
     ...entry.node.attrs,
-    ...(layout.previewWidth === undefined ? {} : { previewWidth: normalizePreviewWidth(layout.previewWidth) }),
+    ...(layout.displaySize === undefined ? {} : { displaySize: normalizeDisplaySize(layout.displaySize) }),
     ...(layout.textAlignment === undefined ? {} : { textAlignment: normalizeAlignment(layout.textAlignment) }),
     ...(layout.aspectRatio === undefined ? {} : { aspectRatio: normalizeAspectRatio(layout.aspectRatio) }),
   };
@@ -508,11 +508,11 @@ function TiptapExternalVideoNodeView({
     () => ({
       url,
       title,
-      previewWidth: normalizePreviewWidth(node.attrs.previewWidth),
+      displaySize: normalizeDisplaySize(node.attrs.displaySize),
       textAlignment: normalizeAlignment(node.attrs.textAlignment),
       aspectRatio: normalizeAspectRatio(node.attrs.aspectRatio),
     }),
-    [node.attrs.aspectRatio, node.attrs.previewWidth, node.attrs.textAlignment, title, url],
+    [node.attrs.aspectRatio, node.attrs.displaySize, node.attrs.textAlignment, title, url],
   );
   const select = useCallback(() => {
     const position = getPos();
@@ -527,10 +527,10 @@ function TiptapExternalVideoNodeView({
     editor.view.focus();
   }, [editor, getPos]);
   const canSelect = useCallback(() => editor.isEditable, [editor]);
-  const updatePreviewWidth = useCallback(
-    (previewWidth: string) => {
+  const updateDisplaySize = useCallback(
+    (displaySize: string) => {
       if (editor.isEditable) {
-        updateAttributes({ previewWidth: normalizePreviewWidth(previewWidth) });
+        updateAttributes({ displaySize: normalizeDisplaySize(displaySize) });
       }
     },
     [editor, updateAttributes],
@@ -556,7 +556,7 @@ function TiptapExternalVideoNodeView({
         canSelect={canSelect}
         onSelect={select}
         onShowPreview={select}
-        onPreviewWidthChange={updatePreviewWidth}
+        onDisplaySizeChange={updateDisplaySize}
       />
       {captionLabels ? (
         <StandaloneLinkCaption
@@ -592,7 +592,7 @@ export function createTiptapExternalVideoExtension(options: TiptapExternalVideoO
         {
           types: ['paragraph'],
           attributes: {
-            previewWidth: { default: Number(EXTERNAL_VIDEO_PREVIEW_WIDTH_DEFAULT) },
+            displaySize: { default: Number(EXTERNAL_VIDEO_DISPLAY_SIZE_DEFAULT) },
             aspectRatio: { default: 'auto' as ExternalVideoAspectRatio },
             ...Object.fromEntries(
               Object.entries(linkPresentationProps).map(([name, spec]) => [name, { default: spec.default }]),

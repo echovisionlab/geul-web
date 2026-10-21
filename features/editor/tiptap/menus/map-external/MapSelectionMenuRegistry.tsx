@@ -7,7 +7,7 @@ import type { MapSelectionPlace } from './MapSelectionMenu';
 export interface TiptapMapSelectionMenuSnapshot {
   places: readonly MapSelectionPlace[];
   textAlignment: ContextualBlockAlignment;
-  previewWidth: string | number;
+  displaySize: string | number;
   isResizing?: boolean;
   disabled?: boolean;
 }

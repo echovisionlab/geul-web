@@ -3153,7 +3153,7 @@
       "primaryLabelLabel": "Rótulo principal",
       "primaryLabelDescription": "Controla a primeira linha de cada chamada do mapa.",
       "aspectRatioLabel": "Proporção",
-      "previewWidthLabel": "Largura da prévia (%)",
+      "displaySizeLabel": "Largura da prévia (%)",
       "defaultThemePlaceholder": "Tema padrão",
       "sortByLabel": "Ordenar por"
     },

@@ -2,18 +2,18 @@ import type { CSSProperties } from 'react';
 import { normalizeMediaTextAlignment } from '@/lib/media/shared';
 
 export function resolveMapEmbeddedContainerStyle(input: {
-  previewWidth: number;
+  displaySize: number;
   blockAlignment?: string;
-  applyPreviewWidth: boolean;
+  applyDisplaySize: boolean;
   isMobileViewport: boolean;
 }): CSSProperties {
-  const shouldApplyWidth = input.applyPreviewWidth && !input.isMobileViewport;
+  const shouldApplyWidth = input.applyDisplaySize && !input.isMobileViewport;
   const style: CSSProperties = {
-    width: shouldApplyWidth ? `${input.previewWidth}%` : '100%',
+    width: shouldApplyWidth ? `${input.displaySize}%` : '100%',
     maxWidth: '100%',
   };
 
-  if (!shouldApplyWidth || input.previewWidth >= 100) {
+  if (!shouldApplyWidth || input.displaySize >= 100) {
     return style;
   }
 

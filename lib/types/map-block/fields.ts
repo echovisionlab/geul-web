@@ -21,7 +21,7 @@ export const MAP_BLOCK_FIELDS = {
   /** Map aspect ratio */
   aspectRatio: { type: 'enum', default: '16:9', values: ['16:9', '4:3', '1:1'] },
   /** Map preview width as percentage (1-100) */
-  previewWidth: { type: 'string', default: '100' },
+  displaySize: { type: 'string', default: '100' },
   /** Map zoom level (always explicit) */
   zoom: { type: 'string', default: '15' },
   /** Minimum allowed zoom level */

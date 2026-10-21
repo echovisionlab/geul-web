@@ -45,7 +45,7 @@ export interface MapSelectionMenuProps {
   labels: MapSelectionMenuLabels;
   places: readonly MapSelectionPlace[];
   textAlignment: ContextualBlockAlignment;
-  previewWidth: string | number;
+  displaySize: string | number;
   editorElement?: HTMLElement | null;
   navigationEnabled?: boolean;
   isResizing?: boolean;
@@ -67,7 +67,7 @@ export function MapSelectionMenu({
   labels,
   places,
   textAlignment,
-  previewWidth,
+  displaySize,
   editorElement = null,
   navigationEnabled = false,
   isResizing = false,
@@ -81,7 +81,7 @@ export function MapSelectionMenu({
   onEscape,
 }: MapSelectionMenuProps) {
   const resizeHintId = useId();
-  const widthStatus = `${labels.width}: ${previewWidth}%${isResizing ? ` (${labels.resizing})` : ''}`;
+  const widthStatus = `${labels.width}: ${displaySize}%${isResizing ? ` (${labels.resizing})` : ''}`;
 
   return (
     <SelectionMenuSurface
@@ -161,7 +161,7 @@ export function MapSelectionMenu({
         >
           <IconArrowsHorizontal size={16} aria-hidden />
           <DsText as="output" size="xs" weight="medium">
-            {previewWidth}%
+            {displaySize}%
           </DsText>
         </DsLayoutInline>
       </DsLayoutInset>

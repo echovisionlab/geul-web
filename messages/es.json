@@ -3153,7 +3153,7 @@
       "primaryLabelLabel": "Etiqueta principal",
       "primaryLabelDescription": "Controla la primera línea de cada tarjeta del mapa.",
       "aspectRatioLabel": "Relación de aspecto",
-      "previewWidthLabel": "Ancho de vista previa (%)",
+      "displaySizeLabel": "Ancho de vista previa (%)",
       "defaultThemePlaceholder": "Tema predeterminado",
       "sortByLabel": "Ordenar por"
     },

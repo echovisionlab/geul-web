@@ -156,7 +156,7 @@ export const mapBlockSchema = z.object({
   mapPlaceIds: z._default(z.string(), ''),
   // Display
   aspectRatio: z._default(z.enum(['16:9', '4:3', '1:1']), '16:9'),
-  previewWidth: z._default(z.string(), '100'),
+  displaySize: z._default(z.string(), '100'),
   zoom: zoomString,
   minZoom: z._default(zoomBoundString, String(MAP_MIN_ZOOM_LIMIT)),
   maxZoom: z._default(zoomBoundString, String(MAP_MAX_ZOOM_LIMIT)),

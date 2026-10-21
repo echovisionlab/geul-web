@@ -9,7 +9,7 @@ export interface SelectedCodeBlock {
   position: number;
   source: string;
   language: string;
-  previewWidth: string;
+  displaySize: string;
   textAlignment: ContextualBlockAlignment;
 }
 
@@ -21,7 +21,7 @@ function normalizedAlignment(value: unknown): ContextualBlockAlignment {
   return value === 'center' || value === 'right' ? value : 'left';
 }
 
-export function normalizeCodeBlockPreviewWidth(value: unknown): string {
+export function normalizeCodeBlockDisplaySize(value: unknown): string {
   const width = typeof value === 'number' ? value : Number.parseInt(typeof value === 'string' ? value : '', 10);
   return String(Math.max(10, Math.min(100, Number.isFinite(width) ? Math.round(width) : 100)));
 }
@@ -48,21 +48,21 @@ export function getSelectedCodeBlock(editor: Editor): SelectedCodeBlock | null {
     position,
     source: codeBlock.textContent,
     language: normalizedLanguage(codeBlock.attrs.language),
-    previewWidth: normalizeCodeBlockPreviewWidth(codeBlock.attrs.previewWidth),
+    displaySize: normalizeCodeBlockDisplaySize(codeBlock.attrs.displaySize),
     textAlignment: normalizedAlignment(codeBlock.attrs.textAlignment),
   };
 }
 
-type CodeBlockNeutralAttributes = Pick<SelectedCodeBlock, 'language' | 'previewWidth' | 'textAlignment'>;
+type CodeBlockNeutralAttributes = Pick<SelectedCodeBlock, 'language' | 'displaySize' | 'textAlignment'>;
 
 function normalizeNeutralAttributes(
   attributes: Partial<CodeBlockNeutralAttributes>,
 ): Partial<CodeBlockNeutralAttributes> {
   return {
     ...(attributes.language === undefined ? {} : { language: normalizedLanguage(attributes.language) }),
-    ...(attributes.previewWidth === undefined
+    ...(attributes.displaySize === undefined
       ? {}
-      : { previewWidth: normalizeCodeBlockPreviewWidth(attributes.previewWidth) }),
+      : { displaySize: normalizeCodeBlockDisplaySize(attributes.displaySize) }),
     ...(attributes.textAlignment === undefined ? {} : { textAlignment: normalizedAlignment(attributes.textAlignment) }),
   };
 }

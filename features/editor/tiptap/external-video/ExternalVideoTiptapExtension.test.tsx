@@ -163,7 +163,7 @@ describe('Tiptap external-video atom', () => {
     const sourceContent = [linkedText('Field ', youtubeUrl, [{ type: 'bold' }]), linkedText('recording')];
     const mounted = await mountEditor([
       paragraph('video', sourceContent, {
-        previewWidth: '64',
+        displaySize: '64',
         textAlignment: 'center',
         aspectRatio: '4:3',
       }),
@@ -187,7 +187,7 @@ describe('Tiptap external-video atom', () => {
     expect(videos[0]).toMatchObject({
       blockId: 'video',
       url: youtubeUrl,
-      previewWidth: '64',
+      displaySize: '64',
       textAlignment: 'center',
       aspectRatio: '4:3',
     });
@@ -400,7 +400,7 @@ describe('Tiptap external-video atom', () => {
     });
     await flushEditor();
 
-    expect(getTiptapStandaloneExternalVideos(mounted.editor.view)[0]?.previewWidth).toBe('70');
+    expect(getTiptapStandaloneExternalVideos(mounted.editor.view)[0]?.displaySize).toBe('70');
     expect(mounted.element.querySelector('[data-external-video-editor-preview]')).toBeTruthy();
 
     await mounted.destroy();
@@ -419,7 +419,7 @@ describe('Tiptap external-video atom', () => {
 
       expect(
         updateTiptapExternalVideoLayout(mounted.editor, {
-          previewWidth: '44',
+          displaySize: '44',
           textAlignment: 'right',
           aspectRatio: '1:1',
         }),
@@ -428,7 +428,7 @@ describe('Tiptap external-video atom', () => {
     expect(getTiptapStandaloneExternalVideos(mounted.editor.view)[0]).toMatchObject({
       url: youtubeUrl,
       title: 'Source label',
-      previewWidth: '44',
+      displaySize: '44',
       textAlignment: 'right',
       aspectRatio: '1:1',
     });
@@ -438,7 +438,7 @@ describe('Tiptap external-video atom', () => {
       expect(updateTiptapExternalVideoSource(mounted.editor, { url: youtubeUrl, label: 'No change' }, 'video')).toBe(
         false,
       );
-      expect(updateTiptapExternalVideoLayout(mounted.editor, { previewWidth: '70' }, 'video')).toBe(false);
+      expect(updateTiptapExternalVideoLayout(mounted.editor, { displaySize: '70' }, 'video')).toBe(false);
       const [notesPosition] = paragraphPositions(mounted.editor);
       mounted.editor.commands.setTextSelection(notesPosition + 1);
     });

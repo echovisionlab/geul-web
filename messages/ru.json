@@ -3140,7 +3140,7 @@
       "primaryLabelLabel": "Основная этикетка",
       "primaryLabelDescription": "Управляет первой строкой каждой выноски карты.",
       "aspectRatioLabel": "Соотношение сторон",
-      "previewWidthLabel": "Ширина предварительного просмотра (%)",
+      "displaySizeLabel": "Ширина предварительного просмотра (%)",
       "defaultThemePlaceholder": "Тема по умолчанию",
       "sortByLabel": "Сортировать по"
     },

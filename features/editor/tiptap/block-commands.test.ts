@@ -178,7 +178,7 @@ describe('Tiptap block commands', () => {
       nodeType: 'p5Sketch',
       node: {
         type: 'p5Sketch',
-        attrs: { title: 'Sketch', mode: 'edit', previewHeight: 360, previewWidth: '100', textAlignment: 'left' },
+        attrs: { title: 'Sketch', mode: 'edit', previewHeight: 360, displaySize: '100', textAlignment: 'left' },
         content: [{ type: 'text', text: 'function setup() {}' }],
       },
       extensions: [createP5SketchExtension({ labels: DEFAULT_P5_SKETCH_LABELS })],
@@ -188,7 +188,7 @@ describe('Tiptap block commands', () => {
       nodeType: 'threeScene',
       node: {
         type: 'threeScene',
-        attrs: { title: 'Scene', mode: 'edit', previewHeight: 360, previewWidth: '100', textAlignment: 'left' },
+        attrs: { title: 'Scene', mode: 'edit', previewHeight: 360, displaySize: '100', textAlignment: 'left' },
         content: [{ type: 'text', text: 'scene.add(cube);' }],
       },
       extensions: [createThreeSceneExtension({ labels: DEFAULT_THREE_SCENE_LABELS })],
@@ -198,7 +198,7 @@ describe('Tiptap block commands', () => {
       nodeType: 'shader',
       node: {
         type: 'shader',
-        attrs: { title: 'Shader', mode: 'edit', previewHeight: 360, previewWidth: '100', textAlignment: 'left' },
+        attrs: { title: 'Shader', mode: 'edit', previewHeight: 360, displaySize: '100', textAlignment: 'left' },
         content: [
           { type: 'shaderCommon' },
           { type: 'shaderVertex', content: [{ type: 'text', text: 'void main() {}' }] },

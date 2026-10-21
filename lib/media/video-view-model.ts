@@ -27,7 +27,7 @@ export interface VideoViewModelInput {
   processingProgress?: string;
   uploadStage?: string;
   duration?: string;
-  previewWidth?: string;
+  displaySize?: string;
   textAlignment?: string;
 }
 
@@ -99,7 +99,7 @@ export function resolveVideoViewModel(input: VideoViewModelInput): VideoViewMode
     entityType: input.entityType || '',
     entityId: input.entityId || '',
     shareToken: input.shareToken || '',
-    containerStyle: mediaContainerStyleToReact(resolveMediaContainerStyle(input.previewWidth, input.textAlignment)),
+    containerStyle: mediaContainerStyleToReact(resolveMediaContainerStyle(input.displaySize, input.textAlignment)),
     domAttrs: {
       ...buildVideoMediaHydrationAttrs({
         fileId: input.fileId,
@@ -131,7 +131,7 @@ export function resolveVideoViewModelFromBlock(block: Pick<Block, 'props'>): Vid
     processingProgress: getBlockPropString(block.props, 'processingProgress'),
     uploadStage: getBlockPropString(block.props, 'uploadStage'),
     duration: getBlockPropString(block.props, 'duration'),
-    previewWidth: getBlockPropString(block.props, 'previewWidth', '100'),
+    displaySize: getBlockPropString(block.props, 'displaySize', '100'),
     textAlignment: getBlockPropString(block.props, 'textAlignment', 'left'),
   });
 }

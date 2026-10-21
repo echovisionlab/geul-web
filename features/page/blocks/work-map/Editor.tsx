@@ -46,7 +46,7 @@ function WorkMapSettingsForm({ props, updateProps }: WorkMapSettingsFormProps) {
   const sortBy = props.sortBy || 'published_at';
   const sortOrder = props.sortOrder || 'desc';
   const aspectRatio = props.aspectRatio || '16:9';
-  const previewWidth = props.previewWidth || '100';
+  const displaySize = props.displaySize || '100';
   const zoomBounds = normalizeMapZoomBounds({
     minZoom: Number.parseFloat(props.minZoom || ''),
     maxZoom: Number.parseFloat(props.maxZoom || ''),
@@ -208,9 +208,9 @@ function WorkMapSettingsForm({ props, updateProps }: WorkMapSettingsFormProps) {
 
         <DsLayoutInline grow>
           <NumberInput
-            label={t('previewWidthLabel')}
-            value={Number.parseInt(previewWidth, 10)}
-            onChange={(value) => updateProp('previewWidth', String(value || 100))}
+            label={t('displaySizeLabel')}
+            value={Number.parseInt(displaySize, 10)}
+            onChange={(value) => updateProp('displaySize', String(value || 100))}
             min={10}
             max={100}
           />

@@ -3140,7 +3140,7 @@
       "primaryLabelLabel": "Etykieta podstawowa",
       "primaryLabelDescription": "Kontroluje pierwszą linię każdego objaśnienia mapy.",
       "aspectRatioLabel": "Proporcje",
-      "previewWidthLabel": "Szerokość podglądu (%)",
+      "displaySizeLabel": "Szerokość podglądu (%)",
       "defaultThemePlaceholder": "Domyślny motyw",
       "sortByLabel": "Sortuj według"
     },

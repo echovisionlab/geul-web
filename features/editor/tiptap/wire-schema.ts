@@ -189,7 +189,7 @@ function standaloneLinkAttributes() {
   return {
     ...propSchemaToAttributes({
       ...defaultTextBlockProps,
-      previewWidth: { default: 100, type: 'number' },
+      displaySize: { default: 100, type: 'number' },
       aspectRatio: { default: 'auto' },
       ...linkPresentationProps,
       url: { default: '' },
@@ -325,7 +325,7 @@ export const WireCodeBlock = createBlockContentNode({
   propSchema: {
     title: { default: '' },
     language: { default: 'javascript' },
-    previewWidth: { default: '100' },
+    displaySize: { default: '100' },
     textAlignment: { default: 'left' },
   },
   tag: 'pre',
@@ -364,7 +364,7 @@ export const WireTable = TiptapNode.create({
   addAttributes() {
     return propSchemaToAttributes({
       textColor: { default: 'default' },
-      previewWidth: { default: 100, type: 'number' },
+      displaySize: { default: 100, type: 'number' },
       textAlignment: { default: 'left' },
     });
   },

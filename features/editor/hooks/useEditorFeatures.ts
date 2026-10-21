@@ -296,7 +296,7 @@ export function createMapBlock(placeId: string, placeData: { lat: number; lng: n
       mapPlaceIds: placeId,
       centerLat: String(placeData.lat),
       centerLng: String(placeData.lng),
-      previewWidth: '100',
+      displaySize: '100',
     },
   };
 }

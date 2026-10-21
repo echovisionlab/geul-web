@@ -87,7 +87,7 @@ const fileNode: JSONContent = {
     caption: 'Original caption',
     width: '0',
     height: '0',
-    previewWidth: '100',
+    displaySize: '100',
     textAlignment: 'left' as const,
     mimeType: 'audio/wav',
   },
@@ -294,7 +294,7 @@ describe('Tiptap wire schema', () => {
       element,
       extensions: createTiptapWireExtensions(),
       content:
-        '<table data-preview-width="64" data-text-alignment="right"><tbody><tr><td><p>x</p></td></tr></tbody></table>',
+        '<table data-display-size="64" data-text-alignment="right"><tbody><tr><td><p>x</p></td></tr></tbody></table>',
     });
     let table: ProseMirrorNode | null = null;
     editor.state.doc.descendants((node) => {
@@ -303,10 +303,10 @@ describe('Tiptap wire schema', () => {
       }
     });
     expect((table as ProseMirrorNode | null)?.attrs).toMatchObject({
-      previewWidth: 64,
+      displaySize: 64,
       textAlignment: 'right',
     });
-    expect(editor.getHTML()).toContain('data-preview-width="64"');
+    expect(editor.getHTML()).toContain('data-display-size="64"');
     expect(editor.getHTML()).toContain('data-text-alignment="right"');
     editor.destroy();
     element.remove();

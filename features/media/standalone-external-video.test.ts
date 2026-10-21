@@ -21,7 +21,7 @@ describe('resolveStandaloneExternalVideoLink', () => {
     ).toEqual({
       url: youtubeLink.href,
       title: 'Recorded session',
-      previewWidth: '100',
+      displaySize: '100',
       textAlignment: 'left',
       aspectRatio: 'auto',
     });
@@ -31,9 +31,9 @@ describe('resolveStandaloneExternalVideoLink', () => {
     expect(
       resolveStandaloneExternalVideoLink({
         ...paragraph([youtubeLink]),
-        props: { previewWidth: '42', textAlignment: 'center', aspectRatio: '4:3' },
+        props: { displaySize: '42', textAlignment: 'center', aspectRatio: '4:3' },
       }),
-    ).toMatchObject({ previewWidth: '42', textAlignment: 'center', aspectRatio: '4:3' });
+    ).toMatchObject({ displaySize: '42', textAlignment: 'center', aspectRatio: '4:3' });
   });
 
   it.each([

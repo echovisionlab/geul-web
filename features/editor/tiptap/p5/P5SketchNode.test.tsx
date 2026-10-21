@@ -81,7 +81,7 @@ const TARGET_LOCALE_AUTHORING_MODE: EditorAuthoringMode = {
 
 function documentWithSketch(
   source = DEFAULT_P5_SKETCH_SOURCE,
-  previewWidth = '100',
+  displaySize = '100',
   capabilities: readonly P5Capability[] = [],
 ) {
   return {
@@ -99,7 +99,7 @@ function documentWithSketch(
                 attrs: {
                   mode: 'preview',
                   previewHeight: 320,
-                  previewWidth,
+                  displaySize,
                   textAlignment: 'left',
                   capabilities: capabilities.join(' '),
                 },
@@ -163,11 +163,11 @@ describe('p5.js Tiptap node', () => {
         capabilities: '',
         mode: 'preview',
         previewHeight: 320,
-        previewWidth: '100',
+        displaySize: '100',
       },
       content: [{ type: 'text', text: 'function draw() { circle(10, 10, 8); }' }],
     });
-    expect(editor.getHTML()).toContain('data-preview-width="100"');
+    expect(editor.getHTML()).toContain('data-display-size="100"');
     editor.destroy();
   });
 
@@ -183,12 +183,12 @@ describe('p5.js Tiptap node', () => {
       content: [
         '<div data-node-type="blockGroup">',
         '<div data-node-type="blockContainer" data-id="p5-html">',
-        '<div data-content-type="p5Sketch" data-mode="preview" data-preview-width="43"></div>',
+        '<div data-content-type="p5Sketch" data-mode="preview" data-display-size="43"></div>',
         '</div>',
         '</div>',
       ].join(''),
     });
-    expect(sketchNode(editor)?.attrs?.previewWidth).toBe('43');
+    expect(sketchNode(editor)?.attrs?.displaySize).toBe('43');
     editor.destroy();
   });
 
@@ -222,12 +222,12 @@ describe('p5.js Tiptap node', () => {
         blockId: 'inserted',
         title: 'Particle study',
         source: 'function setup() { createCanvas(100, 100); }',
-        previewWidth: 62,
+        displaySize: 62,
       }),
     ).toBe(true);
     expect(JSON.stringify(editor.getJSON())).toContain('createCanvas');
     expect(JSON.stringify(editor.getJSON())).toContain('Particle study');
-    expect(JSON.stringify(editor.getJSON())).toContain('"previewWidth":"62"');
+    expect(JSON.stringify(editor.getJSON())).toContain('"displaySize":"62"');
     editor.setEditable(false);
     expect(editor.commands.insertP5Sketch()).toBe(false);
     editor.destroy();
@@ -265,12 +265,12 @@ function PublicSketch({
 }
 
 function AuthoringSketch({
-  previewWidth,
+  displaySize,
   onEditor,
   runtimeFactory,
   capabilities,
 }: {
-  previewWidth: string;
+  displaySize: string;
   onEditor: (editor: Editor) => void;
   runtimeFactory?: P5PreviewRuntimeFactory;
   capabilities?: readonly P5Capability[];
@@ -286,7 +286,7 @@ function AuthoringSketch({
         runtimeFactory,
       }),
     ],
-    content: documentWithSketch(DEFAULT_P5_SKETCH_SOURCE, previewWidth, capabilities),
+    content: documentWithSketch(DEFAULT_P5_SKETCH_SOURCE, displaySize, capabilities),
   });
   useEffect(() => {
     if (editor) {
@@ -312,7 +312,7 @@ describe('authoring p5.js sketch resize', () => {
     const mounted = await mountReact(
       context,
       <AuthoringSketch
-        previewWidth="60"
+        displaySize="60"
         capabilities={['microphone']}
         runtimeFactory={runtimeFactory}
         onEditor={(value) => {
@@ -379,7 +379,7 @@ describe('authoring p5.js sketch resize', () => {
     const mounted = await mountReact(
       context,
       <AuthoringSketch
-        previewWidth="60"
+        displaySize="60"
         runtimeFactory={runtimeFactory}
         onEditor={(value) => {
           editor = value;
@@ -426,7 +426,7 @@ describe('authoring p5.js sketch resize', () => {
     const mounted = await mountReact(
       context,
       <AuthoringSketch
-        previewWidth="60"
+        displaySize="60"
         onEditor={(value) => {
           editor = value;
         }}
@@ -467,7 +467,7 @@ describe('authoring p5.js sketch resize', () => {
     const mounted = await mountReact(
       context,
       <AuthoringSketch
-        previewWidth="60"
+        displaySize="60"
         onEditor={(value) => {
           editor = value;
         }}
@@ -482,11 +482,11 @@ describe('authoring p5.js sketch resize', () => {
 
     await act(async () => handles[0]?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true })));
     await vi.waitFor(() => {
-      expect(sketchNode(editor!)?.attrs?.previewWidth).toBe('55');
+      expect(sketchNode(editor!)?.attrs?.displaySize).toBe('55');
     });
     await act(async () => handles[0]?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
     await vi.waitFor(() => {
-      expect(sketchNode(editor!)?.attrs?.previewWidth).toBe('60');
+      expect(sketchNode(editor!)?.attrs?.displaySize).toBe('60');
     });
 
     await act(async () => {
@@ -494,7 +494,7 @@ describe('authoring p5.js sketch resize', () => {
       handles[0]?.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
     });
     await vi.waitFor(() => {
-      expect(sketchNode(editor!)?.attrs?.previewWidth).toBe('100');
+      expect(sketchNode(editor!)?.attrs?.displaySize).toBe('100');
     });
     await act(async () => editor!.setEditable(false));
     await vi.waitFor(() => {

@@ -59,7 +59,7 @@ function documentWithShader(fragmentSource = DEFAULT_SHADER_FRAGMENT_SOURCE, mod
             content: [
               {
                 type: 'shader',
-                attrs: { mode, previewHeight: 320, previewWidth: '64', textAlignment: 'center' },
+                attrs: { mode, previewHeight: 320, displaySize: '64', textAlignment: 'center' },
                 content: SHADER_STAGE_DEFINITIONS.map(([stage, nodeName]) => {
                   const source = stage === 'image' ? fragmentSource : DEFAULT_SHADER_PROGRAM.sources[stage];
                   return { type: nodeName, ...(source ? { content: [{ type: 'text', text: source }] } : {}) };
@@ -110,7 +110,7 @@ describe('Shader source and wire contract', () => {
     });
     expect(shader(editor)).toMatchObject({
       type: 'shader',
-      attrs: { mode: 'edit', previewHeight: 320, previewWidth: '64', textAlignment: 'center' },
+      attrs: { mode: 'edit', previewHeight: 320, displaySize: '64', textAlignment: 'center' },
     });
     expect(shader(editor)?.attrs).not.toHaveProperty('source');
     expect(shader(editor)?.content?.[1]).toEqual({
@@ -148,7 +148,7 @@ describe('Shader source and wire contract', () => {
       editor.commands.insertShader({
         title: 'Water shader',
         fragmentSource: 'void mainImage(out vec4 c, in vec2 p) { c = vec4(1.0); }',
-        previewWidth: '72',
+        displaySize: '72',
         textAlignment: 'right',
       }),
     ).toBe(true);

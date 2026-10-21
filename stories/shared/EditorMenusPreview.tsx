@@ -169,7 +169,7 @@ export function ContextualMenuPreview({ kind = 'map' }: { kind?: 'map' | 'extern
           }}
           places={places}
           textAlignment={alignment}
-          previewWidth={64}
+          displaySize={64}
           onChangeAlignment={setAlignment}
           onAddPlace={() =>
             setPlaces((value) => [
@@ -195,7 +195,7 @@ export function ContextualMenuPreview({ kind = 'map' }: { kind?: 'map' | 'extern
           }}
           aspectRatio={aspectRatio}
           textAlignment={alignment}
-          previewWidth={72}
+          displaySize={72}
           onChangeAspectRatio={setAspectRatio}
           onChangeAlignment={setAlignment}
           onEditLink={() => setEditingLink((value) => !value)}

@@ -40,9 +40,9 @@ export function toMapConfig(props: MapBlockPropsInput): MapConfig {
       : 'inherit'
   ) as MapLabelVisibilityMode;
 
-  // Parse previewWidth (empty string = undefined = full width)
-  const previewWidthStr = String(props.previewWidth ?? '');
-  const previewWidth = previewWidthStr ? parseInt(previewWidthStr, 10) : undefined;
+  // Parse displaySize (empty string = undefined = full width)
+  const displaySizeStr = String(props.displaySize ?? '');
+  const displaySize = displaySizeStr ? parseInt(displaySizeStr, 10) : undefined;
   const zoomBounds = normalizeMapZoomBounds({
     minZoom: parseFloat(String(props.minZoom ?? String(DEFAULT_MAP_CONFIG.minZoom))),
     maxZoom: parseFloat(String(props.maxZoom ?? String(DEFAULT_MAP_CONFIG.maxZoom))),
@@ -55,7 +55,7 @@ export function toMapConfig(props: MapBlockPropsInput): MapConfig {
     minZoom: zoomBounds.minZoom,
     maxZoom: zoomBounds.maxZoom,
     aspectRatio: String(props.aspectRatio ?? '16:9') as MapAspectRatio,
-    previewWidth: previewWidth && !isNaN(previewWidth) ? previewWidth : undefined,
+    displaySize: displaySize && !isNaN(displaySize) ? displaySize : undefined,
     draggable: String(props.draggable) !== 'false',
     zoomable: String(props.zoomable) !== 'false',
     rotatable: String(props.rotatable) === 'true',
@@ -97,8 +97,8 @@ export function fromMapConfigUpdate(config: Partial<MapConfig>): Partial<MapBloc
   if (config.aspectRatio !== undefined) {
     result.aspectRatio = config.aspectRatio;
   }
-  if (config.previewWidth !== undefined) {
-    result.previewWidth = config.previewWidth ? String(config.previewWidth) : '';
+  if (config.displaySize !== undefined) {
+    result.displaySize = config.displaySize ? String(config.displaySize) : '';
   }
   if (config.draggable !== undefined) {
     result.draggable = config.draggable ? 'true' : 'false';

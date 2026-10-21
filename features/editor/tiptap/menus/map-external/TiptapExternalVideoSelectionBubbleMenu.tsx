@@ -82,7 +82,7 @@ export function TiptapExternalVideoSelectionBubbleMenu({
         labels={labels}
         aspectRatio={selected.aspectRatio}
         textAlignment={selected.textAlignment}
-        previewWidth={selected.previewWidth}
+        displaySize={selected.displaySize}
         editorElement={editor.view.dom}
         navigationEnabled
         onEditLink={() => {

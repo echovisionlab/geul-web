@@ -118,13 +118,13 @@ export function formatMediaSize(value: string | number | undefined | null): stri
 }
 
 export function resolveMediaContainerStyle(
-  previewWidth: string | number | undefined | null,
+  displaySize: string | number | undefined | null,
   textAlignment: string | undefined | null,
 ): MediaContainerStyleRecord {
   const widthPercent =
-    typeof previewWidth === 'number'
-      ? previewWidth
-      : Math.max(10, Math.min(100, parseInt((previewWidth || '100').toString(), 10) || 100));
+    typeof displaySize === 'number'
+      ? displaySize
+      : Math.max(10, Math.min(100, parseInt((displaySize || '100').toString(), 10) || 100));
 
   if (widthPercent >= 100) {
     return {};

@@ -38,7 +38,7 @@ export function PublicRichTextBlockView({
           title={externalVideo.title}
           aspectRatio={externalVideo.aspectRatio}
           style={mediaContainerStyleToReact(
-            resolveMediaContainerStyle(externalVideo.previewWidth, externalVideo.textAlignment),
+            resolveMediaContainerStyle(externalVideo.displaySize, externalVideo.textAlignment),
           )}
         />
       </PublicDocumentBlock>

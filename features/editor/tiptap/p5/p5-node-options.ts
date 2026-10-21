@@ -49,7 +49,7 @@ export interface InsertP5SketchOptions {
   source?: string;
   mode?: P5SketchMode;
   previewHeight?: number;
-  previewWidth?: string | number;
+  displaySize?: string | number;
   textAlignment?: ContextualBlockAlignment;
   capabilities?: readonly P5Capability[] | string;
   blockId?: string;

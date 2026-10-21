@@ -32,7 +32,7 @@ export interface ExternalVideoSelectionMenuProps {
   labels: ExternalVideoSelectionMenuLabels;
   aspectRatio: ExternalVideoAspectRatio;
   textAlignment: ContextualBlockAlignment;
-  previewWidth: string | number;
+  displaySize: string | number;
   editorElement?: HTMLElement | null;
   navigationEnabled?: boolean;
   disabled?: boolean;
@@ -49,7 +49,7 @@ export function ExternalVideoSelectionMenu({
   labels,
   aspectRatio,
   textAlignment,
-  previewWidth,
+  displaySize,
   editorElement = null,
   navigationEnabled = false,
   disabled = false,
@@ -121,14 +121,14 @@ export function ExternalVideoSelectionMenu({
         <DsLayoutInline
           role="status"
           aria-describedby={resizeHintId}
-          aria-label={`${labels.width}: ${previewWidth}%`}
+          aria-label={`${labels.width}: ${displaySize}%`}
           gap="xxs"
           wrap="nowrap"
           data-testid="tiptap-external-video-width"
         >
           <IconArrowsHorizontal size={16} aria-hidden />
           <DsText as="output" size="xs" weight="medium">
-            {previewWidth}%
+            {displaySize}%
           </DsText>
         </DsLayoutInline>
       </DsLayoutInset>

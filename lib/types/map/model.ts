@@ -64,7 +64,7 @@ export interface MapConfig {
   /** Display aspect ratio */
   aspectRatio: MapAspectRatio;
   /** Preview width in percent (10-100, undefined = 100% container width) */
-  previewWidth?: number;
+  displaySize?: number;
   /** Allow map dragging */
   draggable: boolean;
   /** Allow map zooming */
@@ -165,7 +165,7 @@ export interface MapViewConfig {
   // Display
   aspectRatio: MapAspectRatio;
   /** Preview width in percent (10-100, undefined = 100% container width) */
-  previewWidth?: number;
+  displaySize?: number;
 
   // Interaction
   draggable: boolean;

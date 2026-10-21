@@ -3600,7 +3600,7 @@
       "primaryLabelLabel": "Primäres Label",
       "primaryLabelDescription": "Steuert die erste Zeile jeder Kartenmarkierung.",
       "aspectRatioLabel": "Seitenverhältnis",
-      "previewWidthLabel": "Vorschaubreite (%)",
+      "displaySizeLabel": "Vorschaubreite (%)",
       "defaultThemePlaceholder": "Standardthema",
       "sortByLabel": "Sortieren nach"
     },

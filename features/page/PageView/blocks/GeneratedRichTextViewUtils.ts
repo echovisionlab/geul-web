@@ -7,11 +7,11 @@ export function alignment(value: number | undefined): 'left' | 'center' | 'right
 }
 
 export function containerStyle(
-  previewWidth: number | undefined,
+  displaySize: number | undefined,
   textAlignment: number | undefined,
 ): React.CSSProperties {
   return (
-    mediaContainerStyleToReact(resolveMediaContainerStyle(String(previewWidth ?? 100), alignment(textAlignment))) ?? {}
+    mediaContainerStyleToReact(resolveMediaContainerStyle(String(displaySize ?? 100), alignment(textAlignment))) ?? {}
   );
 }
 
@@ -39,8 +39,8 @@ export function documentBlockMeasure(
   if (!options.isTopLevel) {
     return undefined;
   }
-  const previewWidth = (block.base.props as { previewWidth?: number } | undefined)?.previewWidth;
-  const fullWidth = previewWidth === undefined || previewWidth <= 0 || previewWidth >= 100;
+  const displaySize = (block.base.props as { displaySize?: number } | undefined)?.displaySize;
+  const fullWidth = displaySize === undefined || displaySize <= 0 || displaySize >= 100;
   switch (block.kind) {
     case 'code-block':
     case 'mermaid':
@@ -62,7 +62,7 @@ export function documentBlockMeasure(
         props: block.base.props,
         hasChildren: block.children.length > 0,
       });
-      const videoWidth = video ? Number.parseInt(String(video.previewWidth ?? 100), 10) || 100 : 0;
+      const videoWidth = video ? Number.parseInt(String(video.displaySize ?? 100), 10) || 100 : 0;
       return video && videoWidth >= 100 ? 'wide' : undefined;
     }
     default:

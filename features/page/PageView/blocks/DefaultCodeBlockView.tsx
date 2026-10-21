@@ -20,7 +20,7 @@ export function DefaultCodeBlockView({ block }: { block: Block }) {
     <figure data-content-type="codeBlock" style={getContainerStyle(block)}>
       <div
         data-language={language}
-        data-preview-width={getBlockPropString(block.props, 'previewWidth', '100')}
+        data-display-size={getBlockPropString(block.props, 'displaySize', '100')}
         data-text-alignment={String(block.props.textAlignment || 'left')}
       >
         <CodeBlockSurface

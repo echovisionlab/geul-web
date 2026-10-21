@@ -3140,7 +3140,7 @@
       "primaryLabelLabel": "etiqueta primaria",
       "primaryLabelDescription": "Controla la primera línea de cada llamada del mapa.",
       "aspectRatioLabel": "relación de aspecto",
-      "previewWidthLabel": "Ancho de vista previa (%)",
+      "displaySizeLabel": "Ancho de vista previa (%)",
       "defaultThemePlaceholder": "Tema predeterminado",
       "sortByLabel": "Ordenar por"
     },

@@ -117,7 +117,7 @@ export function GeneratedFileBlockView({
   if (!durableAttachment || durableAttachment.case === undefined) {
     throw new Error(`Generated File Block ${block.id} has no attachment.`);
   }
-  const style = containerStyle(block.base.props?.previewWidth, block.base.props?.textAlignment);
+  const style = containerStyle(block.base.props?.displaySize, block.base.props?.textAlignment);
   const caption = block.locale.props?.caption ?? '';
   if (durableAttachment.case === 'missingAttachment') {
     const kind = missingKind(durableAttachment.value.mediaKind);
@@ -192,7 +192,7 @@ export function GeneratedFileBlockView({
     processingStatus: processingStatus(delivery.processingStatus),
     processingProgress: String(delivery.processingPercentage ?? 0),
     duration: String(delivery.durationSeconds ?? 0),
-    previewWidth: String(block.base.props?.previewWidth ?? 100),
+    displaySize: String(block.base.props?.displaySize ?? 100),
     textAlignment: alignment(block.base.props?.textAlignment),
   };
   if (kind === 'audio') {

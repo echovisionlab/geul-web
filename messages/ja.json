@@ -3153,7 +3153,7 @@
       "primaryLabelLabel": "主ラベル",
       "primaryLabelDescription": "各地図コールアウトの1行目を制御します。",
       "aspectRatioLabel": "アスペクト比",
-      "previewWidthLabel": "プレビュー幅 (%)",
+      "displaySizeLabel": "プレビュー幅 (%)",
       "defaultThemePlaceholder": "デフォルトテーマ",
       "sortByLabel": "並び順"
     },

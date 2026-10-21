@@ -38,8 +38,8 @@ const MapLibreMap = dynamic(
 interface MapViewEmbeddedProps {
   config: MapViewConfig;
   /** Apply preview width from config (percentage). Disable when parent already controls width. */
-  applyPreviewWidth?: boolean;
-  /** Optional alignment for the preview-width container. */
+  applyDisplaySize?: boolean;
+  /** Optional alignment for the display-size container. */
   blockAlignment?: string;
   allowEmpty?: boolean;
   labelLocale?: string | null;
@@ -57,7 +57,7 @@ interface MapViewEmbeddedProps {
  */
 export function MapViewEmbedded({
   config,
-  applyPreviewWidth = true,
+  applyDisplaySize = true,
   blockAlignment,
   allowEmpty = false,
   labelLocale,
@@ -127,15 +127,15 @@ export function MapViewEmbedded({
     [config.places],
   );
 
-  const previewWidthPercent =
-    typeof config.previewWidth === 'number' && Number.isFinite(config.previewWidth)
-      ? Math.max(10, Math.min(100, config.previewWidth))
+  const displaySizePercent =
+    typeof config.displaySize === 'number' && Number.isFinite(config.displaySize)
+      ? Math.max(10, Math.min(100, config.displaySize))
       : 100;
 
   const containerStyle = resolveMapEmbeddedContainerStyle({
-    previewWidth: previewWidthPercent,
+    displaySize: displaySizePercent,
     blockAlignment,
-    applyPreviewWidth,
+    applyDisplaySize,
     isMobileViewport,
   });
 

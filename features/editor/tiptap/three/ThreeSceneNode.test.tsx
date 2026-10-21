@@ -64,7 +64,7 @@ const TARGET_LOCALE_AUTHORING_MODE: EditorAuthoringMode = {
   allowLocalizedBlockEdits: true,
 };
 
-function documentWithScene(source = DEFAULT_THREE_SCENE_SOURCE, previewWidth = '64') {
+function documentWithScene(source = DEFAULT_THREE_SCENE_SOURCE, displaySize = '64') {
   return {
     type: 'doc',
     content: [
@@ -81,7 +81,7 @@ function documentWithScene(source = DEFAULT_THREE_SCENE_SOURCE, previewWidth = '
                   language: 'typescript',
                   mode: 'preview',
                   previewHeight: 320,
-                  previewWidth,
+                  displaySize,
                   textAlignment: 'left',
                 },
                 content: [{ type: 'text', text: source }],
@@ -119,10 +119,10 @@ describe('Three.js Tiptap node', () => {
     });
     expect(sceneNode(editor)).toMatchObject({
       type: 'threeScene',
-      attrs: { language: 'typescript', mode: 'preview', previewHeight: 320, previewWidth: '64' },
+      attrs: { language: 'typescript', mode: 'preview', previewHeight: 320, displaySize: '64' },
       content: [{ type: 'text', text: 'scene.add(new THREE.Group())' }],
     });
-    expect(editor.getHTML()).toContain('data-preview-width="64"');
+    expect(editor.getHTML()).toContain('data-display-size="64"');
     editor.destroy();
   });
 
@@ -138,13 +138,13 @@ describe('Three.js Tiptap node', () => {
       content: [
         '<div data-node-type="blockGroup">',
         '<div data-node-type="blockContainer" data-id="three-html">',
-        '<div data-content-type="threeScene" data-mode="preview" data-preview-width="9"></div>',
+        '<div data-content-type="threeScene" data-mode="preview" data-display-size="9"></div>',
         '</div>',
         '</div>',
       ].join(''),
     });
-    expect(sceneNode(editor)?.attrs?.previewWidth).toBe('10');
-    expect(editor.getHTML()).toContain('data-preview-width="10"');
+    expect(sceneNode(editor)?.attrs?.displaySize).toBe('10');
+    expect(editor.getHTML()).toContain('data-display-size="10"');
     editor.destroy();
   });
 });
@@ -371,14 +371,14 @@ describe('authoring Three.js scene resize', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
     expect(rightHandle?.getAttribute('aria-valuenow')).toBe('69');
-    expect(JSON.stringify(editor!.getJSON())).toContain('"previewWidth":"69"');
+    expect(JSON.stringify(editor!.getJSON())).toContain('"displaySize":"69"');
 
     await act(async () => {
       rightHandle?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
     expect(rightHandle?.getAttribute('aria-valuenow')).toBe('64');
-    expect(JSON.stringify(editor!.getJSON())).toContain('"previewWidth":"64"');
+    expect(JSON.stringify(editor!.getJSON())).toContain('"displaySize":"64"');
 
     await act(async () => {
       editor!.setEditable(false);

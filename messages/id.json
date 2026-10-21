@@ -3140,7 +3140,7 @@
       "primaryLabelLabel": "Label utama",
       "primaryLabelDescription": "Mengontrol baris pertama dari setiap pemanggilan peta.",
       "aspectRatioLabel": "Rasio aspek",
-      "previewWidthLabel": "Lebar pratinjau (%)",
+      "displaySizeLabel": "Lebar pratinjau (%)",
       "defaultThemePlaceholder": "Tema bawaan",
       "sortByLabel": "Urutkan berdasarkan"
     },

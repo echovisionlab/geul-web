@@ -19,7 +19,7 @@ function paragraph(id: string, text: string, attrs: Record<string, unknown> = {}
           backgroundColor: 'default',
           textColor: 'default',
           textAlignment: 'left',
-          previewWidth: '64',
+          displaySize: '64',
           aspectRatio: '4:3',
           ...attrs,
         },
@@ -83,7 +83,7 @@ describe('replaceParagraphWithExternalVideoLink', () => {
     expect(captured?.attrs.id).toBe('captured');
     expect(externalVideoNode?.type.name).toBe('externalVideo');
     expect(externalVideoNode?.attrs).toMatchObject({
-      previewWidth: '64',
+      displaySize: '64',
       aspectRatio: '4:3',
       textAlignment: 'right',
       url: 'https://youtu.be/dQw4w9WgXcQ',

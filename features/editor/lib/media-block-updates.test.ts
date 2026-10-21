@@ -27,14 +27,14 @@ describe('pickNeutralPropsFromBlock', () => {
           size: '2048',
           processingStatus: 'completed',
           processingProgress: '100',
-          previewWidth: '54',
+          displaySize: '54',
           textAlignment: 'right',
         },
       }),
     ).toEqual({
       fileId,
       name: 'file.pdf',
-      previewWidth: '54',
+      displaySize: '54',
       textAlignment: 'right',
     });
   });
