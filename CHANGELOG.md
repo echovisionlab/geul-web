@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.1](https://github.com/echovisionlab/geul-web/compare/v0.20.0...v0.20.1) (2026-10-21)
+
+
+### Bug Fixes
+
+* keep File block controls in its menu above the block ([#169](https://github.com/echovisionlab/geul-web/issues/169)) ([d0166b7](https://github.com/echovisionlab/geul-web/commit/d0166b76d3c12f2a894e81e19f6f0ad154b84724))
+
 ## [0.20.0](https://github.com/echovisionlab/geul-web/compare/v0.19.0...v0.20.0) (2026-10-21)
 
 
