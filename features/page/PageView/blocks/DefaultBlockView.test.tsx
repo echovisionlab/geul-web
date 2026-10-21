@@ -114,7 +114,7 @@ describe('DefaultBlockView', () => {
             block={{
               id: type,
               type,
-              props: { title: `Localized ${type}`, mode: 'preview', previewWidth: '48', textAlignment: 'right' },
+              props: { title: `Localized ${type}`, mode: 'preview', displaySize: '48', textAlignment: 'right' },
               content:
                 type === 'shader'
                   ? shaderContent()
@@ -147,7 +147,7 @@ describe('DefaultBlockView', () => {
               props: {
                 title: 'Localized example',
                 language: 'typescript',
-                previewWidth: '58',
+                displaySize: '58',
                 textAlignment: 'center',
               },
               content: [{ type: 'text', text: 'const answer: number = 42;', styles: {} }],
@@ -159,7 +159,7 @@ describe('DefaultBlockView', () => {
     );
 
     expect(html).toContain('data-language="typescript"');
-    expect(html).toContain('data-preview-width="58"');
+    expect(html).toContain('data-display-size="58"');
     expect(html).toContain('data-text-alignment="center"');
     expect(html).toContain('Localized example');
     expect(html).toContain('TypeScript');
@@ -296,7 +296,7 @@ describe('DefaultBlockView', () => {
           {
             id: 'table',
             type: 'table',
-            props: { previewWidth: '82', textAlignment: 'center' },
+            props: { displaySize: '82', textAlignment: 'center' },
             content: {
               type: 'tableContent',
               columnWidths: [40, 60],
@@ -523,7 +523,7 @@ describe('DefaultBlockView', () => {
         name: 'Field notes',
         mimeType: 'application/pdf',
         size: '2048',
-        previewWidth: '62',
+        displaySize: '62',
         textAlignment: 'left',
       },
       content: [],
@@ -630,7 +630,7 @@ describe('DefaultBlockView', () => {
         url: 'https://cdn.example.com/image.webp',
         caption: 'Documented during setup',
         name: 'setup.webp',
-        previewWidth: '54',
+        displaySize: '54',
         textAlignment: 'center',
       },
       content: [],

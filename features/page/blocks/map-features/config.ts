@@ -13,7 +13,7 @@ export { clampMapViewportToZoomBounds };
 
 export interface FeatureMapConfigProps {
   aspectRatio: MapViewConfig['aspectRatio'];
-  previewWidth: string;
+  displaySize: string;
   minZoom?: string;
   maxZoom?: string;
   preferredScheme: MapViewConfig['preferredScheme'];
@@ -30,7 +30,7 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-function parsePreviewWidth(value: string): number | undefined {
+function parseDisplaySize(value: string): number | undefined {
   if (!value) {
     return undefined;
   }
@@ -78,7 +78,7 @@ export function buildFeatureMapConfig(
     pitch: 0,
     bearing: 0,
     aspectRatio: props.aspectRatio,
-    previewWidth: parsePreviewWidth(props.previewWidth),
+    displaySize: parseDisplaySize(props.displaySize),
     draggable: true,
     zoomable: true,
     rotatable: false,

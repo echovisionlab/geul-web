@@ -247,7 +247,7 @@ afterEach(() => {
 
 describe('TiptapMapNodeView', () => {
   it('leaves map pointer selection to the Tiptap NodeView owner', () => {
-    render({ mapPlaceIds: 'place-1', previewWidth: '100' });
+    render({ mapPlaceIds: 'place-1', displaySize: '100' });
 
     const mapNode = screen.getByRole('group', { name: 'Map block' });
     const event = new MouseEvent('mousedown', { bubbles: true, button: 0, cancelable: true });
@@ -261,7 +261,7 @@ describe('TiptapMapNodeView', () => {
 
   it('renders and updates a full map canvas without requiring a place', async () => {
     render(
-      { mapPlaceIds: '', previewWidth: '100', centerLat: '37.5', centerLng: '127' },
+      { mapPlaceIds: '', displaySize: '100', centerLat: '37.5', centerLng: '127' },
       { onNeutralAttrsChange: neutralPatch },
     );
 
@@ -279,7 +279,7 @@ describe('TiptapMapNodeView', () => {
     render({
       mapPlaceId: 'place-1',
       location: JSON.stringify({ name: 'Seoul', lat: 37.5, lng: 127 }),
-      previewWidth: '100',
+      displaySize: '100',
     });
 
     expect(screen.getByRole('region', { name: 'Map canvas' })).toHaveAttribute('data-map-place-count', '1');
@@ -293,7 +293,7 @@ describe('TiptapMapNodeView', () => {
   it('projects stored string flags to the live map config and persists an enabled drag as a string attr', async () => {
     render({
       mapPlaceIds: 'place-1',
-      previewWidth: '100',
+      displaySize: '100',
       aspectRatio: '16:9',
       draggable: 'false',
       zoomable: 'false',
@@ -318,7 +318,7 @@ describe('TiptapMapNodeView', () => {
     render(
       {
         mapPlaceIds: 'place-1',
-        previewWidth: '100',
+        displaySize: '100',
         aspectRatio: '16:9',
         draggable: 'false',
         zoomable: 'true',
@@ -342,14 +342,14 @@ describe('TiptapMapNodeView', () => {
 
   it('passes Tiptap selection to the resize frame', () => {
     resizeDirection = 'right';
-    render({ mapPlaceIds: 'place-1', previewWidth: '100', aspectRatio: '16:9', caption: '' }, {}, true);
+    render({ mapPlaceIds: 'place-1', displaySize: '100', aspectRatio: '16:9', caption: '' }, {}, true);
 
     expect(screen.getByRole('group', { name: 'Map frame' })).toHaveAttribute('data-selected', 'true');
     expect(screen.getByRole('group', { name: 'Map frame' })).toHaveAttribute('data-resizing', 'true');
   });
 
   it('keeps the selected static map surface separate from the text-selectable caption editor', async () => {
-    render({ mapPlaceIds: 'place-1', previewWidth: '100', aspectRatio: '16:9', caption: '' }, {}, true);
+    render({ mapPlaceIds: 'place-1', displaySize: '100', aspectRatio: '16:9', caption: '' }, {}, true);
 
     // eslint-disable-next-line testing-library/no-node-access -- The wrapper owns static text selection; the external map and caption must stay on opposite sides.
     const staticSurface = screen.getByRole('region', { name: 'Map canvas' }).parentElement!;
@@ -373,7 +373,7 @@ describe('TiptapMapNodeView', () => {
 
   it('hides read-only authoring controls while preserving durable map interactions', async () => {
     render(
-      { mapPlaceIds: 'place-1', previewWidth: '100', aspectRatio: '16:9', caption: '' },
+      { mapPlaceIds: 'place-1', displaySize: '100', aspectRatio: '16:9', caption: '' },
       {
         allowNeutralBlockEdits: false,
         allowLocalizedBlockEdits: false,
@@ -395,7 +395,7 @@ describe('TiptapMapNodeView', () => {
 
   it('keeps the selected read-only display caption inside static selection suppression', () => {
     const mounted = render(
-      { mapPlaceIds: 'place-1', previewWidth: '100', aspectRatio: '16:9', caption: 'Seoul map' },
+      { mapPlaceIds: 'place-1', displaySize: '100', aspectRatio: '16:9', caption: 'Seoul map' },
       { allowNeutralBlockEdits: false, allowLocalizedBlockEdits: false },
       true,
     );
@@ -411,7 +411,7 @@ describe('TiptapMapNodeView', () => {
 
   it('ANDs localized and neutral permissions with the editor editable state', async () => {
     render(
-      { mapPlaceIds: 'place-1', previewWidth: '100', aspectRatio: '16:9', caption: 'Seoul' },
+      { mapPlaceIds: 'place-1', displaySize: '100', aspectRatio: '16:9', caption: 'Seoul' },
       { allowNeutralBlockEdits: true, allowLocalizedBlockEdits: true, onNeutralAttrsChange: neutralPatch },
       true,
       false,
@@ -428,7 +428,7 @@ describe('TiptapMapNodeView', () => {
   });
 
   it('uses a native button to activate localized caption editing', async () => {
-    render({ mapPlaceIds: 'place-1', previewWidth: '100', aspectRatio: '16:9', caption: '' });
+    render({ mapPlaceIds: 'place-1', displaySize: '100', aspectRatio: '16:9', caption: '' });
 
     const caption = screen.getByRole('button', { name: 'clickToAddCaption' });
     expect(caption?.tagName).toBe('BUTTON');
@@ -451,7 +451,7 @@ describe('TiptapMapNodeView', () => {
     const view = render(
       {
         mapPlaceIds: 'place-1',
-        previewWidth: '72',
+        displaySize: '72',
         textAlignment: 'center',
         aspectRatio: '16:9',
         caption: '',
@@ -466,7 +466,7 @@ describe('TiptapMapNodeView', () => {
     expect(registeredBinding?.snapshot).toMatchObject({
       places: [{ id: 'place-1', name: 'Seoul', centered: true }],
       textAlignment: 'center',
-      previewWidth: 100,
+      displaySize: 100,
       isResizing: false,
       disabled: false,
     });
@@ -525,7 +525,7 @@ describe('TiptapMapNodeView', () => {
       subscribe: vi.fn(() => vi.fn()),
     };
     render(
-      { mapPlaceIds: 'place-1', previewWidth: '100', aspectRatio: '16:9', caption: 'Seoul' },
+      { mapPlaceIds: 'place-1', displaySize: '100', aspectRatio: '16:9', caption: 'Seoul' },
       { selectionMenuRegistry: registry, allowNeutralBlockEdits: true, allowLocalizedBlockEdits: true },
       true,
       false,
@@ -552,7 +552,7 @@ describe('TiptapMapNodeView', () => {
       subscribe: vi.fn(() => vi.fn()),
     };
     const mounted = render(
-      { mapPlaceIds: 'place-1', previewWidth: '100', aspectRatio: '16:9', caption: '' },
+      { mapPlaceIds: 'place-1', displaySize: '100', aspectRatio: '16:9', caption: '' },
       {
         selectionMenuRegistry: registry,
         allowNeutralBlockEdits: true,

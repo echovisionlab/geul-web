@@ -28,6 +28,7 @@ import {
 import type { BlockCanvasPreviewProps, BlockEditorProps, BlockSettingsEditorProps } from '../types';
 import type { WorkMapProps } from './schema';
 import { WorkMapView } from './View';
+import { DisplaySizeControl } from '../DisplaySizeControl';
 
 interface WorkMapSettingsFormProps {
   props: Partial<WorkMapProps>;
@@ -46,7 +47,7 @@ function WorkMapSettingsForm({ props, updateProps }: WorkMapSettingsFormProps) {
   const sortBy = props.sortBy || 'published_at';
   const sortOrder = props.sortOrder || 'desc';
   const aspectRatio = props.aspectRatio || '16:9';
-  const previewWidth = props.previewWidth || '100';
+  const displaySize = props.displaySize || '100';
   const zoomBounds = normalizeMapZoomBounds({
     minZoom: Number.parseFloat(props.minZoom || ''),
     maxZoom: Number.parseFloat(props.maxZoom || ''),
@@ -207,12 +208,10 @@ function WorkMapSettingsForm({ props, updateProps }: WorkMapSettingsFormProps) {
         />
 
         <DsLayoutInline grow>
-          <NumberInput
-            label={t('previewWidthLabel')}
-            value={Number.parseInt(previewWidth, 10)}
-            onChange={(value) => updateProp('previewWidth', String(value || 100))}
-            min={10}
-            max={100}
+          <DisplaySizeControl
+            label={t('displaySizeLabel')}
+            value={displaySize}
+            onChange={(next) => updateProp('displaySize', next)}
           />
           <Select
             label={tMapControls('fields.colorScheme')}

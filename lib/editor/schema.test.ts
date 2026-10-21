@@ -39,7 +39,7 @@ describe('durable editor schemas', () => {
       props: {
         title: { default: '' },
         language: { default: 'javascript' },
-        previewWidth: { default: '100' },
+        displaySize: { default: '100' },
         textAlignment: { default: 'left', values: ['left', 'center', 'right'] },
       },
     });
@@ -49,7 +49,7 @@ describe('durable editor schemas', () => {
         capabilities: { default: '' },
         mode: { default: 'edit', values: ['edit', 'source', 'preview'] },
         previewHeight: { default: 360, type: 'number' },
-        previewWidth: { default: '100' },
+        displaySize: { default: '100' },
         textAlignment: { default: 'left', values: ['left', 'center', 'right'] },
         title: { default: '' },
       },
@@ -65,10 +65,10 @@ describe('durable editor schemas', () => {
   });
 
   it('keeps external-video layout attributes limited to Post/Page paragraphs', () => {
-    expect(editorSchema.blockSchema.paragraph.props).not.toHaveProperty('previewWidth');
+    expect(editorSchema.blockSchema.paragraph.props).not.toHaveProperty('displaySize');
     expect(editorSchema.blockSchema.paragraph.props).not.toHaveProperty('aspectRatio');
     expect(externalVideoEditorSchema.blockSchema.paragraph.props).toMatchObject({
-      previewWidth: { default: '100' },
+      displaySize: { default: '100' },
       aspectRatio: { default: 'auto', values: ['auto', '16:9', '4:3', '1:1', '9:16'] },
     });
   });

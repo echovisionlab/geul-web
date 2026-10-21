@@ -52,7 +52,7 @@ export function P5SketchNodeView({
     title,
     mode: durableMode,
     previewHeight,
-    previewWidth,
+    displaySize,
     textAlignment,
     capabilities: serializedCapabilities,
   } = normalizeP5NodeAttributes(node.attrs);
@@ -99,19 +99,19 @@ export function P5SketchNodeView({
     () => detectP5Capabilities(mode === 'edit' ? draftSource : source),
     [draftSource, mode, source],
   );
-  const persistPreviewWidth = useCallback(
+  const persistDisplaySize = useCallback(
     (width: number) => {
       if (canEditNeutral) {
-        updateAttributes({ previewWidth: String(width) });
+        updateAttributes({ displaySize: String(width) });
       }
     },
     [canEditNeutral, updateAttributes],
   );
   const resize = useBlockResize({
     containerRef: frameRef,
-    previewWidth,
+    displaySize,
     enabled: authoringSelected,
-    onResize: persistPreviewWidth,
+    onResize: persistDisplaySize,
     keyboardSession: { owner: editor, key: `p5Sketch:${blockId}` },
   });
   const selectBlock = useP5SelectionMenu({
@@ -123,6 +123,8 @@ export function P5SketchNodeView({
     mode,
     running,
     textAlignment,
+    displaySize: resize.widthPercent,
+    setDisplaySize: persistDisplaySize,
     labels,
     selectionMenuRegistry,
     selectionMenuLabels,
@@ -144,7 +146,7 @@ export function P5SketchNodeView({
         className={classes.frame}
         containerRef={frameRef}
         suppressStaticTextSelection
-        widthPercent={resize.widthPercent}
+        displaySize={resize.widthPercent}
         margin={resize.getMarginStyle(textAlignment)}
         allowResize={authoringSelected}
         selected={authoringSelected}

@@ -2,11 +2,12 @@
 
 import { createContext, useContext, type ReactNode } from 'react';
 import type { ContextualBlockAlignment } from '../map-external/AlignmentMenuActions';
+import type { ContextualBlockSizeLabels } from '../map-external/DisplaySizeMenuActions';
 
 export type ExecutableBlockMode = 'edit' | 'source' | 'preview';
 export type ExecutableBlockType = 'p5Sketch' | 'threeScene' | 'shader';
 
-export interface ExecutableSelectionMenuLabels {
+export interface ExecutableSelectionMenuLabels extends ContextualBlockSizeLabels {
   menu: string;
   edit: string;
   source: string;
@@ -26,6 +27,7 @@ export interface ExecutableSelectionMenuSnapshot {
   mode: ExecutableBlockMode;
   running: boolean;
   textAlignment: ContextualBlockAlignment;
+  displaySize: number;
   disabled?: boolean;
   labels: ExecutableSelectionMenuLabels;
 }
@@ -36,6 +38,7 @@ export interface ExecutableSelectionMenuCommands {
   stop: () => void;
   restart: () => void;
   setAlignment: (alignment: ContextualBlockAlignment) => void;
+  setDisplaySize: (displaySize: number) => void;
   deleteBlock: () => void;
 }
 

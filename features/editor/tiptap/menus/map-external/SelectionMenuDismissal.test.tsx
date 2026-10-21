@@ -13,6 +13,7 @@ import type { MapSelectionMenuLabels } from './MapSelectionMenu';
 import { createTiptapMapSelectionMenuRegistry } from './MapSelectionMenuRegistry';
 import { TiptapExternalVideoSelectionBubbleMenu } from './TiptapExternalVideoSelectionBubbleMenu';
 import { TiptapMapSelectionBubbleMenu } from './TiptapMapSelectionBubbleMenu';
+import { DEFAULT_DISPLAY_SIZE_LABELS } from './DisplaySizeMenuActions';
 
 vi.mock('@tiptap/react/menus', () => ({
   BubbleMenu: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -28,6 +29,7 @@ const mapLabels: MapSelectionMenuLabels = {
   alignLeft: 'Align left',
   alignCenter: 'Align center',
   alignRight: 'Align right',
+  ...DEFAULT_DISPLAY_SIZE_LABELS,
   width: 'Width',
   resizeHint: 'Resize',
   resizing: 'Resizing',
@@ -44,6 +46,7 @@ const externalVideoLabels: ExternalVideoSelectionMenuLabels = {
   alignLeft: 'Align left',
   alignCenter: 'Align center',
   alignRight: 'Align right',
+  ...DEFAULT_DISPLAY_SIZE_LABELS,
   width: 'Width',
   resizeHint: 'Resize',
 };
@@ -58,7 +61,7 @@ const paragraph = (id: string, content?: Record<string, unknown>[]) => ({
         backgroundColor: 'default',
         textColor: 'default',
         textAlignment: 'left',
-        previewWidth: '100',
+        displaySize: '100',
         aspectRatio: 'auto',
       },
       content,
@@ -166,7 +169,7 @@ describe('map and external-video selection menu dismissal', () => {
               mapPlaceIds: '',
               centerLat: '',
               centerLng: '',
-              previewWidth: '72',
+              displaySize: '72',
               textAlignment: 'center',
               caption: '',
               aspectRatio: '16:9',
@@ -184,7 +187,7 @@ describe('map and external-video selection menu dismissal', () => {
     const registry = createTiptapMapSelectionMenuRegistry();
     registrations.push(
       registry.register('map', {
-        snapshot: { places: [], textAlignment: 'center', previewWidth: '72' },
+        snapshot: { places: [], textAlignment: 'center', displaySize: '72' },
         commands: { deleteBlock: () => undefined },
       }),
     );
@@ -217,7 +220,7 @@ describe('map and external-video selection menu dismissal', () => {
             attrs: {
               url: 'https://youtu.be/dQw4w9WgXcQ',
               label: 'Video',
-              previewWidth: '100',
+              displaySize: '100',
               aspectRatio: 'auto',
               textAlignment: 'left',
               sourceContent: [

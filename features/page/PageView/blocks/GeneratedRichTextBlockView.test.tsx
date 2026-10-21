@@ -64,7 +64,7 @@ function generatedParagraph(
     kind: 'paragraph',
     base: {
       props: {
-        previewWidth: 42,
+        displaySize: 42,
         textAlignment: ParagraphProps_TextAlignment.CENTER,
         aspectRatio: ParagraphProps_AspectRatio.X_4_3,
       },
@@ -163,7 +163,7 @@ describe('GeneratedRichTextBlockView external video', () => {
     expect(html).toContain('data-external-video-facade=""');
     expect(html).toContain('aria-label="Play Generated recording"');
     expect(html).toContain('Playing loads it from YouTube.');
-    expect(html).toContain('style="width:42%;margin-left:auto;margin-right:auto"');
+    expect(html).toContain('style="width:min(42%, calc(33.6svh * 1.3333));margin-left:auto;margin-right:auto"');
     expect(html).toContain('aspect-ratio:4 / 3');
     expect(html).toContain('href="https://youtu.be/dQw4w9WgXcQ?autoplay=1"');
   });

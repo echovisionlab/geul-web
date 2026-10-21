@@ -28,7 +28,7 @@ describe('resolveGeneratedStandaloneExternalVideoLink', () => {
             { value: { case: 'text', value: { text: '\t' } } } as RichTextInline,
           ],
           props: {
-            previewWidth: 42,
+            displaySize: 42,
             textAlignment: ParagraphProps_TextAlignment.CENTER,
             aspectRatio: ParagraphProps_AspectRatio.X_4_3,
           } as ParagraphProps,
@@ -39,7 +39,7 @@ describe('resolveGeneratedStandaloneExternalVideoLink', () => {
     ).toEqual({
       url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&autoplay=1',
       title: 'Generated recording',
-      previewWidth: '42',
+      displaySize: '42',
       textAlignment: 'center',
       aspectRatio: '4:3',
     });

@@ -83,7 +83,7 @@ export function TiptapMapSelectionBubbleMenu({
         labels={labels}
         places={binding.snapshot.places}
         textAlignment={binding.snapshot.textAlignment}
-        previewWidth={binding.snapshot.previewWidth}
+        displaySize={binding.snapshot.displaySize}
         editorElement={editor.view.dom}
         navigationEnabled
         isResizing={binding.snapshot.isResizing}
@@ -92,6 +92,7 @@ export function TiptapMapSelectionBubbleMenu({
         onRemovePlace={binding.commands.removePlace}
         onCenterPlace={binding.commands.centerPlace}
         onChangeAlignment={binding.commands.changeAlignment}
+        onChangeDisplaySize={binding.commands.changeDisplaySize}
         onFocusCaption={binding.commands.focusCaption}
         onDelete={binding.commands.deleteBlock}
         onEscape={menu.hide}

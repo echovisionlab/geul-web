@@ -150,7 +150,7 @@ export function useEntityMediaSurface({
             caption: '',
             width: '0',
             height: '0',
-            previewWidth: '100',
+            displaySize: '100',
             textAlignment: 'left',
             ...createEditorLibraryFilePatch('file', {}, file),
           },

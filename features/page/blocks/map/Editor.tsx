@@ -70,7 +70,7 @@ function buildEditorMapViewConfig(
     pitch: config.pitch,
     bearing: config.bearing,
     aspectRatio: config.aspectRatio,
-    previewWidth: config.previewWidth,
+    displaySize: config.displaySize,
     draggable: config.draggable,
     zoomable: config.zoomable,
     rotatable: config.rotatable,

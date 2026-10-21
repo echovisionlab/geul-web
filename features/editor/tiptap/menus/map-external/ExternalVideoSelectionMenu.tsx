@@ -17,9 +17,10 @@ import {
   type ContextualBlockAlignment,
   type ContextualBlockAlignmentLabels,
 } from './AlignmentMenuActions';
+import { DisplaySizeMenuActions, type ContextualBlockSizeLabels } from './DisplaySizeMenuActions';
 import { SelectionMenuAction, SelectionMenuSurface } from './SelectionMenuPrimitives';
 
-export interface ExternalVideoSelectionMenuLabels extends ContextualBlockAlignmentLabels {
+export interface ExternalVideoSelectionMenuLabels extends ContextualBlockAlignmentLabels, ContextualBlockSizeLabels {
   menu: string;
   editLink: string;
   aspectRatio: string;
@@ -32,13 +33,14 @@ export interface ExternalVideoSelectionMenuProps {
   labels: ExternalVideoSelectionMenuLabels;
   aspectRatio: ExternalVideoAspectRatio;
   textAlignment: ContextualBlockAlignment;
-  previewWidth: string | number;
+  displaySize: string | number;
   editorElement?: HTMLElement | null;
   navigationEnabled?: boolean;
   disabled?: boolean;
   onEditLink?: () => void;
   onChangeAspectRatio?: (aspectRatio: ExternalVideoAspectRatio) => void;
   onChangeAlignment?: (alignment: ContextualBlockAlignment) => void;
+  onChangeDisplaySize?: (displaySize: number) => void;
   onEscape?: () => void;
   /** Link / card / video choices placed before the video controls. */
   presentationActions?: ReactNode;
@@ -49,13 +51,14 @@ export function ExternalVideoSelectionMenu({
   labels,
   aspectRatio,
   textAlignment,
-  previewWidth,
+  displaySize,
   editorElement = null,
   navigationEnabled = false,
   disabled = false,
   onEditLink,
   onChangeAspectRatio,
   onChangeAlignment,
+  onChangeDisplaySize,
   onEscape,
   presentationActions,
 }: ExternalVideoSelectionMenuProps) {
@@ -116,19 +119,25 @@ export function ExternalVideoSelectionMenu({
         disabled={disabled}
         testIdPrefix="tiptap-external-video-align"
       />
+      <DisplaySizeMenuActions
+        value={displaySize}
+        labels={labels}
+        onChange={onChangeDisplaySize}
+        testIdPrefix="tiptap-external-video-size"
+      />
 
       <DsLayoutInset inline="xxs">
         <DsLayoutInline
           role="status"
           aria-describedby={resizeHintId}
-          aria-label={`${labels.width}: ${previewWidth}%`}
+          aria-label={`${labels.width}: ${displaySize}%`}
           gap="xxs"
           wrap="nowrap"
           data-testid="tiptap-external-video-width"
         >
           <IconArrowsHorizontal size={16} aria-hidden />
           <DsText as="output" size="xs" weight="medium">
-            {previewWidth}%
+            {displaySize}%
           </DsText>
         </DsLayoutInline>
       </DsLayoutInset>

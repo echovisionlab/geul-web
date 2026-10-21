@@ -124,7 +124,7 @@ describe('editor library file selection', () => {
       type: 'file',
       props: {
         caption: 'Localized caption',
-        previewWidth: '60',
+        displaySize: '60',
         textAlignment: 'right',
         fileId: randomTestUuid(),
         name: '',
@@ -144,7 +144,7 @@ describe('editor library file selection', () => {
       expect.objectContaining({
         fileId: file.id,
         caption: 'Localized caption',
-        previewWidth: '60',
+        displaySize: '60',
         textAlignment: 'right',
       }),
     );

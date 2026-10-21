@@ -42,6 +42,9 @@ import {
 } from '../menus/useSelectionToolbarNavigation';
 import type { TableTextAlignment } from './table-commands';
 import classes from './TiptapTable.module.css';
+import { normalizeDisplaySize } from '@/components/core/ResizeHandle/display-size';
+import { DisplaySizeMenuActions } from '../menus/map-external/DisplaySizeMenuActions';
+import { useDisplaySizeLabels } from '../menus/map-external/useDisplaySizeLabels';
 
 const TABLE_BUBBLE_MENU_OPTIONS = { placement: 'top', offset: 8, flip: true, shift: true } as const;
 
@@ -87,6 +90,17 @@ function selectedTableAlignment(editor: Editor): TableTextAlignment {
   return 'left';
 }
 
+function selectedTableDisplaySize(editor: Editor): number {
+  const { $from } = editor.state.selection;
+  for (let depth = $from.depth; depth > 0; depth -= 1) {
+    const node = $from.node(depth);
+    if (node.type.spec.tableRole === 'table') {
+      return normalizeDisplaySize(node.attrs.displaySize);
+    }
+  }
+  return normalizeDisplaySize(undefined);
+}
+
 function setTableAlignmentAndRestoreFocus(editor: Editor, alignment: TableTextAlignment): void {
   const selection = editor.state.selection;
   const cellSelection =
@@ -128,6 +142,7 @@ function TableAction(props: TableActionProps) {
 /** Compact table-only menu that is limited to table selections. */
 export function TiptapTableMenu({ editor }: { editor: Editor }) {
   const labels = useTranslations('editorCommon.editor.table');
+  const displaySizeLabels = useDisplaySizeLabels();
   const menu = useTiptapBubbleMenu(editor, 'tiptap-table-menu');
   const dismissTableMenu = menu.hide;
   const navigation = useSelectionToolbarNavigation({ onEscape: dismissTableMenu });
@@ -319,6 +334,18 @@ export function TiptapTableMenu({ editor }: { editor: Editor }) {
                   <IconAlignRight size={16} />
                 </TableAction>
               </DsLayoutInline>
+
+              <Separator orientation="vertical" aria-hidden />
+
+              <DisplaySizeMenuActions
+                value={selectedTableDisplaySize(editor)}
+                labels={displaySizeLabels}
+                onChange={(displaySize) => {
+                  editor.commands.setTableDisplaySize(displaySize);
+                  editor.commands.focus();
+                }}
+                testIdPrefix="tiptap-table-size"
+              />
 
               <Separator orientation="vertical" aria-hidden />
 

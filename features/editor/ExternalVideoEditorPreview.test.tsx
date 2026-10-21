@@ -44,7 +44,7 @@ describe('ExternalVideoEditorPreview', () => {
           video={{
             url: 'https://youtu.be/dQw4w9WgXcQ',
             title: 'Field recording',
-            previewWidth: '64',
+            displaySize: '64',
             textAlignment: 'left',
             aspectRatio: 'auto',
           }}
@@ -53,7 +53,7 @@ describe('ExternalVideoEditorPreview', () => {
           selected={false}
           onSelect={onSelect}
           onShowPreview={vi.fn()}
-          onPreviewWidthChange={vi.fn()}
+          onDisplaySizeChange={vi.fn()}
           videoView={FixtureVideoView}
         />,
       );
@@ -84,7 +84,7 @@ describe('ExternalVideoEditorPreview', () => {
           video={{
             url: 'https://youtu.be/dQw4w9WgXcQ',
             title: 'Field recording',
-            previewWidth: '64',
+            displaySize: '64',
             textAlignment: 'left',
             aspectRatio: 'auto',
           }}
@@ -93,7 +93,7 @@ describe('ExternalVideoEditorPreview', () => {
           selected={false}
           onSelect={onSelect}
           onShowPreview={vi.fn()}
-          onPreviewWidthChange={vi.fn()}
+          onDisplaySizeChange={vi.fn()}
           videoView={FixtureVideoView}
         />,
       );
@@ -113,7 +113,7 @@ describe('ExternalVideoEditorPreview', () => {
     host = document.createElement('div');
     document.body.appendChild(host);
     root = createRoot(host);
-    const onPreviewWidthChange = vi.fn();
+    const onDisplaySizeChange = vi.fn();
     const renderPreview = (editable: boolean, selected: boolean) => (
       <div data-node-type="blockContainer">
         <ExternalVideoEditorPreview
@@ -121,7 +121,7 @@ describe('ExternalVideoEditorPreview', () => {
           video={{
             url: 'https://youtu.be/dQw4w9WgXcQ',
             title: 'Field recording',
-            previewWidth: '64',
+            displaySize: '64',
             textAlignment: 'left',
             aspectRatio: 'auto',
           }}
@@ -130,7 +130,7 @@ describe('ExternalVideoEditorPreview', () => {
           selected={selected}
           onSelect={vi.fn()}
           onShowPreview={vi.fn()}
-          onPreviewWidthChange={onPreviewWidthChange}
+          onDisplaySizeChange={onDisplaySizeChange}
           videoView={FixtureVideoView}
         />
       </div>
@@ -163,6 +163,6 @@ describe('ExternalVideoEditorPreview', () => {
     const pointerUp = new MouseEvent('pointerup', { bubbles: true, cancelable: true, clientX: 700 });
     Object.defineProperty(pointerUp, 'pointerId', { value: 7 });
     act(() => frame?.dispatchEvent(pointerUp));
-    expect(onPreviewWidthChange).not.toHaveBeenCalled();
+    expect(onDisplaySizeChange).not.toHaveBeenCalled();
   });
 });

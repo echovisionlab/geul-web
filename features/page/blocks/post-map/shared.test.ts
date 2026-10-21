@@ -7,7 +7,7 @@ describe('buildPostMapConfig', () => {
     const config = buildPostMapConfig(
       {
         aspectRatio: '16:9',
-        previewWidth: '100',
+        displaySize: '100',
         minZoom: '-2',
         maxZoom: '22',
         preferredScheme: 'auto',
@@ -30,7 +30,7 @@ describe('buildPostMapConfig', () => {
     const config = buildPostMapConfig(
       {
         aspectRatio: '16:9',
-        previewWidth: '100',
+        displaySize: '100',
         minZoom: '4',
         maxZoom: '6',
         preferredScheme: 'auto',

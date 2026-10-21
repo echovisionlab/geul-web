@@ -28,12 +28,12 @@ it('inserts a schema-valid block and refuses the command when read-only', () => 
       blockId: 'inserted',
       title: 'Night scene',
       source: 'camera.position.z = 2;',
-      previewWidth: '72',
+      displaySize: '72',
     }),
   ).toBe(true);
   expect(JSON.stringify(editor.getJSON())).toContain('camera.position.z = 2;');
   expect(JSON.stringify(editor.getJSON())).toContain('Night scene');
-  expect(JSON.stringify(editor.getJSON())).toContain('"previewWidth":"72"');
+  expect(JSON.stringify(editor.getJSON())).toContain('"displaySize":"72"');
   editor.setEditable(false);
   expect(editor.commands.insertThreeScene()).toBe(false);
   editor.destroy();

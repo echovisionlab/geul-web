@@ -20,6 +20,7 @@ import {
   type ContextualBlockAlignment,
   type ContextualBlockAlignmentLabels,
 } from './AlignmentMenuActions';
+import { DisplaySizeMenuActions, type ContextualBlockSizeLabels } from './DisplaySizeMenuActions';
 import { SelectionMenuAction, SelectionMenuSurface } from './SelectionMenuPrimitives';
 
 export interface MapSelectionPlace {
@@ -28,7 +29,7 @@ export interface MapSelectionPlace {
   centered?: boolean;
 }
 
-export interface MapSelectionMenuLabels extends ContextualBlockAlignmentLabels {
+export interface MapSelectionMenuLabels extends ContextualBlockAlignmentLabels, ContextualBlockSizeLabels {
   menu: string;
   places: string;
   addPlace: string;
@@ -45,7 +46,7 @@ export interface MapSelectionMenuProps {
   labels: MapSelectionMenuLabels;
   places: readonly MapSelectionPlace[];
   textAlignment: ContextualBlockAlignment;
-  previewWidth: string | number;
+  displaySize: string | number;
   editorElement?: HTMLElement | null;
   navigationEnabled?: boolean;
   isResizing?: boolean;
@@ -54,6 +55,7 @@ export interface MapSelectionMenuProps {
   onRemovePlace?: (placeId: string) => void;
   onCenterPlace?: (placeId: string) => void;
   onChangeAlignment?: (alignment: ContextualBlockAlignment) => void;
+  onChangeDisplaySize?: (displaySize: number) => void;
   onFocusCaption?: () => void;
   onDelete?: () => void;
   onEscape?: () => void;
@@ -67,7 +69,7 @@ export function MapSelectionMenu({
   labels,
   places,
   textAlignment,
-  previewWidth,
+  displaySize,
   editorElement = null,
   navigationEnabled = false,
   isResizing = false,
@@ -76,12 +78,13 @@ export function MapSelectionMenu({
   onRemovePlace,
   onCenterPlace,
   onChangeAlignment,
+  onChangeDisplaySize,
   onFocusCaption,
   onDelete,
   onEscape,
 }: MapSelectionMenuProps) {
   const resizeHintId = useId();
-  const widthStatus = `${labels.width}: ${previewWidth}%${isResizing ? ` (${labels.resizing})` : ''}`;
+  const widthStatus = `${labels.width}: ${displaySize}%${isResizing ? ` (${labels.resizing})` : ''}`;
 
   return (
     <SelectionMenuSurface
@@ -149,6 +152,14 @@ export function MapSelectionMenu({
         testIdPrefix="tiptap-map-align"
       />
 
+      <DisplaySizeMenuActions
+        value={displaySize}
+        labels={labels}
+        onChange={onChangeDisplaySize}
+        disabled={disabled}
+        testIdPrefix="tiptap-map-size"
+      />
+
       <DsLayoutInset inline="xxs">
         <DsLayoutInline
           role="status"
@@ -161,7 +172,7 @@ export function MapSelectionMenu({
         >
           <IconArrowsHorizontal size={16} aria-hidden />
           <DsText as="output" size="xs" weight="medium">
-            {previewWidth}%
+            {displaySize}%
           </DsText>
         </DsLayoutInline>
       </DsLayoutInset>

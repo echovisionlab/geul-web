@@ -3,6 +3,7 @@ import {
   createExecutableSelectionMenuRegistry,
   type ExecutableSelectionMenuBinding,
 } from './ExecutableSelectionMenuRegistry';
+import { DEFAULT_DISPLAY_SIZE_LABELS } from '../map-external/DisplaySizeMenuActions';
 
 const labels = {
   menu: 'p5.js sketch',
@@ -17,17 +18,19 @@ const labels = {
   alignLeft: 'Align left',
   alignCenter: 'Align center',
   alignRight: 'Align right',
+  ...DEFAULT_DISPLAY_SIZE_LABELS,
 };
 
 function binding(): ExecutableSelectionMenuBinding {
   return {
-    snapshot: { blockType: 'p5Sketch', mode: 'edit', running: false, textAlignment: 'left', labels },
+    snapshot: { blockType: 'p5Sketch', mode: 'edit', running: false, textAlignment: 'left', displaySize: 100, labels },
     commands: {
       setMode: vi.fn(),
       run: vi.fn(),
       stop: vi.fn(),
       restart: vi.fn(),
       setAlignment: vi.fn(),
+      setDisplaySize: vi.fn(),
       deleteBlock: vi.fn(),
     },
   };

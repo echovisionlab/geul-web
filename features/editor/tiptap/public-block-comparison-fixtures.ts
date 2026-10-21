@@ -82,7 +82,7 @@ export function createPublicBlockComparisonDocument(includeRuntimes = false) {
     add(
       'table',
       {
-        props: { previewWidth: 100 },
+        props: { displaySize: 100 },
         content: {
           columnWidths: [40, 60],
           headerRows: 1,

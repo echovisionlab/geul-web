@@ -76,7 +76,7 @@ export function createVerifiedFileBlock(file: File, result: MediaFileUploadResul
       caption: '',
       width: '0',
       height: '0',
-      previewWidth: '100',
+      displaySize: '100',
       textAlignment: 'left',
       fileName: file.name,
       mimeType: file.type || 'application/octet-stream',

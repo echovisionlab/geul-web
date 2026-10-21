@@ -39,7 +39,7 @@ export interface P5SketchOptions {
   selectionMenuRegistry?: ExecutableSelectionMenuRegistry;
   selectionMenuLabels?: Pick<
     ExecutableSelectionMenuLabels,
-    'deleteBlock' | 'alignment' | 'alignLeft' | 'alignCenter' | 'alignRight'
+    'deleteBlock' | 'alignment' | 'alignLeft' | 'alignCenter' | 'alignRight' | 'displaySize' | 'displaySizePresets'
   >;
   authoringMode?: EditorAuthoringMode | null;
 }
@@ -49,7 +49,7 @@ export interface InsertP5SketchOptions {
   source?: string;
   mode?: P5SketchMode;
   previewHeight?: number;
-  previewWidth?: string | number;
+  displaySize?: string | number;
   textAlignment?: ContextualBlockAlignment;
   capabilities?: readonly P5Capability[] | string;
   blockId?: string;

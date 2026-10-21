@@ -50,10 +50,10 @@ describe('PublicRichTextBlockView', () => {
   it('applies persisted width, alignment, and aspect ratio to the public player', () => {
     const html = renderPublicRichText({
       ...paragraph([youtubeLink]),
-      props: { previewWidth: '42', textAlignment: 'center', aspectRatio: '4:3' },
+      props: { displaySize: '42', textAlignment: 'center', aspectRatio: '4:3' },
     });
 
-    expect(html).toContain('style="width:42%;margin-left:auto;margin-right:auto"');
+    expect(html).toContain('style="width:min(42%, calc(33.6svh * 1.3333));margin-left:auto;margin-right:auto"');
     expect(html).toContain('aspect-ratio:4 / 3');
   });
 });

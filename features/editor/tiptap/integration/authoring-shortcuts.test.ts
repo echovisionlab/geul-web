@@ -31,7 +31,7 @@ function createEditor() {
               content: [
                 {
                   type: 'codeBlock',
-                  attrs: { language: 'typescript', previewWidth: '64', textAlignment: 'right' },
+                  attrs: { language: 'typescript', displaySize: '64', textAlignment: 'right' },
                   content: [{ type: 'text', text: 'const code = true;' }],
                 },
               ],

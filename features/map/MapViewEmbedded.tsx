@@ -17,6 +17,7 @@ import { useLocale } from '@/lib/providers/LocaleProvider';
 import type { ResolvedThemeConfig } from '@/lib/types/map-theme/model';
 import type { MapViewConfig } from '@/lib/types/map/model';
 import { resolveMapLabelVisibility } from '@/lib/utils/map-theme';
+import { parseAspectRatio } from '@/components/core/ResizeHandle/display-size';
 import { resolveMapEmbeddedContainerStyle } from './embedded-layout';
 import { loadPublicMapRuntime, preloadPublicMapRuntime } from './public-map-runtime-loader';
 
@@ -38,8 +39,8 @@ const MapLibreMap = dynamic(
 interface MapViewEmbeddedProps {
   config: MapViewConfig;
   /** Apply preview width from config (percentage). Disable when parent already controls width. */
-  applyPreviewWidth?: boolean;
-  /** Optional alignment for the preview-width container. */
+  applyDisplaySize?: boolean;
+  /** Optional alignment for the display-size container. */
   blockAlignment?: string;
   allowEmpty?: boolean;
   labelLocale?: string | null;
@@ -57,7 +58,7 @@ interface MapViewEmbeddedProps {
  */
 export function MapViewEmbedded({
   config,
-  applyPreviewWidth = true,
+  applyDisplaySize = true,
   blockAlignment,
   allowEmpty = false,
   labelLocale,
@@ -127,15 +128,16 @@ export function MapViewEmbedded({
     [config.places],
   );
 
-  const previewWidthPercent =
-    typeof config.previewWidth === 'number' && Number.isFinite(config.previewWidth)
-      ? Math.max(10, Math.min(100, config.previewWidth))
+  const displaySizePercent =
+    typeof config.displaySize === 'number' && Number.isFinite(config.displaySize)
+      ? Math.max(10, Math.min(100, config.displaySize))
       : 100;
 
   const containerStyle = resolveMapEmbeddedContainerStyle({
-    previewWidth: previewWidthPercent,
+    displaySize: displaySizePercent,
+    aspectRatio: parseAspectRatio(config.aspectRatio) ?? 16 / 9,
     blockAlignment,
-    applyPreviewWidth,
+    applyDisplaySize,
     isMobileViewport,
   });
 

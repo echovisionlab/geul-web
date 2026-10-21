@@ -1,19 +1,25 @@
 import type { CSSProperties } from 'react';
+import { displaySizeInlineSize } from '@/components/core/ResizeHandle/display-size';
 import { normalizeMediaTextAlignment } from '@/lib/media/shared';
 
 export function resolveMapEmbeddedContainerStyle(input: {
-  previewWidth: number;
+  displaySize: number;
+  /** Width / height of the map frame; it also caps the map's height. */
+  aspectRatio?: number;
   blockAlignment?: string;
-  applyPreviewWidth: boolean;
+  applyDisplaySize: boolean;
   isMobileViewport: boolean;
 }): CSSProperties {
-  const shouldApplyWidth = input.applyPreviewWidth && !input.isMobileViewport;
+  const sizedWidth =
+    input.applyDisplaySize && !input.isMobileViewport
+      ? displaySizeInlineSize(input.displaySize, input.aspectRatio)
+      : undefined;
   const style: CSSProperties = {
-    width: shouldApplyWidth ? `${input.previewWidth}%` : '100%',
+    width: sizedWidth ?? '100%',
     maxWidth: '100%',
   };
 
-  if (!shouldApplyWidth || input.previewWidth >= 100) {
+  if (!sizedWidth) {
     return style;
   }
 

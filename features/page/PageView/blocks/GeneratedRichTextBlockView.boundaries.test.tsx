@@ -93,7 +93,7 @@ describe('GeneratedRichTextBlockView runtime boundary', () => {
       kind: 'paragraph',
       base: {
         props: {
-          previewWidth: 42,
+          displaySize: 42,
           textAlignment: ParagraphProps_TextAlignment.CENTER,
           aspectRatio: ParagraphProps_AspectRatio.X_4_3,
         },
@@ -116,7 +116,9 @@ describe('GeneratedRichTextBlockView runtime boundary', () => {
     expect(imports.externalVideo).toBe(0);
     const externalVideoHtml = await render(externalVideoBlock, true);
     expect(externalVideoHtml).toContain('data-external-video-facade=""');
-    expect(externalVideoHtml).toContain('style="width:42%;margin-left:auto;margin-right:auto"');
+    expect(externalVideoHtml).toContain(
+      'style="width:min(42%, calc(33.6svh * 1.3333));margin-left:auto;margin-right:auto"',
+    );
     expect(externalVideoHtml).toContain('aspect-ratio:4 / 3');
     expect(externalVideoHtml).toContain('>Recording<');
     expect(imports).toEqual({

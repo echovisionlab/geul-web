@@ -6,6 +6,7 @@ import { createRoot, type Root } from 'react-dom/client';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MapSelectionMenu, type MapSelectionMenuLabels } from './MapSelectionMenu';
+import { DEFAULT_DISPLAY_SIZE_LABELS } from './DisplaySizeMenuActions';
 
 const labels: MapSelectionMenuLabels = {
   menu: 'Map controls',
@@ -17,6 +18,7 @@ const labels: MapSelectionMenuLabels = {
   alignLeft: 'Align left',
   alignCenter: 'Align center',
   alignRight: 'Align right',
+  ...DEFAULT_DISPLAY_SIZE_LABELS,
   width: 'Width',
   resizeHint: 'Drag the side handles to resize',
   resizing: 'Resizing',
@@ -59,7 +61,7 @@ describe('MapSelectionMenu', () => {
             labels={labels}
             places={[{ id: 'place-1', name: 'Studio', centered: true }]}
             textAlignment="center"
-            previewWidth="64"
+            displaySize="64"
             isResizing
             onAddPlace={onAddPlace}
             onRemovePlace={onRemovePlace}
@@ -109,7 +111,7 @@ describe('MapSelectionMenu', () => {
             labels={labels}
             places={[]}
             textAlignment="left"
-            previewWidth="100"
+            displaySize="100"
             editorElement={editorElement}
             navigationEnabled
             onAddPlace={() => undefined}

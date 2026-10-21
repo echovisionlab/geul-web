@@ -4,15 +4,15 @@ Run `node scripts/design-system/inventory.mjs` to regenerate; `--check` fails wh
 
 Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.
 
-Source manifest SHA-256: `d6ea05b23036967115a1b9254700fbbf84b0686be2deaa4c77a89b77c49e9eed`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
+Source manifest SHA-256: `1b81bef8ad32dcc38d5312003e82c220be92b6005b943f427eb2ffd9cd51339e`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
 
 ## Counts
 
 | Metric                | Count |
 | --------------------- | ----: |
-| sourceFiles           |  3841 |
-| productionSourceFiles |  2317 |
-| componentFiles        |   917 |
+| sourceFiles           |  3847 |
+| productionSourceFiles |  2322 |
+| componentFiles        |   919 |
 | coreFamilies          |    57 |
 | featureDomains        |    54 |
 | storyFiles            |   259 |
@@ -135,7 +135,7 @@ Counts include every production JS/TS file in the domain; component files are Pa
 | [date-time](../../features/date-time)                 |      1 |          1 |       0 |     0 |             0 |
 | [document-layout](../../features/document-layout)     |     13 |          7 |       1 |     3 |             0 |
 | [draft-mode](../../features/draft-mode)               |      2 |          2 |       0 |     0 |             0 |
-| [editor](../../features/editor)                       |    236 |         80 |      12 |   159 |             0 |
+| [editor](../../features/editor)                       |    238 |         81 |      12 |   159 |             0 |
 | [email](../../features/email)                         |      4 |          2 |       0 |     6 |             0 |
 | [executable](../../features/executable)               |      1 |          1 |       0 |     1 |             0 |
 | [file-manager](../../features/file-manager)           |     19 |         10 |       0 |     5 |             1 |
@@ -143,7 +143,7 @@ Counts include every production JS/TS file in the domain; component files are Pa
 | [label](../../features/label)                         |      7 |          6 |       0 |     0 |             1 |
 | [location](../../features/location)                   |      4 |          4 |       1 |     2 |             0 |
 | [map](../../features/map)                             |     37 |         10 |       1 |    24 |             0 |
-| [media](../../features/media)                         |     32 |         22 |       6 |    15 |             0 |
+| [media](../../features/media)                         |     33 |         22 |       6 |    15 |             0 |
 | [media-download](../../features/media-download)       |      6 |          3 |       1 |     5 |             0 |
 | [member](../../features/member)                       |      2 |          1 |       0 |     2 |             0 |
 | [menu](../../features/menu)                           |      7 |          4 |       0 |     4 |             1 |
@@ -152,7 +152,7 @@ Counts include every production JS/TS file in the domain; component files are Pa
 | [my](../../features/my)                               |     38 |         26 |       8 |    20 |             7 |
 | [navigation](../../features/navigation)               |      2 |          2 |       0 |     0 |             1 |
 | [newsletter](../../features/newsletter)               |      2 |          2 |       0 |     1 |             1 |
-| [page](../../features/page)                           |    254 |        165 |       8 |   107 |             4 |
+| [page](../../features/page)                           |    255 |        166 |       8 |   107 |             4 |
 | [participants](../../features/participants)           |      1 |          1 |       0 |     1 |             0 |
 | [place](../../features/place)                         |      7 |          7 |       0 |     3 |             0 |
 | [policy](../../features/policy)                       |     17 |         14 |       0 |     9 |             6 |

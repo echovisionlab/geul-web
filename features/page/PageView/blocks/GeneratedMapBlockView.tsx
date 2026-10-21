@@ -17,7 +17,7 @@ export function GeneratedMapBlockView({
       props={{
         mapPlaceIds: block.base.props?.mapPlaceIds.join(',') ?? '',
         aspectRatio: block.base.props?.aspectRatio === 2 ? '4:3' : block.base.props?.aspectRatio === 3 ? '1:1' : '16:9',
-        previewWidth: String(block.base.props?.previewWidth ?? 100),
+        displaySize: String(block.base.props?.displaySize ?? 100),
         textAlignment: alignment(block.base.props?.textAlignment),
         zoom: String(block.base.props?.zoom ?? 15),
         minZoom: String(block.base.props?.minZoom ?? 1),

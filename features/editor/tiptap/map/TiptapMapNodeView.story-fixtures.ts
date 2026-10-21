@@ -57,7 +57,7 @@ export interface MapStoryDocument extends MapStoryNode {
 
 export interface MapStoryInitialState {
   readonly kind: 'slash' | 'empty' | 'populated';
-  readonly previewWidth?: string;
+  readonly displaySize?: string;
   readonly caption?: string;
   readonly textAlignment?: 'left' | 'center' | 'right';
   readonly themeId?: string;
@@ -103,7 +103,7 @@ export function createMapStoryDocument(initial: MapStoryInitialState): MapStoryD
               mapPlaceIds,
               centerLat: initial.kind === 'empty' ? '' : String(firstPlace.lat),
               centerLng: initial.kind === 'empty' ? '' : String(firstPlace.lng),
-              previewWidth: initial.previewWidth ?? '72',
+              displaySize: initial.displaySize ?? '72',
               textAlignment: initial.textAlignment ?? 'center',
               caption: initial.caption ?? '서울의 공연장과 야외 청취 지점',
               aspectRatio: '16:9',

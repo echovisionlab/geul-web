@@ -58,7 +58,7 @@ describe('DefaultBlockView media boundaries', () => {
         url: '/media/audio.wav',
         name: 'Recording',
         caption: 'Audio caption',
-        previewWidth: '42',
+        displaySize: '42',
         textAlignment: 'center',
       },
     });
@@ -76,7 +76,7 @@ describe('DefaultBlockView media boundaries', () => {
         url: '/media/video.mp4',
         name: 'Film',
         caption: 'Video caption',
-        previewWidth: '58',
+        displaySize: '58',
         textAlignment: 'right',
       },
     });

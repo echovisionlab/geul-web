@@ -7,11 +7,11 @@ describe('createTiptapMapSelectionMenuRegistry', () => {
     const listener = vi.fn();
     registry.subscribe(listener);
     const first = {
-      snapshot: { places: [], textAlignment: 'left' as const, previewWidth: '100' },
+      snapshot: { places: [], textAlignment: 'left' as const, displaySize: '100' },
       commands: {},
     };
     const replacement = {
-      snapshot: { places: [], textAlignment: 'center' as const, previewWidth: '64' },
+      snapshot: { places: [], textAlignment: 'center' as const, displaySize: '64' },
       commands: {},
     };
 

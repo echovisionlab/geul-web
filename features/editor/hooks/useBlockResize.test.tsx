@@ -2,7 +2,7 @@
 
 import { act, createRef, type ReactNode, useEffect, useRef } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { EditorMediaBlockFrame } from '../ui/EditorMediaBlockShell';
 import { useBlockResize } from './useBlockResize';
 
@@ -15,26 +15,31 @@ function ResizeHarness({
   enabled = true,
   keyboardSession,
   onResize,
-  previewWidth = '60',
+  displaySize = '60',
   sessionBlock,
+  aspectRatio,
 }: {
   enabled?: boolean;
   keyboardSession?: { owner: object; key: string };
   onResize: (width: number) => void;
-  previewWidth?: string;
+  displaySize?: string;
   sessionBlock?: { id: string; type: string };
+  aspectRatio?: number;
 }) {
   const containerRef = createRef<HTMLDivElement>();
-  const controls = useBlockResize({ containerRef, previewWidth, enabled, onResize, keyboardSession });
+  const controls = useBlockResize({ containerRef, displaySize, enabled, onResize, keyboardSession, aspectRatio });
   const frame = (
     <EditorMediaBlockFrame
       containerRef={containerRef}
-      widthPercent={controls.widthPercent}
+      displaySize={controls.widthPercent}
+      aspectRatio={aspectRatio}
       allowResize={enabled}
       resizeLeftLabel="너비 줄이기"
       resizeRightLabel="너비 늘리기"
       onResizeLeftPointerDown={controls.startResizeLeft}
       onResizeRightPointerDown={controls.startResizeRight}
+      onResizeTopPointerDown={controls.startResizeTop}
+      onResizeBottomPointerDown={controls.startResizeBottom}
       onResizeLeftKeyDown={controls.onResizeKeyDown}
       onResizeRightKeyDown={controls.onResizeKeyDown}
       onResizeBlur={controls.onResizeBlur}
@@ -67,7 +72,20 @@ function NativeEditorKeymapBoundary({ children, onEscape }: { children: ReactNod
   return <div ref={boundaryRef}>{children}</div>;
 }
 
+/** Presses a key and lets the keyboard steps settle, which is when the size is saved. */
+function press(target: HTMLElement | null | undefined, key: string) {
+  act(() => {
+    target?.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+    vi.advanceTimersByTime(300);
+  });
+}
+
+beforeEach(() => {
+  vi.useFakeTimers();
+});
+
 afterEach(() => {
+  vi.useRealTimers();
   act(() => root?.unmount());
   container?.remove();
   container = null;
@@ -85,12 +103,30 @@ describe('useBlockResize', () => {
     const handle = container.querySelector<HTMLButtonElement>('[aria-label="너비 늘리기"]');
     expect(handle?.getAttribute('aria-valuenow')).toBe('60');
 
-    act(() => handle?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })));
+    press(handle, 'ArrowRight');
     expect(onResize).toHaveBeenLastCalledWith(65);
     expect(handle?.getAttribute('aria-valuenow')).toBe('65');
 
-    act(() => handle?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
+    press(handle, 'Escape');
     expect(onResize).toHaveBeenLastCalledWith(60);
+  });
+
+  it('shows each keyboard step at once and saves only the settled size', () => {
+    const onResize = vi.fn();
+    container = document.createElement('div');
+    document.body.append(container);
+    root = createRoot(container);
+    act(() => root?.render(<ResizeHarness onResize={onResize} />));
+    const handle = container.querySelector<HTMLButtonElement>('[aria-label="너비 늘리기"]');
+
+    act(() => handle?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })));
+    act(() => handle?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })));
+    expect(handle?.getAttribute('aria-valuenow')).toBe('70');
+    expect(onResize).not.toHaveBeenCalled();
+
+    act(() => vi.advanceTimersByTime(300));
+    expect(onResize).toHaveBeenCalledTimes(1);
+    expect(onResize).toHaveBeenLastCalledWith(70);
   });
 
   it('restores the keyboard session after the resize consumer remounts', () => {
@@ -111,7 +147,7 @@ describe('useBlockResize', () => {
 
     const initialHandle = container.querySelector<HTMLButtonElement>('[aria-label="너비 늘리기"]');
     initialHandle?.focus();
-    act(() => initialHandle?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })));
+    press(initialHandle, 'ArrowRight');
     expect(onResize).toHaveBeenLastCalledWith(65);
 
     act(() => {
@@ -121,14 +157,14 @@ describe('useBlockResize', () => {
           key="after-transaction"
           keyboardSession={{ owner: {}, key: keyboardSessionKey }}
           onResize={onResize}
-          previewWidth="65"
+          displaySize="65"
         />,
       );
     });
     const replacementHandle = container.querySelector<HTMLButtonElement>('[aria-label="너비 늘리기"]');
     expect(replacementHandle?.getAttribute('aria-valuenow')).toBe('65');
 
-    act(() => replacementHandle?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
+    press(replacementHandle, 'Escape');
     expect(onResize).toHaveBeenLastCalledWith(60);
   });
 
@@ -147,10 +183,10 @@ describe('useBlockResize', () => {
     );
 
     const handle = container.querySelector<HTMLButtonElement>('[aria-label="너비 늘리기"]');
-    act(() => handle?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })));
+    press(handle, 'ArrowRight');
     expect(onResize).toHaveBeenLastCalledWith(65);
 
-    act(() => handle?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
+    press(handle, 'Escape');
     expect(onResize).toHaveBeenLastCalledWith(60);
     expect(onEditorEscape).not.toHaveBeenCalled();
   });
@@ -164,16 +200,16 @@ describe('useBlockResize', () => {
 
     const handle = container.querySelector<HTMLButtonElement>('[aria-label="너비 늘리기"]');
     handle?.focus();
-    act(() => handle?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })));
+    press(handle, 'ArrowRight');
     expect(onResize).toHaveBeenLastCalledWith(65);
 
     act(() => handle?.blur());
     await act(async () => Promise.resolve());
     handle?.focus();
-    act(() => handle?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true })));
+    press(handle, 'Home');
     expect(onResize).toHaveBeenLastCalledWith(10);
 
-    act(() => handle?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
+    press(handle, 'Escape');
     expect(onResize).toHaveBeenLastCalledWith(65);
   });
 
@@ -190,7 +226,7 @@ describe('useBlockResize', () => {
 
     const initialHandle = container.querySelector<HTMLButtonElement>('[aria-label="너비 늘리기"]');
     initialHandle?.focus();
-    act(() => initialHandle?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })));
+    press(initialHandle, 'ArrowRight');
     expect(onResize).toHaveBeenLastCalledWith(65);
 
     act(() => {
@@ -200,12 +236,12 @@ describe('useBlockResize', () => {
           key="after-map-transaction"
           sessionBlock={{ id: 'map-1', type: 'map' }}
           onResize={onResize}
-          previewWidth="65"
+          displaySize="65"
         />,
       );
     });
     const replacementHandle = container.querySelector<HTMLButtonElement>('[aria-label="너비 늘리기"]');
-    act(() => replacementHandle?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
+    press(replacementHandle, 'Escape');
     expect(onResize).toHaveBeenLastCalledWith(60);
   });
 
@@ -237,5 +273,35 @@ describe('useBlockResize', () => {
     expect(onResize).not.toHaveBeenCalled();
     expect(container.querySelector('[data-resize-drag-shield]')).toBeNull();
     expect(container.querySelector('[data-resize-handle]')).toBeNull();
+  });
+
+  it('resizes a block with an aspect ratio from its bottom edge and snaps near a preset', () => {
+    const onResize = vi.fn();
+    container = document.createElement('div');
+    document.body.append(container);
+    root = createRoot(container);
+    act(() => root?.render(<ResizeHarness onResize={onResize} aspectRatio={1} />));
+    const frame = container.querySelector<HTMLElement>('[data-resize-handle]')?.parentElement;
+    // At size 60 the square frame is 360px wide, so size 100 is 600px.
+    Object.defineProperty(frame, 'getBoundingClientRect', { configurable: true, value: () => ({ width: 360 }) });
+    const drag = (direction: string, from: { x: number; y: number }, to: { x: number; y: number }) => {
+      const handle = container?.querySelector<HTMLButtonElement>(`[data-resize-direction="${direction}"]`);
+      const down = new MouseEvent('pointerdown', { bubbles: true, cancelable: true, clientX: from.x, clientY: from.y });
+      Object.defineProperty(down, 'pointerId', { value: 3 });
+      act(() => handle?.dispatchEvent(down));
+      for (const type of ['pointermove', 'pointerup']) {
+        const event = new MouseEvent(type, { bubbles: true, clientX: to.x, clientY: to.y });
+        Object.defineProperty(event, 'pointerId', { value: 3 });
+        act(() => document.dispatchEvent(event));
+      }
+    };
+
+    drag('bottom', { x: 0, y: 0 }, { x: 0, y: 60 });
+    expect(onResize).toHaveBeenLastCalledWith(70);
+
+    // The draft now shows 70 until the stored size catches up; drag again from there.
+    Object.defineProperty(frame, 'getBoundingClientRect', { configurable: true, value: () => ({ width: 420 }) });
+    drag('top', { x: 0, y: 0 }, { x: 0, y: -55 });
+    expect(onResize).toHaveBeenLastCalledWith(80);
   });
 });

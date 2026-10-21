@@ -54,6 +54,35 @@
   right: calc(-0.5 * max(var(--geul-control-height-compact), var(--geul-interaction-minimum)));
 }
 
+/* Vertical handles turn the same hit area and marker a quarter turn. */
+.handle[data-resize-direction='top'],
+.handle[data-resize-direction='bottom'] {
+  width: max(var(--geul-control-height-xs), var(--geul-interaction-minimum));
+  height: max(var(--geul-control-height-compact), var(--geul-interaction-minimum));
+  cursor: ns-resize;
+}
+
+.handle[data-resize-direction='top']::before,
+.handle[data-resize-direction='bottom']::before {
+  width: var(--geul-control-height-xs);
+  height: calc(2 * var(--geul-spacing-xxs));
+}
+
+.handle[data-geul-resize-placement='media-edge'][data-resize-direction='top'],
+.handle[data-geul-resize-placement='media-edge'][data-resize-direction='bottom'] {
+  top: auto;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.handle[data-geul-resize-placement='media-edge'][data-resize-direction='top'] {
+  top: calc(-0.5 * max(var(--geul-control-height-compact), var(--geul-interaction-minimum)));
+}
+
+.handle[data-geul-resize-placement='media-edge'][data-resize-direction='bottom'] {
+  bottom: calc(-0.5 * max(var(--geul-control-height-compact), var(--geul-interaction-minimum)));
+}
+
 .handle[data-geul-resize-visibility='on-interaction'] {
   opacity: 0;
   transition: opacity var(--geul-motion-normal) var(--geul-motion-easing);

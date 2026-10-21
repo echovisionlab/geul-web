@@ -49,7 +49,7 @@ export function storyCodeBlock(id: string, source: string, title: string): Local
     base: create(CodeBlockBlockSchema, {
       props: {
         language: CodeBlockProps_Language.TYPESCRIPT,
-        previewWidth: 100,
+        displaySize: 100,
         textAlignment: CodeBlockProps_TextAlignment.LEFT,
       },
     }),
@@ -69,7 +69,7 @@ export function storyTable(
     id,
     kind: 'table',
     base: create(TableBlockSchema, {
-      props: { previewWidth: 100, textAlignment: TableProps_TextAlignment.LEFT },
+      props: { displaySize: 100, textAlignment: TableProps_TextAlignment.LEFT },
       content: {
         columnWidths: [...columnWidths],
         headerRows: 1,

@@ -1,5 +1,6 @@
 'use client';
 
+import { DISPLAY_SIZE_MAX, displaySizeInlineSize, parseAspectRatio } from '@/components/core/ResizeHandle/display-size';
 import { useState, type CSSProperties } from 'react';
 import { IconPlayerPlayFilled } from '@tabler/icons-react';
 import { IconButton } from '@/components/core/IconButton';
@@ -73,8 +74,11 @@ export function ExternalVideoPlayerView({
   style,
 }: ExternalVideoPlayerViewProps) {
   const [requested, setRequested] = useState(false);
-  const playerFrameStyle: CSSProperties =
-    aspectRatio === '9:16' ? { width: 'min(100%, 22.5rem)', marginInline: 'auto' } : { width: '100%' };
+  // The full display size rule: a portrait player fits the screen height, not the column.
+  const playerFrameStyle: CSSProperties = {
+    width: displaySizeInlineSize(DISPLAY_SIZE_MAX, parseAspectRatio(aspectRatio)),
+    marginInline: 'auto',
+  };
   const frameStyle: CSSProperties = { display: 'block', width: '100%', aspectRatio: ratios[aspectRatio], border: 0 };
   const showPlayer = consented || requested || !playbackLabels;
 

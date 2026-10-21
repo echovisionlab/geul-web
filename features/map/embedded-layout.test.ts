@@ -5,9 +5,9 @@ describe('resolveMapEmbeddedContainerStyle', () => {
   it('centers narrower maps when block alignment is center', () => {
     expect(
       resolveMapEmbeddedContainerStyle({
-        previewWidth: 60,
+        displaySize: 60,
         blockAlignment: 'center',
-        applyPreviewWidth: true,
+        applyDisplaySize: true,
         isMobileViewport: false,
       }),
     ).toMatchObject({
@@ -20,9 +20,9 @@ describe('resolveMapEmbeddedContainerStyle', () => {
   it('keeps full-width maps stretched on mobile', () => {
     expect(
       resolveMapEmbeddedContainerStyle({
-        previewWidth: 60,
+        displaySize: 60,
         blockAlignment: 'right',
-        applyPreviewWidth: true,
+        applyDisplaySize: true,
         isMobileViewport: true,
       }),
     ).toMatchObject({

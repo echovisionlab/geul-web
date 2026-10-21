@@ -304,7 +304,7 @@ describe('Tiptap table commands', () => {
     expect(tableElement.style.width).toBe('80%');
     window.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, clientX: 480 }));
     const table = mounted.editor.state.doc.firstChild?.firstChild?.firstChild;
-    expect(table?.attrs).toMatchObject({ previewWidth: 80, textAlignment: 'left' });
+    expect(table?.attrs).toMatchObject({ displaySize: 80, textAlignment: 'left' });
     if (!table) {
       throw new Error('Expected table after outer resize.');
     }
@@ -314,7 +314,7 @@ describe('Tiptap table commands', () => {
     mounted.editor.view.dispatch(
       mounted.editor.state.tr.setNodeMarkup(tablePosition, undefined, {
         ...table.attrs,
-        previewWidth: 80,
+        displaySize: 80,
         textAlignment: 'center',
       }),
     );
@@ -333,7 +333,7 @@ describe('Tiptap table commands', () => {
     expect(centeredTable.style.width).toBe('70%');
     window.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, clientX: 90 }));
     expect(mounted.editor.state.doc.firstChild?.firstChild?.firstChild?.attrs).toMatchObject({
-      previewWidth: 70,
+      displaySize: 70,
       textAlignment: 'center',
     });
 
@@ -362,7 +362,7 @@ describe('Tiptap table commands', () => {
     expect(rightTable.style.width).toBe('80%');
     window.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, clientX: 120 }));
     expect(mounted.editor.state.doc.firstChild?.firstChild?.firstChild?.attrs).toMatchObject({
-      previewWidth: 80,
+      displaySize: 80,
       textAlignment: 'right',
     });
     mounted.destroy();
@@ -407,7 +407,7 @@ describe('Tiptap table commands', () => {
 
     document.dispatchEvent(pointerEvent('pointerup', { bubbles: true, button: 0, clientX: 480, pointerId: 7 }));
     expect(transactionCount).toBe(1);
-    expect(mounted.editor.state.doc.firstChild?.firstChild?.firstChild?.attrs).toMatchObject({ previewWidth: 80 });
+    expect(mounted.editor.state.doc.firstChild?.firstChild?.firstChild?.attrs).toMatchObject({ displaySize: 80 });
     expect(scrollContainer.querySelector('.column-resize-guide')).toBeNull();
     expect(document.documentElement.classList.contains('table-resizing')).toBe(false);
     expect(mounted.editor.state.selection.toJSON()).toEqual(selectionBefore);

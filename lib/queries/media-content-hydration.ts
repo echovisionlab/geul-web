@@ -261,7 +261,7 @@ function hydrateMapBlockProps(
     pitch: baseConfig.pitch,
     bearing: baseConfig.bearing,
     aspectRatio: baseConfig.aspectRatio,
-    previewWidth: baseConfig.previewWidth,
+    displaySize: baseConfig.displaySize,
     draggable: baseConfig.draggable,
     zoomable: baseConfig.zoomable,
     rotatable: baseConfig.rotatable,

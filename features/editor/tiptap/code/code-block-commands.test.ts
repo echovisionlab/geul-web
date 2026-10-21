@@ -32,7 +32,7 @@ function createEditor(includeAfter = true) {
               content: [
                 {
                   type: 'codeBlock',
-                  attrs: { language: 'javascript', previewWidth: '100', textAlignment: 'left' },
+                  attrs: { language: 'javascript', displaySize: '100', textAlignment: 'left' },
                   content: [{ type: 'text', text: 'const answer = 42;' }],
                 },
               ],
@@ -84,7 +84,7 @@ describe('code block contextual commands', () => {
       position: codePosition,
       source: 'const answer = 42;',
       language: 'javascript',
-      previewWidth: '100',
+      displaySize: '100',
       textAlignment: 'left',
     });
     editor.view.dispatch(editor.state.tr.setSelection(NodeSelection.create(editor.state.doc, codePosition)));
@@ -99,18 +99,18 @@ describe('code block contextual commands', () => {
     expect(
       updateSelectedCodeBlockAttrs(
         editor,
-        { language: 'typescript', previewWidth: '63', textAlignment: 'right' },
+        { language: 'typescript', displaySize: '63', textAlignment: 'right' },
         authoringMode,
       ),
     ).toBe(true);
     expect(editor.state.doc.nodeAt(codePosition)?.attrs).toMatchObject({
       language: 'typescript',
-      previewWidth: '63',
+      displaySize: '63',
       textAlignment: 'right',
     });
     expect(applyNeutralBlockProps).toHaveBeenCalledWith('code', {
       language: 'typescript',
-      previewWidth: '63',
+      displaySize: '63',
       textAlignment: 'right',
     });
     expect(editor.state.doc.nodeAt(codePosition)?.textContent).toBe('const answer = 42;');

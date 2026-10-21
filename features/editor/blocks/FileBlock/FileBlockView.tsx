@@ -76,7 +76,7 @@ export function FileBlockView({
 
   if (kind === 'loading') {
     return (
-      <EditorMediaBlockFrame widthPercent={100} allowResize={false} suppressStaticTextSelection>
+      <EditorMediaBlockFrame displaySize={100} allowResize={false} suppressStaticTextSelection>
         <div style={{ minHeight: 88 }}>
           <DsLayoutStack align="center" justify="center" gap="xs">
             <Loader size="sm" />
@@ -88,7 +88,7 @@ export function FileBlockView({
   }
 
   return (
-    <EditorMediaBlockFrame widthPercent={100} allowResize={false} suppressStaticTextSelection>
+    <EditorMediaBlockFrame displaySize={100} allowResize={false} suppressStaticTextSelection>
       <div className="attachment-block attachment-block--empty" contentEditable={false}>
         <DsLayoutStack gap="xs" fill="inline">
           <UploadPlaceholder

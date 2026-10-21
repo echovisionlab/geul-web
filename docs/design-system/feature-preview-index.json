@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "sourceManifestHash": "d6ea05b23036967115a1b9254700fbbf84b0686be2deaa4c77a89b77c49e9eed",
+  "sourceManifestHash": "1b81bef8ad32dcc38d5312003e82c220be92b6005b943f427eb2ffd9cd51339e",
   "methodology": "All inventoried Feature component candidates. Direct value imports, literal lazy imports and transitive source relationships through production owners/local adapters are indexed separately. A dependency can be unused or render conditionally; neither relationship proves rendered states, route parity or design compliance. Empty JSX records include runtime/lazy/controller boundaries and must be inspected before treating them as visual gaps.",
-  "counts": { "domains": 54, "componentFiles": 776, "jsxWithoutStoryRelationship": 43 },
+  "counts": { "domains": 54, "componentFiles": 778, "jsxWithoutStoryRelationship": 43 },
   "domains": [
     {
       "domain": "account",
@@ -2972,6 +2972,27 @@
           ]
         },
         {
+          "file": "features/editor/tiptap/menus/map-external/DisplaySizeMenuActions.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": [
+            "Feature/Editor/File Insertion",
+            "Feature/Editor/Executables",
+            "Feature/Editor/Tiptap Playground",
+            "Feature/Editor/Public Block Comparison",
+            "Feature/Editor/Menus",
+            "Feature/Editor/Site Variables",
+            "Pages/Editors/Campaign",
+            "Pages/Admin/Email Editors",
+            "Pages/Admin/Legal Policies",
+            "Pages/Editors/Legal",
+            "Pages/Editors/Page",
+            "Pages/Editors/Post",
+            "Pages/Editors/Program Events",
+            "Pages/Editors/Work"
+          ]
+        },
+        {
           "file": "features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu.tsx",
           "hasJsx": true,
           "directStories": [],
@@ -3060,6 +3081,8 @@
             "Feature/Editor/Menus",
             "Feature/Editor/Link Presentation Menu",
             "Feature/Editor/Site Variables",
+            "Pages/Editors/Campaign",
+            "Pages/Admin/Email Editors",
             "Pages/Admin/Legal Policies",
             "Pages/Editors/Legal",
             "Pages/Editors/Page",
@@ -5892,6 +5915,12 @@
           "hasJsx": true,
           "directStories": [],
           "relatedStories": ["Feature/Page/List Block Settings", "Pages/Editors/Page"]
+        },
+        {
+          "file": "features/page/blocks/DisplaySizeControl.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": ["Pages/Editors/Page"]
         },
         {
           "file": "features/page/blocks/EntityListView.tsx",

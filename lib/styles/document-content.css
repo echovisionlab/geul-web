@@ -28,7 +28,8 @@
  * start edge of the document box, where the title and hero text start. Full-width dense blocks (tables, code, diagrams) may extend to `standard`; full-width visual
  * blocks (images, video, external video, maps, executable scenes) to `wide`. Breakouts never exceed
  * the document box, which the table of contents layout already keeps clear of the outline.
- * `data-document-measure` is set by the public block view from the block kind and preview width.
+ * `data-document-measure` is set by the public block view from the block kind and display size. A
+ * portrait image or video is kept narrower than the column by its height cap, so it stays in place.
  */
 .prose[data-reading-measure] > [data-document-block] {
   max-width: var(--geul-content-width-reading);
@@ -41,7 +42,9 @@
 
 .prose[data-reading-measure] > [data-document-measure='wide']:not([data-document-block='file']),
 .prose[data-reading-measure]
-  > [data-document-block='file'][data-document-measure='wide']:has(> :is(.image-block, .video-block)) {
+  > [data-document-block='file'][data-document-measure='wide']:has(
+    > :is(.image-block, .video-block):not([data-media-portrait])
+  ) {
   max-width: var(--geul-content-width-wide);
 }
 

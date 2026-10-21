@@ -51,7 +51,7 @@ describe('insertMirroredBlockAtPosition with Tiptap ports', () => {
         caption: '',
         width: '0',
         height: '0',
-        previewWidth: '100',
+        displaySize: '100',
         textAlignment: 'left',
       },
     };

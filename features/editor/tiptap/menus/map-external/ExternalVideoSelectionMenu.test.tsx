@@ -6,6 +6,7 @@ import { createRoot, type Root } from 'react-dom/client';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ExternalVideoSelectionMenu, type ExternalVideoSelectionMenuLabels } from './ExternalVideoSelectionMenu';
+import { DEFAULT_DISPLAY_SIZE_LABELS } from './DisplaySizeMenuActions';
 
 const labels: ExternalVideoSelectionMenuLabels = {
   menu: 'External video controls',
@@ -16,6 +17,7 @@ const labels: ExternalVideoSelectionMenuLabels = {
   alignLeft: 'Align left',
   alignCenter: 'Align center',
   alignRight: 'Align right',
+  ...DEFAULT_DISPLAY_SIZE_LABELS,
   width: 'Width',
   resizeHint: 'Drag the side handles to resize',
 };
@@ -52,7 +54,7 @@ describe('ExternalVideoSelectionMenu', () => {
             labels={labels}
             aspectRatio="16:9"
             textAlignment="left"
-            previewWidth="72"
+            displaySize="72"
             onEditLink={onEditLink}
             onChangeAspectRatio={onChangeAspectRatio}
             onChangeAlignment={onChangeAlignment}
@@ -87,7 +89,7 @@ describe('ExternalVideoSelectionMenu', () => {
             labels={labels}
             aspectRatio="auto"
             textAlignment="left"
-            previewWidth="100"
+            displaySize="100"
             editorElement={editorElement}
             navigationEnabled
             onChangeAspectRatio={() => undefined}

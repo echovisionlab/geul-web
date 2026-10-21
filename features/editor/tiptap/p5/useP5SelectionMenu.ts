@@ -4,6 +4,7 @@ import type { NodeViewProps } from '@tiptap/react';
 import type { ExecutableSelectionMenuBinding } from '../menus/executable';
 import type { P5SketchOptions, P5SketchLabels, P5SketchMode } from './p5-node-options';
 import type { ContextualBlockAlignment } from '../menus/map-external/AlignmentMenuActions';
+import { DEFAULT_DISPLAY_SIZE_LABELS } from '../menus/map-external/DisplaySizeMenuActions';
 
 interface UseP5SelectionMenuOptions {
   editor: NodeViewProps['editor'];
@@ -14,6 +15,8 @@ interface UseP5SelectionMenuOptions {
   mode: P5SketchMode;
   running: boolean;
   textAlignment: ContextualBlockAlignment;
+  displaySize: number;
+  setDisplaySize: (displaySize: number) => void;
   labels: P5SketchLabels;
   selectionMenuRegistry: P5SketchOptions['selectionMenuRegistry'];
   selectionMenuLabels: P5SketchOptions['selectionMenuLabels'];
@@ -31,6 +34,8 @@ export function useP5SelectionMenu({
   mode,
   running,
   textAlignment,
+  displaySize,
+  setDisplaySize,
   labels,
   selectionMenuRegistry,
   selectionMenuLabels,
@@ -86,6 +91,7 @@ export function useP5SelectionMenu({
         mode,
         running,
         textAlignment,
+        displaySize,
         labels: {
           menu: labels.title,
           edit: labels.edit,
@@ -99,6 +105,8 @@ export function useP5SelectionMenu({
           alignLeft: selectionMenuLabels?.alignLeft ?? 'Align left',
           alignCenter: selectionMenuLabels?.alignCenter ?? 'Align center',
           alignRight: selectionMenuLabels?.alignRight ?? 'Align right',
+          displaySize: selectionMenuLabels?.displaySize ?? DEFAULT_DISPLAY_SIZE_LABELS.displaySize,
+          displaySizePresets: selectionMenuLabels?.displaySizePresets ?? DEFAULT_DISPLAY_SIZE_LABELS.displaySizePresets,
         },
       },
       commands: {
@@ -111,10 +119,13 @@ export function useP5SelectionMenu({
             updateAttributes({ textAlignment: alignment });
           }
         },
+        setDisplaySize,
         deleteBlock,
       },
     }),
     [
+      displaySize,
+      setDisplaySize,
       canEditNeutral,
       deleteBlock,
       labels,

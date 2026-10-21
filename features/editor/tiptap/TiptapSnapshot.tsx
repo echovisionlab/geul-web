@@ -117,7 +117,7 @@ function renderNode(node: JSONContent, blocks: ReadonlyMap<string, LocalizedRich
   if (node.type === 'table') {
     const table = wireSchema().nodeFromJSON(node);
     const widths = readTableColumnWidths(table);
-    const width = Math.max(10, Math.min(100, Number(table.attrs.previewWidth) || 100));
+    const width = Math.max(10, Math.min(100, Number(table.attrs.displaySize) || 100));
     const alignment = table.attrs.textAlignment;
     return (
       <div className={tableClasses.root} data-editor-editable="false">

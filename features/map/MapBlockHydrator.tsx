@@ -9,7 +9,7 @@ import { MapViewEmbedded } from './MapViewEmbedded';
 interface MapBlockData {
   element: Element;
   config: MapViewConfig;
-  applyPreviewWidth: boolean;
+  applyDisplaySize: boolean;
   blockAlignment?: string | null;
   signature: string;
 }
@@ -59,16 +59,16 @@ function collectMapBlocks(container: HTMLElement): MapBlockData[] {
     }
 
     const figure = element.closest('figure.map-block-figure');
-    const applyPreviewWidth = !hasInlineWidthStyle(element) && !hasInlineWidthStyle(figure as Element | null);
+    const applyDisplaySize = !hasInlineWidthStyle(element) && !hasInlineWidthStyle(figure as Element | null);
     const blockAlignment = element.getAttribute('data-block-alignment');
-    const signature = `${configJson}:${applyPreviewWidth ? '1' : '0'}:${blockAlignment || ''}`;
+    const signature = `${configJson}:${applyDisplaySize ? '1' : '0'}:${blockAlignment || ''}`;
 
     if (element.getAttribute('data-map-hydrated-signature') !== signature) {
       element.innerHTML = '';
       element.setAttribute('data-map-hydrated-signature', signature);
     }
 
-    blocks.push({ element, config, applyPreviewWidth, blockAlignment, signature });
+    blocks.push({ element, config, applyDisplaySize, blockAlignment, signature });
   });
 
   return blocks;
@@ -148,7 +148,7 @@ export function MapBlockHydrator({ containerRef, contentKey, labelLocale }: MapB
           key={`${block.signature}:${index}`}
           element={block.element}
           config={block.config}
-          applyPreviewWidth={block.applyPreviewWidth}
+          applyDisplaySize={block.applyDisplaySize}
           blockAlignment={block.blockAlignment ?? undefined}
           labelLocale={labelLocale}
         />
@@ -160,12 +160,12 @@ export function MapBlockHydrator({ containerRef, contentKey, labelLocale }: MapB
 interface MapBlockPortalProps {
   element: Element;
   config: MapViewConfig;
-  applyPreviewWidth: boolean;
+  applyDisplaySize: boolean;
   blockAlignment?: string;
   labelLocale?: string | null;
 }
 
-function MapBlockPortal({ element, config, applyPreviewWidth, blockAlignment, labelLocale }: MapBlockPortalProps) {
+function MapBlockPortal({ element, config, applyDisplaySize, blockAlignment, labelLocale }: MapBlockPortalProps) {
   const isMobileViewport =
     typeof window !== 'undefined' &&
     typeof window.matchMedia === 'function' &&
@@ -174,7 +174,7 @@ function MapBlockPortal({ element, config, applyPreviewWidth, blockAlignment, la
   return createPortal(
     <MapViewEmbedded
       config={config}
-      applyPreviewWidth={isMobileViewport ? false : applyPreviewWidth}
+      applyDisplaySize={isMobileViewport ? false : applyDisplaySize}
       blockAlignment={blockAlignment}
       labelLocale={labelLocale}
     />,

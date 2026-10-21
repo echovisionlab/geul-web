@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "d6ea05b23036967115a1b9254700fbbf84b0686be2deaa4c77a89b77c49e9eed",
+  "manifestHash": "1b81bef8ad32dcc38d5312003e82c220be92b6005b943f427eb2ffd9cd51339e",
   "counts": {
-    "sourceFiles": 3841,
-    "productionSourceFiles": 2317,
-    "componentFiles": 917,
+    "sourceFiles": 3847,
+    "productionSourceFiles": 2322,
+    "componentFiles": 919,
     "coreFamilies": 57,
     "featureDomains": 54,
     "storyFiles": 259,
@@ -727,6 +727,8 @@
     "components/core/ResizeHandle/ResizeHandle.test.tsx",
     "components/core/ResizeHandle/ResizeHandle.tsx",
     "components/core/ResizeHandle/ResizeHandle.type-test.tsx",
+    "components/core/ResizeHandle/display-size.test.ts",
+    "components/core/ResizeHandle/display-size.ts",
     "components/core/ResizeHandle/index.ts",
     "components/core/Section/Section.test.tsx",
     "components/core/Section/SectionCard.stories.tsx",
@@ -1525,6 +1527,7 @@
     "features/editor/tiptap/menus/executable/index.ts",
     "features/editor/tiptap/menus/index.ts",
     "features/editor/tiptap/menus/map-external/AlignmentMenuActions.tsx",
+    "features/editor/tiptap/menus/map-external/DisplaySizeMenuActions.tsx",
     "features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu.test.tsx",
     "features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu.tsx",
     "features/editor/tiptap/menus/map-external/LinkPresentationActions.stories.tsx",
@@ -1539,6 +1542,7 @@
     "features/editor/tiptap/menus/map-external/TiptapLinkPresentationBubbleMenu.tsx",
     "features/editor/tiptap/menus/map-external/TiptapMapSelectionBubbleMenu.tsx",
     "features/editor/tiptap/menus/map-external/index.ts",
+    "features/editor/tiptap/menus/map-external/useDisplaySizeLabels.ts",
     "features/editor/tiptap/menus/selection-bubble-authority.test.tsx",
     "features/editor/tiptap/menus/selection-bubble-commands.test.ts",
     "features/editor/tiptap/menus/selection-bubble-commands.ts",
@@ -1932,6 +1936,7 @@
     "features/media/ui/ThemedAssetImageView.tsx",
     "features/media/useAudioPlaybackController.ts",
     "features/media/useExternalVideoPlaybackLabels.ts",
+    "features/media/useMediaAspectRatio.ts",
     "features/member/onboarding/NicknameOnboarding.test.tsx",
     "features/member/onboarding/NicknameOnboarding.tsx",
     "features/member/useNicknameValidation.test.tsx",
@@ -2150,6 +2155,7 @@
     "features/page/blocks/CollectionBlocks.stories.tsx",
     "features/page/blocks/CollectionSettings.permissions.test.tsx",
     "features/page/blocks/CollectionSizeControl.tsx",
+    "features/page/blocks/DisplaySizeControl.tsx",
     "features/page/blocks/EntityListView.test.tsx",
     "features/page/blocks/EntityListView.tsx",
     "features/page/blocks/InfiniteCollection.stories.tsx",
@@ -11365,6 +11371,7 @@
         "features/form/FormSettingsContent.tsx",
         "features/page/PageEditor/SectionSettingsForm.tsx",
         "features/page/PageEditor/editors/ColumnsEditor.tsx",
+        "features/page/blocks/DisplaySizeControl.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
         "features/page/blocks/author-list/Editor.tsx",
         "features/page/blocks/immersive-scene/ImmersiveSceneSceneSettingsPanel.tsx",
@@ -12033,6 +12040,7 @@
         "features/file-manager/ui/FileBrowserViewToggle.tsx",
         "features/form/FormBuilder/ConditionEditor.tsx",
         "features/page/PageEditor/editors/ColumnsEditor.tsx",
+        "features/page/blocks/DisplaySizeControl.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
         "features/page/blocks/author-list/Editor.tsx",
         "features/page/blocks/immersive-scene/ImmersiveSceneSceneSettingsPanel.tsx",
@@ -13318,6 +13326,7 @@
         "features/editor/tiptap/code/CodeBlockSurface.tsx",
         "features/editor/tiptap/menus/SelectionBubbleMenu.tsx",
         "features/editor/tiptap/menus/map-external/AlignmentMenuActions.tsx",
+        "features/editor/tiptap/menus/map-external/DisplaySizeMenuActions.tsx",
         "features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu.tsx",
         "features/editor/tiptap/menus/map-external/MapSelectionMenu.tsx",
         "features/editor/tiptap/menus/map-external/SelectionMenuPrimitives.tsx",
@@ -13418,6 +13427,7 @@
         "features/page/PageEditor/editors/ColumnsEditor.tsx",
         "features/page/PageRestrictedAccess.tsx",
         "features/page/PageView/blocks/PublicExecutableBlockView.tsx",
+        "features/page/blocks/DisplaySizeControl.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
         "features/page/blocks/ListBlockSkeleton.tsx",
         "features/page/blocks/ListViewShell.tsx",
@@ -16415,7 +16425,7 @@
       "typeAliasEvidence": [
         {
           "name": "ResizeHandleDirection",
-          "type": "'left' | 'right'"
+          "type": "'left' | 'right' | 'top' | 'bottom'"
         },
         {
           "name": "ResizeHandlePlacement",
@@ -19651,6 +19661,7 @@
         "features/editor/tiptap/code/CodeBlockSurface.tsx",
         "features/editor/tiptap/link-presentation/StandaloneLinkCaption.tsx",
         "features/editor/tiptap/map/TiptapMapNodeView.tsx",
+        "features/editor/tiptap/menus/map-external/DisplaySizeMenuActions.tsx",
         "features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu.tsx",
         "features/editor/tiptap/menus/map-external/MapSelectionMenu.tsx",
         "features/editor/tiptap/p5/P5CapabilityControl.tsx",
@@ -34746,9 +34757,9 @@
               "type": "() => void"
             },
             {
-              "name": "onPreviewWidthChange",
+              "name": "onDisplaySizeChange",
               "optional": false,
-              "type": "(previewWidth: string) => void"
+              "type": "(displaySize: string) => void"
             },
             {
               "name": "videoView",
@@ -37320,7 +37331,7 @@
       "propsEvidence": [
         {
           "name": "CodeBlockSelectionMenuLabels",
-          "extends": ["extends ContextualBlockAlignmentLabels"],
+          "extends": ["extends ContextualBlockAlignmentLabels, ContextualBlockSizeLabels"],
           "properties": [
             {
               "name": "menu",
@@ -37378,6 +37389,7 @@
       "composedJsx": [
         "AlignmentMenuActions",
         "BubbleMenu",
+        "DisplaySizeMenuActions",
         "IconEdit",
         "IconTrash",
         "SelectionMenuAction",
@@ -37724,7 +37736,7 @@
               "type": "string"
             },
             {
-              "name": "previewWidth",
+              "name": "displaySize",
               "optional": false,
               "type": "string"
             },
@@ -37745,7 +37757,7 @@
           "extends": [],
           "properties": [
             {
-              "name": "previewWidth",
+              "name": "displaySize",
               "optional": true,
               "type": "string"
             },
@@ -38406,7 +38418,13 @@
       "catalogAdapters": [],
       "tests": ["features/editor/tiptap/menus/executable/ExecutableSelectionMenu.test.tsx"],
       "stories": [],
-      "composedJsx": ["AlignmentMenuActions", "IconTrash", "SelectionMenuAction", "SelectionMenuSurface"]
+      "composedJsx": [
+        "AlignmentMenuActions",
+        "DisplaySizeMenuActions",
+        "IconTrash",
+        "SelectionMenuAction",
+        "SelectionMenuSurface"
+      ]
     },
     {
       "file": "features/editor/tiptap/menus/executable/ExecutableSelectionMenuRegistry.tsx",
@@ -38421,7 +38439,7 @@
       "propsEvidence": [
         {
           "name": "ExecutableSelectionMenuLabels",
-          "extends": [],
+          "extends": ["extends ContextualBlockSizeLabels"],
           "properties": [
             {
               "name": "menu",
@@ -38510,6 +38528,11 @@
               "type": "ContextualBlockAlignment"
             },
             {
+              "name": "displaySize",
+              "optional": false,
+              "type": "number"
+            },
+            {
               "name": "disabled",
               "optional": true,
               "type": "boolean"
@@ -38549,6 +38572,11 @@
               "name": "setAlignment",
               "optional": false,
               "type": "(alignment: ContextualBlockAlignment) => void"
+            },
+            {
+              "name": "setDisplaySize",
+              "optional": false,
+              "type": "(displaySize: number) => void"
             },
             {
               "name": "deleteBlock",
@@ -38727,6 +38755,90 @@
       "composedJsx": ["DsLayoutInline", "Icon", "SelectionMenuAction"]
     },
     {
+      "file": "features/editor/tiptap/menus/map-external/DisplaySizeMenuActions.tsx",
+      "owner": "Feature/editor",
+      "exports": [
+        {
+          "name": "DisplaySizeMenuActions",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "ContextualBlockSizeLabels",
+          "extends": [],
+          "properties": [
+            {
+              "name": "displaySize",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "displaySizePresets",
+              "optional": false,
+              "type": "Record<DisplaySizePresetId, string>"
+            }
+          ]
+        },
+        {
+          "name": "DisplaySizeMenuActionsProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "value",
+              "optional": false,
+              "type": "number | string"
+            },
+            {
+              "name": "labels",
+              "optional": false,
+              "type": "ContextualBlockSizeLabels"
+            },
+            {
+              "name": "onChange",
+              "optional": true,
+              "type": "(displaySize: number) => void"
+            },
+            {
+              "name": "disabled",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
+              "name": "testIdPrefix",
+              "optional": false,
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": [
+        "features/editor/tiptap/TiptapFileBlockNodeView.tsx",
+        "features/editor/tiptap/code/CodeBlockSelectionMenu.tsx",
+        "features/editor/tiptap/menus/executable/ExecutableSelectionMenu.tsx",
+        "features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu.tsx",
+        "features/editor/tiptap/menus/map-external/MapSelectionMenu.tsx",
+        "features/editor/tiptap/p5/useP5SelectionMenu.ts",
+        "features/editor/tiptap/shader/ShaderNode.tsx",
+        "features/editor/tiptap/table/TiptapTableMenu.tsx",
+        "features/editor/tiptap/three/ThreeSceneNode.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [
+        "features/editor/tiptap/code/CodeBlockSelectionMenu.test.tsx",
+        "features/editor/tiptap/integration/shader-menu.test.tsx",
+        "features/editor/tiptap/menus/executable/ExecutableSelectionMenu.test.tsx",
+        "features/editor/tiptap/menus/executable/ExecutableSelectionMenuRegistry.test.ts",
+        "features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu.test.tsx",
+        "features/editor/tiptap/menus/map-external/MapSelectionMenu.test.tsx",
+        "features/editor/tiptap/menus/map-external/SelectionMenuDismissal.test.tsx"
+      ],
+      "stories": [],
+      "composedJsx": ["DsLayoutInline", "SelectionMenuAction", "Text"]
+    },
+    {
       "file": "features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu.tsx",
       "owner": "Feature/editor",
       "exports": [
@@ -38739,7 +38851,7 @@
       "propsEvidence": [
         {
           "name": "ExternalVideoSelectionMenuLabels",
-          "extends": ["extends ContextualBlockAlignmentLabels"],
+          "extends": ["extends ContextualBlockAlignmentLabels, ContextualBlockSizeLabels"],
           "properties": [
             {
               "name": "menu",
@@ -38793,7 +38905,7 @@
               "type": "ContextualBlockAlignment"
             },
             {
-              "name": "previewWidth",
+              "name": "displaySize",
               "optional": false,
               "type": "string | number"
             },
@@ -38828,6 +38940,11 @@
               "type": "(alignment: ContextualBlockAlignment) => void"
             },
             {
+              "name": "onChangeDisplaySize",
+              "optional": true,
+              "type": "(displaySize: number) => void"
+            },
+            {
               "name": "onEscape",
               "optional": true,
               "type": "() => void"
@@ -38847,6 +38964,7 @@
       "stories": [],
       "composedJsx": [
         "AlignmentMenuActions",
+        "DisplaySizeMenuActions",
         "DropdownMenu",
         "DropdownMenu.Dropdown",
         "DropdownMenu.Item",
@@ -39021,7 +39139,7 @@
         },
         {
           "name": "MapSelectionMenuLabels",
-          "extends": ["extends ContextualBlockAlignmentLabels"],
+          "extends": ["extends ContextualBlockAlignmentLabels, ContextualBlockSizeLabels"],
           "properties": [
             {
               "name": "menu",
@@ -39095,7 +39213,7 @@
               "type": "ContextualBlockAlignment"
             },
             {
-              "name": "previewWidth",
+              "name": "displaySize",
               "optional": false,
               "type": "string | number"
             },
@@ -39140,6 +39258,11 @@
               "type": "(alignment: ContextualBlockAlignment) => void"
             },
             {
+              "name": "onChangeDisplaySize",
+              "optional": true,
+              "type": "(displaySize: number) => void"
+            },
+            {
               "name": "onFocusCaption",
               "optional": true,
               "type": "() => void"
@@ -39164,6 +39287,7 @@
       "stories": [],
       "composedJsx": [
         "AlignmentMenuActions",
+        "DisplaySizeMenuActions",
         "DropdownMenu",
         "DropdownMenu.Divider",
         "DropdownMenu.Dropdown",
@@ -39212,7 +39336,7 @@
               "type": "ContextualBlockAlignment"
             },
             {
-              "name": "previewWidth",
+              "name": "displaySize",
               "optional": false,
               "type": "string | number"
             },
@@ -39251,6 +39375,11 @@
               "name": "changeAlignment",
               "optional": true,
               "type": "(alignment: ContextualBlockAlignment) => void"
+            },
+            {
+              "name": "changeDisplaySize",
+              "optional": true,
+              "type": "(displaySize: number) => void"
             },
             {
               "name": "focusCaption",
@@ -39341,6 +39470,7 @@
         "features/editor/tiptap/code/CodeBlockSelectionMenu.tsx",
         "features/editor/tiptap/menus/executable/ExecutableSelectionMenu.tsx",
         "features/editor/tiptap/menus/map-external/AlignmentMenuActions.tsx",
+        "features/editor/tiptap/menus/map-external/DisplaySizeMenuActions.tsx",
         "features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu.tsx",
         "features/editor/tiptap/menus/map-external/LinkPresentationActions.tsx",
         "features/editor/tiptap/menus/map-external/MapSelectionMenu.tsx",
@@ -40300,7 +40430,7 @@
             {
               "name": "selectionMenuLabels",
               "optional": true,
-              "type": "Pick< ExecutableSelectionMenuLabels, 'deleteBlock' | 'alignment' | 'alignLeft' | 'alignCenter' | 'alignRight' >"
+              "type": "Pick< ExecutableSelectionMenuLabels, 'deleteBlock' | 'alignment' | 'alignLeft' | 'alignCenter' | 'alignRight' | 'displaySize' | 'displaySizePresets' >"
             },
             {
               "name": "resolveAsset",
@@ -40370,7 +40500,7 @@
               "type": "number"
             },
             {
-              "name": "previewWidth",
+              "name": "displaySize",
               "optional": true,
               "type": "string | number"
             },
@@ -40564,6 +40694,7 @@
       "stories": [],
       "composedJsx": [
         "BubbleMenu",
+        "DisplaySizeMenuActions",
         "DropdownMenu",
         "DropdownMenu.Divider",
         "DropdownMenu.Dropdown",
@@ -40724,7 +40855,7 @@
             {
               "name": "selectionMenuLabels",
               "optional": true,
-              "type": "Pick< ExecutableSelectionMenuLabels, 'deleteBlock' | 'alignment' | 'alignLeft' | 'alignCenter' | 'alignRight' >"
+              "type": "Pick< ExecutableSelectionMenuLabels, 'deleteBlock' | 'alignment' | 'alignLeft' | 'alignCenter' | 'alignRight' | 'displaySize' | 'displaySizePresets' >"
             },
             {
               "name": "authoringMode",
@@ -40758,7 +40889,7 @@
               "type": "number"
             },
             {
-              "name": "previewWidth",
+              "name": "displaySize",
               "optional": true,
               "type": "string"
             },
@@ -41456,8 +41587,13 @@
               "type": "RefObject<HTMLElement | null>"
             },
             {
-              "name": "widthPercent",
+              "name": "displaySize",
               "optional": false,
+              "type": "number"
+            },
+            {
+              "name": "aspectRatio",
+              "optional": true,
               "type": "number"
             },
             {
@@ -41496,6 +41632,16 @@
               "type": "PointerEventHandler<HTMLButtonElement>"
             },
             {
+              "name": "onResizeTopPointerDown",
+              "optional": true,
+              "type": "PointerEventHandler<HTMLButtonElement>"
+            },
+            {
+              "name": "onResizeBottomPointerDown",
+              "optional": true,
+              "type": "PointerEventHandler<HTMLButtonElement>"
+            },
+            {
               "name": "onResizePointerMove",
               "optional": true,
               "type": "PointerEventHandler<HTMLDivElement>"
@@ -41522,6 +41668,16 @@
             },
             {
               "name": "resizeRightLabel",
+              "optional": true,
+              "type": "string"
+            },
+            {
+              "name": "resizeTopLabel",
+              "optional": true,
+              "type": "string"
+            },
+            {
+              "name": "resizeBottomLabel",
               "optional": true,
               "type": "string"
             },
@@ -46986,7 +47142,7 @@
               "type": "MapViewConfig"
             },
             {
-              "name": "applyPreviewWidth",
+              "name": "applyDisplaySize",
               "optional": false,
               "type": "boolean"
             },
@@ -47038,7 +47194,7 @@
               "type": "MapViewConfig"
             },
             {
-              "name": "applyPreviewWidth",
+              "name": "applyDisplaySize",
               "optional": false,
               "type": "boolean"
             },
@@ -47346,7 +47502,7 @@
               "type": "MapViewConfig"
             },
             {
-              "name": "applyPreviewWidth",
+              "name": "applyDisplaySize",
               "optional": true,
               "type": "boolean"
             },
@@ -48879,6 +49035,11 @@
               "name": "afterPlayer",
               "optional": true,
               "type": "ReactNode"
+            },
+            {
+              "name": "onNaturalSize",
+              "optional": true,
+              "type": "(width: number, height: number) => void"
             }
           ]
         }
@@ -48954,6 +49115,11 @@
               "name": "action",
               "optional": true,
               "type": "ReactNode"
+            },
+            {
+              "name": "onNaturalSize",
+              "optional": true,
+              "type": "(width: number, height: number) => void"
             }
           ]
         }
@@ -49231,6 +49397,11 @@
               "name": "onError",
               "optional": true,
               "type": "React.ReactEventHandler<HTMLImageElement>"
+            },
+            {
+              "name": "onNaturalSize",
+              "optional": true,
+              "type": "(width: number, height: number) => void"
             },
             {
               "name": "action",
@@ -55831,6 +56002,51 @@
       "composedJsx": ["Select"]
     },
     {
+      "file": "features/page/blocks/DisplaySizeControl.tsx",
+      "owner": "Feature/page",
+      "exports": [
+        {
+          "name": "DisplaySizeControl",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "DisplaySizeControlProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "label",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "value",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "disabled",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
+              "name": "onChange",
+              "optional": false,
+              "type": "(displaySize: string) => void"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["features/page/blocks/post-map/Editor.tsx", "features/page/blocks/work-map/Editor.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["DsLayoutStack", "NumberInput", "SegmentedControl"]
+    },
+    {
       "file": "features/page/blocks/EntityListView.tsx",
       "owner": "Feature/page",
       "exports": [
@@ -60130,6 +60346,7 @@
       "tests": [],
       "stories": [],
       "composedJsx": [
+        "DisplaySizeControl",
         "DsLayoutInline",
         "DsLayoutInset",
         "DsLayoutStack",
@@ -61263,6 +61480,7 @@
       "tests": [],
       "stories": [],
       "composedJsx": [
+        "DisplaySizeControl",
         "DsLayoutInline",
         "DsLayoutInset",
         "DsLayoutStack",
@@ -76432,6 +76650,7 @@
         "features/editor/tiptap/menus/executable/index.ts",
         "features/editor/tiptap/menus/index.ts",
         "features/editor/tiptap/menus/map-external/AlignmentMenuActions.tsx",
+        "features/editor/tiptap/menus/map-external/DisplaySizeMenuActions.tsx",
         "features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu.tsx",
         "features/editor/tiptap/menus/map-external/LinkPresentationActions.tsx",
         "features/editor/tiptap/menus/map-external/MapSelectionMenu.tsx",
@@ -76441,6 +76660,7 @@
         "features/editor/tiptap/menus/map-external/TiptapLinkPresentationBubbleMenu.tsx",
         "features/editor/tiptap/menus/map-external/TiptapMapSelectionBubbleMenu.tsx",
         "features/editor/tiptap/menus/map-external/index.ts",
+        "features/editor/tiptap/menus/map-external/useDisplaySizeLabels.ts",
         "features/editor/tiptap/menus/selection-bubble-commands.ts",
         "features/editor/tiptap/menus/useSelectionToolbarNavigation.ts",
         "features/editor/tiptap/mermaid/MermaidNodeView.tsx",
@@ -76574,6 +76794,7 @@
         "features/editor/tiptap/menus/executable/ExecutableSelectionMenuRegistry.tsx",
         "features/editor/tiptap/menus/executable/TiptapExecutableSelectionBubbleMenu.tsx",
         "features/editor/tiptap/menus/map-external/AlignmentMenuActions.tsx",
+        "features/editor/tiptap/menus/map-external/DisplaySizeMenuActions.tsx",
         "features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu.tsx",
         "features/editor/tiptap/menus/map-external/LinkPresentationActions.tsx",
         "features/editor/tiptap/menus/map-external/MapSelectionMenu.tsx",
@@ -77161,7 +77382,8 @@
         "features/media/ui/MissingMediaView.tsx",
         "features/media/ui/ThemedAssetImageView.tsx",
         "features/media/useAudioPlaybackController.ts",
-        "features/media/useExternalVideoPlaybackLabels.ts"
+        "features/media/useExternalVideoPlaybackLabels.ts",
+        "features/media/useMediaAspectRatio.ts"
       ],
       "components": [
         "features/media/AudioMediaView.tsx",
@@ -77548,6 +77770,7 @@
         "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/PageView/page-localized-text.ts",
         "features/page/blocks/CollectionSizeControl.tsx",
+        "features/page/blocks/DisplaySizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
         "features/page/blocks/ListBlockSkeleton.tsx",
@@ -77785,6 +78008,7 @@
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
         "features/page/PageView/blocks/PublicSiteVariable.tsx",
         "features/page/blocks/CollectionSizeControl.tsx",
+        "features/page/blocks/DisplaySizeControl.tsx",
         "features/page/blocks/EntityListView.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
         "features/page/blocks/ListBlockSkeleton.tsx",
@@ -99712,6 +99936,66 @@
             {
               "exported": "ResizeHandleVisibility",
               "imported": "ResizeHandleVisibility",
+              "typeOnly": true
+            }
+          ]
+        },
+        {
+          "target": "components/core/ResizeHandle/display-size.ts",
+          "symbols": [
+            {
+              "exported": "DISPLAY_SIZE_DEFAULT",
+              "imported": "DISPLAY_SIZE_DEFAULT",
+              "typeOnly": false
+            },
+            {
+              "exported": "DISPLAY_SIZE_MAX",
+              "imported": "DISPLAY_SIZE_MAX",
+              "typeOnly": false
+            },
+            {
+              "exported": "DISPLAY_SIZE_MIN",
+              "imported": "DISPLAY_SIZE_MIN",
+              "typeOnly": false
+            },
+            {
+              "exported": "DISPLAY_SIZE_PRESETS",
+              "imported": "DISPLAY_SIZE_PRESETS",
+              "typeOnly": false
+            },
+            {
+              "exported": "displaySizeInlineSize",
+              "imported": "displaySizeInlineSize",
+              "typeOnly": false
+            },
+            {
+              "exported": "displaySizeIsPortrait",
+              "imported": "displaySizeIsPortrait",
+              "typeOnly": false
+            },
+            {
+              "exported": "displaySizePreset",
+              "imported": "displaySizePreset",
+              "typeOnly": false
+            },
+            {
+              "exported": "normalizeDisplaySize",
+              "imported": "normalizeDisplaySize",
+              "typeOnly": false
+            },
+            {
+              "exported": "parseAspectRatio",
+              "imported": "parseAspectRatio",
+              "typeOnly": false
+            },
+            {
+              "exported": "snapDisplaySize",
+              "imported": "snapDisplaySize",
+              "typeOnly": false
+            },
+            {
+              "exported": "DisplaySizePresetId",
+              "imported": "DisplaySizePresetId",
               "typeOnly": true
             }
           ]

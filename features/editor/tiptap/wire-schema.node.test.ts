@@ -26,7 +26,7 @@ describe('Tiptap wire schema', () => {
       backgroundColor: 'default',
       textColor: 'default',
       textAlignment: 'left',
-      previewWidth: 100,
+      displaySize: 100,
       aspectRatio: 'auto',
       linkPresentation: 'auto',
       linkSiteName: '',

@@ -11,19 +11,27 @@ import {
   useRef,
   useState,
 } from 'react';
+import { snapDisplaySize } from '@/components/core/ResizeHandle/display-size';
 
-export type ResizeDirection = 'left' | 'right' | null;
+export type ResizeDirection = 'left' | 'right' | 'top' | 'bottom' | null;
 export type TextAlignment = 'left' | 'center' | 'right';
 
 interface UseBlockResizeOptions {
   containerRef: RefObject<HTMLElement | null>;
-  previewWidth: string;
+  displaySize: string;
   onResize: (newWidthPercent: number) => void;
   keyboardSession?: {
     owner: object;
     key: string;
   };
   enabled?: boolean;
+  /**
+   * Width / height of a block whose height follows its width. Its top and
+   * bottom handles then resize it too, and its height is capped at 80svh.
+   */
+  aspectRatio?: number;
+  /** A centered block grows on both sides, so a side handle moves half as far as the width grows. */
+  textAlignment?: TextAlignment;
   minWidth?: number;
   maxWidth?: number;
   step?: number;
@@ -36,6 +44,8 @@ interface UseBlockResizeReturn {
   maxWidth: number;
   startResizeLeft: PointerEventHandler<HTMLButtonElement>;
   startResizeRight: PointerEventHandler<HTMLButtonElement>;
+  startResizeTop: PointerEventHandler<HTMLButtonElement>;
+  startResizeBottom: PointerEventHandler<HTMLButtonElement>;
   onResizeKeyDown: KeyboardEventHandler<HTMLButtonElement>;
   onResizeBlur: FocusEventHandler<HTMLButtonElement>;
   getMarginStyle: (textAlignment?: TextAlignment) => string | undefined;
@@ -44,6 +54,9 @@ interface UseBlockResizeReturn {
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, Math.round(value)));
 }
+
+/** Keyboard steps settle for this long before the size is saved. */
+const KEYBOARD_COMMIT_DELAY_MS = 300;
 
 function readEditorWidth(container: HTMLElement | null): number {
   const blockWrapper = container?.closest('[data-node-type="blockContainer"]');
@@ -139,27 +152,36 @@ function clearKeyboardResizeStart(
 /** Shared feature adapter for pointer and keyboard media-width authoring. */
 export function useBlockResize({
   containerRef,
-  previewWidth,
+  displaySize,
   onResize,
   keyboardSession,
   enabled = true,
+  aspectRatio,
+  textAlignment,
   minWidth = 10,
   maxWidth = 100,
   step = 5,
 }: UseBlockResizeOptions): UseBlockResizeReturn {
   const keyboardSessionOwner = keyboardSession?.owner;
   const keyboardSessionKey = keyboardSession?.key;
-  const persistedWidth = clamp(Number.parseInt(previewWidth, 10) || maxWidth, minWidth, maxWidth);
+  const persistedWidth = clamp(Number.parseInt(displaySize, 10) || maxWidth, minWidth, maxWidth);
   const [draftWidth, setDraftWidth] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState<ResizeDirection>(null);
   const sessionRef = useRef<{
     direction: Exclude<ResizeDirection, null>;
     pointerId: number;
     startX: number;
+    startY: number;
     startWidth: number;
-    editorWidth: number;
+    /** Rendered width at the start of the drag. */
+    startPixels: number;
+    /** Rendered width at size 100: size/100 × min(column, 80svh × ratio) is linear in size. */
+    fullPixels: number;
+    aspectRatio: number | undefined;
+    centered: boolean;
     latestWidth: number;
   } | null>(null);
+  const keyboardCommitRef = useRef<{ timer: ReturnType<typeof setTimeout>; width: number } | null>(null);
   const keyboardStartWidthRef = useRef<number | null>(null);
   const enabledRef = useRef(enabled);
   enabledRef.current = enabled;
@@ -187,16 +209,43 @@ export function useBlockResize({
     setDraftWidth(null);
   }, [enabled, keyboardSessionKey, keyboardSessionOwner]);
 
+  const onResizeRef = useRef(onResize);
+  onResizeRef.current = onResize;
+  const flushKeyboardCommit = useCallback(() => {
+    const pending = keyboardCommitRef.current;
+    if (!pending) {
+      return;
+    }
+    clearTimeout(pending.timer);
+    keyboardCommitRef.current = null;
+    if (enabledRef.current) {
+      onResizeRef.current(pending.width);
+    }
+  }, []);
+  useEffect(() => flushKeyboardCommit, [flushKeyboardCommit]);
+
   const commit = useCallback(
-    (width: number) => {
+    (width: number, { settle = false }: { settle?: boolean } = {}) => {
       if (!enabledRef.current) {
         return;
       }
       const nextWidth = clamp(width, minWidth, maxWidth);
       setDraftWidth(nextWidth);
-      onResize(nextWidth);
+      if (!settle) {
+        flushKeyboardCommit();
+        onResizeRef.current(nextWidth);
+        return;
+      }
+      // The draft shows each step at once; only the settled size is saved.
+      if (keyboardCommitRef.current) {
+        clearTimeout(keyboardCommitRef.current.timer);
+      }
+      keyboardCommitRef.current = {
+        width: nextWidth,
+        timer: setTimeout(flushKeyboardCommit, KEYBOARD_COMMIT_DELAY_MS),
+      };
     },
-    [maxWidth, minWidth, onResize],
+    [flushKeyboardCommit, maxWidth, minWidth],
   );
 
   const finishPointerResize = useCallback(
@@ -226,9 +275,18 @@ export function useBlockResize({
       if (!enabledRef.current || !session || session.pointerId !== event.pointerId) {
         return;
       }
-      const deltaPercent = ((event.clientX - session.startX) / session.editorWidth) * 100;
-      const directionalDelta = session.direction === 'right' ? deltaPercent : -deltaPercent;
-      const nextWidth = clamp(session.startWidth + directionalDelta, minWidth, maxWidth);
+      const dx = event.clientX - session.startX;
+      const dy = event.clientY - session.startY;
+      // A vertical drag changes the height; the ratio turns it into the same width change.
+      const pixelDelta =
+        session.direction === 'right' || session.direction === 'left'
+          ? (session.direction === 'right' ? dx : -dx) * (session.centered ? 2 : 1)
+          : (session.direction === 'bottom' ? dy : -dy) * (session.aspectRatio ?? 1);
+      const nextWidth = clamp(
+        snapDisplaySize(((session.startPixels + pixelDelta) / session.fullPixels) * 100),
+        minWidth,
+        maxWidth,
+      );
       session.latestWidth = nextWidth;
       setDraftWidth(nextWidth);
     };
@@ -258,25 +316,35 @@ export function useBlockResize({
         if (!enabledRef.current) {
           return;
         }
-        const editorWidth = readEditorWidth(containerRef.current);
-        if (editorWidth <= 0) {
+        const verticalRatio = direction === 'top' || direction === 'bottom' ? aspectRatio : undefined;
+        if ((direction === 'top' || direction === 'bottom') && !verticalRatio) {
+          return;
+        }
+        const startPixels = containerRef.current?.getBoundingClientRect().width ?? 0;
+        const fullPixels = startPixels > 0 ? (startPixels * 100) / widthPercent : readEditorWidth(containerRef.current);
+        if (fullPixels <= 0) {
           return;
         }
         event.preventDefault();
         event.stopPropagation();
+        flushKeyboardCommit();
         sessionRef.current = {
           direction,
           pointerId: event.pointerId,
           startX: event.clientX,
+          startY: event.clientY,
           startWidth: widthPercent,
-          editorWidth,
+          startPixels: startPixels > 0 ? startPixels : (fullPixels * widthPercent) / 100,
+          fullPixels,
+          aspectRatio: verticalRatio,
+          centered: textAlignment === 'center',
           latestWidth: widthPercent,
         };
         event.currentTarget.setPointerCapture?.(event.pointerId);
         setDraftWidth(widthPercent);
         setIsDragging(direction);
       },
-    [containerRef, widthPercent],
+    [aspectRatio, containerRef, flushKeyboardCommit, textAlignment, widthPercent],
   );
 
   const handleResizeKeyDown = useCallback(
@@ -292,7 +360,7 @@ export function useBlockResize({
         keyboardStartWidthRef.current = null;
         clearKeyboardResizeStart(scope, sessionKey, handle);
         if (initialWidth != null) {
-          commit(initialWidth);
+          commit(initialWidth, { settle: true });
         }
         return true;
       }
@@ -317,7 +385,7 @@ export function useBlockResize({
         widthPercent,
         clamp(nextWidth, minWidth, maxWidth),
       );
-      commit(nextWidth);
+      commit(nextWidth, { settle: true });
       return true;
     },
     [commit, keyboardSessionKey, keyboardSessionOwner, maxWidth, minWidth, step, widthPercent],
@@ -359,6 +427,7 @@ export function useBlockResize({
   const onResizeBlur = useCallback<FocusEventHandler<HTMLButtonElement>>(
     (event) => {
       const handle = event.currentTarget;
+      flushKeyboardCommit();
       queueMicrotask(() => {
         if (!handle.isConnected) {
           return;
@@ -371,12 +440,13 @@ export function useBlockResize({
         );
       });
     },
-    [keyboardSessionKey, keyboardSessionOwner],
+    [flushKeyboardCommit, keyboardSessionKey, keyboardSessionOwner],
   );
 
   const getMarginStyle = useCallback(
     (textAlignment: TextAlignment = 'left'): string | undefined => {
-      if (widthPercent >= 100) {
+      // A block with an aspect ratio can be narrower than its column even at full size.
+      if (widthPercent >= 100 && !aspectRatio) {
         return undefined;
       }
       if (textAlignment === 'center') {
@@ -387,7 +457,7 @@ export function useBlockResize({
       }
       return undefined;
     },
-    [widthPercent],
+    [aspectRatio, widthPercent],
   );
 
   return useMemo(
@@ -398,6 +468,8 @@ export function useBlockResize({
       maxWidth,
       startResizeLeft: startPointerResize('left'),
       startResizeRight: startPointerResize('right'),
+      startResizeTop: startPointerResize('top'),
+      startResizeBottom: startPointerResize('bottom'),
       onResizeKeyDown,
       onResizeBlur,
       getMarginStyle,

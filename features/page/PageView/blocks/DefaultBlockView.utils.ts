@@ -6,7 +6,7 @@ export function getContainerStyle(block: Block): React.CSSProperties {
   return (
     mediaContainerStyleToReact(
       resolveMediaContainerStyle(
-        getBlockPropString(block.props, 'previewWidth', '100'),
+        getBlockPropString(block.props, 'displaySize', '100'),
         getBlockPropString(block.props, 'textAlignment', 'left'),
       ),
     ) || {}

@@ -6,6 +6,7 @@ import { createRoot } from 'react-dom/client';
 
 import { ExecutableSelectionMenu } from './ExecutableSelectionMenu';
 import { type ExecutableSelectionMenuBinding } from './ExecutableSelectionMenuRegistry';
+import { DEFAULT_DISPLAY_SIZE_LABELS } from '../map-external/DisplaySizeMenuActions';
 
 const labels = {
   menu: 'p5.js sketch',
@@ -20,17 +21,19 @@ const labels = {
   alignLeft: 'Align left',
   alignCenter: 'Align center',
   alignRight: 'Align right',
+  ...DEFAULT_DISPLAY_SIZE_LABELS,
 };
 
 function binding(): ExecutableSelectionMenuBinding {
   return {
-    snapshot: { blockType: 'p5Sketch', mode: 'edit', running: false, textAlignment: 'left', labels },
+    snapshot: { blockType: 'p5Sketch', mode: 'edit', running: false, textAlignment: 'left', displaySize: 100, labels },
     commands: {
       setMode: vi.fn(),
       run: vi.fn(),
       stop: vi.fn(),
       restart: vi.fn(),
       setAlignment: vi.fn(),
+      setDisplaySize: vi.fn(),
       deleteBlock: vi.fn(),
     },
   };
@@ -38,17 +41,14 @@ function binding(): ExecutableSelectionMenuBinding {
 
 describe('executable selection menu', () => {
   it('uses compact shared chrome and keeps runtime/source commands on the executable surface', () => {
+    const menu = binding();
     const element = document.createElement('div');
     document.body.append(element);
     const root = createRoot(element);
     act(() =>
       root.render(
         <DesignSystemProvider forceColorScheme="light">
-          <ExecutableSelectionMenu
-            binding={binding()}
-            editorElement={document.createElement('div')}
-            onEscape={() => {}}
-          />
+          <ExecutableSelectionMenu binding={menu} editorElement={document.createElement('div')} onEscape={() => {}} />
         </DesignSystemProvider>,
       ),
     );
@@ -58,11 +58,22 @@ describe('executable selection menu', () => {
       'Align left',
       'Align center',
       'Align right',
+      'Extra small · 25%',
+      'Small · 40%',
+      'Medium · 60%',
+      'Large · 80%',
+      'Extra large · 100%',
       'Delete',
     ]);
     expect(
       [...toolbar.querySelectorAll('button')].every((button) => button.getAttribute('data-control-size') === 'compact'),
     ).toBe(true);
+    // The stored size 100 is the XL preset; picking another preset saves its share.
+    expect(element.querySelector('[data-testid="tiptap-executable-size-xl"]')?.getAttribute('aria-pressed')).toBe(
+      'true',
+    );
+    act(() => element.querySelector<HTMLButtonElement>('[data-testid="tiptap-executable-size-m"]')?.click());
+    expect(menu.commands.setDisplaySize).toHaveBeenCalledExactlyOnceWith(60);
     act(() => root.unmount());
     element.remove();
   });

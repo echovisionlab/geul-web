@@ -90,11 +90,11 @@ class TableNodeView extends TableView {
     }
     const widths = readTableColumnWidths(node);
     const map = TableMap.get(node);
-    const previewWidthValue = Number(node.attrs.previewWidth);
-    const previewWidth = Number.isFinite(previewWidthValue) ? Math.max(10, Math.min(100, previewWidthValue)) : 100;
+    const displaySizeValue = Number(node.attrs.displaySize);
+    const displaySize = Number.isFinite(displaySizeValue) ? Math.max(10, Math.min(100, displaySizeValue)) : 100;
     const alignment =
       node.attrs.textAlignment === 'center' || node.attrs.textAlignment === 'right' ? node.attrs.textAlignment : 'left';
-    const offset = alignment === 'right' ? 100 - previewWidth : alignment === 'center' ? (100 - previewWidth) / 2 : 0;
+    const offset = alignment === 'right' ? 100 - displaySize : alignment === 'center' ? (100 - displaySize) / 2 : 0;
     const boundaries: Array<{
       left: number;
       kind: 'internal' | 'outer-left' | 'outer-right';
@@ -108,7 +108,7 @@ class TableNodeView extends TableView {
     for (const [column, width] of widths.slice(0, -1).entries()) {
       cumulative += width;
       boundaries.push({
-        left: offset + previewWidth * (cumulative / 100),
+        left: offset + displaySize * (cumulative / 100),
         kind: 'internal',
         cellPosition: tablePosition + 1 + map.map[column]!,
         column,
@@ -116,7 +116,7 @@ class TableNodeView extends TableView {
     }
     if (alignment === 'left' || alignment === 'center') {
       boundaries.push({
-        left: offset + previewWidth,
+        left: offset + displaySize,
         kind: 'outer-right',
         cellPosition: tablePosition + 1 + map.map[map.width - 1]!,
         column: map.width - 1,

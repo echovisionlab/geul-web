@@ -259,7 +259,7 @@ function labDocument(): RichTextDocument {
     },
     {
       id: BLOCK_IDS.youtube,
-      paragraph: { props: { previewWidth: 64, textAlignment: 'TEXT_ALIGNMENT_CENTER' } },
+      paragraph: { props: { displaySize: 64, textAlignment: 'TEXT_ALIGNMENT_CENTER' } },
     },
     {
       id: BLOCK_IDS.audioOne,
@@ -267,7 +267,7 @@ function labDocument(): RichTextDocument {
         props: {
           attachment: { activeFileId: FILE_IDS.audioOne },
           name: 'local-tone-one.wav',
-          previewWidth: 100,
+          displaySize: 100,
         },
       },
     },
@@ -277,7 +277,7 @@ function labDocument(): RichTextDocument {
         props: {
           attachment: { activeFileId: FILE_IDS.audioTwo },
           name: 'local-tone-two.wav',
-          previewWidth: 100,
+          displaySize: 100,
         },
       },
     },

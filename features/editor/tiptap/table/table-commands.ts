@@ -1,3 +1,4 @@
+import { normalizeDisplaySize } from '@/components/core/ResizeHandle/display-size';
 import { Extension, type Editor } from '@tiptap/core';
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
 import { Plugin, type Command, type Transaction, TextSelection } from '@tiptap/pm/state';
@@ -73,6 +74,7 @@ declare module '@tiptap/core' {
       setTableCellBackgroundColor: (color: TableColor) => ReturnType;
       setTableCellAlignment: (alignment: TableTextAlignment) => ReturnType;
       setTableAlignment: (alignment: TableTextAlignment) => ReturnType;
+      setTableDisplaySize: (displaySize: number) => ReturnType;
       selectTableRow: () => ReturnType;
       selectTableColumn: () => ReturnType;
       selectTable: () => ReturnType;
@@ -569,6 +571,33 @@ export function createTableCommands(options: TableExtensionOptions = {}) {
               }
             : null;
         tr.setNodeMarkup(selected.position, undefined, { ...selected.node.attrs, textAlignment: alignment });
+        if (cellSelection) {
+          tr.setSelection(CellSelection.create(tr.doc, cellSelection.anchor, cellSelection.head));
+        }
+        return true;
+      },
+    setTableDisplaySize:
+      (displaySize: number) =>
+      ({ editor, tr }: { editor: Editor; tr: Transaction }) => {
+        if (!editor.isEditable) {
+          return report(options, 'readonly', 'The table is read-only.');
+        }
+        const selected = tableAtSelection(editor);
+        if (!selected) {
+          return report(options, 'not-in-table', 'Place the cursor in a table first.');
+        }
+        const cellSelection =
+          editor.state.selection instanceof CellSelection
+            ? {
+                anchor: editor.state.selection.$anchorCell.pos,
+                head: editor.state.selection.$headCell.pos,
+              }
+            : null;
+        // Columns are shares of the table, so they keep their proportions.
+        tr.setNodeMarkup(selected.position, undefined, {
+          ...selected.node.attrs,
+          displaySize: normalizeDisplaySize(displaySize),
+        });
         if (cellSelection) {
           tr.setSelection(CellSelection.create(tr.doc, cellSelection.anchor, cellSelection.head));
         }

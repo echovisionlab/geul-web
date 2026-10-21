@@ -82,7 +82,7 @@ export function TiptapExternalVideoSelectionBubbleMenu({
         labels={labels}
         aspectRatio={selected.aspectRatio}
         textAlignment={selected.textAlignment}
-        previewWidth={selected.previewWidth}
+        displaySize={selected.displaySize}
         editorElement={editor.view.dom}
         navigationEnabled
         onEditLink={() => {
@@ -93,6 +93,9 @@ export function TiptapExternalVideoSelectionBubbleMenu({
         }}
         onChangeAlignment={(textAlignment) => {
           updateTiptapExternalVideoLayout(editor, { textAlignment }, selected.blockId);
+        }}
+        onChangeDisplaySize={(displaySize) => {
+          updateTiptapExternalVideoLayout(editor, { displaySize: String(displaySize) }, selected.blockId);
         }}
         onEscape={() => {
           dismissPastedLink(editor);

@@ -213,7 +213,7 @@ export function ServerFeatureMapViewClient<
     return (
       <div style={{ position: 'relative' }} ref={containerRef} className={className}>
         <MapViewEmbedded
-          key={`${mapViewConfig.aspectRatio}:${mapViewConfig.previewWidth ?? 100}`}
+          key={`${mapViewConfig.aspectRatio}:${mapViewConfig.displaySize ?? 100}`}
           config={mapConfigForViewport}
           allowEmpty
           labelLocale={requestedLocale}
@@ -225,7 +225,7 @@ export function ServerFeatureMapViewClient<
   return (
     <div style={{ position: 'relative' }} ref={containerRef} className={className}>
       <MapViewEmbedded
-        key={`${mapViewConfig.aspectRatio}:${mapViewConfig.previewWidth ?? 100}`}
+        key={`${mapViewConfig.aspectRatio}:${mapViewConfig.displaySize ?? 100}`}
         config={mapConfigForViewport}
         allowEmpty
         labelLocale={requestedLocale}
