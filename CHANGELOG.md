@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.2](https://github.com/echovisionlab/geul-web/compare/v0.20.1...v0.20.2) (2026-10-21)
+
+
+### Bug Fixes
+
+* open File settings below its menu instead of inside the toolbar ([#171](https://github.com/echovisionlab/geul-web/issues/171)) ([4cb76b0](https://github.com/echovisionlab/geul-web/commit/4cb76b0159a0009aea478e0d0d9182815901cc21))
+
 ## [0.20.1](https://github.com/echovisionlab/geul-web/compare/v0.20.0...v0.20.1) (2026-10-21)
 
 
