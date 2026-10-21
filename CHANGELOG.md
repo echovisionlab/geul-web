@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.20.0](https://github.com/echovisionlab/geul-web/compare/v0.19.0...v0.20.0) (2026-10-21)
+
+
+### Features
+
+* size blocks with XS–XL presets and keep tall media on screen ([#168](https://github.com/echovisionlab/geul-web/issues/168)) ([9298331](https://github.com/echovisionlab/geul-web/commit/92983315dcdee2329f7823134cefedd996490879))
+
+
+### Bug Fixes
+
+* keep the editor updating when an image block is selected ([#166](https://github.com/echovisionlab/geul-web/issues/166)) ([4dbccfb](https://github.com/echovisionlab/geul-web/commit/4dbccfbbd2e3e33800290b66ac3cd8a6a4aa3005))
+
 ## [0.19.0](https://github.com/echovisionlab/geul-web/compare/v0.18.2...v0.19.0) (2026-10-21)
 
 
