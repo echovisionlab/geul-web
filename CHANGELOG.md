@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.19.0](https://github.com/echovisionlab/geul-web/compare/v0.18.2...v0.19.0) (2026-10-21)
+
+
+### Features
+
+* import images from pasted Markdown and export images as images ([#162](https://github.com/echovisionlab/geul-web/issues/162)) ([d8b5374](https://github.com/echovisionlab/geul-web/commit/d8b5374090bcd0a3b71e6ed191deb61c42f807df))
+* present standalone links as cards or videos and gate players on consent ([#165](https://github.com/echovisionlab/geul-web/issues/165)) ([2889835](https://github.com/echovisionlab/geul-web/commit/28898359bb865e5df1ca9f97c0ad0f21fd89fc0d))
+
+
+### Bug Fixes
+
+* **deps:** update dependencies, toolchain and shared contracts to latest ([#164](https://github.com/echovisionlab/geul-web/issues/164)) ([a77ebb0](https://github.com/echovisionlab/geul-web/commit/a77ebb0fc4dc966e9f3ea52250e4d6a4d7f9cbad))
+
 ## [0.18.2](https://github.com/echovisionlab/geul-web/compare/v0.18.1...v0.18.2) (2026-10-20)
 
 
