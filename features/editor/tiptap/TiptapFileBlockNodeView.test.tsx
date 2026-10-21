@@ -14,6 +14,12 @@ import {
 } from '@/features/editor/lib/editor-media-runtime-store';
 import { createTiptapWireExtensions } from './wire-schema';
 import { createTiptapFileNode } from './TiptapFileBlockNodeView';
+import { EditorAuthoringModeProvider } from '@/features/editor/EditorAuthoringMode';
+import {
+  createFileBlockSettingsSlot,
+  TiptapFileBlockSettingsBubbleMenu,
+  type FileBlockSettingsSlot,
+} from './menus/TiptapFileBlockSettingsBubbleMenu';
 
 const getFileStatusesAction = vi.hoisted(() => vi.fn());
 const audioMediaViewRender = vi.hoisted(() => vi.fn());
@@ -94,17 +100,19 @@ function TestEditor({
   onActivate,
   onReady,
   runtimeStore,
+  settingsSlot,
 }: {
   editable: boolean;
   onActivate: (blockId: string) => void;
   onReady: (editor: Editor) => void;
   runtimeStore: EditorMediaRuntimeStore;
+  settingsSlot?: FileBlockSettingsSlot;
 }) {
   const editor = useEditor({
     immediatelyRender: false,
     editable,
     extensions: createTiptapWireExtensions({
-      fileNode: createTiptapFileNode({ onActivate, runtimeStore }),
+      fileNode: createTiptapFileNode({ onActivate, runtimeStore, settingsSlot }),
     }),
     content: {
       type: 'doc',
@@ -149,10 +157,23 @@ function TestEditor({
       onReady(editor);
     }
   }, [editor, onReady]);
-  return <EditorContent editor={editor} />;
+  return (
+    <>
+      <EditorContent editor={editor} />
+      {editor && settingsSlot ? <TiptapFileBlockSettingsBubbleMenu editor={editor} slot={settingsSlot} /> : null}
+    </>
+  );
 }
 
-async function mountEditor({ editable, onActivate }: { editable: boolean; onActivate: (blockId: string) => void }) {
+async function mountEditor({
+  editable,
+  onActivate,
+  settingsSlot,
+}: {
+  editable: boolean;
+  onActivate: (blockId: string) => void;
+  settingsSlot?: FileBlockSettingsSlot;
+}) {
   const element = document.createElement('div');
   document.body.append(element);
   const root = createRoot(element);
@@ -169,12 +190,15 @@ async function mountEditor({ editable, onActivate }: { editable: boolean; onActi
   await act(async () => {
     root.render(
       <DesignSystemProvider forceColorScheme="light">
-        <TestEditor
-          editable={editable}
-          onActivate={onActivate}
-          runtimeStore={runtimeStore}
-          onReady={(value) => (editor = value)}
-        />
+        <EditorAuthoringModeProvider value={{ allowNeutralBlockEdits: true, allowLocalizedBlockEdits: true }}>
+          <TestEditor
+            editable={editable}
+            onActivate={onActivate}
+            runtimeStore={runtimeStore}
+            settingsSlot={settingsSlot}
+            onReady={(value) => (editor = value)}
+          />
+        </EditorAuthoringModeProvider>
       </DesignSystemProvider>,
     );
   });
@@ -325,5 +349,40 @@ describe('Tiptap file node view', () => {
 
     await act(async () => root.unmount());
     element.remove();
+  });
+
+  it('edits a selected block in settings beside the editor, not inside its editable document', async () => {
+    const { editor, element, destroy } = await mountEditor({
+      editable: true,
+      onActivate: vi.fn(),
+      settingsSlot: createFileBlockSettingsSlot(),
+    });
+    let imagePosition = -1;
+    editor.state.doc.descendants((node, position) => {
+      if (imagePosition < 0 && node.type.name === 'file') {
+        imagePosition = position;
+      }
+    });
+
+    await act(async () => {
+      editor.view.dispatch(editor.state.tr.setSelection(NodeSelection.create(editor.state.doc, imagePosition)));
+    });
+
+    const fields = element.querySelector<HTMLElement>('[data-file-block-metadata-fields]');
+    expect(fields?.closest('[data-file-block-settings]')).not.toBeNull();
+    expect(editor.view.dom.contains(fields)).toBe(false);
+    const name = fields!.querySelector<HTMLInputElement>('input')!;
+    await act(async () => {
+      name.focus();
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(name, 'cover-final.png');
+      name.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    expect(editor.state.doc.nodeAt(imagePosition)?.attrs.name).toBe('cover-final.png');
+
+    await act(async () => {
+      editor.commands.setTextSelection(1);
+    });
+    expect(element.querySelector('[data-file-block-metadata-fields]')).toBeNull();
+    await destroy();
   });
 });

@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "416eaee68f6b440f8ce338511079f005c663f9986a380b84f60d33cd02c18338",
+  "manifestHash": "d6ea05b23036967115a1b9254700fbbf84b0686be2deaa4c77a89b77c49e9eed",
   "counts": {
-    "sourceFiles": 3840,
-    "productionSourceFiles": 2316,
-    "componentFiles": 916,
+    "sourceFiles": 3841,
+    "productionSourceFiles": 2317,
+    "componentFiles": 917,
     "coreFamilies": 57,
     "featureDomains": 54,
     "storyFiles": 259,
@@ -1516,6 +1516,7 @@
     "features/editor/tiptap/menus/EditorMenus.stories.tsx",
     "features/editor/tiptap/menus/SelectionBubbleMenu.test.tsx",
     "features/editor/tiptap/menus/SelectionBubbleMenu.tsx",
+    "features/editor/tiptap/menus/TiptapFileBlockSettingsBubbleMenu.tsx",
     "features/editor/tiptap/menus/executable/ExecutableSelectionMenu.test.tsx",
     "features/editor/tiptap/menus/executable/ExecutableSelectionMenu.tsx",
     "features/editor/tiptap/menus/executable/ExecutableSelectionMenuRegistry.test.ts",
@@ -16528,6 +16529,7 @@
         "features/editor/AIMenu/AIMenu.tsx",
         "features/editor/components/MediaProcessingSurface.tsx",
         "features/editor/components/UnifiedFileAttachmentPagePreview.tsx",
+        "features/editor/tiptap/TiptapFileBlockNodeView.tsx",
         "features/editor/tiptap/code/CodeBlockSurface.tsx",
         "features/editor/tiptap/p5/P5CapabilityStoryPreview.tsx",
         "features/editor/tiptap/p5/P5SketchNodeView.tsx",
@@ -34531,6 +34533,7 @@
       "tests": [
         "features/editor/EditorAuthoringMode.test.tsx",
         "features/editor/tiptap/TiptapEditor-lifetime.test.tsx",
+        "features/editor/tiptap/TiptapFileBlockNodeView.test.tsx",
         "features/editor/tiptap/menus/selection-bubble-authority.test.tsx"
       ],
       "stories": [
@@ -36799,6 +36802,11 @@
               "type": "ExecutableSelectionMenuRegistry"
             },
             {
+              "name": "fileBlockSettingsSlot",
+              "optional": false,
+              "type": "FileBlockSettingsSlot"
+            },
+            {
               "name": "authoringCallbacks",
               "optional": false,
               "type": "TiptapEditorProps['authoringCallbacks']"
@@ -36853,6 +36861,7 @@
         "TiptapContextualMenuRouter",
         "TiptapExecutableSelectionBubbleMenu",
         "TiptapExternalVideoSelectionBubbleMenu",
+        "TiptapFileBlockSettingsBubbleMenu",
         "TiptapLinkPresentationBubbleMenu",
         "TiptapMapSelectionBubbleMenu",
         "TiptapMapSelectionMenuRegistryProvider",
@@ -38337,6 +38346,49 @@
         "form",
         "span"
       ]
+    },
+    {
+      "file": "features/editor/tiptap/menus/TiptapFileBlockSettingsBubbleMenu.tsx",
+      "owner": "Feature/editor",
+      "exports": [
+        {
+          "name": "TiptapFileBlockSettingsBubbleMenu",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "FileBlockSettingsSlot",
+          "extends": [],
+          "properties": [
+            {
+              "name": "get",
+              "optional": false,
+              "type": "() => HTMLElement | null"
+            },
+            {
+              "name": "set",
+              "optional": false,
+              "type": "(element: HTMLElement | null) => void"
+            },
+            {
+              "name": "subscribe",
+              "optional": false,
+              "type": "(listener: () => void) => () => void"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": [
+        "features/editor/tiptap/TiptapEditor.tsx",
+        "features/editor/tiptap/TiptapFileBlockNodeView.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": ["features/editor/tiptap/TiptapFileBlockNodeView.test.tsx"],
+      "stories": [],
+      "composedJsx": ["BubbleMenu", "div"]
     },
     {
       "file": "features/editor/tiptap/menus/executable/ExecutableSelectionMenu.tsx",
@@ -76373,6 +76425,7 @@
         "features/editor/tiptap/math/math-render.ts",
         "features/editor/tiptap/math/math-selection.ts",
         "features/editor/tiptap/menus/SelectionBubbleMenu.tsx",
+        "features/editor/tiptap/menus/TiptapFileBlockSettingsBubbleMenu.tsx",
         "features/editor/tiptap/menus/executable/ExecutableSelectionMenu.tsx",
         "features/editor/tiptap/menus/executable/ExecutableSelectionMenuRegistry.tsx",
         "features/editor/tiptap/menus/executable/TiptapExecutableSelectionBubbleMenu.tsx",
@@ -76516,6 +76569,7 @@
         "features/editor/tiptap/map/TiptapMapNodeView.tsx",
         "features/editor/tiptap/math/TiptapMathNodeViews.tsx",
         "features/editor/tiptap/menus/SelectionBubbleMenu.tsx",
+        "features/editor/tiptap/menus/TiptapFileBlockSettingsBubbleMenu.tsx",
         "features/editor/tiptap/menus/executable/ExecutableSelectionMenu.tsx",
         "features/editor/tiptap/menus/executable/ExecutableSelectionMenuRegistry.tsx",
         "features/editor/tiptap/menus/executable/TiptapExecutableSelectionBubbleMenu.tsx",

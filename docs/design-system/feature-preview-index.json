@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "sourceManifestHash": "416eaee68f6b440f8ce338511079f005c663f9986a380b84f60d33cd02c18338",
+  "sourceManifestHash": "d6ea05b23036967115a1b9254700fbbf84b0686be2deaa4c77a89b77c49e9eed",
   "methodology": "All inventoried Feature component candidates. Direct value imports, literal lazy imports and transitive source relationships through production owners/local adapters are indexed separately. A dependency can be unused or render conditionally; neither relationship proves rendered states, route parity or design compliance. Empty JSX records include runtime/lazy/controller boundaries and must be inspected before treating them as visual gaps.",
-  "counts": { "domains": 54, "componentFiles": 775, "jsxWithoutStoryRelationship": 43 },
+  "counts": { "domains": 54, "componentFiles": 776, "jsxWithoutStoryRelationship": 43 },
   "domains": [
     {
       "domain": "account",
@@ -2868,6 +2868,25 @@
             "Feature/Editor/Site Variables",
             "Pages/Editors/Campaign",
             "Pages/Admin/Email Editors",
+            "Pages/Admin/Legal Policies",
+            "Pages/Editors/Legal",
+            "Pages/Editors/Page",
+            "Pages/Editors/Post",
+            "Pages/Editors/Program Events",
+            "Pages/Editors/Work"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/menus/TiptapFileBlockSettingsBubbleMenu.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": [
+            "Feature/Editor/File Insertion",
+            "Feature/Editor/Executables",
+            "Feature/Editor/Tiptap Playground",
+            "Feature/Editor/Public Block Comparison",
+            "Feature/Editor/Menus",
+            "Feature/Editor/Site Variables",
             "Pages/Admin/Legal Policies",
             "Pages/Editors/Legal",
             "Pages/Editors/Page",

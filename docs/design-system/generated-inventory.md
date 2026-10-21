@@ -4,15 +4,15 @@ Run `node scripts/design-system/inventory.mjs` to regenerate; `--check` fails wh
 
 Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.
 
-Source manifest SHA-256: `416eaee68f6b440f8ce338511079f005c663f9986a380b84f60d33cd02c18338`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
+Source manifest SHA-256: `d6ea05b23036967115a1b9254700fbbf84b0686be2deaa4c77a89b77c49e9eed`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
 
 ## Counts
 
 | Metric                | Count |
 | --------------------- | ----: |
-| sourceFiles           |  3840 |
-| productionSourceFiles |  2316 |
-| componentFiles        |   916 |
+| sourceFiles           |  3841 |
+| productionSourceFiles |  2317 |
+| componentFiles        |   917 |
 | coreFamilies          |    57 |
 | featureDomains        |    54 |
 | storyFiles            |   259 |
@@ -135,7 +135,7 @@ Counts include every production JS/TS file in the domain; component files are Pa
 | [date-time](../../features/date-time)                 |      1 |          1 |       0 |     0 |             0 |
 | [document-layout](../../features/document-layout)     |     13 |          7 |       1 |     3 |             0 |
 | [draft-mode](../../features/draft-mode)               |      2 |          2 |       0 |     0 |             0 |
-| [editor](../../features/editor)                       |    235 |         79 |      12 |   159 |             0 |
+| [editor](../../features/editor)                       |    236 |         80 |      12 |   159 |             0 |
 | [email](../../features/email)                         |      4 |          2 |       0 |     6 |             0 |
 | [executable](../../features/executable)               |      1 |          1 |       0 |     1 |             0 |
 | [file-manager](../../features/file-manager)           |     19 |         10 |       0 |     5 |             1 |

@@ -3,9 +3,4 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
   gap: var(--geul-spacing-xs);
   width: 100%;
-  margin-top: var(--geul-spacing-xs);
-  padding: var(--geul-spacing-sm);
-  border: 1px solid var(--geul-border-default);
-  border-radius: var(--geul-radius-square);
-  background: var(--geul-background);
 }
