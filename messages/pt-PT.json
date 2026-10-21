@@ -1631,7 +1631,7 @@
     }
   },
   "cookieConsentCommon": {
-    "analyticsLabel": "Cookies analíticos (Google Analytics)"
+    "analyticsLabel": "Análise e conteúdos externos (Google Analytics, YouTube, Vimeo)"
   },
   "nicknameField": {
     "label": "Apelido",
@@ -2489,8 +2489,8 @@
     }
   },
   "cookieConsentBanner": {
-    "renewalNotice": "Atualizámos a nossa política de cookies. Confirme as suas preferências para continuar as análises opcionais.",
-    "intro": "Utilizamos cookies essenciais para a autenticação e operação do website, e cookies analíticos opcionais para compreender a utilização do website.",
+    "renewalNotice": "Atualizámos a nossa política de cookies. Confirme as suas preferências de análise e conteúdos externos opcionais.",
+    "intro": "Utilizamos cookies essenciais para a autenticação e o funcionamento do site. Com o seu consentimento, utilizamos também cookies de análise para compreender a utilização do site e carregamos diretamente os vídeos incorporados do YouTube e do Vimeo.",
     "learnMore": "Consulte a nossa <privacy>Política de Privacidade</privacy> e <terms>Termos de Serviço</terms>.",
     "actions": {
       "customize": "Personalizar"
@@ -4039,6 +4039,19 @@
           "alignRight": "Alinhar à direita",
           "youtubeTitle": "Vídeo do YouTube",
           "vimeoTitle": "Vídeo do Vimeo"
+        },
+        "linkPresentation": {
+          "menu": "Apresentação da ligação",
+          "asLink": "Ligação",
+          "asCard": "Cartão",
+          "asVideo": "Vídeo",
+          "refreshPreview": "Atualizar pré-visualização",
+          "loadingPreview": "A carregar a pré-visualização…",
+          "previewUnavailable": "Não foi possível carregar a pré-visualização desta ligação.",
+          "playVideo": "Reproduzir {title}",
+          "playNotice": "Ao reproduzir, o vídeo é carregado do {provider}.",
+          "addCaption": "Clique para adicionar legenda",
+          "captionPlaceholder": "Adicione uma legenda..."
         },
         "shader": {
           "title": "Shader GLSL",

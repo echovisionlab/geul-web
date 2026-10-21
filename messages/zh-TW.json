@@ -1631,7 +1631,7 @@
     }
   },
   "cookieConsentCommon": {
-    "analyticsLabel": "分析 cookie（Google分析）"
+    "analyticsLabel": "分析與外部媒體（Google Analytics、YouTube、Vimeo）"
   },
   "nicknameField": {
     "label": "暱稱",
@@ -2489,8 +2489,8 @@
     }
   },
   "cookieConsentBanner": {
-    "renewalNotice": "我們更新了 cookie 政策。請確認您的偏好以繼續可選分析",
-    "intro": "我們使用基本 cookie 進行身份驗證和網站操作，並使用可選的分析 cookie 來了解網站使用情況",
+    "renewalNotice": "我們已更新 Cookie 政策。請重新確認選用分析與外部媒體的設定。",
+    "intro": "我們使用必要 Cookie 進行身分驗證與網站營運。經您同意後，我們也會使用分析 Cookie 了解網站使用情況，並直接載入嵌入的 YouTube 與 Vimeo 影片。",
     "learnMore": "查看我們的 <privacy>隱私權政策</privacy> 和 <terms>服務條款</terms>",
     "actions": {
       "customize": "自訂"
@@ -4039,6 +4039,19 @@
           "alignRight": "靠右對齊",
           "youtubeTitle": "YouTube 影片",
           "vimeoTitle": "Vimeo 影片"
+        },
+        "linkPresentation": {
+          "menu": "連結顯示方式",
+          "asLink": "連結",
+          "asCard": "卡片",
+          "asVideo": "影片",
+          "refreshPreview": "重新整理預覽",
+          "loadingPreview": "正在載入預覽…",
+          "previewUnavailable": "無法載入此連結的預覽。",
+          "playVideo": "播放 {title}",
+          "playNotice": "播放時會從 {provider} 載入。",
+          "addCaption": "點擊新增說明文字",
+          "captionPlaceholder": "新增說明文字..."
         },
         "shader": {
           "title": "GLSL 著色器",

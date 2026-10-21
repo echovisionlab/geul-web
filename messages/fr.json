@@ -1631,7 +1631,7 @@
     }
   },
   "cookieConsentCommon": {
-    "analyticsLabel": "Cookies analytiques (Google Analytics)"
+    "analyticsLabel": "Mesure d’audience et médias externes (Google Analytics, YouTube, Vimeo)"
   },
   "nicknameField": {
     "label": "Pseudo",
@@ -2489,8 +2489,8 @@
     }
   },
   "cookieConsentBanner": {
-    "renewalNotice": "Nous avons mis à jour notre politique en matière de cookies. Veuillez confirmer vos préférences pour continuer à utiliser les analyses facultatives.",
-    "intro": "Nous utilisons des cookies essentiels pour l'authentification et le fonctionnement du site, ainsi que des cookies d'analyse facultatifs pour comprendre l'utilisation du site.",
+    "renewalNotice": "Nous avons mis à jour notre politique relative aux cookies. Veuillez confirmer vos préférences pour la mesure d’audience et les médias externes facultatifs.",
+    "intro": "Nous utilisons des cookies essentiels pour l’authentification et le fonctionnement du site. Avec votre consentement, nous utilisons aussi des cookies de mesure d’audience pour comprendre l’utilisation du site et chargeons directement les vidéos YouTube et Vimeo intégrées.",
     "learnMore": "Consultez notre <privacy>Politique de confidentialité</privacy> et nos <terms>Conditions d'utilisation</terms>.",
     "actions": {
       "customize": "Personnaliser"
@@ -4039,6 +4039,19 @@
           "alignRight": "Aligner à droite",
           "youtubeTitle": "Vidéo YouTube",
           "vimeoTitle": "Vidéo Vimeo"
+        },
+        "linkPresentation": {
+          "menu": "Affichage du lien",
+          "asLink": "Lien",
+          "asCard": "Carte",
+          "asVideo": "Vidéo",
+          "refreshPreview": "Actualiser l’aperçu",
+          "loadingPreview": "Chargement de l’aperçu…",
+          "previewUnavailable": "Impossible de charger l’aperçu de ce lien.",
+          "playVideo": "Lire {title}",
+          "playNotice": "La lecture charge la vidéo depuis {provider}.",
+          "addCaption": "Cliquer pour ajouter une légende",
+          "captionPlaceholder": "Ajouter une légende..."
         },
         "shader": {
           "title": "Shader GLSL",

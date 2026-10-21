@@ -15,6 +15,7 @@ import {
   FileBlockLocaleSchema,
   FileBlockSchema,
   ParagraphProps_AspectRatio,
+  ParagraphProps_LinkPresentation,
   ParagraphProps_TextAlignment,
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import {
@@ -143,7 +144,7 @@ describe('GeneratedRichTextBlockView external video', () => {
     expect(callout.textContent).toContain('Clear the rights first.');
   });
 
-  it('renders the generated Post/Page standalone YouTube link as the canonical non-autoplay player', () => {
+  it('server-renders a standalone YouTube link as a play control that waits for consent', () => {
     const html = renderGenerated(
       generatedParagraph([
         {
@@ -158,11 +159,58 @@ describe('GeneratedRichTextBlockView external video', () => {
       ]),
     );
 
-    expect(html).toContain('<iframe');
-    expect(html).toContain('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=0');
+    expect(html).not.toContain('<iframe');
+    expect(html).toContain('data-external-video-facade=""');
+    expect(html).toContain('aria-label="Play Generated recording"');
+    expect(html).toContain('Playing loads it from YouTube.');
     expect(html).toContain('style="width:42%;margin-left:auto;margin-right:auto"');
     expect(html).toContain('aspect-ratio:4 / 3');
     expect(html).toContain('href="https://youtu.be/dQw4w9WgXcQ?autoplay=1"');
+  });
+
+  it('renders a standalone link the author chose to show as a card with its stored media and caption', () => {
+    const blockId = '10000000-0000-4000-8000-000000000021';
+    const media = (referencePath: string, fileId: string, url: string) =>
+      create(ContentBlockMediaItemSchema, {
+        selector: { blockId, referencePath },
+        attachment: { state: { case: 'activeFileId', value: fileId } },
+        delivery: { fileId, mimeType: 'image/png', asset: { url } },
+      });
+    const block = {
+      ...generatedParagraph([
+        {
+          value: {
+            case: 'link',
+            value: { href: 'https://youtu.be/dQw4w9WgXcQ', content: [{ text: 'Live at the Hall' }] },
+          },
+        },
+      ]),
+      id: blockId,
+      base: { props: { linkPresentation: ParagraphProps_LinkPresentation.CARD } },
+    } as LocalizedRichTextBlock;
+    (block.locale as { props?: unknown }).props = { linkDescription: 'A full set.', linkCaption: 'Recorded in 2026.' };
+
+    const html = renderToStaticMarkup(
+      <NextIntlClientProvider locale="en" timeZone="UTC" messages={enMessages}>
+        <ContentBlockMediaRuntimeProvider
+          items={[
+            media('paragraph.linkThumbnail', '10000000-0000-4000-8000-000000000022', '/asset/cover.jpg'),
+            media('paragraph.linkIcon', '10000000-0000-4000-8000-000000000023', '/asset/icon.png'),
+          ]}
+        >
+          <GeneratedRichTextBlockView block={block} allowStandaloneExternalVideo />
+        </ContentBlockMediaRuntimeProvider>
+      </NextIntlClientProvider>,
+    );
+
+    expect(html).not.toContain('data-external-video');
+    expect(html).toContain('href="https://youtu.be/dQw4w9WgXcQ"');
+    expect(html).toContain('>Live at the Hall<');
+    expect(html).toContain('>A full set.<');
+    expect(html).toContain('>https://youtu.be/dQw4w9WgXcQ<');
+    expect(html).toContain('cover.jpg');
+    expect(html).toContain('icon.png');
+    expect(html).toContain('>Recorded in 2026.<');
   });
 
   it('keeps a generated mixed paragraph as ordinary content', () => {
@@ -183,7 +231,7 @@ describe('GeneratedRichTextBlockView external video', () => {
     expect(html).toContain('>recording<');
   });
 
-  it('renders generated Vimeo links with the same non-autoplay player and fallback', () => {
+  it('server-renders generated Vimeo links with the same play control and fallback', () => {
     const html = renderGenerated(
       generatedParagraph([
         {
@@ -198,7 +246,8 @@ describe('GeneratedRichTextBlockView external video', () => {
       ]),
     );
 
-    expect(html).toContain('https://player.vimeo.com/video/123456789?dnt=1&amp;autoplay=0');
+    expect(html).not.toContain('<iframe');
+    expect(html).toContain('Playing loads it from Vimeo.');
     expect(html).toContain('href="https://vimeo.com/123456789?autoplay=1"');
   });
 

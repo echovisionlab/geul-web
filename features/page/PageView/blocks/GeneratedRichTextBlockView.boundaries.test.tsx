@@ -115,7 +115,7 @@ describe('GeneratedRichTextBlockView runtime boundary', () => {
     expect(ordinaryLinkHtml).not.toContain('<iframe');
     expect(imports.externalVideo).toBe(0);
     const externalVideoHtml = await render(externalVideoBlock, true);
-    expect(externalVideoHtml).toContain('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=0');
+    expect(externalVideoHtml).toContain('data-external-video-facade=""');
     expect(externalVideoHtml).toContain('style="width:42%;margin-left:auto;margin-right:auto"');
     expect(externalVideoHtml).toContain('aspect-ratio:4 / 3');
     expect(externalVideoHtml).toContain('>Recording<');

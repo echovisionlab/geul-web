@@ -1631,7 +1631,7 @@
     }
   },
   "cookieConsentCommon": {
-    "analyticsLabel": "Cookies analíticos (Google Analytics)"
+    "analyticsLabel": "Análise e mídia externa (Google Analytics, YouTube, Vimeo)"
   },
   "nicknameField": {
     "label": "Apelido",
@@ -2489,8 +2489,8 @@
     }
   },
   "cookieConsentBanner": {
-    "renewalNotice": "Atualizamos nossa política de cookies. Confirme suas preferências para continuar com as análises opcionais",
-    "intro": "Usamos cookies essenciais para autenticação e funcionamento do site, e cookies opcionais de análise para entender o uso do site",
+    "renewalNotice": "Atualizamos nossa política de cookies. Confirme suas preferências de análise e mídia externa opcionais.",
+    "intro": "Usamos cookies essenciais para autenticação e funcionamento do site. Com o seu consentimento, também usamos cookies de análise para entender o uso do site e carregamos diretamente os vídeos incorporados do YouTube e do Vimeo.",
     "learnMore": "Veja nossa <privacy>Política de Privacidade</privacy> e os <terms>Termos de Serviço</terms>",
     "actions": {
       "customize": "Personalizar"
@@ -4039,6 +4039,19 @@
           "alignRight": "Alinhar à direita",
           "youtubeTitle": "Vídeo do YouTube",
           "vimeoTitle": "Vídeo do Vimeo"
+        },
+        "linkPresentation": {
+          "menu": "Exibição do link",
+          "asLink": "Link",
+          "asCard": "Cartão",
+          "asVideo": "Vídeo",
+          "refreshPreview": "Atualizar prévia",
+          "loadingPreview": "Carregando prévia…",
+          "previewUnavailable": "Não foi possível carregar a prévia deste link.",
+          "playVideo": "Reproduzir {title}",
+          "playNotice": "Ao reproduzir, o vídeo é carregado do {provider}.",
+          "addCaption": "Clique para adicionar uma legenda",
+          "captionPlaceholder": "Adicionar legenda..."
         },
         "shader": {
           "title": "Shader GLSL",

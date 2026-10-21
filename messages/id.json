@@ -1631,7 +1631,7 @@
     }
   },
   "cookieConsentCommon": {
-    "analyticsLabel": "Cookie Analytics (Google Analytics)"
+    "analyticsLabel": "Analitik dan media eksternal (Google Analytics, YouTube, Vimeo)"
   },
   "nicknameField": {
     "label": "Nama panggilan",
@@ -2489,8 +2489,8 @@
     }
   },
   "cookieConsentBanner": {
-    "renewalNotice": "Kami memperbarui kebijakan cookie kami. Harap konfirmasikan preferensi Anda untuk melanjutkan analisis opsional.",
-    "intro": "Kami menggunakan cookie penting untuk autentikasi dan pengoperasian situs, serta cookie analitik opsional untuk memahami penggunaan situs.",
+    "renewalNotice": "Kami memperbarui kebijakan cookie. Konfirmasikan kembali preferensi analitik dan media eksternal opsional Anda.",
+    "intro": "Kami menggunakan cookie penting untuk autentikasi dan pengoperasian situs. Dengan persetujuan Anda, kami juga menggunakan cookie analitik untuk memahami penggunaan situs dan langsung memuat video YouTube serta Vimeo yang disematkan.",
     "learnMore": "Lihat <privacy>Kebijakan Privasi</privacy> dan <terms>Ketentuan Layanan</terms> kami.",
     "actions": {
       "customize": "Sesuaikan"
@@ -4039,6 +4039,19 @@
           "alignRight": "Rata kanan",
           "youtubeTitle": "Video YouTube",
           "vimeoTitle": "Video Vimeo"
+        },
+        "linkPresentation": {
+          "menu": "Tampilan tautan",
+          "asLink": "Tautan",
+          "asCard": "Kartu",
+          "asVideo": "Video",
+          "refreshPreview": "Muat ulang pratinjau",
+          "loadingPreview": "Memuat pratinjau…",
+          "previewUnavailable": "Pratinjau tautan ini tidak dapat dimuat.",
+          "playVideo": "Putar {title}",
+          "playNotice": "Saat diputar, video dimuat dari {provider}.",
+          "addCaption": "Klik untuk menambahkan keterangan",
+          "captionPlaceholder": "Tambahkan keterangan..."
         },
         "shader": {
           "title": "Shader GLSL",

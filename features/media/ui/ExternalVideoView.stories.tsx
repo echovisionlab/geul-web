@@ -50,3 +50,28 @@ export const Narrow: Story = {
 export const Print: Story = {
   parameters: { media: 'print' },
 };
+
+const playbackLabels = { play: 'Play YouTube video', notice: 'Playing loads it from YouTube.' };
+
+/** Without consent the stored thumbnail stands in; pressing play starts that one player. */
+export const WaitingForConsent: Story = {
+  args: { consented: false, thumbnailUrl: '/storybook/media/video-poster.jpg', playbackLabels },
+};
+export const WaitingForConsentWithoutThumbnail: Story = {
+  args: { consented: false, thumbnailUrl: null, playbackLabels },
+};
+export const ShortsWaitingForConsent: Story = {
+  args: { consented: false, aspectRatio: '9:16', thumbnailUrl: '/storybook/media/video-poster.jpg', playbackLabels },
+};
+
+/** At a small block width the play control shrinks and the notice is dropped. */
+export const NarrowWaitingForConsent: Story = {
+  args: { consented: false, thumbnailUrl: '/storybook/media/video-poster.jpg', playbackLabels },
+  decorators: [
+    (Story) => (
+      <div style={{ width: 200 }}>
+        <Story />
+      </div>
+    ),
+  ],
+};

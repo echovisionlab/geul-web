@@ -1,4 +1,4 @@
-import type { JsonValue } from '@bufbuild/protobuf';
+import type { JsonObject, JsonValue } from '@bufbuild/protobuf';
 import {
   isRichTextCollaborativeTextPath,
   type RichTextBlockKind,
@@ -18,6 +18,10 @@ export function replaceArray(
     return;
   }
   bridge.replaceCollection({ blockId, scope, path }, next);
+}
+
+function isObject(value: JsonValue | undefined): value is JsonObject {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
 function isAtomic(value: JsonValue | undefined): value is string | number | boolean | null {
@@ -80,26 +84,23 @@ export function applyJsonDiff(
       }
       return;
     }
-    if (isAtomic(previous)) {
-      bridge.deleteAtomicValue({ blockId, scope, path });
+    if (isAtomic(previous) || isObject(previous)) {
+      bridge.deletePayloadValue({ blockId, scope, path });
       return;
     }
   }
-  if (isAtomic(next)) {
+  if (isAtomic(next) && !isObject(previous)) {
     bridge.setAtomicValue({ blockId, scope, path }, next);
     return;
   }
-  if (
-    previous &&
-    next &&
-    !Array.isArray(previous) &&
-    !Array.isArray(next) &&
-    typeof previous === 'object' &&
-    typeof next === 'object'
-  ) {
-    const keys = new Set([...Object.keys(previous), ...Object.keys(next)]);
-    for (const key of keys) {
-      applyJsonDiff(bridge, blockId, kind, scope, `${path}.${key}`, previous[key], next[key]);
+  if (isObject(next) && (previous === undefined || isObject(previous))) {
+    // A field such as a File attachment may appear after the block exists.
+    if (previous === undefined) {
+      bridge.ensurePayloadObject({ blockId, scope, path });
+    }
+    const before = previous ?? {};
+    for (const key of new Set([...Object.keys(before), ...Object.keys(next)])) {
+      applyJsonDiff(bridge, blockId, kind, scope, `${path}.${key}`, before[key], next[key]);
     }
     return;
   }

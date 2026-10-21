@@ -1631,7 +1631,7 @@
     }
   },
   "cookieConsentCommon": {
-    "analyticsLabel": "分析 Cookie（Google Analytics）"
+    "analyticsLabel": "分析与外部媒体（Google Analytics、YouTube、Vimeo）"
   },
   "nicknameField": {
     "label": "昵称",
@@ -2489,8 +2489,8 @@
     }
   },
   "cookieConsentBanner": {
-    "renewalNotice": "我们更新了 cookie 政策。请确认您的偏好以继续可选分析",
-    "intro": "我们使用基本 cookie 进行身份验证和网站操作，并使用可选的分析 cookie 来了解网站使用情况",
+    "renewalNotice": "我们更新了 Cookie 政策。请重新确认可选分析和外部媒体的设置。",
+    "intro": "我们使用必要 Cookie 进行身份验证和网站运营。经您同意后，我们还会使用分析 Cookie 了解网站使用情况，并直接加载嵌入的 YouTube 和 Vimeo 视频。",
     "learnMore": "查看我们的 <privacy>隐私政策</privacy> 和 <terms>服务条款</terms>",
     "actions": {
       "customize": "自定义"
@@ -4039,6 +4039,19 @@
           "alignRight": "右对齐",
           "youtubeTitle": "YouTube 视频",
           "vimeoTitle": "Vimeo 视频"
+        },
+        "linkPresentation": {
+          "menu": "链接显示方式",
+          "asLink": "链接",
+          "asCard": "卡片",
+          "asVideo": "视频",
+          "refreshPreview": "刷新预览",
+          "loadingPreview": "正在加载预览…",
+          "previewUnavailable": "无法加载此链接的预览。",
+          "playVideo": "播放 {title}",
+          "playNotice": "播放时将从 {provider} 加载。",
+          "addCaption": "点击添加说明文字",
+          "captionPlaceholder": "添加说明文字..."
         },
         "shader": {
           "title": "GLSL 着色器",

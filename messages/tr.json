@@ -1631,7 +1631,7 @@
     }
   },
   "cookieConsentCommon": {
-    "analyticsLabel": "Analytics çerezleri (Google Analytics)"
+    "analyticsLabel": "Analiz ve harici medya (Google Analytics, YouTube, Vimeo)"
   },
   "nicknameField": {
     "label": "Takma ad",
@@ -2489,8 +2489,8 @@
     }
   },
   "cookieConsentBanner": {
-    "renewalNotice": "Çerez politikamızı güncelledik. İsteğe bağlı analizlere devam etmek için lütfen tercihlerinizi onaylayın.",
-    "intro": "Kimlik doğrulama ve site işletimi için temel çerezleri, site kullanımını anlamak için ise isteğe bağlı analiz çerezlerini kullanırız.",
+    "renewalNotice": "Çerez politikamızı güncelledik. İsteğe bağlı analiz ve harici medya tercihlerinizi lütfen yeniden onaylayın.",
+    "intro": "Kimlik doğrulama ve site işleyişi için zorunlu çerezler kullanıyoruz. Onay verirseniz sitenin nasıl kullanıldığını anlamak için analiz çerezleri de kullanır, sayfalara eklenen YouTube ve Vimeo videolarını doğrudan yükleriz.",
     "learnMore": "<privacy>Gizlilik Politikamıza</privacy> ve <terms>Hizmet Şartlarımıza</terms> bakın.",
     "actions": {
       "customize": "Özelleştirmek"
@@ -4039,6 +4039,19 @@
           "alignRight": "Sağa hizala",
           "youtubeTitle": "YouTube videosu",
           "vimeoTitle": "Vimeo videosu"
+        },
+        "linkPresentation": {
+          "menu": "Bağlantı görünümü",
+          "asLink": "Bağlantı",
+          "asCard": "Kart",
+          "asVideo": "Video",
+          "refreshPreview": "Önizlemeyi yenile",
+          "loadingPreview": "Önizleme yükleniyor…",
+          "previewUnavailable": "Bu bağlantının önizlemesi yüklenemedi.",
+          "playVideo": "{title} oynat",
+          "playNotice": "Oynatınca {provider} üzerinden yüklenir.",
+          "addCaption": "Başlık eklemek için tıklayın",
+          "captionPlaceholder": "Bir başlık ekleyin..."
         },
         "shader": {
           "title": "GLSL gölgelendiricisi",

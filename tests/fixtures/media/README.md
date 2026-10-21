@@ -9,5 +9,6 @@ These files are local-only Storybook fixtures and are not part of the production
 - `example-studio-logo.svg`: deterministic neutral logo used by public-shell stories.
 - `event-poster.svg`: deterministic 4:5 event poster used by public entity detail stories.
 - `client-wordmark.svg`, `client-symbol.svg`: fictional 5:1 wordmark and square symbol for client logo sizing.
+- `site-icon.svg`: fictional square site icon for link card stories.
 
 Storybook serves this directory at `/storybook/media` through `.storybook/main.ts`.

@@ -802,7 +802,7 @@
     }
   },
   "cookieConsentCommon": {
-    "analyticsLabel": "Analyse-Cookies (Google Analytics)"
+    "analyticsLabel": "Analyse und externe Medien (Google Analytics, YouTube, Vimeo)"
   },
   "nicknameField": {
     "label": "Spitzname",
@@ -3033,8 +3033,8 @@
     }
   },
   "cookieConsentBanner": {
-    "renewalNotice": "Wir haben unsere Cookie-Richtlinie aktualisiert. Bitte bestätigen Sie Ihre Einstellungen, um optionale Analysen weiter zu verwenden.",
-    "intro": "Wir verwenden notwendige Cookies pour Authentifizierung und den Betrieb der Website sowie optionale Analyse-Cookies, um die Nutzung der Website zu verstehen.",
+    "renewalNotice": "Wir haben unsere Cookie-Richtlinie aktualisiert. Bitte bestätige deine Einstellungen für optionale Analyse und externe Medien.",
+    "intro": "Wir verwenden notwendige Cookies für die Anmeldung und den Betrieb der Website. Mit deiner Einwilligung verwenden wir außerdem Analyse-Cookies, um die Nutzung der Website zu verstehen, und laden eingebettete YouTube- und Vimeo-Videos direkt.",
     "learnMore": "Siehe unsere <privacy>Datenschutzerklärung</privacy> und unsere <terms>Nutzungsbedingungen</terms>.",
     "actions": {
       "customize": "Anpassen"
@@ -4486,6 +4486,19 @@
           "alignRight": "Rechtsbündig ausrichten",
           "youtubeTitle": "YouTube-Video",
           "vimeoTitle": "Vimeo-Video"
+        },
+        "linkPresentation": {
+          "menu": "Linkdarstellung",
+          "asLink": "Link",
+          "asCard": "Karte",
+          "asVideo": "Video",
+          "refreshPreview": "Vorschau aktualisieren",
+          "loadingPreview": "Vorschau wird geladen…",
+          "previewUnavailable": "Für diesen Link konnte keine Vorschau geladen werden.",
+          "playVideo": "{title} abspielen",
+          "playNotice": "Beim Abspielen wird das Video von {provider} geladen.",
+          "addCaption": "Klicken, um eine Beschriftung hinzuzufügen",
+          "captionPlaceholder": "Beschriftung hinzufügen..."
         },
         "shader": {
           "title": "GLSL-Shader",

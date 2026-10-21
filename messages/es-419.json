@@ -1631,7 +1631,7 @@
     }
   },
   "cookieConsentCommon": {
-    "analyticsLabel": "Cookies de análisis (Google Analytics)"
+    "analyticsLabel": "Analítica y contenido externo (Google Analytics, YouTube, Vimeo)"
   },
   "nicknameField": {
     "label": "Apodo",
@@ -2489,8 +2489,8 @@
     }
   },
   "cookieConsentBanner": {
-    "renewalNotice": "Actualizamos nuestra política de cookies. Confirme sus preferencias para continuar con los análisis opcionales.",
-    "intro": "Utilizamos cookies esenciales para la autenticación y el funcionamiento del sitio, y cookies analíticas opcionales para comprender el uso del sitio.",
+    "renewalNotice": "Actualizamos nuestra política de cookies. Confirma tus preferencias de analítica y contenido externo opcionales.",
+    "intro": "Usamos cookies esenciales para la autenticación y el funcionamiento del sitio. Con tu consentimiento, también usamos cookies de analítica para entender el uso del sitio y cargamos directamente los videos insertados de YouTube y Vimeo.",
     "learnMore": "Consulte nuestra <privacy>Política de privacidad</privacy> y <terms>Términos de servicio</terms>.",
     "actions": {
       "customize": "Personalizar"
@@ -4039,6 +4039,19 @@
           "alignRight": "Alinear a la derecha",
           "youtubeTitle": "Video de YouTube",
           "vimeoTitle": "Video de Vimeo"
+        },
+        "linkPresentation": {
+          "menu": "Visualización del enlace",
+          "asLink": "Enlace",
+          "asCard": "Tarjeta",
+          "asVideo": "Video",
+          "refreshPreview": "Actualizar vista previa",
+          "loadingPreview": "Cargando vista previa…",
+          "previewUnavailable": "No se pudo cargar la vista previa de este enlace.",
+          "playVideo": "Reproducir {title}",
+          "playNotice": "Al reproducir, se carga desde {provider}.",
+          "addCaption": "Haga clic para agregar título",
+          "captionPlaceholder": "Añade un título..."
         },
         "shader": {
           "title": "Shader GLSL",

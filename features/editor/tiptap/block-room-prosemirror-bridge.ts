@@ -16,6 +16,8 @@ import {
   decodeCanonicalBlockRoomAffectedNodes,
   type BlockRoomChangeSet,
   deleteBlockRoomAtomicValue,
+  deleteBlockRoomPayloadValue,
+  ensureBlockRoomPayloadObject,
   deleteBlockRoomBaseNode,
   deleteBlockRoomPayloadArrayItem,
   getBlockRoomAtomicValue,
@@ -530,6 +532,18 @@ export class BlockRoomProseMirrorBridge {
   deleteAtomicValue(target: BlockRoomPayloadTarget): void {
     this.#assertPayloadMutationAuthority(target);
     deleteBlockRoomAtomicValue(this.#document, this.#payloadRef(target), { origin: this.#origin });
+  }
+
+  /** Creates the nested object at the target so its keys can be written field by field. */
+  ensurePayloadObject(target: BlockRoomPayloadTarget): void {
+    this.#assertPayloadMutationAuthority(target);
+    ensureBlockRoomPayloadObject(this.#document, this.#payloadRef(target), { origin: this.#origin });
+  }
+
+  /** Removes an atomic or object value at an object key. */
+  deletePayloadValue(target: BlockRoomPayloadTarget): void {
+    this.#assertPayloadMutationAuthority(target);
+    deleteBlockRoomPayloadValue(this.#document, this.#payloadRef(target), { origin: this.#origin });
   }
 
   insertCollectionItem(target: BlockRoomPayloadTarget, index: number, value: JsonValue): void {
