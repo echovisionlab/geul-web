@@ -58,6 +58,7 @@ import {
 } from './shader-program';
 import { SHADER_MAX_SOURCE_LENGTH, type ShaderError } from './shader-source';
 import classes from './ShaderNode.module.css';
+import { DEFAULT_DISPLAY_SIZE_LABELS } from '../menus/map-external/DisplaySizeMenuActions';
 
 export type ShaderMode = 'edit' | 'source' | 'preview';
 export interface ShaderLabels extends ShaderApiLabels {
@@ -163,7 +164,7 @@ export interface ShaderOptions {
   selectionMenuRegistry?: ExecutableSelectionMenuRegistry;
   selectionMenuLabels?: Pick<
     ExecutableSelectionMenuLabels,
-    'deleteBlock' | 'alignment' | 'alignLeft' | 'alignCenter' | 'alignRight'
+    'deleteBlock' | 'alignment' | 'alignLeft' | 'alignCenter' | 'alignRight' | 'displaySize' | 'displaySizePresets'
   >;
   resolveAsset?: ShaderAssetResolver;
   filePicker?: ComponentType<ShaderFilePickerProps>;
@@ -832,6 +833,7 @@ export function ShaderNodeView(props: NodeViewProps & ShaderOptions) {
         mode,
         running,
         textAlignment,
+        displaySize: resize.widthPercent,
         labels: {
           menu: labels.title,
           edit: labels.edit,
@@ -845,6 +847,8 @@ export function ShaderNodeView(props: NodeViewProps & ShaderOptions) {
           alignLeft: selectionMenuLabels?.alignLeft ?? 'Align left',
           alignCenter: selectionMenuLabels?.alignCenter ?? 'Align center',
           alignRight: selectionMenuLabels?.alignRight ?? 'Align right',
+          displaySize: selectionMenuLabels?.displaySize ?? DEFAULT_DISPLAY_SIZE_LABELS.displaySize,
+          displaySizePresets: selectionMenuLabels?.displaySizePresets ?? DEFAULT_DISPLAY_SIZE_LABELS.displaySizePresets,
         },
       },
       commands: {
@@ -857,10 +861,13 @@ export function ShaderNodeView(props: NodeViewProps & ShaderOptions) {
             updateAttributes({ textAlignment: alignment });
           }
         },
+        setDisplaySize: persistWidth,
         deleteBlock,
       },
     }),
     [
+      persistWidth,
+      resize.widthPercent,
       authoringMode,
       deleteBlock,
       editor,
@@ -922,7 +929,7 @@ export function ShaderNodeView(props: NodeViewProps & ShaderOptions) {
       <EditorMediaBlockFrame
         className={classes.frame}
         containerRef={containerRef}
-        widthPercent={resize.widthPercent}
+        displaySize={resize.widthPercent}
         margin={resize.getMarginStyle(textAlignment)}
         allowResize={authoringSelected}
         suppressStaticTextSelection

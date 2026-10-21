@@ -360,7 +360,8 @@ describe('Tiptap external-video atom', () => {
       selectionShield?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }));
     });
     await flushEditor();
-    expect(mounted.element.querySelectorAll('[data-resize-handle]')).toHaveLength(2);
+    // A player keeps its aspect ratio, so it also has top and bottom handles.
+    expect(mounted.element.querySelectorAll('[data-resize-handle]')).toHaveLength(4);
 
     const blockGroup = mounted.editor.state.doc.firstChild;
     if (!blockGroup) {

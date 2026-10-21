@@ -2,6 +2,7 @@
 
 import { IconTrash } from '@tabler/icons-react';
 import { AlignmentMenuActions } from '../map-external/AlignmentMenuActions';
+import { DisplaySizeMenuActions } from '../map-external/DisplaySizeMenuActions';
 import { SelectionMenuAction, SelectionMenuSurface } from '../map-external/SelectionMenuPrimitives';
 import type { ExecutableSelectionMenuBinding } from './ExecutableSelectionMenuRegistry';
 
@@ -30,6 +31,13 @@ export function ExecutableSelectionMenu({
         disabled={snapshot.disabled}
         onChange={commands.setAlignment}
         testIdPrefix="tiptap-executable-align"
+      />
+      <DisplaySizeMenuActions
+        value={snapshot.displaySize}
+        labels={labels}
+        disabled={snapshot.disabled}
+        onChange={commands.setDisplaySize}
+        testIdPrefix="tiptap-executable-size"
       />
       <SelectionMenuAction
         label={labels.deleteBlock}

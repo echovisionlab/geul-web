@@ -1,5 +1,6 @@
 'use client';
 
+import { parseAspectRatio } from '@/components/core/ResizeHandle/display-size';
 import { liveNodeView } from '@/features/editor/tiptap/live-node-view';
 import { Text as EditorDsText } from '@/components/core/Typography';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -165,14 +166,25 @@ function TiptapMapNodeView({
     },
     [editor, updateCurrentAttrs],
   );
-  const { widthPercent, isDragging, startResizeLeft, startResizeRight, onResizeKeyDown, onResizeBlur, getMarginStyle } =
-    useBlockResize({
-      containerRef,
-      displaySize: readString(attributes, 'displaySize'),
-      enabled: canEditNeutral,
-      onResize: (width) => updateNeutralAttrs({ displaySize: String(width) }),
-      keyboardSession: { owner: editor, key: `map:${blockId}` },
-    });
+  const mapAspectRatio = parseAspectRatio(readString(attributes, 'aspectRatio')) ?? 16 / 9;
+  const {
+    widthPercent,
+    isDragging,
+    startResizeLeft,
+    startResizeRight,
+    startResizeTop,
+    startResizeBottom,
+    onResizeKeyDown,
+    onResizeBlur,
+    getMarginStyle,
+  } = useBlockResize({
+    containerRef,
+    displaySize: readString(attributes, 'displaySize'),
+    aspectRatio: mapAspectRatio,
+    enabled: canEditNeutral,
+    onResize: (width) => updateNeutralAttrs({ displaySize: String(width) }),
+    keyboardSession: { owner: editor, key: `map:${blockId}` },
+  });
 
   const { data: placesData } = useQuery({
     queryKey: ['mapPlace', 'byIds', mapPlaceIds],
@@ -261,6 +273,10 @@ function TiptapMapNodeView({
       setIsEditingCaption(true);
     }
   }, [editor]);
+  const changeDisplaySize = useCallback(
+    (displaySize: number) => updateNeutralAttrs({ displaySize: String(displaySize) }),
+    [updateNeutralAttrs],
+  );
   const changeAlignment = useCallback(
     (alignment: ContextualBlockAlignment) => updateNeutralAttrs({ textAlignment: alignment }),
     [updateNeutralAttrs],
@@ -331,6 +347,7 @@ function TiptapMapNodeView({
         removePlace: canEditNeutral ? removePlace : undefined,
         centerPlace: canEditNeutral ? centerPlace : undefined,
         changeAlignment: canEditNeutral ? changeAlignment : undefined,
+        changeDisplaySize: canEditNeutral ? changeDisplaySize : undefined,
         focusCaption: canEditLocalized ? focusCaption : undefined,
         deleteBlock: canEditNeutral ? deleteBlock : undefined,
       },
@@ -340,6 +357,7 @@ function TiptapMapNodeView({
       canEditNeutral,
       centerPlace,
       changeAlignment,
+      changeDisplaySize,
       config.center.lat,
       config.center.lng,
       deleteBlock,
@@ -370,7 +388,8 @@ function TiptapMapNodeView({
       <EditorMediaBlockFrame
         className={`${styles.frame} map-block`}
         containerRef={containerRef}
-        widthPercent={widthPercent}
+        displaySize={widthPercent}
+        aspectRatio={mapAspectRatio}
         margin={getMarginStyle(textAlignment as 'left' | 'center' | 'right')}
         allowResize={canEditNeutral}
         isResizing={isDragging !== null}
@@ -378,8 +397,12 @@ function TiptapMapNodeView({
         suppressStaticTextSelection
         resizeLeftLabel={`${tCommon('labels.width')} ${tCommon('labels.left')}`}
         resizeRightLabel={`${tCommon('labels.width')} ${tCommon('labels.right')}`}
+        resizeTopLabel={`${tCommon('labels.height')} ${tCommon('labels.top')}`}
+        resizeBottomLabel={`${tCommon('labels.height')} ${tCommon('labels.bottom')}`}
         onResizeLeftPointerDown={startResizeLeft}
         onResizeRightPointerDown={startResizeRight}
+        onResizeTopPointerDown={startResizeTop}
+        onResizeBottomPointerDown={startResizeBottom}
         onResizeLeftKeyDown={onResizeKeyDown}
         onResizeRightKeyDown={onResizeKeyDown}
         onResizeBlur={onResizeBlur}

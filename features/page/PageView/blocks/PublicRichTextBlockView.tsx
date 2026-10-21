@@ -4,7 +4,10 @@ import dynamic from 'next/dynamic';
 import type { ComponentType } from 'react';
 import { useTranslations } from 'next-intl';
 import type { ExternalVideoViewProps } from '@/features/media/ExternalVideoView';
-import { resolveStandaloneExternalVideoLink } from '@/features/media/standalone-external-video';
+import {
+  resolveStandaloneExternalVideoLink,
+  standaloneExternalVideoAspectRatio,
+} from '@/features/media/standalone-external-video';
 import { mediaContainerStyleToReact, resolveMediaContainerStyle } from '@/lib/media/shared';
 import type { Block } from '@/lib/types/page-content';
 import { DefaultBlockView } from './DefaultBlockView';
@@ -38,7 +41,11 @@ export function PublicRichTextBlockView({
           title={externalVideo.title}
           aspectRatio={externalVideo.aspectRatio}
           style={mediaContainerStyleToReact(
-            resolveMediaContainerStyle(externalVideo.displaySize, externalVideo.textAlignment),
+            resolveMediaContainerStyle(
+              externalVideo.displaySize,
+              externalVideo.textAlignment,
+              standaloneExternalVideoAspectRatio(externalVideo),
+            ),
           )}
         />
       </PublicDocumentBlock>

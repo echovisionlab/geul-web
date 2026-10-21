@@ -15,6 +15,7 @@ import {
 } from '@/features/editor/components/ConnectedMediaDownloadPolicyPanel';
 import { MediaProcessingSurface } from '@/features/editor/components/MediaProcessingSurface';
 import { useBlockResize } from '@/features/editor/hooks/useBlockResize';
+import { useMediaAspectRatio } from '@/features/media/useMediaAspectRatio';
 import { useEditorMediaRuntimeBinding } from '@/features/editor/hooks/useEditorMediaRuntimeBinding';
 import type {
   EditorMediaRuntimeSnapshot,
@@ -34,6 +35,8 @@ import { isBlockId } from '@/lib/editor/block-id';
 import { getFileTypeName } from '@/lib/utils/file-icon';
 import { FileBlockView, resolveFileBlockViewKind } from '../blocks/FileBlock/FileBlockView';
 import { WireFile } from './wire-schema';
+import { DisplaySizeMenuActions } from './menus/map-external/DisplaySizeMenuActions';
+import { useDisplaySizeLabels } from './menus/map-external/useDisplaySizeLabels';
 import { useFileBlockSettingsSlot, type FileBlockSettingsSlot } from './menus/TiptapFileBlockSettingsBubbleMenu';
 import { useExactTiptapNodeSelection } from './useExactTiptapNodeSelection';
 import { useTiptapEditorEditable } from './useTiptapEditorEditable';
@@ -111,14 +114,26 @@ function TiptapFileBlockNodeView({
   const authoringSelected = editorEditable && exactNodeSelected;
   const settingsElement = useFileBlockSettingsSlot(settingsSlot);
   const downloadPolicyTarget = useEditorMediaDownloadPolicyRuntimeTarget();
+  const canResize = editorEditable && hasSource;
+  const displaySizeLabels = useDisplaySizeLabels();
   const hasSettings =
     authoringMode?.allowNeutralBlockEdits === true ||
     authoringMode?.allowLocalizedBlockEdits === true ||
     Boolean(downloadPolicyTarget && hasSource && blockId);
+  const media = useMediaAspectRatio();
+  const storedWidth = Number(readString(attributes, 'width')) || 0;
+  const storedHeight = Number(readString(attributes, 'height')) || 0;
+  const aspectRatio =
+    kind === 'image' || kind === 'video'
+      ? storedWidth > 0 && storedHeight > 0
+        ? storedWidth / storedHeight
+        : media.aspectRatio
+      : undefined;
   const resize = useBlockResize({
     containerRef,
     displaySize: readString(attributes, 'displaySize') || '100',
-    enabled: editorEditable && hasSource,
+    aspectRatio,
+    enabled: canResize,
     onResize: (displaySize) => {
       if (editor.isEditable) {
         updateAttributes({ displaySize: String(displaySize) });
@@ -127,13 +142,16 @@ function TiptapFileBlockNodeView({
   });
   const frameProps = {
     containerRef,
-    widthPercent: resize.widthPercent,
+    displaySize: resize.widthPercent,
+    aspectRatio,
     margin: resize.getMarginStyle(readString(attributes, 'textAlignment') as 'left' | 'center' | 'right'),
-    allowResize: editorEditable && hasSource,
+    allowResize: canResize,
     isResizing: resize.isDragging !== null,
     selected: authoringSelected,
     onResizeLeftPointerDown: resize.startResizeLeft,
     onResizeRightPointerDown: resize.startResizeRight,
+    onResizeTopPointerDown: resize.startResizeTop,
+    onResizeBottomPointerDown: resize.startResizeBottom,
     onResizeLeftKeyDown: resize.onResizeKeyDown,
     onResizeRightKeyDown: resize.onResizeKeyDown,
     onResizeBlur: resize.onResizeBlur,
@@ -194,7 +212,12 @@ function TiptapFileBlockNodeView({
         emptyInteractive={false}
         imageView={
           <EditorMediaBlockFrame {...frameProps}>
-            <ImageMediaView src={url || originalUrl} alt={readString(attributes, 'alt') || name} caption={caption} />
+            <ImageMediaView
+              src={url || originalUrl}
+              alt={readString(attributes, 'alt') || name}
+              caption={caption}
+              onNaturalSize={media.onNaturalSize}
+            />
           </EditorMediaBlockFrame>
         }
         audioView={
@@ -229,6 +252,7 @@ function TiptapFileBlockNodeView({
                 processingStatus,
                 duration: readString(attributes, 'duration'),
               })}
+              onNaturalSize={media.onNaturalSize}
             />
           </EditorMediaBlockFrame>
         }
@@ -259,6 +283,18 @@ function TiptapFileBlockNodeView({
       {authoringSelected && hasSettings && settingsElement
         ? createPortal(
             <SectionCard appearance="overlay" withBorder padding="sm" layout="stack">
+              {canResize && authoringMode?.allowNeutralBlockEdits === true ? (
+                <DisplaySizeMenuActions
+                  value={resize.widthPercent}
+                  labels={displaySizeLabels}
+                  onChange={(displaySize) => {
+                    if (editor.isEditable) {
+                      updateAttributes({ displaySize: String(displaySize) });
+                    }
+                  }}
+                  testIdPrefix="tiptap-file-size"
+                />
+              ) : null}
               <FileBlockMetadataFields
                 labels={{
                   name: tCommonLabels('name'),

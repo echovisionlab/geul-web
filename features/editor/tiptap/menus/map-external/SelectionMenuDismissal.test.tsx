@@ -13,6 +13,7 @@ import type { MapSelectionMenuLabels } from './MapSelectionMenu';
 import { createTiptapMapSelectionMenuRegistry } from './MapSelectionMenuRegistry';
 import { TiptapExternalVideoSelectionBubbleMenu } from './TiptapExternalVideoSelectionBubbleMenu';
 import { TiptapMapSelectionBubbleMenu } from './TiptapMapSelectionBubbleMenu';
+import { DEFAULT_DISPLAY_SIZE_LABELS } from './DisplaySizeMenuActions';
 
 vi.mock('@tiptap/react/menus', () => ({
   BubbleMenu: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -28,6 +29,7 @@ const mapLabels: MapSelectionMenuLabels = {
   alignLeft: 'Align left',
   alignCenter: 'Align center',
   alignRight: 'Align right',
+  ...DEFAULT_DISPLAY_SIZE_LABELS,
   width: 'Width',
   resizeHint: 'Resize',
   resizing: 'Resizing',
@@ -44,6 +46,7 @@ const externalVideoLabels: ExternalVideoSelectionMenuLabels = {
   alignLeft: 'Align left',
   alignCenter: 'Align center',
   alignRight: 'Align right',
+  ...DEFAULT_DISPLAY_SIZE_LABELS,
   width: 'Width',
   resizeHint: 'Resize',
 };

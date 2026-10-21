@@ -92,6 +92,7 @@ export function TiptapMapSelectionBubbleMenu({
         onRemovePlace={binding.commands.removePlace}
         onCenterPlace={binding.commands.centerPlace}
         onChangeAlignment={binding.commands.changeAlignment}
+        onChangeDisplaySize={binding.commands.changeDisplaySize}
         onFocusCaption={binding.commands.focusCaption}
         onDelete={binding.commands.deleteBlock}
         onEscape={menu.hide}

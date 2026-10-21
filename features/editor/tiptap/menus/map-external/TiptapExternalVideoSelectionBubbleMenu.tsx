@@ -94,6 +94,9 @@ export function TiptapExternalVideoSelectionBubbleMenu({
         onChangeAlignment={(textAlignment) => {
           updateTiptapExternalVideoLayout(editor, { textAlignment }, selected.blockId);
         }}
+        onChangeDisplaySize={(displaySize) => {
+          updateTiptapExternalVideoLayout(editor, { displaySize: String(displaySize) }, selected.blockId);
+        }}
         onEscape={() => {
           dismissPastedLink(editor);
           menu.hide();

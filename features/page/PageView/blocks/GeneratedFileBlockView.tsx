@@ -28,7 +28,8 @@ import { formatMediaSize } from '@/lib/media/shared';
 import { resolveVideoViewModel } from '@/lib/media/video-view-model';
 import { getFileTypeName } from '@/lib/utils/file-icon';
 import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
-import { alignment, containerStyle } from './GeneratedRichTextViewUtils';
+import { useMediaAspectRatio } from '@/features/media/useMediaAspectRatio';
+import { alignment, containerStyle, fileAspectRatio } from './GeneratedRichTextViewUtils';
 
 function fileKind(mimeType: string): 'image' | 'audio' | 'video' | 'file' {
   if (mimeType.startsWith('image/')) {
@@ -113,11 +114,16 @@ export function GeneratedFileBlockView({
   const tMedia = useTranslations('editorCommon.media');
   const contentMedia = useContentMediaDelivery();
   const runtime = useContentBlockMediaItem(block.id, 'file');
+  const media = useMediaAspectRatio();
   const durableAttachment = block.base.props?.attachment?.state;
   if (!durableAttachment || durableAttachment.case === undefined) {
     throw new Error(`Generated File Block ${block.id} has no attachment.`);
   }
-  const style = containerStyle(block.base.props?.displaySize, block.base.props?.textAlignment);
+  const style = containerStyle(
+    block.base.props?.displaySize,
+    block.base.props?.textAlignment,
+    fileAspectRatio(block.base.props) ?? media.aspectRatio,
+  );
   const caption = block.locale.props?.caption ?? '';
   if (durableAttachment.case === 'missingAttachment') {
     const kind = missingKind(durableAttachment.value.mediaKind);
@@ -177,6 +183,7 @@ export function GeneratedFileBlockView({
         alt={block.locale.props?.alt || name || caption}
         caption={caption}
         style={style}
+        onNaturalSize={media.onNaturalSize}
         action={imageDownloadUnavailable(runtime) ? undefined : action}
       />
     );
@@ -205,7 +212,7 @@ export function GeneratedFileBlockView({
   }
   if (kind === 'video') {
     const model = resolveVideoViewModel({ ...common, thumbnailUrl: delivery.thumbnail?.url });
-    return <VideoMediaView model={model} style={style} playerAction={action} />;
+    return <VideoMediaView model={model} style={style} playerAction={action} onNaturalSize={media.onNaturalSize} />;
   }
   return (
     <AttachmentMediaView

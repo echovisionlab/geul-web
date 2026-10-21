@@ -16,6 +16,7 @@ import {
   LINK_THUMBNAIL_REFERENCE_PATH,
   resolveGeneratedStandaloneExternalVideoLink,
   resolveGeneratedStandaloneLinkCard,
+  standaloneExternalVideoAspectRatio,
 } from '@/features/media/standalone-external-video';
 import { useOptionalContentBlockMediaRuntime } from '@/features/media/ContentBlockMediaRuntimeContext';
 import { LinkCardView } from '@/features/media/ui/LinkCardView';
@@ -189,7 +190,11 @@ function GeneratedParagraphBlock({
         thumbnailUrl={thumbnailUrl}
         playbackLabels={playbackLabels}
         style={mediaContainerStyleToReact(
-          resolveMediaContainerStyle(externalVideo.displaySize, externalVideo.textAlignment),
+          resolveMediaContainerStyle(
+            externalVideo.displaySize,
+            externalVideo.textAlignment,
+            standaloneExternalVideoAspectRatio(externalVideo),
+          ),
         )}
       />
     );

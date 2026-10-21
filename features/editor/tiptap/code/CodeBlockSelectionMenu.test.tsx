@@ -11,6 +11,7 @@ import type { EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode'
 import { createTiptapWireExtensions } from '../wire-schema';
 import { canShowSelectionBubbleMenu } from '../menus/selection-bubble-commands';
 import { CodeBlockSelectionMenu, type CodeBlockSelectionMenuLabels } from './CodeBlockSelectionMenu';
+import { DEFAULT_DISPLAY_SIZE_LABELS } from '../menus/map-external/DisplaySizeMenuActions';
 
 // Focus still runs the real editor and lazy loader. Emoji lookup data is a separate
 // contract, covered by emoji-extension tests and the browser; these cases use no emoji.
@@ -49,6 +50,7 @@ const labels: CodeBlockSelectionMenuLabels = {
   alignLeft: 'Left',
   alignCenter: 'Center',
   alignRight: 'Right',
+  ...DEFAULT_DISPLAY_SIZE_LABELS,
   resizeLeft: 'Resize left',
   resizeRight: 'Resize right',
 };
@@ -135,7 +137,7 @@ afterEach(async () => {
 });
 
 describe('CodeBlockSelectionMenu', () => {
-  it('offers edit, alignment and delete in one keyboard toolbar', async () => {
+  it('offers edit, alignment, size and delete in one keyboard toolbar', async () => {
     const applyNeutralBlockProps = vi.fn();
     const { editor, codePosition } = await mount({
       authoringMode: {
@@ -150,7 +152,8 @@ describe('CodeBlockSelectionMenu', () => {
     expect(document.querySelectorAll('[data-testid="tiptap-code-block-menu"]')).toHaveLength(1);
     expect(document.querySelector('[data-testid="tiptap-selection-menu"]')).toBeNull();
     const actions = toolbar?.querySelectorAll<HTMLElement>('[data-selection-toolbar-action]') ?? [];
-    expect(actions).toHaveLength(5);
+    // Edit, three alignments, five sizes and delete.
+    expect(actions).toHaveLength(10);
     expect(actions[0]?.getAttribute('data-testid')).toBe('tiptap-code-block-edit');
 
     await act(async () => {

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useCallback, useState, type ReactNode } from 'react';
 import { Text } from '@/components/core/Typography';
 import type { VideoViewModel } from '@/lib/media/video-view-model';
 import { VideoPlayer } from './VideoPlayer';
@@ -16,6 +16,7 @@ interface VideoMediaViewProps {
   playerAction?: ReactNode;
   beforePlayer?: ReactNode;
   afterPlayer?: ReactNode;
+  onNaturalSize?: (width: number, height: number) => void;
 }
 
 function joinClassNames(...values: Array<string | undefined>) {
@@ -33,14 +34,23 @@ export function VideoMediaView({
   playerAction,
   beforePlayer,
   afterPlayer,
+  onNaturalSize,
 }: VideoMediaViewProps) {
   const resolvedStyle = style || model.containerStyle;
+  const [portrait, setPortrait] = useState(false);
+  const reportNaturalSize = useCallback(
+    (width: number, height: number) => {
+      setPortrait(height > width);
+      onNaturalSize?.(width, height);
+    },
+    [onNaturalSize],
+  );
 
   return (
     <MediaBlockShell
       className={joinClassNames('video-block', className)}
       style={resolvedStyle}
-      domAttrs={model.domAttrs}
+      domAttrs={{ ...model.domAttrs, 'data-media-portrait': portrait ? '' : undefined }}
       header={
         <MediaBlockHeader
           headerClassName="video-block__header"
@@ -73,6 +83,7 @@ export function VideoMediaView({
         duration={model.durationSeconds}
         isProcessing={model.isProcessing}
         action={playerAction}
+        onNaturalSize={reportNaturalSize}
       />
       {afterPlayer}
     </MediaBlockShell>

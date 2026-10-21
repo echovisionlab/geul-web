@@ -1,4 +1,5 @@
 import { normalizeHydrationUrl } from '@echovisionlab/geul-common/media/hydration';
+import { displaySizeInlineSize } from '@/components/core/ResizeHandle/display-size';
 
 export type MediaTextAlignment = 'left' | 'center' | 'right';
 
@@ -117,22 +118,21 @@ export function formatMediaSize(value: string | number | undefined | null): stri
   return `${sizeNum} B`;
 }
 
+/**
+ * Container style for a sized block. `aspectRatio` (width / height) also caps a
+ * block whose height follows its width at its share of 80svh.
+ */
 export function resolveMediaContainerStyle(
   displaySize: string | number | undefined | null,
   textAlignment: string | undefined | null,
+  aspectRatio?: number,
 ): MediaContainerStyleRecord {
-  const widthPercent =
-    typeof displaySize === 'number'
-      ? displaySize
-      : Math.max(10, Math.min(100, parseInt((displaySize || '100').toString(), 10) || 100));
-
-  if (widthPercent >= 100) {
+  const width = displaySizeInlineSize(displaySize, aspectRatio);
+  if (!width) {
     return {};
   }
 
-  const style: MediaContainerStyleRecord = {
-    width: `${widthPercent}%`,
-  };
+  const style: MediaContainerStyleRecord = { width };
   const alignment = normalizeMediaTextAlignment(textAlignment);
 
   if (alignment === 'center') {

@@ -9,6 +9,7 @@ import {
 import type { LinkPresentationLabels } from './menus/map-external/LinkPresentationActions';
 import type { ExternalVideoPlaybackLabelFormatter } from '@/features/media/ExternalVideoView';
 import { TiptapLinkPresentationBubbleMenu } from './menus/map-external/TiptapLinkPresentationBubbleMenu';
+import { useDisplaySizeLabels } from './menus/map-external/useDisplaySizeLabels';
 import {
   createFileBlockSettingsSlot,
   TiptapFileBlockSettingsBubbleMenu,
@@ -260,14 +261,16 @@ function EditorChrome({
     }),
     [aiController, aiReady, authoringCallbacks, externalVideo, onFileActivate],
   );
+  const displaySizeLabels = useDisplaySizeLabels();
   const contextualAlignmentLabels = useMemo(
     () => ({
       alignment: editorMessages('formatting.alignment'),
       alignLeft: editorMessages('formatting.alignLeft'),
       alignCenter: editorMessages('formatting.alignCenter'),
       alignRight: editorMessages('formatting.alignRight'),
+      ...displaySizeLabels,
     }),
-    [editorMessages],
+    [displaySizeLabels, editorMessages],
   );
   const mapMenuLabels = useMemo<MapSelectionMenuLabels>(
     () => ({
@@ -426,6 +429,7 @@ export function TiptapEditor({
   const searchCombobox = useTranslations('searchCombobox');
   const editorMessages = useTranslations('editorCommon.editor');
   const selectMathBlockLabel = editorMessages('math.selectBlock');
+  const displaySizeLabels = useDisplaySizeLabels();
   const codeBlockLabels = useMemo<CodeBlockSelectionMenuLabels>(
     () => ({
       menu: editorMessages('slashMenu.items.codeBlock.title'),
@@ -439,10 +443,11 @@ export function TiptapEditor({
       alignLeft: editorMessages('formatting.alignLeft'),
       alignCenter: editorMessages('formatting.alignCenter'),
       alignRight: editorMessages('formatting.alignRight'),
+      ...displaySizeLabels,
       resizeLeft: runtimeLabels('p5.resizeLeft'),
       resizeRight: runtimeLabels('p5.resizeRight'),
     }),
-    [commonActions, commonLabels, editorMessages, runtimeLabels, searchCombobox],
+    [commonActions, commonLabels, displaySizeLabels, editorMessages, runtimeLabels, searchCombobox],
   );
   const p5Labels = useMemo<P5SketchLabels>(
     () => ({
@@ -598,8 +603,9 @@ export function TiptapEditor({
       alignLeft: editorMessages('formatting.alignLeft'),
       alignCenter: editorMessages('formatting.alignCenter'),
       alignRight: editorMessages('formatting.alignRight'),
+      ...displaySizeLabels,
     }),
-    [commonActions, editorMessages],
+    [commonActions, displaySizeLabels, editorMessages],
   );
   const authoringModeRef = useRef(authoringMode);
   authoringModeRef.current = authoringMode;

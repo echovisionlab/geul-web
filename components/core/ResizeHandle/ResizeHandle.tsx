@@ -4,7 +4,7 @@ import type { FocusEventHandler, KeyboardEventHandler, PointerEventHandler } fro
 import type { ClosedVisualProps } from '../visual-contract';
 import classes from './ResizeHandle.module.css';
 
-export type ResizeHandleDirection = 'left' | 'right';
+export type ResizeHandleDirection = 'left' | 'right' | 'top' | 'bottom';
 
 export type ResizeHandlePlacement = 'inline' | 'media-edge';
 export type ResizeHandleVisibility = 'always' | 'on-interaction' | 'active';
@@ -50,7 +50,7 @@ export function ResizeHandle({
       data-resize-handle
       data-resize-direction={direction}
       aria-label={ariaLabel}
-      aria-orientation="horizontal"
+      aria-orientation={direction === 'top' || direction === 'bottom' ? 'vertical' : 'horizontal'}
       aria-valuemin={min}
       aria-valuemax={max}
       aria-valuenow={value}

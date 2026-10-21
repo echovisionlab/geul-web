@@ -21,6 +21,8 @@ interface VideoPlayerProps {
   isReady?: boolean;
   isProcessing?: boolean;
   action?: ReactNode;
+  /** Reports the video's natural size once its metadata loads. */
+  onNaturalSize?: (width: number, height: number) => void;
 }
 
 export function VideoPlayer({
@@ -32,6 +34,7 @@ export function VideoPlayer({
   isReady = true,
   isProcessing = false,
   action,
+  onNaturalSize,
 }: VideoPlayerProps) {
   const tMedia = useTranslations('editorCommon.media');
   const locale = useLocale();
@@ -42,6 +45,24 @@ export function VideoPlayer({
     () => ({ ...buildVideoJsMessages(locale, tMedia), ...(name ? { regionLabel: name } : {}) }),
     [locale, name, tMedia],
   );
+
+  const onNaturalSizeRef = useRef(onNaturalSize);
+  onNaturalSizeRef.current = onNaturalSize;
+  useEffect(() => {
+    const mountNode = mountRef.current;
+    if (!mountNode) {
+      return;
+    }
+    // Media events do not bubble; capture covers the Video.js and fallback elements alike.
+    const reportNaturalSize = (event: Event) => {
+      const video = event.target;
+      if (video instanceof HTMLVideoElement) {
+        onNaturalSizeRef.current?.(video.videoWidth, video.videoHeight);
+      }
+    };
+    mountNode.addEventListener('loadedmetadata', reportNaturalSize, true);
+    return () => mountNode.removeEventListener('loadedmetadata', reportNaturalSize, true);
+  }, []);
 
   useEffect(() => {
     const mountNode = mountRef.current;

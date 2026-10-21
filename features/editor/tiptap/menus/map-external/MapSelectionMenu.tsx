@@ -20,6 +20,7 @@ import {
   type ContextualBlockAlignment,
   type ContextualBlockAlignmentLabels,
 } from './AlignmentMenuActions';
+import { DisplaySizeMenuActions, type ContextualBlockSizeLabels } from './DisplaySizeMenuActions';
 import { SelectionMenuAction, SelectionMenuSurface } from './SelectionMenuPrimitives';
 
 export interface MapSelectionPlace {
@@ -28,7 +29,7 @@ export interface MapSelectionPlace {
   centered?: boolean;
 }
 
-export interface MapSelectionMenuLabels extends ContextualBlockAlignmentLabels {
+export interface MapSelectionMenuLabels extends ContextualBlockAlignmentLabels, ContextualBlockSizeLabels {
   menu: string;
   places: string;
   addPlace: string;
@@ -54,6 +55,7 @@ export interface MapSelectionMenuProps {
   onRemovePlace?: (placeId: string) => void;
   onCenterPlace?: (placeId: string) => void;
   onChangeAlignment?: (alignment: ContextualBlockAlignment) => void;
+  onChangeDisplaySize?: (displaySize: number) => void;
   onFocusCaption?: () => void;
   onDelete?: () => void;
   onEscape?: () => void;
@@ -76,6 +78,7 @@ export function MapSelectionMenu({
   onRemovePlace,
   onCenterPlace,
   onChangeAlignment,
+  onChangeDisplaySize,
   onFocusCaption,
   onDelete,
   onEscape,
@@ -147,6 +150,14 @@ export function MapSelectionMenu({
         onChange={onChangeAlignment}
         disabled={disabled}
         testIdPrefix="tiptap-map-align"
+      />
+
+      <DisplaySizeMenuActions
+        value={displaySize}
+        labels={labels}
+        onChange={onChangeDisplaySize}
+        disabled={disabled}
+        testIdPrefix="tiptap-map-size"
       />
 
       <DsLayoutInset inline="xxs">

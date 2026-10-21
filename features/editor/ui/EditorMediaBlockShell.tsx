@@ -1,7 +1,7 @@
 'use client';
 
 import type { FocusEventHandler, KeyboardEventHandler, PointerEventHandler, ReactNode, RefObject } from 'react';
-import { ResizeHandle } from '@/components/core/ResizeHandle';
+import { ResizeHandle, displaySizeInlineSize } from '@/components/core/ResizeHandle';
 import { BlockSelectionTarget } from '@/components/core/SelectionSurface';
 import { TextInput } from '@/components/core/Input';
 import { TextButton } from '@/components/core/TextButton';
@@ -37,7 +37,10 @@ export function EditorMediaBlockSelector({
 interface EditorMediaBlockFrameProps {
   className?: string;
   containerRef?: RefObject<HTMLElement | null>;
-  widthPercent: number;
+  /** Display size share (10–100). */
+  displaySize: number;
+  /** Width / height when the block keeps an aspect ratio; adds the height cap and vertical handles. */
+  aspectRatio?: number;
   margin?: string;
   allowResize: boolean;
   suppressStaticTextSelection?: boolean;
@@ -45,12 +48,16 @@ interface EditorMediaBlockFrameProps {
   selected?: boolean;
   onResizeLeftPointerDown?: PointerEventHandler<HTMLButtonElement>;
   onResizeRightPointerDown?: PointerEventHandler<HTMLButtonElement>;
+  onResizeTopPointerDown?: PointerEventHandler<HTMLButtonElement>;
+  onResizeBottomPointerDown?: PointerEventHandler<HTMLButtonElement>;
   onResizePointerMove?: PointerEventHandler<HTMLDivElement>;
   onResizePointerEnd?: PointerEventHandler<HTMLDivElement>;
   resizeMin?: number;
   resizeMax?: number;
   resizeLeftLabel?: string;
   resizeRightLabel?: string;
+  resizeTopLabel?: string;
+  resizeBottomLabel?: string;
   onResizeLeftKeyDown?: KeyboardEventHandler<HTMLButtonElement>;
   onResizeRightKeyDown?: KeyboardEventHandler<HTMLButtonElement>;
   onResizeBlur?: FocusEventHandler<HTMLButtonElement>;
@@ -60,7 +67,8 @@ interface EditorMediaBlockFrameProps {
 export function EditorMediaBlockFrame({
   className,
   containerRef,
-  widthPercent,
+  displaySize,
+  aspectRatio,
   margin,
   allowResize,
   suppressStaticTextSelection = false,
@@ -68,18 +76,24 @@ export function EditorMediaBlockFrame({
   selected,
   onResizeLeftPointerDown,
   onResizeRightPointerDown,
+  onResizeTopPointerDown,
+  onResizeBottomPointerDown,
   onResizePointerMove,
   onResizePointerEnd,
   resizeMin = 10,
   resizeMax = 100,
   resizeLeftLabel = 'Resize width from left',
   resizeRightLabel = 'Resize width from right',
+  resizeTopLabel = 'Resize from top',
+  resizeBottomLabel = 'Resize from bottom',
   onResizeLeftKeyDown,
   onResizeRightKeyDown,
   onResizeBlur,
   children,
 }: EditorMediaBlockFrameProps) {
   const isSelected = selected ?? false;
+  const handleVisibility = isSelected || isResizing ? 'active' : 'on-interaction';
+  const verticalResize = allowResize && Boolean(aspectRatio);
 
   return (
     <div
@@ -95,17 +109,31 @@ export function EditorMediaBlockFrame({
       onPointerUp={onResizePointerEnd}
       onPointerCancel={onResizePointerEnd}
       style={{
-        width: `${widthPercent}%`,
+        width: displaySizeInlineSize(displaySize, aspectRatio) ?? '100%',
         margin,
         position: 'relative',
       }}
     >
+      {verticalResize ? (
+        <ResizeHandle
+          placement="media-edge"
+          visibility={handleVisibility}
+          direction="top"
+          value={displaySize}
+          min={resizeMin}
+          max={resizeMax}
+          ariaLabel={resizeTopLabel}
+          onPointerDown={onResizeTopPointerDown}
+          onKeyDown={onResizeLeftKeyDown}
+          onBlur={onResizeBlur}
+        />
+      ) : null}
       {allowResize ? (
         <ResizeHandle
           placement="media-edge"
-          visibility={isSelected || isResizing ? 'active' : 'on-interaction'}
+          visibility={handleVisibility}
           direction="left"
-          value={widthPercent}
+          value={displaySize}
           min={resizeMin}
           max={resizeMax}
           ariaLabel={resizeLeftLabel}
@@ -119,13 +147,27 @@ export function EditorMediaBlockFrame({
       {allowResize ? (
         <ResizeHandle
           placement="media-edge"
-          visibility={isSelected || isResizing ? 'active' : 'on-interaction'}
+          visibility={handleVisibility}
           direction="right"
-          value={widthPercent}
+          value={displaySize}
           min={resizeMin}
           max={resizeMax}
           ariaLabel={resizeRightLabel}
           onPointerDown={onResizeRightPointerDown}
+          onKeyDown={onResizeRightKeyDown}
+          onBlur={onResizeBlur}
+        />
+      ) : null}
+      {verticalResize ? (
+        <ResizeHandle
+          placement="media-edge"
+          visibility={handleVisibility}
+          direction="bottom"
+          value={displaySize}
+          min={resizeMin}
+          max={resizeMax}
+          ariaLabel={resizeBottomLabel}
+          onPointerDown={onResizeBottomPointerDown}
           onKeyDown={onResizeRightKeyDown}
           onBlur={onResizeBlur}
         />

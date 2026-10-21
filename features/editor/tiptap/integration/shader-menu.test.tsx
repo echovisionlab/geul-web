@@ -16,6 +16,7 @@ import {
 } from '../menus/executable';
 import { createShaderExtension, DEFAULT_SHADER_PROGRAM, SHADER_STAGE_DEFINITIONS } from '../shader';
 import { createTiptapWireExtensions } from '../wire-schema';
+import { DEFAULT_DISPLAY_SIZE_LABELS } from '../menus/map-external/DisplaySizeMenuActions';
 
 vi.mock('@tiptap/react/menus', () => ({
   BubbleMenu: ({ children }: { children: ReactNode }) => children,
@@ -39,6 +40,7 @@ const labels = {
   alignLeft: 'Align left',
   alignCenter: 'Align center',
   alignRight: 'Align right',
+  ...DEFAULT_DISPLAY_SIZE_LABELS,
 };
 
 function binding(): ExecutableSelectionMenuBinding {
@@ -47,6 +49,7 @@ function binding(): ExecutableSelectionMenuBinding {
       blockType: 'shader',
       mode: 'edit',
       running: false,
+      displaySize: 100,
       textAlignment: 'left',
       labels,
     },
@@ -56,6 +59,7 @@ function binding(): ExecutableSelectionMenuBinding {
       stop: vi.fn(),
       restart: vi.fn(),
       setAlignment: vi.fn(),
+      setDisplaySize: vi.fn(),
       deleteBlock: vi.fn(),
     },
   };

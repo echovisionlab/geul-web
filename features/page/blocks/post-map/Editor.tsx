@@ -33,6 +33,7 @@ import {
 import type { BlockCanvasPreviewProps, BlockEditorProps, BlockSettingsEditorProps } from '../types';
 import type { PostMapProps } from './schema';
 import { PostMapView } from './View';
+import { DisplaySizeControl } from '../DisplaySizeControl';
 
 interface PostMapSettingsFormProps {
   props: Partial<PostMapProps>;
@@ -269,12 +270,10 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
         </DsLayoutInline>
 
         <DsLayoutInline grow>
-          <NumberInput
+          <DisplaySizeControl
             label={t('displaySizeLabel')}
-            value={Number.parseInt(displaySize, 10)}
-            onChange={(value) => updateProp('displaySize', String(value || 100))}
-            min={10}
-            max={100}
+            value={displaySize}
+            onChange={(next) => updateProp('displaySize', next)}
           />
           <Select
             label={tMapControls('fields.colorScheme')}

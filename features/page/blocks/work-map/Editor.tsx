@@ -28,6 +28,7 @@ import {
 import type { BlockCanvasPreviewProps, BlockEditorProps, BlockSettingsEditorProps } from '../types';
 import type { WorkMapProps } from './schema';
 import { WorkMapView } from './View';
+import { DisplaySizeControl } from '../DisplaySizeControl';
 
 interface WorkMapSettingsFormProps {
   props: Partial<WorkMapProps>;
@@ -207,12 +208,10 @@ function WorkMapSettingsForm({ props, updateProps }: WorkMapSettingsFormProps) {
         />
 
         <DsLayoutInline grow>
-          <NumberInput
+          <DisplaySizeControl
             label={t('displaySizeLabel')}
-            value={Number.parseInt(displaySize, 10)}
-            onChange={(value) => updateProp('displaySize', String(value || 100))}
-            min={10}
-            max={100}
+            value={displaySize}
+            onChange={(next) => updateProp('displaySize', next)}
           />
           <Select
             label={tMapControls('fields.colorScheme')}

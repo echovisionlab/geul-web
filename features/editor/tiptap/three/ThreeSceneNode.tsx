@@ -47,6 +47,7 @@ import {
 import classes from './ThreeSceneNode.module.css';
 import { useTiptapEditorEditable } from '../useTiptapEditorEditable';
 import { useExactTiptapNodeSelection } from '../useExactTiptapNodeSelection';
+import { DEFAULT_DISPLAY_SIZE_LABELS } from '../menus/map-external/DisplaySizeMenuActions';
 
 export type ThreeSceneMode = 'edit' | 'source' | 'preview';
 
@@ -145,7 +146,7 @@ export interface ThreeSceneOptions {
   selectionMenuRegistry?: ExecutableSelectionMenuRegistry;
   selectionMenuLabels?: Pick<
     ExecutableSelectionMenuLabels,
-    'deleteBlock' | 'alignment' | 'alignLeft' | 'alignCenter' | 'alignRight'
+    'deleteBlock' | 'alignment' | 'alignLeft' | 'alignCenter' | 'alignRight' | 'displaySize' | 'displaySizePresets'
   >;
   authoringMode?: EditorAuthoringMode | null;
 }
@@ -532,6 +533,7 @@ export function ThreeSceneNodeView({
         mode,
         running,
         textAlignment,
+        displaySize: resize.widthPercent,
         labels: {
           menu: labels.title,
           edit: labels.edit,
@@ -545,6 +547,8 @@ export function ThreeSceneNodeView({
           alignLeft: selectionMenuLabels?.alignLeft ?? 'Align left',
           alignCenter: selectionMenuLabels?.alignCenter ?? 'Align center',
           alignRight: selectionMenuLabels?.alignRight ?? 'Align right',
+          displaySize: selectionMenuLabels?.displaySize ?? DEFAULT_DISPLAY_SIZE_LABELS.displaySize,
+          displaySizePresets: selectionMenuLabels?.displaySizePresets ?? DEFAULT_DISPLAY_SIZE_LABELS.displaySizePresets,
         },
       },
       commands: {
@@ -557,10 +561,13 @@ export function ThreeSceneNodeView({
             updateAttributes({ textAlignment: alignment });
           }
         },
+        setDisplaySize: persistDisplaySize,
         deleteBlock,
       },
     }),
     [
+      persistDisplaySize,
+      resize.widthPercent,
       authoringMode,
       deleteBlock,
       editor,
@@ -611,7 +618,7 @@ export function ThreeSceneNodeView({
       <EditorMediaBlockFrame
         className={classes.frame}
         containerRef={containerRef}
-        widthPercent={resize.widthPercent}
+        displaySize={resize.widthPercent}
         margin={resize.getMarginStyle(textAlignment)}
         allowResize={authoringSelected}
         suppressStaticTextSelection

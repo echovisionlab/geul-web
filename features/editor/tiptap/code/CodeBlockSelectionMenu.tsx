@@ -7,6 +7,7 @@ import { BubbleMenu } from '@tiptap/react/menus';
 import { IconEdit, IconTrash } from '@tabler/icons-react';
 import type { EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
 import { AlignmentMenuActions, type ContextualBlockAlignmentLabels } from '../menus/map-external/AlignmentMenuActions';
+import { DisplaySizeMenuActions, type ContextualBlockSizeLabels } from '../menus/map-external/DisplaySizeMenuActions';
 import { SelectionMenuAction, SelectionMenuSurface } from '../menus/map-external/SelectionMenuPrimitives';
 import { useTiptapBubbleMenu } from '../menus/useSelectionToolbarNavigation';
 import {
@@ -18,7 +19,7 @@ import {
 import { focusSelectedCodeBlockSourceEditor } from './CodeBlockNode';
 
 const CODE_BLOCK_BUBBLE_OPTIONS = { placement: 'top', offset: 8, flip: true, shift: true } as const;
-export interface CodeBlockSelectionMenuLabels extends ContextualBlockAlignmentLabels {
+export interface CodeBlockSelectionMenuLabels extends ContextualBlockAlignmentLabels, ContextualBlockSizeLabels {
   menu: string;
   edit: string;
   source: string;
@@ -97,6 +98,14 @@ export function CodeBlockSelectionMenu({
           labels={labels}
           onChange={(textAlignment) => updateSelectedCodeBlockAttrs(editor, { textAlignment }, authoringMode)}
           testIdPrefix="tiptap-code-block-align"
+        />
+        <DisplaySizeMenuActions
+          value={selected.displaySize}
+          labels={labels}
+          onChange={(displaySize) =>
+            updateSelectedCodeBlockAttrs(editor, { displaySize: String(displaySize) }, authoringMode)
+          }
+          testIdPrefix="tiptap-code-block-size"
         />
         <SelectionMenuAction
           label={labels.delete}

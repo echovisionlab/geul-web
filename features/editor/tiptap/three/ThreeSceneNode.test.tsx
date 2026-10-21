@@ -366,17 +366,20 @@ describe('authoring Three.js scene resize', () => {
     );
     expect(rightHandle?.getAttribute('aria-valuenow')).toBe('64');
 
-    await act(async () => {
+    // Keyboard steps show at once and save once they settle.
+    vi.useFakeTimers();
+    act(() => {
       rightHandle?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
-      await new Promise((resolve) => setTimeout(resolve, 0));
     });
     expect(rightHandle?.getAttribute('aria-valuenow')).toBe('69');
+    act(() => vi.advanceTimersByTime(300));
     expect(JSON.stringify(editor!.getJSON())).toContain('"displaySize":"69"');
 
-    await act(async () => {
+    act(() => {
       rightHandle?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-      await new Promise((resolve) => setTimeout(resolve, 0));
     });
+    act(() => vi.advanceTimersByTime(300));
+    vi.useRealTimers();
     expect(rightHandle?.getAttribute('aria-valuenow')).toBe('64');
     expect(JSON.stringify(editor!.getJSON())).toContain('"displaySize":"64"');
 

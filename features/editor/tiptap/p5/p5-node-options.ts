@@ -39,7 +39,7 @@ export interface P5SketchOptions {
   selectionMenuRegistry?: ExecutableSelectionMenuRegistry;
   selectionMenuLabels?: Pick<
     ExecutableSelectionMenuLabels,
-    'deleteBlock' | 'alignment' | 'alignLeft' | 'alignCenter' | 'alignRight'
+    'deleteBlock' | 'alignment' | 'alignLeft' | 'alignCenter' | 'alignRight' | 'displaySize' | 'displaySizePresets'
   >;
   authoringMode?: EditorAuthoringMode | null;
 }

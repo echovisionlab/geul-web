@@ -196,7 +196,7 @@ function CodeBlockNodeView({
       <EditorMediaBlockFrame
         className={classes.frame}
         containerRef={frameRef}
-        widthPercent={resize.widthPercent}
+        displaySize={resize.widthPercent}
         margin={resize.getMarginStyle(alignment)}
         allowResize={canEditNeutral && exactNodeSelected}
         suppressStaticTextSelection

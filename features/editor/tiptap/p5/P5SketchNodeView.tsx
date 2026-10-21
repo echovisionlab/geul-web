@@ -123,6 +123,8 @@ export function P5SketchNodeView({
     mode,
     running,
     textAlignment,
+    displaySize: resize.widthPercent,
+    setDisplaySize: persistDisplaySize,
     labels,
     selectionMenuRegistry,
     selectionMenuLabels,
@@ -144,7 +146,7 @@ export function P5SketchNodeView({
         className={classes.frame}
         containerRef={frameRef}
         suppressStaticTextSelection
-        widthPercent={resize.widthPercent}
+        displaySize={resize.widthPercent}
         margin={resize.getMarginStyle(textAlignment)}
         allowResize={authoringSelected}
         selected={authoringSelected}

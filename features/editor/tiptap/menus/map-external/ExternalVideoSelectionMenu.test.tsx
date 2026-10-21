@@ -6,6 +6,7 @@ import { createRoot, type Root } from 'react-dom/client';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ExternalVideoSelectionMenu, type ExternalVideoSelectionMenuLabels } from './ExternalVideoSelectionMenu';
+import { DEFAULT_DISPLAY_SIZE_LABELS } from './DisplaySizeMenuActions';
 
 const labels: ExternalVideoSelectionMenuLabels = {
   menu: 'External video controls',
@@ -16,6 +17,7 @@ const labels: ExternalVideoSelectionMenuLabels = {
   alignLeft: 'Align left',
   alignCenter: 'Align center',
   alignRight: 'Align right',
+  ...DEFAULT_DISPLAY_SIZE_LABELS,
   width: 'Width',
   resizeHint: 'Drag the side handles to resize',
 };

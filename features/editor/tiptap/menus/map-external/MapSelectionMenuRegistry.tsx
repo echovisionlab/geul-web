@@ -17,6 +17,7 @@ export interface TiptapMapSelectionMenuCommands {
   removePlace?: (placeId: string) => void;
   centerPlace?: (placeId: string) => void;
   changeAlignment?: (alignment: ContextualBlockAlignment) => void;
+  changeDisplaySize?: (displaySize: number) => void;
   focusCaption?: () => void;
   deleteBlock?: () => void;
 }

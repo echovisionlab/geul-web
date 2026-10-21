@@ -20,6 +20,7 @@ import { MapSelectionMenu } from '@/features/editor/tiptap/menus/map-external/Ma
 import { ExternalVideoSelectionMenu } from '@/features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu';
 import type { ContextualBlockAlignment } from '@/features/editor/tiptap/menus/map-external/AlignmentMenuActions';
 import type { ExternalVideoAspectRatio } from '@echovisionlab/geul-common/media/block-schemas';
+import { useDisplaySizeLabels } from '@/features/editor/tiptap/menus/map-external/useDisplaySizeLabels';
 
 const authoringMode = { allowNeutralBlockEdits: true, allowLocalizedBlockEdits: true };
 const documentWithText = (text: string) => ({
@@ -142,11 +143,14 @@ export function ContextualMenuPreview({ kind = 'map' }: { kind?: 'map' | 'extern
   const [url, setUrl] = useState('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
   const [caption, setCaption] = useState('');
   const captionInput = useRef<HTMLInputElement>(null);
+  const displaySizeLabels = useDisplaySizeLabels();
+  const [displaySize, setDisplaySize] = useState(60);
   const sharedLabels = {
     alignment: t('formatting.alignment'),
     alignLeft: t('formatting.alignLeft'),
     alignCenter: t('formatting.alignCenter'),
     alignRight: t('formatting.alignRight'),
+    ...displaySizeLabels,
   };
   return (
     <LayoutStack gap="md">
@@ -169,8 +173,9 @@ export function ContextualMenuPreview({ kind = 'map' }: { kind?: 'map' | 'extern
           }}
           places={places}
           textAlignment={alignment}
-          displaySize={64}
+          displaySize={displaySize}
           onChangeAlignment={setAlignment}
+          onChangeDisplaySize={setDisplaySize}
           onAddPlace={() =>
             setPlaces((value) => [
               ...value,
@@ -195,9 +200,10 @@ export function ContextualMenuPreview({ kind = 'map' }: { kind?: 'map' | 'extern
           }}
           aspectRatio={aspectRatio}
           textAlignment={alignment}
-          displaySize={72}
+          displaySize={displaySize}
           onChangeAspectRatio={setAspectRatio}
           onChangeAlignment={setAlignment}
+          onChangeDisplaySize={setDisplaySize}
           onEditLink={() => setEditingLink((value) => !value)}
         />
       )}

@@ -25170,6 +25170,7 @@
         "Consumer: features/form/FormSettingsContent.tsx",
         "Consumer: features/page/PageEditor/SectionSettingsForm.tsx",
         "Consumer: features/page/PageEditor/editors/ColumnsEditor.tsx",
+        "Consumer: features/page/blocks/DisplaySizeControl.tsx",
         "Consumer: features/page/blocks/ListBlockEditorBase.tsx",
         "Consumer: features/page/blocks/author-list/Editor.tsx",
         "Consumer: features/page/blocks/immersive-scene/ImmersiveSceneSceneSettingsPanel.tsx",
@@ -33637,6 +33638,7 @@
         "Consumer: features/file-manager/ui/FileBrowserViewToggle.tsx",
         "Consumer: features/form/FormBuilder/ConditionEditor.tsx",
         "Consumer: features/page/PageEditor/editors/ColumnsEditor.tsx",
+        "Consumer: features/page/blocks/DisplaySizeControl.tsx",
         "Consumer: features/page/blocks/ListBlockEditorBase.tsx",
         "Consumer: features/page/blocks/author-list/Editor.tsx",
         "Consumer: features/page/blocks/immersive-scene/ImmersiveSceneSceneSettingsPanel.tsx",
@@ -43854,7 +43856,10 @@
           "sources": [
             { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 4, "property": "width" },
             { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 50, "property": "left" },
-            { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 54, "property": "right" }
+            { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 54, "property": "right" },
+            { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 61, "property": "height" },
+            { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 79, "property": "top" },
+            { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 83, "property": "bottom" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 115, "value": "1.5rem", "context": ":root" }
@@ -43865,7 +43870,9 @@
           "registered": true,
           "sources": [
             { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 5, "property": "height" },
-            { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 24, "property": "height" }
+            { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 24, "property": "height" },
+            { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 60, "property": "width" },
+            { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 67, "property": "width" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 117, "value": "1.5rem", "context": ":root" }
@@ -43912,7 +43919,11 @@
             { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 4, "property": "width" },
             { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 5, "property": "height" },
             { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 50, "property": "left" },
-            { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 54, "property": "right" }
+            { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 54, "property": "right" },
+            { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 60, "property": "width" },
+            { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 61, "property": "height" },
+            { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 79, "property": "top" },
+            { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 83, "property": "bottom" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 122, "value": "0px", "context": ":root" },
@@ -43928,7 +43939,7 @@
           "name": "--geul-motion-easing",
           "registered": true,
           "sources": [
-            { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 59, "property": "transition" }
+            { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 88, "property": "transition" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 147, "value": "ease-out", "context": ":root" }
@@ -43938,7 +43949,7 @@
           "name": "--geul-motion-normal",
           "registered": true,
           "sources": [
-            { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 59, "property": "transition" }
+            { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 88, "property": "transition" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 144, "value": "140ms", "context": ":root" }]
         },
@@ -43955,7 +43966,8 @@
           "name": "--geul-spacing-xxs",
           "registered": true,
           "sources": [
-            { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 23, "property": "width" }
+            { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 23, "property": "width" },
+            { "file": "components/core/ResizeHandle/ResizeHandle.module.css", "line": 68, "property": "height" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 59, "value": "0.25rem", "context": ":root" }
@@ -43978,7 +43990,7 @@
       "anatomy": ["Named slider handle → resize callback → actual panel geometry."],
       "api": [
         { "name": "ariaLabel", "type": "string", "required": true },
-        { "name": "direction", "type": "'left' | 'right'", "required": true },
+        { "name": "direction", "type": "'left' | 'right' | 'top' | 'bottom'", "required": true },
         { "name": "max", "type": "number", "required": true },
         { "name": "min", "type": "number", "required": true },
         { "name": "value", "type": "number", "required": true },
@@ -48149,6 +48161,7 @@
         "Consumer: features/editor/tiptap/code/CodeBlockSurface.tsx",
         "Consumer: features/editor/tiptap/menus/SelectionBubbleMenu.tsx",
         "Consumer: features/editor/tiptap/menus/map-external/AlignmentMenuActions.tsx",
+        "Consumer: features/editor/tiptap/menus/map-external/DisplaySizeMenuActions.tsx",
         "Consumer: features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu.tsx",
         "Consumer: features/editor/tiptap/menus/map-external/MapSelectionMenu.tsx",
         "Consumer: features/editor/tiptap/menus/map-external/SelectionMenuPrimitives.tsx",
@@ -48249,6 +48262,7 @@
         "Consumer: features/page/PageEditor/editors/ColumnsEditor.tsx",
         "Consumer: features/page/PageRestrictedAccess.tsx",
         "Consumer: features/page/PageView/blocks/PublicExecutableBlockView.tsx",
+        "Consumer: features/page/blocks/DisplaySizeControl.tsx",
         "Consumer: features/page/blocks/ListBlockEditorBase.tsx",
         "Consumer: features/page/blocks/ListBlockSkeleton.tsx",
         "Consumer: features/page/blocks/ListViewShell.tsx",
@@ -61646,6 +61660,7 @@
         "Consumer: features/editor/tiptap/code/CodeBlockSurface.tsx",
         "Consumer: features/editor/tiptap/link-presentation/StandaloneLinkCaption.tsx",
         "Consumer: features/editor/tiptap/map/TiptapMapNodeView.tsx",
+        "Consumer: features/editor/tiptap/menus/map-external/DisplaySizeMenuActions.tsx",
         "Consumer: features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu.tsx",
         "Consumer: features/editor/tiptap/menus/map-external/MapSelectionMenu.tsx",
         "Consumer: features/editor/tiptap/p5/P5CapabilityControl.tsx",

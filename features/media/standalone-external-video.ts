@@ -14,6 +14,7 @@ import {
   type RichTextInline,
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import type { Block, InlineContent } from '@/lib/types/page-content';
+import { parseAspectRatio } from '@/components/core/ResizeHandle/display-size';
 import { resolveExternalVideo } from '@/lib/media/external-video';
 
 export interface StandaloneExternalVideoLink {
@@ -22,6 +23,14 @@ export interface StandaloneExternalVideoLink {
   displaySize: string;
   textAlignment: 'left' | 'center' | 'right';
   aspectRatio: ExternalVideoAspectRatio;
+}
+
+/** Width / height the player shows: an auto ratio follows the URL (Shorts are portrait). */
+export function standaloneExternalVideoAspectRatio(
+  video: Pick<StandaloneExternalVideoLink, 'url' | 'aspectRatio'>,
+): number {
+  const ratio = video.aspectRatio === 'auto' ? resolveExternalVideo(video.url)?.aspectRatio : video.aspectRatio;
+  return parseAspectRatio(ratio) ?? 16 / 9;
 }
 
 export interface ExternalVideoProviderTitleLabels {

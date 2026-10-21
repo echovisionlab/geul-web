@@ -18,7 +18,7 @@ describe('EditorMediaBlockShell', () => {
       const [selected, setSelected] = useState(false);
       return (
         <>
-          <EditorMediaBlockFrame widthPercent={100} allowResize={false} selected={selected}>
+          <EditorMediaBlockFrame displaySize={100} allowResize={false} selected={selected}>
             <EditorMediaBlockSelector label="Code block" enabled onSelect={() => setSelected(true)} />
           </EditorMediaBlockFrame>
           <button type="button">Next control</button>
@@ -70,7 +70,7 @@ describe('EditorMediaBlockShell', () => {
 
   it('projects editor selection and resize state into Core handle visibility', () => {
     const html = renderToStaticMarkup(
-      <EditorMediaBlockFrame widthPercent={60} allowResize selected isResizing>
+      <EditorMediaBlockFrame displaySize={60} allowResize selected isResizing>
         <div>content</div>
       </EditorMediaBlockFrame>,
     );
@@ -81,7 +81,7 @@ describe('EditorMediaBlockShell', () => {
     expect(html).toContain('data-geul-resize-visibility="active"');
     expect(html).not.toContain('data-show-resize-handles');
     const resting = renderToStaticMarkup(
-      <EditorMediaBlockFrame widthPercent={60} allowResize>
+      <EditorMediaBlockFrame displaySize={60} allowResize>
         <div>content</div>
       </EditorMediaBlockFrame>,
     );
@@ -90,13 +90,13 @@ describe('EditorMediaBlockShell', () => {
 
   it('marks only opted-in media frames as static-text selection boundaries', () => {
     const suppressed = renderToStaticMarkup(
-      <EditorMediaBlockFrame widthPercent={100} allowResize={false} suppressStaticTextSelection>
+      <EditorMediaBlockFrame displaySize={100} allowResize={false} suppressStaticTextSelection>
         <input aria-label="Editable title" />
         <span>Static metadata</span>
       </EditorMediaBlockFrame>,
     );
     const regular = renderToStaticMarkup(
-      <EditorMediaBlockFrame widthPercent={100} allowResize={false}>
+      <EditorMediaBlockFrame displaySize={100} allowResize={false}>
         <span>Regular content</span>
       </EditorMediaBlockFrame>,
     );

@@ -73,9 +73,7 @@ export function resolveAudioViewModel(input: AudioViewModelInput): AudioViewMode
 
   const actions: AudioActionLink[] = [];
 
-  const containerStyle = mediaContainerStyleToReact(
-    resolveMediaContainerStyle(input.displaySize, input.textAlignment),
-  );
+  const containerStyle = mediaContainerStyleToReact(resolveMediaContainerStyle(input.displaySize, input.textAlignment));
   const domAttrs = {
     ...buildAudioMediaHydrationAttrs({
       fileId: input.fileId,
