@@ -10,6 +10,7 @@ minimumReleaseAgeExclude:
   - '@tabler/icons@3.49.0'
   - react-aria-components@1.22.1
   - react-aria@3.53.1
+  - '@storybook/addon-docs@10.6.3'
 
 overrides:
   '@babel/core': 8.0.7
@@ -51,10 +52,10 @@ overrides:
   ws: 8.21.3
   js-yaml: 4.3.1
   webapi-parser>ajv: 6.15.0
-  '@storybook/builder-webpack5@10.6.2>typescript': workspace:*
-  '@storybook/nextjs@10.6.2>typescript': workspace:*
-  '@storybook/preset-react-webpack@10.6.2>typescript': workspace:*
-  '@storybook/react@10.6.2>typescript': workspace:*
+  '@storybook/builder-webpack5@10.6.3>typescript': workspace:*
+  '@storybook/nextjs@10.6.3>typescript': workspace:*
+  '@storybook/preset-react-webpack@10.6.3>typescript': workspace:*
+  '@storybook/react@10.6.3>typescript': workspace:*
   '@storybook/react-docgen-typescript-plugin@1.0.6--canary.9.0c3f3b7.0>typescript': workspace:*
   'fork-ts-checker-webpack-plugin@9.1.0>typescript': workspace:*
   'react-docgen-typescript@2.4.0>typescript': workspace:*
@@ -86,16 +87,16 @@ packageExtensions:
   '@maplibre/maplibre-gl-style-spec@26.4.4':
     dependencies:
       '@types/geojson': 7946.0.16
-  '@storybook/builder-webpack5@10.6.2':
+  '@storybook/builder-webpack5@10.6.3':
     dependencies:
       typescript: workspace:*
-  '@storybook/nextjs@10.6.2':
+  '@storybook/nextjs@10.6.3':
     dependencies:
       typescript: workspace:*
-  '@storybook/preset-react-webpack@10.6.2':
+  '@storybook/preset-react-webpack@10.6.3':
     dependencies:
       typescript: workspace:*
-  '@storybook/react@10.6.2':
+  '@storybook/react@10.6.3':
     dependencies:
       typescript: workspace:*
   'eslint-config-mantine@4.0.3':
@@ -124,4 +125,4 @@ patchedDependencies:
   ast-types@0.16.1: patches/ast-types@0.16.1.patch
   simple-icons@16.35.0: patches/simple-icons@16.35.0.patch
   react-aria@3.53.1: patches/react-aria@3.53.1.patch
-  '@storybook/addon-docs@10.6.2': patches/@storybook__addon-docs@10.6.2.patch
+  '@storybook/addon-docs@10.6.3': patches/@storybook__addon-docs@10.6.3.patch
