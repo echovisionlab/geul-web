@@ -94,7 +94,8 @@ export function ExternalVideoPlayerView({
         ) : (
           <div className={classes.facade} style={frameStyle} data-external-video-facade="">
             {thumbnailUrl ? <MediaImage src={thumbnailUrl} alt="" fit="cover" fill loading="lazy" /> : null}
-            <span className={classes.facadeControl}>
+            {/* A narrow player swaps in the compact control; display: none removes the other one. */}
+            <span className={classes.facadeControl} data-facade-control="regular">
               <IconButton
                 label={playbackLabels.play}
                 shape="circle"
@@ -104,6 +105,18 @@ export function ExternalVideoPlayerView({
                 onClick={() => setRequested(true)}
               >
                 <IconPlayerPlayFilled size={24} aria-hidden />
+              </IconButton>
+            </span>
+            <span className={classes.facadeControl} data-facade-control="compact">
+              <IconButton
+                label={playbackLabels.play}
+                shape="circle"
+                size="sm"
+                emphasis="strong"
+                contrast="inverse"
+                onClick={() => setRequested(true)}
+              >
+                <IconPlayerPlayFilled size={14} aria-hidden />
               </IconButton>
             </span>
             <span className={classes.facadeNotice}>

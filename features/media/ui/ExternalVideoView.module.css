@@ -45,6 +45,7 @@
 }
 
 .facade {
+  container: external-video-facade / inline-size;
   position: relative;
   overflow: hidden;
   background: var(--geul-surface-muted);
@@ -65,4 +66,20 @@
   padding: var(--geul-spacing-xs) var(--geul-spacing-sm);
   text-align: start;
   background: var(--geul-overlay-control);
+}
+
+.facadeControl[data-facade-control='compact'] {
+  display: none;
+}
+
+/* A video resized below the smallest breakpoint keeps the control in proportion and drops the notice. */
+@container external-video-facade (width < $mantine-breakpoint-xs) {
+  .facadeControl[data-facade-control='regular'],
+  .facadeNotice {
+    display: none;
+  }
+
+  .facadeControl[data-facade-control='compact'] {
+    display: grid;
+  }
 }

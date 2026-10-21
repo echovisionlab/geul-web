@@ -63,3 +63,15 @@ export const WaitingForConsentWithoutThumbnail: Story = {
 export const ShortsWaitingForConsent: Story = {
   args: { consented: false, aspectRatio: '9:16', thumbnailUrl: '/storybook/media/video-poster.jpg', playbackLabels },
 };
+
+/** At a small block width the play control shrinks and the notice is dropped. */
+export const NarrowWaitingForConsent: Story = {
+  args: { consented: false, thumbnailUrl: '/storybook/media/video-poster.jpg', playbackLabels },
+  decorators: [
+    (Story) => (
+      <div style={{ width: 200 }}>
+        <Story />
+      </div>
+    ),
+  ],
+};
