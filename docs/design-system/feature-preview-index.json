@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "sourceManifestHash": "b14c5ece1543975409324c3ba25686309f178ad28c1d2a7634d82aabfe72107a",
+  "sourceManifestHash": "416eaee68f6b440f8ce338511079f005c663f9986a380b84f60d33cd02c18338",
   "methodology": "All inventoried Feature component candidates. Direct value imports, literal lazy imports and transitive source relationships through production owners/local adapters are indexed separately. A dependency can be unused or render conditionally; neither relationship proves rendered states, route parity or design compliance. Empty JSX records include runtime/lazy/controller boundaries and must be inspected before treating them as visual gaps.",
-  "counts": { "domains": 54, "componentFiles": 769, "jsxWithoutStoryRelationship": 43 },
+  "counts": { "domains": 54, "componentFiles": 775, "jsxWithoutStoryRelationship": 43 },
   "domains": [
     {
       "domain": "account",
@@ -2572,6 +2572,7 @@
             "Feature/Editor/Public Block Comparison",
             "Feature/Editor/Source Editor",
             "Feature/Editor/Menus",
+            "Feature/Editor/Link Presentation Menu",
             "Feature/Editor/Site Variables",
             "Feature/Mermaid/Diagram",
             "Feature/Page/Embed",
@@ -2603,6 +2604,7 @@
             "Feature/Editor/Public Block Comparison",
             "Feature/Editor/Source Editor",
             "Feature/Editor/Menus",
+            "Feature/Editor/Link Presentation Menu",
             "Feature/Editor/Site Variables",
             "Feature/Mermaid/Diagram",
             "Feature/Page/Embed",
@@ -2748,6 +2750,44 @@
             "Feature/Editor/Site Variables",
             "Pages/Editors/Campaign",
             "Pages/Admin/Email Editors",
+            "Pages/Admin/Legal Policies",
+            "Pages/Editors/Legal",
+            "Pages/Editors/Page",
+            "Pages/Editors/Post",
+            "Pages/Editors/Program Events",
+            "Pages/Editors/Work"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/link-presentation/LinkCardTiptapExtension.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": [
+            "Feature/Editor/File Insertion",
+            "Feature/Editor/Executables",
+            "Feature/Editor/Tiptap Playground",
+            "Feature/Editor/Public Block Comparison",
+            "Feature/Editor/Menus",
+            "Feature/Editor/Site Variables",
+            "Pages/Admin/Legal Policies",
+            "Pages/Editors/Legal",
+            "Pages/Editors/Page",
+            "Pages/Editors/Post",
+            "Pages/Editors/Program Events",
+            "Pages/Editors/Work"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/link-presentation/StandaloneLinkCaption.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": [
+            "Feature/Editor/File Insertion",
+            "Feature/Editor/Executables",
+            "Feature/Editor/Tiptap Playground",
+            "Feature/Editor/Public Block Comparison",
+            "Feature/Editor/Menus",
+            "Feature/Editor/Site Variables",
             "Pages/Admin/Legal Policies",
             "Pages/Editors/Legal",
             "Pages/Editors/Page",
@@ -2932,6 +2972,26 @@
           ]
         },
         {
+          "file": "features/editor/tiptap/menus/map-external/LinkPresentationActions.tsx",
+          "hasJsx": true,
+          "directStories": ["Feature/Editor/Link Presentation Menu"],
+          "relatedStories": [
+            "Feature/Editor/File Insertion",
+            "Feature/Editor/Executables",
+            "Feature/Editor/Tiptap Playground",
+            "Feature/Editor/Public Block Comparison",
+            "Feature/Editor/Menus",
+            "Feature/Editor/Link Presentation Menu",
+            "Feature/Editor/Site Variables",
+            "Pages/Admin/Legal Policies",
+            "Pages/Editors/Legal",
+            "Pages/Editors/Page",
+            "Pages/Editors/Post",
+            "Pages/Editors/Program Events",
+            "Pages/Editors/Work"
+          ]
+        },
+        {
           "file": "features/editor/tiptap/menus/map-external/MapSelectionMenu.tsx",
           "hasJsx": true,
           "directStories": [],
@@ -2972,6 +3032,26 @@
         {
           "file": "features/editor/tiptap/menus/map-external/SelectionMenuPrimitives.tsx",
           "hasJsx": true,
+          "directStories": ["Feature/Editor/Link Presentation Menu"],
+          "relatedStories": [
+            "Feature/Editor/File Insertion",
+            "Feature/Editor/Executables",
+            "Feature/Editor/Tiptap Playground",
+            "Feature/Editor/Public Block Comparison",
+            "Feature/Editor/Menus",
+            "Feature/Editor/Link Presentation Menu",
+            "Feature/Editor/Site Variables",
+            "Pages/Admin/Legal Policies",
+            "Pages/Editors/Legal",
+            "Pages/Editors/Page",
+            "Pages/Editors/Post",
+            "Pages/Editors/Program Events",
+            "Pages/Editors/Work"
+          ]
+        },
+        {
+          "file": "features/editor/tiptap/menus/map-external/TiptapExternalVideoSelectionBubbleMenu.tsx",
+          "hasJsx": true,
           "directStories": [],
           "relatedStories": [
             "Feature/Editor/File Insertion",
@@ -2989,7 +3069,7 @@
           ]
         },
         {
-          "file": "features/editor/tiptap/menus/map-external/TiptapExternalVideoSelectionBubbleMenu.tsx",
+          "file": "features/editor/tiptap/menus/map-external/TiptapLinkPresentationBubbleMenu.tsx",
           "hasJsx": true,
           "directStories": [],
           "relatedStories": [
@@ -3381,6 +3461,7 @@
             "Feature/Editor/Tiptap Playground",
             "Feature/Editor/Public Block Comparison",
             "Feature/Editor/Menus",
+            "Feature/Editor/Link Presentation Menu",
             "Feature/Editor/Site Variables",
             "Pages/Editors/Campaign",
             "Pages/Admin/Email Editors",
@@ -3404,6 +3485,7 @@
             "Feature/Editor/Tiptap Playground",
             "Feature/Editor/Public Block Comparison",
             "Feature/Editor/Menus",
+            "Feature/Editor/Link Presentation Menu",
             "Feature/Editor/Site Variables",
             "Feature/Editor/Color Palette",
             "Feature/Page/Embed",
@@ -4473,6 +4555,12 @@
             "Pages/Editors/Work"
           ]
         },
+        {
+          "file": "features/media/LocalizedExternalVideoView.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": ["Feature/Page/Embed", "Pages/Editors/Page", "Pages/Public/Documents"]
+        },
         { "file": "features/media/MediaBlockHydrator.tsx", "hasJsx": false, "directStories": [], "relatedStories": [] },
         {
           "file": "features/media/ThemedAssetImage.tsx",
@@ -4641,6 +4729,34 @@
             "Feature/Editor/Public Block Comparison",
             "Feature/Editor/Menus",
             "Feature/Editor/Site Variables",
+            "Feature/Page/Embed",
+            "Pages/Legal/Public Document",
+            "Pages/Admin/Legal Policies",
+            "Pages/Editors/Legal",
+            "Pages/Legal/History Detail",
+            "Pages/Editors/Page",
+            "Pages/Editors/Post",
+            "Pages/Editors/Program Events",
+            "Pages/Public/Catalog Entity Detail",
+            "Pages/Public/Documents",
+            "Pages/Public/Entity Detail",
+            "Pages/Editors/Work"
+          ]
+        },
+        {
+          "file": "features/media/ui/LinkCardView.tsx",
+          "hasJsx": true,
+          "directStories": ["Feature/Media/Link Card"],
+          "relatedStories": [
+            "Pages/Public/Entities",
+            "Feature/Editor/Snapshot Handoff",
+            "Feature/Editor/File Insertion",
+            "Feature/Editor/Executables",
+            "Feature/Editor/Tiptap Playground",
+            "Feature/Editor/Public Block Comparison",
+            "Feature/Editor/Menus",
+            "Feature/Editor/Site Variables",
+            "Feature/Media/Link Card",
             "Feature/Page/Embed",
             "Pages/Legal/Public Document",
             "Pages/Admin/Legal Policies",

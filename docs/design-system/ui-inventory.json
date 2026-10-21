@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "b14c5ece1543975409324c3ba25686309f178ad28c1d2a7634d82aabfe72107a",
+  "manifestHash": "416eaee68f6b440f8ce338511079f005c663f9986a380b84f60d33cd02c18338",
   "counts": {
-    "sourceFiles": 3825,
-    "productionSourceFiles": 2306,
-    "componentFiles": 910,
+    "sourceFiles": 3840,
+    "productionSourceFiles": 2316,
+    "componentFiles": 916,
     "coreFamilies": 57,
     "featureDomains": 54,
-    "storyFiles": 257,
-    "storyVariants": 1471,
+    "storyFiles": 259,
+    "storyVariants": 1489,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -1200,6 +1200,7 @@
     "features/cookie-consent/CookieConsentBanner.tsx",
     "features/cookie-consent/ui/CookieConsentBannerView.test.tsx",
     "features/cookie-consent/ui/CookieConsentBannerView.tsx",
+    "features/cookie-consent/useOptionalCookieConsent.ts",
     "features/credits/PublicCreditList.test.tsx",
     "features/credits/PublicCreditList.tsx",
     "features/credits/PublicNameList.tsx",
@@ -1488,6 +1489,10 @@
     "features/editor/tiptap/integration/slash-workflows.ts",
     "features/editor/tiptap/line-break-round-trip.node.test.ts",
     "features/editor/tiptap/line-break-round-trip.test.ts",
+    "features/editor/tiptap/link-presentation/LinkCardTiptapExtension.tsx",
+    "features/editor/tiptap/link-presentation/StandaloneLinkCaption.tsx",
+    "features/editor/tiptap/link-presentation/link-presentation.test.ts",
+    "features/editor/tiptap/link-presentation/link-presentation.ts",
     "features/editor/tiptap/live-node-view.tsx",
     "features/editor/tiptap/live-translation-structure-lock.ts",
     "features/editor/tiptap/map/TiptapMapNodeView.story-fixtures.ts",
@@ -1521,6 +1526,8 @@
     "features/editor/tiptap/menus/map-external/AlignmentMenuActions.tsx",
     "features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu.test.tsx",
     "features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu.tsx",
+    "features/editor/tiptap/menus/map-external/LinkPresentationActions.stories.tsx",
+    "features/editor/tiptap/menus/map-external/LinkPresentationActions.tsx",
     "features/editor/tiptap/menus/map-external/MapSelectionMenu.test.tsx",
     "features/editor/tiptap/menus/map-external/MapSelectionMenu.tsx",
     "features/editor/tiptap/menus/map-external/MapSelectionMenuRegistry.test.ts",
@@ -1528,6 +1535,7 @@
     "features/editor/tiptap/menus/map-external/SelectionMenuDismissal.test.tsx",
     "features/editor/tiptap/menus/map-external/SelectionMenuPrimitives.tsx",
     "features/editor/tiptap/menus/map-external/TiptapExternalVideoSelectionBubbleMenu.tsx",
+    "features/editor/tiptap/menus/map-external/TiptapLinkPresentationBubbleMenu.tsx",
     "features/editor/tiptap/menus/map-external/TiptapMapSelectionBubbleMenu.tsx",
     "features/editor/tiptap/menus/map-external/index.ts",
     "features/editor/tiptap/menus/selection-bubble-authority.test.tsx",
@@ -1877,11 +1885,13 @@
     "features/media/ContentBlockMediaRuntimeContext.test.tsx",
     "features/media/ContentBlockMediaRuntimeContext.tsx",
     "features/media/ContentMediaDeliveryContext.tsx",
+    "features/media/ExternalVideoView.consent.test.tsx",
     "features/media/ExternalVideoView.test.tsx",
     "features/media/ExternalVideoView.tsx",
     "features/media/FileMediaPreview.test.tsx",
     "features/media/FileMediaPreview.tsx",
     "features/media/FilePreview.tsx",
+    "features/media/LocalizedExternalVideoView.tsx",
     "features/media/MediaBlockHydrator.test.tsx",
     "features/media/MediaBlockHydrator.tsx",
     "features/media/ThemedAssetImage.tsx",
@@ -1910,6 +1920,8 @@
     "features/media/ui/ExternalVideoView.stories.tsx",
     "features/media/ui/ExternalVideoView.tsx",
     "features/media/ui/ImageMediaView.tsx",
+    "features/media/ui/LinkCardView.stories.tsx",
+    "features/media/ui/LinkCardView.tsx",
     "features/media/ui/MediaBlockHeader.tsx",
     "features/media/ui/MediaBlockShell.tsx",
     "features/media/ui/MediaPlayerStatusOverlay.test.tsx",
@@ -1918,6 +1930,7 @@
     "features/media/ui/ThemedAssetImageView.stories.tsx",
     "features/media/ui/ThemedAssetImageView.tsx",
     "features/media/useAudioPlaybackController.ts",
+    "features/media/useExternalVideoPlaybackLabels.ts",
     "features/member/onboarding/NicknameOnboarding.test.tsx",
     "features/member/onboarding/NicknameOnboarding.tsx",
     "features/member/useNicknameValidation.test.tsx",
@@ -2836,6 +2849,8 @@
     "lib/actions/immersive-scene-optimization.ts",
     "lib/actions/label.test.ts",
     "lib/actions/label.ts",
+    "lib/actions/link-preview.test.ts",
+    "lib/actions/link-preview.ts",
     "lib/actions/mail-adapter.test.ts",
     "lib/actions/mail-adapter.ts",
     "lib/actions/map-place-create.test.ts",
@@ -6521,6 +6536,7 @@
         "features/form/FormDashboard/FieldStatsChart.tsx",
         "features/label/LabelEditor/ui/LabelParticipantsDialogView.tsx",
         "features/media-download/FileDownloadPolicyEditor.tsx",
+        "features/media/ui/LinkCardView.tsx",
         "features/metadata/ui/OgImagePreviewView.tsx",
         "features/metadata/ui/UrlSectionView.tsx",
         "features/my/MyWorksPageView.tsx",
@@ -8794,6 +8810,7 @@
         "features/label/LabelEditor/ui/LabelParticipantsDialogView.tsx",
         "features/media-download/AuthorizedDownloadAction.tsx",
         "features/media/AudioPlayer.tsx",
+        "features/media/ui/ExternalVideoView.tsx",
         "features/menu/AdminMenusPage.tsx",
         "features/menu/MenuItemsEditor.tsx",
         "features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
@@ -12612,6 +12629,7 @@
         "features/editor/ExternalVideoInsertDialog.tsx",
         "features/editor/tiptap/TiptapAuthoringControls.tsx",
         "features/editor/tiptap/code/CodeBlockSurface.tsx",
+        "features/editor/tiptap/link-presentation/StandaloneLinkCaption.tsx",
         "features/editor/tiptap/map/TiptapMapNodeView.tsx",
         "features/editor/tiptap/menus/SelectionBubbleMenu.tsx",
         "features/editor/ui/EditorMediaBlockShell.tsx",
@@ -13350,6 +13368,8 @@
         "features/map/ui/MapLibreMapView.tsx",
         "features/media-download/FileDownloadPolicyEditor.tsx",
         "features/media/ui/AttachmentSurface.tsx",
+        "features/media/ui/ExternalVideoView.tsx",
+        "features/media/ui/LinkCardView.tsx",
         "features/media/ui/MediaBlockHeader.tsx",
         "features/media/ui/MediaBlockShell.tsx",
         "features/member/onboarding/NicknameOnboarding.tsx",
@@ -14324,6 +14344,8 @@
         "components/core/SelectionSurface/SelectionSurface.tsx",
         "features/artist/ArtistEditor/ArtistImageGalleryEditor.tsx",
         "features/media/FilePreview.tsx",
+        "features/media/ui/ExternalVideoView.tsx",
+        "features/media/ui/LinkCardView.tsx",
         "features/post/PostHeader/PostHeader.tsx"
       ],
       "catalogAdapters": [],
@@ -16525,6 +16547,7 @@
         "features/form/PublicFormView.tsx",
         "features/map/BaseMap.tsx",
         "features/media/ui/AttachmentSurface.tsx",
+        "features/media/ui/LinkCardView.tsx",
         "features/metadata/MetadataPanel/MetadataPanel.tsx",
         "features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
         "features/metadata/ui/OgGenerationRunProgressView.tsx",
@@ -18718,6 +18741,7 @@
         "features/cookie-consent/ui/CookieConsentBannerView.tsx",
         "features/editor/ExternalVideoEditorPreview.tsx",
         "features/editor/components/EditorFileLibraryPickerView.tsx",
+        "features/editor/tiptap/link-presentation/StandaloneLinkCaption.tsx",
         "features/editor/tiptap/map/TiptapMapNodeView.tsx",
         "features/editor/ui/EditorMediaBlockShell.tsx",
         "features/file-manager/FileManagerView.tsx",
@@ -19623,6 +19647,7 @@
         "features/editor/components/UnifiedFileAttachmentPagePreview.tsx",
         "features/editor/tiptap/TiptapFileBlockNodeView.tsx",
         "features/editor/tiptap/code/CodeBlockSurface.tsx",
+        "features/editor/tiptap/link-presentation/StandaloneLinkCaption.tsx",
         "features/editor/tiptap/map/TiptapMapNodeView.tsx",
         "features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu.tsx",
         "features/editor/tiptap/menus/map-external/MapSelectionMenu.tsx",
@@ -19667,6 +19692,8 @@
         "features/media/AudioMediaView.tsx",
         "features/media/VideoMediaView.tsx",
         "features/media/ui/AttachmentSurface.tsx",
+        "features/media/ui/ExternalVideoView.tsx",
+        "features/media/ui/LinkCardView.tsx",
         "features/media/ui/MediaBlockShell.tsx",
         "features/menu/AdminMenusPage.tsx",
         "features/menu/MenuItemsEditor.tsx",
@@ -19704,6 +19731,7 @@
         "features/page/PageEditor/SectionSettingsForm.tsx",
         "features/page/PageEditor/editors/ColumnsEditor.tsx",
         "features/page/PageRestrictedAccess.tsx",
+        "features/page/PageView/blocks/GeneratedRichTextBlockViewRuntime.tsx",
         "features/page/blocks/ListBlockEditorBase.tsx",
         "features/page/blocks/ListViewShell.tsx",
         "features/page/blocks/author-list/Editor.tsx",
@@ -34492,6 +34520,7 @@
         "features/editor/hooks/useBlockAuthoringUpdates.ts",
         "features/editor/tiptap/TiptapEditor.tsx",
         "features/editor/tiptap/TiptapFileBlockNodeView.tsx",
+        "features/editor/tiptap/link-presentation/LinkCardTiptapExtension.tsx",
         "features/editor/tiptap/menus/selection-bubble-commands.ts",
         "features/editor/tiptap/profiles/CompactTiptapEditor.tsx",
         "features/editor/tiptap/profiles/EmailTiptapEditor.tsx",
@@ -34722,6 +34751,16 @@
               "name": "videoView",
               "optional": true,
               "type": "React.ComponentType<ExternalVideoViewProps>"
+            },
+            {
+              "name": "thumbnailUrl",
+              "optional": true,
+              "type": "string | null"
+            },
+            {
+              "name": "playbackLabels",
+              "optional": true,
+              "type": "ExternalVideoPlaybackLabelFormatter"
             }
           ]
         }
@@ -36603,6 +36642,11 @@
               "type": "MarkdownImageImporter"
             },
             {
+              "name": "linkPresentation",
+              "optional": true,
+              "type": "LinkPresentationRuntime"
+            },
+            {
               "name": "externalVideo",
               "optional": true,
               "type": "TiptapExternalVideoOptions | false"
@@ -36730,6 +36774,11 @@
               "type": "TiptapExternalVideoLabels"
             },
             {
+              "name": "linkPresentation",
+              "optional": false,
+              "type": "{ labels: LinkPresentationLabels; runtime: LinkPresentationRuntime }"
+            },
+            {
               "name": "codeBlockLabels",
               "optional": false,
               "type": "CodeBlockSelectionMenuLabels"
@@ -36804,6 +36853,7 @@
         "TiptapContextualMenuRouter",
         "TiptapExecutableSelectionBubbleMenu",
         "TiptapExternalVideoSelectionBubbleMenu",
+        "TiptapLinkPresentationBubbleMenu",
         "TiptapMapSelectionBubbleMenu",
         "TiptapMapSelectionMenuRegistryProvider",
         "div"
@@ -37612,6 +37662,21 @@
               "name": "videoView",
               "optional": true,
               "type": "ComponentType<ExternalVideoViewProps>"
+            },
+            {
+              "name": "runtimeStore",
+              "optional": true,
+              "type": "EditorMediaRuntimeStore"
+            },
+            {
+              "name": "playbackLabels",
+              "optional": true,
+              "type": "ExternalVideoPlaybackLabelFormatter"
+            },
+            {
+              "name": "captionLabels",
+              "optional": true,
+              "type": "StandaloneLinkCaptionLabels"
             }
           ]
         },
@@ -37757,10 +37822,16 @@
         "features/editor/external-video-insert.test.ts",
         "features/editor/tiptap/block-room-external-video-codec.test.ts",
         "features/editor/tiptap/external-video/ExternalVideoTiptapExtension.schema.test.ts",
-        "features/editor/tiptap/external-video/ExternalVideoTiptapExtension.test.tsx"
+        "features/editor/tiptap/external-video/ExternalVideoTiptapExtension.test.tsx",
+        "features/editor/tiptap/link-presentation/link-presentation.test.ts"
       ],
       "stories": [],
-      "composedJsx": ["ExternalVideoEditorPreview", "NodeViewWrapper", "TiptapExternalVideoNodeView"]
+      "composedJsx": [
+        "ExternalVideoEditorPreview",
+        "NodeViewWrapper",
+        "StandaloneLinkCaption",
+        "TiptapExternalVideoNodeView"
+      ]
     },
     {
       "file": "features/editor/tiptap/integration/contextual-menu-router.tsx",
@@ -37784,6 +37855,152 @@
       "composedJsx": ["TiptapSelectionBubbleMenu", "TiptapTableMenu"]
     },
     {
+      "file": "features/editor/tiptap/link-presentation/LinkCardTiptapExtension.tsx",
+      "owner": "Feature/editor",
+      "exports": [
+        {
+          "name": "LinkPresentationPaste",
+          "kind": "value"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "LinkPreviewSource",
+          "extends": [],
+          "properties": [
+            {
+              "name": "title",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "description",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "siteName",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "imageSource",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "iconSource",
+              "optional": false,
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "LinkPresentationRuntime",
+          "extends": [],
+          "properties": [
+            {
+              "name": "loadPreview",
+              "optional": false,
+              "type": "(url: string) => Promise<LinkPreviewSource | null>"
+            },
+            {
+              "name": "importImage",
+              "optional": true,
+              "type": "(source: string) => Promise<string | null>"
+            }
+          ]
+        },
+        {
+          "name": "TiptapLinkCardOptions",
+          "extends": [],
+          "properties": [
+            {
+              "name": "labels",
+              "optional": false,
+              "type": "LinkPresentationLabels"
+            },
+            {
+              "name": "runtimeStore",
+              "optional": true,
+              "type": "EditorMediaRuntimeStore"
+            }
+          ]
+        },
+        {
+          "name": "LinkPresentationState",
+          "extends": [],
+          "properties": [
+            {
+              "name": "pasted",
+              "optional": false,
+              "type": "{ blockId: string; url: string } | null"
+            },
+            {
+              "name": "pending",
+              "optional": false,
+              "type": "readonly string[]"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [
+        {
+          "name": "LinkPresentationMeta",
+          "type": "{ pasted: LinkPresentationState['pasted'] } | { pending: string; active: boolean }"
+        }
+      ],
+      "productionConsumers": [
+        "features/editor/tiptap/TiptapEditor.tsx",
+        "features/editor/tiptap/external-video/ExternalVideoTiptapExtension.tsx",
+        "features/editor/tiptap/menus/map-external/TiptapExternalVideoSelectionBubbleMenu.tsx",
+        "features/editor/tiptap/menus/map-external/TiptapLinkPresentationBubbleMenu.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": ["features/editor/tiptap/link-presentation/link-presentation.test.ts"],
+      "stories": [],
+      "composedJsx": ["LinkCardView", "NodeViewWrapper", "StandaloneLinkCaption", "TiptapLinkCardNodeView"]
+    },
+    {
+      "file": "features/editor/tiptap/link-presentation/StandaloneLinkCaption.tsx",
+      "owner": "Feature/editor",
+      "exports": [
+        {
+          "name": "StandaloneLinkCaption",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "StandaloneLinkCaptionLabels",
+          "extends": [],
+          "properties": [
+            {
+              "name": "addCaption",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "captionPlaceholder",
+              "optional": false,
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": [
+        "features/editor/tiptap/external-video/ExternalVideoTiptapExtension.tsx",
+        "features/editor/tiptap/link-presentation/LinkCardTiptapExtension.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["Text", "TextButton", "TextInput"]
+    },
+    {
       "file": "features/editor/tiptap/live-node-view.tsx",
       "owner": "Feature/editor",
       "exports": [
@@ -37800,6 +38017,7 @@
         "features/editor/tiptap/TiptapEditor.tsx",
         "features/editor/tiptap/code/CodeBlockNode.tsx",
         "features/editor/tiptap/external-video/ExternalVideoTiptapExtension.tsx",
+        "features/editor/tiptap/link-presentation/LinkCardTiptapExtension.tsx",
         "features/editor/tiptap/map/TiptapMapNodeView.tsx",
         "features/editor/tiptap/math/TiptapMathNodeViews.tsx",
         "features/editor/tiptap/mermaid/mermaid-extension.tsx",
@@ -38561,6 +38779,11 @@
               "name": "onEscape",
               "optional": true,
               "type": "() => void"
+            },
+            {
+              "name": "presentationActions",
+              "optional": true,
+              "type": "ReactNode"
             }
           ]
         }
@@ -38587,6 +38810,130 @@
         "SelectionMenuSurface",
         "span"
       ]
+    },
+    {
+      "file": "features/editor/tiptap/menus/map-external/LinkPresentationActions.tsx",
+      "owner": "Feature/editor",
+      "exports": [
+        {
+          "name": "LinkPresentationActions",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "LinkPresentationLabels",
+          "extends": [],
+          "properties": [
+            {
+              "name": "menu",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "asLink",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "asCard",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "asVideo",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "refreshPreview",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "loadingPreview",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "previewUnavailable",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "playVideo",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "playNotice",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "addCaption",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "captionPlaceholder",
+              "optional": false,
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "LinkPresentationActionsProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "labels",
+              "optional": false,
+              "type": "LinkPresentationLabels"
+            },
+            {
+              "name": "presentations",
+              "optional": false,
+              "type": "readonly LinkPresentation[]"
+            },
+            {
+              "name": "current",
+              "optional": false,
+              "type": "LinkPresentation"
+            },
+            {
+              "name": "disabled",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
+              "name": "onChange",
+              "optional": true,
+              "type": "(presentation: LinkPresentation) => void"
+            },
+            {
+              "name": "onRefresh",
+              "optional": true,
+              "type": "() => void"
+            },
+            {
+              "name": "refreshing",
+              "optional": true,
+              "type": "boolean"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": [
+        "features/editor/tiptap/menus/map-external/TiptapExternalVideoSelectionBubbleMenu.tsx",
+        "features/editor/tiptap/menus/map-external/TiptapLinkPresentationBubbleMenu.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": ["features/editor/tiptap/menus/map-external/LinkPresentationActions.stories.tsx"],
+      "composedJsx": ["Icon", "IconRefresh", "SelectionMenuAction"]
     },
     {
       "file": "features/editor/tiptap/menus/map-external/MapSelectionMenu.tsx",
@@ -38943,11 +39290,13 @@
         "features/editor/tiptap/menus/executable/ExecutableSelectionMenu.tsx",
         "features/editor/tiptap/menus/map-external/AlignmentMenuActions.tsx",
         "features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu.tsx",
-        "features/editor/tiptap/menus/map-external/MapSelectionMenu.tsx"
+        "features/editor/tiptap/menus/map-external/LinkPresentationActions.tsx",
+        "features/editor/tiptap/menus/map-external/MapSelectionMenu.tsx",
+        "features/editor/tiptap/menus/map-external/TiptapLinkPresentationBubbleMenu.tsx"
       ],
       "catalogAdapters": [],
       "tests": [],
-      "stories": [],
+      "stories": ["features/editor/tiptap/menus/map-external/LinkPresentationActions.stories.tsx"],
       "composedJsx": ["DsLayoutInline", "EditorToolbarAction", "ToolbarSurface"]
     },
     {
@@ -38979,6 +39328,11 @@
               "name": "onEditLink",
               "optional": true,
               "type": "(video: TiptapStandaloneExternalVideo) => void"
+            },
+            {
+              "name": "presentation",
+              "optional": true,
+              "type": "{ labels: LinkPresentationLabels; runtime?: LinkPresentationRuntime }"
             }
           ]
         }
@@ -38988,7 +39342,73 @@
       "catalogAdapters": [],
       "tests": ["features/editor/tiptap/menus/map-external/SelectionMenuDismissal.test.tsx"],
       "stories": [],
-      "composedJsx": ["BubbleMenu", "ExternalVideoSelectionMenu"]
+      "composedJsx": ["BubbleMenu", "ExternalVideoSelectionMenu", "LinkPresentationActions"]
+    },
+    {
+      "file": "features/editor/tiptap/menus/map-external/TiptapLinkPresentationBubbleMenu.tsx",
+      "owner": "Feature/editor",
+      "exports": [
+        {
+          "name": "TiptapLinkPresentationBubbleMenu",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "LinkPresentationTarget",
+          "extends": [],
+          "properties": [
+            {
+              "name": "blockId",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "url",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "current",
+              "optional": false,
+              "type": "LinkPresentation"
+            },
+            {
+              "name": "entry",
+              "optional": false,
+              "type": "StandaloneLinkBlock | null"
+            }
+          ]
+        },
+        {
+          "name": "TiptapLinkPresentationBubbleMenuProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "editor",
+              "optional": false,
+              "type": "Editor"
+            },
+            {
+              "name": "labels",
+              "optional": false,
+              "type": "LinkPresentationLabels"
+            },
+            {
+              "name": "runtime",
+              "optional": true,
+              "type": "LinkPresentationRuntime"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["features/editor/tiptap/TiptapEditor.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["BubbleMenu", "LinkPresentationActions", "SelectionMenuSurface"]
     },
     {
       "file": "features/editor/tiptap/menus/map-external/TiptapMapSelectionBubbleMenu.tsx",
@@ -47876,6 +48296,7 @@
         "features/page/PageView/PageContentView.tsx",
         "features/page/PageView/blocks/DefaultBlockView.tsx",
         "features/page/PageView/blocks/GeneratedFileBlockView.tsx",
+        "features/page/PageView/blocks/GeneratedRichTextBlockViewRuntime.tsx",
         "features/page/blocks/immersive-scene/ViewRuntime.tsx",
         "features/post/PostEditor/PostEditorBody.tsx",
         "features/post/PostViewContent.tsx"
@@ -48011,6 +48432,16 @@
               "type": "ExternalVideoAspectRatio | 'auto'"
             },
             {
+              "name": "thumbnailUrl",
+              "optional": true,
+              "type": "string | null"
+            },
+            {
+              "name": "playbackLabels",
+              "optional": true,
+              "type": "ExternalVideoPlaybackLabelFormatter"
+            },
+            {
               "name": "className",
               "optional": true,
               "type": "string"
@@ -48023,14 +48454,19 @@
           ]
         }
       ],
-      "typeAliasEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "ExternalVideoPlaybackLabelFormatter",
+          "type": "(input: { title: string; provider: string; }) => ExternalVideoPlaybackLabels"
+        }
+      ],
       "productionConsumers": [
         "features/editor/ExternalVideoEditorPreview.tsx",
-        "features/page/blocks/external-video/CanvasPreview.tsx",
-        "features/page/blocks/external-video/View.tsx"
+        "features/media/LocalizedExternalVideoView.tsx",
+        "features/page/blocks/external-video/CanvasPreview.tsx"
       ],
       "catalogAdapters": [],
-      "tests": ["features/media/ExternalVideoView.test.tsx"],
+      "tests": ["features/media/ExternalVideoView.consent.test.tsx", "features/media/ExternalVideoView.test.tsx"],
       "stories": [],
       "composedJsx": ["ExternalVideoPlayerView", "a", "span"]
     },
@@ -48186,6 +48622,24 @@
       "tests": [],
       "stories": [],
       "composedJsx": ["FileMediaPreview", "FileTypeIcon", "MediaImage", "iframe"]
+    },
+    {
+      "file": "features/media/LocalizedExternalVideoView.tsx",
+      "owner": "Feature/media",
+      "exports": [
+        {
+          "name": "LocalizedExternalVideoView",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["features/page/blocks/external-video/View.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["ExternalVideoView"]
     },
     {
       "file": "features/media/MediaBlockHydrator.tsx",
@@ -48580,6 +49034,22 @@
       "classification": "feature-ui boundary candidate (path-based; inspect source)",
       "propsEvidence": [
         {
+          "name": "ExternalVideoPlaybackLabels",
+          "extends": [],
+          "properties": [
+            {
+              "name": "play",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "notice",
+              "optional": false,
+              "type": "string"
+            }
+          ]
+        },
+        {
           "name": "ExternalVideoPlayerViewProps",
           "extends": [],
           "properties": [
@@ -48614,6 +49084,21 @@
               "type": "ExternalVideoPlayerAspectRatio"
             },
             {
+              "name": "consented",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
+              "name": "thumbnailUrl",
+              "optional": true,
+              "type": "string | null"
+            },
+            {
+              "name": "playbackLabels",
+              "optional": true,
+              "type": "ExternalVideoPlaybackLabels"
+            },
+            {
               "name": "className",
               "optional": true,
               "type": "string"
@@ -48636,7 +49121,19 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": ["features/media/ui/ExternalVideoView.stories.tsx"],
-      "composedJsx": ["a", "div", "figcaption", "figure", "iframe", "span"]
+      "composedJsx": [
+        "IconButton",
+        "IconPlayerPlayFilled",
+        "LayoutInline",
+        "MediaImage",
+        "Text",
+        "a",
+        "div",
+        "figcaption",
+        "figure",
+        "iframe",
+        "span"
+      ]
     },
     {
       "file": "features/media/ui/ImageMediaView.tsx",
@@ -48701,6 +49198,92 @@
       "tests": ["features/media/media-view.test.tsx"],
       "stories": [],
       "composedJsx": ["MediaBlockCaption", "MediaBlockShell", "div", "img"]
+    },
+    {
+      "file": "features/media/ui/LinkCardView.tsx",
+      "owner": "Feature/media",
+      "exports": [
+        {
+          "name": "LinkCardView",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-ui boundary candidate (path-based; inspect source)",
+      "propsEvidence": [
+        {
+          "name": "LinkCardViewProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "url",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "title",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "description",
+              "optional": true,
+              "type": "string"
+            },
+            {
+              "name": "thumbnailUrl",
+              "optional": true,
+              "type": "string | null"
+            },
+            {
+              "name": "iconUrl",
+              "optional": true,
+              "type": "string | null"
+            },
+            {
+              "name": "loadingLabel",
+              "optional": true,
+              "type": "string"
+            },
+            {
+              "name": "caption",
+              "optional": true,
+              "type": "ReactNode"
+            },
+            {
+              "name": "interactive",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
+              "name": "style",
+              "optional": true,
+              "type": "CSSProperties"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": [
+        "features/editor/tiptap/link-presentation/LinkCardTiptapExtension.tsx",
+        "features/page/PageView/blocks/GeneratedRichTextBlockViewRuntime.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": ["features/media/ui/LinkCardView.stories.tsx"],
+      "composedJsx": [
+        "IconWorld",
+        "LayoutInline",
+        "LayoutStack",
+        "MediaImage",
+        "SectionCard",
+        "Spinner",
+        "Text",
+        "a",
+        "div",
+        "figcaption",
+        "figure",
+        "span"
+      ]
     },
     {
       "file": "features/media/ui/MediaBlockHeader.tsx",
@@ -54751,12 +55334,14 @@
         "GeneratedRichTextBlockContent",
         "GeneratedRichTextBlockView",
         "Heading",
+        "LinkCardView",
         "List",
         "PublicDocumentBlock",
         "PublicListItem",
         "PublicSiteVariable",
         "PublicSiteVariableLink",
         "PublicSiteVariableText",
+        "Text",
         "aside",
         "blockquote",
         "br",
@@ -75464,7 +76049,8 @@
       "category": "governance",
       "sourceFiles": [
         "features/cookie-consent/CookieConsentBanner.tsx",
-        "features/cookie-consent/ui/CookieConsentBannerView.tsx"
+        "features/cookie-consent/ui/CookieConsentBannerView.tsx",
+        "features/cookie-consent/useOptionalCookieConsent.ts"
       ],
       "components": [
         "features/cookie-consent/CookieConsentBanner.tsx",
@@ -75770,6 +76356,9 @@
         "features/editor/tiptap/integration/file-block-workflow.ts",
         "features/editor/tiptap/integration/map-insert-workflow.ts",
         "features/editor/tiptap/integration/slash-workflows.ts",
+        "features/editor/tiptap/link-presentation/LinkCardTiptapExtension.tsx",
+        "features/editor/tiptap/link-presentation/StandaloneLinkCaption.tsx",
+        "features/editor/tiptap/link-presentation/link-presentation.ts",
         "features/editor/tiptap/live-node-view.tsx",
         "features/editor/tiptap/live-translation-structure-lock.ts",
         "features/editor/tiptap/map/TiptapMapNodeView.story-fixtures.ts",
@@ -75791,10 +76380,12 @@
         "features/editor/tiptap/menus/index.ts",
         "features/editor/tiptap/menus/map-external/AlignmentMenuActions.tsx",
         "features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu.tsx",
+        "features/editor/tiptap/menus/map-external/LinkPresentationActions.tsx",
         "features/editor/tiptap/menus/map-external/MapSelectionMenu.tsx",
         "features/editor/tiptap/menus/map-external/MapSelectionMenuRegistry.tsx",
         "features/editor/tiptap/menus/map-external/SelectionMenuPrimitives.tsx",
         "features/editor/tiptap/menus/map-external/TiptapExternalVideoSelectionBubbleMenu.tsx",
+        "features/editor/tiptap/menus/map-external/TiptapLinkPresentationBubbleMenu.tsx",
         "features/editor/tiptap/menus/map-external/TiptapMapSelectionBubbleMenu.tsx",
         "features/editor/tiptap/menus/map-external/index.ts",
         "features/editor/tiptap/menus/selection-bubble-commands.ts",
@@ -75919,6 +76510,8 @@
         "features/editor/tiptap/emoji/TiptapEmojiPicker.tsx",
         "features/editor/tiptap/external-video/ExternalVideoTiptapExtension.tsx",
         "features/editor/tiptap/integration/contextual-menu-router.tsx",
+        "features/editor/tiptap/link-presentation/LinkCardTiptapExtension.tsx",
+        "features/editor/tiptap/link-presentation/StandaloneLinkCaption.tsx",
         "features/editor/tiptap/live-node-view.tsx",
         "features/editor/tiptap/map/TiptapMapNodeView.tsx",
         "features/editor/tiptap/math/TiptapMathNodeViews.tsx",
@@ -75928,10 +76521,12 @@
         "features/editor/tiptap/menus/executable/TiptapExecutableSelectionBubbleMenu.tsx",
         "features/editor/tiptap/menus/map-external/AlignmentMenuActions.tsx",
         "features/editor/tiptap/menus/map-external/ExternalVideoSelectionMenu.tsx",
+        "features/editor/tiptap/menus/map-external/LinkPresentationActions.tsx",
         "features/editor/tiptap/menus/map-external/MapSelectionMenu.tsx",
         "features/editor/tiptap/menus/map-external/MapSelectionMenuRegistry.tsx",
         "features/editor/tiptap/menus/map-external/SelectionMenuPrimitives.tsx",
         "features/editor/tiptap/menus/map-external/TiptapExternalVideoSelectionBubbleMenu.tsx",
+        "features/editor/tiptap/menus/map-external/TiptapLinkPresentationBubbleMenu.tsx",
         "features/editor/tiptap/menus/map-external/TiptapMapSelectionBubbleMenu.tsx",
         "features/editor/tiptap/mermaid/MermaidNodeView.tsx",
         "features/editor/tiptap/p5/P5CapabilityControl.tsx",
@@ -75967,6 +76562,7 @@
         "features/editor/tiptap/TiptapPublicBlockComparison.stories.tsx",
         "features/editor/tiptap/code-editor/MonacoSourceEditor.stories.tsx",
         "features/editor/tiptap/menus/EditorMenus.stories.tsx",
+        "features/editor/tiptap/menus/map-external/LinkPresentationActions.stories.tsx",
         "features/editor/tiptap/profiles/CompactTiptapEditor.stories.tsx",
         "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
         "features/editor/toolbars/EditorColorStyleButton.stories.tsx"
@@ -76063,6 +76659,7 @@
         "features/editor/tiptap/integration/slash-workflows.test.ts",
         "features/editor/tiptap/line-break-round-trip.node.test.ts",
         "features/editor/tiptap/line-break-round-trip.test.ts",
+        "features/editor/tiptap/link-presentation/link-presentation.test.ts",
         "features/editor/tiptap/map/TiptapMapNodeView.test.tsx",
         "features/editor/tiptap/markdown-paste.node.test.ts",
         "features/editor/tiptap/markdown-paste.test.ts",
@@ -76486,6 +77083,7 @@
         "features/media/ExternalVideoView.tsx",
         "features/media/FileMediaPreview.tsx",
         "features/media/FilePreview.tsx",
+        "features/media/LocalizedExternalVideoView.tsx",
         "features/media/MediaBlockHydrator.tsx",
         "features/media/ThemedAssetImage.tsx",
         "features/media/VideoMediaView.tsx",
@@ -76502,12 +77100,14 @@
         "features/media/ui/AttachmentSurface.tsx",
         "features/media/ui/ExternalVideoView.tsx",
         "features/media/ui/ImageMediaView.tsx",
+        "features/media/ui/LinkCardView.tsx",
         "features/media/ui/MediaBlockHeader.tsx",
         "features/media/ui/MediaBlockShell.tsx",
         "features/media/ui/MediaPlayerStatusOverlay.tsx",
         "features/media/ui/MissingMediaView.tsx",
         "features/media/ui/ThemedAssetImageView.tsx",
-        "features/media/useAudioPlaybackController.ts"
+        "features/media/useAudioPlaybackController.ts",
+        "features/media/useExternalVideoPlaybackLabels.ts"
       ],
       "components": [
         "features/media/AudioMediaView.tsx",
@@ -76517,6 +77117,7 @@
         "features/media/ExternalVideoView.tsx",
         "features/media/FileMediaPreview.tsx",
         "features/media/FilePreview.tsx",
+        "features/media/LocalizedExternalVideoView.tsx",
         "features/media/MediaBlockHydrator.tsx",
         "features/media/ThemedAssetImage.tsx",
         "features/media/VideoMediaView.tsx",
@@ -76525,6 +77126,7 @@
         "features/media/ui/AttachmentSurface.tsx",
         "features/media/ui/ExternalVideoView.tsx",
         "features/media/ui/ImageMediaView.tsx",
+        "features/media/ui/LinkCardView.tsx",
         "features/media/ui/MediaBlockHeader.tsx",
         "features/media/ui/MediaBlockShell.tsx",
         "features/media/ui/MediaPlayerStatusOverlay.tsx",
@@ -76536,11 +77138,13 @@
         "features/media/VideoPlayer.stories.tsx",
         "features/media/ui/AttachmentSurface.stories.tsx",
         "features/media/ui/ExternalVideoView.stories.tsx",
+        "features/media/ui/LinkCardView.stories.tsx",
         "features/media/ui/ThemedAssetImageView.stories.tsx"
       ],
       "tests": [
         "features/media/AudioPlayer.test.tsx",
         "features/media/ContentBlockMediaRuntimeContext.test.tsx",
+        "features/media/ExternalVideoView.consent.test.tsx",
         "features/media/ExternalVideoView.test.tsx",
         "features/media/FileMediaPreview.test.tsx",
         "features/media/MediaBlockHydrator.test.tsx",
@@ -82612,6 +83216,37 @@
       "importedSources": ["stories/shared/EditorMenusPreview.tsx", "stories/shared/EditorRuntimePreview.tsx"]
     },
     {
+      "file": "features/editor/tiptap/menus/map-external/LinkPresentationActions.stories.tsx",
+      "title": "Feature/Editor/Link Presentation Menu",
+      "component": "LinkPresentationMenuPreview",
+      "variants": [
+        {
+          "name": "PastedLink",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/feature-editor-link-presentation-menu--pasted-link"
+        },
+        {
+          "name": "PastedVideoLink",
+          "args": "{ presentations: ['video', 'card', 'link'], initial: 'video' }",
+          "preview": "http://localhost:6010/?path=/story/feature-editor-link-presentation-menu--pasted-video-link"
+        },
+        {
+          "name": "SelectedCard",
+          "args": "{ initial: 'card', refreshable: true }",
+          "preview": "http://localhost:6010/?path=/story/feature-editor-link-presentation-menu--selected-card"
+        },
+        {
+          "name": "RefreshingPreview",
+          "args": "{ initial: 'card', refreshable: true, refreshing: true }",
+          "preview": "http://localhost:6010/?path=/story/feature-editor-link-presentation-menu--refreshing-preview"
+        }
+      ],
+      "importedSources": [
+        "features/editor/tiptap/menus/map-external/LinkPresentationActions.tsx",
+        "features/editor/tiptap/menus/map-external/SelectionMenuPrimitives.tsx"
+      ]
+    },
+    {
       "file": "features/editor/tiptap/profiles/CompactTiptapEditor.stories.tsx",
       "title": "Feature/Editor/Compact Frame",
       "component": null,
@@ -82952,9 +83587,87 @@
           "name": "Print",
           "args": null,
           "preview": "http://localhost:6010/?path=/story/feature-media-external-video--print"
+        },
+        {
+          "name": "WaitingForConsent",
+          "args": "{ consented: false, thumbnailUrl: '/storybook/media/video-poster.jpg', playbackLabels }",
+          "preview": "http://localhost:6010/?path=/story/feature-media-external-video--waiting-for-consent"
+        },
+        {
+          "name": "WaitingForConsentWithoutThumbnail",
+          "args": "{ consented: false, thumbnailUrl: null, playbackLabels }",
+          "preview": "http://localhost:6010/?path=/story/feature-media-external-video--waiting-for-consent-without-thumbnail"
+        },
+        {
+          "name": "ShortsWaitingForConsent",
+          "args": "{ consented: false, aspectRatio: '9:16', thumbnailUrl: '/storybook/media/video-poster.jpg', playbackLabels }",
+          "preview": "http://localhost:6010/?path=/story/feature-media-external-video--shorts-waiting-for-consent"
+        },
+        {
+          "name": "NarrowWaitingForConsent",
+          "args": "{ consented: false, thumbnailUrl: '/storybook/media/video-poster.jpg', playbackLabels }",
+          "preview": "http://localhost:6010/?path=/story/feature-media-external-video--narrow-waiting-for-consent"
         }
       ],
       "importedSources": ["features/media/ui/ExternalVideoView.tsx"]
+    },
+    {
+      "file": "features/media/ui/LinkCardView.stories.tsx",
+      "title": "Feature/Media/Link Card",
+      "component": "LinkCardView",
+      "variants": [
+        {
+          "name": "Default",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/feature-media-link-card--default"
+        },
+        {
+          "name": "WithoutThumbnail",
+          "args": "{ thumbnailUrl: null }",
+          "preview": "http://localhost:6010/?path=/story/feature-media-link-card--without-thumbnail"
+        },
+        {
+          "name": "WithoutIcon",
+          "args": "{ iconUrl: null }",
+          "preview": "http://localhost:6010/?path=/story/feature-media-link-card--without-icon"
+        },
+        {
+          "name": "WithCaption",
+          "args": "{ caption: 'Pressed on 180 g vinyl; the download code is inside the sleeve.' }",
+          "preview": "http://localhost:6010/?path=/story/feature-media-link-card--with-caption"
+        },
+        {
+          "name": "WithoutDescription",
+          "args": "{ description: '' }",
+          "preview": "http://localhost:6010/?path=/story/feature-media-link-card--without-description"
+        },
+        {
+          "name": "HostOnly",
+          "args": "{ url: 'https://github.com/echovisionlab/geul', title: '', description: '', thumbnailUrl: null, iconUrl: null, }",
+          "preview": "http://localhost:6010/?path=/story/feature-media-link-card--host-only"
+        },
+        {
+          "name": "LongTitle",
+          "args": "{ title: 'An unusually long page title that keeps going to check that the card clamps it to two lines without pushing the thumbnail out of the row', }",
+          "preview": "http://localhost:6010/?path=/story/feature-media-link-card--long-title"
+        },
+        {
+          "name": "LoadingPreview",
+          "args": "{ title: '', description: '', thumbnailUrl: null, iconUrl: null, loadingLabel: 'Loading preview…' }",
+          "preview": "http://localhost:6010/?path=/story/feature-media-link-card--loading-preview"
+        },
+        {
+          "name": "EditorCard",
+          "args": "{ interactive: false }",
+          "preview": "http://localhost:6010/?path=/story/feature-media-link-card--editor-card"
+        },
+        {
+          "name": "Narrow",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/feature-media-link-card--narrow"
+        }
+      ],
+      "importedSources": ["features/media/ui/LinkCardView.tsx"]
     },
     {
       "file": "features/media/ui/ThemedAssetImageView.stories.tsx",
