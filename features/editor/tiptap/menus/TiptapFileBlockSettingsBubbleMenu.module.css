@@ -1,7 +1,0 @@
-.slot {
-  width: min(36rem, calc(100vw - var(--geul-spacing-md)));
-}
-
-.slot:empty {
-  display: none;
-}

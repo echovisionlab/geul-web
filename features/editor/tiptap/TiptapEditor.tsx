@@ -10,11 +10,7 @@ import type { LinkPresentationLabels } from './menus/map-external/LinkPresentati
 import type { ExternalVideoPlaybackLabelFormatter } from '@/features/media/ExternalVideoView';
 import { TiptapLinkPresentationBubbleMenu } from './menus/map-external/TiptapLinkPresentationBubbleMenu';
 import { useDisplaySizeLabels } from './menus/map-external/useDisplaySizeLabels';
-import {
-  createFileBlockSettingsSlot,
-  TiptapFileBlockSettingsBubbleMenu,
-  type FileBlockSettingsSlot,
-} from './menus/TiptapFileBlockSettingsBubbleMenu';
+import { createFileBlockSettingsSlot, type FileBlockSettingsSlot } from './menus/file-block-settings-slot';
 import { EditorRuntimeOptions } from './live-node-view';
 import {
   useCallback,
@@ -96,6 +92,7 @@ import { TiptapContextualMenuRouter } from './integration/contextual-menu-router
 import { createTiptapBlockContainer } from './TiptapBlockContainerNodeView';
 import {
   TiptapAuthoringControls,
+  TiptapFileBubbleMenu,
   type TiptapAuthoringCapabilities,
   type TiptapAuthoringControlsCallbacks,
   type TiptapSlashActionContext,
@@ -335,7 +332,14 @@ function EditorChrome({
       {canMutateStructure ? (
         <CodeBlockSelectionMenu editor={editor} authoringMode={authoringMode} labels={codeBlockLabels} />
       ) : null}
-      {editable ? <TiptapFileBlockSettingsBubbleMenu editor={editor} slot={fileBlockSettingsSlot} /> : null}
+      {editable ? (
+        <TiptapFileBubbleMenu
+          editor={editor}
+          onFileActivate={onFileActivate}
+          structure={canMutateStructure}
+          settingsSlot={fileBlockSettingsSlot}
+        />
+      ) : null}
       {canMutateStructure ? (
         <TiptapMapSelectionBubbleMenu editor={editor} labels={mapMenuLabels} registry={mapSelectionRegistry} />
       ) : null}

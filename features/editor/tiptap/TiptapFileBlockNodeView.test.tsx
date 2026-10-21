@@ -15,11 +15,7 @@ import {
 import { createTiptapWireExtensions } from './wire-schema';
 import { createTiptapFileNode } from './TiptapFileBlockNodeView';
 import { EditorAuthoringModeProvider } from '@/features/editor/EditorAuthoringMode';
-import {
-  createFileBlockSettingsSlot,
-  TiptapFileBlockSettingsBubbleMenu,
-  type FileBlockSettingsSlot,
-} from './menus/TiptapFileBlockSettingsBubbleMenu';
+import { createFileBlockSettingsSlot, type FileBlockSettingsSlot } from './menus/file-block-settings-slot';
 
 const getFileStatusesAction = vi.hoisted(() => vi.fn());
 const audioMediaViewRender = vi.hoisted(() => vi.fn());
@@ -160,7 +156,8 @@ function TestEditor({
   return (
     <>
       <EditorContent editor={editor} />
-      {editor && settingsSlot ? <TiptapFileBlockSettingsBubbleMenu editor={editor} slot={settingsSlot} /> : null}
+      {/* Stands in for the File menu's settings popover, which hosts the slot beside the editor. */}
+      {settingsSlot ? <div ref={settingsSlot.set} data-file-block-settings="" /> : null}
     </>
   );
 }

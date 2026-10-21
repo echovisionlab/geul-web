@@ -11,11 +11,13 @@ import { loadMathRenderer } from './math/math-render-runtime';
 import enMessages from '@/messages/en.json';
 import koMessages from '@/messages/ko.json';
 import { createTiptapWireExtensions } from './wire-schema';
+import { createFileBlockSettingsSlot } from './menus/file-block-settings-slot';
 import {
   applyTiptapSlashItem,
   createTiptapSlashItems,
   getSlashMenuState,
   TiptapAuthoringControls,
+  TiptapFileBubbleMenu,
   type TiptapSlashActionContext,
 } from './TiptapAuthoringControls';
 
@@ -129,6 +131,7 @@ async function renderControls(
           onFileActivate={onFileActivate}
           onMapActivate={onMapActivate}
         />
+        <TiptapFileBubbleMenu editor={editor} onFileActivate={onFileActivate} structure />
       </DesignSystemProvider>,
     );
   });
@@ -515,7 +518,8 @@ describe('Tiptap authoring controls', () => {
     const fileSelection = mounted.editor.state.selection.toJSON();
     expect(toolbar).toHaveAttribute('role', 'toolbar');
     expect(toolbar).not.toHaveAttribute('tabindex');
-    expect(actions).toHaveLength(5);
+    // Replace, three alignments, five sizes and delete.
+    expect(actions).toHaveLength(10);
     expect(actions.filter((action) => action.tabIndex === 0)).toHaveLength(1);
 
     const pointer = new Event('pointerdown', { bubbles: true, cancelable: true });
@@ -552,6 +556,48 @@ describe('Tiptap authoring controls', () => {
     expect(document.querySelector('[data-testid="tiptap-file-menu"]')).not.toBeNull();
 
     await controls.destroy();
+    mounted.destroy();
+  });
+
+  it('sizes the selected file from its menu and opens its settings beside the editor', async () => {
+    const mounted = createEditorWithBlock({ type: 'file', attrs: { mimeType: 'image/png', name: 'cover.png' } });
+    const settingsSlot = createFileBlockSettingsSlot();
+    const container = document.createElement('div');
+    document.body.append(container);
+    const root = createRoot(container);
+    const renderMenu = (structure: boolean) =>
+      root.render(
+        <DesignSystemProvider forceColorScheme="light">
+          <TiptapFileBubbleMenu editor={mounted.editor} structure={structure} settingsSlot={settingsSlot} />
+        </DesignSystemProvider>,
+      );
+    await act(async () => renderMenu(true));
+    await act(async () => {
+      mounted.editor.view.focus();
+      mounted.editor.commands.setNodeSelection(2);
+    });
+    await flushMenuUpdate();
+
+    await act(async () => document.querySelector<HTMLButtonElement>('[data-testid="tiptap-file-size-m"]')?.click());
+    expect(mounted.editor.state.doc.nodeAt(2)?.attrs.displaySize).toBe('60');
+    expect(mounted.editor.state.selection).toBeInstanceOf(NodeSelection);
+    expect(document.querySelector('[data-testid="tiptap-file-size-m"]')).toHaveAttribute('aria-pressed', 'true');
+
+    await act(async () => document.querySelector<HTMLButtonElement>('[data-testid="tiptap-file-settings"]')?.click());
+    const slot = settingsSlot.get();
+    expect(slot).not.toBeNull();
+    expect(mounted.editor.view.dom.contains(slot)).toBe(false);
+
+    // A translation editor cannot change the layout but still reaches the settings.
+    await act(async () => renderMenu(false));
+    await flushMenuUpdate();
+    const menu = document.querySelector<HTMLElement>('[data-testid="tiptap-file-menu"]');
+    expect(menu?.querySelector('[data-testid="tiptap-file-size-m"]')).toBeNull();
+    expect(menu?.querySelector('[data-testid="tiptap-file-replace"]')).toBeNull();
+    expect(menu?.querySelector('[data-testid="tiptap-file-settings"]')).not.toBeNull();
+
+    await act(async () => root.unmount());
+    container.remove();
     mounted.destroy();
   });
 

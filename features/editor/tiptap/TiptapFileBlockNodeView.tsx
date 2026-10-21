@@ -7,7 +7,7 @@ import { NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from '@tip
 import { useTranslations } from 'next-intl';
 
 import { Alert } from '@/components/core/Alert';
-import { SectionCard } from '@/components/core/Section';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { useOptionalEditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
 import {
   ConnectedMediaDownloadPolicyPanel,
@@ -35,9 +35,7 @@ import { isBlockId } from '@/lib/editor/block-id';
 import { getFileTypeName } from '@/lib/utils/file-icon';
 import { FileBlockView, resolveFileBlockViewKind } from '../blocks/FileBlock/FileBlockView';
 import { WireFile } from './wire-schema';
-import { DisplaySizeMenuActions } from './menus/map-external/DisplaySizeMenuActions';
-import { useDisplaySizeLabels } from './menus/map-external/useDisplaySizeLabels';
-import { useFileBlockSettingsSlot, type FileBlockSettingsSlot } from './menus/TiptapFileBlockSettingsBubbleMenu';
+import { useFileBlockSettingsSlot, type FileBlockSettingsSlot } from './menus/file-block-settings-slot';
 import { useExactTiptapNodeSelection } from './useExactTiptapNodeSelection';
 import { useTiptapEditorEditable } from './useTiptapEditorEditable';
 
@@ -115,7 +113,6 @@ function TiptapFileBlockNodeView({
   const settingsElement = useFileBlockSettingsSlot(settingsSlot);
   const downloadPolicyTarget = useEditorMediaDownloadPolicyRuntimeTarget();
   const canResize = editorEditable && hasSource;
-  const displaySizeLabels = useDisplaySizeLabels();
   const hasSettings =
     authoringMode?.allowNeutralBlockEdits === true ||
     authoringMode?.allowLocalizedBlockEdits === true ||
@@ -282,19 +279,7 @@ function TiptapFileBlockNodeView({
       {content}
       {authoringSelected && hasSettings && settingsElement
         ? createPortal(
-            <SectionCard appearance="overlay" withBorder padding="sm" layout="stack">
-              {canResize && authoringMode?.allowNeutralBlockEdits === true ? (
-                <DisplaySizeMenuActions
-                  value={resize.widthPercent}
-                  labels={displaySizeLabels}
-                  onChange={(displaySize) => {
-                    if (editor.isEditable) {
-                      updateAttributes({ displaySize: String(displaySize) });
-                    }
-                  }}
-                  testIdPrefix="tiptap-file-size"
-                />
-              ) : null}
+            <DsLayoutStack gap="sm">
               <FileBlockMetadataFields
                 labels={{
                   name: tCommonLabels('name'),
@@ -313,7 +298,7 @@ function TiptapFileBlockNodeView({
                 onCaptionChange={(value) => updateAttributes({ caption: value })}
               />
               <ConnectedMediaDownloadPolicyPanel fileId={fileId} blockId={blockId} blockType="file" />
-            </SectionCard>,
+            </DsLayoutStack>,
             settingsElement,
           )
         : null}
