@@ -21,7 +21,6 @@ import {
 } from '@tabler/icons-react';
 import { useLocale, useTranslations, type Messages } from 'next-intl';
 import { Separator } from '@/components/core/Display';
-import { Popover } from '@/components/core/Popover';
 import { TextInput } from '@/components/core/Input';
 import { LayoutInline as DsLayoutInline } from '@/components/core/Layout';
 import { ToolbarSurface } from '@/components/core/Section';
@@ -31,6 +30,7 @@ import { EDITOR_TOOLBAR_ALIGNMENT_CYCLE_SHORTCUTS } from '@/features/editor/tool
 import { EditorToolbarAction as Action } from '@/features/editor/toolbars/EditorToolbarAction';
 import { setCurrentBlockAlignment, type TextAlignment } from './block-commands';
 import type { FileBlockSettingsSlot } from './menus/file-block-settings-slot';
+import fileMenuClasses from './TiptapFileBubbleMenu.module.css';
 import { DisplaySizeMenuActions } from './menus/map-external/DisplaySizeMenuActions';
 import { useDisplaySizeLabels } from './menus/map-external/useDisplaySizeLabels';
 import {
@@ -62,6 +62,7 @@ import {
   useSelectionToolbarEditorTabBridge,
   useSelectionToolbarNavigation,
 } from './menus/useSelectionToolbarNavigation';
+import { hasFocusedOwnedPopup } from './menus/SelectionBubbleMenu';
 import { CommandSuggestions } from '@/components/core/CommandPalette';
 
 export type TiptapAuthoringCapability = ReviewedSlashCapability;
@@ -191,7 +192,8 @@ function canShowNodeMenu(editor: Editor, nodeName: SelectedNodeName): boolean {
 
 function shouldShowNodeMenu(nodeName: SelectedNodeName): NonNullable<BubbleMenuProps['shouldShow']> {
   return ({ editor, element, view }) =>
-    canShowNodeMenu(editor, nodeName) && (view.hasFocus() || element.contains(document.activeElement));
+    canShowNodeMenu(editor, nodeName) &&
+    (view.hasFocus() || element.contains(document.activeElement) || hasFocusedOwnedPopup(element));
 }
 
 function canBridgeNodeMenu(editor: Editor, nodeName: SelectedNodeName): boolean {
@@ -320,75 +322,85 @@ export function TiptapFileBubbleMenu({
       shouldShow={shouldShowFileBubbleMenu}
       options={bubbleOptions}
     >
-      <ToolbarSurface
-        ref={navigation.toolbarRef}
-        density="compact"
-        wrap="nowrap"
-        data-testid="tiptap-file-menu"
-        label={toolbarLabel}
-        onKeyDownCapture={navigation.onToolbarKeyDown}
-        onFocusCapture={navigation.onToolbarFocusCapture}
-      >
-        <DsLayoutInline gap="xxs" wrap="nowrap">
-          {structure ? (
-            <>
-              <Action
-                label={t('replace', { item: '' }).trim()}
-                testId="tiptap-file-replace"
-                onClick={() => {
-                  const current = editor.state.selection;
-                  if (isSelectedNode(current, 'file')) {
-                    const blockId = String(current.$from.parent.attrs.id ?? '');
-                    if (blockId) {
-                      onFileActivate?.(blockId);
+      <div className={fileMenuClasses.menu}>
+        <ToolbarSurface
+          ref={navigation.toolbarRef}
+          density="compact"
+          wrap="nowrap"
+          data-testid="tiptap-file-menu"
+          label={toolbarLabel}
+          onKeyDownCapture={navigation.onToolbarKeyDown}
+          onFocusCapture={navigation.onToolbarFocusCapture}
+        >
+          <DsLayoutInline gap="xxs" wrap="nowrap">
+            {structure ? (
+              <>
+                <Action
+                  label={t('replace', { item: '' }).trim()}
+                  testId="tiptap-file-replace"
+                  onClick={() => {
+                    const current = editor.state.selection;
+                    if (isSelectedNode(current, 'file')) {
+                      const blockId = String(current.$from.parent.attrs.id ?? '');
+                      if (blockId) {
+                        onFileActivate?.(blockId);
+                      }
                     }
-                  }
-                }}
-              >
-                <IconComponent size={16} />
-              </Action>
-              <AlignmentActions editor={editor} />
-              <DisplaySizeMenuActions
-                value={String(selection.node.attrs.displaySize ?? '')}
-                labels={displaySizeLabels}
-                onChange={(displaySize) => setSelectedFileDisplaySize(editor, displaySize)}
-                testIdPrefix="tiptap-file-size"
-              />
-              <Separator orientation="vertical" aria-hidden />
-            </>
-          ) : null}
-          {settingsSlot ? (
-            <Popover
-              open={settingsOpen}
-              onOpenChange={setSettingsOpen}
-              portal={false}
-              placement="bottom-start"
-              size="wide"
-            >
+                  }}
+                >
+                  <IconComponent size={16} />
+                </Action>
+                <AlignmentActions editor={editor} />
+                <DisplaySizeMenuActions
+                  value={String(selection.node.attrs.displaySize ?? '')}
+                  labels={displaySizeLabels}
+                  onChange={(displaySize) => setSelectedFileDisplaySize(editor, displaySize)}
+                  testIdPrefix="tiptap-file-size"
+                />
+                <Separator orientation="vertical" aria-hidden />
+              </>
+            ) : null}
+            {settingsSlot ? (
               <Action
-                popoverTarget
                 label={commonLabels('settings')}
+                pressed={settingsOpen}
                 testId="tiptap-file-settings"
-                onClick={() => setSettingsOpen(true)}
+                onClick={() => setSettingsOpen((open) => !open)}
               >
                 <IconSettings size={16} />
               </Action>
-              <Popover.Dropdown padding="compact" aria-label={commonLabels('settings')}>
-                <div ref={settingsSlot.set} data-file-block-settings="" />
-              </Popover.Dropdown>
-            </Popover>
-          ) : null}
-          {structure ? (
-            <Action
-              label={actions('remove')}
-              testId="tiptap-file-delete"
-              onClick={() => editor.chain().focus().deleteSelection().run()}
-            >
-              <IconTrash size={16} />
-            </Action>
-          ) : null}
-        </DsLayoutInline>
-      </ToolbarSurface>
+            ) : null}
+            {structure ? (
+              <Action
+                label={actions('remove')}
+                testId="tiptap-file-delete"
+                onClick={() => editor.chain().focus().deleteSelection().run()}
+              >
+                <IconTrash size={16} />
+              </Action>
+            ) : null}
+          </DsLayoutInline>
+        </ToolbarSurface>
+        {settingsSlot && settingsOpen ? (
+          // A sibling of the toolbar inside the menu: the toolbar scrolls its
+          // overflow, and focus here stays within the menu, so it is not hidden.
+          <div
+            role="dialog"
+            className={fileMenuClasses.settings}
+            aria-label={commonLabels('settings')}
+            data-file-block-settings-panel=""
+            onKeyDownCapture={(event) => {
+              if (event.key === 'Escape' && !event.nativeEvent.isComposing) {
+                event.preventDefault();
+                setSettingsOpen(false);
+                editor.commands.focus();
+              }
+            }}
+          >
+            <div ref={settingsSlot.set} data-file-block-settings="" />
+          </div>
+        ) : null}
+      </div>
     </BubbleMenu>
   );
 }

@@ -587,6 +587,11 @@ describe('Tiptap authoring controls', () => {
     const slot = settingsSlot.get();
     expect(slot).not.toBeNull();
     expect(mounted.editor.view.dom.contains(slot)).toBe(false);
+    // The toolbar scrolls its overflow, so settings inside it would be clipped.
+    expect(document.querySelector('[data-testid="tiptap-file-menu"]')?.contains(slot)).toBe(false);
+    await act(async () => slot?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
+    expect(document.querySelector('[data-file-block-settings]')).toBeNull();
+    expect(mounted.editor.view.hasFocus()).toBe(true);
 
     // A translation editor cannot change the layout but still reaches the settings.
     await act(async () => renderMenu(false));
