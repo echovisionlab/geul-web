@@ -48893,6 +48893,7 @@
         "Consumer: features/editor/AIMenu/AIMenu.tsx",
         "Consumer: features/editor/components/MediaProcessingSurface.tsx",
         "Consumer: features/editor/components/UnifiedFileAttachmentPagePreview.tsx",
+        "Consumer: features/editor/tiptap/TiptapFileBlockNodeView.tsx",
         "Consumer: features/editor/tiptap/code/CodeBlockSurface.tsx",
         "Consumer: features/editor/tiptap/p5/P5CapabilityStoryPreview.tsx",
         "Consumer: features/editor/tiptap/p5/P5SketchNodeView.tsx",

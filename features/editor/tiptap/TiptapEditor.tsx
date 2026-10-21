@@ -9,6 +9,11 @@ import {
 import type { LinkPresentationLabels } from './menus/map-external/LinkPresentationActions';
 import type { ExternalVideoPlaybackLabelFormatter } from '@/features/media/ExternalVideoView';
 import { TiptapLinkPresentationBubbleMenu } from './menus/map-external/TiptapLinkPresentationBubbleMenu';
+import {
+  createFileBlockSettingsSlot,
+  TiptapFileBlockSettingsBubbleMenu,
+  type FileBlockSettingsSlot,
+} from './menus/TiptapFileBlockSettingsBubbleMenu';
 import { EditorRuntimeOptions } from './live-node-view';
 import {
   useCallback,
@@ -195,6 +200,7 @@ interface EditorChromeProps {
   ai: TiptapEditorProps['ai'];
   mapSelectionRegistry: TiptapMapSelectionMenuRegistry;
   executableSelectionRegistry: ExecutableSelectionMenuRegistry;
+  fileBlockSettingsSlot: FileBlockSettingsSlot;
   authoringCallbacks: TiptapEditorProps['authoringCallbacks'];
   authoringCapabilities: TiptapEditorProps['authoringCapabilities'];
 }
@@ -214,6 +220,7 @@ function EditorChrome({
   ai,
   mapSelectionRegistry,
   executableSelectionRegistry,
+  fileBlockSettingsSlot,
   authoringCallbacks,
   authoringCapabilities,
 }: EditorChromeProps) {
@@ -325,6 +332,7 @@ function EditorChrome({
       {canMutateStructure ? (
         <CodeBlockSelectionMenu editor={editor} authoringMode={authoringMode} labels={codeBlockLabels} />
       ) : null}
+      {editable ? <TiptapFileBlockSettingsBubbleMenu editor={editor} slot={fileBlockSettingsSlot} /> : null}
       {canMutateStructure ? (
         <TiptapMapSelectionBubbleMenu editor={editor} labels={mapMenuLabels} registry={mapSelectionRegistry} />
       ) : null}
@@ -582,6 +590,7 @@ export function TiptapEditor({
   );
   const mapSelectionRegistry = useMemo(() => createTiptapMapSelectionMenuRegistry(), []);
   const executableSelectionRegistry = useMemo(() => createExecutableSelectionMenuRegistry(), []);
+  const fileBlockSettingsSlot = useMemo(() => createFileBlockSettingsSlot(), []);
   const executableSelectionLabels = useMemo(
     () => ({
       deleteBlock: commonActions('delete'),
@@ -620,6 +629,7 @@ export function TiptapEditor({
     const fileNode = createTiptapFileNode({
       onActivate: (blockId) => onFileActivateRef.current?.(blockId),
       runtimeStore: mediaRuntimeStore,
+      settingsSlot: fileBlockSettingsSlot,
     });
     const effectiveMapOptions: TiptapMapNodeOptions = {
       ...map,
@@ -719,6 +729,7 @@ export function TiptapEditor({
     map,
     mediaRuntimeStore,
     mapSelectionRegistry,
+    fileBlockSettingsSlot,
     p5Labels,
     shaderLabels,
     shaderFilePicker,
@@ -838,6 +849,7 @@ export function TiptapEditor({
               ai={ai}
               mapSelectionRegistry={mapSelectionRegistry}
               executableSelectionRegistry={executableSelectionRegistry}
+              fileBlockSettingsSlot={fileBlockSettingsSlot}
               authoringCallbacks={authoringCallbacks}
               authoringCapabilities={authoringCapabilities}
             />

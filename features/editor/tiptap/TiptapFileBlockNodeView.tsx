@@ -2,12 +2,17 @@
 
 import { Text as DsText } from '@/components/core/Typography';
 import { useCallback, useRef, useSyncExternalStore, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 
 import { Alert } from '@/components/core/Alert';
+import { SectionCard } from '@/components/core/Section';
 import { useOptionalEditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
-import { ConnectedMediaDownloadPolicyPanel } from '@/features/editor/components/ConnectedMediaDownloadPolicyPanel';
+import {
+  ConnectedMediaDownloadPolicyPanel,
+  useEditorMediaDownloadPolicyRuntimeTarget,
+} from '@/features/editor/components/ConnectedMediaDownloadPolicyPanel';
 import { MediaProcessingSurface } from '@/features/editor/components/MediaProcessingSurface';
 import { useBlockResize } from '@/features/editor/hooks/useBlockResize';
 import { useEditorMediaRuntimeBinding } from '@/features/editor/hooks/useEditorMediaRuntimeBinding';
@@ -29,6 +34,7 @@ import { isBlockId } from '@/lib/editor/block-id';
 import { getFileTypeName } from '@/lib/utils/file-icon';
 import { FileBlockView, resolveFileBlockViewKind } from '../blocks/FileBlock/FileBlockView';
 import { WireFile } from './wire-schema';
+import { useFileBlockSettingsSlot, type FileBlockSettingsSlot } from './menus/TiptapFileBlockSettingsBubbleMenu';
 import { useExactTiptapNodeSelection } from './useExactTiptapNodeSelection';
 import { useTiptapEditorEditable } from './useTiptapEditorEditable';
 
@@ -37,6 +43,8 @@ type FileNodeAttributes = Record<string, unknown>;
 export interface TiptapFileNodeOptions {
   onActivate?: (blockId: string) => void;
   runtimeStore?: EditorMediaRuntimeStore;
+  /** Where the selected block's settings render, beside the editor rather than inside it. */
+  settingsSlot?: FileBlockSettingsSlot;
 }
 
 const EMPTY_RUNTIME_SNAPSHOT: EditorMediaRuntimeSnapshot = Object.freeze({});
@@ -59,6 +67,7 @@ function TiptapFileBlockNodeView({
   node,
   updateAttributes,
   runtimeStore,
+  settingsSlot,
 }: NodeViewProps & TiptapFileNodeOptions) {
   const tCommon = useTranslations('common');
   const tCommonLabels = useTranslations('common.labels');
@@ -100,6 +109,12 @@ function TiptapFileBlockNodeView({
     isLoadingMime: Boolean(hasSource && !mimeType && delivery.isLoading),
   });
   const authoringSelected = editorEditable && exactNodeSelected;
+  const settingsElement = useFileBlockSettingsSlot(settingsSlot);
+  const downloadPolicyTarget = useEditorMediaDownloadPolicyRuntimeTarget();
+  const hasSettings =
+    authoringMode?.allowNeutralBlockEdits === true ||
+    authoringMode?.allowLocalizedBlockEdits === true ||
+    Boolean(downloadPolicyTarget && hasSource && blockId);
   const resize = useBlockResize({
     containerRef,
     previewWidth: readString(attributes, 'previewWidth') || '100',
@@ -241,28 +256,31 @@ function TiptapFileBlockNodeView({
       contentEditable={false}
     >
       {content}
-      {authoringSelected ? (
-        <>
-          <FileBlockMetadataFields
-            labels={{
-              name: tCommonLabels('name'),
-              alt: tCommonLabels('description'),
-              caption: tCommonLabels('caption'),
-              captionPlaceholder: tCommonLabels('caption'),
-            }}
-            mimeType={mimeType}
-            name={readString(durableAttributes, 'name')}
-            alt={readString(durableAttributes, 'alt')}
-            caption={caption}
-            allowNameEdit={authoringMode?.allowNeutralBlockEdits === true}
-            allowLocalizedEdit={authoringMode?.allowLocalizedBlockEdits === true}
-            onNameChange={(value) => updateAttributes({ name: value })}
-            onAltChange={(value) => updateAttributes({ alt: value })}
-            onCaptionChange={(value) => updateAttributes({ caption: value })}
-          />
-          <ConnectedMediaDownloadPolicyPanel fileId={fileId} blockId={blockId} blockType="file" />
-        </>
-      ) : null}
+      {authoringSelected && hasSettings && settingsElement
+        ? createPortal(
+            <SectionCard appearance="overlay" withBorder padding="sm" layout="stack">
+              <FileBlockMetadataFields
+                labels={{
+                  name: tCommonLabels('name'),
+                  alt: tCommonLabels('description'),
+                  caption: tCommonLabels('caption'),
+                  captionPlaceholder: tCommonLabels('caption'),
+                }}
+                mimeType={mimeType}
+                name={readString(durableAttributes, 'name')}
+                alt={readString(durableAttributes, 'alt')}
+                caption={caption}
+                allowNameEdit={authoringMode?.allowNeutralBlockEdits === true}
+                allowLocalizedEdit={authoringMode?.allowLocalizedBlockEdits === true}
+                onNameChange={(value) => updateAttributes({ name: value })}
+                onAltChange={(value) => updateAttributes({ alt: value })}
+                onCaptionChange={(value) => updateAttributes({ caption: value })}
+              />
+              <ConnectedMediaDownloadPolicyPanel fileId={fileId} blockId={blockId} blockType="file" />
+            </SectionCard>,
+            settingsElement,
+          )
+        : null}
     </NodeViewWrapper>
   );
 }
@@ -279,6 +297,7 @@ export function createTiptapFileNode(options: TiptapFileNodeOptions = {}) {
           {...props}
           onActivate={nodeOptions.onActivate}
           runtimeStore={nodeOptions.runtimeStore}
+          settingsSlot={nodeOptions.settingsSlot}
         />
       ));
     },
