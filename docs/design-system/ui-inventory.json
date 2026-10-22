@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "8aca051984eb69a6c34a8f98fb0e24a7a8b3f162fabd484f5490206991f8af31",
+  "manifestHash": "26593deb3df5dcf4460017975a6cc96aca117dd4ab101569f887f814c4b2115c",
   "counts": {
-    "sourceFiles": 3847,
-    "productionSourceFiles": 2322,
-    "componentFiles": 918,
+    "sourceFiles": 3848,
+    "productionSourceFiles": 2323,
+    "componentFiles": 919,
     "coreFamilies": 57,
     "featureDomains": 54,
     "storyFiles": 259,
@@ -1320,6 +1320,7 @@
     "features/editor/components/UnifiedFileAttachmentPagePreview.tsx",
     "features/editor/contexts/EditorMediaIngestContext.tsx",
     "features/editor/contexts/EditorMediaServicesContext.tsx",
+    "features/editor/contexts/EditorSnapshotMediaContext.tsx",
     "features/editor/contract/block-registry.test.ts",
     "features/editor/contract/block-registry.ts",
     "features/editor/contract/localized-page.test.ts",
@@ -34658,7 +34659,7 @@
       "catalogAdapters": [],
       "tests": ["features/editor/EditorSnapshotHandoff.test.tsx"],
       "stories": ["features/editor/EditorSnapshotHandoff.stories.tsx"],
-      "composedJsx": ["div"]
+      "composedJsx": ["EditorSnapshotMediaProvider", "div"]
     },
     {
       "file": "features/editor/ExternalVideoEditorPreview.tsx",
@@ -36262,6 +36263,32 @@
       "tests": [],
       "stories": ["stories/pages/PostEditorPage.stories.tsx"],
       "composedJsx": ["EditorMediaServicesContext.Provider"]
+    },
+    {
+      "file": "features/editor/contexts/EditorSnapshotMediaContext.tsx",
+      "owner": "Feature/editor",
+      "exports": [
+        {
+          "name": "EditorSnapshotMediaProvider",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "EditorSnapshotMedia",
+          "type": "ReadonlyMap<string, EditorFileStatusRuntimeState>"
+        }
+      ],
+      "productionConsumers": [
+        "features/editor/EditorSnapshotHandoff.tsx",
+        "features/translation/LocalizedCollaborativeRichTextEditor.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": ["features/editor/tiptap/TiptapFileBlockNodeView.hydration.test.tsx"],
+      "stories": [],
+      "composedJsx": ["EditorSnapshotMediaContext.Provider"]
     },
     {
       "file": "features/editor/tiptap/TiptapAuthoringControls.tsx",
@@ -76497,6 +76524,7 @@
         "features/editor/components/UnifiedFileAttachmentPagePreview.tsx",
         "features/editor/contexts/EditorMediaIngestContext.tsx",
         "features/editor/contexts/EditorMediaServicesContext.tsx",
+        "features/editor/contexts/EditorSnapshotMediaContext.tsx",
         "features/editor/contract/block-registry.ts",
         "features/editor/contract/localized-page.ts",
         "features/editor/contract/localized-rich-text-story-fixtures.ts",
@@ -76734,6 +76762,7 @@
         "features/editor/components/UnifiedFileAttachmentPagePreview.tsx",
         "features/editor/contexts/EditorMediaIngestContext.tsx",
         "features/editor/contexts/EditorMediaServicesContext.tsx",
+        "features/editor/contexts/EditorSnapshotMediaContext.tsx",
         "features/editor/tiptap/TiptapAuthoringControls.tsx",
         "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
         "features/editor/tiptap/TiptapBlockMenu.tsx",

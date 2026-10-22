@@ -1,4 +1,4 @@
-import { MediaProcessingStatus } from '@echovisionlab/geul-proto/common/media_pb.ts';
+import { MediaProcessingStatus, type MediaDelivery } from '@echovisionlab/geul-proto/common/media_pb.ts';
 
 export type EditorMediaRuntimeProcessingStatus = 'processing' | 'ready' | 'failed';
 
@@ -46,6 +46,35 @@ export interface EditorVideoFileStatusRuntimeState extends BaseEditorMediaRuntim
 
 export interface EditorImageFileStatusRuntimeState {
   url: string;
+}
+
+function hasDeliveryUrl(delivery: MediaDelivery | undefined): boolean {
+  return Boolean(delivery?.asset?.url || delivery?.inline?.url || delivery?.download?.url || delivery?.playback?.url);
+}
+
+/** Reads one authorized File delivery the way the editor status bootstrap reports it. */
+export function fileStatusFromDelivery(delivery: MediaDelivery | undefined): EditorFileStatusSnapshot {
+  const mimeType = (delivery?.mimeType || '').toLowerCase();
+  const hasBackendProcessingLifecycle = mimeType.startsWith('video/') || mimeType.startsWith('audio/');
+  const completed = hasBackendProcessingLifecycle
+    ? delivery?.processingStatus === MediaProcessingStatus.READY
+    : hasDeliveryUrl(delivery);
+
+  return {
+    mimeType,
+    completed,
+    failed: !completed && delivery?.processingStatus === MediaProcessingStatus.FAILED,
+    unavailable: false,
+    url: delivery?.asset?.url || delivery?.inline?.url || '',
+    originalUrl: delivery?.download?.url || delivery?.inline?.url || delivery?.asset?.url || '',
+    waveformUrl: delivery?.waveform?.url || '',
+    spectrogramUrl: delivery?.spectrogram?.url || '',
+    thumbnailUrl: delivery?.thumbnail?.url || '',
+    hlsUrl: delivery?.playback?.url || '',
+    durationSeconds: delivery?.durationSeconds || 0,
+    processingStatus: delivery?.processingStatus ?? MediaProcessingStatus.UNSPECIFIED,
+    processingPercentage: delivery?.processingPercentage,
+  };
 }
 
 function normalizeProcessingPercentage(percentage?: number): string {

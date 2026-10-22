@@ -1,16 +1,25 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import type { ContentBlockMediaItem } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
+import { EditorSnapshotMediaProvider } from './contexts/EditorSnapshotMediaContext';
 
-/** Keeps SSR pixels in place until the room-backed view has mounted, including lazy chunks. */
+const EMPTY_MEDIA: readonly ContentBlockMediaItem[] = [];
+
+/**
+ * Keeps SSR pixels in place until the room-backed view has mounted, including lazy chunks.
+ * `media` hands the snapshot's File deliveries to the live editor, so its File blocks open as rendered.
+ */
 export function EditorSnapshotHandoff({
   snapshot,
+  media = EMPTY_MEDIA,
   ready,
   editable,
   children,
   page = false,
 }: {
   snapshot: ReactNode;
+  media?: readonly ContentBlockMediaItem[];
   ready: boolean;
   editable: boolean;
   children: ReactNode;
@@ -137,7 +146,7 @@ export function EditorSnapshotHandoff({
           inert={!showLive || undefined}
           style={showLive ? undefined : { position: 'absolute', inset: 0, visibility: 'hidden', pointerEvents: 'none' }}
         >
-          {children}
+          <EditorSnapshotMediaProvider items={media}>{children}</EditorSnapshotMediaProvider>
         </div>
       ) : null}
     </div>

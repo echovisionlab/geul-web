@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "sourceManifestHash": "8aca051984eb69a6c34a8f98fb0e24a7a8b3f162fabd484f5490206991f8af31",
+  "sourceManifestHash": "26593deb3df5dcf4460017975a6cc96aca117dd4ab101569f887f814c4b2115c",
   "methodology": "All inventoried Feature component candidates. Direct value imports, literal lazy imports and transitive source relationships through production owners/local adapters are indexed separately. A dependency can be unused or render conditionally; neither relationship proves rendered states, route parity or design compliance. Empty JSX records include runtime/lazy/controller boundaries and must be inspected before treating them as visual gaps.",
-  "counts": { "domains": 54, "componentFiles": 777, "jsxWithoutStoryRelationship": 43 },
+  "counts": { "domains": 54, "componentFiles": 778, "jsxWithoutStoryRelationship": 43 },
   "domains": [
     {
       "domain": "account",
@@ -2442,6 +2442,18 @@
           "hasJsx": true,
           "directStories": ["Pages/Editors/Post"],
           "relatedStories": [
+            "Pages/Editors/Page",
+            "Pages/Editors/Post",
+            "Pages/Editors/Program Events",
+            "Pages/Editors/Work"
+          ]
+        },
+        {
+          "file": "features/editor/contexts/EditorSnapshotMediaContext.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": [
+            "Feature/Editor/Snapshot Handoff",
             "Pages/Editors/Page",
             "Pages/Editors/Post",
             "Pages/Editors/Program Events",

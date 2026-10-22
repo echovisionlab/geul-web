@@ -22,7 +22,7 @@ import {
   mergeRecordBatches,
   uniqueMediaIdsInOrder,
 } from '@/lib/media/media-delivery-batches';
-import type { EditorFileStatusSnapshot } from '@/lib/media/editor-file-status-runtime';
+import { fileStatusFromDelivery, type EditorFileStatusSnapshot } from '@/lib/media/editor-file-status-runtime';
 import { UPLOAD_FAILED_MESSAGE, UPLOAD_FINALIZATION_FAILED_MESSAGE } from '@/lib/upload/failure';
 import { CLIENT_MEDIA_ARTIFACTS_MISSING } from '@/lib/upload/upload-errors';
 import { actionFailure, actionSuccess, type ActionResult } from './action-result';
@@ -51,34 +51,6 @@ function timestampToDate(value: Timestamp | undefined): Date | null {
   }
   const seconds = typeof value.seconds === 'bigint' ? Number(value.seconds) : Number(value.seconds || 0);
   return new Date(seconds * 1000 + Math.floor((value.nanos || 0) / 1_000_000));
-}
-
-function hasDeliveryUrl(delivery: MediaDelivery | undefined): boolean {
-  return Boolean(delivery?.asset?.url || delivery?.inline?.url || delivery?.download?.url || delivery?.playback?.url);
-}
-
-function fileStatusFromDelivery(delivery: MediaDelivery | undefined): EditorFileStatusSnapshot {
-  const mimeType = (delivery?.mimeType || '').toLowerCase();
-  const hasBackendProcessingLifecycle = mimeType.startsWith('video/') || mimeType.startsWith('audio/');
-  const completed = hasBackendProcessingLifecycle
-    ? delivery?.processingStatus === MediaProcessingStatus.READY
-    : hasDeliveryUrl(delivery);
-
-  return {
-    mimeType,
-    completed,
-    failed: !completed && delivery?.processingStatus === MediaProcessingStatus.FAILED,
-    unavailable: false,
-    url: delivery?.asset?.url || delivery?.inline?.url || '',
-    originalUrl: delivery?.download?.url || delivery?.inline?.url || delivery?.asset?.url || '',
-    waveformUrl: delivery?.waveform?.url || '',
-    spectrogramUrl: delivery?.spectrogram?.url || '',
-    thumbnailUrl: delivery?.thumbnail?.url || '',
-    hlsUrl: delivery?.playback?.url || '',
-    durationSeconds: delivery?.durationSeconds || 0,
-    processingStatus: delivery?.processingStatus ?? MediaProcessingStatus.UNSPECIFIED,
-    processingPercentage: delivery?.processingPercentage,
-  };
 }
 
 function missingFileStatus(): EditorFileStatusSnapshot {

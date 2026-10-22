@@ -901,6 +901,12 @@ export function PageEditorView({ model }: { model: PageEditorViewModel }) {
                   <EditorSnapshotHandoff
                     key={activeEditLocale.activeLocale ?? model.initialSnapshot?.locale ?? 'source'}
                     page
+                    media={
+                      !activeEditLocale.activeLocale ||
+                      activeEditLocale.activeLocale === model.initialSnapshot?.locale
+                        ? model.initialSnapshot?.blockMedia
+                        : undefined
+                    }
                     ready={Boolean(provider && doc && durabilityProtocol && roomLocale)}
                     editable={canEditLocaleDocument}
                     snapshot={

@@ -33,6 +33,7 @@ import { formatMediaSize } from '@/lib/media/shared';
 import { resolveVideoViewModel } from '@/lib/media/video-view-model';
 import { isBlockId } from '@/lib/editor/block-id';
 import { getFileTypeName } from '@/lib/utils/file-icon';
+import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
 import { FileBlockView, resolveFileBlockViewKind } from '../blocks/FileBlock/FileBlockView';
 import { WireFile } from './wire-schema';
 import { useFileBlockSettingsSlot, type FileBlockSettingsSlot } from './menus/file-block-settings-slot';
@@ -210,7 +211,7 @@ function TiptapFileBlockNodeView({
         imageView={
           <EditorMediaBlockFrame {...frameProps}>
             <ImageMediaView
-              src={url || originalUrl}
+              src={buildManagedImageUrl(url || originalUrl, MANAGED_IMAGE_PRESET.CONTENT_IMAGE) ?? ''}
               alt={readString(attributes, 'alt') || name}
               caption={caption}
               onNaturalSize={media.onNaturalSize}
