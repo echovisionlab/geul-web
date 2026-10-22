@@ -6,6 +6,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FileUsageDomain } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 
+import { notifications } from '@/components/core/Notification';
 import { FileManager } from './FileManager';
 import type { FileManagerViewProps } from './FileManagerView';
 import type { FileManagerFileView, FileManagerFolderView } from './model';
@@ -14,6 +15,8 @@ const mocks = vi.hoisted(() => ({
   listItems: vi.fn(),
   searchItems: vi.fn(),
   getDeletionImpact: vi.fn(),
+  getFile: vi.fn(),
+  listUsages: vi.fn(),
   translate: (key: string, values?: Record<string, unknown>) => {
     if (values && 'count' in values) {
       return `${key}:${String(values.count)}`;
@@ -43,10 +46,10 @@ vi.mock('@/lib/actions/file', () => ({
   deleteFileFolderAction: vi.fn(),
   deleteManagedFilesAction: vi.fn(),
   getFileDeletionImpactAction: mocks.getDeletionImpact,
-  getManagedFileAction: vi.fn(),
+  getManagedFileAction: mocks.getFile,
   listFileManagerItemsAction: mocks.listItems,
   searchFileManagerItemsAction: mocks.searchItems,
-  listManagedFileUsagesAction: vi.fn(),
+  listManagedFileUsagesAction: mocks.listUsages,
   moveFileFolderAction: vi.fn(),
   moveManagedFilesAction: vi.fn(),
   renameFileFolderAction: vi.fn(),
@@ -94,6 +97,9 @@ describe('FileManager directory loading', () => {
     mocks.listItems.mockReset();
     mocks.searchItems.mockReset();
     mocks.getDeletionImpact.mockReset();
+    mocks.getFile.mockReset();
+    mocks.listUsages.mockReset();
+    vi.mocked(notifications.show).mockReset();
     mocks.viewProps = undefined;
     window.localStorage.clear();
     container = document.createElement('div');
@@ -105,6 +111,72 @@ describe('FileManager directory loading', () => {
     vi.useRealTimers();
     act(() => root.unmount());
     container.remove();
+  });
+
+  async function renderManager() {
+    await act(async () => {
+      root.render(
+        <DesignSystemProvider forceColorScheme="light">
+          <FileManager viewerRole="admin" />
+        </DesignSystemProvider>,
+      );
+    });
+  }
+
+  it('stops loading a file when its details cannot be requested', async () => {
+    const opened = file('file-1');
+    mocks.listItems.mockResolvedValue({ items: [opened], total: 1, folderNotFound: false });
+    mocks.getFile.mockRejectedValue(new Error('offline'));
+    mocks.listUsages.mockResolvedValue({ success: true, usages: [] });
+    await renderManager();
+
+    await act(async () => {
+      getViewProps().onOpenFile(opened);
+    });
+
+    expect(getViewProps().detailLoading).toBe(false);
+    expect(notifications.show).toHaveBeenCalledWith({ tone: 'danger', message: 'errors.loadFile' });
+  });
+
+  it("loads one more page of a file's usages at a time", async () => {
+    const opened = file('file-1');
+    const nextPage = Promise.withResolvers<{ success: true; usages: [] }>();
+    mocks.listItems.mockResolvedValue({ items: [opened], total: 1, folderNotFound: false });
+    mocks.getFile.mockResolvedValue({ success: true, file: opened });
+    mocks.listUsages
+      .mockResolvedValueOnce({ success: true, usages: [], nextPageToken: 'usages-2' })
+      .mockReturnValueOnce(nextPage.promise);
+    await renderManager();
+    await act(async () => {
+      getViewProps().onOpenFile(opened);
+    });
+
+    await act(async () => {
+      getViewProps().onLoadMoreDetailUsages();
+      getViewProps().onLoadMoreDetailUsages();
+    });
+
+    expect(mocks.listUsages).toHaveBeenCalledTimes(2);
+    expect(mocks.listUsages).toHaveBeenLastCalledWith({ fileId: 'file-1', pageSize: 25, pageToken: 'usages-2' });
+    await act(async () => nextPage.resolve({ success: true, usages: [] }));
+    expect(getViewProps().detailLoading).toBe(false);
+  });
+
+  it('stops checking a deletion when the usage check cannot be requested', async () => {
+    const selected = file('file-1');
+    mocks.listItems.mockResolvedValue({ items: [selected], total: 1, folderNotFound: false });
+    mocks.getDeletionImpact.mockRejectedValue(new Error('offline'));
+    await renderManager();
+    await act(async () => {
+      getViewProps().onSelectedItemIdsChange([selected.id]);
+    });
+
+    await act(async () => {
+      getViewProps().onDeleteSelectedFiles();
+    });
+
+    expect(getViewProps().mutationLoading).toBe(false);
+    expect(notifications.show).toHaveBeenCalledWith({ tone: 'danger', message: 'errors.inspectUsage' });
   });
 
   it('clears the previous directory before a failed navigation result', async () => {
