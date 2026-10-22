@@ -273,6 +273,9 @@ export function createFileDownloadPolicyStore(
   };
 
   const refreshPolicyFromPeer = async (): Promise<void> => {
+    if (!active) {
+      return;
+    }
     if (!enabled || targetStale || activeSave || pendingSave) {
       peerRefreshRequested = true;
       return;

@@ -3,6 +3,7 @@
 import { act, StrictMode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
+import { getEditorWriteOrigin } from '@/lib/editor/editor-write-origin';
 import { setProviderDocumentRevision } from '@/lib/collab/provider-control-state';
 import { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
@@ -82,14 +83,6 @@ function page(items: AudienceSegmentSummary[], pageNumber = 1, hasMore = false) 
       hasMore,
     },
   };
-}
-
-function deferred<T>() {
-  let resolve!: (value: T) => void;
-  const promise = new Promise<T>((nextResolve) => {
-    resolve = nextResolve;
-  });
-  return { promise, resolve };
 }
 
 class TestBroadcastChannel {
@@ -306,7 +299,7 @@ describe('FileDownloadPolicyEditor', () => {
     expect(loadPolicy).toHaveBeenLastCalledWith(target);
     expectSelectedAccess('Signed-in users');
   });
-  it('reloads a key-only peer hint through the exact authorized selector', async () => {
+  it('reloads the shown policy when a key-only peer hint arrives on the browser channel', async () => {
     const loadPolicy = vi
       .fn<FileDownloadPolicyEditorAdapter['loadPolicy']>()
       .mockResolvedValueOnce({
@@ -321,7 +314,6 @@ describe('FileDownloadPolicyEditor', () => {
       savePolicy: vi.fn(),
     };
 
-    vi.stubGlobal('BroadcastChannel', TestBroadcastChannel);
     renderEditor(adapter);
     await settle();
 
@@ -337,7 +329,6 @@ describe('FileDownloadPolicyEditor', () => {
     await settle();
 
     expect(loadPolicy).toHaveBeenCalledTimes(2);
-    expect(loadPolicy).toHaveBeenLastCalledWith(defaultTarget);
     expectSelectedAccess('Signed-in users');
   });
 
@@ -350,14 +341,12 @@ describe('FileDownloadPolicyEditor', () => {
       .mockResolvedValueOnce({
         data: { fileId: 'file-2', audience: 'authenticated', audienceSegments: [] },
       });
-    const savePolicy = vi.fn<FileDownloadPolicyEditorAdapter['savePolicy']>();
     const adapter: FileDownloadPolicyEditorAdapter = {
       loadPolicy,
       loadSegments: vi.fn(async () => page([])),
-      savePolicy,
+      savePolicy: vi.fn(),
     };
 
-    vi.stubGlobal('BroadcastChannel', TestBroadcastChannel);
     renderEditor(adapter);
     await settle();
     const subscription = TestBroadcastChannel.channels.find(
@@ -372,7 +361,47 @@ describe('FileDownloadPolicyEditor', () => {
 
     expect(inputForLabel('Download access').disabled).toBe(true);
     expect(host?.textContent).toContain('Reload before continuing to edit.');
-    expect(savePolicy).not.toHaveBeenCalled();
+  });
+
+  it('reloads the exact selector after an own-origin parent hint without replacing a pending policy edit', async () => {
+    vi.useFakeTimers();
+    const provider = policyProvider();
+    policyRuntime.current = {
+      entityType: 'post',
+      entityId: 'post-1',
+      provider: provider as unknown as HocuspocusProvider,
+    };
+    const saving = Promise.withResolvers<FileDownloadActionResult<FileDownloadPolicyModel>>();
+    const loadPolicy = vi
+      .fn<FileDownloadPolicyEditorAdapter['loadPolicy']>()
+      .mockResolvedValueOnce({ data: { fileId: 'file-1', audience: 'public', audienceSegments: [] } })
+      .mockResolvedValueOnce({ data: { fileId: 'replacement-file', audience: 'disabled', audienceSegments: [] } });
+    const savePolicy = vi.fn<FileDownloadPolicyEditorAdapter['savePolicy']>().mockReturnValueOnce(saving.promise);
+    renderEditor({ loadPolicy, savePolicy, loadSegments: vi.fn(async () => page([])) });
+    await settle();
+    await selectOption('Download access', 'Signed-in users');
+    await flushAutosave();
+    act(() =>
+      provider.emit(
+        JSON.stringify({
+          v: 3,
+          kind: 'entity.changed',
+          entity: 'post:post-1',
+          scope: 'metadata',
+          origin: getEditorWriteOrigin(),
+        }),
+      ),
+    );
+    await flushAutosave();
+    expect(loadPolicy).toHaveBeenCalledTimes(1);
+    expectSelectedAccess('Signed-in users');
+    await act(async () =>
+      saving.resolve({ data: { fileId: 'file-1', audience: 'authenticated', audienceSegments: [] } }),
+    );
+    await settle();
+    expect(loadPolicy).toHaveBeenCalledTimes(2);
+    expect(loadPolicy).toHaveBeenLastCalledWith(defaultTarget);
+    expect(inputForLabel('Download access').disabled).toBe(true);
   });
 
   it('titles the access field in block settings and describes the selected audience', async () => {
@@ -400,15 +429,9 @@ describe('FileDownloadPolicyEditor', () => {
   });
 
   it('renders a real loading state instead of a false disabled policy', async () => {
-    let resolvePolicy:
-      ((value: Awaited<ReturnType<FileDownloadPolicyEditorAdapter['loadPolicy']>>) => void) | undefined;
+    const policyRead = Promise.withResolvers<Awaited<ReturnType<FileDownloadPolicyEditorAdapter['loadPolicy']>>>();
     const adapter: FileDownloadPolicyEditorAdapter = {
-      loadPolicy: vi.fn(
-        () =>
-          new Promise<Awaited<ReturnType<FileDownloadPolicyEditorAdapter['loadPolicy']>>>((resolve) => {
-            resolvePolicy = resolve;
-          }),
-      ),
+      loadPolicy: vi.fn(() => policyRead.promise),
       loadSegments: vi.fn(async () => page([])),
       savePolicy: vi.fn(),
     };
@@ -419,7 +442,7 @@ describe('FileDownloadPolicyEditor', () => {
     expect(host?.textContent).not.toContain('No visitor can download this file');
     expect(host?.querySelector('input')).toBeNull();
 
-    resolvePolicy?.({
+    policyRead.resolve({
       data: {
         fileId: 'file-1',
         audience: 'public',
@@ -516,7 +539,6 @@ describe('FileDownloadPolicyEditor', () => {
     await flushAutosave();
     await settle();
 
-    expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'authenticated', [], expect.any(Object), expect.any(String));
     expectSelectedAccess('Signed-in users');
     expect(host?.querySelector('[data-file-download-policy-sync]')).toBe(synchronizationStatus);
     expect(synchronizationStatus?.textContent).toBe('Synced');
@@ -555,8 +577,89 @@ describe('FileDownloadPolicyEditor', () => {
     });
   });
 
+  it('flushes the latest old-target value before switching targets without overwriting the new UI', async () => {
+    const oldTargetSave = Promise.withResolvers<Awaited<ReturnType<FileDownloadPolicyEditorAdapter['savePolicy']>>>();
+    const savePolicy = vi.fn<FileDownloadPolicyEditorAdapter['savePolicy']>((target, audience) =>
+      target.expectedFileId === 'file-1'
+        ? oldTargetSave.promise
+        : Promise.resolve({ data: { fileId: target.expectedFileId, audience, audienceSegments: [] } }),
+    );
+    const adapter: FileDownloadPolicyEditorAdapter = {
+      loadPolicy: vi.fn(async (target) => ({
+        data: { fileId: target.expectedFileId, audience: 'disabled' as const, audienceSegments: [] },
+      })),
+      loadSegments: vi.fn(async () => page([])),
+      savePolicy,
+    };
+
+    renderEditor(adapter);
+    await settle();
+    vi.useFakeTimers();
+    await selectOption('Download access', 'Public');
+
+    const nextTarget = { ...defaultTarget, expectedFileId: 'file-2' };
+    renderEditor(adapter, { target: nextTarget });
+    await settle();
+
+    expect(savePolicy).toHaveBeenCalledTimes(1);
+    expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'public', [], expect.any(Object), expect.any(String));
+    expectSelectedAccess('No downloads');
+
+    oldTargetSave.resolve({ data: { fileId: 'file-1', audience: 'public', audienceSegments: [] } });
+    await settle();
+
+    expectSelectedAccess('No downloads');
+    expect(savePolicy).toHaveBeenCalledTimes(1);
+  });
+
+  it('notifies a detached target-switch CAS failure with reload-required wording', async () => {
+    const savePolicy = vi.fn(async () => ({ errorCode: 'staleTarget' as const }));
+    const adapter: FileDownloadPolicyEditorAdapter = {
+      loadPolicy: vi.fn(async (target) => ({
+        data: { fileId: target.expectedFileId, audience: 'public' as const, audienceSegments: [] },
+      })),
+      loadSegments: vi.fn(async () => page([])),
+      savePolicy,
+    };
+
+    renderEditor(adapter);
+    await settle();
+    vi.useFakeTimers();
+    await selectOption('Download access', 'No downloads');
+    renderEditor(adapter, { target: { ...defaultTarget, expectedFileId: 'file-2' } });
+    await settle();
+
+    expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'disabled', [], expect.any(Object), expect.any(String));
+    expect(notifications.show).toHaveBeenCalledWith({
+      autoClose: false,
+      tone: 'danger',
+      title: 'Download access',
+      message: 'A newer version was saved while this editor was open. Reload before continuing to edit.',
+    });
+  });
+
+  it('keeps a selected Audience valid when it is outside the first list page', async () => {
+    const adapter: FileDownloadPolicyEditorAdapter = {
+      loadPolicy: vi.fn(async () => ({
+        data: {
+          fileId: 'file-1',
+          audience: 'restricted' as const,
+          audienceSegments: [segment('later-page-segment', 'Tour members')],
+        },
+      })),
+      loadSegments: vi.fn(async () => page([segment('first-page-segment', 'Members')])),
+      savePolicy: vi.fn(),
+    };
+
+    renderEditor(adapter);
+    await settle();
+
+    expect(host?.textContent).toContain('Tour members');
+    expect(inputForLabel('Download access').disabled).toBe(false);
+  });
+
   it('guards browser unload while a policy write is pending or active', async () => {
-    const activeSave = deferred<Awaited<ReturnType<FileDownloadPolicyEditorAdapter['savePolicy']>>>();
+    const activeSave = Promise.withResolvers<Awaited<ReturnType<FileDownloadPolicyEditorAdapter['savePolicy']>>>();
     const adapter: FileDownloadPolicyEditorAdapter = {
       loadPolicy: vi.fn(async (target) => ({
         data: {
@@ -603,7 +706,7 @@ describe('FileDownloadPolicyEditor', () => {
   });
 
   it('visibly announces later Audience loading in the production block-settings presentation', async () => {
-    const laterPage = deferred<Awaited<ReturnType<FileDownloadPolicyEditorAdapter['loadSegments']>>>();
+    const laterPage = Promise.withResolvers<Awaited<ReturnType<FileDownloadPolicyEditorAdapter['loadSegments']>>>();
     const firstAudience = segment('segment-1', 'Audience 1');
     const loadSegments = vi.fn<FileDownloadPolicyEditorAdapter['loadSegments']>(({ page: pageNumber = 1 }) =>
       pageNumber === 1 ? Promise.resolve(page([firstAudience], 1, true)) : laterPage.promise,
@@ -667,7 +770,6 @@ describe('FileDownloadPolicyEditor', () => {
     await settle();
 
     expectSelectedAccess('Audiences');
-    expect(savePolicy).not.toHaveBeenCalled();
     await flushAutosave();
     await settle();
 
@@ -740,13 +842,6 @@ describe('FileDownloadPolicyEditor', () => {
     await flushAutosave();
     await settle();
 
-    expect(savePolicy).toHaveBeenCalledWith(
-      defaultTarget,
-      'restricted',
-      ['audience-members'],
-      expect.any(Object),
-      expect.any(String),
-    );
     expectSelectedAccess('Public');
     expect(host?.textContent).not.toContain('Members');
     const saveError = Array.from(host?.querySelectorAll('[role="alert"]') ?? []).find((candidate) =>

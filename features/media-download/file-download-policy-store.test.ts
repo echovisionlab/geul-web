@@ -41,14 +41,6 @@ function page(items: AudienceSegmentSummary[], pageNumber = 1, hasMore = false) 
   };
 }
 
-function deferred<T>() {
-  let resolve!: (value: T) => void;
-  const promise = new Promise<T>((nextResolve) => {
-    resolve = nextResolve;
-  });
-  return { promise, resolve };
-}
-
 /** The API echoes the exact selector of the request; tests supply only the File and Audience. */
 function echoTarget(adapter: FileDownloadPolicyEditorAdapter): FileDownloadPolicyEditorAdapter {
   const echo = (result: SaveResult, target: FileDownloadPolicyTarget): SaveResult =>
@@ -106,7 +98,7 @@ afterEach(() => {
 describe('file download policy store', () => {
   it('ignores a peer read that completes after a newer local policy save', async () => {
     vi.useFakeTimers();
-    const olderRead = deferred<SaveResult>();
+    const olderRead = Promise.withResolvers<SaveResult>();
     const canonical = policy('authenticated');
     const loadPolicy = vi
       .fn<FileDownloadPolicyEditorAdapter['loadPolicy']>()
@@ -132,7 +124,7 @@ describe('file download policy store', () => {
 
   it('reloads the exact selector after a peer hint that arrived during a save', async () => {
     vi.useFakeTimers();
-    const saving = deferred<SaveResult>();
+    const saving = Promise.withResolvers<SaveResult>();
     const loadPolicy = vi
       .fn<FileDownloadPolicyEditorAdapter['loadPolicy']>()
       .mockResolvedValueOnce(policy('public'))
@@ -167,7 +159,9 @@ describe('file download policy store', () => {
     await settle();
 
     expect(state()).toMatchObject({ targetStale: true, error: 'reloadRequired' });
+    vi.useFakeTimers();
     store.changeAccess('disabled', []);
+    await flushAutosave();
     expect(savePolicy).not.toHaveBeenCalled();
   });
 
@@ -275,7 +269,7 @@ describe('file download policy store', () => {
   });
 
   it('serializes rapid changes so the latest audience wins', async () => {
-    const latestSave = deferred<SaveResult>();
+    const latestSave = Promise.withResolvers<SaveResult>();
     const savePolicy = vi.fn<FileDownloadPolicyEditorAdapter['savePolicy']>(() => latestSave.promise);
     const { store, state } = startStore({
       loadPolicy: vi.fn(async () => policy('disabled')),
@@ -303,7 +297,7 @@ describe('file download policy store', () => {
     const base = segment('segment-base', 'Base segment');
     const local = segment('segment-local', 'Local segment');
     const peer = segment('segment-peer', 'Peer segment');
-    const firstSave = deferred<SaveResult>();
+    const firstSave = Promise.withResolvers<SaveResult>();
     const savePolicy = vi
       .fn<FileDownloadPolicyEditorAdapter['savePolicy']>()
       .mockImplementationOnce(() => firstSave.promise)
@@ -351,7 +345,7 @@ describe('file download policy store', () => {
   });
 
   it('rolls a failed queued change back to the most recent confirmed save', async () => {
-    const firstSave = deferred<SaveResult>();
+    const firstSave = Promise.withResolvers<SaveResult>();
     const savePolicy = vi
       .fn<FileDownloadPolicyEditorAdapter['savePolicy']>()
       .mockImplementationOnce(() => firstSave.promise)
@@ -432,7 +426,7 @@ describe('file download policy store', () => {
   });
 
   it('has unsaved changes while a policy write is pending or active', async () => {
-    const activeSave = deferred<SaveResult>();
+    const activeSave = Promise.withResolvers<SaveResult>();
     const { store, onDetachedSaveFailure } = startStore({
       loadPolicy: vi.fn(async () => policy('public')),
       loadSegments: vi.fn(async () => page([])),
@@ -453,7 +447,7 @@ describe('file download policy store', () => {
   });
 
   it('writes the latest pending value after an active save settles when stopped', async () => {
-    const activeSave = deferred<SaveResult>();
+    const activeSave = Promise.withResolvers<SaveResult>();
     const savePolicy = vi
       .fn<FileDownloadPolicyEditorAdapter['savePolicy']>()
       .mockImplementationOnce(() => activeSave.promise)
@@ -488,7 +482,7 @@ describe('file download policy store', () => {
   });
 
   it('drains old same-target writes before a new editor reads, and saves its latest value last', async () => {
-    const activeSave = deferred<SaveResult>();
+    const activeSave = Promise.withResolvers<SaveResult>();
     let persistedAudience: FileDownloadPolicyModel['audience'] = 'disabled';
     let saveInvocation = 0;
     const order: string[] = [];
@@ -535,7 +529,7 @@ describe('file download policy store', () => {
   });
 
   it('keeps a pending write to an old target from blocking or overwriting a new target', async () => {
-    const oldTargetSave = deferred<SaveResult>();
+    const oldTargetSave = Promise.withResolvers<SaveResult>();
     const savePolicy = vi.fn<FileDownloadPolicyEditorAdapter['savePolicy']>((target, audience) =>
       target.expectedFileId === 'file-1'
         ? oldTargetSave.promise
@@ -575,7 +569,7 @@ describe('file download policy store', () => {
   });
 
   it('ignores a load for an old target that completes after the editor moved on', async () => {
-    const oldTargetLoad = deferred<SaveResult>();
+    const oldTargetLoad = Promise.withResolvers<SaveResult>();
     const savePolicy = vi.fn<FileDownloadPolicyEditorAdapter['savePolicy']>();
     const adapter: FileDownloadPolicyEditorAdapter = {
       loadPolicy: vi.fn((target) =>
@@ -650,7 +644,7 @@ describe('file download policy store', () => {
   });
 
   it('reports Audience loading until a later search page arrives', async () => {
-    const laterPage = deferred<LoadSegmentsResult>();
+    const laterPage = Promise.withResolvers<LoadSegmentsResult>();
     const firstAudience = segment('segment-1', 'Audience 1');
     const loadSegments = vi.fn<FileDownloadPolicyEditorAdapter['loadSegments']>(({ page: pageNumber = 1 }) =>
       pageNumber === 1 ? Promise.resolve(page([firstAudience], 1, true)) : laterPage.promise,
