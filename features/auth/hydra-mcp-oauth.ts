@@ -263,19 +263,20 @@ function mcpAuthenticatedContext(
   return Buffer.from(toBinary(MCPAuthenticatedContextSchema, context)).toString('base64url');
 }
 
-function assertHydraContinuation(value: unknown): string {
+function assertHydraContinuation(value: unknown, mcp = true): string {
   const contract = mcpOAuthContract();
   const { redirect_to: redirectTo } = redirectResponseSchema.parse(value);
   const parsed = new URL(redirectTo);
   if (
     parsed.origin !== contract.issuerURL ||
-    parsed.pathname !== '/oauth2/auth' ||
+    !['/oauth2/auth', '/oidc/oauth2/auth'].includes(parsed.pathname) ||
     parsed.username !== '' ||
     parsed.password !== '' ||
     parsed.hash !== ''
   ) {
     throw new Error('Hydra returned an invalid authorization continuation');
   }
+  parsed.pathname = mcp ? '/oauth2/auth' : '/oidc/oauth2/auth';
   return parsed.toString();
 }
 
@@ -296,6 +297,7 @@ export async function acceptHydraLogin(challenge: string, session: SessionWithUs
       method: 'PUT',
       body: JSON.stringify({ remember: false, subject: session.account_identity_id }),
     }),
+    !isSignInClient(loginRequest.client.client_id),
   );
 }
 
@@ -350,6 +352,7 @@ export async function acceptHydraSignInConsent(
         session: { id_token: signInIdTokenClaims(request.requested_scope, session) },
       }),
     }),
+    false,
   );
 }
 
