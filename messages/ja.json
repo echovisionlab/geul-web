@@ -5304,7 +5304,7 @@
       "loading": "ダウンロードアクセスを読み込み中…",
       "audiences": {
         "disabled": {
-          "label": "無効",
+          "label": "ダウンロード不可",
           "description": "このファイルはダウンロードできません。"
         },
         "public": {
@@ -5330,8 +5330,6 @@
     },
     "public": {
       "fileFallback": "ファイル",
-      "unavailableFor": "{name} はダウンロードできません",
-      "unavailable": "利用できません",
       "signInFor": "{name} をダウンロードするにはログイン",
       "downloadFor": "{name} をダウンロード",
       "signIn": "ログインしてダウンロード",

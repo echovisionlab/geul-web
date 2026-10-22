@@ -5304,7 +5304,7 @@
       "loading": "İndirme erişimi yükleniyor…",
       "audiences": {
         "disabled": {
-          "label": "Engelli",
+          "label": "İndirme yok",
           "description": "Hiçbir ziyaretçi bu dosyayı indiremez."
         },
         "public": {
@@ -5330,8 +5330,6 @@
     },
     "public": {
       "fileFallback": "dosya",
-      "unavailableFor": "{name} için indirilemiyor",
-      "unavailable": "Kullanılamıyor",
       "signInFor": "{name} dosyasını indirmek için oturum açın",
       "downloadFor": "{name} dosyasını indirin",
       "signIn": "İndirmek için oturum açın",

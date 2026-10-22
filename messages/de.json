@@ -5304,7 +5304,7 @@
       "loading": "Download-Zugriff wird geladen…",
       "audiences": {
         "disabled": {
-          "label": "Deaktiviert",
+          "label": "Kein Download",
           "description": "Niemand kann diese Datei herunterladen."
         },
         "public": {
@@ -5330,8 +5330,6 @@
     },
     "public": {
       "fileFallback": "Datei",
-      "unavailableFor": "Download für {name} nicht verfügbar",
-      "unavailable": "Nicht verfügbar",
       "signInFor": "Anmelden, um {name} herunterzuladen",
       "downloadFor": "{name} herunterladen",
       "signIn": "Zum Herunterladen anmelden",

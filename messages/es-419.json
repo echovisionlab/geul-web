@@ -5304,7 +5304,7 @@
       "loading": "Cargando acceso de descarga…",
       "audiences": {
         "disabled": {
-          "label": "Desactivado",
+          "label": "Sin descargas",
           "description": "Ningún visitante puede descargar este archivo."
         },
         "public": {
@@ -5330,8 +5330,6 @@
     },
     "public": {
       "fileFallback": "archivo",
-      "unavailableFor": "Descarga no disponible para {name}",
-      "unavailable": "Indisponible",
       "signInFor": "Inicia sesión para descargar {name}",
       "downloadFor": "Descargar {name}",
       "signIn": "Inicia sesión para descargar",

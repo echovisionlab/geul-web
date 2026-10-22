@@ -5304,7 +5304,7 @@
       "loading": "다운로드 접근 권한을 불러오는 중…",
       "audiences": {
         "disabled": {
-          "label": "사용 안 함",
+          "label": "다운로드 안 함",
           "description": "방문자는 이 파일을 다운로드할 수 없습니다."
         },
         "public": {
@@ -5330,8 +5330,6 @@
     },
     "public": {
       "fileFallback": "파일",
-      "unavailableFor": "{name} 다운로드 불가",
-      "unavailable": "이용할 수 없음",
       "signInFor": "{name}을(를) 다운로드하려면 로그인하세요",
       "downloadFor": "{name} 다운로드",
       "signIn": "로그인하여 다운로드",

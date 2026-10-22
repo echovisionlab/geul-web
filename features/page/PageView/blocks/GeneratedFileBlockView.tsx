@@ -22,7 +22,7 @@ import { VideoMediaView } from '@/features/media/VideoMediaView';
 import { AttachmentMediaView } from '@/features/media/ui/AttachmentMediaView';
 import { ImageMediaView } from '@/features/media/ui/ImageMediaView';
 import { MissingMediaView, type MissingMediaKind } from '@/features/media/ui/MissingMediaView';
-import { AuthorizedDownloadAction } from '@/features/media-download/AuthorizedDownloadAction';
+import { AuthorizedDownloadAction, isDownloadActionOffered } from '@/features/media-download/AuthorizedDownloadAction';
 import { resolveAudioViewModel } from '@/lib/media/audio-view-model';
 import { formatMediaSize } from '@/lib/media/shared';
 import { resolveVideoViewModel } from '@/lib/media/video-view-model';
@@ -80,16 +80,6 @@ function downloadAvailability(value: ContentBlockDownloadAvailability): FileDown
 }
 
 /** An image needs no "download unavailable" notice when the reader can do nothing about it. */
-function imageDownloadUnavailable(runtime: {
-  downloadAvailability: ContentBlockDownloadAvailability;
-  downloadAction: ContentBlockDownloadAction;
-}): boolean {
-  return (
-    runtime.downloadAvailability === ContentBlockDownloadAvailability.UNAVAILABLE &&
-    runtime.downloadAction === ContentBlockDownloadAction.NONE
-  );
-}
-
 function downloadAction(value: ContentBlockDownloadAction): FileDownloadAction {
   switch (value) {
     case ContentBlockDownloadAction.DOWNLOAD:
@@ -147,15 +137,17 @@ export function GeneratedFileBlockView({
   }
   const name = block.base.props?.name || delivery.fileName || tMedia('attachmentEditor.untitledFile');
   const kind = fileKind(delivery.mimeType.toLowerCase());
-  const action = (
+  const availability = downloadAvailability(runtime.downloadAvailability);
+  const offeredAction = downloadAction(runtime.downloadAction);
+  const action = isDownloadActionOffered(availability, offeredAction) ? (
     <AuthorizedDownloadAction
       entityType={downloadOwner?.entityType ?? PublicMediaEntityType.UNSPECIFIED}
       entityId={downloadOwner?.entityId ?? ''}
       selector={{ blockId: block.id, referencePath: 'file' }}
       fileName={name}
       title={name}
-      availability={downloadAvailability(runtime.downloadAvailability)}
-      action={downloadAction(runtime.downloadAction)}
+      availability={availability}
+      action={offeredAction}
       initialDownloadUrl={delivery.download?.url}
       initialDownloadExpiresAt={
         delivery.download?.expiresAt ? timestampDate(delivery.download.expiresAt).toISOString() : undefined
@@ -171,7 +163,7 @@ export function GeneratedFileBlockView({
       }
       presentation="icon"
     />
-  );
+  ) : undefined;
   if (kind === 'image') {
     const source = delivery.asset?.url || delivery.inline?.url;
     if (!source) {
@@ -184,7 +176,7 @@ export function GeneratedFileBlockView({
         caption={caption}
         style={style}
         onNaturalSize={media.onNaturalSize}
-        action={imageDownloadUnavailable(runtime) ? undefined : action}
+        action={action}
       />
     );
   }

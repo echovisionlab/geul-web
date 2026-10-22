@@ -35,6 +35,14 @@ export interface AuthorizedDownloadActionProps extends AuthorizeFileDownloadInpu
   allowFileAuthorization?: boolean;
   presentation?: 'button' | 'icon';
 }
+/** A reader is offered a download, or a sign-in to download, only when the File's policy can grant one. */
+export function isDownloadActionOffered(availability: FileDownloadAvailability, action: FileDownloadAction): boolean {
+  return (
+    availability === FILE_DOWNLOAD_AVAILABILITY.AVAILABLE &&
+    (action === FILE_DOWNLOAD_ACTION.DOWNLOAD || action === FILE_DOWNLOAD_ACTION.SIGN_IN)
+  );
+}
+
 export function AuthorizedDownloadAction({
   availability,
   action,
@@ -84,34 +92,8 @@ export function AuthorizedDownloadAction({
       window.location.assign(href);
     }
   };
-  if (
-    effectiveAvailability !== FILE_DOWNLOAD_AVAILABILITY.AVAILABLE ||
-    effectiveAction === FILE_DOWNLOAD_ACTION.NONE ||
-    effectiveAction === FILE_DOWNLOAD_ACTION.UNSPECIFIED
-  ) {
-    if (presentation === 'icon') {
-      const unavailableLabel = t('unavailableFor', { name: context });
-      return (
-        <Tooltip label={unavailableLabel} withArrow>
-          <span>
-            <IconButton
-              label={unavailableLabel}
-              size="sm"
-              emphasis="low"
-              disabled
-              data-authorized-download-action="icon"
-            >
-              <IconDownload size={16} />
-            </IconButton>
-          </span>
-        </Tooltip>
-      );
-    }
-    return (
-      <DsText size="xs" tone="secondary" role="status" aria-label={t('unavailableFor', { name: context })}>
-        {t('unavailable')}
-      </DsText>
-    );
+  if (!isDownloadActionOffered(effectiveAvailability, effectiveAction)) {
+    return null;
   }
   const isSignIn = effectiveAction === FILE_DOWNLOAD_ACTION.SIGN_IN;
   const handleClick = async () => {
@@ -161,7 +143,10 @@ export function AuthorizedDownloadAction({
         go(buildLoginRedirectHref(currentLocation));
         return;
       }
-      setError(t('unavailable'));
+      // A policy that no longer grants a download hides this action instead.
+      if (isDownloadActionOffered(responseAvailability, responseAction)) {
+        setError(t('failed'));
+      }
     } catch {
       if (generation === requestGeneration.current) {
         setError(t('failed'));

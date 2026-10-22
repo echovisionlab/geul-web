@@ -5304,7 +5304,7 @@
       "loading": "正在加载下载权限…",
       "audiences": {
         "disabled": {
-          "label": "已禁用",
+          "label": "不允许下载",
           "description": "访客无法下载此文件。"
         },
         "public": {
@@ -5330,8 +5330,6 @@
     },
     "public": {
       "fileFallback": "文件",
-      "unavailableFor": "无法下载 {name}",
-      "unavailable": "不可用",
       "signInFor": "登录后下载 {name}",
       "downloadFor": "下载 {name}",
       "signIn": "登录后下载",

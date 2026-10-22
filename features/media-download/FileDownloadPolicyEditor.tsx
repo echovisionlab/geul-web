@@ -56,7 +56,7 @@ interface FileDownloadPolicyEditorProps extends FileDownloadPolicyTarget {
   releaseId?: string;
   compact?: boolean;
   readOnly?: boolean;
-  presentation?: 'standalone' | 'media-header';
+  presentation?: 'standalone' | 'block-settings';
 }
 
 const SEGMENTS_PAGE_SIZE = 50;
@@ -180,7 +180,6 @@ export function FileDownloadPolicyEditor({
   const tActions = useTranslations('common.actions');
   const tStates = useTranslations('common.states');
   const errorId = useId();
-  const audienceDescriptionId = useId();
   const target = useMemo(
     () => ({
       entityType,
@@ -881,7 +880,7 @@ export function FileDownloadPolicyEditor({
     scheduleSaveFlush();
   };
   const loadPending = enabled && (loading || loadedTargetKey !== targetKey);
-  const mediaHeader = presentation === 'media-header';
+  const blockSettings = presentation === 'block-settings';
   const resolvedAudience = audience;
   const selectedAccessValues =
     resolvedAudience === 'restricted'
@@ -891,19 +890,10 @@ export function FileDownloadPolicyEditor({
       : [ACCESS_SCOPE_VALUES[resolvedAudience as Exclude<FileDownloadAudience, 'restricted'>]];
   const accessControl = policyLoaded ? (
     <div style={{ width: '100%' }}>
-      {mediaHeader ? (
-        <VisuallyHidden id={audienceDescriptionId} data-file-download-access-description>
-          {t(`audiences.${resolvedAudience}.description`)}
-        </VisuallyHidden>
-      ) : null}
       <MultiSelect
-        label={mediaHeader ? undefined : t('sectionTitle')}
-        aria-label={mediaHeader ? t('sectionTitle') : undefined}
-        aria-describedby={
-          [mediaHeader ? audienceDescriptionId : undefined, error ? errorId : undefined].filter(Boolean).join(' ') ||
-          undefined
-        }
-        description={mediaHeader ? undefined : t(`audiences.${resolvedAudience}.description`)}
+        label={t('sectionTitle')}
+        aria-describedby={error ? errorId : undefined}
+        description={t(`audiences.${resolvedAudience}.description`)}
         value={selectedAccessValues}
         data={[
           { value: ACCESS_SCOPE_VALUES.disabled, label: t('audiences.disabled.label') },
@@ -975,7 +965,7 @@ export function FileDownloadPolicyEditor({
   const synchronizationFeedback =
     saving || saved ? (
       <div style={{ minHeight: 18 }}>
-        <DsLayoutStack align={mediaHeader ? 'start' : 'end'} gap="none">
+        <DsLayoutStack align={blockSettings ? 'start' : 'end'} gap="none">
           {saving ? (
             <StatusBadge tone="neutral" appearance="soft" leftSection={<Loader size="xs" />}>
               {tStates('syncing')}
@@ -1016,7 +1006,7 @@ export function FileDownloadPolicyEditor({
     </>
   );
 
-  if (mediaHeader) {
+  if (blockSettings) {
     return (
       <DsLayoutStack
         gap="xs"
@@ -1024,7 +1014,7 @@ export function FileDownloadPolicyEditor({
         role="group"
         aria-label={t('sectionTitle')}
         aria-busy={loadPending}
-        data-file-download-policy-presentation="media-header"
+        data-file-download-policy-presentation="block-settings"
         onMouseDown={(event) => event.stopPropagation()}
         onClick={(event) => event.stopPropagation()}
       >

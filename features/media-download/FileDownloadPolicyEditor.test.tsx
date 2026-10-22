@@ -108,7 +108,7 @@ class TestBroadcastChannel {
 function renderEditor(
   adapter: FileDownloadPolicyEditorAdapter,
   options: {
-    presentation?: 'standalone' | 'media-header';
+    presentation?: 'standalone' | 'block-settings';
     strict?: boolean;
     target?: FileDownloadPolicyTarget;
     exactEcho?: boolean;
@@ -545,7 +545,7 @@ describe('FileDownloadPolicyEditor', () => {
     renderEditor(adapter);
     await settle();
     vi.useFakeTimers();
-    await selectOption('Download access', 'Disabled');
+    await selectOption('Download access', 'No downloads');
     await flushAutosave();
     await settle();
 
@@ -574,7 +574,7 @@ describe('FileDownloadPolicyEditor', () => {
     renderEditor(adapter);
     await settle();
     vi.useFakeTimers();
-    await selectOption('Download access', 'Disabled');
+    await selectOption('Download access', 'No downloads');
     await flushAutosave();
     await settle();
     await flushAutosave(1);
@@ -587,7 +587,7 @@ describe('FileDownloadPolicyEditor', () => {
     expect(host?.textContent).toContain('Download access could not be saved');
   });
 
-  it('shows the current audience in the media header and describes it to assistive technology', async () => {
+  it('titles the access field in block settings and describes the selected audience', async () => {
     const adapter: FileDownloadPolicyEditorAdapter = {
       loadPolicy: vi.fn(async () => ({
         data: {
@@ -600,11 +600,15 @@ describe('FileDownloadPolicyEditor', () => {
       savePolicy: vi.fn(),
     };
 
-    renderEditor(adapter, { presentation: 'media-header' });
+    renderEditor(adapter, { presentation: 'block-settings' });
     await settle();
 
     expectSelectedAccess('Signed-in users');
-    expect(inputForLabel('Download access')).toHaveAccessibleDescription(/Any signed-in user can download this file\./);
+    const description = 'Any signed-in user can download this file.';
+    expect(inputForLabel('Download access')).toHaveAccessibleDescription(expect.stringContaining(description));
+    // Next to name, description and caption, the field needs a visible title and meaning.
+    expect(host?.querySelector('label')?.textContent).toBe('Download access');
+    expect(host?.textContent).toContain(description);
   });
 
   it('renders a real loading state instead of a false disabled policy', async () => {
@@ -752,7 +756,7 @@ describe('FileDownloadPolicyEditor', () => {
     vi.useFakeTimers();
     await selectOption('Download access', 'Public');
     await selectOption('Download access', 'Signed-in users');
-    await selectOption('Download access', 'Disabled');
+    await selectOption('Download access', 'No downloads');
 
     expect(savePolicy).not.toHaveBeenCalled();
     await flushAutosave();
@@ -768,7 +772,7 @@ describe('FileDownloadPolicyEditor', () => {
     await settle();
 
     expect(savePolicy).toHaveBeenCalledTimes(1);
-    expectSelectedAccess('Disabled');
+    expectSelectedAccess('No downloads');
     expect(host?.textContent).toContain('Synced');
   });
 
@@ -863,7 +867,7 @@ describe('FileDownloadPolicyEditor', () => {
       savePolicy,
     };
 
-    renderEditor(adapter, { presentation: 'media-header' });
+    renderEditor(adapter, { presentation: 'block-settings' });
     await settle();
     vi.useFakeTimers();
 
@@ -935,7 +939,7 @@ describe('FileDownloadPolicyEditor', () => {
 
     expect(savePolicy).toHaveBeenCalledTimes(1);
     expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'public', [], expect.any(Object), expect.any(String));
-    expectSelectedAccess('Disabled');
+    expectSelectedAccess('No downloads');
 
     oldTargetSave.resolve({
       data: {
@@ -946,7 +950,7 @@ describe('FileDownloadPolicyEditor', () => {
     });
     await settle();
 
-    expectSelectedAccess('Disabled');
+    expectSelectedAccess('No downloads');
     expect(savePolicy).toHaveBeenCalledTimes(1);
   });
 
@@ -1005,7 +1009,7 @@ describe('FileDownloadPolicyEditor', () => {
     renderEditor(adapter);
     await settle();
     vi.useFakeTimers();
-    await selectOption('Download access', 'Disabled');
+    await selectOption('Download access', 'No downloads');
     act(() => root?.unmount());
     root = null;
     await settle();
@@ -1041,7 +1045,7 @@ describe('FileDownloadPolicyEditor', () => {
     renderEditor(adapter);
     await settle();
     vi.useFakeTimers();
-    await selectOption('Download access', 'Disabled');
+    await selectOption('Download access', 'No downloads');
     renderEditor(adapter, { target: { ...defaultTarget, expectedFileId: 'file-2' } });
     await settle();
 
@@ -1071,7 +1075,7 @@ describe('FileDownloadPolicyEditor', () => {
     renderEditor(adapter);
     await settle();
     vi.useFakeTimers();
-    await selectOption('Download access', 'Disabled');
+    await selectOption('Download access', 'No downloads');
 
     const pendingUnload = new Event('beforeunload', { cancelable: true });
     window.dispatchEvent(pendingUnload);
@@ -1306,7 +1310,7 @@ describe('FileDownloadPolicyEditor', () => {
     expectSelectedAccess('Signed-in users');
   });
 
-  it('visibly announces later Audience loading in the production media-header presentation', async () => {
+  it('visibly announces later Audience loading in the production block-settings presentation', async () => {
     const laterPage = deferred<Awaited<ReturnType<FileDownloadPolicyEditorAdapter['loadSegments']>>>();
     const firstAudience = segment('segment-1', 'Audience 1');
     const loadSegments = vi.fn<FileDownloadPolicyEditorAdapter['loadSegments']>(({ page: pageNumber = 1 }) =>
@@ -1324,7 +1328,7 @@ describe('FileDownloadPolicyEditor', () => {
       savePolicy: vi.fn(),
     };
 
-    renderEditor(adapter, { presentation: 'media-header' });
+    renderEditor(adapter, { presentation: 'block-settings' });
     await settle();
     vi.useFakeTimers();
 
@@ -1534,7 +1538,7 @@ describe('FileDownloadPolicyEditor', () => {
     expect(savePolicy).not.toHaveBeenCalled();
   });
 
-  it('reports failures and rolls the production media-header back to the last persisted policy', async () => {
+  it('reports failures and rolls the production block-settings back to the last persisted policy', async () => {
     const members = segment('audience-members', 'Members');
     const savePolicy = vi.fn(async () => ({ errorCode: 'saveFailed' as const }));
     const adapter: FileDownloadPolicyEditorAdapter = {
@@ -1558,7 +1562,7 @@ describe('FileDownloadPolicyEditor', () => {
       savePolicy,
     };
 
-    renderEditor(adapter, { presentation: 'media-header' });
+    renderEditor(adapter, { presentation: 'block-settings' });
     await settle();
 
     vi.useFakeTimers();
@@ -1581,7 +1585,7 @@ describe('FileDownloadPolicyEditor', () => {
     expect(saveError).toBeTruthy();
     expect(inputForLabel('Download access').getAttribute('aria-describedby')?.split(' ')).toContain(saveError?.id);
     expect(host?.textContent).not.toContain('Synced');
-    expect(host?.querySelector('[data-file-download-policy-presentation="media-header"]')).toBeTruthy();
+    expect(host?.querySelector('[data-file-download-policy-presentation="block-settings"]')).toBeTruthy();
     expect(host?.textContent).not.toContain('Save access');
   });
 });

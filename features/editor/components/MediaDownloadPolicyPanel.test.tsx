@@ -62,7 +62,7 @@ describe('MediaDownloadPolicyPanel', () => {
       expect(html).toContain('data-block-id="block-1"');
       expect(html).toContain('data-reference-path="file"');
       expect(html).toContain('data-entity-id="entity-1"');
-      expect(html).toContain('data-presentation="media-header"');
+      expect(html).toContain('data-presentation="block-settings"');
     },
   );
 

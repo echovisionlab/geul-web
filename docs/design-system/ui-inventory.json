@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "ea70cf69d8096fe8f451d38872093b569e826994f2fb1e3ad3602d78422ad7cb",
+  "manifestHash": "77fd02a9da4d5a8c9584b5cdf7b13794e443eb1b941bb22263cb48641976ade5",
   "counts": {
     "sourceFiles": 3848,
     "productionSourceFiles": 2323,
@@ -48102,7 +48102,7 @@
       "catalogAdapters": [],
       "tests": ["features/media-download/AuthorizedDownloadAction.test.tsx"],
       "stories": ["features/media-download/AuthorizedDownloadAction.stories.tsx"],
-      "composedJsx": ["Button", "DsText", "IconButton", "IconDownload", "Tooltip", "VisuallyHidden", "span"]
+      "composedJsx": ["Button", "DsText", "IconButton", "IconDownload", "Tooltip", "VisuallyHidden"]
     },
     {
       "file": "features/media-download/ConnectedFileDownloadPolicyEditor.tsx",
@@ -48203,7 +48203,7 @@
             {
               "name": "presentation",
               "optional": true,
-              "type": "'standalone' | 'media-header'"
+              "type": "'standalone' | 'block-settings'"
             }
           ]
         },
@@ -55187,7 +55187,6 @@
         "AudioBlock",
         "AudioMediaView",
         "AuthorizedDownloadAction",
-        "BlockDownloadAction",
         "BulletListItem",
         "CalloutBlock",
         "CheckListItem",
