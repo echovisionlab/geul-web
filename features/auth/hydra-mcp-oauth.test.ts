@@ -100,7 +100,7 @@ describe('Hydra MCP OAuth controller', () => {
       user: { ...session.user, role, status: status ?? 'active' },
     });
 
-    expect(continuation).toBe(accepted ? 'https://sso.example/oauth2/auth?login_verifier=accepted' : null);
+    expect(continuation).toBe(accepted ? 'https://sso.example/oidc/oauth2/auth?login_verifier=accepted' : null);
     expect(fetchMock).toHaveBeenCalledTimes(accepted ? 2 : 1);
   });
 
@@ -129,7 +129,9 @@ describe('Hydra MCP OAuth controller', () => {
       );
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(acceptHydraSignInConsent(challenge, request, admin)).resolves.toContain('consent_verifier=accepted');
+    await expect(acceptHydraSignInConsent(challenge, request, admin)).resolves.toBe(
+      'https://sso.example/oidc/oauth2/auth?consent_verifier=accepted',
+    );
     expect(JSON.parse(String((fetchMock.mock.calls[0]?.[1] as RequestInit).body))).toEqual({
       grant_access_token_audience: [],
       grant_scope: ['openid', 'email', 'profile'],
@@ -235,6 +237,19 @@ describe('Hydra MCP OAuth controller', () => {
     );
 
     await expect(getHydraConsentRequest(challenge)).rejects.toThrow();
+  });
+
+  it.each(['login', 'consent'] as const)('keeps an MCP %s continuation on the MCP endpoint', async (kind) => {
+    const redirect = { redirect_to: `https://sso.example/oidc/oauth2/auth?${kind}_verifier=accepted` };
+    const fetchMock = vi.fn();
+    if (kind === 'login') {
+      fetchMock.mockResolvedValueOnce(jsonResponse({ client: consentRequest.client }));
+    }
+    fetchMock.mockResolvedValueOnce(jsonResponse(redirect));
+    vi.stubGlobal('fetch', fetchMock);
+    const continuation =
+      kind === 'login' ? acceptHydraLogin(challenge, session) : acceptHydraConsent(challenge, consentRequest, session);
+    await expect(continuation).resolves.toBe(`https://sso.example/oauth2/auth?${kind}_verifier=accepted`);
   });
 
   it('rejects a Hydra continuation outside the canonical issuer', async () => {
