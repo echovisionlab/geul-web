@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.3](https://github.com/echovisionlab/geul-web/compare/v0.20.2...v0.20.3) (2026-10-22)
+
+
+### Bug Fixes
+
+* **editor:** keep snapshot images in place when the live editor takes over ([#173](https://github.com/echovisionlab/geul-web/issues/173)) ([dc06e45](https://github.com/echovisionlab/geul-web/commit/dc06e457b545084118031466c6ae684c361f0d34))
+
 ## [0.20.2](https://github.com/echovisionlab/geul-web/compare/v0.20.1...v0.20.2) (2026-10-21)
 
 
