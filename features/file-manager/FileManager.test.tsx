@@ -17,6 +17,7 @@ const mocks = vi.hoisted(() => ({
   getDeletionImpact: vi.fn(),
   getFile: vi.fn(),
   listUsages: vi.fn(),
+  deleteFolder: vi.fn(),
   translate: (key: string, values?: Record<string, unknown>) => {
     if (values && 'count' in values) {
       return `${key}:${String(values.count)}`;
@@ -43,7 +44,7 @@ vi.mock('@/lib/hooks/useFileUpload', () => ({
 
 vi.mock('@/lib/actions/file', () => ({
   createFileFolderAction: vi.fn(),
-  deleteFileFolderAction: vi.fn(),
+  deleteFileFolderAction: mocks.deleteFolder,
   deleteManagedFilesAction: vi.fn(),
   getFileDeletionImpactAction: mocks.getDeletionImpact,
   getManagedFileAction: mocks.getFile,
@@ -99,6 +100,7 @@ describe('FileManager directory loading', () => {
     mocks.getDeletionImpact.mockReset();
     mocks.getFile.mockReset();
     mocks.listUsages.mockReset();
+    mocks.deleteFolder.mockReset();
     vi.mocked(notifications.show).mockReset();
     mocks.viewProps = undefined;
     window.localStorage.clear();
@@ -177,6 +179,48 @@ describe('FileManager directory loading', () => {
 
     expect(getViewProps().mutationLoading).toBe(false);
     expect(notifications.show).toHaveBeenCalledWith({ tone: 'danger', message: 'errors.inspectUsage' });
+  });
+
+  it('opens a breadcrumb by its index in the root-first path', async () => {
+    const child: FileManagerFolderView = {
+      kind: 'folder',
+      id: 'folder-2',
+      name: 'March',
+      createdAt: null,
+      updatedAt: null,
+    };
+    mocks.listItems.mockResolvedValue({ items: [], total: 0, folderNotFound: false });
+    await renderManager();
+    await act(async () => getViewProps().onOpenFolder(folder));
+    await act(async () => getViewProps().onOpenFolder(child));
+    expect(getViewProps().path.map((part) => part.name)).toEqual(['root', '2026', 'March']);
+
+    await act(async () => getViewProps().onOpenPath(1));
+    expect(getViewProps().path.map((part) => part.name)).toEqual(['root', '2026']);
+    expect(mocks.listItems).toHaveBeenLastCalledWith(expect.objectContaining({ folderId: 'folder-1' }));
+
+    await act(async () => getViewProps().onOpenPath(0));
+    expect(getViewProps().path.map((part) => part.name)).toEqual(['root']);
+    expect(mocks.listItems).toHaveBeenLastCalledWith(expect.objectContaining({ folderId: undefined }));
+  });
+
+  it('stops waiting for a folder deletion that cannot be requested', async () => {
+    mocks.listItems.mockResolvedValue({ items: [folder], total: 1, folderNotFound: false });
+    mocks.deleteFolder.mockRejectedValue(new Error('offline'));
+    await renderManager();
+    await act(async () => getViewProps().onDeleteFolder(folder));
+    const confirm = Array.from(document.querySelectorAll('button')).find(
+      (button) => button.textContent === 'actions.delete',
+    );
+    expect(confirm).toBeDefined();
+
+    await act(async () => {
+      confirm?.click();
+    });
+
+    expect(mocks.deleteFolder).toHaveBeenCalledWith('folder-1');
+    expect(getViewProps().mutationLoading).toBe(false);
+    expect(notifications.show).toHaveBeenCalledWith({ tone: 'danger', message: 'errors.mutation' });
   });
 
   it('clears the previous directory before a failed navigation result', async () => {
