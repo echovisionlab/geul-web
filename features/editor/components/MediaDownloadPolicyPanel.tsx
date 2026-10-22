@@ -47,7 +47,7 @@ export function MediaDownloadPolicyPanel({
       referencePath="file"
       expectedFileId={normalizedFileId}
       adapter={adapter}
-      presentation="media-header"
+      presentation="block-settings"
     />
   );
 }

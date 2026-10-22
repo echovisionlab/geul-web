@@ -5304,7 +5304,7 @@
       "loading": "Đang tải quyền truy cập tải xuống…",
       "audiences": {
         "disabled": {
-          "label": "Tàn tật",
+          "label": "Không cho tải xuống",
           "description": "Không có khách truy cập có thể tải tập tin này."
         },
         "public": {
@@ -5330,8 +5330,6 @@
     },
     "public": {
       "fileFallback": "tài liệu",
-      "unavailableFor": "Tải xuống không khả dụng cho {name}",
-      "unavailable": "Không có sẵn",
       "signInFor": "Đăng nhập để tải xuống {name}",
       "downloadFor": "Tải xuống {name}",
       "signIn": "Đăng nhập để tải xuống",

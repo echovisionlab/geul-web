@@ -366,7 +366,10 @@ describe('GeneratedRichTextBlockView File Block downloads', () => {
     host.remove();
   });
 
-  it('draws no download icon on an image whose original the reader cannot download', () => {
+  it.each([
+    { mimeType: 'image/png', extension: 'png', rendered: '<img' },
+    { mimeType: 'application/pdf', extension: 'pdf', rendered: 'attachment-title' },
+  ])('draws no download icon on a $mimeType File the reader cannot download', ({ mimeType, extension, rendered }) => {
     const blockId = '01b3db42-75f1-4bf1-8cb9-9b3baf57e795';
     const fileId = 'b67328c4-668c-5bf2-8f1e-41465149ded6';
     const block = {
@@ -384,10 +387,10 @@ describe('GeneratedRichTextBlockView File Block downloads', () => {
       delivery: {
         fileId,
         fileName: 'field-recording',
-        extension: 'png',
-        mimeType: 'image/png',
+        extension,
+        mimeType,
         fileSize: 1024n,
-        asset: { url: 'https://cdn.example/field-recording.png' },
+        asset: { url: `https://cdn.example/field-recording.${extension}` },
       },
       downloadAvailability: ContentBlockDownloadAvailability.UNAVAILABLE,
       downloadAction: ContentBlockDownloadAction.NONE,
@@ -404,7 +407,7 @@ describe('GeneratedRichTextBlockView File Block downloads', () => {
       </TestProviders>,
     );
 
-    expect(html).toContain('<img');
+    expect(html).toContain(rendered);
     expect(html).not.toContain('data-authorized-download-action');
   });
 });

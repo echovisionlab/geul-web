@@ -88,8 +88,7 @@ describe('AuthorizedDownloadAction', () => {
       await Promise.resolve();
     });
     expect(navigate).not.toHaveBeenCalled();
-    expect(host?.querySelector('button')).toBeNull();
-    expect(host?.querySelector('[role="status"]')?.textContent).toBe('Unavailable');
+    expect(host?.childElementCount).toBe(0);
   });
 
   it.each(['button', 'icon'] as const)(
@@ -217,14 +216,14 @@ describe('AuthorizedDownloadAction', () => {
     expect(navigate).toHaveBeenCalledWith(expect.stringContaining('/login?redirect='));
   });
 
-  it('renders only a minimal unavailable state with no download button', () => {
+  it.each(['button', 'icon'] as const)('renders nothing as a %s when the policy grants no download', (presentation) => {
     renderAction({
+      presentation,
       availability: FileDownloadAvailability.UNAVAILABLE,
       action: FileDownloadAction.NONE,
     });
 
-    expect(host?.querySelector('button')).toBeNull();
-    expect(host?.querySelector('[role="status"]')?.textContent).toBe('Unavailable');
+    expect(host?.childElementCount).toBe(0);
   });
 
   it('renders an icon control for media player toolbars', () => {
@@ -234,16 +233,5 @@ describe('AuthorizedDownloadAction', () => {
     expect(button).not.toBeNull();
     expect(button?.textContent).toBe('');
     expect(button?.getAttribute('aria-label')).toContain('Field recording');
-  });
-
-  it('keeps an unavailable player download visible but disabled', () => {
-    renderAction({
-      presentation: 'icon',
-      availability: FileDownloadAvailability.UNAVAILABLE,
-      action: FileDownloadAction.NONE,
-    });
-
-    expect(host?.querySelector<HTMLButtonElement>('[data-authorized-download-action="icon"]')?.disabled).toBe(true);
-    expect(host?.querySelector('[role="status"]')).toBeNull();
   });
 });

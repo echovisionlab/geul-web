@@ -5304,7 +5304,7 @@
       "loading": "Chargement de l’accès au téléchargement…",
       "audiences": {
         "disabled": {
-          "label": "Désactivé",
+          "label": "Aucun téléchargement",
           "description": "Aucun visiteur ne peut télécharger ce fichier."
         },
         "public": {
@@ -5330,8 +5330,6 @@
     },
     "public": {
       "fileFallback": "fichier",
-      "unavailableFor": "Téléchargement indisponible pour {name}",
-      "unavailable": "Indisponible",
       "signInFor": "Connectez-vous pour télécharger {name}",
       "downloadFor": "Télécharger {name}",
       "signIn": "Se connecter pour télécharger",

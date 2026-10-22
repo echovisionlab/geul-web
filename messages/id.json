@@ -5304,7 +5304,7 @@
       "loading": "Memuat akses unduhan…",
       "audiences": {
         "disabled": {
-          "label": "Dengan disabilitas",
+          "label": "Tanpa unduhan",
           "description": "Tidak ada pengunjung yang dapat mengunduh file ini."
         },
         "public": {
@@ -5330,8 +5330,6 @@
     },
     "public": {
       "fileFallback": "mengajukan",
-      "unavailableFor": "Unduhan tidak tersedia untuk {name}",
-      "unavailable": "Tidak tersedia",
       "signInFor": "Masuk untuk mengunduh {name}",
       "downloadFor": "Unduh {name}",
       "signIn": "Masuk untuk mengunduh",

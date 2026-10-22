@@ -5304,7 +5304,7 @@
       "loading": "Wczytuję dostęp do pobierania…",
       "audiences": {
         "disabled": {
-          "label": "Wyłączony",
+          "label": "Bez pobierania",
           "description": "Żaden odwiedzający nie może pobrać tego pliku."
         },
         "public": {
@@ -5330,8 +5330,6 @@
     },
     "public": {
       "fileFallback": "plik",
-      "unavailableFor": "Pobieranie niedostępne dla {name}",
-      "unavailable": "Nie płynny",
       "signInFor": "Zaloguj się, aby pobrać {name}",
       "downloadFor": "Pobierz {name}",
       "signIn": "Zaloguj się, aby pobrać",

@@ -5304,7 +5304,7 @@
       "loading": "جارٍ تحميل صلاحيات التنزيل…",
       "audiences": {
         "disabled": {
-          "label": "معطّل",
+          "label": "بلا تنزيل",
           "description": "لا يمكن لأي زائر تنزيل هذا الملف."
         },
         "public": {
@@ -5330,8 +5330,6 @@
     },
     "public": {
       "fileFallback": "ملف",
-      "unavailableFor": "تنزيل {name} غير متاح",
-      "unavailable": "غير متاح",
       "signInFor": "سجّل الدخول لتنزيل {name}",
       "downloadFor": "تنزيل {name}",
       "signIn": "سجّل الدخول للتنزيل",

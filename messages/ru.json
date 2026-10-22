@@ -5304,7 +5304,7 @@
       "loading": "Загрузка доступа к скачиванию…",
       "audiences": {
         "disabled": {
-          "label": "Неполноценный",
+          "label": "Без скачивания",
           "description": "Ни один посетитель не может скачать этот файл."
         },
         "public": {
@@ -5330,8 +5330,6 @@
     },
     "public": {
       "fileFallback": "файл",
-      "unavailableFor": "Загрузка недоступна для {name}",
-      "unavailable": "Недоступно",
       "signInFor": "Войдите, чтобы загрузить {name}",
       "downloadFor": "Скачать {name}",
       "signIn": "Войдите, чтобы скачать",

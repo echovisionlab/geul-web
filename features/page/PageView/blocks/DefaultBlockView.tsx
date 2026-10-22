@@ -20,7 +20,7 @@ import { useDocumentHeadingParentLevel } from '@/features/document-layout/ui/Doc
 import { AttachmentMediaView } from '@/features/media/ui/AttachmentMediaView';
 import { ImageMediaView } from '@/features/media/ui/ImageMediaView';
 import { MissingMediaView, type MissingMediaKind } from '@/features/media/ui/MissingMediaView';
-import { AuthorizedDownloadAction } from '@/features/media-download/AuthorizedDownloadAction';
+import { AuthorizedDownloadAction, isDownloadActionOffered } from '@/features/media-download/AuthorizedDownloadAction';
 import { useContentMediaDelivery } from '@/features/media/ContentMediaDeliveryContext';
 import { useOptionalContentBlockMediaRuntime } from '@/features/media/ContentBlockMediaRuntimeContext';
 import { resolveAudioViewModelFromBlock } from '@/lib/media/audio-view-model';
@@ -474,6 +474,7 @@ function ImageBlock({ block }: { block: Block }) {
   const alt = getBlockPropString(block.props, 'alt');
   const caption = getBlockPropString(block.props, 'caption');
   const name = getBlockPropString(block.props, 'name');
+  const downloadAction = useBlockDownloadAction(block, name || alt || caption || 'Image');
 
   if (!url) {
     return null;
@@ -485,20 +486,14 @@ function ImageBlock({ block }: { block: Block }) {
       alt={alt || name || caption || 'Image'}
       caption={caption}
       style={getContainerStyle(block)}
-      action={
-        <BlockDownloadAction
-          block={block}
-          title={name || alt || caption || 'Image'}
-          presentation="icon"
-          hideWhenUnavailable
-        />
-      }
+      action={downloadAction}
     />
   );
 }
 
 function VideoBlock({ block }: { block: Block }) {
   const model = resolveVideoViewModelFromBlock(block);
+  const downloadAction = useBlockDownloadAction(block, model.title);
   if (!model.hlsUrl && !model.playbackUrl && !getBlockPropString(block.props, 'fileId')) {
     return null;
   }
@@ -506,13 +501,14 @@ function VideoBlock({ block }: { block: Block }) {
     <VideoMediaView
       model={model}
       style={model.containerStyle || getContainerStyle(block)}
-      playerAction={<BlockDownloadAction block={block} title={model.title} presentation="icon" />}
+      playerAction={downloadAction}
     />
   );
 }
 
 function AudioBlock({ block }: { block: Block }) {
   const model = resolveAudioViewModelFromBlock(block);
+  const downloadAction = useBlockDownloadAction(block, model.title);
   if (!model.playbackUrl && !getBlockPropString(block.props, 'fileId')) {
     return null;
   }
@@ -520,7 +516,7 @@ function AudioBlock({ block }: { block: Block }) {
     <AudioMediaView
       model={model}
       style={model.containerStyle || getContainerStyle(block)}
-      playerAction={<BlockDownloadAction block={block} title={model.title} presentation="icon" />}
+      playerAction={downloadAction}
     />
   );
 }
@@ -603,6 +599,7 @@ function AttachmentBlockView({ block }: { block: Block }) {
 
   const typeLabel = getFileTypeName(mimeType);
   const meta = [typeLabel, sizeText].filter(Boolean).join(' · ');
+  const downloadAction = useBlockDownloadAction(block, displayName);
 
   return (
     <AttachmentMediaView
@@ -610,23 +607,13 @@ function AttachmentBlockView({ block }: { block: Block }) {
       meta={meta}
       caption={caption}
       style={getContainerStyle(block)}
-      action={<BlockDownloadAction block={block} title={displayName} presentation="icon" />}
+      action={downloadAction}
     />
   );
 }
 
-function BlockDownloadAction({
-  block,
-  title,
-  presentation = 'button',
-  hideWhenUnavailable = false,
-}: {
-  block: Block;
-  title: string;
-  presentation?: 'button' | 'icon';
-  /** An image needs no "download unavailable" notice when the reader can do nothing about it. */
-  hideWhenUnavailable?: boolean;
-}) {
+/** The reader's download action for a File Block, or nothing when its policy grants no download. */
+function useBlockDownloadAction(block: Block, title: string): ReactNode {
   const contentMedia = useContentMediaDelivery();
   const runtimeIndex = useOptionalContentBlockMediaRuntime();
   const runtime = runtimeIndex && isBlockId(block.id) ? runtimeIndex.get(block.id, 'file') : undefined;
@@ -637,7 +624,7 @@ function BlockDownloadAction({
     : undefined;
 
   if (!runtime || !contentMedia) {
-    return null;
+    return undefined;
   }
 
   const availability =
@@ -654,12 +641,8 @@ function BlockDownloadAction({
         : runtime.downloadAction === ContentBlockDownloadAction.NONE
           ? FileDownloadAction.NONE
           : FileDownloadAction.UNSPECIFIED;
-  if (
-    hideWhenUnavailable &&
-    availability === FileDownloadAvailability.UNAVAILABLE &&
-    action === FileDownloadAction.NONE
-  ) {
-    return null;
+  if (!isDownloadActionOffered(availability, action)) {
+    return undefined;
   }
 
   return (
@@ -674,7 +657,7 @@ function BlockDownloadAction({
       initialDownloadUrl={delivery?.download?.url}
       initialDownloadExpiresAt={initialDownloadExpiresAt}
       allowFileAuthorization={false}
-      presentation={presentation}
+      presentation="icon"
       authorize={({ selector }) =>
         selector
           ? contentMedia.authorizeDownload(selector)

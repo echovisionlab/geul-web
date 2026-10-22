@@ -5304,7 +5304,7 @@
       "loading": "Downloadtoegang laden…",
       "audiences": {
         "disabled": {
-          "label": "Uitgeschakeld",
+          "label": "Geen downloads",
           "description": "Geen enkele bezoeker kan dit bestand downloaden."
         },
         "public": {
@@ -5330,8 +5330,6 @@
     },
     "public": {
       "fileFallback": "bestand",
-      "unavailableFor": "Download niet beschikbaar voor {name}",
-      "unavailable": "Niet beschikbaar",
       "signInFor": "Log in om {name} te downloaden",
       "downloadFor": "{name} downloaden",
       "signIn": "Log in om te downloaden",

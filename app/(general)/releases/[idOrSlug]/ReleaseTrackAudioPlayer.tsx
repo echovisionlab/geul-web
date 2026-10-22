@@ -8,6 +8,7 @@ import { PUBLIC_MEDIA_ENTITY_TYPE } from '@/features/media-download/download-wir
 import { AudioPlayer } from '@/features/media/AudioPlayer';
 import {
   AuthorizedDownloadAction,
+  isDownloadActionOffered,
   type AuthorizedDownloadActionProps,
 } from '@/features/media-download/AuthorizedDownloadAction';
 import { authorizeReleaseTrackDownload } from '@/lib/queries/release-download-browser';
@@ -59,34 +60,35 @@ export function ReleaseTrackAudioPlayer({
     return null;
   }
 
-  const downloadControl = fileId ? (
-    <AuthorizedDownloadAction
-      entityType={PUBLIC_MEDIA_ENTITY_TYPE.RELEASE}
-      entityId={releaseId}
-      trackId={trackId}
-      fileName={fileName || title}
-      title={title}
-      availability={downloadAvailability}
-      action={downloadAction}
-      authorize={
-        authorizeDownload ??
-        ((input) =>
-          authorizeReleaseTrackDownload({
-            ...input,
-            idOrSlug: releaseId,
-            trackId,
-            requestedLocale,
-            shareToken,
-            sharePassword,
-          }))
-      }
-      navigate={navigateDownload}
-      initialDownloadUrl={downloadUrl ?? undefined}
-      initialDownloadExpiresAt={downloadExpiresAt ?? undefined}
-      allowFileAuthorization={false}
-      presentation="icon"
-    />
-  ) : null;
+  const downloadControl =
+    fileId && isDownloadActionOffered(downloadAvailability, downloadAction) ? (
+      <AuthorizedDownloadAction
+        entityType={PUBLIC_MEDIA_ENTITY_TYPE.RELEASE}
+        entityId={releaseId}
+        trackId={trackId}
+        fileName={fileName || title}
+        title={title}
+        availability={downloadAvailability}
+        action={downloadAction}
+        authorize={
+          authorizeDownload ??
+          ((input) =>
+            authorizeReleaseTrackDownload({
+              ...input,
+              idOrSlug: releaseId,
+              trackId,
+              requestedLocale,
+              shareToken,
+              sharePassword,
+            }))
+        }
+        navigate={navigateDownload}
+        initialDownloadUrl={downloadUrl ?? undefined}
+        initialDownloadExpiresAt={downloadExpiresAt ?? undefined}
+        allowFileAuthorization={false}
+        presentation="icon"
+      />
+    ) : null;
 
   return (
     <DsLayoutStack gap="xs">
