@@ -160,6 +160,7 @@ export function PostEditorBody({
       {snapshot?.content && (!activeLocale || snapshot.locale === activeLocale) ? (
         <EditorSnapshotHandoff
           key={snapshot.locale}
+          media={snapshot.blockMedia}
           ready={Boolean(roomReady && session)}
           editable={canEditBody}
           snapshot={

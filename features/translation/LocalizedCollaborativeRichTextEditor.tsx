@@ -16,6 +16,10 @@ import { MediaIngestDialog, type MediaIngestDialogCloseReason } from '@/features
 import { MediaIngestOverlay } from '@/features/editor/components/MediaIngestOverlay';
 import { EditorMediaIngestProvider } from '@/features/editor/contexts/EditorMediaIngestContext';
 import { useOptionalEditorMediaServices } from '@/features/editor/contexts/EditorMediaServicesContext';
+import {
+  seedEditorMediaRuntimeStore,
+  useEditorSnapshotMedia,
+} from '@/features/editor/contexts/EditorSnapshotMediaContext';
 import { EditorAuthoringModeProvider, type EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
 import { MapInsertModal } from '@/features/editor/MapInsertModal';
 import { useEntityMediaSurface } from '@/features/editor/hooks/useEntityMediaSurface';
@@ -99,9 +103,16 @@ function LocalizedCollaborativeRichTextEditorSurface({
     throw new Error('Typed Block-room editor requires provider awareness.');
   }
   const mediaServices = useOptionalEditorMediaServices();
+  // Only the first snapshot seeds the store; a refreshed snapshot must not replace the resident editor.
+  const snapshotMedia = useEditorSnapshotMedia();
+  const [initialSnapshotMedia] = useState(snapshotMedia);
   const mediaRuntimeStore = useMemo(
-    () => mediaServices?.createRuntimeStore() ?? createEditorMediaRuntimeStore(),
-    [mediaServices],
+    () =>
+      seedEditorMediaRuntimeStore(
+        mediaServices?.createRuntimeStore() ?? createEditorMediaRuntimeStore(),
+        initialSnapshotMedia,
+      ),
+    [mediaServices, initialSnapshotMedia],
   );
   const tEditorCommon = useTranslations('editorCommon');
   const tMedia = useTranslations('editorCommon.media');
