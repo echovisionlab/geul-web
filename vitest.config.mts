@@ -6,6 +6,9 @@ import { discoverTestProjects, sharedRuntimeFiles, testProjectNames } from './sc
 import { testRuntimeEnv } from './test/runtime-env.mts';
 
 const projectRoot = fileURLToPath(new URL('.', import.meta.url));
+// V8 bytecode of Vitest and externalized dependencies, reused across runs; Vitest passes it to its workers.
+// CI restores the same directory. `NODE_DISABLE_COMPILE_CACHE=1` turns it off.
+process.env.NODE_COMPILE_CACHE ??= resolve(projectRoot, 'node_modules/.cache/node-compile-cache');
 const testFiles = discoverTestProjects(projectRoot);
 
 export default defineConfig({
