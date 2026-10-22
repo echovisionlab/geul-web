@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.1](https://github.com/echovisionlab/geul-web/compare/v0.21.0...v0.21.1) (2026-10-22)
+
+
+### Bug Fixes
+
+* **auth:** return operator sign-ins to native Hydra endpoints ([#186](https://github.com/echovisionlab/geul-web/issues/186)) ([b462beb](https://github.com/echovisionlab/geul-web/commit/b462beb263478773c72e0959623e81facbbcb95c))
+
 ## [0.21.0](https://github.com/echovisionlab/geul-web/compare/v0.20.4...v0.21.0) (2026-10-22)
 
 
