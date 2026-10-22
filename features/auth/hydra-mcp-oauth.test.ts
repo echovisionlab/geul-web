@@ -86,14 +86,19 @@ describe('Hydra MCP OAuth controller', () => {
     { role: 'admin' as const, accepted: true },
     { role: 'author' as const, accepted: false },
     { role: 'user' as const, accepted: false },
-  ])('lets only an Admin sign in to an operator tool ($role)', async ({ role, accepted }) => {
+    { role: 'admin' as const, status: 'banned' as const, accepted: false },
+    { role: 'admin' as const, status: 'pending_deletion' as const, accepted: false },
+  ])('lets only an active Admin sign in to an operator tool ($role, $status)', async ({ role, status, accepted }) => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(jsonResponse({ client: { client_id: 'monitor-client' } }))
       .mockResolvedValueOnce(jsonResponse({ redirect_to: 'https://sso.example/oauth2/auth?login_verifier=accepted' }));
     vi.stubGlobal('fetch', fetchMock);
 
-    const continuation = await acceptHydraLogin(challenge, { ...session, user: { ...session.user, role } });
+    const continuation = await acceptHydraLogin(challenge, {
+      ...session,
+      user: { ...session.user, role, status: status ?? 'active' },
+    });
 
     expect(continuation).toBe(accepted ? 'https://sso.example/oauth2/auth?login_verifier=accepted' : null);
     expect(fetchMock).toHaveBeenCalledTimes(accepted ? 2 : 1);
@@ -151,6 +156,7 @@ describe('Hydra MCP OAuth controller', () => {
     expect(() => assertSignInConsentRequest(request, admin)).not.toThrow();
     const cases: [string, typeof request, SessionWithUser][] = [
       ['an Author', request, session],
+      ['a banned Admin', request, { ...admin, user: { ...admin.user, status: 'banned' } }],
       ['another subject', { ...request, subject: crypto.randomUUID() }, admin],
       ['the MCP scope', { ...request, requested_scope: ['openid', 'mcp'] }, admin],
       ['no openid scope', { ...request, requested_scope: ['email'] }, admin],

@@ -151,15 +151,20 @@ function isSignInScopeSet(scopes: string[]): boolean {
   );
 }
 
-/** Operator tools are for Admins only; MCP clients connect Authors and Admins. */
+/** Operator tools admit only Admins in good standing; nothing re-checks the member after sign-in. */
+export function isActiveAdmin(session: SessionWithUser): boolean {
+  return session.user.role === 'admin' && session.user.status === 'active';
+}
+
+/** Operator tools are for active Admins only; MCP clients connect Authors and Admins. */
 export function maySignInWith(clientId: string, session: SessionWithUser): boolean {
-  return isSignInClient(clientId) ? session.user.role === 'admin' : isMcpAuthor(session);
+  return isSignInClient(clientId) ? isActiveAdmin(session) : isMcpAuthor(session);
 }
 
 export function assertSignInConsentRequest(request: HydraConsentRequest, session: SessionWithUser): void {
   if (
     !isSignInClient(request.client.client_id) ||
-    session.user.role !== 'admin' ||
+    !isActiveAdmin(session) ||
     request.subject !== session.account_identity_id ||
     !isSignInScopeSet(request.requested_scope) ||
     request.requested_access_token_audience.length !== 0

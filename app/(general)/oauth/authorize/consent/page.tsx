@@ -8,6 +8,7 @@ import {
   acceptHydraSignInConsent,
   assertMcpConsentRequest,
   getHydraConsentRequest,
+  isActiveAdmin,
   isMcpAuthor,
   isSignInClient,
   mcpClientDisplayName,
@@ -45,7 +46,7 @@ export default async function McpConsentPage({ searchParams }: PageProps) {
   }
   const request = await getHydraConsentRequest(challenge);
   if (isSignInClient(request.client.client_id)) {
-    if (session.user.role !== 'admin') {
+    if (!isActiveAdmin(session)) {
       notFound();
     }
     redirect(await acceptHydraSignInConsent(challenge, request, session));

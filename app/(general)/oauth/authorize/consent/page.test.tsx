@@ -35,6 +35,8 @@ vi.mock('@/features/auth/hydra-mcp-oauth-actions', () => ({
 }));
 vi.mock('@/features/auth/hydra-mcp-oauth', () => ({
   acceptHydraSignInConsent: mocks.acceptSignIn,
+  isActiveAdmin: (session: { user: { role: string; status: string } }) =>
+    session.user.role === 'admin' && session.user.status === 'active',
   assertMcpConsentRequest: mocks.assertRequest,
   isSignInClient: mocks.signInClient,
   getHydraConsentRequest: mocks.getRequest,
@@ -62,7 +64,7 @@ describe('MCP consent explanation', () => {
   });
 
   it('signs an Admin in to an operator tool without a consent screen', async () => {
-    mocks.getSession.mockResolvedValue({ user: { id: 'admin-id', role: 'admin' } });
+    mocks.getSession.mockResolvedValue({ user: { id: 'admin-id', role: 'admin', status: 'active' } });
     mocks.signInClient.mockReturnValue(true);
     mocks.acceptSignIn.mockResolvedValue('https://sso.example/oauth2/auth?consent_verifier=accepted');
 
@@ -73,7 +75,11 @@ describe('MCP consent explanation', () => {
     expect(mocks.assertRequest).not.toHaveBeenCalled();
   });
 
-  it('hides an operator tool from an Author', async () => {
+  it.each([
+    { role: 'author', status: 'active' },
+    { role: 'admin', status: 'banned' },
+  ])('hides an operator tool from a $status $role', async (user) => {
+    mocks.getSession.mockResolvedValue({ user: { id: 'member-id', ...user } });
     mocks.signInClient.mockReturnValue(true);
 
     await expect(renderConsent(['openid', 'email'])).rejects.toThrow('not-found');
