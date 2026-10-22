@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "methodology": "All App Router visual entry files indexed by TypeScript imports/JSX; exact reviewed route/boundary maps count separately from mere Feature story overlap. Unmapped entrypoints remain explicit gaps. Static source census is not a browser pass.",
-  "sourceManifestHash": "f7eae90fe42e3146f2206f2416bd0440f30738f5790ab8bbc0b0d835adbe8cdd",
+  "sourceManifestHash": "40e54f60e81686ecb6c332ceaccbc160289667f81dfef253887bbc2dc0457b2d",
   "counts": {
     "queryEditorBranches": 12,
     "editorBranchPreviews": 12,
@@ -32091,6 +32091,7 @@
         "features/work/WorkEditor/credits/credit-order-utils.ts",
         "features/work/WorkEditor/credits/work-credit-save-coordinator.ts",
         "features/work/WorkEditor/stringList.ts",
+        "features/work/WorkEditor/useWorkClientDetails.ts",
         "features/work/WorkEditor/useWorkLifecycle.ts",
         "features/work/WorkEditor/work-lifecycle-controls.ts",
         "features/work/WorkMediaDeliveryContext.tsx",

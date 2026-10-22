@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "77fd02a9da4d5a8c9584b5cdf7b13794e443eb1b941bb22263cb48641976ade5",
+  "manifestHash": "02ff5ef516dbe7436e2dd03abb51419b7106558cafcd96bd4bcf7b098ff5cedd",
   "counts": {
-    "sourceFiles": 3848,
-    "productionSourceFiles": 2323,
+    "sourceFiles": 3850,
+    "productionSourceFiles": 2324,
     "componentFiles": 919,
     "coreFamilies": 57,
     "featureDomains": 54,
@@ -2808,6 +2808,8 @@
     "features/work/WorkEditor/credits/work-credit-save-coordinator.test.ts",
     "features/work/WorkEditor/credits/work-credit-save-coordinator.ts",
     "features/work/WorkEditor/stringList.ts",
+    "features/work/WorkEditor/useWorkClientDetails.test.tsx",
+    "features/work/WorkEditor/useWorkClientDetails.ts",
     "features/work/WorkEditor/useWorkLifecycle.ts",
     "features/work/WorkEditor/work-lifecycle-controls.test.ts",
     "features/work/WorkEditor/work-lifecycle-controls.ts",
@@ -74304,42 +74306,6 @@
       "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
       "propsEvidence": [
         {
-          "name": "ClientDetails",
-          "extends": [],
-          "properties": [
-            {
-              "name": "id",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "name",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "logoUrl",
-              "optional": false,
-              "type": "string | null"
-            },
-            {
-              "name": "logoLightUrl",
-              "optional": true,
-              "type": "string | null"
-            },
-            {
-              "name": "logoDarkUrl",
-              "optional": true,
-              "type": "string | null"
-            },
-            {
-              "name": "website",
-              "optional": false,
-              "type": "string | null"
-            }
-          ]
-        },
-        {
           "name": "WorkClientsSectionProps",
           "extends": [],
           "properties": [
@@ -74356,7 +74322,7 @@
             {
               "name": "initialClientDetails",
               "optional": true,
-              "type": "ClientDetails[]"
+              "type": "WorkClientDetails[]"
             }
           ]
         },
@@ -74372,7 +74338,7 @@
             {
               "name": "client",
               "optional": false,
-              "type": "ClientDetails | null"
+              "type": "WorkClientDetails | null"
             },
             {
               "name": "canEdit",
@@ -74513,42 +74479,6 @@
       "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
       "propsEvidence": [
         {
-          "name": "ClientDetails",
-          "extends": [],
-          "properties": [
-            {
-              "name": "id",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "name",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "logoUrl",
-              "optional": false,
-              "type": "string | null"
-            },
-            {
-              "name": "logoLightUrl",
-              "optional": true,
-              "type": "string | null"
-            },
-            {
-              "name": "logoDarkUrl",
-              "optional": true,
-              "type": "string | null"
-            },
-            {
-              "name": "website",
-              "optional": false,
-              "type": "string | null"
-            }
-          ]
-        },
-        {
           "name": "WorkEditorProps",
           "extends": [],
           "properties": [
@@ -74645,7 +74575,7 @@
             {
               "name": "initialClientDetails",
               "optional": true,
-              "type": "ClientDetails[]"
+              "type": "WorkClientDetails[]"
             },
             {
               "name": "userName",
@@ -78966,6 +78896,7 @@
         "features/work/WorkEditor/credits/credit-order-utils.ts",
         "features/work/WorkEditor/credits/work-credit-save-coordinator.ts",
         "features/work/WorkEditor/stringList.ts",
+        "features/work/WorkEditor/useWorkClientDetails.ts",
         "features/work/WorkEditor/useWorkLifecycle.ts",
         "features/work/WorkEditor/work-lifecycle-controls.ts",
         "features/work/WorkMediaDeliveryContext.tsx",
@@ -78992,6 +78923,7 @@
         "features/work/WorkEditor/credits/SortableCreditEditing.a11y.test.tsx",
         "features/work/WorkEditor/credits/credit-order-utils.test.ts",
         "features/work/WorkEditor/credits/work-credit-save-coordinator.test.ts",
+        "features/work/WorkEditor/useWorkClientDetails.test.tsx",
         "features/work/WorkEditor/work-lifecycle-controls.test.ts",
         "features/work/WorkMediaDeliveryContext.test.tsx"
       ],
