@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "77fd02a9da4d5a8c9584b5cdf7b13794e443eb1b941bb22263cb48641976ade5",
+  "manifestHash": "a7972123e0fb97dc84f966eddc1efa545665dd7cd7f33be349923aa10056d390",
   "counts": {
-    "sourceFiles": 3848,
-    "productionSourceFiles": 2323,
+    "sourceFiles": 3851,
+    "productionSourceFiles": 2325,
     "componentFiles": 919,
     "coreFamilies": 57,
     "featureDomains": 54,
@@ -1882,8 +1882,11 @@
     "features/media-download/download-wire-values.ts",
     "features/media-download/file-download-policy-state.test.ts",
     "features/media-download/file-download-policy-state.ts",
+    "features/media-download/file-download-policy-store.test.ts",
+    "features/media-download/file-download-policy-store.ts",
     "features/media-download/file-download-policy-write-coordinator.test.ts",
     "features/media-download/file-download-policy-write-coordinator.ts",
+    "features/media-download/useFileDownloadPolicyStore.ts",
     "features/media/AudioMediaView.tsx",
     "features/media/AudioPlayer.stories.tsx",
     "features/media/AudioPlayer.test.tsx",
@@ -48156,27 +48159,6 @@
       "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
       "propsEvidence": [
         {
-          "name": "FileDownloadPolicyEditorAdapter",
-          "extends": [],
-          "properties": [
-            {
-              "name": "loadPolicy",
-              "optional": false,
-              "type": "(target: FileDownloadPolicyTarget) => Promise<FileDownloadActionResult<FileDownloadPolicyModel>>"
-            },
-            {
-              "name": "loadSegments",
-              "optional": false,
-              "type": "( input: FileDownloadPageInput, ) => Promise<FileDownloadActionResult<FileDownloadPage<AudienceSegmentSummary>>>"
-            },
-            {
-              "name": "savePolicy",
-              "optional": false,
-              "type": "( target: FileDownloadPolicyTarget, audience: FileDownloadAudience, audienceSegmentIds: string[], observedPolicy: FileDownloadPolicyObservedState, editorOrigin?: string, ) => Promise<FileDownloadActionResult<FileDownload"
-            }
-          ]
-        },
-        {
           "name": "FileDownloadPolicyEditorProps",
           "extends": ["extends FileDownloadPolicyTarget"],
           "properties": [
@@ -48204,99 +48186,6 @@
               "name": "presentation",
               "optional": true,
               "type": "'standalone' | 'block-settings'"
-            }
-          ]
-        },
-        {
-          "name": "PendingPolicySave",
-          "extends": [],
-          "properties": [
-            {
-              "name": "generation",
-              "optional": false,
-              "type": "number"
-            },
-            {
-              "name": "sequence",
-              "optional": false,
-              "type": "number"
-            },
-            {
-              "name": "targetKey",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "target",
-              "optional": false,
-              "type": "FileDownloadPolicyTarget"
-            },
-            {
-              "name": "observedPolicy",
-              "optional": false,
-              "type": "FileDownloadPolicyObservedState"
-            },
-            {
-              "name": "audience",
-              "optional": false,
-              "type": "FileDownloadAudience"
-            },
-            {
-              "name": "audienceSegmentIds",
-              "optional": false,
-              "type": "string[]"
-            },
-            {
-              "name": "retryCount",
-              "optional": false,
-              "type": "number"
-            }
-          ]
-        },
-        {
-          "name": "ActivePolicySave",
-          "extends": [],
-          "properties": [
-            {
-              "name": "token",
-              "optional": false,
-              "type": "symbol"
-            },
-            {
-              "name": "request",
-              "optional": false,
-              "type": "PendingPolicySave"
-            },
-            {
-              "name": "promise",
-              "optional": false,
-              "type": "Promise<void>"
-            }
-          ]
-        },
-        {
-          "name": "ActiveSegmentPagination",
-          "extends": [],
-          "properties": [
-            {
-              "name": "generation",
-              "optional": false,
-              "type": "number"
-            },
-            {
-              "name": "search",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "token",
-              "optional": false,
-              "type": "symbol"
-            },
-            {
-              "name": "promise",
-              "optional": false,
-              "type": "Promise<void>"
             }
           ]
         }
@@ -77438,7 +77327,9 @@
         "features/media-download/FileDownloadPolicyEditor.tsx",
         "features/media-download/download-wire-values.ts",
         "features/media-download/file-download-policy-state.ts",
-        "features/media-download/file-download-policy-write-coordinator.ts"
+        "features/media-download/file-download-policy-store.ts",
+        "features/media-download/file-download-policy-write-coordinator.ts",
+        "features/media-download/useFileDownloadPolicyStore.ts"
       ],
       "components": [
         "features/media-download/AuthorizedDownloadAction.tsx",
@@ -77451,6 +77342,7 @@
         "features/media-download/FileDownloadPolicyEditor.test.tsx",
         "features/media-download/download-wire-values.test.ts",
         "features/media-download/file-download-policy-state.test.ts",
+        "features/media-download/file-download-policy-store.test.ts",
         "features/media-download/file-download-policy-write-coordinator.test.ts"
       ],
       "directlyImportingRoutes": []
@@ -107255,6 +107147,21 @@
               "exported": "TILE_STYLES",
               "imported": "TILE_STYLES",
               "typeOnly": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "features/media-download/FileDownloadPolicyEditor.tsx",
+      "reexports": [
+        {
+          "target": "features/media-download/file-download-policy-store.ts",
+          "symbols": [
+            {
+              "exported": "FileDownloadPolicyEditorAdapter",
+              "imported": "FileDownloadPolicyEditorAdapter",
+              "typeOnly": true
             }
           ]
         }
