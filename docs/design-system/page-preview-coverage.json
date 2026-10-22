@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "methodology": "All App Router visual entry files indexed by TypeScript imports/JSX; exact reviewed route/boundary maps count separately from mere Feature story overlap. Unmapped entrypoints remain explicit gaps. Static source census is not a browser pass.",
-  "sourceManifestHash": "40e54f60e81686ecb6c332ceaccbc160289667f81dfef253887bbc2dc0457b2d",
+  "sourceManifestHash": "fdd3944c3d207ebb4ca77b261842b2f4e18cfb424660761b7d449bb10d074041",
   "counts": {
     "queryEditorBranches": 12,
     "editorBranchPreviews": 12,
@@ -22984,7 +22984,7 @@
     },
     {
       "file": "app/(general)/privacy/history/[id]/page.tsx",
-      "sha256": "b34cd88c1ef9cec10d94b1cd57730bbecd07cb1ab1b947be5ecf3c210f02843a",
+      "sha256": "c9d8ba3637f9a1dfb28db88c19ff097ab16d5700b0f7f0d5b278ca49a3223d3e",
       "kind": "page",
       "route": "/privacy/history/[id]",
       "family": "Governance",
@@ -29181,7 +29181,7 @@
     },
     {
       "file": "app/(general)/terms/history/[id]/page.tsx",
-      "sha256": "ba03aa471b455ec934186cd45bcf64367e434e12ea741e4169cbf52cc3d565ae",
+      "sha256": "2b5cc5d940780098f47ff0db82d239fc8d336747650720efff98cc8f41f969e3",
       "kind": "page",
       "route": "/terms/history/[id]",
       "family": "Governance",

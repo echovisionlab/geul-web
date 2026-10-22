@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "02ff5ef516dbe7436e2dd03abb51419b7106558cafcd96bd4bcf7b098ff5cedd",
+  "manifestHash": "6e97b9a79e1ab59202079e135607406e24eb8fe365212fbcefc77607b6ddf24f",
   "counts": {
     "sourceFiles": 3850,
     "productionSourceFiles": 2324,
@@ -91522,7 +91522,7 @@
         },
         {
           "file": "lib/utils/entity-edit-route.ts",
-          "symbols": ["isEntityEditView"]
+          "symbols": ["canOpenEntityEditRoute", "isEntityEditView"]
         },
         {
           "file": "lib/utils/json-ld.ts",
@@ -92158,7 +92158,7 @@
         },
         {
           "file": "lib/utils/entity-edit-route.ts",
-          "symbols": ["isEntityEditView"]
+          "symbols": ["canOpenEntityEditRoute", "isEntityEditView"]
         },
         {
           "file": "lib/utils/json-ld.ts",

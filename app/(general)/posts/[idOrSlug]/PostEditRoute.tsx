@@ -13,7 +13,7 @@ import { getManageSiteContext, getSettings } from '@/lib/queries/manifest';
 import { getPostForEdit, getPostEditorSnapshot } from '@/lib/queries/post';
 import { listMySeries, listSeriesSimple } from '@/lib/queries/series';
 import type { ShareLink } from '@/lib/types/share-link/model';
-import { buildEntityEditHref } from '@/lib/utils/entity-edit-route';
+import { buildEntityEditHref, canOpenEntityEditRoute } from '@/lib/utils/entity-edit-route';
 import { buildStaticOgMetadata } from '@/lib/utils/og';
 import { toDate } from '@/lib/utils/proto';
 import type { SearchParamRecord } from '@/lib/utils/request-path';
@@ -45,8 +45,14 @@ export async function renderPostEditRoute(idOrSlug: string, query: SearchParamRe
   }
 
   const post = await getPostForEdit(idOrSlug);
-  const canReadArchived = post?.status === 'archived' && session.user.role === 'author';
-  if (!post || (!canReadArchived && !post.allowedActions.includes(PostAction.EDIT))) {
+  if (
+    !post ||
+    !canOpenEntityEditRoute({
+      archived: post.status === 'archived',
+      role: session.user.role,
+      canEdit: post.allowedActions.includes(PostAction.EDIT),
+    })
+  ) {
     notFound();
   }
 
