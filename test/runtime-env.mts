@@ -8,6 +8,7 @@ export const testRuntimeEnv = {
   HYDRA_ADMIN_URL: 'http://hydra-admin.test',
   SITE_ORIGIN: 'http://web.test',
   MCP_OAUTH_ISSUER_URL: 'http://sso.test',
+  OAUTH_SIGN_IN_CLIENT_IDS: 'monitor-client',
   DRAFT_SECRET: 'vitest-draft-secret',
   HOST: 'http://web.test',
 };

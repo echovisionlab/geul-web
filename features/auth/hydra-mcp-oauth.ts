@@ -7,7 +7,7 @@ import {
 } from '@echovisionlab/geul-proto/intra/gateway_authorization_pb.ts';
 import { z } from 'zod';
 import type { SessionWithUser } from '@/lib/auth/types';
-import { getHydraAdminUrl, getMcpOAuthIssuerUrl, getSiteOrigin } from '@/lib/env';
+import { getHydraAdminUrl, getMcpOAuthIssuerUrl, getOAuthSignInClientIds, getSiteOrigin } from '@/lib/env';
 
 const MCP_SCOPE = 'mcp';
 const OFFLINE_ACCESS_SCOPE = 'offline_access';
@@ -136,6 +136,47 @@ export function isMcpAuthor(session: SessionWithUser): boolean {
   return session.user.role === 'author' || session.user.role === 'admin';
 }
 
+const SIGN_IN_SCOPES = new Set(['openid', 'email', 'profile', OFFLINE_ACCESS_SCOPE]);
+
+/** A first-party operator tool, such as Grafana, that signs Admins in instead of connecting MCP. */
+export function isSignInClient(clientId: string): boolean {
+  return getOAuthSignInClientIds().includes(clientId);
+}
+
+function isSignInScopeSet(scopes: string[]): boolean {
+  return (
+    new Set(scopes).size === scopes.length &&
+    scopes.includes('openid') &&
+    scopes.every((scope) => SIGN_IN_SCOPES.has(scope))
+  );
+}
+
+/** Operator tools are for Admins only; MCP clients connect Authors and Admins. */
+export function maySignInWith(clientId: string, session: SessionWithUser): boolean {
+  return isSignInClient(clientId) ? session.user.role === 'admin' : isMcpAuthor(session);
+}
+
+export function assertSignInConsentRequest(request: HydraConsentRequest, session: SessionWithUser): void {
+  if (
+    !isSignInClient(request.client.client_id) ||
+    session.user.role !== 'admin' ||
+    request.subject !== session.account_identity_id ||
+    !isSignInScopeSet(request.requested_scope) ||
+    request.requested_access_token_audience.length !== 0
+  ) {
+    throw new Error('Hydra consent request does not match an Admin sign-in');
+  }
+}
+
+/** Claims a sign-in client reads from the ID token; `role` lets it re-check that the member is an Admin. */
+function signInIdTokenClaims(scopes: string[], session: SessionWithUser): Record<string, string> {
+  return {
+    role: session.user.role,
+    ...(scopes.includes('email') && session.user.email ? { email: session.user.email } : {}),
+    ...(scopes.includes('profile') ? { name: session.user.nickname, preferred_username: session.user.nickname } : {}),
+  };
+}
+
 export function mcpClientDisplayName(request: HydraConsentRequest): string {
   const name = request.client.client_name?.replace(/\s+/g, ' ').trim();
   return name || 'MCP Client';
@@ -233,13 +274,17 @@ function assertHydraContinuation(value: unknown): string {
   return parsed.toString();
 }
 
-export async function acceptHydraLogin(challenge: string, session: SessionWithUser): Promise<string> {
+/** Accepts the login for a member the client admits, or returns null so the route can hide the client. */
+export async function acceptHydraLogin(challenge: string, session: SessionWithUser): Promise<string | null> {
   const parsedChallenge = challengeSchema.parse(challenge);
   const loginRequest = loginRequestSchema.parse(
     await hydraAdminRequest('/admin/oauth2/auth/requests/login', 'login_challenge', parsedChallenge),
   );
   if (!loginRequest.client.client_id) {
     throw new Error('Hydra login request is missing its client');
+  }
+  if (!maySignInWith(loginRequest.client.client_id, session)) {
+    return null;
   }
   return assertHydraContinuation(
     await hydraAdminRequest('/admin/oauth2/auth/requests/login/accept', 'login_challenge', parsedChallenge, {
@@ -277,6 +322,27 @@ export async function acceptHydraConsent(
             authenticated_context_b64: mcpAuthenticatedContext(request, session, delegationName),
           },
         },
+      }),
+    }),
+  );
+}
+
+/** An operator tool's consent needs no screen: the Admin signs in to a first-party tool. */
+export async function acceptHydraSignInConsent(
+  challenge: string,
+  request: HydraConsentRequest,
+  session: SessionWithUser,
+): Promise<string> {
+  const parsedChallenge = challengeSchema.parse(challenge);
+  assertSignInConsentRequest(request, session);
+  return assertHydraContinuation(
+    await hydraAdminRequest('/admin/oauth2/auth/requests/consent/accept', 'consent_challenge', parsedChallenge, {
+      method: 'PUT',
+      body: JSON.stringify({
+        grant_access_token_audience: [],
+        grant_scope: request.requested_scope,
+        remember: false,
+        session: { id_token: signInIdTokenClaims(request.requested_scope, session) },
       }),
     }),
   );

@@ -8,6 +8,8 @@ import type { SessionWithUser } from '@/lib/auth/types';
 import {
   acceptHydraConsent,
   acceptHydraLogin,
+  acceptHydraSignInConsent,
+  assertSignInConsentRequest,
   assertMcpConsentRequest,
   getHydraConsentRequest,
   listMcpOAuthGrants,
@@ -19,6 +21,7 @@ import {
 vi.mock('@/lib/env', () => ({
   getHydraAdminUrl: () => 'http://hydra.internal:4445',
   getMcpOAuthIssuerUrl: () => 'https://sso.example',
+  getOAuthSignInClientIds: () => ['monitor-client'],
   getSiteOrigin: () => 'https://site.example',
 }));
 
@@ -77,6 +80,87 @@ describe('Hydra MCP OAuth controller', () => {
       remember: false,
       subject: session.account_identity_id,
     });
+  });
+
+  it.each([
+    { role: 'admin' as const, accepted: true },
+    { role: 'author' as const, accepted: false },
+    { role: 'user' as const, accepted: false },
+  ])('lets only an Admin sign in to an operator tool ($role)', async ({ role, accepted }) => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ client: { client_id: 'monitor-client' } }))
+      .mockResolvedValueOnce(jsonResponse({ redirect_to: 'https://sso.example/oauth2/auth?login_verifier=accepted' }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const continuation = await acceptHydraLogin(challenge, { ...session, user: { ...session.user, role } });
+
+    expect(continuation).toBe(accepted ? 'https://sso.example/oauth2/auth?login_verifier=accepted' : null);
+    expect(fetchMock).toHaveBeenCalledTimes(accepted ? 2 : 1);
+  });
+
+  it('hides an MCP client from an ordinary user', async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(jsonResponse({ client: { client_id: 'example-client' } }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(
+      acceptHydraLogin(challenge, { ...session, user: { ...session.user, role: 'user' } }),
+    ).resolves.toBeNull();
+    expect(fetchMock).toHaveBeenCalledOnce();
+  });
+
+  it('signs an Admin in to an operator tool with identity claims and no MCP audience or delegation', async () => {
+    const admin: SessionWithUser = { ...session, user: { ...session.user, role: 'admin', email: 'admin@example.com' } };
+    const request = {
+      client: { client_id: 'monitor-client' },
+      requested_access_token_audience: [],
+      requested_scope: ['openid', 'email', 'profile'],
+      subject: session.account_identity_id,
+    };
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse({ redirect_to: 'https://sso.example/oauth2/auth?consent_verifier=accepted' }),
+      );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(acceptHydraSignInConsent(challenge, request, admin)).resolves.toContain('consent_verifier=accepted');
+    expect(JSON.parse(String((fetchMock.mock.calls[0]?.[1] as RequestInit).body))).toEqual({
+      grant_access_token_audience: [],
+      grant_scope: ['openid', 'email', 'profile'],
+      remember: false,
+      session: {
+        id_token: {
+          role: 'admin',
+          email: 'admin@example.com',
+          name: 'Example Member',
+          preferred_username: 'Example Member',
+        },
+      },
+    });
+  });
+
+  it('refuses an operator-tool consent that is not an Admin signing in with identity scopes', () => {
+    const admin: SessionWithUser = { ...session, user: { ...session.user, role: 'admin' } };
+    const request = {
+      client: { client_id: 'monitor-client' },
+      requested_access_token_audience: [] as string[],
+      requested_scope: ['openid', 'email'],
+      subject: session.account_identity_id,
+    };
+    expect(() => assertSignInConsentRequest(request, admin)).not.toThrow();
+    const cases: [string, typeof request, SessionWithUser][] = [
+      ['an Author', request, session],
+      ['another subject', { ...request, subject: crypto.randomUUID() }, admin],
+      ['the MCP scope', { ...request, requested_scope: ['openid', 'mcp'] }, admin],
+      ['no openid scope', { ...request, requested_scope: ['email'] }, admin],
+      ['a repeated scope', { ...request, requested_scope: ['openid', 'openid'] }, admin],
+      ['an audience', { ...request, requested_access_token_audience: ['https://site.example/mcp'] }, admin],
+      ['an MCP client', { ...request, client: { client_id: 'example-client' } }, admin],
+    ];
+    for (const [name, candidate, member] of cases) {
+      expect(() => assertSignInConsentRequest(candidate, member), name).toThrow('does not match an Admin sign-in');
+    }
   });
 
   it('writes the exact MCP audience, scope, and delegation attribution to the access token session', async () => {

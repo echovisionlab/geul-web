@@ -5,9 +5,11 @@ import { getTranslations } from 'next-intl/server';
 
 import { approveMcpConsent, rejectMcpConsentAction } from '@/features/auth/hydra-mcp-oauth-actions';
 import {
+  acceptHydraSignInConsent,
   assertMcpConsentRequest,
   getHydraConsentRequest,
   isMcpAuthor,
+  isSignInClient,
   mcpClientDisplayName,
   mcpDelegationDisplayName,
   parseHydraChallenge,
@@ -41,11 +43,16 @@ export default async function McpConsentPage({ searchParams }: PageProps) {
   if (!session) {
     redirect(buildLoginRedirectHref(consentContinuation(challenge)));
   }
+  const request = await getHydraConsentRequest(challenge);
+  if (isSignInClient(request.client.client_id)) {
+    if (session.user.role !== 'admin') {
+      notFound();
+    }
+    redirect(await acceptHydraSignInConsent(challenge, request, session));
+  }
   if (!isMcpAuthor(session)) {
     notFound();
   }
-
-  const request = await getHydraConsentRequest(challenge);
   assertMcpConsentRequest(request, session);
   const clientName = mcpClientDisplayName(request);
   const delegationName = mcpDelegationDisplayName(request, session);

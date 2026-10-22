@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "methodology": "All App Router visual entry files indexed by TypeScript imports/JSX; exact reviewed route/boundary maps count separately from mere Feature story overlap. Unmapped entrypoints remain explicit gaps. Static source census is not a browser pass.",
-  "sourceManifestHash": "40e54f60e81686ecb6c332ceaccbc160289667f81dfef253887bbc2dc0457b2d",
+  "sourceManifestHash": "b03965b82d138d2d3d36e5fb49f06f54bd97f5d1e0791dbf5185d91ed62b57fe",
   "counts": {
     "queryEditorBranches": 12,
     "editorBranchPreviews": 12,
@@ -18540,7 +18540,7 @@
     },
     {
       "file": "app/(general)/oauth/authorize/consent/page.tsx",
-      "sha256": "5977b93ad31e5860e6f94be6e6fe2cda0dd2b3d5509310f9965f77201b75a8f2",
+      "sha256": "84f48bcb170513492d91f7da4c6acde5d2dfea3c7d98b6428965e5384862de27",
       "kind": "page",
       "route": "/oauth/authorize/consent",
       "family": "Identity",
@@ -18568,8 +18568,12 @@
       "renderability": "normal-or-conditional",
       "redirects": [
         {
-          "line": 42,
+          "line": 44,
           "expression": "redirect(buildLoginRedirectHref(consentContinuation(challenge)))"
+        },
+        {
+          "line": 51,
+          "expression": "redirect(await acceptHydraSignInConsent(challenge, request, session))"
         }
       ],
       "previews": [
