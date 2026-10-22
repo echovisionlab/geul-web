@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.4](https://github.com/echovisionlab/geul-web/compare/v0.20.3...v0.20.4) (2026-10-22)
+
+
+### Bug Fixes
+
+* hide download actions a File's policy does not grant ([#175](https://github.com/echovisionlab/geul-web/issues/175)) ([7bc603e](https://github.com/echovisionlab/geul-web/commit/7bc603e2dfd21276299551181be28dbdce5959b8))
+
 ## [0.20.3](https://github.com/echovisionlab/geul-web/compare/v0.20.2...v0.20.3) (2026-10-22)
 
 
