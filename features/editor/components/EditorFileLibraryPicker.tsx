@@ -2,20 +2,21 @@
 import { useFileBrowserViewSettings } from '@/features/file-manager/useFileBrowserViewSettings';
 import { fileBrowserViewSettingsLabels } from '@/features/file-manager/ui/file-browser-view-settings';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { parseFileBrowserSort } from '@/features/file-manager/sort';
+import type { FileLibraryBrowserAdapter } from '@/features/file-manager/file-library-browser-store';
+import { useFileLibraryBrowserStore } from '@/features/file-manager/useFileLibraryBrowserStore';
 import {
   listFileManagerItemsAction,
   searchFileManagerItemsAction,
   type FileManagerFileRow,
-  type FileManagerFolderRow,
   type FileManagerRow,
 } from '@/lib/actions/file';
 import {
   isUnifiedEditorLibraryFileEligible,
   type EditorLibraryFileSelection,
 } from '../lib/editor-library-file-selection';
+import { eligibleLibrarySelection, toggleLibraryFileSelection } from '../lib/editor-library-picker-selection';
 import {
   EditorFileLibraryPickerView,
   type EditorFileLibraryPickerViewLabels,
@@ -23,10 +24,7 @@ import {
 } from './EditorFileLibraryPickerView';
 
 /** Read-only transport boundary; the same controller and view run in app and catalogue. */
-export interface EditorFileLibraryDataSource {
-  list: typeof listFileManagerItemsAction;
-  search: typeof searchFileManagerItemsAction;
-}
+export type EditorFileLibraryDataSource = FileLibraryBrowserAdapter;
 
 const defaultLibraryDataSource: EditorFileLibraryDataSource = {
   list: listFileManagerItemsAction,
@@ -51,173 +49,25 @@ export function EditorFileLibraryPicker({
   const tMedia = useTranslations('editorCommon.media');
   const tCommonActions = useTranslations('common.actions');
   const tCommonStates = useTranslations('common.states');
-  const requestRef = useRef(0);
-  const moreRequestRef = useRef<string | null>(null);
-  const [path, setPath] = useState<FileLibraryPathItem[]>([{ name: tFileManager('root') }]);
-  const [query, setQuery] = useState('');
-  const [appliedQuery, setAppliedQuery] = useState('');
-  const [searchScope, setSearchScope] = useState<'folder' | 'all'>('folder');
-  const [mimeTypePrefix, setMimeTypePrefix] = useState(initialMimeTypePrefix);
-  const [sort, setSort] = useState('name:asc');
-  const [rows, setRows] = useState<FileManagerRow[]>([]);
-  const [total, setTotal] = useState(0);
-  const [nextPageToken, setNextPageToken] = useState<string | undefined>();
-  const [selectedFiles, setSelectedFiles] = useState<FileManagerFileRow[]>([]);
+  const { store: browser, state } = useFileLibraryBrowserStore(dataSource, {
+    initialMimeTypePrefix,
+    preserveSelection: allowMultiple,
+  });
+  const { folders, query, appliedQuery, searchScope, mimeTypePrefix, sort, items: rows, total, nextPageToken } = state;
+  const { loading, loadingMore, folderNotFound } = state;
+  const selectedFiles = useMemo(
+    () => state.selectedRows.filter((row): row is FileManagerFileRow => row.kind === 'file'),
+    [state.selectedRows],
+  );
+  const path = useMemo<FileLibraryPathItem[]>(
+    () => [{ name: tFileManager('root') }, ...folders],
+    [folders, tFileManager],
+  );
   const { settings: viewSettings, change: changeViewSettings } = useFileBrowserViewSettings();
   const viewMode = viewSettings.viewMode;
   const setViewMode = (mode: 'grid' | 'list') => changeViewSettings({ ...viewSettings, viewMode: mode });
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [folderNotFound, setFolderNotFound] = useState(false);
-  const currentFolderId = path.at(-1)?.id;
   const searching = appliedQuery !== '';
-  const sortInput = useMemo(() => parseFileBrowserSort(sort), [sort]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setAppliedQuery(query.trim()), 300);
-    return () => window.clearTimeout(timer);
-  }, [query]);
-
-  const loadRows = useCallback(async () => {
-    const requestId = requestRef.current + 1;
-    requestRef.current = requestId;
-    moreRequestRef.current = null;
-    setLoading(true);
-    setLoadingMore(false);
-    setLoadMoreError(null);
-    setError(null);
-    setFolderNotFound(false);
-    if (!allowMultiple) {
-      setSelectedFiles([]);
-    }
-    setRows([]);
-    setTotal(0);
-    setNextPageToken(undefined);
-
-    try {
-      if (appliedQuery) {
-        const result = await dataSource.search({
-          query: appliedQuery,
-          folderId: searchScope === 'folder' ? currentFolderId : undefined,
-          mimeTypePrefix,
-          ...sortInput,
-        });
-        if (requestRef.current !== requestId) {
-          return;
-        }
-        setRows(result.items);
-        setTotal(result.total);
-        setNextPageToken(result.nextPageToken);
-      } else {
-        const result = await dataSource.list({
-          folderId: currentFolderId,
-          mimeTypePrefix,
-          ...sortInput,
-        });
-        if (requestRef.current !== requestId) {
-          return;
-        }
-        setFolderNotFound(result.folderNotFound);
-        setRows(result.items);
-        setTotal(result.items.length);
-      }
-    } catch {
-      if (requestRef.current !== requestId) {
-        return;
-      }
-      setRows([]);
-      setError(tFileManager('errors.load'));
-    } finally {
-      if (requestRef.current === requestId) {
-        setLoading(false);
-      }
-    }
-  }, [allowMultiple, appliedQuery, currentFolderId, dataSource, mimeTypePrefix, searchScope, sortInput, tFileManager]);
-
-  useEffect(() => {
-    void loadRows();
-  }, [loadRows]);
-
-  const loadMore = useCallback(async () => {
-    if (
-      !appliedQuery ||
-      query.trim() !== appliedQuery ||
-      !nextPageToken ||
-      loading ||
-      loadingMore ||
-      moreRequestRef.current !== null
-    ) {
-      return;
-    }
-    const requestId = requestRef.current;
-    const pageKey = JSON.stringify([requestId, nextPageToken]);
-    moreRequestRef.current = pageKey;
-    setLoadingMore(true);
-    setLoadMoreError(null);
-    try {
-      const result = await dataSource.search({
-        query: appliedQuery,
-        folderId: searchScope === 'folder' ? currentFolderId : undefined,
-        mimeTypePrefix,
-        ...sortInput,
-        pageToken: nextPageToken,
-      });
-      if (requestRef.current !== requestId) {
-        return;
-      }
-      if (result.nextPageToken === nextPageToken) {
-        throw new Error('File search returned the same continuation cursor');
-      }
-      setRows((current) => [
-        ...new Map([...current, ...result.items].map((item) => [`${item.kind}:${item.id}`, item])).values(),
-      ]);
-      setTotal(result.total);
-      setNextPageToken(result.nextPageToken);
-    } catch {
-      if (requestRef.current === requestId) {
-        setLoadMoreError(tFileManager('errors.load'));
-      }
-    } finally {
-      if (requestRef.current === requestId && moreRequestRef.current === pageKey) {
-        moreRequestRef.current = null;
-        setLoadingMore(false);
-      }
-    }
-  }, [
-    appliedQuery,
-    currentFolderId,
-    dataSource,
-    loading,
-    loadingMore,
-    mimeTypePrefix,
-    nextPageToken,
-    query,
-    searchScope,
-    sortInput,
-    tFileManager,
-  ]);
-
-  const clearSearch = useCallback(() => {
-    setQuery('');
-    setAppliedQuery('');
-  }, []);
-
-  const openFolder = useCallback(
-    (folder: FileManagerFolderRow) => {
-      if (searching && folder.folderPath?.length) {
-        setPath([{ name: tFileManager('root') }, ...folder.folderPath]);
-      } else {
-        setPath((previous) => [...previous, { id: folder.id, name: folder.name }]);
-      }
-      if (!allowMultiple) {
-        setSelectedFiles([]);
-      }
-      clearSearch();
-    },
-    [allowMultiple, clearSearch, searching, tFileManager],
-  );
+  useEffect(() => browser.setPreserveSelection(allowMultiple), [allowMultiple, browser]);
 
   const isRowDisabled = useCallback(
     (row: FileManagerRow) => row.kind === 'file' && !isUnifiedEditorLibraryFileEligible(row),
@@ -227,26 +77,23 @@ export function EditorFileLibraryPicker({
   const activateRow = useCallback(
     (row: FileManagerRow) => {
       if (row.kind === 'folder') {
-        openFolder(row);
+        browser.openFolder(row);
       } else if (!isRowDisabled(row)) {
-        setSelectedFiles((current) => {
-          if (!allowMultiple) {
-            return [row];
-          }
-          return current.some((file) => file.id === row.id)
-            ? current.filter((file) => file.id !== row.id)
-            : [...current, row];
-        });
+        // Read the store, not this render: two activations in one tick must both count.
+        const current = browser.api
+          .getState()
+          .selectedRows.filter((item): item is FileManagerFileRow => item.kind === 'file');
+        browser.setSelection(toggleLibraryFileSelection(current, row, allowMultiple));
       }
     },
-    [allowMultiple, isRowDisabled, openFolder],
+    [allowMultiple, browser, isRowDisabled],
   );
 
   const confirmFiles = useCallback(
     (files: FileManagerFileRow[]) => {
-      const eligibleFiles = files.filter((file) => !isRowDisabled(file));
+      const eligibleFiles = eligibleLibrarySelection(files, allowMultiple, isRowDisabled);
       if (eligibleFiles.length > 0) {
-        onSelect(allowMultiple ? eligibleFiles : eligibleFiles.slice(0, 1));
+        onSelect(eligibleFiles);
       }
     },
     [allowMultiple, isRowDisabled, onSelect],
@@ -327,32 +174,22 @@ export function EditorFileLibraryPicker({
       loadingMore={loadingMore}
       hasMore={Boolean(nextPageToken)}
       nextPageKey={nextPageToken}
-      loadMoreError={loadMoreError}
-      error={error}
+      loadMoreError={state.loadMoreError ? tFileManager(`errors.${state.loadMoreError}`) : null}
+      error={state.error ? tFileManager(`errors.${state.error}`) : null}
       folderNotFound={folderNotFound}
       isRowDisabled={isRowDisabled}
-      onQueryChange={setQuery}
-      onSearchScopeChange={setSearchScope}
-      onMimeTypePrefixChange={setMimeTypePrefix}
-      onSortChange={setSort}
-      onOpenPath={(index) => {
-        setPath((previous) => previous.slice(0, index + 1));
-        if (!allowMultiple) {
-          setSelectedFiles([]);
-        }
-        clearSearch();
-      }}
+      onQueryChange={browser.setQuery}
+      onSearchScopeChange={browser.setSearchScope}
+      onMimeTypePrefixChange={browser.setMimeTypePrefix}
+      onSortChange={browser.setSort}
+      onOpenPath={browser.openPath}
       onActivateRow={activateRow}
-      onSelectedFilesChange={(files) => {
-        const eligible = files.filter((file) => !isRowDisabled(file));
-        setSelectedFiles(allowMultiple ? eligible : eligible.slice(0, 1));
-      }}
+      onSelectedFilesChange={(files) =>
+        browser.setSelection(eligibleLibrarySelection(files, allowMultiple, isRowDisabled))
+      }
       onConfirmFiles={confirmFiles}
-      onReturnToParent={() => {
-        setPath((previous) => previous.slice(0, -1));
-        clearSearch();
-      }}
-      onLoadMore={loadMore}
+      onReturnToParent={browser.openParent}
+      onLoadMore={browser.loadMore}
       onViewModeChange={setViewMode}
     />
   );

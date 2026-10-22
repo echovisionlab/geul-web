@@ -6,7 +6,7 @@ import { ConfirmationDialog } from '@/features/confirmation';
 
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { Text as DsText } from '@/components/core/Typography';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { notifications } from '@/components/core/Notification';
 import { FormModal } from '@/components/core/Modal';
@@ -29,14 +29,10 @@ import {
 import { useFileUpload } from '@/lib/hooks/useFileUpload';
 import { FileManagerView, type FileManagerPathItem } from './FileManagerView';
 import { summarizeFileDeletionImpact } from './file-deletion-impact';
-import { useFileManagerI18n, type FileManagerErrorKey } from './i18n';
-import { parseFileBrowserSort } from './sort';
-import type {
-  FileManagerFileView,
-  FileManagerFolderView,
-  FileManagerItemView,
-  FileManagerUsageItemView,
-} from './model';
+import type { FileLibraryBrowserAdapter, FileLibraryBrowserOptions } from './file-library-browser-store';
+import { useFileLibraryBrowserStore } from './useFileLibraryBrowserStore';
+import { useFileManagerI18n } from './i18n';
+import type { FileManagerFileView, FileManagerFolderView, FileManagerUsageItemView } from './model';
 
 type FormOperation =
   | { kind: 'create-folder'; value: string }
@@ -51,26 +47,38 @@ type DeleteOperation =
 
 const deletionImpactPreviewSize = 5;
 
+const fileManagerLibrary: FileLibraryBrowserAdapter = {
+  list: listFileManagerItemsAction,
+  search: searchFileManagerItemsAction,
+};
+const fileManagerBrowsing: FileLibraryBrowserOptions = { initialSearchScope: 'all' };
+
 export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) {
   const tViewSettings = useTranslations('fileManager.viewSettings');
   const { labels, errorMessage, message: t } = useFileManagerI18n();
-  const listRequestRef = useRef(0);
-  const moreRequestRef = useRef<string | null>(null);
   const detailRequestRef = useRef(0);
   const detailMoreRequestRef = useRef<string | null>(null);
   const { upload } = useFileUpload();
-  const [items, setItems] = useState<FileManagerItemView[]>([]);
-  const [total, setTotal] = useState(0);
-  const [nextPageToken, setNextPageToken] = useState<string | undefined>();
-  const [folders, setFolders] = useState<FileManagerPathItem[]>([]);
-  const [query, setQuery] = useState('');
-  const [appliedQuery, setAppliedQuery] = useState('');
-  const [mimeTypePrefix, setMimeTypePrefix] = useState('');
-  const [sort, setSort] = useState('name:asc');
+  const { store: browser, state: browserState } = useFileLibraryBrowserStore(fileManagerLibrary, fileManagerBrowsing);
+  const {
+    items,
+    total,
+    nextPageToken,
+    folders,
+    query,
+    appliedQuery,
+    mimeTypePrefix,
+    sort,
+    loading,
+    loadingMore: itemsLoadingMore,
+    loadMoreError: itemsLoadMoreError,
+    error,
+    folderNotFound,
+  } = browserState;
+  const selectedItemIds = useMemo(() => browserState.selectedRows.map((row) => row.id), [browserState.selectedRows]);
   const { settings: viewSettings, change: changeViewSettings } = useFileBrowserViewSettings();
   const viewMode = viewSettings.viewMode;
   const setViewMode = (mode: 'grid' | 'list') => changeViewSettings({ ...viewSettings, viewMode: mode });
-  const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
   const [detailFile, setDetailFile] = useState<FileManagerFileView | null>(null);
   const [detailUsages, setDetailUsages] = useState<FileManagerUsageItemView[]>([]);
   const [detailUsageNextPageToken, setDetailUsageNextPageToken] = useState<string | undefined>();
@@ -78,17 +86,11 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
   const [formOperation, setFormOperation] = useState<FormOperation | null>(null);
   const [moveOperation, setMoveOperation] = useState<MoveOperation | null>(null);
   const [deleteOperation, setDeleteOperation] = useState<DeleteOperation | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [itemsLoadingMore, setItemsLoadingMore] = useState(false);
-  const [itemsLoadMoreError, setItemsLoadMoreError] = useState<FileManagerErrorKey | null>(null);
   const [mutationLoading, setMutationLoading] = useState(false);
   const [uploadPercentage, setUploadPercentage] = useState<number | null>(null);
-  const [error, setError] = useState<FileManagerErrorKey | null>(null);
-  const [folderNotFound, setFolderNotFound] = useState(false);
 
   const currentFolderID = folders.at(-1)?.id;
   const path: FileManagerPathItem[] = [{ name: t('root') }, ...folders];
-  const sortInput = useMemo(() => parseFileBrowserSort(sort), [sort]);
   const selectedFileIds = useMemo(
     () =>
       items
@@ -96,112 +98,6 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
         .map((item) => item.id),
     [items, selectedItemIds],
   );
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setAppliedQuery(query.trim()), 300);
-    return () => window.clearTimeout(timer);
-  }, [query]);
-
-  const loadItems = useCallback(async () => {
-    const requestId = listRequestRef.current + 1;
-    listRequestRef.current = requestId;
-    moreRequestRef.current = null;
-    setLoading(true);
-    setItemsLoadingMore(false);
-    setItemsLoadMoreError(null);
-    setError(null);
-    setFolderNotFound(false);
-    setItems([]);
-    setTotal(0);
-    setNextPageToken(undefined);
-    setSelectedItemIds([]);
-    try {
-      if (appliedQuery) {
-        const result = await searchFileManagerItemsAction({
-          query: appliedQuery,
-          mimeTypePrefix,
-          ...sortInput,
-        });
-        if (listRequestRef.current !== requestId) {
-          return;
-        }
-        setItems(result.items);
-        setTotal(result.total);
-        setNextPageToken(result.nextPageToken);
-      } else {
-        const result = await listFileManagerItemsAction({
-          folderId: currentFolderID,
-          mimeTypePrefix,
-          ...sortInput,
-        });
-        if (listRequestRef.current !== requestId) {
-          return;
-        }
-        setFolderNotFound(result.folderNotFound);
-        setItems(result.items);
-        setTotal(result.total);
-      }
-    } catch {
-      if (listRequestRef.current !== requestId) {
-        return;
-      }
-      setError('load');
-    } finally {
-      if (listRequestRef.current === requestId) {
-        setLoading(false);
-      }
-    }
-  }, [appliedQuery, currentFolderID, mimeTypePrefix, sortInput]);
-
-  useEffect(() => {
-    void loadItems();
-  }, [loadItems]);
-
-  const loadMoreItems = async () => {
-    if (
-      !appliedQuery ||
-      query.trim() !== appliedQuery ||
-      !nextPageToken ||
-      loading ||
-      itemsLoadingMore ||
-      moreRequestRef.current !== null
-    ) {
-      return;
-    }
-    const requestId = listRequestRef.current;
-    const pageKey = JSON.stringify([requestId, nextPageToken]);
-    moreRequestRef.current = pageKey;
-    setItemsLoadingMore(true);
-    setItemsLoadMoreError(null);
-    try {
-      const result = await searchFileManagerItemsAction({
-        query: appliedQuery,
-        mimeTypePrefix,
-        ...sortInput,
-        pageToken: nextPageToken,
-      });
-      if (listRequestRef.current !== requestId) {
-        return;
-      }
-      if (result.nextPageToken === nextPageToken) {
-        throw new Error('File search returned the same continuation cursor');
-      }
-      setItems((current) => [
-        ...new Map([...current, ...result.items].map((item) => [`${item.kind}:${item.id}`, item])).values(),
-      ]);
-      setTotal(result.total);
-      setNextPageToken(result.nextPageToken);
-    } catch {
-      if (listRequestRef.current === requestId) {
-        setItemsLoadMoreError('load');
-      }
-    } finally {
-      if (listRequestRef.current === requestId && moreRequestRef.current === pageKey) {
-        moreRequestRef.current = null;
-        setItemsLoadingMore(false);
-      }
-    }
-  };
 
   const closeFile = () => {
     detailRequestRef.current += 1;
@@ -213,24 +109,12 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
   };
 
   const openFolder = (folder: FileManagerFolderView) => {
-    setFolderNotFound(false);
-    if (appliedQuery && folder.folderPath?.length) {
-      setFolders(folder.folderPath);
-    } else {
-      setFolders((previous) => [...previous, { id: folder.id, name: folder.name }]);
-    }
-    setQuery('');
-    setAppliedQuery('');
-    setSelectedItemIds([]);
+    browser.openFolder(folder);
     closeFile();
   };
 
   const openPath = (index: number) => {
-    setFolderNotFound(false);
-    setFolders((previous) => previous.slice(0, index));
-    setQuery('');
-    setAppliedQuery('');
-    setSelectedItemIds([]);
+    browser.openPath(index);
     closeFile();
   };
 
@@ -335,8 +219,8 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
         return;
       }
       setFormOperation(null);
-      setSelectedItemIds([]);
-      await loadItems();
+      browser.setSelection([]);
+      await browser.reload();
     } catch {
       showMutationFailure();
     } finally {
@@ -359,8 +243,8 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
         return;
       }
       setMoveOperation(null);
-      setSelectedItemIds([]);
-      await loadItems();
+      browser.setSelection([]);
+      await browser.reload();
     } catch {
       showMutationFailure();
     } finally {
@@ -410,8 +294,8 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
         }
       }
       setDeleteOperation(null);
-      setSelectedItemIds([]);
-      await loadItems();
+      browser.setSelection([]);
+      await browser.reload();
     } catch {
       showMutationFailure();
     } finally {
@@ -421,21 +305,16 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
 
   const uploadFile = async (file: File) => {
     setUploadPercentage(0);
-    setError(null);
+    browser.setError(null);
     try {
       await upload(file, {
         uploadType: UploadType.GENERAL_FILE,
         onProgress: (progress) => setUploadPercentage(progress.percentage),
       });
       notifications.show({ tone: 'positive', message: t('messages.uploaded') });
-      const alreadyAtRoot = currentFolderID == null;
-      setFolders([]);
-      setSelectedItemIds([]);
-      if (alreadyAtRoot) {
-        await loadItems();
-      }
+      await browser.showRoot();
     } catch {
-      setError('upload');
+      browser.setError('upload');
     } finally {
       setUploadPercentage(null);
     }
@@ -501,19 +380,15 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
             folderNotFound={folderNotFound}
             movePendingLabel={movePendingLabel}
             mutationLoading={mutationLoading}
-            onQueryChange={(value) => {
-              setQuery(value);
-            }}
-            onMimeTypePrefixChange={(value) => {
-              setMimeTypePrefix(value);
-            }}
-            onSortChange={(value) => {
-              setSort(value);
-            }}
+            onQueryChange={browser.setQuery}
+            onMimeTypePrefixChange={browser.setMimeTypePrefix}
+            onSortChange={browser.setSort}
             onViewModeChange={(mode) => {
               setViewMode(mode);
             }}
-            onSelectedItemIdsChange={setSelectedItemIds}
+            onSelectedItemIdsChange={(ids) =>
+              browser.setSelection(ids.flatMap((id) => items.filter((item) => item.id === id)))
+            }
             onOpenPath={openPath}
             onReturnToRoot={() => openPath(0)}
             onOpenFolder={openFolder}
@@ -524,7 +399,7 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
             onRenameFolder={(folder) => setFormOperation({ kind: 'rename-folder', folder, value: folder.name })}
             onMoveFolder={(folder) => {
               setMoveOperation({ kind: 'folder', folder });
-              setSelectedItemIds([]);
+              browser.setSelection([]);
             }}
             onDeleteFolder={(folder) => setDeleteOperation({ kind: 'folder', folder })}
             onRenameFile={(file) => setFormOperation({ kind: 'rename-file', file, value: file.fileName })}
@@ -533,13 +408,13 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
                 return;
               }
               setMoveOperation({ kind: 'files', fileIds: selectedFileIds });
-              setSelectedItemIds([]);
+              browser.setSelection([]);
             }}
             onDeleteSelectedFiles={() => void inspectSelectedDeletion()}
             onConfirmMoveHere={() => void confirmMoveHere()}
             onCancelMove={() => setMoveOperation(null)}
             onLoadMoreDetailUsages={() => void loadMoreDetailUsages()}
-            onLoadMoreItems={loadMoreItems}
+            onLoadMoreItems={browser.loadMore}
           />
         )}
       </FilePicker>
