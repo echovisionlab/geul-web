@@ -16,7 +16,10 @@ import { MediaIngestDialog, type MediaIngestDialogCloseReason } from '@/features
 import { MediaIngestOverlay } from '@/features/editor/components/MediaIngestOverlay';
 import { EditorMediaIngestProvider } from '@/features/editor/contexts/EditorMediaIngestContext';
 import { useOptionalEditorMediaServices } from '@/features/editor/contexts/EditorMediaServicesContext';
-import { seedEditorMediaRuntimeStore, useEditorSnapshotMedia } from '@/features/editor/contexts/EditorSnapshotMediaContext';
+import {
+  seedEditorMediaRuntimeStore,
+  useEditorSnapshotMedia,
+} from '@/features/editor/contexts/EditorSnapshotMediaContext';
 import { EditorAuthoringModeProvider, type EditorAuthoringMode } from '@/features/editor/EditorAuthoringMode';
 import { MapInsertModal } from '@/features/editor/MapInsertModal';
 import { useEntityMediaSurface } from '@/features/editor/hooks/useEntityMediaSurface';

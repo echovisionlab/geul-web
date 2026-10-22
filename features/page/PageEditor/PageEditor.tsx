@@ -902,8 +902,7 @@ export function PageEditorView({ model }: { model: PageEditorViewModel }) {
                     key={activeEditLocale.activeLocale ?? model.initialSnapshot?.locale ?? 'source'}
                     page
                     media={
-                      !activeEditLocale.activeLocale ||
-                      activeEditLocale.activeLocale === model.initialSnapshot?.locale
+                      !activeEditLocale.activeLocale || activeEditLocale.activeLocale === model.initialSnapshot?.locale
                         ? model.initialSnapshot?.blockMedia
                         : undefined
                     }
