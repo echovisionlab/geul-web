@@ -57,6 +57,7 @@ import { getPendingEditorPatch } from '@/lib/editor/editor-save-registry';
 import { flushEditorSavesOrNotify } from '@/lib/editor/flush-editor-saves-or-notify';
 import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUpdates';
 import { WorkClientsSection } from './WorkClientsSection';
+import type { WorkClientDetails } from './useWorkClientDetails';
 import { WorkCreditsSection } from './WorkCreditsSection';
 import { WorkFeaturedImageUploader } from './WorkFeaturedImageUploader';
 import { WorkMetaForm } from './WorkMetaForm';
@@ -65,15 +66,6 @@ import { requireActionSuccess } from '@/lib/editor/require-action-success';
 import { useDebouncedRoomMetadata } from '@/lib/editor/useDebouncedRoomMetadata';
 import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
 import { useAuthoritativeConfiguration } from '@/lib/editor/useAuthoritativeConfiguration';
-
-interface ClientDetails {
-  id: string;
-  name: string;
-  logoUrl: string | null;
-  logoLightUrl?: string | null;
-  logoDarkUrl?: string | null;
-  website: string | null;
-}
 
 interface WorkEditorProps {
   workId: string;
@@ -94,7 +86,7 @@ interface WorkEditorProps {
   initialFeaturedImageUrl: string | null;
   initialOgImageUrl: string | null;
   initialClients?: string[]; // Client IDs for Y.js sync
-  initialClientDetails?: ClientDetails[]; // Client details for display
+  initialClientDetails?: WorkClientDetails[]; // Client details for display
   userName: string;
   isAdmin: boolean;
   canEdit: boolean;
