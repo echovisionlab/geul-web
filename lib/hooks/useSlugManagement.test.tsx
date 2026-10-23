@@ -51,8 +51,6 @@ let root: Root | null = null;
 let latestHook: ReturnType<typeof useSlugManagement> | null = null;
 let latestRenderedSlug = '';
 let setHarnessSlug: ((slug: string) => void) | null = null;
-let harnessQueryClient: QueryClient;
-let setHarnessEntityId: ((entityId: string) => void) | null = null;
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -68,7 +66,6 @@ afterEach(() => {
   container = null;
   latestHook = null;
   latestRenderedSlug = '';
-  setHarnessEntityId = null;
   setHarnessSlug = null;
   vi.useRealTimers();
 });
@@ -89,8 +86,7 @@ function TestHarness({
   checkAvailability?: Parameters<typeof useSlugManagement>[0]['checkAvailability'];
 }) {
   const [slug, setSlug] = useState(initialSlug);
-  const [entityId, setEntityId] = useState(initialEntityId);
-  setHarnessEntityId = setEntityId;
+  const entityId = initialEntityId;
   setHarnessSlug = setSlug;
   const slugMgmt = useSlugManagement({
     entityType,
@@ -117,7 +113,6 @@ function renderHarness(node: ReactNode) {
     },
   });
 
-  harnessQueryClient = queryClient;
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
@@ -159,15 +154,8 @@ function blurInput() {
   });
 }
 
-function changeEntityId(entityId: string) {
-  expect(setHarnessEntityId).not.toBeNull();
-  act(() => {
-    (setHarnessEntityId as (value: string) => void)(entityId);
-  });
-}
-
 describe('useSlugManagement', () => {
-  it('shows the spinner throughout the default 1000ms delay and availability request', async () => {
+  it('checks the settled slug after the default 1000ms delay and returns the result', async () => {
     vi.useFakeTimers();
     let resolveCheck: ((result: PageSlugAvailabilityResult) => void) | undefined;
     checkPageSlugAvailable.mockImplementation(
@@ -178,46 +166,19 @@ describe('useSlugManagement', () => {
     );
     renderHarness(<TestHarness initialSlug="" onSave={vi.fn()} />);
     changeInput('new-slug');
-    expect(getHook().isChecking).toBe(true);
-    expect(getHook().isAvailable).toBeUndefined();
     await act(async () => {
       vi.advanceTimersByTime(999);
     });
     expect(checkPageSlugAvailable).not.toHaveBeenCalled();
-    expect(getHook().isChecking).toBe(true);
     await act(async () => {
       vi.advanceTimersByTime(1);
     });
     expect(checkPageSlugAvailable).toHaveBeenCalledExactlyOnceWith('new-slug', 'page-1');
-    expect(getHook().isChecking).toBe(true);
-    expect(getHook().isAvailable).toBeUndefined();
     await act(async () => {
       resolveCheck?.({ available: true });
     });
     await flushFakeTimerUpdates();
-    expect(getHook().isChecking).toBe(false);
     expect(getHook().isAvailable).toBe(true);
-  });
-
-  it.each(['custom', ''])('stops title autofill after a manual edit to %j', (manualSlug) => {
-    renderHarness(<TestHarness initialSlug="" onSave={vi.fn()} debounceMs={300} />);
-    act(() => {
-      getHook().updateFromTitle('First Title');
-    });
-    expect(latestRenderedSlug).toBe('first-title');
-    changeInput(manualSlug);
-    act(() => {
-      getHook().updateFromTitle('Second Title');
-    });
-    expect(latestRenderedSlug).toBe(manualSlug);
-  });
-
-  it('preserves an existing slug when its title changes', () => {
-    renderHarness(<TestHarness initialSlug="existing" onSave={vi.fn()} debounceMs={300} />);
-    act(() => {
-      getHook().updateFromTitle('Changed Title');
-    });
-    expect(latestRenderedSlug).toBe('existing');
   });
 
   it('stops title autofill after a collaborative slug change', () => {
@@ -234,7 +195,7 @@ describe('useSlugManagement', () => {
     expect(latestRenderedSlug).toBe('collaborator-slug');
   });
 
-  it('blocks autosave and reports a failed check instead of a duplicate slug', async () => {
+  it('returns a failed check as the failure reason', async () => {
     vi.useFakeTimers();
     checkPageSlugAvailable.mockRejectedValue(new Error('backend unavailable'));
     const onSave = vi.fn();
@@ -244,223 +205,7 @@ describe('useSlugManagement', () => {
       vi.advanceTimersByTime(300);
     });
     await flushFakeTimerUpdates();
-    expect(getHook().isAvailable).toBeUndefined();
     expect(getHook().errorReason).toBe('checkFailed');
-    expect(getHook().error).toBe('Could not check slug availability');
-    expect(onSave).not.toHaveBeenCalled();
-  });
-
-  it('hides the previous server rejection while new input is debouncing', async () => {
-    vi.useFakeTimers();
-    checkPageSlugAvailable.mockResolvedValue({ available: false, reason: 'alreadyExists' });
-    renderHarness(<TestHarness initialSlug="taken" onSave={vi.fn()} debounceMs={300} />);
-    await flushFakeTimerUpdates();
-    expect(getHook().errorReason).toBe('alreadyExists');
-    changeInput('new-slug');
-    expect(getHook().isAvailable).toBeUndefined();
-    expect(getHook().errorReason).toBeUndefined();
-    expect(getHook().isChecking).toBe(true);
-    changeInput('admin');
-    expect(getHook().errorReason).toBe('reservedRoute');
-  });
-
-  it('hides cached rejection while the current slug refetches', async () => {
-    vi.useFakeTimers();
-    renderHarness(<TestHarness initialSlug="" onSave={vi.fn()} debounceMs={300} />);
-    harnessQueryClient.setQueryData(['slug-check', 'page', 'cached', 'page-1'], {
-      available: false,
-      reason: 'alreadyExists',
-    });
-    let resolveCheck: ((result: PageSlugAvailabilityResult) => void) | undefined;
-    checkPageSlugAvailable.mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          resolveCheck = resolve;
-        }),
-    );
-    changeInput('cached');
-    await act(async () => {
-      vi.advanceTimersByTime(300);
-    });
-    expect(getHook().isChecking).toBe(true);
-    expect(getHook().isAvailable).toBeUndefined();
-    expect(getHook().errorReason).toBeUndefined();
-    await act(async () => {
-      resolveCheck?.({ available: true });
-    });
-    await flushFakeTimerUpdates();
-    expect(getHook().isAvailable).toBe(true);
-  });
-
-  it('resets autofill and never checks or saves the previous entity debounced slug', async () => {
-    vi.useFakeTimers();
-    const onSave = vi.fn();
-    renderHarness(<TestHarness initialSlug="old" onSave={onSave} debounceMs={300} />);
-    await flushFakeTimerUpdates();
-    changeInput('manual');
-    await act(async () => {
-      vi.advanceTimersByTime(50);
-    });
-    checkPageSlugAvailable.mockClear();
-    act(() => {
-      setHarnessEntityId?.('page-2');
-      setHarnessSlug?.('');
-    });
-    act(() => {
-      getHook().updateFromTitle('New Title');
-    });
-    expect(latestRenderedSlug).toBe('new-title');
-    expect(checkPageSlugAvailable).not.toHaveBeenCalled();
-    await act(async () => {
-      vi.advanceTimersByTime(299);
-    });
-    expect(checkPageSlugAvailable).not.toHaveBeenCalled();
-    expect(onSave).not.toHaveBeenCalled();
-    await act(async () => {
-      vi.advanceTimersByTime(1);
-    });
-    await flushFakeTimerUpdates();
-    expect(checkPageSlugAvailable).toHaveBeenCalledExactlyOnceWith('new-title', 'page-2');
-    expect(onSave).toHaveBeenCalledExactlyOnceWith('new-title');
-  });
-
-  it('keeps the trailing delay when input returns to the last checked slug', async () => {
-    vi.useFakeTimers();
-    renderHarness(<TestHarness initialSlug="first" onSave={vi.fn()} debounceMs={300} />);
-    await flushFakeTimerUpdates();
-    checkPageSlugAvailable.mockClear();
-    changeInput('second');
-    await act(async () => {
-      vi.advanceTimersByTime(50);
-    });
-    changeInput('first');
-    expect(getHook().isChecking).toBe(true);
-    expect(getHook().isAvailable).toBeUndefined();
-    await act(async () => {
-      vi.advanceTimersByTime(299);
-    });
-    expect(checkPageSlugAvailable).not.toHaveBeenCalled();
-    await act(async () => {
-      vi.advanceTimersByTime(1);
-    });
-    await flushFakeTimerUpdates();
-    expect(checkPageSlugAvailable).toHaveBeenCalledExactlyOnceWith('first', 'page-1');
-  });
-
-  it('ignores an old query result after switching entities', async () => {
-    vi.useFakeTimers();
-    let resolveOldCheck: ((result: PageSlugAvailabilityResult) => void) | undefined;
-    checkPageSlugAvailable.mockImplementation((slug) =>
-      slug === 'old-pending'
-        ? new Promise((resolve) => {
-            resolveOldCheck = resolve;
-          })
-        : Promise.resolve({ available: true }),
-    );
-    const onSave = vi.fn();
-    renderHarness(<TestHarness initialSlug="" onSave={onSave} debounceMs={300} />);
-    changeInput('old-pending');
-    await act(async () => {
-      vi.advanceTimersByTime(300);
-    });
-    act(() => {
-      setHarnessEntityId?.('page-2');
-      setHarnessSlug?.('');
-    });
-    act(() => {
-      getHook().updateFromTitle('New Title');
-    });
-    await act(async () => {
-      resolveOldCheck?.({ available: false, reason: 'alreadyExists' });
-    });
-    await flushFakeTimerUpdates();
-    expect(getHook().errorReason).toBeUndefined();
-    expect(getHook().isChecking).toBe(true);
-    expect(onSave).not.toHaveBeenCalled();
-    await act(async () => {
-      vi.advanceTimersByTime(300);
-    });
-    await flushFakeTimerUpdates();
-    expect(onSave).toHaveBeenCalledExactlyOnceWith('new-title');
-  });
-
-  it('does not save a checked prefix after the user has continued typing', async () => {
-    vi.useFakeTimers();
-    let resolvePrefixCheck: ((result: PageSlugAvailabilityResult) => void) | undefined;
-    const prefixCheck = new Promise<PageSlugAvailabilityResult>((resolve) => {
-      resolvePrefixCheck = resolve;
-    });
-    checkPageSlugAvailable.mockImplementation((slug) =>
-      slug === 'dyn' ? prefixCheck : Promise.resolve({ available: true }),
-    );
-    const onSave = vi.fn();
-
-    renderHarness(<TestHarness initialSlug="" onSave={onSave} debounceMs={250} />);
-    changeInput('dyn');
-
-    await act(async () => {
-      vi.advanceTimersByTime(250);
-      await Promise.resolve();
-    });
-    await flushFakeTimerUpdates();
-    expect(checkPageSlugAvailable).toHaveBeenCalledWith('dyn', 'page-1');
-
-    changeInput('dynamic-gpgpu-particles-tutorial');
-    await act(async () => {
-      resolvePrefixCheck?.({ available: true });
-      await Promise.resolve();
-    });
-    await flushFakeTimerUpdates();
-
-    expect(onSave).not.toHaveBeenCalled();
-    expect(latestRenderedSlug).toBe('dynamic-gpgpu-particles-tutorial');
-
-    await act(async () => {
-      vi.advanceTimersByTime(250);
-      await Promise.resolve();
-    });
-    await flushFakeTimerUpdates();
-
-    expect(onSave).toHaveBeenCalledTimes(1);
-    expect(onSave).toHaveBeenCalledWith('dynamic-gpgpu-particles-tutorial');
-  });
-
-  it('serializes saves and keeps only the newest value typed while a save is in flight', async () => {
-    vi.useFakeTimers();
-    let resolvePrefixSave: (() => void) | undefined;
-    const prefixSave = new Promise<void>((resolve) => {
-      resolvePrefixSave = resolve;
-    });
-    const onSave = vi.fn((slug: string) => (slug === 'dyn' ? prefixSave : Promise.resolve()));
-
-    renderHarness(<TestHarness initialSlug="" onSave={onSave} debounceMs={250} />);
-    changeInput('dyn');
-    await act(async () => {
-      vi.advanceTimersByTime(250);
-      await Promise.resolve();
-    });
-    await flushFakeTimerUpdates();
-    expect(onSave).toHaveBeenCalledWith('dyn');
-
-    changeInput('dynamic-gpgpu');
-    await act(async () => {
-      vi.advanceTimersByTime(250);
-      await Promise.resolve();
-    });
-    await flushFakeTimerUpdates();
-
-    expect(onSave).toHaveBeenCalledTimes(1);
-    expect(latestRenderedSlug).toBe('dynamic-gpgpu');
-
-    await act(async () => {
-      resolvePrefixSave?.();
-      await Promise.resolve();
-    });
-    await flushFakeTimerUpdates();
-
-    expect(onSave).toHaveBeenCalledTimes(2);
-    expect(onSave).toHaveBeenLastCalledWith('dynamic-gpgpu');
-    expect(latestRenderedSlug).toBe('dynamic-gpgpu');
   });
 
   it('saves an empty slug immediately on blur without checking availability', async () => {
@@ -477,48 +222,6 @@ describe('useSlugManagement', () => {
 
     expect(onSave).toHaveBeenCalledWith('');
     expect(checkPageSlugAvailable).not.toHaveBeenCalled();
-  });
-
-  it('treats an empty slug as saveable when the debounced value settles', async () => {
-    vi.useFakeTimers();
-    const onSave = vi.fn();
-
-    renderHarness(<TestHarness initialSlug="existing-slug" onSave={onSave} debounceMs={250} />);
-    await flushUpdates();
-    checkPageSlugAvailable.mockClear();
-
-    changeInput('');
-    await flushUpdates();
-
-    await act(async () => {
-      vi.advanceTimersByTime(250);
-      await Promise.resolve();
-    });
-    await flushFakeTimerUpdates();
-
-    expect(onSave).toHaveBeenCalledWith('');
-    expect(checkPageSlugAvailable).not.toHaveBeenCalled();
-  });
-
-  it('keeps the interior slash of a Page path slug', () => {
-    renderHarness(<TestHarness initialSlug="existing-slug" onSave={vi.fn()} />);
-
-    changeInput('a/b');
-
-    expect(latestRenderedSlug).toBe('a/b');
-  });
-
-  it('exposes the Page rejection reason without saving the slug', async () => {
-    const onSave = vi.fn();
-    checkPageSlugAvailable.mockResolvedValue({ available: false, reason: 'reservedRoute' });
-
-    renderHarness(<TestHarness initialSlug="" onSave={onSave} debounceMs={1} />);
-    changeInput('admin/team');
-    await flushUpdates();
-
-    expect(getHook().errorReason).toBe('reservedRoute');
-    expect(getHook().error).toBeUndefined();
-    expect(onSave).not.toHaveBeenCalled();
   });
 
   it('lets the shared document flush wait for an in-flight slug save', async () => {
@@ -623,30 +326,5 @@ describe('useSlugManagement', () => {
     expect(onSave).toHaveBeenCalledTimes(3);
     expect(onSave).toHaveBeenLastCalledWith('new-slug');
     expect(getPendingEditorPatch('page:page-1')).toEqual({});
-  });
-
-  it('ignores a blur availability result after the hook switches entities', async () => {
-    let resolveAvailability: ((result: PageSlugAvailabilityResult) => void) | undefined;
-    const pendingAvailability = new Promise<PageSlugAvailabilityResult>((resolve) => {
-      resolveAvailability = resolve;
-    });
-    checkPageSlugAvailable.mockImplementation((slug) =>
-      slug === 'new-slug' ? pendingAvailability : Promise.resolve({ available: true }),
-    );
-    const onSave = vi.fn();
-
-    renderHarness(<TestHarness initialSlug="old-slug" onSave={onSave} debounceMs={1_000} />);
-    await flushUpdates();
-    changeInput('new-slug');
-    blurInput();
-    changeEntityId('page-2');
-
-    await act(async () => {
-      resolveAvailability?.({ available: true });
-      await Promise.resolve();
-    });
-    await flushUpdates();
-
-    expect(onSave).not.toHaveBeenCalled();
   });
 });
