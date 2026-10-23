@@ -1,29 +1,33 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useDebouncedValue } from '@mantine/hooks';
+import { useStore } from 'zustand';
 import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
 import { checkArtistSlugAvailable } from '@/lib/queries/artist-browser';
 import { checkFormSlugAvailable } from '@/lib/queries/form-browser';
 import { checkLabelSlugAvailable } from '@/lib/queries/label-browser';
-import {
-  checkPageSlugAvailable,
-  type PageSlugAvailabilityReason,
-  type PageSlugAvailabilityResult,
-} from '@/lib/queries/page-browser';
+import { checkPageSlugAvailable, type PageSlugAvailabilityReason } from '@/lib/queries/page-browser';
 import { checkPostSlugAvailable } from '@/lib/queries/post-browser';
 import { checkReleaseSlugAvailable } from '@/lib/queries/release-browser';
 import { checkSeriesSlugAvailable } from '@/lib/queries/series-browser';
 import { checkWorkSlugAvailable } from '@/lib/queries/work-browser';
-import { getPageSlugValidationReason } from '@/lib/utils/page-route';
-import { generateSlug, sanitizePageSlugInput, sanitizeSlugInput } from '@/lib/utils/slug';
-
-type EntityType = 'post' | 'page' | 'form' | 'work' | 'label' | 'artist' | 'series' | 'release';
+import {
+  createSlugManagementStore,
+  DEFAULT_SLUG_DEBOUNCE_MS,
+  deriveSlugStatus,
+  isSettledInput,
+  slugDocumentKey,
+  writeSlug,
+  type SlugAvailabilityCheck,
+  type SlugEntityType,
+  type SlugManagementPorts,
+  type SlugSaveHandler,
+} from './slug-management-store';
 
 interface UseSlugManagementOptions {
   /** Entity type for slug availability check */
-  entityType: EntityType;
+  entityType: SlugEntityType;
   /** Entity ID (excluded from duplicate check) */
   entityId: string;
   /** Current slug value (from external state - useState or Yjs) */
@@ -33,9 +37,9 @@ interface UseSlugManagementOptions {
   /** Debounce delay in ms (default: 1000) */
   debounceMs?: number;
   /** Callback when slug is available and should be saved (for auto-save scenarios) */
-  onSave?: (slug: string) => void | Promise<unknown>;
+  onSave?: SlugSaveHandler;
   /** Optional typed transport for local views; production uses the entity registry. */
-  checkAvailability?: (slug: string, excludeId?: string) => Promise<PageSlugAvailabilityResult>;
+  checkAvailability?: SlugAvailabilityCheck;
 }
 
 interface UseSlugManagementReturn {
@@ -66,59 +70,30 @@ const checkSlugActions = {
   label: checkLabelSlugAvailable,
   series: checkSeriesSlugAvailable,
   release: checkReleaseSlugAvailable,
-};
+} satisfies Record<SlugEntityType, SlugAvailabilityCheck>;
 
-/**
- * Hook for managing title-generated and explicit slug edits and validation.
- * Works with both regular state and collaboration state (Yjs).
- */
+/** Connects the slug store to the availability query and the editor save queue of the entity. */
 export function useSlugManagement({
   entityType,
   entityId,
   slug,
   onSlugChange,
-  debounceMs = 1000,
+  debounceMs = DEFAULT_SLUG_DEBOUNCE_MS,
   onSave,
   checkAvailability,
 }: UseSlugManagementOptions): UseSlugManagementReturn {
-  const registryEntityType = entityType === 'series' ? 'post_series' : entityType;
-  const document = `${registryEntityType}:${entityId}`;
-  const previousDocument = useRef(document);
+  const document = slugDocumentKey(entityType, entityId);
   const activeDocumentRef = useRef(document);
   activeDocumentRef.current = document;
-  const saveGenerationRef = useRef(0);
-  const debounceInput = useMemo(() => ({ document, slug }), [document, slug]);
-  const [debouncedInput] = useDebouncedValue(debounceInput, debounceMs);
-  const debouncedSlug = debouncedInput.slug;
-  const isCurrentDebouncedSlug = debouncedInput === debounceInput;
-  const autoSlugRef = useRef({ enabled: slug.length === 0, lastSlug: slug });
-  const currentSlugRef = useRef(slug);
-  const lastHandledSlug = useRef(debouncedSlug);
   const onSaveRef = useRef(onSave);
-
-  if (previousDocument.current !== document) {
-    previousDocument.current = document;
-    saveGenerationRef.current += 1;
-    currentSlugRef.current = slug;
-    lastHandledSlug.current = slug;
-    autoSlugRef.current = { enabled: slug.length === 0, lastSlug: slug };
-  } else if (autoSlugRef.current.enabled && slug !== autoSlugRef.current.lastSlug) {
-    autoSlugRef.current.enabled = false;
-  }
+  const checkAction: SlugAvailabilityCheck = checkAvailability ?? checkSlugActions[entityType];
 
   const slugSave = useDebouncedPatch<{ slug: string }>({
     write: async ({ slug: nextSlug }) => {
       if (activeDocumentRef.current !== document) {
         throw new Error('Slug save belongs to a different entity.');
       }
-      const save = onSaveRef.current;
-      if (!save) {
-        throw new Error('Slug save handler is unavailable.');
-      }
-      const result = await save(nextSlug);
-      if (result && typeof result === 'object' && 'error' in result && result.error) {
-        throw new Error(typeof result.error === 'string' ? result.error : 'Slug save failed.');
-      }
+      await writeSlug(onSaveRef.current, nextSlug);
     },
     delay: 0,
     scope: document,
@@ -129,136 +104,54 @@ export function useSlugManagement({
   });
 
   useEffect(() => {
-    currentSlugRef.current = slug;
-  }, [slug]);
-
-  useEffect(() => {
     onSaveRef.current = onSave;
   }, [onSave]);
 
-  const queueSave = useCallback(
-    (nextSlug: string) => {
-      if (!onSaveRef.current) {
-        return;
+  const portsRef = useRef<SlugManagementPorts | null>(null);
+  const [store] = useState(() =>
+    createSlugManagementStore({ entityType, entityId, slug, debounceMs }, () => {
+      if (!portsRef.current) {
+        throw new Error('The slug field has not mounted.');
       }
-      slugSave({ slug: nextSlug });
-    },
-    [slugSave],
+      return portsRef.current;
+    }),
   );
+  useLayoutEffect(() => {
+    portsRef.current = {
+      onSlugChange,
+      hasSaveHandler: () => Boolean(onSaveRef.current),
+      enqueueSave: (nextSlug) => slugSave({ slug: nextSlug }),
+      flushSave: () => {
+        void slugSave.flush();
+      },
+      checkAvailability: checkAction,
+    };
+    store.sync({ entityType, entityId, slug, debounceMs });
+  });
+  useEffect(() => {
+    store.start();
+    return () => store.stop();
+  }, [store]);
 
-  const checkAction = checkAvailability ?? checkSlugActions[entityType];
-  const isSlugEmpty = slug.length === 0;
-
+  const state = useStore(store.api);
+  const debouncedSlug = state.settled.slug;
+  const settled = isSettledInput(state, document, slug);
   const { data, isFetching, isError } = useQuery({
     queryKey: ['slug-check', entityType, debouncedSlug, entityId],
     queryFn: () => checkAction(debouncedSlug, entityId),
-    enabled: !isSlugEmpty && isCurrentDebouncedSlug,
+    enabled: slug.length > 0 && settled,
+  });
+  const { isChecking, isAvailable, error, errorReason } = deriveSlugStatus(entityType, slug, settled, {
+    data,
+    isFetching,
+    isError,
   });
 
-  const isChecking = !isSlugEmpty && (!isCurrentDebouncedSlug || isFetching);
-  const isAvailable = isSlugEmpty ? true : isChecking || isError ? undefined : data?.available;
-
-  const error =
-    !isSlugEmpty && isError
-      ? 'Could not check slug availability'
-      : entityType !== 'page' && !isSlugEmpty && isAvailable === false
-        ? 'Slug already exists'
-        : undefined;
-  const localPageSlugReason = entityType === 'page' ? getPageSlugValidationReason(slug) : undefined;
-  const errorReason =
-    entityType === 'page' && slug.length > 0
-      ? (localPageSlugReason ??
-        (isError
-          ? 'checkFailed'
-          : !isSlugEmpty && isAvailable === false
-            ? ((data as PageSlugAvailabilityResult | undefined)?.reason ?? 'alreadyExists')
-            : undefined))
-      : undefined;
-
-  // Call onSave when debounced slug changes and is available
   useEffect(() => {
-    // Availability belongs to the debounced value. If the user has already
-    // typed beyond it, never persist that stale prefix.
-    if (!isCurrentDebouncedSlug || currentSlugRef.current !== debouncedSlug) {
-      return;
-    }
+    store.considerSave(isAvailable);
+  }, [store, isAvailable, settled, debouncedSlug, slug, onSave]);
 
-    // Skip if slug hasn't changed
-    if (lastHandledSlug.current === debouncedSlug) {
-      return;
-    }
-
-    // Skip if availability check is still pending
-    if (!isSlugEmpty && isAvailable === undefined) {
-      return;
-    }
-
-    // Only save if slug is available
-    if (isAvailable && onSave) {
-      queueSave(debouncedSlug);
-    }
-
-    // Update ref only after we've processed this slug
-    lastHandledSlug.current = debouncedSlug;
-  }, [debouncedSlug, isAvailable, isCurrentDebouncedSlug, isSlugEmpty, onSave, queueSave]);
-
-  const handleChange = useCallback(
-    (value: string) => {
-      autoSlugRef.current.enabled = false;
-      const sanitized = entityType === 'page' ? sanitizePageSlugInput(value) : sanitizeSlugInput(value);
-      currentSlugRef.current = sanitized;
-      onSlugChange(sanitized);
-    },
-    [entityType, onSlugChange],
-  );
-
-  const updateFromTitle = useCallback(
-    (title: string) => {
-      if (!autoSlugRef.current.enabled) {
-        return;
-      }
-      const generated = generateSlug(title);
-      autoSlugRef.current.lastSlug = generated;
-      currentSlugRef.current = generated;
-      onSlugChange(generated);
-    },
-    [onSlugChange],
-  );
-
-  const handleBlur = useCallback(() => {
-    const currentSlug = currentSlugRef.current;
-    const documentAtBlur = document;
-    const generationAtBlur = saveGenerationRef.current;
-
-    if (lastHandledSlug.current === currentSlug) {
-      return;
-    }
-
-    void (async () => {
-      const available =
-        currentSlug.length === 0
-          ? true
-          : currentSlug === debouncedSlug && isAvailable !== undefined
-            ? isAvailable
-            : (await checkAction(currentSlug, entityId)).available;
-
-      // Ignore stale async results if the input changed again while validating.
-      if (
-        activeDocumentRef.current !== documentAtBlur ||
-        saveGenerationRef.current !== generationAtBlur ||
-        currentSlugRef.current !== currentSlug
-      ) {
-        return;
-      }
-
-      if (available && onSaveRef.current) {
-        queueSave(currentSlug);
-        void slugSave.flush();
-      }
-
-      lastHandledSlug.current = currentSlug;
-    })();
-  }, [checkAction, debouncedSlug, document, entityId, isAvailable, queueSave, slugSave]);
+  const handleBlur = useCallback(() => store.blur({ debouncedSlug, isAvailable }), [store, debouncedSlug, isAvailable]);
 
   return {
     debouncedSlug,
@@ -266,8 +159,8 @@ export function useSlugManagement({
     isChecking,
     error,
     errorReason,
-    handleChange,
-    updateFromTitle,
+    handleChange: store.handleChange,
+    updateFromTitle: store.updateFromTitle,
     handleBlur,
   };
 }
