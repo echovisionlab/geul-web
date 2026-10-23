@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "a3e207b86d42542fbd699158586547692207519afce3fb2b33d2065f63082a5c",
+  "manifestHash": "42852d224c4e210038708088c0d06e45d73dae8ec74d30fbbc467d96368af0f8",
   "counts": {
-    "sourceFiles": 3860,
-    "productionSourceFiles": 2330,
+    "sourceFiles": 3862,
+    "productionSourceFiles": 2331,
     "componentFiles": 919,
     "coreFamilies": 57,
     "featureDomains": 54,
@@ -1275,6 +1275,8 @@
     "features/draft-mode/ui/DraftModeAlertView.tsx",
     "features/editor/AIMenu/AIMenu.test.tsx",
     "features/editor/AIMenu/AIMenu.tsx",
+    "features/editor/AIMenu/ai-editor-turn-store.test.ts",
+    "features/editor/AIMenu/ai-editor-turn-store.ts",
     "features/editor/EditorAuthoringMode.test.tsx",
     "features/editor/EditorAuthoringMode.tsx",
     "features/editor/EditorHeader/EditorHeader.test.tsx",
@@ -34411,6 +34413,22 @@
           ]
         },
         {
+          "name": "AIEditorTurnBinding",
+          "extends": ["extends AIEditorTurnScope"],
+          "properties": [
+            {
+              "name": "initialAction",
+              "optional": true,
+              "type": "string"
+            },
+            {
+              "name": "onApproveFailed",
+              "optional": false,
+              "type": "() => void"
+            }
+          ]
+        },
+        {
           "name": "AIAssistantProps",
           "extends": [],
           "properties": [
@@ -34447,12 +34465,7 @@
           ]
         }
       ],
-      "typeAliasEvidence": [
-        {
-          "name": "AIMenuState",
-          "type": "'input' | 'streaming' | 'approval' | 'resolving' | 'completed' | 'error'"
-        }
-      ],
+      "typeAliasEvidence": [],
       "productionConsumers": ["features/editor/tiptap/ai/TiptapAIController.tsx"],
       "catalogAdapters": [],
       "tests": ["features/editor/AIMenu/AIMenu.test.tsx"],
@@ -76314,6 +76327,7 @@
       "category": "content",
       "sourceFiles": [
         "features/editor/AIMenu/AIMenu.tsx",
+        "features/editor/AIMenu/ai-editor-turn-store.ts",
         "features/editor/EditorAuthoringMode.tsx",
         "features/editor/EditorHeader/index.ts",
         "features/editor/EditorPermissionRevokedDialog.tsx",
@@ -76653,6 +76667,7 @@
       ],
       "tests": [
         "features/editor/AIMenu/AIMenu.test.tsx",
+        "features/editor/AIMenu/ai-editor-turn-store.test.ts",
         "features/editor/EditorAuthoringMode.test.tsx",
         "features/editor/EditorHeader/EditorHeader.test.tsx",
         "features/editor/EditorPermissionRevokedDialog.test.tsx",
