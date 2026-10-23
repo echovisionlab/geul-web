@@ -9,7 +9,7 @@ import {
 import { Text as DsText } from '@/components/core/Typography';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { closestCenter, DndContext, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableSurface, useSortableItem } from '@/components/core/Sortable';
@@ -26,26 +26,18 @@ import { ThemedAssetImage } from '@/features/media/ThemedAssetImage';
 import { useWorkMeta } from '@/lib/contexts/WorkMetaContext';
 import { useSearchCombobox } from '@/lib/hooks/useSearchCombobox';
 import { useSortableSensors } from '@/lib/hooks/useSortableSensors';
-import { getClient, searchClients } from '@/lib/queries/client-browser';
-
-interface ClientDetails {
-  id: string;
-  name: string;
-  logoUrl: string | null;
-  logoLightUrl?: string | null;
-  logoDarkUrl?: string | null;
-  website: string | null;
-}
+import { searchClients } from '@/lib/queries/client-browser';
+import { useWorkClientDetails, type WorkClientDetails } from './useWorkClientDetails';
 
 interface WorkClientsSectionProps {
   workId: string;
   canEdit: boolean;
-  initialClientDetails?: ClientDetails[];
+  initialClientDetails?: WorkClientDetails[];
 }
 
 interface SortableClientProps {
   clientId: string;
-  client: ClientDetails | null;
+  client: WorkClientDetails | null;
   canEdit: boolean;
   onRemove: (clientId: string) => void;
   isLoading: boolean;
@@ -174,63 +166,13 @@ export function WorkClientsSection({ workId: _workId, canEdit, initialClientDeta
   const tCommonEntities = useTranslations('common.entities');
   const tCommonPlaceholders = useTranslations('common.placeholders');
   const [showAddForm, setShowAddForm] = useState(false);
-  // Cache client details by ID
-  const [clientDetailsCache, setClientDetailsCache] = useState<Map<string, ClientDetails>>(
-    () => new Map(initialClientDetails.map((c) => [c.id, c])),
-  );
-  const [loadingClientIds, setLoadingClientIds] = useState<Set<string>>(new Set());
-
   const { search, setSearch, debouncedSearch, combobox, isEnabled, reset } = useSearchCombobox();
   const sensors = useSortableSensors();
 
   // Get clients from Y.js context
   const { clients, setClients, isSynced } = useWorkMeta();
 
-  // Fetch missing client details
-  const fetchClientDetails = useCallback(
-    async (clientId: string) => {
-      if (clientDetailsCache.has(clientId) || loadingClientIds.has(clientId)) {
-        return;
-      }
-
-      setLoadingClientIds((prev) => new Set(prev).add(clientId));
-      try {
-        const details = await getClient(clientId);
-        if (details) {
-          setClientDetailsCache((prev) => {
-            const next = new Map(prev);
-            next.set(clientId, {
-              id: details.id,
-              name: details.name,
-              logoUrl: details.logoUrl,
-              logoLightUrl: details.logoLightUrl,
-              logoDarkUrl: details.logoDarkUrl,
-              website: details.website,
-            });
-            return next;
-          });
-        }
-      } catch {
-        // Keep selected client ids visible even if detail hydration fails.
-      } finally {
-        setLoadingClientIds((prev) => {
-          const next = new Set(prev);
-          next.delete(clientId);
-          return next;
-        });
-      }
-    },
-    [clientDetailsCache, loadingClientIds],
-  );
-
-  // Fetch details for any clients not in cache
-  useEffect(() => {
-    for (const clientId of clients) {
-      if (!clientDetailsCache.has(clientId) && !loadingClientIds.has(clientId)) {
-        fetchClientDetails(clientId);
-      }
-    }
-  }, [clients, clientDetailsCache, loadingClientIds, fetchClientDetails]);
+  const { clients: clientsWithDetails, rememberClient } = useWorkClientDetails(clients, initialClientDetails);
 
   // Search clients
   const searchResultsQuery = useQuery({
@@ -253,18 +195,13 @@ export function WorkClientsSection({ workId: _workId, canEdit, initialClientDeta
       // Find client details from search results
       const clientFromSearch = searchResults.find((c: { id: string }) => c.id === clientId);
       if (clientFromSearch) {
-        // Cache the details
-        setClientDetailsCache((prev) => {
-          const next = new Map(prev);
-          next.set(clientId, {
-            id: clientFromSearch.id,
-            name: clientFromSearch.name,
-            logoUrl: clientFromSearch.logoUrl ?? null,
-            logoLightUrl: clientFromSearch.logoLightUrl ?? clientFromSearch.logoUrl ?? null,
-            logoDarkUrl: clientFromSearch.logoDarkUrl ?? null,
-            website: clientFromSearch.website ?? null,
-          });
-          return next;
+        rememberClient({
+          id: clientFromSearch.id,
+          name: clientFromSearch.name,
+          logoUrl: clientFromSearch.logoUrl ?? null,
+          logoLightUrl: clientFromSearch.logoLightUrl ?? clientFromSearch.logoUrl ?? null,
+          logoDarkUrl: clientFromSearch.logoDarkUrl ?? null,
+          website: clientFromSearch.website ?? null,
         });
       }
 
@@ -272,7 +209,7 @@ export function WorkClientsSection({ workId: _workId, canEdit, initialClientDeta
       setClients([...clients, clientId]);
       reset();
     },
-    [clients, setClients, searchResults, reset],
+    [clients, setClients, searchResults, reset, rememberClient],
   );
 
   // Remove client via Y.js
@@ -298,15 +235,6 @@ export function WorkClientsSection({ workId: _workId, canEdit, initialClientDeta
     },
     [clients, setClients],
   );
-
-  // Build display list with details
-  const clientsWithDetails = useMemo(() => {
-    return clients.map((clientId) => ({
-      clientId,
-      details: clientDetailsCache.get(clientId) ?? null,
-      isLoading: loadingClientIds.has(clientId),
-    }));
-  }, [clients, clientDetailsCache, loadingClientIds]);
 
   if (!isSynced) {
     return (

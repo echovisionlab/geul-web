@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.21.1](https://github.com/echovisionlab/geul-web/compare/v0.21.0...v0.21.1) (2026-10-22)
+
+
+### Bug Fixes
+
+* **auth:** return operator sign-ins to native Hydra endpoints ([#186](https://github.com/echovisionlab/geul-web/issues/186)) ([b462beb](https://github.com/echovisionlab/geul-web/commit/b462beb263478773c72e0959623e81facbbcb95c))
+
+## [0.21.0](https://github.com/echovisionlab/geul-web/compare/v0.20.4...v0.21.0) (2026-10-22)
+
+
+### Features
+
+* **auth:** sign rawsector Admins in to operator tools through Hydra ([#185](https://github.com/echovisionlab/geul-web/issues/185)) ([4606363](https://github.com/echovisionlab/geul-web/commit/4606363f5851e0ed1cdc924aac5508c9fbc15ad5))
+
+
+### Bug Fixes
+
+* stop re-requesting Work client details that cannot be read ([#179](https://github.com/echovisionlab/geul-web/issues/179)) ([bd364a3](https://github.com/echovisionlab/geul-web/commit/bd364a348b21597cead8bac0f6e660cc50e9da94))
+
 ## [0.20.4](https://github.com/echovisionlab/geul-web/compare/v0.20.3...v0.20.4) (2026-10-22)
 
 

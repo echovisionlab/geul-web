@@ -4,14 +4,14 @@ Run `node scripts/design-system/inventory.mjs` to regenerate; `--check` fails wh
 
 Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.
 
-Source manifest SHA-256: `81e1083559e5d1d0ceab627083486b4a0a9df8961a5c3cd5d12ceea7ba596e3b`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
+Source manifest SHA-256: `e106c006353da5c7416d2debdf067c2cbdf76dfc6510e044eecfde94e7a9649a`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
 
 ## Counts
 
 | Metric                | Count |
 | --------------------- | ----: |
-| sourceFiles           |  3855 |
-| productionSourceFiles |  2327 |
+| sourceFiles           |  3857 |
+| productionSourceFiles |  2328 |
 | componentFiles        |   919 |
 | coreFamilies          |    57 |
 | featureDomains        |    54 |
@@ -170,7 +170,7 @@ Counts include every production JS/TS file in the domain; component files are Pa
 | [upload](../../features/upload)                       |      5 |          1 |       1 |     4 |             0 |
 | [user](../../features/user)                           |     18 |         12 |       2 |     6 |             1 |
 | [version-history](../../features/version-history)     |      5 |          2 |       1 |     3 |             0 |
-| [work](../../features/work)                           |     16 |         10 |       0 |     9 |             0 |
+| [work](../../features/work)                           |     17 |         10 |       0 |    10 |             0 |
 
 ## Page source entrypoints
 
