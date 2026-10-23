@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+// @geul-test-pool forks: Vitest's VM loader resolves khroma's '../utils/index.js' to dist/channels/utils
 
 import mermaid from 'mermaid';
 import { describe, expect, it } from 'vitest';
