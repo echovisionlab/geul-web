@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.2](https://github.com/echovisionlab/geul-web/compare/v0.21.1...v0.21.2) (2026-10-23)
+
+
+### Bug Fixes
+
+* recover File manager detail and deletion checks when a request fails ([#180](https://github.com/echovisionlab/geul-web/issues/180)) ([d272059](https://github.com/echovisionlab/geul-web/commit/d272059fb00dc54561458c77c887634eabd65f0f))
+
 ## [0.21.1](https://github.com/echovisionlab/geul-web/compare/v0.21.0...v0.21.1) (2026-10-22)
 
 
