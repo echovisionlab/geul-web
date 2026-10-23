@@ -14,7 +14,7 @@ import { getAllSiteSettings } from '@/lib/queries/site-setting';
 import { getTermsVersion } from '@/lib/queries/terms';
 import { getSession } from '@/lib/utils/session.server';
 import { TERMS_STATUS } from '@/lib/policy-status';
-import { isEntityEditView } from '@/lib/utils/entity-edit-route';
+import { canOpenEntityEditRoute, isEntityEditView } from '@/lib/utils/entity-edit-route';
 import { buildStaticWebPageJsonLd } from '@/lib/utils/json-ld';
 import { buildPageOgMetadata } from '@/lib/utils/og';
 import { withNoIndex } from '@/lib/utils/route-metadata';
@@ -52,8 +52,14 @@ export default async function TermsHistoryDetailPage({ params, searchParams }: P
     await connection();
     try {
       const [terms, session] = await Promise.all([getTermsVersion(id), getSession()]);
-      const canReadArchived = terms?.status === TERMS_STATUS.ARCHIVED && session?.user?.role === 'author';
-      if (!terms || (!canReadArchived && session?.user?.role !== 'admin')) {
+      if (
+        !terms ||
+        !canOpenEntityEditRoute({
+          archived: terms.status === TERMS_STATUS.ARCHIVED,
+          role: session?.user?.role,
+          canEdit: session?.user?.role === 'admin',
+        })
+      ) {
         notFound();
       }
       const siteSettings = session?.user?.role === 'admin' ? await getAllSiteSettings() : null;

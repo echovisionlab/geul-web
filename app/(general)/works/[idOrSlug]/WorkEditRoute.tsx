@@ -6,7 +6,7 @@ import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import type { WorkType } from '@/lib/contexts/WorkMetaContext';
 import { getManageSiteContext, getSettings } from '@/lib/queries/manifest';
 import { getWorkForEdit } from '@/lib/queries/work';
-import { buildEntityEditHref } from '@/lib/utils/entity-edit-route';
+import { buildEntityEditHref, canOpenEntityEditRoute } from '@/lib/utils/entity-edit-route';
 import { buildStaticOgMetadata } from '@/lib/utils/og';
 import type { SearchParamRecord } from '@/lib/utils/request-path';
 import { withNoIndex } from '@/lib/utils/route-metadata';
@@ -37,8 +37,10 @@ export async function renderWorkEditRoute(idOrSlug: string, query: SearchParamRe
   }
   const work = await getWorkForEdit(idOrSlug);
   const isAdmin = session.user.role === 'admin';
-  const canReadArchived = work?.status === 'archived' && session.user.role === 'author';
-  if (!work || (!isAdmin && !canReadArchived)) {
+  if (
+    !work ||
+    !canOpenEntityEditRoute({ archived: work.status === 'archived', role: session.user.role, canEdit: isAdmin })
+  ) {
     notFound();
   }
 
