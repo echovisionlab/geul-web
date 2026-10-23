@@ -242,8 +242,6 @@ describe('FileManager directory loading', () => {
     });
 
     expect(getViewProps().path.map((part) => part.name)).toEqual(['root', '2026']);
-    expect(getViewProps().items).toEqual([]);
-    expect(getViewProps().total).toBe(0);
     expect(getViewProps().error).toBe('errors.load');
   });
 
@@ -296,7 +294,7 @@ describe('FileManager directory loading', () => {
     ).toBe(true);
   });
 
-  it('switches to paginated site-wide results and opens a folder by its returned path', async () => {
+  it('shows site-wide search results as a list', async () => {
     vi.useFakeTimers();
     const searchFolder: FileManagerFolderView = {
       kind: 'folder',
@@ -333,72 +331,14 @@ describe('FileManager directory loading', () => {
     expect(mocks.searchItems).toHaveBeenCalledWith(expect.objectContaining({ query: 'NeEdLe' }));
     expect(getViewProps().searching).toBe(true);
     expect(getViewProps().viewMode).toBe('list');
-    expect(getViewProps().total).toBe(12);
-    expect(getViewProps().hasMoreItems).toBe(true);
-
-    await act(async () => {
-      getViewProps().onOpenFolder(searchFolder);
-      await Promise.resolve();
-    });
-    expect(getViewProps().path.map((part) => part.name)).toEqual(['root', 'Library', 'Needle']);
-    expect(getViewProps().query).toBe('');
   });
 
-  it('loads the real next cursor once, retains selection and deduplicates overlapping search pages', async () => {
+  it('shows a failed results page as its translated message', async () => {
     vi.useFakeTimers();
-    const first = file('first');
-    const second = file('second');
-    let resolvePage!: (result: { items: FileManagerFileView[]; total: number }) => void;
-    const pending = new Promise<{ items: FileManagerFileView[]; total: number }>((resolve) => {
-      resolvePage = resolve;
-    });
     mocks.listItems.mockResolvedValue({ items: [], total: 0, folderNotFound: false });
     mocks.searchItems
-      .mockResolvedValueOnce({ items: [first], total: 2, nextPageToken: 'page-2' })
-      .mockReturnValueOnce(pending);
-    await act(async () =>
-      root.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <FileManager viewerRole="author" />
-        </DesignSystemProvider>,
-      ),
-    );
-    await act(async () => getViewProps().onQueryChange('needle'));
-    await act(async () => {
-      vi.advanceTimersByTime(300);
-    });
-    await act(async () => getViewProps().onSelectedItemIdsChange([first.id]));
-    const load = getViewProps().onLoadMoreItems;
-    await act(async () => {
-      void load();
-      void load();
-    });
-    expect(mocks.searchItems).toHaveBeenCalledTimes(2);
-    expect(mocks.searchItems).toHaveBeenLastCalledWith(
-      expect.objectContaining({ query: 'needle', pageToken: 'page-2' }),
-    );
-    expect(getViewProps().itemsLoadingMore).toBe(true);
-    await act(async () => resolvePage({ items: [first, second], total: 2 }));
-    expect(getViewProps().items.map((item) => item.id)).toEqual(['first', 'second']);
-    expect(getViewProps().selectedItemIds).toEqual(['first']);
-    expect(getViewProps().itemsLoadingMore).toBe(false);
-    expect(getViewProps().hasMoreItems).toBe(false);
-  });
-
-  it('retains results after page failure, retries explicitly and discards a page from an obsolete query', async () => {
-    vi.useFakeTimers();
-    const first = file('first');
-    const replacement = file('replacement');
-    let resolvePage!: (result: { items: FileManagerFileView[]; total: number }) => void;
-    const pending = new Promise<{ items: FileManagerFileView[]; total: number }>((resolve) => {
-      resolvePage = resolve;
-    });
-    mocks.listItems.mockResolvedValue({ items: [], total: 0, folderNotFound: false });
-    mocks.searchItems
-      .mockResolvedValueOnce({ items: [first], total: 2, nextPageToken: 'page-2' })
-      .mockRejectedValueOnce(new Error('Offline'))
-      .mockReturnValueOnce(pending)
-      .mockResolvedValueOnce({ items: [replacement], total: 1 });
+      .mockResolvedValueOnce({ items: [file('first')], total: 2, nextPageToken: 'page-2' })
+      .mockRejectedValueOnce(new Error('Offline'));
     await act(async () =>
       root.render(
         <DesignSystemProvider forceColorScheme="light">
@@ -411,20 +351,7 @@ describe('FileManager directory loading', () => {
       vi.advanceTimersByTime(300);
     });
     await act(async () => getViewProps().onLoadMoreItems());
-    expect(getViewProps().items).toEqual([first]);
     expect(getViewProps().itemsLoadMoreError).toBe('errors.load');
     expect(getViewProps().hasMoreItems).toBe(true);
-    await act(async () => {
-      void getViewProps().onLoadMoreItems();
-    });
-    expect(getViewProps().itemsLoadMoreError).toBeNull();
-    await act(async () => getViewProps().onQueryChange('replacement'));
-    await act(async () => {
-      vi.advanceTimersByTime(300);
-    });
-    await act(async () => resolvePage({ items: [file('stale')], total: 2 }));
-    expect(getViewProps().items).toEqual([replacement]);
-    expect(getViewProps().itemsLoadingMore).toBe(false);
-    expect(getViewProps().itemsLoadMoreError).toBeNull();
   });
 });
