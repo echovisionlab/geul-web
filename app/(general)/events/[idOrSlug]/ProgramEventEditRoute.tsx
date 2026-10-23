@@ -14,7 +14,7 @@ import {
   listProgramEventSeriesAdmin,
   listProgramEventTypesAdmin,
 } from '@/lib/queries/program-event';
-import { buildEntityEditHref } from '@/lib/utils/entity-edit-route';
+import { buildEntityEditHref, canOpenEntityEditRoute } from '@/lib/utils/entity-edit-route';
 import type { SearchParamRecord } from '@/lib/utils/request-path';
 import { withNoIndex } from '@/lib/utils/route-metadata';
 import { getSession } from '@/lib/utils/session.server';
@@ -38,8 +38,7 @@ export async function renderProgramEventEditRoute(idOrSlug: string, query: Searc
   }
   const event = await getProgramEventAdmin(idOrSlug);
   const canEdit = session.user.role === 'admin';
-  const canReadArchived = event?.status === 'archived' && session.user.role === 'author';
-  if (!event || (!canEdit && !canReadArchived)) {
+  if (!event || !canOpenEntityEditRoute({ archived: event.status === 'archived', role: session.user.role, canEdit })) {
     notFound();
   }
   if (idOrSlug !== event.id) {

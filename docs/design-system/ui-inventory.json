@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "b16aef1131e56c5ba07facf6d550af8fc684f4b2601c5962036c69aada602d9b",
+  "manifestHash": "5b542cf8d69dfe586c7b100a623a1096ca4cfe4af9298b23c315f94a0ef3f485",
   "counts": {
-    "sourceFiles": 3853,
-    "productionSourceFiles": 2326,
+    "sourceFiles": 3860,
+    "productionSourceFiles": 2330,
     "componentFiles": 919,
     "coreFamilies": 57,
     "featureDomains": 54,
@@ -1355,6 +1355,8 @@
     "features/editor/lib/block-insert.ts",
     "features/editor/lib/editor-library-file-selection.test.ts",
     "features/editor/lib/editor-library-file-selection.ts",
+    "features/editor/lib/editor-library-picker-selection.test.ts",
+    "features/editor/lib/editor-library-picker-selection.ts",
     "features/editor/lib/editor-media-runtime-store.test.ts",
     "features/editor/lib/editor-media-runtime-store.ts",
     "features/editor/lib/external-container-style.ts",
@@ -1703,6 +1705,10 @@
     "features/file-manager/file-browser-presentation.test.ts",
     "features/file-manager/file-browser-presentation.ts",
     "features/file-manager/file-browser-presentation.usage.test.ts",
+    "features/file-manager/file-deletion-impact.test.ts",
+    "features/file-manager/file-deletion-impact.ts",
+    "features/file-manager/file-library-browser-store.test.ts",
+    "features/file-manager/file-library-browser-store.ts",
     "features/file-manager/i18n.ts",
     "features/file-manager/index.ts",
     "features/file-manager/model.ts",
@@ -1719,6 +1725,7 @@
     "features/file-manager/ui/file-browser-view-settings.ts",
     "features/file-manager/useFileBrowserViewSettings.test.tsx",
     "features/file-manager/useFileBrowserViewSettings.ts",
+    "features/file-manager/useFileLibraryBrowserStore.ts",
     "features/file-manager/useFileManagerSelection.ts",
     "features/form/AdminFormLayoutClient.test.tsx",
     "features/form/AdminFormLayoutClient.tsx",
@@ -35161,22 +35168,6 @@
       "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
       "propsEvidence": [
         {
-          "name": "EditorFileLibraryDataSource",
-          "extends": [],
-          "properties": [
-            {
-              "name": "list",
-              "optional": false,
-              "type": "typeof listFileManagerItemsAction"
-            },
-            {
-              "name": "search",
-              "optional": false,
-              "type": "typeof searchFileManagerItemsAction"
-            }
-          ]
-        },
-        {
           "name": "EditorFileLibraryPickerProps",
           "extends": [],
           "properties": [
@@ -35203,7 +35194,12 @@
           ]
         }
       ],
-      "typeAliasEvidence": [],
+      "typeAliasEvidence": [
+        {
+          "name": "EditorFileLibraryDataSource",
+          "type": "FileLibraryBrowserAdapter"
+        }
+      ],
       "productionConsumers": ["features/editor/components/MediaIngestDialog.tsx"],
       "catalogAdapters": [],
       "tests": ["features/editor/components/EditorFileLibraryPicker.test.tsx"],
@@ -76363,6 +76359,7 @@
         "features/editor/hooks/useStableSuggestionMenuWidth.ts",
         "features/editor/lib/block-insert.ts",
         "features/editor/lib/editor-library-file-selection.ts",
+        "features/editor/lib/editor-library-picker-selection.ts",
         "features/editor/lib/editor-media-runtime-store.ts",
         "features/editor/lib/external-container-style.ts",
         "features/editor/lib/file-drag.ts",
@@ -76688,6 +76685,7 @@
         "features/editor/lib/block-insert.integration.test.tsx",
         "features/editor/lib/block-insert.test.ts",
         "features/editor/lib/editor-library-file-selection.test.ts",
+        "features/editor/lib/editor-library-picker-selection.test.ts",
         "features/editor/lib/editor-media-runtime-store.test.ts",
         "features/editor/lib/markdown-image-import.test.ts",
         "features/editor/lib/media-block-updates.test.ts",
@@ -76857,6 +76855,8 @@
         "features/file-manager/FileManager.tsx",
         "features/file-manager/FileManagerView.tsx",
         "features/file-manager/file-browser-presentation.ts",
+        "features/file-manager/file-deletion-impact.ts",
+        "features/file-manager/file-library-browser-store.ts",
         "features/file-manager/i18n.ts",
         "features/file-manager/index.ts",
         "features/file-manager/model.ts",
@@ -76872,6 +76872,7 @@
         "features/file-manager/ui/file-browser-layout.ts",
         "features/file-manager/ui/file-browser-view-settings.ts",
         "features/file-manager/useFileBrowserViewSettings.ts",
+        "features/file-manager/useFileLibraryBrowserStore.ts",
         "features/file-manager/useFileManagerSelection.ts"
       ],
       "components": [
@@ -76892,6 +76893,8 @@
         "features/file-manager/FileManagerView.test.tsx",
         "features/file-manager/file-browser-presentation.test.ts",
         "features/file-manager/file-browser-presentation.usage.test.ts",
+        "features/file-manager/file-deletion-impact.test.ts",
+        "features/file-manager/file-library-browser-store.test.ts",
         "features/file-manager/useFileBrowserViewSettings.test.tsx"
       ],
       "directlyImportingRoutes": ["/admin/files"]
@@ -91417,7 +91420,7 @@
         },
         {
           "file": "lib/utils/entity-edit-route.ts",
-          "symbols": ["isEntityEditView"]
+          "symbols": ["canOpenEntityEditRoute", "isEntityEditView"]
         },
         {
           "file": "lib/utils/json-ld.ts",
@@ -92053,7 +92056,7 @@
         },
         {
           "file": "lib/utils/entity-edit-route.ts",
-          "symbols": ["isEntityEditView"]
+          "symbols": ["canOpenEntityEditRoute", "isEntityEditView"]
         },
         {
           "file": "lib/utils/json-ld.ts",
