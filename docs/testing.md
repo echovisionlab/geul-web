@@ -131,8 +131,16 @@ instead of once per file. `sharesRuntime` in `scripts/test/vitest-projects.mts` 
 must clean up what they render (Testing Library, or `unmount` in `afterEach`). A file whose module under
 test keeps state across imports declares `// @geul-test-isolate: <reason>` and stays isolated. The shared
 projects cut the local full run from 139s to 101s with the same 1,118 files; file-order shuffles
-(`--sequence.shuffle.files`) pass. `pnpm test:unit` and `pnpm test:components` include both halves of their
+(`--sequence.shuffle.files`) pass. `pnpm test:unit` and `pnpm test:components` include every project of their
 tier.
+
+Isolated jsdom component files run in VM contexts instead (`component-vm`, pool `vmThreads`): each file still
+gets its own jsdom window and module graph, but no process of its own. That cut the local component run from
+106s to 47s with the same 550 files. `runsInVmContext` keeps a file in forks when it assigns `TZ` or
+`process.env` directly, or replaces jsdom's unforgeable `window`, `document`, `location` or `top`;
+`// @geul-test-pool forks: <reason>` keeps any other file there. `test/vm-context.setup.ts` provides Node's web
+streams. Other Node classes come from Vitest's copy list, so `instanceof` against them crosses realms. A VM
+worker is recycled at `vmMemoryLimit` (1 GiB).
 
 Keep per-test `vi.stubGlobal` fixtures in `beforeEach` with corresponding cleanup;
 avoid fixtures that are installed only at module load and then removed by a
