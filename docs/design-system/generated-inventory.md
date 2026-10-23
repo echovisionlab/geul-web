@@ -4,14 +4,14 @@ Run `node scripts/design-system/inventory.mjs` to regenerate; `--check` fails wh
 
 Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.
 
-Source manifest SHA-256: `eb3469f0359a027e42a286b3a5932a1f2df21a9538bcfd533a3cb94fd61b148e`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
+Source manifest SHA-256: `5b542cf8d69dfe586c7b100a623a1096ca4cfe4af9298b23c315f94a0ef3f485`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
 
 ## Counts
 
 | Metric                | Count |
 | --------------------- | ----: |
-| sourceFiles           |  3857 |
-| productionSourceFiles |  2328 |
+| sourceFiles           |  3860 |
+| productionSourceFiles |  2330 |
 | componentFiles        |   919 |
 | coreFamilies          |    57 |
 | featureDomains        |    54 |
@@ -144,7 +144,7 @@ Counts include every production JS/TS file in the domain; component files are Pa
 | [location](../../features/location)                   |      4 |          4 |       1 |     2 |             0 |
 | [map](../../features/map)                             |     37 |         10 |       1 |    24 |             0 |
 | [media](../../features/media)                         |     33 |         22 |       6 |    15 |             0 |
-| [media-download](../../features/media-download)       |      6 |          3 |       1 |     5 |             0 |
+| [media-download](../../features/media-download)       |      8 |          3 |       1 |     6 |             0 |
 | [member](../../features/member)                       |      2 |          1 |       0 |     2 |             0 |
 | [menu](../../features/menu)                           |      7 |          4 |       0 |     4 |             1 |
 | [mermaid](../../features/mermaid)                     |      4 |          2 |       1 |     4 |             0 |
