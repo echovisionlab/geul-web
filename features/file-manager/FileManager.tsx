@@ -7,7 +7,7 @@ import { ConfirmationDialog } from '@/features/confirmation';
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { Text as DsText } from '@/components/core/Typography';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FileUsageDomain, UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
+import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { notifications } from '@/components/core/Notification';
 import { FormModal } from '@/components/core/Modal';
 import { FilePicker, TextInput } from '@/components/core/Input';
@@ -25,13 +25,11 @@ import {
   renameManagedFileAction,
   searchFileManagerItemsAction,
   type FileDeletionImpactView,
-  type FileManagerFileRow as FileManagerActionFileRow,
-  type FileManagerRow as FileManagerActionRow,
-  type FileManagerUsageView as FileManagerActionUsageView,
 } from '@/lib/actions/file';
 import { useFileUpload } from '@/lib/hooks/useFileUpload';
 import { FileManagerView, type FileManagerPathItem } from './FileManagerView';
-import { useFileManagerI18n } from './i18n';
+import { summarizeFileDeletionImpact } from './file-deletion-impact';
+import { useFileManagerI18n, type FileManagerErrorKey } from './i18n';
 import { parseFileBrowserSort } from './sort';
 import type {
   FileManagerFileView,
@@ -39,18 +37,6 @@ import type {
   FileManagerItemView,
   FileManagerUsageItemView,
 } from './model';
-
-function toFileManagerItemView(item: FileManagerActionRow): FileManagerItemView {
-  return { ...item };
-}
-
-function toFileManagerFileView(file: FileManagerActionFileRow): FileManagerFileView {
-  return { ...file };
-}
-
-function toFileManagerUsageItemView(usage: FileManagerActionUsageView): FileManagerUsageItemView {
-  return { ...usage };
-}
 
 type FormOperation =
   | { kind: 'create-folder'; value: string }
@@ -71,11 +57,12 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
   const listRequestRef = useRef(0);
   const moreRequestRef = useRef<string | null>(null);
   const detailRequestRef = useRef(0);
+  const detailMoreRequestRef = useRef<string | null>(null);
   const { upload } = useFileUpload();
   const [items, setItems] = useState<FileManagerItemView[]>([]);
   const [total, setTotal] = useState(0);
   const [nextPageToken, setNextPageToken] = useState<string | undefined>();
-  const [path, setPath] = useState<FileManagerPathItem[]>([{ name: t('root') }]);
+  const [folders, setFolders] = useState<FileManagerPathItem[]>([]);
   const [query, setQuery] = useState('');
   const [appliedQuery, setAppliedQuery] = useState('');
   const [mimeTypePrefix, setMimeTypePrefix] = useState('');
@@ -93,13 +80,14 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
   const [deleteOperation, setDeleteOperation] = useState<DeleteOperation | null>(null);
   const [loading, setLoading] = useState(true);
   const [itemsLoadingMore, setItemsLoadingMore] = useState(false);
-  const [itemsLoadMoreError, setItemsLoadMoreError] = useState<string | null>(null);
+  const [itemsLoadMoreError, setItemsLoadMoreError] = useState<FileManagerErrorKey | null>(null);
   const [mutationLoading, setMutationLoading] = useState(false);
   const [uploadPercentage, setUploadPercentage] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<FileManagerErrorKey | null>(null);
   const [folderNotFound, setFolderNotFound] = useState(false);
 
-  const currentFolderID = path.at(-1)?.id;
+  const currentFolderID = folders.at(-1)?.id;
+  const path: FileManagerPathItem[] = [{ name: t('root') }, ...folders];
   const sortInput = useMemo(() => parseFileBrowserSort(sort), [sort]);
   const selectedFileIds = useMemo(
     () =>
@@ -137,7 +125,7 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
         if (listRequestRef.current !== requestId) {
           return;
         }
-        setItems(result.items.map(toFileManagerItemView));
+        setItems(result.items);
         setTotal(result.total);
         setNextPageToken(result.nextPageToken);
       } else {
@@ -150,20 +138,20 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
           return;
         }
         setFolderNotFound(result.folderNotFound);
-        setItems(result.items.map(toFileManagerItemView));
+        setItems(result.items);
         setTotal(result.total);
       }
     } catch {
       if (listRequestRef.current !== requestId) {
         return;
       }
-      setError(errorMessage('load'));
+      setError('load');
     } finally {
       if (listRequestRef.current === requestId) {
         setLoading(false);
       }
     }
-  }, [appliedQuery, currentFolderID, errorMessage, mimeTypePrefix, sortInput]);
+  }, [appliedQuery, currentFolderID, mimeTypePrefix, sortInput]);
 
   useEffect(() => {
     void loadItems();
@@ -199,15 +187,13 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
         throw new Error('File search returned the same continuation cursor');
       }
       setItems((current) => [
-        ...new Map(
-          [...current, ...result.items.map(toFileManagerItemView)].map((item) => [`${item.kind}:${item.id}`, item]),
-        ).values(),
+        ...new Map([...current, ...result.items].map((item) => [`${item.kind}:${item.id}`, item])).values(),
       ]);
       setTotal(result.total);
       setNextPageToken(result.nextPageToken);
     } catch {
       if (listRequestRef.current === requestId) {
-        setItemsLoadMoreError(errorMessage('load'));
+        setItemsLoadMoreError('load');
       }
     } finally {
       if (listRequestRef.current === requestId && moreRequestRef.current === pageKey) {
@@ -219,6 +205,7 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
 
   const closeFile = () => {
     detailRequestRef.current += 1;
+    detailMoreRequestRef.current = null;
     setDetailFile(null);
     setDetailUsages([]);
     setDetailUsageNextPageToken(undefined);
@@ -228,9 +215,9 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
   const openFolder = (folder: FileManagerFolderView) => {
     setFolderNotFound(false);
     if (appliedQuery && folder.folderPath?.length) {
-      setPath([{ name: t('root') }, ...folder.folderPath]);
+      setFolders(folder.folderPath);
     } else {
-      setPath((previous) => [...previous, { id: folder.id, name: folder.name }]);
+      setFolders((previous) => [...previous, { id: folder.id, name: folder.name }]);
     }
     setQuery('');
     setAppliedQuery('');
@@ -240,7 +227,7 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
 
   const openPath = (index: number) => {
     setFolderNotFound(false);
-    setPath((previous) => previous.slice(0, index + 1));
+    setFolders((previous) => previous.slice(0, index));
     setQuery('');
     setAppliedQuery('');
     setSelectedItemIds([]);
@@ -253,52 +240,76 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
   const openFile = async (file: FileManagerFileView) => {
     const requestId = detailRequestRef.current + 1;
     detailRequestRef.current = requestId;
+    detailMoreRequestRef.current = null;
     setDetailFile(file);
     setDetailUsages([]);
     setDetailUsageNextPageToken(undefined);
     setDetailLoading(true);
-    const [detailResult, usageResult] = await Promise.all([
-      getManagedFileAction(file.id),
-      listManagedFileUsagesAction({ fileId: file.id, pageSize: 25 }),
-    ]);
-    if (detailRequestRef.current !== requestId) {
-      return;
+    try {
+      const [detailResult, usageResult] = await Promise.all([
+        getManagedFileAction(file.id),
+        listManagedFileUsagesAction({ fileId: file.id, pageSize: 25 }),
+      ]);
+      if (detailRequestRef.current !== requestId) {
+        return;
+      }
+      if (detailResult.success) {
+        setDetailFile(detailResult.file);
+      }
+      if (usageResult.success) {
+        setDetailUsages(usageResult.usages);
+        setDetailUsageNextPageToken(usageResult.nextPageToken);
+      }
+      if (!detailResult.success || !usageResult.success) {
+        showMutationFailure(!detailResult.success ? detailResult.errorCode : usageResult.errorCode);
+      }
+    } catch {
+      if (detailRequestRef.current === requestId) {
+        showMutationFailure('loadFile');
+      }
+    } finally {
+      if (detailRequestRef.current === requestId) {
+        setDetailLoading(false);
+      }
     }
-    if (detailResult.success) {
-      setDetailFile(toFileManagerFileView(detailResult.file));
-    }
-    if (usageResult.success) {
-      setDetailUsages(usageResult.usages.map(toFileManagerUsageItemView));
-      setDetailUsageNextPageToken(usageResult.nextPageToken);
-    }
-    if (!detailResult.success || !usageResult.success) {
-      showMutationFailure(!detailResult.success ? detailResult.errorCode : usageResult.errorCode);
-    }
-    setDetailLoading(false);
   };
 
   const loadMoreDetailUsages = async () => {
-    if (!detailFile || !detailUsageNextPageToken) {
+    if (!detailFile || !detailUsageNextPageToken || detailMoreRequestRef.current !== null) {
       return;
     }
     const requestId = detailRequestRef.current;
     const fileId = detailFile.id;
+    const pageKey = JSON.stringify([requestId, detailUsageNextPageToken]);
+    detailMoreRequestRef.current = pageKey;
     setDetailLoading(true);
-    const result = await listManagedFileUsagesAction({
-      fileId,
-      pageSize: 25,
-      pageToken: detailUsageNextPageToken,
-    });
-    if (detailRequestRef.current !== requestId) {
-      return;
+    try {
+      const result = await listManagedFileUsagesAction({
+        fileId,
+        pageSize: 25,
+        pageToken: detailUsageNextPageToken,
+      });
+      if (detailRequestRef.current !== requestId) {
+        return;
+      }
+      if (result.success) {
+        setDetailUsages((current) => [...current, ...result.usages]);
+        setDetailUsageNextPageToken(result.nextPageToken);
+      } else {
+        showMutationFailure(result.errorCode);
+      }
+    } catch {
+      if (detailRequestRef.current === requestId) {
+        showMutationFailure('loadUsages');
+      }
+    } finally {
+      if (detailMoreRequestRef.current === pageKey) {
+        detailMoreRequestRef.current = null;
+      }
+      if (detailRequestRef.current === requestId) {
+        setDetailLoading(false);
+      }
     }
-    if (result.success) {
-      setDetailUsages((current) => [...current, ...result.usages.map(toFileManagerUsageItemView)]);
-      setDetailUsageNextPageToken(result.nextPageToken);
-    } else {
-      showMutationFailure(result.errorCode);
-    }
-    setDetailLoading(false);
   };
 
   const submitFormOperation = async () => {
@@ -326,6 +337,8 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
       setFormOperation(null);
       setSelectedItemIds([]);
       await loadItems();
+    } catch {
+      showMutationFailure();
     } finally {
       setMutationLoading(false);
     }
@@ -348,6 +361,8 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
       setMoveOperation(null);
       setSelectedItemIds([]);
       await loadItems();
+    } catch {
+      showMutationFailure();
     } finally {
       setMutationLoading(false);
     }
@@ -358,13 +373,18 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
       return;
     }
     setMutationLoading(true);
-    const result = await getFileDeletionImpactAction(selectedFileIds);
-    setMutationLoading(false);
-    if (!result.success) {
-      showMutationFailure(result.errorCode);
-      return;
+    try {
+      const result = await getFileDeletionImpactAction(selectedFileIds);
+      if (!result.success) {
+        showMutationFailure(result.errorCode);
+        return;
+      }
+      setDeleteOperation({ kind: 'files', fileIds: selectedFileIds, impacts: result.impacts });
+    } catch {
+      showMutationFailure('inspectUsage');
+    } finally {
+      setMutationLoading(false);
     }
-    setDeleteOperation({ kind: 'files', fileIds: selectedFileIds, impacts: result.impacts });
   };
 
   const confirmDelete = async () => {
@@ -392,6 +412,8 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
       setDeleteOperation(null);
       setSelectedItemIds([]);
       await loadItems();
+    } catch {
+      showMutationFailure();
     } finally {
       setMutationLoading(false);
     }
@@ -407,13 +429,13 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
       });
       notifications.show({ tone: 'positive', message: t('messages.uploaded') });
       const alreadyAtRoot = currentFolderID == null;
-      setPath([{ name: t('root') }]);
+      setFolders([]);
       setSelectedItemIds([]);
       if (alreadyAtRoot) {
         await loadItems();
       }
     } catch {
-      setError(errorMessage('upload'));
+      setError('upload');
     } finally {
       setUploadPercentage(null);
     }
@@ -427,21 +449,16 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
       : moveOperation?.kind === 'files'
         ? t('selectedCount', { count: moveOperation.fileIds.length })
         : null;
-  const blockingImpacts =
-    deleteOperation?.kind === 'files' ? deleteOperation.impacts.filter((impact) => impact.totalUsageCount > 0) : [];
-  const blockingUsagePreview = blockingImpacts
-    .flatMap((impact) => impact.firstUsages)
-    .slice(0, deletionImpactPreviewSize);
-  const blockingTotalUsageCount = blockingImpacts.reduce((total, impact) => total + impact.totalUsageCount, 0);
-  const blockingHiddenUsageCount = Math.max(0, blockingTotalUsageCount - blockingUsagePreview.length);
-  const blockingDomainCounts = Array.from(
-    blockingImpacts
-      .flatMap((impact) => impact.domainCounts)
-      .reduce(
-        (counts, entry) => counts.set(entry.domain, (counts.get(entry.domain) ?? 0) + entry.count),
-        new Map<FileUsageDomain, number>(),
-      ),
-  ).sort(([left], [right]) => left - right);
+  const {
+    blockingFileCount,
+    totalUsageCount: blockingTotalUsageCount,
+    usagePreview: blockingUsagePreview,
+    hiddenUsageCount: blockingHiddenUsageCount,
+    domainCounts: blockingDomainCounts,
+  } = summarizeFileDeletionImpact(
+    deleteOperation?.kind === 'files' ? deleteOperation.impacts : [],
+    deletionImpactPreviewSize,
+  );
 
   return (
     <>
@@ -464,7 +481,7 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
             hasMoreItems={Boolean(nextPageToken)}
             itemsNextPageKey={nextPageToken}
             itemsLoadingMore={itemsLoadingMore}
-            itemsLoadMoreError={itemsLoadMoreError}
+            itemsLoadMoreError={itemsLoadMoreError ? errorMessage(itemsLoadMoreError) : null}
             query={query}
             mimeTypePrefix={mimeTypePrefix}
             sort={sort}
@@ -480,7 +497,7 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
             detailLoading={detailLoading}
             hasMoreDetailUsages={Boolean(detailUsageNextPageToken)}
             uploadPercentage={uploadPercentage}
-            error={error}
+            error={error ? errorMessage(error) : null}
             folderNotFound={folderNotFound}
             movePendingLabel={movePendingLabel}
             mutationLoading={mutationLoading}
@@ -565,10 +582,10 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
                 ? t('dialogs.delete.folder')
                 : t('dialogs.delete.files', { count: deleteOperation?.fileIds.length ?? 0 })}
             </DsText>
-            {blockingImpacts.length > 0 ? (
+            {blockingFileCount > 0 ? (
               <>
                 <DsText size="sm" tone="danger">
-                  {t('dialogs.delete.blocked', { count: blockingImpacts.length })}
+                  {t('dialogs.delete.blocked', { count: blockingFileCount })}
                 </DsText>
                 <DsText size="sm">{t('dialogs.delete.totalUsages', { count: blockingTotalUsageCount })}</DsText>
                 <DsText size="sm">
@@ -594,7 +611,7 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
         cancelLabel={t('actions.cancel')}
         closeLabel={t('actions.close')}
         loading={mutationLoading}
-        confirmDisabled={blockingImpacts.length > 0}
+        confirmDisabled={blockingFileCount > 0}
       />
     </>
   );
