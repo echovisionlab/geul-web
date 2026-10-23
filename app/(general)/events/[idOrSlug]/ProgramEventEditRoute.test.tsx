@@ -97,7 +97,7 @@ describe('Program Event edit query route', () => {
   });
 
   it('returns the same not-found result for a non-Author and a missing Event', async () => {
-    mocks.getSession.mockResolvedValue({ user: { id: 'member-1', nickname: 'Member', role: 'member' } });
+    mocks.getSession.mockResolvedValue({ user: { id: 'member-1', nickname: 'Member', role: 'user' } });
     await expect(renderProgramEventEditRoute('hidden-event', { edit: 'true' })).rejects.toThrow('not-found');
     expect(mocks.getProgramEventAdmin).toHaveBeenCalledWith('hidden-event');
 

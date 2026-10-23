@@ -14,7 +14,7 @@ import { getPrivacyVersion } from '@/lib/queries/privacy';
 import { getSession } from '@/lib/utils/session.server';
 import { PRIVACY_STATUS } from '@/lib/policy-status';
 import { getAllSiteSettings } from '@/lib/queries/site-setting';
-import { isEntityEditView } from '@/lib/utils/entity-edit-route';
+import { canOpenEntityEditRoute, isEntityEditView } from '@/lib/utils/entity-edit-route';
 import { buildStaticWebPageJsonLd } from '@/lib/utils/json-ld';
 import { buildPageOgMetadata } from '@/lib/utils/og';
 import { withNoIndex } from '@/lib/utils/route-metadata';
@@ -52,8 +52,14 @@ export default async function PrivacyHistoryDetailPage({ params, searchParams }:
     await connection();
     try {
       const [privacy, session] = await Promise.all([getPrivacyVersion(id), getSession()]);
-      const canReadArchived = privacy?.status === PRIVACY_STATUS.ARCHIVED && session?.user?.role === 'author';
-      if (!privacy || (!canReadArchived && session?.user?.role !== 'admin')) {
+      if (
+        !privacy ||
+        !canOpenEntityEditRoute({
+          archived: privacy.status === PRIVACY_STATUS.ARCHIVED,
+          role: session?.user?.role,
+          canEdit: session?.user?.role === 'admin',
+        })
+      ) {
         notFound();
       }
       const siteSettings = session?.user?.role === 'admin' ? await getAllSiteSettings() : null;
