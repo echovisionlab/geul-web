@@ -7,7 +7,8 @@ import {
   LayoutStack as DsLayoutStack,
 } from '@/components/core/Layout';
 import { Text as DsText } from '@/components/core/Typography';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useStore } from 'zustand';
 import {
   IconAbc,
   IconArrowRight,
@@ -23,10 +24,6 @@ import {
   IconWand,
   IconX,
 } from '@tabler/icons-react';
-import {
-  AIEditorTurnTerminalStatus,
-  type AIEditorDocumentToolApprovalRequired,
-} from '@echovisionlab/geul-proto/secure/ai_pb.ts';
 import { useTranslations } from 'next-intl';
 import { FloatingPanel } from '@/components/core/FloatingPanel';
 import { Spinner as Loader, ScrollArea } from '@/components/core/Display';
@@ -38,17 +35,15 @@ import {
   describeAIDocumentOperation,
   proposalOperations,
   type AIEditorAssistantClient,
-  type AIEditorTurn,
 } from '@/lib/ai/editor-orchestration';
 import type { AIDocumentTarget } from '@/lib/ai/document-client';
 import type { AIEditorContext } from '@/lib/editor/ai-support';
+import { createAIEditorTurnStore, type AIEditorTurnScope } from './ai-editor-turn-store';
 import styles from './AIMenu.module.css';
 
 const AI_FLOATING_WINDOW_DRAG_HANDLE_CLASS = 'ai-assistant-floating-drag-handle';
 const AI_FLOATING_WINDOW_EXCLUDE_SELECTOR =
   'button:not([data-ai-floating-drag-handle]),input,textarea,select,a,[contenteditable="true"]';
-
-type AIMenuState = 'input' | 'streaming' | 'approval' | 'resolving' | 'completed' | 'error';
 
 interface AIMenuItem {
   label: string;
@@ -65,25 +60,53 @@ interface AIMenuProps {
   initialAction?: string;
 }
 
-function selectedHandles(context: AIEditorContext): readonly string[] {
-  // Generation is anchored to the current stable Block handle. An empty list
-  // means whole-document context in the RPC and would lose the editor cursor anchor.
-  return context.selectedBlockIds.length > 0 ? context.selectedBlockIds : [context.currentBlockId];
+interface AIEditorTurnBinding extends AIEditorTurnScope {
+  initialAction?: string;
+  onApproveFailed: () => void;
+}
+
+/** Runs one menu's turn store while mounted. */
+function useAIEditorTurnStore({ client, target, context, initialAction, onApproveFailed }: AIEditorTurnBinding) {
+  const scope = useRef<AIEditorTurnScope>({ client, target, context });
+  scope.current = { client, target, context };
+  const approveFailed = useRef(onApproveFailed);
+  approveFailed.current = onApproveFailed;
+  const [initial] = useState(initialAction);
+  const [store] = useState(() =>
+    createAIEditorTurnStore({
+      scope: () => scope.current,
+      initialAction: initial,
+      onApproveFailed: () => approveFailed.current(),
+    }),
+  );
+  useEffect(() => {
+    // A remount, such as StrictMode's, starts the initial action again after dispose cancelled it.
+    if (initial && initial !== 'custom') {
+      void store.start(initial);
+    }
+    return () => store.dispose();
+  }, [initial, store]);
+  return { store, state: useStore(store.api) };
 }
 
 export function AIMenu({ client, context, target, onClose, dragHandleClassName, initialAction }: AIMenuProps) {
   const t = useTranslations('aiAssistant');
   const tCommonActions = useTranslations('common.actions');
-  const [menuState, setMenuState] = useState<AIMenuState>('input');
   const [customPrompt, setCustomPrompt] = useState('');
-  const [currentAction, setCurrentAction] = useState<string | null>(initialAction || null);
-  const [assistantText, setAssistantText] = useState('');
-  const [approval, setApproval] = useState<AIEditorDocumentToolApprovalRequired | null>(null);
-  const [error, setError] = useState<Error | null>(null);
-  const turnRef = useRef<AIEditorTurn | null>(null);
-  const turnGenerationRef = useRef(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const initialActionHandledRef = useRef(false);
+  const { store, state } = useAIEditorTurnStore({
+    client,
+    target,
+    context,
+    initialAction,
+    onApproveFailed: () =>
+      notifications.show({
+        title: t('notifications.applyFailedTitle'),
+        message: t('notifications.applyFailedMessage'),
+        tone: 'danger',
+      }),
+  });
+  const { phase, assistantText, approval } = state;
 
   const menuItems: AIMenuItem[] =
     context.mode === 'modify'
@@ -113,181 +136,20 @@ export function AIMenu({ client, context, target, onClose, dragHandleClassName, 
         ];
 
   useEffect(() => {
-    if (menuState === 'input') {
+    if (phase === 'input') {
       inputRef.current?.focus();
     }
-  }, [menuState]);
+  }, [phase]);
 
-  useEffect(
-    () => () => {
-      turnGenerationRef.current += 1;
-      void turnRef.current?.cancel().catch(() => undefined);
-      turnRef.current = null;
-    },
-    [],
-  );
-
-  const startTurn = useCallback(
-    async (action: string, prompt?: string) => {
-      const generation = ++turnGenerationRef.current;
-      setCurrentAction(action);
-      setAssistantText('');
-      setApproval(null);
-      setError(null);
-      setMenuState('streaming');
-      try {
-        const turn = await client.start({
-          target,
-          selection: { mode: context.mode, blockHandles: selectedHandles(context) },
-          action,
-          prompt,
-        });
-        turnRef.current = turn;
-        let receivedTerminal = false;
-        for await (const event of turn.events) {
-          if (generation !== turnGenerationRef.current) {
-            return;
-          }
-          switch (event.event.case) {
-            case 'assistantText':
-              {
-                const delta = event.event.value.text;
-                setAssistantText((current) => current + delta);
-              }
-              break;
-            case 'approvalRequired':
-              if (!event.event.value.mutation) {
-                throw new Error('AI editor approval is missing its document mutation');
-              }
-              setApproval(event.event.value);
-              setMenuState('approval');
-              break;
-            case 'documentResult':
-              setApproval(null);
-              if (event.event.value.result.case === 'rejected') {
-                throw new Error('The document changed before the AI mutation could be applied');
-              }
-              if (event.event.value.result.case !== 'accepted') {
-                throw new Error('AI editor document result is missing its outcome');
-              }
-              setMenuState('streaming');
-              break;
-            case 'terminal':
-              receivedTerminal = true;
-              turnRef.current = null;
-              setApproval(null);
-              if (event.event.value.status === AIEditorTurnTerminalStatus.AI_EDITOR_TURN_TERMINAL_STATUS_COMPLETED) {
-                setMenuState('completed');
-              } else if (
-                event.event.value.status === AIEditorTurnTerminalStatus.AI_EDITOR_TURN_TERMINAL_STATUS_CANCELLED
-              ) {
-                setMenuState('input');
-              } else {
-                throw new Error(t('errors.generic'));
-              }
-              break;
-            default:
-              break;
-          }
-        }
-        if (!receivedTerminal && generation === turnGenerationRef.current) {
-          throw new Error('AI editor stream ended without a terminal outcome');
-        }
-      } catch (value) {
-        if (generation !== turnGenerationRef.current) {
-          return;
-        }
-        const nextError = value instanceof Error ? value : new Error(String(value));
-        turnRef.current = null;
-        setError(nextError);
-        setMenuState('error');
-      }
-    },
-    [client, context, t, target],
-  );
-
-  useEffect(() => {
-    if (!initialAction || initialAction === 'custom' || initialActionHandledRef.current) {
-      return;
+  const submitCustomPrompt = () => {
+    const prompt = customPrompt.trim();
+    if (prompt) {
+      void store.start('custom', prompt);
     }
-    initialActionHandledRef.current = true;
-    void startTurn(initialAction);
-  }, [initialAction, startTurn]);
-
-  const handleCustomPrompt = useCallback(() => {
-    if (customPrompt.trim()) {
-      void startTurn('custom', customPrompt.trim());
-    }
-  }, [customPrompt, startTurn]);
-
-  const handleApprove = useCallback(async () => {
-    const turn = turnRef.current;
-    if (!turn || !approval) {
-      return;
-    }
-    setMenuState('resolving');
-    try {
-      await turn.resolve(approval.toolCallId, 'approve');
-    } catch (value) {
-      setError(value instanceof Error ? value : new Error(String(value)));
-      setMenuState('error');
-      notifications.show({
-        title: t('notifications.applyFailedTitle'),
-        message: t('notifications.applyFailedMessage'),
-        tone: 'danger',
-      });
-    }
-  }, [approval, t]);
-
-  const handleDeny = useCallback(async () => {
-    const turn = turnRef.current;
-    if (!turn || !approval) {
-      return;
-    }
-    setMenuState('resolving');
-    try {
-      await turn.resolve(approval.toolCallId, 'deny');
-      setApproval(null);
-      setMenuState('streaming');
-    } catch (value) {
-      setError(value instanceof Error ? value : new Error(String(value)));
-      setMenuState('error');
-    }
-  }, [approval]);
-
-  const handleRetry = useCallback(async () => {
-    if (!currentAction) {
-      return;
-    }
-    turnGenerationRef.current += 1;
-    try {
-      await turnRef.current?.cancel();
-    } catch (value) {
-      setError(value instanceof Error ? value : new Error(String(value)));
-      setMenuState('error');
-      return;
-    } finally {
-      turnRef.current = null;
-    }
-    await startTurn(currentAction, currentAction === 'custom' ? customPrompt.trim() : undefined);
-  }, [currentAction, customPrompt, startTurn]);
-
-  const handleStop = useCallback(async () => {
-    turnGenerationRef.current += 1;
-    try {
-      await turnRef.current?.cancel();
-    } catch {
-      // The stream is aborted by the client even when the cancellation RPC fails.
-    } finally {
-      turnRef.current = null;
-      setApproval(null);
-      setAssistantText('');
-      setMenuState('input');
-    }
-  }, []);
+  };
 
   const placeholder = context.mode === 'modify' ? t('placeholders.modify') : t('placeholders.generate');
-  const showInput = menuState === 'input' || menuState === 'streaming';
+  const showInput = phase === 'input' || phase === 'streaming';
 
   return (
     <div style={{ width: 360, maxWidth: '100%' }}>
@@ -335,20 +197,20 @@ export function AIMenu({ client, context, target, onClose, dragHandleClassName, 
                 onKeyDown={(event) => {
                   if (event.key === 'Enter' && !event.shiftKey) {
                     event.preventDefault();
-                    handleCustomPrompt();
+                    submitCustomPrompt();
                   }
                 }}
                 size="sm"
-                disabled={menuState === 'streaming'}
+                disabled={phase === 'streaming'}
                 rightSection={
-                  menuState === 'streaming' ? (
+                  phase === 'streaming' ? (
                     <Loader size="xs" />
                   ) : (
                     <IconButton
                       size="compact"
                       emphasis="low"
                       aria-label={t('actions.submitPrompt')}
-                      onClick={handleCustomPrompt}
+                      onClick={submitCustomPrompt}
                       disabled={!customPrompt.trim()}
                     >
                       <IconArrowRight size={14} />
@@ -356,7 +218,7 @@ export function AIMenu({ client, context, target, onClose, dragHandleClassName, 
                   )
                 }
               />
-              {menuState === 'input' ? (
+              {phase === 'input' ? (
                 <>
                   <DsText size="xs" weight="medium" tone="secondary">
                     {t('quickActions.title')}
@@ -368,7 +230,7 @@ export function AIMenu({ client, context, target, onClose, dragHandleClassName, 
                         size="xs"
                         emphasis="medium"
                         leftSection={item.icon}
-                        onClick={() => void startTurn(item.action)}
+                        onClick={() => void store.start(item.action)}
                       >
                         {item.label}
                       </Button>
@@ -381,12 +243,12 @@ export function AIMenu({ client, context, target, onClose, dragHandleClassName, 
                   {assistantText}
                 </DsText>
               ) : null}
-              {menuState === 'streaming' ? (
+              {phase === 'streaming' ? (
                 <Button
                   size="xs"
                   tone="danger"
                   emphasis="medium"
-                  onClick={() => void handleStop()}
+                  onClick={() => void store.stop()}
                   leftSection={<IconX size={14} />}
                   fullWidth
                 >
@@ -396,7 +258,7 @@ export function AIMenu({ client, context, target, onClose, dragHandleClassName, 
             </>
           ) : null}
 
-          {(menuState === 'approval' || menuState === 'resolving') && approval?.mutation ? (
+          {(phase === 'approval' || phase === 'resolving') && approval?.mutation ? (
             <>
               <EditorDsSectionCard padding="xs" withBorder>
                 <DsLayoutInset blockEnd="xxs">
@@ -425,9 +287,9 @@ export function AIMenu({ client, context, target, onClose, dragHandleClassName, 
                   size="sm"
                   tone="neutral"
                   emphasis="medium"
-                  onClick={() => void handleDeny()}
+                  onClick={() => void store.deny()}
                   leftSection={<IconX size={14} />}
-                  disabled={menuState === 'resolving'}
+                  disabled={phase === 'resolving'}
                 >
                   {t('actions.reject')}
                 </Button>
@@ -435,9 +297,9 @@ export function AIMenu({ client, context, target, onClose, dragHandleClassName, 
                   size="sm"
                   tone="positive"
                   emphasis="medium"
-                  onClick={() => void handleApprove()}
-                  leftSection={menuState === 'resolving' ? <Loader size="xs" /> : <IconCheck size={14} />}
-                  disabled={menuState === 'resolving'}
+                  onClick={() => void store.approve()}
+                  leftSection={phase === 'resolving' ? <Loader size="xs" /> : <IconCheck size={14} />}
+                  disabled={phase === 'resolving'}
                 >
                   {context.mode === 'modify' ? t('actions.accept') : t('actions.insert')}
                 </Button>
@@ -445,7 +307,7 @@ export function AIMenu({ client, context, target, onClose, dragHandleClassName, 
             </>
           ) : null}
 
-          {menuState === 'completed' ? (
+          {phase === 'completed' ? (
             <>
               {assistantText ? (
                 <EditorDsSectionCard padding="xs" withBorder>
@@ -458,7 +320,7 @@ export function AIMenu({ client, context, target, onClose, dragHandleClassName, 
             </>
           ) : null}
 
-          {menuState === 'error' ? (
+          {phase === 'error' ? (
             <>
               <EditorDsSectionCard padding="xs" withBorder>
                 <DsLayoutInset blockEnd="xxs">
@@ -466,7 +328,8 @@ export function AIMenu({ client, context, target, onClose, dragHandleClassName, 
                     {t('sections.result')}
                   </DsText>
                 </DsLayoutInset>
-                <DsText size="sm">{error?.message || t('errors.generic')}</DsText>
+                {/* Failure codes stay out of the menu: none of them helps the author, so every failure reads the same. */}
+                <DsText size="sm">{t('errors.generic')}</DsText>
               </EditorDsSectionCard>
               <DsLayoutInline gap="xs">
                 <Button size="xs" emphasis="medium" onClick={onClose}>
@@ -475,7 +338,7 @@ export function AIMenu({ client, context, target, onClose, dragHandleClassName, 
                 <Button
                   size="xs"
                   emphasis="medium"
-                  onClick={() => void handleRetry()}
+                  onClick={() => void store.retry(customPrompt)}
                   leftSection={<IconRefresh size={14} />}
                 >
                   {t('actions.retry')}

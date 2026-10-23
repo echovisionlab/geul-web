@@ -53,6 +53,29 @@ export function sharesRuntime(project: TestProjectName, source: string): boolean
   return project === 'node-unit' || domCleanup.test(source);
 }
 
+/**
+ * Isolated jsdom component files run in VM contexts (pool `vmThreads`): each file still gets its own jsdom
+ * and module graph, but not a process of its own. What needs one stays in forks:
+ * - assigning `TZ`: a worker thread's `process.env` is a copy, so V8 never adopts the new time zone;
+ * - replacing jsdom's unforgeable `window`, `document`, `location` or `top`: in a VM context they are the
+ *   context's own non-configurable properties (forks copy them onto Node's global as configurable ones);
+ * - assigning `process.env` directly: all files of a VM worker share one `process`, so an assignment that
+ *   is not restored reaches later files (`vi.stubEnv` is restored by `unstubEnvs`).
+ * `// @geul-test-pool forks: <reason>` keeps any other file in forks; `// @geul-test-pool vmThreads`
+ * overrides a false positive of these patterns.
+ */
+const vmIncompatible =
+  /\bTZ\b|vi\.stubGlobal\(\s*['"](?:window|document|location|top)['"]|Object\.defineProperty\(\s*(?:window|globalThis|global)\s*,\s*['"](?:window|document|location|top)['"]|delete\s+(?:window|globalThis)\.(?:document|location)\b|process\.env(?:\.[A-Za-z_]+|\[[^\]]+\])\s*=(?!=)/;
+const jsdomEnvironment = /^\s*(?:\/\/|\/\*\*?)\s*@vitest-environment\s+jsdom\b/m;
+
+export function runsInVmContext(project: TestProjectName, source: string): boolean {
+  if (project !== 'component' || sharesRuntime(project, source) || !jsdomEnvironment.test(source)) {
+    return false;
+  }
+  const explicitPool = source.match(/^\s*\/\/\s*@geul-test-pool\s+(forks|vmThreads)\b/m)?.[1];
+  return explicitPool ? explicitPool === 'vmThreads' : !vmIncompatible.test(source);
+}
+
 /** Literal paths still need glob escaping: Next route names contain [] and (). */
 export function literalTestGlob(file: string): string {
   return file.replace(/[()[\]{}?*+!@]/g, '\\$&');
@@ -66,6 +89,7 @@ export function discoverTestProjects(root: string): Record<TestProjectName, stri
     'editor-integration': [],
   };
   const shared = new Set<string>();
+  const vm = new Set<string>();
   function visit(directory: string) {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
       const path = join(directory, entry.name);
@@ -87,6 +111,9 @@ export function discoverTestProjects(root: string): Record<TestProjectName, stri
         if (sharesRuntime(project, source)) {
           shared.add(literalTestGlob(file));
         }
+        if (runsInVmContext(project, source)) {
+          vm.add(literalTestGlob(file));
+        }
       }
     }
   }
@@ -95,10 +122,12 @@ export function discoverTestProjects(root: string): Record<TestProjectName, stri
     files.sort();
   }
   sharedTestFiles.set(root, shared);
+  vmTestFiles.set(root, vm);
   return projects;
 }
 
 const sharedTestFiles = new Map<string, Set<string>>();
+const vmTestFiles = new Map<string, Set<string>>();
 
 /** The discovered files of one project that may share a runtime (call after `discoverTestProjects`). */
 export function sharedRuntimeFiles(root: string, files: readonly string[]): { shared: string[]; isolated: string[] } {
@@ -106,5 +135,14 @@ export function sharedRuntimeFiles(root: string, files: readonly string[]): { sh
   return {
     shared: files.filter((file) => shared.has(file)),
     isolated: files.filter((file) => !shared.has(file)),
+  };
+}
+
+/** The isolated files of one project that run in VM contexts (call after `discoverTestProjects`). */
+export function vmRuntimeFiles(root: string, files: readonly string[]): { vm: string[]; forks: string[] } {
+  const vm = vmTestFiles.get(root) ?? new Set<string>();
+  return {
+    vm: files.filter((file) => vm.has(file)),
+    forks: files.filter((file) => !vm.has(file)),
   };
 }

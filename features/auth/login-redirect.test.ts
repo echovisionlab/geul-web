@@ -11,16 +11,6 @@ describe('login-redirect helpers', () => {
   });
 
   it('builds a refresh login browser URL with a return target', async () => {
-    vi.stubGlobal('document', {
-      documentElement: {
-        dataset: {
-          geulCdnUrl: 'https://cdn.example.test',
-          geulApiUrl: 'https://api.example.test',
-        },
-      },
-    });
-    vi.stubGlobal('window', {});
-
     const { buildLoginBrowserUrl } = await import('./login-redirect');
     expect(
       buildLoginBrowserUrl({
