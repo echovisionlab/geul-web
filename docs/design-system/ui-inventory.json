@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "bb031d65ce7f95b4475f264c2911a92838bff19f4512078ebb1592ccaac2bc0d",
+  "manifestHash": "27390a0ebb7598b6ed7a8a3e285bc38220158577105b9134e69ec0ae04f652a0",
   "counts": {
-    "sourceFiles": 3850,
-    "productionSourceFiles": 2324,
+    "sourceFiles": 3852,
+    "productionSourceFiles": 2325,
     "componentFiles": 919,
     "coreFamilies": 57,
     "featureDomains": 54,
@@ -1703,6 +1703,8 @@
     "features/file-manager/file-browser-presentation.test.ts",
     "features/file-manager/file-browser-presentation.ts",
     "features/file-manager/file-browser-presentation.usage.test.ts",
+    "features/file-manager/file-deletion-impact.test.ts",
+    "features/file-manager/file-deletion-impact.ts",
     "features/file-manager/i18n.ts",
     "features/file-manager/index.ts",
     "features/file-manager/model.ts",
@@ -76968,6 +76970,7 @@
         "features/file-manager/FileManager.tsx",
         "features/file-manager/FileManagerView.tsx",
         "features/file-manager/file-browser-presentation.ts",
+        "features/file-manager/file-deletion-impact.ts",
         "features/file-manager/i18n.ts",
         "features/file-manager/index.ts",
         "features/file-manager/model.ts",
@@ -77003,6 +77006,7 @@
         "features/file-manager/FileManagerView.test.tsx",
         "features/file-manager/file-browser-presentation.test.ts",
         "features/file-manager/file-browser-presentation.usage.test.ts",
+        "features/file-manager/file-deletion-impact.test.ts",
         "features/file-manager/useFileBrowserViewSettings.test.tsx"
       ],
       "directlyImportingRoutes": ["/admin/files"]
