@@ -11,9 +11,18 @@ const mocks = vi.hoisted(() => ({
   assertRequest: vi.fn(),
   approve: vi.fn(),
   reject: vi.fn(),
+  acceptSignIn: vi.fn(),
+  signInClient: vi.fn(),
 }));
 
-vi.mock('next/navigation', () => ({ notFound: vi.fn(), redirect: vi.fn() }));
+vi.mock('next/navigation', () => ({
+  notFound: vi.fn(() => {
+    throw new Error('not-found');
+  }),
+  redirect: vi.fn((location: string) => {
+    throw new Error(`redirect:${location}`);
+  }),
+}));
 vi.mock('next-intl/server', () => ({
   getTranslations: async (namespace: 'common.actions' | 'common.labels' | 'security.mcpIntegration') =>
     createTranslator({ locale: 'en', messages, namespace }),
@@ -25,7 +34,11 @@ vi.mock('@/features/auth/hydra-mcp-oauth-actions', () => ({
   rejectMcpConsentAction: mocks.reject,
 }));
 vi.mock('@/features/auth/hydra-mcp-oauth', () => ({
+  acceptHydraSignInConsent: mocks.acceptSignIn,
+  isActiveAdmin: (session: { user: { role: string; status: string } }) =>
+    session.user.role === 'admin' && session.user.status === 'active',
   assertMcpConsentRequest: mocks.assertRequest,
+  isSignInClient: mocks.signInClient,
   getHydraConsentRequest: mocks.getRequest,
   isMcpAuthor: () => true,
   mcpClientDisplayName: () => 'Example AI client',
@@ -36,7 +49,7 @@ vi.mock('@/features/auth/hydra-mcp-oauth', () => ({
 import McpConsentPage from './page';
 
 async function renderConsent(scopes: string[]) {
-  mocks.getRequest.mockResolvedValue({ requested_scope: scopes });
+  mocks.getRequest.mockResolvedValue({ client: { client_id: 'example-client' }, requested_scope: scopes });
   const page = await McpConsentPage({
     searchParams: Promise.resolve({ consent_challenge: 'test-challenge' }),
   });
@@ -47,6 +60,30 @@ describe('MCP consent explanation', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.getSession.mockResolvedValue({ user: { id: 'author-id', role: 'author' } });
+    mocks.signInClient.mockReturnValue(false);
+  });
+
+  it('signs an Admin in to an operator tool without a consent screen', async () => {
+    mocks.getSession.mockResolvedValue({ user: { id: 'admin-id', role: 'admin', status: 'active' } });
+    mocks.signInClient.mockReturnValue(true);
+    mocks.acceptSignIn.mockResolvedValue('https://sso.example/oauth2/auth?consent_verifier=accepted');
+
+    await expect(renderConsent(['openid', 'email'])).rejects.toThrow(
+      'redirect:https://sso.example/oauth2/auth?consent_verifier=accepted',
+    );
+    expect(mocks.acceptSignIn).toHaveBeenCalledOnce();
+    expect(mocks.assertRequest).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { role: 'author', status: 'active' },
+    { role: 'admin', status: 'banned' },
+  ])('hides an operator tool from a $status $role', async (user) => {
+    mocks.getSession.mockResolvedValue({ user: { id: 'member-id', ...user } });
+    mocks.signInClient.mockReturnValue(true);
+
+    await expect(renderConsent(['openid', 'email'])).rejects.toThrow('not-found');
+    expect(mocks.acceptSignIn).not.toHaveBeenCalled();
   });
 
   it('explains account permissions, content and attachment changes, revocation and client attribution', async () => {

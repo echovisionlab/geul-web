@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "6e97b9a79e1ab59202079e135607406e24eb8fe365212fbcefc77607b6ddf24f",
+  "manifestHash": "5206a4d701c74c9015ea482674d0118e1ced6a06dccdd3367e868f2695e06035",
   "counts": {
     "sourceFiles": 3850,
     "productionSourceFiles": 2324,
@@ -91129,9 +91129,12 @@
         {
           "file": "features/auth/hydra-mcp-oauth.ts",
           "symbols": [
+            "acceptHydraSignInConsent",
             "assertMcpConsentRequest",
             "getHydraConsentRequest",
+            "isActiveAdmin",
             "isMcpAuthor",
+            "isSignInClient",
             "mcpClientDisplayName",
             "mcpDelegationDisplayName",
             "parseHydraChallenge"
