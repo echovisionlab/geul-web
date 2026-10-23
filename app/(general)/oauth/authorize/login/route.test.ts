@@ -5,13 +5,11 @@ import { GET } from './route';
 const mocks = vi.hoisted(() => ({
   acceptHydraLogin: vi.fn(),
   getSessionFromCookie: vi.fn(),
-  isMcpAuthor: vi.fn(),
   loggerError: vi.fn(),
 }));
 
 vi.mock('@/features/auth/hydra-mcp-oauth', () => ({
   acceptHydraLogin: mocks.acceptHydraLogin,
-  isMcpAuthor: mocks.isMcpAuthor,
   parseHydraChallenge: (value: unknown) =>
     typeof value === 'string' && value.length > 0 && value.length <= 8_192 ? value : null,
 }));
@@ -24,7 +22,6 @@ describe('MCP OAuth login route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.getSessionFromCookie.mockResolvedValue({ account_identity_id: crypto.randomUUID() });
-    mocks.isMcpAuthor.mockReturnValue(true);
     mocks.acceptHydraLogin.mockResolvedValue('https://sso.example/oauth2/auth?login_verifier=accepted');
   });
 
@@ -61,15 +58,14 @@ describe('MCP OAuth login route', () => {
     expect(mocks.acceptHydraLogin).toHaveBeenCalledWith('opaque+/=', expect.anything());
   });
 
-  it('hides MCP from an authenticated ordinary user', async () => {
-    mocks.isMcpAuthor.mockReturnValue(false);
+  it('hides the client from a member it does not admit', async () => {
+    mocks.acceptHydraLogin.mockResolvedValue(null);
 
     const response = await GET(
       new NextRequest('https://site.example/oauth/authorize/login?login_challenge=challenge-1'),
     );
 
     expect(response.status).toBe(404);
-    expect(mocks.acceptHydraLogin).not.toHaveBeenCalled();
   });
 
   it('rejects duplicate or unknown query parameters before session lookup', async () => {
