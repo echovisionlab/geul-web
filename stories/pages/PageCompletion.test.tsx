@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+// @geul-test-pool forks: the OG preview failure never renders under vmThreads (fake/real timer hand-off)
 import { act } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, describe, expect, it, vi } from 'vitest';

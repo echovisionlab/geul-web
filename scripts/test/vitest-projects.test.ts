@@ -5,7 +5,14 @@ import { existsSync, mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { classifyTest, discoverTestProjects, literalTestGlob, sharesRuntime } from './vitest-projects.mts';
+import {
+  classifyTest,
+  discoverTestProjects,
+  literalTestGlob,
+  runsInVmContext,
+  sharesRuntime,
+  vmRuntimeFiles,
+} from './vitest-projects.mts';
 
 let fixture: string | undefined;
 afterEach(() => {
@@ -66,6 +73,35 @@ describe('test project boundaries', () => {
     expect(sharesRuntime(project, source)).toBe(expected);
   });
 
+  it.each([
+    ['a jsdom component file', '// @vitest-environment jsdom\nroot.render(<Button />);', true],
+    ['an SSR component file in the Node environment', 'renderToStaticMarkup(<Button />);', false],
+    [
+      'a jsdom file that shares a runtime',
+      "// @vitest-environment jsdom\nimport { render } from '@/test/render';",
+      false,
+    ],
+    ['a TZ change', "// @vitest-environment jsdom\nprocess.env.TZ = 'America/New_York';", false],
+    ['a replaced location', "// @vitest-environment jsdom\nvi.stubGlobal('location', { reload });", false],
+    ['a direct environment assignment', "// @vitest-environment jsdom\nprocess.env.FEATURE = 'on';", false],
+    [
+      'an explicit forks marker',
+      '// @vitest-environment jsdom\n// @geul-test-pool forks: reason\nroot.render(<Button />);',
+      false,
+    ],
+    [
+      'an explicit vmThreads marker',
+      '// @vitest-environment jsdom\n// @geul-test-pool vmThreads\n// TZ named only here',
+      true,
+    ],
+  ] as const)('decides whether %s runs in a VM context', (_case, source, expected) => {
+    expect(runsInVmContext('component', source)).toBe(expected);
+  });
+
+  it('keeps other projects out of VM contexts', () => {
+    expect(runsInVmContext('editor-integration', '// @vitest-environment jsdom\n')).toBe(false);
+  });
+
   it('keeps an explicit tier authoritative without interpreting marker text inside assertions', () => {
     expect(classifyTest('lib/example.test.ts', '// @geul-test-tier editor-integration\n')).toBe('editor-integration');
     expect(classifyTest('lib/example.test.ts', "expect(source).toContain('@vitest-environment jsdom')")).toBe(
@@ -98,5 +134,6 @@ describe('test project boundaries', () => {
     const allFiles = Object.values(projects).flat();
     expect(allFiles).toHaveLength(4);
     expect(new Set(allFiles).size).toBe(allFiles.length);
+    expect(vmRuntimeFiles(fixture, projects.component)).toEqual({ vm: ['.storybook/preview.test.tsx'], forks: [] });
   });
 });

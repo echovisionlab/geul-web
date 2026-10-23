@@ -43,7 +43,7 @@
     "format": "prettier --write .",
     "test": "vitest run --fileParallelism",
     "test:unit": "vitest run --project=node-unit --project=node-unit-shared",
-    "test:components": "vitest run --project=component --project=component-shared",
+    "test:components": "vitest run --project=component --project=component-shared --project=component-vm",
     "test:server": "vitest run --project=server-contract",
     "test:editor": "vitest run --project=editor-integration",
     "test:changed": "vitest run --changed",
