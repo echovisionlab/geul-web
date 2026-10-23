@@ -41,6 +41,37 @@ afterEach(() => {
   container = null;
 });
 
+function renderMenu(client: AIEditorAssistantClient) {
+  container = document.createElement('div');
+  document.body.append(container);
+  root = createRoot(container);
+  act(() => {
+    root?.render(
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <DesignSystemProvider locale="en" forceColorScheme="light">
+          <AIMenu
+            client={client}
+            context={{ currentBlockId: 'paragraph-1', isSupported: true, mode: 'modify', selectedBlockIds: [] }}
+            target={{ type: 'post', id: 'post-1', locale: 'en' }}
+            onClose={vi.fn()}
+          />
+        </DesignSystemProvider>
+      </NextIntlClientProvider>,
+    );
+  });
+}
+
+const button = (label: string) =>
+  [...(container?.querySelectorAll('button') ?? [])].find((item) => item.textContent === label);
+
+async function settle() {
+  await act(async () => {
+    for (let index = 0; index < 20; index += 1) {
+      await Promise.resolve();
+    }
+  });
+}
+
 describe('AI menu orchestration stream', () => {
   it('shows a typed approval and resolves it through the server without interpreting assistant text as HTML', async () => {
     const operation = create(AIDocumentOperationSchema, {
@@ -158,5 +189,32 @@ describe('AI menu orchestration stream', () => {
       accept?.click();
       await vi.waitFor(() => expect(turn.resolve).toHaveBeenCalledWith('tool-1', 'approve'));
     });
+  });
+  it('shows the translated failure message instead of the internal error', async () => {
+    const ended = { events: (async function* () {})(), resolve: vi.fn(), cancel: vi.fn().mockResolvedValue(undefined) };
+    renderMenu({ start: vi.fn().mockResolvedValue(ended) });
+    act(() => button('Improve')?.click());
+    await settle();
+
+    expect(container?.textContent).toContain(enMessages.aiAssistant.errors.generic);
+    expect(button('Retry')).toBeDefined();
+  });
+
+  it('cancels the running turn when the menu closes', async () => {
+    const turn = {
+      // A stream that stays open until the turn is cancelled.
+      events: (async function* (): AsyncGenerator<never> {
+        yield await new Promise<never>(() => {});
+      })(),
+      resolve: vi.fn(),
+      cancel: vi.fn().mockResolvedValue(undefined),
+    };
+    renderMenu({ start: vi.fn().mockResolvedValue(turn) });
+    act(() => button('Improve')?.click());
+    await settle();
+
+    act(() => root?.unmount());
+    root = null;
+    expect(turn.cancel).toHaveBeenCalledTimes(1);
   });
 });
