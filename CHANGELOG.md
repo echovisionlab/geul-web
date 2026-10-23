@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.3](https://github.com/echovisionlab/geul-web/compare/v0.21.2...v0.21.3) (2026-10-23)
+
+
+### Miscellaneous Chores
+
+* release 0.21.3 ([#193](https://github.com/echovisionlab/geul-web/issues/193)) ([7b207c4](https://github.com/echovisionlab/geul-web/commit/7b207c4ed753c37b0b2ad814f84c09f123c20beb))
+
 ## [0.21.2](https://github.com/echovisionlab/geul-web/compare/v0.21.1...v0.21.2) (2026-10-23)
 
 
