@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "d97ced34dd73c1fe1bdd536ac0ddcbfc0c835f82d1c231712cf9e7298b86b360",
+  "manifestHash": "f2198e136b256e6240d2feae95922b0bcb361430aaa7b249e13649873eee7f9c",
   "counts": {
-    "sourceFiles": 3866,
+    "sourceFiles": 3867,
     "productionSourceFiles": 2332,
     "componentFiles": 919,
     "coreFamilies": 57,
     "featureDomains": 54,
     "storyFiles": 260,
-    "storyVariants": 1491,
+    "storyVariants": 1492,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -633,6 +633,7 @@
     "components/core/MediaControls/media-clock.ts",
     "components/core/MediaControls/media-seek.ts",
     "components/core/MediaControls/native-audio.ts",
+    "components/core/MediaControls/native-video.test.tsx",
     "components/core/MediaControls/native-video.ts",
     "components/core/MediaControls/wave-colors.ts",
     "components/core/MediaImage/MediaImage.stories.tsx",
@@ -83650,6 +83651,11 @@
           "name": "Playback",
           "args": null,
           "preview": "http://localhost:6010/?path=/story/feature-media-video-player--playback"
+        },
+        {
+          "name": "SmallPreview",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/feature-media-video-player--small-preview"
         },
         {
           "name": "Processing",
