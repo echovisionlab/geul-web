@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.5](https://github.com/echovisionlab/geul-web/compare/v0.21.4...v0.21.5) (2026-10-26)
+
+
+### Bug Fixes
+
+* apply shared controls to video start button ([#197](https://github.com/echovisionlab/geul-web/issues/197)) ([4d9ba16](https://github.com/echovisionlab/geul-web/commit/4d9ba167e7506e5a4a639b59c0edb9c5bdcdfa87))
+
 ## [0.21.4](https://github.com/echovisionlab/geul-web/compare/v0.21.3...v0.21.4) (2026-10-26)
 
 
