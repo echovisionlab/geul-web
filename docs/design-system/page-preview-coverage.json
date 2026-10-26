@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "methodology": "All App Router visual entry files indexed by TypeScript imports/JSX; exact reviewed route/boundary maps count separately from mere Feature story overlap. Unmapped entrypoints remain explicit gaps. Static source census is not a browser pass.",
-  "sourceManifestHash": "d8b9d97a758958b8d630ffedf2ef4d53133aa5c1849b5c9e4d93359473d6ddec",
+  "sourceManifestHash": "ea6821f1ca7ff42dc08847b53881b681b531cc3cd5d609f5b167d9e1da9c7cc9",
   "counts": {
     "queryEditorBranches": 12,
     "editorBranchPreviews": 12,
@@ -1411,6 +1411,11 @@
           "file": "features/editor/toolbars/EditorColorStyleButton.stories.tsx",
           "title": "Feature/Editor/Color Palette",
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
+        },
+        {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
         },
         {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
@@ -3518,6 +3523,11 @@
           "matchingOwners": ["features/location/ui/CountrySelect.tsx"]
         },
         {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
+        },
+        {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
           "title": "Feature/Map/MapLibreMapView",
           "matchingOwners": ["features/map/ui/MapLibreMapView.tsx", "features/site/PageLoader/index.ts"]
@@ -5101,6 +5111,11 @@
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
         },
         {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
+        },
+        {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
           "title": "Feature/Map/MapLibreMapView",
           "matchingOwners": ["features/map/ui/MapLibreMapView.tsx", "features/site/PageLoader/index.ts"]
@@ -6579,6 +6594,11 @@
           "file": "features/editor/toolbars/EditorColorStyleButton.stories.tsx",
           "title": "Feature/Editor/Color Palette",
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
+        },
+        {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
         },
         {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
@@ -8190,6 +8210,11 @@
           "file": "features/editor/toolbars/EditorColorStyleButton.stories.tsx",
           "title": "Feature/Editor/Color Palette",
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
+        },
+        {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
         },
         {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
@@ -10116,6 +10141,11 @@
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
         },
         {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
+        },
+        {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
           "title": "Feature/Map/MapLibreMapView",
           "matchingOwners": ["features/map/ui/MapLibreMapView.tsx", "features/site/PageLoader/index.ts"]
@@ -11749,6 +11779,11 @@
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
         },
         {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
+        },
+        {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
           "title": "Feature/Map/MapLibreMapView",
           "matchingOwners": ["features/map/ui/MapLibreMapView.tsx", "features/site/PageLoader/index.ts"]
@@ -13327,6 +13362,11 @@
           "file": "features/editor/toolbars/EditorColorStyleButton.stories.tsx",
           "title": "Feature/Editor/Color Palette",
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
+        },
+        {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
         },
         {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
@@ -14987,6 +15027,11 @@
           "matchingOwners": ["features/location/ui/CountrySelect.tsx"]
         },
         {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
+        },
+        {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
           "title": "Feature/Map/MapLibreMapView",
           "matchingOwners": ["features/map/ui/MapLibreMapView.tsx", "features/site/PageLoader/index.ts"]
@@ -16573,6 +16618,11 @@
           "file": "features/editor/toolbars/EditorColorStyleButton.stories.tsx",
           "title": "Feature/Editor/Color Palette",
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
+        },
+        {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
         },
         {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
@@ -19438,6 +19488,11 @@
           "matchingOwners": ["features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"]
         },
         {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
+        },
+        {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
           "title": "Feature/Map/MapLibreMapView",
           "matchingOwners": ["features/map/ui/MapLibreMapView.tsx", "features/site/PageLoader/index.ts"]
@@ -21212,6 +21267,11 @@
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
         },
         {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
+        },
+        {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
           "title": "Feature/Map/MapLibreMapView",
           "matchingOwners": ["features/map/ui/MapLibreMapView.tsx", "features/site/PageLoader/index.ts"]
@@ -22782,6 +22842,11 @@
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
         },
         {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
+        },
+        {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
           "title": "Feature/Map/MapLibreMapView",
           "matchingOwners": ["features/map/ui/MapLibreMapView.tsx", "features/site/PageLoader/index.ts"]
@@ -23731,6 +23796,11 @@
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
         },
         {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
+        },
+        {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
           "title": "Feature/Map/MapLibreMapView",
           "matchingOwners": ["features/map/ui/MapLibreMapView.tsx", "features/site/PageLoader/index.ts"]
@@ -24267,6 +24337,11 @@
           "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
           "title": "Feature/Editor/Site Variables",
           "matchingOwners": ["features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"]
+        },
+        {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
         },
         {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
@@ -25666,6 +25741,11 @@
           "file": "features/editor/toolbars/EditorColorStyleButton.stories.tsx",
           "title": "Feature/Editor/Color Palette",
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
+        },
+        {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
         },
         {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
@@ -27251,6 +27331,11 @@
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
         },
         {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
+        },
+        {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
           "title": "Feature/Map/MapLibreMapView",
           "matchingOwners": ["features/map/ui/MapLibreMapView.tsx", "features/site/PageLoader/index.ts"]
@@ -28720,6 +28805,11 @@
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
         },
         {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
+        },
+        {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
           "title": "Feature/Map/MapLibreMapView",
           "matchingOwners": ["features/map/ui/MapLibreMapView.tsx", "features/site/PageLoader/index.ts"]
@@ -29949,6 +30039,11 @@
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
         },
         {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
+        },
+        {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
           "title": "Feature/Map/MapLibreMapView",
           "matchingOwners": ["features/map/ui/MapLibreMapView.tsx", "features/site/PageLoader/index.ts"]
@@ -30485,6 +30580,11 @@
           "file": "features/editor/tiptap/site-variables/SiteVariables.stories.tsx",
           "title": "Feature/Editor/Site Variables",
           "matchingOwners": ["features/page/PageView/blocks/GeneratedRichTextBlockView.tsx"]
+        },
+        {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
         },
         {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
@@ -32386,6 +32486,11 @@
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
         },
         {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
+        },
+        {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
           "title": "Feature/Map/MapLibreMapView",
           "matchingOwners": ["features/map/ui/MapLibreMapView.tsx", "features/site/PageLoader/index.ts"]
@@ -33972,6 +34077,11 @@
           "file": "features/editor/toolbars/EditorColorStyleButton.stories.tsx",
           "title": "Feature/Editor/Color Palette",
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
+        },
+        {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
         },
         {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
@@ -45342,6 +45452,11 @@
           "matchingOwners": ["features/form/FormDashboard/FieldStatsChart.tsx"]
         },
         {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
+        },
+        {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
           "title": "Feature/Map/MapLibreMapView",
           "matchingOwners": ["features/map/ui/MapLibreMapView.tsx", "features/site/PageLoader/index.ts"]
@@ -47046,6 +47161,11 @@
           "matchingOwners": ["features/form/FormBuilder/FormBuilder.tsx"]
         },
         {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
+        },
+        {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
           "title": "Feature/Map/MapLibreMapView",
           "matchingOwners": ["features/map/ui/MapLibreMapView.tsx", "features/site/PageLoader/index.ts"]
@@ -48588,6 +48708,11 @@
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
         },
         {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
+        },
+        {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
           "title": "Feature/Map/MapLibreMapView",
           "matchingOwners": ["features/map/ui/MapLibreMapView.tsx", "features/site/PageLoader/index.ts"]
@@ -50128,6 +50253,11 @@
           "file": "features/editor/toolbars/EditorColorStyleButton.stories.tsx",
           "title": "Feature/Editor/Color Palette",
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
+        },
+        {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
         },
         {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
@@ -51696,6 +51826,11 @@
           "matchingOwners": ["features/editor/toolbars/EditorColorStyleButton.tsx"]
         },
         {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
+        },
+        {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",
           "title": "Feature/Map/MapLibreMapView",
           "matchingOwners": ["features/map/ui/MapLibreMapView.tsx", "features/site/PageLoader/index.ts"]
@@ -52877,6 +53012,11 @@
           "file": "features/form/FormDashboard/FieldStatsChart.stories.tsx",
           "title": "Feature/Form/Field Statistics",
           "matchingOwners": ["features/form/FormDashboard/FieldStatsChart.tsx"]
+        },
+        {
+          "file": "features/map/MapViewEmbedded.stories.tsx",
+          "title": "Feature/Map/Embedded",
+          "matchingOwners": ["features/map/MapViewEmbedded.tsx"]
         },
         {
           "file": "features/map/ui/MapLibreMapView.stories.tsx",

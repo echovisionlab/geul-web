@@ -159,6 +159,14 @@ export function MapLibreMapRuntime({
   onLoadingStageChange,
 }: MapLibreMapRuntimeProps) {
   const colorScheme = useComputedColorScheme();
+  const [startupError, setStartupError] = useState<Error | null>(null);
+  useEffect(() => {
+    if (isReady) {
+      return;
+    }
+    const timer = setTimeout(() => setStartupError(new Error('Map initialization timed out')), 20_000);
+    return () => clearTimeout(timer);
+  }, [isReady]);
   const mapRef = useRef<MapLibreMapInstance | null>(null);
   const mapStyleControllerRef = useRef<MapStyleController | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -560,6 +568,10 @@ export function MapLibreMapRuntime({
     [selectedPlace],
   );
 
+  if (startupError) {
+    throw startupError;
+  }
+
   return (
     <MapLibreMapView
       height={height}
@@ -611,14 +623,20 @@ export function MapLibreMapRuntime({
               mapStyleControllerRef.current = controller;
               controller.setStyle(mapStyle);
             }
-            onLoadingStageChange('rendering');
             syncTouchZoomRotateRotation(map.touchZoomRotate, { rotatable, zoomable });
             setCanvasCursor(null);
-            map.once('idle', () => {
-              onLoadingStageChange('ready');
-              emitViewportSettled();
-            });
             onMapReady?.(map);
+            onLoadingStageChange('ready');
+            emitViewportSettled();
+          }}
+          onError={(event) => {
+            // Constructor failures have no map target; tile errors can recover.
+            if (!event.target) {
+              setStartupError(event.error);
+            }
+            // Keep MapLibre's default diagnostic output when handling its error event.
+            // eslint-disable-next-line no-console
+            console.error(event.error);
           }}
           onMoveStart={(e) => {
             if (e.originalEvent) {

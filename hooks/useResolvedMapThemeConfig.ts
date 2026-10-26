@@ -15,6 +15,7 @@ export function useResolvedMapThemeConfig({ theme, scheme }: UseResolvedMapTheme
   config: ResolvedThemeConfig | undefined;
   isLoading: boolean;
   isError: boolean;
+  error: unknown;
 } {
   const shouldResolveDefaultTheme = !theme;
 
@@ -49,5 +50,6 @@ export function useResolvedMapThemeConfig({ theme, scheme }: UseResolvedMapTheme
     config,
     isLoading: shouldResolveDefaultTheme && defaultThemeQuery.isLoading,
     isError: shouldResolveDefaultTheme && defaultThemeQuery.isError,
+    error: shouldResolveDefaultTheme ? defaultThemeQuery.error : null,
   };
 }

@@ -1,5 +1,15 @@
 # Design system changes
 
+## 2026-10-27 — embedded map width and startup recovery (unreleased)
+
+`MapViewEmbedded` now applies display size to the parent width independently of its height cap.
+A 100% map fills the content column even on wide screens; smaller authored widths and mobile stretching remain supported.
+The shared `MapLibreMap` controller shows the map on its first load without waiting for an idle camera.
+Constructor failures and startup exceeding 20 seconds reach the existing route error boundary and shared application error page.
+Theme lookup failures preserve their original status for the same boundary. Recoverable tile errors retain the map.
+Consumers include the public work/post maps and authored map blocks. Review `Feature/Map/Embedded/FullWidth`
+and `Feature/Application Error/ErrorPage/GeneralError` in Storybook; the embedded fixture uses real browser graphics support.
+
 ## 2026-10-21 — phone navigation fills the screen below the header (unreleased)
 
 Core `ApplicationFrame kind="site"` replaces the phone navigation drawer with a full-screen panel below

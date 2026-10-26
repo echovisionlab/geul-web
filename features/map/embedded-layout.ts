@@ -4,16 +4,12 @@ import { normalizeMediaTextAlignment } from '@/lib/media/shared';
 
 export function resolveMapEmbeddedContainerStyle(input: {
   displaySize: number;
-  /** Width / height of the map frame; it also caps the map's height. */
-  aspectRatio?: number;
   blockAlignment?: string;
   applyDisplaySize: boolean;
   isMobileViewport: boolean;
 }): CSSProperties {
   const sizedWidth =
-    input.applyDisplaySize && !input.isMobileViewport
-      ? displaySizeInlineSize(input.displaySize, input.aspectRatio)
-      : undefined;
+    input.applyDisplaySize && !input.isMobileViewport ? displaySizeInlineSize(input.displaySize) : undefined;
   const style: CSSProperties = {
     width: sizedWidth ?? '100%',
     maxWidth: '100%',

@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
     config: undefined as unknown,
     isLoading: true,
     isError: false,
+    error: null as Error | null,
   },
   mapRuntimeImportCount: 0,
 }));
@@ -73,6 +74,7 @@ beforeEach(() => {
   mocks.themeResolution.config = undefined;
   mocks.themeResolution.isLoading = true;
   mocks.themeResolution.isError = false;
+  mocks.themeResolution.error = null;
   mocks.mapRuntimeImportCount = 0;
 });
 
@@ -101,9 +103,7 @@ describe('MapViewEmbedded runtime loading', () => {
 
     expect(mocks.mapRuntimeImportCount).toBe(1);
   });
-  it('preserves authored map geometry and caption while the theme is unavailable', () => {
-    mocks.themeResolution.isLoading = false;
-    mocks.themeResolution.isError = true;
+  it('preserves full-width map geometry and caption while the theme is loading', () => {
     const html = renderToStaticMarkup(
       <DesignSystemProvider forceColorScheme="light">
         <MapViewEmbedded
@@ -114,7 +114,23 @@ describe('MapViewEmbedded runtime loading', () => {
       </DesignSystemProvider>,
     );
     expect(html).toContain('aspect-ratio:4 / 3');
-    expect(html).toContain('themeUnavailable');
+    // A height cap must not shrink the authored full-width map frame.
+    expect(html).toContain('style="width:100%;max-width:100%"');
+    expect(html).toContain('loading');
     expect(html).toContain('Map caption');
+  });
+
+  it('passes the original theme failure to the application error boundary', () => {
+    const failure = Object.assign(new Error('Theme service unavailable'), { status: 503 });
+    mocks.themeResolution.isLoading = false;
+    mocks.themeResolution.isError = true;
+    mocks.themeResolution.error = failure;
+    expect(() =>
+      renderToStaticMarkup(
+        <DesignSystemProvider forceColorScheme="light">
+          <MapViewEmbedded config={emptyConfig} allowEmpty />
+        </DesignSystemProvider>,
+      ),
+    ).toThrow(failure);
   });
 });
