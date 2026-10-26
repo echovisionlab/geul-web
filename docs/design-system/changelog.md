@@ -4,6 +4,7 @@
 
 The Core Video.js adapter includes the SDK's standalone big play button, which lacks the regular `vjs-button` class.
 It uses the existing inverse, low-emphasis `lg` icon control with shared hover and keyboard focus states.
+Centering follows the rendered hit area and preserves the shared minimum target on touch devices.
 The SDK's oversized filled border is removed for video blocks, file previews and other `VideoPlayer` consumers.
 Review `Feature/Media/Video Player/SmallPreview` at the 288px media width alongside the normal playback story.
 

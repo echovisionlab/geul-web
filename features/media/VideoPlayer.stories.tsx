@@ -28,7 +28,7 @@ export const SmallPreview: Story = {
     const button = await canvas.findByRole('button');
     const bounds = button.getBoundingClientRect();
     const frame = canvas.getByRole('region', { name: 'Narrow video preview' }).getBoundingClientRect();
-    expect(bounds.width).toBeGreaterThan(0);
+    expect(bounds.width).toBeGreaterThanOrEqual(window.matchMedia('(any-pointer: coarse)').matches ? 44 : 40);
     expect(Math.abs(bounds.width - bounds.height)).toBeLessThan(1);
     expect(bounds.width).toBeLessThan(frame.width / 2);
     expect(Math.abs(bounds.x + bounds.width / 2 - (frame.x + frame.width / 2))).toBeLessThan(1);
