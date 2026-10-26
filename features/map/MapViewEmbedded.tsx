@@ -17,7 +17,6 @@ import { useLocale } from '@/lib/providers/LocaleProvider';
 import type { ResolvedThemeConfig } from '@/lib/types/map-theme/model';
 import type { MapViewConfig } from '@/lib/types/map/model';
 import { resolveMapLabelVisibility } from '@/lib/utils/map-theme';
-import { parseAspectRatio } from '@/components/core/ResizeHandle/display-size';
 import { resolveMapEmbeddedContainerStyle } from './embedded-layout';
 import { loadPublicMapRuntime, preloadPublicMapRuntime } from './public-map-runtime-loader';
 
@@ -135,7 +134,6 @@ export function MapViewEmbedded({
 
   const containerStyle = resolveMapEmbeddedContainerStyle({
     displaySize: displaySizePercent,
-    aspectRatio: parseAspectRatio(config.aspectRatio) ?? 16 / 9,
     blockAlignment,
     applyDisplaySize,
     isMobileViewport,

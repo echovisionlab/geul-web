@@ -5080,7 +5080,8 @@
   },
   "mapView": {
     "loading": "Mở tập bản đồ...",
-    "themeUnavailable": "Không thể tải chủ đề bản đồ."
+    "themeUnavailable": "Không thể tải chủ đề bản đồ.",
+    "renderUnavailable": "Không thể tải bản đồ. Vui lòng thử lại."
   },
   "publicTables": {
     "workColumns": {

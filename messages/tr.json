@@ -5080,7 +5080,8 @@
   },
   "mapView": {
     "loading": "Atlası açıyorum...",
-    "themeUnavailable": "Harita teması yüklenemedi."
+    "themeUnavailable": "Harita teması yüklenemedi.",
+    "renderUnavailable": "Harita yüklenemedi. Lütfen tekrar deneyin."
   },
   "publicTables": {
     "workColumns": {

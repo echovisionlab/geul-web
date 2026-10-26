@@ -114,6 +114,8 @@ describe('MapViewEmbedded runtime loading', () => {
       </DesignSystemProvider>,
     );
     expect(html).toContain('aspect-ratio:4 / 3');
+    // A height cap must not shrink the authored full-width map frame.
+    expect(html).toContain('style="width:100%;max-width:100%"');
     expect(html).toContain('themeUnavailable');
     expect(html).toContain('Map caption');
   });

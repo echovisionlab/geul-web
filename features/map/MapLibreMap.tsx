@@ -1,12 +1,13 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { PageLoader } from '@/features/site/PageLoader';
 import { getPrimaryCalloutText } from './callout-model';
 import { useMapLoadingState } from './hooks';
 import type { MapLibreMapProps } from './MapLibreMap.types';
 import { MapLibreMapRuntime } from './MapLibreMapRuntime';
+import { MapUnavailableView } from './ui/MapLibreMapView';
 
 export type { MapLibreMapProps } from './MapLibreMap.types';
 
@@ -19,6 +20,9 @@ export function MapLibreMap(props: MapLibreMapProps) {
   const tCommonLabels = useTranslations('common.labels');
   const tActions = useTranslations('common.actions');
   const tLoading = useTranslations('map.loading');
+  const tMapView = useTranslations('mapView');
+  const tRecovery = useTranslations('common.loadMore');
+  const [attempt, setAttempt] = useState(0);
   const loadingMessages = useMemo(
     () => ({
       connecting: tLoading('connecting'),
@@ -44,6 +48,7 @@ export function MapLibreMap(props: MapLibreMapProps) {
 
   return (
     <MapLibreMapRuntime
+      key={attempt}
       {...props}
       labels={{
         map: tCommonLabels('map'),
@@ -57,6 +62,16 @@ export function MapLibreMap(props: MapLibreMapProps) {
       }}
       isReady={isReady}
       loadingSurface={<PageLoader height="100%" minHeight={0} message={loadingMessage} />}
+      errorSurface={
+        <MapUnavailableView
+          message={tMapView('renderUnavailable')}
+          retryLabel={tRecovery('retry')}
+          onRetry={() => {
+            setLoadingStage('connecting');
+            setAttempt((current) => current + 1);
+          }}
+        />
+      }
       onLoadingStageChange={setLoadingStage}
     />
   );

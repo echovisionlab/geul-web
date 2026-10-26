@@ -11502,6 +11502,7 @@
         "Consumer: features/form/PublicFormView.tsx",
         "Consumer: features/map/MapLibreMapEditor.tsx",
         "Consumer: features/map/MapViewEmbedded.tsx",
+        "Consumer: features/map/ui/MapLibreMapView.tsx",
         "Consumer: features/media-download/FileDownloadPolicyEditor.tsx",
         "Consumer: features/media/ui/MissingMediaView.tsx",
         "Consumer: features/my/CookieConsentSettings.tsx",

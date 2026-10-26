@@ -5080,7 +5080,8 @@
   },
   "mapView": {
     "loading": "Rozkładanie atlasu...",
-    "themeUnavailable": "Nie można załadować motywu mapy."
+    "themeUnavailable": "Nie można załadować motywu mapy.",
+    "renderUnavailable": "Nie udało się wczytać mapy. Spróbuj ponownie."
   },
   "publicTables": {
     "workColumns": {

@@ -60,6 +60,7 @@ interface MapLibreMapRuntimeProps extends MapLibreMapProps {
   labels: MapLibreMapRuntimeLabels;
   isReady: boolean;
   loadingSurface: ReactNode;
+  errorSurface: ReactNode;
   onLoadingStageChange: (stage: MapLoadingStage) => void;
 }
 
@@ -156,9 +157,18 @@ export function MapLibreMapRuntime({
   labels,
   isReady,
   loadingSurface,
+  errorSurface,
   onLoadingStageChange,
 }: MapLibreMapRuntimeProps) {
   const colorScheme = useComputedColorScheme();
+  const [hasFailed, setHasFailed] = useState(false);
+  useEffect(() => {
+    if (isReady) {
+      return;
+    }
+    const timer = setTimeout(() => setHasFailed(true), 20_000);
+    return () => clearTimeout(timer);
+  }, [isReady]);
   const mapRef = useRef<MapLibreMapInstance | null>(null);
   const mapStyleControllerRef = useRef<MapStyleController | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -611,14 +621,20 @@ export function MapLibreMapRuntime({
               mapStyleControllerRef.current = controller;
               controller.setStyle(mapStyle);
             }
-            onLoadingStageChange('rendering');
             syncTouchZoomRotateRotation(map.touchZoomRotate, { rotatable, zoomable });
             setCanvasCursor(null);
-            map.once('idle', () => {
-              onLoadingStageChange('ready');
-              emitViewportSettled();
-            });
             onMapReady?.(map);
+            onLoadingStageChange('ready');
+            emitViewportSettled();
+          }}
+          onError={(event) => {
+            // Constructor failures have no map target; tile errors can recover.
+            if (!event.target) {
+              setHasFailed(true);
+            }
+            // Keep MapLibre's default diagnostic output when handling its error event.
+            // eslint-disable-next-line no-console
+            console.error(event.error);
           }}
           onMoveStart={(e) => {
             if (e.originalEvent) {
@@ -787,6 +803,7 @@ export function MapLibreMapRuntime({
       }
       isReady={isReady}
       loadingSurface={loadingSurface}
+      errorSurface={hasFailed ? errorSurface : undefined}
       attributionItems={[
         { label: '© OpenMapTiles', href: 'https://openmaptiles.org' },
         {

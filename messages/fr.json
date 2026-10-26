@@ -5080,7 +5080,8 @@
   },
   "mapView": {
     "loading": "L'atlas se déploie...",
-    "themeUnavailable": "Le thème de carte n’a pas pu être chargé."
+    "themeUnavailable": "Le thème de carte n’a pas pu être chargé.",
+    "renderUnavailable": "La carte n’a pas pu être chargée. Veuillez réessayer."
   },
   "publicTables": {
     "workColumns": {

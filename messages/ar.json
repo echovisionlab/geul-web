@@ -3970,7 +3970,8 @@
   },
   "mapView": {
     "loading": "جارٍ فتح الأطلس...",
-    "themeUnavailable": "تعذر تحميل سمة الخريطة."
+    "themeUnavailable": "تعذر تحميل سمة الخريطة.",
+    "renderUnavailable": "تعذّر تحميل الخريطة. يرجى المحاولة مرة أخرى."
   },
   "notFoundPage": {
     "title": "الصفحة غير موجودة",

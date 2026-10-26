@@ -4732,7 +4732,8 @@
   },
   "mapView": {
     "loading": "Der Atlas entfaltet sich...",
-    "themeUnavailable": "Das Kartenthema konnte nicht geladen werden."
+    "themeUnavailable": "Das Kartenthema konnte nicht geladen werden.",
+    "renderUnavailable": "Die Karte konnte nicht geladen werden. Bitte versuche es erneut."
   },
   "publicTables": {
     "workColumns": {
