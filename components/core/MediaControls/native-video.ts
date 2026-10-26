@@ -17,7 +17,8 @@ export function applyVideoMediaPresentation(root: HTMLElement, { kind }: VideoMe
   }
   root.classList.add(classes.video);
   const project = () => {
-    root.querySelectorAll<HTMLElement>('.vjs-button').forEach((element) => {
+    // Video.js's BigPlayButton omits the regular vjs-button class.
+    root.querySelectorAll<HTMLElement>('.vjs-button, .vjs-big-play-button').forEach((element) => {
       if (!element.classList.contains(control.root)) {
         element.classList.add(control.root);
       }

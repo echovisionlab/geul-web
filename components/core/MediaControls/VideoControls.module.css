@@ -45,7 +45,7 @@
 }
 
 /* Neutralize SDK button skins before the shared Control state selectors apply. */
-.video:global(.video-js) :global(.vjs-button[data-control-kind]) {
+.video:global(.video-js) :global(:is(.vjs-button, .vjs-big-play-button)[data-control-kind]) {
   background: transparent;
   background-image: none;
   border: var(--geul-border-thin) solid transparent;
@@ -54,27 +54,28 @@
 }
 
 /* native-video.ts assigns chrome to SDK icon commands and lg to the big play command. */
-.video:global(.video-js) :global(.vjs-button[data-control-kind='icon']) {
+.video:global(.video-js) :global(:is(.vjs-button, .vjs-big-play-button)[data-control-kind='icon']) {
   width: var(--geul-control-height-chrome);
   height: var(--geul-control-height-chrome);
   padding: 0;
 }
 
 .video:global(.video-js) :global(.vjs-big-play-button[data-control-kind='icon']) {
-  width: var(--geul-control-height-lg);
-  height: var(--geul-control-height-lg);
+  width: max(var(--geul-control-height-lg), var(--geul-interaction-minimum));
+  height: max(var(--geul-control-height-lg), var(--geul-interaction-minimum));
 }
 
-.video:global(.video-js) :global(.vjs-button[data-control-kind='button']) {
+.video:global(.video-js) :global(:is(.vjs-button, .vjs-big-play-button)[data-control-kind='button']) {
   padding: 0 var(--geul-spacing-md);
 }
 
-.video:global(.video-js) :global(.vjs-button[data-control-kind]):focus-visible {
+.video:global(.video-js) :global(:is(.vjs-button, .vjs-big-play-button)[data-control-kind]):focus-visible {
   outline: var(--geul-border-focus) solid var(--geul-text-inverse-primary);
   outline-offset: var(--geul-border-focus);
 }
 
-.video:global(.video-js) :global(.vjs-modal-dialog .vjs-button[data-control-kind]):focus-visible {
+.video:global(.video-js)
+  :global(.vjs-modal-dialog :is(.vjs-button, .vjs-big-play-button)[data-control-kind]):focus-visible {
   outline-color: var(--geul-focus);
 }
 
@@ -90,9 +91,9 @@
   line-height: var(--geul-control-height-chrome);
 }
 
-.video :global(.vjs-big-play-button) {
-  margin-top: calc(-1 * var(--geul-control-height-lg) / 2);
-  margin-left: calc(-1 * var(--geul-control-height-lg) / 2);
+.video:global(.video-js) :global(.vjs-big-play-button) {
+  margin: 0;
+  transform: translate(-50%, -50%);
   filter: drop-shadow(var(--geul-shadow-video-text));
 }
 
@@ -102,7 +103,7 @@
 }
 
 .video :global(.vjs-big-play-button .vjs-icon-placeholder)::before {
-  line-height: var(--geul-control-height-lg);
+  line-height: max(var(--geul-control-height-lg), var(--geul-interaction-minimum));
   font-size: var(--geul-font-size-xl);
 }
 
