@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.4](https://github.com/echovisionlab/geul-web/compare/v0.21.3...v0.21.4) (2026-10-26)
+
+
+### Bug Fixes
+
+* fill embedded map width and use shared startup error page ([#195](https://github.com/echovisionlab/geul-web/issues/195)) ([dd6e52c](https://github.com/echovisionlab/geul-web/commit/dd6e52c239c485983e28d541fb5d1535dbd80120))
+
 ## [0.21.3](https://github.com/echovisionlab/geul-web/compare/v0.21.2...v0.21.3) (2026-10-23)
 
 
