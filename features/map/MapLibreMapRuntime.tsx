@@ -60,7 +60,6 @@ interface MapLibreMapRuntimeProps extends MapLibreMapProps {
   labels: MapLibreMapRuntimeLabels;
   isReady: boolean;
   loadingSurface: ReactNode;
-  errorSurface: ReactNode;
   onLoadingStageChange: (stage: MapLoadingStage) => void;
 }
 
@@ -157,16 +156,15 @@ export function MapLibreMapRuntime({
   labels,
   isReady,
   loadingSurface,
-  errorSurface,
   onLoadingStageChange,
 }: MapLibreMapRuntimeProps) {
   const colorScheme = useComputedColorScheme();
-  const [hasFailed, setHasFailed] = useState(false);
+  const [startupError, setStartupError] = useState<Error | null>(null);
   useEffect(() => {
     if (isReady) {
       return;
     }
-    const timer = setTimeout(() => setHasFailed(true), 20_000);
+    const timer = setTimeout(() => setStartupError(new Error('Map initialization timed out')), 20_000);
     return () => clearTimeout(timer);
   }, [isReady]);
   const mapRef = useRef<MapLibreMapInstance | null>(null);
@@ -570,6 +568,10 @@ export function MapLibreMapRuntime({
     [selectedPlace],
   );
 
+  if (startupError) {
+    throw startupError;
+  }
+
   return (
     <MapLibreMapView
       height={height}
@@ -630,7 +632,7 @@ export function MapLibreMapRuntime({
           onError={(event) => {
             // Constructor failures have no map target; tile errors can recover.
             if (!event.target) {
-              setHasFailed(true);
+              setStartupError(event.error);
             }
             // Keep MapLibre's default diagnostic output when handling its error event.
             // eslint-disable-next-line no-console
@@ -803,7 +805,6 @@ export function MapLibreMapRuntime({
       }
       isReady={isReady}
       loadingSurface={loadingSurface}
-      errorSurface={hasFailed ? errorSurface : undefined}
       attributionItems={[
         { label: '© OpenMapTiles', href: 'https://openmaptiles.org' },
         {

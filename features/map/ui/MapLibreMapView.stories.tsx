@@ -8,7 +8,7 @@ import { PageLoader } from '@/features/site/PageLoader';
 import { ManifestProvider } from '@/lib/contexts/ManifestContext';
 import { DEFAULT_SITE_SETTINGS_VIEW } from '@/lib/types/site-setting/config';
 
-import { MapLibreMapView, MapUnavailableView } from './MapLibreMapView';
+import { MapLibreMapView } from './MapLibreMapView';
 
 const meta: Meta<typeof MapLibreMapView> = {
   title: 'Feature/Map/MapLibreMapView',
@@ -18,13 +18,6 @@ const meta: Meta<typeof MapLibreMapView> = {
       project: (args, t) => ({
         closeDirectionsLabel: t('common.actions.close'),
         loadingSurface: <PageLoader height="100%" minHeight={0} size="sm" message={t('map.loading.rendering')} />,
-        errorSurface: args.errorSurface ? (
-          <MapUnavailableView
-            message={t('mapView.renderUnavailable')}
-            retryLabel={t('common.loadMore.retry')}
-            onRetry={() => {}}
-          />
-        ) : undefined,
         printPreviewAlt: `${t('common.labels.map')} · ${t('common.labels.preview')}`,
         directions: args.directions
           ? { ...(args.directions as Record<string, unknown>), title: t('map.directions') }
@@ -167,19 +160,6 @@ export const Loading: Story = {
   },
   play: async ({ canvasElement }) => {
     await inspectLoadingSurface(canvasElement);
-  },
-};
-
-export const Unavailable: Story = {
-  args: {
-    isReady: false,
-    directions: null,
-    errorSurface: true,
-  },
-  play: async ({ canvas }) => {
-    await expect(canvas.getByRole('alert')).toBeVisible();
-    await expect(canvas.getByRole('button')).toBeVisible();
-    await expect(canvas.queryByRole('status')).not.toBeInTheDocument();
   },
 };
 

@@ -5080,8 +5080,7 @@
   },
   "mapView": {
     "loading": "展開地圖集..",
-    "themeUnavailable": "無法載入地圖主題。",
-    "renderUnavailable": "無法載入地圖。請再試一次。"
+    "themeUnavailable": "無法載入地圖主題。"
   },
   "publicTables": {
     "workColumns": {

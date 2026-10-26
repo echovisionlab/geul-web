@@ -1,10 +1,9 @@
 'use client';
 
-import { LayoutInset as DsLayoutInset, LayoutStack } from '@/components/core/Layout';
+import { LayoutInset as DsLayoutInset } from '@/components/core/Layout';
 import type { ReactNode, Ref } from 'react';
 
 import { Button } from '@/components/core/Button';
-import { Alert } from '@/components/core/Alert';
 import { mapProviderBrandColors } from '@/components/core/Social/brand-colors';
 import { ContentModal, DialogActions } from '@/components/core/Modal';
 
@@ -34,7 +33,6 @@ export interface MapLibreMapViewProps {
   mapSurface: ReactNode;
   isReady: boolean;
   loadingSurface: ReactNode;
-  errorSurface?: ReactNode;
   attributionItems: MapAttributionViewModel[];
   attributionColor?: string;
   attributionFontSize?: number;
@@ -92,7 +90,6 @@ export function MapLibreMapView({
   mapSurface,
   isReady,
   loadingSurface,
-  errorSurface,
   attributionItems,
   attributionColor,
   attributionFontSize,
@@ -107,15 +104,13 @@ export function MapLibreMapView({
   return (
     <div
       className={className}
-      aria-busy={!isReady && !errorSurface}
+      aria-busy={!isReady}
       style={{ zIndex, position: 'relative', height, isolation: 'isolate' }}
     >
       <DsLayoutInset ref={containerRef} fill="both" space="none">
-        {errorSurface ? null : mapSurface}
+        {mapSurface}
 
-        {errorSurface ? (
-          <div style={{ position: 'absolute', inset: 0 }}>{errorSurface}</div>
-        ) : !isReady ? (
+        {!isReady ? (
           <div data-map-loading-surface style={{ zIndex: 20, position: 'absolute', inset: 0 }}>
             {loadingSurface}
           </div>
@@ -164,24 +159,5 @@ export function MapLibreMapView({
         {printImageUrl ? <img src={printImageUrl} alt={printPreviewAlt} className="mgl-print-image" /> : null}
       </DsLayoutInset>
     </div>
-  );
-}
-
-export function MapUnavailableView({
-  message,
-  retryLabel,
-  onRetry,
-}: {
-  message: string;
-  retryLabel: string;
-  onRetry: () => void;
-}) {
-  return (
-    <LayoutStack fill="both" align="center" justify="center" gap="sm">
-      <Alert role="alert" tone="danger">
-        {message}
-      </Alert>
-      <Button onClick={onRetry}>{retryLabel}</Button>
-    </LayoutStack>
   );
 }

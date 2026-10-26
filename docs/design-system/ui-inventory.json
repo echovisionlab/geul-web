@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "87019c588652a2f6260d1185fdf04c1186567c5d6e84c8943e1497900aa16395",
+  "manifestHash": "d97ced34dd73c1fe1bdd536ac0ddcbfc0c835f82d1c231712cf9e7298b86b360",
   "counts": {
     "sourceFiles": 3866,
     "productionSourceFiles": 2332,
@@ -10,7 +10,7 @@
     "coreFamilies": 57,
     "featureDomains": 54,
     "storyFiles": 260,
-    "storyVariants": 1492,
+    "storyVariants": 1491,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -3977,8 +3977,6 @@
         "features/editor/tiptap/three/ThreeSceneNode.tsx",
         "features/form/PublicFormView.tsx",
         "features/map/MapLibreMapEditor.tsx",
-        "features/map/MapViewEmbedded.tsx",
-        "features/map/ui/MapLibreMapView.tsx",
         "features/media-download/FileDownloadPolicyEditor.tsx",
         "features/media/ui/MissingMediaView.tsx",
         "features/my/CookieConsentSettings.tsx",
@@ -47246,7 +47244,7 @@
       "catalogAdapters": [],
       "tests": ["features/map/MapLibreMap.loading.test.tsx", "features/map/MapLibreMap.test.tsx"],
       "stories": [],
-      "composedJsx": ["MapLibreMapRuntime", "MapUnavailableView", "PageLoader"]
+      "composedJsx": ["MapLibreMapRuntime", "PageLoader"]
     },
     {
       "file": "features/map/MapLibreMapEditor.tsx",
@@ -47394,11 +47392,6 @@
             },
             {
               "name": "loadingSurface",
-              "optional": false,
-              "type": "ReactNode"
-            },
-            {
-              "name": "errorSurface",
               "optional": false,
               "type": "ReactNode"
             },
@@ -47642,7 +47635,7 @@
       "catalogAdapters": [],
       "tests": ["features/map/MapViewEmbedded.test.tsx"],
       "stories": ["features/map/MapViewEmbedded.stories.tsx"],
-      "composedJsx": ["Alert", "MapEmbeddedLoader", "MapLibreMap", "MapLibreMapView", "PageLoader", "div"]
+      "composedJsx": ["MapEmbeddedLoader", "MapLibreMap", "MapLibreMapView", "PageLoader", "div"]
     },
     {
       "file": "features/map/Marker.tsx",
@@ -47854,10 +47847,6 @@
         {
           "name": "MapLibreMapView",
           "kind": "function"
-        },
-        {
-          "name": "MapUnavailableView",
-          "kind": "function"
         }
       ],
       "classification": "feature-ui boundary candidate (path-based; inspect source)",
@@ -47955,11 +47944,6 @@
               "type": "ReactNode"
             },
             {
-              "name": "errorSurface",
-              "optional": true,
-              "type": "ReactNode"
-            },
-            {
               "name": "attributionItems",
               "optional": false,
               "type": "MapAttributionViewModel[]"
@@ -48013,18 +47997,16 @@
         }
       ],
       "typeAliasEvidence": [],
-      "productionConsumers": ["features/map/MapLibreMap.tsx", "features/map/MapLibreMapRuntime.tsx"],
+      "productionConsumers": ["features/map/MapLibreMapRuntime.tsx"],
       "catalogAdapters": [],
       "tests": ["features/map/ui/MapLibreMapView.test.tsx"],
       "stories": ["features/map/ui/MapLibreMapView.stories.tsx"],
       "composedJsx": [
-        "Alert",
         "Button",
         "ContentModal",
         "DialogActions",
         "DsLayoutInset",
         "GoogleMapsIcon",
-        "LayoutStack",
         "NaverMapsIcon",
         "a",
         "div",
@@ -83587,11 +83569,6 @@
           "name": "Loading",
           "args": "{ isReady: false, directions: null, }",
           "preview": "http://localhost:6010/?path=/story/feature-map-maplibremapview--loading"
-        },
-        {
-          "name": "Unavailable",
-          "args": "{ isReady: false, directions: null, errorSurface: true, }",
-          "preview": "http://localhost:6010/?path=/story/feature-map-maplibremapview--unavailable"
         },
         {
           "name": "ConfiguredSiteImage",

@@ -5080,8 +5080,7 @@
   },
   "mapView": {
     "loading": "展开地图集..",
-    "themeUnavailable": "无法加载地图主题。",
-    "renderUnavailable": "无法加载地图。请重试。"
+    "themeUnavailable": "无法加载地图主题。"
   },
   "publicTables": {
     "workColumns": {

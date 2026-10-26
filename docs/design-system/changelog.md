@@ -5,10 +5,10 @@
 `MapViewEmbedded` now applies display size to the parent width independently of its height cap.
 A 100% map fills the content column even on wide screens; smaller authored widths and mobile stretching remain supported.
 The shared `MapLibreMap` controller shows the map on its first load without waiting for an idle camera.
-Constructor failures and startup exceeding 20 seconds replace the loader with a localized error and a retry command.
-Recoverable tile errors retain the map. The error surface uses Core Alert, Button and LayoutStack.
+Constructor failures and startup exceeding 20 seconds reach the existing route error boundary and shared application error page.
+Theme lookup failures preserve their original status for the same boundary. Recoverable tile errors retain the map.
 Consumers include the public work/post maps and authored map blocks. Review `Feature/Map/Embedded/FullWidth`
-and `Feature/Map/MapLibreMapView/Unavailable` in Storybook; the embedded fixture uses real browser graphics support.
+and `Feature/Application Error/ErrorPage/GeneralError` in Storybook; the embedded fixture uses real browser graphics support.
 
 ## 2026-10-21 — phone navigation fills the screen below the header (unreleased)
 

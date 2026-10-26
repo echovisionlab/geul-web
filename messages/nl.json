@@ -5080,8 +5080,7 @@
   },
   "mapView": {
     "loading": "De atlas ontvouwen...",
-    "themeUnavailable": "Het kaartthema kon niet worden geladen.",
-    "renderUnavailable": "De kaart kon niet worden geladen. Probeer het opnieuw."
+    "themeUnavailable": "Het kaartthema kon niet worden geladen."
   },
   "publicTables": {
     "workColumns": {

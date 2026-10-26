@@ -5080,8 +5080,7 @@
   },
   "mapView": {
     "loading": "Unfolding the atlas...",
-    "themeUnavailable": "The map theme could not be loaded.",
-    "renderUnavailable": "The map could not be loaded. Please try again."
+    "themeUnavailable": "The map theme could not be loaded."
   },
   "publicTables": {
     "workColumns": {

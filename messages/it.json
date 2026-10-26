@@ -5080,8 +5080,7 @@
   },
   "mapView": {
     "loading": "Dispiegando l’atlante...",
-    "themeUnavailable": "Impossibile caricare il tema mappa.",
-    "renderUnavailable": "Impossibile caricare la mappa. Riprova."
+    "themeUnavailable": "Impossibile caricare il tema mappa."
   },
   "publicTables": {
     "workColumns": {

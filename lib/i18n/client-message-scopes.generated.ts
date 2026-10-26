@@ -155,7 +155,6 @@ export const CLIENT_MESSAGE_SCOPE_PATHS: Record<ClientMessageScope, readonly str
     'legalHistoryCommon.actions',
     'map',
     'mapControls',
-    'mapView',
     'nicknameField',
     'ogImagePreview',
     'ogImageSettings',

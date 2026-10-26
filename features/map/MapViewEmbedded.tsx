@@ -8,7 +8,6 @@ import dynamic from 'next/dynamic';
 import type * as maplibregl from 'maplibre-gl';
 import { useTranslations } from 'next-intl';
 
-import { Alert } from '@/components/core/Alert';
 import type { MapRendererProps, MapServerFeatureSource, MapViewportSnapshot } from '@/features/map/types';
 import { PageLoader } from '@/features/site/PageLoader';
 import { useResolvedMapThemeConfig } from '@/hooks/useResolvedMapThemeConfig';
@@ -68,7 +67,6 @@ export function MapViewEmbedded({
   onMapReady,
   caption,
 }: MapViewEmbeddedProps) {
-  const t = useTranslations('mapView');
   const computedColorScheme = useComputedColorScheme();
   const currentLocale = useLocale();
   const [isMobileViewport, setIsMobileViewport] = useState(false);
@@ -143,17 +141,15 @@ export function MapViewEmbedded({
     return null;
   }
 
-  if (themeResolution.isLoading || themeResolution.isError || !themeConfig) {
+  if (themeResolution.isError || (!themeResolution.isLoading && !themeConfig)) {
+    throw themeResolution.error ?? new Error('Map theme could not be loaded');
+  }
+
+  if (themeResolution.isLoading || !themeConfig) {
     return (
       <div style={containerStyle}>
         <div style={{ width: '100%', aspectRatio: getAspectRatioValue(config.aspectRatio), overflow: 'hidden' }}>
-          {themeResolution.isLoading ? (
-            <MapEmbeddedLoader />
-          ) : (
-            <Alert role="alert" tone="danger">
-              {t('themeUnavailable')}
-            </Alert>
-          )}
+          <MapEmbeddedLoader />
         </div>
         {caption}
       </div>

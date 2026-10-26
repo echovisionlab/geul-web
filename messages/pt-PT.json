@@ -5080,8 +5080,7 @@
   },
   "mapView": {
     "loading": "Desdobrando o atlas...",
-    "themeUnavailable": "O tema do mapa não pôde ser carregado.",
-    "renderUnavailable": "Não foi possível carregar o mapa. Tente novamente."
+    "themeUnavailable": "O tema do mapa não pôde ser carregado."
   },
   "publicTables": {
     "workColumns": {

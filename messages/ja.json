@@ -5080,8 +5080,7 @@
   },
   "mapView": {
     "loading": "地図を展開中...",
-    "themeUnavailable": "地図テーマを読み込めませんでした。",
-    "renderUnavailable": "地図を読み込めませんでした。もう一度お試しください。"
+    "themeUnavailable": "地図テーマを読み込めませんでした。"
   },
   "publicTables": {
     "workColumns": {

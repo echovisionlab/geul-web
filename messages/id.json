@@ -5080,8 +5080,7 @@
   },
   "mapView": {
     "loading": "Membuka atlas...",
-    "themeUnavailable": "Tema peta tidak dapat dimuat.",
-    "renderUnavailable": "Peta tidak dapat dimuat. Silakan coba lagi."
+    "themeUnavailable": "Tema peta tidak dapat dimuat."
   },
   "publicTables": {
     "workColumns": {

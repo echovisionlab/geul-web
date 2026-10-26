@@ -5080,8 +5080,7 @@
   },
   "mapView": {
     "loading": "เผยแผนที่...",
-    "themeUnavailable": "ไม่สามารถโหลดธีมแผนที่ได้",
-    "renderUnavailable": "ไม่สามารถโหลดแผนที่ได้ โปรดลองอีกครั้ง"
+    "themeUnavailable": "ไม่สามารถโหลดธีมแผนที่ได้"
   },
   "publicTables": {
     "workColumns": {

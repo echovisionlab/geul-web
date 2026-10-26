@@ -5080,8 +5080,7 @@
   },
   "mapView": {
     "loading": "Разворачиваю атлас...",
-    "themeUnavailable": "Не удалось загрузить тему карты.",
-    "renderUnavailable": "Не удалось загрузить карту. Повторите попытку."
+    "themeUnavailable": "Не удалось загрузить тему карты."
   },
   "publicTables": {
     "workColumns": {
