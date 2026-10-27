@@ -4,13 +4,13 @@ Run `node scripts/design-system/inventory.mjs` to regenerate; `--check` fails wh
 
 Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.
 
-Source manifest SHA-256: `053a2335f94515a42511af11e79c910c88f757d2f493920a25c7f7eb56c673c4`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
+Source manifest SHA-256: `7cb1a6746730e4f8fa33d6395c3dbd09c4f9201892b9a0aee987d46ca6a8e095`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
 
 ## Counts
 
 | Metric                | Count |
 | --------------------- | ----: |
-| sourceFiles           |  3867 |
+| sourceFiles           |  3868 |
 | productionSourceFiles |  2332 |
 | componentFiles        |   919 |
 | coreFamilies          |    57 |
@@ -119,7 +119,7 @@ Counts include every production JS/TS file in the domain; component files are Pa
 | ----------------------------------------------------- | -----: | ---------: | ------: | ----: | ------------: |
 | [account](../../features/account)                     |      4 |          4 |       0 |     1 |             4 |
 | [account-email](../../features/account-email)         |      1 |          1 |       0 |     1 |             0 |
-| [admin](../../features/admin)                         |    179 |        147 |       4 |    27 |            31 |
+| [admin](../../features/admin)                         |    179 |        147 |       4 |    28 |            31 |
 | [analytics](../../features/analytics)                 |      1 |          1 |       0 |     0 |             0 |
 | [application-error](../../features/application-error) |      9 |          5 |       2 |     5 |             1 |
 | [artist](../../features/artist)                       |      9 |          9 |       1 |     1 |             0 |
