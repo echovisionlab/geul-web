@@ -64,6 +64,18 @@ describe('SiteLogoView fallback', () => {
     expect(host.textContent).toBe('Example Studio');
     expect(host.querySelector('img')).toBeNull();
   });
+
+  it.each([
+    ['intrinsic', '1rem'],
+    [{ min: 28 }, '28px'],
+  ] as const)('draws %o at the size the file declares, between a floor and the header cap', (height, minHeight) => {
+    // The floor keeps a viewBox-only SVG, which declares no size, from collapsing in a content-sized slot.
+    render(<SiteLogoView src="/logo.svg" alt="Example Studio" height={height} />);
+    const image = host.querySelector('img');
+    expect(image?.style.height).toBe('auto');
+    expect(image?.style.minHeight).toBe(minHeight);
+    expect(image?.style.maxHeight).toBe('var(--_site-header-brand-max-height, var(--geul-chrome-header-height-sm))');
+  });
 });
 
 describe('SiteLogoView theme variants', () => {
@@ -75,7 +87,6 @@ describe('SiteLogoView theme variants', () => {
       ['dark', '/logo-dark.svg'],
     ]);
     expect(images[0]?.style.height).toBe('auto');
-    expect(images[0]?.style.maxHeight).toBe('var(--_site-header-brand-max-height, var(--geul-chrome-header-height-sm))');
   });
 
   it('renders a single mark when there is no separate dark logo', () => {

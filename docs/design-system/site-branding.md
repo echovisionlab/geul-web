@@ -44,11 +44,14 @@ stored slots without fallbacks, each previewed on the theme background it is dra
 print uses the light symbol (paper and the OG renderer are light).
 
 `SITE_LOGO_HEIGHT` (`features/site/SiteLogo/placements.ts`) owns the image heights. The full logo is drawn
-at its own size (`'intrinsic'`) in the public header, expanded admin navigation and form pages: the site
-sizes it by the `width`/`height` attributes of the uploaded SVG. Core `SiteHeader` caps the brand at the
-header height less `--geul-spacing-xxs` above and below (44px on phones, 56px from `sm`); elsewhere
-`SiteLogoView` caps an intrinsic logo at `--geul-chrome-header-height-sm`. An SVG with only a `viewBox`
-has no size of its own and grows to that cap, so upload full logos with explicit `width` and `height`.
+at its own size (`{ min }`) in the public header, expanded admin navigation and form pages: the site sizes it
+by the `width`/`height` attributes of the uploaded SVG. Core `SiteHeader` caps the brand at the header height
+less `--geul-spacing-xxs` above and below (44px on phones, 56px from `sm`); elsewhere `SiteLogoView` caps it
+at `--geul-chrome-header-height-sm`. `min` is the height for a file that declares a smaller size or none:
+header 28px, expanded admin navigation 36px, form pages 24px. An SVG with only a `viewBox` declares no size
+and would collapse in these content-sized slots without it. In the expanded admin navigation such a file
+fills the navigation width instead, up to the cap. A wide logo declared at the full header height can crowd
+the phone header actions at 280px; check that width when choosing the upload size.
 The symbol keeps fixed heights: compact admin rail 28px, print watermark 18px. These are proportional
 image dimensions, separate from control/text sizes. `SiteLogoView` prevents image flex shrink; the admin
 navigation's header remains outside its shrinking, scrollable navigation list.

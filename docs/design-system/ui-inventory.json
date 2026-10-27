@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "2ff27d2c690fd5908d4f0de8b4b6f3e002ebf9b85510d236e1e4f75020729e67",
+  "manifestHash": "16a697ffc27891ebb1b8ba8b85dfef1a6babbe66860bb07d7890d3ca946d37ac",
   "counts": {
     "sourceFiles": 3868,
     "productionSourceFiles": 2332,
@@ -70391,7 +70391,7 @@
             {
               "name": "height",
               "optional": true,
-              "type": "number | 'intrinsic'"
+              "type": "SiteLogoHeight"
             },
             {
               "name": "style",
@@ -70670,7 +70670,7 @@
             {
               "name": "height",
               "optional": true,
-              "type": "number | 'intrinsic'"
+              "type": "SiteLogoHeight"
             },
             {
               "name": "fallbackText",
@@ -70689,6 +70689,10 @@
         {
           "name": "SiteLogoSize",
           "type": "Exclude<TextSize, 'display'>"
+        },
+        {
+          "name": "SiteLogoHeight",
+          "type": "number | 'intrinsic' | { min: number }"
         }
       ],
       "productionConsumers": ["features/site/SiteLogo/SiteLogo.tsx"],
@@ -108047,6 +108051,11 @@
             {
               "exported": "SiteLogoSize",
               "imported": "SiteLogoSize",
+              "typeOnly": true
+            },
+            {
+              "exported": "SiteLogoHeight",
+              "imported": "SiteLogoHeight",
               "typeOnly": true
             }
           ]

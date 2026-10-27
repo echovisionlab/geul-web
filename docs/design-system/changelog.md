@@ -3,10 +3,11 @@
 ## 2026-10-28 — site logos sized by the uploaded file; search dialog copy (unreleased)
 
 The public header, expanded admin navigation and form pages draw the full site logo at the size its SVG
-authors (`SITE_LOGO_HEIGHT` `'intrinsic'`) instead of fixed 28/36/24px heights. Core `SiteHeader` exposes
-`--_site-header-brand-max-height` (header height less `--geul-spacing-xxs` on each side) and `SiteLogoView`
-caps intrinsic logos at it, or at `--geul-chrome-header-height-sm` outside the header. The print watermark
-uses the symbol. Upload full logos with `width`/`height`: a `viewBox`-only SVG grows to the cap.
+declares (`SITE_LOGO_HEIGHT` `{ min }`) instead of fixed 28/36/24px heights; those heights remain the minimum
+for files that declare a smaller size or none. Core `SiteHeader` exposes `--_site-header-brand-max-height`
+(header height less `--geul-spacing-xxs` on each side) and `SiteLogoView` caps sized logos at it, or at
+`--geul-chrome-header-height-sm` outside the header. `SiteLogoView` `height` also accepts `{ min }`; `'intrinsic'`
+uses the `size` icon height as its minimum. The print watermark uses the symbol.
 See [Site branding](site-branding.md); review `Pages/Application/Frames/StackedBrand*` in light/dark and on phones.
 
 The post search dialog no longer repeats "Search posts…" as its title, field hint and empty state. The title
