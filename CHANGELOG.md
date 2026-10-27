@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.22.1](https://github.com/echovisionlab/geul-web/compare/v0.22.0...v0.22.1) (2026-10-27)
+
+
+### Bug Fixes
+
+* MCP grant revoke, local backups, placeholder nicknames and security updates ([#201](https://github.com/echovisionlab/geul-web/issues/201)) ([44c630f](https://github.com/echovisionlab/geul-web/commit/44c630f7a89e43bc490e12084304aa8488ded790))
+
 ## [0.22.0](https://github.com/echovisionlab/geul-web/compare/v0.21.5...v0.22.0) (2026-10-27)
 
 
