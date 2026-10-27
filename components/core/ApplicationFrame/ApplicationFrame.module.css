@@ -31,6 +31,9 @@
 }
 
 .headerBrand {
+  /* Tallest brand artwork the bar holds: its height less a small inset. Logos that author their own size read this. */
+  --_site-header-brand-max-height: calc(var(--geul-chrome-header-height-base) - 2 * var(--geul-spacing-xxs));
+
   display: flex;
   flex-shrink: 0;
   align-items: center;
@@ -52,6 +55,10 @@
 @media (width >= $mantine-breakpoint-sm) {
   .headerRow {
     grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .headerBrand {
+    --_site-header-brand-max-height: calc(var(--geul-chrome-header-height-sm) - 2 * var(--geul-spacing-xxs));
   }
 
   .headerLeading {

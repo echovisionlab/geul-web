@@ -38,6 +38,7 @@ export function PostSpotlight() {
   const [query, setQuery] = useState('');
   const [debouncedQuery] = useDebouncedValue(query, 300);
   const tPlaceholders = useTranslations('common.placeholders');
+  const tShell = useTranslations('shell');
   const tMessages = useTranslations('common.messages');
   const tStates = useTranslations('common.states');
   const [Runtime, setRuntime] = useState<ComponentType<PostSpotlightRuntimeProps> | null>(null);
@@ -106,18 +107,14 @@ export function PostSpotlight() {
     </Alert>
   );
 
-  const pendingMessage =
-    query.length === 0
-      ? tPlaceholders('searchPosts')
-      : query.length < 2
-        ? tMessages('typeAtLeast2Characters', { count: 2 })
-        : tStates('loading');
+  // The field's placeholder already names the search; before two characters, the empty state says what to do next.
+  const pendingMessage = query.length < 2 ? tMessages('typeAtLeast2Characters', { count: 2 }) : tStates('loading');
 
   return (
     <CommandPalette
       opened={opened}
       onClose={close}
-      title={tPlaceholders('searchPosts')}
+      title={tShell('actions.search')}
       closeLabel={t('actions.close')}
       query={query}
       onQueryChange={setQuery}

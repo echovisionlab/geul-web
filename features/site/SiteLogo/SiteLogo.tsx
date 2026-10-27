@@ -3,7 +3,7 @@
 import type { CSSProperties } from 'react';
 
 import { SiteLogoView } from '@/features/site/ui/SiteLogo';
-import type { SiteLogoSize } from '@/features/site/ui/SiteLogo/SiteLogoView';
+import type { SiteLogoHeight, SiteLogoSize } from '@/features/site/ui/SiteLogo/SiteLogoView';
 import { useSiteSettings } from '@/lib/contexts/ManifestContext';
 import { toCdnUrl } from '@/lib/utils/file-url';
 
@@ -11,7 +11,7 @@ export interface SiteLogoProps {
   /** full: symbol with wordmark (default); symbol: the mark alone, for compact spaces. */
   form?: 'full' | 'symbol';
   size?: SiteLogoSize;
-  height?: number | 'intrinsic';
+  height?: SiteLogoHeight;
   style?: CSSProperties;
 }
 

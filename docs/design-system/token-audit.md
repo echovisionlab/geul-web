@@ -12,7 +12,7 @@ This report is generated from production source by `node scripts/design-system/c
 - 0 existing literal CSS spacing/typography occurrences covered by the migration baseline.
 - 0 existing custom-property declarations/inline assignments outside central files (private `--_*` implementation variables are permitted).
 - 176 literal CSS dimension occurrences in spacing, typography and geometry properties; 67 distinct values. These are audit findings, not blanket errors: canvas dimensions, geometry and responsive layouts require context.
-- 771 CSS custom-property declarations, 301 distinct names, 143 names declared more than once. Theme/state/media overrides are expected; equal values alone do not establish semantic duplication.
+- 773 CSS custom-property declarations, 302 distinct names, 144 names declared more than once. Theme/state/media overrides are expected; equal values alone do not establish semantic duplication.
 - 0 findings match the reviewed migration baseline; 0 new violations; 0 obsolete baseline keys eligible for removal.
 
 ## Enforcement contract
@@ -87,6 +87,7 @@ Authored typography exceptions (artwork, not interface roles):
 | Name                                 | Declarations | Files                                                                                                  |
 | ------------------------------------ | -----------: | ------------------------------------------------------------------------------------------------------ |
 | `--_alert-ink`                       |            5 | `components/core/Alert/Alert.module.css`                                                               |
+| `--_site-header-brand-max-height`    |            2 | `components/core/ApplicationFrame/ApplicationFrame.module.css`                                         |
 | `--_frame-navigation-width`          |            2 | `components/core/ApplicationFrame/ApplicationFrame.module.css`                                         |
 | `--_badge-ink`                       |            5 | `components/core/Badge/Badge.module.css`                                                               |
 | `--_collection-thumbnail`            |            5 | `components/core/Collection/Collection.module.css`                                                     |

@@ -100,7 +100,7 @@ export async function Shell({ children, initialUserSnapshot }: ShellProps) {
         slots={{
           logo: <SiteLogo height={SITE_LOGO_HEIGHT.header} />,
           printHeader: <PrintHeader />,
-          printWatermark: <SiteLogo height={SITE_LOGO_HEIGHT.printWatermark} />,
+          printWatermark: <SiteLogo form="symbol" height={SITE_LOGO_HEIGHT.printWatermark} />,
           languageDesktop: <LanguageMenu />,
           languageNavigation: <LanguageMenu variant="navigation" />,
           languageFooterDesktop: <LanguageMenu variant="text" textSize="xs" />,

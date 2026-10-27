@@ -52,7 +52,7 @@ describe('PostSpotlight results runtime', () => {
 
   it('retains locale hints, loading/errors, and post navigation', async () => {
     await render({ query: '', debouncedQuery: '', opened: true });
-    expect(host.textContent).toBe('searchPosts');
+    expect(host.textContent).toBe('typeAtLeast2Characters');
     await render({ query: 'a', debouncedQuery: 'a', opened: true });
     expect(host.textContent).toBe('typeAtLeast2Characters');
     mocks.query.mockReturnValue({ data: [], isLoading: true, isError: false });

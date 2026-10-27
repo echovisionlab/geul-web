@@ -1,5 +1,19 @@
 # Design system changes
 
+## 2026-10-28 — site logos sized by the uploaded file; search dialog copy (unreleased)
+
+The public header, expanded admin navigation and form pages draw the full site logo at the size its SVG
+declares (`SITE_LOGO_HEIGHT` `{ min }`) instead of fixed 28/36/24px heights; those heights remain the minimum
+for files that declare a smaller size or none. Core `SiteHeader` exposes `--_site-header-brand-max-height`
+(header height less `--geul-spacing-xxs` on each side) and `SiteLogoView` caps sized logos at it, or at
+`--geul-chrome-header-height-sm` outside the header. `SiteLogoView` `height` also accepts `{ min }`; `'intrinsic'`
+uses the `size` icon height as its minimum. The print watermark uses the symbol.
+See [Site branding](site-branding.md); review `Pages/Application/Frames/StackedBrand*` in light/dark and on phones.
+
+The post search dialog no longer repeats "Search posts…" as its title, field hint and empty state. The title
+is the header's search action name, the field keeps the hint, and the empty state asks for two characters.
+The `Frames` stories open the same Core `CommandPalette` with the same copy roles instead of a text-field modal.
+
 ## 2026-10-27 — video start control (unreleased)
 
 The Core Video.js adapter includes the SDK's standalone big play button, which lacks the regular `vjs-button` class.
