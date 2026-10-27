@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/nextjs';
+import { expect, within } from 'storybook/test';
 import { useTranslations } from 'next-intl';
 import { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
 import { LayoutContainer } from '@/components/core/Layout';
@@ -34,6 +35,20 @@ const initialUsers: UserRow[] = [
     status: 'active',
     banned: false,
     onboarded: true,
+    newsletter_subscribed: false,
+    newsletter_subscribed_at: null,
+    created_at: date,
+  },
+  {
+    // Until onboarding the API stores the member UUID as a placeholder nickname.
+    id: '7c1d4f3e-2a9b-4c8d-9e0f-1a2b3c4d5e6f',
+    email: 'new.member@example.com',
+    nickname: '7c1d4f3e-2a9b-4c8d-9e0f-1a2b3c4d5e6f',
+    image: null,
+    role: 'user',
+    status: 'active',
+    banned: false,
+    onboarded: false,
     newsletter_subscribed: false,
     newsletter_subscribed_at: null,
     created_at: date,
@@ -261,7 +276,13 @@ const meta = {
 } satisfies Meta<typeof AudienceUsersPreview>;
 export default meta;
 type Story = StoryObj<typeof meta>;
-export const Users: Story = {};
+export const Users: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(await canvas.findByText(/^(Nickname not set|닉네임 미설정)$/u)).toBeVisible();
+    await expect(canvas.queryByText('7c1d4f3e-2a9b-4c8d-9e0f-1a2b3c4d5e6f')).toBeNull();
+  },
+};
 export const UsersEmpty: Story = { args: { state: 'empty' } };
 export const UsersFailed: Story = { args: { state: 'failed' } };
 export const UsersActionFailed: Story = { args: { state: 'action-failed' } };

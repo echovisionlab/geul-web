@@ -5,6 +5,7 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 export interface UserModalTarget {
   id: string;
   nickname: string;
+  onboarded: boolean;
   role: string | null;
   status: string;
   banned: boolean;

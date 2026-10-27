@@ -13,6 +13,7 @@ import { FormModal } from '@/components/core/Modal';
 import { banUserAction, deleteUserAction, updateUserAction } from '@/lib/actions/user';
 import { unsubscribeUserFromNewsletterAction } from '@/lib/actions/newsletter';
 import { useUserModal } from './UserModalContext';
+import { adminMemberName } from './member-name';
 
 export interface UserModalsBindings {
   banUserAction: typeof banUserAction;
@@ -163,7 +164,9 @@ export function UserModals({
         <DsLayoutStack>
           <DsText>
             {tUserProfile.rich('modals.ban.description', {
-              name: banningUser?.nickname || tCommon('entities.member'),
+              name: banningUser
+                ? adminMemberName(banningUser, tCommon('labels.nicknameNotSet'))
+                : tCommon('entities.member'),
               strong: (chunks) => <strong>{chunks}</strong>,
             })}
           </DsText>
@@ -211,7 +214,9 @@ export function UserModals({
           <DsLayoutStack gap="xs">
             <DsText>
               {tUserProfile.rich('modals.delete.description', {
-                name: deletingUser?.nickname || tCommon('entities.member'),
+                name: deletingUser
+                  ? adminMemberName(deletingUser, tCommon('labels.nicknameNotSet'))
+                  : tCommon('entities.member'),
                 strong: (chunks) => <strong>{chunks}</strong>,
               })}
             </DsText>
@@ -232,7 +237,9 @@ export function UserModals({
         onConfirm={handleNewsletterUnsubscribe}
         title={tUserProfile('modals.newsletterUnsubscribe.title')}
         message={tUserProfile('modals.newsletterUnsubscribe.description', {
-          name: newsletterUser?.nickname || tCommon('entities.member'),
+          name: newsletterUser
+            ? adminMemberName(newsletterUser, tCommon('labels.nicknameNotSet'))
+            : tCommon('entities.member'),
         })}
         confirmLabel={tCommon('actions.unsubscribe')}
         cancelLabel={tCommon('actions.cancel')}

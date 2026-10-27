@@ -17,6 +17,7 @@ import { normalizeEnumToken } from '@/lib/i18n/admin-labels';
 import type { ColumnDef } from '@/lib/types/common/data-table';
 import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
 import { UserNewsletterStatus } from './UserNewsletterStatus';
+import { adminMemberName, isPlaceholderNickname } from './member-name';
 
 export interface UserRow {
   id: string;
@@ -62,6 +63,7 @@ function getColumns(
       pendingDeletion: string;
       deleted: string;
       onboardingPending: string;
+      nicknameNotSet: string;
       subscribed: string;
       unsubscribed: string;
     };
@@ -74,26 +76,29 @@ function getColumns(
       header: labels.user,
       width: 140,
       minWidth: 140,
-      cell: (row) => (
-        <DsLayoutInline gap="sm" wrap="nowrap">
-          <Avatar
-            src={buildManagedImageUrl(row.image, MANAGED_IMAGE_PRESET.AVATAR_SM)}
-            size="sm"
-            shape="circle"
-            name={row.nickname}
-          />
-          <TextButton
-            href={`/admin/users/${row.id}`}
-            size="sm"
-            weight="medium"
-            appearance="default"
-            nowrap
-            title={row.nickname}
-          >
-            {row.nickname}
-          </TextButton>
-        </DsLayoutInline>
-      ),
+      cell: (row) => {
+        const name = adminMemberName(row, labels.statuses.nicknameNotSet);
+        return (
+          <DsLayoutInline gap="sm" wrap="nowrap">
+            <Avatar
+              src={buildManagedImageUrl(row.image, MANAGED_IMAGE_PRESET.AVATAR_SM)}
+              size="sm"
+              shape="circle"
+              name={isPlaceholderNickname(row) ? null : name}
+            />
+            <TextButton
+              href={`/admin/users/${row.id}`}
+              size="sm"
+              weight="medium"
+              appearance="default"
+              nowrap
+              title={name}
+            >
+              {name}
+            </TextButton>
+          </DsLayoutInline>
+        );
+      },
     },
     {
       key: 'email',
@@ -227,6 +232,7 @@ export function UsersTableView({
         pendingDeletion: tCommon('statuses.pendingDeletion'),
         deleted: tCommon('statuses.deleted'),
         onboardingPending: tCommon('statuses.onboardingPending'),
+        nicknameNotSet: tCommon('labels.nicknameNotSet'),
         subscribed: tCommon('statuses.subscribed'),
         unsubscribed: tCommon('statuses.unsubscribed'),
       },
@@ -248,7 +254,7 @@ export function UsersTableView({
       bulkDelete={{
         entityLabel: tCommonEntities('users'),
         deleteAction,
-        getRowLabel: (row) => row.nickname,
+        getRowLabel: (row) => adminMemberName(row, tCommon('labels.nicknameNotSet')),
       }}
     />
   );
