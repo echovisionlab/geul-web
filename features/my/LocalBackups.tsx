@@ -1,10 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { getActiveMember, subscribeSignedOutMembers } from '@/lib/auth/active-member';
 import { createBrowserLocalBackupRepository, type LocalBackup } from '@/lib/collab/local-backups';
-import { buildLocalBackupEditorRoute } from '@/lib/utils/local-backup-route';
 import { useSessionContext } from '@/lib/providers/SessionProvider';
 import { LocalBackupsView } from './LocalBackupsView';
 
@@ -21,11 +19,10 @@ export function LocalBackups() {
       }),
     [],
   );
-  const router = useRouter();
   const [entries, setEntries] = useState<LocalBackup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [pendingId, setPendingId] = useState<string | null>(null);
+  const [clearing, setClearing] = useState(false);
   const generation = useRef(0);
   const refresh = useCallback(async () => {
     const request = ++generation.current;
@@ -63,32 +60,19 @@ export function LocalBackups() {
       unsubscribe();
     };
   }, [memberId, refresh]);
-  const operate = async (entry: LocalBackup, action: 'open' | 'discard') => {
-    setPendingId(`${entry.database}:${entry.id}`);
+  const clear = async () => {
+    setClearing(true);
     setError(false);
     try {
-      // Revalidate ownership just before acting; another tab may have reopened the room.
-      const current = (await repository?.list()) ?? [];
-      if (
-        !current.some((item) => item.database === entry.database && item.id === entry.id && item.tabId === entry.tabId)
-      ) {
-        await refresh();
-        return;
-      }
-      if (action === 'discard') {
+      // Each discard rechecks the owner lock, so a document reopened in another tab keeps its journal.
+      for (const entry of (await repository?.list()) ?? []) {
         await repository?.discard(entry);
-        await refresh();
-      } else {
-        const actor = memberRef.current;
-        const href = buildLocalBackupEditorRoute(entry);
-        if (actor && memberRef.current === actor && getActiveMember() === actor) {
-          router.push(href);
-        }
       }
     } catch {
       setError(true);
     } finally {
-      setPendingId(null);
+      await refresh();
+      setClearing(false);
     }
   };
   if (!memberId || getActiveMember() !== memberId) {
@@ -96,14 +80,14 @@ export function LocalBackups() {
   }
   return (
     <LocalBackupsView
-      entries={entries}
+      count={entries.length}
+      bytes={entries.reduce((total, entry) => total + entry.bytes, 0)}
       loading={loading}
       error={error}
-      pendingId={pendingId}
+      clearing={clearing}
       unavailable={!repository || !navigator.locks}
       onRefresh={() => void refresh()}
-      onOpen={(entry) => void operate(entry, 'open')}
-      onDiscard={(entry) => operate(entry, 'discard')}
+      onClear={clear}
     />
   );
 }

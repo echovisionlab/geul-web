@@ -215,7 +215,8 @@
       "newsletter": "Bản tin",
       "images": "Hình ảnh",
       "classification": "Phân loại",
-      "related": "Liên quan"
+      "related": "Liên quan",
+      "nicknameNotSet": "Chưa đặt biệt hiệu"
     },
     "entities": {
       "post": "Bưu kiện",
@@ -5370,36 +5371,15 @@
   },
   "localBackups": {
     "title": "Bản sao lưu cục bộ",
-    "description": "Các chỉnh sửa chưa lưu từ những tab đã đóng trên thiết bị này, được giữ 30 ngày và bị xóa khi đăng xuất.",
+    "description": "Các chỉnh sửa chưa lưu từ những tab đã đóng trên thiết bị này, được giữ 30 ngày và bị xóa khi đăng xuất. Trình chỉnh sửa sẽ khôi phục khi tài liệu được mở lại.",
     "empty": "Không có bản sao lưu từ các thẻ đã đóng để khôi phục.",
     "unavailable": "Bản sao lưu cục bộ cần bộ nhớ trình duyệt và Web Locks trên thiết bị này.",
     "loading": "Đang tìm bản sao lưu cục bộ…",
     "error": "Không thể hoàn tất thao tác này. Làm mới danh sách và thử lại.",
     "refresh": "Làm mới",
-    "lastChanged": "Thay đổi lần cuối {time}",
-    "open": "Mở trình chỉnh sửa",
-    "discard": "Bỏ chỉnh sửa",
-    "openLabel": "Mở trình chỉnh sửa: {kind} {id}, {locale}",
-    "discardLabel": "Bỏ chỉnh sửa: {kind} {id}, {locale}",
-    "discardTitle": "Xóa bản sao lưu cục bộ?",
-    "discardDescription": "Các chỉnh sửa chưa lưu này sẽ bị xóa vĩnh viễn khỏi thiết bị này. Nội dung đã lưu không bị ảnh hưởng.",
-    "kinds": {
-      "post": "Bài viết",
-      "page": "Trang",
-      "work": "Tác phẩm",
-      "campaign": "Chiến dịch",
-      "email-template": "Mẫu email",
-      "email-layout": "Bố cục email",
-      "terms-history": "Điều khoản dịch vụ",
-      "privacy-history": "Chính sách bảo mật",
-      "artist": "Nghệ sĩ",
-      "release": "Bản phát hành",
-      "label": "Nhãn",
-      "form": "Biểu mẫu",
-      "map-theme": "Chủ đề bản đồ",
-      "program-event": "Sự kiện",
-      "menu": "Menu",
-      "post-series": "Loạt bài viết"
-    }
+    "summary": "{count} chỉnh sửa chưa lưu · khoảng {size}",
+    "clear": "Xóa tất cả",
+    "clearTitle": "Xóa tất cả bản sao lưu cục bộ?",
+    "clearDescription": "Các chỉnh sửa chưa lưu này sẽ bị xóa vĩnh viễn khỏi thiết bị này. Nội dung đã lưu không bị ảnh hưởng."
   }
 }

@@ -79,6 +79,15 @@ describe('local backups', () => {
     f.setMember(null);
     expect(await f.repository.list()).toEqual([]);
   });
+  it('reports a size that grows with the binary edits a backup holds', async () => {
+    const f = fixture([
+      record('small', { changes: [{ update: new Uint8Array(10) }] }),
+      record('large', { changes: [{ update: new Uint8Array(4096) }, { update: new Uint8Array(4096) }] }),
+    ]);
+    const sizes = Object.fromEntries((await f.repository.list()).map((entry) => [entry.id, entry.bytes]));
+    expect(sizes.large).toBeGreaterThanOrEqual(8192);
+    expect(sizes.large! - sizes.small!).toBeGreaterThanOrEqual(8182);
+  });
   it('uses geul-common document names for document rooms and preserves exact locale', async () => {
     const f = fixture([]);
     f.state.set('doc', record('doc', { scope: { documentName: `email-layout:${entityId}:en` } }));

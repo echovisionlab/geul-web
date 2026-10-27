@@ -215,7 +215,8 @@
       "newsletter": "Boletim informativo",
       "images": "Imagens",
       "classification": "Classificação",
-      "related": "Relacionados"
+      "related": "Relacionados",
+      "nicknameNotSet": "Apelido não definido"
     },
     "entities": {
       "post": "Publicação",
@@ -5370,36 +5371,15 @@
   },
   "localBackups": {
     "title": "Cópias de segurança locais",
-    "description": "Edições não guardadas de separadores fechados neste dispositivo, mantidas durante 30 dias e apagadas ao terminar sessão.",
+    "description": "Edições não guardadas de separadores fechados neste dispositivo, mantidas durante 30 dias e apagadas ao terminar sessão. O editor restaura-as ao abrir novamente o documento.",
     "empty": "Não há cópias de segurança de separadores fechados para recuperar.",
     "unavailable": "As cópias de segurança locais requerem armazenamento do navegador e Web Locks neste dispositivo.",
     "loading": "A procurar cópias de segurança locais…",
     "error": "Não foi possível concluir esta ação. Atualize a lista e tente novamente.",
     "refresh": "Atualizar",
-    "lastChanged": "Última alteração {time}",
-    "open": "Abrir editor",
-    "discard": "Descartar",
-    "openLabel": "Abrir editor: {kind} {id}, {locale}",
-    "discardLabel": "Descartar: {kind} {id}, {locale}",
-    "discardTitle": "Descartar cópia de segurança local?",
-    "discardDescription": "Estas alterações não guardadas serão removidas permanentemente deste dispositivo. O conteúdo guardado não será afetado.",
-    "kinds": {
-      "post": "Post",
-      "page": "Página",
-      "work": "Trabalho",
-      "campaign": "Campanha",
-      "email-template": "Modelo de e-mail",
-      "email-layout": "Layout de e-mail",
-      "terms-history": "Termos",
-      "privacy-history": "Política de privacidade",
-      "artist": "Artista",
-      "release": "Lançamento",
-      "label": "Rótulo",
-      "form": "Formulário",
-      "map-theme": "Tema do mapa",
-      "program-event": "Evento",
-      "menu": "Menu",
-      "post-series": "Série de posts"
-    }
+    "summary": "{count, plural, one {# edição não guardada} many {# edições não guardadas} other {# edições não guardadas}} · cerca de {size}",
+    "clear": "Descartar tudo",
+    "clearTitle": "Descartar todas as cópias de segurança locais?",
+    "clearDescription": "Estas alterações não guardadas serão removidas permanentemente deste dispositivo. O conteúdo guardado não será afetado."
   }
 }

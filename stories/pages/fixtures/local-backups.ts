@@ -11,6 +11,7 @@ export const localBackupEntries: LocalBackup[] = [
     locale: 'ko',
     title: '밤의 기록',
     updatedAt: Date.parse('2026-10-14T02:25:00Z'),
+    bytes: 184_320,
   },
   {
     database: ROOM_JOURNAL_DATABASES.blockRoom,
@@ -21,6 +22,7 @@ export const localBackupEntries: LocalBackup[] = [
     locale: 'en',
     title: 'Listening room — autumn program',
     updatedAt: Date.parse('2026-10-13T08:10:00Z'),
+    bytes: 1_258_291,
   },
   {
     database: ROOM_JOURNAL_DATABASES.documentRoom,
@@ -30,5 +32,6 @@ export const localBackupEntries: LocalBackup[] = [
     entityId: '33333333-3333-4333-8333-333333333333',
     locale: 'ja',
     updatedAt: Date.parse('2026-10-12T11:05:00Z'),
+    bytes: 36_864,
   },
 ];

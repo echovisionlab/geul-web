@@ -215,7 +215,8 @@
       "newsletter": "新闻通讯",
       "images": "图片",
       "classification": "分类",
-      "related": "相关"
+      "related": "相关",
+      "nicknameNotSet": "未设置昵称"
     },
     "entities": {
       "post": "文章",
@@ -5370,36 +5371,15 @@
   },
   "localBackups": {
     "title": "本地备份",
-    "description": "此设备上已关闭标签页中未保存的编辑，保留 30 天，退出登录后清除。",
+    "description": "此设备上已关闭标签页中未保存的编辑，保留 30 天，退出登录后清除。再次打开文档时，编辑器会恢复这些编辑。",
     "empty": "没有可恢复的已关闭标签页备份。",
     "unavailable": "本地备份需要此设备上的浏览器存储和Web Locks支持。",
     "loading": "正在查找本地备份…",
     "error": "无法完成此操作。请刷新列表后重试。",
     "refresh": "刷新",
-    "lastChanged": "最后更改 {time}",
-    "open": "打开编辑器",
-    "discard": "丢弃",
-    "openLabel": "打开编辑器: {kind} {id}, {locale}",
-    "discardLabel": "丢弃: {kind} {id}, {locale}",
-    "discardTitle": "丢弃本地备份吗?",
-    "discardDescription": "这些未保存的编辑内容将从此设备上永久移除。已保存的内容不受影响。",
-    "kinds": {
-      "post": "文章",
-      "page": "页面",
-      "work": "作品",
-      "campaign": "活动",
-      "email-template": "电子邮件模板",
-      "email-layout": "电子邮件布局",
-      "terms-history": "服务条款",
-      "privacy-history": "隐私政策",
-      "artist": "艺术家",
-      "release": "发行",
-      "label": "厂牌",
-      "form": "表单",
-      "map-theme": "地图主题",
-      "program-event": "活动",
-      "menu": "菜单",
-      "post-series": "文章系列"
-    }
+    "summary": "{count} 项未保存的编辑 · 约 {size}",
+    "clear": "全部丢弃",
+    "clearTitle": "丢弃所有本地备份吗?",
+    "clearDescription": "这些未保存的编辑内容将从此设备上永久移除。已保存的内容不受影响。"
   }
 }

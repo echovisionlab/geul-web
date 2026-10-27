@@ -215,7 +215,8 @@
       "newsletter": "Newsletter",
       "images": "Imagens",
       "classification": "Classificação",
-      "related": "Relacionados"
+      "related": "Relacionados",
+      "nicknameNotSet": "Apelido não definido"
     },
     "entities": {
       "post": "Postagem",
@@ -5370,36 +5371,15 @@
   },
   "localBackups": {
     "title": "Backups locais",
-    "description": "Edições não salvas de abas fechadas neste dispositivo, mantidas por 30 dias e apagadas ao sair.",
+    "description": "Edições não salvas de abas fechadas neste dispositivo, mantidas por 30 dias e apagadas ao sair. O editor as restaura ao abrir o documento novamente.",
     "empty": "Não há backups de abas fechadas para recuperar.",
     "unavailable": "Os backups locais exigem armazenamento do navegador e Web Locks neste dispositivo.",
     "loading": "Buscando backups locais…",
     "error": "Não foi possível concluir esta ação. Atualize a lista e tente novamente.",
     "refresh": "Atualizar",
-    "lastChanged": "Última alteração {time}",
-    "open": "Abrir editor",
-    "discard": "Descartar",
-    "openLabel": "Abrir editor: {kind} {id}, {locale}",
-    "discardLabel": "Descartar: {kind} {id}, {locale}",
-    "discardTitle": "Descartar backup local?",
-    "discardDescription": "Estas alterações não salvas serão removidas permanentemente deste dispositivo. O conteúdo salvo não será afetado.",
-    "kinds": {
-      "post": "Post",
-      "page": "Página",
-      "work": "Obra",
-      "campaign": "Campanha",
-      "email-template": "Modelo de e-mail",
-      "email-layout": "Layout de e-mail",
-      "terms-history": "Termos",
-      "privacy-history": "Política de privacidade",
-      "artist": "Artista",
-      "release": "Lançamento",
-      "label": "Selo",
-      "form": "Formulário",
-      "map-theme": "Tema do mapa",
-      "program-event": "Evento",
-      "menu": "Menu",
-      "post-series": "Série de posts"
-    }
+    "summary": "{count, plural, one {# edição não salva} many {# edições não salvas} other {# edições não salvas}} · cerca de {size}",
+    "clear": "Descartar tudo",
+    "clearTitle": "Descartar todos os backups locais?",
+    "clearDescription": "Estas alterações não salvas serão removidas permanentemente deste dispositivo. O conteúdo salvo não será afetado."
   }
 }

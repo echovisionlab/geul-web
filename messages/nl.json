@@ -215,7 +215,8 @@
       "newsletter": "Nieuwsbrief",
       "images": "Afbeeldingen",
       "classification": "Indeling",
-      "related": "Gerelateerd"
+      "related": "Gerelateerd",
+      "nicknameNotSet": "Schermnaam niet ingesteld"
     },
     "entities": {
       "post": "Bericht",
@@ -5370,36 +5371,15 @@
   },
   "localBackups": {
     "title": "Lokale back-ups",
-    "description": "Niet-opgeslagen bewerkingen uit gesloten tabbladen op dit apparaat, 30 dagen bewaard en gewist bij afmelden.",
+    "description": "Niet-opgeslagen bewerkingen uit gesloten tabbladen op dit apparaat, 30 dagen bewaard en gewist bij afmelden. Bij het opnieuw openen van het document herstelt de editor ze.",
     "empty": "Geen back-ups van gesloten tabbladen om te herstellen.",
     "unavailable": "Lokale back-ups vereisen browseropslag en Web Locks op dit apparaat.",
     "loading": "Zoeken naar lokale back-ups…",
     "error": "Deze actie kon niet worden voltooid. Vernieuw de lijst en probeer het opnieuw.",
     "refresh": "Vernieuwen",
-    "lastChanged": "Laatst gewijzigd {time}",
-    "open": "Editor openen",
-    "discard": "Weggooien",
-    "openLabel": "Editor openen: {kind} {id}, {locale}",
-    "discardLabel": "Weggooien: {kind} {id}, {locale}",
-    "discardTitle": "Lokale back-up weggooien?",
-    "discardDescription": "Deze niet-opgeslagen wijzigingen worden permanent van dit apparaat verwijderd. Opgeslagen inhoud blijft behouden.",
-    "kinds": {
-      "post": "Bericht",
-      "page": "Pagina",
-      "work": "Werk",
-      "campaign": "Campagne",
-      "email-template": "E-mailsjabloon",
-      "email-layout": "E-mailindeling",
-      "terms-history": "Voorwaarden",
-      "privacy-history": "Privacybeleid",
-      "artist": "Artiest",
-      "release": "Release",
-      "label": "Label",
-      "form": "Formulier",
-      "map-theme": "Kaartthema",
-      "program-event": "Evenement",
-      "menu": "Menu",
-      "post-series": "Berichtenreeks"
-    }
+    "summary": "{count, plural, one {# niet-opgeslagen bewerking} other {# niet-opgeslagen bewerkingen}} · ongeveer {size}",
+    "clear": "Alles weggooien",
+    "clearTitle": "Alle lokale back-ups weggooien?",
+    "clearDescription": "Deze niet-opgeslagen wijzigingen worden permanent van dit apparaat verwijderd. Opgeslagen inhoud blijft behouden."
   }
 }

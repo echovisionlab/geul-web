@@ -215,7 +215,8 @@
       "newsletter": "Newsletter",
       "images": "Images",
       "classification": "Classement",
-      "related": "Liens"
+      "related": "Liens",
+      "nicknameNotSet": "Pseudo non défini"
     },
     "entities": {
       "post": "Article",
@@ -5370,36 +5371,15 @@
   },
   "localBackups": {
     "title": "Sauvegardes locales",
-    "description": "Modifications non enregistrées des onglets fermés sur cet appareil, conservées 30 jours et effacées à la déconnexion.",
+    "description": "Modifications non enregistrées des onglets fermés sur cet appareil, conservées 30 jours et effacées à la déconnexion. L’éditeur les restaure à la réouverture du document.",
     "empty": "Aucune sauvegarde d’onglet fermé à récupérer.",
     "unavailable": "Les sauvegardes locales nécessitent le stockage du navigateur et Web Locks sur cet appareil.",
     "loading": "Recherche de sauvegardes locales…",
     "error": "Impossible d’effectuer cette action. Actualisez la liste et réessayez.",
     "refresh": "Actualiser",
-    "lastChanged": "Dernière modification {time}",
-    "open": "Ouvrir l’éditeur",
-    "discard": "Abandonner",
-    "openLabel": "Ouvrir l’éditeur : {kind} {id}, {locale}",
-    "discardLabel": "Abandonner : {kind} {id}, {locale}",
-    "discardTitle": "Abandonner la sauvegarde locale ?",
-    "discardDescription": "Ces modifications non enregistrées seront définitivement supprimées de cet appareil. Le contenu enregistré n’est pas affecté.",
-    "kinds": {
-      "post": "Article",
-      "page": "Page",
-      "work": "Œuvre",
-      "campaign": "Campagne",
-      "email-template": "Modèle d’e-mail",
-      "email-layout": "Mise en page d’e-mail",
-      "terms-history": "Conditions d’utilisation",
-      "privacy-history": "Politique de confidentialité",
-      "artist": "Artiste",
-      "release": "Sortie",
-      "label": "Label",
-      "form": "Formulaire",
-      "map-theme": "Thème de carte",
-      "program-event": "Événement",
-      "menu": "Menu",
-      "post-series": "Série d’articles"
-    }
+    "summary": "{count, plural, one {# modification non enregistrée} many {# modifications non enregistrées} other {# modifications non enregistrées}} · environ {size}",
+    "clear": "Tout abandonner",
+    "clearTitle": "Abandonner toutes les sauvegardes locales ?",
+    "clearDescription": "Ces modifications non enregistrées seront définitivement supprimées de cet appareil. Le contenu enregistré n’est pas affecté."
   }
 }

@@ -19,12 +19,12 @@ function Preview({
   return (
     <LayoutContainer size="standard" inset="md">
       <LocalBackupsView
-        entries={backups}
+        count={backups.length}
+        bytes={backups.reduce((total, entry) => total + entry.bytes, 0)}
         error={error}
         unavailable={unavailable}
         onRefresh={() => {}}
-        onOpen={() => {}}
-        onDiscard={async (entry) => setBackups((current) => current.filter((item) => item.id !== entry.id))}
+        onClear={async () => setBackups([])}
       />
     </LayoutContainer>
   );
@@ -37,7 +37,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The account settings LocalBackupsView used in /my/settings. Orphan journal fixtures simulate IndexedDB and closed owners; opening is inert. Discard removes only fixture rows. Check empty, several rows, confirmation/cancel/discard, narrow widths, keyboard focus, light/dark and English/Korean. This preview does not verify live session authorization or persistence.',
+          'The account settings LocalBackupsView used in /my/settings: how many closed-tab backups this device keeps, their approximate size, and one action that deletes them all. The editor recovers a backup when its document is opened again, so backups are not listed one by one. Fixtures simulate IndexedDB journals; Delete all clears only fixture state. Check empty, several backups, confirmation/cancel/delete, narrow widths, keyboard focus, light/dark and English/Korean. This preview does not verify live session authorization or persistence.',
       },
     },
   },
@@ -46,15 +46,17 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 export const SeveralEntries: Story = {};
 export const Empty: Story = { args: { initialEntries: [] } };
-export const Discard: Story = {
+export const DeleteAll: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const page = within(canvasElement.ownerDocument.body);
-    await expect(canvas.getAllByRole('listitem')).toHaveLength(3);
-    await userEvent.click(canvas.getAllByRole('button', { name: /^(Discard|버리기):/u })[0]!);
+    await expect(canvas.getByRole('status')).toHaveTextContent(/3/u);
+    await userEvent.click(canvas.getByRole('button', { name: /^(Delete all|모두 삭제)$/u }));
     const dialog = await page.findByRole('dialog');
-    await userEvent.click(within(dialog).getByRole('button', { name: /^(Discard|버리기)$/u }));
-    await expect(canvas.getAllByRole('listitem')).toHaveLength(2);
+    await userEvent.click(within(dialog).getByRole('button', { name: /^(Delete all|모두 삭제)$/u }));
+    await expect(
+      await canvas.findByText(/^(No backups from closed tabs to recover\.|닫힌 탭에서 복구할 백업이 없습니다\.)$/u),
+    ).toBeVisible();
   },
 };
 export const LoadFailed: Story = { args: { initialEntries: [], error: true } };

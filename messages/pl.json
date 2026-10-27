@@ -215,7 +215,8 @@
       "newsletter": "Biuletyn",
       "images": "Obrazy",
       "classification": "Klasyfikacja",
-      "related": "Powiązane"
+      "related": "Powiązane",
+      "nicknameNotSet": "Nie ustawiono przydomka"
     },
     "entities": {
       "post": "Post",
@@ -5370,36 +5371,15 @@
   },
   "localBackups": {
     "title": "Lokalne kopie zapasowe",
-    "description": "Niezapisane zmiany z zamkniętych kart na tym urządzeniu, przechowywane przez 30 dni i usuwane po wylogowaniu.",
+    "description": "Niezapisane zmiany z zamkniętych kart na tym urządzeniu, przechowywane przez 30 dni i usuwane po wylogowaniu. Edytor przywraca je po ponownym otwarciu dokumentu.",
     "empty": "Brak kopii zapasowych z zamkniętych kart do przywrócenia.",
     "unavailable": "Lokalne kopie zapasowe wymagają pamięci przeglądarki i Web Locks na tym urządzeniu.",
     "loading": "Wyszukiwanie lokalnych kopii zapasowych…",
     "error": "Nie udało się wykonać tej czynności. Odśwież listę i spróbuj ponownie.",
     "refresh": "Odśwież",
-    "lastChanged": "Ostatnia zmiana {time}",
-    "open": "Otwórz edytor",
-    "discard": "Odrzuć",
-    "openLabel": "Otwórz edytor: {kind} {id}, {locale}",
-    "discardLabel": "Odrzuć: {kind} {id}, {locale}",
-    "discardTitle": "Odrzucić lokalną kopię zapasową?",
-    "discardDescription": "Te niezapisane zmiany zostaną trwale usunięte z tego urządzenia. Zapisane treści pozostaną bez zmian.",
-    "kinds": {
-      "post": "Post",
-      "page": "Strona",
-      "work": "Dzieło",
-      "campaign": "Kampania",
-      "email-template": "Szablon e-maila",
-      "email-layout": "Układ e-maila",
-      "terms-history": "Warunki",
-      "privacy-history": "Polityka prywatności",
-      "artist": "Artysta",
-      "release": "Wydanie",
-      "label": "Etykieta",
-      "form": "Formularz",
-      "map-theme": "Motyw mapy",
-      "program-event": "Wydarzenie",
-      "menu": "Menu",
-      "post-series": "Seria postów"
-    }
+    "summary": "{count, plural, one {# niezapisana zmiana} few {# niezapisane zmiany} many {# niezapisanych zmian} other {# niezapisanej zmiany}} · około {size}",
+    "clear": "Odrzuć wszystko",
+    "clearTitle": "Odrzucić wszystkie lokalne kopie zapasowe?",
+    "clearDescription": "Te niezapisane zmiany zostaną trwale usunięte z tego urządzenia. Zapisane treści pozostaną bez zmian."
   }
 }

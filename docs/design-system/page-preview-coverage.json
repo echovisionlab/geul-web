@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "methodology": "All App Router visual entry files indexed by TypeScript imports/JSX; exact reviewed route/boundary maps count separately from mere Feature story overlap. Unmapped entrypoints remain explicit gaps. Static source census is not a browser pass.",
-  "sourceManifestHash": "d89c7cb35d6095d670d7eeea4c7c6628af725573c94db1486a8e7d99132b8845",
+  "sourceManifestHash": "92d439e38ea7a07178fc050ac3f3b7bc5515915605523827a6bd35573b9bffc5",
   "counts": {
     "queryEditorBranches": 12,
     "editorBranchPreviews": 12,
@@ -43158,6 +43158,7 @@
         "features/admin/user/auth/UserSsoProvidersSection.tsx",
         "features/admin/user/auth/index.ts",
         "features/admin/user/auth/shared.tsx",
+        "features/admin/user/member-name.ts",
         "features/application-error/QueryErrorAlert.tsx",
         "features/application-error/error-page-messages.ts",
         "features/application-error/error-status.ts",
@@ -43341,6 +43342,7 @@
         "features/admin/user/UsersPageView.tsx",
         "features/admin/user/UsersTableContent.tsx",
         "features/admin/user/UsersTableView.tsx",
+        "features/admin/user/member-name.ts",
         "features/confirmation/confirmation-dialogs.ts",
         "features/confirmation/index.ts",
         "features/confirmation/ui/ConfirmationDialog.tsx",

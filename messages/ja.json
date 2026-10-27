@@ -215,7 +215,8 @@
       "newsletter": "ニュースレター",
       "images": "画像",
       "classification": "分類",
-      "related": "関連"
+      "related": "関連",
+      "nicknameNotSet": "ニックネーム未設定"
     },
     "entities": {
       "post": "投稿",
@@ -5370,36 +5371,15 @@
   },
   "localBackups": {
     "title": "ローカルバックアップ",
-    "description": "このデバイスで閉じたタブの未保存の編集です。30日間保持され、サインアウトすると削除されます。",
+    "description": "このデバイスで閉じたタブの未保存の編集です。30日間保持され、サインアウトすると削除されます。ドキュメントを再び開くと、エディターが復元します。",
     "empty": "閉じたタブから復元できるバックアップはありません。",
     "unavailable": "ローカルバックアップには、このデバイスのブラウザーストレージとWeb Locksが必要です。",
     "loading": "ローカルバックアップを検索中…",
     "error": "操作を完了できませんでした。一覧を更新して、もう一度お試しください。",
     "refresh": "更新",
-    "lastChanged": "最終変更 {time}",
-    "open": "エディターを開く",
-    "discard": "破棄",
-    "openLabel": "エディターを開く: {kind} {id}, {locale}",
-    "discardLabel": "破棄: {kind} {id}, {locale}",
-    "discardTitle": "ローカルバックアップを破棄しますか?",
-    "discardDescription": "これらの未保存の変更はこのデバイスから完全に削除されます。保存済みのコンテンツには影響しません。",
-    "kinds": {
-      "post": "投稿",
-      "page": "ページ",
-      "work": "作品",
-      "campaign": "キャンペーン",
-      "email-template": "メールテンプレート",
-      "email-layout": "メールレイアウト",
-      "terms-history": "利用規約",
-      "privacy-history": "プライバシーポリシー",
-      "artist": "アーティスト",
-      "release": "リリース",
-      "label": "レーベル",
-      "form": "フォーム",
-      "map-theme": "地図テーマ",
-      "program-event": "イベント",
-      "menu": "メニュー",
-      "post-series": "投稿シリーズ"
-    }
+    "summary": "未保存の編集 {count}件 · 約 {size}",
+    "clear": "すべて破棄",
+    "clearTitle": "ローカルバックアップをすべて破棄しますか?",
+    "clearDescription": "これらの未保存の変更はこのデバイスから完全に削除されます。保存済みのコンテンツには影響しません。"
   }
 }

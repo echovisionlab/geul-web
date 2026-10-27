@@ -215,7 +215,8 @@
       "newsletter": "Bülten",
       "images": "Görseller",
       "classification": "Sınıflandırma",
-      "related": "İlişkili"
+      "related": "İlişkili",
+      "nicknameNotSet": "Takma ad belirlenmedi"
     },
     "entities": {
       "post": "Postalamak",
@@ -5370,36 +5371,15 @@
   },
   "localBackups": {
     "title": "Yerel yedekler",
-    "description": "Bu cihazdaki kapatılmış sekmelerden kaydedilmemiş düzenlemeler; 30 gün saklanır ve oturum kapatıldığında silinir.",
+    "description": "Bu cihazdaki kapatılmış sekmelerden kaydedilmemiş düzenlemeler; 30 gün saklanır ve oturum kapatıldığında silinir. Belge yeniden açıldığında düzenleyici bunları geri yükler.",
     "empty": "Kapalı sekmelerden kurtarılacak yedek yok.",
     "unavailable": "Yerel yedekler için bu cihazda tarayıcı depolaması ve Web Locks gerekir.",
     "loading": "Yerel yedekler aranıyor…",
     "error": "Bu işlem tamamlanamadı. Listeyi yenileyip tekrar deneyin.",
     "refresh": "Yenile",
-    "lastChanged": "Son değişiklik: {time}",
-    "open": "Düzenleyiciyi aç",
-    "discard": "Düzenlemeleri at",
-    "openLabel": "Düzenleyiciyi aç: {kind} {id}, {locale}",
-    "discardLabel": "Düzenlemeleri at: {kind} {id}, {locale}",
-    "discardTitle": "Yerel yedek silinsin mi?",
-    "discardDescription": "Bu kaydedilmemiş düzenlemeler bu cihazdan kalıcı olarak silinecek. Kaydedilmiş içerik etkilenmez.",
-    "kinds": {
-      "post": "Gönderi",
-      "page": "Sayfa",
-      "work": "Eser",
-      "campaign": "Kampanya",
-      "email-template": "E-posta Şablonu",
-      "email-layout": "E-posta Düzeni",
-      "terms-history": "Hizmet Şartları",
-      "privacy-history": "Gizlilik Politikası",
-      "artist": "Sanatçı",
-      "release": "Sürüm",
-      "label": "Etiket",
-      "form": "Form",
-      "map-theme": "Harita Teması",
-      "program-event": "Etkinlik",
-      "menu": "Menü",
-      "post-series": "Gönderi Serisi"
-    }
+    "summary": "{count, plural, one {# kaydedilmemiş düzenleme} other {# kaydedilmemiş düzenleme}} · yaklaşık {size}",
+    "clear": "Tümünü sil",
+    "clearTitle": "Tüm yerel yedekler silinsin mi?",
+    "clearDescription": "Bu kaydedilmemiş düzenlemeler bu cihazdan kalıcı olarak silinecek. Kaydedilmiş içerik etkilenmez."
   }
 }
