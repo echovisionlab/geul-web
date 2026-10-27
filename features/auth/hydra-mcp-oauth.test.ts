@@ -312,7 +312,8 @@ describe('Hydra MCP OAuth controller', () => {
     await expect(revokeMcpOAuthGrant(session, 'consent-request-1')).resolves.toBeUndefined();
     expect(fetchMock).toHaveBeenCalledTimes(2);
     const revokeUrl = new URL(String(fetchMock.mock.calls[1]?.[0]));
-    expect(revokeUrl.searchParams.get('subject')).toBe(session.account_identity_id);
+    // Hydra answers 400 when subject accompanies consent_request_id.
+    expect(revokeUrl.searchParams.has('subject')).toBe(false);
     expect(revokeUrl.searchParams.get('consent_request_id')).toBe('consent-request-1');
     expect(fetchMock.mock.calls[1]?.[1]).toMatchObject({ method: 'DELETE' });
   });

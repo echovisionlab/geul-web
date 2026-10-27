@@ -215,7 +215,8 @@
       "newsletter": "電子報",
       "images": "圖片",
       "classification": "分類",
-      "related": "相關"
+      "related": "相關",
+      "nicknameNotSet": "未設定暱稱"
     },
     "entities": {
       "post": "文章",
@@ -5370,36 +5371,15 @@
   },
   "localBackups": {
     "title": "本機備份",
-    "description": "此裝置上已關閉分頁中未儲存的編輯，保留 30 天，登出後清除。",
+    "description": "此裝置上已關閉分頁中未儲存的編輯，保留 30 天，登出後清除。再次開啟文件時，編輯器會還原這些編輯。",
     "empty": "沒有可復原的已關閉分頁備份。",
     "unavailable": "本機備份需要此裝置上的瀏覽器儲存空間和Web Locks支援。",
     "loading": "正在尋找本機備份…",
     "error": "無法完成此操作。請重新整理清單後重試。",
     "refresh": "重新整理",
-    "lastChanged": "最後變更 {time}",
-    "open": "開啟編輯器",
-    "discard": "捨棄",
-    "openLabel": "開啟編輯器: {kind} {id}, {locale}",
-    "discardLabel": "捨棄: {kind} {id}, {locale}",
-    "discardTitle": "捨棄本機備份嗎?",
-    "discardDescription": "這些未儲存的編輯內容將從此裝置上永久移除。已儲存的內容不受影響。",
-    "kinds": {
-      "post": "文章",
-      "page": "頁面",
-      "work": "作品",
-      "campaign": "活動",
-      "email-template": "電子郵件範本",
-      "email-layout": "電子郵件版面",
-      "terms-history": "服務條款",
-      "privacy-history": "隱私權政策",
-      "artist": "藝術家",
-      "release": "發行",
-      "label": "廠牌",
-      "form": "表單",
-      "map-theme": "地圖主題",
-      "program-event": "活動",
-      "menu": "選單",
-      "post-series": "文章系列"
-    }
+    "summary": "{count} 項未儲存的編輯 · 約 {size}",
+    "clear": "全部捨棄",
+    "clearTitle": "捨棄所有本機備份嗎?",
+    "clearDescription": "這些未儲存的編輯內容將從此裝置上永久移除。已儲存的內容不受影響。"
   }
 }

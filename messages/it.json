@@ -215,7 +215,8 @@
       "newsletter": "Newsletter",
       "images": "Immagini",
       "classification": "Classificazione",
-      "related": "Correlati"
+      "related": "Correlati",
+      "nicknameNotSet": "Soprannome non impostato"
     },
     "entities": {
       "post": "Inviare",
@@ -5370,36 +5371,15 @@
   },
   "localBackups": {
     "title": "Backup locali",
-    "description": "Modifiche non salvate delle schede chiuse su questo dispositivo, conservate per 30 giorni ed eliminate all'uscita.",
+    "description": "Modifiche non salvate delle schede chiuse su questo dispositivo, conservate per 30 giorni ed eliminate all'uscita. L'editor le ripristina quando si riapre il documento.",
     "empty": "Nessun backup di schede chiuse da recuperare.",
     "unavailable": "I backup locali richiedono l’archiviazione del browser e Web Locks su questo dispositivo.",
     "loading": "Ricerca di backup locali…",
     "error": "Impossibile completare questa azione. Aggiorna l’elenco e riprova.",
     "refresh": "Aggiorna",
-    "lastChanged": "Ultima modifica {time}",
-    "open": "Apri editor",
-    "discard": "Scarta",
-    "openLabel": "Apri editor: {kind} {id}, {locale}",
-    "discardLabel": "Scarta: {kind} {id}, {locale}",
-    "discardTitle": "Scartare il backup locale?",
-    "discardDescription": "Queste modifiche non salvate verranno rimosse definitivamente da questo dispositivo. I contenuti salvati non saranno interessati.",
-    "kinds": {
-      "post": "Post",
-      "page": "Pagina",
-      "work": "Opera",
-      "campaign": "Campagna",
-      "email-template": "Modello e-mail",
-      "email-layout": "Layout e-mail",
-      "terms-history": "Termini",
-      "privacy-history": "Informativa sulla privacy",
-      "artist": "Artista",
-      "release": "Pubblicazione",
-      "label": "Etichetta",
-      "form": "Modulo",
-      "map-theme": "Tema della mappa",
-      "program-event": "Evento",
-      "menu": "Menu",
-      "post-series": "Serie di post"
-    }
+    "summary": "{count, plural, one {# modifica non salvata} many {# modifiche non salvate} other {# modifiche non salvate}} · circa {size}",
+    "clear": "Scarta tutto",
+    "clearTitle": "Scartare tutti i backup locali?",
+    "clearDescription": "Queste modifiche non salvate verranno rimosse definitivamente da questo dispositivo. I contenuti salvati non saranno interessati."
   }
 }

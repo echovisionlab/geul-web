@@ -96,20 +96,6 @@ async function hydraAdminRequest(path: string, challengeName: string, challenge:
   return response.json() as Promise<unknown>;
 }
 
-async function hydraAdminSubjectRequest(path: string, subject: string, init?: RequestInit): Promise<Response> {
-  const url = new URL(path, `${getHydraAdminUrl()}/`);
-  url.searchParams.set('subject', subject);
-  const response = await fetch(url, {
-    ...init,
-    cache: 'no-store',
-    signal: AbortSignal.timeout(HYDRA_TIMEOUT_MS),
-  });
-  if (!response.ok) {
-    throw new Error(`Hydra Admin returned ${response.status}`);
-  }
-  return response;
-}
-
 function exactStringSet(values: string[], expected: string): boolean {
   return values.length === 1 && values[0] === expected;
 }
@@ -243,9 +229,17 @@ export async function revokeMcpOAuthGrant(session: SessionWithUser, grantId: str
   if (!grants.some((grant) => grant.id === parsedGrantId)) {
     throw new Error('MCP grant is not active for the current account');
   }
-  const path = new URL('/admin/oauth2/auth/sessions/consent', `${getHydraAdminUrl()}/`);
-  path.searchParams.set('consent_request_id', parsedGrantId);
-  await hydraAdminSubjectRequest(path.toString(), session.account_identity_id, { method: 'DELETE' });
+  // Ownership is checked above. Hydra rejects consent_request_id combined with subject as an invalid combination.
+  const url = new URL('/admin/oauth2/auth/sessions/consent', `${getHydraAdminUrl()}/`);
+  url.searchParams.set('consent_request_id', parsedGrantId);
+  const response = await fetch(url, {
+    method: 'DELETE',
+    cache: 'no-store',
+    signal: AbortSignal.timeout(HYDRA_TIMEOUT_MS),
+  });
+  if (!response.ok) {
+    throw new Error(`Hydra Admin returned ${response.status}`);
+  }
 }
 
 function mcpAuthenticatedContext(

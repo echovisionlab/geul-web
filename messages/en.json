@@ -215,7 +215,8 @@
       "newsletter": "Newsletter",
       "images": "Images",
       "classification": "Classification",
-      "related": "Related"
+      "related": "Related",
+      "nicknameNotSet": "Nickname not set"
     },
     "entities": {
       "post": "Post",
@@ -5370,36 +5371,15 @@
   },
   "localBackups": {
     "title": "Local backups",
-    "description": "Unsaved edits from closed tabs on this device, kept for 30 days and cleared on sign-out.",
+    "description": "Unsaved edits from closed tabs on this device, kept for 30 days and cleared on sign-out. Opening the document again restores them in the editor.",
     "empty": "No backups from closed tabs to recover.",
     "unavailable": "Local backups require browser storage and Web Locks on this device.",
     "loading": "Looking for local backups…",
     "error": "Could not complete this action. Refresh the list and try again.",
     "refresh": "Refresh",
-    "lastChanged": "Last changed {time}",
-    "open": "Open editor",
-    "discard": "Discard",
-    "openLabel": "Open editor: {kind} {id}, {locale}",
-    "discardLabel": "Discard: {kind} {id}, {locale}",
-    "discardTitle": "Discard local backup?",
-    "discardDescription": "These unsaved edits will be permanently removed from this device. Saved content is unaffected.",
-    "kinds": {
-      "post": "Post",
-      "page": "Page",
-      "work": "Work",
-      "campaign": "Campaign",
-      "email-template": "Email template",
-      "email-layout": "Email layout",
-      "terms-history": "Terms",
-      "privacy-history": "Privacy policy",
-      "artist": "Artist",
-      "release": "Release",
-      "label": "Label",
-      "form": "Form",
-      "map-theme": "Map theme",
-      "program-event": "Event",
-      "menu": "Menu",
-      "post-series": "Post series"
-    }
+    "summary": "{count, plural, one {# unsaved edit} other {# unsaved edits}} · about {size}",
+    "clear": "Delete all",
+    "clearTitle": "Delete all local backups?",
+    "clearDescription": "These unsaved edits will be permanently removed from this device. Saved content is unaffected."
   }
 }

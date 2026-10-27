@@ -21,6 +21,7 @@ import { Select, TextInput } from '@/components/core/Input';
 import { PageLoader } from '@/features/site/PageLoader';
 import { UserBanStateSection, UserDeliveryEmailSection, UserSsoProvidersSection } from '@/features/admin/user/auth';
 import { UserProfileFormSection, type AdminUserProfileFormValues } from '@/features/admin/user/UserProfileFormSection';
+import { adminMemberName } from '@/features/admin/user/member-name';
 import {
   PersonalAccessTokenSettings,
   type PersonalAccessTokenBindings,
@@ -370,7 +371,7 @@ export default function AdminUserEditPage({
     <DsLayoutStack>
       <QueryErrorAlert queries={[userQuery, memberTagsQuery, emailSuppressionQuery]} />
       <EditorHeader
-        title={user?.nickname ?? tCommon('entities.member')}
+        title={user ? adminMemberName(user, tCommon('labels.nicknameNotSet')) : tCommon('entities.member')}
         isConnected
         isSynced
         hideConnectionStatus

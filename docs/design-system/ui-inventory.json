@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "16a697ffc27891ebb1b8ba8b85dfef1a6babbe66860bb07d7890d3ca946d37ac",
+  "manifestHash": "7cb1a6746730e4f8fa33d6395c3dbd09c4f9201892b9a0aee987d46ca6a8e095",
   "counts": {
     "sourceFiles": 3868,
     "productionSourceFiles": 2332,
@@ -1082,6 +1082,8 @@
     "features/admin/user/auth/index.ts",
     "features/admin/user/auth/shared.tsx",
     "features/admin/user/index.ts",
+    "features/admin/user/member-name.test.ts",
+    "features/admin/user/member-name.ts",
     "features/admin/work/WorksPageView.tsx",
     "features/analytics/GoogleAnalyticsLoader.tsx",
     "features/application-error/ApplicationErrorPage.test.tsx",
@@ -3656,8 +3658,6 @@
     "lib/utils/json-ld.test.ts",
     "lib/utils/json-ld.ts",
     "lib/utils/language.server.ts",
-    "lib/utils/local-backup-route.test.ts",
-    "lib/utils/local-backup-route.ts",
     "lib/utils/location-place.ts",
     "lib/utils/logger.ts",
     "lib/utils/managed-image-url.test.ts",
@@ -19086,7 +19086,6 @@
       ],
       "typeAliasEvidence": [],
       "productionConsumers": [
-        "features/my/LocalBackupsView.tsx",
         "features/translation/admin/TranslationJobsPage.tsx",
         "features/translation/admin/TranslationOverviewPage.tsx"
       ],
@@ -27766,6 +27765,11 @@
               "name": "nickname",
               "optional": false,
               "type": "string"
+            },
+            {
+              "name": "onboarded",
+              "optional": false,
+              "type": "boolean"
             },
             {
               "name": "role",
@@ -51145,9 +51149,14 @@
           "extends": [],
           "properties": [
             {
-              "name": "entries",
+              "name": "count",
               "optional": false,
-              "type": "LocalBackup[]"
+              "type": "number"
+            },
+            {
+              "name": "bytes",
+              "optional": false,
+              "type": "number"
             },
             {
               "name": "loading",
@@ -51165,9 +51174,9 @@
               "type": "boolean"
             },
             {
-              "name": "pendingId",
+              "name": "clearing",
               "optional": true,
-              "type": "string | null"
+              "type": "boolean"
             },
             {
               "name": "onRefresh",
@@ -51175,14 +51184,9 @@
               "type": "() => void"
             },
             {
-              "name": "onOpen",
+              "name": "onClear",
               "optional": false,
-              "type": "(entry: LocalBackup) => void"
-            },
-            {
-              "name": "onDiscard",
-              "optional": false,
-              "type": "(entry: LocalBackup) => Promise<void>"
+              "type": "() => Promise<void>"
             }
           ]
         }
@@ -51200,7 +51204,6 @@
         "Heading",
         "LayoutInline",
         "LayoutStack",
-        "LocaleCode",
         "SectionCard",
         "Text"
       ]
@@ -75673,6 +75676,7 @@
         "features/admin/user/auth/index.ts",
         "features/admin/user/auth/shared.tsx",
         "features/admin/user/index.ts",
+        "features/admin/user/member-name.ts",
         "features/admin/work/WorksPageView.tsx"
       ],
       "components": [
@@ -75857,7 +75861,8 @@
         "features/admin/ui/AdminNavigation/AdminNavigationView.test.tsx",
         "features/admin/ui/AdminPageHeader/AdminPageHeader.test.tsx",
         "features/admin/user/UserAuthAdminSections.test.tsx",
-        "features/admin/user/admin-user-profile.test.ts"
+        "features/admin/user/admin-user-profile.test.ts",
+        "features/admin/user/member-name.test.ts"
       ],
       "directlyImportingRoutes": [
         "/admin/artists",
@@ -84043,9 +84048,9 @@
           "preview": "http://localhost:6010/?path=/story/feature-my-local-backups--empty"
         },
         {
-          "name": "Discard",
+          "name": "DeleteAll",
           "args": null,
-          "preview": "http://localhost:6010/?path=/story/feature-my-local-backups--discard"
+          "preview": "http://localhost:6010/?path=/story/feature-my-local-backups--delete-all"
         },
         {
           "name": "LoadFailed",

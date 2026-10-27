@@ -13,10 +13,8 @@ const mocks = vi.hoisted(() => ({
   member: 'member' as string | null,
   list: vi.fn(),
   discard: vi.fn(),
-  push: vi.fn(),
   signedOut: null as (() => void) | null,
 }));
-vi.mock('next/navigation', () => ({ useRouter: () => ({ push: mocks.push }) }));
 vi.mock('@/lib/providers/SessionProvider', () => ({ useSessionContext: () => ({ data: { user: { id: 'member' } } }) }));
 vi.mock('@/lib/auth/active-member', () => ({
   getActiveMember: () => mocks.member,
@@ -39,7 +37,9 @@ const entry: LocalBackup = {
   entityId: '11111111-1111-4111-8111-111111111111',
   locale: 'ko',
   updatedAt: Date.parse('2026-10-14T02:00:00Z'),
+  bytes: 1536,
 };
+const other: LocalBackup = { ...entry, id: 'other', tabId: 'closed-other', bytes: 1048576 };
 let root: Root;
 let host: HTMLDivElement;
 async function settle() {
@@ -86,36 +86,35 @@ afterEach(() => {
 });
 
 describe('LocalBackups account surface', () => {
-  it('shows kind, locale and last change, then opens the exact editor without adopting the journal', async () => {
+  it('summarizes how many backups this device keeps and their approximate size', async () => {
+    mocks.list.mockResolvedValue([entry, other]);
     await render();
-    expect(host.textContent).toContain('Post');
-    expect(host.textContent).toContain('KO');
-    expect(host.textContent).toContain('Last changed');
-    await click('Open editor');
-    expect(mocks.push).toHaveBeenCalledWith(`/posts/${entry.entityId}?lang=ko&edit=true`);
-    expect(mocks.discard).not.toHaveBeenCalled();
+    expect(host.textContent).toContain('2 unsaved edits · about 1 MB');
+    expect(host.querySelector('[role="list"]')).toBeNull();
   });
-  it('keeps the record on cancel and deletes only after discard confirmation', async () => {
+  it('deletes nothing on cancel and every closed-tab backup after confirmation', async () => {
+    mocks.list.mockResolvedValue([entry, other]);
     await render();
-    await click('Discard');
-    expect(mocks.discard).not.toHaveBeenCalled();
+    await click('Delete all');
     await click('Cancel', document.body.querySelector('[role="dialog"]')!);
     expect(mocks.discard).not.toHaveBeenCalled();
-    await click('Discard');
+    await click('Delete all');
     mocks.discard.mockImplementation(async () => {
       mocks.list.mockResolvedValue([]);
       return true;
     });
-    await click('Discard', document.body.querySelector('[role="dialog"]')!);
-    expect(mocks.discard).toHaveBeenCalledExactlyOnceWith(entry);
+    await click('Delete all', document.body.querySelector('[role="dialog"]')!);
+    expect(mocks.discard.mock.calls.map(([backup]) => backup.id)).toEqual(['record', 'other']);
     expect(host.textContent).toContain('No backups from closed tabs to recover');
   });
-  it('refreshes instead of opening a stale row claimed by a live tab', async () => {
+  it('keeps a backup whose document another tab reopened meanwhile', async () => {
+    mocks.list.mockResolvedValue([entry, other]);
     await render();
-    mocks.list.mockResolvedValue([]);
-    await click('Open editor');
-    expect(mocks.push).not.toHaveBeenCalled();
-    expect(host.textContent).toContain('No backups from closed tabs to recover');
+    mocks.discard.mockImplementation(async (backup: LocalBackup) => backup.id === 'record');
+    await click('Delete all');
+    mocks.list.mockResolvedValueOnce([entry, other]).mockResolvedValue([other]);
+    await click('Delete all', document.body.querySelector('[role="dialog"]')!);
+    expect(host.textContent).toContain('1 unsaved edit · about 1 MB');
   });
   it('removes the member’s rows immediately on sign-out', async () => {
     await render();

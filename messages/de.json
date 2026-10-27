@@ -215,7 +215,8 @@
       "newsletter": "Newsletter",
       "images": "Bilder",
       "classification": "Einordnung",
-      "related": "Verknüpft"
+      "related": "Verknüpft",
+      "nicknameNotSet": "Kein Spitzname festgelegt"
     },
     "entities": {
       "post": "Beitrag",
@@ -5370,36 +5371,15 @@
   },
   "localBackups": {
     "title": "Lokale Sicherungen",
-    "description": "Nicht gespeicherte Änderungen aus geschlossenen Tabs auf diesem Gerät, 30 Tage aufbewahrt und beim Abmelden gelöscht.",
+    "description": "Nicht gespeicherte Änderungen aus geschlossenen Tabs auf diesem Gerät, 30 Tage aufbewahrt und beim Abmelden gelöscht. Beim erneuten Öffnen des Dokuments stellt der Editor sie wieder her.",
     "empty": "Keine Backups aus geschlossenen Tabs zum Wiederherstellen.",
     "unavailable": "Lokale Sicherungen erfordern Browserspeicher und Web Locks auf diesem Gerät.",
     "loading": "Lokale Sicherungen werden gesucht…",
     "error": "Diese Aktion konnte nicht abgeschlossen werden. Aktualisieren Sie die Liste und versuchen Sie es erneut.",
     "refresh": "Aktualisieren",
-    "lastChanged": "Zuletzt geändert {time}",
-    "open": "Editor öffnen",
-    "discard": "Verwerfen",
-    "openLabel": "Editor öffnen: {kind} {id}, {locale}",
-    "discardLabel": "Verwerfen: {kind} {id}, {locale}",
-    "discardTitle": "Lokale Sicherung verwerfen?",
-    "discardDescription": "Diese ungespeicherten Änderungen werden dauerhaft von diesem Gerät entfernt. Gespeicherte Inhalte bleiben erhalten.",
-    "kinds": {
-      "post": "Beitrag",
-      "page": "Seite",
-      "work": "Werk",
-      "campaign": "Kampagne",
-      "email-template": "E-Mail-Vorlage",
-      "email-layout": "E-Mail-Layout",
-      "terms-history": "Nutzungsbedingungen",
-      "privacy-history": "Datenschutzerklärung",
-      "artist": "Künstler",
-      "release": "Veröffentlichung",
-      "label": "Label",
-      "form": "Formular",
-      "map-theme": "Kartenthema",
-      "program-event": "Veranstaltung",
-      "menu": "Menü",
-      "post-series": "Beitragsserie"
-    }
+    "summary": "{count, plural, one {# nicht gespeicherte Änderung} other {# nicht gespeicherte Änderungen}} · etwa {size}",
+    "clear": "Alle verwerfen",
+    "clearTitle": "Alle lokalen Sicherungen verwerfen?",
+    "clearDescription": "Diese ungespeicherten Änderungen werden dauerhaft von diesem Gerät entfernt. Gespeicherte Inhalte bleiben erhalten."
   }
 }

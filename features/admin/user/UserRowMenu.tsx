@@ -8,6 +8,7 @@ import { notifications } from '@/components/core/Notification';
 import { TableRowMenu, type TableRowMenuItem } from '@/components/core/DataTable';
 import { unbanUserAction } from '@/lib/actions/user';
 import { useUserModal, type UserModalTarget } from './UserModalContext';
+import { adminMemberName } from './member-name';
 
 interface UserRowMenuProps {
   user: UserModalTarget;
@@ -78,5 +79,10 @@ export function UserRowMenu({ user }: UserRowMenuProps) {
     tone: 'danger',
   });
 
-  return <TableRowMenu aria-label={tTable('aria.rowActions', { label: user.nickname })} items={items} />;
+  return (
+    <TableRowMenu
+      aria-label={tTable('aria.rowActions', { label: adminMemberName(user, tCommon('labels.nicknameNotSet')) })}
+      items={items}
+    />
+  );
 }

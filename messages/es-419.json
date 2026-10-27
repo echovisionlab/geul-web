@@ -215,7 +215,8 @@
       "newsletter": "Hoja informativa",
       "images": "Imágenes",
       "classification": "Clasificación",
-      "related": "Relacionado"
+      "related": "Relacionado",
+      "nicknameNotSet": "Apodo sin definir"
     },
     "entities": {
       "post": "Correo",
@@ -5370,36 +5371,15 @@
   },
   "localBackups": {
     "title": "Copias de seguridad locales",
-    "description": "Ediciones sin guardar de pestañas cerradas en este dispositivo; se conservan 30 días y se borran al cerrar sesión.",
+    "description": "Ediciones sin guardar de pestañas cerradas en este dispositivo; se conservan 30 días y se borran al cerrar sesión. El editor las recupera al volver a abrir el documento.",
     "empty": "No hay copias de seguridad de pestañas cerradas para recuperar.",
     "unavailable": "Las copias de seguridad locales requieren almacenamiento del navegador y Web Locks en este dispositivo.",
     "loading": "Buscando copias de seguridad locales…",
     "error": "No se pudo completar esta acción. Actualiza la lista e inténtalo de nuevo.",
     "refresh": "Actualizar",
-    "lastChanged": "Último cambio {time}",
-    "open": "Abrir editor",
-    "discard": "Descartar",
-    "openLabel": "Abrir editor: {kind} {id}, {locale}",
-    "discardLabel": "Descartar: {kind} {id}, {locale}",
-    "discardTitle": "¿Descartar la copia de seguridad local?",
-    "discardDescription": "Estos cambios sin guardar se eliminarán permanentemente de este dispositivo. El contenido guardado no se verá afectado.",
-    "kinds": {
-      "post": "Publicación",
-      "page": "Página",
-      "work": "Trabajo",
-      "campaign": "Campaña",
-      "email-template": "Plantilla de correo electrónico",
-      "email-layout": "Diseño de correo electrónico",
-      "terms-history": "Términos",
-      "privacy-history": "Política de privacidad",
-      "artist": "Artista",
-      "release": "Lanzamiento",
-      "label": "Etiqueta",
-      "form": "Formulario",
-      "map-theme": "Tema del mapa",
-      "program-event": "Evento",
-      "menu": "Menú",
-      "post-series": "Serie de publicaciones"
-    }
+    "summary": "{count, plural, one {# edición sin guardar} many {# ediciones sin guardar} other {# ediciones sin guardar}} · aprox. {size}",
+    "clear": "Descartar todo",
+    "clearTitle": "¿Descartar todas las copias de seguridad locales?",
+    "clearDescription": "Estos cambios sin guardar se eliminarán permanentemente de este dispositivo. El contenido guardado no se verá afectado."
   }
 }

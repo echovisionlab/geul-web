@@ -92,13 +92,12 @@ export function MyAccountPagesPreview({
           ) : (
             <MySettingsPageView
               localBackups={{
-                entries: backupEntries,
+                count: backupEntries.length,
+                bytes: backupEntries.reduce((total, entry) => total + entry.bytes, 0),
                 loading: state === 'pending',
                 error: failed,
                 onRefresh: () => {},
-                onOpen: () => {},
-                onDiscard: async (entry) =>
-                  setBackupEntries((current) => current.filter((item) => item.id !== entry.id)),
+                onClear: async () => setBackupEntries([]),
               }}
               email="june@example.com"
               preferredLocale="ko"

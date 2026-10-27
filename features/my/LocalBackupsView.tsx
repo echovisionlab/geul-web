@@ -5,38 +5,48 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { Button } from '@/components/core/Button';
 import { LayoutInline, LayoutStack } from '@/components/core/Layout';
 import { SectionCard } from '@/components/core/Section';
-import { Heading, LocaleCode, Text } from '@/components/core/Typography';
+import { Heading, Text } from '@/components/core/Typography';
 import { Alert } from '@/components/core/Alert';
 import { EmptyState } from '@/components/core/EmptyState';
 import { ConfirmationDialog } from '@/features/confirmation';
-import type { LocalBackup } from '@/lib/collab/local-backups';
 
 export interface LocalBackupsViewProps {
-  entries: LocalBackup[];
+  /** Unsaved edits from closed tabs. The editor recovers them when their document is opened again. */
+  count: number;
+  /** Approximate total size in bytes. */
+  bytes: number;
   loading?: boolean;
   unavailable?: boolean;
   error?: boolean;
-  pendingId?: string | null;
+  clearing?: boolean;
   onRefresh: () => void;
-  onOpen: (entry: LocalBackup) => void;
-  onDiscard: (entry: LocalBackup) => Promise<void>;
+  onClear: () => Promise<void>;
 }
+
+const BYTE_UNITS = ['byte', 'kilobyte', 'megabyte', 'gigabyte'] as const;
 
 /** Account settings composition; all visual and control contracts stay with Core. */
 export function LocalBackupsView({
-  entries,
+  count,
+  bytes,
   loading,
   unavailable,
   error,
-  pendingId,
+  clearing,
   onRefresh,
-  onOpen,
-  onDiscard,
+  onClear,
 }: LocalBackupsViewProps) {
   const t = useTranslations('localBackups');
   const actions = useTranslations('common.actions');
   const format = useFormatter();
-  const [discarding, setDiscarding] = useState<LocalBackup | null>(null);
+  const [confirming, setConfirming] = useState(false);
+  const exponent = Math.min(BYTE_UNITS.length - 1, bytes > 0 ? Math.floor(Math.log(bytes) / Math.log(1024)) : 0);
+  const size = format.number(bytes / 1024 ** exponent, {
+    style: 'unit',
+    unit: BYTE_UNITS[exponent],
+    unitDisplay: 'short',
+    maximumFractionDigits: exponent === 0 ? 0 : 1,
+  });
   return (
     <SectionCard padding="none" appearance="plain" withBorder={false}>
       <LayoutStack gap="md">
@@ -44,7 +54,7 @@ export function LocalBackupsView({
           <Heading level={2} scale={4}>
             {t('title')}
           </Heading>
-          <Button onClick={onRefresh} loading={loading} disabled={!!pendingId || unavailable}>
+          <Button onClick={onRefresh} loading={loading} disabled={clearing || unavailable}>
             {t('refresh')}
           </Button>
         </LayoutInline>
@@ -56,85 +66,41 @@ export function LocalBackupsView({
           <Text size="sm" tone="secondary">
             {t('unavailable')}
           </Text>
-        ) : loading && entries.length === 0 ? (
+        ) : loading && count === 0 ? (
           <Text size="sm" role="status">
             {t('loading')}
           </Text>
-        ) : entries.length === 0 && !error ? (
-          <EmptyState title={t('empty')} live inset="none" />
-        ) : null}
-        <LayoutStack role="list" gap="md" aria-label={t('title')}>
-          {entries.map((entry) => {
-            const key = `${entry.database}:${entry.id}`;
-            const kind = t(`kinds.${entry.documentKind}`);
-            // Named by the title the editor showed; the id only identifies untitled backups.
-            const name = entry.title ?? entry.entityId;
-            return (
-              <LayoutStack role="listitem" gap="xs" key={key}>
-                {entry.title ? (
-                  <Text size="sm" weight="medium" wrap="anywhere">
-                    {entry.title}
-                  </Text>
-                ) : null}
-                <LayoutInline gap="sm" wrap="wrap">
-                  <Text
-                    size="sm"
-                    weight={entry.title ? undefined : 'medium'}
-                    tone={entry.title ? 'secondary' : undefined}
-                  >
-                    {kind}
-                  </Text>
-                  <LocaleCode code={entry.locale} />
-                  <Text size="sm" tone="secondary">
-                    {t('lastChanged', {
-                      time: format.dateTime(new Date(entry.updatedAt), { dateStyle: 'medium', timeStyle: 'short' }),
-                    })}
-                  </Text>
-                </LayoutInline>
-                {entry.title ? null : (
-                  <Text size="xs" tone="secondary" wrap="anywhere">
-                    {entry.entityId}
-                  </Text>
-                )}
-                <LayoutInline gap="action-group" wrap="wrap">
-                  <Button
-                    onClick={() => onOpen(entry)}
-                    disabled={!!pendingId}
-                    aria-label={t('openLabel', { kind, id: name, locale: entry.locale })}
-                  >
-                    {t('open')}
-                  </Button>
-                  <Button
-                    onClick={() => setDiscarding(entry)}
-                    disabled={!!pendingId}
-                    aria-label={t('discardLabel', { kind, id: name, locale: entry.locale })}
-                  >
-                    {t('discard')}
-                  </Button>
-                </LayoutInline>
-              </LayoutStack>
-            );
-          })}
-        </LayoutStack>
+        ) : count === 0 ? (
+          error ? null : (
+            <EmptyState title={t('empty')} live inset="none" />
+          )
+        ) : (
+          <LayoutInline justify="between" gap="sm" wrap="wrap">
+            <Text size="sm" role="status">
+              {t('summary', { count, size })}
+            </Text>
+            <Button onClick={() => setConfirming(true)} disabled={clearing}>
+              {t('clear')}
+            </Button>
+          </LayoutInline>
+        )}
         <ConfirmationDialog
           intent="discard"
-          opened={discarding !== null}
+          opened={confirming}
           onClose={() => {
-            if (!pendingId) {
-              setDiscarding(null);
+            if (!clearing) {
+              setConfirming(false);
             }
           }}
           onConfirm={() => {
-            if (discarding) {
-              void onDiscard(discarding).then(() => setDiscarding(null));
-            }
+            void onClear().then(() => setConfirming(false));
           }}
-          title={t('discardTitle')}
-          message={t('discardDescription')}
-          confirmLabel={t('discard')}
+          title={t('clearTitle')}
+          message={t('clearDescription')}
+          confirmLabel={t('clear')}
           cancelLabel={actions('cancel')}
           closeLabel={actions('close')}
-          loading={!!pendingId}
+          loading={!!clearing}
         />
       </LayoutStack>
     </SectionCard>

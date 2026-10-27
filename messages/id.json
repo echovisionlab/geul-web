@@ -215,7 +215,8 @@
       "newsletter": "Buletin",
       "images": "Gambar",
       "classification": "Klasifikasi",
-      "related": "Terkait"
+      "related": "Terkait",
+      "nicknameNotSet": "Nama panggilan belum diatur"
     },
     "entities": {
       "post": "Pos",
@@ -5370,36 +5371,15 @@
   },
   "localBackups": {
     "title": "Cadangan lokal",
-    "description": "Suntingan yang belum disimpan dari tab yang ditutup di perangkat ini, disimpan selama 30 hari dan dihapus saat keluar.",
+    "description": "Suntingan yang belum disimpan dari tab yang ditutup di perangkat ini, disimpan selama 30 hari dan dihapus saat keluar. Editor memulihkannya saat dokumen dibuka kembali.",
     "empty": "Tidak ada cadangan dari tab yang ditutup untuk dipulihkan.",
     "unavailable": "Cadangan lokal memerlukan penyimpanan browser dan Web Locks di perangkat ini.",
     "loading": "Mencari cadangan lokal…",
     "error": "Tidak dapat menyelesaikan tindakan ini. Muat ulang daftar dan coba lagi.",
     "refresh": "Muat ulang",
-    "lastChanged": "Terakhir diubah {time}",
-    "open": "Buka editor",
-    "discard": "Buang",
-    "openLabel": "Buka editor: {kind} {id}, {locale}",
-    "discardLabel": "Buang: {kind} {id}, {locale}",
-    "discardTitle": "Buang cadangan lokal?",
-    "discardDescription": "Suntingan yang belum tersimpan ini akan dihapus secara permanen dari perangkat ini. Konten yang sudah tersimpan tidak terpengaruh.",
-    "kinds": {
-      "post": "Postingan",
-      "page": "Halaman",
-      "work": "Pekerjaan",
-      "campaign": "Kampanye",
-      "email-template": "Templat email",
-      "email-layout": "Tata letak email",
-      "terms-history": "Ketentuan",
-      "privacy-history": "Kebijakan privasi",
-      "artist": "Artis",
-      "release": "Rilis",
-      "label": "Label",
-      "form": "Formulir",
-      "map-theme": "Tema peta",
-      "program-event": "Acara",
-      "menu": "Menu",
-      "post-series": "Rangkaian postingan"
-    }
+    "summary": "{count} suntingan belum disimpan · sekitar {size}",
+    "clear": "Buang semua",
+    "clearTitle": "Buang semua cadangan lokal?",
+    "clearDescription": "Suntingan yang belum tersimpan ini akan dihapus secara permanen dari perangkat ini. Konten yang sudah tersimpan tidak terpengaruh."
   }
 }

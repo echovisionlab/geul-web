@@ -40,8 +40,33 @@ export interface LocalBackup {
   /** Title the editor showed when the backup was written, when known. */
   title?: string;
   updatedAt: number;
+  /** Approximate stored size: binary payloads by length, text as UTF-8. */
+  bytes: number;
 }
 type Record = RoomJournalRecord<unknown, unknown, unknown>;
+
+const utf8 = new TextEncoder();
+
+function approximateBytes(value: unknown, seen = new Set<object>()): number {
+  if (typeof value === 'string') {
+    return utf8.encode(value).byteLength;
+  }
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return 8;
+  }
+  if (value instanceof ArrayBuffer || ArrayBuffer.isView(value)) {
+    return value.byteLength;
+  }
+  if (!value || typeof value !== 'object' || seen.has(value)) {
+    return 0;
+  }
+  seen.add(value);
+  let total = 0;
+  for (const [key, item] of Object.entries(value)) {
+    total += key.length + approximateBytes(item, seen);
+  }
+  return total;
+}
 
 function backupFromRecord(database: RoomJournalDatabase, record: Record, now: number): LocalBackup | null {
   if (
@@ -84,6 +109,7 @@ function backupFromRecord(database: RoomJournalDatabase, record: Record, now: nu
       locale: parsed.locale,
       ...(typeof record.title === 'string' && record.title.trim() ? { title: record.title.trim() } : {}),
       updatedAt: record.updatedAt,
+      bytes: approximateBytes(record),
     };
   } catch {
     return null;
