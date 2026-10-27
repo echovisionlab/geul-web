@@ -1,4 +1,4 @@
-import type { Decorator, Meta, StoryObj } from '@storybook/nextjs';
+import type { Meta, StoryObj } from '@storybook/nextjs';
 import { useState } from 'react';
 import { useMediaQuery } from '@mantine/hooks';
 import { useTranslations } from 'next-intl';
@@ -10,13 +10,12 @@ import { SiteLogo } from '@/features/site/SiteLogo';
 import { SITE_LOGO_HEIGHT } from '@/features/site/SiteLogo/placements';
 import { SessionProvider } from '@/lib/providers/SessionProvider';
 import { LanguageMenu } from '@/features/shell/LanguageMenu';
-import { useSiteSettings, ManifestProvider } from '@/lib/contexts/ManifestContext';
-import { DEFAULT_SITE_SETTINGS_VIEW } from '@/lib/types/site-setting/config';
+import { useSiteSettings } from '@/lib/contexts/ManifestContext';
 import { navigatePreview } from '../shared/preview-navigation';
-import { ContentModal } from '@/components/core/Modal';
+import { withStackedBrand } from '../shared/stacked-brand';
+import { CommandPalette, CommandPaletteResults } from '@/components/core/CommandPalette';
 import { FormModal } from '@/components/core/Modal/FormModal';
-import { Checkbox, TextInput } from '@/components/core/Input';
-import { TextButton } from '@/components/core/TextButton';
+import { Checkbox } from '@/components/core/Input';
 import { useColorScheme } from '@/lib/providers/DesignSystemProvider';
 import { LayoutStack } from '@/components/core/Layout';
 import { Text, Heading } from '@/components/core/Typography';
@@ -239,7 +238,7 @@ export function FramesPreview({
       slots={{
         logo: <SiteLogo height={SITE_LOGO_HEIGHT.header} />,
         printHeader: null,
-        printWatermark: <SiteLogo height={SITE_LOGO_HEIGHT.printWatermark} />,
+        printWatermark: <SiteLogo form="symbol" height={SITE_LOGO_HEIGHT.printWatermark} />,
         languageDesktop: <LanguageMenu />,
         languageNavigation: <LanguageMenu variant="navigation" />,
         languageFooterDesktop: null,
@@ -248,25 +247,24 @@ export function FramesPreview({
       }}
     >
       {children}
-      <ContentModal
+      {/* Same Core palette and copy roles as production PostSpotlight; navigation entries stand in for post results. */}
+      <CommandPalette
         opened={panel === 'search'}
         onClose={() => setPanel(null)}
         title={shell('actions.search')}
         closeLabel={t('actions.close')}
+        query={query}
+        onQueryChange={setQuery}
+        placeholder={t('placeholders.searchPosts')}
       >
-        <TextInput
-          label={shell('actions.search')}
-          value={query}
-          onChange={(event) => setQuery(event.currentTarget.value)}
+        <CommandPaletteResults
+          items={query.length < 2 ? [] : nav.filter((item) => item.label.toLowerCase().includes(query.toLowerCase()))}
+          label={t('placeholders.searchPosts')}
+          emptyLabel={
+            query.length < 2 ? t('messages.typeAtLeast2Characters', { count: 2 }) : t('messages.noPostsFound')
+          }
         />
-        {nav
-          .filter((item) => item.label.toLowerCase().includes(query.toLowerCase()))
-          .map((item) => (
-            <TextButton key={item.id} onClick={() => navigatePreview(item.href)}>
-              {item.label}
-            </TextButton>
-          ))}
-      </ContentModal>
+      </CommandPalette>
       <FormModal
         opened={panel === 'cookies'}
         onClose={() => setPanel(null)}
@@ -326,28 +324,6 @@ export const Account: Story = { args: { kind: 'account' } };
 export const Phone: Story = { globals: { viewport: { value: 'phone', isRotated: false } } };
 
 export const NavigationHierarchy: Story = { args: { signedIn: true, nestedNavigation: true } };
-
-/** Remote published brand assets; the editable vector authority remains the Illustrator media kit. */
-const withStackedBrand: Decorator = (Story) => (
-  <ManifestProvider
-    manifest={{
-      settings: {
-        ...DEFAULT_SITE_SETTINGS_VIEW,
-        site_origin: 'https://www.rawsector.com',
-        site_title: 'rawsector',
-        favicon_asset_set: null,
-        site_og_image_url: null,
-        logo_full_light_url: 'https://cdn.rawsector.com/asset/b8cc8296-7f93-4704-b06d-657d39171ba9/image.svg',
-        logo_full_dark_url: 'https://cdn.rawsector.com/asset/62d7d08d-8a4e-4ff7-96a2-a7669a0183bc/image.svg',
-        logo_symbol_light_url: 'https://cdn.rawsector.com/asset/b8cc8296-7f93-4704-b06d-657d39171ba9/image.svg',
-        logo_symbol_dark_url: 'https://cdn.rawsector.com/asset/62d7d08d-8a4e-4ff7-96a2-a7669a0183bc/image.svg',
-      },
-      menus: { $typeName: 'api.open.v1.Menus', header: [], secondary: [], footer: [], avatarDropdown: [] },
-    }}
-  >
-    <Story />
-  </ManifestProvider>
-);
 
 export const StackedBrand: Story = { decorators: [withStackedBrand] };
 export const StackedBrandSignedIn: Story = { args: { signedIn: true }, decorators: [withStackedBrand] };

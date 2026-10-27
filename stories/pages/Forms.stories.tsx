@@ -1,5 +1,6 @@
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { navigatePreview } from '../shared/preview-navigation';
+import { withStackedBrand } from '../shared/stacked-brand';
 import { useMemo, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -202,6 +203,9 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 export const Response: Story = {};
 export const Success: Story = { args: { surface: 'success' } };
+/** Rawsector's red label at the size its file authors. */
+export const StackedBrand: Story = { decorators: [withStackedBrand] };
+export const StackedBrandSuccess: Story = { args: { surface: 'success' }, decorators: [withStackedBrand] };
 export const PasswordRequired: Story = { args: { surface: 'access' } };
 export const Closed: Story = { args: { surface: 'access', reason: 'closed' } };
 export const NotPublic: Story = { args: { surface: 'access', reason: 'not_public' } };

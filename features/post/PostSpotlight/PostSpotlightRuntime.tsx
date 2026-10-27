@@ -46,9 +46,6 @@ export function PostSpotlightRuntime({ query, debouncedQuery, opened }: PostSpot
   }));
 
   const getNothingFoundMessage = () => {
-    if (query.length === 0) {
-      return tCommonPlaceholders('searchPosts');
-    }
     if (query.length < 2) {
       return tCommonMessages('typeAtLeast2Characters', { count: 2 });
     }

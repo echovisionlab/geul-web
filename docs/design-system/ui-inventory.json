@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "f2efd4c828e1ff9c227b145ff5c20dbadd36d36024ed2fb9fcabd5580c9b88e8",
+  "manifestHash": "2ff27d2c690fd5908d4f0de8b4b6f3e002ebf9b85510d236e1e4f75020729e67",
   "counts": {
-    "sourceFiles": 3867,
+    "sourceFiles": 3868,
     "productionSourceFiles": 2332,
     "componentFiles": 919,
     "coreFamilies": 57,
     "featureDomains": 54,
     "storyFiles": 260,
-    "storyVariants": 1492,
+    "storyVariants": 1494,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -3881,7 +3881,8 @@
     "stories/shared/local-file-library.ts",
     "stories/shared/local-media-insert.ts",
     "stories/shared/preview-navigation.ts",
-    "stories/shared/public-accessibility.ts"
+    "stories/shared/public-accessibility.ts",
+    "stories/shared/stacked-brand.tsx"
   ],
   "components": [
     {
@@ -5172,7 +5173,7 @@
       ],
       "catalogAdapters": [],
       "tests": ["components/core/CommandPalette/CommandPalette.test.tsx"],
-      "stories": ["components/core/CommandPalette/CommandPalette.stories.tsx"],
+      "stories": ["components/core/CommandPalette/CommandPalette.stories.tsx", "stories/pages/Frames.stories.tsx"],
       "composedJsx": [
         "Autocomplete",
         "CloseContext.Provider",
@@ -12754,8 +12755,7 @@
         "stories/foundations/AccessibilityMotion.stories.tsx",
         "stories/foundations/SizeDensity.stories.tsx",
         "stories/foundations/Spacing.stories.tsx",
-        "stories/foundations/Tokens.stories.tsx",
-        "stories/pages/Frames.stories.tsx"
+        "stories/foundations/Tokens.stories.tsx"
       ],
       "composedJsx": ["Group", "Input", "InputHelp", "InputLabel", "TextField", "span"]
     },
@@ -14837,8 +14837,7 @@
       "stories": [
         "components/core/Modal/ContentModal.stories.tsx",
         "components/core/Modal/DialogActions.stories.tsx",
-        "stories/pages/EventSeries.stories.tsx",
-        "stories/pages/Frames.stories.tsx"
+        "stories/pages/EventSeries.stories.tsx"
       ],
       "composedJsx": ["OverlayDialog"]
     },
@@ -18816,8 +18815,7 @@
         "stories/compositions/SizeDensity.stories.tsx",
         "stories/design-system/components/Components.stories.tsx",
         "stories/foundations/AccessibilityMotion.stories.tsx",
-        "stories/foundations/SizeDensity.stories.tsx",
-        "stories/pages/Frames.stories.tsx"
+        "stories/foundations/SizeDensity.stories.tsx"
       ],
       "composedJsx": ["AriaButton", "AriaLink", "ControlIndicator", "button", "span"]
     },
@@ -87268,6 +87266,16 @@
           "preview": "http://localhost:6010/?path=/story/pages-forms-public-response--success"
         },
         {
+          "name": "StackedBrand",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/pages-forms-public-response--stacked-brand"
+        },
+        {
+          "name": "StackedBrandSuccess",
+          "args": "{ surface: 'success' }",
+          "preview": "http://localhost:6010/?path=/story/pages-forms-public-response--stacked-brand-success"
+        },
+        {
           "name": "PasswordRequired",
           "args": "{ surface: 'access' }",
           "preview": "http://localhost:6010/?path=/story/pages-forms-public-response--password-required"
@@ -87357,7 +87365,8 @@
         "features/form/FormSuccessPageView.tsx",
         "features/form/PublicFormView.tsx",
         "lib/actions/action-result.ts",
-        "stories/shared/preview-navigation.ts"
+        "stories/shared/preview-navigation.ts",
+        "stories/shared/stacked-brand.tsx"
       ]
     },
     {
@@ -87427,13 +87436,12 @@
         }
       ],
       "importedSources": [
+        "components/core/CommandPalette/index.ts",
         "components/core/Display/index.ts",
         "components/core/Input/index.ts",
         "components/core/Layout/index.ts",
         "components/core/Modal/FormModal.tsx",
-        "components/core/Modal/index.ts",
         "components/core/Section/index.ts",
-        "components/core/TextButton/index.ts",
         "components/core/Typography/index.ts",
         "features/admin/ui/AdminShell/AdminShellView.tsx",
         "features/shell/LanguageMenu.tsx",
@@ -87444,8 +87452,8 @@
         "lib/contexts/ManifestContext.tsx",
         "lib/providers/DesignSystemProvider.tsx",
         "lib/providers/SessionProvider.tsx",
-        "lib/types/site-setting/config.ts",
-        "stories/shared/preview-navigation.ts"
+        "stories/shared/preview-navigation.ts",
+        "stories/shared/stacked-brand.tsx"
       ]
     },
     {

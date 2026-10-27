@@ -45697,7 +45697,7 @@
           "name": "--geul-action-primary",
           "registered": true,
           "sources": [
-            { "file": "components/core/ApplicationFrame/ApplicationFrame.module.css", "line": 143, "property": "color" }
+            { "file": "components/core/ApplicationFrame/ApplicationFrame.module.css", "line": 150, "property": "color" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 177, "value": "#1b1b19", "context": ":root" },
@@ -45733,32 +45733,32 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 82,
+              "line": 89,
               "property": "background"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 107,
+              "line": 114,
               "property": "background"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 152,
+              "line": 159,
               "property": "background"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 168,
+              "line": 175,
               "property": "background"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 184,
+              "line": 191,
               "property": "background"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 231,
+              "line": 238,
               "property": "background"
             }
           ],
@@ -45796,22 +45796,22 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 81,
+              "line": 88,
               "property": "border-block-end"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 106,
+              "line": 113,
               "property": "border-inline-end"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 129,
+              "line": 136,
               "property": "color"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 154,
+              "line": 161,
               "property": "border-block-start"
             }
           ],
@@ -45849,12 +45849,12 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 147,
+              "line": 154,
               "property": "outline"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 148,
+              "line": 155,
               "property": "outline-offset"
             }
           ],
@@ -45866,22 +45866,22 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 81,
+              "line": 88,
               "property": "border-block-end"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 106,
+              "line": 113,
               "property": "border-inline-end"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 137,
+              "line": 144,
               "property": "width"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 154,
+              "line": 161,
               "property": "border-block-start"
             }
           ],
@@ -45893,17 +45893,22 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 79,
+              "line": 35,
+              "property": "--_site-header-brand-max-height"
+            },
+            {
+              "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
+              "line": 86,
               "property": "height"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 94,
+              "line": 101,
               "property": "padding-block-start"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 226,
+              "line": 233,
               "property": "inset-block"
             }
           ],
@@ -45917,12 +45922,17 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 176,
+              "line": 61,
+              "property": "--_site-header-brand-max-height"
+            },
+            {
+              "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
+              "line": 183,
               "property": "height"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 180,
+              "line": 187,
               "property": "padding-block-start"
             }
           ],
@@ -45934,7 +45944,7 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 71,
+              "line": 78,
               "property": "--_frame-navigation-width"
             }
           ],
@@ -45946,10 +45956,10 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 124,
+              "line": 131,
               "property": "inset-inline-end"
             },
-            { "file": "components/core/ApplicationFrame/ApplicationFrame.module.css", "line": 125, "property": "width" }
+            { "file": "components/core/ApplicationFrame/ApplicationFrame.module.css", "line": 132, "property": "width" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 117, "value": "1.5rem", "context": ":root" }
@@ -45961,7 +45971,7 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 147,
+              "line": 154,
               "property": "outline"
             }
           ],
@@ -45999,12 +46009,12 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 76,
+              "line": 83,
               "property": "z-index"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 99,
+              "line": 106,
               "property": "z-index"
             }
           ],
@@ -46016,7 +46026,7 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 225,
+              "line": 232,
               "property": "z-index"
             }
           ],
@@ -46028,12 +46038,12 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 108,
+              "line": 115,
               "property": "transition"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 118,
+              "line": 125,
               "property": "transition"
             }
           ],
@@ -46047,12 +46057,12 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 108,
+              "line": 115,
               "property": "transition"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 118,
+              "line": 125,
               "property": "transition"
             }
           ],
@@ -46064,17 +46074,17 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 153,
+              "line": 160,
               "property": "padding"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 185,
+              "line": 192,
               "property": "padding-inline"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 230,
+              "line": 237,
               "property": "padding"
             }
           ],
@@ -46086,22 +46096,22 @@
           "sources": [
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 90,
+              "line": 97,
               "property": "padding"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 94,
+              "line": 101,
               "property": "padding-block-start"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 153,
+              "line": 160,
               "property": "padding"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 180,
+              "line": 187,
               "property": "padding-block-start"
             }
           ],
@@ -46120,7 +46130,7 @@
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 230,
+              "line": 237,
               "property": "padding"
             }
           ],
@@ -46136,17 +46146,17 @@
             { "file": "components/core/ApplicationFrame/ApplicationFrame.module.css", "line": 16, "property": "gap" },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 44,
+              "line": 47,
               "property": "padding-inline"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 105,
+              "line": 112,
               "property": "padding"
             },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 230,
+              "line": 237,
               "property": "padding"
             }
           ],
@@ -46156,10 +46166,20 @@
           "name": "--geul-spacing-xxs",
           "registered": true,
           "sources": [
-            { "file": "components/core/ApplicationFrame/ApplicationFrame.module.css", "line": 43, "property": "gap" },
             {
               "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
-              "line": 112,
+              "line": 35,
+              "property": "--_site-header-brand-max-height"
+            },
+            { "file": "components/core/ApplicationFrame/ApplicationFrame.module.css", "line": 46, "property": "gap" },
+            {
+              "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
+              "line": 61,
+              "property": "--_site-header-brand-max-height"
+            },
+            {
+              "file": "components/core/ApplicationFrame/ApplicationFrame.module.css",
+              "line": 119,
               "property": "padding"
             }
           ],
@@ -46171,7 +46191,7 @@
           "name": "--geul-text-primary",
           "registered": true,
           "sources": [
-            { "file": "components/core/ApplicationFrame/ApplicationFrame.module.css", "line": 67, "property": "color" }
+            { "file": "components/core/ApplicationFrame/ApplicationFrame.module.css", "line": 74, "property": "color" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 168, "value": "#1b1b19", "context": ":root" },

@@ -7,6 +7,9 @@ import styles from './SiteLogoView.module.css';
 
 export type SiteLogoSize = Exclude<TextSize, 'display'>;
 
+/** An uploaded file without its own size would render at the browser's 150px default; never exceed a header bar. */
+const INTRINSIC_MAX_HEIGHT = 'var(--_site-header-brand-max-height, var(--geul-chrome-header-height-sm))';
+
 export interface SiteLogoViewProps {
   /** Logo for light surfaces; also used on dark surfaces when `darkSrc` is absent. */
   src: string | null;
@@ -17,7 +20,8 @@ export interface SiteLogoViewProps {
   size?: SiteLogoSize;
   /**
    * Explicit authored image geometry remains supported. `'intrinsic'` renders the
-   * uploaded image at its own size, so the uploaded file decides how large it is.
+   * uploaded image at its own size, so the uploaded file decides how large it is,
+   * up to the site header's brand height (or the header height outside the header).
    */
   height?: number | 'intrinsic';
   fallbackText?: string | null;
@@ -41,6 +45,7 @@ export function SiteLogoView({ src, darkSrc, alt, size = 'md', height, fallbackT
   const imageStyle: CSSProperties = {
     height: height === 'intrinsic' ? 'auto' : (height ?? primitiveTokens.iconSize[size]),
     maxWidth: height === 'intrinsic' ? '100%' : undefined,
+    maxHeight: height === 'intrinsic' ? INTRINSIC_MAX_HEIGHT : undefined,
     ...style,
   };
   const markFailed = (url: string) => setFailedSrcs((current) => (current.includes(url) ? current : [...current, url]));

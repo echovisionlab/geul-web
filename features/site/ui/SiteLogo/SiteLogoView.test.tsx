@@ -75,6 +75,7 @@ describe('SiteLogoView theme variants', () => {
       ['dark', '/logo-dark.svg'],
     ]);
     expect(images[0]?.style.height).toBe('auto');
+    expect(images[0]?.style.maxHeight).toBe('var(--_site-header-brand-max-height, var(--geul-chrome-header-height-sm))');
   });
 
   it('renders a single mark when there is no separate dark logo', () => {
