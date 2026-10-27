@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.22.0](https://github.com/echovisionlab/geul-web/compare/v0.21.5...v0.22.0) (2026-10-27)
+
+
+### Features
+
+* size site logos by their files and stop repeating the search hint ([#199](https://github.com/echovisionlab/geul-web/issues/199)) ([6a535a6](https://github.com/echovisionlab/geul-web/commit/6a535a61f21ae5b6fafb60cc340752ada80e3f6b))
+
 ## [0.21.5](https://github.com/echovisionlab/geul-web/compare/v0.21.4...v0.21.5) (2026-10-26)
 
 
