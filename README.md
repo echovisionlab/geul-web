@@ -4,7 +4,7 @@ The Geul web application, maintained in a private Next.js source repository.
 
 ## Development
 
-Requirements: Node.js `24.22.0` and pnpm `12.14.0`.
+Requirements: Node.js `24.22.1` and pnpm `12.14.0`.
 
 The committed `.npmrc` routes `@echovisionlab` to private GitHub Packages and uses
 `//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}`. Export `NODE_AUTH_TOKEN`

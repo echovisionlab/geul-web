@@ -41,16 +41,22 @@ overrides:
   immer: 11.1.21
   json-schema-migrate>ajv: 6.15.0
   lodash: 4.18.1
-  next: 16.4.2
+  next: 16.4.3
   postcss: 8.5.31
   protobufjs@7: 7.6.6
   protobufjs@8: 8.8.1
   prosemirror-model: 1.25.12
-  prosemirror-view: 1.41.9
+  prosemirror-transform: 1.12.2
+  prosemirror-view: 1.42.8
   uuid: 11.1.1
   vite: 8.3.3
   ws: 8.21.3
-  js-yaml: 4.3.1
+  'satori>fflate': 0.7.5
+  source-map-js@1: 1.2.2
+  qs@6: 6.16.1
+  postcss-selector-parser@7: 7.1.7
+  pbkdf2: 3.1.7
+  js-yaml: 4.3.2
   webapi-parser>ajv: 6.15.0
   '@storybook/builder-webpack5@10.6.3>typescript': workspace:*
   '@storybook/nextjs@10.6.3>typescript': workspace:*
