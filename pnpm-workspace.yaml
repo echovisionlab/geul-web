@@ -10,10 +10,9 @@ minimumReleaseAgeExclude:
   - '@tabler/icons@3.49.0'
   - react-aria-components@1.22.1
   - react-aria@3.53.1
-  - '@storybook/addon-docs@10.6.3'
 
 overrides:
-  '@babel/core': 8.0.7
+  '@babel/core': 8.0.9
   '@protobufjs/utf8': 1.1.2
   '@types/dom-mediacapture-transform>@types/dom-webcodecs': 0.1.13
   '@tiptap/core': 3.32.0
@@ -38,19 +37,20 @@ overrides:
   brace-expansion@5: 5.0.12
   dompurify: 3.4.17
   fast-uri: 3.1.9
-  immer: 11.1.21
+  immer: 11.2.9
   json-schema-migrate>ajv: 6.15.0
   lodash: 4.18.1
   next: 16.4.3
-  postcss: 8.5.31
+  postcss: 8.5.32
   protobufjs@7: 7.6.6
   protobufjs@8: 8.8.1
   prosemirror-model: 1.25.12
-  prosemirror-transform: 1.12.2
+  prosemirror-transform: 1.12.4
   prosemirror-view: 1.42.8
   uuid: 11.1.1
-  vite: 8.3.3
-  ws: 8.21.3
+  vite: 8.3.5
+  ws: 8.22.0
+  '@storybook/builder-webpack5>webpack-dev-middleware': 7.4.6
   'satori>fflate': 0.7.5
   source-map-js@1: 1.2.2
   qs@6: 6.16.1
@@ -58,10 +58,10 @@ overrides:
   pbkdf2: 3.1.7
   js-yaml: 4.3.2
   webapi-parser>ajv: 6.15.0
-  '@storybook/builder-webpack5@10.6.3>typescript': workspace:*
-  '@storybook/nextjs@10.6.3>typescript': workspace:*
-  '@storybook/preset-react-webpack@10.6.3>typescript': workspace:*
-  '@storybook/react@10.6.3>typescript': workspace:*
+  '@storybook/builder-webpack5@10.6.4>typescript': workspace:*
+  '@storybook/nextjs@10.6.4>typescript': workspace:*
+  '@storybook/preset-react-webpack@10.6.4>typescript': workspace:*
+  '@storybook/react@10.6.4>typescript': workspace:*
   '@storybook/react-docgen-typescript-plugin@1.0.6--canary.9.0c3f3b7.0>typescript': workspace:*
   'fork-ts-checker-webpack-plugin@9.1.0>typescript': workspace:*
   'react-docgen-typescript@2.4.0>typescript': workspace:*
@@ -77,8 +77,8 @@ allowBuilds:
 
 peerDependencyRules:
   allowedVersions:
-    '@mantine/core': 9.7.3
-    '@mantine/hooks': 9.7.3
+    '@mantine/core': 9.7.4
+    '@mantine/hooks': 9.7.4
   ignoreMissing:
     - '@floating-ui/dom'
     - '@mantine/utils'
@@ -87,22 +87,22 @@ packageExtensions:
   'react-aria@3.53.1':
     dependencies:
       dom-accessibility-api: 0.6.3
-  '@mantine/hooks@9.7.3':
+  '@mantine/hooks@9.7.4':
     peerDependencies:
       react-dom: ^19.2.0
   '@maplibre/maplibre-gl-style-spec@26.4.4':
     dependencies:
       '@types/geojson': 7946.0.16
-  '@storybook/builder-webpack5@10.6.3':
+  '@storybook/builder-webpack5@10.6.4':
     dependencies:
       typescript: workspace:*
-  '@storybook/nextjs@10.6.3':
+  '@storybook/nextjs@10.6.4':
     dependencies:
       typescript: workspace:*
-  '@storybook/preset-react-webpack@10.6.3':
+  '@storybook/preset-react-webpack@10.6.4':
     dependencies:
       typescript: workspace:*
-  '@storybook/react@10.6.3':
+  '@storybook/react@10.6.4':
     dependencies:
       typescript: workspace:*
   'eslint-config-mantine@4.0.3':
@@ -128,7 +128,6 @@ patchedDependencies:
   '@maplibre/maplibre-gl-style-spec@26.4.4': patches/@maplibre__maplibre-gl-style-spec@26.4.4.patch
   '@monaco-editor/react@4.7.0': patches/@monaco-editor__react@4.7.0.patch
   '@types/dom-webcodecs@0.1.13': patches/@types__dom-webcodecs@0.1.13.patch
-  ast-types@0.16.1: patches/ast-types@0.16.1.patch
-  simple-icons@16.35.0: patches/simple-icons@16.35.0.patch
+  simple-icons@16.36.0: patches/simple-icons@16.36.0.patch
   react-aria@3.53.1: patches/react-aria@3.53.1.patch
-  '@storybook/addon-docs@10.6.3': patches/@storybook__addon-docs@10.6.3.patch
+  '@storybook/addon-docs@10.6.4': patches/@storybook__addon-docs@10.6.4.patch
