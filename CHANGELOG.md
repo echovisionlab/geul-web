@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.22.2](https://github.com/echovisionlab/geul-web/compare/v0.22.1...v0.22.2) (2026-10-28)
+
+
+### Bug Fixes
+
+* **deps:** refresh dependencies and patch webpack-dev-middleware ([#203](https://github.com/echovisionlab/geul-web/issues/203)) ([98e5aa9](https://github.com/echovisionlab/geul-web/commit/98e5aa9360ebb97ff1077180f044013317561b3a))
+
 ## [0.22.1](https://github.com/echovisionlab/geul-web/compare/v0.22.0...v0.22.1) (2026-10-27)
 
 
