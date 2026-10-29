@@ -5,7 +5,9 @@ export const tokenDefinitionFiles = new Set(['components/core/design-tokens.ts',
 export const fontDefinitionFiles = new Set(['lib/styles/font-assignment.css']);
 export const fontRoles = new Set(['--font-family-sans', '--font-mono']);
 /** The branding adapter projects validated site configuration into the brand fill and its text color. */
-export const runtimeRoleOwners = new Map([['lib/theme/site-brand.ts', new Set(['--geul-brand-color', '--geul-brand-ink'])]]);
+export const runtimeRoleOwners = new Map([
+  ['lib/theme/site-brand.ts', new Set(['--geul-brand-color', '--geul-brand-ink'])],
+]);
 
 export const legacyDefinitionFiles = new Set(['lib/styles/variables.css']);
 /** Type sizes that belong to generated or authored artwork rather than interface roles. Screen and

@@ -103,7 +103,10 @@ test('the validated branding adapter owns only its registered site identity role
   );
   const ink = "const style = {'--geul-brand-ink': siteBrandInk(color)};";
   assert.equal(scanSource('lib/theme/site-brand.ts', ink, new Set([...known, '--geul-brand-ink'])).findings.length, 0);
-  assert.equal(scanSource('features/example.ts', ink, new Set([...known, '--geul-brand-ink'])).findings[0]?.kind, 'custom-token');
+  assert.equal(
+    scanSource('features/example.ts', ink, new Set([...known, '--geul-brand-ink'])).findings[0]?.kind,
+    'custom-token',
+  );
 });
 
 test('TypeScript parses inline styles, templates and custom definitions but ignores comments and regex', () => {

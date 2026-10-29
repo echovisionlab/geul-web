@@ -305,7 +305,8 @@ export function TranslationSettingsPage({ client }: { client?: TranslationSettin
             >
               {t('actions.jobs')}
             </Button>
-            <SaveButton type="button"
+            <SaveButton
+              type="button"
               leftSection={<IconDeviceFloppy size={16} />}
               onClick={() => {
                 const baseline = persistedFormRef.current;

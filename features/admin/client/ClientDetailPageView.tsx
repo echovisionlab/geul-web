@@ -253,7 +253,8 @@ export function ClientDetailPageView({
             >
               {tCommon('actions.cancel')}
             </Button>
-            <SaveButton type="button"
+            <SaveButton
+              type="button"
               onClick={handleSubmit}
               loading={createClient.isPending || updateClient.isPending}
               disabled={!name.trim()}

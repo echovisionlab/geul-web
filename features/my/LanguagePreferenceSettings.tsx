@@ -72,7 +72,8 @@ export function LanguagePreferenceSettings({
         disabled={updateLocaleMutation.isPending}
       />
 
-      <SaveButton type="button"
+      <SaveButton
+        type="button"
         onClick={() => updateLocaleMutation.mutate()}
         loading={updateLocaleMutation.isPending}
         disabled={!selectedLocale || selectedLocale === savedLocale}

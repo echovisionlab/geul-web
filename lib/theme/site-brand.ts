@@ -31,7 +31,8 @@ function contrastRatio(a: number, b: number): number {
 /** Picks the text color with the higher WCAG contrast against the brand fill. */
 export function siteBrandInk(color: string): string {
   const fill = relativeLuminance(color);
-  return contrastRatio(fill, relativeLuminance(BRAND_INK_LIGHT)) >= contrastRatio(fill, relativeLuminance(BRAND_INK_DARK))
+  return contrastRatio(fill, relativeLuminance(BRAND_INK_LIGHT)) >=
+    contrastRatio(fill, relativeLuminance(BRAND_INK_DARK))
     ? BRAND_INK_LIGHT
     : BRAND_INK_DARK;
 }

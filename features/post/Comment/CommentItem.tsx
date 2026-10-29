@@ -281,7 +281,8 @@ export function CommentItem({
                       >
                         {tCommonActions('cancel')}
                       </Button>
-                      <SaveButton type="button"
+                      <SaveButton
+                        type="button"
                         size="xs"
                         onClick={handleUpdate}
                         loading={updateMutation.isPending}

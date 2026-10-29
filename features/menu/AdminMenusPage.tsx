@@ -720,7 +720,8 @@ export function AdminMenusPageView({ model }: { model: AdminMenusPageViewModel }
               <Button emphasis="low" onClick={closeMenuModal}>
                 {tCommon('actions.cancel')}
               </Button>
-              <SaveButton type="button"
+              <SaveButton
+                type="button"
                 onClick={handleSaveMenu}
                 loading={isSaving}
                 disabled={!menuName.trim() || (Boolean(editingMenuId) && selectedMenuAuthoringLocked)}

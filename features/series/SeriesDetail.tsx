@@ -676,7 +676,12 @@ export function SeriesDetailView({
                   />
                   {activeEditLocale.isSourceLocale && (
                     <DsLayoutInline justify="end">
-                      <SaveButton type="button" disabled={!canEdit} onClick={handleSave} loading={updateSeries.isPending}>
+                      <SaveButton
+                        type="button"
+                        disabled={!canEdit}
+                        onClick={handleSave}
+                        loading={updateSeries.isPending}
+                      >
                         {tActions('saveChanges')}
                       </SaveButton>
                     </DsLayoutInline>

@@ -467,12 +467,7 @@ export function ProfileFormView({
             </DsText>
           ) : null}
 
-          <SaveButton
-            id={submitId}
-            type="submit"
-            loading={pending}
-            disabled={formDisabled}
-          >
+          <SaveButton id={submitId} type="submit" loading={pending} disabled={formDisabled}>
             {labels.submit}
           </SaveButton>
         </DsLayoutStack>

@@ -559,7 +559,8 @@ export function SortableCreditRow({
             <Button emphasis="low" onClick={() => setNoteModalOpened(false)}>
               {tCommon('actions.cancel')}
             </Button>
-            <SaveButton type="button"
+            <SaveButton
+              type="button"
               onClick={() => {
                 onNoteChange(localNote);
                 setNoteModalOpened(false);

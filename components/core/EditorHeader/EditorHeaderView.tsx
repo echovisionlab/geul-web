@@ -246,20 +246,20 @@ export function EditorHeaderView<TStatus extends string = string>({
             {item.label}
           </SaveButton>
         ) : (
-        <ToolbarCommand
-          key={item.key}
-          {...(item.iconOnly && item.icon
-            ? { presentation: 'icon' as const, icon: item.icon }
-            : { presentation: 'label' as const, icon: item.icon })}
-          label={item.label}
-          tooltipLabel={item.tooltip}
-          aria-label={item.ariaLabel ?? item.label}
-          tone={item.tone}
-          emphasis={item.emphasis}
-          onClick={item.onClick}
-          disabled={item.disabled}
-          loading={item.loading}
-        />
+          <ToolbarCommand
+            key={item.key}
+            {...(item.iconOnly && item.icon
+              ? { presentation: 'icon' as const, icon: item.icon }
+              : { presentation: 'label' as const, icon: item.icon })}
+            label={item.label}
+            tooltipLabel={item.tooltip}
+            aria-label={item.ariaLabel ?? item.label}
+            tone={item.tone}
+            emphasis={item.emphasis}
+            onClick={item.onClick}
+            disabled={item.disabled}
+            loading={item.loading}
+          />
         ),
       )}
       {actions}
