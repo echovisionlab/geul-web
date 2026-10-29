@@ -41,7 +41,11 @@ function localizeEmailActionMessage(
   ) {
     return t('errors.alreadyExists');
   }
-  if (normalized.includes('already the verified') || normalized.includes('already verified')) {
+  if (
+    normalized.includes('already the verified') ||
+    normalized.includes('already verified') ||
+    normalized.includes('already the current')
+  ) {
     return t('errors.currentVerified');
   }
   if (normalized.includes('valid email')) {
@@ -269,6 +273,9 @@ export function VerificationContent() {
             rememberEmailVerificationContinuation({ mode, email: trimmedEmail, operation: 'start' }, subjectId);
             startPrivilegedReauthentication(emailVerificationReauthenticationReturnTo());
             return;
+          case 'cooldown':
+            setError(t('errors.cooldown', { seconds: result.retryAfterSeconds }));
+            return;
           case 'failed':
             setError(t('errors.sendVerificationEmail'));
         }
@@ -323,6 +330,9 @@ export function VerificationContent() {
           case 'reauth_required':
             rememberEmailVerificationContinuation({ mode, email: trimmedEmail, operation: 'restart' }, subjectId);
             startPrivilegedReauthentication(emailVerificationReauthenticationReturnTo());
+            return;
+          case 'cooldown':
+            setError(t('errors.cooldown', { seconds: result.retryAfterSeconds }));
             return;
           case 'failed':
             setError(t('errors.sendVerificationEmail'));

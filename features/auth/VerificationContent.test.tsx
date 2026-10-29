@@ -375,6 +375,26 @@ describe('VerificationContent', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it('explains that the requested address is already the account email', async () => {
+    navigationMock.searchParams = new URLSearchParams();
+    emailActionMock.requestEmailChangeAction.mockResolvedValue({
+      success: false,
+      message: 'This is already the current email for this account.',
+    });
+    vi.stubGlobal('fetch', vi.fn());
+
+    await renderVerificationContent();
+    const emailInput = document.querySelector<HTMLInputElement>('input[type="email"]');
+    await act(async () => {
+      setInputValue(emailInput as HTMLInputElement, 'current@example.test');
+      emailInput?.closest('form')?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    });
+    await flush();
+
+    expect(document.body.textContent).toContain('이미 이 계정에서 인증된 이메일입니다');
+    expect(document.body.textContent).not.toContain('인증 메일을 보내지 못했습니다');
+  });
+
   it('stops on a preflight conflict before creating a settings flow', async () => {
     navigationMock.searchParams = new URLSearchParams();
     emailActionMock.requestEmailChangeAction.mockResolvedValue({

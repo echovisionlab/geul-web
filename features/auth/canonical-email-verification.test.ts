@@ -280,6 +280,123 @@ describe('canonical email verification', () => {
     });
   });
 
+  it('clears a stale pending address left by an earlier attempt before starting a new verification', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse({
+          ...settingsFlow,
+          identity: {
+            traits: {
+              email: 'old@example.test',
+              pending_email: 'new@example.test',
+              name: 'John Doe',
+            },
+          },
+        }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          id: 'clear-flow',
+          state: 'success',
+          identity: {
+            traits: {
+              email: 'old@example.test',
+              name: 'John Doe',
+            },
+          },
+          ui: { nodes: [] },
+        }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          ...settingsFlow,
+          id: 'restage-flow',
+          ui: {
+            nodes: [
+              {
+                attributes: {
+                  name: 'csrf_token',
+                  value: 'restage-csrf',
+                },
+              },
+            ],
+          },
+        }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          id: 'restage-flow',
+          state: 'success',
+          identity: {
+            traits: {
+              email: 'old@example.test',
+              pending_email: 'new@example.test',
+              name: 'John Doe',
+            },
+          },
+          continue_with: [
+            {
+              action: 'show_verification_ui',
+              flow: {
+                id: '019f9b65-c856-7fb8-a66a-84d915a0303d',
+                verifiable_address: 'new@example.test',
+              },
+            },
+          ],
+          ui: { nodes: [] },
+        }),
+      );
+    const preflight = vi.fn().mockResolvedValue({ success: true, message: 'accepted' });
+    const { beginCanonicalEmailVerification } = await import('./canonical-email-verification');
+
+    await expect(
+      beginCanonicalEmailVerification({
+        fetchFn: fetchMock,
+        newEmail: 'new@example.test',
+        preflight,
+      }),
+    ).resolves.toEqual({
+      kind: 'verification_started',
+      flowId: '019f9b65-c856-7fb8-a66a-84d915a0303d',
+      verifiableAddress: 'new@example.test',
+    });
+    expect(preflight).toHaveBeenCalledTimes(1);
+    expect(JSON.parse((fetchMock.mock.calls[1]?.[1] as RequestInit).body as string)).toEqual({
+      method: 'profile',
+      csrf_token: 'settings-csrf',
+      traits: {
+        email: 'old@example.test',
+        name: 'John Doe',
+      },
+    });
+    expect(JSON.parse((fetchMock.mock.calls[3]?.[1] as RequestInit).body as string)).toMatchObject({
+      traits: {
+        email: 'old@example.test',
+        name: 'John Doe',
+        pending_email: 'new@example.test',
+      },
+    });
+  });
+
+  it('reports the code cooldown instead of a generic failure when staging is rate limited', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(settingsFlow))
+      .mockResolvedValueOnce(
+        jsonResponse(
+          { error: { code: 429, message: 'please wait before requesting another code' } },
+          { status: 429, headers: { 'Retry-After': '42' } },
+        ),
+      );
+    const preflight = vi.fn().mockResolvedValue({ success: true, message: 'accepted' });
+    const { beginCanonicalEmailVerification } = await import('./canonical-email-verification');
+
+    await expect(
+      beginCanonicalEmailVerification({ fetchFn: fetchMock, newEmail: 'new@example.test', preflight }),
+    ).resolves.toEqual({ kind: 'cooldown', retryAfterSeconds: 42 });
+  });
+
   it('accepts only a validated replacement verification flow id', async () => {
     const { getReplacementVerificationFlowId } = await import('./canonical-email-verification');
 
