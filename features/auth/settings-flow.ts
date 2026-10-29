@@ -75,12 +75,20 @@ interface FlowErrorPayload {
 
 class SettingsFlowError extends Error {
   readonly status: number;
+  /** Seconds from the Retry-After header of a 429 code cooldown, when present. */
+  readonly retryAfterSeconds: number | null;
 
-  constructor(message: string, status: number) {
+  constructor(message: string, status: number, retryAfterSeconds: number | null = null) {
     super(message);
     this.name = 'SettingsFlowError';
     this.status = status;
+    this.retryAfterSeconds = retryAfterSeconds;
   }
+}
+
+function retryAfterSeconds(response: Response): number | null {
+  const seconds = Number.parseInt(response.headers.get('Retry-After') ?? '', 10);
+  return Number.isFinite(seconds) && seconds > 0 ? seconds : null;
 }
 
 export function getSettingsFlowCsrfToken(flow: SettingsFlow): string | null {
@@ -189,6 +197,14 @@ export async function readSettingsFlowError(response: Response, fallbackMessage:
   return new SettingsFlowError(message, response.status);
 }
 
+/** Returns the cooldown in seconds when the code limiter rejected a pending email (HTTP 429), else null. */
+export function settingsFlowCooldownSeconds(error: unknown): number | null {
+  if (!(error instanceof SettingsFlowError) || error.status !== 429) {
+    return null;
+  }
+  return error.retryAfterSeconds ?? 60;
+}
+
 export function isSettingsFlowFreshnessError(error: unknown): boolean {
   return error instanceof SettingsFlowError && (error.status === 401 || error.status === 403);
 }
@@ -248,7 +264,11 @@ async function submitSettingsProfileTraits({
   }
   if (!response.ok || !payload) {
     const errorPayload = asFlowErrorPayload(payload);
-    throw new SettingsFlowError(getSettingsErrorMessage(errorPayload) ?? errorMessage, response.status);
+    throw new SettingsFlowError(
+      getSettingsErrorMessage(errorPayload) ?? errorMessage,
+      response.status,
+      retryAfterSeconds(response),
+    );
   }
   return payload;
 }

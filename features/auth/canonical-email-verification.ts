@@ -7,6 +7,7 @@ import {
   hasSettingsFlowError,
   isSettingsFlowFreshnessError,
   requestSettingsFlow,
+  settingsFlowCooldownSeconds,
   submitSettingsPendingEmail,
 } from './settings-flow';
 
@@ -24,6 +25,11 @@ export type CanonicalEmailVerificationResult =
       kind: 'reauth_required';
     }
   | {
+      /** The code limiter refused a new code for this address; retry after the cooldown. */
+      kind: 'cooldown';
+      retryAfterSeconds: number;
+    }
+  | {
       kind: 'failed';
     };
 
@@ -32,6 +38,14 @@ interface EmailVerificationRequest {
   newEmail: string;
   preflight: (email: string) => Promise<ActionResult>;
   locale?: string;
+}
+
+function settingsFlowResultForError(cause: unknown): CanonicalEmailVerificationResult {
+  const cooldown = settingsFlowCooldownSeconds(cause);
+  if (cooldown !== null) {
+    return { kind: 'cooldown', retryAfterSeconds: cooldown };
+  }
+  return isSettingsFlowFreshnessError(cause) ? { kind: 'reauth_required' } : { kind: 'failed' };
 }
 
 async function beginEmailVerification({
@@ -75,7 +89,7 @@ async function beginEmailVerification({
     const continuation = getSettingsVerificationContinuation(updatedSettings, email, canonicalEmail);
     return continuation ? { kind: 'verification_started', ...continuation } : { kind: 'failed' };
   } catch (cause) {
-    return isSettingsFlowFreshnessError(cause) ? { kind: 'reauth_required' } : { kind: 'failed' };
+    return settingsFlowResultForError(cause);
   }
 }
 
@@ -102,7 +116,7 @@ async function restartEmailVerification({
     }
     return beginEmailVerification({ fetchFn, newEmail, preflight, locale });
   } catch (cause) {
-    return isSettingsFlowFreshnessError(cause) ? { kind: 'reauth_required' } : { kind: 'failed' };
+    return settingsFlowResultForError(cause);
   }
 }
 

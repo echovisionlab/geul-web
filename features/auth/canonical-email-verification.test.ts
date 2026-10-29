@@ -379,6 +379,24 @@ describe('canonical email verification', () => {
     });
   });
 
+  it('reports the code cooldown instead of a generic failure when staging is rate limited', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(settingsFlow))
+      .mockResolvedValueOnce(
+        jsonResponse(
+          { error: { code: 429, message: 'please wait before requesting another code' } },
+          { status: 429, headers: { 'Retry-After': '42' } },
+        ),
+      );
+    const preflight = vi.fn().mockResolvedValue({ success: true, message: 'accepted' });
+    const { beginCanonicalEmailVerification } = await import('./canonical-email-verification');
+
+    await expect(
+      beginCanonicalEmailVerification({ fetchFn: fetchMock, newEmail: 'new@example.test', preflight }),
+    ).resolves.toEqual({ kind: 'cooldown', retryAfterSeconds: 42 });
+  });
+
   it('accepts only a validated replacement verification flow id', async () => {
     const { getReplacementVerificationFlowId } = await import('./canonical-email-verification');
 
