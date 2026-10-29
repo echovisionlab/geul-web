@@ -4684,7 +4684,8 @@
     },
     "profile": {
       "description": "本部分的更改需点击保存后生效。下方各部分的更改会立即生效。"
-    }
+    },
+    "deletedNotice": "该用户已被删除，无法编辑其资料。"
   },
   "adminSettings": {
     "site": {

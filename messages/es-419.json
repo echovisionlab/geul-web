@@ -4684,7 +4684,8 @@
     },
     "profile": {
       "description": "Guardar aplica los cambios de esta sección. Las secciones de abajo aplican cada cambio de inmediato."
-    }
+    },
+    "deletedNotice": "Este usuario fue eliminado. No se puede editar el perfil."
   },
   "adminSettings": {
     "site": {

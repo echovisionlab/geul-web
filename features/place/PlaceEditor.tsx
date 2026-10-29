@@ -236,6 +236,7 @@ function PlaceEditorContent({
                     : []),
                   {
                     key: 'save',
+                    save: true,
                     label: resolvedSubmitLabel,
                     disabled: !isFormValid || isSubmitting,
                     loading: isSubmitting,

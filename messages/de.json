@@ -1942,7 +1942,8 @@
     },
     "profile": {
       "description": "Änderungen in diesem Abschnitt werden mit „Speichern“ übernommen. Die Abschnitte darunter übernehmen jede Änderung sofort."
-    }
+    },
+    "deletedNotice": "Dieser Benutzer wurde gelöscht. Das Profil kann nicht bearbeitet werden."
   },
   "adminSettings": {
     "site": {

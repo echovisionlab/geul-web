@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "d7f241907d9e9fe79e505072ff52d8300e1c11d8c436ac535abc4df14c1b6387",
+  "manifestHash": "6d46216701bc8fbf711a5d16c76e81b0febd313767302fee6a87e1cf70f6f7c5",
   "counts": {
-    "sourceFiles": 3868,
-    "productionSourceFiles": 2332,
-    "componentFiles": 919,
+    "sourceFiles": 3869,
+    "productionSourceFiles": 2333,
+    "componentFiles": 920,
     "coreFamilies": 57,
     "featureDomains": 54,
     "storyFiles": 260,
-    "storyVariants": 1495,
+    "storyVariants": 1496,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -352,6 +352,7 @@
     "components/core/Button/Button.tsx",
     "components/core/Button/Button.type-test.tsx",
     "components/core/Button/PendingAnnouncement.test.tsx",
+    "components/core/Button/SaveButton.tsx",
     "components/core/Button/index.ts",
     "components/core/Carousel/Carousel.stories.tsx",
     "components/core/Carousel/Carousel.test.tsx",
@@ -4441,7 +4442,7 @@
             {
               "name": "tone",
               "optional": true,
-              "type": "ControlTone"
+              "type": "ButtonTone"
             },
             {
               "name": "emphasis",
@@ -4587,6 +4588,7 @@
         "app/(general)/privacy/PrivacyPageClient.tsx",
         "app/(general)/terms/TermsPageClient.tsx",
         "app/editor-lab-local/EditorInteractionLab.tsx",
+        "components/core/Button/SaveButton.tsx",
         "components/core/Display/Pagination.tsx",
         "components/core/EditorHeader/EditorHeaderView.tsx",
         "components/core/ErrorPage/ErrorPageView.tsx",
@@ -4670,7 +4672,6 @@
         "features/menu/MenuItemsEditor.tsx",
         "features/menu/MenuTargetItemsEditor.tsx",
         "features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
-        "features/my/LanguagePreferenceSettings.tsx",
         "features/my/LocalBackupsView.tsx",
         "features/my/McpOAuthGrantSettings.tsx",
         "features/my/PasskeySettingsSection.tsx",
@@ -4715,11 +4716,9 @@
         "features/release/ReleaseEditor/ReleaseTrackCreateView.tsx",
         "features/release/ReleaseEditor/ReleaseTracksSection.tsx",
         "features/release/ReleaseEditor/TrackCreditsEditorSection.tsx",
-        "features/series/SeriesDetail.tsx",
         "features/share/SharePasswordView.tsx",
         "features/share/ui/ShareLinkSectionView.tsx",
         "features/shell/ui/Shell/ShellIslands.tsx",
-        "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
         "features/social-links/ui/SocialLinksEditorView.tsx",
         "features/translation/ContentLanguageMenu.tsx",
         "features/translation/ContentLocaleNotice.tsx",
@@ -4797,6 +4796,56 @@
         "stories/pages/EventSeries.stories.tsx"
       ],
       "composedJsx": ["AriaButton", "AriaLink", "ControlIndicator", "ProgressBar", "button", "span"]
+    },
+    {
+      "file": "components/core/Button/SaveButton.tsx",
+      "owner": "Core/Button",
+      "exports": [
+        {
+          "name": "SaveButton",
+          "kind": "value"
+        }
+      ],
+      "classification": "core",
+      "propsEvidence": [
+        {
+          "name": "SaveButtonProps",
+          "extends": ["extends Omit<ButtonActionProps, 'tone' | 'emphasis' | 'children'>"],
+          "properties": [
+            {
+              "name": "children",
+              "optional": false,
+              "type": "ReactNode"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": [
+        "components/core/EditorHeader/EditorHeaderView.tsx",
+        "features/admin/client/ClientDetailPageView.tsx",
+        "features/admin/mail-adapter/MailAdaptersPage.tsx",
+        "features/admin/program-event/ProgramEventTypeManager.tsx",
+        "features/admin/settings/OgImageSettingsPage.tsx",
+        "features/admin/user/AdminUserEditPage.tsx",
+        "features/menu/AdminMenusPage.tsx",
+        "features/menu/MenuItemsEditor.tsx",
+        "features/my/LanguagePreferenceSettings.tsx",
+        "features/my/ui/ProfileForm/ProfileFormView.tsx",
+        "features/page/PageEditor/PageAccessSettings.tsx",
+        "features/post/Comment/CommentItem.tsx",
+        "features/release/ReleaseEditor/ReleaseCreditsSection.tsx",
+        "features/release/ReleaseEditor/ReleaseLabelsSection.tsx",
+        "features/release/ReleaseEditor/ReleaseTracksSection.tsx",
+        "features/series/SeriesDetail.tsx",
+        "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
+        "features/translation/admin/TranslationSettingsPage.tsx",
+        "features/translation/settings/TranslationProviderModal.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": ["components/core/Button/Button.stories.tsx"],
+      "composedJsx": ["Button"]
     },
     {
       "file": "components/core/Carousel/Carousel.tsx",
@@ -7910,6 +7959,11 @@
               "name": "emphasis",
               "optional": true,
               "type": "ControlEmphasis"
+            },
+            {
+              "name": "save",
+              "optional": true,
+              "type": "boolean"
             }
           ]
         },
@@ -8157,6 +8211,7 @@
         "IconButton",
         "IconTrash",
         "LabelBadge",
+        "SaveButton",
         "SupportingText",
         "TextInput",
         "ToolbarCommand",
@@ -14990,7 +15045,7 @@
             {
               "name": "submitTone",
               "optional": true,
-              "type": "ControlTone"
+              "type": "ButtonTone"
             },
             {
               "name": "loading",
@@ -21851,6 +21906,7 @@
         "DsLayoutStack",
         "EditorHeader",
         "PageLoader",
+        "SaveButton",
         "TextInput"
       ]
     },
@@ -24228,6 +24284,7 @@
         "PageHeader",
         "PasswordInput",
         "QueryErrorAlert",
+        "SaveButton",
         "SectionHeader",
         "Select",
         "SettingsSection",
@@ -24985,6 +25042,7 @@
         "IconListDetails",
         "NumberInput",
         "ProgramEventTypeManagerView",
+        "SaveButton",
         "Select",
         "TextInput",
         "Textarea"
@@ -26336,6 +26394,7 @@
         "PageHeader",
         "PageLoader",
         "QueryErrorAlert",
+        "SaveButton",
         "SectionCard",
         "SectionHeader",
         "SettingsGroup",
@@ -27732,6 +27791,7 @@
         "PageLoader",
         "PersonalAccessTokenSettings",
         "QueryErrorAlert",
+        "SaveButton",
         "Select",
         "TextInput",
         "UserBanStateSection",
@@ -49864,6 +49924,7 @@
         "PageHeader",
         "PageLoader",
         "QueryErrorAlert",
+        "SaveButton",
         "Select",
         "SelectionRow",
         "SettingsSection",
@@ -49979,6 +50040,7 @@
         "LabelBadge",
         "MenuItemForm",
         "QueryErrorAlert",
+        "SaveButton",
         "Select",
         "SortableSurface",
         "TextInput",
@@ -51113,7 +51175,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": ["Button", "DsLayoutStack", "IconCheck", "Select"]
+      "composedJsx": ["DsLayoutStack", "IconCheck", "SaveButton", "Select"]
     },
     {
       "file": "features/my/LocalBackups.tsx",
@@ -53213,6 +53275,7 @@
         "IconPlus",
         "IconTrash",
         "ReorderRow",
+        "SaveButton",
         "Select",
         "TextInput",
         "Textarea",
@@ -53759,6 +53822,7 @@
         "DsLayoutStack",
         "DsText",
         "MultiSelect",
+        "SaveButton",
         "Select",
         "SupportingText"
       ]
@@ -63750,6 +63814,7 @@
         "IconEdit",
         "IconMessageReply",
         "IconTrash",
+        "SaveButton",
         "SectionCard",
         "StatusIcon",
         "Textarea",
@@ -67106,6 +67171,7 @@
         "IconPlus",
         "IconX",
         "QueryErrorAlert",
+        "SaveButton",
         "SectionCard",
         "SectionHeader",
         "SegmentedControl",
@@ -67497,6 +67563,7 @@
         "IconPlus",
         "IconX",
         "QueryErrorAlert",
+        "SaveButton",
         "SectionCard",
         "SectionHeader",
         "Select",
@@ -67973,6 +68040,7 @@
         "Progress",
         "ReleaseTrackCreateView",
         "ReorderRow",
+        "SaveButton",
         "SectionCard",
         "SectionHeader",
         "SortableContext",
@@ -68415,7 +68483,6 @@
       "stories": ["stories/pages/SeriesEditor.stories.tsx"],
       "composedJsx": [
         "AuthoringExtension",
-        "Button",
         "DateTime",
         "DocumentEditorPanels",
         "DsLayoutInline",
@@ -68437,6 +68504,7 @@
         "MediaPreviewGrid",
         "OgImagePreview",
         "Pagination",
+        "SaveButton",
         "SectionCard",
         "SeriesDetailView",
         "SeriesManagersModal",
@@ -70620,11 +70688,11 @@
       "tests": [],
       "stories": [],
       "composedJsx": [
-        "Button",
         "ColorInput",
         "DsLayoutInline",
         "DsLayoutStack",
         "PageHeader",
+        "SaveButton",
         "Select",
         "SettingsGroup",
         "SettingsSection",
@@ -72447,6 +72515,7 @@
         "LabelBadge",
         "PageHeader",
         "PageLoader",
+        "SaveButton",
         "Select",
         "SettingsSection",
         "SupportingText",
@@ -72524,6 +72593,7 @@
         "LayoutInset",
         "NumberInput",
         "PasswordInput",
+        "SaveButton",
         "SectionHeader",
         "Select",
         "Switch",
@@ -74915,7 +74985,7 @@
     },
     {
       "owner": "Core/Button",
-      "components": ["components/core/Button/Button.tsx"],
+      "components": ["components/core/Button/Button.tsx", "components/core/Button/SaveButton.tsx"],
       "stories": ["components/core/Button/Button.stories.tsx"]
     },
     {
@@ -78987,6 +79057,11 @@
           "preview": "http://localhost:6010/?path=/story/core-actions-button--danger"
         },
         {
+          "name": "Save",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/core-actions-button--save"
+        },
+        {
           "name": "Loading",
           "args": "{ loading: true, children: 'Saving' }",
           "preview": "http://localhost:6010/?path=/story/core-actions-button--loading"
@@ -79055,6 +79130,7 @@
       "importedSources": [
         ".storybook/fixture-i18n.tsx",
         "components/core/Button/Button.tsx",
+        "components/core/Button/SaveButton.tsx",
         "components/core/DropdownMenu/index.ts",
         "components/core/Layout/index.ts",
         "components/core/Typography/index.ts",
@@ -96520,6 +96596,26 @@
           ]
         },
         {
+          "target": "components/core/Button/SaveButton.tsx",
+          "symbols": [
+            {
+              "exported": "SaveButton",
+              "imported": "SaveButton",
+              "typeOnly": false
+            }
+          ]
+        },
+        {
+          "target": "components/core/Button/SaveButton.tsx",
+          "symbols": [
+            {
+              "exported": "SaveButtonProps",
+              "imported": "SaveButtonProps",
+              "typeOnly": true
+            }
+          ]
+        },
+        {
           "target": "components/core/Button/Button.tsx",
           "symbols": [
             {
@@ -96545,6 +96641,11 @@
             {
               "exported": "ButtonSize",
               "imported": "ButtonSize",
+              "typeOnly": true
+            },
+            {
+              "exported": "ButtonTone",
+              "imported": "ButtonTone",
               "typeOnly": true
             },
             {
@@ -101095,6 +101196,11 @@
               "exported": "Button",
               "imported": "Button",
               "typeOnly": false
+            },
+            {
+              "exported": "SaveButton",
+              "imported": "SaveButton",
+              "typeOnly": false
             }
           ]
         },
@@ -101107,6 +101213,11 @@
               "typeOnly": true
             },
             {
+              "exported": "ButtonTone",
+              "imported": "ButtonTone",
+              "typeOnly": true
+            },
+            {
               "exported": "ControlEmphasis",
               "imported": "ControlEmphasis",
               "typeOnly": true
@@ -101114,6 +101225,11 @@
             {
               "exported": "ControlTone",
               "imported": "ControlTone",
+              "typeOnly": true
+            },
+            {
+              "exported": "SaveButtonProps",
+              "imported": "SaveButtonProps",
               "typeOnly": true
             }
           ]

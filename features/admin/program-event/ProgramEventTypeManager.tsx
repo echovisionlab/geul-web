@@ -7,7 +7,7 @@ import { IconListDetails } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 
 import { notifications } from '@/components/core/Notification';
-import { Button } from '@/components/core/Button';
+import { Button, SaveButton } from '@/components/core/Button';
 import { Checkbox, NumberInput, Select, Textarea, TextInput } from '@/components/core/Input';
 import { ContentModal, DialogActions } from '@/components/core/Modal';
 import {
@@ -171,15 +171,14 @@ export function ProgramEventTypeManagerView({
             <Button type="button" tone="neutral" emphasis="low" onClick={onClose} disabled={saving}>
               {labels.cancel}
             </Button>
-            <Button
-              emphasis="strong"
+            <SaveButton
               type="button"
               onClick={onSave}
               loading={saving}
               disabled={!draft.name.trim() || !draft.slug.trim()}
             >
               {labels.save}
-            </Button>
+            </SaveButton>
           </DialogActions>
         </DsLayoutStack>
       </ContentModal>

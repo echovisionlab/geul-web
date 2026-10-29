@@ -148,6 +148,7 @@ export function StyleModals({
         onSubmit={handleEdit}
         title={tAdmin('styles.editTitle')}
         submitLabel={tCommon('actions.save')}
+        submitTone="brand"
         cancelLabel={tCommon('actions.cancel')}
         closeLabel={tCommon('actions.close')}
         loading={editLoading}

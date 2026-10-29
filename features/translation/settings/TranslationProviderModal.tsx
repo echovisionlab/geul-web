@@ -11,7 +11,7 @@ import { useTranslations } from 'next-intl';
 
 import { SectionHeader } from '@/components/core/Section';
 import { ContentModal, DialogActions } from '@/components/core/Modal';
-import { Button } from '@/components/core/Button';
+import { Button, SaveButton } from '@/components/core/Button';
 import { NumberInput, PasswordInput, Select, Switch, TextInput } from '@/components/core/Input';
 import {
   DEFAULT_PROVIDER_FORM,
@@ -197,9 +197,9 @@ export function TranslationProviderModal({ opened, editing, form, saving, onChan
             <Button type="button" emphasis="low" disabled={saving} onClick={onClose}>
               {tCommonActions('cancel')}
             </Button>
-            <Button emphasis="strong" onClick={onSubmit} loading={saving}>
+            <SaveButton type="button" onClick={onSubmit} loading={saving}>
               {editing ? tCommonActions('save') : t('actions.createProvider')}
-            </Button>
+            </SaveButton>
           </DialogActions>
         </DsLayoutInset>
       </DsLayoutStack>

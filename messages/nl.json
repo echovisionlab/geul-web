@@ -4684,7 +4684,8 @@
     },
     "profile": {
       "description": "Opslaan past de wijzigingen in deze sectie toe. De secties hieronder passen elke wijziging direct toe."
-    }
+    },
+    "deletedNotice": "Deze gebruiker is verwijderd. Het profiel kan niet worden bewerkt."
   },
   "adminSettings": {
     "site": {

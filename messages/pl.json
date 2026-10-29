@@ -4684,7 +4684,8 @@
     },
     "profile": {
       "description": "Zapisz stosuje zmiany w tej sekcji. Sekcje poniżej stosują każdą zmianę natychmiast."
-    }
+    },
+    "deletedNotice": "Ten użytkownik został usunięty. Nie można edytować profilu."
   },
   "adminSettings": {
     "site": {

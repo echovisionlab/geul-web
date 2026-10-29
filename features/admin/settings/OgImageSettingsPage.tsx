@@ -22,7 +22,7 @@ import { Spinner as Loader } from '@/components/core/Display';
 import { useForm } from '@mantine/form';
 import { useDebouncedValue } from '@mantine/hooks';
 import { notifications } from '@/components/core/Notification';
-import { Button } from '@/components/core/Button';
+import { Button, SaveButton } from '@/components/core/Button';
 import { OgGenerationRunProgress } from '@/features/metadata/OgGenerationRunProgress';
 import { useOgPreview } from '@/features/metadata/useOgPreview';
 import { TextInput, ColorInput, NumberInput, Slider } from '@/components/core/Input';
@@ -330,9 +330,9 @@ function HomeSettingsPanel({ sharingImage, form, onSubmit, onReset, isLoading }:
               <Button emphasis="low" onClick={onReset}>
                 {t('actions.resetToDefaults')}
               </Button>
-              <Button emphasis="medium" type="submit" loading={isLoading}>
+              <SaveButton type="submit" loading={isLoading}>
                 {tCommonActions('save')}
-              </Button>
+              </SaveButton>
             </DsLayoutInline>
           </DsLayoutStack>
         </DsLayoutGridItem>
@@ -627,9 +627,9 @@ function ContentSettingsPanel({ form, onSubmit, onReset, isLoading }: ContentSet
               <Button emphasis="low" onClick={onReset}>
                 {t('actions.resetToDefaults')}
               </Button>
-              <Button emphasis="medium" type="submit" loading={isLoading}>
+              <SaveButton type="submit" loading={isLoading}>
                 {tCommonActions('save')}
-              </Button>
+              </SaveButton>
             </DsLayoutInline>
           </DsLayoutStack>
         </DsLayoutGridItem>

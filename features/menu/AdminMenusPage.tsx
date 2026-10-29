@@ -34,7 +34,7 @@ import { SelectionRow } from '@/components/core/SelectionSurface';
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@/components/core/Notification';
 import { LabelBadge } from '@/components/core/Badge';
-import { Button } from '@/components/core/Button';
+import { Button, SaveButton } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import { Select, TextInput, Checkbox } from '@/components/core/Input';
 import { ContentModal, DialogActions } from '@/components/core/Modal';
@@ -720,8 +720,7 @@ export function AdminMenusPageView({ model }: { model: AdminMenusPageViewModel }
               <Button emphasis="low" onClick={closeMenuModal}>
                 {tCommon('actions.cancel')}
               </Button>
-              <Button
-                emphasis="strong"
+              <SaveButton type="button"
                 onClick={handleSaveMenu}
                 loading={isSaving}
                 disabled={!menuName.trim() || (Boolean(editingMenuId) && selectedMenuAuthoringLocked)}
@@ -729,7 +728,7 @@ export function AdminMenusPageView({ model }: { model: AdminMenusPageViewModel }
                 {editingMenuId
                   ? tCommon('actions.save')
                   : tCommon('actions.createItem', { item: tCommon('entities.menu') })}
-              </Button>
+              </SaveButton>
             </DialogActions>
           </DsLayoutStack>
         </ContentModal>

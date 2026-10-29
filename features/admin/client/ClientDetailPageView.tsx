@@ -12,7 +12,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
 import { notifications } from '@/components/core/Notification';
-import { Button } from '@/components/core/Button';
+import { Button, SaveButton } from '@/components/core/Button';
 import { EditorHeader } from '@/features/editor/EditorHeader';
 import { TextInput } from '@/components/core/Input';
 import { PageLoader } from '@/features/site/PageLoader';
@@ -253,13 +253,13 @@ export function ClientDetailPageView({
             >
               {tCommon('actions.cancel')}
             </Button>
-            <Button
+            <SaveButton type="button"
               onClick={handleSubmit}
               loading={createClient.isPending || updateClient.isPending}
               disabled={!name.trim()}
             >
               {isNew ? tCommon('actions.createItem', { item: tCommon('entities.client') }) : tCommon('actions.save')}
-            </Button>
+            </SaveButton>
           </DsLayoutInline>
         </DsLayoutInset>
       </DsLayoutStack>

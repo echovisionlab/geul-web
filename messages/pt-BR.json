@@ -4684,7 +4684,8 @@
     },
     "profile": {
       "description": "Salvar aplica as alterações desta seção. As seções abaixo aplicam cada alteração imediatamente."
-    }
+    },
+    "deletedNotice": "Este usuário foi excluído. Não é possível editar o perfil."
   },
   "adminSettings": {
     "site": {

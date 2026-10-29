@@ -6,7 +6,7 @@ import type { ReactNode, SubmitEvent } from 'react';
 import { LayoutStack } from '../Layout';
 import { DialogActions } from './DialogActions';
 import { OverlayDialog } from './OverlayDialog';
-import { Button, type ControlTone } from '../Button';
+import { Button, type ButtonTone } from '../Button';
 
 export type FormModalSize = 'compact' | 'standard' | 'large';
 
@@ -19,7 +19,7 @@ export interface FormModalProps extends OverlayPresentationProps {
   submitLabel: string;
   cancelLabel: string;
   closeLabel: string;
-  submitTone?: ControlTone;
+  submitTone?: ButtonTone;
   loading?: boolean;
   submitDisabled?: boolean;
   size?: FormModalSize;

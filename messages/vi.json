@@ -4684,7 +4684,8 @@
     },
     "profile": {
       "description": "Nút Lưu áp dụng các thay đổi trong phần này. Các phần bên dưới áp dụng mỗi thay đổi ngay lập tức."
-    }
+    },
+    "deletedNotice": "Người dùng này đã bị xóa. Không thể chỉnh sửa hồ sơ."
   },
   "adminSettings": {
     "site": {

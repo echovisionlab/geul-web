@@ -9,7 +9,7 @@ import {
   type ControlNativeProps,
 } from '../control-props';
 import { controlLinkRender } from '../control-render';
-import type { ButtonSize, ControlEmphasis, ControlTone } from '../control-style';
+import type { ButtonSize, ButtonTone, ControlEmphasis } from '../control-style';
 import {
   navigationHref,
   useNavigationClick,
@@ -31,7 +31,7 @@ import { ControlIndicator, type ControlIndicatorKind } from '../control-indicato
 interface SharedButtonProps extends ControlNativeProps, ControlContentProps {
   size?: ButtonSize;
   contrast?: ControlContrast;
-  tone?: ControlTone;
+  tone?: ButtonTone;
   emphasis?: ControlEmphasis;
   labelWrap?: 'nowrap' | 'wrap';
   loading?: boolean;

@@ -45,6 +45,15 @@
   --_action-boundary: var(--geul-status-accent);
 }
 
+.root[data-tone='brand'] {
+  --_action-ink: var(--geul-brand-color);
+  --_action-ink-muted: var(--geul-brand-color);
+  --_action-fill: var(--geul-brand-color);
+  --_action-fill-hover: var(--geul-brand-color-hover);
+  --_action-fill-pressed: var(--geul-brand-color-pressed);
+  --_action-boundary: var(--geul-brand-color);
+}
+
 .root[data-tone='positive'] {
   --_action-ink: var(--geul-status-positive);
   --_action-ink-muted: var(--geul-status-positive);
@@ -84,6 +93,10 @@
   border: 0;
   background: var(--_action-fill);
   color: var(--geul-text-on-action);
+}
+
+.root[data-tone='brand'][data-emphasis='strong'] {
+  color: var(--geul-brand-ink);
 }
 
 /* Persistent selection is a state signal, not a principal commit action. */

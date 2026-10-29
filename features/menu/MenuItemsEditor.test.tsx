@@ -32,13 +32,14 @@ vi.mock('@dnd-kit/sortable', () => ({
   }),
 }));
 
-vi.mock('@/components/core/Button', () => ({
-  Button: ({ children, disabled, onClick }: { children: ReactNode; disabled?: boolean; onClick?: () => void }) => (
+vi.mock('@/components/core/Button', () => {
+  const Button = ({ children, disabled, onClick }: { children: ReactNode; disabled?: boolean; onClick?: () => void }) => (
     <button type="button" disabled={disabled} onClick={onClick}>
       {children}
     </button>
-  ),
-}));
+  );
+  return { Button, SaveButton: Button };
+});
 
 vi.mock('@/components/core/Badge', () => ({
   LabelBadge: ({ children }: { children: ReactNode }) => <span>{children}</span>,

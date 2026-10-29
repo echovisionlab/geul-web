@@ -23,7 +23,7 @@ import { Table } from '@/components/core/Display';
 import { ContentModal, DialogActions } from '@/components/core/Modal';
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@/components/core/Notification';
-import { Button } from '@/components/core/Button';
+import { Button, SaveButton } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import { Select, Textarea, TextInput, SegmentedControl } from '@/components/core/Input';
 import { SectionCard, SectionHeader } from '@/components/core/Section';
@@ -559,8 +559,7 @@ export function SortableCreditRow({
             <Button emphasis="low" onClick={() => setNoteModalOpened(false)}>
               {tCommon('actions.cancel')}
             </Button>
-            <Button
-              emphasis="strong"
+            <SaveButton type="button"
               onClick={() => {
                 onNoteChange(localNote);
                 setNoteModalOpened(false);
@@ -568,7 +567,7 @@ export function SortableCreditRow({
               disabled={!canEditNote}
             >
               {tCommon('actions.save')}
-            </Button>
+            </SaveButton>
           </DialogActions>
         </DsLayoutStack>
       </ContentModal>

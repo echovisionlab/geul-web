@@ -9,7 +9,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
 import { notifications } from '@/components/core/Notification';
-import { Button } from '@/components/core/Button';
+import { SaveButton } from '@/components/core/Button';
 import { Select } from '@/components/core/Input';
 import { updatePreferredLocaleAction } from '@/lib/actions/user-preference';
 import { DEFAULT_LOCALE, getSupportedLocaleOptions, normalizeLocale, type SupportedLocale } from '@/lib/i18n/locale';
@@ -72,14 +72,13 @@ export function LanguagePreferenceSettings({
         disabled={updateLocaleMutation.isPending}
       />
 
-      <Button
-        emphasis="medium"
+      <SaveButton type="button"
         onClick={() => updateLocaleMutation.mutate()}
         loading={updateLocaleMutation.isPending}
         disabled={!selectedLocale || selectedLocale === savedLocale}
       >
         {t('save')}
-      </Button>
+      </SaveButton>
     </DsLayoutStack>
   );
 }

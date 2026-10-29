@@ -4684,7 +4684,8 @@
     },
     "profile": {
       "description": "Enregistrer applique les modifications de cette section. Les sections ci-dessous appliquent chaque modification immédiatement."
-    }
+    },
+    "deletedNotice": "Cet utilisateur a été supprimé. Son profil ne peut pas être modifié."
   },
   "adminSettings": {
     "site": {
