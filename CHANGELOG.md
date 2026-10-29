@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.0](https://github.com/echovisionlab/geul-web/compare/v0.22.3...v0.23.0) (2026-10-29)
+
+
+### Features
+
+* **ui:** add SaveButton in the site color and use it for every save action ([#208](https://github.com/echovisionlab/geul-web/issues/208)) ([73642e5](https://github.com/echovisionlab/geul-web/commit/73642e59f94f79eeb78dabdda9ec1cfa893737ef))
+
 ## [0.22.3](https://github.com/echovisionlab/geul-web/compare/v0.22.2...v0.22.3) (2026-10-29)
 
 
