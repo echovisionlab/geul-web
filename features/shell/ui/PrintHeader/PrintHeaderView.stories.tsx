@@ -24,3 +24,10 @@ export const WithoutLogoOrTaxId: Story = {
     taxId: null,
   },
 };
+
+export const LogoOnly: Story = {
+  args: {
+    companyName: null,
+    taxId: null,
+  },
+};

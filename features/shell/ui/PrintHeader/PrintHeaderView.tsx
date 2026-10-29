@@ -7,7 +7,7 @@ import {
 export interface PrintHeaderViewProps {
   logoSrc: string | null;
   logoAlt: string;
-  companyName: string;
+  companyName: string | null;
   taxId: string | null;
 }
 export function PrintHeaderView({ logoSrc, logoAlt, companyName, taxId }: PrintHeaderViewProps) {
@@ -28,18 +28,22 @@ export function PrintHeaderView({ logoSrc, logoAlt, companyName, taxId }: PrintH
           />
         ) : null}
 
-        <DsLayoutStack gap="none" align="end">
-          <DsText size="sm" weight="strong">
-            {companyName}
-          </DsText>
-          {taxId ? (
-            <DsLayoutInset blockStart="xxs">
-              <DsText size="xs" tone="secondary">
-                {taxId}
+        {companyName || taxId ? (
+          <DsLayoutStack gap="none" align="end">
+            {companyName ? (
+              <DsText size="sm" weight="strong">
+                {companyName}
               </DsText>
-            </DsLayoutInset>
-          ) : null}
-        </DsLayoutStack>
+            ) : null}
+            {taxId ? (
+              <DsLayoutInset blockStart="xxs">
+                <DsText size="xs" tone="secondary">
+                  {taxId}
+                </DsText>
+              </DsLayoutInset>
+            ) : null}
+          </DsLayoutStack>
+        ) : null}
       </DsLayoutInline>
     </div>
   );

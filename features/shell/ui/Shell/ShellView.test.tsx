@@ -176,6 +176,15 @@ describe('ShellView', () => {
     expect(navigateClientRoute.mock.calls.map(([href]) => href)).toEqual(['/']);
   });
 
+  it('leaves the company line out of the footer when the site sets no company details', () => {
+    renderView({ footer: { ...defaultProps.footer, copyright: null, taxId: null, companyAddress: null } });
+
+    const footer = container.querySelector('footer[data-shell-footer]');
+    expect(footer?.textContent).not.toContain('©');
+    expect(footer?.textContent).not.toContain('·');
+    expect(footer?.textContent).toContain('v0.21.3');
+  });
+
   it('renders the public header, active navigation, print slots, page content, and semantic footer', () => {
     renderView();
 

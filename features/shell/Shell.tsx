@@ -51,7 +51,6 @@ export async function Shell({ children, initialUserSnapshot }: ShellProps) {
   const settings = { ...DEFAULT_SITE_SETTINGS_VIEW, ...manifest.settings };
   const menus = manifest.menus;
   const variables = siteVariableContext(settings);
-  const companyName = settings.company_name || settings.site_title;
   return (
     <ShellRuntime
       initialUserSnapshot={initialUserSnapshot}
@@ -76,7 +75,7 @@ export async function Shell({ children, initialUserSnapshot }: ShellProps) {
         footer={{
           siteTitle: settings.site_title,
           description: settings.meta_description || null,
-          copyright: `© ${new Date().getFullYear()} ${companyName}`,
+          copyright: settings.company_name ? `© ${new Date().getFullYear()} ${settings.company_name}` : null,
           taxId: settings.tax_id || null,
           companyAddress: settings.company_address || null,
           version: APP_VERSION_LABEL,

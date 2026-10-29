@@ -24,7 +24,7 @@ export interface ShellViewUser {
 export interface ShellViewFooter {
   siteTitle: string;
   description: string | null;
-  copyright: string;
+  copyright: string | null;
   taxId: string | null;
   companyAddress: string | null;
   version: string;
