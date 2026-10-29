@@ -9,7 +9,7 @@ import { IconArrowLeft, IconTrash } from '@tabler/icons-react';
 import { VisuallyHidden } from 'react-aria-components';
 import { useMediaQuery } from '@mantine/hooks';
 import { LabelBadge } from '../Badge';
-import { Button, type ControlEmphasis, type ControlTone } from '../Button';
+import { Button, SaveButton, type ControlEmphasis, type ControlTone } from '../Button';
 import { DropdownMenu } from '../DropdownMenu';
 import { IconButton } from '../IconButton';
 import { TextInput } from '../Input';
@@ -45,6 +45,8 @@ export interface EditorHeaderActionItem {
   loading?: boolean;
   tone?: ControlTone;
   emphasis?: ControlEmphasis;
+  /** Renders the item as the form's SaveButton instead of a toolbar command. */
+  save?: boolean;
 }
 export interface EditorHeaderProps<TStatus extends string = string> {
   title: string;
@@ -230,22 +232,36 @@ export function EditorHeaderView<TStatus extends string = string>({
   const hasCommands = Boolean(actionItems?.length || actions || onDelete);
   const commands = (
     <ToolbarSurface label={labels.actions} appearance="inline" wrap="wrap" data-testid="editor-header-command-toolbar">
-      {actionItems?.map((item) => (
-        <ToolbarCommand
-          key={item.key}
-          {...(item.iconOnly && item.icon
-            ? { presentation: 'icon' as const, icon: item.icon }
-            : { presentation: 'label' as const, icon: item.icon })}
-          label={item.label}
-          tooltipLabel={item.tooltip}
-          aria-label={item.ariaLabel ?? item.label}
-          tone={item.tone}
-          emphasis={item.emphasis}
-          onClick={item.onClick}
-          disabled={item.disabled}
-          loading={item.loading}
-        />
-      ))}
+      {actionItems?.map((item) =>
+        item.save ? (
+          <SaveButton
+            key={item.key}
+            type="button"
+            leftSection={item.icon}
+            aria-label={item.ariaLabel}
+            onClick={item.onClick}
+            disabled={item.disabled}
+            loading={item.loading}
+          >
+            {item.label}
+          </SaveButton>
+        ) : (
+          <ToolbarCommand
+            key={item.key}
+            {...(item.iconOnly && item.icon
+              ? { presentation: 'icon' as const, icon: item.icon }
+              : { presentation: 'label' as const, icon: item.icon })}
+            label={item.label}
+            tooltipLabel={item.tooltip}
+            aria-label={item.ariaLabel ?? item.label}
+            tone={item.tone}
+            emphasis={item.emphasis}
+            onClick={item.onClick}
+            disabled={item.disabled}
+            loading={item.loading}
+          />
+        ),
+      )}
       {actions}
       {onDelete ? (
         <ToolbarCommand

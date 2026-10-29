@@ -8,7 +8,7 @@ import { IconGripVertical, IconPlus, IconTrash } from '@tabler/icons-react';
 import { CopyButton } from '@/components/core/CopyButton';
 
 import { useForm } from '@mantine/form';
-import { Button } from '@/components/core/Button';
+import { Button, SaveButton } from '@/components/core/Button';
 import { Field } from '@/components/core/Field';
 import { IconButton } from '@/components/core/IconButton';
 import { Select, Textarea, TextInput, ValidatingTextInput, type TextValidationStatus } from '@/components/core/Input';
@@ -467,16 +467,9 @@ export function ProfileFormView({
             </DsText>
           ) : null}
 
-          <Button
-            id={submitId}
-            type="submit"
-            tone="neutral"
-            emphasis="medium"
-            loading={pending}
-            disabled={formDisabled}
-          >
+          <SaveButton id={submitId} type="submit" loading={pending} disabled={formDisabled}>
             {labels.submit}
-          </Button>
+          </SaveButton>
         </DsLayoutStack>
       </form>
     </DsLayoutStack>

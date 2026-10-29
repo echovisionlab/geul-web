@@ -42,7 +42,7 @@ import { Progress } from '@/components/core/Progress';
 import { TimePicker, TextInput } from '@/components/core/Input';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { notifications } from '@/components/core/Notification';
-import { Button } from '@/components/core/Button';
+import { Button, SaveButton } from '@/components/core/Button';
 import { TextButton } from '@/components/core/TextButton';
 import { IconButton } from '@/components/core/IconButton';
 
@@ -1201,9 +1201,9 @@ function TrackRowEditorPanel({
         <Button emphasis="low" onClick={onClose}>
           {tCommon('actions.close')}
         </Button>
-        <Button emphasis="medium" onClick={onSave} loading={isSaving} disabled={!canEdit || !title.trim()}>
+        <SaveButton type="button" onClick={onSave} loading={isSaving} disabled={!canEdit || !title.trim()}>
           {tCommon('actions.save')}
-        </Button>
+        </SaveButton>
       </DsLayoutInline>
     </DsLayoutStack>
   );

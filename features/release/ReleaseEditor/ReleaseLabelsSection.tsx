@@ -23,7 +23,7 @@ import { Table } from '@/components/core/Display';
 import { ContentModal, DialogActions } from '@/components/core/Modal';
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@/components/core/Notification';
-import { Button } from '@/components/core/Button';
+import { Button, SaveButton } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import { Select, TextInput } from '@/components/core/Input';
 import { SectionCard, SectionHeader } from '@/components/core/Section';
@@ -369,9 +369,9 @@ export function SortableLabelRow({ idPrefix, label, onRemove, onCatalogNumberCha
             <Button emphasis="low" onClick={() => setModalOpened(false)}>
               {tCommon('actions.cancel')}
             </Button>
-            <Button disabled={!canEdit} emphasis="strong" onClick={handleSave}>
+            <SaveButton type="button" disabled={!canEdit} onClick={handleSave}>
               {tCommon('actions.save')}
-            </Button>
+            </SaveButton>
           </DialogActions>
         </DsLayoutStack>
       </ContentModal>

@@ -13,7 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Disclosure } from '@/components/core/Disclosure';
 import { LabelBadge } from '@/components/core/Badge';
-import { Button } from '@/components/core/Button';
+import { Button, SaveButton } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import { Checkbox, Select, TextInput } from '@/components/core/Input';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
@@ -313,9 +313,9 @@ function MenuItemForm({
           <Button size="xs" tone="neutral" emphasis="low" onClick={onCancel}>
             {tCommon('actions.cancel')}
           </Button>
-          <Button size="xs" emphasis="medium" onClick={handleSave} disabled={!canSave}>
+          <SaveButton type="button" size="xs" onClick={handleSave} disabled={!canSave}>
             {tCommon('actions.save')}
-          </Button>
+          </SaveButton>
         </DsLayoutInline>
       </DsLayoutStack>
     </DsLayoutInset>

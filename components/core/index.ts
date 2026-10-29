@@ -6,8 +6,8 @@ export type { NotificationOptions, NotificationHostProps, NotificationHostLoadin
 export { useInputCombobox } from './Input/useInputCombobox';
 export type { InputComboboxController } from './Input/useInputCombobox';
 export type { AlertProminence, AlertProps, AlertTone } from './Alert';
-export { Button } from './Button';
-export type { ButtonProps, ControlEmphasis, ControlTone } from './Button';
+export { Button, SaveButton } from './Button';
+export type { ButtonProps, ButtonTone, ControlEmphasis, ControlTone, SaveButtonProps } from './Button';
 export { TextButton } from './TextButton';
 export type {
   TextButtonAppearance,

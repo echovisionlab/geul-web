@@ -20,7 +20,7 @@ import { useTranslations } from 'next-intl';
 import { Spinner as Loader, Pagination, StatusIcon, Table } from '@/components/core/Display';
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@/components/core/Notification';
-import { Button } from '@/components/core/Button';
+import { SaveButton } from '@/components/core/Button';
 import { DateTime } from '@/features/date-time/DateTime';
 import { EditorHeader, type StatusOption } from '@/features/editor/EditorHeader';
 import { IconButton } from '@/components/core/IconButton';
@@ -676,9 +676,14 @@ export function SeriesDetailView({
                   />
                   {activeEditLocale.isSourceLocale && (
                     <DsLayoutInline justify="end">
-                      <Button disabled={!canEdit} onClick={handleSave} loading={updateSeries.isPending}>
+                      <SaveButton
+                        type="button"
+                        disabled={!canEdit}
+                        onClick={handleSave}
+                        loading={updateSeries.isPending}
+                      >
                         {tActions('saveChanges')}
-                      </Button>
+                      </SaveButton>
                     </DsLayoutInline>
                   )}
                 </DsLayoutStack>

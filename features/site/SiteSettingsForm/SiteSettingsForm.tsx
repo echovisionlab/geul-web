@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl';
 import { useForm } from '@mantine/form';
 import { useWindowEvent } from '@mantine/hooks';
 import { notifications } from '@/components/core/Notification';
-import { Button } from '@/components/core/Button';
+import { SaveButton } from '@/components/core/Button';
 import { ColorInput, Select, Switch, Textarea, TextInput } from '@/components/core/Input';
 import { PageHeader } from '@/components/core/PageHeader';
 import { SettingsGroup, SettingsSection } from '@/components/core/Section';
@@ -282,9 +282,9 @@ export function SiteSettingsForm({
         {maintenance}
 
         <DsLayoutInline justify="end">
-          <Button type="submit" emphasis="medium" loading={saving} disabled={!hasUnsavedChanges}>
+          <SaveButton type="submit" loading={saving} disabled={!hasUnsavedChanges}>
             {tCommon('actions.saveChanges')}
-          </Button>
+          </SaveButton>
         </DsLayoutInline>
       </DsLayoutStack>
     </form>

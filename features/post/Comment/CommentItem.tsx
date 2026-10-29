@@ -23,7 +23,7 @@ import { useTranslations } from 'next-intl';
 import { Avatar, StatusIcon } from '@/components/core/Display';
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@/components/core/Notification';
-import { Button } from '@/components/core/Button';
+import { Button, SaveButton } from '@/components/core/Button';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
 import { IconButton } from '@/components/core/IconButton';
 import { Textarea } from '@/components/core/Input';
@@ -281,15 +281,15 @@ export function CommentItem({
                       >
                         {tCommonActions('cancel')}
                       </Button>
-                      <Button
-                        emphasis="medium"
+                      <SaveButton
+                        type="button"
                         size="xs"
                         onClick={handleUpdate}
                         loading={updateMutation.isPending}
                         disabled={!editContent.trim()}
                       >
                         {tCommonActions('save')}
-                      </Button>
+                      </SaveButton>
                     </DsLayoutInline>
                   </DsLayoutStack>
                 ) : (

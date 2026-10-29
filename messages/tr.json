@@ -4684,7 +4684,8 @@
     },
     "profile": {
       "description": "Kaydet bu bölümdeki değişiklikleri uygular. Aşağıdaki bölümler her değişikliği hemen uygular."
-    }
+    },
+    "deletedNotice": "Bu kullanıcı silindi. Profil düzenlenemez."
   },
   "adminSettings": {
     "site": {

@@ -7,6 +7,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs';
 import type { ControlEmphasis, ControlTone } from '../control-style';
 import { useState } from 'react';
 import { Button, type ButtonProps } from './Button';
+import { SaveButton } from './SaveButton';
 import { DropdownMenu } from '../DropdownMenu';
 
 function ButtonExample(props: ButtonProps) {
@@ -47,6 +48,23 @@ export const Quiet: Story = {
   args: { tone: 'neutral', emphasis: 'low', children: 'Quiet' },
 };
 export const Danger: Story = { args: { tone: 'danger', emphasis: 'strong', children: 'Delete' } };
+/** Form and settings commits use SaveButton: a strong fill in the configured site color. */
+export const Save: Story = {
+  render: localizedRender(() => (
+    <DsLayoutInline gap="sm">
+      <Button tone="neutral" emphasis="low">
+        Cancel
+      </Button>
+      <SaveButton type="button">Save</SaveButton>
+      <SaveButton type="button" loading>
+        Saving
+      </SaveButton>
+      <SaveButton type="button" disabled>
+        Save
+      </SaveButton>
+    </DsLayoutInline>
+  )),
+};
 export const Loading: Story = { args: { loading: true, children: 'Saving' } };
 export const Disabled: Story = { args: { disabled: true, children: 'Disabled' } };
 

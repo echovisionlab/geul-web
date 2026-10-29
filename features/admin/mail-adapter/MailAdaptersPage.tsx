@@ -23,7 +23,7 @@ import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@/components/core/Notification';
 import { LabelBadge } from '@/components/core/Badge';
-import { Button } from '@/components/core/Button';
+import { Button, SaveButton } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import { PasswordInput, Select, TextInput, NumberInput, Switch } from '@/components/core/Input';
 
@@ -617,14 +617,13 @@ export default function MailAdaptersPage({ bindings = defaultBindings }: { bindi
               >
                 {tCommon('actions.cancel')}
               </Button>
-              <Button
-                emphasis="strong"
+              <SaveButton
                 type="submit"
                 loading={isEdit ? updateMutation.isPending : createMutation.isPending}
                 disabled={!isEdit && !isCreateReady}
               >
                 {isEdit ? tCommon('actions.save') : tCommon('actions.createItem', { item: tPage('entity') })}
-              </Button>
+              </SaveButton>
             </DialogActions>
           </DsLayoutInset>
         </DsLayoutStack>

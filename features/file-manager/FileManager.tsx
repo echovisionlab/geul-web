@@ -425,6 +425,7 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
         onSubmit={() => void submitFormOperation()}
         title={formTitle}
         submitLabel={t('actions.save')}
+        submitTone="brand"
         cancelLabel={t('actions.cancel')}
         closeLabel={t('actions.close')}
         loading={mutationLoading}

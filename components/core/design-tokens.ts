@@ -557,6 +557,10 @@ export const semanticThemes = {
 export const invariantTokens = {
   /** Configurable site identity; runtime overrides retain this stable public name. */
   'brand-color': 'var(--geul-brand-default)',
+  /** Text on a brand-color fill; siteBrandStyle picks white or ink for the configured color. */
+  'brand-ink': colors.white,
+  'brand-color-hover': 'color-mix(in srgb, var(--geul-brand-color) 86%, #000)',
+  'brand-color-pressed': 'color-mix(in srgb, var(--geul-brand-color) 74%, #000)',
   'text-on-image': colors.white,
   'paper-image-background': '#17282d',
   'paper-image-gradient':

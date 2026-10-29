@@ -6,7 +6,7 @@ import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { Button } from '@/components/core/Button';
+import { Button, SaveButton } from '@/components/core/Button';
 import { Checkbox, MultiSelect, Select } from '@/components/core/Input';
 import type { PageAccessPolicyValue } from '@/lib/types/page-access';
 import {
@@ -199,9 +199,9 @@ export function PageAccessSettings({
         </DsText>
       ) : null}
       <DsLayoutInline gap="xs">
-        <Button emphasis="medium" onClick={() => void save()} disabled={disabled || !dirty} loading={pending}>
+        <SaveButton type="button" onClick={() => void save()} disabled={disabled || !dirty} loading={pending}>
           {pending ? t('saving') : t('save')}
-        </Button>
+        </SaveButton>
         <Button
           tone="neutral"
           emphasis="low"

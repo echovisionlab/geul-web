@@ -28,8 +28,8 @@ const mocks = vi.hoisted(() => ({
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: mocks.routerPush }) }));
 vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
 vi.mock('@/components/core/Notification', () => ({ notifications: { show: mocks.notification } }));
-vi.mock('@/components/core/Button', () => ({
-  Button: ({
+vi.mock('@/components/core/Button', () => {
+  const Button = ({
     children,
     loading,
     disabled,
@@ -38,8 +38,9 @@ vi.mock('@/components/core/Button', () => ({
     <button type="button" disabled={disabled || loading} aria-busy={loading || undefined} {...props}>
       {children}
     </button>
-  ),
-}));
+  );
+  return { Button, SaveButton: Button };
+});
 vi.mock('@/components/core/IconButton', () => ({
   IconButton: ({
     children,

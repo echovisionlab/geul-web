@@ -4684,7 +4684,8 @@
     },
     "profile": {
       "description": "Simpan menerapkan perubahan di bagian ini. Bagian di bawah menerapkan setiap perubahan secara langsung."
-    }
+    },
+    "deletedNotice": "Pengguna ini telah dihapus. Profilnya tidak dapat diubah."
   },
   "adminSettings": {
     "site": {

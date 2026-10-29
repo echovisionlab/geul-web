@@ -3,7 +3,7 @@
 import { logServerFailure } from '@/lib/logging/logger';
 import { queryResult } from '@/lib/api/query-result';
 
-import { isConnectError } from '@/lib/api/connect-error';
+import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { create } from '@bufbuild/protobuf';
 import { timestampDate, timestampFromDate } from '@bufbuild/protobuf/wkt';
@@ -165,7 +165,7 @@ export async function updateUserAction(
     role?: string;
     tag_ids?: string[];
   },
-): Promise<{ success?: boolean; error?: string }> {
+): Promise<{ success?: boolean; error?: string; errorCode?: AdminMemberUpdateErrorCode }> {
   try {
     const hasProfileChanges =
       data.nickname !== undefined ||
@@ -204,9 +204,10 @@ export async function updateUserAction(
     return { success: true };
   } catch (err) {
     logServerFailure('user-actions', 'updateUserAction', err, [data?.nickname]);
+    const errorCode = isConnectErrorCode(err, Code.NotFound) ? 'member_not_found' : nicknameErrorCode(err);
     return {
       error: err instanceof Error ? err.message : 'Failed to update user',
-      ...(nicknameErrorCode(err) && { errorCode: nicknameErrorCode(err) }),
+      ...(errorCode && { errorCode }),
     };
   }
 }
@@ -432,6 +433,8 @@ export async function updateProfileAction(data: {
 }
 
 export type NicknameErrorCode = 'nickname_invalid' | 'nickname_unavailable';
+/** A deleted or missing Member cannot be edited; the API answers NotFound. */
+export type AdminMemberUpdateErrorCode = NicknameErrorCode | 'member_not_found';
 
 function nicknameErrorCode(error: unknown): NicknameErrorCode | undefined {
   if (!isConnectError(error)) {

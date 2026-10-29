@@ -4684,7 +4684,8 @@
     },
     "profile": {
       "description": "本區段的變更需按儲存後生效。下方各區段的變更會立即生效。"
-    }
+    },
+    "deletedNotice": "此使用者已刪除，無法編輯個人資料。"
   },
   "adminSettings": {
     "site": {

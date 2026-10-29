@@ -18,7 +18,7 @@ import { useTranslations } from 'next-intl';
 
 import { notifications } from '@/components/core/Notification';
 import { LabelBadge } from '@/components/core/Badge';
-import { Button } from '@/components/core/Button';
+import { Button, SaveButton } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import { Select, Switch, TagsInput } from '@/components/core/Input';
 
@@ -305,8 +305,8 @@ export function TranslationSettingsPage({ client }: { client?: TranslationSettin
             >
               {t('actions.jobs')}
             </Button>
-            <Button
-              emphasis="medium"
+            <SaveButton
+              type="button"
               leftSection={<IconDeviceFloppy size={16} />}
               onClick={() => {
                 const baseline = persistedFormRef.current;
@@ -322,7 +322,7 @@ export function TranslationSettingsPage({ client }: { client?: TranslationSettin
               disabled={!hasSettingsChanges}
             >
               {t('actions.save')}
-            </Button>
+            </SaveButton>
           </DsLayoutInline>
         }
       />

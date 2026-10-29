@@ -139,6 +139,7 @@ export function TagModals({
         onSubmit={handleEdit}
         title={tAdmin('tags.editTitle')}
         submitLabel={tCommon('actions.save')}
+        submitTone="brand"
         cancelLabel={tCommon('actions.cancel')}
         closeLabel={tCommon('actions.close')}
         loading={editLoading}

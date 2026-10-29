@@ -4684,7 +4684,8 @@
     },
     "profile": {
       "description": "Save applies changes in this section. The sections below apply each change immediately."
-    }
+    },
+    "deletedNotice": "This user has been deleted. The profile can’t be edited."
   },
   "adminSettings": {
     "site": {

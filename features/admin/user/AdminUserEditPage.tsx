@@ -14,7 +14,7 @@ import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@/components/core/Notification';
 import { Alert } from '@/components/core/Alert';
-import { Button } from '@/components/core/Button';
+import { Button, SaveButton } from '@/components/core/Button';
 import { DateTime } from '@/features/date-time/DateTime';
 import { EditorHeader } from '@/features/editor/EditorHeader';
 import { Select, TextInput } from '@/components/core/Input';
@@ -36,6 +36,7 @@ import {
   setUserCanonicalEmailAction,
   unbanUserAction,
   updateUserAction,
+  type AdminMemberUpdateErrorCode,
 } from '@/lib/actions/user';
 import { listAllUserTagsAction } from '@/lib/actions/user-tag';
 import type { SocialLinks } from '@/lib/types/common/social-links';
@@ -92,6 +93,7 @@ export default function AdminUserEditPage({
   const tCommonActions = useTranslations('common.actions');
   const tPage = useTranslations('adminUserDetail');
   const tSecurityEmail = useTranslations('security.email');
+  const tNickname = useTranslations('nicknameField');
   const userQuery = useQuery({
     queryKey: ['users', 'admin', id],
     queryFn: () => bindings.getUserAdminAction(id).then(unwrapQueryResult),
@@ -146,7 +148,7 @@ export default function AdminUserEditPage({
       }),
     onSuccess: (result, variables) => {
       if (result.error) {
-        notifications.show({ message: result.error, tone: 'danger' });
+        notifications.show({ message: profileUpdateErrorMessage(result.errorCode), tone: 'danger' });
         return;
       }
       const currentBaseline = profileBaselineRef.current;
@@ -184,10 +186,24 @@ export default function AdminUserEditPage({
       notifications.show({ message: tPage('notifications.updated'), tone: 'positive' });
       invalidateUserQueries();
     },
-    onError: (error) => {
-      notifications.show({ message: error.message, tone: 'danger' });
+    onError: () => {
+      notifications.show({ message: profileUpdateErrorMessage(undefined), tone: 'danger' });
     },
   });
+
+  // Server text such as "[not_found] member not found: <id>" is for logs; admins see the localized reason.
+  function profileUpdateErrorMessage(errorCode: AdminMemberUpdateErrorCode | undefined): string {
+    switch (errorCode) {
+      case 'nickname_unavailable':
+        return tNickname('unavailable');
+      case 'nickname_invalid':
+        return tNickname('invalid');
+      case 'member_not_found':
+        return tCommon('errors.entityNotFound', { entity: tCommon('entities.member') });
+      default:
+        return tCommon('notifications.saveFailed');
+    }
+  }
 
   const banUser = useMutation({
     mutationFn: (data: { id: string; reason?: string; banExpiresIn?: number }) =>
@@ -322,9 +338,12 @@ export default function AdminUserEditPage({
 
   guardNotFound(user);
 
+  const isDeleted = user.status === 'deleted';
+
   const handleSubmit = form.onSubmit((values) => {
     const baseline = profileBaselineRef.current;
-    if (!baseline) {
+    // Enter in a field submits again while the first save is in flight; that produced duplicate errors.
+    if (!baseline || isDeleted || updateUser.isPending) {
       return;
     }
 
@@ -410,6 +429,8 @@ export default function AdminUserEditPage({
         </Alert>
       )}
 
+      {isDeleted ? <Alert tone="neutral">{tPage('deletedNotice')}</Alert> : null}
+
       <DsLayoutStack gap="xl">
         <form id="admin-user-profile-form" onSubmit={handleSubmit}>
           <UserProfileFormSection
@@ -426,9 +447,9 @@ export default function AdminUserEditPage({
             onCopyUserIdError={handleCopyUserIdError}
             footer={
               <DsLayoutInline justify="end">
-                <Button emphasis="medium" type="submit" loading={updateUser.isPending}>
+                <SaveButton type="submit" loading={updateUser.isPending} disabled={isDeleted}>
                   {tCommonActions('save')}
-                </Button>
+                </SaveButton>
               </DsLayoutInline>
             }
           />
