@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.22.3](https://github.com/echovisionlab/geul-web/compare/v0.22.2...v0.22.3) (2026-10-29)
+
+
+### Bug Fixes
+
+* hide the company line when the site sets no company name ([#206](https://github.com/echovisionlab/geul-web/issues/206)) ([001f954](https://github.com/echovisionlab/geul-web/commit/001f954c1d0ff8d3cd964b20c612cb4dbbce0b19))
+
 ## [0.22.2](https://github.com/echovisionlab/geul-web/compare/v0.22.1...v0.22.2) (2026-10-28)
 
 
