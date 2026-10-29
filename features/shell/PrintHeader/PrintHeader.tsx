@@ -13,7 +13,7 @@ export function PrintHeader() {
     <PrintHeaderView
       logoSrc={logoUrl ? toCdnUrl(logoUrl) : null}
       logoAlt={settings.site_title || 'Site logo'}
-      companyName={settings.company_name || settings.site_title}
+      companyName={settings.company_name || null}
       taxId={settings.tax_id || null}
     />
   );

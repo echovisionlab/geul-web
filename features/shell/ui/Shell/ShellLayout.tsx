@@ -116,9 +116,11 @@ function Footer({
           <DsLayoutInset blockStart="md">
             <DsLayoutInline justify="between" align="center" gap="md" wrap="wrap">
               <DsLayoutInline gap="md" wrap="wrap">
-                <DsText size="xs" tone="secondary" suppressHydrationWarning>
-                  {footer.copyright}
-                </DsText>
+                {footer.copyright ? (
+                  <DsText size="xs" tone="secondary" suppressHydrationWarning>
+                    {footer.copyright}
+                  </DsText>
+                ) : null}
                 {footer.taxId ? (
                   <DsText size="xs" tone="secondary">
                     {footer.taxId}
@@ -143,10 +145,11 @@ function Footer({
           <DsLayoutInline justify="center" gap="sm" wrap="wrap">
             {footerLinks}
           </DsLayoutInline>
-          <DsText size="xs" tone="secondary" suppressHydrationWarning>
-            {footer.copyright}
-            {footer.taxId ? ` · ${footer.taxId}` : ''}
-          </DsText>
+          {footer.copyright || footer.taxId ? (
+            <DsText size="xs" tone="secondary" suppressHydrationWarning>
+              {[footer.copyright, footer.taxId].filter(Boolean).join(' · ')}
+            </DsText>
+          ) : null}
           <DsLayoutInline justify="center" gap="xs" wrap="wrap">
             {footerActions(slots.languageFooterMobile)}
           </DsLayoutInline>
