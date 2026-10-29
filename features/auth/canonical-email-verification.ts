@@ -53,10 +53,20 @@ async function beginEmailVerification({
   }
 
   try {
-    const settings = await requestSettingsFlow({
+    let settings = await requestSettingsFlow({
       fetchFn,
       returnTo: '/my/security',
     });
+    // An earlier, unfinished change leaves pending_email set. Staging the same address again does not
+    // start a new verification flow, so clear it first and stage the address on a fresh flow.
+    const stalePendingEmail = settings.flow.identity?.traits?.pending_email;
+    if (typeof stalePendingEmail === 'string' && stalePendingEmail.trim()) {
+      const cleared = await clearSettingsPendingEmail({ fetchFn, flow: settings.flow });
+      if (hasSettingsFlowError(cleared)) {
+        return { kind: 'failed' };
+      }
+      settings = await requestSettingsFlow({ fetchFn, returnTo: '/my/security' });
+    }
     const canonicalEmail = settings.flow.identity?.traits?.email;
     if (typeof canonicalEmail !== 'string' || !canonicalEmail.trim()) {
       return { kind: 'failed' };
