@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.1](https://github.com/echovisionlab/geul-web/compare/v0.23.0...v0.23.1) (2026-10-29)
+
+
+### Bug Fixes
+
+* **auth:** clear a stale pending email before starting a new verification ([#210](https://github.com/echovisionlab/geul-web/issues/210)) ([f958000](https://github.com/echovisionlab/geul-web/commit/f9580009289fda835d1509f6d9d07f387faaf149))
+
 ## [0.23.0](https://github.com/echovisionlab/geul-web/compare/v0.22.3...v0.23.0) (2026-10-29)
 
 
