@@ -56,8 +56,8 @@ it('keeps an unonboarded Member draft across refresh and saves only the edited p
   }
   const member = { ...loaded.value, id: 'member-1', role: 'user' as const, onboarded: false };
   const read = vi.fn(async () => ({ ok: true as const, value: member }));
-  let finishSave!: (result: { success: boolean }) => void;
-  const save = new Promise<{ success: boolean }>((resolve) => {
+  let finishSave!: (result: { ok: true; success: true }) => void;
+  const save = new Promise<{ ok: true; success: true }>((resolve) => {
     finishSave = resolve;
   });
   const update = vi.fn(() => save);
@@ -103,7 +103,7 @@ it('keeps an unonboarded Member draft across refresh and saves only the edited p
     // Keep the same query snapshot while the mutation settles, as before its refetch returns.
     read.mockReturnValueOnce(refetch);
     await act(async () => {
-      finishSave({ success: true });
+      finishSave({ ok: true, success: true });
       await save;
     });
     await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).not.toHaveAttribute('aria-busy', 'true'));
@@ -113,7 +113,7 @@ it('keeps an unonboarded Member draft across refresh and saves only the edited p
   } finally {
     view.unmount();
     await act(async () => {
-      finishSave({ success: true });
+      finishSave({ ok: true, success: true });
       finishRefetch({ ok: true, value: member });
       await Promise.all([save, refetch]);
     });

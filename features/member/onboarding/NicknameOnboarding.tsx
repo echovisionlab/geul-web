@@ -1,19 +1,21 @@
 'use client';
 import { LayoutStack as DsLayoutStack, LayoutInline } from '@/components/core/Layout';
 import { useId, useState } from 'react';
+import { Code } from '@connectrpc/connect';
 import { VisuallyHidden } from '@/components/core/Typography';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/core/Button';
 import { ValidatingTextInput, type TextValidationStatus } from '@/components/core/Input';
 import { PageHeader } from '@/components/core/PageHeader';
 import { TextButton } from '@/components/core/TextButton';
-import { completeMyOnboardingAction, type MemberSummaryResult, type NicknameErrorCode } from '@/lib/actions/user';
+import type { ActionErrorCode } from '@/lib/actions/action-result';
+import { completeMyOnboardingAction, type MemberSummaryResult } from '@/lib/actions/user';
 import { useNicknameValidation, type NicknameAvailabilityCheck } from '@/features/member/useNicknameValidation';
 type CompleteOnboarding = (nickname: string) => Promise<{
   member?: MemberSummaryResult;
   onboarded?: boolean;
   error?: string;
-  errorCode?: NicknameErrorCode;
+  errorCode?: ActionErrorCode;
 }>;
 interface NicknameOnboardingProps {
   initialNickname: string;
@@ -90,12 +92,13 @@ export function NicknameOnboarding({
       }
       setSubmitError({
         message:
-          result.errorCode === 'nickname_unavailable'
+          result.errorCode === Code.AlreadyExists
             ? tNickname('unavailable')
-            : result.errorCode === 'nickname_invalid'
+            : result.errorCode === Code.InvalidArgument
               ? tNickname('invalid')
               : t('submitFailed'),
-        status: result.errorCode ? 'invalid' : 'error',
+        status:
+          result.errorCode === Code.AlreadyExists || result.errorCode === Code.InvalidArgument ? 'invalid' : 'error',
       });
     } catch {
       setSubmitError({ message: t('submitFailed'), status: 'error' });

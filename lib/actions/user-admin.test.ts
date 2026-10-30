@@ -254,7 +254,7 @@ describe('admin Member and profile actions', () => {
   it('bans an account with the reason until the chosen duration in seconds elapses', async () => {
     const now = vi.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-01-01T00:00:00Z'));
     try {
-      await expect(actions.banUserAction('member-1', 'spam', 86400)).resolves.toEqual({ success: true });
+      await expect(actions.banUserAction('member-1', 'spam', 86400)).resolves.toEqual({ ok: true, success: true });
     } finally {
       now.mockRestore();
     }
@@ -267,7 +267,7 @@ describe('admin Member and profile actions', () => {
   });
 
   it('bans an account permanently when no duration is chosen', async () => {
-    await expect(actions.banUserAction('member-1', 'spam')).resolves.toEqual({ success: true });
+    await expect(actions.banUserAction('member-1', 'spam')).resolves.toEqual({ ok: true, success: true });
 
     expect(accountClient.banAccount).toHaveBeenCalledWith({ memberId: 'member-1', reason: 'spam', until: undefined });
   });
@@ -298,13 +298,14 @@ describe('admin Member and profile actions', () => {
       expected: { memberId: 'member-1' },
     },
   ])('applies the $name account command to the target member', async ({ run, rpc, expected }) => {
-    await expect(run()).resolves.toEqual({ success: true });
+    await expect(run()).resolves.toEqual({ ok: true, success: true });
 
     expect(rpc).toHaveBeenCalledWith(expected);
   });
 
   it("changes the caller's own avatar without touching another member", async () => {
     await expect(actions.setAvatarAction('file-1')).resolves.toEqual({
+      ok: true,
       member: {
         id: 'member-1',
         nickname: 'Me',
@@ -313,6 +314,7 @@ describe('admin Member and profile actions', () => {
       },
     });
     await expect(actions.deleteAvatarAction()).resolves.toEqual({
+      ok: true,
       member: { id: 'member-1', nickname: 'Me', avatarUrl: null, deleted: false },
     });
 
@@ -324,9 +326,10 @@ describe('admin Member and profile actions', () => {
 
   it("changes another member's avatar without touching the caller's own", async () => {
     await expect(actions.setAvatarForMemberAction('member-2', 'file-2')).resolves.toEqual({
+      ok: true,
       url: 'https://cdn.example/member.webp',
     });
-    await expect(actions.deleteAvatarForMemberAction('member-2')).resolves.toEqual({ success: true });
+    await expect(actions.deleteAvatarForMemberAction('member-2')).resolves.toEqual({ ok: true, success: true });
 
     expect(memberClient.setMemberAvatar).toHaveBeenCalledWith({ memberId: 'member-2', fileId: 'file-2' });
     expect(memberClient.deleteMemberAvatar).toHaveBeenCalledWith({ memberId: 'member-2' });
@@ -335,7 +338,10 @@ describe('admin Member and profile actions', () => {
   });
 
   it('sends only the changed admin profile, tag, or role request', async () => {
-    await expect(actions.updateUserAction('member-1', { bio: 'Updated bio' })).resolves.toEqual({ success: true });
+    await expect(actions.updateUserAction('member-1', { bio: 'Updated bio' })).resolves.toEqual({
+      ok: true,
+      success: true,
+    });
     expect(memberClient.updateMemberProfile).toHaveBeenCalledWith({
       memberId: 'member-1',
       nickname: undefined,
@@ -347,7 +353,7 @@ describe('admin Member and profile actions', () => {
     vi.clearAllMocks();
     mocks.createMemberClient.mockResolvedValue(memberClient);
     mocks.createAccountClient.mockResolvedValue(accountClient);
-    await expect(actions.updateUserAction('member-1', { tag_ids: [] })).resolves.toEqual({ success: true });
+    await expect(actions.updateUserAction('member-1', { tag_ids: [] })).resolves.toEqual({ ok: true, success: true });
     expect(memberClient.updateMemberProfile).not.toHaveBeenCalled();
     expect(memberClient.setMemberTags).toHaveBeenCalledWith({ memberId: 'member-1', tagIds: [] });
     expect(accountClient.setAccountRole).not.toHaveBeenCalled();
@@ -355,14 +361,17 @@ describe('admin Member and profile actions', () => {
     vi.clearAllMocks();
     mocks.createMemberClient.mockResolvedValue(memberClient);
     mocks.createAccountClient.mockResolvedValue(accountClient);
-    await expect(actions.updateUserAction('member-1', { role: 'admin' })).resolves.toEqual({ success: true });
+    await expect(actions.updateUserAction('member-1', { role: 'admin' })).resolves.toEqual({ ok: true, success: true });
     expect(memberClient.updateMemberProfile).not.toHaveBeenCalled();
     expect(memberClient.setMemberTags).not.toHaveBeenCalled();
     expect(accountClient.setAccountRole).toHaveBeenCalledWith({ memberId: 'member-1', role: AuthorizationRole.ADMIN });
   });
 
   it('keeps omitted profile fields out of partial Member updates and preserves explicit clearing', async () => {
-    await expect(actions.updateUserAction('member-1', { nickname: 'Name only' })).resolves.toEqual({ success: true });
+    await expect(actions.updateUserAction('member-1', { nickname: 'Name only' })).resolves.toEqual({
+      ok: true,
+      success: true,
+    });
     expect(memberClient.updateMemberProfile).toHaveBeenLastCalledWith({
       memberId: 'member-1',
       nickname: 'Name only',
@@ -374,7 +383,7 @@ describe('admin Member and profile actions', () => {
         website: null,
         social_links: null,
       }),
-    ).resolves.toEqual({ success: true });
+    ).resolves.toEqual({ ok: true, success: true });
     expect(memberClient.updateMemberProfile).toHaveBeenLastCalledWith({
       memberId: 'member-1',
       bio: '',
@@ -382,13 +391,14 @@ describe('admin Member and profile actions', () => {
       socialLinks: {},
     });
 
-    await expect(actions.updateUserAction('member-1', { tag_ids: [] })).resolves.toEqual({ success: true });
+    await expect(actions.updateUserAction('member-1', { tag_ids: [] })).resolves.toEqual({ ok: true, success: true });
     expect(memberClient.setMemberTags).toHaveBeenLastCalledWith({
       memberId: 'member-1',
       tagIds: [],
     });
 
     await expect(actions.updateProfileAction({ nickname: 'Self name only' })).resolves.toEqual({
+      ok: true,
       member: { id: 'member-1', nickname: 'Me', avatarUrl: null, deleted: false },
     });
     expect(memberClient.updateMyProfile).toHaveBeenLastCalledWith({ nickname: 'Self name only' });
@@ -414,7 +424,9 @@ describe('admin Member and profile actions', () => {
 
     accountClient.deleteAccount.mockRejectedValueOnce(new ConnectError('denied', Code.PermissionDenied));
     await expect(actions.deleteUserAction('member-1')).resolves.toEqual({
-      error: '[permission_denied] denied',
+      ok: false,
+      error: 'denied',
+      errorCode: Code.PermissionDenied,
     });
   });
 });

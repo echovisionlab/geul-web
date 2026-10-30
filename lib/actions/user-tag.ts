@@ -1,9 +1,7 @@
 'use server';
 
-import { logServerFailure } from '@/lib/logging/logger';
 import { queryResult, type QueryResult } from '@/lib/api/query-result';
 
-import { isConnectError } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { create } from '@bufbuild/protobuf';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
@@ -16,6 +14,8 @@ import {
   SortSpecSchema,
 } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import { createMemberClient } from '@/lib/api/server-client';
+import type { ActionResult } from '@/lib/actions/action-result';
+import { runAction } from '@/lib/actions/run-action';
 
 const userTagFilterFields = new Set(['name', 'created_at']);
 
@@ -110,19 +110,18 @@ export async function listUserTagsAdminAction(input: UserTagListInput) {
   });
 }
 
-export async function createUserTagAction(name: string): Promise<{ data?: { id: string }; error?: string }> {
-  try {
-    const client = await createMemberClient();
-    const tag = await client.createMemberTag({ name });
-    revalidatePath('/admin/user-tags');
-    return { data: { id: tag.id } };
-  } catch (err) {
-    logServerFailure('user-tag-actions', 'createUserTagAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to create tag' };
-  }
+export async function createUserTagAction(name: string): Promise<ActionResult<{ data: { id: string } }>> {
+  return runAction(
+    'user-tag-actions',
+    'createUserTagAction',
+    async () => {
+      const client = await createMemberClient();
+      const tag = await client.createMemberTag({ name });
+      revalidatePath('/admin/user-tags');
+      return { data: { id: tag.id } };
+    },
+    { fallback: 'Failed to create tag' },
+  );
 }
 
 export async function listAllUserTagsAction(): Promise<QueryResult<{ id: string; name: string }[]>> {
@@ -135,17 +134,16 @@ export async function listAllUserTagsAction(): Promise<QueryResult<{ id: string;
   });
 }
 
-export async function deleteUserTagAction(id: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createMemberClient();
-    await client.deleteMemberTag({ id });
-    revalidatePath('/admin/user-tags');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('user-tag-actions', 'deleteUserTagAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete tag' };
-  }
+export async function deleteUserTagAction(id: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'user-tag-actions',
+    'deleteUserTagAction',
+    async () => {
+      const client = await createMemberClient();
+      await client.deleteMemberTag({ id });
+      revalidatePath('/admin/user-tags');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete tag' },
+  );
 }
