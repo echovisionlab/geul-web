@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.2](https://github.com/echovisionlab/geul-web/compare/v0.23.1...v0.23.2) (2026-10-30)
+
+
+### Bug Fixes
+
+* **auth:** notice a lost session promptly and leave signed-in areas ([#212](https://github.com/echovisionlab/geul-web/issues/212)) ([3be9c0b](https://github.com/echovisionlab/geul-web/commit/3be9c0bbb0e1c6fc8dbb5253905937f4d202f5a6))
+
 ## [0.23.1](https://github.com/echovisionlab/geul-web/compare/v0.23.0...v0.23.1) (2026-10-29)
 
 
