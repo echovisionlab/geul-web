@@ -10,6 +10,7 @@ import { SessionProvider } from '@/lib/providers/SessionProvider';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { accountAccessibilityLabels } from './AccountAccessibility';
 import { localBackupEntries } from './fixtures/local-backups';
+import { actionFailure, actionSuccess } from '@/lib/actions/action-result';
 export function MyAccountPagesPreview({
   surface = 'profile',
   role = 'author',
@@ -41,7 +42,11 @@ export function MyAccountPagesPreview({
               }}
               disabled={state === 'pending'}
               checkNickname={async () => (failed ? { error: 'Local nickname check failed' } : { available: true })}
-              updateAction={async () => (failed ? { error: 'Local profile save failed' } : {})}
+              updateAction={async () =>
+                failed
+                  ? actionFailure('Local profile save failed', 'ACTION_FAILED')
+                  : actionSuccess({ member: undefined })
+              }
             />
           ) : surface === 'security' ? (
             <MySecurityPageView
@@ -114,7 +119,9 @@ export function MyAccountPagesPreview({
               setupGuideUrl="/fixtures/remote-mcp-preview.md"
               preferences={{
                 language: async (locale) =>
-                  failed ? { error: 'Local locale save failed' } : { success: true, preferred_locale: locale },
+                  failed
+                    ? actionFailure('Local locale save failed', 'ACTION_FAILED')
+                    : actionSuccess({ success: true as const, preferred_locale: locale }),
                 newsletter: async () => ({
                   success: !failed,
                   message: failed ? 'Local subscription failed' : 'Local subscription saved',

@@ -6,6 +6,7 @@ import { LayoutContainer } from '@/components/core/Layout';
 import MapPlacesPage, { type AdminMapPlacesPageBindings } from '@/features/admin/map-place/MapPlacesPage';
 import MapPlaceDetailPage, { type EditPlacePageBindings } from '@/features/admin/map-place/MapPlaceDetailPage';
 import { pageRows } from './fixtures/paginated';
+import { actionFailure, actionSuccess } from '@/lib/actions/action-result';
 type State = 'ready' | 'empty' | 'failed' | 'pending' | 'action-failed';
 const date = new Date('2026-10-01T00:00:00Z');
 function fixture(state: State): { list: AdminMapPlacesPageBindings; detail: EditPlacePageBindings } {
@@ -36,10 +37,10 @@ function fixture(state: State): { list: AdminMapPlacesPageBindings; detail: Edit
         ];
   const deleteMapPlaceAction: EditPlacePageBindings['deleteMapPlaceAction'] = async (id) => {
     if (state === 'action-failed') {
-      return { error: 'Local deletion failed' };
+      return actionFailure('Local deletion failed', 'ACTION_FAILED');
     }
     places = places.filter((p) => p.id !== id);
-    return { success: true };
+    return actionSuccess({ success: true as const });
   };
   return {
     list: {
@@ -54,7 +55,7 @@ function fixture(state: State): { list: AdminMapPlacesPageBindings; detail: Edit
       },
       createMapPlaceAction: async (data) => {
         if (state === 'action-failed') {
-          return { error: 'Local creation failed' };
+          return actionFailure('Local creation failed', 'ACTION_FAILED');
         }
         const id = `local-place-${crypto.randomUUID()}`;
         places = [
@@ -84,7 +85,7 @@ function fixture(state: State): { list: AdminMapPlacesPageBindings; detail: Edit
             updated_at: new Date(),
           },
         ];
-        return { data: { id } };
+        return actionSuccess({ data: { id } });
       },
       deleteMapPlaceAction,
     },
@@ -119,7 +120,7 @@ function fixture(state: State): { list: AdminMapPlacesPageBindings; detail: Edit
       },
       updateMapPlaceAction: async (id, patch) => {
         if (state === 'action-failed') {
-          return { error: 'Local update failed' };
+          return actionFailure('Local update failed', 'ACTION_FAILED');
         }
         places = places.map((p) =>
           p.id === id
@@ -132,7 +133,7 @@ function fixture(state: State): { list: AdminMapPlacesPageBindings; detail: Edit
               }
             : p,
         );
-        return { success: true };
+        return actionSuccess({ success: true as const });
       },
       deleteMapPlaceAction,
     },

@@ -39,7 +39,6 @@ export function adminUserFixture(state: AdminUserPreviewState): AdminUserEditPag
     }
     return { ok: true, value };
   };
-  const mutation = async () => (state === 'action-failed' ? { error: 'Local operation failed' } : { success: true });
   return {
     getUserAdminAction: async () => read(user),
     listAllUserTagsAction: async () => read([]),

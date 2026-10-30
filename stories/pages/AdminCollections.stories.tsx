@@ -13,6 +13,7 @@ import type { listWorksAdminAction } from '@/lib/actions/work';
 import type { QueryValue } from '@/lib/api/query-result';
 import { parseTableQuery } from '@/lib/utils/table-url';
 import { tableRows } from './fixtures/table-query';
+import { actionFailure, actionSuccess } from '@/lib/actions/action-result';
 const date = new Date('2026-09-12T10:00:00Z');
 const clients = [
   {
@@ -129,21 +130,21 @@ export function AdminCollectionPagePreview({
               createBindings={{
                 createAction: async (name) => {
                   if (state === 'create-error') {
-                    return { error: t('messages.failedToLoad') };
+                    return actionFailure(t('messages.failedToLoad'), 'ACTION_FAILED');
                   }
                   setClientRows((rows) => [...rows, { ...clients[0], id: `client-${rows.length + 1}`, name }]);
-                  return { data: { id: 'local-client' } };
+                  return actionSuccess({ data: { id: 'local-client' } });
                 },
                 onCreated: () => {},
               }}
               deleteAction={async (id) => {
                 setClientRows((rows) => rows.filter((row) => row.id !== id));
-                return { success: true };
+                return actionSuccess({ success: true as const });
               }}
               modalBindings={{
                 deleteAction: async (id) => {
                   setClientRows((rows) => rows.filter((row) => row.id !== id));
-                  return { success: true };
+                  return actionSuccess({ success: true as const });
                 },
                 onDeleted: () => {},
               }}
@@ -154,20 +155,20 @@ export function AdminCollectionPagePreview({
               result={result(seriesRows)}
               deleteAction={async (id) => {
                 setSeriesRows((rows) => rows.filter((row) => row.id !== id));
-                return { success: true };
+                return actionSuccess({ success: true as const });
               }}
               modalBindings={{
                 createAction: async ({ title }) => {
                   if (state === 'create-error') {
-                    return { error: t('messages.failedToLoad') };
+                    return actionFailure(t('messages.failedToLoad'), 'ACTION_FAILED');
                   }
                   setSeriesRows((rows) => [...rows, { ...series[1], id: `series-${rows.length + 1}`, title }]);
-                  return { data: { id: 'local-series' } };
+                  return actionSuccess({ data: { id: 'local-series' } });
                 },
                 onCreated: () => {},
                 deleteAction: async (id) => {
                   setSeriesRows((rows) => rows.filter((row) => row.id !== id));
-                  return { success: true };
+                  return actionSuccess({ success: true as const });
                 },
                 onDeleted: () => {},
               }}
@@ -190,17 +191,17 @@ export function AdminCollectionPagePreview({
               }
               createAction={async (data) => {
                 if (state === 'create-error') {
-                  return { error: t('messages.failedToLoad') };
+                  return actionFailure(t('messages.failedToLoad'), 'ACTION_FAILED');
                 }
                 workRows.current = [
                   ...workRows.current,
                   { ...works[1], id: `work-${workRows.current.length + 1}`, title: data.title },
                 ];
-                return { data: { id: 'local-work' } };
+                return actionSuccess({ data: { id: 'local-work' } });
               }}
               deleteAction={async (id) => {
                 workRows.current = workRows.current.filter((row) => row.id !== id);
-                return { success: true };
+                return actionSuccess({ success: true as const });
               }}
               onCreated={() => {}}
             />

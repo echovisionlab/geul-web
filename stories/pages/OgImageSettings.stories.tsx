@@ -35,24 +35,25 @@ function fixture(state: 'ready' | 'empty' | 'failed' | 'pending' | 'action-faile
     },
     updateHomeOgConfigAction: async (home) => {
       if (state === 'action-failed') {
-        return { error: 'Local save failed' };
+        return actionFailure('Local save failed', 'ACTION_FAILED');
       }
       config = { ...config, home };
-      return { success: true };
+      return actionSuccess({ success: true as const });
     },
     updateContentOgConfigAction: async (content) => {
       if (state === 'action-failed') {
-        return { error: 'Local save failed' };
+        return actionFailure('Local save failed', 'ACTION_FAILED');
       }
       config = { ...config, content };
-      return { success: true };
+      return actionSuccess({ success: true as const });
     },
-    regenerateAllOgImagesAction: async () => ({ error: 'Image generation requires the unavailable preview service' }),
+    regenerateAllOgImagesAction: async () =>
+      actionFailure('Image generation requires the unavailable preview service', 'ACTION_FAILED'),
     getOgGenerationRunAction: async () =>
       actionFailure('Image generation is unavailable in this preview', Code.Unimplemented),
     getSettings: async () => settings,
     siteOg: {
-      status: async () => ({ data: { assetId: null } }),
+      status: async () => actionSuccess({ data: { assetId: null } }),
       regenerate: async () => ({ error: 'Image generation is unavailable in this preview' }),
       read: {
         latest: async () => actionSuccess({ generation: undefined }),
@@ -61,14 +62,14 @@ function fixture(state: 'ready' | 'empty' | 'failed' | 'pending' | 'action-faile
       asset: {
         set: async (type, fileId) => {
           if (state === 'action-failed') {
-            return { error: 'Local asset update failed' };
+            return actionFailure('Local asset update failed', 'ACTION_FAILED');
           }
           settings = { ...settings, [`${type}_url`]: files.get(fileId) ?? null };
-          return { success: true };
+          return actionSuccess({ success: true as const });
         },
         remove: async (type) => {
           settings = { ...settings, [`${type}_url`]: null };
-          return { success: true };
+          return actionSuccess({ success: true as const, assetUrl: null });
         },
         upload,
         uploadFile: upload,

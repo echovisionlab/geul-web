@@ -11,6 +11,7 @@ import type { AudienceSegmentRow } from '@/features/admin/segment/model';
 import { ServerDataTableNavigationProvider } from '@/features/data-table/ServerDataTable/ServerDataTableNavigation';
 import { parseTableQuery } from '@/lib/utils/table-url';
 import { tableRows } from './fixtures/table-query';
+import { actionFailure, actionSuccess } from '@/lib/actions/action-result';
 const date = new Date('2026-10-01T00:00:00Z');
 const initialUsers: UserRow[] = [
   {
@@ -117,20 +118,26 @@ export function AudienceUsersPreview({
     sortFields: fields.map(({ field, label }) => ({ field, label })),
     searchPlaceholder: t('placeholders.search'),
   };
-  const error = state === 'action-failed' ? { error: 'Local operation failed' } : undefined;
+  const error = state === 'action-failed' ? actionFailure('Local operation failed', 'ACTION_FAILED') : undefined;
   const deleteUser = async (id: string) => {
     if (error) {
       return error;
     }
     setUsers((rows) => rows.filter((row) => row.id !== id));
-    return { success: true };
+    return actionSuccess({ success: true as const });
   };
   const detail = (row: AudienceSegmentRow) => ({
     id: row.id,
     name: row.name,
     description: row.description,
     segmentType: row.segment_type,
-    config: { memberTagIds: [], accountRoles: [], excludeMemberIds: [] },
+    config: {
+      memberTagIds: [],
+      accountRoles: [],
+      createdAfter: undefined,
+      createdBefore: undefined,
+      excludeMemberIds: [],
+    },
     estimatedCount: row.estimated_count,
     archivedAt: row.archived_at,
   });
@@ -160,7 +167,7 @@ export function AudienceUsersPreview({
                   setUsers((rows) =>
                     rows.map((row) => (row.id === id ? { ...row, banned: true, status: 'banned' } : row)),
                   );
-                  return { success: true };
+                  return actionSuccess({ success: true as const });
                 },
                 updateUserAction: async (id, patch) => {
                   if (error) {
@@ -169,7 +176,7 @@ export function AudienceUsersPreview({
                   setUsers((rows) =>
                     rows.map((row) => (row.id === id ? { ...row, role: patch.role ?? row.role } : row)),
                   );
-                  return { success: true };
+                  return actionSuccess({ success: true as const });
                 },
                 unsubscribeUserFromNewsletterAction: async (id) => {
                   if (error) {
@@ -208,14 +215,14 @@ export function AudienceUsersPreview({
                       segment_type: input.segmentType,
                     },
                   ]);
-                  return { data: { id } };
+                  return actionSuccess({ data: { id } });
                 },
                 getSegmentAction: async (id) => {
                   if (error) {
                     return error;
                   }
                   const row = segments.find((row) => row.id === id);
-                  return row ? { data: detail(row) } : { error: 'Not found' };
+                  return row ? actionSuccess({ data: detail(row) }) : actionFailure('Not found', 'ACTION_FAILED');
                 },
                 updateSegmentAction: async (input) => {
                   if (error) {
@@ -223,7 +230,7 @@ export function AudienceUsersPreview({
                   }
                   const row = segments.find((row) => row.id === input.id);
                   if (!row) {
-                    return { error: 'Not found' };
+                    return actionFailure('Not found', 'ACTION_FAILED');
                   }
                   const updated = {
                     ...row,
@@ -232,23 +239,23 @@ export function AudienceUsersPreview({
                     segment_type: input.segmentType ?? row.segment_type,
                   };
                   setSegments((rows) => rows.map((row) => (row.id === input.id ? updated : row)));
-                  return { data: detail(updated) };
+                  return actionSuccess({ data: detail(updated) });
                 },
                 archiveSegmentAction: async (id) => {
                   if (error) {
                     return error;
                   }
                   setSegments((rows) => rows.map((row) => (row.id === id ? { ...row, archived_at: date } : row)));
-                  return { success: true };
+                  return actionSuccess({ success: true as const });
                 },
                 restoreSegmentAction: async (id) => {
                   if (error) {
                     return error;
                   }
                   setSegments((rows) => rows.map((row) => (row.id === id ? { ...row, archived_at: null } : row)));
-                  return { success: true };
+                  return actionSuccess({ success: true as const });
                 },
-                estimateSegmentCountAction: async () => error ?? { count: 82 },
+                estimateSegmentCountAction: async () => error ?? actionSuccess({ count: 82 }),
               },
             }}
           />

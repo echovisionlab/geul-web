@@ -13,6 +13,7 @@ import type {
 import { ServerDataTableNavigationProvider } from '@/features/data-table/ServerDataTable/ServerDataTableNavigation';
 import { parseTableQuery } from '@/lib/utils/table-url';
 import { tableRows } from './fixtures/table-query';
+import { actionFailure, actionSuccess } from '@/lib/actions/action-result';
 const date = new Date('2026-10-01T00:00:00Z');
 const initialEvents: AdminProgramEventListItem[] = [
   {
@@ -109,24 +110,24 @@ export function ProgramEventListsPreview({
               navigate: navigatePreview,
               createAction: async () => {
                 if (state === 'action-failed') {
-                  return { error: 'Local creation failed' };
+                  return actionFailure('Local creation failed', 'ACTION_FAILED');
                 }
                 const id = `local-event-${events.length}`;
                 setEvents((rows) => [...rows, { ...initialEvents[0], id, status: 'draft' }]);
-                return { data: { id } };
+                return actionSuccess({ data: { id } });
               },
             }}
             deleteAction={async (id) => {
               if (state === 'action-failed') {
-                return { error: 'Local deletion failed' };
+                return actionFailure('Local deletion failed', 'ACTION_FAILED');
               }
               setEvents((rows) => rows.filter((row) => row.id !== id));
-              return { success: true };
+              return actionSuccess({ success: true as const });
             }}
             typeBindings={{
               createProgramEventTypeAction: async (input) => {
                 if (state === 'action-failed') {
-                  return { error: 'Local creation failed' };
+                  return actionFailure('Local creation failed', 'ACTION_FAILED');
                 }
                 const item = {
                   ...eventTypes[0],
@@ -136,21 +137,21 @@ export function ProgramEventListsPreview({
                   locales: [],
                 };
                 setTypes((current) => [...current, item]);
-                return { data: { id: item.id, name: item.name, slug: item.slug } };
+                return actionSuccess({ data: { id: item.id, name: item.name, slug: item.slug } });
               },
               updateProgramEventTypeAction: async (id, input) => {
                 if (state === 'action-failed') {
-                  return { error: 'Local update failed' };
+                  return actionFailure('Local update failed', 'ACTION_FAILED');
                 }
                 setTypes((current) => current.map((item) => (item.id === id ? { ...item, ...input } : item)));
-                return { success: true };
+                return actionSuccess({ success: true as const });
               },
               deleteProgramEventTypeAction: async (id) => {
                 if (state === 'action-failed') {
-                  return { error: 'Local deletion failed' };
+                  return actionFailure('Local deletion failed', 'ACTION_FAILED');
                 }
                 setTypes((current) => current.filter((item) => item.id !== id));
-                return { success: true };
+                return actionSuccess({ success: true as const });
               },
             }}
           />
@@ -162,19 +163,19 @@ export function ProgramEventListsPreview({
               navigate: navigatePreview,
               createAction: async () => {
                 if (state === 'action-failed') {
-                  return { error: 'Local creation failed' };
+                  return actionFailure('Local creation failed', 'ACTION_FAILED');
                 }
                 const id = `local-series-${series.length}`;
                 setSeries((rows) => [...rows, { ...initialSeries[0], id, status: 'draft' }]);
-                return { data: { id } };
+                return actionSuccess({ data: { id } });
               },
             }}
             deleteAction={async (id) => {
               if (state === 'action-failed') {
-                return { error: 'Local deletion failed' };
+                return actionFailure('Local deletion failed', 'ACTION_FAILED');
               }
               setSeries((rows) => rows.filter((row) => row.id !== id));
-              return { success: true };
+              return actionSuccess({ success: true as const });
             }}
           />
         )}
