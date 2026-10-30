@@ -1,18 +1,11 @@
 'use server';
 
-import { logServerFailure } from '@/lib/logging/logger';
-
 import { getSettings } from '@/lib/queries/manifest';
 import { siteVariableContext } from '@/lib/site-variables';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
-import { connectActionErrorCode, isConnectError } from '@/lib/api/connect-error';
-import {
-  actionFailure,
-  actionSuccess,
-  type ActionResult,
-  type LocalActionErrorCode,
-} from '@/lib/actions/action-result';
+import { actionFailure, actionSuccess, type ActionResult } from '@/lib/actions/action-result';
+import { runAction } from '@/lib/actions/run-action';
 import { revalidatePath } from 'next/cache';
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
@@ -31,21 +24,6 @@ import { normalizeOgRegenerationLocale } from '@/lib/utils/og-regeneration';
 
 const revalidatePostAfterCommit = createCommittedMutationRevalidator('post-actions', 'post');
 
-function postActionFailure(
-  err: unknown,
-  fallback: string,
-  fallbackCode: LocalActionErrorCode,
-  unauthorizedCodes: readonly Code[] = [Code.Unauthenticated],
-) {
-  const message =
-    isConnectError(err) && unauthorizedCodes.includes(err.code)
-      ? 'Unauthorized'
-      : err instanceof Error
-        ? err.message
-        : fallback;
-  return actionFailure(message.trim() ? message : fallback, connectActionErrorCode(err, fallbackCode));
-}
-
 function toProtoDocumentLayout(layout: DocumentLayout) {
   return {
     contentHeight: layout.contentHeight === 'viewport' ? DocumentContentHeight.VIEWPORT : DocumentContentHeight.CONTENT,
@@ -56,33 +34,38 @@ function toProtoDocumentLayout(layout: DocumentLayout) {
 }
 
 export async function createPostAction(): Promise<ActionResult<{ data: { id: string } }>> {
-  try {
-    const client = await createPostClient();
-    const response = await client.createPost({
-      title: 'Untitled Post',
-      commentsEnabled: true,
-    });
-    revalidatePath('/admin/posts');
-    return actionSuccess({ data: { id: response.id } });
-  } catch (err) {
-    logServerFailure('post-actions', 'createPostAction', err);
-    return postActionFailure(err, 'Failed to create post', 'POST_CREATE_FAILED');
-  }
+  return runAction(
+    'post-actions',
+    'createPostAction',
+    async () => {
+      const client = await createPostClient();
+      const response = await client.createPost({
+        title: 'Untitled Post',
+        commentsEnabled: true,
+      });
+      revalidatePath('/admin/posts');
+      return { data: { id: response.id } };
+    },
+    { fallback: 'Failed to create post', code: 'POST_CREATE_FAILED' },
+  );
 }
 
 export async function deletePostAdminAction(id: string): Promise<ActionResult<{ success: true }>> {
-  try {
-    const client = await createPostClient();
-    await client.deletePost({ id });
-    revalidatePostAfterCommit('/admin/posts');
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('post-actions', 'deletePostAdminAction', err);
-    return postActionFailure(err, 'Failed to delete post', 'POST_DELETE_FAILED', [
-      Code.Unauthenticated,
-      Code.PermissionDenied,
-    ]);
-  }
+  return runAction(
+    'post-actions',
+    'deletePostAdminAction',
+    async () => {
+      const client = await createPostClient();
+      await client.deletePost({ id });
+      revalidatePostAfterCommit('/admin/posts');
+      return { success: true as const };
+    },
+    {
+      fallback: 'Failed to delete post',
+      code: 'POST_DELETE_FAILED',
+      messages: { [Code.PermissionDenied]: 'Unauthorized' },
+    },
+  );
 }
 
 export async function updatePostAction(
@@ -96,50 +79,54 @@ export async function updatePostAction(
   expectedConfigurationRevision: string,
   editorOrigin?: string,
 ): Promise<ActionResult<{ success: true; configurationRevision: string; configuration: PostConfigurationSnapshot }>> {
-  try {
-    const client = await createPostClient(editorOrigin);
-    const request: {
-      id: string;
-      expectedConfigurationRevision: string;
-      slug?: string;
-      commentsEnabled?: boolean;
-      mapPlaceId?: string;
-      documentLayout?: ReturnType<typeof toProtoDocumentLayout>;
-    } = { id: postId, expectedConfigurationRevision };
+  return runAction(
+    'post-actions',
+    'updatePostAction',
+    async () => {
+      const client = await createPostClient(editorOrigin);
+      const request: {
+        id: string;
+        expectedConfigurationRevision: string;
+        slug?: string;
+        commentsEnabled?: boolean;
+        mapPlaceId?: string;
+        documentLayout?: ReturnType<typeof toProtoDocumentLayout>;
+      } = { id: postId, expectedConfigurationRevision };
 
-    if ('slug' in data) {
-      request.slug = data.slug;
-    }
-    if ('commentsEnabled' in data) {
-      request.commentsEnabled = data.commentsEnabled;
-    }
-    if ('mapPlaceId' in data) {
-      request.mapPlaceId = data.mapPlaceId;
-    }
-    if ('documentLayout' in data && data.documentLayout) {
-      request.documentLayout = toProtoDocumentLayout(data.documentLayout);
-    }
+      if ('slug' in data) {
+        request.slug = data.slug;
+      }
+      if ('commentsEnabled' in data) {
+        request.commentsEnabled = data.commentsEnabled;
+      }
+      if ('mapPlaceId' in data) {
+        request.mapPlaceId = data.mapPlaceId;
+      }
+      if ('documentLayout' in data && data.documentLayout) {
+        request.documentLayout = toProtoDocumentLayout(data.documentLayout);
+      }
 
-    const response = await client.updatePost(request);
-    const configuration = postConfigurationSnapshot(response);
-    return actionSuccess({ success: true, configurationRevision: configuration.configurationRevision, configuration });
-  } catch (err) {
-    logServerFailure('post-actions', 'updatePostAction', err);
-    return postActionFailure(err, 'Failed to update post', 'POST_UPDATE_FAILED');
-  }
+      const response = await client.updatePost(request);
+      const configuration = postConfigurationSnapshot(response);
+      return { success: true as const, configurationRevision: configuration.configurationRevision, configuration };
+    },
+    { fallback: 'Failed to update post', code: 'POST_UPDATE_FAILED' },
+  );
 }
 
 export async function getPostConfigurationAction(
   postId: string,
 ): Promise<ActionResult<{ configuration: PostConfigurationSnapshot }>> {
-  try {
-    const client = await createPostClient();
-    const response = await client.getPost({ id: postId });
-    return actionSuccess({ configuration: postConfigurationSnapshot(response) });
-  } catch (err) {
-    logServerFailure('post-actions', 'getPostConfigurationAction', err);
-    return postActionFailure(err, 'Failed to load Post settings', 'POST_UPDATE_FAILED');
-  }
+  return runAction(
+    'post-actions',
+    'getPostConfigurationAction',
+    async () => {
+      const client = await createPostClient();
+      const response = await client.getPost({ id: postId });
+      return { configuration: postConfigurationSnapshot(response) };
+    },
+    { fallback: 'Failed to load Post settings', code: 'POST_UPDATE_FAILED' },
+  );
 }
 
 function postConfigurationSnapshot(post: {
@@ -159,57 +146,65 @@ function postConfigurationSnapshot(post: {
 }
 
 export async function deletePostAction(postId: string): Promise<ActionResult<{ success: true }>> {
-  try {
-    const client = await createPostClient();
-    await client.deletePost({ id: postId });
-    revalidatePostAfterCommit('/admin/posts');
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('post-actions', 'deletePostAction', err);
-    return postActionFailure(err, 'Failed to delete post', 'POST_DELETE_FAILED');
-  }
+  return runAction(
+    'post-actions',
+    'deletePostAction',
+    async () => {
+      const client = await createPostClient();
+      await client.deletePost({ id: postId });
+      revalidatePostAfterCommit('/admin/posts');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete post', code: 'POST_DELETE_FAILED' },
+  );
 }
 
 export async function publishPostAction(
   postId: string,
   editorOrigin?: string,
 ): Promise<ActionResult<{ success: true }>> {
-  try {
-    const client = await createPostClient(editorOrigin);
-    await client.publishPost({ id: postId });
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('post-actions', 'publishPostAction', err);
-    return postActionFailure(err, 'Failed to publish post', 'POST_PUBLISH_FAILED');
-  }
+  return runAction(
+    'post-actions',
+    'publishPostAction',
+    async () => {
+      const client = await createPostClient(editorOrigin);
+      await client.publishPost({ id: postId });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to publish post', code: 'POST_PUBLISH_FAILED' },
+  );
 }
 
 export async function unpublishPostAction(
   postId: string,
   editorOrigin?: string,
 ): Promise<ActionResult<{ success: true }>> {
-  try {
-    const client = await createPostClient(editorOrigin);
-    await client.unpublishPost({ id: postId });
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('post-actions', 'unpublishPostAction', err);
-    return postActionFailure(err, 'Failed to unpublish post', 'POST_UNPUBLISH_FAILED');
-  }
+  return runAction(
+    'post-actions',
+    'unpublishPostAction',
+    async () => {
+      const client = await createPostClient(editorOrigin);
+      await client.unpublishPost({ id: postId });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to unpublish post', code: 'POST_UNPUBLISH_FAILED' },
+  );
 }
 
 export async function archivePostAction(
   postId: string,
   editorOrigin?: string,
 ): Promise<ActionResult<{ success: true }>> {
-  try {
-    const client = await createPostClient(editorOrigin);
-    await client.archivePost({ id: postId });
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('post-actions', 'archivePostAction', err);
-    return postActionFailure(err, 'Failed to archive post', 'POST_ARCHIVE_FAILED');
-  }
+  return runAction(
+    'post-actions',
+    'archivePostAction',
+    async () => {
+      const client = await createPostClient(editorOrigin);
+      await client.archivePost({ id: postId });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to archive post', code: 'POST_ARCHIVE_FAILED' },
+  );
 }
 
 export async function schedulePostAction(
@@ -218,133 +213,149 @@ export async function schedulePostAction(
   scheduledTimeZone: string,
   editorOrigin?: string,
 ): Promise<ActionResult<{ success: true }>> {
-  try {
-    const client = await createPostClient(editorOrigin);
-    await client.schedulePost({
-      id: postId,
-      scheduledAt: timestampFromDate(scheduledAt),
-      scheduledTimeZone,
-    });
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('post-actions', 'schedulePostAction', err);
-    return postActionFailure(err, 'Failed to schedule post', 'POST_SCHEDULE_FAILED');
-  }
+  return runAction(
+    'post-actions',
+    'schedulePostAction',
+    async () => {
+      const client = await createPostClient(editorOrigin);
+      await client.schedulePost({
+        id: postId,
+        scheduledAt: timestampFromDate(scheduledAt),
+        scheduledTimeZone,
+      });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to schedule post', code: 'POST_SCHEDULE_FAILED' },
+  );
 }
 
 export async function cancelPostScheduleAction(
   postId: string,
   editorOrigin?: string,
 ): Promise<ActionResult<{ success: true }>> {
-  try {
-    const client = await createPostClient(editorOrigin);
-    await client.cancelPostSchedule({ id: postId });
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('post-actions', 'cancelPostScheduleAction', err);
-    return postActionFailure(err, 'Failed to cancel post schedule', 'POST_CANCEL_SCHEDULE_FAILED');
-  }
+  return runAction(
+    'post-actions',
+    'cancelPostScheduleAction',
+    async () => {
+      const client = await createPostClient(editorOrigin);
+      await client.cancelPostSchedule({ id: postId });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to cancel post schedule', code: 'POST_CANCEL_SCHEDULE_FAILED' },
+  );
 }
 
 export async function republishPostAction(
   postId: string,
   editorOrigin?: string,
 ): Promise<ActionResult<{ success: true }>> {
-  try {
-    const client = await createPostClient(editorOrigin);
-    await client.republishPost({ id: postId });
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('post-actions', 'republishPostAction', err);
-    return postActionFailure(err, 'Failed to republish post', 'POST_REPUBLISH_FAILED');
-  }
+  return runAction(
+    'post-actions',
+    'republishPostAction',
+    async () => {
+      const client = await createPostClient(editorOrigin);
+      await client.republishPost({ id: postId });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to republish post', code: 'POST_REPUBLISH_FAILED' },
+  );
 }
 
 export async function setPostFeaturedImageAction(
   postId: string,
   fileId: string,
 ): Promise<ActionResult<{ imageUrl: string | undefined; ogGenerationRunId?: string }>> {
-  try {
-    const client = await createPostClient();
-    const result = await client.setPostFeaturedImage({ postId, fileId });
-    const response = { imageUrl: resolvePostFeaturedImageUrl(result.imageDelivery) ?? undefined };
-    return actionSuccess(
-      result.ogGenerationRunId ? { ...response, ogGenerationRunId: result.ogGenerationRunId } : response,
-    );
-  } catch (err) {
-    logServerFailure('post-actions', 'setPostFeaturedImageAction', err);
-    return postActionFailure(err, 'Failed to set featured image', 'POST_SET_FEATURED_IMAGE_FAILED');
-  }
+  return runAction(
+    'post-actions',
+    'setPostFeaturedImageAction',
+    async () => {
+      const client = await createPostClient();
+      const result = await client.setPostFeaturedImage({ postId, fileId });
+      const response = { imageUrl: resolvePostFeaturedImageUrl(result.imageDelivery) ?? undefined };
+      return result.ogGenerationRunId ? { ...response, ogGenerationRunId: result.ogGenerationRunId } : response;
+    },
+    { fallback: 'Failed to set featured image', code: 'POST_SET_FEATURED_IMAGE_FAILED' },
+  );
 }
 
 export async function removePostFeaturedImageAction(
   postId: string,
 ): Promise<ActionResult<{ success: true; ogGenerationRunId?: string }>> {
-  try {
-    const client = await createPostClient();
-    const result = await client.deletePostFeaturedImage({ postId });
-    return actionSuccess(
-      result.ogGenerationRunId ? { success: true, ogGenerationRunId: result.ogGenerationRunId } : { success: true },
-    );
-  } catch (err) {
-    logServerFailure('post-actions', 'removePostFeaturedImageAction', err);
-    return postActionFailure(err, 'Failed to remove featured image', 'POST_REMOVE_FEATURED_IMAGE_FAILED');
-  }
+  return runAction(
+    'post-actions',
+    'removePostFeaturedImageAction',
+    async () => {
+      const client = await createPostClient();
+      const result = await client.deletePostFeaturedImage({ postId });
+      return result.ogGenerationRunId
+        ? { success: true as const, ogGenerationRunId: result.ogGenerationRunId }
+        : { success: true as const };
+    },
+    { fallback: 'Failed to remove featured image', code: 'POST_REMOVE_FEATURED_IMAGE_FAILED' },
+  );
 }
 
 // === Authors and collaborators ===
 
 export async function addPostAuthorAction(postId: string, memberId: string): Promise<ActionResult<{ success: true }>> {
-  try {
-    const client = await createPostClient();
-    await client.addPostAuthor({ postId, memberId });
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('post-actions', 'addPostAuthorAction', err);
-    return postActionFailure(err, 'Failed to add author', 'POST_ADD_AUTHOR_FAILED');
-  }
+  return runAction(
+    'post-actions',
+    'addPostAuthorAction',
+    async () => {
+      const client = await createPostClient();
+      await client.addPostAuthor({ postId, memberId });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to add author', code: 'POST_ADD_AUTHOR_FAILED' },
+  );
 }
 
 export async function removePostAuthorAction(
   postId: string,
   memberId: string,
 ): Promise<ActionResult<{ success: true }>> {
-  try {
-    const client = await createPostClient();
-    await client.removePostAuthor({ postId, memberId });
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('post-actions', 'removePostAuthorAction', err);
-    return postActionFailure(err, 'Failed to remove author', 'POST_REMOVE_AUTHOR_FAILED');
-  }
+  return runAction(
+    'post-actions',
+    'removePostAuthorAction',
+    async () => {
+      const client = await createPostClient();
+      await client.removePostAuthor({ postId, memberId });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to remove author', code: 'POST_REMOVE_AUTHOR_FAILED' },
+  );
 }
 
 export async function addPostCollaboratorAction(
   postId: string,
   memberId: string,
 ): Promise<ActionResult<{ success: true }>> {
-  try {
-    const client = await createPostClient();
-    await client.addPostCollaborator({ postId, memberId });
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('post-actions', 'addPostCollaboratorAction', err);
-    return postActionFailure(err, 'Failed to add collaborator', 'POST_ADD_COLLABORATOR_FAILED');
-  }
+  return runAction(
+    'post-actions',
+    'addPostCollaboratorAction',
+    async () => {
+      const client = await createPostClient();
+      await client.addPostCollaborator({ postId, memberId });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to add collaborator', code: 'POST_ADD_COLLABORATOR_FAILED' },
+  );
 }
 
 export async function removePostCollaboratorAction(
   postId: string,
   memberId: string,
 ): Promise<ActionResult<{ success: true }>> {
-  try {
-    const client = await createPostClient();
-    await client.removePostCollaborator({ postId, memberId });
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('post-actions', 'removePostCollaboratorAction', err);
-    return postActionFailure(err, 'Failed to remove collaborator', 'POST_REMOVE_COLLABORATOR_FAILED');
-  }
+  return runAction(
+    'post-actions',
+    'removePostCollaboratorAction',
+    async () => {
+      const client = await createPostClient();
+      await client.removePostCollaborator({ postId, memberId });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to remove collaborator', code: 'POST_REMOVE_COLLABORATOR_FAILED' },
+  );
 }
 
 // Share links - delegate to ShareLink service
@@ -416,20 +427,24 @@ async function getGeneratedPostMarkdown(postId: string): Promise<{ title: string
 export async function getPostMarkdownAction(
   postId: string,
 ): Promise<ActionResult<{ title: string; markdown: string }>> {
-  try {
-    return actionSuccess(await getGeneratedPostMarkdown(postId));
-  } catch (err) {
-    logServerFailure('post-actions', 'getPostMarkdownAction', err);
-    return postActionFailure(err, 'Failed to get markdown', 'POST_GET_MARKDOWN_FAILED', []);
-  }
+  return runAction(
+    'post-actions',
+    'getPostMarkdownAction',
+    async () => {
+      return await getGeneratedPostMarkdown(postId);
+    },
+    { fallback: 'Failed to get markdown', code: 'POST_GET_MARKDOWN_FAILED' },
+  );
 }
 
 export async function exportPostMarkdownAction(postId: string): Promise<ActionResult<{ markdown: string }>> {
-  try {
-    const result = await getGeneratedPostMarkdown(postId);
-    return actionSuccess({ markdown: result.markdown });
-  } catch (err) {
-    logServerFailure('post-actions', 'exportPostMarkdownAction', err);
-    return postActionFailure(err, 'Failed to export markdown', 'POST_EXPORT_MARKDOWN_FAILED', []);
-  }
+  return runAction(
+    'post-actions',
+    'exportPostMarkdownAction',
+    async () => {
+      const result = await getGeneratedPostMarkdown(postId);
+      return { markdown: result.markdown };
+    },
+    { fallback: 'Failed to export markdown', code: 'POST_EXPORT_MARKDOWN_FAILED' },
+  );
 }

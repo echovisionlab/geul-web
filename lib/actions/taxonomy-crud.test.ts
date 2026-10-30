@@ -79,13 +79,13 @@ describe('taxonomy CRUD actions', () => {
   });
 
   it.each(describedTaxonomies)('clears a $name description by sending an empty string', async ({ update, rpc }) => {
-    await expect(update('id-1', { description: null })).resolves.toEqual({ success: true });
+    await expect(update('id-1', { description: null })).resolves.toEqual({ ok: true, success: true });
 
     expect(rpc).toHaveBeenCalledWith({ id: 'id-1', description: '' });
   });
 
   it.each(describedTaxonomies)('renames a $name without touching its description', async ({ update, rpc }) => {
-    await expect(update('id-1', { name: 'New' })).resolves.toEqual({ success: true });
+    await expect(update('id-1', { name: 'New' })).resolves.toEqual({ ok: true, success: true });
 
     expect(rpc).toHaveBeenCalledWith({ id: 'id-1', name: 'New' });
   });

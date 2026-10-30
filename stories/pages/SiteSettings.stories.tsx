@@ -7,6 +7,7 @@ import { LayoutContainer } from '@/components/core/Layout';
 import SiteSettingsPage, { type SiteSettingsPageBindings } from '@/features/admin/settings/SiteSettingsPage';
 import type { SiteAssetBindings } from '@/features/site/site-asset-bindings';
 import { DEFAULT_SITE_SETTINGS_VIEW } from '@/lib/types/site-setting/config';
+import { actionFailure, actionSuccess } from '@/lib/actions/action-result';
 function fixture(state: 'ready' | 'failed' | 'pending' | 'action-failed'): SiteSettingsPageBindings {
   let settings = {
     ...DEFAULT_SITE_SETTINGS_VIEW,
@@ -32,17 +33,17 @@ function fixture(state: 'ready' | 'failed' | 'pending' | 'action-failed'): SiteS
   const asset: SiteAssetBindings = {
     set: async (type, fileId) => {
       if (state === 'action-failed') {
-        return { error: 'Local asset update failed' };
+        return actionFailure('Local asset update failed', 'ACTION_FAILED');
       }
       settings = { ...settings, [`${type}_url`]: files.get(fileId) ?? null };
-      return { success: true };
+      return actionSuccess({ success: true as const });
     },
     remove: async (type) => {
       if (state === 'action-failed') {
-        return { error: 'Local asset removal failed' };
+        return actionFailure('Local asset removal failed', 'ACTION_FAILED');
       }
       settings = { ...settings, [`${type}_url`]: null };
-      return { success: true };
+      return actionSuccess({ success: true as const, assetUrl: null });
     },
     upload,
     uploadFile: upload,
@@ -61,27 +62,27 @@ function fixture(state: 'ready' | 'failed' | 'pending' | 'action-failed'): SiteS
     getMenus: async () => [],
     update: async (patch) => {
       if (state === 'action-failed') {
-        return { error: 'Local save failed' };
+        return actionFailure('Local save failed', 'ACTION_FAILED');
       }
       settings = { ...settings, ...patch };
-      return { success: true };
+      return actionSuccess({ success: true as const });
     },
     asset,
     loader: {
       add: async (fileId) => {
         if (state === 'action-failed') {
-          return { error: 'Local asset update failed' };
+          return actionFailure('Local asset update failed', 'ACTION_FAILED');
         }
         const url = files.get(fileId);
         if (!url) {
-          return { error: 'Local asset missing' };
+          return actionFailure('Local asset missing', 'ACTION_FAILED');
         }
         settings = {
           ...settings,
           loader_assets: [...settings.loader_assets, { file_id: fileId, url }],
           loader_urls: [...settings.loader_urls, url],
         };
-        return { success: true };
+        return actionSuccess({ success: true as const });
       },
       remove: async (fileId) => {
         settings = {
@@ -89,7 +90,7 @@ function fixture(state: 'ready' | 'failed' | 'pending' | 'action-failed'): SiteS
           loader_assets: settings.loader_assets.filter((asset) => asset.file_id !== fileId),
           loader_urls: settings.loader_urls.filter((url) => url !== files.get(fileId)),
         };
-        return { success: true };
+        return actionSuccess({ success: true as const });
       },
       uploadFile: upload,
     },

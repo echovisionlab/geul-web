@@ -98,9 +98,11 @@ describe('map place actions', () => {
     updateMapPlaceMock.mockResolvedValue({});
 
     await expect(updateMapPlaceAction('place-1', { google_place_id: 'google-place-1' })).resolves.toEqual({
+      ok: true,
       success: true,
     });
     await expect(updateMapPlaceAction('place-1', { google_place_id: null })).resolves.toEqual({
+      ok: true,
       success: true,
     });
 
@@ -126,7 +128,7 @@ describe('map place actions', () => {
         address_components: null,
         image_file_id: null,
       }),
-    ).resolves.toEqual({ success: true });
+    ).resolves.toEqual({ ok: true, success: true });
 
     const request = updateMapPlaceMock.mock.calls[0][0];
     expect(request).toMatchObject({

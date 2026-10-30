@@ -1,6 +1,8 @@
 'use server';
 
 import { logServerFailure } from '@/lib/logging/logger';
+import type { ActionResult } from '@/lib/actions/action-result';
+import { runAction } from '@/lib/actions/run-action';
 import { throwQueryError } from '@/lib/api/query-error';
 import { queryResult } from '@/lib/api/query-result';
 
@@ -58,97 +60,92 @@ export async function listArtistParentOptionsAction(artistId: string) {
   });
 }
 
-export async function createArtistDraftAction(): Promise<{
-  data?: { id: string };
-  error?: string;
-}> {
-  try {
-    const client = await createArtistClient();
-    const name = await getLocalizedNewEntityName('artist');
-    const artist = await client.createArtist({
-      name,
-    });
-    revalidatePath('/admin/artists');
-    return { data: { id: artist.id } };
-  } catch (err) {
-    logServerFailure('artist-actions', 'createArtistDraftAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to create artist draft' };
-  }
+export async function createArtistDraftAction(): Promise<ActionResult<{ data: { id: string } }>> {
+  return runAction(
+    'artist-actions',
+    'createArtistDraftAction',
+    async () => {
+      const client = await createArtistClient();
+      const name = await getLocalizedNewEntityName('artist');
+      const artist = await client.createArtist({
+        name,
+      });
+      revalidatePath('/admin/artists');
+      return { data: { id: artist.id } };
+    },
+    { fallback: 'Failed to create artist draft' },
+  );
 }
 
 export async function previewDeleteArtistAction(id: string) {
-  try {
-    const client = await createArtistClient();
-    const response = await client.previewDeleteArtist({ id });
-    return {
-      data: {
-        revision: response.revision,
-        totalRelationCount: response.totalRelationCount,
-        impacts: response.impacts.map((impact) => ({
-          domain: impact.domain,
-          entityId: impact.entityId,
-          label: impact.label,
-          relationCount: impact.relationCount,
-        })),
-      },
-    };
-  } catch (err) {
-    logServerFailure('artist-actions', 'previewDeleteArtistAction', err);
-    return { error: err instanceof Error ? err.message : 'Failed to preview artist deletion' };
-  }
+  return runAction(
+    'artist-actions',
+    'previewDeleteArtistAction',
+    async () => {
+      const client = await createArtistClient();
+      const response = await client.previewDeleteArtist({ id });
+      return {
+        data: {
+          revision: response.revision,
+          totalRelationCount: response.totalRelationCount,
+          impacts: response.impacts.map((impact) => ({
+            domain: impact.domain,
+            entityId: impact.entityId,
+            label: impact.label,
+            relationCount: impact.relationCount,
+          })),
+        },
+      };
+    },
+    { fallback: 'Failed to preview artist deletion' },
+  );
 }
 
 export async function deleteArtistAction(
   id: string,
   expectedRevision: string,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createArtistClient();
-    await client.deleteArtist({ id, expectedRevision });
-    revalidatePath('/admin/artists');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('artist-actions', 'deleteArtistAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete artist' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'artist-actions',
+    'deleteArtistAction',
+    async () => {
+      const client = await createArtistClient();
+      await client.deleteArtist({ id, expectedRevision });
+      revalidatePath('/admin/artists');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete artist' },
+  );
 }
 
-export async function publishArtistAction(id: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createArtistClient();
-    await client.publishArtist({ id });
-    revalidatePath('/admin/artists');
-    revalidatePath(`/artists/${id}`);
-    return { success: true };
-  } catch (err) {
-    logServerFailure('artist-actions', 'publishArtistAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to publish artist' };
-  }
+export async function publishArtistAction(id: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'artist-actions',
+    'publishArtistAction',
+    async () => {
+      const client = await createArtistClient();
+      await client.publishArtist({ id });
+      revalidatePath('/admin/artists');
+      revalidatePath(`/artists/${id}`);
+      return { success: true as const };
+    },
+    { fallback: 'Failed to publish artist' },
+  );
 }
 
-export async function unpublishArtistAction(id: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createArtistClient();
-    await client.unpublishArtist({ id });
-    revalidatePath('/admin/artists');
-    revalidatePath(`/artists/${id}`);
-    return { success: true };
-  } catch (err) {
-    logServerFailure('artist-actions', 'unpublishArtistAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to unpublish artist' };
-  }
+export async function unpublishArtistAction(id: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'artist-actions',
+    'unpublishArtistAction',
+    async () => {
+      const client = await createArtistClient();
+      await client.unpublishArtist({ id });
+      revalidatePath('/admin/artists');
+      revalidatePath(`/artists/${id}`);
+      return { success: true as const };
+    },
+    { fallback: 'Failed to unpublish artist' },
+  );
 }
 
 interface ArtistListInput {
@@ -291,72 +288,70 @@ export async function regenerateArtistOgImageAction(
   return { success: true, runId: result.runId, generationId: result.generationIds?.[0] };
 }
 
-export async function deleteArtistAvatarAction(artistId: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createArtistClient();
-    await client.deleteArtistImage({ artistId });
-    return { success: true };
-  } catch (err) {
-    logServerFailure('artist-actions', 'deleteArtistAvatarAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete avatar' };
-  }
+export async function deleteArtistAvatarAction(artistId: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'artist-actions',
+    'deleteArtistAvatarAction',
+    async () => {
+      const client = await createArtistClient();
+      await client.deleteArtistImage({ artistId });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete avatar' },
+  );
 }
 
-export async function setArtistImageAction(
-  artistId: string,
-  fileId: string,
-): Promise<{ url?: string; error?: string }> {
-  try {
-    const client = await createArtistClient();
-    const response = await client.setArtistImage({ artistId, fileId });
-    return { url: response.imageAsset?.url };
-  } catch (err) {
-    logServerFailure('artist-actions', 'setArtistImageAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Artist or file not found' };
-    }
-    if (isConnectErrorCode(err, Code.PermissionDenied)) {
-      return { error: 'No permission to edit this artist' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to set artist image' };
-  }
+export async function setArtistImageAction(artistId: string, fileId: string): Promise<ActionResult<{ url?: string }>> {
+  return runAction(
+    'artist-actions',
+    'setArtistImageAction',
+    async () => {
+      const client = await createArtistClient();
+      const response = await client.setArtistImage({ artistId, fileId });
+      return { url: response.imageAsset?.url };
+    },
+    {
+      fallback: 'Failed to set artist image',
+      messages: {
+        [Code.NotFound]: 'Artist or file not found',
+        [Code.PermissionDenied]: 'No permission to edit this artist',
+      },
+    },
+  );
 }
 
 export async function setArtistImagesAction(
   artistId: string,
   fileIds: string[],
   expectedRevision: string,
-): Promise<{
-  data?: {
-    images: { fileId: string; url: string | null; sortOrder: number; primary: boolean }[];
-    revision: string;
-  };
-  error?: string;
-}> {
-  try {
-    const client = await createArtistClient();
-    const response = await client.setArtistImages({ artistId, fileIds, expectedRevision });
-    return {
-      data: {
-        images: response.images.map((image) => ({
-          fileId: image.fileId,
-          url: image.asset?.url ?? null,
-          sortOrder: image.sortOrder,
-          primary: image.primary,
-        })),
-        revision: response.revision,
-      },
+): Promise<
+  ActionResult<{
+    data: {
+      images: { fileId: string; url: string | null; sortOrder: number; primary: boolean }[];
+      revision: string;
     };
-  } catch (err) {
-    logServerFailure('artist-actions', 'setArtistImagesAction', err);
-    return { error: err instanceof Error ? err.message : 'Failed to update artist images' };
-  }
+  }>
+> {
+  return runAction(
+    'artist-actions',
+    'setArtistImagesAction',
+    async () => {
+      const client = await createArtistClient();
+      const response = await client.setArtistImages({ artistId, fileIds, expectedRevision });
+      return {
+        data: {
+          images: response.images.map((image) => ({
+            fileId: image.fileId,
+            url: image.asset?.url ?? null,
+            sortOrder: image.sortOrder,
+            primary: image.primary,
+          })),
+          revision: response.revision,
+        },
+      };
+    },
+    { fallback: 'Failed to update artist images' },
+  );
 }
 
 // User-scoped list (for /my/artists page) - artists where user is editor
@@ -470,39 +465,34 @@ export async function setArtistParticipantAction(
   artistId: string,
   memberId: string,
   role: ArtistParticipantRole,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createArtistClient();
-    await client.setArtistParticipant({ artistId, memberId, role });
-    return { success: true };
-  } catch (err) {
-    logServerFailure('artist-actions', 'setArtistParticipantAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Artist or member not found' };
-    }
-    if (isConnectErrorCode(err, Code.AlreadyExists)) {
-      return { error: 'Member already has this role' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to update participant' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'artist-actions',
+    'setArtistParticipantAction',
+    async () => {
+      const client = await createArtistClient();
+      await client.setArtistParticipant({ artistId, memberId, role });
+      return { success: true as const };
+    },
+    {
+      fallback: 'Failed to update participant',
+      messages: { [Code.NotFound]: 'Artist or member not found', [Code.AlreadyExists]: 'Member already has this role' },
+    },
+  );
 }
 
 export async function removeArtistParticipantAction(
   artistId: string,
   memberId: string,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createArtistClient();
-    await client.removeArtistParticipant({ artistId, memberId });
-    return { success: true };
-  } catch (err) {
-    logServerFailure('artist-actions', 'removeArtistParticipantAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to remove participant' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'artist-actions',
+    'removeArtistParticipantAction',
+    async () => {
+      const client = await createArtistClient();
+      await client.removeArtistParticipant({ artistId, memberId });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to remove participant' },
+  );
 }

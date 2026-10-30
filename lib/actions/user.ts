@@ -1,13 +1,10 @@
 'use server';
 
-import { logServerFailure } from '@/lib/logging/logger';
 import { queryResult } from '@/lib/api/query-result';
 
-import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { create } from '@bufbuild/protobuf';
 import { timestampDate, timestampFromDate } from '@bufbuild/protobuf/wkt';
-import { Code } from '@connectrpc/connect';
 import {
   FilterOp,
   type FilterSpec,
@@ -24,6 +21,8 @@ import {
 } from '@echovisionlab/geul-proto/secure/account_pb.ts';
 import { AuthorizationRole } from '@echovisionlab/geul-proto/policy/access_pb.ts';
 import { createAccountClient, createMemberClient } from '@/lib/api/server-client';
+import type { ActionResult } from '@/lib/actions/action-result';
+import { runAction } from '@/lib/actions/run-action';
 import { listAuthorOptions as queryListAuthorOptions, listAuthors as queryListAuthors } from '@/lib/queries/user';
 import type { AdminUserBanDetails } from '@/lib/types/user/model';
 import { accountRoleToString, accountStatusToString } from '@/lib/types/user/proto';
@@ -165,137 +164,139 @@ export async function updateUserAction(
     role?: string;
     tag_ids?: string[];
   },
-): Promise<{ success?: boolean; error?: string; errorCode?: AdminMemberUpdateErrorCode }> {
-  try {
-    const hasProfileChanges =
-      data.nickname !== undefined ||
-      data.bio !== undefined ||
-      data.website !== undefined ||
-      data.social_links !== undefined;
-    if (hasProfileChanges) {
-      const memberClient = await createMemberClient();
-      await memberClient.updateMemberProfile({
-        memberId: id,
-        nickname: data.nickname,
-        ...(data.bio !== undefined && { bio: data.bio ?? '' }),
-        ...(data.website !== undefined && { website: data.website ?? '' }),
-        ...(data.social_links !== undefined && { socialLinks: data.social_links ?? {} }),
-      });
-    }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'user-actions',
+    'updateUserAction',
+    async () => {
+      const hasProfileChanges =
+        data.nickname !== undefined ||
+        data.bio !== undefined ||
+        data.website !== undefined ||
+        data.social_links !== undefined;
+      if (hasProfileChanges) {
+        const memberClient = await createMemberClient();
+        await memberClient.updateMemberProfile({
+          memberId: id,
+          nickname: data.nickname,
+          ...(data.bio !== undefined && { bio: data.bio ?? '' }),
+          ...(data.website !== undefined && { website: data.website ?? '' }),
+          ...(data.social_links !== undefined && { socialLinks: data.social_links ?? {} }),
+        });
+      }
 
-    if (data.tag_ids !== undefined) {
-      const memberClient = await createMemberClient();
-      await memberClient.setMemberTags({
-        memberId: id,
-        tagIds: data.tag_ids,
-      });
-    }
+      if (data.tag_ids !== undefined) {
+        const memberClient = await createMemberClient();
+        await memberClient.setMemberTags({
+          memberId: id,
+          tagIds: data.tag_ids,
+        });
+      }
 
-    // Update role if changed
-    if (data.role !== undefined) {
-      const accountClient = await createAccountClient();
-      await accountClient.setAccountRole({
-        memberId: id,
-        role: stringToAuthorizationRole(data.role),
-      });
-    }
+      // Update role if changed
+      if (data.role !== undefined) {
+        const accountClient = await createAccountClient();
+        await accountClient.setAccountRole({
+          memberId: id,
+          role: stringToAuthorizationRole(data.role),
+        });
+      }
 
-    revalidatePath('/admin/users');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('user-actions', 'updateUserAction', err, [data?.nickname]);
-    const errorCode = isConnectErrorCode(err, Code.NotFound) ? 'member_not_found' : nicknameErrorCode(err);
-    return {
-      error: err instanceof Error ? err.message : 'Failed to update user',
-      ...(errorCode && { errorCode }),
-    };
-  }
+      revalidatePath('/admin/users');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to update user', privateValues: [data?.nickname] },
+  );
 }
 
 export async function banUserAction(
   id: string,
   reason?: string,
   banExpiresIn?: number,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const accountClient = await createAccountClient();
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'user-actions',
+    'banUserAction',
+    async () => {
+      const accountClient = await createAccountClient();
 
-    await accountClient.banAccount({
-      memberId: id,
-      reason,
-      until: banExpiresIn ? timestampFromDate(new Date(Date.now() + banExpiresIn * 1000)) : undefined,
-    });
+      await accountClient.banAccount({
+        memberId: id,
+        reason,
+        until: banExpiresIn ? timestampFromDate(new Date(Date.now() + banExpiresIn * 1000)) : undefined,
+      });
 
-    revalidatePath('/admin/users');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('user-actions', 'banUserAction', err);
-    return { error: err instanceof Error ? err.message : 'Failed to ban user' };
-  }
+      revalidatePath('/admin/users');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to ban user' },
+  );
 }
 
-export async function unbanUserAction(id: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const accountClient = await createAccountClient();
+export async function unbanUserAction(id: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'user-actions',
+    'unbanUserAction',
+    async () => {
+      const accountClient = await createAccountClient();
 
-    await accountClient.unbanAccount({
-      memberId: id,
-    });
+      await accountClient.unbanAccount({
+        memberId: id,
+      });
 
-    revalidatePath('/admin/users');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('user-actions', 'unbanUserAction', err);
-    return { error: err instanceof Error ? err.message : 'Failed to unban user' };
-  }
+      revalidatePath('/admin/users');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to unban user' },
+  );
 }
 
-export async function setUserCanonicalEmailAction(
-  id: string,
-  email: string,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const accountClient = await createAccountClient();
-    await accountClient.setAccountCanonicalEmail({ memberId: id, email });
-    revalidatePath('/admin/users');
-    revalidatePath(`/admin/users/${id}`);
-    return { success: true };
-  } catch (err) {
-    logServerFailure('user-actions', 'setUserCanonicalEmailAction', err, [email]);
-    return { error: err instanceof Error ? err.message : 'Failed to update canonical account email' };
-  }
+export async function setUserCanonicalEmailAction(id: string, email: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'user-actions',
+    'setUserCanonicalEmailAction',
+    async () => {
+      const accountClient = await createAccountClient();
+      await accountClient.setAccountCanonicalEmail({ memberId: id, email });
+      revalidatePath('/admin/users');
+      revalidatePath(`/admin/users/${id}`);
+      return { success: true as const };
+    },
+    { fallback: 'Failed to update canonical account email', privateValues: [email] },
+  );
 }
 
 export async function removeUserSsoProviderAction(
   id: string,
   provider: string,
   identifier: string,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const accountClient = await createAccountClient();
-    await accountClient.removeAccountSsoProvider({ memberId: id, provider, identifier });
-    revalidatePath('/admin/users');
-    revalidatePath(`/admin/users/${id}`);
-    return { success: true };
-  } catch (err) {
-    logServerFailure('user-actions', 'removeUserSsoProviderAction', err);
-    return { error: err instanceof Error ? err.message : 'Failed to remove SSO provider' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'user-actions',
+    'removeUserSsoProviderAction',
+    async () => {
+      const accountClient = await createAccountClient();
+      await accountClient.removeAccountSsoProvider({ memberId: id, provider, identifier });
+      revalidatePath('/admin/users');
+      revalidatePath(`/admin/users/${id}`);
+      return { success: true as const };
+    },
+    { fallback: 'Failed to remove SSO provider' },
+  );
 }
 
-export async function deleteUserAction(id: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const accountClient = await createAccountClient();
-    await accountClient.deleteAccount({ memberId: id });
-    revalidatePath('/admin/users');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('user-actions', 'deleteUserAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete user' };
-  }
+export async function deleteUserAction(id: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'user-actions',
+    'deleteUserAction',
+    async () => {
+      const accountClient = await createAccountClient();
+      await accountClient.deleteAccount({ memberId: id });
+      revalidatePath('/admin/users');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete user' },
+  );
 }
 
 export async function getUserAdminAction(id: string) {
@@ -411,78 +412,56 @@ export async function updateProfileAction(data: {
   bio?: string | null;
   website?: string | null;
   social_links?: Record<string, string> | null;
-}): Promise<{ member?: MemberSummaryResult; error?: string; errorCode?: NicknameErrorCode }> {
-  try {
-    const memberClient = await createMemberClient();
+}): Promise<ActionResult<{ member: MemberSummaryResult | undefined }>> {
+  return runAction(
+    'user-actions',
+    'updateProfileAction',
+    async () => {
+      const memberClient = await createMemberClient();
 
-    const response = await memberClient.updateMyProfile({
-      nickname: data.nickname?.trim(),
-      ...(data.bio !== undefined && { bio: data.bio ?? '' }),
-      ...(data.website !== undefined && { website: data.website ?? '' }),
-      ...(data.social_links !== undefined && { socialLinks: data.social_links ?? {} }),
-    });
+      const response = await memberClient.updateMyProfile({
+        nickname: data.nickname?.trim(),
+        ...(data.bio !== undefined && { bio: data.bio ?? '' }),
+        ...(data.website !== undefined && { website: data.website ?? '' }),
+        ...(data.social_links !== undefined && { socialLinks: data.social_links ?? {} }),
+      });
 
-    return { member: mapMemberSummary(response.member) };
-  } catch (err) {
-    logServerFailure('user-actions', 'updateProfileAction', err, [data?.nickname]);
-    return {
-      error: err instanceof Error ? err.message : 'Failed to update profile',
-      ...(nicknameErrorCode(err) && { errorCode: nicknameErrorCode(err) }),
-    };
-  }
+      return { member: mapMemberSummary(response.member) };
+    },
+    { fallback: 'Failed to update profile', privateValues: [data?.nickname] },
+  );
 }
 
-export type NicknameErrorCode = 'nickname_invalid' | 'nickname_unavailable';
-/** A deleted or missing Member cannot be edited; the API answers NotFound. */
-export type AdminMemberUpdateErrorCode = NicknameErrorCode | 'member_not_found';
-
-function nicknameErrorCode(error: unknown): NicknameErrorCode | undefined {
-  if (!isConnectError(error)) {
-    return undefined;
-  }
-  if (error.code === Code.AlreadyExists) {
-    return 'nickname_unavailable';
-  }
-  if (error.code === Code.InvalidArgument) {
-    return 'nickname_invalid';
-  }
-  return undefined;
+export async function checkNicknameAvailabilityAction(nickname: string): Promise<ActionResult<{ available: boolean }>> {
+  return runAction(
+    'user-actions',
+    'checkNicknameAvailabilityAction',
+    async () => {
+      const memberClient = await createMemberClient();
+      const response = await memberClient.checkNicknameAvailability({ nickname: nickname.trim() });
+      return { available: response.available };
+    },
+    { fallback: 'Failed to check nickname availability', privateValues: [nickname] },
+  );
 }
 
-export async function checkNicknameAvailabilityAction(
+export async function completeMyOnboardingAction(
   nickname: string,
-): Promise<{ available?: boolean; error?: string }> {
-  try {
-    const memberClient = await createMemberClient();
-    const response = await memberClient.checkNicknameAvailability({ nickname: nickname.trim() });
-    return { available: response.available };
-  } catch (err) {
-    logServerFailure('user-actions', 'checkNicknameAvailabilityAction', err, [nickname]);
-    return { error: err instanceof Error ? err.message : 'Failed to check nickname availability' };
-  }
-}
-
-export async function completeMyOnboardingAction(nickname: string): Promise<{
-  member?: MemberSummaryResult;
-  onboarded?: boolean;
-  error?: string;
-  errorCode?: NicknameErrorCode;
-}> {
-  try {
-    const memberClient = await createMemberClient();
-    const response = await memberClient.completeMyOnboarding({ nickname: nickname.trim() });
-    const member = mapMemberSummary(response.member);
-    if (!response.onboarded || !member) {
-      return { error: 'Onboarding did not complete' };
-    }
-    return { member, onboarded: true };
-  } catch (err) {
-    logServerFailure('user-actions', 'completeMyOnboardingAction', err, [nickname]);
-    return {
-      error: err instanceof Error ? err.message : 'Failed to complete onboarding',
-      ...(nicknameErrorCode(err) && { errorCode: nicknameErrorCode(err) }),
-    };
-  }
+): Promise<ActionResult<{ member: MemberSummaryResult; onboarded: true }>> {
+  return runAction(
+    'user-actions',
+    'completeMyOnboardingAction',
+    async () => {
+      const memberClient = await createMemberClient();
+      const response = await memberClient.completeMyOnboarding({ nickname: nickname.trim() });
+      const member = mapMemberSummary(response.member);
+      if (!response.onboarded || !member) {
+        throw new Error('Onboarding did not complete');
+      }
+      return { member, onboarded: true as const };
+    },
+    { fallback: 'Failed to complete onboarding', privateValues: [nickname] },
+  );
 }
 
 // === Avatar Actions ===
@@ -509,66 +488,76 @@ function mapMemberSummary(
   };
 }
 
-export async function setAvatarAction(fileId: string): Promise<{ member?: MemberSummaryResult; error?: string }> {
-  try {
-    const memberClient = await createMemberClient();
+export async function setAvatarAction(
+  fileId: string,
+): Promise<ActionResult<{ member: MemberSummaryResult | undefined }>> {
+  return runAction(
+    'user-actions',
+    'setAvatarAction',
+    async () => {
+      const memberClient = await createMemberClient();
 
-    const response = await memberClient.setMyAvatar({
-      fileId,
-    });
+      const response = await memberClient.setMyAvatar({
+        fileId,
+      });
 
-    return { member: mapMemberSummary(response.member) };
-  } catch (err) {
-    logServerFailure('user-actions', 'setAvatarAction', err);
-    return { error: err instanceof Error ? err.message : 'Failed to set avatar' };
-  }
+      return { member: mapMemberSummary(response.member) };
+    },
+    { fallback: 'Failed to set avatar' },
+  );
 }
 
 export async function setAvatarForMemberAction(
   memberId: string,
   fileId: string,
-): Promise<{ url?: string; error?: string }> {
-  try {
-    const memberClient = await createMemberClient();
+): Promise<ActionResult<{ url: string | undefined }>> {
+  return runAction(
+    'user-actions',
+    'setAvatarForMemberAction',
+    async () => {
+      const memberClient = await createMemberClient();
 
-    const response = await memberClient.setMemberAvatar({
-      memberId,
-      fileId,
-    });
+      const response = await memberClient.setMemberAvatar({
+        memberId,
+        fileId,
+      });
 
-    return { url: response.member?.avatarAsset?.url };
-  } catch (err) {
-    logServerFailure('user-actions', 'setAvatarForMemberAction', err);
-    return { error: err instanceof Error ? err.message : 'Failed to set avatar' };
-  }
+      return { url: response.member?.avatarAsset?.url };
+    },
+    { fallback: 'Failed to set avatar' },
+  );
 }
 
-export async function deleteAvatarAction(): Promise<{ member?: MemberSummaryResult; error?: string }> {
-  try {
-    const memberClient = await createMemberClient();
+export async function deleteAvatarAction(): Promise<ActionResult<{ member: MemberSummaryResult | undefined }>> {
+  return runAction(
+    'user-actions',
+    'deleteAvatarAction',
+    async () => {
+      const memberClient = await createMemberClient();
 
-    const response = await memberClient.deleteMyAvatar({});
+      const response = await memberClient.deleteMyAvatar({});
 
-    return { member: mapMemberSummary(response.member) };
-  } catch (err) {
-    logServerFailure('user-actions', 'deleteAvatarAction', err);
-    return { error: err instanceof Error ? err.message : 'Failed to delete avatar' };
-  }
+      return { member: mapMemberSummary(response.member) };
+    },
+    { fallback: 'Failed to delete avatar' },
+  );
 }
 
-export async function deleteAvatarForMemberAction(memberId: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const memberClient = await createMemberClient();
+export async function deleteAvatarForMemberAction(memberId: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'user-actions',
+    'deleteAvatarForMemberAction',
+    async () => {
+      const memberClient = await createMemberClient();
 
-    await memberClient.deleteMemberAvatar({
-      memberId,
-    });
+      await memberClient.deleteMemberAvatar({
+        memberId,
+      });
 
-    return { success: true };
-  } catch (err) {
-    logServerFailure('user-actions', 'deleteAvatarForMemberAction', err);
-    return { error: err instanceof Error ? err.message : 'Failed to delete avatar' };
-  }
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete avatar' },
+  );
 }
 
 function stringToAuthorizationRole(role: string): AuthorizationRole {

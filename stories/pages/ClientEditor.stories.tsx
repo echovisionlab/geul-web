@@ -7,6 +7,7 @@ import { Alert } from '@/components/core/Alert';
 import { LayoutContainer, LayoutStack } from '@/components/core/Layout';
 import type { getClient } from '@/lib/queries/client-browser';
 import { ClientDetailPageView } from '@/features/admin/client/ClientDetailPageView';
+import { actionFailure, actionSuccess } from '@/lib/actions/action-result';
 const initial: NonNullable<Awaited<ReturnType<typeof getClient>>> = {
   id: 'client-preview',
   name: 'Quiet Signal',
@@ -33,15 +34,15 @@ export function ClientEditorPreview({ state = 'edit' }: { state?: 'edit' | 'new'
             readAction={async () => (state === 'pending' ? new Promise(() => {}) : record.current)}
             createAction={async (name, website) => {
               record.current = { ...record.current, name, website: website ?? null };
-              return { data: { id: initial.id } };
+              return actionSuccess({ data: { id: initial.id } });
             }}
             updateAction={async (_id, data) => {
               if (state === 'save-failed') {
-                return { error: t('messages.failedToLoad') };
+                return actionFailure(t('messages.failedToLoad'), 'ACTION_FAILED');
               }
               record.current = { ...record.current, ...data };
               setComplete(true);
-              return { success: true };
+              return actionSuccess({ success: true as const });
             }}
             onNavigate={navigatePreview}
             logoBindings={{

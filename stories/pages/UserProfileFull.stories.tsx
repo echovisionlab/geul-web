@@ -15,6 +15,7 @@ import {
 import { ServerDataTableNavigationProvider } from '@/features/data-table/ServerDataTable/ServerDataTableNavigation';
 import { parseTableQuery } from '@/lib/utils/table-url';
 import { tableRows } from './fixtures/table-query';
+import { actionFailure, actionSuccess } from '@/lib/actions/action-result';
 import type { PublicPostTableRow } from '@/lib/queries/post-table';
 const rows: PublicPostTableRow[] = [
   {
@@ -80,31 +81,31 @@ export function UserProfileFullPreview({
             bindings={{
               banUserAction: async (_id, reason) => {
                 if (failed) {
-                  return { error: 'Local moderation failed' };
+                  return actionFailure('Local moderation failed', 'ACTION_FAILED');
                 }
                 setUser((u) => ({ ...u, banned: true, ban_reason: reason ?? null }));
-                return { success: true };
+                return actionSuccess({ success: true as const });
               },
               unbanUserAction: async () => {
                 if (failed) {
-                  return { error: 'Local moderation failed' };
+                  return actionFailure('Local moderation failed', 'ACTION_FAILED');
                 }
                 setUser((u) => ({ ...u, banned: false, ban_reason: null }));
-                return { success: true };
+                return actionSuccess({ success: true as const });
               },
               updateUserAction: async (_id, patch) => {
                 if (failed) {
-                  return { error: 'Local role change failed' };
+                  return actionFailure('Local role change failed', 'ACTION_FAILED');
                 }
                 setUser((u) => ({ ...u, role: patch.role ?? u.role }));
-                return { success: true };
+                return actionSuccess({ success: true as const });
               },
               deleteUserAction: async () => {
                 if (failed) {
-                  return { error: 'Local deletion failed' };
+                  return actionFailure('Local deletion failed', 'ACTION_FAILED');
                 }
                 setUser((u) => ({ ...u, deleted: true }));
-                return { success: true };
+                return actionSuccess({ success: true as const });
               },
             }}
             publishedPosts={

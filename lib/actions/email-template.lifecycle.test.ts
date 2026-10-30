@@ -74,7 +74,7 @@ describe('email template lifecycle actions', () => {
   it('deletes through the hard-cut RPC and invalidates every composition surface', async () => {
     deleteEmailTemplate.mockResolvedValue({ success: true });
 
-    await expect(deleteEmailTemplateAction('template-1')).resolves.toEqual({ success: true });
+    await expect(deleteEmailTemplateAction('template-1')).resolves.toEqual({ ok: true, success: true });
 
     expect(deleteEmailTemplate).toHaveBeenCalledWith({ id: 'template-1' });
     expect(revalidatePath).toHaveBeenCalledWith('/admin/email-templates');
@@ -85,8 +85,9 @@ describe('email template lifecycle actions', () => {
     deleteEmailTemplate.mockRejectedValue(new ConnectError('template is in use', Code.FailedPrecondition));
 
     await expect(deleteEmailTemplateAction('template-1')).resolves.toEqual({
+      ok: false,
       error: expect.stringContaining('template is in use'),
-      errorCode: 'FAILED_PRECONDITION',
+      errorCode: Code.FailedPrecondition,
     });
   });
 
@@ -96,7 +97,7 @@ describe('email template lifecycle actions', () => {
       throw new Error('cache unavailable');
     });
 
-    await expect(deleteEmailTemplateAction('template-1')).resolves.toEqual({ success: true });
+    await expect(deleteEmailTemplateAction('template-1')).resolves.toEqual({ ok: true, success: true });
     expect(deleteEmailTemplate).toHaveBeenCalledWith({ id: 'template-1' });
   });
 });

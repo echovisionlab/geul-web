@@ -2,6 +2,7 @@
 
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ReactNode } from 'react';
+import { Code } from '@connectrpc/connect';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -314,8 +315,9 @@ describe('email authoring admin list deletion', () => {
 
   it('localizes a template delete conflict returned after confirmation', async () => {
     api.deleteEmailTemplateAction.mockResolvedValue({
-      error: '[failed_precondition] email template is frozen by an active delivery run',
-      errorCode: 'FAILED_PRECONDITION',
+      ok: false,
+      error: 'email template is frozen by an active delivery run',
+      errorCode: Code.FailedPrecondition,
     });
     renderPage(<AdminEmailTemplatesPage />);
     await flush();
@@ -367,8 +369,9 @@ describe('email authoring admin list deletion', () => {
 
   it('localizes a layout delete conflict returned after confirmation', async () => {
     api.deleteEmailLayoutAction.mockResolvedValue({
-      error: '[failed_precondition] email layout is frozen by an active delivery run',
-      errorCode: 'FAILED_PRECONDITION',
+      ok: false,
+      error: 'email layout is frozen by an active delivery run',
+      errorCode: Code.FailedPrecondition,
     });
     renderPage(<AdminEmailLayoutsPage />);
     await flush();

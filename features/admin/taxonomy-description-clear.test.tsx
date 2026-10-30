@@ -74,9 +74,9 @@ function Scenario({
 }: {
   refreshedEntity?: typeof original;
   Provider: ComponentType<{ children: ReactNode }>;
-  Modals: ComponentType<{ updateAction: () => Promise<{ success: boolean }>; refresh: () => void }>;
+  Modals: ComponentType<{ updateAction: () => Promise<{ ok: true; success: true }>; refresh: () => void }>;
   useModal: () => { openEdit: (target: typeof original) => void };
-  updateAction: () => Promise<{ success: boolean }>;
+  updateAction: () => Promise<{ ok: true; success: true }>;
 }) {
   return (
     <Provider>
@@ -88,7 +88,7 @@ function Scenario({
 
 describe('taxonomy edit drafts', () => {
   it.each(editors)('sends an explicit description clear from the $kind editor', async (editor) => {
-    const update = vi.fn(async () => ({ success: true }));
+    const update = vi.fn(async () => ({ ok: true as const, success: true as const }));
     const { user } = render(<Scenario {...editor} updateAction={update} />);
     await user.click(screen.getByRole('button', { name: 'Edit original' }));
     const dialog = await screen.findByRole('dialog');
@@ -99,7 +99,7 @@ describe('taxonomy edit drafts', () => {
   });
 
   it('preserves a dirty draft across a refresh and submits only the changed name', async () => {
-    const update = vi.fn(async () => ({ success: true }));
+    const update = vi.fn(async () => ({ ok: true as const, success: true as const }));
     const { user, rerender } = render(<Scenario {...editors[0]} updateAction={update} />);
     await user.click(screen.getByRole('button', { name: 'Edit original' }));
     const dialog = await screen.findByRole('dialog');
@@ -120,7 +120,7 @@ describe('taxonomy edit drafts', () => {
   });
 
   it('adopts a refresh while pristine and reloads the entity after cancelling a draft', async () => {
-    const update = vi.fn(async () => ({ success: true }));
+    const update = vi.fn(async () => ({ ok: true as const, success: true as const }));
     const { user, rerender } = render(<Scenario {...editors[0]} updateAction={update} />);
     await user.click(screen.getByRole('button', { name: 'Edit original' }));
     let dialog = await screen.findByRole('dialog');

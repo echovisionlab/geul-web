@@ -1,4 +1,5 @@
 import type { AdminUserEditPageBindings } from '@/features/admin/user/AdminUserEditPage';
+import { actionFailure, actionSuccess } from '@/lib/actions/action-result';
 import type { QueryResult } from '@/lib/api/query-result';
 export type AdminUserPreviewState = 'ready' | 'banned' | 'failed' | 'pending' | 'action-failed';
 export function adminUserFixture(state: AdminUserPreviewState): AdminUserEditPageBindings {
@@ -38,7 +39,6 @@ export function adminUserFixture(state: AdminUserPreviewState): AdminUserEditPag
     }
     return { ok: true, value };
   };
-  const mutation = async () => (state === 'action-failed' ? { error: 'Local operation failed' } : { success: true });
   return {
     getUserAdminAction: async () => read(user),
     listAllUserTagsAction: async () => read([]),
@@ -46,7 +46,7 @@ export function adminUserFixture(state: AdminUserPreviewState): AdminUserEditPag
     listAccountPersonalAccessTokensAction: async () => ({ personalAccessTokens: [] }),
     updateUserAction: async (_id, patch) => {
       if (state === 'action-failed') {
-        return { error: 'Local update failed' };
+        return actionFailure('Local update failed', 'ACTION_FAILED');
       }
       user = {
         ...user,
@@ -55,30 +55,36 @@ export function adminUserFixture(state: AdminUserPreviewState): AdminUserEditPag
         bio: patch.bio === undefined ? user.bio : patch.bio,
         website: patch.website === undefined ? user.website : patch.website,
       };
-      return { success: true };
+      return actionSuccess({ success: true as const });
     },
     banUserAction: async (_id, reason) => {
       if (state === 'action-failed') {
-        return { error: 'Local moderation failed' };
+        return actionFailure('Local moderation failed', 'ACTION_FAILED');
       }
       user = { ...user, banned: true, status: 'banned', ban_reason: reason ?? null };
-      return { success: true };
+      return actionSuccess({ success: true as const });
     },
     unbanUserAction: async () => {
       if (state === 'action-failed') {
-        return { error: 'Local moderation failed' };
+        return actionFailure('Local moderation failed', 'ACTION_FAILED');
       }
       user = { ...user, banned: false, status: 'active', ban_reason: null };
-      return { success: true };
+      return actionSuccess({ success: true as const });
     },
     setUserCanonicalEmailAction: async (_id, email) => {
       if (state === 'action-failed') {
-        return { error: 'Local email update failed' };
+        return actionFailure('Local email update failed', 'ACTION_FAILED');
       }
       user = { ...user, email };
-      return { success: true };
+      return actionSuccess({ success: true as const });
     },
-    removeUserSsoProviderAction: mutation,
-    releaseEmailSuppressionAction: mutation,
+    removeUserSsoProviderAction: async () =>
+      state === 'action-failed'
+        ? actionFailure('Local operation failed', 'ACTION_FAILED')
+        : actionSuccess({ success: true as const }),
+    releaseEmailSuppressionAction: async () =>
+      state === 'action-failed'
+        ? actionFailure('Local operation failed', 'ACTION_FAILED')
+        : actionSuccess({ success: true as const }),
   };
 }

@@ -1,9 +1,6 @@
 'use server';
 
-import { logServerFailure } from '@/lib/logging/logger';
-
 import { queryResult, unwrapQueryResult, type QueryResult } from '@/lib/api/query-result';
-import { isConnectError } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import {
   MenuItemLocalizationMode,
@@ -11,7 +8,9 @@ import {
   MenuVisibilityMode,
   type MenuItem as ProtoMenuItem,
 } from '@echovisionlab/geul-proto/secure/menu_pb.ts';
+import type { ActionResult } from '@/lib/actions/action-result';
 import { listCategoriesAdminAction } from '@/lib/actions/category';
+import { runAction } from '@/lib/actions/run-action';
 import { listTagsAdminAction } from '@/lib/actions/tag';
 import { createMenuClient } from '@/lib/api/server-client';
 import { listPagesAdmin } from '@/lib/queries/page';
@@ -137,64 +136,58 @@ function formatTargetName(name: string, slug?: string | null, fallback = 'Untitl
   return fallback;
 }
 
-export async function updateMenuAction(
-  id: string,
-  data: UpdateMenuInput,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createMenuClient();
-    await client.updateMenu({
-      id,
-      name: data.name,
-      items: data.items
-        ? {
-            $typeName: 'api.manage.v1.MenuItemsUpdate',
-            items: data.items.map(toProtoMenuItem),
-          }
-        : undefined,
-    });
-    revalidatePath('/admin/menus');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('menu-actions', 'updateMenuAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to update menu' };
-  }
+export async function updateMenuAction(id: string, data: UpdateMenuInput): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'menu-actions',
+    'updateMenuAction',
+    async () => {
+      const client = await createMenuClient();
+      await client.updateMenu({
+        id,
+        name: data.name,
+        items: data.items
+          ? {
+              $typeName: 'api.manage.v1.MenuItemsUpdate',
+              items: data.items.map(toProtoMenuItem),
+            }
+          : undefined,
+      });
+      revalidatePath('/admin/menus');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to update menu' },
+  );
 }
 
-export async function createMenuAction(name: string): Promise<{ data?: { id: string }; error?: string }> {
-  try {
-    const client = await createMenuClient();
-    const menu = await client.createMenu({
-      name,
-      items: [],
-    });
-    revalidatePath('/admin/menus');
-    return { data: { id: menu.id } };
-  } catch (err) {
-    logServerFailure('menu-actions', 'createMenuAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to create menu' };
-  }
+export async function createMenuAction(name: string): Promise<ActionResult<{ data: { id: string } }>> {
+  return runAction(
+    'menu-actions',
+    'createMenuAction',
+    async () => {
+      const client = await createMenuClient();
+      const menu = await client.createMenu({
+        name,
+        items: [],
+      });
+      revalidatePath('/admin/menus');
+      return { data: { id: menu.id } };
+    },
+    { fallback: 'Failed to create menu' },
+  );
 }
 
-export async function deleteMenuAction(id: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createMenuClient();
-    await client.deleteMenu({ id });
-    revalidatePath('/admin/menus');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('menu-actions', 'deleteMenuAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete menu' };
-  }
+export async function deleteMenuAction(id: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'menu-actions',
+    'deleteMenuAction',
+    async () => {
+      const client = await createMenuClient();
+      await client.deleteMenu({ id });
+      revalidatePath('/admin/menus');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete menu' },
+  );
 }
 
 export async function getMenuAvailableTargetsAction(type: string): Promise<QueryResult<MenuTarget[]>> {

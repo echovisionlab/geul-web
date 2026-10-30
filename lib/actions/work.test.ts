@@ -164,6 +164,7 @@ describe('work actions', () => {
       featuredImageAsset: assetRefFixture('https://cdn.example/featured.webp'),
     });
     await expect(actions.getWorkConfigurationAction('work-1')).resolves.toEqual({
+      ok: true,
       data: {
         slug: 'work-slug',
         type: 'portfolio',
@@ -186,7 +187,11 @@ describe('work actions', () => {
   it('preserves authorized configuration read failures', async () => {
     workClient.getWork.mockRejectedValueOnce(new ConnectError('Not allowed', Code.PermissionDenied));
     const result = await actions.getWorkConfigurationAction('work-1');
-    expect(result).toEqual({ error: expect.stringContaining('Not allowed') });
+    expect(result).toEqual({
+      ok: false,
+      error: expect.stringContaining('Not allowed'),
+      errorCode: Code.PermissionDenied,
+    });
     expect(result).not.toHaveProperty('data');
   });
 
@@ -197,6 +202,7 @@ describe('work actions', () => {
     });
 
     await expect(actions.updateWorkAction('work-1', { mapPlaceId: 'place-1' })).resolves.toEqual({
+      ok: true,
       success: true,
     });
     expect(mocks.loggerWarn).toHaveBeenCalledTimes(1);
@@ -207,7 +213,7 @@ describe('work actions', () => {
       throw new Error('cache unavailable');
     });
 
-    await expect(actions.deleteWorkAction('work-1')).resolves.toEqual({ success: true });
+    await expect(actions.deleteWorkAction('work-1')).resolves.toEqual({ ok: true, success: true });
     expect(workClient.deleteWork).toHaveBeenCalledWith({ id: 'work-1' });
     expect(mocks.loggerWarn).toHaveBeenCalledTimes(1);
   });
@@ -274,7 +280,7 @@ describe('work actions', () => {
         untilMonth: null,
         isPresent: true,
       }),
-    ).resolves.toEqual({ data: { id: 'work-1' } });
+    ).resolves.toEqual({ ok: true, data: { id: 'work-1' } });
 
     expect(workClient.createWork).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -290,7 +296,10 @@ describe('work actions', () => {
   });
 
   it('clears the work map place without touching other fields', async () => {
-    await expect(actions.updateWorkAction('work-1', { mapPlaceId: null })).resolves.toEqual({ success: true });
+    await expect(actions.updateWorkAction('work-1', { mapPlaceId: null })).resolves.toEqual({
+      ok: true,
+      success: true,
+    });
 
     expect(workClient.updateWork).toHaveBeenCalledWith({ id: 'work-1', mapPlaceId: '' });
   });
@@ -311,11 +320,13 @@ describe('work actions', () => {
 
   it('returns the OG run started by a featured image change', async () => {
     await expect(actions.setWorkFeaturedImageAction('work-1', 'file-1')).resolves.toEqual({
+      ok: true,
       success: true,
       imageUrl: 'https://cdn.example/work.webp',
       ogGenerationRunId: 'featured-run',
     });
     await expect(actions.removeWorkFeaturedImageAction('work-1')).resolves.toEqual({
+      ok: true,
       success: true,
       ogGenerationRunId: 'delete-featured-run',
     });
@@ -328,12 +339,16 @@ describe('work actions', () => {
   });
 
   it('moves a credit out of its group only when the group is cleared', async () => {
-    await expect(actions.updateWorkCreditAction('credit-1', { groupId: null })).resolves.toEqual({ success: true });
+    await expect(actions.updateWorkCreditAction('credit-1', { groupId: null })).resolves.toEqual({
+      ok: true,
+      success: true,
+    });
     expect(workClient.updateWorkCredit).toHaveBeenLastCalledWith(
       expect.objectContaining({ creditId: 'credit-1', groupId: '' }),
     );
 
     await expect(actions.updateWorkCreditAction('credit-1', { creditRole: 'Mixing' })).resolves.toEqual({
+      ok: true,
       success: true,
     });
     expect(workClient.updateWorkCredit).toHaveBeenLastCalledWith(
@@ -352,7 +367,7 @@ describe('work actions', () => {
         clients: ['client-b'],
         observedClients: ['client-a'],
       }),
-    ).resolves.toEqual({ success: true });
+    ).resolves.toEqual({ ok: true, success: true });
 
     expect(workClient.updateWork).toHaveBeenCalledWith({
       id: 'work-1',
@@ -382,6 +397,7 @@ describe('work actions', () => {
         clients: ['local-client'],
       }),
     ).resolves.toEqual({
+      ok: true,
       success: true,
       metadata: { peerKey: 'peer value', localKey: 'local value' },
       clients: ['peer-client', 'local-client'],
@@ -396,11 +412,15 @@ describe('work actions', () => {
 
     workClient.publishWork.mockRejectedValueOnce(new ConnectError('missing', Code.NotFound));
     await expect(actions.publishWorkAction('missing')).resolves.toEqual({
+      ok: false,
+      errorCode: Code.NotFound,
       error: 'Work not found',
     });
 
     workClient.setWorkFeaturedImage.mockRejectedValueOnce(new ConnectError('denied', Code.PermissionDenied));
     await expect(actions.setWorkFeaturedImageAction('work-1', 'file-1')).resolves.toEqual({
+      ok: false,
+      errorCode: Code.PermissionDenied,
       error: 'No permission to edit this work',
     });
   });

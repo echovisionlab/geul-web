@@ -1,9 +1,9 @@
 'use server';
 
-import { logServerFailure } from '@/lib/logging/logger';
+import type { ActionResult } from '@/lib/actions/action-result';
+import { runAction } from '@/lib/actions/run-action';
 import { queryResult } from '@/lib/api/query-result';
 
-import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { create } from '@bufbuild/protobuf';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
@@ -29,43 +29,35 @@ function themeAssetVariantFromName(variant?: ThemeAssetVariantName): ThemeAssetV
   return variant === 'dark' ? ThemeAssetVariant.DARK : ThemeAssetVariant.LIGHT;
 }
 
-export async function createLabelDraftAction(): Promise<{
-  data?: { id: string };
-  error?: string;
-}> {
-  try {
-    const client = await createLabelClient();
-    const name = await getLocalizedNewEntityName('label');
-    const label = await client.createLabel({
-      name,
-    });
-    revalidatePath('/admin/labels');
-    return { data: { id: label.id } };
-  } catch (err) {
-    logServerFailure('label-actions', 'createLabelDraftAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to create label draft' };
-  }
+export async function createLabelDraftAction(): Promise<ActionResult<{ data: { id: string } }>> {
+  return runAction(
+    'label-actions',
+    'createLabelDraftAction',
+    async () => {
+      const client = await createLabelClient();
+      const name = await getLocalizedNewEntityName('label');
+      const label = await client.createLabel({
+        name,
+      });
+      revalidatePath('/admin/labels');
+      return { data: { id: label.id } };
+    },
+    { fallback: 'Failed to create label draft' },
+  );
 }
 
-export async function deleteLabelAction(
-  id: string,
-  previewRevision: string,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createLabelClient();
-    await client.deleteLabel({ id, previewRevision });
-    revalidatePath('/admin/labels');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('label-actions', 'deleteLabelAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete label' };
-  }
+export async function deleteLabelAction(id: string, previewRevision: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'label-actions',
+    'deleteLabelAction',
+    async () => {
+      const client = await createLabelClient();
+      await client.deleteLabel({ id, previewRevision });
+      revalidatePath('/admin/labels');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete label' },
+  );
 }
 
 export async function previewDeleteLabelAction(id: string) {
@@ -105,65 +97,61 @@ export async function setLabelParticipantAction(
   labelId: string,
   memberId: string,
   role: LabelParticipantRole,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createLabelClient();
-    await client.setLabelParticipant({ labelId, memberId, role });
-    return { success: true };
-  } catch (err) {
-    logServerFailure('label-actions', 'setLabelParticipantAction', err);
-    return { error: err instanceof Error ? err.message : 'Failed to update participant' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'label-actions',
+    'setLabelParticipantAction',
+    async () => {
+      const client = await createLabelClient();
+      await client.setLabelParticipant({ labelId, memberId, role });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to update participant' },
+  );
 }
 
 export async function removeLabelParticipantAction(
   labelId: string,
   memberId: string,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createLabelClient();
-    await client.removeLabelParticipant({ labelId, memberId });
-    return { success: true };
-  } catch (err) {
-    logServerFailure('label-actions', 'removeLabelParticipantAction', err);
-    return { error: err instanceof Error ? err.message : 'Failed to remove participant' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'label-actions',
+    'removeLabelParticipantAction',
+    async () => {
+      const client = await createLabelClient();
+      await client.removeLabelParticipant({ labelId, memberId });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to remove participant' },
+  );
 }
 
-export async function publishLabelAction(id: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createLabelClient();
-    await client.publishLabel({ id });
-    revalidatePath('/admin/labels');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('label-actions', 'publishLabelAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Label not found' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to publish label' };
-  }
+export async function publishLabelAction(id: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'label-actions',
+    'publishLabelAction',
+    async () => {
+      const client = await createLabelClient();
+      await client.publishLabel({ id });
+      revalidatePath('/admin/labels');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to publish label', messages: { [Code.NotFound]: 'Label not found' } },
+  );
 }
 
-export async function unpublishLabelAction(id: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createLabelClient();
-    await client.unpublishLabel({ id });
-    revalidatePath('/admin/labels');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('label-actions', 'unpublishLabelAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Label not found' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to unpublish label' };
-  }
+export async function unpublishLabelAction(id: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'label-actions',
+    'unpublishLabelAction',
+    async () => {
+      const client = await createLabelClient();
+      await client.unpublishLabel({ id });
+      revalidatePath('/admin/labels');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to unpublish label', messages: { [Code.NotFound]: 'Label not found' } },
+  );
 }
 
 // === Logo Actions ===
@@ -172,43 +160,42 @@ export async function setLabelLogoAction(
   labelId: string,
   fileId: string,
   variant?: ThemeAssetVariantName,
-): Promise<{ url?: string; error?: string }> {
-  try {
-    const client = await createLabelClient();
-    const protoVariant = themeAssetVariantFromName(variant);
-    const response = await client.setLabelImage({ labelId, fileId, variant: protoVariant });
-    const url = protoVariant === ThemeAssetVariant.DARK ? response.imageDarkAsset?.url : response.imageLightAsset?.url;
-    return { url };
-  } catch (err) {
-    logServerFailure('label-actions', 'setLabelLogoAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Label or file not found' };
-    }
-    if (isConnectErrorCode(err, Code.PermissionDenied)) {
-      return { error: 'No permission to edit this label' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to set label logo' };
-  }
+): Promise<ActionResult<{ url?: string }>> {
+  return runAction(
+    'label-actions',
+    'setLabelLogoAction',
+    async () => {
+      const client = await createLabelClient();
+      const protoVariant = themeAssetVariantFromName(variant);
+      const response = await client.setLabelImage({ labelId, fileId, variant: protoVariant });
+      const url =
+        protoVariant === ThemeAssetVariant.DARK ? response.imageDarkAsset?.url : response.imageLightAsset?.url;
+      return { url };
+    },
+    {
+      fallback: 'Failed to set label logo',
+      messages: {
+        [Code.NotFound]: 'Label or file not found',
+        [Code.PermissionDenied]: 'No permission to edit this label',
+      },
+    },
+  );
 }
 
 export async function deleteLabelLogoAction(
   labelId: string,
   variant?: ThemeAssetVariantName,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createLabelClient();
-    await client.deleteLabelImage({ labelId, variant: themeAssetVariantFromName(variant) });
-    return { success: true };
-  } catch (err) {
-    logServerFailure('label-actions', 'deleteLabelLogoAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete label logo' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'label-actions',
+    'deleteLabelLogoAction',
+    async () => {
+      const client = await createLabelClient();
+      await client.deleteLabelImage({ labelId, variant: themeAssetVariantFromName(variant) });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete label logo' },
+  );
 }
 
 export async function listLabelsForBlockAction(input: {

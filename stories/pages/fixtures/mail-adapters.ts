@@ -6,6 +6,7 @@ import {
 } from '@echovisionlab/geul-proto/secure/mail_adapter_pb.ts';
 import type { PlainMailAdapter, CreateMailAdapterInput } from '@/lib/actions/mail-adapter';
 import type { MailAdaptersPageBindings } from '@/features/admin/mail-adapter/MailAdaptersPage';
+import { actionFailure, actionSuccess } from '@/lib/actions/action-result';
 export function mailAdaptersFixture(
   state: 'ready' | 'empty' | 'failed' | 'pending' | 'action-failed',
 ): MailAdaptersPageBindings {
@@ -42,7 +43,8 @@ export function mailAdaptersFixture(
             updatedAt: date,
           },
         ];
-  const failure = () => (state === 'action-failed' ? { error: 'Local mail adapter action failed' } : null);
+  const failure = () =>
+    state === 'action-failed' ? actionFailure('Local mail adapter action failed', 'ACTION_FAILED') : null;
   function config(input: Pick<CreateMailAdapterInput, 'sesConfig' | 'smtpConfig'>): PlainMailAdapter['config'] {
     return input.sesConfig
       ? { case: 'sesConfig', value: create(SESConfigSchema, input.sesConfig) }
@@ -55,8 +57,8 @@ export function mailAdaptersFixture(
       state === 'pending'
         ? new Promise(() => {})
         : state === 'failed'
-          ? { error: 'Local adapter list unavailable' }
-          : { adapters },
+          ? actionFailure('Local adapter list unavailable', 'ACTION_FAILED')
+          : actionSuccess({ adapters }),
     createMailAdapterAction: async (input) => {
       const error = failure();
       if (error) {
@@ -73,7 +75,7 @@ export function mailAdaptersFixture(
         updatedAt: date,
       };
       adapters = [...adapters, adapter];
-      return { adapter };
+      return actionSuccess({ adapter });
     },
     updateMailAdapterAction: async (input) => {
       const error = failure();
@@ -82,7 +84,7 @@ export function mailAdaptersFixture(
       }
       const current = adapters.find((adapter) => adapter.id === input.id);
       if (!current) {
-        return { error: 'Missing local adapter' };
+        return actionFailure('Missing local adapter', 'ACTION_FAILED');
       }
       const adapter: PlainMailAdapter = {
         ...current,
@@ -93,7 +95,7 @@ export function mailAdaptersFixture(
         config: input.sesConfig || input.smtpConfig ? config(input) : current.config,
       };
       adapters = adapters.map((row) => (row.id === adapter.id ? adapter : row));
-      return { adapter };
+      return actionSuccess({ adapter });
     },
     deleteMailAdapterAction: async (id) => {
       const error = failure();
@@ -101,7 +103,7 @@ export function mailAdaptersFixture(
         return error;
       }
       adapters = adapters.filter((row) => row.id !== id);
-      return { success: true };
+      return actionSuccess({ success: true as const });
     },
     toggleMailAdapterAction: async (id, isActive) => {
       const error = failure();
@@ -109,7 +111,7 @@ export function mailAdaptersFixture(
         return error;
       }
       adapters = adapters.map((row) => (row.id === id ? { ...row, isActive } : row));
-      return { adapter: adapters.find((row) => row.id === id) };
+      return actionSuccess({ adapter: adapters.find((row) => row.id === id) });
     },
     testMailAdapterAction: async () => failure() ?? { success: true, messageId: 'local-only-no-mail-sent' },
     testMailAdapterConfigAction: async () => failure() ?? { success: true, messageId: 'local-only-no-mail-sent' },

@@ -20,7 +20,26 @@ import {
   type SESConfig,
   type SMTPConfig,
 } from '@echovisionlab/geul-proto/secure/mail_adapter_pb.ts';
+import type { ActionResult } from '@/lib/actions/action-result';
+import { runAction } from '@/lib/actions/run-action';
 import { createMailAdapterClient } from '@/lib/api/server-client';
+
+const MAIL_ADAPTER_MESSAGES = { [Code.PermissionDenied]: 'Forbidden' };
+const MAIL_ADAPTER_NOT_FOUND_MESSAGES = { ...MAIL_ADAPTER_MESSAGES, [Code.NotFound]: 'Not found' };
+
+/** Credentials and sender details a failure log must redact. */
+function mailAdapterPrivateValues(input: Pick<CreateMailAdapterInput, 'sesConfig' | 'smtpConfig'>): unknown[] {
+  return [
+    input?.sesConfig?.accessKeyId,
+    input?.sesConfig?.secretAccessKey,
+    input?.sesConfig?.fromEmail,
+    input?.sesConfig?.fromName,
+    input?.smtpConfig?.user,
+    input?.smtpConfig?.password,
+    input?.smtpConfig?.fromEmail,
+    input?.smtpConfig?.fromName,
+  ];
+}
 
 // Helper to convert proto MailAdapter to plain object
 function toPlainAdapter(adapter: MailAdapter): PlainMailAdapter {
@@ -53,29 +72,22 @@ export interface PlainMailAdapter {
 
 export async function listMailAdaptersAction(
   activeOnly?: boolean,
-): Promise<{ adapters?: PlainMailAdapter[]; error?: string }> {
-  try {
-    const client = await createMailAdapterClient();
-    const request = create(ListMailAdaptersAdminRequestSchema, {
-      filters: activeOnly
-        ? [create(FilterSpecSchema, { field: 'is_active', op: FilterOp.EQ, value: 'true' })]
-        : undefined,
-    });
-    const response = await client.listMailAdaptersAdmin(request);
-    return { adapters: response.adapters.map(toPlainAdapter) };
-  } catch (err) {
-    logServerFailure('mail-adapter-actions', 'listMailAdaptersAction', err);
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        return { error: 'Unauthorized' };
-      }
-      if (err.code === Code.PermissionDenied) {
-        return { error: 'Forbidden' };
-      }
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to list mail adapters' };
-  }
+): Promise<ActionResult<{ adapters: PlainMailAdapter[] }>> {
+  return runAction(
+    'mail-adapter-actions',
+    'listMailAdaptersAction',
+    async () => {
+      const client = await createMailAdapterClient();
+      const request = create(ListMailAdaptersAdminRequestSchema, {
+        filters: activeOnly
+          ? [create(FilterSpecSchema, { field: 'is_active', op: FilterOp.EQ, value: 'true' })]
+          : undefined,
+      });
+      const response = await client.listMailAdaptersAdmin(request);
+      return { adapters: response.adapters.map(toPlainAdapter) };
+    },
+    { fallback: 'Failed to list mail adapters', messages: MAIL_ADAPTER_MESSAGES },
+  );
 }
 
 export interface CreateMailAdapterInput {
@@ -103,67 +115,55 @@ export interface CreateMailAdapterInput {
 
 export async function createMailAdapterAction(
   input: CreateMailAdapterInput,
-): Promise<{ adapter?: PlainMailAdapter; error?: string }> {
-  try {
-    const client = await createMailAdapterClient();
-    const request = create(CreateMailAdapterRequestSchema, {
-      name: input.name,
-      type: input.type,
-      isActive: input.isActive,
-      priority: input.priority,
-    });
+): Promise<ActionResult<{ adapter?: PlainMailAdapter }>> {
+  return runAction(
+    'mail-adapter-actions',
+    'createMailAdapterAction',
+    async () => {
+      const client = await createMailAdapterClient();
+      const request = create(CreateMailAdapterRequestSchema, {
+        name: input.name,
+        type: input.type,
+        isActive: input.isActive,
+        priority: input.priority,
+      });
 
-    // Set config based on type
-    if (input.type === MailAdapterType.SES && input.sesConfig) {
-      request.config = {
-        case: 'sesConfig',
-        value: create(SESConfigSchema, {
-          region: input.sesConfig.region,
-          accessKeyId: input.sesConfig.accessKeyId,
-          secretAccessKey: input.sesConfig.secretAccessKey,
-          fromEmail: input.sesConfig.fromEmail,
-          fromName: input.sesConfig.fromName,
-        }),
-      };
-    } else if (input.type === MailAdapterType.SMTP && input.smtpConfig) {
-      request.config = {
-        case: 'smtpConfig',
-        value: create(SMTPConfigSchema, {
-          host: input.smtpConfig.host,
-          port: input.smtpConfig.port,
-          secure: input.smtpConfig.secure,
-          user: input.smtpConfig.user,
-          password: input.smtpConfig.password,
-          fromEmail: input.smtpConfig.fromEmail,
-          fromName: input.smtpConfig.fromName,
-        }),
-      };
-    }
+      // Set config based on type
+      if (input.type === MailAdapterType.SES && input.sesConfig) {
+        request.config = {
+          case: 'sesConfig',
+          value: create(SESConfigSchema, {
+            region: input.sesConfig.region,
+            accessKeyId: input.sesConfig.accessKeyId,
+            secretAccessKey: input.sesConfig.secretAccessKey,
+            fromEmail: input.sesConfig.fromEmail,
+            fromName: input.sesConfig.fromName,
+          }),
+        };
+      } else if (input.type === MailAdapterType.SMTP && input.smtpConfig) {
+        request.config = {
+          case: 'smtpConfig',
+          value: create(SMTPConfigSchema, {
+            host: input.smtpConfig.host,
+            port: input.smtpConfig.port,
+            secure: input.smtpConfig.secure,
+            user: input.smtpConfig.user,
+            password: input.smtpConfig.password,
+            fromEmail: input.smtpConfig.fromEmail,
+            fromName: input.smtpConfig.fromName,
+          }),
+        };
+      }
 
-    const response = await client.create(request);
-    return { adapter: response.adapter ? toPlainAdapter(response.adapter) : undefined };
-  } catch (err) {
-    logServerFailure('mail-adapter-actions', 'createMailAdapterAction', err, [
-      input?.sesConfig?.accessKeyId,
-      input?.sesConfig?.secretAccessKey,
-      input?.sesConfig?.fromEmail,
-      input?.sesConfig?.fromName,
-      input?.smtpConfig?.user,
-      input?.smtpConfig?.password,
-      input?.smtpConfig?.fromEmail,
-      input?.smtpConfig?.fromName,
-    ]);
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        return { error: 'Unauthorized' };
-      }
-      if (err.code === Code.PermissionDenied) {
-        return { error: 'Forbidden' };
-      }
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to create mail adapter' };
-  }
+      const response = await client.create(request);
+      return { adapter: response.adapter ? toPlainAdapter(response.adapter) : undefined };
+    },
+    {
+      fallback: 'Failed to create mail adapter',
+      messages: MAIL_ADAPTER_MESSAGES,
+      privateValues: mailAdapterPrivateValues(input),
+    },
+  );
 }
 
 export interface UpdateMailAdapterInput {
@@ -192,95 +192,70 @@ export interface UpdateMailAdapterInput {
 
 export async function updateMailAdapterAction(
   input: UpdateMailAdapterInput,
-): Promise<{ adapter?: PlainMailAdapter; error?: string }> {
-  try {
-    const client = await createMailAdapterClient();
-    const request = create(UpdateMailAdapterRequestSchema, {
-      id: input.id,
-      name: input.name,
-      type: input.type,
-      isActive: input.isActive,
-      priority: input.priority,
-    });
+): Promise<ActionResult<{ adapter?: PlainMailAdapter }>> {
+  return runAction(
+    'mail-adapter-actions',
+    'updateMailAdapterAction',
+    async () => {
+      const client = await createMailAdapterClient();
+      const request = create(UpdateMailAdapterRequestSchema, {
+        id: input.id,
+        name: input.name,
+        type: input.type,
+        isActive: input.isActive,
+        priority: input.priority,
+      });
 
-    // Set config if provided
-    if (input.sesConfig) {
-      request.config = {
-        case: 'sesConfig',
-        value: create(SESConfigSchema, {
-          region: input.sesConfig.region,
-          accessKeyId: input.sesConfig.accessKeyId,
-          secretAccessKey: input.sesConfig.secretAccessKey,
-          fromEmail: input.sesConfig.fromEmail,
-          fromName: input.sesConfig.fromName,
-        }),
-      };
-    } else if (input.smtpConfig) {
-      request.config = {
-        case: 'smtpConfig',
-        value: create(SMTPConfigSchema, {
-          host: input.smtpConfig.host,
-          port: input.smtpConfig.port,
-          secure: input.smtpConfig.secure,
-          user: input.smtpConfig.user,
-          password: input.smtpConfig.password,
-          fromEmail: input.smtpConfig.fromEmail,
-          fromName: input.smtpConfig.fromName,
-        }),
-      };
-    }
+      // Set config if provided
+      if (input.sesConfig) {
+        request.config = {
+          case: 'sesConfig',
+          value: create(SESConfigSchema, {
+            region: input.sesConfig.region,
+            accessKeyId: input.sesConfig.accessKeyId,
+            secretAccessKey: input.sesConfig.secretAccessKey,
+            fromEmail: input.sesConfig.fromEmail,
+            fromName: input.sesConfig.fromName,
+          }),
+        };
+      } else if (input.smtpConfig) {
+        request.config = {
+          case: 'smtpConfig',
+          value: create(SMTPConfigSchema, {
+            host: input.smtpConfig.host,
+            port: input.smtpConfig.port,
+            secure: input.smtpConfig.secure,
+            user: input.smtpConfig.user,
+            password: input.smtpConfig.password,
+            fromEmail: input.smtpConfig.fromEmail,
+            fromName: input.smtpConfig.fromName,
+          }),
+        };
+      }
 
-    const response = await client.update(request);
-    return { adapter: response.adapter ? toPlainAdapter(response.adapter) : undefined };
-  } catch (err) {
-    logServerFailure('mail-adapter-actions', 'updateMailAdapterAction', err, [
-      input?.sesConfig?.accessKeyId,
-      input?.sesConfig?.secretAccessKey,
-      input?.sesConfig?.fromEmail,
-      input?.sesConfig?.fromName,
-      input?.smtpConfig?.user,
-      input?.smtpConfig?.password,
-      input?.smtpConfig?.fromEmail,
-      input?.smtpConfig?.fromName,
-    ]);
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        return { error: 'Unauthorized' };
-      }
-      if (err.code === Code.PermissionDenied) {
-        return { error: 'Forbidden' };
-      }
-      if (err.code === Code.NotFound) {
-        return { error: 'Not found' };
-      }
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to update mail adapter' };
-  }
+      const response = await client.update(request);
+      return { adapter: response.adapter ? toPlainAdapter(response.adapter) : undefined };
+    },
+    {
+      fallback: 'Failed to update mail adapter',
+      messages: MAIL_ADAPTER_NOT_FOUND_MESSAGES,
+      privateValues: mailAdapterPrivateValues(input),
+    },
+  );
 }
 
-export async function deleteMailAdapterAction(id: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createMailAdapterClient();
-    const request = create(DeleteMailAdapterRequestSchema, { id });
-    await client.delete(request);
-    return { success: true };
-  } catch (err) {
-    logServerFailure('mail-adapter-actions', 'deleteMailAdapterAction', err);
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        return { error: 'Unauthorized' };
-      }
-      if (err.code === Code.PermissionDenied) {
-        return { error: 'Forbidden' };
-      }
-      if (err.code === Code.NotFound) {
-        return { error: 'Not found' };
-      }
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete mail adapter' };
-  }
+export async function deleteMailAdapterAction(id: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'mail-adapter-actions',
+    'deleteMailAdapterAction',
+    async () => {
+      const client = await createMailAdapterClient();
+      const request = create(DeleteMailAdapterRequestSchema, { id });
+      await client.delete(request);
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete mail adapter', messages: MAIL_ADAPTER_NOT_FOUND_MESSAGES },
+  );
 }
 
 export async function testMailAdapterAction(
@@ -430,6 +405,6 @@ export async function testMailAdapterConfigAction(
 export async function toggleMailAdapterAction(
   id: string,
   isActive: boolean,
-): Promise<{ adapter?: PlainMailAdapter; error?: string }> {
+): Promise<ActionResult<{ adapter?: PlainMailAdapter }>> {
   return updateMailAdapterAction({ id, isActive });
 }

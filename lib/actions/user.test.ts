@@ -36,7 +36,7 @@ describe('updatePreferredLocaleAction', () => {
   it('rejects unsupported locales before calling the API', async () => {
     const result = await updatePreferredLocaleAction('xx');
 
-    expect(result).toEqual({ error: 'Unsupported language' });
+    expect(result).toEqual({ ok: false, error: 'Unsupported language', errorCode: 'ACTION_INVALID_LOCALE' });
     expect(mocks.createMemberClient).not.toHaveBeenCalled();
     expect(mocks.cookieSet).not.toHaveBeenCalled();
   });
@@ -63,6 +63,7 @@ describe('updatePreferredLocaleAction', () => {
     expect(mocks.revalidatePath).toHaveBeenNthCalledWith(1, '/my/settings');
     expect(mocks.revalidatePath).toHaveBeenNthCalledWith(2, '/', 'layout');
     expect(result).toEqual({
+      ok: true,
       success: true,
       preferred_locale: 'ar',
     });

@@ -29,11 +29,8 @@ import { Textarea, TextInput } from '@/components/core/Input';
 import { ContentModal, FormModal } from '@/components/core/Modal';
 import { getEmailLayoutActionErrorMessage } from '@/features/admin/email-layout/action-error-message';
 import { isEmailLayoutDeleteBlocked } from '@/features/email/deletion-policy';
-import {
-  createEmailLayoutAction,
-  deleteEmailLayoutAction,
-  type EmailLayoutActionErrorCode,
-} from '@/lib/actions/email-layout';
+import type { ActionErrorCode } from '@/lib/actions/action-result';
+import { createEmailLayoutAction, deleteEmailLayoutAction } from '@/lib/actions/email-layout';
 import { DEFAULT_LOCALE, normalizeLocale } from '@/lib/i18n/locale';
 import { listEmailLayouts, previewEmailLayout, type EmailLayout } from '@/lib/queries/email-layout';
 import type { ColumnDef } from '@/lib/types/common/data-table';
@@ -65,7 +62,7 @@ export default function AdminEmailLayoutsPage({
   const tUnsubscribe = useTranslations('unsubscribe.actions');
   const router = useRouter();
   const queryClient = useQueryClient();
-  const emailLayoutErrorMessage = (result: { error?: string; errorCode?: EmailLayoutActionErrorCode }) =>
+  const emailLayoutErrorMessage = (result: { error?: string; errorCode?: ActionErrorCode }) =>
     getEmailLayoutActionErrorMessage({
       errorCode: result.errorCode,
       fallbackError: result.error,

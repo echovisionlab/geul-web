@@ -5,6 +5,7 @@ import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useEffect, useRef, useState } from 'react';
+import { Code } from '@connectrpc/connect';
 import { useRouter } from 'next/navigation';
 import { IconBan, IconCheck } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -36,8 +37,8 @@ import {
   setUserCanonicalEmailAction,
   unbanUserAction,
   updateUserAction,
-  type AdminMemberUpdateErrorCode,
 } from '@/lib/actions/user';
+import type { ActionErrorCode } from '@/lib/actions/action-result';
 import { listAllUserTagsAction } from '@/lib/actions/user-tag';
 import type { SocialLinks } from '@/lib/types/common/social-links';
 import type { NicknameAvailabilityCheck } from '@/features/member/useNicknameValidation';
@@ -191,14 +192,15 @@ export default function AdminUserEditPage({
     },
   });
 
-  // Server text such as "[not_found] member not found: <id>" is for logs; admins see the localized reason.
-  function profileUpdateErrorMessage(errorCode: AdminMemberUpdateErrorCode | undefined): string {
+  // Server text such as "member not found: <id>" is for logs; admins see the localized reason.
+  function profileUpdateErrorMessage(errorCode: ActionErrorCode | undefined): string {
     switch (errorCode) {
-      case 'nickname_unavailable':
+      case Code.AlreadyExists:
         return tNickname('unavailable');
-      case 'nickname_invalid':
+      case Code.InvalidArgument:
         return tNickname('invalid');
-      case 'member_not_found':
+      // A deleted or missing Member cannot be edited.
+      case Code.NotFound:
         return tCommon('errors.entityNotFound', { entity: tCommon('entities.member') });
       default:
         return tCommon('notifications.saveFailed');

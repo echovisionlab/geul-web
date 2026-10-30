@@ -1,7 +1,8 @@
-import type { DeleteEmailTemplateErrorCode } from '@/lib/actions/email-template';
+import { Code } from '@connectrpc/connect';
+import type { ActionErrorCode } from '@/lib/actions/action-result';
 
 interface GetEmailTemplateDeleteErrorMessageInput {
-  errorCode?: DeleteEmailTemplateErrorCode;
+  errorCode?: ActionErrorCode;
   fallbackError?: string;
   unauthorizedMessage: string;
   notFoundMessage: string;
@@ -18,11 +19,11 @@ export function getEmailTemplateDeleteErrorMessage({
   genericMessage,
 }: GetEmailTemplateDeleteErrorMessageInput): string {
   switch (errorCode) {
-    case 'UNAUTHORIZED':
+    case Code.Unauthenticated:
       return unauthorizedMessage;
-    case 'NOT_FOUND':
+    case Code.NotFound:
       return notFoundMessage;
-    case 'FAILED_PRECONDITION':
+    case Code.FailedPrecondition:
       return conflictMessage;
     default:
       return fallbackError || genericMessage;

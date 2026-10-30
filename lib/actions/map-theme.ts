@@ -21,6 +21,8 @@ import type {
 } from '@/lib/types/map-theme/model';
 import { createMapThemeInputSchema } from '@/lib/types/map-theme/input-schema';
 import { createLogger } from '@/lib/utils/logger';
+import type { ActionResult } from '@/lib/actions/action-result';
+import { runAction } from '@/lib/actions/run-action';
 
 const logger = createLogger('map-theme-actions');
 
@@ -234,63 +236,48 @@ export async function resolvePublicMapThemeByIdAction(id: string): Promise<MapTh
   return result?.theme ?? null;
 }
 
-export async function copyMapThemeAction(id: string, name: string): Promise<{ data?: { id: string }; error?: string }> {
-  try {
-    const client = await createMapThemeClient();
-    const result = await client.copyMapTheme({ id, name });
-    revalidatePath('/admin/map/themes');
-    return { data: { id: result.id } };
-  } catch (error) {
-    logServerFailure('map-theme-actions', 'copyMapThemeAction', error);
-    if (isConnectErrorCode(error, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(error, Code.NotFound)) {
-      return { error: 'Theme not found' };
-    }
-    return { error: error instanceof Error ? error.message : 'Failed to copy theme' };
-  }
+export async function copyMapThemeAction(id: string, name: string): Promise<ActionResult<{ data: { id: string } }>> {
+  return runAction(
+    'map-theme-actions',
+    'copyMapThemeAction',
+    async () => {
+      const client = await createMapThemeClient();
+      const result = await client.copyMapTheme({ id, name });
+      revalidatePath('/admin/map/themes');
+      return { data: { id: result.id } };
+    },
+    { fallback: 'Failed to copy theme', messages: { [Code.NotFound]: 'Theme not found' } },
+  );
 }
 
-export async function deleteMapThemeAction(id: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createMapThemeClient();
-    await client.deleteMapTheme({ id });
-    revalidatePath('/admin/map/themes');
-    return { success: true };
-  } catch (error) {
-    logServerFailure('map-theme-actions', 'deleteMapThemeAction', error);
-    if (isConnectErrorCode(error, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(error, Code.NotFound)) {
-      return { error: 'Theme not found' };
-    }
-    if (isConnectErrorCode(error, Code.FailedPrecondition)) {
-      return { error: error.message };
-    }
-    return { error: error instanceof Error ? error.message : 'Failed to delete theme' };
-  }
+export async function deleteMapThemeAction(id: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'map-theme-actions',
+    'deleteMapThemeAction',
+    async () => {
+      const client = await createMapThemeClient();
+      await client.deleteMapTheme({ id });
+      revalidatePath('/admin/map/themes');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete theme', messages: { [Code.NotFound]: 'Theme not found' } },
+  );
 }
 
 export async function setDefaultMapThemeAction(
   themeId: string,
-): Promise<{ data?: { defaultMapThemeId: string }; error?: string }> {
-  try {
-    const client = await createMapThemeClient();
-    const result = await client.setDefaultMapTheme({ themeId });
-    revalidatePath('/admin/map/themes');
-    return { data: { defaultMapThemeId: result.defaultMapThemeId } };
-  } catch (error) {
-    logServerFailure('map-theme-actions', 'setDefaultMapThemeAction', error);
-    if (isConnectErrorCode(error, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(error, Code.NotFound)) {
-      return { error: 'Theme not found' };
-    }
-    return { error: error instanceof Error ? error.message : 'Failed to set default theme' };
-  }
+): Promise<ActionResult<{ data: { defaultMapThemeId: string } }>> {
+  return runAction(
+    'map-theme-actions',
+    'setDefaultMapThemeAction',
+    async () => {
+      const client = await createMapThemeClient();
+      const result = await client.setDefaultMapTheme({ themeId });
+      revalidatePath('/admin/map/themes');
+      return { data: { defaultMapThemeId: result.defaultMapThemeId } };
+    },
+    { fallback: 'Failed to set default theme', messages: { [Code.NotFound]: 'Theme not found' } },
+  );
 }
 
 interface CreateMapThemeInput {
@@ -302,23 +289,22 @@ interface CreateMapThemeInput {
 
 export async function createMapThemeAction(
   input: CreateMapThemeInput,
-): Promise<{ data?: { id: string }; error?: string }> {
-  try {
-    const parsedInput = createMapThemeInputSchema.parse(input);
-    const client = await createMapThemeClient();
-    const result = await client.createMapTheme({
-      name: parsedInput.name,
-      settings: parsedInput.settings,
-      lightVariant: toVariantInput(parsedInput.lightVariant),
-      darkVariant: toVariantInput(parsedInput.darkVariant),
-    });
-    revalidatePath('/admin/map/themes');
-    return { data: { id: result.id } };
-  } catch (error) {
-    logServerFailure('map-theme-actions', 'createMapThemeAction', error);
-    if (isConnectErrorCode(error, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    return { error: error instanceof Error ? error.message : 'Failed to create theme' };
-  }
+): Promise<ActionResult<{ data: { id: string } }>> {
+  return runAction(
+    'map-theme-actions',
+    'createMapThemeAction',
+    async () => {
+      const parsedInput = createMapThemeInputSchema.parse(input);
+      const client = await createMapThemeClient();
+      const result = await client.createMapTheme({
+        name: parsedInput.name,
+        settings: parsedInput.settings,
+        lightVariant: toVariantInput(parsedInput.lightVariant),
+        darkVariant: toVariantInput(parsedInput.darkVariant),
+      });
+      revalidatePath('/admin/map/themes');
+      return { data: { id: result.id } };
+    },
+    { fallback: 'Failed to create theme' },
+  );
 }

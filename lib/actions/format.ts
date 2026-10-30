@@ -1,9 +1,9 @@
 'use server';
 
-import { logServerFailure } from '@/lib/logging/logger';
+import type { ActionResult } from '@/lib/actions/action-result';
+import { runAction } from '@/lib/actions/run-action';
 import { queryResult } from '@/lib/api/query-result';
 
-import { isConnectError } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { FilterOp, SortOrder } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import { createFormatClient } from '@/lib/api/server-client';
@@ -62,61 +62,58 @@ export async function listFormatsAdminAction(input: FormatListInput) {
 
 export async function createFormatAction(
   name: string,
-): Promise<{ data?: { id: string; name: string; slug: string }; error?: string }> {
-  try {
-    const client = await createFormatClient();
-    const format = await client.createFormat({
-      name,
-    });
-    revalidatePath('/admin/formats');
-    return {
-      data: {
-        id: format.id,
-        name: format.name,
-        slug: format.slug,
-      },
-    };
-  } catch (err) {
-    logServerFailure('format-actions', 'createFormatAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to create format' };
-  }
+): Promise<ActionResult<{ data: { id: string; name: string; slug: string } }>> {
+  return runAction(
+    'format-actions',
+    'createFormatAction',
+    async () => {
+      const client = await createFormatClient();
+      const format = await client.createFormat({
+        name,
+      });
+      revalidatePath('/admin/formats');
+      return {
+        data: {
+          id: format.id,
+          name: format.name,
+          slug: format.slug,
+        },
+      };
+    },
+    { fallback: 'Failed to create format' },
+  );
 }
 
 export async function updateFormatAction(
   id: string,
   data: { name?: string },
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createFormatClient();
-    await client.updateFormat({
-      id,
-      name: data.name,
-    });
-    revalidatePath('/admin/formats');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('format-actions', 'updateFormatAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to update format' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'format-actions',
+    'updateFormatAction',
+    async () => {
+      const client = await createFormatClient();
+      await client.updateFormat({
+        id,
+        name: data.name,
+      });
+      revalidatePath('/admin/formats');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to update format' },
+  );
 }
 
-export async function deleteFormatAction(id: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createFormatClient();
-    await client.deleteFormat({ id });
-    revalidatePath('/admin/formats');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('format-actions', 'deleteFormatAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete format' };
-  }
+export async function deleteFormatAction(id: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'format-actions',
+    'deleteFormatAction',
+    async () => {
+      const client = await createFormatClient();
+      await client.deleteFormat({ id });
+      revalidatePath('/admin/formats');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete format' },
+  );
 }

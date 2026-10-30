@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "e2079298159193beb0be1311d53eb5867ffaecd66169b7b64017acd39299c9ac",
+  "manifestHash": "adcba3867ceba2ab57d47ac6742ab384d91b779f368448dfe92eff753db834c7",
   "counts": {
-    "sourceFiles": 3870,
-    "productionSourceFiles": 2333,
+    "sourceFiles": 3872,
+    "productionSourceFiles": 2334,
     "componentFiles": 920,
     "coreFamilies": 57,
     "featureDomains": 54,
@@ -2908,6 +2908,8 @@
     "lib/actions/release.test.ts",
     "lib/actions/release.ts",
     "lib/actions/revalidate-after-commit.ts",
+    "lib/actions/run-action.test.ts",
+    "lib/actions/run-action.ts",
     "lib/actions/series-share-link.test.ts",
     "lib/actions/series.ts",
     "lib/actions/session.test.ts",
@@ -49849,7 +49851,7 @@
       "typeAliasEvidence": [
         {
           "name": "CompleteOnboarding",
-          "type": "(nickname: string) => Promise<{ member?: MemberSummaryResult; onboarded?: boolean; error?: string; errorCode?: NicknameErrorCode; }>"
+          "type": "(nickname: string) => Promise<{ member?: MemberSummaryResult; onboarded?: boolean; error?: string; errorCode?: ActionErrorCode; }>"
         }
       ],
       "productionConsumers": ["app/(general)/onboarding/nickname/NicknameOnboardingPage.tsx"],
@@ -86304,6 +86306,7 @@
         "features/admin/series/SeriesPageView.tsx",
         "features/admin/work/WorksPageView.tsx",
         "features/data-table/ServerDataTable/ServerDataTableNavigation.tsx",
+        "lib/actions/action-result.ts",
         "lib/utils/table-url.ts",
         "stories/pages/AdminListAccessibility.ts",
         "stories/pages/fixtures/table-query.ts",
@@ -86739,6 +86742,7 @@
         "features/admin/segment/SegmentsPageView.tsx",
         "features/admin/user/UsersPageView.tsx",
         "features/data-table/ServerDataTable/ServerDataTableNavigation.tsx",
+        "lib/actions/action-result.ts",
         "lib/utils/table-url.ts",
         "stories/pages/fixtures/table-query.ts"
       ]
@@ -86912,6 +86916,7 @@
         "components/core/Alert/index.ts",
         "components/core/Layout/index.ts",
         "features/admin/client/ClientDetailPageView.tsx",
+        "lib/actions/action-result.ts",
         "stories/shared/preview-navigation.ts"
       ]
     },
@@ -88088,6 +88093,7 @@
         "components/core/Layout/index.ts",
         "features/admin/map-place/MapPlaceDetailPage.tsx",
         "features/admin/map-place/MapPlacesPage.tsx",
+        "lib/actions/action-result.ts",
         "stories/pages/fixtures/paginated.ts",
         "stories/shared/preview-navigation.ts"
       ]
@@ -88250,6 +88256,7 @@
         "features/my/MyProfilePageView.tsx",
         "features/my/MySecurityPageView.tsx",
         "features/my/MySettingsPageView.tsx",
+        "lib/actions/action-result.ts",
         "lib/providers/SessionProvider.tsx",
         "stories/pages/AccountAccessibility.ts",
         "stories/pages/fixtures/local-backups.ts",
@@ -88779,6 +88786,7 @@
         "features/admin/program-event/ProgramEventSeriesPageView.tsx",
         "features/admin/program-event/ProgramEventsPageView.tsx",
         "features/data-table/ServerDataTable/ServerDataTableNavigation.tsx",
+        "lib/actions/action-result.ts",
         "lib/utils/table-url.ts",
         "stories/pages/fixtures/table-query.ts",
         "stories/shared/preview-navigation.ts"
@@ -89223,6 +89231,7 @@
         "components/core/Layout/index.ts",
         "components/core/Notification/index.ts",
         "features/series/SeriesDetail.tsx",
+        "lib/actions/action-result.ts",
         "stories/pages/fixtures/editor-pages.ts",
         "stories/shared/preview-navigation.ts",
         "stories/shared/public-accessibility.ts"
@@ -89290,6 +89299,7 @@
       "importedSources": [
         "components/core/Layout/index.ts",
         "features/admin/settings/SiteSettingsPage.tsx",
+        "lib/actions/action-result.ts",
         "lib/types/site-setting/config.ts",
         "stories/pages/fixtures/operations-a11y.ts"
       ]
@@ -89384,6 +89394,7 @@
         "features/admin/tag/TagsPageView.tsx",
         "features/admin/user-tag/UserTagsPageView.tsx",
         "features/data-table/ServerDataTable/ServerDataTableNavigation.tsx",
+        "lib/actions/action-result.ts",
         "lib/utils/table-url.ts",
         "stories/pages/AdminListAccessibility.ts",
         "stories/pages/fixtures/table-query.ts"
@@ -89560,6 +89571,7 @@
         "features/user/UserProfilePageView.tsx",
         "features/user/UserPublishedPostsTableView.tsx",
         "features/user/user-published-posts-table-spec.ts",
+        "lib/actions/action-result.ts",
         "lib/utils/table-url.ts",
         "stories/pages/fixtures/table-query.ts",
         "stories/shared/preview-navigation.ts"

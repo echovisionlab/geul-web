@@ -1,12 +1,9 @@
 'use server';
 
-import { logServerFailure } from '@/lib/logging/logger';
 import { queryResult, type QueryResult } from '@/lib/api/query-result';
 
-import { connectErrorCode, isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { timestampDate, timestampFromDate } from '@bufbuild/protobuf/wkt';
-import { Code } from '@connectrpc/connect';
 import { FilterOp, SortOrder } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import type {
   LocalizedRichTextDocument,
@@ -20,6 +17,8 @@ import {
   type Campaign as ProtoCampaign,
   type CampaignRecipient as ProtoCampaignRecipient,
 } from '@echovisionlab/geul-proto/secure/campaign_pb.ts';
+import type { ActionResult } from '@/lib/actions/action-result';
+import { runAction } from '@/lib/actions/run-action';
 import { createCampaignClient } from '@/lib/api/server-client';
 import type { CampaignListItem } from '@/lib/types/campaign/model';
 import type { PaginatedQueryResult } from '@/lib/types/repository/result';
@@ -258,51 +257,45 @@ export async function getCampaignRecipientsAction(
 export async function createCampaignAction(
   name?: string,
   subject?: string,
-): Promise<{ data?: { id: string }; error?: string }> {
-  try {
-    const client = await createCampaignClient();
-    const normalizedName = name?.trim() || DEFAULT_CAMPAIGN_SUBJECT;
-    const normalizedSubject = subject?.trim() || normalizedName;
-    const response = await client.createCampaign({
-      name: normalizedName,
-      subject: normalizedSubject,
-    });
-    if (!response.campaign) {
-      return { error: 'Failed to create campaign' };
-    }
-    revalidatePath('/admin/campaigns');
-    return { data: { id: response.campaign.id } };
-  } catch (err) {
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      logServerFailure('campaign', 'createCampaignAction', err);
-      return { error: 'Unauthorized' };
-    }
-    logger.error('Failed to create campaign', { error: err });
-    return { error: err instanceof Error ? err.message : 'Failed to create campaign' };
-  }
+): Promise<ActionResult<{ data: { id: string } }>> {
+  return runAction(
+    'campaign',
+    'createCampaignAction',
+    async () => {
+      const client = await createCampaignClient();
+      const normalizedName = name?.trim() || DEFAULT_CAMPAIGN_SUBJECT;
+      const normalizedSubject = subject?.trim() || normalizedName;
+      const response = await client.createCampaign({
+        name: normalizedName,
+        subject: normalizedSubject,
+      });
+      if (!response.campaign) {
+        throw new Error('Failed to create campaign');
+      }
+      revalidatePath('/admin/campaigns');
+      return { data: { id: response.campaign.id } };
+    },
+    { fallback: 'Failed to create campaign' },
+  );
 }
 
 export async function updateCampaignNameAction(
   id: string,
   name: string,
   editorOrigin?: string,
-): Promise<{ name?: string; changed?: boolean; error?: string; errorCode?: Code }> {
-  try {
-    const client = await createCampaignClient(editorOrigin);
-    const response = await client.updateCampaignName({ id, name });
-    revalidatePath('/admin/campaigns');
-    revalidatePath(`/campaigns/${id}`);
-    return { name: response.name, changed: response.changed };
-  } catch (err) {
-    // The code lets the editor's save queue tell a refused name from a transient failure.
-    const errorCode = connectErrorCode(err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      logServerFailure('campaign', 'updateCampaignNameAction', err);
-      return { error: 'Unauthorized', errorCode };
-    }
-    logger.error('Failed to update campaign name', { error: err });
-    return { error: err instanceof Error ? err.message : 'Failed to update campaign name', errorCode };
-  }
+): Promise<ActionResult<{ name: string; changed: boolean }>> {
+  return runAction(
+    'campaign',
+    'updateCampaignNameAction',
+    async () => {
+      const client = await createCampaignClient(editorOrigin);
+      const response = await client.updateCampaignName({ id, name });
+      revalidatePath('/admin/campaigns');
+      revalidatePath(`/campaigns/${id}`);
+      return { name: response.name, changed: response.changed };
+    },
+    { fallback: 'Failed to update campaign name' },
+  );
 }
 
 export type CampaignConfigurationPatch =
@@ -329,85 +322,71 @@ export async function updateCampaignConfigurationAction(
   id: string,
   configuration: CampaignConfigurationPatch,
   editorOrigin?: string,
-): Promise<{ changed?: boolean; error?: string }> {
-  try {
-    const client = await createCampaignClient(editorOrigin);
-    const patch = {
-      ...(configuration.targetMode !== undefined
-        ? {
-            targetMode: configuration.targetMode,
-            // An empty optional string is the explicit null/clear for the pair.
-            segmentId: configuration.segmentId ?? '',
-          }
-        : {}),
-      ...(configuration.layoutId !== undefined ? { layoutId: configuration.layoutId ?? '' } : {}),
-      ...(configuration.recipientScope !== undefined
-        ? { recipientScope: campaignRecipientScopeToProto(configuration.recipientScope) }
-        : {}),
-    };
-    const response = await client.updateCampaignConfiguration({
-      id,
-      ...patch,
-    });
-    revalidatePath('/admin/campaigns');
-    revalidatePath(`/campaigns/${id}`);
-    return { changed: response.changed };
-  } catch (err) {
-    logger.error('Failed to update campaign configuration', { error: err });
-    return { error: err instanceof Error ? err.message : 'Failed to update campaign configuration' };
-  }
+): Promise<ActionResult<{ changed: boolean }>> {
+  return runAction(
+    'campaign',
+    'updateCampaignConfigurationAction',
+    async () => {
+      const client = await createCampaignClient(editorOrigin);
+      const patch = {
+        ...(configuration.targetMode !== undefined
+          ? {
+              targetMode: configuration.targetMode,
+              // An empty optional string is the explicit null/clear for the pair.
+              segmentId: configuration.segmentId ?? '',
+            }
+          : {}),
+        ...(configuration.layoutId !== undefined ? { layoutId: configuration.layoutId ?? '' } : {}),
+        ...(configuration.recipientScope !== undefined
+          ? { recipientScope: campaignRecipientScopeToProto(configuration.recipientScope) }
+          : {}),
+      };
+      const response = await client.updateCampaignConfiguration({
+        id,
+        ...patch,
+      });
+      revalidatePath('/admin/campaigns');
+      revalidatePath(`/campaigns/${id}`);
+      return { changed: response.changed };
+    },
+    { fallback: 'Failed to update campaign configuration' },
+  );
 }
 
-export async function deleteCampaignAction(id: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createCampaignClient();
-    const response = await client.deleteCampaign({ id });
-    revalidatePath('/admin/campaigns');
-    return { success: response.success };
-  } catch (err) {
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        logServerFailure('campaign', 'deleteCampaignAction', err);
-        return { error: 'Unauthorized' };
-      }
-      if (err.code === Code.FailedPrecondition) {
-        logServerFailure('campaign', 'deleteCampaignAction', err);
-        return { error: err.message };
-      }
-    }
-    logger.error('Failed to delete campaign', { error: err });
-    return { error: err instanceof Error ? err.message : 'Failed to delete campaign' };
-  }
+export async function deleteCampaignAction(id: string): Promise<ActionResult<{ success: boolean }>> {
+  return runAction(
+    'campaign',
+    'deleteCampaignAction',
+    async () => {
+      const client = await createCampaignClient();
+      const response = await client.deleteCampaign({ id });
+      revalidatePath('/admin/campaigns');
+      return { success: response.success };
+    },
+    { fallback: 'Failed to delete campaign' },
+  );
 }
 
 export async function sendCampaignNowAction(
   id: string,
   recipientScope: CampaignRecipientScopeValue,
-): Promise<{ recipientCount?: number; error?: string }> {
-  try {
-    const client = await createCampaignClient();
-    const response = await client.sendCampaignNow({
-      id,
-      recipientScope: campaignRecipientScopeToProto(recipientScope),
-    });
-    revalidatePath('/admin/campaigns');
-    return {
-      recipientCount: response.recipientCount,
-    };
-  } catch (err) {
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        logServerFailure('campaign', 'sendCampaignNowAction', err);
-        return { error: 'Unauthorized' };
-      }
-      if (err.code === Code.FailedPrecondition) {
-        logServerFailure('campaign', 'sendCampaignNowAction', err);
-        return { error: err.message };
-      }
-    }
-    logger.error('Failed to send campaign', { error: err });
-    return { error: err instanceof Error ? err.message : 'Failed to send campaign' };
-  }
+): Promise<ActionResult<{ recipientCount: number }>> {
+  return runAction(
+    'campaign',
+    'sendCampaignNowAction',
+    async () => {
+      const client = await createCampaignClient();
+      const response = await client.sendCampaignNow({
+        id,
+        recipientScope: campaignRecipientScopeToProto(recipientScope),
+      });
+      revalidatePath('/admin/campaigns');
+      return {
+        recipientCount: response.recipientCount,
+      };
+    },
+    { fallback: 'Failed to send campaign' },
+  );
 }
 
 export async function previewCampaignAction(
@@ -448,69 +427,51 @@ export async function sendTestCampaignAction(
   id: string,
   email: string,
   locale?: string | null,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createCampaignClient();
-    const response = await client.sendTestCampaign({ id, email, locale: locale ?? undefined });
-    return { success: response.success };
-  } catch (err) {
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      logServerFailure('campaign', 'sendTestCampaignAction', err, [email]);
-      return { error: 'Unauthorized' };
-    }
-    logger.error('Failed to send test campaign', { error: err, privateValues: [email] });
-    return { error: err instanceof Error ? err.message : 'Failed to send test email' };
-  }
+): Promise<ActionResult<{ success: boolean }>> {
+  return runAction(
+    'campaign',
+    'sendTestCampaignAction',
+    async () => {
+      const client = await createCampaignClient();
+      const response = await client.sendTestCampaign({ id, email, locale: locale ?? undefined });
+      return { success: response.success };
+    },
+    { fallback: 'Failed to send test email', privateValues: [email] },
+  );
 }
 
 export async function scheduleCampaignAction(
   id: string,
   scheduledAt: Date,
   recipientScope: CampaignRecipientScopeValue,
-): Promise<{ changed?: boolean; error?: string }> {
-  try {
-    const client = await createCampaignClient();
-    const response = await client.scheduleCampaign({
-      id,
-      scheduledAt: timestampFromDate(scheduledAt),
-      recipientScope: campaignRecipientScopeToProto(recipientScope),
-    });
-    revalidatePath('/admin/campaigns');
-    return { changed: response.changed };
-  } catch (err) {
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        logServerFailure('campaign', 'scheduleCampaignAction', err);
-        return { error: 'Unauthorized' };
-      }
-      if (err.code === Code.FailedPrecondition) {
-        logServerFailure('campaign', 'scheduleCampaignAction', err);
-        return { error: err.message };
-      }
-    }
-    logger.error('Failed to schedule campaign', { error: err });
-    return { error: err instanceof Error ? err.message : 'Failed to schedule campaign' };
-  }
+): Promise<ActionResult<{ changed: boolean }>> {
+  return runAction(
+    'campaign',
+    'scheduleCampaignAction',
+    async () => {
+      const client = await createCampaignClient();
+      const response = await client.scheduleCampaign({
+        id,
+        scheduledAt: timestampFromDate(scheduledAt),
+        recipientScope: campaignRecipientScopeToProto(recipientScope),
+      });
+      revalidatePath('/admin/campaigns');
+      return { changed: response.changed };
+    },
+    { fallback: 'Failed to schedule campaign' },
+  );
 }
 
-export async function cancelCampaignAction(id: string): Promise<{ changed?: boolean; error?: string }> {
-  try {
-    const client = await createCampaignClient();
-    const response = await client.cancelCampaign({ id });
-    revalidatePath('/admin/campaigns');
-    return { changed: response.changed };
-  } catch (err) {
-    if (isConnectError(err)) {
-      if (err.code === Code.Unauthenticated) {
-        logServerFailure('campaign', 'cancelCampaignAction', err);
-        return { error: 'Unauthorized' };
-      }
-      if (err.code === Code.FailedPrecondition) {
-        logServerFailure('campaign', 'cancelCampaignAction', err);
-        return { error: err.message };
-      }
-    }
-    logger.error('Failed to cancel campaign', { error: err });
-    return { error: err instanceof Error ? err.message : 'Failed to cancel campaign' };
-  }
+export async function cancelCampaignAction(id: string): Promise<ActionResult<{ changed: boolean }>> {
+  return runAction(
+    'campaign',
+    'cancelCampaignAction',
+    async () => {
+      const client = await createCampaignClient();
+      const response = await client.cancelCampaign({ id });
+      revalidatePath('/admin/campaigns');
+      return { changed: response.changed };
+    },
+    { fallback: 'Failed to cancel campaign' },
+  );
 }

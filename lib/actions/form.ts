@@ -4,12 +4,8 @@ import { logServerFailure } from '@/lib/logging/logger';
 import { queryResult, type QueryResult, unwrapQueryResult } from '@/lib/api/query-result';
 
 import { connectActionErrorCode, isConnectError } from '@/lib/api/connect-error';
-import {
-  actionFailure,
-  actionSuccess,
-  type ActionResult,
-  type LocalActionErrorCode,
-} from '@/lib/actions/action-result';
+import { actionFailure, actionSuccess, type ActionResult } from '@/lib/actions/action-result';
+import { runAction } from '@/lib/actions/run-action';
 import { revalidatePath } from 'next/cache';
 import { timestampDate, timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
@@ -54,11 +50,6 @@ function getFormsBasePath(scope: FormScope): string {
 
 const revalidateFormAfterCommit = createCommittedMutationRevalidator('form-actions', 'form');
 
-function formActionFailure(err: unknown, fallback: string, fallbackCode: LocalActionErrorCode) {
-  const message = err instanceof Error ? err.message : fallback;
-  return actionFailure(message.trim() ? message : fallback, connectActionErrorCode(err, fallbackCode));
-}
-
 export async function listFormsAdminAction(input: FormListInput) {
   return queryResult(async () => {
     const client = await createFormClient();
@@ -94,35 +85,39 @@ export async function listFormsAdminAction(input: FormListInput) {
 }
 
 export async function createFormAction(title: string): Promise<ActionResult<{ data: { id: string } }>> {
-  try {
-    const client = await createFormClient();
-    const schema = {
-      id: crypto.randomUUID(),
-      steps: [{ id: crypto.randomUUID(), title: 'Step 1' }],
-    };
-    const form = await client.createForm({
-      title,
-      schema: toBytes(JSON.stringify(schema)),
-      isPublic: false,
-    });
-    revalidatePath('/admin/forms');
-    return actionSuccess({ data: { id: form.id } });
-  } catch (err) {
-    logServerFailure('form-actions', 'createFormAction', err);
-    return formActionFailure(err, 'Failed to create form', 'FORM_CREATE_FAILED');
-  }
+  return runAction(
+    'form-actions',
+    'createFormAction',
+    async () => {
+      const client = await createFormClient();
+      const schema = {
+        id: crypto.randomUUID(),
+        steps: [{ id: crypto.randomUUID(), title: 'Step 1' }],
+      };
+      const form = await client.createForm({
+        title,
+        schema: toBytes(JSON.stringify(schema)),
+        isPublic: false,
+      });
+      revalidatePath('/admin/forms');
+      return { data: { id: form.id } };
+    },
+    { fallback: 'Failed to create form', code: 'FORM_CREATE_FAILED' },
+  );
 }
 
 export async function deleteFormAction(id: string): Promise<ActionResult<{ success: true }>> {
-  try {
-    const client = await createFormClient();
-    await client.deleteForm({ id });
-    revalidateFormAfterCommit('/admin/forms');
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('form-actions', 'deleteFormAction', err);
-    return formActionFailure(err, 'Failed to delete form', 'FORM_DELETE_FAILED');
-  }
+  return runAction(
+    'form-actions',
+    'deleteFormAction',
+    async () => {
+      const client = await createFormClient();
+      await client.deleteForm({ id });
+      revalidateFormAfterCommit('/admin/forms');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete form', code: 'FORM_DELETE_FAILED' },
+  );
 }
 
 export interface UpdateFormInput {
@@ -140,36 +135,38 @@ export interface UpdateFormInput {
 }
 
 export async function updateFormAction(id: string, data: UpdateFormInput): Promise<ActionResult<{ success: true }>> {
-  try {
-    const client = await createFormClient();
-    await client.updateForm({
-      id,
-      title: data.title,
-      slug: data.slug === null ? undefined : data.slug,
-      clearSlug: data.slug === null,
-      isPublic: data.isPublic,
-      password: data.password,
-      opensAt: data.opensAt instanceof Date ? timestampFromDate(data.opensAt) : undefined,
-      clearOpensAt: data.opensAt === null,
-      closesAt: data.closesAt instanceof Date ? timestampFromDate(data.closesAt) : undefined,
-      clearClosesAt: data.closesAt === null,
-      maxSubmissions: data.maxSubmissions === null ? undefined : data.maxSubmissions,
-      clearMaxSubmissions: data.maxSubmissions === null,
-      requireAuth: data.requireAuth,
-      allowedRoles: data.allowedRoles,
-      replaceAllowedRoles: data.allowedRoles !== undefined,
-      allowDuplicateSubmission: data.allowDuplicateSubmission,
-      status:
-        data.status === 'published' ? FormStatus.PUBLISHED : data.status === 'draft' ? FormStatus.DRAFT : undefined,
-    });
-    const basePath = getFormsBasePath('admin');
-    revalidateFormAfterCommit(basePath);
-    revalidateFormAfterCommit(`${basePath}/${id}`);
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('form-actions', 'updateFormAction', err, [data?.password]);
-    return formActionFailure(err, 'Failed to update form', 'FORM_UPDATE_FAILED');
-  }
+  return runAction(
+    'form-actions',
+    'updateFormAction',
+    async () => {
+      const client = await createFormClient();
+      await client.updateForm({
+        id,
+        title: data.title,
+        slug: data.slug === null ? undefined : data.slug,
+        clearSlug: data.slug === null,
+        isPublic: data.isPublic,
+        password: data.password,
+        opensAt: data.opensAt instanceof Date ? timestampFromDate(data.opensAt) : undefined,
+        clearOpensAt: data.opensAt === null,
+        closesAt: data.closesAt instanceof Date ? timestampFromDate(data.closesAt) : undefined,
+        clearClosesAt: data.closesAt === null,
+        maxSubmissions: data.maxSubmissions === null ? undefined : data.maxSubmissions,
+        clearMaxSubmissions: data.maxSubmissions === null,
+        requireAuth: data.requireAuth,
+        allowedRoles: data.allowedRoles,
+        replaceAllowedRoles: data.allowedRoles !== undefined,
+        allowDuplicateSubmission: data.allowDuplicateSubmission,
+        status:
+          data.status === 'published' ? FormStatus.PUBLISHED : data.status === 'draft' ? FormStatus.DRAFT : undefined,
+      });
+      const basePath = getFormsBasePath('admin');
+      revalidateFormAfterCommit(basePath);
+      revalidateFormAfterCommit(`${basePath}/${id}`);
+      return { success: true as const };
+    },
+    { fallback: 'Failed to update form', code: 'FORM_UPDATE_FAILED', privateValues: [data?.password] },
+  );
 }
 
 export async function setFormFeaturedImageAction(
@@ -177,35 +174,37 @@ export async function setFormFeaturedImageAction(
   fileId: string,
   scope: FormScope = 'admin',
 ): Promise<ActionResult<{ imageUrl?: string; ogGenerationRunId?: string }>> {
-  try {
-    const client = await createFormClient();
-    const result = await client.setFormFeaturedImage({ formId, fileId });
-    revalidateFormAfterCommit(`${getFormsBasePath(scope)}/${formId}`);
-    const response = { imageUrl: result.imageAsset?.url };
-    return actionSuccess(
-      result.ogGenerationRunId ? { ...response, ogGenerationRunId: result.ogGenerationRunId } : response,
-    );
-  } catch (err) {
-    logServerFailure('form-actions', 'setFormFeaturedImageAction', err);
-    return formActionFailure(err, 'Failed to set featured image', 'FORM_SET_FEATURED_IMAGE_FAILED');
-  }
+  return runAction(
+    'form-actions',
+    'setFormFeaturedImageAction',
+    async () => {
+      const client = await createFormClient();
+      const result = await client.setFormFeaturedImage({ formId, fileId });
+      revalidateFormAfterCommit(`${getFormsBasePath(scope)}/${formId}`);
+      const response = { imageUrl: result.imageAsset?.url };
+      return result.ogGenerationRunId ? { ...response, ogGenerationRunId: result.ogGenerationRunId } : response;
+    },
+    { fallback: 'Failed to set featured image', code: 'FORM_SET_FEATURED_IMAGE_FAILED' },
+  );
 }
 
 export async function removeFormFeaturedImageAction(
   formId: string,
   scope: FormScope = 'admin',
 ): Promise<ActionResult<{ success: true; ogGenerationRunId?: string }>> {
-  try {
-    const client = await createFormClient();
-    const result = await client.deleteFormFeaturedImage({ formId });
-    revalidateFormAfterCommit(`${getFormsBasePath(scope)}/${formId}`);
-    return actionSuccess(
-      result.ogGenerationRunId ? { success: true, ogGenerationRunId: result.ogGenerationRunId } : { success: true },
-    );
-  } catch (err) {
-    logServerFailure('form-actions', 'removeFormFeaturedImageAction', err);
-    return formActionFailure(err, 'Failed to remove featured image', 'FORM_REMOVE_FEATURED_IMAGE_FAILED');
-  }
+  return runAction(
+    'form-actions',
+    'removeFormFeaturedImageAction',
+    async () => {
+      const client = await createFormClient();
+      const result = await client.deleteFormFeaturedImage({ formId });
+      revalidateFormAfterCommit(`${getFormsBasePath(scope)}/${formId}`);
+      return result.ogGenerationRunId
+        ? { success: true as const, ogGenerationRunId: result.ogGenerationRunId }
+        : { success: true as const };
+    },
+    { fallback: 'Failed to remove featured image', code: 'FORM_REMOVE_FEATURED_IMAGE_FAILED' },
+  );
 }
 
 export async function regenerateFormOgImageAction(
@@ -310,14 +309,16 @@ export async function listFormSubmissionsAction(
 }
 
 export async function deleteFormSubmissionAction(id: string): Promise<ActionResult<{ success: true }>> {
-  try {
-    const client = await createFormClient();
-    await client.deleteFormSubmission({ id });
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('form-actions', 'deleteFormSubmissionAction', err);
-    return formActionFailure(err, 'Failed to delete submission', 'FORM_DELETE_SUBMISSION_FAILED');
-  }
+  return runAction(
+    'form-actions',
+    'deleteFormSubmissionAction',
+    async () => {
+      const client = await createFormClient();
+      await client.deleteFormSubmission({ id });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete submission', code: 'FORM_DELETE_SUBMISSION_FAILED' },
+  );
 }
 
 // Public: submit form response
@@ -327,21 +328,23 @@ export async function submitFormAction(
   password?: string,
   requestedLocale?: string,
 ): Promise<ActionResult<{ success: true }>> {
-  try {
-    const publicClient = await createPublicFormClientWithAuth(requestedLocale);
-    const normalizedPassword = password?.trim() ? password : undefined;
+  return runAction(
+    'form-actions',
+    'submitFormAction',
+    async () => {
+      const publicClient = await createPublicFormClientWithAuth(requestedLocale);
+      const normalizedPassword = password?.trim() ? password : undefined;
 
-    await publicClient.submit({
-      formId,
-      data: toBytes(JSON.stringify(data)),
-      password: normalizedPassword,
-    });
+      await publicClient.submit({
+        formId,
+        data: toBytes(JSON.stringify(data)),
+        password: normalizedPassword,
+      });
 
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('form-actions', 'submitFormAction', err, [password, data]);
-    return formActionFailure(err, 'Failed to submit form', 'FORM_SUBMIT_FAILED');
-  }
+      return { success: true as const };
+    },
+    { fallback: 'Failed to submit form', code: 'FORM_SUBMIT_FAILED', privateValues: [password, data] },
+  );
 }
 
 // Public: verify form password

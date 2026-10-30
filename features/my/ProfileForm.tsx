@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { Code } from '@connectrpc/connect';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { notifications } from '@/components/core/Notification';
@@ -75,13 +76,14 @@ export function ProfileForm({
     mutationFn: updateAction,
     onSuccess: async (result) => {
       if (result.error) {
+        const nicknameRejected = result.errorCode === Code.AlreadyExists || result.errorCode === Code.InvalidArgument;
         showUpdateError(
-          result.errorCode === 'nickname_unavailable'
+          result.errorCode === Code.AlreadyExists
             ? tNickname('unavailable')
-            : result.errorCode === 'nickname_invalid'
+            : result.errorCode === Code.InvalidArgument
               ? tNickname('invalid')
               : result.error,
-          result.errorCode ? 'nickname' : 'form',
+          nicknameRejected ? 'nickname' : 'form',
         );
         return;
       }

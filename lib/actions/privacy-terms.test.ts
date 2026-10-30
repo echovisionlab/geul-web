@@ -55,21 +55,27 @@ describe('privacy and terms actions', () => {
     const effectiveFrom = new Date('2026-02-03T04:05:06Z');
 
     await expect(privacy.createPrivacyVersionAction()).resolves.toEqual({
+      ok: true,
       data: { id: 'privacy-1' },
     });
     await expect(privacy.schedulePrivacyAction('privacy-1', effectiveFrom, observedRevision)).resolves.toEqual({
+      ok: true,
       success: true,
     });
     await expect(privacy.cancelPrivacyScheduleAction('privacy-1')).resolves.toEqual({
+      ok: true,
       success: true,
     });
     await expect(privacy.activatePrivacyNowAction('privacy-1', observedRevision)).resolves.toEqual({
+      ok: true,
       success: true,
     });
     await expect(privacy.regeneratePrivacyHtmlAction('privacy-1')).resolves.toEqual({
+      ok: true,
       success: true,
     });
     await expect(privacy.deletePrivacyVersionAction('privacy-1', observedRevision)).resolves.toEqual({
+      ok: true,
       success: true,
     });
 
@@ -99,21 +105,27 @@ describe('privacy and terms actions', () => {
     const effectiveFrom = new Date('2026-03-04T05:06:07Z');
 
     await expect(terms.createTermsVersionAction()).resolves.toEqual({
+      ok: true,
       data: { id: 'terms-1' },
     });
     await expect(terms.scheduleTermsAction('terms-1', effectiveFrom, observedRevision)).resolves.toEqual({
+      ok: true,
       success: true,
     });
     await expect(terms.cancelTermsScheduleAction('terms-1')).resolves.toEqual({
+      ok: true,
       success: true,
     });
     await expect(terms.activateTermsNowAction('terms-1', observedRevision)).resolves.toEqual({
+      ok: true,
       success: true,
     });
     await expect(terms.regenerateTermsHtmlAction('terms-1')).resolves.toEqual({
+      ok: true,
       success: true,
     });
     await expect(terms.deleteTermsVersionAction('terms-1', observedRevision)).resolves.toEqual({
+      ok: true,
       success: true,
     });
 
@@ -144,12 +156,16 @@ describe('privacy and terms actions', () => {
     termsClient.scheduleTerms.mockRejectedValueOnce(new ConnectError('date is required', Code.InvalidArgument));
 
     await expect(privacy.createPrivacyVersionAction()).resolves.toEqual({
+      ok: false,
       error: 'Unauthorized',
+      errorCode: Code.Unauthenticated,
     });
     await expect(
       terms.scheduleTermsAction('terms-1', new Date('2026-01-01T00:00:00Z'), observedRevision),
     ).resolves.toEqual({
-      error: '[invalid_argument] date is required',
+      ok: false,
+      error: 'date is required',
+      errorCode: Code.InvalidArgument,
     });
   });
 
@@ -158,10 +174,14 @@ describe('privacy and terms actions', () => {
     termsClient.getTermsVersion.mockResolvedValueOnce({ snapshotDigest: '   ' });
 
     await expect(privacy.regeneratePrivacyHtmlAction('privacy-1')).resolves.toEqual({
+      ok: false,
       error: 'Privacy snapshot digest is unavailable',
+      errorCode: 'ACTION_FAILED',
     });
     await expect(terms.regenerateTermsHtmlAction('terms-1')).resolves.toEqual({
+      ok: false,
       error: 'Terms snapshot digest is unavailable',
+      errorCode: 'ACTION_FAILED',
     });
     expect(privacyClient.regeneratePrivacyDerivedContent).not.toHaveBeenCalled();
     expect(termsClient.regenerateTermsDerivedContent).not.toHaveBeenCalled();
@@ -177,9 +197,11 @@ describe('privacy and terms actions', () => {
       });
 
     await expect(privacy.deletePrivacyVersionAction('privacy-1', observedRevision)).resolves.toEqual({
+      ok: true,
       success: true,
     });
     await expect(terms.deleteTermsVersionAction('terms-1', observedRevision)).resolves.toEqual({
+      ok: true,
       success: true,
     });
     expect(privacyClient.deletePrivacy).toHaveBeenCalledWith({ id: 'privacy-1', expectedRevision: observedRevision });

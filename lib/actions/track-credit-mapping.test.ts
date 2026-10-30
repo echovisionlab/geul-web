@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { Code } from '@connectrpc/connect';
 import * as actions from './track';
 
 const mocks = vi.hoisted(() => ({
@@ -22,7 +23,9 @@ describe('track credit action mapping', () => {
 
   it('rejects track credit writes without an observed baseline', async () => {
     await expect(actions.setTrackCreditsAction('track-1', [], undefined as never)).resolves.toEqual({
+      ok: false,
       error: 'An observed credit snapshot is required',
+      errorCode: Code.InvalidArgument,
     });
     expect(trackClient.setTrackCredits).not.toHaveBeenCalled();
   });
@@ -34,7 +37,7 @@ describe('track credit action mapping', () => {
         [{ id: '', credited_name: 'New credit', sort_order: 1 }],
         [{ id: 'credit-1', artist_id: 'artist-1', sort_order: 0 }],
       ),
-    ).resolves.toEqual({ success: true });
+    ).resolves.toEqual({ ok: true, success: true });
 
     expect(trackClient.setTrackCredits).toHaveBeenCalledWith({
       trackId: 'track-1',

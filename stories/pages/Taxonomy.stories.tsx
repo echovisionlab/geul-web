@@ -12,6 +12,7 @@ import { LayoutContainer } from '@/components/core/Layout';
 import { ServerDataTableNavigationProvider } from '@/features/data-table/ServerDataTable/ServerDataTableNavigation';
 import { parseTableQuery } from '@/lib/utils/table-url';
 import { tableRows } from './fixtures/table-query';
+import { actionFailure, actionSuccess } from '@/lib/actions/action-result';
 const initial = [
   {
     id: 'taxonomy-1',
@@ -64,7 +65,7 @@ export function TaxonomyPagePreview({
   };
   const create = async (name: string, description?: string) => {
     if (state === 'mutation-failed') {
-      return { error: t('messages.failedToLoad') };
+      return actionFailure(t('messages.failedToLoad'), 'ACTION_FAILED');
     }
     const item = {
       ...initial[0],
@@ -74,11 +75,11 @@ export function TaxonomyPagePreview({
       slug: name.toLowerCase().replaceAll(' ', '-'),
     };
     setRows((current) => [...current, item]);
-    return { data: { id: item.id, name: item.name, slug: item.slug } };
+    return actionSuccess({ data: { id: item.id, name: item.name, slug: item.slug } });
   };
   const update = async (id: string, data: { name?: string; description?: string | null }) => {
     if (state === 'mutation-failed') {
-      return { error: t('messages.failedToLoad') };
+      return actionFailure(t('messages.failedToLoad'), 'ACTION_FAILED');
     }
     setRows((current) =>
       current.map((row) =>
@@ -91,14 +92,14 @@ export function TaxonomyPagePreview({
           : row,
       ),
     );
-    return { success: true };
+    return actionSuccess({ success: true as const });
   };
   const remove = async (id: string) => {
     if (state === 'mutation-failed') {
-      return { error: t('messages.failedToLoad') };
+      return actionFailure(t('messages.failedToLoad'), 'ACTION_FAILED');
     }
     setRows((current) => current.filter((row) => row.id !== id));
-    return { success: true };
+    return actionSuccess({ success: true as const });
   };
   const bindings = { createAction: create, updateAction: update, deleteAction: remove, refresh: () => {} };
   return (

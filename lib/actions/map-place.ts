@@ -15,6 +15,8 @@ import {
   createPublicMapPlaceClientWithAuth,
 } from '@/lib/api/server-client';
 import { createLogger } from '@/lib/utils/logger';
+import type { ActionResult } from '@/lib/actions/action-result';
+import { runAction } from '@/lib/actions/run-action';
 
 const logger = createLogger('map-place-actions');
 
@@ -108,22 +110,18 @@ export async function listMapPlacesAdminAction(input: { page?: number; pageSize?
   });
 }
 
-export async function deleteMapPlaceAction(id: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createMapPlaceClient();
-    await client.deleteMapPlace({ id });
-    revalidatePath('/admin/map/places');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('map-place-actions', 'deleteMapPlaceAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Place not found' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete place' };
-  }
+export async function deleteMapPlaceAction(id: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'map-place-actions',
+    'deleteMapPlaceAction',
+    async () => {
+      const client = await createMapPlaceClient();
+      await client.deleteMapPlace({ id });
+      revalidatePath('/admin/map/places');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete place', messages: { [Code.NotFound]: 'Place not found' } },
+  );
 }
 
 export async function getMapPlaceAction(id: string) {
@@ -167,45 +165,41 @@ export async function getMapPlaceAction(id: string) {
 export async function updateMapPlaceAction(
   id: string,
   data: UpdateMapPlaceInput,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createMapPlaceClient();
-    await client.updateMapPlace({
-      id,
-      name: data.name,
-      address: data.address,
-      lat: data.lat,
-      lng: data.lng,
-      googlePlaceId: data.google_place_id === null ? '' : data.google_place_id,
-      addressComponents:
-        data.address_components === undefined
-          ? undefined
-          : data.address_components === null
-            ? // The API patch uses optional-message presence: an empty message clears the
-              // component values; omitting this field leaves the stored value untouched.
-              {}
-            : {
-                street: data.address_components.street,
-                city: data.address_components.city,
-                region: data.address_components.region,
-                country: data.address_components.country,
-                postalCode: data.address_components.postalCode,
-              },
-      imageFileId: data.image_file_id ?? undefined,
-      clearImage: data.image_file_id === null,
-    });
-    revalidatePath('/admin/map/places');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('map-place-actions', 'updateMapPlaceAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Place not found' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to update place' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'map-place-actions',
+    'updateMapPlaceAction',
+    async () => {
+      const client = await createMapPlaceClient();
+      await client.updateMapPlace({
+        id,
+        name: data.name,
+        address: data.address,
+        lat: data.lat,
+        lng: data.lng,
+        googlePlaceId: data.google_place_id === null ? '' : data.google_place_id,
+        addressComponents:
+          data.address_components === undefined
+            ? undefined
+            : data.address_components === null
+              ? // The API patch uses optional-message presence: an empty message clears the
+                // component values; omitting this field leaves the stored value untouched.
+                {}
+              : {
+                  street: data.address_components.street,
+                  city: data.address_components.city,
+                  region: data.address_components.region,
+                  country: data.address_components.country,
+                  postalCode: data.address_components.postalCode,
+                },
+        imageFileId: data.image_file_id ?? undefined,
+        clearImage: data.image_file_id === null,
+      });
+      revalidatePath('/admin/map/places');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to update place', messages: { [Code.NotFound]: 'Place not found' } },
+  );
 }
 
 // Public: get multiple places by IDs (for Map block editor)

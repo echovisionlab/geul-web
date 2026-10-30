@@ -73,6 +73,7 @@ describe('createCampaignAction', () => {
     });
 
     await expect(createCampaignAction()).resolves.toEqual({
+      ok: true,
       data: { id: 'campaign-1' },
     });
 
@@ -88,6 +89,7 @@ describe('createCampaignAction', () => {
     });
 
     await expect(createCampaignAction('   ')).resolves.toEqual({
+      ok: true,
       data: { id: 'campaign-2' },
     });
 
@@ -103,6 +105,7 @@ describe('createCampaignAction', () => {
     });
 
     await expect(createCampaignAction('  Launch Campaign  ')).resolves.toEqual({
+      ok: true,
       data: { id: 'campaign-3' },
     });
 
@@ -418,7 +421,7 @@ describe('updateCampaignConfigurationAction field patches', () => {
         targetMode: CampaignTargetMode.ALL,
         segmentId: null,
       }),
-    ).resolves.toEqual({ changed: true });
+    ).resolves.toEqual({ ok: true, changed: true });
 
     expect(updateCampaignConfigurationRpcMock).toHaveBeenCalledWith({
       id: 'campaign-1',

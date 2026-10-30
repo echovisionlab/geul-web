@@ -1,9 +1,9 @@
 'use server';
 
-import { logServerFailure } from '@/lib/logging/logger';
+import type { ActionResult } from '@/lib/actions/action-result';
+import { runAction } from '@/lib/actions/run-action';
 
 import { queryResult } from '@/lib/api/query-result';
-import { isConnectError } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { FilterOp, SortOrder } from '@echovisionlab/geul-proto/common/common_pb.ts';
@@ -55,65 +55,62 @@ export async function listCategoriesAdminAction(input: CategoryListInput) {
 export async function createCategoryAction(data: {
   name: string;
   description?: string;
-}): Promise<{ data?: { id: string; name: string; slug: string }; error?: string }> {
-  try {
-    const client = await createCategoryClient();
-    const category = await client.createCategory({
-      name: data.name,
-      description: data.description,
-    });
-    revalidatePath('/admin/categories');
-    return {
-      data: {
-        id: category.id,
-        name: category.name,
-        slug: category.slug ?? '',
-      },
-    };
-  } catch (err) {
-    logServerFailure('category-actions', 'createCategoryAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to create category' };
-  }
+}): Promise<ActionResult<{ data: { id: string; name: string; slug: string } }>> {
+  return runAction(
+    'category-actions',
+    'createCategoryAction',
+    async () => {
+      const client = await createCategoryClient();
+      const category = await client.createCategory({
+        name: data.name,
+        description: data.description,
+      });
+      revalidatePath('/admin/categories');
+      return {
+        data: {
+          id: category.id,
+          name: category.name,
+          slug: category.slug ?? '',
+        },
+      };
+    },
+    { fallback: 'Failed to create category' },
+  );
 }
 
 export async function updateCategoryAction(
   id: string,
   data: { name?: string; description?: string | null },
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createCategoryClient();
-    await client.updateCategory({
-      id,
-      ...(data.name !== undefined ? { name: data.name } : {}),
-      ...(data.description !== undefined ? { description: data.description ?? '' } : {}),
-    });
-    revalidatePath('/admin/categories');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('category-actions', 'updateCategoryAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to update category' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'category-actions',
+    'updateCategoryAction',
+    async () => {
+      const client = await createCategoryClient();
+      await client.updateCategory({
+        id,
+        ...(data.name !== undefined ? { name: data.name } : {}),
+        ...(data.description !== undefined ? { description: data.description ?? '' } : {}),
+      });
+      revalidatePath('/admin/categories');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to update category' },
+  );
 }
 
-export async function deleteCategoryAction(id: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createCategoryClient();
-    await client.deleteCategory({ id });
-    revalidatePath('/admin/categories');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('category-actions', 'deleteCategoryAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete category' };
-  }
+export async function deleteCategoryAction(id: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'category-actions',
+    'deleteCategoryAction',
+    async () => {
+      const client = await createCategoryClient();
+      await client.deleteCategory({ id });
+      revalidatePath('/admin/categories');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete category' },
+  );
 }
 
 // Simple list for selectors (returns all categories)

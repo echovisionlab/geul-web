@@ -127,6 +127,7 @@ describe('site setting asset actions', () => {
   it('queues all-locale privacy OG refresh after privacy background upload completes', async () => {
     setSettingMock.mockResolvedValueOnce({ success: true, ogGenerationRunId: 'privacy-run' });
     await expect(setSiteAssetAction('privacy_og_background', 'file-1')).resolves.toEqual({
+      ok: true,
       success: true,
       ogGenerationRunId: 'privacy-run',
     });
@@ -142,6 +143,7 @@ describe('site setting asset actions', () => {
   it('queues homepage OG refresh after site background upload completes', async () => {
     setSettingMock.mockResolvedValueOnce({ success: true, ogGenerationRunId: 'site-run' });
     await expect(setSiteAssetAction('site_og_background', 'file-1')).resolves.toEqual({
+      ok: true,
       success: true,
       ogGenerationRunId: 'site-run',
     });
@@ -157,6 +159,7 @@ describe('site setting asset actions', () => {
     setSettingMock.mockResolvedValueOnce({ success: true, ogGenerationRunId: 'site-run' });
 
     await expect(setSiteAssetAction('site_og_background', 'file-1')).resolves.toEqual({
+      ok: true,
       success: true,
       ogGenerationRunId: 'site-run',
     });
@@ -173,6 +176,7 @@ describe('site setting asset actions', () => {
     setSettingMock.mockResolvedValueOnce({ success: true, ogGenerationRunId: 'terms-run' });
 
     await expect(deleteSiteAssetAction('terms_og_background')).resolves.toEqual({
+      ok: true,
       success: true,
       assetUrl: null,
       ogGenerationRunId: 'terms-run',
@@ -191,6 +195,7 @@ describe('site setting asset actions', () => {
     setSettingMock.mockResolvedValueOnce({ success: true, ogGenerationRunId: 'favicon-run' });
 
     await expect(deleteSiteAssetAction('favicon')).resolves.toEqual({
+      ok: true,
       success: true,
       assetUrl: null,
       ogGenerationRunId: 'favicon-run',
@@ -206,6 +211,7 @@ describe('site setting asset actions', () => {
   it('returns the automatic full-regeneration run for the full light logo', async () => {
     setSettingMock.mockResolvedValueOnce({ success: true, ogGenerationRunId: 'logo-run' });
     await expect(setSiteAssetAction('logo_full_light', 'file-1')).resolves.toEqual({
+      ok: true,
       success: true,
       ogGenerationRunId: 'logo-run',
     });
@@ -226,10 +232,12 @@ describe('site setting asset actions', () => {
         homepage_page_id: 'page-1',
         meta_description: 'Description',
       } as never),
-    ).resolves.toEqual({ success: true, ogGenerationRunId: 'settings-run' });
-    await expect(updateSiteSettingsAction({} as never)).resolves.toEqual({ success: true });
+    ).resolves.toEqual({ ok: true, success: true, ogGenerationRunId: 'settings-run' });
+    await expect(updateSiteSettingsAction({} as never)).resolves.toEqual({ ok: true, success: true });
     await expect(updateSiteSettingsAction(null as never)).resolves.toEqual({
+      ok: false,
       error: 'Invalid settings payload',
+      errorCode: 'ACTION_FAILED',
     });
 
     expect(setManySettingsMock).toHaveBeenCalledWith({
@@ -246,7 +254,9 @@ describe('site setting asset actions', () => {
   it('rejects malformed settings before SetMany', async () => {
     for (const payload of [{ future_setting: 'not-writable' }, { site_title: undefined }, []]) {
       await expect(updateSiteSettingsAction(payload as never)).resolves.toEqual({
+        ok: false,
         error: 'Invalid settings payload',
+        errorCode: 'ACTION_FAILED',
       });
     }
 
@@ -259,6 +269,7 @@ describe('site setting asset actions', () => {
       throw new Error('cache unavailable');
     });
     await expect(updateSiteSettingsAction({ site_title: 'Committed' } as never)).resolves.toEqual({
+      ok: true,
       success: true,
       ogGenerationRunId: 'settings-run',
     });
@@ -289,7 +300,11 @@ describe('site setting asset actions', () => {
     setSettingMock.mockResolvedValue({ success: true, ogGenerationRunId: 'config-run' });
     const config = { title: 'Heading', layout: { align: 'left' } };
 
-    await expect(update(config as never)).resolves.toEqual({ success: true, ogGenerationRunId: 'config-run' });
+    await expect(update(config as never)).resolves.toEqual({
+      ok: true,
+      success: true,
+      ogGenerationRunId: 'config-run',
+    });
 
     expect(setSettingMock).toHaveBeenCalledWith({ key, value: fromJson(ValueSchema, config) });
     expect(getSettingMock).not.toHaveBeenCalled();
@@ -309,6 +324,7 @@ describe('site setting asset actions', () => {
 
   it('reports how many OG images a full regeneration queued', async () => {
     await expect(regenerateAllOgImagesAction()).resolves.toEqual({
+      ok: true,
       success: true,
       runId: 'global-run',
       generationCount: 12,
@@ -319,13 +335,16 @@ describe('site setting asset actions', () => {
     setSettingMock.mockRejectedValue(new ConnectError('stored counterpart is malformed', Code.FailedPrecondition));
 
     await expect(updateContentOgConfigAction({ title: 'Content' } as never)).resolves.toEqual({
-      error: '[failed_precondition] stored counterpart is malformed',
+      ok: false,
+      error: 'stored counterpart is malformed',
+      errorCode: Code.FailedPrecondition,
     });
     expect(getSettingMock).not.toHaveBeenCalled();
   });
 
   it('loads the current site OG image', async () => {
     await expect(getSiteOgStatusAction()).resolves.toEqual({
+      ok: true,
       data: {
         assetId: 'site-og-asset',
         url: 'https://cdn.example.com/asset/site-og-asset/og.webp',
@@ -335,6 +354,7 @@ describe('site setting asset actions', () => {
 
   it('loads legal OG images through the locale-scoped legal page reader', async () => {
     await expect(getLegalOgImageAction('privacy', ' ko ')).resolves.toEqual({
+      ok: true,
       data: {
         assetId: 'privacy-og-asset',
         url: 'https://cdn.example.com/asset/privacy-og-asset/og.webp',
@@ -344,6 +364,7 @@ describe('site setting asset actions', () => {
     expect(createPublicTermsClientWithAuth).not.toHaveBeenCalled();
 
     await expect(getLegalOgImageAction('terms')).resolves.toEqual({
+      ok: true,
       data: {
         assetId: 'terms-og-asset',
         url: 'https://cdn.example.com/asset/terms-og-asset/og.webp',
@@ -368,8 +389,8 @@ describe('site setting asset actions', () => {
   });
 
   it('adds and removes loader references without deleting the original file', async () => {
-    await expect(addSiteLoaderAssetAction('file-1')).resolves.toEqual({ success: true });
-    await expect(removeSiteLoaderAssetAction('file-1')).resolves.toEqual({ success: true });
+    await expect(addSiteLoaderAssetAction('file-1')).resolves.toEqual({ ok: true, success: true });
+    await expect(removeSiteLoaderAssetAction('file-1')).resolves.toEqual({ ok: true, success: true });
 
     expect(addSiteLoaderAssetMock).toHaveBeenCalledWith({ fileId: 'file-1' });
     expect(removeSiteLoaderAssetMock).toHaveBeenCalledWith({ fileId: 'file-1' });

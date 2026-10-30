@@ -33,7 +33,7 @@ describe('createMapPlaceAction', () => {
         lng: 126.9904063,
         google_place_id: 'google-place-1',
       }),
-    ).resolves.toEqual({ data: { id: 'place-1' } });
+    ).resolves.toEqual({ ok: true, data: { id: 'place-1' } });
 
     expect(createMapPlaceMock).toHaveBeenCalledWith(
       expect.objectContaining({

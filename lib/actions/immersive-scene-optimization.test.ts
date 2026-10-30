@@ -208,7 +208,7 @@ describe.concurrent('immersive scene mesh optimization actions', () => {
     await withMockFileClient(fileClient, () =>
       expect(listImmersiveSceneMeshOptimizationCandidatesAction(meshOptimizationContext)).resolves.toEqual({
         candidates: [],
-        error: '[not_found] optimization candidate not found',
+        error: 'optimization candidate not found',
       }),
     );
   });
@@ -281,7 +281,9 @@ describe.concurrent('immersive scene mesh optimization actions', () => {
           targetRatioPercent: 70,
         }),
       ).resolves.toEqual({
-        error: '[not_found] source_file not found: mesh-file',
+        ok: false,
+        errorCode: Code.NotFound,
+        error: 'source_file not found: mesh-file',
       });
       await expect(
         useImmersiveSceneMeshOptimizationCandidateAction({
@@ -289,7 +291,9 @@ describe.concurrent('immersive scene mesh optimization actions', () => {
           candidateId: 'candidate-1',
         }),
       ).resolves.toEqual({
-        error: '[not_found] source_file not found: mesh-file',
+        ok: false,
+        errorCode: Code.NotFound,
+        error: 'source_file not found: mesh-file',
       });
       await expect(
         clearImmersiveSceneMeshOptimizationCandidatesAction({
@@ -297,7 +301,9 @@ describe.concurrent('immersive scene mesh optimization actions', () => {
           candidateId: 'candidate-1',
         }),
       ).resolves.toEqual({
-        error: '[not_found] source_file not found: mesh-file',
+        ok: false,
+        errorCode: Code.NotFound,
+        error: 'source_file not found: mesh-file',
       });
     });
     expect(fileClient.clearMeshOptimizationCandidates).toHaveBeenCalledWith({
@@ -327,6 +333,8 @@ describe.concurrent('immersive scene mesh optimization actions', () => {
           targetRatioPercent: 70,
         }),
       ).resolves.toEqual({
+        ok: false,
+        errorCode: Code.Unimplemented,
         error: 'Mesh optimization is not available.',
       });
       await expect(
@@ -335,6 +343,8 @@ describe.concurrent('immersive scene mesh optimization actions', () => {
           candidateId: 'candidate-1',
         }),
       ).resolves.toEqual({
+        ok: false,
+        errorCode: Code.Unimplemented,
         error: 'Mesh optimization is not available.',
       });
       await expect(
@@ -343,6 +353,8 @@ describe.concurrent('immersive scene mesh optimization actions', () => {
           candidateId: 'candidate-1',
         }),
       ).resolves.toEqual({
+        ok: false,
+        errorCode: Code.Unimplemented,
         error: 'Mesh optimization is not available.',
       });
     });

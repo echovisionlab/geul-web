@@ -91,6 +91,7 @@ describe('series and share-link actions', () => {
 
   it('creates a series with its title and description', async () => {
     await expect(series.createSeriesAction({ title: 'Series', description: 'Description' })).resolves.toEqual({
+      ok: true,
       data: { id: 'series-1' },
     });
 
@@ -100,7 +101,7 @@ describe('series and share-link actions', () => {
   it('saves the series title, slug and published status', async () => {
     await expect(
       series.updateSeriesAction('series-1', { title: 'Updated', slug: 'series', status: 'published' }),
-    ).resolves.toEqual({ success: true });
+    ).resolves.toEqual({ ok: true, success: true });
 
     expect(seriesClient.updateSeries).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'series-1', title: 'Updated', slug: 'series', status: 'SERIES_STATUS_PUBLISHED' }),
@@ -111,7 +112,7 @@ describe('series and share-link actions', () => {
     { action: 'addSeriesManagerAction', rpc: 'addSeriesManager', other: 'removeSeriesManager' },
     { action: 'removeSeriesManagerAction', rpc: 'removeSeriesManager', other: 'addSeriesManager' },
   ] as const)('$action changes only the $rpc membership', async ({ action, rpc, other }) => {
-    await expect(series[action]('series-1', 'member-1')).resolves.toEqual({ success: true });
+    await expect(series[action]('series-1', 'member-1')).resolves.toEqual({ ok: true, success: true });
 
     expect(seriesClient[rpc]).toHaveBeenCalledWith({ seriesId: 'series-1', memberId: 'member-1' });
     expect(seriesClient[other]).not.toHaveBeenCalled();
@@ -183,10 +184,12 @@ describe('series and share-link actions', () => {
       });
 
     await expect(series.setSeriesFeaturedImageAction('series-1', 'file-1')).resolves.toEqual({
+      ok: true,
       imageUrl: 'https://cdn.example/series.webp',
       ogGenerationRunId: 'featured-run',
     });
     await expect(series.removeSeriesFeaturedImageAction('series-1')).resolves.toEqual({
+      ok: true,
       success: true,
       ogGenerationRunId: 'delete-featured-run',
     });
@@ -209,6 +212,7 @@ describe('series and share-link actions', () => {
       });
 
     await expect(series.updateSeriesAction('series-1', { title: 'Committed' })).resolves.toEqual({
+      ok: true,
       success: true,
     });
     expect(seriesClient.updateSeries).toHaveBeenCalledWith(
@@ -229,7 +233,7 @@ describe('series and share-link actions', () => {
         throw new Error('cache unavailable');
       });
 
-    await expect(series.deleteSeriesAction('series-1')).resolves.toEqual({ success: true });
+    await expect(series.deleteSeriesAction('series-1')).resolves.toEqual({ ok: true, success: true });
     expect(seriesClient.deleteSeries).toHaveBeenCalledWith({ id: 'series-1' });
     expect(mocks.loggerWarn).toHaveBeenCalledTimes(2);
   });

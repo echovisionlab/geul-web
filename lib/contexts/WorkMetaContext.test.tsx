@@ -108,7 +108,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(getWorkConfigurationAction)
     .mockReset()
-    .mockImplementation(async () => ({ data: serverConfiguration }));
+    .mockImplementation(async () => ({ ok: true as const, data: serverConfiguration }));
   mockDoc = new Y.Doc();
   container = document.createElement('div');
   document.body.appendChild(container);
@@ -247,7 +247,7 @@ describe('WorkMetaProvider', () => {
     });
     act(() => write.acknowledge({ metadata: { local: 'Edited', peer: 'Canonical' } }));
     await act(async () => {
-      finishRead({ data: configurationFor({ ...initialMeta, metadata: { peer: 'Old read' } }) });
+      finishRead({ ok: true, data: configurationFor({ ...initialMeta, metadata: { peer: 'Old read' } }) });
       await expect(refresh).resolves.toBe(false);
     });
     expect(latest?.metadata).toEqual({ local: 'Edited', peer: 'Canonical' });
@@ -274,8 +274,8 @@ describe('WorkMetaProvider', () => {
 
   it('keeps the acknowledged client merge baseline while reloading stale route props', async () => {
     vi.mocked(updateWorkFieldsAction)
-      .mockResolvedValueOnce({ success: true, clients: ['a', 'b'] })
-      .mockResolvedValueOnce({ success: true, clients: ['a'] });
+      .mockResolvedValueOnce({ ok: true, success: true, clients: ['a', 'b'] })
+      .mockResolvedValueOnce({ ok: true, success: true, clients: ['a'] });
     renderProvider(null, { ...initialMeta, clients: ['a'] });
     await act(async () => latest?.setClients(['a', 'b']));
     renderProvider(null, { ...initialMeta, clients: ['a'] }, { ...initialMeta, clients: ['a', 'b'] });
@@ -306,7 +306,7 @@ describe('WorkMetaProvider', () => {
       await latest?.refreshConfiguration?.();
     });
     expect(latest?.clients).toEqual(['local-a']);
-    await act(async () => finishWrite({ success: true, clients: ['local-a'] }));
+    await act(async () => finishWrite({ ok: true, success: true, clients: ['local-a'] }));
     expect(latest?.clients).toEqual(['peer-b']);
 
     await act(async () => latest?.setClients(['peer-b', 'local-c']));
@@ -334,8 +334,8 @@ describe('WorkMetaProvider', () => {
 describe('client save failures', () => {
   it('retains a failed replacement as pending and lets the save barrier retry it', async () => {
     vi.mocked(updateWorkFieldsAction)
-      .mockResolvedValueOnce({ error: 'permission denied' })
-      .mockResolvedValueOnce({ success: true, clients: ['unsaved'] });
+      .mockResolvedValueOnce({ ok: false, error: 'permission denied', errorCode: 'ACTION_FAILED' })
+      .mockResolvedValueOnce({ ok: true, success: true, clients: ['unsaved'] });
     renderProvider();
     await act(async () => {
       latest?.setClients(['unsaved']);
@@ -355,8 +355,8 @@ describe('client save failures', () => {
   });
 
   it('flushes current and queued client edits before the save barrier resolves', async () => {
-    let finishFirst!: (result: { success: boolean; clients: string[] }) => void;
-    let finishSecond!: (result: { success: boolean; clients: string[] }) => void;
+    let finishFirst!: (result: { ok: true; success: true; clients: string[] }) => void;
+    let finishSecond!: (result: { ok: true; success: true; clients: string[] }) => void;
     vi.mocked(updateWorkFieldsAction)
       .mockImplementationOnce(
         () =>
@@ -385,21 +385,21 @@ describe('client save failures', () => {
     expect(hasPendingEditorSaves(`work:${workId}`)).toBe(true);
 
     await act(async () => {
-      finishFirst({ success: true, clients: ['client-one'] });
+      finishFirst({ ok: true, success: true, clients: ['client-one'] });
     });
     expect(updateWorkFieldsAction).toHaveBeenCalledTimes(2);
     expect(flushed).toBeUndefined();
 
     await act(async () => {
-      finishSecond({ success: true, clients: ['client-two'] });
+      finishSecond({ ok: true, success: true, clients: ['client-two'] });
     });
     await expect(flush).resolves.toBe(true);
     expect(latest?.clients).toEqual(['client-two']);
     expect(hasPendingEditorSaves(`work:${workId}`)).toBe(false);
   });
   it('serializes rapid replacements and retains the latest intent when a later save fails', async () => {
-    let finishFirst!: (result: { success: boolean; clients: string[] }) => void;
-    let finishSecond!: (result: { error: string }) => void;
+    let finishFirst!: (result: { ok: true; success: true; clients: string[] }) => void;
+    let finishSecond!: (result: { ok: false; error: string; errorCode: 'ACTION_FAILED' }) => void;
     vi.mocked(updateWorkFieldsAction)
       .mockImplementationOnce(
         () =>
@@ -435,7 +435,7 @@ describe('client save failures', () => {
       expect.any(String),
     );
     await act(async () => {
-      finishFirst({ success: true, clients: ['saved', 'peer-client'] });
+      finishFirst({ ok: true, success: true, clients: ['saved', 'peer-client'] });
     });
     expect(updateWorkFieldsAction).toHaveBeenCalledTimes(2);
     expect(updateWorkFieldsAction).toHaveBeenNthCalledWith(
@@ -449,7 +449,7 @@ describe('client save failures', () => {
     );
     expect(latest?.clients).toEqual(['unsaved']);
     await act(async () => {
-      finishSecond({ error: 'offline' });
+      finishSecond({ ok: false, error: 'offline', errorCode: 'ACTION_FAILED' });
     });
     expect(latest?.clients).toEqual(['unsaved']);
     expect(getPendingEditorPatch(`work:${workId}`)).toEqual({ clients: ['unsaved'] });

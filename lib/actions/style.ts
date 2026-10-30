@@ -1,9 +1,9 @@
 'use server';
 
-import { logServerFailure } from '@/lib/logging/logger';
+import type { ActionResult } from '@/lib/actions/action-result';
+import { runAction } from '@/lib/actions/run-action';
 import { queryResult } from '@/lib/api/query-result';
 
-import { isConnectError } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { FilterOp, SortOrder } from '@echovisionlab/geul-proto/common/common_pb.ts';
@@ -63,63 +63,60 @@ export async function listStylesAdminAction(input?: StyleListInput) {
 export async function createStyleAction(
   name: string,
   description?: string,
-): Promise<{ data?: { id: string; name: string; slug: string }; error?: string }> {
-  try {
-    const client = await createStyleClient();
-    const style = await client.createStyle({
-      name,
-      description,
-    });
-    revalidatePath('/admin/styles');
-    return {
-      data: {
-        id: style.id,
-        name: style.name,
-        slug: style.slug,
-      },
-    };
-  } catch (err) {
-    logServerFailure('style-actions', 'createStyleAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to create style' };
-  }
+): Promise<ActionResult<{ data: { id: string; name: string; slug: string } }>> {
+  return runAction(
+    'style-actions',
+    'createStyleAction',
+    async () => {
+      const client = await createStyleClient();
+      const style = await client.createStyle({
+        name,
+        description,
+      });
+      revalidatePath('/admin/styles');
+      return {
+        data: {
+          id: style.id,
+          name: style.name,
+          slug: style.slug,
+        },
+      };
+    },
+    { fallback: 'Failed to create style' },
+  );
 }
 
 export async function updateStyleAction(
   id: string,
   data: { name?: string; description?: string | null },
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createStyleClient();
-    await client.updateStyle({
-      id,
-      ...(data.name !== undefined ? { name: data.name } : {}),
-      ...(data.description !== undefined ? { description: data.description ?? '' } : {}),
-    });
-    revalidatePath('/admin/styles');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('style-actions', 'updateStyleAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to update style' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'style-actions',
+    'updateStyleAction',
+    async () => {
+      const client = await createStyleClient();
+      await client.updateStyle({
+        id,
+        ...(data.name !== undefined ? { name: data.name } : {}),
+        ...(data.description !== undefined ? { description: data.description ?? '' } : {}),
+      });
+      revalidatePath('/admin/styles');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to update style' },
+  );
 }
 
-export async function deleteStyleAction(id: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createStyleClient();
-    await client.deleteStyle({ id });
-    revalidatePath('/admin/styles');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('style-actions', 'deleteStyleAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete style' };
-  }
+export async function deleteStyleAction(id: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'style-actions',
+    'deleteStyleAction',
+    async () => {
+      const client = await createStyleClient();
+      await client.deleteStyle({ id });
+      revalidatePath('/admin/styles');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete style' },
+  );
 }

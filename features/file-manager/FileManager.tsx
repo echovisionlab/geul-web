@@ -7,6 +7,7 @@ import { ConfirmationDialog } from '@/features/confirmation';
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { Text as DsText } from '@/components/core/Typography';
 import { useMemo, useRef, useState } from 'react';
+import { Code } from '@connectrpc/connect';
 import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { notifications } from '@/components/core/Notification';
 import { FormModal } from '@/components/core/Modal';
@@ -26,12 +27,13 @@ import {
   searchFileManagerItemsAction,
   type FileDeletionImpactView,
 } from '@/lib/actions/file';
+import type { ActionErrorCode, ActionResult } from '@/lib/actions/action-result';
 import { useFileUpload } from '@/lib/hooks/useFileUpload';
 import { FileManagerView, type FileManagerPathItem } from './FileManagerView';
 import { summarizeFileDeletionImpact } from './file-deletion-impact';
 import type { FileLibraryBrowserAdapter, FileLibraryBrowserOptions } from './file-library-browser-store';
 import { useFileLibraryBrowserStore } from './useFileLibraryBrowserStore';
-import { useFileManagerI18n } from './i18n';
+import { useFileManagerI18n, type FileManagerErrorKey } from './i18n';
 import type { FileManagerFileView, FileManagerFolderView, FileManagerUsageItemView } from './model';
 
 type FormOperation =
@@ -52,6 +54,17 @@ const fileManagerLibrary: FileLibraryBrowserAdapter = {
   search: searchFileManagerItemsAction,
 };
 const fileManagerBrowsing: FileLibraryBrowserOptions = { initialSearchScope: 'all' };
+
+/** The message a failed File Manager mutation shows: sign-in and permission first, then the operation. */
+function mutationFailureKey(errorCode: ActionErrorCode, operation: FileManagerErrorKey): FileManagerErrorKey {
+  if (errorCode === Code.Unauthenticated) {
+    return 'unauthorized';
+  }
+  if (errorCode === Code.PermissionDenied) {
+    return 'forbidden';
+  }
+  return operation;
+}
 
 export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) {
   const tViewSettings = useTranslations('fileManager.viewSettings');
@@ -202,20 +215,24 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
     }
     setMutationLoading(true);
     try {
-      let result: { success: boolean; errorCode?: Parameters<typeof errorMessage>[0] };
+      let result: ActionResult<{ success: true }>;
+      let operation: FileManagerErrorKey;
       switch (formOperation.kind) {
         case 'create-folder':
           result = await createFileFolderAction({ parentId: currentFolderID, name: formOperation.value });
+          operation = 'createFolder';
           break;
         case 'rename-folder':
           result = await renameFileFolderAction({ folderId: formOperation.folder.id, name: formOperation.value });
+          operation = 'renameFolder';
           break;
         case 'rename-file':
           result = await renameManagedFileAction({ fileId: formOperation.file.id, fileName: formOperation.value });
+          operation = 'renameFile';
           break;
       }
-      if (!result.success) {
-        showMutationFailure(result.errorCode);
+      if (!result.ok) {
+        showMutationFailure(mutationFailureKey(result.errorCode, operation));
         return;
       }
       setFormOperation(null);
@@ -238,8 +255,10 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
         moveOperation.kind === 'folder'
           ? await moveFileFolderAction({ folderId: moveOperation.folder.id, parentId: currentFolderID })
           : await moveManagedFilesAction({ fileIds: moveOperation.fileIds, folderId: currentFolderID });
-      if (!result.success) {
-        showMutationFailure(result.errorCode);
+      if (!result.ok) {
+        showMutationFailure(
+          mutationFailureKey(result.errorCode, moveOperation.kind === 'folder' ? 'moveFolder' : 'moveFiles'),
+        );
         return;
       }
       setMoveOperation(null);
@@ -279,14 +298,14 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
     try {
       if (deleteOperation.kind === 'folder') {
         const result = await deleteFileFolderAction(deleteOperation.folder.id);
-        if (!result.success) {
-          showMutationFailure(result.errorCode);
+        if (!result.ok) {
+          showMutationFailure(mutationFailureKey(result.errorCode, 'deleteFolder'));
           return;
         }
       } else {
         const result = await deleteManagedFilesAction(deleteOperation.fileIds);
-        if (!result.success) {
-          showMutationFailure(result.errorCode);
+        if (!result.ok) {
+          showMutationFailure(mutationFailureKey(result.errorCode, 'deleteFiles'));
           return;
         }
         if (result.rejectedFiles.length > 0) {

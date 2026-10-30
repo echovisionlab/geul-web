@@ -11,6 +11,7 @@ import { SeriesDetailView, type SeriesDetailViewModel } from '@/features/series/
 import type { SeriesManagerBindings } from '@/features/series/SeriesManagersModal';
 import type { SeriesStatus } from '@/lib/types/series/model';
 import { localEditLocale, localEditorQueryClient } from './fixtures/editor-pages';
+import { actionSuccess } from '@/lib/actions/action-result';
 const initialPosts: SeriesDetailViewModel['posts'] = [
   {
     id: 'room-1',
@@ -57,11 +58,11 @@ function Preview({
         ...managers.current,
         { memberId, nickname: 'Studio reader', avatarUrl: undefined, createdAt: undefined },
       ];
-      return { success: true };
+      return actionSuccess({ success: true as const });
     },
     remove: async (_id, memberId) => {
       managers.current = managers.current.filter((x) => x.memberId !== memberId);
-      return { success: true };
+      return actionSuccess({ success: true as const });
     },
   };
   const connected = state !== 'disconnected';

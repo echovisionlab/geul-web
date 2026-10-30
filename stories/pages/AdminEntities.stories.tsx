@@ -121,7 +121,9 @@ export function AdminEntityPagePreview({
     sortFields: fields.map(({ field, label }) => ({ field, label })),
   };
   const create = async () =>
-    state === 'create-error' ? { error: t('messages.failedToLoad') } : { data: { id: 'local-draft' } };
+    state === 'create-error'
+      ? actionFailure(t('messages.failedToLoad'), 'ACTION_FAILED')
+      : actionSuccess({ data: { id: 'local-draft' } });
   const remove = (id: string) => setRemoved((current) => [...current, id]);
   return (
     <ServerDataTableNavigationProvider
@@ -152,16 +154,17 @@ export function AdminEntityPagePreview({
               )}
               createBindings={{ createAction: create, onCreated: () => setCreated(true) }}
               modalBindings={{
-                previewAction: async () => ({
-                  data: {
-                    revision: 'local-1',
-                    totalRelationCount: 3,
-                    impacts: [{ domain: 4, entityId: 'release-1', label: 'Night Signals', relationCount: 3 }],
-                  },
-                }),
+                previewAction: async () =>
+                  actionSuccess({
+                    data: {
+                      revision: 'local-1',
+                      totalRelationCount: 3,
+                      impacts: [{ domain: 4, entityId: 'release-1', label: 'Night Signals', relationCount: 3 }],
+                    },
+                  }),
                 deleteAction: async (id) => {
                   remove(id);
-                  return { success: true };
+                  return actionSuccess({ success: true as const });
                 },
                 onDeleted: () => {},
               }}
@@ -197,7 +200,7 @@ export function AdminEntityPagePreview({
                 }),
                 deleteAction: async (id) => {
                   remove(id);
-                  return { success: true };
+                  return actionSuccess({ success: true as const });
                 },
                 onDeleted: () => {},
               }}

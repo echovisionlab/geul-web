@@ -120,8 +120,8 @@ describe('Audience lifecycle actions', () => {
     archiveSegment.mockResolvedValue({});
     restoreSegment.mockResolvedValue({});
 
-    await expect(archiveSegmentAction('audience-1')).resolves.toEqual({ success: true });
-    await expect(restoreSegmentAction('audience-1')).resolves.toEqual({ success: true });
+    await expect(archiveSegmentAction('audience-1')).resolves.toEqual({ ok: true, success: true });
+    await expect(restoreSegmentAction('audience-1')).resolves.toEqual({ ok: true, success: true });
 
     expect(archiveSegment).toHaveBeenCalledWith({ id: 'audience-1' });
     expect(restoreSegment).toHaveBeenCalledWith({ id: 'audience-1' });
@@ -135,6 +135,6 @@ describe('Audience lifecycle actions', () => {
       throw new Error('cache unavailable');
     });
 
-    await expect(archiveSegmentAction('audience-1')).resolves.toEqual({ success: true });
+    await expect(archiveSegmentAction('audience-1')).resolves.toEqual({ ok: true, success: true });
   });
 });

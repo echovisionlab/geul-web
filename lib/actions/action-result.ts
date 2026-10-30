@@ -1,6 +1,7 @@
 import type { Code } from '@connectrpc/connect';
 
 export const LOCAL_ACTION_ERROR_CODES = [
+  'ACTION_FAILED',
   'ACTION_INVALID_LOCALE',
   'ENTITY_ID_REQUIRED',
   'FORM_CREATE_FAILED',

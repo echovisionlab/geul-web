@@ -26,10 +26,10 @@ import { DataTableSelectableSection } from '@/features/data-table/DataTableSelec
 import { TableRowMenu, type TableRowMenuItem } from '@/components/core/DataTable';
 import { Select, Textarea, TextInput } from '@/components/core/Input';
 import { FormModal } from '@/components/core/Modal';
+import type { ActionErrorCode } from '@/lib/actions/action-result';
 import {
   createEmailTemplateAction,
   deleteEmailTemplateAction,
-  type DeleteEmailTemplateErrorCode,
   listEmailEventMappingsAction,
   listEmailTemplatesAdminAction,
   type EmailTemplateListItem,
@@ -65,7 +65,7 @@ export default function AdminEmailTemplatesPage({
   const tSystemEvents = useTranslations('adminList.emailTemplates.systemEvents');
   const router = useRouter();
   const queryClient = useQueryClient();
-  const emailTemplateDeleteErrorMessage = (result: { error?: string; errorCode?: DeleteEmailTemplateErrorCode }) =>
+  const emailTemplateDeleteErrorMessage = (result: { error?: string; errorCode?: ActionErrorCode }) =>
     getEmailTemplateDeleteErrorMessage({
       errorCode: result.errorCode,
       fallbackError: result.error,
