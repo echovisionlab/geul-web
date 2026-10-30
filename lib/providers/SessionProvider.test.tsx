@@ -473,4 +473,14 @@ describe('SessionProvider', () => {
     expect(container.textContent).toContain('signed-out:settled');
     expect(replace).not.toHaveBeenCalled();
   });
+  it('adopts the session of a new server render after a Server Action changed cookies', async () => {
+    vi.stubGlobal('fetch', vi.fn());
+    await renderProvider();
+    expect(container.textContent).toContain('Session User:settled');
+
+    await renderProvider(null);
+
+    expect(container.textContent).toContain('signed-out:settled');
+    expect(fetch).not.toHaveBeenCalled();
+  });
 });

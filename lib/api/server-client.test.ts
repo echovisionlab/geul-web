@@ -1,5 +1,7 @@
 import { ClientService as PublicClientService } from '@echovisionlab/geul-proto/public/client_pb.ts';
 import { ManifestService } from '@echovisionlab/geul-proto/public/manifest_pb.ts';
+import { MemberService } from '@echovisionlab/geul-proto/secure/member_pb.ts';
+import { Code, ConnectError } from '@connectrpc/connect';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { REQUEST_ID_HEADER } from '@/lib/observability/request-correlation';
 import {
@@ -23,10 +25,19 @@ type TestTransport = {
   };
 };
 
+const { clearInvalidSessionCookieMock, getCurrentSessionMock } = vi.hoisted(() => ({
+  clearInvalidSessionCookieMock: vi.fn(),
+  getCurrentSessionMock: vi.fn(),
+}));
+
+vi.mock('@/lib/auth/invalid-session-cookie', () => ({
+  clearInvalidSessionCookie: clearInvalidSessionCookieMock,
+}));
+
 const { cookiesMock, createClientMock, createConnectTransportMock, fetchMock, getRequestHeadersMock } = vi.hoisted(
   () => ({
     cookiesMock: vi.fn(),
-    createClientMock: vi.fn((service, transport) => ({ service, transport })),
+    createClientMock: vi.fn((service, transport) => ({ service, transport, getCurrentSession: getCurrentSessionMock })),
     createConnectTransportMock: vi.fn((options) => ({ options })),
     fetchMock: vi.fn(),
     getRequestHeadersMock: vi.fn(),
@@ -68,6 +79,8 @@ vi.mock('@/lib/utils/header.server', () => ({
 }));
 
 beforeEach(() => {
+  clearInvalidSessionCookieMock.mockReset();
+  getCurrentSessionMock.mockReset();
   createClientMock.mockClear();
   createConnectTransportMock.mockClear();
   cookiesMock.mockResolvedValue({ getAll: () => [{ name: 'site_session', value: 'raw' }] });
@@ -263,5 +276,56 @@ describe('editor write origin', () => {
 
     const headers = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
     expect(headers.has('Geul-Client-Origin')).toBe(false);
+  });
+});
+
+describe('lost session handling', () => {
+  async function workFetcher() {
+    await createWorkClient();
+    return (createClientMock.mock.calls[0]?.[1] as TestTransport).options.fetch;
+  }
+
+  beforeEach(() => {
+    cookiesMock.mockResolvedValue({ getAll: () => [{ name: 'ory_kratos_session', value: 'raw' }] });
+  });
+
+  it('deletes the session cookie when a 401 comes from a session the API no longer accepts', async () => {
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 401 }));
+    getCurrentSessionMock.mockRejectedValueOnce(new ConnectError('session ended', Code.Unauthenticated));
+    const fetcher = await workFetcher();
+
+    const response = await fetcher('https://api.example.test/api.manage.v1.WorkService/UpdateWork', { method: 'POST' });
+
+    expect(response.status).toBe(401);
+    expect(createClientMock).toHaveBeenCalledWith(MemberService, expect.any(Object));
+    expect(getCurrentSessionMock).toHaveBeenCalledOnce();
+    expect(clearInvalidSessionCookieMock).toHaveBeenCalledOnce();
+  });
+
+  it('keeps the cookie when the session is still valid or the check cannot answer', async () => {
+    fetchMock.mockResolvedValue(new Response(null, { status: 401 }));
+    getCurrentSessionMock.mockResolvedValueOnce({});
+    const fetcher = await workFetcher();
+    await fetcher('https://api.example.test/api.manage.v1.WorkService/UpdateWork', { method: 'POST' });
+    expect(clearInvalidSessionCookieMock).not.toHaveBeenCalled();
+
+    getCurrentSessionMock.mockRejectedValueOnce(new ConnectError('down', Code.Unavailable));
+    await fetcher('https://api.example.test/api.manage.v1.WorkService/UpdateWork', { method: 'POST' });
+    expect(clearInvalidSessionCookieMock).not.toHaveBeenCalled();
+  });
+
+  it('skips the check without a session cookie, for other statuses and for the session read itself', async () => {
+    fetchMock.mockResolvedValue(new Response(null, { status: 401 }));
+    const fetcher = await workFetcher();
+    await fetcher('https://api.example.test/api.manage.v1.MemberService/GetCurrentSession', { method: 'POST' });
+
+    fetchMock.mockResolvedValue(new Response(null, { status: 403 }));
+    await fetcher('https://api.example.test/api.manage.v1.WorkService/UpdateWork', { method: 'POST' });
+
+    cookiesMock.mockResolvedValue({ getAll: () => [{ name: 'site_session', value: 'raw' }] });
+    fetchMock.mockResolvedValue(new Response(null, { status: 401 }));
+    await fetcher('https://api.example.test/api.manage.v1.WorkService/UpdateWork', { method: 'POST' });
+
+    expect(getCurrentSessionMock).not.toHaveBeenCalled();
   });
 });

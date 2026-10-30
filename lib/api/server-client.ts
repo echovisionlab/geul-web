@@ -2,7 +2,7 @@ import 'server-only';
 
 import { cache } from 'react';
 import { cookies } from 'next/headers';
-import { createClient } from '@connectrpc/connect';
+import { Code, createClient } from '@connectrpc/connect';
 import { createConnectTransport } from '@connectrpc/connect-web';
 import { ArtistService as PublicArtistService } from '@echovisionlab/geul-proto/public/artist_pb.ts';
 import { CategoryService as PublicCategoryService } from '@echovisionlab/geul-proto/public/category_pb.ts';
@@ -74,7 +74,9 @@ import { WorkService } from '@echovisionlab/geul-proto/secure/work_pb.ts';
 import { forwardIncomingRequestMetadataHeaders } from '@/lib/api/request-metadata-headers';
 import { parseEditorWriteToken } from '@/lib/editor/editor-write-token';
 import { buildCookieHeader } from '@/lib/auth/session-cookie';
-import { getApiUrl } from '@/lib/env';
+import { clearInvalidSessionCookie } from '@/lib/auth/invalid-session-cookie';
+import { isConnectErrorCode } from '@/lib/api/connect-error';
+import { getApiUrl, getSessionCookieName } from '@/lib/env';
 import { getRequestHeaders } from '@/lib/utils/header.server';
 
 // Create transport for public API requests (no auth needed)
@@ -103,12 +105,43 @@ const getServerCookieHeader = cache(async (): Promise<string> => {
   return buildCookieHeader(cookieStore.getAll());
 });
 
+const hasServerSessionCookie = cache(async (): Promise<boolean> => {
+  const cookieStore = await cookies();
+  const sessionCookieName = getSessionCookieName();
+  return cookieStore.getAll().some((cookie) => cookie.name === sessionCookieName);
+});
+
+/**
+ * Every server request to the API funnels through here, so a lost session is handled once instead
+ * of in each Server Action. A 401 alone does not prove the session ended, so the current session is
+ * checked once per request; when it is gone the cookie is deleted. Deleting a cookie in a Server
+ * Action makes Next re-render the page and its layouts: signed-in layouts redirect to sign in and
+ * the session provider receives the signed-out state.
+ */
+// The session read itself already clears the cookie when it is rejected (getSessionFromCookie).
+function isCurrentSessionRequest(input: RequestInfo | URL): boolean {
+  const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+  return url.endsWith('/GetCurrentSession');
+}
+
+const confirmSessionLoss = cache(async (): Promise<void> => {
+  const transport = await createServerTransport({ confirmSessionLoss: false });
+  try {
+    await createClient(MemberService, transport).getCurrentSession({});
+  } catch (error) {
+    if (isConnectErrorCode(error, Code.Unauthenticated)) {
+      await clearInvalidSessionCookie();
+    }
+  }
+});
+
 // Create transport for server-side requests (SSR, Server Components)
 // Forwards session cookies to the Go API for Kratos auth
 async function createServerTransport(options?: {
   acceptLanguageOverride?: string | null;
   authOptional?: boolean;
   editorOrigin?: string;
+  confirmSessionLoss?: boolean;
 }) {
   const cookieHeader = await getServerCookieHeader();
   const headersList = await getRequestHeaders();
@@ -143,6 +176,15 @@ async function createServerTransport(options?: {
         headers: buildHeaders(init?.headers, true),
         cache: 'no-store',
       });
+
+      if (
+        response.status === 401 &&
+        options?.confirmSessionLoss !== false &&
+        !isCurrentSessionRequest(input) &&
+        (await hasServerSessionCookie())
+      ) {
+        await confirmSessionLoss();
+      }
 
       if (options?.authOptional && cookieHeader && (response.status === 401 || response.status === 403)) {
         return fetch(input, {
