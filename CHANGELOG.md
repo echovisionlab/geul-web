@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.3](https://github.com/echovisionlab/geul-web/compare/v0.23.2...v0.23.3) (2026-10-30)
+
+
+### Bug Fixes
+
+* **auth:** handle a lost session once in the server API client ([#214](https://github.com/echovisionlab/geul-web/issues/214)) ([05d380a](https://github.com/echovisionlab/geul-web/commit/05d380a2663d19e454755879584a51d2ba643695))
+
 ## [0.23.2](https://github.com/echovisionlab/geul-web/compare/v0.23.1...v0.23.2) (2026-10-30)
 
 
