@@ -2,7 +2,7 @@
 
 import { logServerFailure } from '@/lib/logging/logger';
 
-import { isConnectError, isConnectErrorCode } from '@/lib/api/connect-error';
+import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { Code } from '@connectrpc/connect';
 import {
   MeshOptimizationCompressionMethod,
@@ -18,12 +18,12 @@ import {
   MESH_OPTIMIZATION_METHOD_DRACO,
   normalizeMeshOptimizationTargetRatioPercent,
   type MeshOptimizationCandidate,
-  type MeshOptimizationCandidateResult,
   type MeshOptimizationCandidatesResult,
-  type MeshOptimizationClearResult,
   type MeshOptimizationMethod,
   type MeshOptimizationStatus,
 } from '@/lib/types/mesh-optimization';
+import type { ActionResult } from '@/lib/actions/action-result';
+import { actionFailureMessage, runAction, type ActionFailurePolicy } from '@/lib/actions/run-action';
 
 interface MeshOptimizationRequestContext {
   sourceFileId: string;
@@ -160,21 +160,13 @@ function normalizeCandidateResponse(
   return normalizeCandidate(candidate) ?? undefined;
 }
 
-function actionErrorMessage(error: unknown): string {
-  if (isConnectError(error)) {
-    if (error.code === Code.Unauthenticated) {
-      return 'Unauthorized';
-    }
-    if (error.code === Code.PermissionDenied) {
-      return 'Forbidden';
-    }
-    if (error.code === Code.Unimplemented) {
-      return 'Mesh optimization is not available.';
-    }
-    return error.message;
-  }
-  return error instanceof Error ? error.message : 'Mesh optimization request failed';
-}
+const MESH_OPTIMIZATION_FAILURE_POLICY: ActionFailurePolicy = {
+  fallback: 'Mesh optimization request failed',
+  messages: {
+    [Code.PermissionDenied]: 'Forbidden',
+    [Code.Unimplemented]: 'Mesh optimization is not available.',
+  },
+};
 
 function isStaleSourceFileNotFoundError(error: unknown): boolean {
   return isConnectErrorCode(error, Code.NotFound) && error.message.includes('source_file not found');
@@ -221,68 +213,66 @@ export async function listImmersiveSceneMeshOptimizationCandidatesAction(
     if (isStaleSourceFileNotFoundError(error)) {
       return { candidates: [] };
     }
-    return { candidates: [], error: actionErrorMessage(error) };
+    return { candidates: [], error: actionFailureMessage(error, MESH_OPTIMIZATION_FAILURE_POLICY) };
   }
 }
 
 export async function generateImmersiveSceneMeshOptimizationCandidateAction(
   input: GenerateMeshOptimizationRequest,
-): Promise<MeshOptimizationCandidateResult> {
-  try {
-    const client = await createFileClient();
-    const targetRatioPercent = normalizeMeshOptimizationTargetRatioPercent(input.targetRatioPercent);
-    const response = await client.generateMeshOptimizationCandidate({
-      ...toApiContext(input),
-      method: MeshOptimizationCompressionMethod.DRACO,
-      targetRatioPercent,
-      profile: IMMERSIVE_SCENE_MESH_OPTIMIZATION_PROFILE,
-    });
-    return { candidate: normalizeCandidateResponse(response.candidate) };
-  } catch (error) {
-    logServerFailure(
-      'immersive-scene-optimization-actions',
-      'generateImmersiveSceneMeshOptimizationCandidateAction',
-      error,
-    );
-    return { error: actionErrorMessage(error) };
-  }
+): Promise<ActionResult<{ candidate: MeshOptimizationCandidate | undefined }>> {
+  return runAction(
+    'immersive-scene-optimization-actions',
+    'generateImmersiveSceneMeshOptimizationCandidateAction',
+    async () => {
+      const client = await createFileClient();
+      const targetRatioPercent = normalizeMeshOptimizationTargetRatioPercent(input.targetRatioPercent);
+      const response = await client.generateMeshOptimizationCandidate({
+        ...toApiContext(input),
+        method: MeshOptimizationCompressionMethod.DRACO,
+        targetRatioPercent,
+        profile: IMMERSIVE_SCENE_MESH_OPTIMIZATION_PROFILE,
+      });
+      return { candidate: normalizeCandidateResponse(response.candidate) };
+    },
+    MESH_OPTIMIZATION_FAILURE_POLICY,
+  );
 }
 
 export async function useImmersiveSceneMeshOptimizationCandidateAction(
   input: UseMeshOptimizationRequest,
-): Promise<MeshOptimizationCandidateResult> {
-  try {
-    const client = await createFileClient();
-    const response = await client.useMeshOptimizationCandidate({
-      candidateId: input.candidateId,
-      sourceFileId: input.sourceFileId,
-      entityType: input.entityType,
-      entityId: input.entityId,
-    });
-    return { candidate: normalizeCandidateResponse(response.candidate) };
-  } catch (error) {
-    logServerFailure('immersive-scene-optimization-actions', 'useImmersiveSceneMeshOptimizationCandidateAction', error);
-    return { error: actionErrorMessage(error) };
-  }
+): Promise<ActionResult<{ candidate: MeshOptimizationCandidate | undefined }>> {
+  return runAction(
+    'immersive-scene-optimization-actions',
+    'useImmersiveSceneMeshOptimizationCandidateAction',
+    async () => {
+      const client = await createFileClient();
+      const response = await client.useMeshOptimizationCandidate({
+        candidateId: input.candidateId,
+        sourceFileId: input.sourceFileId,
+        entityType: input.entityType,
+        entityId: input.entityId,
+      });
+      return { candidate: normalizeCandidateResponse(response.candidate) };
+    },
+    MESH_OPTIMIZATION_FAILURE_POLICY,
+  );
 }
 
 export async function clearImmersiveSceneMeshOptimizationCandidatesAction(
   input: ClearMeshOptimizationRequest,
-): Promise<MeshOptimizationClearResult> {
-  try {
-    const client = await createFileClient();
-    const response = await client.clearMeshOptimizationCandidates({
-      ...toApiContext(input),
-      candidateId: input.candidateId,
-      profile: IMMERSIVE_SCENE_MESH_OPTIMIZATION_PROFILE,
-    });
-    return { success: response.success };
-  } catch (error) {
-    logServerFailure(
-      'immersive-scene-optimization-actions',
-      'clearImmersiveSceneMeshOptimizationCandidatesAction',
-      error,
-    );
-    return { error: actionErrorMessage(error) };
-  }
+): Promise<ActionResult<{ success: boolean }>> {
+  return runAction(
+    'immersive-scene-optimization-actions',
+    'clearImmersiveSceneMeshOptimizationCandidatesAction',
+    async () => {
+      const client = await createFileClient();
+      const response = await client.clearMeshOptimizationCandidates({
+        ...toApiContext(input),
+        candidateId: input.candidateId,
+        profile: IMMERSIVE_SCENE_MESH_OPTIMIZATION_PROFILE,
+      });
+      return { success: response.success };
+    },
+    MESH_OPTIMIZATION_FAILURE_POLICY,
+  );
 }

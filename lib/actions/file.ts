@@ -26,6 +26,7 @@ import { fileStatusFromDelivery, type EditorFileStatusSnapshot } from '@/lib/med
 import { UPLOAD_FAILED_MESSAGE, UPLOAD_FINALIZATION_FAILED_MESSAGE } from '@/lib/upload/failure';
 import { CLIENT_MEDIA_ARTIFACTS_MISSING } from '@/lib/upload/upload-errors';
 import { actionFailure, actionSuccess, type ActionResult } from './action-result';
+import { runAction } from './run-action';
 
 function completionError(err: unknown, mode: 'candidate' | 'completion'): Error | null {
   if (!isConnectError(err)) {
@@ -760,64 +761,93 @@ export async function listManagedFileUsagesAction(input: { fileId: string; pageS
   }
 }
 
-export async function createFileFolderAction(input: { parentId?: string; name: string }) {
-  try {
-    const response = await (await createFileClient()).createFileFolder(input);
-    return { success: true as const, folderId: response.folder?.id };
-  } catch (error) {
-    logServerFailure('file-actions', 'createFileFolderAction', error);
-    return { success: false as const, errorCode: fileManagerActionErrorCode(error, 'createFolder') };
-  }
+export async function createFileFolderAction(input: {
+  parentId?: string;
+  name: string;
+}): Promise<ActionResult<{ success: true; folderId: string | undefined }>> {
+  return runAction(
+    'file-actions',
+    'createFileFolderAction',
+    async () => {
+      const response = await (await createFileClient()).createFileFolder(input);
+      return { success: true as const, folderId: response.folder?.id };
+    },
+    { fallback: 'Failed to create folder' },
+  );
 }
 
-export async function renameFileFolderAction(input: { folderId: string; name: string }) {
-  try {
-    await (await createFileClient()).renameFileFolder(input);
-    return { success: true as const };
-  } catch (error) {
-    logServerFailure('file-actions', 'renameFileFolderAction', error);
-    return { success: false as const, errorCode: fileManagerActionErrorCode(error, 'renameFolder') };
-  }
+export async function renameFileFolderAction(input: {
+  folderId: string;
+  name: string;
+}): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'file-actions',
+    'renameFileFolderAction',
+    async () => {
+      await (await createFileClient()).renameFileFolder(input);
+      return { success: true as const };
+    },
+    { fallback: 'Failed to rename folder' },
+  );
 }
 
-export async function moveFileFolderAction(input: { folderId: string; parentId?: string }) {
-  try {
-    await (await createFileClient()).moveFileFolder(input);
-    return { success: true as const };
-  } catch (error) {
-    logServerFailure('file-actions', 'moveFileFolderAction', error);
-    return { success: false as const, errorCode: fileManagerActionErrorCode(error, 'moveFolder') };
-  }
+export async function moveFileFolderAction(input: {
+  folderId: string;
+  parentId?: string;
+}): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'file-actions',
+    'moveFileFolderAction',
+    async () => {
+      await (await createFileClient()).moveFileFolder(input);
+      return { success: true as const };
+    },
+    { fallback: 'Failed to move folder' },
+  );
 }
 
-export async function deleteFileFolderAction(folderId: string) {
-  try {
-    const response = await (await createFileClient()).deleteFileFolder({ folderId });
-    return { success: true as const, acceptedFileIds: response.acceptedFileIds };
-  } catch (error) {
-    logServerFailure('file-actions', 'deleteFileFolderAction', error);
-    return { success: false as const, errorCode: fileManagerActionErrorCode(error, 'deleteFolder') };
-  }
+export async function deleteFileFolderAction(
+  folderId: string,
+): Promise<ActionResult<{ success: true; acceptedFileIds: string[] }>> {
+  return runAction(
+    'file-actions',
+    'deleteFileFolderAction',
+    async () => {
+      const response = await (await createFileClient()).deleteFileFolder({ folderId });
+      return { success: true as const, acceptedFileIds: response.acceptedFileIds };
+    },
+    { fallback: 'Failed to delete folder' },
+  );
 }
 
-export async function renameManagedFileAction(input: { fileId: string; fileName: string }) {
-  try {
-    await (await createFileClient()).renameFile(input);
-    return { success: true as const };
-  } catch (error) {
-    logServerFailure('file-actions', 'renameManagedFileAction', error);
-    return { success: false as const, errorCode: fileManagerActionErrorCode(error, 'renameFile') };
-  }
+export async function renameManagedFileAction(input: {
+  fileId: string;
+  fileName: string;
+}): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'file-actions',
+    'renameManagedFileAction',
+    async () => {
+      await (await createFileClient()).renameFile(input);
+      return { success: true as const };
+    },
+    { fallback: 'Failed to rename file' },
+  );
 }
 
-export async function moveManagedFilesAction(input: { fileIds: string[]; folderId?: string }) {
-  try {
-    await (await createFileClient()).moveFiles(input);
-    return { success: true as const };
-  } catch (error) {
-    logServerFailure('file-actions', 'moveManagedFilesAction', error);
-    return { success: false as const, errorCode: fileManagerActionErrorCode(error, 'moveFiles') };
-  }
+export async function moveManagedFilesAction(input: {
+  fileIds: string[];
+  folderId?: string;
+}): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'file-actions',
+    'moveManagedFilesAction',
+    async () => {
+      await (await createFileClient()).moveFiles(input);
+      return { success: true as const };
+    },
+    { fallback: 'Failed to move files' },
+  );
 }
 
 export async function getFileDeletionImpactAction(fileIds: string[]) {
@@ -830,18 +860,22 @@ export async function getFileDeletionImpactAction(fileIds: string[]) {
   }
 }
 
-export async function deleteManagedFilesAction(fileIds: string[]) {
-  try {
-    const response = await (await createFileClient()).deleteFiles({ fileIds });
-    return {
-      success: true as const,
-      acceptedFileIds: response.acceptedFileIds,
-      rejectedFiles: response.rejectedFiles.map(fileDeletionImpactView),
-    };
-  } catch (error) {
-    logServerFailure('file-actions', 'deleteManagedFilesAction', error);
-    return { success: false as const, errorCode: fileManagerActionErrorCode(error, 'deleteFiles') };
-  }
+export async function deleteManagedFilesAction(
+  fileIds: string[],
+): Promise<ActionResult<{ success: true; acceptedFileIds: string[]; rejectedFiles: FileDeletionImpactView[] }>> {
+  return runAction(
+    'file-actions',
+    'deleteManagedFilesAction',
+    async () => {
+      const response = await (await createFileClient()).deleteFiles({ fileIds });
+      return {
+        success: true as const,
+        acceptedFileIds: response.acceptedFileIds,
+        rejectedFiles: response.rejectedFiles.map(fileDeletionImpactView),
+      };
+    },
+    { fallback: 'Failed to delete files' },
+  );
 }
 
 export async function downloadFromUrlAction(input: {

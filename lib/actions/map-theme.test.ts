@@ -153,7 +153,7 @@ describe('map theme actions', () => {
         lightVariant: lightInput,
         darkVariant: darkInput,
       }),
-    ).resolves.toEqual({ data: { id: 'theme-new' } });
+    ).resolves.toEqual({ ok: true, data: { id: 'theme-new' } });
 
     expect(createMapThemeMock).toHaveBeenCalledWith(
       expect.objectContaining({

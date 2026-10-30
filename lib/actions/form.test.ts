@@ -420,7 +420,7 @@ describe('checkFormAccessAction', () => {
 
     await expect(submitFormAction('form-1', { email: 'hello@example.com' })).resolves.toEqual({
       ok: false,
-      error: '[invalid_argument] submit failed',
+      error: 'submit failed',
       errorCode: Code.InvalidArgument,
     });
     expect(createPublicFormClientWithAuth).toHaveBeenCalledWith(undefined);
@@ -540,7 +540,7 @@ describe('form admin actions', () => {
 
     await expect(deleteFormAction('form-1')).resolves.toEqual({
       ok: false,
-      error: '[failed_precondition] cannot delete',
+      error: 'cannot delete',
       errorCode: Code.FailedPrecondition,
     });
     expect(revalidatePath).not.toHaveBeenCalled();
@@ -713,7 +713,7 @@ describe('form submission actions', () => {
     deleteSubmissionMock.mockRejectedValueOnce(new ConnectError('cannot delete', Code.Internal));
     await expect(deleteFormSubmissionAction('submission-2')).resolves.toEqual({
       ok: false,
-      error: '[internal] cannot delete',
+      error: 'cannot delete',
       errorCode: Code.Internal,
     });
   });

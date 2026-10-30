@@ -4,6 +4,7 @@ import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { Code } from '@connectrpc/connect';
 import { FileUsageDomain } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 
 import { notifications } from '@/components/core/Notification';
@@ -221,6 +222,27 @@ describe('FileManager directory loading', () => {
     expect(mocks.deleteFolder).toHaveBeenCalledWith('folder-1');
     expect(getViewProps().mutationLoading).toBe(false);
     expect(notifications.show).toHaveBeenCalledWith({ tone: 'danger', message: 'errors.mutation' });
+  });
+
+  it.each([
+    [Code.PermissionDenied, 'errors.forbidden'],
+    [Code.Unauthenticated, 'errors.unauthorized'],
+    [Code.FailedPrecondition, 'errors.deleteFolder'],
+    ['ACTION_FAILED', 'errors.deleteFolder'],
+  ] as const)('explains a folder deletion that fails with %s', async (errorCode, message) => {
+    mocks.listItems.mockResolvedValue({ items: [folder], total: 1, folderNotFound: false });
+    mocks.deleteFolder.mockResolvedValue({ ok: false, error: 'Failed to delete folder', errorCode });
+    await renderManager();
+    await act(async () => getViewProps().onDeleteFolder(folder));
+    const confirm = Array.from(document.querySelectorAll('button')).find(
+      (button) => button.textContent === 'actions.delete',
+    );
+
+    await act(async () => {
+      confirm?.click();
+    });
+
+    expect(notifications.show).toHaveBeenCalledWith({ tone: 'danger', message });
   });
 
   it('clears the previous directory before a failed navigation result', async () => {

@@ -1,10 +1,8 @@
 'use server';
 
-import { logServerFailure } from '@/lib/logging/logger';
-
-import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
-import { Code } from '@connectrpc/connect';
+import type { ActionResult } from '@/lib/actions/action-result';
+import { runAction } from '@/lib/actions/run-action';
 import { createMapPlaceClient } from '@/lib/api/server-client';
 
 interface AddressComponents {
@@ -39,27 +37,24 @@ function toAddressComponents(addressComponents?: AddressComponents) {
   };
 }
 
-export async function createMapPlaceAction(
-  data: CreateMapPlaceInput,
-): Promise<{ data?: { id: string }; error?: string }> {
-  try {
-    const client = await createMapPlaceClient();
-    const result = await client.createMapPlace({
-      name: data.name,
-      address: data.address,
-      lat: data.lat,
-      lng: data.lng,
-      googlePlaceId: data.google_place_id ?? undefined,
-      addressComponents: toAddressComponents(data.address_components),
-      imageFileId: data.image_file_id,
-    });
-    revalidatePath('/admin/map/places');
-    return { data: { id: result.id } };
-  } catch (err) {
-    logServerFailure('map-place-create-actions', 'createMapPlaceAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to create place' };
-  }
+export async function createMapPlaceAction(data: CreateMapPlaceInput): Promise<ActionResult<{ data: { id: string } }>> {
+  return runAction(
+    'map-place-create-actions',
+    'createMapPlaceAction',
+    async () => {
+      const client = await createMapPlaceClient();
+      const result = await client.createMapPlace({
+        name: data.name,
+        address: data.address,
+        lat: data.lat,
+        lng: data.lng,
+        googlePlaceId: data.google_place_id ?? undefined,
+        addressComponents: toAddressComponents(data.address_components),
+        imageFileId: data.image_file_id,
+      });
+      revalidatePath('/admin/map/places');
+      return { data: { id: result.id } };
+    },
+    { fallback: 'Failed to create place' },
+  );
 }
