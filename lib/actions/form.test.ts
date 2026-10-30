@@ -713,7 +713,7 @@ describe('form submission actions', () => {
     deleteSubmissionMock.mockRejectedValueOnce(new ConnectError('cannot delete', Code.Internal));
     await expect(deleteFormSubmissionAction('submission-2')).resolves.toEqual({
       ok: false,
-      error: 'cannot delete',
+      error: 'Failed to delete submission',
       errorCode: Code.Internal,
     });
   });

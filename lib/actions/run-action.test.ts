@@ -59,6 +59,13 @@ describe('runAction', () => {
       errorCode: Code.AlreadyExists,
     });
     await expect(fail(new ConnectError('', Code.Internal))).resolves.toMatchObject({ error: 'Failed' });
+    await expect(fail(new ConnectError('pq: relation "work" does not exist', Code.Internal))).resolves.toMatchObject({
+      error: 'Failed',
+      errorCode: Code.Internal,
+    });
+    await expect(fail(new ConnectError('upstream reset', Code.Unavailable))).resolves.toMatchObject({
+      error: 'Failed',
+    });
     await expect(fail(new ConnectError('ended', Code.Unauthenticated))).resolves.toMatchObject({
       error: 'Unauthorized',
       errorCode: Code.Unauthenticated,

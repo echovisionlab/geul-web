@@ -6,6 +6,15 @@ import { connectErrorCode } from '@/lib/api/connect-error';
 import { logServerFailure } from '@/lib/logging/logger';
 import { actionFailure, actionSuccess, type ActionErrorCode, type ActionResult } from './action-result';
 
+const SERVER_FAULT_CODES: ReadonlySet<Code> = new Set([
+  Code.Internal,
+  Code.Unknown,
+  Code.DataLoss,
+  Code.Unavailable,
+  Code.DeadlineExceeded,
+  Code.Canceled,
+]);
+
 type ActionFailureMessage = string | ((error: ConnectError) => string);
 
 export interface ActionFailurePolicy {
@@ -54,6 +63,11 @@ export function actionFailureMessage(
     }
     if (error.code === Code.Unauthenticated) {
       return 'Unauthorized';
+    }
+    // Server faults carry the underlying cause (SQL, upstream text); the log keeps it, the user
+    // gets the action's own wording.
+    if (SERVER_FAULT_CODES.has(error.code)) {
+      return policy.fallback;
     }
     return error.rawMessage.trim() || policy.fallback;
   }
