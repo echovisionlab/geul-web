@@ -222,6 +222,27 @@ export function SessionProvider({
     }
   }, [refetch, initialData]);
 
+  // The root layout renders again after a Server Action changes cookies or on a router refresh.
+  // Its session is then the server's current answer, newer than anything fetched here before.
+  const renderedSessionRef = useRef(initialData);
+  useEffect(() => {
+    if (renderedSessionRef.current === initialData) {
+      return;
+    }
+    renderedSessionRef.current = initialData;
+    if (initialData === undefined) {
+      return;
+    }
+    requestSequenceRef.current += 1;
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
+    inFlightRef.current = null;
+    hasResolvedSessionRef.current = true;
+    setData((current) => (equalSessionValue(current, initialData) ? current : initialData));
+    setError(null);
+    setIsPending(false);
+  }, [initialData]);
+
   useEffect(() => {
     const handleInvalidated = () => invalidateSession();
     const handleRevalidate = () => void revalidateSession();
