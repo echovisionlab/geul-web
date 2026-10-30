@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.4](https://github.com/echovisionlab/geul-web/compare/v0.23.3...v0.23.4) (2026-10-30)
+
+
+### Bug Fixes
+
+* **auth:** expire a rejected __Host- session cookie the browser accepts ([#219](https://github.com/echovisionlab/geul-web/issues/219)) ([461f15b](https://github.com/echovisionlab/geul-web/commit/461f15bcc4ca953fe69448e3d5601a8ec52750c4))
+
 ## [0.23.3](https://github.com/echovisionlab/geul-web/compare/v0.23.2...v0.23.3) (2026-10-30)
 
 
