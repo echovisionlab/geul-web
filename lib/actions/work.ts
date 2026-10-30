@@ -26,6 +26,8 @@ import { createShareLinkAction, deleteShareLinkAction, listShareLinksAction } fr
 import { createArtistClient, createPublicWorkClient, createWorkClient } from '@/lib/api/server-client';
 import { regenerateOgImageAction as requestOgImageRegeneration } from '@/lib/actions/og-generation';
 import { createCommittedMutationRevalidator } from '@/lib/actions/revalidate-after-commit';
+import type { ActionResult } from '@/lib/actions/action-result';
+import { runAction } from '@/lib/actions/run-action';
 import { filterOpFromString } from '@/lib/types/common/proto-filter';
 import { WORK_TYPE_FILTER_VALUES } from '@/lib/types/work/model';
 import {
@@ -247,91 +249,75 @@ export async function createWorkAction(data: {
   summary?: string;
   metadata?: Record<string, unknown>;
   featured?: boolean;
-}): Promise<{ data?: { id: string }; error?: string }> {
-  try {
-    const client = await createWorkClient();
-    const work = await client.createWork({
-      title: data.title,
-      type: stringToWorkType(data.type),
-      year: data.year,
-      month: data.month,
-      untilYear: data.untilYear ?? undefined,
-      untilMonth: data.untilMonth ?? undefined,
-      isPresent: data.isPresent,
-      summary: data.summary,
-      metadata: data.metadata as JsonObject,
-      featured: data.featured,
-    });
-    revalidatePath('/admin/works');
-    return { data: { id: work.id } };
-  } catch (err) {
-    logServerFailure('work-actions', 'createWorkAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to create work' };
-  }
+}): Promise<ActionResult<{ data: { id: string } }>> {
+  return runAction(
+    'work-actions',
+    'createWorkAction',
+    async () => {
+      const client = await createWorkClient();
+      const work = await client.createWork({
+        title: data.title,
+        type: stringToWorkType(data.type),
+        year: data.year,
+        month: data.month,
+        untilYear: data.untilYear ?? undefined,
+        untilMonth: data.untilMonth ?? undefined,
+        isPresent: data.isPresent,
+        summary: data.summary,
+        metadata: data.metadata as JsonObject,
+        featured: data.featured,
+      });
+      revalidatePath('/admin/works');
+      return { data: { id: work.id } };
+    },
+    { fallback: 'Failed to create work' },
+  );
 }
 
-export async function deleteWorkAction(id: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createWorkClient();
-    await client.deleteWork({ id });
-    revalidateWorkAfterCommit('/admin/works');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('work-actions', 'deleteWorkAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete work' };
-  }
+export async function deleteWorkAction(id: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'work-actions',
+    'deleteWorkAction',
+    async () => {
+      const client = await createWorkClient();
+      await client.deleteWork({ id });
+      revalidateWorkAfterCommit('/admin/works');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete work' },
+  );
 }
 
 // === Status Actions ===
 
-export async function publishWorkAction(
-  id: string,
-  editorOrigin?: string,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createWorkClient(editorOrigin);
-    await client.publishWork({ id });
-    revalidatePath('/admin/works');
-    revalidatePath(`/works/${id}`);
-    return { success: true };
-  } catch (err) {
-    logServerFailure('work-actions', 'publishWorkAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Work not found' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to publish work' };
-  }
+export async function publishWorkAction(id: string, editorOrigin?: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'work-actions',
+    'publishWorkAction',
+    async () => {
+      const client = await createWorkClient(editorOrigin);
+      await client.publishWork({ id });
+      revalidatePath('/admin/works');
+      revalidatePath(`/works/${id}`);
+      return { success: true as const };
+    },
+    { fallback: 'Failed to publish work', messages: { [Code.NotFound]: 'Work not found' } },
+  );
 }
 
-export async function unpublishWorkAction(
-  id: string,
-  editorOrigin?: string,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createWorkClient(editorOrigin);
-    await client.unpublishWork({ id });
-    revalidatePath('/admin/works');
-    revalidatePath(`/works/${id}`);
-    return { success: true };
-  } catch (err) {
-    logServerFailure('work-actions', 'unpublishWorkAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Work not found' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to unpublish work' };
-  }
+export async function unpublishWorkAction(id: string, editorOrigin?: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'work-actions',
+    'unpublishWorkAction',
+    async () => {
+      const client = await createWorkClient(editorOrigin);
+      await client.unpublishWork({ id });
+      revalidatePath('/admin/works');
+      revalidatePath(`/works/${id}`);
+      return { success: true as const };
+    },
+    { fallback: 'Failed to unpublish work', messages: { [Code.NotFound]: 'Work not found' } },
+  );
 }
 
 // === Slug Actions ===

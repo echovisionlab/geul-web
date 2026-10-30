@@ -207,7 +207,7 @@ describe('work actions', () => {
       throw new Error('cache unavailable');
     });
 
-    await expect(actions.deleteWorkAction('work-1')).resolves.toEqual({ success: true });
+    await expect(actions.deleteWorkAction('work-1')).resolves.toEqual({ ok: true, success: true });
     expect(workClient.deleteWork).toHaveBeenCalledWith({ id: 'work-1' });
     expect(mocks.loggerWarn).toHaveBeenCalledTimes(1);
   });
@@ -274,7 +274,7 @@ describe('work actions', () => {
         untilMonth: null,
         isPresent: true,
       }),
-    ).resolves.toEqual({ data: { id: 'work-1' } });
+    ).resolves.toEqual({ ok: true, data: { id: 'work-1' } });
 
     expect(workClient.createWork).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -396,6 +396,8 @@ describe('work actions', () => {
 
     workClient.publishWork.mockRejectedValueOnce(new ConnectError('missing', Code.NotFound));
     await expect(actions.publishWorkAction('missing')).resolves.toEqual({
+      ok: false,
+      errorCode: Code.NotFound,
       error: 'Work not found',
     });
 
