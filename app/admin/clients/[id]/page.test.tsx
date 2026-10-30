@@ -18,7 +18,7 @@ const savedClient = {
 };
 
 it('forwards the website when creating a client', async () => {
-  const create = vi.fn(async () => ({ data: { id: 'client-1' } }));
+  const create = vi.fn(async () => ({ ok: true as const, data: { id: 'client-1' } }));
   const client = new QueryClient();
   const view = render(
     <QueryClientProvider client={client}>
@@ -37,7 +37,7 @@ it('forwards the website when creating a client', async () => {
 });
 
 it('forwards a cleared website on update', async () => {
-  const update = vi.fn(async () => ({ success: true }));
+  const update = vi.fn(async () => ({ ok: true as const, success: true as const }));
   const client = new QueryClient();
   const view = render(
     <QueryClientProvider client={client}>
@@ -57,7 +57,7 @@ it('forwards a cleared website on update', async () => {
 });
 
 it('keeps a dirty draft through a refreshed query and submits only the changed field', async () => {
-  const update = vi.fn(async () => ({ success: true }));
+  const update = vi.fn(async () => ({ ok: true as const, success: true as const }));
   const client = new QueryClient();
   const view = render(
     <QueryClientProvider client={client}>

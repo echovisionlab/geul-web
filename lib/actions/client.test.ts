@@ -52,6 +52,7 @@ describe('client mutation actions', () => {
     createClientMock.mockResolvedValue({ id: 'client-1' });
 
     await expect(createClientAction('Client One', 'https://client.example')).resolves.toEqual({
+      ok: true,
       data: { id: 'client-1' },
     });
 
@@ -61,7 +62,7 @@ describe('client mutation actions', () => {
   it('sends an explicit empty website when clearing the existing value', async () => {
     updateClientMock.mockResolvedValue({});
 
-    await expect(updateClientAction('client-1', { website: null })).resolves.toEqual({ success: true });
+    await expect(updateClientAction('client-1', { website: null })).resolves.toEqual({ ok: true, success: true });
 
     expect(updateClientMock).toHaveBeenCalledWith({ id: 'client-1', website: '' });
   });
@@ -69,7 +70,7 @@ describe('client mutation actions', () => {
   it('omits untouched client fields from partial updates', async () => {
     updateClientMock.mockResolvedValue({});
 
-    await expect(updateClientAction('client-1', { name: 'New name' })).resolves.toEqual({ success: true });
+    await expect(updateClientAction('client-1', { name: 'New name' })).resolves.toEqual({ ok: true, success: true });
 
     expect(updateClientMock).toHaveBeenCalledWith({ id: 'client-1', name: 'New name' });
   });

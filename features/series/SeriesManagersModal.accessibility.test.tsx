@@ -33,10 +33,10 @@ describe('series manager local service interaction', () => {
     const bindings: SeriesManagerBindings = {
       list: async () => managers,
       search: async () => [],
-      add: async () => ({ success: true }),
+      add: async () => ({ ok: true as const, success: true as const }),
       remove: async (_series, id) => {
         managers = managers.filter((manager) => manager.memberId !== id);
-        return { success: true };
+        return { ok: true as const, success: true as const };
       },
     };
     host = document.createElement('div');

@@ -140,6 +140,7 @@ it('retains the canonical moved order when an earlier credits refetch completes 
   expect(order()).toEqual(['b', 'a']);
   await act(async () =>
     move.resolve({
+      ok: true,
       success: true,
       order: [
         { kind: 'group', id: 'b' },
@@ -164,8 +165,9 @@ it('retains the canonical moved order when an earlier credits refetch completes 
 it('reloads the confirmed order after a failed move and allows another move', async () => {
   vi.mocked(getWorkGroupsWithCreditsAction).mockResolvedValue(initial);
   vi.mocked(moveWorkCreditItemAction)
-    .mockResolvedValueOnce({ error: 'offline' })
+    .mockResolvedValueOnce({ ok: false, error: 'offline', errorCode: 'ACTION_FAILED' })
     .mockResolvedValueOnce({
+      ok: true,
       success: true,
       order: [
         { kind: 'group', id: 'b' },
@@ -239,6 +241,7 @@ it('keeps canonical peer group assignments when the next local move adds an over
   await settle();
   await act(async () =>
     first.resolve({
+      ok: true,
       success: true,
       order: [
         { kind: 'group', id: 'a' },
@@ -262,6 +265,7 @@ it('upgrades and downgrades credits on the same mounted rows and save coordinato
   vi.mocked(moveWorkCreditItemAction)
     .mockReset()
     .mockResolvedValue({
+      ok: true,
       success: true,
       order: [
         { kind: 'group', id: 'b' },

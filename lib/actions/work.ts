@@ -1,9 +1,7 @@
 'use server';
 
-import { logServerFailure } from '@/lib/logging/logger';
 import { queryResult, unwrapQueryResult } from '@/lib/api/query-result';
 
-import { connectErrorCode, isConnectErrorCode } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { create, type JsonObject } from '@bufbuild/protobuf';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
@@ -324,50 +322,51 @@ export async function unpublishWorkAction(id: string, editorOrigin?: string): Pr
 
 /** Neutral editor settings read through the same authorized Manage Work RPC as the edit route. */
 export async function getWorkConfigurationAction(id: string) {
-  try {
-    const client = await createWorkClient();
-    const work = await client.getWork({ id });
-    return {
-      data: {
-        slug: work.slug ?? null,
-        type: workTypeToString(work.type),
-        year: work.year,
-        month: work.month,
-        untilYear: work.untilYear ?? null,
-        untilMonth: work.untilMonth ?? null,
-        isPresent: work.isPresent,
-        metadata: (work.metadata as Record<string, unknown> | undefined) ?? {},
-        featured: work.featured,
-        clients: (work.clients ?? []).map((client) => client.id),
-        mapPlaceId: work.mapPlaceId ?? null,
-        featuredImageUrl: work.featuredImageAsset?.url ?? null,
-      },
-    };
-  } catch (error) {
-    logServerFailure('work-actions', 'getWorkConfigurationAction', error);
-    return { error: error instanceof Error ? error.message : 'Failed to load work settings' };
-  }
+  return runAction(
+    'work-actions',
+    'getWorkConfigurationAction',
+    async () => {
+      const client = await createWorkClient();
+      const work = await client.getWork({ id });
+      return {
+        data: {
+          slug: work.slug ?? null,
+          type: workTypeToString(work.type),
+          year: work.year,
+          month: work.month,
+          untilYear: work.untilYear ?? null,
+          untilMonth: work.untilMonth ?? null,
+          isPresent: work.isPresent,
+          metadata: (work.metadata as Record<string, unknown> | undefined) ?? {},
+          featured: work.featured,
+          clients: (work.clients ?? []).map((client) => client.id),
+          mapPlaceId: work.mapPlaceId ?? null,
+          featuredImageUrl: work.featuredImageAsset?.url ?? null,
+        },
+      };
+    },
+    { fallback: 'Failed to load work settings' },
+  );
 }
 
 export async function updateWorkSlugAction(
   id: string,
   slug: string | null,
   editorOrigin?: string,
-): Promise<{ success?: boolean; slug?: string | null; error?: string }> {
-  try {
-    const client = await createWorkClient(editorOrigin);
-    await client.updateWork({
-      id,
-      slug: toSlugInputValue(slug),
-    });
-    return { success: true, slug };
-  } catch (err) {
-    logServerFailure('work-actions', 'updateWorkSlugAction', err);
-    if (isConnectErrorCode(err, Code.PermissionDenied)) {
-      return { error: 'No permission to edit this work' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to update slug' };
-  }
+): Promise<ActionResult<{ success: true; slug?: string | null }>> {
+  return runAction(
+    'work-actions',
+    'updateWorkSlugAction',
+    async () => {
+      const client = await createWorkClient(editorOrigin);
+      await client.updateWork({
+        id,
+        slug: toSlugInputValue(slug),
+      });
+      return { success: true as const, slug };
+    },
+    { fallback: 'Failed to update slug', messages: { [Code.PermissionDenied]: 'No permission to edit this work' } },
+  );
 }
 
 export async function updateWorkAction(
@@ -376,23 +375,22 @@ export async function updateWorkAction(
     mapPlaceId?: string | null;
   },
   editorOrigin?: string,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createWorkClient(editorOrigin);
-    const request: { id: string; mapPlaceId?: string } = { id };
-    if ('mapPlaceId' in data) {
-      request.mapPlaceId = data.mapPlaceId ?? '';
-    }
-    await client.updateWork(request);
-    revalidateWorkAfterCommit(`/works/${id}`);
-    return { success: true };
-  } catch (err) {
-    logServerFailure('work-actions', 'updateWorkAction', err);
-    if (isConnectErrorCode(err, Code.PermissionDenied)) {
-      return { error: 'No permission to edit this work' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to update work' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'work-actions',
+    'updateWorkAction',
+    async () => {
+      const client = await createWorkClient(editorOrigin);
+      const request: { id: string; mapPlaceId?: string } = { id };
+      if ('mapPlaceId' in data) {
+        request.mapPlaceId = data.mapPlaceId ?? '';
+      }
+      await client.updateWork(request);
+      revalidateWorkAfterCommit(`/works/${id}`);
+      return { success: true as const };
+    },
+    { fallback: 'Failed to update work', messages: { [Code.PermissionDenied]: 'No permission to edit this work' } },
+  );
 }
 
 export async function updateWorkFieldsAction(
@@ -411,47 +409,41 @@ export async function updateWorkFieldsAction(
     isPresent?: boolean;
   },
   editorOrigin?: string,
-): Promise<{
-  success?: boolean;
-  metadata?: Record<string, unknown>;
-  clients?: string[];
-  error?: string;
-  errorCode?: Code;
-}> {
-  try {
-    const client = await createWorkClient(editorOrigin);
-    const response = await client.updateWork({
-      id,
-      type: data.type === undefined ? undefined : stringToWorkType(data.type),
-      metadata: data.metadata as JsonObject | undefined,
-      observedMetadata: data.observedMetadata as JsonObject | undefined,
-      featured: data.featured,
-      clients:
-        data.clients === undefined ? undefined : create(WorkClientsUpdateSchema, { clientIds: [...data.clients] }),
-      observedClients:
-        data.observedClients === undefined
-          ? undefined
-          : create(WorkClientsUpdateSchema, { clientIds: [...data.observedClients] }),
-      year: data.year,
-      month: data.month,
-      untilYear: data.untilYear ?? undefined,
-      untilMonth: data.untilMonth ?? undefined,
-      isPresent: data.isPresent,
-    });
-    revalidateWorkAfterCommit(`/works/${id}`);
-    return {
-      success: true,
-      ...(response.metadata ? { metadata: response.metadata } : {}),
-      ...(response.clients ? { clients: response.clients.map((client) => client.id) } : {}),
-    };
-  } catch (error) {
-    logServerFailure('work-actions', 'updateWorkFieldsAction', error);
-    // The code lets the editor's save queue tell a refused change from a transient failure.
-    return {
-      error: error instanceof Error ? error.message : 'Failed to update work fields',
-      errorCode: connectErrorCode(error),
-    };
-  }
+): Promise<ActionResult<{ success: true; metadata?: Record<string, unknown>; clients?: string[] }>> {
+  // runAction keeps the Connect code, which lets the editor's save queue tell a refused change
+  // from a transient failure.
+  return runAction(
+    'work-actions',
+    'updateWorkFieldsAction',
+    async () => {
+      const client = await createWorkClient(editorOrigin);
+      const response = await client.updateWork({
+        id,
+        type: data.type === undefined ? undefined : stringToWorkType(data.type),
+        metadata: data.metadata as JsonObject | undefined,
+        observedMetadata: data.observedMetadata as JsonObject | undefined,
+        featured: data.featured,
+        clients:
+          data.clients === undefined ? undefined : create(WorkClientsUpdateSchema, { clientIds: [...data.clients] }),
+        observedClients:
+          data.observedClients === undefined
+            ? undefined
+            : create(WorkClientsUpdateSchema, { clientIds: [...data.observedClients] }),
+        year: data.year,
+        month: data.month,
+        untilYear: data.untilYear ?? undefined,
+        untilMonth: data.untilMonth ?? undefined,
+        isPresent: data.isPresent,
+      });
+      revalidateWorkAfterCommit(`/works/${id}`);
+      return {
+        success: true as const,
+        ...(response.metadata ? { metadata: response.metadata } : {}),
+        ...(response.clients ? { clients: response.clients.map((client) => client.id) } : {}),
+      };
+    },
+    { fallback: 'Failed to update work fields' },
+  );
 }
 
 // === Featured Image Actions ===
@@ -459,46 +451,44 @@ export async function updateWorkFieldsAction(
 export async function setWorkFeaturedImageAction(
   workId: string,
   fileId: string,
-): Promise<{ success?: boolean; imageUrl?: string; ogGenerationRunId?: string; error?: string }> {
-  try {
-    const client = await createWorkClient();
-    const response = await client.setWorkFeaturedImage({ workId, fileId });
-    const result = {
-      success: true,
-      imageUrl: response.imageAsset?.url,
-    };
-    return response.ogGenerationRunId ? { ...result, ogGenerationRunId: response.ogGenerationRunId } : result;
-  } catch (err) {
-    logServerFailure('work-actions', 'setWorkFeaturedImageAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Work or file not found' };
-    }
-    if (isConnectErrorCode(err, Code.PermissionDenied)) {
-      return { error: 'No permission to edit this work' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to set featured image' };
-  }
+): Promise<ActionResult<{ success: true; imageUrl?: string; ogGenerationRunId?: string }>> {
+  return runAction(
+    'work-actions',
+    'setWorkFeaturedImageAction',
+    async () => {
+      const client = await createWorkClient();
+      const response = await client.setWorkFeaturedImage({ workId, fileId });
+      const result = {
+        success: true as const,
+        imageUrl: response.imageAsset?.url,
+      };
+      return response.ogGenerationRunId ? { ...result, ogGenerationRunId: response.ogGenerationRunId } : result;
+    },
+    {
+      fallback: 'Failed to set featured image',
+      messages: {
+        [Code.NotFound]: 'Work or file not found',
+        [Code.PermissionDenied]: 'No permission to edit this work',
+      },
+    },
+  );
 }
 
 export async function removeWorkFeaturedImageAction(
   workId: string,
-): Promise<{ success?: boolean; ogGenerationRunId?: string; error?: string }> {
-  try {
-    const client = await createWorkClient();
-    const result = await client.deleteWorkFeaturedImage({ workId });
-    return result.ogGenerationRunId
-      ? { success: true, ogGenerationRunId: result.ogGenerationRunId }
-      : { success: true };
-  } catch (err) {
-    logServerFailure('work-actions', 'removeWorkFeaturedImageAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to remove featured image' };
-  }
+): Promise<ActionResult<{ success: true; ogGenerationRunId?: string }>> {
+  return runAction(
+    'work-actions',
+    'removeWorkFeaturedImageAction',
+    async () => {
+      const client = await createWorkClient();
+      const result = await client.deleteWorkFeaturedImage({ workId });
+      return result.ogGenerationRunId
+        ? { success: true as const, ogGenerationRunId: result.ogGenerationRunId }
+        : { success: true as const };
+    },
+    { fallback: 'Failed to remove featured image' },
+  );
 }
 
 // === Credit Actions ===
@@ -546,44 +536,43 @@ export async function moveWorkCreditItemAction(
   workId: string,
   intent: WorkCreditMoveIntent,
   editorOrigin?: string,
-): Promise<{ success?: boolean; changed?: boolean; order?: WorkCreditOrderEntry[]; error?: string }> {
+): Promise<ActionResult<{ success: true; changed?: boolean; order?: WorkCreditOrderEntry[] }>> {
   const protoKind = (kind: WorkCreditMoveAnchor['kind']) =>
     kind === 'group' ? WorkCreditItemKind.GROUP : WorkCreditItemKind.CREDIT;
   const toProtoAnchor = (anchor?: WorkCreditMoveAnchor) =>
     anchor ? { kind: protoKind(anchor.kind), id: anchor.id } : undefined;
 
-  try {
-    const client = await createWorkClient(editorOrigin);
-    const response = await client.moveWorkCreditItem({
-      workId,
-      kind: protoKind(intent.kind),
-      itemId: intent.itemId,
-      ...(intent.kind === 'credit' ? { targetGroupId: intent.targetGroupId ?? '' } : {}),
-      after: toProtoAnchor(intent.after),
-      before: toProtoAnchor(intent.before),
-    });
-    return {
-      success: true,
-      changed: response.changed,
-      order: (response.items ?? []).map((item) => ({
-        kind: item.kind === WorkCreditItemKind.GROUP ? 'group' : 'credit',
-        id: item.id,
-        ...(item.kind === WorkCreditItemKind.CREDIT ? { groupId: item.groupId ?? null } : {}),
-      })),
-    };
-  } catch (err) {
-    logServerFailure('work-actions', 'moveWorkCreditItemAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.PermissionDenied)) {
-      return { error: 'No permission to edit this work' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'The credit order changed and has been refreshed.' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to move credit item' };
-  }
+  return runAction(
+    'work-actions',
+    'moveWorkCreditItemAction',
+    async () => {
+      const client = await createWorkClient(editorOrigin);
+      const response = await client.moveWorkCreditItem({
+        workId,
+        kind: protoKind(intent.kind),
+        itemId: intent.itemId,
+        ...(intent.kind === 'credit' ? { targetGroupId: intent.targetGroupId ?? '' } : {}),
+        after: toProtoAnchor(intent.after),
+        before: toProtoAnchor(intent.before),
+      });
+      return {
+        success: true as const,
+        changed: response.changed,
+        order: (response.items ?? []).map((item) => ({
+          kind: item.kind === WorkCreditItemKind.GROUP ? 'group' : 'credit',
+          id: item.id,
+          ...(item.kind === WorkCreditItemKind.CREDIT ? { groupId: item.groupId ?? null } : {}),
+        })),
+      };
+    },
+    {
+      fallback: 'Failed to move credit item',
+      messages: {
+        [Code.PermissionDenied]: 'No permission to edit this work',
+        [Code.NotFound]: 'The credit order changed and has been refreshed.',
+      },
+    },
+  );
 }
 
 export async function addWorkCreditAction(
@@ -596,73 +585,61 @@ export async function addWorkCreditAction(
     creditRole?: string | null;
   },
   editorOrigin?: string,
-): Promise<{ success?: boolean; creditId?: string; error?: string }> {
-  try {
-    const client = await createWorkClient(editorOrigin);
-    const credit = await client.addWorkCredit({
-      workId: data.workId,
-      groupId: data.groupId ?? undefined,
-      artistId: data.artistId,
-      memberId: data.memberId,
-      name: data.name,
-      creditRole: data.creditRole ?? undefined,
-    });
-    return { success: true, creditId: credit.id };
-  } catch (err) {
-    logServerFailure('work-actions', 'addWorkCreditAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.PermissionDenied)) {
-      return { error: 'No permission to edit this work' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to add credit' };
-  }
+): Promise<ActionResult<{ success: true; creditId?: string }>> {
+  return runAction(
+    'work-actions',
+    'addWorkCreditAction',
+    async () => {
+      const client = await createWorkClient(editorOrigin);
+      const credit = await client.addWorkCredit({
+        workId: data.workId,
+        groupId: data.groupId ?? undefined,
+        artistId: data.artistId,
+        memberId: data.memberId,
+        name: data.name,
+        creditRole: data.creditRole ?? undefined,
+      });
+      return { success: true as const, creditId: credit.id };
+    },
+    { fallback: 'Failed to add credit', messages: { [Code.PermissionDenied]: 'No permission to edit this work' } },
+  );
 }
 
 export async function updateWorkCreditAction(
   creditId: string,
   data: { groupId?: string | null; creditRole?: string | null },
   editorOrigin?: string,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createWorkClient(editorOrigin);
-    await client.updateWorkCredit({
-      creditId,
-      groupId: data.groupId === null ? '' : data.groupId,
-      creditRole: data.creditRole ?? undefined,
-    });
-    return { success: true };
-  } catch (err) {
-    logServerFailure('work-actions', 'updateWorkCreditAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.PermissionDenied)) {
-      return { error: 'No permission to edit this work' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to update credit' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'work-actions',
+    'updateWorkCreditAction',
+    async () => {
+      const client = await createWorkClient(editorOrigin);
+      await client.updateWorkCredit({
+        creditId,
+        groupId: data.groupId === null ? '' : data.groupId,
+        creditRole: data.creditRole ?? undefined,
+      });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to update credit', messages: { [Code.PermissionDenied]: 'No permission to edit this work' } },
+  );
 }
 
 export async function removeWorkCreditAction(
   creditId: string,
   editorOrigin?: string,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createWorkClient(editorOrigin);
-    await client.deleteWorkCredit({ creditId });
-    return { success: true };
-  } catch (err) {
-    logServerFailure('work-actions', 'removeWorkCreditAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.PermissionDenied)) {
-      return { error: 'No permission to edit this work' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to remove credit' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'work-actions',
+    'removeWorkCreditAction',
+    async () => {
+      const client = await createWorkClient(editorOrigin);
+      await client.deleteWorkCredit({ creditId });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to remove credit', messages: { [Code.PermissionDenied]: 'No permission to edit this work' } },
+  );
 }
 
 export async function regenerateWorkOgImageAction(
@@ -686,83 +663,77 @@ export async function createWorkCreditGroupAction(
     name: string;
   },
   editorOrigin?: string,
-): Promise<{ success?: boolean; group?: { id: string; name: string }; error?: string }> {
-  try {
-    const client = await createWorkClient(editorOrigin);
-    const group = await client.createWorkCreditGroup({
-      workId: _data.workId,
-      name: _data.name,
-    });
-    return {
-      success: true,
-      group: {
-        id: group.id,
-        name: group.name,
-      },
-    };
-  } catch (err) {
-    logServerFailure('work-actions', 'createWorkCreditGroupAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.PermissionDenied)) {
-      return { error: 'No permission to edit this work' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Work not found' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to create credit group' };
-  }
+): Promise<ActionResult<{ success: true; group?: { id: string; name: string } }>> {
+  return runAction(
+    'work-actions',
+    'createWorkCreditGroupAction',
+    async () => {
+      const client = await createWorkClient(editorOrigin);
+      const group = await client.createWorkCreditGroup({
+        workId: _data.workId,
+        name: _data.name,
+      });
+      return {
+        success: true as const,
+        group: {
+          id: group.id,
+          name: group.name,
+        },
+      };
+    },
+    {
+      fallback: 'Failed to create credit group',
+      messages: { [Code.PermissionDenied]: 'No permission to edit this work', [Code.NotFound]: 'Work not found' },
+    },
+  );
 }
 
 export async function updateWorkCreditGroupAction(
   groupId: string,
   data: { name?: string },
   editorOrigin?: string,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createWorkClient(editorOrigin);
-    await client.updateWorkCreditGroup({
-      groupId,
-      name: data.name,
-    });
-    return { success: true };
-  } catch (err) {
-    logServerFailure('work-actions', 'updateWorkCreditGroupAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.PermissionDenied)) {
-      return { error: 'No permission to edit this work' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Credit group not found' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to update credit group' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'work-actions',
+    'updateWorkCreditGroupAction',
+    async () => {
+      const client = await createWorkClient(editorOrigin);
+      await client.updateWorkCreditGroup({
+        groupId,
+        name: data.name,
+      });
+      return { success: true as const };
+    },
+    {
+      fallback: 'Failed to update credit group',
+      messages: {
+        [Code.PermissionDenied]: 'No permission to edit this work',
+        [Code.NotFound]: 'Credit group not found',
+      },
+    },
+  );
 }
 
 export async function deleteWorkCreditGroupAction(
   groupId: string,
   editorOrigin?: string,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createWorkClient(editorOrigin);
-    await client.deleteWorkCreditGroup({ groupId });
-    return { success: true };
-  } catch (err) {
-    logServerFailure('work-actions', 'deleteWorkCreditGroupAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.PermissionDenied)) {
-      return { error: 'No permission to edit this work' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Credit group not found' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete credit group' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'work-actions',
+    'deleteWorkCreditGroupAction',
+    async () => {
+      const client = await createWorkClient(editorOrigin);
+      await client.deleteWorkCreditGroup({ groupId });
+      return { success: true as const };
+    },
+    {
+      fallback: 'Failed to delete credit group',
+      messages: {
+        [Code.PermissionDenied]: 'No permission to edit this work',
+        [Code.NotFound]: 'Credit group not found',
+      },
+    },
+  );
 }
 
 export async function searchArtistsForCreditAction(_workId: string, _query: string) {

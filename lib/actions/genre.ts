@@ -1,9 +1,9 @@
 'use server';
 
-import { logServerFailure } from '@/lib/logging/logger';
+import type { ActionResult } from '@/lib/actions/action-result';
+import { runAction } from '@/lib/actions/run-action';
 import { queryResult } from '@/lib/api/query-result';
 
-import { isConnectError } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { FilterOp, SortOrder } from '@echovisionlab/geul-proto/common/common_pb.ts';
@@ -66,63 +66,60 @@ export async function listGenresAdminAction(input: GenreListInput) {
 export async function createGenreAction(
   name: string,
   description?: string,
-): Promise<{ data?: { id: string; name: string; slug: string }; error?: string }> {
-  try {
-    const client = await createGenreClient();
-    const genre = await client.createGenre({
-      name,
-      description,
-    });
-    revalidatePath('/admin/genres');
-    return {
-      data: {
-        id: genre.id,
-        name: genre.name,
-        slug: genre.slug,
-      },
-    };
-  } catch (err) {
-    logServerFailure('genre-actions', 'createGenreAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to create genre' };
-  }
+): Promise<ActionResult<{ data: { id: string; name: string; slug: string } }>> {
+  return runAction(
+    'genre-actions',
+    'createGenreAction',
+    async () => {
+      const client = await createGenreClient();
+      const genre = await client.createGenre({
+        name,
+        description,
+      });
+      revalidatePath('/admin/genres');
+      return {
+        data: {
+          id: genre.id,
+          name: genre.name,
+          slug: genre.slug,
+        },
+      };
+    },
+    { fallback: 'Failed to create genre' },
+  );
 }
 
 export async function updateGenreAction(
   id: string,
   data: { name?: string; description?: string | null },
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createGenreClient();
-    await client.updateGenre({
-      id,
-      ...(data.name !== undefined ? { name: data.name } : {}),
-      ...(data.description !== undefined ? { description: data.description ?? '' } : {}),
-    });
-    revalidatePath('/admin/genres');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('genre-actions', 'updateGenreAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to update genre' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'genre-actions',
+    'updateGenreAction',
+    async () => {
+      const client = await createGenreClient();
+      await client.updateGenre({
+        id,
+        ...(data.name !== undefined ? { name: data.name } : {}),
+        ...(data.description !== undefined ? { description: data.description ?? '' } : {}),
+      });
+      revalidatePath('/admin/genres');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to update genre' },
+  );
 }
 
-export async function deleteGenreAction(id: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createGenreClient();
-    await client.deleteGenre({ id });
-    revalidatePath('/admin/genres');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('genre-actions', 'deleteGenreAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete genre' };
-  }
+export async function deleteGenreAction(id: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'genre-actions',
+    'deleteGenreAction',
+    async () => {
+      const client = await createGenreClient();
+      await client.deleteGenre({ id });
+      revalidatePath('/admin/genres');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete genre' },
+  );
 }

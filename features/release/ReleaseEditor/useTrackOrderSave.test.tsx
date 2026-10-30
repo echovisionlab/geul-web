@@ -58,7 +58,7 @@ afterEach(() => {
 });
 
 it('serializes rapid reorders and restores the last acknowledged order after a later failure', async () => {
-  let finish!: (value: { success: boolean }) => void;
+  let finish!: (value: { ok: true; success: true }) => void;
   vi.mocked(reorderTracksAction)
     .mockImplementationOnce(
       () =>
@@ -66,7 +66,7 @@ it('serializes rapid reorders and restores the last acknowledged order after a l
           finish = resolve;
         }),
     )
-    .mockResolvedValueOnce({ error: 'offline' });
+    .mockResolvedValueOnce({ ok: false, error: 'offline', errorCode: 'ACTION_FAILED' });
   const first = restoreTrackOrder(initial, ['two', 'one', 'three']);
   const second = restoreTrackOrder(initial, ['three', 'two', 'one']);
   await act(async () => {
@@ -80,7 +80,7 @@ it('serializes rapid reorders and restores the last acknowledged order after a l
   expect(onMutationStart).toHaveBeenCalledOnce();
   expect(current.map((item) => item.id)).toEqual(['three', 'two', 'one']);
   await act(async () => {
-    finish({ success: true });
+    finish({ ok: true, success: true });
   });
   expect(reorderTracksAction).toHaveBeenCalledTimes(2);
   expect(reorderTracksAction).toHaveBeenNthCalledWith(2, ['three', 'two', 'one'], editorOrigin);

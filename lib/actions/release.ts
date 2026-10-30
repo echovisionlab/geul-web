@@ -3,13 +3,9 @@
 import { logServerFailure } from '@/lib/logging/logger';
 import { throwQueryError } from '@/lib/api/query-error';
 
-import { connectActionErrorCode, connectActionErrorMessage, isConnectErrorCode } from '@/lib/api/connect-error';
-import {
-  actionFailure,
-  actionSuccess,
-  type ActionResult,
-  type LocalActionErrorCode,
-} from '@/lib/actions/action-result';
+import { isConnectErrorCode } from '@/lib/api/connect-error';
+import { actionFailure, type ActionResult, type LocalActionErrorCode } from '@/lib/actions/action-result';
+import { runAction, type ActionFailurePolicy } from '@/lib/actions/run-action';
 import { revalidatePath } from 'next/cache';
 import { timestampDate, timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
@@ -27,54 +23,55 @@ import type {
 } from '@/lib/types/release/model';
 import { toSlugInputValue } from '@/lib/utils/slug';
 
-function releaseActionFailure(
-  error: unknown,
-  fallback: string,
-  fallbackCode: LocalActionErrorCode,
-  messages: Readonly<Partial<Record<Code, string>>> = {},
-): { ok: false; error: string; errorCode: Code | LocalActionErrorCode } {
-  const message = connectActionErrorMessage(error, fallback, {
-    [Code.Unauthenticated]: 'Unauthorized',
-    ...messages,
-  });
-  return actionFailure(message.trim() ? message : fallback, connectActionErrorCode(error, fallbackCode));
-}
+const RELEASE_EDITOR_FAILURE_MESSAGES = {
+  [Code.NotFound]: 'Release not found',
+  [Code.PermissionDenied]: 'No permission to edit this release',
+};
 
-function releaseEditorFailure(error: unknown, fallback: string, fallbackCode: LocalActionErrorCode) {
-  return releaseActionFailure(error, fallback, fallbackCode, {
-    [Code.NotFound]: 'Release not found',
-    [Code.PermissionDenied]: 'No permission to edit this release',
-  });
+/**
+ * Release actions have never shown the server's wording for internal errors, which can carry
+ * private detail; they keep the action's own fallback.
+ */
+function releaseFailurePolicy(
+  fallback: string,
+  code: LocalActionErrorCode,
+  messages: ActionFailurePolicy['messages'] = {},
+): ActionFailurePolicy {
+  return { fallback, code, messages: { [Code.Internal]: fallback, ...messages } };
 }
 
 export async function createReleaseAction(data: {
   title: string;
   type: 'album' | 'ep' | 'single' | 'compilation';
 }): Promise<ActionResult<{ data: { id: string } }>> {
-  try {
-    const client = await createReleaseClient();
-    const release = await client.createRelease({
-      title: data.title,
-      type: stringToReleaseType(data.type),
-    });
-    revalidatePath('/admin/releases');
-    return actionSuccess({ data: { id: release.id } });
-  } catch (err) {
-    logServerFailure('release-actions', 'createReleaseAction', err);
-    return releaseActionFailure(err, 'Failed to create release', 'RELEASE_CREATE_FAILED');
-  }
+  return runAction(
+    'release-actions',
+    'createReleaseAction',
+    async () => {
+      const client = await createReleaseClient();
+      const release = await client.createRelease({
+        title: data.title,
+        type: stringToReleaseType(data.type),
+      });
+      revalidatePath('/admin/releases');
+      return { data: { id: release.id } };
+    },
+    releaseFailurePolicy('Failed to create release', 'RELEASE_CREATE_FAILED'),
+  );
 }
 
 export async function deleteReleaseAction(id: string): Promise<ActionResult<{ success: true }>> {
-  try {
-    const client = await createReleaseClient();
-    await client.deleteRelease({ id });
-    revalidatePath('/admin/releases');
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('release-actions', 'deleteReleaseAction', err);
-    return releaseActionFailure(err, 'Failed to delete release', 'RELEASE_DELETE_FAILED');
-  }
+  return runAction(
+    'release-actions',
+    'deleteReleaseAction',
+    async () => {
+      const client = await createReleaseClient();
+      await client.deleteRelease({ id });
+      revalidatePath('/admin/releases');
+      return { success: true as const };
+    },
+    releaseFailurePolicy('Failed to delete release', 'RELEASE_DELETE_FAILED'),
+  );
 }
 
 export async function getReleaseAdminAction(id: string) {
@@ -169,30 +166,34 @@ export async function publishReleaseAction(
   id: string,
   editorOrigin?: string,
 ): Promise<ActionResult<{ success: true }>> {
-  try {
-    const client = await createReleaseClient(editorOrigin);
-    await client.publishRelease({ id });
-    revalidatePath('/admin/releases');
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('release-actions', 'publishReleaseAction', err);
-    return releaseEditorFailure(err, 'Failed to publish release', 'RELEASE_PUBLISH_FAILED');
-  }
+  return runAction(
+    'release-actions',
+    'publishReleaseAction',
+    async () => {
+      const client = await createReleaseClient(editorOrigin);
+      await client.publishRelease({ id });
+      revalidatePath('/admin/releases');
+      return { success: true as const };
+    },
+    releaseFailurePolicy('Failed to publish release', 'RELEASE_PUBLISH_FAILED', RELEASE_EDITOR_FAILURE_MESSAGES),
+  );
 }
 
 export async function unpublishReleaseAction(
   id: string,
   editorOrigin?: string,
 ): Promise<ActionResult<{ success: true }>> {
-  try {
-    const client = await createReleaseClient(editorOrigin);
-    await client.unpublishRelease({ id });
-    revalidatePath('/admin/releases');
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('release-actions', 'unpublishReleaseAction', err);
-    return releaseEditorFailure(err, 'Failed to unpublish release', 'RELEASE_UNPUBLISH_FAILED');
-  }
+  return runAction(
+    'release-actions',
+    'unpublishReleaseAction',
+    async () => {
+      const client = await createReleaseClient(editorOrigin);
+      await client.unpublishRelease({ id });
+      revalidatePath('/admin/releases');
+      return { success: true as const };
+    },
+    releaseFailurePolicy('Failed to unpublish release', 'RELEASE_UNPUBLISH_FAILED', RELEASE_EDITOR_FAILURE_MESSAGES),
+  );
 }
 
 export async function updateReleaseSlugAction(
@@ -200,17 +201,19 @@ export async function updateReleaseSlugAction(
   slug: string | null,
   editorOrigin?: string,
 ): Promise<ActionResult<{ success: true; slug: string | null }>> {
-  try {
-    const client = await createReleaseClient(editorOrigin);
-    await client.updateRelease({
-      id,
-      slug: toSlugInputValue(slug),
-    });
-    return actionSuccess({ success: true, slug });
-  } catch (err) {
-    logServerFailure('release-actions', 'updateReleaseSlugAction', err);
-    return releaseEditorFailure(err, 'Failed to update slug', 'RELEASE_UPDATE_SLUG_FAILED');
-  }
+  return runAction(
+    'release-actions',
+    'updateReleaseSlugAction',
+    async () => {
+      const client = await createReleaseClient(editorOrigin);
+      await client.updateRelease({
+        id,
+        slug: toSlugInputValue(slug),
+      });
+      return { success: true as const, slug };
+    },
+    releaseFailurePolicy('Failed to update slug', 'RELEASE_UPDATE_SLUG_FAILED', RELEASE_EDITOR_FAILURE_MESSAGES),
+  );
 }
 
 export async function updateReleaseFieldsAction(
@@ -225,28 +228,34 @@ export async function updateReleaseFieldsAction(
   },
   editorOrigin?: string,
 ): Promise<ActionResult<{ success: true }>> {
-  try {
-    const client = await createReleaseClient(editorOrigin);
-    await client.updateRelease({
-      id,
-      type: data.type === undefined ? undefined : stringToReleaseType(data.type),
-      releaseDateChange:
-        data.releaseDate === undefined
-          ? undefined
-          : data.releaseDate === null
-            ? { case: 'clearReleaseDate', value: {} }
-            : { case: 'setReleaseDate', value: timestampFromDate(data.releaseDate) },
-      spotifyUrl: data.spotifyUrl === null ? '' : data.spotifyUrl,
-      appleMusicUrl: data.appleMusicUrl === null ? '' : data.appleMusicUrl,
-      bandcampUrl: data.bandcampUrl === null ? '' : data.bandcampUrl,
-      youtubeMusicUrl: data.youtubeMusicUrl === null ? '' : data.youtubeMusicUrl,
-    });
-    revalidatePath(`/releases/${id}`);
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('release-actions', 'updateReleaseFieldsAction', err);
-    return releaseEditorFailure(err, 'Failed to update release fields', 'RELEASE_UPDATE_FIELDS_FAILED');
-  }
+  return runAction(
+    'release-actions',
+    'updateReleaseFieldsAction',
+    async () => {
+      const client = await createReleaseClient(editorOrigin);
+      await client.updateRelease({
+        id,
+        type: data.type === undefined ? undefined : stringToReleaseType(data.type),
+        releaseDateChange:
+          data.releaseDate === undefined
+            ? undefined
+            : data.releaseDate === null
+              ? { case: 'clearReleaseDate', value: {} }
+              : { case: 'setReleaseDate', value: timestampFromDate(data.releaseDate) },
+        spotifyUrl: data.spotifyUrl === null ? '' : data.spotifyUrl,
+        appleMusicUrl: data.appleMusicUrl === null ? '' : data.appleMusicUrl,
+        bandcampUrl: data.bandcampUrl === null ? '' : data.bandcampUrl,
+        youtubeMusicUrl: data.youtubeMusicUrl === null ? '' : data.youtubeMusicUrl,
+      });
+      revalidatePath(`/releases/${id}`);
+      return { success: true as const };
+    },
+    releaseFailurePolicy(
+      'Failed to update release fields',
+      'RELEASE_UPDATE_FIELDS_FAILED',
+      RELEASE_EDITOR_FAILURE_MESSAGES,
+    ),
+  );
 }
 
 // === Artwork Actions ===
@@ -256,31 +265,35 @@ export async function setReleaseArtworkAction(
   fileId: string,
   editorOrigin?: string,
 ): Promise<ActionResult<{ url?: string }>> {
-  try {
-    const client = await createReleaseClient(editorOrigin);
-    const response = await client.setReleaseArtwork({ releaseId, fileId });
-    return actionSuccess({ url: response.artworkAsset?.url });
-  } catch (err) {
-    logServerFailure('release-actions', 'setReleaseArtworkAction', err);
-    return releaseActionFailure(err, 'Failed to set artwork', 'RELEASE_SET_ARTWORK_FAILED', {
+  return runAction(
+    'release-actions',
+    'setReleaseArtworkAction',
+    async () => {
+      const client = await createReleaseClient(editorOrigin);
+      const response = await client.setReleaseArtwork({ releaseId, fileId });
+      return { url: response.artworkAsset?.url };
+    },
+    releaseFailurePolicy('Failed to set artwork', 'RELEASE_SET_ARTWORK_FAILED', {
       [Code.NotFound]: 'Release or file not found',
       [Code.PermissionDenied]: 'No permission to edit this release',
-    });
-  }
+    }),
+  );
 }
 
 export async function deleteReleaseArtworkAction(
   releaseId: string,
   editorOrigin?: string,
 ): Promise<ActionResult<{ success: true }>> {
-  try {
-    const client = await createReleaseClient(editorOrigin);
-    await client.deleteReleaseArtwork({ releaseId });
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('release-actions', 'deleteReleaseArtworkAction', err);
-    return releaseEditorFailure(err, 'Failed to delete artwork', 'RELEASE_DELETE_ARTWORK_FAILED');
-  }
+  return runAction(
+    'release-actions',
+    'deleteReleaseArtworkAction',
+    async () => {
+      const client = await createReleaseClient(editorOrigin);
+      await client.deleteReleaseArtwork({ releaseId });
+      return { success: true as const };
+    },
+    releaseFailurePolicy('Failed to delete artwork', 'RELEASE_DELETE_ARTWORK_FAILED', RELEASE_EDITOR_FAILURE_MESSAGES),
+  );
 }
 
 // === Metadata Operations ===
@@ -296,29 +309,31 @@ export async function setReleaseLabelsAction(
   if (!Array.isArray(observedLabels)) {
     return actionFailure('An observed label snapshot is required', Code.InvalidArgument);
   }
-  try {
-    const client = await createReleaseClient(editorOrigin);
-    await client.setReleaseLabels({
-      releaseId,
-      labels: labels.map((l) => ({
-        labelId: l.labelId,
-        catalogNumber: l.catalogNumber,
-        sortOrder: l.sortOrder,
-      })),
-      observed: {
-        labels: observedLabels.map((l) => ({
+  return runAction(
+    'release-actions',
+    'setReleaseLabelsAction',
+    async () => {
+      const client = await createReleaseClient(editorOrigin);
+      await client.setReleaseLabels({
+        releaseId,
+        labels: labels.map((l) => ({
           labelId: l.labelId,
           catalogNumber: l.catalogNumber,
           sortOrder: l.sortOrder,
         })),
-      },
-      ...(orderIntent ? { orderIntent } : {}),
-    });
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('release-actions', 'setReleaseLabelsAction', err);
-    return releaseEditorFailure(err, 'Failed to update labels', 'RELEASE_UPDATE_LABELS_FAILED');
-  }
+        observed: {
+          labels: observedLabels.map((l) => ({
+            labelId: l.labelId,
+            catalogNumber: l.catalogNumber,
+            sortOrder: l.sortOrder,
+          })),
+        },
+        ...(orderIntent ? { orderIntent } : {}),
+      });
+      return { success: true as const };
+    },
+    releaseFailurePolicy('Failed to update labels', 'RELEASE_UPDATE_LABELS_FAILED', RELEASE_EDITOR_FAILURE_MESSAGES),
+  );
 }
 
 export async function setReleaseGenresAction(
@@ -330,18 +345,20 @@ export async function setReleaseGenresAction(
   if (!Array.isArray(observedIds)) {
     return actionFailure('An observed genre snapshot is required', Code.InvalidArgument);
   }
-  try {
-    const client = await createReleaseClient(editorOrigin);
-    await client.setReleaseGenres({
-      releaseId,
-      genreIds,
-      observed: { ids: observedIds },
-    });
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('release-actions', 'setReleaseGenresAction', err);
-    return releaseEditorFailure(err, 'Failed to update genres', 'RELEASE_UPDATE_GENRES_FAILED');
-  }
+  return runAction(
+    'release-actions',
+    'setReleaseGenresAction',
+    async () => {
+      const client = await createReleaseClient(editorOrigin);
+      await client.setReleaseGenres({
+        releaseId,
+        genreIds,
+        observed: { ids: observedIds },
+      });
+      return { success: true as const };
+    },
+    releaseFailurePolicy('Failed to update genres', 'RELEASE_UPDATE_GENRES_FAILED', RELEASE_EDITOR_FAILURE_MESSAGES),
+  );
 }
 
 export async function setReleaseArtistsAction(
@@ -354,27 +371,29 @@ export async function setReleaseArtistsAction(
   if (!Array.isArray(observedArtists)) {
     return actionFailure('An observed artist snapshot is required', Code.InvalidArgument);
   }
-  try {
-    const client = await createReleaseClient(editorOrigin);
-    await client.setReleaseArtists({
-      releaseId,
-      artists: artists.map((artist) => ({
-        artistId: artist.artistId,
-        sortOrder: artist.sortOrder,
-      })),
-      observed: {
-        artists: observedArtists.map((artist) => ({
+  return runAction(
+    'release-actions',
+    'setReleaseArtistsAction',
+    async () => {
+      const client = await createReleaseClient(editorOrigin);
+      await client.setReleaseArtists({
+        releaseId,
+        artists: artists.map((artist) => ({
           artistId: artist.artistId,
           sortOrder: artist.sortOrder,
         })),
-      },
-      ...(orderIntent ? { orderIntent } : {}),
-    });
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('release-actions', 'setReleaseArtistsAction', err);
-    return releaseEditorFailure(err, 'Failed to update artists', 'RELEASE_UPDATE_ARTISTS_FAILED');
-  }
+        observed: {
+          artists: observedArtists.map((artist) => ({
+            artistId: artist.artistId,
+            sortOrder: artist.sortOrder,
+          })),
+        },
+        ...(orderIntent ? { orderIntent } : {}),
+      });
+      return { success: true as const };
+    },
+    releaseFailurePolicy('Failed to update artists', 'RELEASE_UPDATE_ARTISTS_FAILED', RELEASE_EDITOR_FAILURE_MESSAGES),
+  );
 }
 
 export async function setReleaseCategoriesAction(
@@ -386,18 +405,24 @@ export async function setReleaseCategoriesAction(
   if (!Array.isArray(observedIds)) {
     return actionFailure('An observed category snapshot is required', Code.InvalidArgument);
   }
-  try {
-    const client = await createReleaseClient(editorOrigin);
-    await client.setReleaseCategories({
-      releaseId,
-      categoryIds,
-      observed: { ids: observedIds },
-    });
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('release-actions', 'setReleaseCategoriesAction', err);
-    return releaseEditorFailure(err, 'Failed to update categories', 'RELEASE_UPDATE_CATEGORIES_FAILED');
-  }
+  return runAction(
+    'release-actions',
+    'setReleaseCategoriesAction',
+    async () => {
+      const client = await createReleaseClient(editorOrigin);
+      await client.setReleaseCategories({
+        releaseId,
+        categoryIds,
+        observed: { ids: observedIds },
+      });
+      return { success: true as const };
+    },
+    releaseFailurePolicy(
+      'Failed to update categories',
+      'RELEASE_UPDATE_CATEGORIES_FAILED',
+      RELEASE_EDITOR_FAILURE_MESSAGES,
+    ),
+  );
 }
 
 export async function setReleaseStylesAction(
@@ -409,18 +434,20 @@ export async function setReleaseStylesAction(
   if (!Array.isArray(observedIds)) {
     return actionFailure('An observed style snapshot is required', Code.InvalidArgument);
   }
-  try {
-    const client = await createReleaseClient(editorOrigin);
-    await client.setReleaseStyles({
-      releaseId,
-      styleIds,
-      observed: { ids: observedIds },
-    });
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('release-actions', 'setReleaseStylesAction', err);
-    return releaseEditorFailure(err, 'Failed to update styles', 'RELEASE_UPDATE_STYLES_FAILED');
-  }
+  return runAction(
+    'release-actions',
+    'setReleaseStylesAction',
+    async () => {
+      const client = await createReleaseClient(editorOrigin);
+      await client.setReleaseStyles({
+        releaseId,
+        styleIds,
+        observed: { ids: observedIds },
+      });
+      return { success: true as const };
+    },
+    releaseFailurePolicy('Failed to update styles', 'RELEASE_UPDATE_STYLES_FAILED', RELEASE_EDITOR_FAILURE_MESSAGES),
+  );
 }
 
 export async function setReleaseFormatsAction(
@@ -432,26 +459,28 @@ export async function setReleaseFormatsAction(
   if (!Array.isArray(observedFormats)) {
     return actionFailure('An observed format snapshot is required', Code.InvalidArgument);
   }
-  try {
-    const client = await createReleaseClient(editorOrigin);
-    await client.setReleaseFormats({
-      releaseId,
-      formats: formats.map((f) => ({
-        formatId: f.formatId,
-        formatDescription: f.formatDescription,
-      })),
-      observed: {
-        formats: observedFormats.map((f) => ({
+  return runAction(
+    'release-actions',
+    'setReleaseFormatsAction',
+    async () => {
+      const client = await createReleaseClient(editorOrigin);
+      await client.setReleaseFormats({
+        releaseId,
+        formats: formats.map((f) => ({
           formatId: f.formatId,
           formatDescription: f.formatDescription,
         })),
-      },
-    });
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('release-actions', 'setReleaseFormatsAction', err);
-    return releaseEditorFailure(err, 'Failed to update formats', 'RELEASE_UPDATE_FORMATS_FAILED');
-  }
+        observed: {
+          formats: observedFormats.map((f) => ({
+            formatId: f.formatId,
+            formatDescription: f.formatDescription,
+          })),
+        },
+      });
+      return { success: true as const };
+    },
+    releaseFailurePolicy('Failed to update formats', 'RELEASE_UPDATE_FORMATS_FAILED', RELEASE_EDITOR_FAILURE_MESSAGES),
+  );
 }
 
 export async function setReleaseCreditsAction(
@@ -478,20 +507,14 @@ export async function setReleaseCreditsAction(
   if (!Array.isArray(observedCredits)) {
     return actionFailure('An observed credit snapshot is required', Code.InvalidArgument);
   }
-  try {
-    const client = await createReleaseClient(editorOrigin);
-    await client.setReleaseCredits({
-      releaseId,
-      credits: credits.map((c) => ({
-        id: c.id,
-        artistId: c.artistId ?? undefined,
-        memberId: c.memberId ?? undefined,
-        creditedName: c.creditedName ?? undefined,
-        creditRole: c.creditRole ?? undefined,
-        sortOrder: c.sortOrder,
-      })),
-      observed: {
-        credits: observedCredits.map((c) => ({
+  return runAction(
+    'release-actions',
+    'setReleaseCreditsAction',
+    async () => {
+      const client = await createReleaseClient(editorOrigin);
+      await client.setReleaseCredits({
+        releaseId,
+        credits: credits.map((c) => ({
           id: c.id,
           artistId: c.artistId ?? undefined,
           memberId: c.memberId ?? undefined,
@@ -499,12 +522,20 @@ export async function setReleaseCreditsAction(
           creditRole: c.creditRole ?? undefined,
           sortOrder: c.sortOrder,
         })),
-      },
-      ...(orderIntent ? { orderIntent } : {}),
-    });
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('release-actions', 'setReleaseCreditsAction', err);
-    return releaseEditorFailure(err, 'Failed to update credits', 'RELEASE_UPDATE_CREDITS_FAILED');
-  }
+        observed: {
+          credits: observedCredits.map((c) => ({
+            id: c.id,
+            artistId: c.artistId ?? undefined,
+            memberId: c.memberId ?? undefined,
+            creditedName: c.creditedName ?? undefined,
+            creditRole: c.creditRole ?? undefined,
+            sortOrder: c.sortOrder,
+          })),
+        },
+        ...(orderIntent ? { orderIntent } : {}),
+      });
+      return { success: true as const };
+    },
+    releaseFailurePolicy('Failed to update credits', 'RELEASE_UPDATE_CREDITS_FAILED', RELEASE_EDITOR_FAILURE_MESSAGES),
+  );
 }

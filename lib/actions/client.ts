@@ -1,6 +1,8 @@
 'use server';
 
 import { logServerFailure } from '@/lib/logging/logger';
+import type { ActionResult } from '@/lib/actions/action-result';
+import { runAction } from '@/lib/actions/run-action';
 import { queryResult } from '@/lib/api/query-result';
 
 import { isConnectErrorCode } from '@/lib/api/connect-error';
@@ -96,62 +98,53 @@ export async function getClientsForBlockByIdsAction(input: { ids: string[]; requ
 export async function createClientAction(
   name: string,
   website?: string | null,
-): Promise<{ data?: { id: string }; error?: string }> {
-  try {
-    const client = await createClientClient();
-    const created = await client.createClient({ name, website: website || undefined });
-    revalidatePath('/admin/clients');
-    return { data: { id: created.id } };
-  } catch (err) {
-    logServerFailure('client-actions', 'createClientAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to create client' };
-  }
+): Promise<ActionResult<{ data: { id: string } }>> {
+  return runAction(
+    'client-actions',
+    'createClientAction',
+    async () => {
+      const client = await createClientClient();
+      const created = await client.createClient({ name, website: website || undefined });
+      revalidatePath('/admin/clients');
+      return { data: { id: created.id } };
+    },
+    { fallback: 'Failed to create client' },
+  );
 }
 
-export async function deleteClientAction(id: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createClientClient();
-    await client.deleteClient({ id });
-    revalidatePath('/admin/clients');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('client-actions', 'deleteClientAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Client not found' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete client' };
-  }
+export async function deleteClientAction(id: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'client-actions',
+    'deleteClientAction',
+    async () => {
+      const client = await createClientClient();
+      await client.deleteClient({ id });
+      revalidatePath('/admin/clients');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete client', messages: { [Code.NotFound]: 'Client not found' } },
+  );
 }
 
 export async function updateClientAction(
   id: string,
   data: { name?: string; website?: string | null },
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createClientClient();
-    await client.updateClient({
-      id,
-      ...(data.name !== undefined ? { name: data.name } : {}),
-      ...(data.website !== undefined ? { website: data.website ?? '' } : {}),
-    });
-    revalidatePath('/admin/clients');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('client-actions', 'updateClientAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Client not found' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to update client' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'client-actions',
+    'updateClientAction',
+    async () => {
+      const client = await createClientClient();
+      await client.updateClient({
+        id,
+        ...(data.name !== undefined ? { name: data.name } : {}),
+        ...(data.website !== undefined ? { website: data.website ?? '' } : {}),
+      });
+      revalidatePath('/admin/clients');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to update client', messages: { [Code.NotFound]: 'Client not found' } },
+  );
 }
 
 // === Logo Actions ===
@@ -160,38 +153,33 @@ export async function setClientLogoAction(
   clientId: string,
   fileId: string,
   variant?: ThemeAssetVariantName,
-): Promise<{ url?: string; error?: string }> {
-  try {
-    const client = await createClientClient();
-    const protoVariant = themeAssetVariantFromName(variant);
-    const response = await client.setClientLogo({ clientId, fileId, variant: protoVariant });
-    const url = protoVariant === ThemeAssetVariant.DARK ? response.logoDarkAsset?.url : response.logoLightAsset?.url;
-    return { url };
-  } catch (err) {
-    logServerFailure('client-actions', 'setClientLogoAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Client or file not found' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to set client logo' };
-  }
+): Promise<ActionResult<{ url?: string }>> {
+  return runAction(
+    'client-actions',
+    'setClientLogoAction',
+    async () => {
+      const client = await createClientClient();
+      const protoVariant = themeAssetVariantFromName(variant);
+      const response = await client.setClientLogo({ clientId, fileId, variant: protoVariant });
+      const url = protoVariant === ThemeAssetVariant.DARK ? response.logoDarkAsset?.url : response.logoLightAsset?.url;
+      return { url };
+    },
+    { fallback: 'Failed to set client logo', messages: { [Code.NotFound]: 'Client or file not found' } },
+  );
 }
 
 export async function deleteClientLogoAction(
   clientId: string,
   variant?: ThemeAssetVariantName,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createClientClient();
-    await client.deleteClientLogo({ clientId, variant: themeAssetVariantFromName(variant) });
-    return { success: true };
-  } catch (err) {
-    logServerFailure('client-actions', 'deleteClientLogoAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete client logo' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'client-actions',
+    'deleteClientLogoAction',
+    async () => {
+      const client = await createClientClient();
+      await client.deleteClientLogo({ clientId, variant: themeAssetVariantFromName(variant) });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete client logo' },
+  );
 }

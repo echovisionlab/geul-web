@@ -1,9 +1,9 @@
 'use server';
 
-import { logServerFailure } from '@/lib/logging/logger';
+import { actionFailure, type ActionResult } from '@/lib/actions/action-result';
+import { runAction } from '@/lib/actions/run-action';
 import { queryResult, type QueryResult, unwrapQueryResult } from '@/lib/api/query-result';
 
-import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { revalidatePath } from 'next/cache';
 import { timestampDate, type Timestamp } from '@bufbuild/protobuf/wkt';
 import { Code } from '@connectrpc/connect';
@@ -56,25 +56,24 @@ export async function createTrackAction(
     lyrics?: string;
   },
   editorOrigin?: string,
-): Promise<{ data?: TrackSelect; error?: string }> {
-  try {
-    const client = await createTrackClient(editorOrigin);
-    const result = await client.createTrack({
-      releaseId: data.release_id,
-      trackNumber: data.track_number,
-      title: data.title,
-      durationSeconds: data.duration_seconds,
-      lyrics: data.lyrics,
-    });
-    revalidatePath(`/releases/${data.release_id}`);
-    return { data: mapTrack(result) };
-  } catch (err) {
-    logServerFailure('track-actions', 'createTrackAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to create track' };
-  }
+): Promise<ActionResult<{ data: TrackSelect }>> {
+  return runAction(
+    'track-actions',
+    'createTrackAction',
+    async () => {
+      const client = await createTrackClient(editorOrigin);
+      const result = await client.createTrack({
+        releaseId: data.release_id,
+        trackNumber: data.track_number,
+        title: data.title,
+        durationSeconds: data.duration_seconds,
+        lyrics: data.lyrics,
+      });
+      revalidatePath(`/releases/${data.release_id}`);
+      return { data: mapTrack(result) };
+    },
+    { fallback: 'Failed to create track' },
+  );
 }
 
 export async function listTracksByReleaseAction(releaseId: string): Promise<ReleaseTrackItem[]> {
@@ -122,50 +121,39 @@ export async function updateTrackAction(
     lyrics?: string | null;
   },
   editorOrigin?: string,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createTrackClient(editorOrigin);
-    await client.updateTrack({
-      id,
-      trackNumber: data.track_number,
-      title: data.title,
-      durationSeconds: data.duration_seconds ?? undefined,
-      clearDuration: data.duration_seconds === null,
-      processingStatus: data.processing_status ?? undefined,
-      lyrics: data.lyrics ?? undefined,
-      clearLyrics: data.lyrics === null,
-    });
-    return { success: true };
-  } catch (err) {
-    logServerFailure('track-actions', 'updateTrackAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Track not found' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to update track' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'track-actions',
+    'updateTrackAction',
+    async () => {
+      const client = await createTrackClient(editorOrigin);
+      await client.updateTrack({
+        id,
+        trackNumber: data.track_number,
+        title: data.title,
+        durationSeconds: data.duration_seconds ?? undefined,
+        clearDuration: data.duration_seconds === null,
+        processingStatus: data.processing_status ?? undefined,
+        lyrics: data.lyrics ?? undefined,
+        clearLyrics: data.lyrics === null,
+      });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to update track', messages: { [Code.NotFound]: 'Track not found' } },
+  );
 }
 
-export async function deleteTrackAction(
-  id: string,
-  editorOrigin?: string,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createTrackClient(editorOrigin);
-    await client.deleteTrack({ id });
-    return { success: true };
-  } catch (err) {
-    logServerFailure('track-actions', 'deleteTrackAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Track not found' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to delete track' };
-  }
+export async function deleteTrackAction(id: string, editorOrigin?: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'track-actions',
+    'deleteTrackAction',
+    async () => {
+      const client = await createTrackClient(editorOrigin);
+      await client.deleteTrack({ id });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete track', messages: { [Code.NotFound]: 'Track not found' } },
+  );
 }
 
 export async function setTrackCreditsAction(
@@ -173,43 +161,38 @@ export async function setTrackCreditsAction(
   credits: TrackCreditInput[],
   observedCredits: TrackCreditInput[],
   editorOrigin?: string,
-): Promise<{ success?: boolean; error?: string }> {
+): Promise<ActionResult<{ success: true }>> {
   if (!Array.isArray(observedCredits)) {
-    return { error: 'An observed credit snapshot is required' };
+    return actionFailure('An observed credit snapshot is required', Code.InvalidArgument);
   }
-  try {
-    const client = await createTrackClient(editorOrigin);
-    await client.setTrackCredits({
-      trackId,
-      credits: credits.map(mapTrackCreditInput),
-      observed: { credits: observedCredits.map(mapTrackCreditInput) },
-    });
-    return { success: true };
-  } catch (err) {
-    logServerFailure('track-actions', 'setTrackCreditsAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Track not found' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to set track credits' };
-  }
+  return runAction(
+    'track-actions',
+    'setTrackCreditsAction',
+    async () => {
+      const client = await createTrackClient(editorOrigin);
+      await client.setTrackCredits({
+        trackId,
+        credits: credits.map(mapTrackCreditInput),
+        observed: { credits: observedCredits.map(mapTrackCreditInput) },
+      });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to set track credits', messages: { [Code.NotFound]: 'Track not found' } },
+  );
 }
 
 export async function reorderTracksAction(
   trackIds: string[],
   editorOrigin?: string,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createTrackClient(editorOrigin);
-    await client.reorderTracks({ trackIds });
-    return { success: true };
-  } catch (err) {
-    logServerFailure('track-actions', 'reorderTracksAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to reorder tracks' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'track-actions',
+    'reorderTracksAction',
+    async () => {
+      const client = await createTrackClient(editorOrigin);
+      await client.reorderTracks({ trackIds });
+      return { success: true as const };
+    },
+    { fallback: 'Failed to reorder tracks' },
+  );
 }

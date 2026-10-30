@@ -120,7 +120,7 @@ describe('program event actions', () => {
     'forwards lifecycle origin for %s',
     async (action) => {
       const origin = '40000000-0000-4000-8000-000000000001';
-      await expect(actions[action]('entity-1', origin)).resolves.toEqual({ success: true });
+      await expect(actions[action]('entity-1', origin)).resolves.toEqual({ ok: true, success: true });
       expect(mocks.createProgramEventClient).toHaveBeenCalledWith(origin);
     },
   );
@@ -275,11 +275,15 @@ describe('program event actions', () => {
     await expect(actions.getProgramEventNeutralConfigurationAction('event-1')).resolves.toEqual({
       ok: false,
       error: 'Unauthorized',
+      errorCode: Code.PermissionDenied,
     });
   });
 
   it('creates an event in the editor locale with an existing type, the given timezone and TBA location', async () => {
-    await expect(actions.createProgramEventAction('Asia/Seoul')).resolves.toEqual({ data: { id: 'event-1' } });
+    await expect(actions.createProgramEventAction('Asia/Seoul')).resolves.toEqual({
+      ok: true,
+      data: { id: 'event-1' },
+    });
 
     expect(typeClient.createProgramEventType).not.toHaveBeenCalled();
     expect(eventClient.createProgramEvent).toHaveBeenCalledWith(
@@ -295,7 +299,7 @@ describe('program event actions', () => {
   it('creates a default event type before the first event when none exists', async () => {
     typeClient.listProgramEventTypesAdmin.mockResolvedValueOnce({ types: [] });
 
-    await expect(actions.createProgramEventAction()).resolves.toEqual({ data: { id: 'event-1' } });
+    await expect(actions.createProgramEventAction()).resolves.toEqual({ ok: true, data: { id: 'event-1' } });
 
     expect(typeClient.createProgramEventType).toHaveBeenCalledWith({
       slug: 'event',
@@ -309,7 +313,7 @@ describe('program event actions', () => {
   it('clears the series, series order and end time when they are removed', async () => {
     await expect(
       actions.updateProgramEventAction('event-1', { seriesId: null, seriesOrder: null, endsAt: null }),
-    ).resolves.toEqual({ success: true });
+    ).resolves.toEqual({ ok: true, success: true });
 
     const update = eventClient.updateProgramEvent.mock.lastCall?.[0];
     expect(update).toMatchObject({ id: 'event-1', seriesId: '', clearSeriesOrder: true, clearEndsAt: true });
@@ -334,7 +338,7 @@ describe('program event actions', () => {
         artists: [{ id: 'artist-1', role: 'performer' }],
         observed: { artists: [{ id: 'artist-1', role: 'performer', sortOrder: 4 }] },
       }),
-    ).resolves.toEqual({ success: true });
+    ).resolves.toEqual({ ok: true, success: true });
 
     expect(eventClient.updateProgramEvent).toHaveBeenCalledOnce();
     const update = eventClient.updateProgramEvent.mock.lastCall?.[0];
@@ -356,7 +360,7 @@ describe('program event actions', () => {
         artists: [{ id: 'artist-1', sortOrder: 0 }],
         observed: { artists: [] },
       }),
-    ).resolves.toEqual({ success: true });
+    ).resolves.toEqual({ ok: true, success: true });
 
     const update = eventClient.updateProgramEvent.mock.lastCall?.[0];
     expect(update?.observedArtists).toMatchObject({ artists: [] });
@@ -374,7 +378,7 @@ describe('program event actions', () => {
           clients: [{ id: 'client-before', role: 'host', sortOrder: 7 }],
         },
       }),
-    ).resolves.toEqual({ success: true });
+    ).resolves.toEqual({ ok: true, success: true });
 
     const update = eventClient.updateProgramEvent.mock.lastCall?.[0];
     expect(update?.observedArtists?.artists).toMatchObject([
@@ -386,6 +390,7 @@ describe('program event actions', () => {
 
   it('hydrates poster media and maps credit operations', async () => {
     await expect(actions.addProgramEventPosterAction('event-1', 'file-1')).resolves.toEqual({
+      ok: true,
       imageUrl: 'https://cdn.example/file-2-thumb.webp',
       media: [
         {
@@ -420,15 +425,20 @@ describe('program event actions', () => {
       }),
     ).resolves.toMatchObject({ credit: { id: 'credit-1', member: { id: 'member-1' } } });
     await expect(actions.deleteProgramEventCreditAction('event-1', 'credit-1')).resolves.toEqual({
+      ok: true,
       success: true,
     });
-    await expect(actions.reorderProgramEventCreditsAction('event-1', ['credit-1'])).resolves.toEqual({ success: true });
+    await expect(actions.reorderProgramEventCreditsAction('event-1', ['credit-1'])).resolves.toEqual({
+      ok: true,
+      success: true,
+    });
   });
 
   it('trims the name and slug of a new event type', async () => {
     await expect(
       actions.createProgramEventTypeAction({ name: ' Listening Party ', slug: ' party ', sortOrder: 2 }),
     ).resolves.toEqual({
+      ok: true,
       data: { id: 'type-created', name: 'Listening Party', slug: 'party' },
     });
 
@@ -452,7 +462,7 @@ describe('program event actions', () => {
         requiresPlace: true,
         requiresStreamUrl: false,
       }),
-    ).resolves.toEqual({ success: true });
+    ).resolves.toEqual({ ok: true, success: true });
 
     expect(typeClient.updateProgramEventType).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'type-1', description: '', status: expected }),
@@ -470,7 +480,7 @@ describe('program event actions', () => {
         posterFileId: null,
         status,
       }),
-    ).resolves.toEqual({ success: true });
+    ).resolves.toEqual({ ok: true, success: true });
 
     expect(seriesClient.updateProgramEventSeries).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -494,7 +504,9 @@ describe('program event actions', () => {
   it('maps auth and permission failures to Unauthorized', async () => {
     eventClient.publishProgramEvent.mockRejectedValueOnce(new ConnectError('denied', Code.PermissionDenied));
     await expect(actions.publishProgramEventAction('event-1')).resolves.toEqual({
+      ok: false,
       error: 'Unauthorized',
+      errorCode: Code.PermissionDenied,
     });
   });
 });

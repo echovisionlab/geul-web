@@ -4,12 +4,8 @@ import { logServerFailure } from '@/lib/logging/logger';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { connectActionErrorCode, isConnectError } from '@/lib/api/connect-error';
-import {
-  actionFailure,
-  actionSuccess,
-  type ActionResult,
-  type LocalActionErrorCode,
-} from '@/lib/actions/action-result';
+import { actionFailure, actionSuccess, type ActionResult } from '@/lib/actions/action-result';
+import { runAction } from '@/lib/actions/run-action';
 import { revalidatePath } from 'next/cache';
 import { Code } from '@connectrpc/connect';
 import { ShareLinkEntityType, type ShareLinkItem } from '@echovisionlab/geul-proto/secure/share_link_pb.ts';
@@ -43,35 +39,34 @@ function pageLifecycleStatus(status: PageStatus): PageLifecycleStatus {
   }
 }
 
-function pageActionFailure(err: unknown, fallback: string, fallbackCode: LocalActionErrorCode) {
-  const message = err instanceof Error ? err.message : fallback;
-  return actionFailure(message.trim() ? message : fallback, connectActionErrorCode(err, fallbackCode));
-}
-
 export async function createPageAction(): Promise<ActionResult<{ data: { id: string; slug: string | null } }>> {
-  try {
-    const client = await createPageClient();
-    const page = await client.createPage({
-      title: 'Untitled Page',
-    });
-    revalidatePath('/admin/pages');
-    return actionSuccess({ data: { id: page.id, slug: page.slug ?? null } });
-  } catch (err) {
-    logServerFailure('page-actions', 'createPageAction', err);
-    return pageActionFailure(err, 'Failed to create page', 'PAGE_CREATE_FAILED');
-  }
+  return runAction(
+    'page-actions',
+    'createPageAction',
+    async () => {
+      const client = await createPageClient();
+      const page = await client.createPage({
+        title: 'Untitled Page',
+      });
+      revalidatePath('/admin/pages');
+      return { data: { id: page.id, slug: page.slug ?? null } };
+    },
+    { fallback: 'Failed to create page', code: 'PAGE_CREATE_FAILED' },
+  );
 }
 
 export async function deletePageAdminAction(id: string): Promise<ActionResult<{ success: true }>> {
-  try {
-    const client = await createPageClient();
-    await client.deletePage({ id });
-    revalidatePageAfterCommit('/admin/pages');
-    return actionSuccess({ success: true });
-  } catch (err) {
-    logServerFailure('page-actions', 'deletePageAdminAction', err);
-    return pageActionFailure(err, 'Failed to delete page', 'PAGE_DELETE_FAILED');
-  }
+  return runAction(
+    'page-actions',
+    'deletePageAdminAction',
+    async () => {
+      const client = await createPageClient();
+      await client.deletePage({ id });
+      revalidatePageAfterCommit('/admin/pages');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete page', code: 'PAGE_DELETE_FAILED' },
+  );
 }
 
 // === Editor Mutations ===
@@ -84,22 +79,21 @@ export async function getPageNeutralConfigurationAction(id: string): Promise<
     accessPolicy: PageAccessPolicyValue;
   }>
 > {
-  try {
-    const client = await createPageClient();
-    const page = await client.getPage({ id });
-    return actionSuccess({
-      slug: page.slug || null,
-      showTitle: page.showTitle,
-      status: pageLifecycleStatus(page.status),
-      accessPolicy: fromProtoPageAccessPolicy(page.accessPolicy),
-    });
-  } catch (err) {
-    logServerFailure('page-actions', 'getPageNeutralConfigurationAction', err);
-    return actionFailure(
-      err instanceof Error ? err.message : 'Failed to load page editor configuration',
-      isConnectError(err) ? err.code : Code.Internal,
-    );
-  }
+  return runAction(
+    'page-actions',
+    'getPageNeutralConfigurationAction',
+    async () => {
+      const client = await createPageClient();
+      const page = await client.getPage({ id });
+      return {
+        slug: page.slug || null,
+        showTitle: page.showTitle,
+        status: pageLifecycleStatus(page.status),
+        accessPolicy: fromProtoPageAccessPolicy(page.accessPolicy),
+      };
+    },
+    { fallback: 'Failed to load page editor configuration', code: Code.Internal },
+  );
 }
 
 export async function updatePageAccessPolicyAction(
@@ -107,75 +101,77 @@ export async function updatePageAccessPolicyAction(
   accessPolicy: PageAccessPolicyValue,
   editorOrigin?: string,
 ): Promise<ActionResult<{ accessPolicy: PageAccessPolicyValue }>> {
-  try {
-    const client = await createPageClient(editorOrigin);
-    const page = await client.updatePage({ id, accessPolicy: toProtoPageAccessPolicy(accessPolicy) });
-    const canonical = fromProtoPageAccessPolicy(page.accessPolicy);
-    revalidatePageAfterCommit('/admin/pages');
-    revalidatePageAfterCommit('/');
-    revalidatePageAfterCommit(`/${page.slug || id}`);
-    return actionSuccess({ accessPolicy: canonical });
-  } catch (err) {
-    logServerFailure('page-actions', 'updatePageAccessPolicyAction', err);
-    return actionFailure(
-      err instanceof Error ? err.message : 'Failed to update page access settings',
-      isConnectError(err) ? err.code : Code.Internal,
-    );
-  }
+  return runAction(
+    'page-actions',
+    'updatePageAccessPolicyAction',
+    async () => {
+      const client = await createPageClient(editorOrigin);
+      const page = await client.updatePage({ id, accessPolicy: toProtoPageAccessPolicy(accessPolicy) });
+      const canonical = fromProtoPageAccessPolicy(page.accessPolicy);
+      revalidatePageAfterCommit('/admin/pages');
+      revalidatePageAfterCommit('/');
+      revalidatePageAfterCommit(`/${page.slug || id}`);
+      return { accessPolicy: canonical };
+    },
+    { fallback: 'Failed to update page access settings', code: Code.Internal },
+  );
 }
 
 export async function getPageAccessTagOptionsAction(): Promise<
   ActionResult<{ tagOptions: { value: string; label: string }[] }>
 > {
-  try {
-    const client = await createMemberClient();
-    const tagOptions: { value: string; label: string }[] = [];
-    let offset = 0;
-    let hasMore = false;
-    do {
-      const response = await client.listMemberTagsAdmin({ pagination: { limit: 500, offset } });
-      tagOptions.push(...response.tags.map((tag) => ({ value: tag.id, label: tag.name })));
-      offset += response.tags.length;
-      hasMore = response.pagination?.hasMore ?? false;
-    } while (hasMore);
-    return actionSuccess({ tagOptions });
-  } catch (err) {
-    logServerFailure('page-actions', 'getPageAccessTagOptionsAction', err);
-    return actionFailure(
-      err instanceof Error ? err.message : 'Failed to load member tags',
-      isConnectError(err) ? err.code : Code.Internal,
-    );
-  }
+  return runAction(
+    'page-actions',
+    'getPageAccessTagOptionsAction',
+    async () => {
+      const client = await createMemberClient();
+      const tagOptions: { value: string; label: string }[] = [];
+      let offset = 0;
+      let hasMore = false;
+      do {
+        const response = await client.listMemberTagsAdmin({ pagination: { limit: 500, offset } });
+        tagOptions.push(...response.tags.map((tag) => ({ value: tag.id, label: tag.name })));
+        offset += response.tags.length;
+        hasMore = response.pagination?.hasMore ?? false;
+      } while (hasMore);
+      return { tagOptions };
+    },
+    { fallback: 'Failed to load member tags', code: Code.Internal },
+  );
 }
 
 export async function publishPageAction(
   id: string,
   editorOrigin?: string,
 ): Promise<ActionResult<{ success: true; status: PageLifecycleStatus }>> {
-  try {
-    const client = await createPageClient(editorOrigin);
-    const response = await client.publishPage({ id });
-    revalidatePath('/admin/pages');
-    return actionSuccess({ success: true, status: pageLifecycleStatus(response.status) });
-  } catch (err) {
-    logServerFailure('page-actions', 'publishPageAction', err);
-    return pageActionFailure(err, 'Failed to publish page', 'PAGE_PUBLISH_FAILED');
-  }
+  return runAction(
+    'page-actions',
+    'publishPageAction',
+    async () => {
+      const client = await createPageClient(editorOrigin);
+      const response = await client.publishPage({ id });
+      revalidatePath('/admin/pages');
+      return { success: true as const, status: pageLifecycleStatus(response.status) };
+    },
+    { fallback: 'Failed to publish page', code: 'PAGE_PUBLISH_FAILED' },
+  );
 }
 
 export async function unpublishPageAction(
   id: string,
   editorOrigin?: string,
 ): Promise<ActionResult<{ success: true; status: PageLifecycleStatus }>> {
-  try {
-    const client = await createPageClient(editorOrigin);
-    const response = await client.unpublishPage({ id });
-    revalidatePath('/admin/pages');
-    return actionSuccess({ success: true, status: pageLifecycleStatus(response.status) });
-  } catch (err) {
-    logServerFailure('page-actions', 'unpublishPageAction', err);
-    return pageActionFailure(err, 'Failed to unpublish page', 'PAGE_UNPUBLISH_FAILED');
-  }
+  return runAction(
+    'page-actions',
+    'unpublishPageAction',
+    async () => {
+      const client = await createPageClient(editorOrigin);
+      const response = await client.unpublishPage({ id });
+      revalidatePath('/admin/pages');
+      return { success: true as const, status: pageLifecycleStatus(response.status) };
+    },
+    { fallback: 'Failed to unpublish page', code: 'PAGE_UNPUBLISH_FAILED' },
+  );
 }
 
 export async function updatePageShowTitleAction(
@@ -183,14 +179,16 @@ export async function updatePageShowTitleAction(
   showTitle: boolean,
   editorOrigin?: string,
 ): Promise<ActionResult<{ success: true; showTitle: boolean }>> {
-  try {
-    const client = await createPageClient(editorOrigin);
-    const response = await client.updatePage({ id, showTitle });
-    return actionSuccess({ success: true, showTitle: response.showTitle });
-  } catch (err) {
-    logServerFailure('page-actions', 'updatePageShowTitleAction', err);
-    return pageActionFailure(err, 'Failed to update page show title', 'PAGE_UPDATE_SHOW_TITLE_FAILED');
-  }
+  return runAction(
+    'page-actions',
+    'updatePageShowTitleAction',
+    async () => {
+      const client = await createPageClient(editorOrigin);
+      const response = await client.updatePage({ id, showTitle });
+      return { success: true as const, showTitle: response.showTitle };
+    },
+    { fallback: 'Failed to update page show title', code: 'PAGE_UPDATE_SHOW_TITLE_FAILED' },
+  );
 }
 
 export async function updatePageSlugAction(
@@ -277,31 +275,33 @@ export async function setPageFeaturedImageAction(
   pageId: string,
   fileId: string,
 ): Promise<ActionResult<{ imageUrl?: string; ogGenerationRunId?: string }>> {
-  try {
-    const client = await createPageClient();
-    const result = await client.setPageFeaturedImage({ pageId, fileId });
-    const imageUrl = resolveFeaturedImageDeliveryUrl(result.imageDelivery);
-    const response = imageUrl ? { imageUrl } : {};
-    return actionSuccess(
-      result.ogGenerationRunId ? { ...response, ogGenerationRunId: result.ogGenerationRunId } : response,
-    );
-  } catch (err) {
-    logServerFailure('page-actions', 'setPageFeaturedImageAction', err);
-    return pageActionFailure(err, 'Failed to set featured image', 'PAGE_SET_FEATURED_IMAGE_FAILED');
-  }
+  return runAction(
+    'page-actions',
+    'setPageFeaturedImageAction',
+    async () => {
+      const client = await createPageClient();
+      const result = await client.setPageFeaturedImage({ pageId, fileId });
+      const imageUrl = resolveFeaturedImageDeliveryUrl(result.imageDelivery);
+      const response = imageUrl ? { imageUrl } : {};
+      return result.ogGenerationRunId ? { ...response, ogGenerationRunId: result.ogGenerationRunId } : response;
+    },
+    { fallback: 'Failed to set featured image', code: 'PAGE_SET_FEATURED_IMAGE_FAILED' },
+  );
 }
 
 export async function removePageFeaturedImageAction(
   pageId: string,
 ): Promise<ActionResult<{ success: true; ogGenerationRunId?: string }>> {
-  try {
-    const client = await createPageClient();
-    const result = await client.deletePageFeaturedImage({ pageId });
-    return actionSuccess(
-      result.ogGenerationRunId ? { success: true, ogGenerationRunId: result.ogGenerationRunId } : { success: true },
-    );
-  } catch (err) {
-    logServerFailure('page-actions', 'removePageFeaturedImageAction', err);
-    return pageActionFailure(err, 'Failed to remove featured image', 'PAGE_REMOVE_FEATURED_IMAGE_FAILED');
-  }
+  return runAction(
+    'page-actions',
+    'removePageFeaturedImageAction',
+    async () => {
+      const client = await createPageClient();
+      const result = await client.deletePageFeaturedImage({ pageId });
+      return result.ogGenerationRunId
+        ? { success: true as const, ogGenerationRunId: result.ogGenerationRunId }
+        : { success: true as const };
+    },
+    { fallback: 'Failed to remove featured image', code: 'PAGE_REMOVE_FEATURED_IMAGE_FAILED' },
+  );
 }
