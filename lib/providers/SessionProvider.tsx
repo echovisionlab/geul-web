@@ -1,7 +1,9 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { SESSION_INVALIDATED_EVENT } from '@/lib/auth/session-events';
+import { usePathname } from 'next/navigation';
+import { SESSION_INVALIDATED_EVENT, SESSION_REVALIDATE_EVENT } from '@/lib/auth/session-events';
+import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import { isPageMember, isSigningOutHere, subscribeSignedOutMembers, syncActiveMember } from '@/lib/auth/active-member';
 import { suspendEditorUnloadGuard } from '@/lib/editor/usePendingEditorUnload';
 import { prepareToLeaveWithDurableEdits } from '@/lib/editor/leave-with-durable-edits';
@@ -27,6 +29,13 @@ export interface MemberSummarySnapshot {
 
 const SessionContext = createContext<SessionContextValue | null>(null);
 const SESSION_REVALIDATE_INTERVAL_MS = 60_000;
+// Areas that only render for a signed-in member. A session lost there sends the member to sign in
+// again instead of leaving pages whose every request now fails.
+const SIGNED_IN_AREA_PREFIXES = ['/admin', '/my'];
+
+function isSignedInArea(pathname: string): boolean {
+  return SIGNED_IN_AREA_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+}
 
 // Compare the complete JSON response, including fields added by the server, so
 // unchanged refreshes preserve identity without hiding authentication changes.
@@ -215,9 +224,43 @@ export function SessionProvider({
 
   useEffect(() => {
     const handleInvalidated = () => invalidateSession();
+    const handleRevalidate = () => void revalidateSession();
     window.addEventListener(SESSION_INVALIDATED_EVENT, handleInvalidated);
-    return () => window.removeEventListener(SESSION_INVALIDATED_EVENT, handleInvalidated);
-  }, [invalidateSession]);
+    window.addEventListener(SESSION_REVALIDATE_EVENT, handleRevalidate);
+    return () => {
+      window.removeEventListener(SESSION_INVALIDATED_EVENT, handleInvalidated);
+      window.removeEventListener(SESSION_REVALIDATE_EVENT, handleRevalidate);
+    };
+  }, [invalidateSession, revalidateSession]);
+
+  // Client navigation keeps the root layout, so a session that ended between pages is otherwise
+  // noticed only on focus or at the next interval.
+  const pathname = usePathname();
+  const navigatedPathnameRef = useRef(pathname);
+  useEffect(() => {
+    if (navigatedPathnameRef.current === pathname) {
+      return;
+    }
+    navigatedPathnameRef.current = pathname;
+    if (data?.user.id) {
+      void revalidateSession();
+    }
+  }, [pathname, data?.user.id, revalidateSession]);
+
+  const signedInMemberRef = useRef(data?.user.id ?? null);
+  useEffect(() => {
+    const previousMember = signedInMemberRef.current;
+    signedInMemberRef.current = data?.user.id ?? null;
+    if (!previousMember || data?.user.id || isPending || isSigningOutHere()) {
+      return;
+    }
+    if (!isSignedInArea(window.location.pathname)) {
+      return;
+    }
+    const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    // Keep this member's unsaved edits on the device for their next sign-in, then sign in again.
+    void prepareToLeaveWithDurableEdits().finally(() => window.location.replace(buildLoginRedirectHref(currentPath)));
+  }, [data?.user.id, isPending]);
 
   useEffect(() => {
     const revalidate = () => void revalidateSession();

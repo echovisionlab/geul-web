@@ -3,7 +3,7 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { SESSION_INVALIDATED_EVENT } from '@/lib/auth/session-events';
+import { SESSION_INVALIDATED_EVENT, SESSION_REVALIDATE_EVENT } from '@/lib/auth/session-events';
 import type { SessionData } from '@/lib/session-data';
 import { SessionProvider, useSessionContext } from './SessionProvider';
 import { getActiveMember, resetActiveMemberForTests } from '@/lib/auth/active-member';
@@ -432,5 +432,45 @@ describe('SessionProvider', () => {
     otherTab.postMessage({ signedOut: sessionFixture.user.id });
     await vi.waitFor(() => expect(reload).toHaveBeenCalledOnce());
     otherTab.close();
+  });
+  it('rechecks the session when a Server Action reports a lost session', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 401 }));
+    vi.stubGlobal('fetch', fetchMock);
+    await renderProvider();
+
+    await act(async () => window.dispatchEvent(new Event(SESSION_REVALIDATE_EVENT)));
+
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(container.textContent).toContain('signed-out:settled');
+  });
+
+  it('sends a member who lost the session in a signed-in area to sign in again', async () => {
+    const replace = vi.fn();
+    vi.stubGlobal('location', {
+      ...window.location,
+      replace,
+      pathname: '/admin/users',
+      search: '?page=2',
+      hash: '',
+    });
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 401 })));
+    await renderProvider();
+
+    await act(async () => window.dispatchEvent(new Event('focus')));
+
+    await vi.waitFor(() => expect(replace).toHaveBeenCalledWith('/login?redirect=%2Fadmin%2Fusers%3Fpage%3D2'));
+    expect(leaveMocks.prepare).toHaveBeenCalledOnce();
+  });
+
+  it('keeps public pages in place when the session ends there', async () => {
+    const replace = vi.fn();
+    vi.stubGlobal('location', { ...window.location, replace, pathname: '/posts/hello', search: '', hash: '' });
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 401 })));
+    await renderProvider();
+
+    await act(async () => window.dispatchEvent(new Event('focus')));
+
+    expect(container.textContent).toContain('signed-out:settled');
+    expect(replace).not.toHaveBeenCalled();
   });
 });
