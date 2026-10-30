@@ -2,6 +2,8 @@ import type { AdminEmailLayoutsPageBindings } from '@/features/admin/email-layou
 import type { AdminEmailTemplatesPageBindings } from '@/features/admin/email-template/EmailTemplatesPage';
 import type { EmailLayout } from '@/lib/queries/email-layout';
 import type { EmailTemplateListItem } from '@/lib/actions/email-template';
+import { Code } from '@connectrpc/connect';
+import { actionFailure, actionSuccess } from '@/lib/actions/action-result';
 import { pageRows } from './paginated';
 export type EmailCatalogState = 'ready' | 'empty' | 'failed' | 'pending' | 'action-failed';
 const date = new Date('2026-10-01T00:00:00Z');
@@ -72,7 +74,8 @@ export function emailCatalogFixture(state: EmailCatalogState): {
       throw new Error('Local email catalog unavailable');
     }
   };
-  const failure = () => (state === 'action-failed' ? { error: 'Local email action failed' } : null);
+  const failure = () =>
+    state === 'action-failed' ? actionFailure('Local email action failed', 'ACTION_FAILED') : null;
   return {
     layouts: {
       listEmailLayouts: async (input = {}) => {
@@ -92,7 +95,7 @@ export function emailCatalogFixture(state: EmailCatalogState): {
           ...layouts,
           { ...input, id, campaignCount: 0, templateCount: 0, deliveryRunCount: 0, createdAt: date },
         ];
-        return { data: { id } };
+        return actionSuccess({ data: { id } });
       },
       deleteEmailLayoutAction: async (id) => {
         const error = failure();
@@ -101,10 +104,10 @@ export function emailCatalogFixture(state: EmailCatalogState): {
         }
         const row = layouts.find((row) => row.id === id);
         if (row && row.campaignCount + row.templateCount + row.deliveryRunCount > 0) {
-          return { error: 'Local layout is referenced', errorCode: 'FAILED_PRECONDITION' };
+          return actionFailure('Local layout is referenced', Code.FailedPrecondition);
         }
         layouts = layouts.filter((row) => row.id !== id);
-        return { success: true };
+        return actionSuccess({ success: true as const });
       },
     },
     templates: {
@@ -130,7 +133,7 @@ export function emailCatalogFixture(state: EmailCatalogState): {
               }
             : row,
         );
-        return { success: true };
+        return actionSuccess({ success: true as const });
       },
       createEmailTemplateAction: async (input) => {
         const error = failure();
@@ -142,7 +145,7 @@ export function emailCatalogFixture(state: EmailCatalogState): {
           ...templates,
           { ...input, id, isSystem: false, isActive: true, deliveryRunCount: 0, createdAt: date },
         ];
-        return { data: { id } };
+        return actionSuccess({ data: { id } });
       },
       deleteEmailTemplateAction: async (id) => {
         const error = failure();
@@ -150,7 +153,7 @@ export function emailCatalogFixture(state: EmailCatalogState): {
           return error;
         }
         templates = templates.filter((row) => row.id !== id);
-        return { success: true };
+        return actionSuccess({ success: true as const });
       },
     },
   };

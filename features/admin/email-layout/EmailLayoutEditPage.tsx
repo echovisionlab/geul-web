@@ -40,7 +40,8 @@ import { IconViewModeControl } from '@/features/admin/IconViewModeControl';
 import { EmailEntityTranslationsPanel } from '@/features/translation/EmailEntityTranslationsPanel';
 import { TranslationLocaleControl } from '@/features/translation/TranslationLocaleControl';
 import { useActiveEditLocale } from '@/features/translation/useActiveEditLocale';
-import { updateEmailLayoutAction, type EmailLayoutActionErrorCode } from '@/lib/actions/email-layout';
+import type { ActionErrorCode } from '@/lib/actions/action-result';
+import { updateEmailLayoutAction } from '@/lib/actions/email-layout';
 import { createTranslationClient } from '@/lib/api/browser/secure-translation';
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
 import { normalizeLocale } from '@/lib/i18n/locale';
@@ -71,7 +72,7 @@ function useEmailLayoutEditPageModel() {
   const [key, setKey] = useState('');
   const [htmlContent, setHtmlContent] = useState('');
   const [variablesExpanded, setVariablesExpanded] = useState(false);
-  const emailLayoutErrorMessage = (result: { error?: string; errorCode?: EmailLayoutActionErrorCode }) =>
+  const emailLayoutErrorMessage = (result: { error?: string; errorCode?: ActionErrorCode }) =>
     getEmailLayoutActionErrorMessage({
       errorCode: result.errorCode,
       fallbackError: result.error,

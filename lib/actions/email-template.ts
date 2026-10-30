@@ -12,7 +12,9 @@ import type {
   RichTextDocument,
 } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
 import { createEmailTemplateClient } from '@/lib/api/server-client';
+import type { ActionResult } from '@/lib/actions/action-result';
 import { createCommittedMutationRevalidator } from '@/lib/actions/revalidate-after-commit';
+import { runAction } from '@/lib/actions/run-action';
 import type { PaginatedQueryResult } from '@/lib/types/repository/result';
 
 const revalidateEmailTemplateAfterCommit = createCommittedMutationRevalidator(
@@ -200,109 +202,90 @@ export async function createEmailTemplateAction(data: {
   name: string;
   subject: string;
   description?: string;
-}): Promise<{ data?: { id: string }; error?: string }> {
-  try {
-    const client = await createEmailTemplateClient();
-    const result = await client.createEmailTemplate({
-      key: data.key,
-      name: data.name,
-      subject: data.subject,
-      description: data.description,
-    });
-    revalidateEmailTemplateAfterCommit('/admin/email-templates');
-    return { data: { id: result.id } };
-  } catch (err) {
-    logServerFailure('email-template-actions', 'createEmailTemplateAction', err, [data?.subject, data?.description]);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.AlreadyExists)) {
-      return { error: 'Template with this key already exists' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to create email template' };
-  }
+}): Promise<ActionResult<{ data: { id: string } }>> {
+  return runAction(
+    'email-template-actions',
+    'createEmailTemplateAction',
+    async () => {
+      const client = await createEmailTemplateClient();
+      const result = await client.createEmailTemplate({
+        key: data.key,
+        name: data.name,
+        subject: data.subject,
+        description: data.description,
+      });
+      revalidateEmailTemplateAfterCommit('/admin/email-templates');
+      return { data: { id: result.id } };
+    },
+    {
+      fallback: 'Failed to create email template',
+      messages: { [Code.AlreadyExists]: 'Template with this key already exists' },
+      privateValues: [data?.subject, data?.description],
+    },
+  );
 }
 
 export async function updateEmailTemplateLayoutAction(
   id: string,
   layoutId: string | null,
   editorOrigin?: string,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createEmailTemplateClient(editorOrigin);
-    await client.updateEmailTemplate({
-      id,
-      layoutId: layoutId ?? '',
-    });
-    revalidateEmailTemplateAfterCommit('/admin/email-templates');
-    revalidateEmailTemplateAfterCommit('/admin/campaigns');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('email-template-actions', 'updateEmailTemplateLayoutAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Template or layout not found' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to update layout' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'email-template-actions',
+    'updateEmailTemplateLayoutAction',
+    async () => {
+      const client = await createEmailTemplateClient(editorOrigin);
+      await client.updateEmailTemplate({
+        id,
+        layoutId: layoutId ?? '',
+      });
+      revalidateEmailTemplateAfterCommit('/admin/email-templates');
+      revalidateEmailTemplateAfterCommit('/admin/campaigns');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to update layout', messages: { [Code.NotFound]: 'Template or layout not found' } },
+  );
 }
 
-export type DeleteEmailTemplateErrorCode = 'UNAUTHORIZED' | 'NOT_FOUND' | 'FAILED_PRECONDITION' | 'UNKNOWN';
-
-export async function deleteEmailTemplateAction(
-  id: string,
-): Promise<{ success?: boolean; error?: string; errorCode?: DeleteEmailTemplateErrorCode }> {
-  try {
-    const client = await createEmailTemplateClient();
-    await client.deleteEmailTemplate({ id });
-    revalidateEmailTemplateAfterCommit('/admin/email-templates');
-    revalidateEmailTemplateAfterCommit('/admin/campaigns');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('email-template-actions', 'deleteEmailTemplateAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized', errorCode: 'UNAUTHORIZED' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Template not found', errorCode: 'NOT_FOUND' };
-    }
-    if (isConnectErrorCode(err, Code.FailedPrecondition)) {
-      return { error: err.message, errorCode: 'FAILED_PRECONDITION' };
-    }
-    return {
-      error: err instanceof Error ? err.message : 'Failed to delete email template',
-      errorCode: 'UNKNOWN',
-    };
-  }
+export async function deleteEmailTemplateAction(id: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'email-template-actions',
+    'deleteEmailTemplateAction',
+    async () => {
+      const client = await createEmailTemplateClient();
+      await client.deleteEmailTemplate({ id });
+      revalidateEmailTemplateAfterCommit('/admin/email-templates');
+      revalidateEmailTemplateAfterCommit('/admin/campaigns');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete email template', messages: { [Code.NotFound]: 'Template not found' } },
+  );
 }
 
 export async function updateEmailTemplateEventMappingAction(
   eventKey: string,
   templateId: string | null,
-): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createEmailTemplateClient();
-    await client.updateEventMapping({
-      event: eventKey,
-      templateId: templateId ?? undefined,
-    });
-    revalidateEmailTemplateAfterCommit('/admin/email-templates');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('email-template-actions', 'updateEmailTemplateEventMappingAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Template not found' };
-    }
-    if (isConnectErrorCode(err, Code.FailedPrecondition)) {
-      return { error: 'Inactive templates cannot be assigned to events' };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to update event mapping' };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'email-template-actions',
+    'updateEmailTemplateEventMappingAction',
+    async () => {
+      const client = await createEmailTemplateClient();
+      await client.updateEventMapping({
+        event: eventKey,
+        templateId: templateId ?? undefined,
+      });
+      revalidateEmailTemplateAfterCommit('/admin/email-templates');
+      return { success: true as const };
+    },
+    {
+      fallback: 'Failed to update event mapping',
+      messages: {
+        [Code.NotFound]: 'Template not found',
+        [Code.FailedPrecondition]: 'Inactive templates cannot be assigned to events',
+      },
+    },
+  );
 }
 
 export async function sendTestEmailTemplateAction(

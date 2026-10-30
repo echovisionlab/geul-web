@@ -26,8 +26,8 @@ function deferred<T>() {
 describe('campaign name persistence', () => {
   it('preserves a newer draft through peer metadata and an older name acknowledgement', async () => {
     vi.useFakeTimers();
-    const first = deferred<{ name: string }>();
-    const second = deferred<{ name: string }>();
+    const first = deferred<{ ok: true; name: string; changed: boolean }>();
+    const second = deferred<{ ok: true; name: string; changed: boolean }>();
     vi.mocked(updateCampaignNameAction)
       .mockImplementationOnce(() => first.promise)
       .mockImplementationOnce(() => second.promise);
@@ -64,7 +64,7 @@ describe('campaign name persistence', () => {
       expect(result.current.name).toBe('Second draft');
 
       await act(async () => {
-        first.resolve({ name: 'Canonical first' });
+        first.resolve({ ok: true, name: 'Canonical first', changed: true });
         await first.promise;
       });
       expect(result.current.name).toBe('Second draft');
@@ -72,7 +72,7 @@ describe('campaign name persistence', () => {
         await vi.advanceTimersByTimeAsync(500);
       });
       await act(async () => {
-        second.resolve({ name: 'Canonical second' });
+        second.resolve({ ok: true, name: 'Canonical second', changed: true });
         await second.promise;
       });
 

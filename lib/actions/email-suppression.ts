@@ -1,6 +1,7 @@
 'use server';
 
-import { logServerFailure } from '@/lib/logging/logger';
+import { actionFailure, type ActionResult } from '@/lib/actions/action-result';
+import { runAction } from '@/lib/actions/run-action';
 import { queryResult, type QueryResult } from '@/lib/api/query-result';
 
 import { timestampDate, type Timestamp } from '@bufbuild/protobuf/wkt';
@@ -62,20 +63,22 @@ export async function getEmailSuppressionAction(email: string): Promise<QueryRes
   });
 }
 
-export async function releaseEmailSuppressionAction(email: string): Promise<{ success?: boolean; error?: string }> {
+export async function releaseEmailSuppressionAction(email: string): Promise<ActionResult<{ success: true }>> {
   if (!email.trim()) {
-    return { error: 'Email is required' };
+    return actionFailure('Email is required', 'ACTION_FAILED');
   }
 
-  try {
-    const client = await createEmailSuppressionClient();
-    const response = await client.releaseEmailSuppression({ email });
-    if (!response.success) {
-      return { error: 'Failed to release email suppression' };
-    }
-    return { success: response.success };
-  } catch (err) {
-    logServerFailure('email-suppression-actions', 'releaseEmailSuppressionAction', err, [email]);
-    return { error: err instanceof Error ? err.message : 'Failed to release email suppression' };
-  }
+  return runAction(
+    'email-suppression-actions',
+    'releaseEmailSuppressionAction',
+    async () => {
+      const client = await createEmailSuppressionClient();
+      const response = await client.releaseEmailSuppression({ email });
+      if (!response.success) {
+        throw new Error('Failed to release email suppression');
+      }
+      return { success: true as const };
+    },
+    { fallback: 'Failed to release email suppression', privateValues: [email] },
+  );
 }

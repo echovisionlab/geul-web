@@ -1,3 +1,4 @@
+import { Code } from '@connectrpc/connect';
 import { describe, expect, it } from 'vitest';
 import { getEmailTemplateDeleteErrorMessage } from './delete-error-message';
 
@@ -11,10 +12,11 @@ const messages = {
 
 describe('getEmailTemplateDeleteErrorMessage', () => {
   it.each([
-    ['UNAUTHORIZED', messages.unauthorizedMessage],
-    ['NOT_FOUND', messages.notFoundMessage],
-    ['FAILED_PRECONDITION', messages.conflictMessage],
-    ['UNKNOWN', messages.fallbackError],
+    [Code.Unauthenticated, messages.unauthorizedMessage],
+    [Code.NotFound, messages.notFoundMessage],
+    [Code.FailedPrecondition, messages.conflictMessage],
+    ['ACTION_FAILED', messages.fallbackError],
+    [Code.Internal, messages.fallbackError],
   ] as const)('maps %s without exposing transport wording for known errors', (errorCode, expected) => {
     expect(getEmailTemplateDeleteErrorMessage({ ...messages, errorCode })).toBe(expected);
   });

@@ -1,7 +1,8 @@
-import type { EmailLayoutActionErrorCode } from '@/lib/actions/email-layout';
+import { Code } from '@connectrpc/connect';
+import type { ActionErrorCode } from '@/lib/actions/action-result';
 
 interface GetEmailLayoutActionErrorMessageInput {
-  errorCode?: EmailLayoutActionErrorCode;
+  errorCode?: ActionErrorCode;
   fallbackError?: string;
   unauthorizedMessage: string;
   duplicateKeyMessage: string;
@@ -20,13 +21,13 @@ export function getEmailLayoutActionErrorMessage({
   genericMessage,
 }: GetEmailLayoutActionErrorMessageInput): string {
   switch (errorCode) {
-    case 'UNAUTHORIZED':
+    case Code.Unauthenticated:
       return unauthorizedMessage;
-    case 'ALREADY_EXISTS':
+    case Code.AlreadyExists:
       return duplicateKeyMessage;
-    case 'NOT_FOUND':
+    case Code.NotFound:
       return notFoundMessage;
-    case 'FAILED_PRECONDITION':
+    case Code.FailedPrecondition:
       return conflictMessage || fallbackError || genericMessage;
     default:
       return fallbackError || genericMessage;

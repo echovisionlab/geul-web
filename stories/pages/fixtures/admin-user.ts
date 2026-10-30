@@ -83,6 +83,9 @@ export function adminUserFixture(state: AdminUserPreviewState): AdminUserEditPag
       state === 'action-failed'
         ? actionFailure('Local operation failed', 'ACTION_FAILED')
         : actionSuccess({ success: true as const }),
-    releaseEmailSuppressionAction: mutation,
+    releaseEmailSuppressionAction: async () =>
+      state === 'action-failed'
+        ? actionFailure('Local operation failed', 'ACTION_FAILED')
+        : actionSuccess({ success: true as const }),
   };
 }

@@ -1,9 +1,7 @@
 'use server';
 
-import { logServerFailure } from '@/lib/logging/logger';
 import { queryResult } from '@/lib/api/query-result';
 
-import { isConnectError } from '@/lib/api/connect-error';
 import { create } from '@bufbuild/protobuf';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import {
@@ -21,7 +19,9 @@ import {
   type SegmentConfig,
 } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
 import { AuthorizationRole } from '@echovisionlab/geul-proto/policy/access_pb.ts';
+import type { ActionResult } from '@/lib/actions/action-result';
 import { createCommittedMutationRevalidator } from '@/lib/actions/revalidate-after-commit';
+import { runAction } from '@/lib/actions/run-action';
 import { createAudienceClient } from '@/lib/api/server-client';
 import { createLogger } from '@/lib/utils/logger';
 
@@ -115,57 +115,54 @@ export async function createSegmentAction(input: {
   description?: string;
   segmentType: SegmentType;
   config?: SegmentConfig;
-}): Promise<{ data?: { id: string }; error?: string }> {
-  try {
-    const client = await createAudienceClient();
-    const segment = await client.createSegment({
-      name: input.name,
-      description: input.description,
-      segmentType: input.segmentType,
-      config: input.config ?? create(SegmentConfigSchema, {}),
-    });
-    revalidateAudienceAfterCommit('/admin/audience-segments');
-    revalidateAudienceAfterCommit('/admin/campaigns');
-    return { data: { id: segment.id } };
-  } catch (err) {
-    logServerFailure('audience-actions', 'createSegmentAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to create segment' };
-  }
+}): Promise<ActionResult<{ data: { id: string } }>> {
+  return runAction(
+    'audience-actions',
+    'createSegmentAction',
+    async () => {
+      const client = await createAudienceClient();
+      const segment = await client.createSegment({
+        name: input.name,
+        description: input.description,
+        segmentType: input.segmentType,
+        config: input.config ?? create(SegmentConfigSchema, {}),
+      });
+      revalidateAudienceAfterCommit('/admin/audience-segments');
+      revalidateAudienceAfterCommit('/admin/campaigns');
+      return { data: { id: segment.id } };
+    },
+    { fallback: 'Failed to create segment' },
+  );
 }
 
-export async function archiveSegmentAction(id: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createAudienceClient();
-    await client.archiveSegment({ id });
-    revalidateAudienceAfterCommit('/admin/audience-segments');
-    revalidateAudienceAfterCommit('/admin/campaigns');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('audience-actions', 'archiveSegmentAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to archive segment' };
-  }
+export async function archiveSegmentAction(id: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'audience-actions',
+    'archiveSegmentAction',
+    async () => {
+      const client = await createAudienceClient();
+      await client.archiveSegment({ id });
+      revalidateAudienceAfterCommit('/admin/audience-segments');
+      revalidateAudienceAfterCommit('/admin/campaigns');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to archive segment' },
+  );
 }
 
-export async function restoreSegmentAction(id: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    const client = await createAudienceClient();
-    await client.restoreSegment({ id });
-    revalidateAudienceAfterCommit('/admin/audience-segments');
-    revalidateAudienceAfterCommit('/admin/campaigns');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('audience-actions', 'restoreSegmentAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to restore segment' };
-  }
+export async function restoreSegmentAction(id: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'audience-actions',
+    'restoreSegmentAction',
+    async () => {
+      const client = await createAudienceClient();
+      await client.restoreSegment({ id });
+      revalidateAudienceAfterCommit('/admin/audience-segments');
+      revalidateAudienceAfterCommit('/admin/campaigns');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to restore segment' },
+  );
 }
 
 export async function listActiveSegmentsAction(): Promise<{ id: string; name: string; segmentTypeLabel: string }[]> {
@@ -212,57 +209,57 @@ export async function listActiveSegmentsAction(): Promise<{ id: string; name: st
   }
 }
 
-export async function getSegmentAction(id: string): Promise<{
-  data?: {
-    id: string;
-    name: string;
-    description: string;
-    segmentType: SegmentType;
-    config: {
-      memberTagIds: string[];
-      accountRoles: string[];
-      createdAfter?: string;
-      createdBefore?: string;
+export async function getSegmentAction(id: string): Promise<
+  ActionResult<{
+    data: {
+      id: string;
+      name: string;
+      description: string;
+      segmentType: SegmentType;
+      config: {
+        memberTagIds: string[];
+        accountRoles: string[];
+        createdAfter?: string;
+        createdBefore?: string;
+      };
+      estimatedCount: number | null;
+      archivedAt: Date | null;
     };
-    estimatedCount: number | null;
-    archivedAt: Date | null;
-  };
-  error?: string;
-}> {
-  try {
-    const client = await createAudienceClient();
-    const segment = await client.getSegment({ id });
-    return {
-      data: {
-        id: segment.id,
-        name: segment.name,
-        description: segment.description ?? '',
-        segmentType: segment.segmentType,
-        config: {
-          memberTagIds: segment.config?.memberTagIds ?? [],
-          accountRoles:
-            segment.config?.accountRoles.flatMap((role) => {
-              const mapped = accountRoleToValue(role);
-              return mapped === null ? [] : [mapped];
-            }) ?? [],
-          createdAfter: segment.config?.createdAfter
-            ? timestampDate(segment.config.createdAfter).toISOString()
-            : undefined,
-          createdBefore: segment.config?.createdBefore
-            ? timestampDate(segment.config.createdBefore).toISOString()
-            : undefined,
+  }>
+> {
+  return runAction(
+    'audience-actions',
+    'getSegmentAction',
+    async () => {
+      const client = await createAudienceClient();
+      const segment = await client.getSegment({ id });
+      return {
+        data: {
+          id: segment.id,
+          name: segment.name,
+          description: segment.description ?? '',
+          segmentType: segment.segmentType,
+          config: {
+            memberTagIds: segment.config?.memberTagIds ?? [],
+            accountRoles:
+              segment.config?.accountRoles.flatMap((role) => {
+                const mapped = accountRoleToValue(role);
+                return mapped === null ? [] : [mapped];
+              }) ?? [],
+            createdAfter: segment.config?.createdAfter
+              ? timestampDate(segment.config.createdAfter).toISOString()
+              : undefined,
+            createdBefore: segment.config?.createdBefore
+              ? timestampDate(segment.config.createdBefore).toISOString()
+              : undefined,
+          },
+          estimatedCount: segment.estimatedCount ?? null,
+          archivedAt: segment.archivedAt ? timestampDate(segment.archivedAt) : null,
         },
-        estimatedCount: segment.estimatedCount ?? null,
-        archivedAt: segment.archivedAt ? timestampDate(segment.archivedAt) : null,
-      },
-    };
-  } catch (err) {
-    logServerFailure('audience-actions', 'getSegmentAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to get segment' };
-  }
+      };
+    },
+    { fallback: 'Failed to get segment' },
+  );
 }
 
 export async function updateSegmentAction(input: {
@@ -272,49 +269,31 @@ export async function updateSegmentAction(input: {
   segmentType?: SegmentType;
   config?: SegmentConfig;
   observed?: { segmentType: SegmentType; config: SegmentConfig };
-}): Promise<{
-  data?: {
-    id: string;
-    name: string;
-    description: string;
-    segmentType: SegmentType;
-    config: {
-      memberTagIds: string[];
-      accountRoles: string[];
-      createdAfter?: string;
-      createdBefore?: string;
-      excludeMemberIds: string[];
-    };
-    estimatedCount: number | null;
-    archivedAt: Date | null;
-  };
-  error?: string;
-}> {
-  try {
-    const client = await createAudienceClient();
-    const segment = await client.updateSegment({
-      id: input.id,
-      name: input.name,
-      description: input.description,
-      segmentType: input.segmentType,
-      config: input.config,
-      observed: input.observed
-        ? create(SegmentConfigSnapshotSchema, {
-            segmentType: input.observed.segmentType,
-            config: input.observed.config,
-          })
-        : undefined,
-    });
-    revalidateAudienceAfterCommit('/admin/audience-segments');
-    revalidateAudienceAfterCommit('/admin/campaigns');
-    return { data: mapUpdatedSegment(segment) };
-  } catch (err) {
-    logServerFailure('audience-actions', 'updateSegmentAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to update segment' };
-  }
+}): Promise<ActionResult<{ data: ReturnType<typeof mapUpdatedSegment> }>> {
+  return runAction(
+    'audience-actions',
+    'updateSegmentAction',
+    async () => {
+      const client = await createAudienceClient();
+      const segment = await client.updateSegment({
+        id: input.id,
+        name: input.name,
+        description: input.description,
+        segmentType: input.segmentType,
+        config: input.config,
+        observed: input.observed
+          ? create(SegmentConfigSnapshotSchema, {
+              segmentType: input.observed.segmentType,
+              config: input.observed.config,
+            })
+          : undefined,
+      });
+      revalidateAudienceAfterCommit('/admin/audience-segments');
+      revalidateAudienceAfterCommit('/admin/campaigns');
+      return { data: mapUpdatedSegment(segment) };
+    },
+    { fallback: 'Failed to update segment' },
+  );
 }
 
 function mapUpdatedSegment(segment: Segment) {
@@ -344,19 +323,18 @@ function mapUpdatedSegment(segment: Segment) {
 export async function estimateSegmentCountAction(input: {
   segmentType: SegmentType;
   config?: SegmentConfig;
-}): Promise<{ count?: number; error?: string }> {
-  try {
-    const client = await createAudienceClient();
-    const response = await client.estimateSegmentCount({
-      segmentType: input.segmentType,
-      config: input.config ?? create(SegmentConfigSchema, {}),
-    });
-    return { count: response.count };
-  } catch (err) {
-    logServerFailure('audience-actions', 'estimateSegmentCountAction', err);
-    if (isConnectError(err)) {
-      return { error: err.message };
-    }
-    return { error: err instanceof Error ? err.message : 'Failed to estimate count' };
-  }
+}): Promise<ActionResult<{ count: number }>> {
+  return runAction(
+    'audience-actions',
+    'estimateSegmentCountAction',
+    async () => {
+      const client = await createAudienceClient();
+      const response = await client.estimateSegmentCount({
+        segmentType: input.segmentType,
+        config: input.config ?? create(SegmentConfigSchema, {}),
+      });
+      return { count: response.count };
+    },
+    { fallback: 'Failed to estimate count' },
+  );
 }

@@ -23,7 +23,7 @@ describe('email layout lifecycle actions', () => {
   it('deletes through the hard-cut RPC and invalidates composition surfaces', async () => {
     deleteEmailLayout.mockResolvedValue({ success: true });
 
-    await expect(deleteEmailLayoutAction('layout-1')).resolves.toEqual({ success: true });
+    await expect(deleteEmailLayoutAction('layout-1')).resolves.toEqual({ ok: true, success: true });
 
     expect(deleteEmailLayout).toHaveBeenCalledWith({ id: 'layout-1' });
     expect(revalidatePath).toHaveBeenCalledWith('/admin/email-layouts');
@@ -35,8 +35,9 @@ describe('email layout lifecycle actions', () => {
     deleteEmailLayout.mockRejectedValue(new ConnectError('layout is in use', Code.FailedPrecondition));
 
     await expect(deleteEmailLayoutAction('layout-1')).resolves.toEqual({
+      ok: false,
       error: expect.stringContaining('layout is in use'),
-      errorCode: 'FAILED_PRECONDITION',
+      errorCode: Code.FailedPrecondition,
     });
   });
 
@@ -46,7 +47,7 @@ describe('email layout lifecycle actions', () => {
       throw new Error('cache unavailable');
     });
 
-    await expect(deleteEmailLayoutAction('layout-1')).resolves.toEqual({ success: true });
+    await expect(deleteEmailLayoutAction('layout-1')).resolves.toEqual({ ok: true, success: true });
     expect(deleteEmailLayout).toHaveBeenCalledWith({ id: 'layout-1' });
   });
 });

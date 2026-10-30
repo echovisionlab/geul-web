@@ -5,53 +5,44 @@ import { logServerFailure } from '@/lib/logging/logger';
 import { isConnectErrorCode } from '@/lib/api/connect-error';
 import { Code } from '@connectrpc/connect';
 import { createEmailLayoutClient } from '@/lib/api/server-client';
+import type { ActionResult } from '@/lib/actions/action-result';
 import { createCommittedMutationRevalidator } from '@/lib/actions/revalidate-after-commit';
+import { runAction } from '@/lib/actions/run-action';
 import type { EmailLayoutValidationError } from '@/lib/types/email-layout/validation';
 
 const revalidateEmailLayoutAfterCommit = createCommittedMutationRevalidator('email-layout-actions', 'email layout');
 
-export type EmailLayoutActionErrorCode =
-  'UNAUTHORIZED' | 'ALREADY_EXISTS' | 'NOT_FOUND' | 'FAILED_PRECONDITION' | 'INVALID_ARGUMENT' | 'UNKNOWN';
-
-interface EmailLayoutActionError {
-  error?: string;
-  errorCode?: EmailLayoutActionErrorCode;
-}
+const LAYOUT_NOT_FOUND = 'Layout not found';
+const LAYOUT_KEY_EXISTS = 'Layout with this key already exists';
 
 export async function createEmailLayoutAction(data: {
   name: string;
   key: string;
   htmlContent: string;
   sourceLocale: string;
-}): Promise<{ data?: { id: string } } & EmailLayoutActionError> {
-  try {
-    const client = await createEmailLayoutClient();
-    const result = await client.createEmailLayout({
-      name: data.name,
-      key: data.key,
-      htmlContent: data.htmlContent,
-      sourceLocale: data.sourceLocale,
-    });
-    revalidateEmailLayoutAfterCommit('/admin/email-layouts');
-    revalidateEmailLayoutAfterCommit('/admin/email-templates');
-    revalidateEmailLayoutAfterCommit('/admin/campaigns');
-    return { data: { id: result.id } };
-  } catch (err) {
-    logServerFailure('email-layout-actions', 'createEmailLayoutAction', err, [data?.htmlContent]);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized', errorCode: 'UNAUTHORIZED' };
-    }
-    if (isConnectErrorCode(err, Code.AlreadyExists)) {
-      return { error: 'Layout with this key already exists', errorCode: 'ALREADY_EXISTS' };
-    }
-    if (isConnectErrorCode(err, Code.InvalidArgument)) {
-      return { error: err.message, errorCode: 'INVALID_ARGUMENT' };
-    }
-    return {
-      error: err instanceof Error ? err.message : 'Failed to create email layout',
-      errorCode: 'UNKNOWN',
-    };
-  }
+}): Promise<ActionResult<{ data: { id: string } }>> {
+  return runAction(
+    'email-layout-actions',
+    'createEmailLayoutAction',
+    async () => {
+      const client = await createEmailLayoutClient();
+      const result = await client.createEmailLayout({
+        name: data.name,
+        key: data.key,
+        htmlContent: data.htmlContent,
+        sourceLocale: data.sourceLocale,
+      });
+      revalidateEmailLayoutAfterCommit('/admin/email-layouts');
+      revalidateEmailLayoutAfterCommit('/admin/email-templates');
+      revalidateEmailLayoutAfterCommit('/admin/campaigns');
+      return { data: { id: result.id } };
+    },
+    {
+      fallback: 'Failed to create email layout',
+      messages: { [Code.AlreadyExists]: LAYOUT_KEY_EXISTS },
+      privateValues: [data?.htmlContent],
+    },
+  );
 }
 
 export async function updateEmailLayoutAction(
@@ -61,63 +52,43 @@ export async function updateEmailLayoutAction(
     key?: string;
   },
   editorOrigin?: string,
-): Promise<{ success?: boolean } & EmailLayoutActionError> {
-  try {
-    const client = await createEmailLayoutClient(editorOrigin);
-    await client.updateEmailLayout({
-      id,
-      name: data.name,
-      key: data.key,
-    });
-    revalidateEmailLayoutAfterCommit('/admin/email-layouts');
-    revalidateEmailLayoutAfterCommit('/admin/email-templates');
-    revalidateEmailLayoutAfterCommit('/admin/campaigns');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('email-layout-actions', 'updateEmailLayoutAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized', errorCode: 'UNAUTHORIZED' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Layout not found', errorCode: 'NOT_FOUND' };
-    }
-    if (isConnectErrorCode(err, Code.AlreadyExists)) {
-      return { error: 'Layout with this key already exists', errorCode: 'ALREADY_EXISTS' };
-    }
-    if (isConnectErrorCode(err, Code.InvalidArgument)) {
-      return { error: err.message, errorCode: 'INVALID_ARGUMENT' };
-    }
-    return {
-      error: err instanceof Error ? err.message : 'Failed to update email layout',
-      errorCode: 'UNKNOWN',
-    };
-  }
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'email-layout-actions',
+    'updateEmailLayoutAction',
+    async () => {
+      const client = await createEmailLayoutClient(editorOrigin);
+      await client.updateEmailLayout({
+        id,
+        name: data.name,
+        key: data.key,
+      });
+      revalidateEmailLayoutAfterCommit('/admin/email-layouts');
+      revalidateEmailLayoutAfterCommit('/admin/email-templates');
+      revalidateEmailLayoutAfterCommit('/admin/campaigns');
+      return { success: true as const };
+    },
+    {
+      fallback: 'Failed to update email layout',
+      messages: { [Code.NotFound]: LAYOUT_NOT_FOUND, [Code.AlreadyExists]: LAYOUT_KEY_EXISTS },
+    },
+  );
 }
 
-export async function deleteEmailLayoutAction(id: string): Promise<{ success?: boolean } & EmailLayoutActionError> {
-  try {
-    const client = await createEmailLayoutClient();
-    await client.deleteEmailLayout({ id });
-    revalidateEmailLayoutAfterCommit('/admin/email-layouts');
-    revalidateEmailLayoutAfterCommit('/admin/email-templates');
-    revalidateEmailLayoutAfterCommit('/admin/campaigns');
-    return { success: true };
-  } catch (err) {
-    logServerFailure('email-layout-actions', 'deleteEmailLayoutAction', err);
-    if (isConnectErrorCode(err, Code.Unauthenticated)) {
-      return { error: 'Unauthorized', errorCode: 'UNAUTHORIZED' };
-    }
-    if (isConnectErrorCode(err, Code.NotFound)) {
-      return { error: 'Layout not found', errorCode: 'NOT_FOUND' };
-    }
-    if (isConnectErrorCode(err, Code.FailedPrecondition)) {
-      return { error: err.message, errorCode: 'FAILED_PRECONDITION' };
-    }
-    return {
-      error: err instanceof Error ? err.message : 'Failed to delete email layout',
-      errorCode: 'UNKNOWN',
-    };
-  }
+export async function deleteEmailLayoutAction(id: string): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'email-layout-actions',
+    'deleteEmailLayoutAction',
+    async () => {
+      const client = await createEmailLayoutClient();
+      await client.deleteEmailLayout({ id });
+      revalidateEmailLayoutAfterCommit('/admin/email-layouts');
+      revalidateEmailLayoutAfterCommit('/admin/email-templates');
+      revalidateEmailLayoutAfterCommit('/admin/campaigns');
+      return { success: true as const };
+    },
+    { fallback: 'Failed to delete email layout', messages: { [Code.NotFound]: LAYOUT_NOT_FOUND } },
+  );
 }
 
 export interface PreviewEmailLayoutContentResult {
