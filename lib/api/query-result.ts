@@ -1,3 +1,4 @@
+import { requestSessionRevalidation } from '@/lib/auth/session-events';
 import { createLogger } from '@/lib/utils/logger';
 import { markQueryError } from './query-error';
 import { toHttpErrorResult } from './http-error';
@@ -39,6 +40,9 @@ export async function queryResult<T>(
 export function unwrapQueryResult<T>(result: QueryResult<T>): T {
   if (result.ok) {
     return result.value;
+  }
+  if (result.status === 401) {
+    requestSessionRevalidation();
   }
   throw new QueryFailureError(result.error, result.status);
 }
