@@ -163,7 +163,11 @@ describe('getSessionFromCookie', () => {
 
     await expect(getSessionFromCookie()).resolves.toBeNull();
 
-    expect(mocks.cookieDelete).toHaveBeenCalledWith('ory_kratos_session');
+    expect(mocks.cookieSet).toHaveBeenCalledWith('ory_kratos_session', '', {
+      domain: '.site.example',
+      path: '/',
+      expires: new Date(0),
+    });
   });
 
   it('records the bounded Connect RPC code for non-authentication failures', async () => {
@@ -183,7 +187,7 @@ describe('getSessionFromCookie', () => {
     const error = new ConnectError('upstream unavailable', Code.Unavailable);
     mocks.getCurrentSession.mockRejectedValue(error);
     await expect(getSessionFromCookie({ throwOnError: true })).rejects.toBe(error);
-    expect(mocks.cookieDelete).not.toHaveBeenCalled();
+    expect(mocks.cookieSet).not.toHaveBeenCalled();
   });
 
   it('still returns null for an expired session in strict mode', async () => {
@@ -194,6 +198,6 @@ describe('getSessionFromCookie', () => {
   it('propagates invalid session projections in strict mode', async () => {
     mocks.getCurrentSession.mockResolvedValue({});
     await expect(getSessionFromCookie({ throwOnError: true })).rejects.toThrow('invalid session projection');
-    expect(mocks.cookieDelete).not.toHaveBeenCalled();
+    expect(mocks.cookieSet).not.toHaveBeenCalled();
   });
 });
