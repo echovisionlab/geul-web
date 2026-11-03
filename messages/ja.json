@@ -502,7 +502,8 @@
       "system": "システム"
     },
     "items": {
-      "mailSettings": "メール設定"
+      "mailSettings": "メール設定",
+      "oauthApps": "OAuth アプリ"
     }
   },
   "adminList": {
@@ -646,6 +647,117 @@
       "types": {
         "usersByFilter": "フィルターでユーザーを絞り込み",
         "allUsers": "すべてのユーザー"
+      }
+    },
+    "oauthApps": {
+      "title": "OAuth アプリ",
+      "description": "{siteName} アカウントでサインインさせるアプリと、サイトの編集ツールに接続された AI ツールです。",
+      "create": "新しいアプリ",
+      "createTitle": "新しいサインインアプリ",
+      "createSubmit": "アプリを作成",
+      "untitled": "名前のないアプリ",
+      "createdAt": "{date} に登録",
+      "loadFailed": "OAuth アプリを読み込めませんでした。",
+      "openApp": "{name} を開く",
+      "openConnection": "{name} を開く",
+      "connectionActions": "{name} の操作",
+      "copyClientId": "クライアント ID をコピー",
+      "copySecret": "シークレットをコピー",
+      "rotateSecret": "新しいシークレットを発行",
+      "rotateTitle": "新しいクライアントシークレットを発行しますか?",
+      "rotateConfirm": "現在のシークレットはすぐに使えなくなります。アプリの設定を新しいシークレットにすぐ更新してください。",
+      "delete": "アプリを削除",
+      "deleteTitle": "このアプリを削除しますか?",
+      "deleteConfirm": "{name} は誰もサインインさせられなくなり、発行済みのトークンも使えなくなります。",
+      "deleted": "{name} を削除しました",
+      "saved": "アプリを保存しました",
+      "disconnect": "接続を解除",
+      "disconnectTitle": "この AI ツールの接続を解除しますか?",
+      "disconnectConfirm": "{name} はすぐにアクセスを失います。会員が再び承認するまで再接続できません。",
+      "disconnected": "{name} の接続を解除しました",
+      "secretTitle": "クライアントシークレット",
+      "secretWarning": "今すぐシークレットをコピーしてください。表示は一度だけです。なくした場合は新しく発行してください。",
+      "apps": {
+        "title": "サインインアプリ",
+        "description": "ここに登録したアプリは {siteName} アカウントでサインインさせます。",
+        "empty": "サインインアプリはまだありません。"
+      },
+      "connections": {
+        "title": "接続された AI ツール",
+        "description": "会員がサイトの編集ツールに接続したツールです。各ツールは自身で登録しました。",
+        "empty": "接続された AI ツールはありません。",
+        "generatedId": "自動生成された ID で登録",
+        "active": "接続中",
+        "stale": "古いアドレス",
+        "staleWarning": "この接続はサイトがもう提供していないアドレスを指しているため使えません。接続を解除して整理してください。",
+        "detailDescription": "このツールは自身で登録したため、ここでは設定を編集できません。"
+      },
+      "sections": {
+        "basics": "基本情報",
+        "signIn": "サインイン",
+        "tokens": "トークン",
+        "manage": "管理",
+        "connection": "接続情報"
+      },
+      "fields": {
+        "clientId": "クライアント ID",
+        "clientSecret": "クライアントシークレット",
+        "redirectUris": "リダイレクト URI",
+        "redirectHosts": "リダイレクト先",
+        "postLogoutRedirectUris": "サインアウト後のリダイレクト URI",
+        "scopes": "共有するプロフィール情報",
+        "authMethod": "クライアント認証",
+        "accessTokenLifespan": "アクセストークンの有効期間",
+        "idTokenLifespan": "ID トークンの有効期間",
+        "publisher": "登録元",
+        "resource": "トークンの対象",
+        "signInAccess": "サインインできる人"
+      },
+      "scopes": {
+        "openid": "アカウント ID (常に共有)",
+        "email": "メールアドレス",
+        "profile": "ニックネーム"
+      },
+      "authMethods": {
+        "client_secret_basic": "クライアントシークレット (HTTP Basic)",
+        "client_secret_post": "クライアントシークレット (フォーム本文)",
+        "private_key_jwt": "署名鍵 (private_key_jwt)",
+        "none": "なし: PKCE を使う公開アプリ"
+      },
+      "lifespans": {
+        "5m": "5 分",
+        "15m": "15 分",
+        "1h": "1 時間"
+      },
+      "placeholders": {
+        "clientId": "例: team-dashboard",
+        "redirectUri": "https://…/callback"
+      },
+      "help": {
+        "name": "この一覧で管理者に表示されます。",
+        "clientIdCreate": "空欄にすると自動で生成します。後から変更できません。",
+        "clientIdFixed": "アプリの設定に入る値のため、変更できません。",
+        "signIn": "サインインアプリにはリフレッシュトークンを渡さないため、サインインのたびにアクセスを確認します。条件を満たさなくなった会員は、トークンの期限が切れるとアクセスを失います。",
+        "redirectUris": "サインイン後にアプリが戻る正確な HTTPS アドレスです。1 つ入力するごとに Enter を押してください。",
+        "postLogoutRedirectUris": "サインアウト後にアプリが戻れる任意のアドレスです。",
+        "scopes": "アカウント ID のほかにアプリが読めるプロフィール情報です。",
+        "tokens": "有効期間が短いほど、会員が条件を満たさなくなった後のアクセスが早く終わります。",
+        "authMethodSecret": "アプリがサーバーにクライアントシークレットを保管します。",
+        "authMethodPublic": "ブラウザやデスクトップのアプリなど、シークレットを保管できないアプリ向けです。",
+        "manage": "新しいシークレットの発行とアプリの削除はすぐに反映されます。",
+        "disconnect": "接続を解除するとツールの登録が削除され、すべての会員のアクセスが終了します。"
+      },
+      "access": {
+        "none": "なし (サインイン停止中)",
+        "admins": "管理者のみ",
+        "members": "すべての会員",
+        "memberCriteria": "会員条件"
+      },
+      "accessHelp": {
+        "none": "アプリの登録は残したまま、すべてのサインインを拒否します。",
+        "admins": "有効な管理者だけがサインインできます。",
+        "members": "有効なすべての会員がサインインできます。",
+        "memberCriteria": "選択した会員条件に当てはまる会員がサインインできます。判定は制限付きダウンロードと同じです。"
       }
     },
     "series": {

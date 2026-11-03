@@ -2,16 +2,16 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "ecef398cbe648db6c570ca7c38ecc33b7c0f803f2a506976da0cacb2ac30271e",
+  "manifestHash": "b9867bc94366bc6b09336c1584cd37df176b3dae6ea65d3ffe8e956eb0d3969d",
   "counts": {
-    "sourceFiles": 3943,
-    "productionSourceFiles": 2342,
-    "componentFiles": 924,
+    "sourceFiles": 3961,
+    "productionSourceFiles": 2358,
+    "componentFiles": 931,
     "coreFamilies": 57,
     "featureDomains": 54,
-    "storyFiles": 284,
-    "storyVariants": 1631,
-    "pageEntrypoints": 115,
+    "storyFiles": 285,
+    "storyVariants": 1640,
+    "pageEntrypoints": 119,
     "layouts": 17
   },
   "sourceFiles": [
@@ -217,6 +217,10 @@
     "app/admin/map/themes/page.tsx",
     "app/admin/member-criteria/page.tsx",
     "app/admin/menus/page.tsx",
+    "app/admin/oauth-apps/apps/[clientId]/page.tsx",
+    "app/admin/oauth-apps/new/page.tsx",
+    "app/admin/oauth-apps/page.tsx",
+    "app/admin/oauth-apps/tools/[clientId]/page.tsx",
     "app/admin/page.tsx",
     "app/admin/pages/page.tsx",
     "app/admin/posts/page.tsx",
@@ -1022,6 +1026,17 @@
     "features/admin/member-criteria/useMemberCriteriaKindLabel.ts",
     "features/admin/modal-context.test.tsx",
     "features/admin/modal-context.tsx",
+    "features/admin/oauth-app/OAuthAppEditor.tsx",
+    "features/admin/oauth-app/OAuthAppEditorView.tsx",
+    "features/admin/oauth-app/OAuthAppListView.tsx",
+    "features/admin/oauth-app/OAuthAppSecretDialog.tsx",
+    "features/admin/oauth-app/OAuthAppsPage.tsx",
+    "features/admin/oauth-app/OAuthConnectionDetail.tsx",
+    "features/admin/oauth-app/OAuthConnectionDetailView.tsx",
+    "features/admin/oauth-app/model.ts",
+    "features/admin/oauth-app/paths.ts",
+    "features/admin/oauth-app/sign-in-access.test.ts",
+    "features/admin/oauth-app/sign-in-access.ts",
     "features/admin/post/CreatePostButton.tsx",
     "features/admin/post/PostModalContext.tsx",
     "features/admin/post/PostModals.tsx",
@@ -2957,6 +2972,8 @@
     "lib/actions/menu.ts",
     "lib/actions/newsletter.test.ts",
     "lib/actions/newsletter.ts",
+    "lib/actions/oauth-app-criteria.ts",
+    "lib/actions/oauth-apps.ts",
     "lib/actions/og-generation.test.ts",
     "lib/actions/og-generation.ts",
     "lib/actions/page.test.ts",
@@ -3883,6 +3900,7 @@
     "stories/pages/MyAccountPages.stories.tsx",
     "stories/pages/MyLists.stories.tsx",
     "stories/pages/OAuth.stories.tsx",
+    "stories/pages/OAuthApps.stories.tsx",
     "stories/pages/OgImageSettings.stories.tsx",
     "stories/pages/Onboarding.stories.tsx",
     "stories/pages/OperationsAccessibility.test.tsx",
@@ -4042,6 +4060,10 @@
         "features/admin/email-template/EmailTemplateEditPage.tsx",
         "features/admin/email-template/EmailTemplatesPage.tsx",
         "features/admin/label/LabelRowMenu.tsx",
+        "features/admin/oauth-app/OAuthAppEditorView.tsx",
+        "features/admin/oauth-app/OAuthAppListView.tsx",
+        "features/admin/oauth-app/OAuthAppSecretDialog.tsx",
+        "features/admin/oauth-app/OAuthConnectionDetailView.tsx",
         "features/admin/user/AdminUserEditPage.tsx",
         "features/admin/user/auth/UserDeliveryEmailSection.tsx",
         "features/application-error/QueryErrorAlert.tsx",
@@ -4407,6 +4429,7 @@
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/member-criteria/MemberCriteriaConfigFields.tsx",
         "features/admin/member-criteria/MemberCriteriaTableContent.tsx",
+        "features/admin/oauth-app/OAuthAppListView.tsx",
         "features/admin/release/ReleasesTableContent.tsx",
         "features/admin/style/StylesTableContent.tsx",
         "features/admin/tag/TagsTableContent.tsx",
@@ -4480,6 +4503,7 @@
         "features/admin/email-template/EmailTemplatesPage.tsx",
         "features/admin/form/FormsTableContent.tsx",
         "features/admin/label/LabelsTableContent.tsx",
+        "features/admin/oauth-app/OAuthAppListView.tsx",
         "features/admin/post/PostsTableContent.tsx",
         "features/admin/program-event/ProgramEventSeriesTableContent.tsx",
         "features/admin/program-event/ProgramEventsTableContent.tsx",
@@ -4713,6 +4737,9 @@
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/member-criteria/CreateMemberCriteriaButton.tsx",
         "features/admin/member-criteria/MemberCriteriaConfigFields.tsx",
+        "features/admin/oauth-app/OAuthAppEditorView.tsx",
+        "features/admin/oauth-app/OAuthAppSecretDialog.tsx",
+        "features/admin/oauth-app/OAuthConnectionDetailView.tsx",
         "features/admin/post/CreatePostButton.tsx",
         "features/admin/program-event/CreateProgramEventButton.tsx",
         "features/admin/program-event/CreateProgramEventSeriesButton.tsx",
@@ -5522,6 +5549,7 @@
       ],
       "typeAliasEvidence": [],
       "productionConsumers": [
+        "features/admin/oauth-app/OAuthAppEditorView.tsx",
         "features/admin/user/UserProfileFormSection.tsx",
         "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "features/metadata/ui/UrlSectionView.tsx",
@@ -5977,6 +6005,7 @@
         }
       ],
       "productionConsumers": [
+        "features/admin/oauth-app/OAuthAppListView.tsx",
         "features/data-table/DataTableContent.tsx",
         "features/data-table/ServerDataTable/ServerDataTableContent.tsx",
         "features/file-manager/ui/FileBrowserListView.tsx"
@@ -6098,6 +6127,7 @@
         "features/admin/form/FormRowMenu.tsx",
         "features/admin/label/LabelRowMenu.tsx",
         "features/admin/member-criteria/MemberCriteriaRowMenu.tsx",
+        "features/admin/oauth-app/OAuthAppListView.tsx",
         "features/admin/post/PostRowMenu.tsx",
         "features/admin/program-event/ProgramEventSeriesTableContent.tsx",
         "features/admin/program-event/ProgramEventsTableContent.tsx",
@@ -10233,6 +10263,7 @@
       "productionConsumers": [
         "components/core/DataTable/DataTableView.tsx",
         "components/core/ParameterPanel/ParameterPanel.tsx",
+        "features/admin/oauth-app/OAuthAppEditorView.tsx",
         "features/admin/program-event/ProgramEventTypeManager.tsx",
         "features/data-table/MultiFilterEditorView.tsx",
         "features/data-table/MultiSortView.tsx",
@@ -11245,6 +11276,7 @@
       "productionConsumers": [
         "components/core/Input/MultiSelectComboboxView.tsx",
         "features/admin/member-criteria/MemberCriteriaConfigFields.tsx",
+        "features/admin/oauth-app/OAuthAppEditorView.tsx",
         "features/admin/user/UserProfileFormSection.tsx",
         "features/artist/ArtistEditor/ArtistDetailEditor.tsx",
         "features/data-table/MultiFilterValueInput.tsx",
@@ -12420,6 +12452,7 @@
         "features/admin/email-template/EmailTemplatesPage.tsx",
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/member-criteria/MemberCriteriaModals.tsx",
+        "features/admin/oauth-app/OAuthAppEditorView.tsx",
         "features/admin/program-event/ProgramEventTypeManager.tsx",
         "features/admin/user/AdminUserEditPage.tsx",
         "features/admin/user/UserModals.tsx",
@@ -12765,6 +12798,7 @@
       ],
       "typeAliasEvidence": [],
       "productionConsumers": [
+        "features/admin/oauth-app/OAuthAppEditorView.tsx",
         "features/form/FormBuilder/ConditionEditor.tsx",
         "features/translation/admin/TranslationSettingsPage.tsx",
         "features/work/WorkEditor/WorkMetaForm.tsx"
@@ -12857,6 +12891,7 @@
         "features/admin/genre/GenreModals.tsx",
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/member-criteria/MemberCriteriaModals.tsx",
+        "features/admin/oauth-app/OAuthAppEditorView.tsx",
         "features/admin/program-event/ProgramEventTypeManager.tsx",
         "features/admin/series/SeriesModals.tsx",
         "features/admin/settings/OgImageSettingsPage.tsx",
@@ -13492,6 +13527,10 @@
         "features/admin/map-place/MapPlacesPage.tsx",
         "features/admin/member-criteria/MemberCriteriaConfigFields.tsx",
         "features/admin/member-criteria/MemberCriteriaModals.tsx",
+        "features/admin/oauth-app/OAuthAppEditorView.tsx",
+        "features/admin/oauth-app/OAuthAppListView.tsx",
+        "features/admin/oauth-app/OAuthAppSecretDialog.tsx",
+        "features/admin/oauth-app/OAuthConnectionDetailView.tsx",
         "features/admin/post/PostsTableContent.tsx",
         "features/admin/program-event/ProgramEventSeriesTableContent.tsx",
         "features/admin/program-event/ProgramEventTypeManager.tsx",
@@ -13942,6 +13981,7 @@
         "stories/pages/MyAccountPages.stories.tsx",
         "stories/pages/MyLists.stories.tsx",
         "stories/pages/OAuth.stories.tsx",
+        "stories/pages/OAuthApps.stories.tsx",
         "stories/pages/OgImageSettings.stories.tsx",
         "stories/pages/Onboarding.stories.tsx",
         "stories/pages/PostTaxonomy.stories.tsx",
@@ -15056,6 +15096,7 @@
         "features/admin/email-layout/EmailLayoutsPage.tsx",
         "features/admin/email-template/EmailTemplateEditPage.tsx",
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
+        "features/admin/oauth-app/OAuthAppSecretDialog.tsx",
         "features/admin/program-event/ProgramEventTypeManager.tsx",
         "features/admin/user/AdminUserEditPage.tsx",
         "features/artist/ArtistEditor/ArtistParticipantsDialog.tsx",
@@ -15167,6 +15208,7 @@
         "components/core/Modal/confirm-dialogs.tsx",
         "features/admin/email-template/EmailTemplateEditPage.tsx",
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
+        "features/admin/oauth-app/OAuthAppSecretDialog.tsx",
         "features/admin/program-event/ProgramEventTypeManager.tsx",
         "features/admin/user/AdminUserEditPage.tsx",
         "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
@@ -16540,6 +16582,8 @@
         "components/core/DataTable/DataTableView.tsx",
         "components/core/PublicMetadata/PublicMetadata.tsx",
         "features/admin/map-place/MapPlaceDetailPage.tsx",
+        "features/admin/oauth-app/OAuthAppSecretDialog.tsx",
+        "features/admin/oauth-app/OAuthConnectionDetailView.tsx",
         "features/file-manager/FileManagerView.tsx",
         "features/my/ui/McpIntegrationSettings/McpIntegrationSettingsView.tsx",
         "features/my/ui/PersonalAccessTokenSettings/PersonalAccessTokenSettingsView.tsx"
@@ -17118,6 +17162,9 @@
       ],
       "productionConsumers": [
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
+        "features/admin/oauth-app/OAuthAppEditorView.tsx",
+        "features/admin/oauth-app/OAuthAppListView.tsx",
+        "features/admin/oauth-app/OAuthConnectionDetailView.tsx",
         "features/admin/settings/OgImageSettingsPage.tsx",
         "features/admin/settings/SiteSettingsPage.tsx",
         "features/admin/user/UserProfileFormSection.tsx",
@@ -19634,6 +19681,9 @@
         "features/admin/email-template/EmailTemplatesPage.tsx",
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/member-criteria/MemberCriteriaConfigFields.tsx",
+        "features/admin/oauth-app/OAuthAppEditorView.tsx",
+        "features/admin/oauth-app/OAuthAppListView.tsx",
+        "features/admin/oauth-app/OAuthConnectionDetailView.tsx",
         "features/admin/settings/OgImageSettingsPage.tsx",
         "features/admin/user/auth/UserBanStateSection.tsx",
         "features/admin/user/auth/UserSsoProvidersSection.tsx",
@@ -19958,6 +20008,11 @@
         "features/admin/map-place/MapPlacesPage.tsx",
         "features/admin/member-criteria/MemberCriteriaModals.tsx",
         "features/admin/member-criteria/MemberCriteriaTableContent.tsx",
+        "features/admin/oauth-app/OAuthAppEditorView.tsx",
+        "features/admin/oauth-app/OAuthAppListView.tsx",
+        "features/admin/oauth-app/OAuthAppSecretDialog.tsx",
+        "features/admin/oauth-app/OAuthAppsPage.tsx",
+        "features/admin/oauth-app/OAuthConnectionDetailView.tsx",
         "features/admin/post/PostModals.tsx",
         "features/admin/post/PostsTableContent.tsx",
         "features/admin/program-event/ProgramEventSeriesTableContent.tsx",
@@ -25208,6 +25263,417 @@
       "composedJsx": ["DateTime", "DsText", "LabelBadge", "MemberCriteriaRowMenu", "ServerDataTableSelectableSection"]
     },
     {
+      "file": "features/admin/oauth-app/OAuthAppEditor.tsx",
+      "owner": "Feature/admin",
+      "exports": [
+        {
+          "name": "OAuthAppEditor",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "OAuthAppEditorProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "app",
+              "optional": false,
+              "type": "OAuthSignInApp | null"
+            },
+            {
+              "name": "memberCriteria",
+              "optional": false,
+              "type": "OAuthMemberCriteriaOption[]"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["app/admin/oauth-apps/apps/[clientId]/page.tsx", "app/admin/oauth-apps/new/page.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["OAuthAppEditorView"]
+    },
+    {
+      "file": "features/admin/oauth-app/OAuthAppEditorView.tsx",
+      "owner": "Feature/admin",
+      "exports": [
+        {
+          "name": "OAuthAppEditorView",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "OAuthAppEditorViewProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "mode",
+              "optional": false,
+              "type": "'create' | 'edit'"
+            },
+            {
+              "name": "draft",
+              "optional": false,
+              "type": "OAuthSignInAppDraft"
+            },
+            {
+              "name": "memberCriteria",
+              "optional": false,
+              "type": "OAuthMemberCriteriaOption[]"
+            },
+            {
+              "name": "createdAt",
+              "optional": true,
+              "type": "string"
+            },
+            {
+              "name": "saving",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
+              "name": "saveError",
+              "optional": true,
+              "type": "string | null"
+            },
+            {
+              "name": "pendingCommand",
+              "optional": true,
+              "type": "'rotate' | 'delete' | null"
+            },
+            {
+              "name": "secret",
+              "optional": true,
+              "type": "OAuthAppSecret | null"
+            },
+            {
+              "name": "backHref",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "onChange",
+              "optional": false,
+              "type": "(draft: OAuthSignInAppDraft) => void"
+            },
+            {
+              "name": "onSave",
+              "optional": false,
+              "type": "() => void"
+            },
+            {
+              "name": "onRotateSecret",
+              "optional": false,
+              "type": "() => Promise<boolean>"
+            },
+            {
+              "name": "onDelete",
+              "optional": false,
+              "type": "() => Promise<boolean>"
+            },
+            {
+              "name": "onCopySecret",
+              "optional": false,
+              "type": "(value: string) => void"
+            },
+            {
+              "name": "onCloseSecret",
+              "optional": false,
+              "type": "() => void"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["features/admin/oauth-app/OAuthAppEditor.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": ["stories/pages/OAuthApps.stories.tsx"],
+      "composedJsx": [
+        "AdminPageHeader",
+        "Alert",
+        "Button",
+        "Checkbox",
+        "ConfirmationDialog",
+        "CopyButton",
+        "IconArrowLeft",
+        "IconRefresh",
+        "IconTrash",
+        "LayoutInline",
+        "LayoutStack",
+        "MultiSelect",
+        "OAuthAppSecretDialog",
+        "Select",
+        "SettingsGroup",
+        "SettingsSection",
+        "SupportingText",
+        "TagsInput",
+        "Text",
+        "TextInput"
+      ]
+    },
+    {
+      "file": "features/admin/oauth-app/OAuthAppListView.tsx",
+      "owner": "Feature/admin",
+      "exports": [
+        {
+          "name": "OAuthAppListView",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "OAuthAppListViewProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "siteName",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "apps",
+              "optional": false,
+              "type": "OAuthSignInAppSummary[]"
+            },
+            {
+              "name": "connections",
+              "optional": false,
+              "type": "OAuthConnectionSummary[]"
+            },
+            {
+              "name": "loadFailed",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
+              "name": "getAppHref",
+              "optional": false,
+              "type": "(clientId: string) => string"
+            },
+            {
+              "name": "getConnectionHref",
+              "optional": false,
+              "type": "(clientId: string) => string"
+            },
+            {
+              "name": "createHref",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "onOpen",
+              "optional": false,
+              "type": "(href: string) => void"
+            },
+            {
+              "name": "onDisconnect",
+              "optional": false,
+              "type": "(connection: OAuthConnectionSummary) => void"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["features/admin/oauth-app/OAuthAppsPage.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": ["stories/pages/OAuthApps.stories.tsx"],
+      "composedJsx": [
+        "AdminPageHeader",
+        "Alert",
+        "DataTableView",
+        "DateTime",
+        "IconPlus",
+        "LabelBadge",
+        "LayoutInline",
+        "LayoutStack",
+        "SettingsSection",
+        "StatusBadge",
+        "SupportingText",
+        "TableRowMenu",
+        "Text"
+      ]
+    },
+    {
+      "file": "features/admin/oauth-app/OAuthAppSecretDialog.tsx",
+      "owner": "Feature/admin",
+      "exports": [
+        {
+          "name": "OAuthAppSecretDialog",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "OAuthAppSecretDialogProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "secret",
+              "optional": false,
+              "type": "OAuthAppSecret | null"
+            },
+            {
+              "name": "onCopy",
+              "optional": false,
+              "type": "(value: string) => void"
+            },
+            {
+              "name": "onClose",
+              "optional": false,
+              "type": "() => void"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["features/admin/oauth-app/OAuthAppEditorView.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": [
+        "Alert",
+        "Button",
+        "ContentModal",
+        "DialogActions",
+        "IconCopy",
+        "LayoutStack",
+        "MetadataPair",
+        "Text"
+      ]
+    },
+    {
+      "file": "features/admin/oauth-app/OAuthAppsPage.tsx",
+      "owner": "Feature/admin",
+      "exports": [
+        {
+          "name": "OAuthAppsPage",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "OAuthAppsPageProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "siteName",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "apps",
+              "optional": false,
+              "type": "OAuthSignInAppSummary[]"
+            },
+            {
+              "name": "connections",
+              "optional": false,
+              "type": "OAuthConnectionSummary[]"
+            },
+            {
+              "name": "loadFailed",
+              "optional": false,
+              "type": "boolean"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["app/admin/oauth-apps/page.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["ConfirmationDialog", "OAuthAppListView", "Text"]
+    },
+    {
+      "file": "features/admin/oauth-app/OAuthConnectionDetail.tsx",
+      "owner": "Feature/admin",
+      "exports": [
+        {
+          "name": "OAuthConnectionDetail",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["app/admin/oauth-apps/tools/[clientId]/page.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["OAuthConnectionDetailView"]
+    },
+    {
+      "file": "features/admin/oauth-app/OAuthConnectionDetailView.tsx",
+      "owner": "Feature/admin",
+      "exports": [
+        {
+          "name": "OAuthConnectionDetailView",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "OAuthConnectionDetailViewProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "connection",
+              "optional": false,
+              "type": "OAuthConnectionDetail"
+            },
+            {
+              "name": "backHref",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "disconnecting",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
+              "name": "onDisconnect",
+              "optional": false,
+              "type": "() => Promise<boolean>"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["features/admin/oauth-app/OAuthConnectionDetail.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": ["stories/pages/OAuthApps.stories.tsx"],
+      "composedJsx": [
+        "AdminPageHeader",
+        "Alert",
+        "Button",
+        "ConfirmationDialog",
+        "DateTime",
+        "IconArrowLeft",
+        "IconPlugConnectedX",
+        "LayoutStack",
+        "MetadataPair",
+        "SettingsSection",
+        "SupportingText",
+        "Text",
+        "div"
+      ]
+    },
+    {
       "file": "features/admin/post/CreatePostButton.tsx",
       "owner": "Feature/admin",
       "exports": [
@@ -27647,6 +28113,9 @@
         "features/admin/label/LabelsPageView.tsx",
         "features/admin/map-place/MapPlacesPage.tsx",
         "features/admin/member-criteria/MemberCriteriaPageView.tsx",
+        "features/admin/oauth-app/OAuthAppEditorView.tsx",
+        "features/admin/oauth-app/OAuthAppListView.tsx",
+        "features/admin/oauth-app/OAuthConnectionDetailView.tsx",
         "features/admin/post/PostsPageView.tsx",
         "features/admin/program-event/ProgramEventSeriesPageView.tsx",
         "features/admin/program-event/ProgramEventsPageView.tsx",
@@ -32152,6 +32621,9 @@
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/map-place/MapPlacesPage.tsx",
         "features/admin/member-criteria/MemberCriteriaModals.tsx",
+        "features/admin/oauth-app/OAuthAppEditorView.tsx",
+        "features/admin/oauth-app/OAuthAppsPage.tsx",
+        "features/admin/oauth-app/OAuthConnectionDetailView.tsx",
         "features/admin/post/PostModals.tsx",
         "features/admin/program-event/ProgramEventTypeManager.tsx",
         "features/admin/release/ReleaseModals.tsx",
@@ -34243,6 +34715,9 @@
         "features/admin/map-place/MapPlaceDetailPage.tsx",
         "features/admin/map-place/MapPlacesPage.tsx",
         "features/admin/member-criteria/MemberCriteriaTableContent.tsx",
+        "features/admin/oauth-app/OAuthAppEditorView.tsx",
+        "features/admin/oauth-app/OAuthAppListView.tsx",
+        "features/admin/oauth-app/OAuthConnectionDetailView.tsx",
         "features/admin/post/PostsTableContent.tsx",
         "features/admin/program-event/ProgramEventSeriesTableContent.tsx",
         "features/admin/program-event/ProgramEventsTableContent.tsx",
@@ -76713,6 +77188,16 @@
         "features/admin/member-criteria/model.ts",
         "features/admin/member-criteria/useMemberCriteriaKindLabel.ts",
         "features/admin/modal-context.tsx",
+        "features/admin/oauth-app/OAuthAppEditor.tsx",
+        "features/admin/oauth-app/OAuthAppEditorView.tsx",
+        "features/admin/oauth-app/OAuthAppListView.tsx",
+        "features/admin/oauth-app/OAuthAppSecretDialog.tsx",
+        "features/admin/oauth-app/OAuthAppsPage.tsx",
+        "features/admin/oauth-app/OAuthConnectionDetail.tsx",
+        "features/admin/oauth-app/OAuthConnectionDetailView.tsx",
+        "features/admin/oauth-app/model.ts",
+        "features/admin/oauth-app/paths.ts",
+        "features/admin/oauth-app/sign-in-access.ts",
         "features/admin/post/CreatePostButton.tsx",
         "features/admin/post/PostModalContext.tsx",
         "features/admin/post/PostModals.tsx",
@@ -76876,6 +77361,13 @@
         "features/admin/member-criteria/MemberCriteriaPageView.tsx",
         "features/admin/member-criteria/MemberCriteriaRowMenu.tsx",
         "features/admin/member-criteria/MemberCriteriaTableContent.tsx",
+        "features/admin/oauth-app/OAuthAppEditor.tsx",
+        "features/admin/oauth-app/OAuthAppEditorView.tsx",
+        "features/admin/oauth-app/OAuthAppListView.tsx",
+        "features/admin/oauth-app/OAuthAppSecretDialog.tsx",
+        "features/admin/oauth-app/OAuthAppsPage.tsx",
+        "features/admin/oauth-app/OAuthConnectionDetail.tsx",
+        "features/admin/oauth-app/OAuthConnectionDetailView.tsx",
         "features/admin/post/CreatePostButton.tsx",
         "features/admin/post/PostModalContext.tsx",
         "features/admin/post/PostModals.tsx",
@@ -76973,6 +77465,7 @@
         "features/admin/member-criteria/MemberCriteriaConfig.test.ts",
         "features/admin/member-criteria/MemberCriteriaModals.test.tsx",
         "features/admin/modal-context.test.tsx",
+        "features/admin/oauth-app/sign-in-access.test.ts",
         "features/admin/post/PostRowMenu.test.tsx",
         "features/admin/program-event/ProgramEventTypeManager.test.tsx",
         "features/admin/taxonomy-description-clear.test.tsx",
@@ -77001,6 +77494,10 @@
         "/admin/map/themes/[id]",
         "/admin/map/themes",
         "/admin/member-criteria",
+        "/admin/oauth-apps/apps/[clientId]",
+        "/admin/oauth-apps/new",
+        "/admin/oauth-apps",
+        "/admin/oauth-apps/tools/[clientId]",
         "/admin",
         "/admin/pages",
         "/admin/posts",
@@ -90375,6 +90872,65 @@
       ]
     },
     {
+      "file": "stories/pages/OAuthApps.stories.tsx",
+      "title": "Pages/Admin/OAuth Apps",
+      "component": "OAuthAppsPreview",
+      "variants": [
+        {
+          "name": "List",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--list"
+        },
+        {
+          "name": "ListEmpty",
+          "args": "{ screen: 'list-empty' }",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--list-empty"
+        },
+        {
+          "name": "ListLoadFailed",
+          "args": "{ screen: 'list-failed' }",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--list-load-failed"
+        },
+        {
+          "name": "Create",
+          "args": "{ screen: 'create' }",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--create"
+        },
+        {
+          "name": "Edit",
+          "args": "{ screen: 'edit' }",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--edit"
+        },
+        {
+          "name": "EditMemberCriteriaAccess",
+          "args": "{ screen: 'edit-member-criteria' }",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--edit-member-criteria-access"
+        },
+        {
+          "name": "SecretIssued",
+          "args": "{ screen: 'secret' }",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--secret-issued"
+        },
+        {
+          "name": "StaleConnection",
+          "args": "{ screen: 'connection' }",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--stale-connection"
+        },
+        {
+          "name": "PhoneList",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--phone-list"
+        }
+      ],
+      "importedSources": [
+        "components/core/Layout/index.ts",
+        "features/admin/oauth-app/OAuthAppEditorView.tsx",
+        "features/admin/oauth-app/OAuthAppListView.tsx",
+        "features/admin/oauth-app/OAuthConnectionDetailView.tsx",
+        "stories/shared/preview-navigation.ts"
+      ]
+    },
+    {
       "file": "stories/pages/OgImageSettings.stories.tsx",
       "title": "Pages/Admin/OG Image Settings",
       "component": "OgImageSettingsPreview",
@@ -93273,10 +93829,9 @@
           "symbols": [
             "acceptHydraSignInConsent",
             "assertMcpConsentRequest",
+            "clientSignIn",
             "getHydraConsentRequest",
-            "isActiveAdmin",
             "isMcpAuthor",
-            "isSignInClient",
             "mcpClientDisplayName",
             "mcpDelegationDisplayName",
             "parseHydraChallenge"
@@ -96127,6 +96682,158 @@
       ]
     },
     {
+      "route": "/admin/oauth-apps/apps/[clientId]",
+      "file": "app/admin/oauth-apps/apps/[clientId]/page.tsx",
+      "family": "Admin",
+      "sourceKind": "renders JSX",
+      "imports": [
+        {
+          "file": "features/admin/oauth-app/OAuthAppEditor.tsx",
+          "symbols": ["OAuthAppEditor"]
+        },
+        {
+          "file": "lib/actions/oauth-app-criteria.ts",
+          "symbols": ["loadSignInMemberCriteria"]
+        },
+        {
+          "file": "lib/actions/oauth-apps.ts",
+          "symbols": ["getSignInAppAction"]
+        },
+        {
+          "file": "lib/api/query-result.ts",
+          "symbols": ["unwrapQueryResult"]
+        }
+      ],
+      "reexports": [],
+      "composedJsx": ["OAuthAppEditor"],
+      "controllerEvidence": ["getSignInAppAction", "getSignInAppAction(decodeURIComponent(clientId)).then"],
+      "inheritedLayouts": ["app/admin/layout.tsx", "app/layout.tsx"],
+      "directStoryImports": [],
+      "coverageNote": "Import relationship only; no route behavior, permission, interaction, or nested story coverage is inferred.",
+      "interactivePreviews": [
+        {
+          "route": "/admin/oauth-apps/apps/[clientId]",
+          "storyTitle": "Pages/Admin/OAuth Apps",
+          "variant": "Edit",
+          "coverage": "page-view",
+          "scope": "Actual production sign-in app editor view with access, redirect, scope and token settings, secret rotation and deletion dialogs on local callbacks. Persistence and Hydra writes remain outside.",
+          "file": "stories/pages/OAuthApps.stories.tsx",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--edit"
+        }
+      ]
+    },
+    {
+      "route": "/admin/oauth-apps/new",
+      "file": "app/admin/oauth-apps/new/page.tsx",
+      "family": "Admin",
+      "sourceKind": "renders JSX",
+      "imports": [
+        {
+          "file": "features/admin/oauth-app/OAuthAppEditor.tsx",
+          "symbols": ["OAuthAppEditor"]
+        },
+        {
+          "file": "lib/actions/oauth-app-criteria.ts",
+          "symbols": ["loadSignInMemberCriteria"]
+        }
+      ],
+      "reexports": [],
+      "composedJsx": ["OAuthAppEditor"],
+      "controllerEvidence": [],
+      "inheritedLayouts": ["app/admin/layout.tsx", "app/layout.tsx"],
+      "directStoryImports": [],
+      "coverageNote": "Import relationship only; no route behavior, permission, interaction, or nested story coverage is inferred.",
+      "interactivePreviews": [
+        {
+          "route": "/admin/oauth-apps/new",
+          "storyTitle": "Pages/Admin/OAuth Apps",
+          "variant": "Create",
+          "coverage": "page-view",
+          "scope": "Actual production sign-in app editor view in create mode with local callbacks. Client registration and secret issuance remain outside.",
+          "file": "stories/pages/OAuthApps.stories.tsx",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--create"
+        }
+      ]
+    },
+    {
+      "route": "/admin/oauth-apps",
+      "file": "app/admin/oauth-apps/page.tsx",
+      "family": "Admin",
+      "sourceKind": "renders JSX",
+      "imports": [
+        {
+          "file": "features/admin/oauth-app/OAuthAppsPage.tsx",
+          "symbols": ["OAuthAppsPage"]
+        },
+        {
+          "file": "lib/actions/oauth-apps.ts",
+          "symbols": ["listConnectedToolsAction", "listSignInAppsAction"]
+        },
+        {
+          "file": "lib/api/query-result.ts",
+          "symbols": ["unwrapQueryResult"]
+        },
+        {
+          "file": "lib/queries/manifest.ts",
+          "symbols": ["getSettings"]
+        }
+      ],
+      "reexports": [],
+      "composedJsx": ["OAuthAppsPage"],
+      "controllerEvidence": ["getSettings"],
+      "inheritedLayouts": ["app/admin/layout.tsx", "app/layout.tsx"],
+      "directStoryImports": [],
+      "coverageNote": "Import relationship only; no route behavior, permission, interaction, or nested story coverage is inferred.",
+      "interactivePreviews": [
+        {
+          "route": "/admin/oauth-apps",
+          "storyTitle": "Pages/Admin/OAuth Apps",
+          "variant": "List",
+          "coverage": "page-view",
+          "scope": "Actual production OAuth apps list view with sign-in apps and connected AI tools from local data. Hydra, the API and the disconnect transport remain outside.",
+          "file": "stories/pages/OAuthApps.stories.tsx",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--list"
+        }
+      ]
+    },
+    {
+      "route": "/admin/oauth-apps/tools/[clientId]",
+      "file": "app/admin/oauth-apps/tools/[clientId]/page.tsx",
+      "family": "Admin",
+      "sourceKind": "renders JSX",
+      "imports": [
+        {
+          "file": "features/admin/oauth-app/OAuthConnectionDetail.tsx",
+          "symbols": ["OAuthConnectionDetail"]
+        },
+        {
+          "file": "lib/actions/oauth-apps.ts",
+          "symbols": ["listConnectedToolsAction"]
+        },
+        {
+          "file": "lib/api/query-result.ts",
+          "symbols": ["unwrapQueryResult"]
+        }
+      ],
+      "reexports": [],
+      "composedJsx": ["OAuthConnectionDetail"],
+      "controllerEvidence": ["notFound"],
+      "inheritedLayouts": ["app/admin/layout.tsx", "app/layout.tsx"],
+      "directStoryImports": [],
+      "coverageNote": "Import relationship only; no route behavior, permission, interaction, or nested story coverage is inferred.",
+      "interactivePreviews": [
+        {
+          "route": "/admin/oauth-apps/tools/[clientId]",
+          "storyTitle": "Pages/Admin/OAuth Apps",
+          "variant": "StaleConnection",
+          "coverage": "page-view",
+          "scope": "Actual production connected AI tool detail view with the disconnect dialog on local callbacks. Hydra deletion remains outside.",
+          "file": "stories/pages/OAuthApps.stories.tsx",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--stale-connection"
+        }
+      ]
+    },
+    {
       "route": "/admin",
       "file": "app/admin/page.tsx",
       "family": "Admin",
@@ -97903,6 +98610,34 @@
       "variant": "MemberCriteria",
       "coverage": "page-view",
       "scope": "Actual production Member criteria PageView, query controls, count/create/edit/archive/restore dialogs with typed local transport. Server evaluation, relation constraints and persistence remain outside."
+    },
+    {
+      "route": "/admin/oauth-apps",
+      "storyTitle": "Pages/Admin/OAuth Apps",
+      "variant": "List",
+      "coverage": "page-view",
+      "scope": "Actual production OAuth apps list view with sign-in apps and connected AI tools from local data. Hydra, the API and the disconnect transport remain outside."
+    },
+    {
+      "route": "/admin/oauth-apps/new",
+      "storyTitle": "Pages/Admin/OAuth Apps",
+      "variant": "Create",
+      "coverage": "page-view",
+      "scope": "Actual production sign-in app editor view in create mode with local callbacks. Client registration and secret issuance remain outside."
+    },
+    {
+      "route": "/admin/oauth-apps/apps/[clientId]",
+      "storyTitle": "Pages/Admin/OAuth Apps",
+      "variant": "Edit",
+      "coverage": "page-view",
+      "scope": "Actual production sign-in app editor view with access, redirect, scope and token settings, secret rotation and deletion dialogs on local callbacks. Persistence and Hydra writes remain outside."
+    },
+    {
+      "route": "/admin/oauth-apps/tools/[clientId]",
+      "storyTitle": "Pages/Admin/OAuth Apps",
+      "variant": "StaleConnection",
+      "coverage": "page-view",
+      "scope": "Actual production connected AI tool detail view with the disconnect dialog on local callbacks. Hydra deletion remains outside."
     },
     {
       "route": "/admin/settings/og-image",

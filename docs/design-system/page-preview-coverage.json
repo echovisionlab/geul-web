@@ -1,17 +1,17 @@
 {
   "schemaVersion": 2,
   "methodology": "All App Router visual entry files indexed by TypeScript imports/JSX; exact reviewed route/boundary maps count separately from mere Feature story overlap. Unmapped entrypoints remain explicit gaps. Static source census is not a browser pass.",
-  "sourceManifestHash": "7d9f3150dec505c4b4ff0bb5370efcaa960a331e0d27a78efbe06a9783a7ac42",
+  "sourceManifestHash": "f8612139cc9d7a3f876a62aaf8a6b9e580a895e695b1aff20f3b4b3dc637bdf2",
   "counts": {
     "queryEditorBranches": 12,
     "editorBranchPreviews": 12,
     "missingEditorBranches": 0,
-    "visualEntrypoints": 137,
-    "pageEntrypoints": 115,
+    "visualEntrypoints": 141,
+    "pageEntrypoints": 119,
     "pageDispositions": {
       "development-only-entry": 1,
       "disabled-by-terminal-layout": 6,
-      "page-view-preview": 100,
+      "page-view-preview": 104,
       "redirect-only": 5,
       "terminal-not-found-only": 3
     },
@@ -21,14 +21,14 @@
       "global-error": 1,
       "layout": 17,
       "not-found": 1,
-      "page": 115
+      "page": 119
     },
     "entryDispositions": {
       "boundary-view-preview": 5,
       "development-only-entry": 1,
       "disabled-by-terminal-layout": 6,
       "layout-view-preview": 3,
-      "page-view-preview": 100,
+      "page-view-preview": 104,
       "provider-document-layout": 1,
       "provider-only-layout": 12,
       "redirect-only": 5,
@@ -36,7 +36,7 @@
     },
     "reviewStatus": {
       "machine-import-and-jsx-census": 27,
-      "manual-preview-source-mapping": 110
+      "manual-preview-source-mapping": 114
     }
   },
   "entrypoints": [
@@ -19312,7 +19312,7 @@
     },
     {
       "file": "app/(general)/oauth/authorize/consent/page.tsx",
-      "sha256": "bc0fc23a482c400de6372a3219f5c571ca0596a4cfb4fdbf70638946071a7c1b",
+      "sha256": "8a78329edc65c007e0fd71004b2c2aafe6d6b6a7836b4d2ce73f36278d00c9d3",
       "kind": "page",
       "route": "/oauth/authorize/consent",
       "family": "Identity",
@@ -19340,7 +19340,7 @@
       "renderability": "normal-or-conditional",
       "redirects": [
         {
-          "line": 45,
+          "line": 44,
           "expression": "redirect(buildLoginRedirectHref(consentContinuation(challenge)))"
         },
         {
@@ -41486,6 +41486,446 @@
             "features/site/PageLoader/index.ts",
             "features/translation/TranslationServicesContext.tsx"
           ]
+        }
+      ],
+      "scopeNote": "Source view coverage only. A named story or importing child does not establish complete route state, permission, controller, network, SSR or browser parity."
+    },
+    {
+      "file": "app/admin/oauth-apps/apps/[clientId]/page.tsx",
+      "sha256": "bd3eace30c5c2d8b5178f473d4ee444cd4ca8a2f67934ed4569eb30f43b2e912",
+      "kind": "page",
+      "route": "/admin/oauth-apps/apps/[clientId]",
+      "family": "Administration",
+      "hasQueryEditorBranch": false,
+      "editorBranchPreview": null,
+      "reviewStatus": "manual-preview-source-mapping",
+      "disposition": "page-view-preview",
+      "directJsx": ["OAuthAppEditor"],
+      "visualOwners": [
+        "features/admin/oauth-app/OAuthAppEditor.tsx",
+        "features/admin/oauth-app/OAuthAppEditorView.tsx",
+        "features/admin/oauth-app/OAuthAppSecretDialog.tsx",
+        "features/admin/ui/AdminPageHeader/AdminPageHeader.tsx",
+        "features/confirmation/ui/ConfirmationDialog.tsx",
+        "features/date-time/DateTime.tsx"
+      ],
+      "dependencyGraph": [
+        "app/admin/oauth-apps/apps/[clientId]/page.tsx",
+        "features/admin/oauth-app/OAuthAppEditor.tsx",
+        "features/admin/oauth-app/OAuthAppEditorView.tsx",
+        "features/admin/oauth-app/OAuthAppSecretDialog.tsx",
+        "features/admin/oauth-app/model.ts",
+        "features/admin/oauth-app/paths.ts",
+        "features/admin/oauth-app/sign-in-access.ts",
+        "features/admin/ui/AdminPageHeader/AdminPageHeader.tsx",
+        "features/admin/ui/AdminPageHeader/index.ts",
+        "features/confirmation/ui/ConfirmationDialog.tsx",
+        "features/confirmation/ui/confirmation-intent.ts",
+        "features/date-time/DateTime.tsx"
+      ],
+      "inheritedBoundaries": [
+        "app/admin/error.tsx",
+        "app/admin/layout.tsx",
+        "app/error.tsx",
+        "app/global-error.tsx",
+        "app/layout.tsx",
+        "app/not-found.tsx"
+      ],
+      "inheritedTerminalLayouts": [],
+      "renderability": "normal-or-conditional",
+      "redirects": [],
+      "previews": [
+        {
+          "route": "/admin/oauth-apps/apps/[clientId]",
+          "storyTitle": "Pages/Admin/OAuth Apps",
+          "variant": "Edit",
+          "coverage": "page-view",
+          "scope": "Actual production sign-in app editor view with access, redirect, scope and token settings, secret rotation and deletion dialogs on local callbacks. Persistence and Hydra writes remain outside.",
+          "storySource": "stories/pages/OAuthApps.stories.tsx",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--edit",
+          "availableStates": [
+            {
+              "variant": "List",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--list"
+            },
+            {
+              "variant": "ListEmpty",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--list-empty"
+            },
+            {
+              "variant": "ListLoadFailed",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--list-load-failed"
+            },
+            {
+              "variant": "Create",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--create"
+            },
+            {
+              "variant": "Edit",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--edit"
+            },
+            {
+              "variant": "EditMemberCriteriaAccess",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--edit-member-criteria-access"
+            },
+            {
+              "variant": "SecretIssued",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--secret-issued"
+            },
+            {
+              "variant": "StaleConnection",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--stale-connection"
+            },
+            {
+              "variant": "PhoneList",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--phone-list"
+            }
+          ]
+        }
+      ],
+      "relatedFeatureStories": [
+        {
+          "file": "features/admin/ui/AdminPageHeader/AdminPageHeader.stories.tsx",
+          "title": "Feature/Admin/AdminPageHeader",
+          "matchingOwners": ["features/admin/ui/AdminPageHeader/AdminPageHeader.tsx"]
+        },
+        {
+          "file": "features/confirmation/ConfirmationDialog.stories.tsx",
+          "title": "Feature/Confirmation/Dialog",
+          "matchingOwners": ["features/confirmation/ui/ConfirmationDialog.tsx"]
+        },
+        {
+          "file": "stories/pages/OAuthApps.stories.tsx",
+          "title": "Pages/Admin/OAuth Apps",
+          "matchingOwners": ["features/admin/oauth-app/OAuthAppEditorView.tsx"]
+        }
+      ],
+      "scopeNote": "Source view coverage only. A named story or importing child does not establish complete route state, permission, controller, network, SSR or browser parity."
+    },
+    {
+      "file": "app/admin/oauth-apps/new/page.tsx",
+      "sha256": "046894f7fb7b0ccdbcdf8dd1200b08a6d129d4117df25cf0e32acf5cbcc99491",
+      "kind": "page",
+      "route": "/admin/oauth-apps/new",
+      "family": "Administration",
+      "hasQueryEditorBranch": false,
+      "editorBranchPreview": null,
+      "reviewStatus": "manual-preview-source-mapping",
+      "disposition": "page-view-preview",
+      "directJsx": ["OAuthAppEditor"],
+      "visualOwners": [
+        "features/admin/oauth-app/OAuthAppEditor.tsx",
+        "features/admin/oauth-app/OAuthAppEditorView.tsx",
+        "features/admin/oauth-app/OAuthAppSecretDialog.tsx",
+        "features/admin/ui/AdminPageHeader/AdminPageHeader.tsx",
+        "features/confirmation/ui/ConfirmationDialog.tsx",
+        "features/date-time/DateTime.tsx"
+      ],
+      "dependencyGraph": [
+        "app/admin/oauth-apps/new/page.tsx",
+        "features/admin/oauth-app/OAuthAppEditor.tsx",
+        "features/admin/oauth-app/OAuthAppEditorView.tsx",
+        "features/admin/oauth-app/OAuthAppSecretDialog.tsx",
+        "features/admin/oauth-app/model.ts",
+        "features/admin/oauth-app/paths.ts",
+        "features/admin/oauth-app/sign-in-access.ts",
+        "features/admin/ui/AdminPageHeader/AdminPageHeader.tsx",
+        "features/admin/ui/AdminPageHeader/index.ts",
+        "features/confirmation/ui/ConfirmationDialog.tsx",
+        "features/confirmation/ui/confirmation-intent.ts",
+        "features/date-time/DateTime.tsx"
+      ],
+      "inheritedBoundaries": [
+        "app/admin/error.tsx",
+        "app/admin/layout.tsx",
+        "app/error.tsx",
+        "app/global-error.tsx",
+        "app/layout.tsx",
+        "app/not-found.tsx"
+      ],
+      "inheritedTerminalLayouts": [],
+      "renderability": "normal-or-conditional",
+      "redirects": [],
+      "previews": [
+        {
+          "route": "/admin/oauth-apps/new",
+          "storyTitle": "Pages/Admin/OAuth Apps",
+          "variant": "Create",
+          "coverage": "page-view",
+          "scope": "Actual production sign-in app editor view in create mode with local callbacks. Client registration and secret issuance remain outside.",
+          "storySource": "stories/pages/OAuthApps.stories.tsx",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--create",
+          "availableStates": [
+            {
+              "variant": "List",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--list"
+            },
+            {
+              "variant": "ListEmpty",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--list-empty"
+            },
+            {
+              "variant": "ListLoadFailed",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--list-load-failed"
+            },
+            {
+              "variant": "Create",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--create"
+            },
+            {
+              "variant": "Edit",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--edit"
+            },
+            {
+              "variant": "EditMemberCriteriaAccess",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--edit-member-criteria-access"
+            },
+            {
+              "variant": "SecretIssued",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--secret-issued"
+            },
+            {
+              "variant": "StaleConnection",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--stale-connection"
+            },
+            {
+              "variant": "PhoneList",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--phone-list"
+            }
+          ]
+        }
+      ],
+      "relatedFeatureStories": [
+        {
+          "file": "features/admin/ui/AdminPageHeader/AdminPageHeader.stories.tsx",
+          "title": "Feature/Admin/AdminPageHeader",
+          "matchingOwners": ["features/admin/ui/AdminPageHeader/AdminPageHeader.tsx"]
+        },
+        {
+          "file": "features/confirmation/ConfirmationDialog.stories.tsx",
+          "title": "Feature/Confirmation/Dialog",
+          "matchingOwners": ["features/confirmation/ui/ConfirmationDialog.tsx"]
+        },
+        {
+          "file": "stories/pages/OAuthApps.stories.tsx",
+          "title": "Pages/Admin/OAuth Apps",
+          "matchingOwners": ["features/admin/oauth-app/OAuthAppEditorView.tsx"]
+        }
+      ],
+      "scopeNote": "Source view coverage only. A named story or importing child does not establish complete route state, permission, controller, network, SSR or browser parity."
+    },
+    {
+      "file": "app/admin/oauth-apps/page.tsx",
+      "sha256": "b4ed25754a5c15feae52a9181e1126fa5eae81bdf1cd18ab2b4b81d27033ab91",
+      "kind": "page",
+      "route": "/admin/oauth-apps",
+      "family": "Administration",
+      "hasQueryEditorBranch": false,
+      "editorBranchPreview": null,
+      "reviewStatus": "manual-preview-source-mapping",
+      "disposition": "page-view-preview",
+      "directJsx": ["OAuthAppsPage"],
+      "visualOwners": [
+        "features/admin/oauth-app/OAuthAppListView.tsx",
+        "features/admin/oauth-app/OAuthAppsPage.tsx",
+        "features/admin/ui/AdminPageHeader/AdminPageHeader.tsx",
+        "features/confirmation/ui/ConfirmationDialog.tsx",
+        "features/date-time/DateTime.tsx"
+      ],
+      "dependencyGraph": [
+        "app/admin/oauth-apps/page.tsx",
+        "features/admin/oauth-app/OAuthAppListView.tsx",
+        "features/admin/oauth-app/OAuthAppsPage.tsx",
+        "features/admin/oauth-app/paths.ts",
+        "features/admin/ui/AdminPageHeader/AdminPageHeader.tsx",
+        "features/admin/ui/AdminPageHeader/index.ts",
+        "features/confirmation/ui/ConfirmationDialog.tsx",
+        "features/confirmation/ui/confirmation-intent.ts",
+        "features/date-time/DateTime.tsx"
+      ],
+      "inheritedBoundaries": [
+        "app/admin/error.tsx",
+        "app/admin/layout.tsx",
+        "app/error.tsx",
+        "app/global-error.tsx",
+        "app/layout.tsx",
+        "app/not-found.tsx"
+      ],
+      "inheritedTerminalLayouts": [],
+      "renderability": "normal-or-conditional",
+      "redirects": [],
+      "previews": [
+        {
+          "route": "/admin/oauth-apps",
+          "storyTitle": "Pages/Admin/OAuth Apps",
+          "variant": "List",
+          "coverage": "page-view",
+          "scope": "Actual production OAuth apps list view with sign-in apps and connected AI tools from local data. Hydra, the API and the disconnect transport remain outside.",
+          "storySource": "stories/pages/OAuthApps.stories.tsx",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--list",
+          "availableStates": [
+            {
+              "variant": "List",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--list"
+            },
+            {
+              "variant": "ListEmpty",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--list-empty"
+            },
+            {
+              "variant": "ListLoadFailed",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--list-load-failed"
+            },
+            {
+              "variant": "Create",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--create"
+            },
+            {
+              "variant": "Edit",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--edit"
+            },
+            {
+              "variant": "EditMemberCriteriaAccess",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--edit-member-criteria-access"
+            },
+            {
+              "variant": "SecretIssued",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--secret-issued"
+            },
+            {
+              "variant": "StaleConnection",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--stale-connection"
+            },
+            {
+              "variant": "PhoneList",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--phone-list"
+            }
+          ]
+        }
+      ],
+      "relatedFeatureStories": [
+        {
+          "file": "features/admin/ui/AdminPageHeader/AdminPageHeader.stories.tsx",
+          "title": "Feature/Admin/AdminPageHeader",
+          "matchingOwners": ["features/admin/ui/AdminPageHeader/AdminPageHeader.tsx"]
+        },
+        {
+          "file": "features/confirmation/ConfirmationDialog.stories.tsx",
+          "title": "Feature/Confirmation/Dialog",
+          "matchingOwners": ["features/confirmation/ui/ConfirmationDialog.tsx"]
+        },
+        {
+          "file": "stories/pages/OAuthApps.stories.tsx",
+          "title": "Pages/Admin/OAuth Apps",
+          "matchingOwners": ["features/admin/oauth-app/OAuthAppListView.tsx"]
+        }
+      ],
+      "scopeNote": "Source view coverage only. A named story or importing child does not establish complete route state, permission, controller, network, SSR or browser parity."
+    },
+    {
+      "file": "app/admin/oauth-apps/tools/[clientId]/page.tsx",
+      "sha256": "f58773481aae39248ef85f2b2989453d80297c48fc345d8dfa04513471881c9d",
+      "kind": "page",
+      "route": "/admin/oauth-apps/tools/[clientId]",
+      "family": "Administration",
+      "hasQueryEditorBranch": false,
+      "editorBranchPreview": null,
+      "reviewStatus": "manual-preview-source-mapping",
+      "disposition": "page-view-preview",
+      "directJsx": ["OAuthConnectionDetail"],
+      "visualOwners": [
+        "features/admin/oauth-app/OAuthConnectionDetail.tsx",
+        "features/admin/oauth-app/OAuthConnectionDetailView.tsx",
+        "features/admin/ui/AdminPageHeader/AdminPageHeader.tsx",
+        "features/confirmation/ui/ConfirmationDialog.tsx",
+        "features/date-time/DateTime.tsx"
+      ],
+      "dependencyGraph": [
+        "app/admin/oauth-apps/tools/[clientId]/page.tsx",
+        "features/admin/oauth-app/OAuthConnectionDetail.tsx",
+        "features/admin/oauth-app/OAuthConnectionDetailView.tsx",
+        "features/admin/oauth-app/paths.ts",
+        "features/admin/ui/AdminPageHeader/AdminPageHeader.tsx",
+        "features/admin/ui/AdminPageHeader/index.ts",
+        "features/confirmation/ui/ConfirmationDialog.tsx",
+        "features/confirmation/ui/confirmation-intent.ts",
+        "features/date-time/DateTime.tsx"
+      ],
+      "inheritedBoundaries": [
+        "app/admin/error.tsx",
+        "app/admin/layout.tsx",
+        "app/error.tsx",
+        "app/global-error.tsx",
+        "app/layout.tsx",
+        "app/not-found.tsx"
+      ],
+      "inheritedTerminalLayouts": [],
+      "renderability": "normal-or-conditional",
+      "redirects": [],
+      "previews": [
+        {
+          "route": "/admin/oauth-apps/tools/[clientId]",
+          "storyTitle": "Pages/Admin/OAuth Apps",
+          "variant": "StaleConnection",
+          "coverage": "page-view",
+          "scope": "Actual production connected AI tool detail view with the disconnect dialog on local callbacks. Hydra deletion remains outside.",
+          "storySource": "stories/pages/OAuthApps.stories.tsx",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--stale-connection",
+          "availableStates": [
+            {
+              "variant": "List",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--list"
+            },
+            {
+              "variant": "ListEmpty",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--list-empty"
+            },
+            {
+              "variant": "ListLoadFailed",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--list-load-failed"
+            },
+            {
+              "variant": "Create",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--create"
+            },
+            {
+              "variant": "Edit",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--edit"
+            },
+            {
+              "variant": "EditMemberCriteriaAccess",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--edit-member-criteria-access"
+            },
+            {
+              "variant": "SecretIssued",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--secret-issued"
+            },
+            {
+              "variant": "StaleConnection",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--stale-connection"
+            },
+            {
+              "variant": "PhoneList",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-oauth-apps--phone-list"
+            }
+          ]
+        }
+      ],
+      "relatedFeatureStories": [
+        {
+          "file": "features/admin/ui/AdminPageHeader/AdminPageHeader.stories.tsx",
+          "title": "Feature/Admin/AdminPageHeader",
+          "matchingOwners": ["features/admin/ui/AdminPageHeader/AdminPageHeader.tsx"]
+        },
+        {
+          "file": "features/confirmation/ConfirmationDialog.stories.tsx",
+          "title": "Feature/Confirmation/Dialog",
+          "matchingOwners": ["features/confirmation/ui/ConfirmationDialog.tsx"]
+        },
+        {
+          "file": "stories/pages/OAuthApps.stories.tsx",
+          "title": "Pages/Admin/OAuth Apps",
+          "matchingOwners": ["features/admin/oauth-app/OAuthConnectionDetailView.tsx"]
         }
       ],
       "scopeNote": "Source view coverage only. A named story or importing child does not establish complete route state, permission, controller, network, SSR or browser parity."

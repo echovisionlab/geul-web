@@ -3,6 +3,7 @@ import {
   MCPAuthenticatedContextSchema,
   MCPDelegationMethod,
 } from '@echovisionlab/geul-proto/intra/gateway_authorization_pb.ts';
+import { SignInDecision } from '@echovisionlab/geul-proto/secure/oauth_app_pb.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SessionWithUser } from '@/lib/auth/types';
 import {
@@ -18,11 +19,16 @@ import {
   revokeMcpOAuthGrant,
 } from './hydra-mcp-oauth';
 
+const mocks = vi.hoisted(() => ({ authorizeOAuthSignIn: vi.fn() }));
+
 vi.mock('@/lib/env', () => ({
   getHydraAdminUrl: () => 'http://hydra.internal:4445',
   getMcpOAuthIssuerUrl: () => 'https://sso.example',
-  getOAuthSignInClientIds: () => ['monitor-client'],
   getSiteOrigin: () => 'https://site.example',
+}));
+
+vi.mock('@/lib/api/server-client', () => ({
+  createOAuthAppClient: async () => ({ authorizeOAuthSignIn: mocks.authorizeOAuthSignIn }),
 }));
 
 const challenge = 'challenge-123';
@@ -56,6 +62,8 @@ function jsonResponse(value: unknown): Response {
 describe('Hydra MCP OAuth controller', () => {
   beforeEach(() => {
     vi.unstubAllGlobals();
+    mocks.authorizeOAuthSignIn.mockReset();
+    mocks.authorizeOAuthSignIn.mockResolvedValue({ decision: SignInDecision.NOT_SIGN_IN_APP });
   });
 
   it('accepts a bounded opaque Hydra challenge without constraining its encoding', () => {
@@ -83,25 +91,27 @@ describe('Hydra MCP OAuth controller', () => {
   });
 
   it.each([
-    { role: 'admin' as const, accepted: true },
-    { role: 'author' as const, accepted: false },
-    { role: 'user' as const, accepted: false },
-    { role: 'admin' as const, status: 'banned' as const, accepted: false },
-    { role: 'admin' as const, status: 'pending_deletion' as const, accepted: false },
-  ])('lets only an active Admin sign in to an operator tool ($role, $status)', async ({ role, status, accepted }) => {
+    { decision: SignInDecision.ALLOWED, role: 'user' as const, continuation: 'https://sso.example/oidc/oauth2/auth' },
+    { decision: SignInDecision.DENIED, role: 'admin' as const, continuation: null },
+    {
+      decision: SignInDecision.NOT_SIGN_IN_APP,
+      role: 'author' as const,
+      continuation: 'https://sso.example/oauth2/auth',
+    },
+    { decision: SignInDecision.NOT_SIGN_IN_APP, role: 'user' as const, continuation: null },
+  ])('follows the API sign-in decision ($decision, $role)', async ({ decision, role, continuation }) => {
+    mocks.authorizeOAuthSignIn.mockResolvedValue({ decision });
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(jsonResponse({ client: { client_id: 'monitor-client' } }))
       .mockResolvedValueOnce(jsonResponse({ redirect_to: 'https://sso.example/oauth2/auth?login_verifier=accepted' }));
     vi.stubGlobal('fetch', fetchMock);
 
-    const continuation = await acceptHydraLogin(challenge, {
-      ...session,
-      user: { ...session.user, role, status: status ?? 'active' },
-    });
+    const accepted = await acceptHydraLogin(challenge, { ...session, user: { ...session.user, role } });
 
-    expect(continuation).toBe(accepted ? 'https://sso.example/oidc/oauth2/auth?login_verifier=accepted' : null);
-    expect(fetchMock).toHaveBeenCalledTimes(accepted ? 2 : 1);
+    expect(mocks.authorizeOAuthSignIn).toHaveBeenCalledWith({ clientId: 'monitor-client' });
+    expect(accepted).toBe(continuation && `${continuation}?login_verifier=accepted`);
+    expect(fetchMock).toHaveBeenCalledTimes(continuation ? 2 : 1);
   });
 
   it('hides an MCP client from an ordinary user', async () => {
@@ -114,7 +124,7 @@ describe('Hydra MCP OAuth controller', () => {
     expect(fetchMock).toHaveBeenCalledOnce();
   });
 
-  it('signs an Admin in to an operator tool with identity claims and no MCP audience or delegation', async () => {
+  it('signs a Member in to a sign-in app with identity claims and no MCP audience or delegation', async () => {
     const admin: SessionWithUser = { ...session, user: { ...session.user, role: 'admin', email: 'admin@example.com' } };
     const request = {
       client: { client_id: 'monitor-client' },
@@ -147,7 +157,7 @@ describe('Hydra MCP OAuth controller', () => {
     });
   });
 
-  it('refuses an operator-tool consent that is not an Admin signing in with identity scopes', () => {
+  it('refuses a sign-in app consent that does not ask for identity scopes for the Member', () => {
     const admin: SessionWithUser = { ...session, user: { ...session.user, role: 'admin' } };
     const request = {
       client: { client_id: 'monitor-client' },
@@ -157,17 +167,14 @@ describe('Hydra MCP OAuth controller', () => {
     };
     expect(() => assertSignInConsentRequest(request, admin)).not.toThrow();
     const cases: [string, typeof request, SessionWithUser][] = [
-      ['an Author', request, session],
-      ['a banned Admin', request, { ...admin, user: { ...admin.user, status: 'banned' } }],
       ['another subject', { ...request, subject: crypto.randomUUID() }, admin],
       ['the MCP scope', { ...request, requested_scope: ['openid', 'mcp'] }, admin],
       ['no openid scope', { ...request, requested_scope: ['email'] }, admin],
       ['a repeated scope', { ...request, requested_scope: ['openid', 'openid'] }, admin],
       ['an audience', { ...request, requested_access_token_audience: ['https://site.example/mcp'] }, admin],
-      ['an MCP client', { ...request, client: { client_id: 'example-client' } }, admin],
     ];
     for (const [name, candidate, member] of cases) {
-      expect(() => assertSignInConsentRequest(candidate, member), name).toThrow('does not match an Admin sign-in');
+      expect(() => assertSignInConsentRequest(candidate, member), name).toThrow('does not match a sign-in app sign-in');
     }
   });
 

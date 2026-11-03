@@ -124,6 +124,38 @@ export const routePreviews = [
       'Actual production Member criteria PageView, query controls, count/create/edit/archive/restore dialogs with typed local transport. Server evaluation, relation constraints and persistence remain outside.',
   },
   {
+    route: '/admin/oauth-apps',
+    storyTitle: 'Pages/Admin/OAuth Apps',
+    variant: 'List',
+    coverage: 'page-view',
+    scope:
+      'Actual production OAuth apps list view with sign-in apps and connected AI tools from local data. Hydra, the API and the disconnect transport remain outside.',
+  },
+  {
+    route: '/admin/oauth-apps/new',
+    storyTitle: 'Pages/Admin/OAuth Apps',
+    variant: 'Create',
+    coverage: 'page-view',
+    scope:
+      'Actual production sign-in app editor view in create mode with local callbacks. Client registration and secret issuance remain outside.',
+  },
+  {
+    route: '/admin/oauth-apps/apps/[clientId]',
+    storyTitle: 'Pages/Admin/OAuth Apps',
+    variant: 'Edit',
+    coverage: 'page-view',
+    scope:
+      'Actual production sign-in app editor view with access, redirect, scope and token settings, secret rotation and deletion dialogs on local callbacks. Persistence and Hydra writes remain outside.',
+  },
+  {
+    route: '/admin/oauth-apps/tools/[clientId]',
+    storyTitle: 'Pages/Admin/OAuth Apps',
+    variant: 'StaleConnection',
+    coverage: 'page-view',
+    scope:
+      'Actual production connected AI tool detail view with the disconnect dialog on local callbacks. Hydra deletion remains outside.',
+  },
+  {
     route: '/admin/settings/og-image',
     storyTitle: 'Pages/Admin/OG Image Settings',
     variant: 'Ready',

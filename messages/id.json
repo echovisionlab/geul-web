@@ -502,7 +502,8 @@
       "system": "Sistem"
     },
     "items": {
-      "mailSettings": "Pengaturan Surat"
+      "mailSettings": "Pengaturan Surat",
+      "oauthApps": "Aplikasi OAuth"
     }
   },
   "adminList": {
@@ -646,6 +647,117 @@
       "types": {
         "usersByFilter": "Pengguna berdasarkan Filter",
         "allUsers": "Semua pengguna"
+      }
+    },
+    "oauthApps": {
+      "title": "Aplikasi OAuth",
+      "description": "Aplikasi yang memasukkan orang dengan akun {siteName} mereka, dan alat AI yang terhubung ke alat penyuntingan situs.",
+      "create": "Aplikasi baru",
+      "createTitle": "Aplikasi masuk baru",
+      "createSubmit": "Buat aplikasi",
+      "untitled": "Aplikasi tanpa nama",
+      "createdAt": "Didaftarkan {date}",
+      "loadFailed": "Aplikasi OAuth tidak dapat dimuat.",
+      "openApp": "Buka {name}",
+      "openConnection": "Buka {name}",
+      "connectionActions": "Tindakan untuk {name}",
+      "copyClientId": "Salin ID klien",
+      "copySecret": "Salin rahasia",
+      "rotateSecret": "Terbitkan rahasia baru",
+      "rotateTitle": "Terbitkan rahasia klien baru?",
+      "rotateConfirm": "Rahasia saat ini langsung berhenti berfungsi. Segera perbarui konfigurasi aplikasi dengan rahasia baru.",
+      "delete": "Hapus aplikasi",
+      "deleteTitle": "Hapus aplikasi ini?",
+      "deleteConfirm": "{name} tidak lagi dapat memasukkan siapa pun, dan tokennya berhenti berfungsi.",
+      "deleted": "{name} dihapus",
+      "saved": "Aplikasi disimpan",
+      "disconnect": "Putuskan",
+      "disconnectTitle": "Putuskan alat AI ini?",
+      "disconnectConfirm": "{name} langsung kehilangan akses. Alat ini baru dapat terhubung lagi setelah anggota menyetujuinya kembali.",
+      "disconnected": "{name} diputuskan",
+      "secretTitle": "Rahasia klien",
+      "secretWarning": "Salin rahasia sekarang. Rahasia hanya ditampilkan sekali; terbitkan yang baru jika hilang.",
+      "apps": {
+        "title": "Aplikasi masuk",
+        "description": "Aplikasi yang terdaftar di sini memasukkan orang dengan akun {siteName} mereka.",
+        "empty": "Belum ada aplikasi masuk."
+      },
+      "connections": {
+        "title": "Alat AI yang terhubung",
+        "description": "Alat yang dihubungkan anggota ke alat penyuntingan situs. Setiap alat mendaftarkan dirinya sendiri.",
+        "empty": "Tidak ada alat AI yang terhubung.",
+        "generatedId": "Didaftarkan dengan ID yang dibuat otomatis",
+        "active": "Terhubung",
+        "stale": "Alamat lama",
+        "staleWarning": "Koneksi ini masih menuju alamat yang tidak lagi dilayani situs, jadi tidak dapat digunakan. Putuskan untuk merapikannya.",
+        "detailDescription": "Alat ini mendaftarkan dirinya sendiri, jadi pengaturannya tidak dapat diedit di sini."
+      },
+      "sections": {
+        "basics": "Dasar",
+        "signIn": "Masuk",
+        "tokens": "Token",
+        "manage": "Kelola",
+        "connection": "Koneksi"
+      },
+      "fields": {
+        "clientId": "ID klien",
+        "clientSecret": "Rahasia klien",
+        "redirectUris": "URI pengalihan",
+        "redirectHosts": "Mengalihkan ke",
+        "postLogoutRedirectUris": "URI pengalihan setelah keluar",
+        "scopes": "Data profil yang dibagikan",
+        "authMethod": "Autentikasi klien",
+        "accessTokenLifespan": "Masa berlaku token akses",
+        "idTokenLifespan": "Masa berlaku token ID",
+        "publisher": "Diterbitkan oleh",
+        "resource": "Tujuan token",
+        "signInAccess": "Siapa yang dapat masuk"
+      },
+      "scopes": {
+        "openid": "ID akun (selalu dibagikan)",
+        "email": "Alamat email",
+        "profile": "Nama panggilan"
+      },
+      "authMethods": {
+        "client_secret_basic": "Rahasia klien (HTTP Basic)",
+        "client_secret_post": "Rahasia klien (isi formulir)",
+        "private_key_jwt": "Kunci bertanda tangan (private_key_jwt)",
+        "none": "Tidak ada: aplikasi publik dengan PKCE"
+      },
+      "lifespans": {
+        "5m": "5 menit",
+        "15m": "15 menit",
+        "1h": "1 jam"
+      },
+      "placeholders": {
+        "clientId": "mis. team-dashboard",
+        "redirectUri": "https://…/callback"
+      },
+      "help": {
+        "name": "Ditampilkan kepada admin di daftar ini.",
+        "clientIdCreate": "Biarkan kosong untuk membuatnya otomatis. Tidak dapat diubah nanti.",
+        "clientIdFixed": "Ditetapkan di konfigurasi aplikasi. Tidak dapat diubah.",
+        "signIn": "Aplikasi masuk tidak mendapat token penyegaran, jadi akses diperiksa setiap kali masuk. Anggota yang tidak lagi memenuhi syarat kehilangan akses saat tokennya kedaluwarsa.",
+        "redirectUris": "Alamat HTTPS persis yang dituju aplikasi setelah masuk. Tekan Enter setelah setiap alamat.",
+        "postLogoutRedirectUris": "Alamat opsional yang boleh dituju aplikasi setelah keluar.",
+        "scopes": "Data profil yang boleh dibaca aplikasi selain ID akun.",
+        "tokens": "Masa berlaku yang lebih singkat mengakhiri akses lebih cepat setelah anggota tidak lagi memenuhi syarat.",
+        "authMethodSecret": "Aplikasi menyimpan rahasia klien di servernya.",
+        "authMethodPublic": "Untuk aplikasi yang tidak dapat menyimpan rahasia, seperti aplikasi peramban atau desktop.",
+        "manage": "Rahasia baru atau aplikasi yang dihapus langsung berlaku.",
+        "disconnect": "Memutuskan menghapus pendaftaran alat dan mengakhiri aksesnya untuk semua anggota."
+      },
+      "access": {
+        "none": "Tidak seorang pun (masuk dijeda)",
+        "admins": "Hanya admin",
+        "members": "Semua anggota",
+        "memberCriteria": "Kriteria anggota"
+      },
+      "accessHelp": {
+        "none": "Aplikasi tetap terdaftar tetapi menolak setiap upaya masuk.",
+        "admins": "Hanya admin aktif yang dapat masuk.",
+        "members": "Setiap anggota aktif dapat masuk.",
+        "memberCriteria": "Anggota yang cocok dengan kriteria anggota yang dipilih dapat masuk. Pencocokannya sama seperti untuk unduhan terbatas."
       }
     },
     "series": {

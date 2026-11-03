@@ -34,6 +34,7 @@ import { WorkService as PublicWorkService } from '@echovisionlab/geul-proto/publ
 import { AdminService } from '@echovisionlab/geul-proto/secure/admin_pb.ts';
 import { ArtistService } from '@echovisionlab/geul-proto/secure/artist_pb.ts';
 import { MemberCriteriaService } from '@echovisionlab/geul-proto/secure/member_criteria_pb.ts';
+import { OAuthAppService } from '@echovisionlab/geul-proto/secure/oauth_app_pb.ts';
 import { CampaignService } from '@echovisionlab/geul-proto/secure/campaign_pb.ts';
 import { CategoryService } from '@echovisionlab/geul-proto/secure/category_pb.ts';
 import { ClientService } from '@echovisionlab/geul-proto/secure/client_pb.ts';
@@ -501,6 +502,10 @@ export async function createShareLinkClient() {
 
 export async function createMemberCriteriaClient() {
   return createClient(MemberCriteriaService, await createServerTransport());
+}
+
+export async function createOAuthAppClient() {
+  return createClient(OAuthAppService, await createServerTransport());
 }
 
 export async function createMailAdapterClient() {

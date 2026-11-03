@@ -502,7 +502,8 @@
       "system": "시스템"
     },
     "items": {
-      "mailSettings": "메일 설정"
+      "mailSettings": "메일 설정",
+      "oauthApps": "OAuth 앱"
     }
   },
   "adminList": {
@@ -647,6 +648,117 @@
         "usersByFilter": "조건으로 회원 선택",
         "allUsers": "모든 회원"
       }
+    },
+    "oauthApps": {
+      "title": "OAuth 앱",
+      "description": "{siteName} 계정으로 로그인하는 앱과, 사이트 편집 도구에 연결된 AI 도구입니다.",
+      "create": "새 앱",
+      "createTitle": "새 로그인 앱",
+      "createSubmit": "앱 만들기",
+      "untitled": "이름 없는 앱",
+      "createdAt": "{date} 등록",
+      "loadFailed": "OAuth 앱을 불러오지 못했습니다.",
+      "openApp": "{name} 열기",
+      "openConnection": "{name} 열기",
+      "connectionActions": "{name} 작업",
+      "copyClientId": "클라이언트 ID 복사",
+      "copySecret": "비밀값 복사",
+      "rotateSecret": "새 비밀값 발급",
+      "rotateTitle": "새 클라이언트 비밀값을 발급할까요?",
+      "rotateConfirm": "지금 비밀값은 바로 쓸 수 없게 됩니다. 앱 설정을 새 비밀값으로 즉시 바꾸세요.",
+      "delete": "앱 삭제",
+      "deleteTitle": "이 앱을 삭제할까요?",
+      "deleteConfirm": "{name}은(는) 더 이상 로그인을 처리할 수 없고, 발급된 토큰도 모두 무효가 됩니다.",
+      "disconnect": "연결 끊기",
+      "disconnectTitle": "이 AI 도구의 연결을 끊을까요?",
+      "disconnectConfirm": "{name}은(는) 즉시 접근 권한을 잃습니다. 회원이 다시 승인해야만 다시 연결할 수 있습니다.",
+      "secretTitle": "클라이언트 비밀값",
+      "secretWarning": "지금 비밀값을 복사하세요. 한 번만 표시되며, 잃어버리면 새로 발급해야 합니다.",
+      "apps": {
+        "title": "로그인 앱",
+        "description": "여기에 등록한 앱은 {siteName} 계정으로 로그인합니다.",
+        "empty": "등록한 로그인 앱이 없습니다."
+      },
+      "connections": {
+        "title": "연결된 AI 도구",
+        "description": "회원이 사이트 편집 도구에 연결한 도구입니다. 각 도구가 스스로 등록했습니다.",
+        "empty": "연결된 AI 도구가 없습니다.",
+        "generatedId": "자동 생성 ID로 등록",
+        "active": "연결됨",
+        "stale": "이전 주소",
+        "staleWarning": "이 연결은 사이트가 더 이상 쓰지 않는 주소를 가리켜서 쓸 수 없습니다. 연결을 끊어 정리하세요.",
+        "detailDescription": "이 도구가 스스로 등록했기 때문에 여기서는 설정을 바꿀 수 없습니다."
+      },
+      "sections": {
+        "basics": "기본 정보",
+        "signIn": "로그인",
+        "tokens": "토큰",
+        "manage": "관리",
+        "connection": "연결 정보"
+      },
+      "fields": {
+        "clientId": "클라이언트 ID",
+        "clientSecret": "클라이언트 비밀값",
+        "redirectUris": "리디렉션 URI",
+        "redirectHosts": "돌아가는 곳",
+        "postLogoutRedirectUris": "로그아웃 후 리디렉션 URI",
+        "scopes": "공유하는 프로필 정보",
+        "authMethod": "클라이언트 인증 방식",
+        "accessTokenLifespan": "액세스 토큰 수명",
+        "idTokenLifespan": "ID 토큰 수명",
+        "publisher": "등록 출처",
+        "resource": "토큰 사용처",
+        "signInAccess": "로그인할 수 있는 회원"
+      },
+      "scopes": {
+        "openid": "계정 ID (항상 공유)",
+        "email": "이메일 주소",
+        "profile": "닉네임"
+      },
+      "authMethods": {
+        "client_secret_basic": "클라이언트 비밀값 (HTTP Basic)",
+        "client_secret_post": "클라이언트 비밀값 (폼 본문)",
+        "private_key_jwt": "서명 키 (private_key_jwt)",
+        "none": "없음: PKCE를 쓰는 공개 앱"
+      },
+      "lifespans": {
+        "5m": "5분",
+        "15m": "15분",
+        "1h": "1시간"
+      },
+      "placeholders": {
+        "clientId": "예: team-dashboard",
+        "redirectUri": "https://…/callback"
+      },
+      "help": {
+        "name": "이 목록에서 관리자에게 보이는 이름입니다.",
+        "clientIdCreate": "비워 두면 자동으로 만듭니다. 나중에 바꿀 수 없습니다.",
+        "clientIdFixed": "앱 설정에 들어가는 값이라 바꿀 수 없습니다.",
+        "signIn": "로그인 앱에는 갱신 토큰을 주지 않으므로 로그인할 때마다 허용 여부를 다시 확인합니다. 조건에서 벗어난 회원은 토큰이 만료되면 접근을 잃습니다.",
+        "redirectUris": "로그인 후 앱이 돌아갈 정확한 HTTPS 주소입니다. 하나씩 입력하고 Enter를 누르세요.",
+        "postLogoutRedirectUris": "로그아웃 후 앱이 돌아갈 수 있는 주소입니다. 없어도 됩니다.",
+        "scopes": "계정 ID 외에 앱이 읽을 수 있는 프로필 정보입니다.",
+        "tokens": "수명이 짧을수록 회원이 조건에서 벗어난 뒤 접근이 더 빨리 끝납니다.",
+        "authMethodSecret": "앱이 서버에 클라이언트 비밀값을 보관합니다.",
+        "authMethodPublic": "브라우저나 데스크톱 앱처럼 비밀값을 보관할 수 없는 앱에 씁니다.",
+        "manage": "새 비밀값 발급과 앱 삭제는 바로 적용됩니다.",
+        "disconnect": "연결을 끊으면 도구의 등록이 지워지고 모든 회원의 접근이 끝납니다."
+      },
+      "access": {
+        "none": "없음 (로그인 중지)",
+        "admins": "관리자만",
+        "members": "모든 회원",
+        "memberCriteria": "회원 조건"
+      },
+      "accessHelp": {
+        "none": "앱 등록은 유지하고 모든 로그인을 거부합니다.",
+        "admins": "활성 상태인 관리자만 로그인할 수 있습니다.",
+        "members": "활성 상태인 모든 회원이 로그인할 수 있습니다.",
+        "memberCriteria": "선택한 회원 조건에 맞는 회원이 로그인할 수 있습니다. 제한 다운로드와 같은 기준으로 판단합니다."
+      },
+      "deleted": "{name}을(를) 삭제했습니다",
+      "saved": "앱을 저장했습니다",
+      "disconnected": "{name}의 연결을 끊었습니다"
     },
     "series": {
       "searchPlaceholder": "시리즈 검색...",

@@ -502,7 +502,8 @@
       "system": "System"
     },
     "items": {
-      "mailSettings": "Mail-Einstellungen"
+      "mailSettings": "Mail-Einstellungen",
+      "oauthApps": "OAuth-Apps"
     }
   },
   "map": {
@@ -1105,6 +1106,117 @@
       "types": {
         "usersByFilter": "Benutzer nach Filter",
         "allUsers": "Alle Benutzer"
+      }
+    },
+    "oauthApps": {
+      "title": "OAuth-Apps",
+      "description": "Apps, die Personen mit ihrem {siteName}-Konto anmelden, und KI-Tools, die mit den Bearbeitungswerkzeugen der Website verbunden sind.",
+      "create": "Neue App",
+      "createTitle": "Neue Anmelde-App",
+      "createSubmit": "App erstellen",
+      "untitled": "Unbenannte App",
+      "createdAt": "Registriert am {date}",
+      "loadFailed": "OAuth-Apps konnten nicht geladen werden.",
+      "openApp": "{name} öffnen",
+      "openConnection": "{name} öffnen",
+      "connectionActions": "Aktionen für {name}",
+      "copyClientId": "Client-ID kopieren",
+      "copySecret": "Secret kopieren",
+      "rotateSecret": "Neues Secret ausstellen",
+      "rotateTitle": "Neues Client-Secret ausstellen?",
+      "rotateConfirm": "Das aktuelle Secret funktioniert sofort nicht mehr. Aktualisiere die App-Konfiguration umgehend mit dem neuen Secret.",
+      "delete": "App löschen",
+      "deleteTitle": "Diese App löschen?",
+      "deleteConfirm": "{name} kann niemanden mehr anmelden, und ihre Tokens funktionieren nicht mehr.",
+      "deleted": "{name} gelöscht",
+      "saved": "App gespeichert",
+      "disconnect": "Trennen",
+      "disconnectTitle": "Dieses KI-Tool trennen?",
+      "disconnectConfirm": "{name} verliert sofort den Zugriff. Es kann sich erst wieder verbinden, wenn ein Mitglied es erneut genehmigt.",
+      "disconnected": "{name} getrennt",
+      "secretTitle": "Client-Secret",
+      "secretWarning": "Kopiere das Secret jetzt. Es wird nur einmal angezeigt; stelle ein neues aus, wenn es verloren geht.",
+      "apps": {
+        "title": "Anmelde-Apps",
+        "description": "Hier registrierte Apps melden Personen mit ihrem {siteName}-Konto an.",
+        "empty": "Noch keine Anmelde-Apps."
+      },
+      "connections": {
+        "title": "Verbundene KI-Tools",
+        "description": "Tools, die Mitglieder mit den Bearbeitungswerkzeugen der Website verbunden haben. Jedes Tool hat sich selbst registriert.",
+        "empty": "Keine KI-Tools verbunden.",
+        "generatedId": "Mit einer generierten ID registriert",
+        "active": "Verbunden",
+        "stale": "Alte Adresse",
+        "staleWarning": "Diese Verbindung verweist noch auf eine Adresse, die die Website nicht mehr bereitstellt, und kann daher nicht verwendet werden. Trenne sie, um aufzuräumen.",
+        "detailDescription": "Dieses Tool hat sich selbst registriert, daher können seine Einstellungen hier nicht bearbeitet werden."
+      },
+      "sections": {
+        "basics": "Grundlagen",
+        "signIn": "Anmeldung",
+        "tokens": "Tokens",
+        "manage": "Verwalten",
+        "connection": "Verbindung"
+      },
+      "fields": {
+        "clientId": "Client-ID",
+        "clientSecret": "Client-Secret",
+        "redirectUris": "Weiterleitungs-URIs",
+        "redirectHosts": "Leitet weiter an",
+        "postLogoutRedirectUris": "Weiterleitungs-URIs nach Abmeldung",
+        "scopes": "Geteilte Profildaten",
+        "authMethod": "Client-Authentifizierung",
+        "accessTokenLifespan": "Gültigkeit des Zugriffstokens",
+        "idTokenLifespan": "Gültigkeit des ID-Tokens",
+        "publisher": "Veröffentlicht von",
+        "resource": "Token-Ziel",
+        "signInAccess": "Wer sich anmelden kann"
+      },
+      "scopes": {
+        "openid": "Konto-ID (immer geteilt)",
+        "email": "E-Mail-Adresse",
+        "profile": "Spitzname"
+      },
+      "authMethods": {
+        "client_secret_basic": "Client-Secret (HTTP Basic)",
+        "client_secret_post": "Client-Secret (Formular-Body)",
+        "private_key_jwt": "Signierter Schlüssel (private_key_jwt)",
+        "none": "Keine: öffentliche App mit PKCE"
+      },
+      "lifespans": {
+        "5m": "5 Minuten",
+        "15m": "15 Minuten",
+        "1h": "1 Stunde"
+      },
+      "placeholders": {
+        "clientId": "z. B. team-dashboard",
+        "redirectUri": "https://…/callback"
+      },
+      "help": {
+        "name": "Wird Admins in dieser Liste angezeigt.",
+        "clientIdCreate": "Leer lassen, um eine zu generieren. Sie kann später nicht geändert werden.",
+        "clientIdFixed": "Ist in der Konfiguration der App hinterlegt und kann nicht geändert werden.",
+        "signIn": "Anmelde-Apps erhalten kein Refresh-Token, daher wird der Zugriff bei jeder Anmeldung geprüft. Ein Mitglied, das die Voraussetzungen nicht mehr erfüllt, verliert den Zugriff, wenn seine Tokens ablaufen.",
+        "redirectUris": "Exakte HTTPS-Adressen, zu denen die App nach der Anmeldung zurückkehrt. Drücke nach jeder Adresse die Eingabetaste.",
+        "postLogoutRedirectUris": "Optionale Adressen, zu denen die App nach der Abmeldung zurückkehren darf.",
+        "scopes": "Profildaten, die die App zusätzlich zur Konto-ID lesen darf.",
+        "tokens": "Kürzere Gültigkeiten beenden den Zugriff früher, nachdem ein Mitglied die Voraussetzungen nicht mehr erfüllt.",
+        "authMethodSecret": "Die App bewahrt ein Client-Secret auf ihrem Server auf.",
+        "authMethodPublic": "Für Apps, die kein Secret aufbewahren können, etwa Browser- oder Desktop-Apps.",
+        "manage": "Ein neues Secret oder eine gelöschte App wirkt sofort.",
+        "disconnect": "Das Trennen entfernt die Registrierung des Tools und beendet seinen Zugriff für alle Mitglieder."
+      },
+      "access": {
+        "none": "Niemand (Anmeldung pausiert)",
+        "admins": "Nur Admins",
+        "members": "Alle Mitglieder",
+        "memberCriteria": "Mitgliederkriterien"
+      },
+      "accessHelp": {
+        "none": "Die App bleibt registriert, lehnt aber jede Anmeldung ab.",
+        "admins": "Nur aktive Admins können sich anmelden.",
+        "members": "Jedes aktive Mitglied kann sich anmelden.",
+        "memberCriteria": "Mitglieder, die den ausgewählten Mitgliederkriterien entsprechen, können sich anmelden. Sie werden genauso geprüft wie bei eingeschränkten Downloads."
       }
     },
     "series": {

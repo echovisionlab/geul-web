@@ -502,7 +502,8 @@
       "system": "Sistema"
     },
     "items": {
-      "mailSettings": "Impostazioni di posta"
+      "mailSettings": "Impostazioni di posta",
+      "oauthApps": "App OAuth"
     }
   },
   "adminList": {
@@ -646,6 +647,117 @@
       "types": {
         "usersByFilter": "Utenti per filtro",
         "allUsers": "Tutti gli utenti"
+      }
+    },
+    "oauthApps": {
+      "title": "App OAuth",
+      "description": "App che fanno accedere le persone con il loro account {siteName} e strumenti di IA collegati agli strumenti di modifica del sito.",
+      "create": "Nuova app",
+      "createTitle": "Nuova app di accesso",
+      "createSubmit": "Crea app",
+      "untitled": "App senza nome",
+      "createdAt": "Registrata il {date}",
+      "loadFailed": "Impossibile caricare le app OAuth.",
+      "openApp": "Apri {name}",
+      "openConnection": "Apri {name}",
+      "connectionActions": "Azioni per {name}",
+      "copyClientId": "Copia ID client",
+      "copySecret": "Copia segreto",
+      "rotateSecret": "Emetti nuovo segreto",
+      "rotateTitle": "Emettere un nuovo segreto client?",
+      "rotateConfirm": "Il segreto attuale smette subito di funzionare. Aggiorna subito la configurazione dell'app con il nuovo segreto.",
+      "delete": "Elimina app",
+      "deleteTitle": "Eliminare questa app?",
+      "deleteConfirm": "{name} non potrà più far accedere nessuno e i suoi token smettono di funzionare.",
+      "deleted": "{name} eliminata",
+      "saved": "App salvata",
+      "disconnect": "Disconnetti",
+      "disconnectTitle": "Disconnettere questo strumento di IA?",
+      "disconnectConfirm": "{name} perde subito l'accesso. Potrà ricollegarsi solo dopo una nuova approvazione di un membro.",
+      "disconnected": "{name} disconnesso",
+      "secretTitle": "Segreto client",
+      "secretWarning": "Copia ora il segreto. Viene mostrato una sola volta; se lo perdi, emettine uno nuovo.",
+      "apps": {
+        "title": "App di accesso",
+        "description": "Le app registrate qui fanno accedere le persone con il loro account {siteName}.",
+        "empty": "Nessuna app di accesso."
+      },
+      "connections": {
+        "title": "Strumenti di IA collegati",
+        "description": "Strumenti che i membri hanno collegato agli strumenti di modifica del sito. Ogni strumento si è registrato da sé.",
+        "empty": "Nessuno strumento di IA collegato.",
+        "generatedId": "Registrato con un ID generato",
+        "active": "Collegato",
+        "stale": "Indirizzo vecchio",
+        "staleWarning": "Questo collegamento punta ancora a un indirizzo che il sito non serve più, quindi non è utilizzabile. Disconnettilo per fare pulizia.",
+        "detailDescription": "Questo strumento si è registrato da sé, quindi le sue impostazioni non si possono modificare qui."
+      },
+      "sections": {
+        "basics": "Informazioni di base",
+        "signIn": "Accesso",
+        "tokens": "Token",
+        "manage": "Gestione",
+        "connection": "Collegamento"
+      },
+      "fields": {
+        "clientId": "ID client",
+        "clientSecret": "Segreto client",
+        "redirectUris": "URI di reindirizzamento",
+        "redirectHosts": "Reindirizza a",
+        "postLogoutRedirectUris": "URI di reindirizzamento dopo l'uscita",
+        "scopes": "Dati del profilo condivisi",
+        "authMethod": "Autenticazione del client",
+        "accessTokenLifespan": "Durata del token di accesso",
+        "idTokenLifespan": "Durata del token ID",
+        "publisher": "Pubblicato da",
+        "resource": "Destinazione del token",
+        "signInAccess": "Chi può accedere"
+      },
+      "scopes": {
+        "openid": "ID account (sempre condiviso)",
+        "email": "Indirizzo email",
+        "profile": "Nickname"
+      },
+      "authMethods": {
+        "client_secret_basic": "Segreto client (HTTP Basic)",
+        "client_secret_post": "Segreto client (corpo del modulo)",
+        "private_key_jwt": "Chiave firmata (private_key_jwt)",
+        "none": "Nessuna: app pubblica con PKCE"
+      },
+      "lifespans": {
+        "5m": "5 minuti",
+        "15m": "15 minuti",
+        "1h": "1 ora"
+      },
+      "placeholders": {
+        "clientId": "es. team-dashboard",
+        "redirectUri": "https://…/callback"
+      },
+      "help": {
+        "name": "Mostrato agli amministratori in questo elenco.",
+        "clientIdCreate": "Lascia vuoto per generarne uno. Non si può cambiare in seguito.",
+        "clientIdFixed": "È impostato nella configurazione dell'app. Non si può cambiare.",
+        "signIn": "Le app di accesso non ricevono un token di aggiornamento, quindi l'accesso viene verificato a ogni login. Un membro che non soddisfa più i requisiti perde l'accesso alla scadenza dei suoi token.",
+        "redirectUris": "Indirizzi HTTPS esatti a cui l'app torna dopo l'accesso. Premi Invio dopo ciascuno.",
+        "postLogoutRedirectUris": "Indirizzi facoltativi a cui l'app può tornare dopo l'uscita.",
+        "scopes": "Dati del profilo che l'app può leggere oltre all'ID account.",
+        "tokens": "Durate più brevi terminano prima l'accesso quando un membro non soddisfa più i requisiti.",
+        "authMethodSecret": "L'app conserva un segreto client sul proprio server.",
+        "authMethodPublic": "Per app che non possono conservare un segreto, come app del browser o desktop.",
+        "manage": "Un nuovo segreto o un'app eliminata hanno effetto immediato.",
+        "disconnect": "La disconnessione rimuove la registrazione dello strumento e termina il suo accesso per tutti i membri."
+      },
+      "access": {
+        "none": "Nessuno (accesso sospeso)",
+        "admins": "Solo amministratori",
+        "members": "Tutti i membri",
+        "memberCriteria": "Criteri dei membri"
+      },
+      "accessHelp": {
+        "none": "Mantiene l'app registrata ma rifiuta ogni accesso.",
+        "admins": "Solo gli amministratori attivi possono accedere.",
+        "members": "Ogni membro attivo può accedere.",
+        "memberCriteria": "I membri che soddisfano i criteri dei membri selezionati possono accedere. Vengono valutati come per i download riservati."
       }
     },
     "series": {

@@ -502,7 +502,8 @@
       "system": "系統"
     },
     "items": {
-      "mailSettings": "郵件設定"
+      "mailSettings": "郵件設定",
+      "oauthApps": "OAuth 應用程式"
     }
   },
   "adminList": {
@@ -646,6 +647,117 @@
       "types": {
         "usersByFilter": "按篩選的用戶",
         "allUsers": "所有使用者"
+      }
+    },
+    "oauthApps": {
+      "title": "OAuth 應用程式",
+      "description": "使用 {siteName} 帳號登入的應用程式，以及連接到網站編輯工具的 AI 工具。",
+      "create": "新增應用程式",
+      "createTitle": "新增登入應用程式",
+      "createSubmit": "建立應用程式",
+      "untitled": "未命名的應用程式",
+      "createdAt": "註冊於 {date}",
+      "loadFailed": "無法載入 OAuth 應用程式。",
+      "openApp": "開啟 {name}",
+      "openConnection": "開啟 {name}",
+      "connectionActions": "{name} 的動作",
+      "copyClientId": "複製用戶端 ID",
+      "copySecret": "複製密鑰",
+      "rotateSecret": "核發新密鑰",
+      "rotateTitle": "要核發新的用戶端密鑰嗎？",
+      "rotateConfirm": "目前的密鑰會立即失效。請馬上以新密鑰更新應用程式設定。",
+      "delete": "刪除應用程式",
+      "deleteTitle": "要刪除這個應用程式嗎？",
+      "deleteConfirm": "{name} 將無法再替任何人登入，其權杖也會失效。",
+      "deleted": "已刪除 {name}",
+      "saved": "已儲存應用程式",
+      "disconnect": "中斷連線",
+      "disconnectTitle": "要中斷這個 AI 工具的連線嗎？",
+      "disconnectConfirm": "{name} 會立即失去存取權。必須等會員再次核准後才能重新連線。",
+      "disconnected": "已中斷 {name} 的連線",
+      "secretTitle": "用戶端密鑰",
+      "secretWarning": "請立即複製密鑰。密鑰只會顯示一次；如果遺失，請核發新的密鑰。",
+      "apps": {
+        "title": "登入應用程式",
+        "description": "在此註冊的應用程式會以 {siteName} 帳號為使用者登入。",
+        "empty": "目前沒有登入應用程式。"
+      },
+      "connections": {
+        "title": "已連線的 AI 工具",
+        "description": "會員連接到網站編輯工具的工具。每個工具都是自行註冊的。",
+        "empty": "沒有已連線的 AI 工具。",
+        "generatedId": "以自動產生的 ID 註冊",
+        "active": "已連線",
+        "stale": "舊位址",
+        "staleWarning": "這個連線仍指向網站已不再提供的位址，因此無法使用。請中斷連線加以整理。",
+        "detailDescription": "這個工具是自行註冊的，因此無法在此編輯其設定。"
+      },
+      "sections": {
+        "basics": "基本資訊",
+        "signIn": "登入",
+        "tokens": "權杖",
+        "manage": "管理",
+        "connection": "連線資訊"
+      },
+      "fields": {
+        "clientId": "用戶端 ID",
+        "clientSecret": "用戶端密鑰",
+        "redirectUris": "重新導向 URI",
+        "redirectHosts": "導向至",
+        "postLogoutRedirectUris": "登出後重新導向 URI",
+        "scopes": "共用的個人資料",
+        "authMethod": "用戶端驗證",
+        "accessTokenLifespan": "存取權杖有效期限",
+        "idTokenLifespan": "ID 權杖有效期限",
+        "publisher": "發布者",
+        "resource": "權杖用途",
+        "signInAccess": "誰可以登入"
+      },
+      "scopes": {
+        "openid": "帳號 ID（一律共用）",
+        "email": "電子郵件地址",
+        "profile": "暱稱"
+      },
+      "authMethods": {
+        "client_secret_basic": "用戶端密鑰（HTTP Basic）",
+        "client_secret_post": "用戶端密鑰（表單本文）",
+        "private_key_jwt": "簽署金鑰（private_key_jwt）",
+        "none": "無：使用 PKCE 的公開應用程式"
+      },
+      "lifespans": {
+        "5m": "5 分鐘",
+        "15m": "15 分鐘",
+        "1h": "1 小時"
+      },
+      "placeholders": {
+        "clientId": "例如 team-dashboard",
+        "redirectUri": "https://…/callback"
+      },
+      "help": {
+        "name": "在此清單中向管理員顯示。",
+        "clientIdCreate": "留空即自動產生。之後無法變更。",
+        "clientIdFixed": "寫在應用程式設定中，無法變更。",
+        "signIn": "登入應用程式不會取得更新權杖，因此每次登入都會檢查存取權。不再符合條件的會員會在權杖到期後失去存取權。",
+        "redirectUris": "應用程式登入後返回的確切 HTTPS 位址。每輸入一個請按一次 Enter。",
+        "postLogoutRedirectUris": "應用程式登出後可以返回的選用位址。",
+        "scopes": "除了帳號 ID 之外，應用程式可以讀取的個人資料。",
+        "tokens": "有效期限越短，會員不再符合條件後存取權結束得越早。",
+        "authMethodSecret": "應用程式會在其伺服器上保存用戶端密鑰。",
+        "authMethodPublic": "適用於無法保存密鑰的應用程式，例如瀏覽器或桌面應用程式。",
+        "manage": "核發新密鑰或刪除應用程式會立即生效。",
+        "disconnect": "中斷連線會刪除該工具的註冊，並結束所有會員的存取。"
+      },
+      "access": {
+        "none": "無人（已暫停登入）",
+        "admins": "僅限管理員",
+        "members": "所有會員",
+        "memberCriteria": "會員條件"
+      },
+      "accessHelp": {
+        "none": "保留應用程式註冊，但拒絕所有登入。",
+        "admins": "只有使用中的管理員可以登入。",
+        "members": "所有使用中的會員都可以登入。",
+        "memberCriteria": "符合所選會員條件的會員可以登入。判斷方式與受限下載相同。"
       }
     },
     "series": {

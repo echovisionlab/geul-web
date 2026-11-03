@@ -502,7 +502,8 @@
       "system": "Système"
     },
     "items": {
-      "mailSettings": "Paramètres de messagerie"
+      "mailSettings": "Paramètres de messagerie",
+      "oauthApps": "Applications OAuth"
     }
   },
   "adminList": {
@@ -646,6 +647,117 @@
       "types": {
         "usersByFilter": "Utilisateurs selon filtre",
         "allUsers": "Tous les utilisateurs"
+      }
+    },
+    "oauthApps": {
+      "title": "Applications OAuth",
+      "description": "Applications qui connectent les personnes avec leur compte {siteName}, et outils d'IA connectés aux outils d'édition du site.",
+      "create": "Nouvelle application",
+      "createTitle": "Nouvelle application de connexion",
+      "createSubmit": "Créer l'application",
+      "untitled": "Application sans nom",
+      "createdAt": "Enregistrée le {date}",
+      "loadFailed": "Impossible de charger les applications OAuth.",
+      "openApp": "Ouvrir {name}",
+      "openConnection": "Ouvrir {name}",
+      "connectionActions": "Actions pour {name}",
+      "copyClientId": "Copier l'ID client",
+      "copySecret": "Copier le secret",
+      "rotateSecret": "Émettre un nouveau secret",
+      "rotateTitle": "Émettre un nouveau secret client ?",
+      "rotateConfirm": "Le secret actuel cesse immédiatement de fonctionner. Mettez à jour la configuration de l'application avec le nouveau secret sans attendre.",
+      "delete": "Supprimer l'application",
+      "deleteTitle": "Supprimer cette application ?",
+      "deleteConfirm": "{name} ne pourra plus connecter personne, et ses jetons cessent de fonctionner.",
+      "deleted": "{name} supprimée",
+      "saved": "Application enregistrée",
+      "disconnect": "Déconnecter",
+      "disconnectTitle": "Déconnecter cet outil d'IA ?",
+      "disconnectConfirm": "{name} perd l'accès immédiatement. Il ne pourra se reconnecter qu'après une nouvelle approbation d'un membre.",
+      "disconnected": "{name} déconnecté",
+      "secretTitle": "Secret client",
+      "secretWarning": "Copiez le secret maintenant. Il n'est affiché qu'une fois ; émettez-en un nouveau s'il est perdu.",
+      "apps": {
+        "title": "Applications de connexion",
+        "description": "Les applications enregistrées ici connectent les personnes avec leur compte {siteName}.",
+        "empty": "Aucune application de connexion pour l'instant."
+      },
+      "connections": {
+        "title": "Outils d'IA connectés",
+        "description": "Outils que les membres ont connectés aux outils d'édition du site. Chaque outil s'est enregistré lui-même.",
+        "empty": "Aucun outil d'IA n'est connecté.",
+        "generatedId": "Enregistré avec un ID généré",
+        "active": "Connecté",
+        "stale": "Ancienne adresse",
+        "staleWarning": "Cette connexion pointe encore vers une adresse que le site ne sert plus ; elle est donc inutilisable. Déconnectez-la pour faire le ménage.",
+        "detailDescription": "Cet outil s'est enregistré lui-même ; ses paramètres ne peuvent donc pas être modifiés ici."
+      },
+      "sections": {
+        "basics": "Informations de base",
+        "signIn": "Connexion",
+        "tokens": "Jetons",
+        "manage": "Gestion",
+        "connection": "Connexion"
+      },
+      "fields": {
+        "clientId": "ID client",
+        "clientSecret": "Secret client",
+        "redirectUris": "URI de redirection",
+        "redirectHosts": "Redirige vers",
+        "postLogoutRedirectUris": "URI de redirection après déconnexion",
+        "scopes": "Données de profil partagées",
+        "authMethod": "Authentification du client",
+        "accessTokenLifespan": "Durée de vie du jeton d'accès",
+        "idTokenLifespan": "Durée de vie du jeton d'ID",
+        "publisher": "Publié par",
+        "resource": "Cible du jeton",
+        "signInAccess": "Qui peut se connecter"
+      },
+      "scopes": {
+        "openid": "ID de compte (toujours partagé)",
+        "email": "Adresse e-mail",
+        "profile": "Pseudo"
+      },
+      "authMethods": {
+        "client_secret_basic": "Secret client (HTTP Basic)",
+        "client_secret_post": "Secret client (corps du formulaire)",
+        "private_key_jwt": "Clé signée (private_key_jwt)",
+        "none": "Aucune : application publique avec PKCE"
+      },
+      "lifespans": {
+        "5m": "5 minutes",
+        "15m": "15 minutes",
+        "1h": "1 heure"
+      },
+      "placeholders": {
+        "clientId": "ex. team-dashboard",
+        "redirectUri": "https://…/callback"
+      },
+      "help": {
+        "name": "Affiché aux administrateurs dans cette liste.",
+        "clientIdCreate": "Laissez vide pour en générer un. Il ne pourra pas être modifié ensuite.",
+        "clientIdFixed": "Défini dans la configuration de l'application. Il ne peut pas être modifié.",
+        "signIn": "Les applications de connexion ne reçoivent pas de jeton d'actualisation ; l'accès est donc vérifié à chaque connexion. Un membre qui ne remplit plus les conditions perd l'accès à l'expiration de ses jetons.",
+        "redirectUris": "Adresses HTTPS exactes vers lesquelles l'application revient après la connexion. Appuyez sur Entrée après chacune.",
+        "postLogoutRedirectUris": "Adresses facultatives vers lesquelles l'application peut revenir après la déconnexion.",
+        "scopes": "Données de profil que l'application peut lire en plus de l'ID de compte.",
+        "tokens": "Des durées plus courtes mettent fin à l'accès plus tôt lorsqu'un membre ne remplit plus les conditions.",
+        "authMethodSecret": "L'application conserve un secret client sur son serveur.",
+        "authMethodPublic": "Pour les applications qui ne peuvent pas conserver de secret, comme les applications web ou de bureau.",
+        "manage": "Un nouveau secret ou une application supprimée prend effet immédiatement.",
+        "disconnect": "La déconnexion supprime l'enregistrement de l'outil et met fin à son accès pour tous les membres."
+      },
+      "access": {
+        "none": "Personne (connexion suspendue)",
+        "admins": "Administrateurs uniquement",
+        "members": "Tous les membres",
+        "memberCriteria": "Critères de membres"
+      },
+      "accessHelp": {
+        "none": "L'application reste enregistrée mais refuse toute connexion.",
+        "admins": "Seuls les administrateurs actifs peuvent se connecter.",
+        "members": "Tout membre actif peut se connecter.",
+        "memberCriteria": "Les membres correspondant aux critères de membres sélectionnés peuvent se connecter. Ils sont évalués de la même façon que pour les téléchargements restreints."
       }
     },
     "series": {

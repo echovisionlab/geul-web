@@ -502,7 +502,8 @@
       "system": "Sistem"
     },
     "items": {
-      "mailSettings": "Posta Ayarları"
+      "mailSettings": "Posta Ayarları",
+      "oauthApps": "OAuth uygulamaları"
     }
   },
   "adminList": {
@@ -646,6 +647,117 @@
       "types": {
         "usersByFilter": "Filtreye Göre Kullanıcılar",
         "allUsers": "Tüm kullanıcılar"
+      }
+    },
+    "oauthApps": {
+      "title": "OAuth uygulamaları",
+      "description": "Kişilerin {siteName} hesabıyla giriş yaptığı uygulamalar ve sitenin düzenleme araçlarına bağlı yapay zekâ araçları.",
+      "create": "Yeni uygulama",
+      "createTitle": "Yeni giriş uygulaması",
+      "createSubmit": "Uygulama oluştur",
+      "untitled": "Adsız uygulama",
+      "createdAt": "{date} tarihinde kaydedildi",
+      "loadFailed": "OAuth uygulamaları yüklenemedi.",
+      "openApp": "{name} uygulamasını aç",
+      "openConnection": "{name} aracını aç",
+      "connectionActions": "{name} için işlemler",
+      "copyClientId": "İstemci kimliğini kopyala",
+      "copySecret": "Gizli anahtarı kopyala",
+      "rotateSecret": "Yeni gizli anahtar oluştur",
+      "rotateTitle": "Yeni istemci gizli anahtarı oluşturulsun mu?",
+      "rotateConfirm": "Mevcut gizli anahtar hemen çalışmayı durdurur. Uygulamanın yapılandırmasını hemen yeni gizli anahtarla güncelleyin.",
+      "delete": "Uygulamayı sil",
+      "deleteTitle": "Bu uygulama silinsin mi?",
+      "deleteConfirm": "{name} artık kimseyi giriş yaptıramaz ve token'ları çalışmayı durdurur.",
+      "deleted": "{name} silindi",
+      "saved": "Uygulama kaydedildi",
+      "disconnect": "Bağlantıyı kes",
+      "disconnectTitle": "Bu yapay zekâ aracının bağlantısı kesilsin mi?",
+      "disconnectConfirm": "{name} erişimini hemen kaybeder. Ancak bir üye yeniden onaylarsa tekrar bağlanabilir.",
+      "disconnected": "{name} bağlantısı kesildi",
+      "secretTitle": "İstemci gizli anahtarı",
+      "secretWarning": "Gizli anahtarı şimdi kopyalayın. Yalnızca bir kez gösterilir; kaybolursa yenisini oluşturun.",
+      "apps": {
+        "title": "Giriş uygulamaları",
+        "description": "Burada kayıtlı uygulamalar kişileri {siteName} hesabıyla giriş yaptırır.",
+        "empty": "Henüz giriş uygulaması yok."
+      },
+      "connections": {
+        "title": "Bağlı yapay zekâ araçları",
+        "description": "Üyelerin sitenin düzenleme araçlarına bağladığı araçlar. Her araç kendini kaydetti.",
+        "empty": "Bağlı yapay zekâ aracı yok.",
+        "generatedId": "Oluşturulan bir kimlikle kaydedildi",
+        "active": "Bağlı",
+        "stale": "Eski adres",
+        "staleWarning": "Bu bağlantı, sitenin artık sunmadığı bir adresi gösterdiği için kullanılamaz. Temizlemek için bağlantıyı kesin.",
+        "detailDescription": "Bu araç kendini kaydettiği için ayarları burada düzenlenemez."
+      },
+      "sections": {
+        "basics": "Temel bilgiler",
+        "signIn": "Giriş",
+        "tokens": "Token'lar",
+        "manage": "Yönet",
+        "connection": "Bağlantı"
+      },
+      "fields": {
+        "clientId": "İstemci kimliği",
+        "clientSecret": "İstemci gizli anahtarı",
+        "redirectUris": "Yönlendirme URI'leri",
+        "redirectHosts": "Yönlendirdiği yer",
+        "postLogoutRedirectUris": "Çıkış sonrası yönlendirme URI'leri",
+        "scopes": "Paylaşılan profil bilgileri",
+        "authMethod": "İstemci kimlik doğrulaması",
+        "accessTokenLifespan": "Erişim token'ı süresi",
+        "idTokenLifespan": "Kimlik token'ı süresi",
+        "publisher": "Yayımlayan",
+        "resource": "Token hedefi",
+        "signInAccess": "Kimler giriş yapabilir"
+      },
+      "scopes": {
+        "openid": "Hesap kimliği (her zaman paylaşılır)",
+        "email": "E-posta adresi",
+        "profile": "Takma ad"
+      },
+      "authMethods": {
+        "client_secret_basic": "İstemci gizli anahtarı (HTTP Basic)",
+        "client_secret_post": "İstemci gizli anahtarı (form gövdesi)",
+        "private_key_jwt": "İmzalı anahtar (private_key_jwt)",
+        "none": "Yok: PKCE kullanan genel uygulama"
+      },
+      "lifespans": {
+        "5m": "5 dakika",
+        "15m": "15 dakika",
+        "1h": "1 saat"
+      },
+      "placeholders": {
+        "clientId": "ör. team-dashboard",
+        "redirectUri": "https://…/callback"
+      },
+      "help": {
+        "name": "Bu listede yöneticilere gösterilir.",
+        "clientIdCreate": "Otomatik oluşturmak için boş bırakın. Daha sonra değiştirilemez.",
+        "clientIdFixed": "Uygulamanın yapılandırmasında yer alır. Değiştirilemez.",
+        "signIn": "Giriş uygulamaları yenileme token'ı almaz; bu yüzden erişim her girişte kontrol edilir. Artık koşulları karşılamayan bir üye, token'larının süresi dolunca erişimini kaybeder.",
+        "redirectUris": "Uygulamanın girişten sonra döndüğü tam HTTPS adresleri. Her birinden sonra Enter'a basın.",
+        "postLogoutRedirectUris": "Uygulamanın çıkıştan sonra dönebileceği isteğe bağlı adresler.",
+        "scopes": "Uygulamanın hesap kimliğine ek olarak okuyabileceği profil bilgileri.",
+        "tokens": "Kısa süreler, bir üye koşulları karşılamayı bıraktığında erişimi daha erken sonlandırır.",
+        "authMethodSecret": "Uygulama, istemci gizli anahtarını kendi sunucusunda saklar.",
+        "authMethodPublic": "Tarayıcı veya masaüstü uygulamaları gibi gizli anahtar saklayamayan uygulamalar için.",
+        "manage": "Yeni gizli anahtar veya silinen uygulama hemen geçerli olur.",
+        "disconnect": "Bağlantıyı kesmek aracın kaydını siler ve tüm üyeler için erişimini sonlandırır."
+      },
+      "access": {
+        "none": "Kimse (giriş duraklatıldı)",
+        "admins": "Yalnızca yöneticiler",
+        "members": "Tüm üyeler",
+        "memberCriteria": "Üye ölçütleri"
+      },
+      "accessHelp": {
+        "none": "Uygulama kayıtlı kalır ama her girişi reddeder.",
+        "admins": "Yalnızca etkin yöneticiler giriş yapabilir.",
+        "members": "Etkin her üye giriş yapabilir.",
+        "memberCriteria": "Seçilen üye ölçütlerine uyan üyeler giriş yapabilir. Kısıtlı indirmelerdeki ile aynı şekilde kontrol edilir."
       }
     },
     "series": {

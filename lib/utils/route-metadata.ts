@@ -32,6 +32,7 @@ const ADMIN_SECTION_TITLES: Record<string, SectionTitle> = {
   genres: { list: 'Genres', detail: 'Genre' },
   labels: { list: 'Labels', detail: 'Label' },
   menus: { list: 'Menus', detail: 'Menu' },
+  'oauth-apps': { list: 'OAuth Apps', detail: 'OAuth App' },
   pages: { list: 'Pages', detail: 'Page' },
   posts: { list: 'Posts', detail: 'Post' },
   releases: { list: 'Releases', detail: 'Release' },

@@ -502,7 +502,8 @@
       "system": "System"
     },
     "items": {
-      "mailSettings": "Mail Settings"
+      "mailSettings": "Mail Settings",
+      "oauthApps": "OAuth apps"
     }
   },
   "adminList": {
@@ -646,6 +647,117 @@
       "types": {
         "usersByFilter": "Members by filter",
         "allUsers": "All members"
+      }
+    },
+    "oauthApps": {
+      "title": "OAuth apps",
+      "description": "Apps that sign people in with their {siteName} account, and AI tools connected to the site's editing tools.",
+      "create": "New app",
+      "createTitle": "New sign-in app",
+      "createSubmit": "Create app",
+      "untitled": "Untitled app",
+      "createdAt": "Registered {date}",
+      "loadFailed": "OAuth apps could not be loaded.",
+      "openApp": "Open {name}",
+      "openConnection": "Open {name}",
+      "connectionActions": "Actions for {name}",
+      "copyClientId": "Copy client ID",
+      "copySecret": "Copy secret",
+      "rotateSecret": "Issue new secret",
+      "rotateTitle": "Issue a new client secret?",
+      "rotateConfirm": "The current secret stops working immediately. Update the app's configuration with the new secret right away.",
+      "delete": "Delete app",
+      "deleteTitle": "Delete this app?",
+      "deleteConfirm": "{name} will no longer be able to sign anyone in, and its tokens stop working.",
+      "deleted": "{name} deleted",
+      "saved": "App saved",
+      "disconnect": "Disconnect",
+      "disconnectTitle": "Disconnect this AI tool?",
+      "disconnectConfirm": "{name} loses access right away. It can connect again only after a member approves it again.",
+      "disconnected": "{name} disconnected",
+      "secretTitle": "Client secret",
+      "secretWarning": "Copy the secret now. It is shown only once; issue a new one if it is lost.",
+      "apps": {
+        "title": "Sign-in apps",
+        "description": "Apps registered here sign people in with their {siteName} account.",
+        "empty": "No sign-in apps yet."
+      },
+      "connections": {
+        "title": "Connected AI tools",
+        "description": "Tools that members connected to the site's editing tools. Each tool registered itself.",
+        "empty": "No AI tools are connected.",
+        "generatedId": "Registered with a generated ID",
+        "active": "Connected",
+        "stale": "Old address",
+        "staleWarning": "This connection still points to an address the site no longer serves, so it cannot be used. Disconnect it to clean up.",
+        "detailDescription": "This tool registered itself, so its settings cannot be edited here."
+      },
+      "sections": {
+        "basics": "Basics",
+        "signIn": "Sign-in",
+        "tokens": "Tokens",
+        "manage": "Manage",
+        "connection": "Connection"
+      },
+      "fields": {
+        "clientId": "Client ID",
+        "clientSecret": "Client secret",
+        "redirectUris": "Redirect URIs",
+        "redirectHosts": "Redirects to",
+        "postLogoutRedirectUris": "Sign-out redirect URIs",
+        "scopes": "Shared profile data",
+        "authMethod": "Client authentication",
+        "accessTokenLifespan": "Access token lifetime",
+        "idTokenLifespan": "ID token lifetime",
+        "publisher": "Published by",
+        "resource": "Token target",
+        "signInAccess": "Who can sign in"
+      },
+      "scopes": {
+        "openid": "Account ID (always shared)",
+        "email": "Email address",
+        "profile": "Nickname"
+      },
+      "authMethods": {
+        "client_secret_basic": "Client secret (HTTP Basic)",
+        "client_secret_post": "Client secret (form body)",
+        "private_key_jwt": "Signed key (private_key_jwt)",
+        "none": "None: public app with PKCE"
+      },
+      "lifespans": {
+        "5m": "5 minutes",
+        "15m": "15 minutes",
+        "1h": "1 hour"
+      },
+      "placeholders": {
+        "clientId": "e.g. team-dashboard",
+        "redirectUri": "https://…/callback"
+      },
+      "help": {
+        "name": "Shown to Admins in this list.",
+        "clientIdCreate": "Leave empty to generate one. It cannot be changed later.",
+        "clientIdFixed": "Set in the app's configuration. It cannot be changed.",
+        "signIn": "Sign-in apps get no refresh token, so access is checked at every sign-in. A member who no longer qualifies loses access when their tokens expire.",
+        "redirectUris": "Exact HTTPS addresses the app returns to after sign-in. Press Enter after each one.",
+        "postLogoutRedirectUris": "Optional addresses the app may return to after signing out.",
+        "scopes": "Profile data the app may read in addition to the account ID.",
+        "tokens": "Shorter lifetimes end access sooner after a member stops qualifying.",
+        "authMethodSecret": "The app keeps a client secret on its server.",
+        "authMethodPublic": "For apps that cannot keep a secret, such as browser or desktop apps.",
+        "manage": "A new secret or a deleted app takes effect immediately.",
+        "disconnect": "Disconnecting removes the tool's registration and ends its access for every member."
+      },
+      "access": {
+        "none": "Nobody (sign-in paused)",
+        "admins": "Admins only",
+        "members": "All members",
+        "memberCriteria": "Member criteria"
+      },
+      "accessHelp": {
+        "none": "Keeps the app registered but refuses every sign-in.",
+        "admins": "Only active Admins can sign in.",
+        "members": "Every active member can sign in.",
+        "memberCriteria": "Members matched by the selected member criteria can sign in. They are matched the same way as for restricted downloads."
       }
     },
     "series": {

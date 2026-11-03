@@ -502,7 +502,8 @@
       "system": "Hệ thống"
     },
     "items": {
-      "mailSettings": "Cài đặt thư"
+      "mailSettings": "Cài đặt thư",
+      "oauthApps": "Ứng dụng OAuth"
     }
   },
   "adminList": {
@@ -646,6 +647,117 @@
       "types": {
         "usersByFilter": "Người dùng theo bộ lọc",
         "allUsers": "Tất cả người dùng"
+      }
+    },
+    "oauthApps": {
+      "title": "Ứng dụng OAuth",
+      "description": "Ứng dụng cho mọi người đăng nhập bằng tài khoản {siteName}, và các công cụ AI được kết nối với công cụ chỉnh sửa của trang.",
+      "create": "Ứng dụng mới",
+      "createTitle": "Ứng dụng đăng nhập mới",
+      "createSubmit": "Tạo ứng dụng",
+      "untitled": "Ứng dụng chưa đặt tên",
+      "createdAt": "Đã đăng ký {date}",
+      "loadFailed": "Không thể tải ứng dụng OAuth.",
+      "openApp": "Mở {name}",
+      "openConnection": "Mở {name}",
+      "connectionActions": "Thao tác cho {name}",
+      "copyClientId": "Sao chép ID ứng dụng khách",
+      "copySecret": "Sao chép khóa bí mật",
+      "rotateSecret": "Cấp khóa bí mật mới",
+      "rotateTitle": "Cấp khóa bí mật ứng dụng khách mới?",
+      "rotateConfirm": "Khóa bí mật hiện tại ngừng hoạt động ngay. Hãy cập nhật cấu hình ứng dụng bằng khóa bí mật mới ngay lập tức.",
+      "delete": "Xóa ứng dụng",
+      "deleteTitle": "Xóa ứng dụng này?",
+      "deleteConfirm": "{name} sẽ không thể cho ai đăng nhập nữa, và các token của nó ngừng hoạt động.",
+      "deleted": "Đã xóa {name}",
+      "saved": "Đã lưu ứng dụng",
+      "disconnect": "Ngắt kết nối",
+      "disconnectTitle": "Ngắt kết nối công cụ AI này?",
+      "disconnectConfirm": "{name} mất quyền truy cập ngay. Công cụ chỉ có thể kết nối lại sau khi một thành viên phê duyệt lại.",
+      "disconnected": "Đã ngắt kết nối {name}",
+      "secretTitle": "Khóa bí mật ứng dụng khách",
+      "secretWarning": "Hãy sao chép khóa bí mật ngay. Khóa chỉ hiển thị một lần; nếu bị mất, hãy cấp khóa mới.",
+      "apps": {
+        "title": "Ứng dụng đăng nhập",
+        "description": "Các ứng dụng đăng ký ở đây cho mọi người đăng nhập bằng tài khoản {siteName}.",
+        "empty": "Chưa có ứng dụng đăng nhập nào."
+      },
+      "connections": {
+        "title": "Công cụ AI đã kết nối",
+        "description": "Các công cụ mà thành viên đã kết nối với công cụ chỉnh sửa của trang. Mỗi công cụ tự đăng ký.",
+        "empty": "Không có công cụ AI nào được kết nối.",
+        "generatedId": "Đăng ký bằng ID được tạo tự động",
+        "active": "Đã kết nối",
+        "stale": "Địa chỉ cũ",
+        "staleWarning": "Kết nối này vẫn trỏ đến một địa chỉ mà trang không còn phục vụ, nên không thể sử dụng. Hãy ngắt kết nối để dọn dẹp.",
+        "detailDescription": "Công cụ này tự đăng ký, nên không thể chỉnh sửa cài đặt của nó ở đây."
+      },
+      "sections": {
+        "basics": "Thông tin cơ bản",
+        "signIn": "Đăng nhập",
+        "tokens": "Token",
+        "manage": "Quản lý",
+        "connection": "Kết nối"
+      },
+      "fields": {
+        "clientId": "ID ứng dụng khách",
+        "clientSecret": "Khóa bí mật ứng dụng khách",
+        "redirectUris": "URI chuyển hướng",
+        "redirectHosts": "Chuyển hướng đến",
+        "postLogoutRedirectUris": "URI chuyển hướng sau khi đăng xuất",
+        "scopes": "Dữ liệu hồ sơ được chia sẻ",
+        "authMethod": "Xác thực ứng dụng khách",
+        "accessTokenLifespan": "Thời hạn token truy cập",
+        "idTokenLifespan": "Thời hạn token ID",
+        "publisher": "Phát hành bởi",
+        "resource": "Mục tiêu token",
+        "signInAccess": "Ai có thể đăng nhập"
+      },
+      "scopes": {
+        "openid": "ID tài khoản (luôn được chia sẻ)",
+        "email": "Địa chỉ email",
+        "profile": "Biệt danh"
+      },
+      "authMethods": {
+        "client_secret_basic": "Khóa bí mật ứng dụng khách (HTTP Basic)",
+        "client_secret_post": "Khóa bí mật ứng dụng khách (nội dung biểu mẫu)",
+        "private_key_jwt": "Khóa đã ký (private_key_jwt)",
+        "none": "Không có: ứng dụng công khai dùng PKCE"
+      },
+      "lifespans": {
+        "5m": "5 phút",
+        "15m": "15 phút",
+        "1h": "1 giờ"
+      },
+      "placeholders": {
+        "clientId": "vd: team-dashboard",
+        "redirectUri": "https://…/callback"
+      },
+      "help": {
+        "name": "Hiển thị cho quản trị viên trong danh sách này.",
+        "clientIdCreate": "Để trống để tạo tự động. Không thể thay đổi sau này.",
+        "clientIdFixed": "Được đặt trong cấu hình của ứng dụng. Không thể thay đổi.",
+        "signIn": "Ứng dụng đăng nhập không nhận token làm mới, nên quyền truy cập được kiểm tra mỗi lần đăng nhập. Thành viên không còn đủ điều kiện sẽ mất quyền truy cập khi token hết hạn.",
+        "redirectUris": "Các địa chỉ HTTPS chính xác mà ứng dụng quay lại sau khi đăng nhập. Nhấn Enter sau mỗi địa chỉ.",
+        "postLogoutRedirectUris": "Các địa chỉ tùy chọn mà ứng dụng có thể quay lại sau khi đăng xuất.",
+        "scopes": "Dữ liệu hồ sơ mà ứng dụng có thể đọc ngoài ID tài khoản.",
+        "tokens": "Thời hạn ngắn hơn sẽ kết thúc quyền truy cập sớm hơn khi thành viên không còn đủ điều kiện.",
+        "authMethodSecret": "Ứng dụng lưu khóa bí mật ứng dụng khách trên máy chủ của mình.",
+        "authMethodPublic": "Dành cho ứng dụng không thể lưu khóa bí mật, như ứng dụng trình duyệt hoặc máy tính.",
+        "manage": "Khóa bí mật mới hoặc ứng dụng đã xóa có hiệu lực ngay.",
+        "disconnect": "Ngắt kết nối sẽ xóa đăng ký của công cụ và chấm dứt quyền truy cập của nó cho mọi thành viên."
+      },
+      "access": {
+        "none": "Không ai (tạm dừng đăng nhập)",
+        "admins": "Chỉ quản trị viên",
+        "members": "Tất cả thành viên",
+        "memberCriteria": "Tiêu chí thành viên"
+      },
+      "accessHelp": {
+        "none": "Giữ ứng dụng đã đăng ký nhưng từ chối mọi lượt đăng nhập.",
+        "admins": "Chỉ quản trị viên đang hoạt động mới có thể đăng nhập.",
+        "members": "Mọi thành viên đang hoạt động đều có thể đăng nhập.",
+        "memberCriteria": "Thành viên khớp với tiêu chí thành viên đã chọn có thể đăng nhập. Cách so khớp giống như với lượt tải xuống bị giới hạn."
       }
     },
     "series": {

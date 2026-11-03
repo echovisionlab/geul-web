@@ -502,7 +502,8 @@
       "system": "系统"
     },
     "items": {
-      "mailSettings": "邮件设置"
+      "mailSettings": "邮件设置",
+      "oauthApps": "OAuth 应用"
     }
   },
   "adminList": {
@@ -646,6 +647,117 @@
       "types": {
         "usersByFilter": "按筛选的用户",
         "allUsers": "所有用户"
+      }
+    },
+    "oauthApps": {
+      "title": "OAuth 应用",
+      "description": "使用 {siteName} 账号登录的应用，以及连接到网站编辑工具的 AI 工具。",
+      "create": "新建应用",
+      "createTitle": "新建登录应用",
+      "createSubmit": "创建应用",
+      "untitled": "未命名应用",
+      "createdAt": "注册于 {date}",
+      "loadFailed": "无法加载 OAuth 应用。",
+      "openApp": "打开 {name}",
+      "openConnection": "打开 {name}",
+      "connectionActions": "{name} 的操作",
+      "copyClientId": "复制客户端 ID",
+      "copySecret": "复制密钥",
+      "rotateSecret": "签发新密钥",
+      "rotateTitle": "要签发新的客户端密钥吗？",
+      "rotateConfirm": "当前密钥会立即失效。请马上用新密钥更新应用配置。",
+      "delete": "删除应用",
+      "deleteTitle": "要删除此应用吗？",
+      "deleteConfirm": "{name} 将无法再为任何人登录，其令牌也会失效。",
+      "deleted": "已删除 {name}",
+      "saved": "应用已保存",
+      "disconnect": "断开连接",
+      "disconnectTitle": "要断开此 AI 工具的连接吗？",
+      "disconnectConfirm": "{name} 会立即失去访问权限。只有在会员再次批准后才能重新连接。",
+      "disconnected": "已断开 {name}",
+      "secretTitle": "客户端密钥",
+      "secretWarning": "请立即复制密钥。它只显示一次；如果丢失，请签发新密钥。",
+      "apps": {
+        "title": "登录应用",
+        "description": "在此注册的应用使用 {siteName} 账号为用户登录。",
+        "empty": "还没有登录应用。"
+      },
+      "connections": {
+        "title": "已连接的 AI 工具",
+        "description": "会员连接到网站编辑工具的工具。每个工具都是自行注册的。",
+        "empty": "没有已连接的 AI 工具。",
+        "generatedId": "使用自动生成的 ID 注册",
+        "active": "已连接",
+        "stale": "旧地址",
+        "staleWarning": "此连接仍指向网站已不再提供的地址，因此无法使用。请断开连接以进行清理。",
+        "detailDescription": "此工具是自行注册的，因此无法在此编辑其设置。"
+      },
+      "sections": {
+        "basics": "基本信息",
+        "signIn": "登录",
+        "tokens": "令牌",
+        "manage": "管理",
+        "connection": "连接信息"
+      },
+      "fields": {
+        "clientId": "客户端 ID",
+        "clientSecret": "客户端密钥",
+        "redirectUris": "重定向 URI",
+        "redirectHosts": "重定向到",
+        "postLogoutRedirectUris": "退出后重定向 URI",
+        "scopes": "共享的个人资料信息",
+        "authMethod": "客户端认证",
+        "accessTokenLifespan": "访问令牌有效期",
+        "idTokenLifespan": "ID 令牌有效期",
+        "publisher": "发布方",
+        "resource": "令牌用途",
+        "signInAccess": "谁可以登录"
+      },
+      "scopes": {
+        "openid": "账号 ID（始终共享）",
+        "email": "电子邮件地址",
+        "profile": "昵称"
+      },
+      "authMethods": {
+        "client_secret_basic": "客户端密钥（HTTP Basic）",
+        "client_secret_post": "客户端密钥（表单正文）",
+        "private_key_jwt": "签名密钥（private_key_jwt）",
+        "none": "无：使用 PKCE 的公开应用"
+      },
+      "lifespans": {
+        "5m": "5 分钟",
+        "15m": "15 分钟",
+        "1h": "1 小时"
+      },
+      "placeholders": {
+        "clientId": "例如 team-dashboard",
+        "redirectUri": "https://…/callback"
+      },
+      "help": {
+        "name": "在此列表中向管理员显示。",
+        "clientIdCreate": "留空则自动生成。之后无法更改。",
+        "clientIdFixed": "写在应用配置中，无法更改。",
+        "signIn": "登录应用不会获得刷新令牌，因此每次登录都会检查访问权限。不再符合条件的会员会在令牌过期后失去访问权限。",
+        "redirectUris": "应用登录后返回的确切 HTTPS 地址。每输入一个按一次 Enter。",
+        "postLogoutRedirectUris": "应用退出后可以返回的可选地址。",
+        "scopes": "除账号 ID 外，应用可以读取的个人资料信息。",
+        "tokens": "有效期越短，会员不再符合条件后访问结束得越早。",
+        "authMethodSecret": "应用在其服务器上保存客户端密钥。",
+        "authMethodPublic": "适用于无法保存密钥的应用，例如浏览器或桌面应用。",
+        "manage": "签发新密钥或删除应用会立即生效。",
+        "disconnect": "断开连接会删除该工具的注册，并结束所有会员对它的访问。"
+      },
+      "access": {
+        "none": "无人（已暂停登录）",
+        "admins": "仅管理员",
+        "members": "所有会员",
+        "memberCriteria": "会员条件"
+      },
+      "accessHelp": {
+        "none": "保留应用注册，但拒绝所有登录。",
+        "admins": "只有活跃的管理员可以登录。",
+        "members": "所有活跃会员都可以登录。",
+        "memberCriteria": "符合所选会员条件的会员可以登录。判断方式与受限下载相同。"
       }
     },
     "series": {
