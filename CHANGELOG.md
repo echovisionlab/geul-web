@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.5](https://github.com/echovisionlab/geul-web/compare/v0.23.4...v0.23.5) (2026-11-03)
+
+
+### Bug Fixes
+
+* **ui:** share Core loading feedback and keep Form passwords out of browser storage ([#222](https://github.com/echovisionlab/geul-web/issues/222)) ([0154dba](https://github.com/echovisionlab/geul-web/commit/0154dba66f4be4a5b0049e68e3d0acbea9c66118))
+
 ## [0.23.4](https://github.com/echovisionlab/geul-web/compare/v0.23.3...v0.23.4) (2026-10-30)
 
 
