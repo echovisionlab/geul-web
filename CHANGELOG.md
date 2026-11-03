@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.25.0](https://github.com/echovisionlab/geul-web/compare/v0.24.1...v0.25.0) (2026-11-03)
+
+
+### Features
+
+* manage OAuth apps and ask the API who a sign-in app admits ([#228](https://github.com/echovisionlab/geul-web/issues/228)) ([8557b29](https://github.com/echovisionlab/geul-web/commit/8557b290ff5aff960f95404ca2a8866752944bfb))
+
 ## [0.24.1](https://github.com/echovisionlab/geul-web/compare/v0.24.0...v0.24.1) (2026-11-03)
 
 
