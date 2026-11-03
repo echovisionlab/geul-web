@@ -67,9 +67,6 @@ function FormPasswordTarget({
       mounted.current = false;
     };
   }, []);
-  const [storedPassword, setStoredPassword] = useState<string | undefined>(undefined);
-  const [passwordLoaded, setPasswordLoaded] = useState(false);
-
   const basePath = useMemo(() => {
     const targetPath = next === 'dashboard' ? `/forms/${slug}/dashboard` : `/forms/${slug}`;
     const params = new URLSearchParams();
@@ -83,57 +80,39 @@ function FormPasswordTarget({
     return search ? `${targetPath}?${search}` : targetPath;
   }, [next, requestedLocale, shareToken, slug]);
 
-  useEffect(() => {
-    const existingPassword = sessionStorage.getItem(`form-password-${slug}`) ?? undefined;
-    setStoredPassword(existingPassword);
-    setPasswordLoaded(true);
-  }, [slug]);
-
+  // A password verified earlier in this browser lives in an HttpOnly cookie the server action reads.
   const accessQuery = useQuery({
-    queryKey: ['form-password-route-access', slug, next, shareToken, storedPassword, requestedLocale],
+    queryKey: ['form-password-route-access', slug, next, shareToken, requestedLocale],
     queryFn: () =>
       accessAction({
         slug,
         context: 'url',
         shareToken,
-        password: storedPassword,
         target: next,
         requestedLocale,
       }),
-    enabled: passwordLoaded,
   });
 
   useEffect(() => {
-    if (!passwordLoaded || accessQuery.isLoading || !accessQuery.data) {
+    if (accessQuery.isLoading || !accessQuery.data || accessQuery.data.reason === 'password_required') {
       return;
     }
-
-    if (accessQuery.data.reason === 'password_required') {
-      if (storedPassword) {
-        sessionStorage.removeItem(`form-password-${slug}`);
-        setStoredPassword(undefined);
-      }
-      return;
-    }
-
     if (onNavigate) {
       onNavigate(basePath);
     } else {
       router.replace(basePath);
     }
-  }, [accessQuery.data, accessQuery.isLoading, basePath, passwordLoaded, router, slug, storedPassword, onNavigate]);
+  }, [accessQuery.data, accessQuery.isLoading, basePath, router, onNavigate]);
 
   const verifyPassword = useMutation({
     mutationFn: (data: { slug: string; password: string }) =>
       verifyAction(data.slug, data.password, shareToken).then(unwrapQueryResult),
-    onSuccess: (data, submitted) => {
+    onSuccess: (data) => {
       if (!mounted.current) {
         return;
       }
       if (data.valid) {
         setNavigating(true);
-        // Store password in session storage for this form
-        sessionStorage.setItem(`form-password-${submitted.slug}`, submitted.password);
         if (onNavigate) {
           onNavigate(basePath);
         } else {
@@ -166,7 +145,7 @@ function FormPasswordTarget({
     return <QueryErrorAlert queries={[accessQuery]} />;
   }
 
-  if (!passwordLoaded || accessQuery.isLoading || accessQuery.data?.reason !== 'password_required') {
+  if (accessQuery.isLoading || accessQuery.data?.reason !== 'password_required') {
     return (
       <div style={{ minHeight: '100dvh' }}>
         <DsSectionCard padding="none" appearance="surface" border="none">

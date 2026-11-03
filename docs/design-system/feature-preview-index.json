@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceManifestHash": "9805a6c3a50e2af8e99924621ebb4efe1c1650ca536050cc55c57247e801122b",
+  "sourceManifestHash": "ed2f3d8c91b07adc56f0d453e607c2ac09961a8ed6651b806c545463cb88ff64",
   "methodology": "All inventoried Feature component candidates. Direct value imports, literal lazy imports and transitive source relationships through production owners/local adapters are indexed separately. A dependency can be unused or render conditionally; neither relationship proves rendered states, route parity or design compliance. Empty JSX records include runtime/lazy/controller boundaries and must be inspected before treating them as visual gaps.",
   "counts": { "domains": 54, "componentFiles": 781, "jsxWithoutStoryRelationship": 43 },
   "domains": [
@@ -1026,7 +1026,6 @@
             "Pages/Admin/Email Editors",
             "Pages/Editors/Form",
             "Pages/Forms/Operations",
-            "Pages/Forms/Public Response",
             "Pages/Editors/Label",
             "Pages/Admin/Legal Policies",
             "Pages/Editors/Legal",

@@ -207,7 +207,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Actual AdminFormSubmissionsPage query/delete controller, production FormSubmissionDetailPageView extracted unchanged from the route, shared FormDashboardView access/data controller and FormPasswordContent. Local typed transports implement text/country/date filters, chronological sort and pagination; actual deletion confirmation removes fixture rows. Dashboard uses real field charts. Password signal exercises the actual verification/sessionStorage flow; final navigation is captured locally. Auth, server schema projection, signed share validation, persistence and delivery remain outside. Submission metadata labels retain the existing production language.',
+          'Actual AdminFormSubmissionsPage query/delete controller, production FormSubmissionDetailPageView extracted unchanged from the route, shared FormDashboardView access/data controller and FormPasswordContent. Local typed transports implement text/country/date filters, chronological sort and pagination; actual deletion confirmation removes fixture rows. Dashboard uses real field charts. Password signal exercises the actual verification flow; the HttpOnly access cookie is set by the server action outside Storybook, and final navigation is captured locally. Auth, server schema projection, signed share validation, persistence and delivery remain outside. Submission metadata labels retain the existing production language.',
       },
     },
   },

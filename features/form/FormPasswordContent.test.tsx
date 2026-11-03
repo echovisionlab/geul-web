@@ -1,13 +1,12 @@
 // @vitest-environment jsdom
 import { act, render, screen, waitFor } from '@/test/render';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { afterEach, expect, it, vi } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { FormPasswordContent } from './FormPasswordContent';
 import type { QueryResult } from '@/lib/api/query-result';
 vi.mock('next/navigation', () => ({ useRouter: () => ({ replace: vi.fn() }) }));
-afterEach(() => sessionStorage.clear());
 it.each(['current', 'target', 'unmount'] as const)(
-  'stores only the submitted password and ignores late verification for %s',
+  'navigates only for the current target after verification, without browser storage, for %s',
   async (mode) => {
     const verification = Promise.withResolvers<QueryResult<{ valid: boolean }>>();
     const accessAction = vi.fn().mockResolvedValue({ accessible: false, reason: 'password_required' });
@@ -41,12 +40,12 @@ it.each(['current', 'target', 'unmount'] as const)(
     await act(async () => verification.resolve({ ok: true, value: { valid: true } }));
     if (mode === 'current') {
       await waitFor(() => expect(onNavigate).toHaveBeenCalledWith('/forms/one?lang=en'));
-      expect(sessionStorage.getItem('form-password-one')).toBe('submitted-secret');
+      expect(verifyAction).toHaveBeenCalledWith('one', 'submitted-secret', undefined);
     } else {
       expect(onNavigate).not.toHaveBeenCalled();
-      expect(sessionStorage.getItem('form-password-one')).toBeNull();
-      expect(sessionStorage.getItem('form-password-two')).toBeNull();
     }
+    // The verified password is remembered only by the server action's HttpOnly cookie.
+    expect(sessionStorage.length).toBe(0);
     view.unmount();
     client.clear();
   },

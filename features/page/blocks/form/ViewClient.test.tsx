@@ -337,7 +337,12 @@ describe('FormViewClient', () => {
     });
 
     await waitForAssertion(() => {
-      expect(submitFormActionMock).toHaveBeenCalledWith('form-1', { email: 'hello@example.com' }, undefined, 'ko');
+      expect(submitFormActionMock).toHaveBeenCalledWith(
+        'form-1',
+        { email: 'hello@example.com' },
+        { password: undefined },
+        'ko',
+      );
       expect(document.querySelector('[data-core-page-loader]')).toHaveAttribute('data-contrast', 'inverse');
     });
     expect(document.body.textContent).not.toContain('Submitted successfully');

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "methodology": "All App Router visual entry files indexed by TypeScript imports/JSX; exact reviewed route/boundary maps count separately from mere Feature story overlap. Unmapped entrypoints remain explicit gaps. Static source census is not a browser pass.",
-  "sourceManifestHash": "266105c22793e4c0aff4cd34a8a6d9b62bf7363fb3afc9490034740a37bb3621",
+  "sourceManifestHash": "733f92bb9276540d72e4bc43b991065e946f057cb55028597c366c13543e264c",
   "counts": {
     "queryEditorBranches": 12,
     "editorBranchPreviews": 12,
@@ -50323,7 +50323,7 @@
           "storyTitle": "Pages/Forms/Operations",
           "variant": "Password",
           "coverage": "page-view",
-          "scope": "Actual FormPasswordContent access/verification controller and sessionStorage flow with local password signal. Final navigation contained; signed share/token validation, real passwords and authorization outside.",
+          "scope": "Actual FormPasswordContent access/verification controller with local password signal; the server action keeps a verified password in an HttpOnly cookie. Final navigation contained; signed share/token validation, real passwords and authorization outside.",
           "storySource": "stories/pages/FormOperations.stories.tsx",
           "preview": "http://localhost:6010/?path=/story/pages-forms-operations--password",
           "availableStates": [

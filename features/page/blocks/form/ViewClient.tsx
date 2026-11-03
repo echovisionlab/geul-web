@@ -69,7 +69,7 @@ export function FormViewClient({ props, requestedLocale, preview = false }: Form
       if (!form?.id) {
         throw new Error('Form not found');
       }
-      return submitFormAction(form.id, data, submittedPassword, requestedLocale);
+      return submitFormAction(form.id, data, { password: submittedPassword }, requestedLocale);
     },
     onSuccess: (result) => {
       if (result.error) {

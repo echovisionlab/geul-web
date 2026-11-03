@@ -23,6 +23,7 @@ import { createShareLinkAction, deleteShareLinkAction, listShareLinksAction } fr
 import { regenerateOgImageAction as requestOgImageRegeneration } from '@/lib/actions/og-generation';
 import { createCommittedMutationRevalidator } from '@/lib/actions/revalidate-after-commit';
 import { createFormClient, createPublicFormClientWithAuth } from '@/lib/api/server-client';
+import { readFormPassword, rememberFormPassword } from '@/lib/forms/form-access-cookie.server';
 import { mapPublicLocalizationInfo, type PublicLocalizationInfoLike } from '@/lib/queries/localized-public';
 import type { AccessReason } from '@/lib/types/form/model';
 import type { FormSchema } from '@/lib/types/form/schema';
@@ -321,13 +322,21 @@ export async function deleteFormSubmissionAction(id: string): Promise<ActionResu
   );
 }
 
+/**
+ * How a submission proves the Form password: an embedded Form passes the password its visitor
+ * entered on the page; a Form route passes its slug and the server reads the verified password
+ * from the HttpOnly access cookie.
+ */
+export type FormSubmissionAccess = { password?: string; slug?: never } | { slug: string; password?: never };
+
 // Public: submit form response
 export async function submitFormAction(
   formId: string,
   data: Record<string, unknown>,
-  password?: string,
+  access: FormSubmissionAccess = {},
   requestedLocale?: string,
 ): Promise<ActionResult<{ success: true }>> {
+  const password = access.slug ? await readFormPassword(access.slug) : access.password;
   return runAction(
     'form-actions',
     'submitFormAction',
@@ -362,6 +371,9 @@ export async function verifyFormPasswordAction(
       shareToken: shareToken?.trim() ? shareToken : undefined,
       sharePassword: sharePassword?.trim() ? sharePassword : undefined,
     });
+    if (response.valid) {
+      await rememberFormPassword(slug, password);
+    }
     return { valid: response.valid };
   }, [password, shareToken, sharePassword]);
 }
@@ -489,11 +501,17 @@ function mapFormAccessReason(reason: FormAccessReason): FormAccessFailureReason 
 export async function checkFormAccessAction(input: CheckFormAccessInput): Promise<FormAccessData> {
   try {
     const client = await createPublicFormClientWithAuth(input.requestedLocale);
+    // A Form route proves its password with the verified HttpOnly cookie; an embed passes its own.
+    const password = input.password?.trim()
+      ? input.password
+      : input.context === 'url'
+        ? await readFormPassword(input.slug)
+        : undefined;
     const response = await client.checkAccess({
       slug: input.slug,
       shareToken: input.shareToken?.trim() ? input.shareToken : undefined,
       sharePassword: input.sharePassword?.trim() ? input.sharePassword : undefined,
-      password: input.password?.trim() ? input.password : undefined,
+      password,
       context: input.context === 'embed' ? FormAccessContext.EMBED : FormAccessContext.URL,
       target: input.target === 'dashboard' ? FormAccessTarget.DASHBOARD : FormAccessTarget.FORM,
     });

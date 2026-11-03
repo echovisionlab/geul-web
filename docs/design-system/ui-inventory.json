@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "9805a6c3a50e2af8e99924621ebb4efe1c1650ca536050cc55c57247e801122b",
+  "manifestHash": "ed2f3d8c91b07adc56f0d453e607c2ac09961a8ed6651b806c545463cb88ff64",
   "counts": {
-    "sourceFiles": 3940,
-    "productionSourceFiles": 2340,
+    "sourceFiles": 3942,
+    "productionSourceFiles": 2341,
     "componentFiles": 924,
     "coreFamilies": 57,
     "featureDomains": 54,
@@ -3244,6 +3244,8 @@
     "lib/form/validation-primitives.ts",
     "lib/form/validation-zod.test.ts",
     "lib/form/validation-zod.ts",
+    "lib/forms/form-access-cookie.server.test.ts",
+    "lib/forms/form-access-cookie.server.ts",
     "lib/hooks/share-link-mutation-result.ts",
     "lib/hooks/slug-management-store.test.ts",
     "lib/hooks/slug-management-store.ts",
@@ -29224,7 +29226,6 @@
         "features/editor/tiptap/map/TiptapMapNodeView.tsx",
         "features/form/FormDashboardView.tsx",
         "features/form/FormPasswordContent.tsx",
-        "features/form/PublicFormView.tsx",
         "features/label/AdminLabelDetailClient.tsx",
         "features/label/LabelEditor/LabelParticipantsDialog.tsx",
         "features/menu/AdminMenusPage.tsx",
@@ -46591,19 +46592,9 @@
           "extends": [],
           "properties": [
             {
-              "name": "checkFormAccessAction",
-              "optional": false,
-              "type": "typeof checkFormAccessAction"
-            },
-            {
               "name": "submitFormAction",
               "optional": false,
               "type": "typeof submitFormAction"
-            },
-            {
-              "name": "verifyFormPasswordAction",
-              "optional": false,
-              "type": "typeof verifyFormPasswordAction"
             }
           ]
         },
@@ -46642,11 +46633,6 @@
               "type": "string"
             },
             {
-              "name": "previewSharePassword",
-              "optional": true,
-              "type": "string"
-            },
-            {
               "name": "bindings",
               "optional": true,
               "type": "PublicFormBindings"
@@ -46678,8 +46664,6 @@
         "FormSubmissionPendingState",
         "IconEyeOff",
         "Link",
-        "PageLoader",
-        "QueryErrorAlert",
         "SiteLogo",
         "div"
       ]
@@ -70935,7 +70919,6 @@
         "features/form/FormPasswordContent.tsx",
         "features/form/FormSubmissionState.tsx",
         "features/form/LazyFormEditRoute.tsx",
-        "features/form/PublicFormView.tsx",
         "features/label/AdminLabelDetailClient.tsx",
         "features/label/LabelEditor/LabelDescriptionEditor.tsx",
         "features/label/LabelEditor/LabelParticipantsDialog.tsx",
@@ -97277,7 +97260,7 @@
           "storyTitle": "Pages/Forms/Operations",
           "variant": "Password",
           "coverage": "page-view",
-          "scope": "Actual FormPasswordContent access/verification controller and sessionStorage flow with local password signal. Final navigation contained; signed share/token validation, real passwords and authorization outside.",
+          "scope": "Actual FormPasswordContent access/verification controller with local password signal; the server action keeps a verified password in an HttpOnly cookie. Final navigation contained; signed share/token validation, real passwords and authorization outside.",
           "file": "stories/pages/FormOperations.stories.tsx",
           "preview": "http://localhost:6010/?path=/story/pages-forms-operations--password"
         }
@@ -98432,7 +98415,7 @@
       "storyTitle": "Pages/Forms/Operations",
       "variant": "Password",
       "coverage": "page-view",
-      "scope": "Actual FormPasswordContent access/verification controller and sessionStorage flow with local password signal. Final navigation contained; signed share/token validation, real passwords and authorization outside."
+      "scope": "Actual FormPasswordContent access/verification controller with local password signal; the server action keeps a verified password in an HttpOnly cookie. Final navigation contained; signed share/token validation, real passwords and authorization outside."
     },
     {
       "route": "/admin/forms/[id]/submissions",

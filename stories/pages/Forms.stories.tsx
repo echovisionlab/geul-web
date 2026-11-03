@@ -134,12 +134,6 @@ export function FormPagePreview({
     [t, scenario],
   );
   const bindings: PublicFormBindings = {
-    checkFormAccessAction: async () => ({
-      accessible: surface !== 'access',
-      reason: surface === 'access' ? reason : undefined,
-      form: surface === 'access' ? null : form,
-    }),
-    verifyFormPasswordAction: async () => ({ ok: true, value: { valid: false } }),
     submitFormAction: async () => {
       if (submitState === 'pending') {
         return new Promise(() => {});
