@@ -19,8 +19,8 @@ import {
   inputPresentation,
   inputPopoverPresentation,
   inputState,
-  InputLoadingStatus,
 } from './InputParts';
+import { InputLoadingStatus } from './InputLoadingStatus';
 import {
   inputAttributes,
   flattenOptions,

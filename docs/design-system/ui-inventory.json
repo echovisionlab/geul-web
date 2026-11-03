@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "ff57a91ea72d858b88aecfbaba41d2f216b455706613f167203acf00dbf663d0",
+  "manifestHash": "9805a6c3a50e2af8e99924621ebb4efe1c1650ca536050cc55c57247e801122b",
   "counts": {
-    "sourceFiles": 3939,
-    "productionSourceFiles": 2339,
-    "componentFiles": 923,
+    "sourceFiles": 3940,
+    "productionSourceFiles": 2340,
+    "componentFiles": 924,
     "coreFamilies": 57,
     "featureDomains": 54,
     "storyFiles": 284,
@@ -543,6 +543,7 @@
     "components/core/Input/InputFrame.test.tsx",
     "components/core/Input/InputFrame.tsx",
     "components/core/Input/InputGlyphs.tsx",
+    "components/core/Input/InputLoadingStatus.tsx",
     "components/core/Input/InputParts.tsx",
     "components/core/Input/InputSizeProvider.test.tsx",
     "components/core/Input/InputStates.stories.tsx",
@@ -11026,7 +11027,7 @@
         "components/core/Input/DateInputs.tsx",
         "components/core/Input/DateTimeInput.tsx",
         "components/core/Input/FileInput.tsx",
-        "components/core/Input/InputParts.tsx",
+        "components/core/Input/InputLoadingStatus.tsx",
         "components/core/Input/MultiSelect.tsx",
         "components/core/Input/NativeSelect.tsx",
         "components/core/Input/PasswordInput.tsx",
@@ -11039,6 +11040,24 @@
       "tests": [],
       "stories": [],
       "composedJsx": ["Glyph", "InputGlyph", "span"]
+    },
+    {
+      "file": "components/core/Input/InputLoadingStatus.tsx",
+      "owner": "Core/Input",
+      "exports": [
+        {
+          "name": "InputLoadingStatus",
+          "kind": "function"
+        }
+      ],
+      "classification": "core",
+      "propsEvidence": [],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["components/core/Input/MultiSelect.tsx", "components/core/Input/Select.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["InputValidationGlyph", "span"]
     },
     {
       "file": "components/core/Input/InputParts.tsx",
@@ -11054,10 +11073,6 @@
         },
         {
           "name": "InputHelp",
-          "kind": "function"
-        },
-        {
-          "name": "InputLoadingStatus",
           "kind": "function"
         }
       ],
@@ -11093,7 +11108,7 @@
         "features/page/blocks/ListBlockEditorBase.stories.tsx",
         "features/page/blocks/embed/Embed.stories.tsx"
       ],
-      "composedJsx": ["FieldError", "InputSizeContext.Provider", "InputValidationGlyph", "Label", "Text", "span"]
+      "composedJsx": ["FieldError", "InputSizeContext.Provider", "Label", "Text", "span"]
     },
     {
       "file": "components/core/Input/MultiSelect.tsx",
@@ -76202,6 +76217,7 @@
         "components/core/Input/FilePicker.tsx",
         "components/core/Input/InputFrame.tsx",
         "components/core/Input/InputGlyphs.tsx",
+        "components/core/Input/InputLoadingStatus.tsx",
         "components/core/Input/InputParts.tsx",
         "components/core/Input/MultiSelect.tsx",
         "components/core/Input/MultiSelectComboboxView.tsx",

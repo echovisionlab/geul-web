@@ -4,15 +4,15 @@ Run `node scripts/design-system/inventory.mjs` to regenerate; `--check` fails wh
 
 Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.
 
-Source manifest SHA-256: `ff57a91ea72d858b88aecfbaba41d2f216b455706613f167203acf00dbf663d0`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
+Source manifest SHA-256: `9805a6c3a50e2af8e99924621ebb4efe1c1650ca536050cc55c57247e801122b`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
 
 ## Counts
 
 | Metric                | Count |
 | --------------------- | ----: |
-| sourceFiles           |  3939 |
-| productionSourceFiles |  2339 |
-| componentFiles        |   923 |
+| sourceFiles           |  3940 |
+| productionSourceFiles |  2340 |
+| componentFiles        |   924 |
 | coreFamilies          |    57 |
 | featureDomains        |    54 |
 | storyFiles            |   284 |
@@ -63,7 +63,7 @@ Each family below names its ownership directory. The JSON lists every component 
 | [Core/ImageCropper](../../components/core/ImageCropper)                         |               1 |           1 |
 | [Core/ImageUpload](../../components/core/ImageUpload)                           |               5 |           2 |
 | [Core/InlineReference](../../components/core/InlineReference)                   |               1 |           0 |
-| [Core/Input](../../components/core/Input)                                       |              30 |          27 |
+| [Core/Input](../../components/core/Input)                                       |              31 |          27 |
 | [Core/Layout](../../components/core/Layout)                                     |               3 |           1 |
 | [Core/LoadingSurface](../../components/core/LoadingSurface)                     |               2 |           2 |
 | [Core/MapNavigation](../../components/core/MapNavigation)                       |               1 |           1 |
