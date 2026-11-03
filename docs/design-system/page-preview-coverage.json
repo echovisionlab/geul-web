@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "methodology": "All App Router visual entry files indexed by TypeScript imports/JSX; exact reviewed route/boundary maps count separately from mere Feature story overlap. Unmapped entrypoints remain explicit gaps. Static source census is not a browser pass.",
-  "sourceManifestHash": "bef99d02a47dc7b744fb3ee897d0bfee35b65c1db0e67e13b08388b69a0854df",
+  "sourceManifestHash": "d8c4d23ff503621ee5c87fd0a16ff92e76cd807923283b8185d8baa6b2bfa3e8",
   "counts": {
     "queryEditorBranches": 12,
     "editorBranchPreviews": 12,
