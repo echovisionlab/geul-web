@@ -4,3 +4,8 @@
   display: grid;
   place-items: center;
 }
+
+.root[data-placement='flow'] {
+  position: relative;
+  inset: auto;
+}

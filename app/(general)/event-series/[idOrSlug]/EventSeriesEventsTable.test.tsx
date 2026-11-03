@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { notifyManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Activity } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen, waitFor, within } from '@/test/render';
+import { EventSeriesEventsTable } from './EventSeriesEventsTable';
 
 const mocks = vi.hoisted(() => ({
   listEvents: vi.fn(),
@@ -14,37 +15,6 @@ vi.mock('@/lib/queries/program-event-browser', () => ({
   listProgramEventsForBlockBrowser: mocks.listEvents,
   listProgramEventTypeOptionsBrowser: mocks.listTypes,
 }));
-
-vi.mock('next-intl', () => ({
-  useLocale: () => 'en',
-  useTranslations: () => (key: string) => key,
-}));
-
-vi.mock('@/features/program-event/EventSeriesEventsTableView', () => ({
-  EventSeriesEventsTableView: ({
-    result,
-    onQueryChange,
-    onLoadMore,
-  }: {
-    result: { data: Array<{ id: string }> };
-    onQueryChange: (query: { page: number; pageSize: number; search: string }) => void;
-    onLoadMore: () => void;
-  }) => (
-    <div>
-      <output data-testid="event-ids">{result.data.map((event) => event.id).join(',')}</output>
-      <button type="button" onClick={() => onQueryChange({ page: 1, pageSize: 1, search: 'new' })}>
-        search new
-      </button>
-      <button type="button" onClick={onLoadMore}>
-        load more
-      </button>
-    </div>
-  ),
-}));
-
-import { EventSeriesEventsTable } from './EventSeriesEventsTable';
-
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 function event(id: string) {
   return {
@@ -57,8 +27,9 @@ function event(id: string) {
     endsAt: null,
     timezone: null,
     allDay: false,
-    locationMode: 'tba',
+    locationMode: 'tba' as const,
     imageUrl: null,
+    posterUrl: null,
     publishedAt: null,
   };
 }
@@ -72,100 +43,165 @@ function response(ids: string[], total = 2) {
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
-  const promise = new Promise<T>((resolvePromise) => {
+  let reject!: (error: Error) => void;
+  const promise = new Promise<T>((resolvePromise, rejectPromise) => {
     resolve = resolvePromise;
+    reject = rejectPromise;
   });
-  return { promise, resolve };
+  return { promise, resolve, reject };
 }
 
-let container: HTMLDivElement;
-let root: Root;
 let queryClient: QueryClient;
 
-function render() {
-  act(() => {
-    root.render(
-      <QueryClientProvider client={queryClient}>
+function table({ seriesId = 'series-1', visible = true } = {}) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Activity mode={visible ? 'visible' : 'hidden'}>
         <EventSeriesEventsTable
-          seriesId="series-1"
-          initialEvents={[event('initial-1')] as never}
+          seriesId={seriesId}
+          initialTypeOptions={[]}
+          initialEvents={[event('initial-1')]}
           initialPagination={{ total: 2, limit: 1, offset: 0, hasMore: true }}
           pageSize={1}
         />
-      </QueryClientProvider>,
-    );
-  });
+      </Activity>
+    </QueryClientProvider>
+  );
 }
 
 beforeEach(() => {
-  // Query notifications stay on React Query's asynchronous scheduler; wrap the resulting renders in act.
-  notifyManager.setNotifyFunction((callback) => {
-    act(callback);
-  });
   mocks.listEvents.mockReset();
   mocks.listTypes.mockReset().mockResolvedValue([]);
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
   queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+    defaultOptions: { queries: { retry: false, staleTime: Infinity, gcTime: Infinity } },
   });
 });
 
 afterEach(() => {
-  notifyManager.setNotifyFunction((callback) => {
-    callback();
-  });
-  act(() => root.unmount());
   queryClient.clear();
-  container.remove();
+  vi.useRealTimers();
 });
 
-describe('EventSeriesEventsTable pagination', () => {
+describe('EventSeriesEventsTable requests', () => {
   it('ignores a load-more response after the active query changes', async () => {
     const oldLoadMore = deferred<ReturnType<typeof response>>();
     const newSearch = deferred<ReturnType<typeof response>>();
-    mocks.listEvents.mockImplementation((input: { offset: number; search?: string }) => {
-      if (input.offset === 1) {
-        return oldLoadMore.promise;
-      }
-      if (input.search === 'new') {
-        return newSearch.promise;
-      }
-      return Promise.resolve(response(['initial-1']));
-    });
-
-    render();
-    await act(async () => {
-      await Promise.resolve();
-    });
-
-    act(() => {
-      container.querySelectorAll('button')[1]?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
-    // The browser query module is imported on demand, so the request starts after a microtask.
-    await vi.waitFor(() => expect(mocks.listEvents).toHaveBeenCalledWith(expect.objectContaining({ offset: 1 })));
-
-    act(() => {
-      container.querySelectorAll('button')[0]?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
-    await vi.waitFor(() =>
-      expect(mocks.listEvents).toHaveBeenCalledWith(expect.objectContaining({ search: 'new', offset: 0 })),
+    mocks.listEvents.mockImplementation((input: { offset: number; search?: string }) =>
+      input.offset === 1 ? oldLoadMore.promise : newSearch.promise,
     );
+
+    const { user } = render(table());
+    await user.click(screen.getByRole('button', { name: 'Show 1 more' }));
+    await vi.dynamicImportSettled();
+    expect(mocks.listEvents).toHaveBeenCalledWith(expect.objectContaining({ offset: 1 }));
+
+    vi.useFakeTimers();
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search...' }), { target: { value: 'new' } });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+    expect(mocks.listEvents).toHaveBeenCalledWith(expect.objectContaining({ search: 'new', offset: 0 }));
     await act(async () => {
       newSearch.resolve(response(['new-1']));
+      await vi.advanceTimersByTimeAsync(0);
     });
-    await vi.waitFor(async () => {
-      await act(async () => {
-        await Promise.resolve();
-      });
-      expect(container.querySelector('[data-testid="event-ids"]')?.textContent).toBe('new-1');
-    });
+    expect(within(screen.getByRole('table')).getByRole('link', { name: 'new-1' })).toBeVisible();
 
     await act(async () => {
       oldLoadMore.resolve(response(['old-2']));
-      await oldLoadMore.promise;
     });
-    expect(container.querySelector('[data-testid="event-ids"]')?.textContent).toBe('new-1');
+    expect(within(screen.getByRole('table')).getByRole('link', { name: 'new-1' })).toBeVisible();
+    expect(screen.queryAllByRole('link', { name: 'old-2' })).toHaveLength(0);
+  });
+
+  it('keeps existing rows visible and disables load more while the main query fetches or fails until retry succeeds', async () => {
+    const pending = deferred<ReturnType<typeof response>>();
+    mocks.listEvents.mockReturnValueOnce(pending.promise).mockResolvedValueOnce(response(['recovered-1']));
+    const { user } = render(table());
+
+    act(() => {
+      void queryClient.invalidateQueries({ queryKey: ['program-event-series-events'] });
+    });
+    const loadMore = screen.getByRole('button', { name: 'Show 1 more' });
+    await waitFor(() => expect(loadMore).toBeDisabled());
+    expect(within(screen.getByRole('table')).getByRole('link', { name: 'initial-1' })).toBeVisible();
+
+    await act(async () => {
+      pending.reject(new Error('Offline'));
+    });
+    expect(await screen.findByRole('alert')).toBeVisible();
+    expect(within(screen.getByRole('table')).getByRole('link', { name: 'initial-1' })).toBeVisible();
+    expect(loadMore).toBeDisabled();
+
+    await user.click(loadMore);
+    expect(mocks.listEvents).toHaveBeenCalledTimes(1);
+
+    await user.click(screen.getByRole('button', { name: 'Try again' }));
+    expect((await screen.findAllByRole('link', { name: 'recovered-1' }))[0]).toBeVisible();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(loadMore).toBeEnabled();
+  });
+
+  it('shows load-more failure without losing rows and allows retry', async () => {
+    mocks.listEvents
+      .mockRejectedValueOnce(new Error('Offline'))
+      .mockResolvedValueOnce(response(['initial-1', 'next-2']));
+    const { user } = render(table());
+
+    await user.click(screen.getByRole('button', { name: 'Show 1 more' }));
+    expect(await screen.findByText('Something went wrong. Please try again.')).toBeVisible();
+    expect(within(screen.getByRole('table')).getByRole('link', { name: 'initial-1' })).toBeVisible();
+
+    await user.click(screen.getByRole('button', { name: 'Show 1 more' }));
+    expect((await screen.findAllByRole('link', { name: 'next-2' }))[0]).toBeVisible();
+    expect(within(screen.getByRole('table')).getAllByRole('link', { name: 'initial-1' })).toHaveLength(1);
+    expect(screen.queryByText('Something went wrong. Please try again.')).not.toBeInTheDocument();
+  });
+
+  it('discards load-more results after its effects disconnect', async () => {
+    const pending = deferred<ReturnType<typeof response>>();
+    mocks.listEvents.mockReturnValueOnce(pending.promise);
+    const { user, rerender } = render(table());
+
+    await user.click(screen.getByRole('button', { name: 'Show 1 more' }));
+    await vi.dynamicImportSettled();
+    expect(mocks.listEvents).toHaveBeenCalledWith(expect.objectContaining({ offset: 1 }));
+
+    rerender(table({ visible: false }));
+    rerender(table());
+    await act(async () => {
+      pending.resolve(response(['stale-2']));
+    });
+
+    expect(within(screen.getByRole('table')).getByRole('link', { name: 'initial-1' })).toBeVisible();
+    expect(screen.queryAllByRole('link', { name: 'stale-2' })).toHaveLength(0);
+    expect(screen.getByRole('button', { name: 'Show 1 more' })).toBeEnabled();
+  });
+
+  it('clears the previous context pending state without letting its completion unlock a new request', async () => {
+    const oldRequest = deferred<ReturnType<typeof response>>();
+    const currentRequest = deferred<ReturnType<typeof response>>();
+    mocks.listEvents.mockReturnValueOnce(oldRequest.promise).mockReturnValueOnce(currentRequest.promise);
+    const { user, rerender } = render(table());
+
+    await user.click(screen.getByRole('button', { name: 'Show 1 more' }));
+    await vi.dynamicImportSettled();
+    rerender(table({ seriesId: 'series-2' }));
+    const loadMore = screen.getByRole('button', { name: 'Show 1 more' });
+    expect(loadMore).toBeEnabled();
+    await user.click(loadMore);
+    await vi.dynamicImportSettled();
+
+    await act(async () => {
+      oldRequest.reject(new Error('Old series failed'));
+    });
+    expect(loadMore).toHaveAttribute('aria-busy', 'true');
+    expect(screen.queryByText('Something went wrong. Please try again.')).not.toBeInTheDocument();
+
+    await act(async () => {
+      currentRequest.resolve(response(['current-2']));
+    });
+    expect((await screen.findAllByRole('link', { name: 'current-2' }))[0]).toBeVisible();
+    expect(screen.queryByRole('button', { name: 'Show 1 more' })).not.toBeInTheDocument();
   });
 });

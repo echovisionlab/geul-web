@@ -1332,6 +1332,8 @@
       }
     },
     "verification": {
+      "checking": "Status van de e-mailwijziging controleren…",
+      "unavailable": "De status van de e-mailwijziging kon niet worden gecontroleerd. Probeer het opnieuw.",
       "loading": "Verificatieformulier laden...",
       "startOver": "Opnieuw beginnen",
       "errors": {

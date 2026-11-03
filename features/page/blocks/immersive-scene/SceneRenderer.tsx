@@ -1,4 +1,5 @@
 'use client';
+import { PageLoader } from '@/features/site/PageLoader';
 
 import { primitiveTokens } from '@/components/core/design-tokens';
 import { Button } from '@/components/core/Button';
@@ -888,6 +889,11 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
         style={rootStyle}
       >
         <div className={classes.viewport} data-immersive-scene-viewport>
+          {rendererStatus === 'idle' ? (
+            <div style={{ position: 'absolute', insetInline: 0, bottom: 0, zIndex: 1, pointerEvents: 'none' }}>
+              <PageLoader placement="flow" minHeight={80} size="xs" />
+            </div>
+          ) : null}
           <div
             aria-hidden="true"
             style={{

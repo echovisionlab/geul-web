@@ -174,8 +174,16 @@ function useWorkEditorViewModel({
       router.back();
     }
   }, [onBack, router]);
+  const [flushingCommand, setFlushingCommand] = useState<'back' | 'status' | 'delete' | null>(null);
   const flushPendingSaves = useCallback(
-    () => flushEditorSavesOrNotify(`work:${workId}`, tCommon('notifications.saveFailed')),
+    async (command: 'back' | 'status' | 'delete' = 'back') => {
+      setFlushingCommand(command);
+      try {
+        return await flushEditorSavesOrNotify(`work:${workId}`, tCommon('notifications.saveFailed'));
+      } finally {
+        setFlushingCommand(null);
+      }
+    },
     [tCommon, workId],
   );
   const handleBack = useCallback(async () => {
@@ -244,14 +252,14 @@ function useWorkEditorViewModel({
   );
   const handleStatusChange = useCallback(
     async (nextStatus: Parameters<typeof lifecycle.changeStatus>[0]) => {
-      if (await flushPendingSaves()) {
+      if (await flushPendingSaves('status')) {
         lifecycle.changeStatus(nextStatus);
       }
     },
     [flushPendingSaves, lifecycle.changeStatus],
   );
   const handleDelete = useCallback(async () => {
-    if (await flushPendingSaves()) {
+    if (await flushPendingSaves('delete')) {
       lifecycle.deleteWork.mutate();
     }
   }, [flushPendingSaves, lifecycle.deleteWork.mutate]);
@@ -632,9 +640,9 @@ function useWorkEditorViewModel({
     roomLocale,
     status,
     lifecycle: {
-      isChanging: lifecycle.isChanging,
+      isChanging: lifecycle.isChanging || flushingCommand === 'status',
       controls: { statusOptions: lifecycle.controls.statusOptions, canDelete: lifecycle.controls.canDelete },
-      deleteWork: { isPending: lifecycle.deleteWork.isPending },
+      deleteWork: { isPending: lifecycle.deleteWork.isPending || flushingCommand === 'delete' },
     },
     currentIsConnected,
     handleBack,

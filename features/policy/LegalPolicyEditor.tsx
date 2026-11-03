@@ -1,5 +1,8 @@
 'use client';
 
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { PageLoader } from '@/features/site/PageLoader';
+
 import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
 
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
@@ -297,13 +300,20 @@ function useLegalPolicyEditorViewModel({
     if (blockRoomController && viewMode === 'preview') {
       return materializeLocalizedRichTextTree(blockRoomController.getLocalizedDocumentSnapshot());
     }
-    if (!policyData.document) {
+    if ((!activeEditLocale.isSourceLocale && activeEditLocale.hasLiveRow) || !policyData.document) {
       return null;
     }
     return materializeLocalizedRichTextTree(
       materializeLocalizedRichTextDocument(policyData.document, policyData.document.sourceLocale),
     );
-  }, [blockRoomController, policyData.document, previewHtml, viewMode]);
+  }, [
+    activeEditLocale.hasLiveRow,
+    activeEditLocale.isSourceLocale,
+    blockRoomController,
+    policyData.document,
+    previewHtml,
+    viewMode,
+  ]);
 
   return {
     currentProvider,
@@ -343,6 +353,7 @@ function useLegalPolicyEditorViewModel({
       localeOptions: activeEditLocale.localeOptions,
       setActiveLocale: activeEditLocale.setActiveLocale,
       isLoading: activeEditLocale.isLoading,
+      ...(activeEditLocale.errorQuery ? { errorQuery: activeEditLocale.errorQuery } : {}),
       hasLiveRow: activeEditLocale.hasLiveRow,
       ogGenerationRun: activeEditLocale.ogGenerationRun,
       isSourceLocale: activeEditLocale.isSourceLocale,
@@ -645,12 +656,15 @@ export function LegalPolicyEditorView({ model }: { model: LegalPolicyEditorViewM
           />
         ) : null}
 
-        {isEditingTranslation ? (
+        {isEditingTranslation && !activeEditLocale.isLoading ? (
           <ContentLocaleNotice
             announceTranslation
             pathname={strategy.entityType === 'terms' ? '/terms' : '/privacy'}
             localizationInfo={{
-              displayedLocale: activeEditLocale.activeLocale,
+              requestedLocale: activeEditLocale.activeLocale,
+              displayedLocale: activeEditLocale.hasLiveRow
+                ? activeEditLocale.activeLocale
+                : activeEditLocale.sourceLocale,
               sourceLocale: activeEditLocale.sourceLocale,
             }}
           />
@@ -669,7 +683,9 @@ export function LegalPolicyEditorView({ model }: { model: LegalPolicyEditorViewM
         </div>
 
         <div hidden={viewMode !== 'edit'}>
-          {editorSession ? (
+          {activeEditLocale.errorQuery ? (
+            <QueryErrorAlert queries={[activeEditLocale.errorQuery]} />
+          ) : editorSession ? (
             <PolicyEditor
               provider={editorSession.provider}
               blockRoomController={editorSession.controller}
@@ -679,16 +695,16 @@ export function LegalPolicyEditorView({ model }: { model: LegalPolicyEditorViewM
               onUnsupportedContent={setPolicyEditorError}
             />
           ) : (
-            <DsLayoutInset space="md">
-              <DsLayoutInset space="none">
-                <SupportingText tone="secondary" role="status">
-                  {tCommonStates('connectingEditor')}
-                </SupportingText>
-              </DsLayoutInset>
-            </DsLayoutInset>
+            <PageLoader placement="flow" message={tCommonStates('connectingEditor')} />
           )}
         </div>
-        {viewMode === 'preview' ? (
+        {viewMode === 'preview' && activeEditLocale.errorQuery ? (
+          <QueryErrorAlert queries={[activeEditLocale.errorQuery]} />
+        ) : viewMode === 'preview' &&
+          (activeEditLocale.isLoading ||
+            (!activeEditLocale.isSourceLocale && activeEditLocale.hasLiveRow && !currentIsSynced)) ? (
+          <PageLoader placement="flow" message={tCommonStates('connectingEditor')} />
+        ) : viewMode === 'preview' ? (
           <DsLayoutStack flexible gap="xs">
             <SectionCard padding="none" grow layout="stack" clip>
               <ScrollArea grow inset="xl">
@@ -723,7 +739,10 @@ export function LegalPolicyEditorView({ model }: { model: LegalPolicyEditorViewM
                   <Divider spaceAfter="md" />
                   {activePreviewHtml ? (
                     <div
-                      lang={activeEditLocale.activeLocale ?? undefined}
+                      lang={
+                        (activeEditLocale.hasLiveRow ? activeEditLocale.activeLocale : activeEditLocale.sourceLocale) ??
+                        undefined
+                      }
                       dangerouslySetInnerHTML={{
                         __html: activePreviewHtml,
                       }}
@@ -733,7 +752,11 @@ export function LegalPolicyEditorView({ model }: { model: LegalPolicyEditorViewM
                       <LegalRichTextContent
                         blocks={canonicalPreviewBlocks}
                         className="prose"
-                        requestedLocale={activeEditLocale.activeLocale ?? undefined}
+                        requestedLocale={
+                          (activeEditLocale.hasLiveRow
+                            ? activeEditLocale.activeLocale
+                            : activeEditLocale.sourceLocale) ?? undefined
+                        }
                       />
                     </DocumentHeadingScope>
                   ) : (

@@ -156,9 +156,10 @@ export function createAIEditorTurnStore(options: AIEditorTurnStoreOptions): AIEd
   };
 
   const approve = async (): Promise<void> => {
+    const run = generation;
     const current = turn;
     const { approval } = api.getState();
-    if (!current || !approval) {
+    if (!current || !approval || api.getState().phase === 'resolving') {
       return;
     }
     set({ phase: 'resolving' });
@@ -166,22 +167,32 @@ export function createAIEditorTurnStore(options: AIEditorTurnStoreOptions): AIEd
       // The stream reports the applied change; until then the approval stays resolving.
       await current.resolve(approval.toolCallId, 'approve');
     } catch {
+      if (run !== generation || current !== turn) {
+        return;
+      }
       set({ error: 'approveFailed', phase: 'error' });
       options.onApproveFailed?.();
     }
   };
 
   const deny = async (): Promise<void> => {
+    const run = generation;
     const current = turn;
     const { approval } = api.getState();
-    if (!current || !approval) {
+    if (!current || !approval || api.getState().phase === 'resolving') {
       return;
     }
     set({ phase: 'resolving' });
     try {
       await current.resolve(approval.toolCallId, 'deny');
+      if (run !== generation || current !== turn) {
+        return;
+      }
       set({ approval: null, phase: 'streaming' });
     } catch {
+      if (run !== generation || current !== turn) {
+        return;
+      }
       set({ error: 'denyFailed', phase: 'error' });
     }
   };
@@ -191,27 +202,39 @@ export function createAIEditorTurnStore(options: AIEditorTurnStoreOptions): AIEd
     if (!action) {
       return;
     }
-    generation += 1;
+    const run = ++generation;
     try {
       await turn?.cancel();
     } catch {
+      if (run !== generation) {
+        return;
+      }
       set({ error: 'cancelFailed', phase: 'error' });
       return;
     } finally {
-      turn = null;
+      if (run === generation) {
+        turn = null;
+      }
+    }
+    if (run !== generation) {
+      return;
     }
     await start(action, action === 'custom' ? prompt.trim() : undefined);
   };
 
   const stop = async (): Promise<void> => {
-    generation += 1;
+    const run = ++generation;
     try {
       await turn?.cancel();
     } catch {
       // The stream is aborted by the client even when the cancellation RPC fails.
     } finally {
-      turn = null;
-      set({ approval: null, assistantText: '', phase: 'input' });
+      if (run === generation) {
+        turn = null;
+      }
+      if (run === generation) {
+        set({ approval: null, assistantText: '', phase: 'input' });
+      }
     }
   };
 

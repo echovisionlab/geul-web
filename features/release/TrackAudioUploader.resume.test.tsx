@@ -127,8 +127,7 @@ describe('TrackAudioUploader resume ownership', () => {
 
     expect(findMultipartUploadCandidateAction).not.toHaveBeenCalled();
     expect(screen.queryAllByRole('button')).toHaveLength(0);
-    // The marker stays visible, but only generically: the server session's file is never named here.
-    expect(screen.getByRole('img', { name: 'Interrupted upload found' })).toBeTruthy();
+    expect(screen.queryByRole('img', { name: 'Interrupted upload found' })).not.toBeInTheDocument();
     expect(document.body.textContent).not.toContain('audio.ogg');
   });
 
@@ -224,4 +223,100 @@ describe('TrackAudioUploader resume ownership', () => {
     );
     expect(abortUploadAction).toHaveBeenCalledWith({ fileId: track.fileId, uploadId: track.uploadId });
   });
+});
+
+it.each([
+  [UploadResumeStateCode.LOOKUP_PENDING, 'progressbar', 'Loading...'],
+  [UploadResumeStateCode.LOOKUP_ERROR, 'img', 'Failed to load data.'],
+  [UploadResumeStateCode.MISSING_SESSION, 'img', 'Not available'],
+] as const)('shows %s recovery without inventing resume availability or losing identity', (code, role, name) => {
+  const track = ids();
+  rememberUploadSession({ fileId: track.fileId, uploadId: track.uploadId, attemptId: track.attemptId });
+  const onCancelled = vi.fn();
+  renderUploader(
+    <TrackAudioUploader
+      trackId={track.trackId}
+      processingStatus="TRACK_PROCESSING_STATUS_PENDING"
+      pendingUploadFileId={track.fileId}
+      pendingUploadAttemptId={track.attemptId}
+      pendingUploadStatus="pending"
+      onPendingUploadCancelled={onCancelled}
+      resumeStateOverride={{ code, resumeNotice: null, hasActiveSession: false }}
+      mode="status-only"
+    />,
+  );
+  expect(screen.getByRole(role, { name })).toBeInTheDocument();
+  expect(screen.queryByRole('img', { name: 'Interrupted upload found' })).not.toBeInTheDocument();
+  expect(readUploadSession(track.fileId)).toMatchObject({ fileId: track.fileId, uploadId: track.uploadId });
+  expect(onCancelled).not.toHaveBeenCalled();
+});
+
+it.each([UploadResumeStateCode.IDLE, UploadResumeStateCode.ACTIVE_SURFACE])(
+  'does not infer availability from persisted identity in %s',
+  (code) => {
+    const track = ids();
+    renderUploader(
+      <TrackAudioUploader
+        trackId={track.trackId}
+        processingStatus={null}
+        pendingUploadFileId={track.fileId}
+        pendingUploadStatus="pending"
+        resumeStateOverride={{ code, resumeNotice: null, hasActiveSession: false }}
+        mode="status-only"
+      />,
+    );
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+  },
+);
+
+it.each([
+  [{ activeUploadState: { active: true, progress: 35, stage: 'uploading' } }, 'Uploading 35%'],
+  [{ activeUploadState: { active: true, progress: 100, stage: 'finalizing' } }, 'Finalizing'],
+  [{ audioAttached: true, processingActive: true, processingProgress: 42 }, 'Processing 42%'],
+] as const)('keeps transfer and processing ahead of recovery: %s', (props, label) => {
+  renderUploader(
+    <TrackAudioUploader
+      trackId={ids().trackId}
+      processingStatus={null}
+      pendingUploadFileId="pending-file"
+      pendingUploadStatus="expired"
+      resumeStateOverride={{ code: UploadResumeStateCode.LOOKUP_ERROR, resumeNotice: null, hasActiveSession: false }}
+      mode="status-only"
+      {...props}
+    />,
+  );
+  expect(screen.getByRole('progressbar', { name: label })).toBeInTheDocument();
+  expect(screen.queryByRole('img', { name: 'Failed to load data.' })).not.toBeInTheDocument();
+});
+
+it('keeps a suppressed recovery identity hidden while lookup is pending', () => {
+  const track = ids();
+  renderUploader(
+    <TrackAudioUploader
+      trackId={track.trackId}
+      processingStatus={null}
+      pendingUploadFileId={track.fileId}
+      pendingUploadAttemptId={track.attemptId}
+      suppressedResumeIdentity={{ attemptId: track.attemptId }}
+      resumeStateOverride={{ code: UploadResumeStateCode.LOOKUP_PENDING, resumeNotice: null, hasActiveSession: false }}
+      mode="status-only"
+    />,
+  );
+  expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+  expect(screen.queryByRole('img')).not.toBeInTheDocument();
+});
+
+it('hides recovery instructions while attached audio is processing without a live progress event', () => {
+  renderUploader(
+    <TrackAudioUploader
+      trackId={ids().trackId}
+      processingStatus="TRACK_PROCESSING_STATUS_PROCESSING"
+      audioAttached
+      pendingUploadFileId="pending-file"
+      resumeStateOverride={{ code: UploadResumeStateCode.LOOKUP_ERROR, resumeNotice: null, hasActiveSession: false }}
+    />,
+  );
+  expect(screen.getByRole('progressbar', { name: 'Processing...' })).toBeInTheDocument();
+  expect(screen.queryByText('Failed to load data.')).not.toBeInTheDocument();
 });

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert } from '@/components/core/Alert';
 import { ExecutableRuntimeStatus } from '@/features/executable/ExecutableRuntimeControls';
 import {
@@ -17,17 +17,11 @@ import classes from './ShaderNode.module.css';
 export interface ShaderPreviewLabels {
   title?: string;
   preview: string;
+  starting: string;
   running: string;
   stopped: string;
   error: string;
 }
-
-const DEFAULT_PREVIEW_LABELS: ShaderPreviewLabels = {
-  preview: 'Preview',
-  running: 'Running',
-  stopped: 'Stopped',
-  error: 'Error',
-};
 
 function previewHeight(value: unknown): number {
   const parsed = Number(value);
@@ -194,7 +188,12 @@ export function ShaderPreviewSurface({
           }
         }}
       />
-      <ExecutableRuntimeStatus status={status} running={labels.running} stopped={labels.stopped} />
+      <ExecutableRuntimeStatus
+        status={status}
+        starting={labels.starting}
+        running={labels.running}
+        stopped={labels.stopped}
+      />
       {error ? (
         <div className={classes.error}>
           <Alert tone="danger" title={labels.error} data-testid="shader-error">
@@ -213,7 +212,7 @@ export function ShaderPublicPreview({
   audioEnabled = false,
   resolveAsset,
   height = 360,
-  labels: providedLabels,
+  labels,
   runtimeFactory = createShaderPreviewWorkerRuntime,
   active: controlledActive,
   revision: controlledRevision,
@@ -225,7 +224,7 @@ export function ShaderPublicPreview({
   audioEnabled?: boolean;
   resolveAsset?: ShaderAssetResolver;
   height?: number;
-  labels?: Partial<ShaderPreviewLabels>;
+  labels: ShaderPreviewLabels;
   runtimeFactory?: ShaderPreviewRuntimeFactory;
   active?: boolean;
   revision?: number;
@@ -233,7 +232,6 @@ export function ShaderPublicPreview({
   onError?: (error: ShaderError | null) => void;
   onRunningChange?: (running: boolean) => void;
 }) {
-  const labels = useMemo(() => ({ ...DEFAULT_PREVIEW_LABELS, ...providedLabels }), [providedLabels]);
   const runtimeRef = useRef<ShaderPreviewRuntime | null>(null);
   const previousAudioEnabled = useRef(false);
   const onRuntimeRef = useRef(onRuntime);

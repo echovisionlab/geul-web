@@ -8,6 +8,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import messages from '@/lib/i18n/error-page-messages.json';
 import { SUPPORTED_LOCALES } from '@/lib/i18n/locale';
 import { RootErrorPageView } from './RootErrorPageView';
+import { within } from '@/test/render';
 
 describe('root error fallback', () => {
   let root: ReturnType<typeof createRoot> | undefined;
@@ -26,7 +27,8 @@ describe('root error fallback', () => {
     container = host;
     document.body.append(host);
     root = createRoot(host);
-    const retry = vi.fn();
+    const recovery = Promise.withResolvers<void>();
+    const retry = vi.fn(() => recovery.promise);
     await act(async () =>
       root!.render(
         <DesignSystemProvider>
@@ -34,11 +36,19 @@ describe('root error fallback', () => {
         </DesignSystemProvider>,
       ),
     );
-    expect(host.querySelector('h1')?.textContent).toBe(messages.ko.titles['500']);
-    expect(host.querySelector('a')?.getAttribute('href')).toBe('/');
-    await act(async () => host.querySelector('button')!.click());
+    const page = within(host);
+    expect(page.getByRole('heading', { level: 1 })).toHaveTextContent(messages.ko.titles['500']);
+    expect(page.getByRole('link')).toHaveAttribute('href', '/');
+    const button = page.getByRole('button');
+    await act(async () => button.click());
     expect(retry).toHaveBeenCalledOnce();
-    expect(host.querySelector('button')?.getAttribute('data-emphasis')).toBe('low');
+    expect(button).toHaveAttribute('aria-busy', 'true');
+    expect(page.getByRole('progressbar', { name: messages.ko.actions.tryAgain })).toBeVisible();
+    await act(async () => button.click());
+    expect(retry).toHaveBeenCalledOnce();
+    await act(async () => recovery.resolve());
+    expect(button).not.toHaveAttribute('aria-busy');
+    expect(button).toHaveAttribute('data-emphasis', 'low');
   });
 
   it('keeps the provider-free fallback synchronized with every supported language', () => {

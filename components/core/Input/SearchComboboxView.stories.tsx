@@ -8,7 +8,7 @@ const items = [
   { id: 'member-opaque-17', name: 'Ada Lovelace' },
   { id: 'member-opaque-21', name: 'Grace Hopper' },
 ];
-function SearchFixture({ onSelect }: { onSelect: (id: string) => void }) {
+function SearchFixture({ onSelect, isLoading = false }: { onSelect: (id: string) => void; isLoading?: boolean }) {
   const [search, setSearch] = useState('');
   const combobox = useInputCombobox();
   return (
@@ -19,7 +19,8 @@ function SearchFixture({ onSelect }: { onSelect: (id: string) => void }) {
       search={search}
       onSearchChange={setSearch}
       debouncedSearch={search}
-      items={items.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()))}
+      items={isLoading ? [] : items.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()))}
+      isLoading={isLoading}
       getItemId={(item) => item.id}
       getItemText={(item) => item.name}
       renderItem={(item) => <span>{item.name}</span>}
@@ -37,6 +38,17 @@ const meta = {
 } satisfies Meta<typeof SearchFixture>;
 export default meta;
 type Story = StoryObj<typeof meta>;
+export const Pending: Story = {
+  args: { isLoading: true },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Focus the search field to inspect pending with an empty collection. The existing input spinner and busy state remain; minimum-query and no-results copy wait for loading to end. Existing options remain selectable while refreshing. error retains its input-validation meaning; callers own query failures and retry UI.',
+      },
+    },
+  },
+};
 export const KeyboardMemberSelection: Story = {
   tags: ['a11y-smoke'],
   play: async ({ canvasElement, args }) => {

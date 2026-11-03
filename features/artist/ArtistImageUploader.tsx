@@ -17,6 +17,7 @@ export interface ArtistImageUploaderProps {
   artistName?: string | null;
   /** Deterministic file input id for testing */
   inputId?: string;
+  disabled?: boolean;
   /** Image display size */
   size?: number;
   /** Label text */
@@ -51,6 +52,7 @@ export function ArtistImageUploader({
   currentImage,
   artistName,
   inputId,
+  disabled = false,
   size,
   label,
   onImageChange,
@@ -129,6 +131,7 @@ export function ArtistImageUploader({
       currentImage={currentImage}
       artistName={artistName}
       inputId={inputId}
+      disabled={disabled}
       size={size}
       label={label}
       uploadProgress={uploadProgress}

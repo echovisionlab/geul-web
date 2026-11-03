@@ -1,20 +1,9 @@
 // @vitest-environment jsdom
-
-import { DesignSystemTestProvider as DesignSystemProvider } from '@/test/TestProviders';
 import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
+import { render, screen, fireEvent, waitFor } from '@/test/render';
+import { PageLoaderView } from '@/components/core/LoadingSurface';
 import { ProfileAvatarControl, type ProfileAvatarControlProps } from './ProfileAvatarControl';
-
-vi.mock('@/components/core/ImageCropper', () => ({
-  ImageCropper: ({ onCrop }: { onCrop: (blob: Blob) => Promise<boolean> }) => (
-    <button type="button" data-testid="complete-crop" onClick={() => void onCrop(new Blob(['crop']))}>
-      Complete crop
-    </button>
-  ),
-}));
-
 const labels = {
   alt: 'Profile image',
   upload: 'Upload profile image',
@@ -25,122 +14,99 @@ const labels = {
   cancel: 'Cancel',
   confirm: 'Confirm',
   preparing: 'Preparing image',
+  loadFailed: 'Failed to load data.',
+  retry: 'Try again',
 };
-
-const baseProps: ProfileAvatarControlProps = {
+const props: ProfileAvatarControlProps = {
   imageUrl: null,
   accept: ['image/png'],
   maxSize: 20 * 1024 * 1024,
   labels,
-  onSave: vi.fn(async () => true),
+  loadingSurface: <PageLoaderView imageAlt="Loading" message="Loading" placement="flow" />,
+  onSave: async () => true,
 };
-
-let container: HTMLDivElement;
-let root: Root;
-
-function renderControl(props: Partial<ProfileAvatarControlProps> = {}) {
-  act(() => {
-    root.render(
-      <DesignSystemProvider forceColorScheme="light">
-        <ProfileAvatarControl {...baseProps} {...props} />
-      </DesignSystemProvider>,
-    );
-  });
-}
-
 beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-  vi.stubGlobal(
-    'ResizeObserver',
-    class ResizeObserver {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
-    },
-  );
-  vi.stubGlobal('URL', {
-    ...URL,
-    createObjectURL: vi.fn(() => 'blob:avatar-crop'),
-    revokeObjectURL: vi.fn(),
-  });
+  Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: vi.fn(() => 'blob:avatar-crop') });
+  Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: vi.fn() });
 });
-
-afterEach(() => {
-  act(() => root.unmount());
-  container.remove();
-  vi.unstubAllGlobals();
-  vi.clearAllMocks();
-});
-
+afterEach(() => vi.restoreAllMocks());
 describe('ProfileAvatarControl', () => {
-  it('renders a canonical asset image and exposes one remove action', async () => {
+  it('renders the asset image and exposes one remove action', async () => {
     const onRemove = vi.fn(async () => true);
-    renderControl({ imageUrl: '/asset/avatar-id/avatar.webp', onRemove });
-
-    expect(container.querySelector('img')?.getAttribute('src')).toBe('/asset/avatar-id/avatar.webp');
-    const remove = container.querySelector<HTMLButtonElement>('button[aria-label="Remove profile image"]');
-    expect(remove).not.toBeNull();
-    expect(remove).toHaveAttribute('data-control-size', 'compact');
-    expect(remove).toHaveAttribute('data-tone', 'danger');
-    expect(remove).toHaveAttribute('data-emphasis', 'strong');
-    expect(remove?.querySelector('svg')).toHaveAttribute('viewBox', '0 0 24 24');
-
-    await act(async () => remove?.click());
+    const { user } = render(
+      <ProfileAvatarControl {...props} imageUrl="/asset/avatar-id/avatar.webp" onRemove={onRemove} />,
+    );
+    expect(screen.getByRole('img', { name: labels.alt })).toHaveAttribute('src', '/asset/avatar-id/avatar.webp');
+    expect(screen.getAllByRole('button', { name: labels.remove })).toHaveLength(1);
+    expect(screen.getByRole('button', { name: labels.remove })).toHaveAttribute('data-tone', 'danger');
+    expect(screen.getByRole('button', { name: labels.remove })).toHaveAttribute('data-emphasis', 'strong');
+    await user.click(screen.getByRole('button', { name: labels.remove }));
     expect(onRemove).toHaveBeenCalledOnce();
   });
-
-  it('keeps upload policy outside the view and reports validation failures', () => {
+  it('keeps upload policy outside the view and reports validation failures', async () => {
     const onValidationError = vi.fn();
-    renderControl({
-      validateFile: () => 'Invalid image',
-      onValidationError,
-    });
-
-    const input = container.querySelector<HTMLInputElement>('input[type="file"]');
-    const file = new File(['bad'], 'bad.png', { type: 'image/png' });
-    Object.defineProperty(input, 'files', { value: [file], configurable: true });
-    act(() => input?.dispatchEvent(new Event('change', { bubbles: true })));
-
+    const { user } = render(
+      <ProfileAvatarControl {...props} validateFile={() => 'Invalid image'} onValidationError={onValidationError} />,
+    );
+    await user.upload(
+      screen.getByLabelText(labels.upload, { selector: 'input' }),
+      new File(['bad'], 'bad.png', { type: 'image/png' }),
+    );
     expect(onValidationError).toHaveBeenCalledWith('Invalid image');
     expect(URL.createObjectURL).not.toHaveBeenCalled();
   });
-
-  it('passes cropped bytes to the controller callback', async () => {
-    const onSave = vi.fn(async (_blob: Blob) => true);
-    renderControl({ onSave });
-
-    const input = container.querySelector<HTMLInputElement>('input[type="file"]');
-    const file = new File(['image'], 'avatar.png', { type: 'image/png' });
-    Object.defineProperty(input, 'files', { value: [file], configurable: true });
-    act(() => input?.dispatchEvent(new Event('change', { bubbles: true })));
-
-    // The cropper is loaded on demand after a file is chosen.
-    const completeCrop = await vi.waitFor(async () => {
-      await act(async () => {});
-      const button = container.querySelector<HTMLButtonElement>('[data-testid="complete-crop"]');
-      expect(button).not.toBeNull();
-      return button;
+  it('passes cropped bytes through the real cropper to the controller', async () => {
+    const blob = new Blob(['crop'], { type: 'image/webp' });
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+      drawImage: vi.fn(),
+    } as unknown as CanvasRenderingContext2D);
+    vi.spyOn(HTMLCanvasElement.prototype, 'toBlob').mockImplementation((callback) => callback(blob));
+    const onSave = vi.fn(async () => true);
+    const { user } = render(<ProfileAvatarControl {...props} onSave={onSave} />);
+    await user.upload(
+      screen.getByLabelText(labels.upload, { selector: 'input' }),
+      new File(['image'], 'avatar.png', { type: 'image/png' }),
+    );
+    const image = await screen.findByRole('img', { name: labels.cropPreview });
+    Object.defineProperties(image, {
+      width: { configurable: true, value: 100 },
+      height: { configurable: true, value: 100 },
+      naturalWidth: { configurable: true, value: 100 },
+      naturalHeight: { configurable: true, value: 100 },
     });
-    await act(async () => completeCrop?.click());
-
-    expect(onSave).toHaveBeenCalledOnce();
-    expect(onSave.mock.calls[0]?.[0]).toBeInstanceOf(Blob);
+    fireEvent.load(image);
+    await user.click(screen.getByRole('button', { name: labels.confirm }));
+    expect(onSave).toHaveBeenCalledWith(blob);
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:avatar-crop');
   });
-
-  it('uses controller-provided preprocessing before opening the cropper', async () => {
-    const prepared = new File(['webp'], 'avatar.webp', { type: 'image/webp' });
-    const prepareFile = vi.fn(async () => prepared);
-    renderControl({ prepareFile, accept: ['image/heic'] });
-
-    const input = container.querySelector<HTMLInputElement>('input[type="file"]');
+  it('uses controller preprocessing and ignores a result after unmount', async () => {
+    let finish!: (file: File) => void;
+    const prepareFile = vi.fn(
+      () =>
+        new Promise<File>((resolve) => {
+          finish = resolve;
+        }),
+    );
+    const { user, unmount } = render(
+      <ProfileAvatarControl {...props} prepareFile={prepareFile} accept={['image/heic']} />,
+    );
     const source = new File(['heic'], 'avatar.heic', { type: 'image/heic' });
-    Object.defineProperty(input, 'files', { value: [source], configurable: true });
-    await act(async () => input?.dispatchEvent(new Event('change', { bubbles: true })));
-
+    await user.upload(screen.getByLabelText(labels.upload, { selector: 'input' }), source);
     expect(prepareFile).toHaveBeenCalledWith(source);
-    expect(URL.createObjectURL).toHaveBeenCalledWith(prepared);
+    expect(screen.queryByRole('button', { name: labels.upload })).not.toBeInTheDocument();
+    unmount();
+    await act(async () => finish(new File(['webp'], 'avatar.webp', { type: 'image/webp' })));
+    expect(URL.createObjectURL).not.toHaveBeenCalled();
   });
+});
+
+it('opens the prepared file rather than the selected source', async () => {
+  const prepared = new File(['webp'], 'avatar.webp', { type: 'image/webp' });
+  const prepareFile = vi.fn(async () => prepared);
+  const { user } = render(<ProfileAvatarControl {...props} prepareFile={prepareFile} accept={['image/heic']} />);
+  const source = new File(['heic'], 'avatar.heic', { type: 'image/heic' });
+  await user.upload(screen.getByLabelText(labels.upload, { selector: 'input' }), source);
+  expect(prepareFile).toHaveBeenCalledWith(source);
+  expect(URL.createObjectURL).toHaveBeenCalledWith(prepared);
 });

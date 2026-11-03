@@ -8,7 +8,7 @@ import {
   LayoutInset as DsLayoutInset,
 } from '@/components/core/Layout';
 
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react';
 import { IconDownload, IconEye, IconFolderOpen } from '@tabler/icons-react';
 import {
   SelectionEmptyState,
@@ -19,7 +19,7 @@ import {
   SelectionMarquee,
   type SelectionGridColumns,
 } from '@/components/core/SelectionSurface';
-import { NearEndLoader, Spinner as Loader, type NearEndLoaderLabels } from '@/components/core/Display';
+import { NearEndLoader, type NearEndLoaderLabels } from '@/components/core/Display';
 import { Button } from '@/components/core/Button';
 import { DropdownMenu } from '@/components/core/DropdownMenu';
 import { SearchInput } from '@/components/core/Input';
@@ -106,6 +106,7 @@ export interface EditorFileLibraryPickerViewProps {
   selectedFiles?: readonly FileManagerFileRow[];
   allowMultiple?: boolean;
   loading?: boolean;
+  loadingSurface: ReactNode;
   loadingMore?: boolean;
   hasMore?: boolean;
   nextPageKey?: string;
@@ -433,16 +434,20 @@ export function EditorFileLibraryPickerView(props: EditorFileLibraryPickerViewPr
               />
             </SelectionEmptyState>
           ) : props.loading ? (
-            <SelectionEmptyState>
-              <Loader size="sm" aria-label={labels.loading} />
-            </SelectionEmptyState>
+            props.loadingSurface
           ) : props.rows.length === 0 ? (
             <SelectionEmptyState>
               <EmptyState inset="none" title={labels.empty} />
             </SelectionEmptyState>
           ) : viewMode === 'grid' ? (
             <div className={classes.gridSurface}>
-              <SelectionViewport inset="none" ref={selection.surfaceRef} {...selectionSurfaceProps}>
+              <SelectionViewport
+                role="region"
+                aria-label={props.searching ? labels.searchResultCount(props.total) : labels.itemCount(props.total)}
+                inset="none"
+                ref={selection.surfaceRef}
+                {...selectionSurfaceProps}
+              >
                 <DsLayoutInset inline={fileBrowserContentInset} block="xs">
                   <FileBrowserGridView
                     label={labels.selectFile}
@@ -474,7 +479,13 @@ export function EditorFileLibraryPickerView(props: EditorFileLibraryPickerViewPr
             </div>
           ) : (
             <div className={classes.listSurface}>
-              <SelectionViewport inset="none" ref={selection.surfaceRef} {...selectionSurfaceProps}>
+              <SelectionViewport
+                role="region"
+                aria-label={props.searching ? labels.searchResultCount(props.total) : labels.itemCount(props.total)}
+                inset="none"
+                ref={selection.surfaceRef}
+                {...selectionSurfaceProps}
+              >
                 <DsLayoutInset inline={fileBrowserContentInset} block="none">
                   <FileBrowserListView
                     accessibleLabel={labels.selectFile}
@@ -590,9 +601,11 @@ export function EditorFileLibraryPickerView(props: EditorFileLibraryPickerViewPr
       >
         {selectedItemIds.length > 0
           ? labels.selectedCount(selectedItemIds.length)
-          : props.searching
-            ? labels.searchResultCount(props.total)
-            : labels.itemCount(props.rows.length)}
+          : props.loading
+            ? labels.loading
+            : props.searching
+              ? labels.searchResultCount(props.total)
+              : labels.itemCount(props.rows.length)}
       </SelectionStatus>
 
       {contextMenu ? (

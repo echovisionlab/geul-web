@@ -1,52 +1,43 @@
 // @vitest-environment jsdom
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+import { act, render as rtlRender, screen } from '@/test/render';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { TestProviders } from '@/test/TestProviders';
+import { Alert } from '@/components/core/Alert';
 import { ShareLinkSectionView, type ShareLinkSectionViewProps } from './ShareLinkSectionView';
 import meta from './ShareLinkSectionView.stories';
-
-let host: HTMLDivElement;
-let root: Root;
+let view: ReturnType<typeof rtlRender> | undefined;
 afterEach(() => {
-  act(() => root?.unmount());
-  host?.remove();
+  view = undefined;
 });
 function render(props: Partial<ShareLinkSectionViewProps> = {}) {
-  if (!host?.isConnected) {
-    host = document.createElement('div');
-    document.body.append(host);
-    root = createRoot(host);
+  const element = <ShareLinkSectionView {...meta.args} {...props} />;
+  if (view) {
+    view.rerender(element);
+  } else {
+    view = rtlRender(element);
   }
-  act(() =>
-    root.render(
-      <TestProviders>
-        <ShareLinkSectionView {...meta.args} {...props} />
-      </TestProviders>,
-    ),
-  );
 }
 describe('share link keyboard and target context', () => {
   it('moves focus into the opened form, exposes its relationship and returns focus after close', () => {
     render();
-    const trigger = host.querySelector<HTMLButtonElement>('button[aria-label="New link"]')!;
+    const trigger = screen.getByRole('button', { name: 'New link' });
     expect(trigger).toHaveAccessibleName('New link');
     expect(trigger.textContent).toBe('');
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
     render({ formOpened: true });
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
-    const form = document.getElementById(trigger.getAttribute('aria-controls')!);
+    const form = screen.getByRole('group', { name: 'New link' });
+    expect(form).toHaveAttribute('id', trigger.getAttribute('aria-controls'));
     expect(form).toHaveAttribute('role', 'group');
     expect(form).toHaveAttribute('aria-label', 'New link');
-    expect(document.activeElement).toBe(form?.querySelector('input'));
+    expect(screen.getByRole('textbox', { name: 'Label (optional)' })).toHaveFocus();
     render({ formOpened: false });
-    expect(document.activeElement).toBe(trigger);
+    expect(trigger).toHaveFocus();
     expect(trigger).not.toHaveAttribute('aria-controls');
   });
   it('keeps the compact icon creation command connected and preserves the permission boundary', () => {
     const toggle = vi.fn();
     render({ onToggleForm: toggle });
-    const trigger = host.querySelector<HTMLButtonElement>('button[aria-label="New link"]')!;
+    const trigger = screen.getByRole('button', { name: 'New link' });
     act(() => trigger.click());
     expect(toggle).toHaveBeenCalledOnce();
     render({ onToggleForm: toggle, disabled: true });
@@ -57,14 +48,12 @@ describe('share link keyboard and target context', () => {
   it('retains the custom-date creation guard and pending form state in compact composition', () => {
     const create = vi.fn();
     render({ formOpened: true, preset: 'custom', customDateTimestamp: null, onCreate: create });
-    const button = Array.from(host.querySelectorAll<HTMLButtonElement>('button')).find(
-      (element) => element.textContent === 'Create',
-    )!;
+    const button = screen.getByRole('button', { name: 'Create' });
     expect(button).toBeDisabled();
     act(() => button.click());
     expect(create).not.toHaveBeenCalled();
     render({ formOpened: true, isCreating: true, onCreate: create });
-    expect(host.querySelector('[role="group"][aria-label="New link"]')).toHaveAttribute('aria-busy', 'true');
+    expect(screen.getByRole('group', { name: 'New link' })).toHaveAttribute('aria-busy', 'true');
     expect(button).toHaveAttribute('aria-disabled', 'true');
     act(() => button.click());
     expect(create).not.toHaveBeenCalled();
@@ -84,22 +73,37 @@ describe('share link keyboard and target context', () => {
       ],
       totalLinkCount: 2,
     });
-    for (const id of ['one', 'two']) {
-      const copy = host.querySelector(`[data-testid="share-link-copy-${id}"]`)!;
-      const context = document.getElementById(copy.getAttribute('aria-describedby')!);
-      expect(copy).toHaveAttribute('aria-label', meta.args.labels.copyAria);
-      expect(context).toHaveTextContent(id === 'one' ? 'Review' : 'Archive');
-      expect(context).toHaveTextContent(`https://studio.example.com/share/${id}`);
-      expect(host.querySelector(`[data-testid="share-link-delete-${id}"]`)).toHaveAttribute(
-        'aria-describedby',
-        context!.id,
+    const copies = screen.getAllByRole('button', { name: meta.args.labels.copyAria });
+    const deletes = screen.getAllByRole('button', { name: meta.args.labels.deleteAria });
+    for (const [index, id] of ['one', 'two'].entries()) {
+      expect(copies[index]).toHaveAccessibleDescription(
+        new RegExp(`${index === 0 ? 'Review' : 'Archive'}.*https://studio.example.com/share/${id}`),
       );
+      expect(deletes[index]).toHaveAttribute('aria-describedby', copies[index].getAttribute('aria-describedby'));
     }
-    expect(host.querySelector('[data-testid="share-link-copy-two"]')).toBeDisabled();
-    expect(host.querySelector('[data-testid="share-link-open-two"]')).toBeDisabled();
-    expect(host.querySelector('[data-testid="share-link-open-one"]')).toHaveAttribute(
+    expect(copies[1]).toBeDisabled();
+    expect(screen.getByRole('button', { name: meta.args.labels.openAria })).toBeDisabled();
+    expect(screen.getByRole('link', { name: meta.args.labels.openAria })).toHaveAttribute(
       'href',
       'https://studio.example.com/share/one',
     );
   });
+});
+
+it('uses the shared loading surface and keeps failed initial reads distinct from an empty list', () => {
+  render({ isLoading: true, links: [], totalLinkCount: 0 });
+  expect(screen.getByRole('status')).toHaveTextContent('Loading');
+  expect(screen.queryByText(meta.args.labels.noLinks)).not.toBeInTheDocument();
+  render({
+    links: [],
+    totalLinkCount: 0,
+    errorContent: (
+      <Alert role="alert" tone="danger">
+        List unavailable
+      </Alert>
+    ),
+  });
+  expect(screen.getByRole('alert')).toHaveTextContent('List unavailable');
+  expect(screen.queryByText(meta.args.labels.noLinks)).not.toBeInTheDocument();
+  expect(screen.queryByRole('status')).not.toBeInTheDocument();
 });

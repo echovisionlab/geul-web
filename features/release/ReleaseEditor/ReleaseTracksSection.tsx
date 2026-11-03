@@ -33,11 +33,12 @@ import {
 } from '@dnd-kit/sortable';
 import { SortableSurface, ReorderRow, useSortableItem } from '@/components/core/Sortable';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
+import { UploadSessionStatus } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { IconChevronDown, IconChevronUp, IconGripVertical, IconX } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
-import { Table } from '@/components/core/Display';
+import { Spinner, Table } from '@/components/core/Display';
 import { Progress } from '@/components/core/Progress';
 import { TimePicker, TextInput } from '@/components/core/Input';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
@@ -56,6 +57,7 @@ import { useMediaProcessingRuntimeState } from '@/lib/media/use-media-processing
 import { UploadType } from '@/lib/types/upload/model';
 import { isUploadResumeSuppressed, type UploadResumeSuppressionIdentity } from '@/lib/upload/resume-suppression';
 import type { UploadResumeState } from '@/lib/hooks/useUploadResumeNotice';
+import { UploadResumeStateCode } from '@/lib/upload/resume-state';
 import { TrackAudioUploader } from '../TrackAudioUploader';
 import { resolveReleaseTrackProcessingStatus } from './track-processing-status';
 import {
@@ -559,8 +561,11 @@ interface SortableTrackRowProps {
   editor?: React.ReactNode;
 }
 
-type TrackUploadProgressIndicator = NonNullable<ReturnType<typeof resolveTrackProgressIndicator>>;
-type TrackResumeIndicator = NonNullable<ReturnType<typeof resolveTrackResumeIndicator>>;
+type TrackUploadProgressIndicator = Pick<
+  NonNullable<ReturnType<typeof resolveTrackProgressIndicator>>,
+  'label' | 'progress'
+>;
+type TrackResumeIndicator = { kind: 'warning' | 'pending' | 'failed'; label: string };
 
 interface TrackAudioViewProps {
   idPrefix?: string;
@@ -568,6 +573,7 @@ interface TrackAudioViewProps {
   uploadProgress: TrackUploadProgressState | null;
   processingLifecycle: TrackProcessingLifecycle | null;
   suppressedResumeIdentity: UploadResumeSuppressionIdentity | null;
+  backendResumeState: UploadResumeState;
 }
 
 function TrackAudioStatusView({
@@ -576,6 +582,7 @@ function TrackAudioStatusView({
   uploadProgress,
   processingLifecycle,
   suppressedResumeIdentity,
+  backendResumeState,
 }: TrackAudioViewProps) {
   return (
     <TrackAudioUploader
@@ -600,6 +607,7 @@ function TrackAudioStatusView({
       processingActive={processingLifecycle != null}
       processingProgress={processingLifecycle?.progress}
       suppressedResumeIdentity={suppressedResumeIdentity}
+      resumeStateOverride={backendResumeState}
       compact
       mode="status-only"
     />
@@ -609,7 +617,6 @@ function TrackAudioStatusView({
 interface TrackAudioUploadButtonViewProps extends Omit<TrackAudioViewProps, 'uploadProgress'> {
   onUploadProgressChange: SortableTrackRowProps['onUploadProgressChange'];
   onPendingUploadCancelled: (identity: UploadResumeSuppressionIdentity) => void;
-  backendResumeState: UploadResumeState;
 }
 
 function TrackAudioUploadButtonView({
@@ -665,8 +672,18 @@ function TrackProgressDetails({ indicator }: { indicator: TrackUploadProgressInd
 }
 
 function TrackResumeMessage({ indicator }: { indicator: TrackResumeIndicator }) {
+  if (indicator.kind === 'pending') {
+    return (
+      <DsLayoutInline gap="xs" role="status">
+        <Spinner size="xs" />
+        <DsText size="xs" tone="secondary">
+          {indicator.label}
+        </DsText>
+      </DsLayoutInline>
+    );
+  }
   return (
-    <DsText size="xs" tone="warning">
+    <DsText size="xs" tone={indicator.kind === 'failed' ? 'danger' : 'warning'}>
       {indicator.label}
     </DsText>
   );
@@ -746,6 +763,7 @@ function useReleaseTrackUploadSurfaceState({
     resumeExpired: string;
   };
 }) {
+  const tCommon = useTranslations('common');
   const runtimeTrackState = useReleaseTrackRuntimeState(track);
   const effectiveTrack = applyReleaseTrackRuntimeState(track, runtimeTrackState);
   const processingLifecycle = getTrackProcessingLifecycle(effectiveTrack);
@@ -769,7 +787,13 @@ function useReleaseTrackUploadSurfaceState({
     hasDurableSource: effectiveTrack.audio_attached,
   });
   const backendResumeState = uploadSurface.resumeState;
-  const isBackendResumeSuppressed = isUploadResumeSuppressed(backendResumeState.resumeNotice, suppressedResumeIdentity);
+  const isBackendResumeSuppressed = isUploadResumeSuppressed(
+    backendResumeState.resumeNotice ?? {
+      fileId: effectiveTrack.pending_upload_file_id,
+      attemptId: effectiveTrack.pending_upload_attempt_id,
+    },
+    suppressedResumeIdentity,
+  );
 
   useEffect(() => {
     if (!suppressedResumeIdentity || !backendResumeState.resumeNotice) {
@@ -783,18 +807,46 @@ function useReleaseTrackUploadSurfaceState({
   const handlePendingUploadCancelled = useCallback((identity: UploadResumeSuppressionIdentity) => {
     setSuppressedResumeIdentity(identity);
   }, []);
-  const progressIndicator = resolveTrackProgressIndicator(mediaStatusLabels, uploadProgress, processingLifecycle);
+  const isFinalizing = backendResumeState.resumeNotice?.status === UploadSessionStatus.FINALIZING;
+  const progressIndicator =
+    uploadProgress != null
+      ? resolveTrackProgressIndicator(mediaStatusLabels, uploadProgress, null)
+      : isFinalizing
+        ? { label: mediaStatusLabels.stage.finalizing, progress: null }
+        : resolveTrackProgressIndicator(mediaStatusLabels, null, processingLifecycle);
   const pendingResumeIndicator = resolveTrackResumeIndicator(effectiveTrack, resumeLabels);
   const backendResumeIndicator =
-    backendResumeState.resumeNotice && !isBackendResumeSuppressed && !effectiveTrack.audio_attached
+    backendResumeState.code === UploadResumeStateCode.AVAILABLE &&
+    backendResumeState.resumeNotice &&
+    !isBackendResumeSuppressed &&
+    !effectiveTrack.audio_attached
       ? {
           kind: 'warning' as const,
           label: resumeLabels.resumeAvailable,
           color: 'yellow' as const,
         }
       : null;
-  const resumeIndicator =
-    uploadProgress == null && !processingLifecycle ? (pendingResumeIndicator ?? backendResumeIndicator) : null;
+  const resolveResumeIndicator = (): TrackResumeIndicator | null => {
+    if (progressIndicator || isBackendResumeSuppressed || effectiveTrack.audio_attached) {
+      return null;
+    }
+    if (pendingResumeIndicator?.color === 'red') {
+      return pendingResumeIndicator;
+    }
+    switch (backendResumeState.code) {
+      case UploadResumeStateCode.LOOKUP_PENDING:
+        return { kind: 'pending', label: tCommon('states.loading') };
+      case UploadResumeStateCode.LOOKUP_ERROR:
+        return { kind: 'failed', label: tCommon('messages.failedToLoad') };
+      case UploadResumeStateCode.MISSING_SESSION:
+        return { kind: 'warning', label: tCommon('states.notAvailable') };
+      case UploadResumeStateCode.AVAILABLE:
+        return backendResumeIndicator ? (pendingResumeIndicator ?? backendResumeIndicator) : null;
+      default:
+        return null;
+    }
+  };
+  const resumeIndicator = resolveResumeIndicator();
 
   return {
     effectiveTrack,
@@ -888,6 +940,7 @@ export function SortableTrackRow({
             uploadProgress={uploadProgress}
             processingLifecycle={processingLifecycle}
             suppressedResumeIdentity={suppressedResumeIdentity}
+            backendResumeState={backendResumeState}
           />
         </Table.Td>
         <Table.Td>
@@ -897,9 +950,9 @@ export function SortableTrackRow({
               track={effectiveTrack}
               processingLifecycle={processingLifecycle}
               suppressedResumeIdentity={suppressedResumeIdentity}
+              backendResumeState={backendResumeState}
               onUploadProgressChange={onUploadProgressChange}
               onPendingUploadCancelled={handlePendingUploadCancelled}
-              backendResumeState={backendResumeState}
             />
             <Tooltip label={tCommon('actions.delete')}>
               <IconButton
@@ -947,9 +1000,7 @@ export function SortableTrackRow({
           <Table.Td colSpan={5}>
             <DsLayoutInset block="xs">
               <DsLayoutStack gap="xxs">
-                <DsText size="xs" tone="warning">
-                  {resumeIndicator.label}
-                </DsText>
+                <TrackResumeMessage indicator={resumeIndicator} />
               </DsLayoutStack>
             </DsLayoutInset>
           </Table.Td>
@@ -1094,6 +1145,7 @@ export function SortableTrackListItem({
               uploadProgress={uploadProgress}
               processingLifecycle={processingLifecycle}
               suppressedResumeIdentity={suppressedResumeIdentity}
+              backendResumeState={backendResumeState}
             />
           ) : null}
           {progressIndicator ? (

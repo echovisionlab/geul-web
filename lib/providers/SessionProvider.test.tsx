@@ -5,7 +5,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SESSION_INVALIDATED_EVENT, SESSION_REVALIDATE_EVENT } from '@/lib/auth/session-events';
 import type { SessionData } from '@/lib/session-data';
-import { SessionProvider, useSessionContext } from './SessionProvider';
+import { SessionProvider, useSessionContext, type SessionRefreshOutcome } from './SessionProvider';
 import { getActiveMember, resetActiveMemberForTests } from '@/lib/auth/active-member';
 
 const leaveMocks = vi.hoisted(() => ({ prepare: vi.fn(async () => undefined) }));
@@ -341,6 +341,24 @@ describe('SessionProvider', () => {
     expect(container.textContent).toContain('signed-out:settled');
   });
 
+  it('reports explicit refresh failure without discarding the current session', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 503 })));
+    await renderProvider();
+    let outcome: unknown;
+    await act(async () => {
+      outcome = await observedSession?.refetchWithOutcome();
+    });
+    expect(outcome).toEqual({
+      kind: 'failed',
+      error: expect.objectContaining({ message: 'Session refresh failed with status 503' }),
+    });
+    expect(observedSession?.data).toEqual(sessionFixture);
+    expect(observedSession?.isPending).toBe(false);
+    await act(async () => {
+      expect(await observedSession?.refetch()).toBeUndefined();
+    });
+  });
+
   it('keeps the current user visible when session revalidation has a transient server error', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 503 })));
     await renderProvider();
@@ -392,11 +410,17 @@ describe('SessionProvider', () => {
         .mockResolvedValueOnce({ ok: true, status: 200, json: async () => newer }),
     );
     await renderProvider();
-    await act(async () => void observedSession?.refetch());
-    await act(async () => void observedSession?.refetch());
+    let olderRefresh: Promise<SessionRefreshOutcome> | undefined;
+    await act(async () => {
+      olderRefresh = observedSession?.refetchWithOutcome();
+    });
+    await act(async () => {
+      expect(await observedSession?.refetchWithOutcome()).toEqual({ kind: 'refreshed', data: newer });
+    });
     await act(async () => finishBody(sessionFixture));
 
     expect(container.textContent).toContain('New session:settled');
+    await expect(olderRefresh).resolves.toEqual({ kind: 'superseded' });
   });
 
   it('reloads instead of running editors when another member appears in this page', async () => {

@@ -722,6 +722,8 @@
       }
     },
     "verification": {
+      "checking": "Status der E-Mail-Änderung wird geprüft…",
+      "unavailable": "Der Status der E-Mail-Änderung konnte nicht geprüft werden. Bitte erneut prüfen.",
       "loading": "Bestätigungsformular wird geladen...",
       "startOver": "Neu beginnen",
       "errors": {

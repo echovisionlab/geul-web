@@ -47,6 +47,7 @@ export function TranslationProviderModal({ opened, editing, form, saving, onChan
   return (
     <ContentModal
       opened={opened}
+      loading={saving}
       onClose={onClose}
       title={editing ? t('modal.editProviderTitle') : t('modal.createProviderTitle')}
       size="standard"

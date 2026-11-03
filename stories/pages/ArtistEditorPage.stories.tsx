@@ -63,6 +63,7 @@ function Preview({ state = 'ready' }: { state?: EditorPreviewState }) {
     canUnpublish: local.canEdit,
     handleStatusChange: async (value) => setStatus(value),
     canDelete: local.canEdit,
+    deletePreparationPending: false,
     handleDelete: local.remove,
     publishArtist: pending,
     unpublishArtist: pending,

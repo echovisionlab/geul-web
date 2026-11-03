@@ -227,10 +227,16 @@ export default function OgImageSettingsPage({
         <Tabs.Panel value="home" paddingTop="md">
           <HomeSettingsPanel
             sharingImage={
-              <SiteOgImagePanel
-                bindings={bindings.siteOg}
-                currentBackgroundUrl={siteSettingsQuery.data?.site_og_background_url ?? null}
-              />
+              siteSettingsQuery.isError ? (
+                <QueryErrorAlert queries={[siteSettingsQuery]} />
+              ) : siteSettingsQuery.isLoading ? (
+                <PageLoader placement="flow" />
+              ) : (
+                <SiteOgImagePanel
+                  bindings={bindings.siteOg}
+                  currentBackgroundUrl={siteSettingsQuery.data?.site_og_background_url ?? null}
+                />
+              )
             }
             form={homeForm}
             onSubmit={(values) => updateHomeOgConfig.mutate(values)}
@@ -353,10 +359,7 @@ function HomeSettingsPanel({ sharingImage, form, onSubmit, onReset, isLoading }:
                     <div style={{ aspectRatio: '1200/630' }}>
                       <DsSectionCard padding="none" border="none" clip>
                         {previewLoading && !previewUrl ? (
-                          <DsLayoutStack align="center" justify="center" fill="block">
-                            <Loader />
-                            <SupportingText tone="secondary">{t('shared.preview.generating')}</SupportingText>
-                          </DsLayoutStack>
+                          <PageLoader placement="flow" message={t('shared.preview.generating')} />
                         ) : previewUrl ? (
                           <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                             {previewLoading && (
@@ -657,10 +660,7 @@ function ContentSettingsPanel({ form, onSubmit, onReset, isLoading }: ContentSet
                     <div style={{ aspectRatio: '1200/630' }}>
                       <DsSectionCard padding="none" border="none" clip>
                         {previewLoading && !previewUrl ? (
-                          <DsLayoutStack align="center" justify="center" fill="block">
-                            <Loader />
-                            <SupportingText tone="secondary">{t('shared.preview.generating')}</SupportingText>
-                          </DsLayoutStack>
+                          <PageLoader placement="flow" message={t('shared.preview.generating')} />
                         ) : previewUrl ? (
                           <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                             {previewLoading && (

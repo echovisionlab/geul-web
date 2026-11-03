@@ -55,6 +55,8 @@ export async function Shell({ children, initialUserSnapshot }: ShellProps) {
     <ShellRuntime
       initialUserSnapshot={initialUserSnapshot}
       labels={{
+        navigationLoadFailed: tCommon('messages.failedToLoad'),
+        retryNavigation: tCommon('loadMore.retry'),
         searchTooltipMac: tShell('actions.searchTooltip', { shortcut: 'Cmd+K' }),
         searchTooltipOther: tShell('actions.searchTooltip', { shortcut: 'Ctrl+K' }),
         lightMode: tCommon('theme.lightMode'),

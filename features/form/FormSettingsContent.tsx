@@ -6,14 +6,16 @@ import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsCont
 
 import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
 import { Heading as DsHeading, Text as DsText, VisuallyHidden } from '@/components/core/Typography';
-import { useCallback, useEffect, useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useIsMutating, useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
 import { DateInput, MultiSelect, NumberInput, PasswordInput, Switch } from '@/components/core/Input';
 import { notifications } from '@/components/core/Notification';
 
 import { MediaPreviewGrid } from '@/components/core/MediaPreviewGrid';
+import { StatusBadge } from '@/components/core/Badge';
+import { Alert } from '@/components/core/Alert';
 import { SectionCard } from '@/components/core/Section';
 import { OgImagePreview } from '@/features/metadata/OgImagePreview';
 import { UrlSection } from '@/features/metadata/UrlSection';
@@ -63,8 +65,13 @@ interface FormSettingsContentProps {
 }
 
 const formFeaturedImageConfig = UPLOAD_CONFIGS[UploadType.FORM_FEATURED_IMAGE];
+type SettingsSaveRequest = { input: UpdateFormInput; sequence: number };
 
-export function FormSettingsContent({
+export function FormSettingsContent(props: FormSettingsContentProps) {
+  return <FormSettingsTarget key={props.formId} {...props} />;
+}
+
+function FormSettingsTarget({
   formId,
   baseUrl,
   initialSlug,
@@ -102,6 +109,17 @@ export function FormSettingsContent({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadPending, setUploadPending] = useState(false);
   const [saveAnnouncement, setSaveAnnouncement] = useState('');
+  const [saveError, setSaveError] = useState('');
+  const mounted = useRef(false);
+  const saveSequence = useRef(0);
+  const failedFields = useRef(new Map<keyof UpdateFormInput, { sequence: number; message: string }>());
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+  const settingsPending = useIsMutating({ mutationKey: ['form-settings', formId] }) > 0;
   const ogImage = useOgImage({
     entityType: 'form',
     entityId: formId,
@@ -116,23 +134,58 @@ export function FormSettingsContent({
   const upload = bindings?.upload ?? uploadController.upload;
   const isUploading = uploadPending || uploadController.isUploading;
 
-  const saveSettings = useMutation({
-    mutationFn: (input: UpdateFormInput) => (bindings?.update ?? updateFormAction)(formId, input),
-    onSuccess: (result) => {
+  const updateSaveFailures = (request: SettingsSaveRequest, message?: string) => {
+    for (const field of Object.keys(request.input) as (keyof UpdateFormInput)[]) {
+      const failure = failedFields.current.get(field);
+      if (failure && failure.sequence > request.sequence) {
+        continue;
+      }
+      if (message) {
+        failedFields.current.set(field, { sequence: request.sequence, message });
+      } else {
+        failedFields.current.delete(field);
+      }
+    }
+    setSaveError([...new Set([...failedFields.current.values()].map((failure) => failure.message))].join('\n'));
+  };
+
+  const saveMutation = useMutation({
+    mutationKey: ['form-settings', formId],
+    scope: { id: `form-settings:${formId}` },
+    mutationFn: ({ input }: SettingsSaveRequest) => (bindings?.update ?? updateFormAction)(formId, input),
+    onSuccess: (result, request) => {
+      if (!mounted.current) {
+        return;
+      }
       if (result.error) {
+        updateSaveFailures(request, result.error);
         notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      setSaveAnnouncement(tCommonNotifications('saveSuccess'));
+      updateSaveFailures(request);
+      if (request.sequence === saveSequence.current && failedFields.current.size === 0) {
+        setSaveAnnouncement(tCommonNotifications('saveSuccess'));
+      }
     },
-    onMutate: () => setSaveAnnouncement(''),
-    onError: (error) => {
-      notifications.show({
-        message: error instanceof Error ? error.message : tCommonNotifications('updateFailed'),
-        tone: 'danger',
-      });
+    onMutate: () => {
+      if (!mounted.current) {
+        return;
+      }
+      setSaveAnnouncement('');
+    },
+    onError: (error, request) => {
+      if (!mounted.current) {
+        return;
+      }
+      const message = error instanceof Error ? error.message : tCommonNotifications('updateFailed');
+      updateSaveFailures(request, message);
+      notifications.show({ message, tone: 'danger' });
     },
   });
+  const saveSettings = {
+    mutate: (input: UpdateFormInput) => saveMutation.mutate({ input, sequence: ++saveSequence.current }),
+    mutateAsync: (input: UpdateFormInput) => saveMutation.mutateAsync({ input, sequence: ++saveSequence.current }),
+  };
 
   const slugMgmt = useSlugManagement({
     entityType: 'form',
@@ -183,6 +236,9 @@ export function FormSettingsContent({
   const setFeaturedImage = useMutation({
     mutationFn: (fileId: string) => (bindings?.setFeaturedImage ?? setFormFeaturedImageAction)(formId, fileId),
     onSuccess: (result) => {
+      if (!mounted.current) {
+        return;
+      }
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
         return;
@@ -198,6 +254,9 @@ export function FormSettingsContent({
   const removeFeaturedImage = useMutation({
     mutationFn: () => (bindings?.removeFeaturedImage ?? removeFormFeaturedImageAction)(formId),
     onSuccess: (result) => {
+      if (!mounted.current) {
+        return;
+      }
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
         return;
@@ -214,6 +273,9 @@ export function FormSettingsContent({
     mutationFn: (request: { locale: string; targetKey: string }) =>
       (bindings?.regenerateOgImage ?? regenerateFormOgImageAction)(formId, request.locale),
     onSuccess: (result, request) => {
+      if (!mounted.current) {
+        return;
+      }
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
         return;
@@ -232,20 +294,41 @@ export function FormSettingsContent({
         fileName: 'featured',
         onProgress: (progress) => setUploadProgress(progress.percentage),
       });
+      if (!mounted.current) {
+        return;
+      }
       await setFeaturedImage.mutateAsync(fileId);
     } catch (error) {
+      if (!mounted.current) {
+        return;
+      }
       notifications.show({
         message: error instanceof Error ? error.message : tCommonNotifications('uploadFailed'),
         tone: 'danger',
       });
     } finally {
-      setUploadPending(false);
-      setUploadProgress(0);
+      if (mounted.current) {
+        setUploadPending(false);
+        setUploadProgress(0);
+      }
     }
   };
 
   return (
-    <DsLayoutStack>
+    <DsLayoutStack role="group" aria-label={t('settings.access.title')} aria-busy={settingsPending}>
+      {settingsPending ? (
+        <StatusBadge role="status" tone="neutral">
+          {tCommon('states.syncing')}
+        </StatusBadge>
+      ) : null}
+      {!settingsPending && saveAnnouncement ? (
+        <StatusBadge tone="positive">{tCommon('states.synced')}</StatusBadge>
+      ) : null}
+      {saveError ? (
+        <Alert tone="danger" role="alert">
+          {saveError}
+        </Alert>
+      ) : null}
       <VisuallyHidden role="status" aria-live="polite" aria-atomic="true">
         {saveAnnouncement}
       </VisuallyHidden>
@@ -259,7 +342,7 @@ export function FormSettingsContent({
             slug={slug}
             isAvailable={slugMgmt.isAvailable}
             error={slugError}
-            saving={isSlugChecking || saveSettings.isPending}
+            saving={isSlugChecking || settingsPending}
             disabled={!canEdit}
             onChange={handleSlugChange}
             onBlur={handleSlugBlur}
@@ -304,6 +387,7 @@ export function FormSettingsContent({
             />
             <ImageUploadCropController
               imageUrl={featuredImageUrl}
+              targetKey={formId}
               canEdit={canEdit}
               isUploading={isUploading}
               uploadProgress={uploadProgress}

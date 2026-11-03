@@ -59,6 +59,21 @@ export const AccentHover: Story = {
 export const Disabled: Story = {
   render: localizedRender(() => <TextButtonExample disabled>Unavailable</TextButtonExample>),
 };
+export const Pending: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Commands accept controlled loading and optional loadingLabel. Text and the action name remain stable; Core adds indeterminate progress and blocks activation while preserving focus. The caller owns the promise, failure notification and clearing loading. Navigation links do not accept loading.',
+      },
+    },
+  },
+  render: localizedRender(() => (
+    <TextButton loading loadingLabel="Saving cookie preferences" appearance="muted">
+      Save preferences
+    </TextButton>
+  )),
+};
 export const AccentDisabled: Story = {
   render: localizedRender(() => (
     <TextButtonExample appearance="accent" disabled>

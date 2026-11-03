@@ -1,3 +1,5 @@
+import { Suspense } from 'react';
+import { PageLoader } from '@/features/site/PageLoader';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import { getLabelsForBlockByIdsAction, listLabelsForBlockAction } from '@/lib/actions/label';
 import { parseIntegerProp } from '../list-shared';
@@ -7,7 +9,7 @@ import { parseMarqueeIds } from '../marquee/schema';
 import type { BlockViewProps } from '../types';
 import { parseLabelMarqueeProps } from './schema';
 
-export async function LabelMarqueeViewServer({ props, requestedLocale }: BlockViewProps) {
+async function LabelMarqueeContent({ props, requestedLocale }: BlockViewProps) {
   const p = parseLabelMarqueeProps(props);
   const selectedIds = parseMarqueeIds(p.ids);
   const labels =
@@ -49,5 +51,13 @@ export async function LabelMarqueeViewServer({ props, requestedLocale }: BlockVi
         fallbackMode: p.fallbackMode,
       }}
     />
+  );
+}
+
+export function LabelMarqueeViewServer(props: BlockViewProps) {
+  return (
+    <Suspense fallback={<PageLoader placement="flow" />}>
+      <LabelMarqueeContent {...props} />
+    </Suspense>
   );
 }

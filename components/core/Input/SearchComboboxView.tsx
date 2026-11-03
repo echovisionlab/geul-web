@@ -33,6 +33,7 @@ export interface SearchComboboxViewProps<T> extends ClosedVisualProps {
   size?: InputSize;
   disabled?: boolean;
   grow?: boolean;
+  /** Input validation state. Query failures and retry UI belong to the caller. */
   error?: ReactNode;
 }
 export function SearchComboboxView<T>(props: SearchComboboxViewProps<T>) {
@@ -102,9 +103,11 @@ export function SearchComboboxView<T>(props: SearchComboboxViewProps<T>) {
         <ListBox<{ id: string; item: T }>
           className={classes.list}
           renderEmptyState={() =>
-            props.debouncedSearch.length < (props.minQueryLength ?? 2)
-              ? props.minimumQueryMessage
-              : props.emptyMessage || props.noResultsMessage
+            props.isLoading
+              ? null
+              : props.debouncedSearch.length < (props.minQueryLength ?? 2)
+                ? props.minimumQueryMessage
+                : props.emptyMessage || props.noResultsMessage
           }
         >
           {(entry) => (

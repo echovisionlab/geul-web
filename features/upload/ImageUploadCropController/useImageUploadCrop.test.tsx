@@ -1,22 +1,17 @@
 // @vitest-environment jsdom
 
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+import { act, renderHook } from '@/test/render';
+import { notifications } from '@/components/core/Notification';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { useImageUploadCrop } from './useImageUploadCrop';
 
-const { prepareImageFileForPreviewMock, notificationShowMock } = vi.hoisted(() => ({
+const { prepareImageFileForPreviewMock } = vi.hoisted(() => ({
   prepareImageFileForPreviewMock: vi.fn(),
-  notificationShowMock: vi.fn(),
 }));
 
 vi.mock('@/lib/utils/upload-pipeline', () => ({
   prepareImageFileForPreview: prepareImageFileForPreviewMock,
-}));
-
-vi.mock('@/components/core/Notification', () => ({
-  notifications: { show: notificationShowMock },
 }));
 
 class MockFileReader {
@@ -29,50 +24,29 @@ class MockFileReader {
   }
 }
 
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-let container: HTMLDivElement;
-let root: Root;
-let currentHook: ReturnType<typeof useImageUploadCrop> | null = null;
-
-function HookHarness({ onUpload }: { onUpload: (blob: Blob) => void }) {
-  currentHook = useImageUploadCrop({
-    onUpload,
-    uploadType: UploadType.FEATURED_IMAGE,
-  });
-
-  return (
-    <output data-crop-open={String(currentHook.cropModalOpened)} data-image-src={currentHook.tempImageSrc ?? ''} />
+let view: ReturnType<
+  typeof renderHook<ReturnType<typeof useImageUploadCrop>, { onUpload: (blob: Blob) => void; targetKey: string }>
+>;
+function mount(onUpload: (blob: Blob) => void = vi.fn()) {
+  view = renderHook(
+    ({ onUpload, targetKey }) => useImageUploadCrop({ onUpload, targetKey, uploadType: UploadType.FEATURED_IMAGE }),
+    { initialProps: { onUpload, targetKey: 'one' } },
   );
 }
-
-function getCurrentHook(): ReturnType<typeof useImageUploadCrop> {
-  if (!currentHook) {
-    throw new Error('Expected the upload crop hook to be rendered');
-  }
-  return currentHook;
+function getCurrentHook() {
+  return view.result.current;
 }
-
 async function selectFile(file: File) {
-  await act(async () => {
-    getCurrentHook().handleFileDrop([file]);
-    await Promise.resolve();
-  });
+  await act(async () => getCurrentHook().handleFileDrop([file]));
 }
-
 beforeEach(() => {
   vi.stubGlobal('FileReader', MockFileReader);
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-  currentHook = null;
+  vi.spyOn(notifications, 'show');
 });
-
 afterEach(() => {
-  act(() => root.unmount());
-  container.remove();
-  currentHook = null;
   vi.unstubAllGlobals();
+  notifications.clean();
+  vi.restoreAllMocks();
   vi.clearAllMocks();
 });
 
@@ -84,7 +58,7 @@ describe('useImageUploadCrop', () => {
     const croppedBlob = new Blob(['cropped'], { type: 'image/webp' });
     prepareImageFileForPreviewMock.mockResolvedValue(previewFile);
 
-    act(() => root.render(<HookHarness onUpload={onUpload} />));
+    mount(onUpload);
     await selectFile(sourceFile);
 
     expect(prepareImageFileForPreviewMock).toHaveBeenCalledWith(sourceFile, UploadType.FEATURED_IMAGE);
@@ -106,7 +80,7 @@ describe('useImageUploadCrop', () => {
           resolvePreparation = resolve;
         }),
     );
-    act(() => root.render(<HookHarness onUpload={vi.fn()} />));
+    mount();
     const source = new File(['source'], 'source.png', { type: 'image/png' });
     act(() => getCurrentHook().handleFileDrop([source]));
     expect(getCurrentHook().isPreparing).toBe(true);
@@ -122,7 +96,7 @@ describe('useImageUploadCrop', () => {
     const previewFile = new File(['preview'], 'preview.webp', { type: 'image/webp' });
     prepareImageFileForPreviewMock.mockResolvedValue(previewFile);
 
-    act(() => root.render(<HookHarness onUpload={vi.fn()} />));
+    mount();
     await selectFile(new File(['source'], 'source.png', { type: 'image/png' }));
     expect(getCurrentHook().cropModalOpened).toBe(true);
 
@@ -135,10 +109,10 @@ describe('useImageUploadCrop', () => {
   it('reports preprocessing failures without opening a crop session', async () => {
     prepareImageFileForPreviewMock.mockRejectedValue(new Error('Could not prepare image'));
 
-    act(() => root.render(<HookHarness onUpload={vi.fn()} />));
+    mount();
     await selectFile(new File(['source'], 'source.png', { type: 'image/png' }));
 
-    expect(notificationShowMock).toHaveBeenCalledWith({
+    expect(notifications.show).toHaveBeenCalledWith({
       message: 'Could not prepare image',
       tone: 'danger',
     });
@@ -146,3 +120,29 @@ describe('useImageUploadCrop', () => {
     expect(getCurrentHook().cropModalOpened).toBe(false);
   });
 });
+
+it.each(['cancel', 'target', 'unmount'] as const)(
+  'does not reopen a crop session after %s while preparing',
+  async (change) => {
+    let complete!: (file: File) => void;
+    prepareImageFileForPreviewMock.mockReturnValue(
+      new Promise<File>((resolve) => {
+        complete = resolve;
+      }),
+    );
+    mount();
+    act(() => getCurrentHook().handleFileDrop([new File(['source'], 'source.png', { type: 'image/png' })]));
+    expect(getCurrentHook().isPreparing).toBe(true);
+    if (change === 'cancel') {
+      act(() => getCurrentHook().handleCropCancel());
+    } else if (change === 'target') {
+      view.rerender({ onUpload: vi.fn(), targetKey: 'two' });
+    } else {
+      view.unmount();
+    }
+    await act(async () => complete(new File(['preview'], 'preview.webp', { type: 'image/webp' })));
+    expect(getCurrentHook().cropModalOpened).toBe(false);
+    expect(getCurrentHook().tempImageSrc).toBeNull();
+    expect(notifications.show).not.toHaveBeenCalled();
+  },
+);

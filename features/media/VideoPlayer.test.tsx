@@ -1,403 +1,269 @@
 // @vitest-environment jsdom
-
-import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
-import { act } from 'react';
-import { NextIntlClientProvider } from 'next-intl';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
-
+import { act, render, screen, within, waitFor } from '@/test/render';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { Button } from '@/components/core/Button';
+import enMessages from '@/messages/en.json';
 import { VideoPlayer } from './VideoPlayer';
 
-const { mockMountVideoJsPlayer, mockDisposeVideoJsPlayer } = vi.hoisted(() => ({
-  mockMountVideoJsPlayer: vi.fn((_videoElement?: HTMLVideoElement) => ({
-    dispose: vi.fn(),
-    error: vi.fn(),
-    one: vi.fn(),
-    el: () => null as HTMLElement | null,
-  })),
-  mockDisposeVideoJsPlayer: vi.fn(),
+const runtime = vi.hoisted(() => ({
+  mountVideoJsPlayer: vi.fn(),
+  disposeVideoJsPlayer: vi.fn(),
+  load: vi.fn(),
 }));
-
-vi.mock('@/features/media/runtime/videojs-player', async () => {
-  const actual = await vi.importActual<typeof import('@/features/media/runtime/videojs-player')>(
-    '@/features/media/runtime/videojs-player',
-  );
-
-  return {
-    ...actual,
-    mountVideoJsPlayer: mockMountVideoJsPlayer,
-    disposeVideoJsPlayer: mockDisposeVideoJsPlayer,
-  };
+vi.mock('./runtime/videojs-loader', () => ({ loadVideoJsRuntime: runtime.load }));
+beforeEach(() => {
+  runtime.mountVideoJsPlayer.mockImplementation(() => ({ el: () => null }));
+  runtime.load.mockResolvedValue(runtime);
+  vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+    callback(0);
+    return 1;
+  });
+  vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
+});
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.clearAllMocks();
 });
 
-const mockLoadVideoJsRuntime = vi.hoisted(() => vi.fn());
-vi.mock('@/features/media/runtime/videojs-loader', () => ({
-  loadVideoJsRuntime: mockLoadVideoJsRuntime,
-}));
-
-mockLoadVideoJsRuntime.mockImplementation(async () => ({
-  mountVideoJsPlayer: mockMountVideoJsPlayer,
-  disposeVideoJsPlayer: mockDisposeVideoJsPlayer,
-}));
-
-let host: HTMLDivElement | null = null;
-let root: Root | null = null;
-
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-if (!window.matchMedia) {
-  window.matchMedia = (query: string) =>
-    ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    }) as MediaQueryList;
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason: unknown) => void;
+  const promise = new Promise<T>((yes, no) => {
+    resolve = yes;
+    reject = no;
+  });
+  return { promise, resolve, reject };
 }
 
-const originalRequestAnimationFrame = window.requestAnimationFrame;
-const originalCancelAnimationFrame = window.cancelAnimationFrame;
-window.requestAnimationFrame = ((callback: FrameRequestCallback) => {
-  callback(performance.now());
-  return 1;
-}) as typeof window.requestAnimationFrame;
-window.cancelAnimationFrame = ((_: number) => {}) as typeof window.cancelAnimationFrame;
-
-afterAll(() => {
-  window.requestAnimationFrame = originalRequestAnimationFrame;
-  window.cancelAnimationFrame = originalCancelAnimationFrame;
-});
-
-afterEach(() => {
-  act(() => {
-    root?.unmount();
-  });
-  host?.remove();
-  root = null;
-  host = null;
-  mockMountVideoJsPlayer.mockReset();
-  mockMountVideoJsPlayer.mockReturnValue({
-    dispose: vi.fn(),
-    error: vi.fn(),
-    one: vi.fn(),
-    el: () => null,
-  });
-  mockDisposeVideoJsPlayer.mockReset();
-  mockLoadVideoJsRuntime.mockReset();
-  mockLoadVideoJsRuntime.mockImplementation(async () => ({
-    mountVideoJsPlayer: mockMountVideoJsPlayer,
-    disposeVideoJsPlayer: mockDisposeVideoJsPlayer,
-  }));
-});
-
-describe('VideoPlayer', () => {
-  const messages = {
-    common: {
-      states: {
-        loading: 'Loading...',
-      },
+const messages = {
+  ...enMessages,
+  common: {
+    ...enMessages.common,
+    states: {
+      ...enMessages.common.states,
+      loading: 'Loading...',
     },
-    editorCommon: {
-      media: {
-        videoPlayer: {
-          regionLabel: 'Video player',
-          play: 'Play',
-          pause: 'Pause',
-          controls: {
-            audioPlayer: 'Audio Player',
-            videoPlayer: 'Video Player',
-            videoPlayerLoading: 'Video Player is loading.',
-            isLoading: '{target} is loading.',
-            close: 'Close',
-            closeModalDialog: 'Close Modal Dialog',
-            mute: 'Mute',
-            unmute: 'Unmute',
-            currentTime: 'Current Time',
-            duration: 'Duration',
-            remainingTime: 'Remaining Time',
-            volumeLevel: 'Volume Level',
-            progressBar: 'Progress Bar',
-            loaded: 'Loaded',
-            streamType: 'Stream Type',
-            playbackRate: 'Playback Rate',
-            fullscreen: 'Fullscreen',
-            exitFullscreen: 'Exit Fullscreen',
-            skipBackward: 'Skip Backward',
-            skipForward: 'Skip Forward',
-            skipBackwardSeconds: 'Skip backward {seconds} seconds',
-            skipForwardSeconds: 'Skip forward {seconds} seconds',
-            seekToLivePlayingLive: 'Seek to live, currently playing live',
-            seekToLiveBehindLive: 'Seek to live, currently behind live',
-            descriptions: 'Descriptions',
-            descriptionsOff: 'descriptions off',
-            subtitles: 'Subtitles',
-            subtitlesSettings: 'subtitles settings',
-            subtitlesOff: 'subtitles off',
-            audioTrack: 'Audio Track',
-            defaultTrack: 'default',
-            chapters: 'Chapters',
-            done: 'Done',
-            reset: 'Reset',
-            live: 'LIVE',
-            selected: ', selected',
-            opensSubtitlesSettingsDialog: ', opens subtitles settings dialog',
-            modalWindow: 'Modal Window',
-            modalWindowText: 'This is a modal window.',
-            captionSettingsDialog: 'Caption Settings Dialog',
-            beginningOfDialogWindow: 'Beginning of dialog window. Escape will cancel and close the window.',
-            restoreDefaultSettings: 'restore all settings to the default values',
-            endOfDialogWindow: 'End of dialog window.',
-            color: 'Color',
-            opacity: 'Opacity',
-            text: 'Text',
-            textBackground: 'Text Background',
-            background: 'Background',
-            captionAreaBackground: 'Caption Area Background',
-            window: 'Window',
-            textEdgeStyle: 'Text Edge Style',
-            fontFamily: 'Font Family',
-            fontSize: 'Font Size',
-            none: 'None',
-            raised: 'Raised',
-            depressed: 'Depressed',
-            uniform: 'Uniform',
-            dropShadow: 'Drop shadow',
-            proportionalSansSerif: 'Proportional Sans-Serif',
-            monospaceSansSerif: 'Monospace Sans-Serif',
-            proportionalSerif: 'Proportional Serif',
-            monospaceSerif: 'Monospace Serif',
-            casual: 'Casual',
-            script: 'Script',
-            smallCaps: 'Small Caps',
-            white: 'White',
-            black: 'Black',
-            red: 'Red',
-            green: 'Green',
-            blue: 'Blue',
-            yellow: 'Yellow',
-            magenta: 'Magenta',
-            cyan: 'Cyan',
-            opaque: 'Opaque',
-            semiTransparent: 'Semi-Transparent',
-            transparent: 'Transparent',
-            playingInPictureInPicture: 'Playing in picture-in-picture',
-          },
-          processingOverlay: 'Processing video...',
+  },
+  editorCommon: {
+    ...enMessages.editorCommon,
+    media: {
+      ...enMessages.editorCommon.media,
+      videoEditor: { ...enMessages.editorCommon.media.videoEditor, processingOverlay: 'Video is processing...' },
+      videoPlayer: {
+        ...enMessages.editorCommon.media.videoPlayer,
+        regionLabel: 'Video player',
+        play: 'Play',
+        pause: 'Pause',
+        controls: {
+          ...enMessages.editorCommon.media.videoPlayer.controls,
+          audioPlayer: 'Audio Player',
+          videoPlayer: 'Video Player',
+          videoPlayerLoading: 'Video Player is loading.',
+          isLoading: '{target} is loading.',
+          close: 'Close',
+          closeModalDialog: 'Close Modal Dialog',
+          mute: 'Mute',
+          unmute: 'Unmute',
+          currentTime: 'Current Time',
+          duration: 'Duration',
+          remainingTime: 'Remaining Time',
+          volumeLevel: 'Volume Level',
+          progressBar: 'Progress Bar',
+          loaded: 'Loaded',
+          streamType: 'Stream Type',
+          playbackRate: 'Playback Rate',
+          fullscreen: 'Fullscreen',
+          exitFullscreen: 'Exit Fullscreen',
+          skipBackward: 'Skip Backward',
+          skipForward: 'Skip Forward',
+          skipBackwardSeconds: 'Skip backward {seconds} seconds',
+          skipForwardSeconds: 'Skip forward {seconds} seconds',
+          seekToLivePlayingLive: 'Seek to live, currently playing live',
+          seekToLiveBehindLive: 'Seek to live, currently behind live',
+          descriptions: 'Descriptions',
+          descriptionsOff: 'descriptions off',
+          subtitles: 'Subtitles',
+          subtitlesSettings: 'subtitles settings',
+          subtitlesOff: 'subtitles off',
+          audioTrack: 'Audio Track',
+          defaultTrack: 'default',
+          chapters: 'Chapters',
+          done: 'Done',
+          reset: 'Reset',
+          live: 'LIVE',
+          selected: ', selected',
+          opensSubtitlesSettingsDialog: ', opens subtitles settings dialog',
+          modalWindow: 'Modal Window',
+          modalWindowText: 'This is a modal window.',
+          captionSettingsDialog: 'Caption Settings Dialog',
+          beginningOfDialogWindow: 'Beginning of dialog window. Escape will cancel and close the window.',
+          restoreDefaultSettings: 'restore all settings to the default values',
+          endOfDialogWindow: 'End of dialog window.',
+          color: 'Color',
+          opacity: 'Opacity',
+          text: 'Text',
+          textBackground: 'Text Background',
+          background: 'Background',
+          captionAreaBackground: 'Caption Area Background',
+          window: 'Window',
+          textEdgeStyle: 'Text Edge Style',
+          fontFamily: 'Font Family',
+          fontSize: 'Font Size',
+          none: 'None',
+          raised: 'Raised',
+          depressed: 'Depressed',
+          uniform: 'Uniform',
+          dropShadow: 'Drop shadow',
+          proportionalSansSerif: 'Proportional Sans-Serif',
+          monospaceSansSerif: 'Monospace Sans-Serif',
+          proportionalSerif: 'Proportional Serif',
+          monospaceSerif: 'Monospace Serif',
+          casual: 'Casual',
+          script: 'Script',
+          smallCaps: 'Small Caps',
+          white: 'White',
+          black: 'Black',
+          red: 'Red',
+          green: 'Green',
+          blue: 'Blue',
+          yellow: 'Yellow',
+          magenta: 'Magenta',
+          cyan: 'Cyan',
+          opaque: 'Opaque',
+          semiTransparent: 'Semi-Transparent',
+          transparent: 'Transparent',
+          playingInPictureInPicture: 'Playing in picture-in-picture',
         },
       },
     },
-  } as const;
+  },
+} as const satisfies typeof enMessages;
 
-  it('recreates the video element after source changes even if dispose removed the old one', async () => {
-    host = document.createElement('div');
-    document.body.appendChild(host);
-    root = createRoot(host);
-    mockDisposeVideoJsPlayer.mockImplementation(() => {
-      host?.querySelector('video')?.remove();
-    });
-
-    await act(async () => {
-      root!.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <NextIntlClientProvider locale="en" messages={messages}>
-            <VideoPlayer
-              hlsSrc="https://cdn.example.com/master-1.m3u8"
-              src="https://cdn.example.com/original.mp4"
-              poster="https://cdn.example.com/thumb-1.webp"
-            />
-          </NextIntlClientProvider>
-        </DesignSystemProvider>,
-      );
-      await new Promise((resolve) => window.requestAnimationFrame(() => resolve(undefined)));
-    });
-
-    expect(host.querySelector('video')).not.toBeNull();
-    expect(mockMountVideoJsPlayer).toHaveBeenCalledTimes(1);
-
-    await act(async () => {
-      root!.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <NextIntlClientProvider locale="en" messages={messages}>
-            <VideoPlayer
-              hlsSrc="https://cdn.example.com/master-2.m3u8"
-              src="https://cdn.example.com/original.mp4"
-              poster="https://cdn.example.com/thumb-2.webp"
-            />
-          </NextIntlClientProvider>
-        </DesignSystemProvider>,
-      );
-      await new Promise((resolve) => window.requestAnimationFrame(() => resolve(undefined)));
-    });
-
-    expect(host.querySelector('video')).not.toBeNull();
-    expect(mockDisposeVideoJsPlayer).toHaveBeenCalledTimes(1);
-    expect(mockMountVideoJsPlayer).toHaveBeenCalledTimes(2);
+function player(props: Parameters<typeof VideoPlayer>[0] = {}) {
+  return <VideoPlayer {...props} />;
+}
+function mountedVideo() {
+  return runtime.mountVideoJsPlayer.mock.lastCall?.[0] as HTMLVideoElement;
+}
+describe('VideoPlayer preparation and playback handoff', () => {
+  it('shows a bounded shared loader until the runtime mounts and resets it for a new source', async () => {
+    const pending = deferred<typeof runtime>();
+    runtime.load.mockReturnValueOnce(pending.promise);
+    const view = render(player({ src: '/first.mp4' }), { messages });
+    expect(screen.getByRole('status')).toHaveTextContent('Video Player is loading.');
+    expect(runtime.mountVideoJsPlayer).not.toHaveBeenCalled();
+    await act(async () => pending.resolve(runtime));
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(mountedVideo().isConnected).toBe(true);
+    const next = deferred<typeof runtime>();
+    runtime.load.mockReturnValueOnce(next.promise);
+    view.rerender(player({ src: '/second.mp4' }));
+    expect(screen.getByRole('status')).toHaveTextContent('Video Player is loading.');
+    await act(async () => next.resolve(runtime));
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
-
+  it('recreates the video element after source changes even if disposal removed the old one', async () => {
+    runtime.disposeVideoJsPlayer.mockImplementationOnce(() => mountedVideo().remove());
+    const view = render(player({ src: '/first.mp4' }), { messages });
+    await waitFor(() => expect(runtime.mountVideoJsPlayer).toHaveBeenCalledOnce());
+    const first = mountedVideo();
+    view.rerender(player({ src: '/second.mp4' }));
+    await waitFor(() => expect(runtime.mountVideoJsPlayer).toHaveBeenCalledTimes(2));
+    expect(first.isConnected).toBe(false);
+    expect(mountedVideo()).not.toBe(first);
+    expect(mountedVideo().isConnected).toBe(true);
+    expect(runtime.disposeVideoJsPlayer).toHaveBeenCalledOnce();
+    expect(runtime.mountVideoJsPlayer).toHaveBeenCalledTimes(2);
+  });
   it('does not remount the player on rerender with unchanged props', async () => {
-    host = document.createElement('div');
-    document.body.appendChild(host);
-    root = createRoot(host);
-
-    await act(async () => {
-      root!.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <NextIntlClientProvider locale="en" messages={messages}>
-            <VideoPlayer
-              hlsSrc="https://cdn.example.com/master.m3u8"
-              src="https://cdn.example.com/original.mp4"
-              poster="https://cdn.example.com/thumb.webp"
-            />
-          </NextIntlClientProvider>
-        </DesignSystemProvider>,
-      );
-      await new Promise((resolve) => window.requestAnimationFrame(() => resolve(undefined)));
-    });
-
-    expect(mockMountVideoJsPlayer).toHaveBeenCalledTimes(1);
-    expect(mockDisposeVideoJsPlayer).toHaveBeenCalledTimes(0);
-
-    await act(async () => {
-      root!.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <NextIntlClientProvider locale="en" messages={messages}>
-            <VideoPlayer
-              hlsSrc="https://cdn.example.com/master.m3u8"
-              src="https://cdn.example.com/original.mp4"
-              poster="https://cdn.example.com/thumb.webp"
-            />
-          </NextIntlClientProvider>
-        </DesignSystemProvider>,
-      );
-      await Promise.resolve();
-    });
-
-    expect(mockMountVideoJsPlayer).toHaveBeenCalledTimes(1);
-    expect(mockDisposeVideoJsPlayer).toHaveBeenCalledTimes(0);
+    const view = render(player({ src: '/original.mp4' }), { messages });
+    await waitFor(() => expect(runtime.mountVideoJsPlayer).toHaveBeenCalledOnce());
+    view.rerender(player({ src: '/original.mp4' }));
+    expect(runtime.mountVideoJsPlayer).toHaveBeenCalledOnce();
+    expect(runtime.disposeVideoJsPlayer).not.toHaveBeenCalled();
   });
-
   it('mounts a caller action beside the native video controls', async () => {
-    host = document.createElement('div');
-    document.body.appendChild(host);
-    root = createRoot(host);
-    mockMountVideoJsPlayer.mockImplementationOnce((videoElement) => {
-      const playerElement = document.createElement('div');
+    let fullscreen!: HTMLButtonElement;
+    // The vendor boundary owns this DOM; the fixture recreates its control-bar insertion point.
+    /* eslint-disable testing-library/no-node-access */
+    runtime.mountVideoJsPlayer.mockImplementationOnce((video: HTMLVideoElement) => {
       const controlBar = document.createElement('div');
-      const fullscreen = document.createElement('button');
       controlBar.className = 'vjs-control-bar';
+      fullscreen = document.createElement('button');
       fullscreen.className = 'vjs-fullscreen-control';
-      videoElement?.parentElement?.replaceChild(playerElement, videoElement);
-      if (videoElement) {
-        playerElement.appendChild(videoElement);
-      }
-      controlBar.appendChild(fullscreen);
-      playerElement.appendChild(controlBar);
-      return {
-        dispose: vi.fn(),
-        error: vi.fn(),
-        one: vi.fn(),
-        el: () => playerElement,
-      };
+      fullscreen.setAttribute('aria-label', 'Fullscreen');
+      controlBar.append(fullscreen);
+      video.parentElement!.append(controlBar);
+      return { el: () => video.parentElement };
     });
-
-    await act(async () => {
-      root!.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <NextIntlClientProvider locale="en" messages={messages}>
-            <VideoPlayer
-              src="https://cdn.example.com/original.mp4"
-              action={
-                <button type="button" data-player-action>
-                  Download
-                </button>
-              }
-            />
-          </NextIntlClientProvider>
-        </DesignSystemProvider>,
-      );
-      await new Promise((resolve) => window.requestAnimationFrame(() => resolve(undefined)));
-    });
-
-    const actionSlot = host.querySelector('[data-video-player-action-slot]');
-    expect(actionSlot?.querySelector('[data-player-action]')).not.toBeNull();
-    expect(actionSlot?.nextElementSibling?.classList.contains('vjs-fullscreen-control')).toBe(true);
+    render(player({ src: '/original.mp4', action: <Button>Download</Button> }), { messages });
+    const action = await screen.findByRole('button', { name: 'Download' });
+    expect(within(screen.getByRole('group', { name: 'Video player' })).getByRole('button', { name: 'Download' })).toBe(
+      action,
+    );
+    expect(action.parentElement?.nextElementSibling).toBe(fullscreen);
+    /* eslint-enable testing-library/no-node-access */
   });
-  async function renderPlayer(props: Parameters<typeof VideoPlayer>[0] = {}) {
-    if (!host) {
-      host = document.createElement('div');
-      document.body.appendChild(host);
-      root = createRoot(host);
-    }
-    await act(async () => {
-      root!.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <NextIntlClientProvider locale="en" messages={messages}>
-            <VideoPlayer {...props} />
-          </NextIntlClientProvider>
-        </DesignSystemProvider>,
-      );
-    });
-  }
-
-  it('does not request the runtime without a ready playable source', async () => {
-    await renderPlayer();
-    await renderPlayer({ src: 'https://cdn.example.com/original.mp4', isReady: false });
-    await renderPlayer({ src: 'undefined' });
-    expect(mockLoadVideoJsRuntime).not.toHaveBeenCalled();
+  it('does not request the runtime without a ready playable source or replace processing progress', () => {
+    const view = render(player(), { messages });
+    view.rerender(player({ src: '/original.mp4', isReady: false, isProcessing: true }));
+    expect(screen.getByRole('status')).toHaveTextContent('Video is processing...');
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    view.rerender(player({ src: 'undefined' }));
+    expect(runtime.load).not.toHaveBeenCalled();
   });
-
   it('does not mount after unmount while the runtime is loading', async () => {
-    let resolveRuntime!: (runtime: unknown) => void;
-    mockLoadVideoJsRuntime.mockReturnValueOnce(
-      new Promise((resolve) => {
-        resolveRuntime = resolve;
-      }),
-    );
-    await renderPlayer({ src: '/original.mp4' });
-    expect(mockMountVideoJsPlayer).not.toHaveBeenCalled();
-    act(() => {
-      root!.unmount();
-      root = null;
-    });
-    await act(async () => {
-      resolveRuntime({ mountVideoJsPlayer: mockMountVideoJsPlayer, disposeVideoJsPlayer: mockDisposeVideoJsPlayer });
-      await Promise.resolve();
-    });
-    expect(mockMountVideoJsPlayer).not.toHaveBeenCalled();
+    const pending = deferred<typeof runtime>();
+    runtime.load.mockReturnValueOnce(pending.promise);
+    const view = render(player({ src: '/original.mp4' }), { messages });
+    expect(screen.getByRole('status')).toBeInTheDocument();
+    view.unmount();
+    await act(async () => pending.resolve(runtime));
+    expect(runtime.mountVideoJsPlayer).not.toHaveBeenCalled();
   });
-
   it('mounts only the latest source when props change during a shared load', async () => {
-    let resolveRuntime!: (runtime: unknown) => void;
-    mockLoadVideoJsRuntime.mockReturnValue(
-      new Promise((resolve) => {
-        resolveRuntime = resolve;
-      }),
-    );
-    await renderPlayer({ src: '/first.mp4' });
-    await renderPlayer({ src: '/second.mp4' });
-    await act(async () => {
-      resolveRuntime({ mountVideoJsPlayer: mockMountVideoJsPlayer, disposeVideoJsPlayer: mockDisposeVideoJsPlayer });
-      await Promise.resolve();
-    });
-    expect(mockMountVideoJsPlayer).toHaveBeenCalledTimes(1);
-    expect(mockMountVideoJsPlayer).toHaveBeenCalledWith(
+    const pending = deferred<typeof runtime>();
+    runtime.load.mockReturnValue(pending.promise);
+    const view = render(player({ src: '/first.mp4' }), { messages });
+    view.rerender(player({ src: '/second.mp4' }));
+    await act(async () => pending.resolve(runtime));
+    expect(runtime.mountVideoJsPlayer).toHaveBeenCalledOnce();
+    expect(runtime.mountVideoJsPlayer).toHaveBeenCalledWith(
       expect.any(HTMLVideoElement),
       expect.objectContaining({ src: '/second.mp4' }),
     );
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
-
-  it('keeps native playback on import failure and retries on a later source', async () => {
-    mockLoadVideoJsRuntime.mockRejectedValueOnce(new Error('chunk unavailable'));
-    await renderPlayer({ hlsSrc: '/master.m3u8', src: '/original.mp4', name: 'session.mp4' });
-    expect(host?.querySelector('video')?.getAttribute('src')).toBe('/original.mp4');
-    expect(host?.querySelector('video')?.controls).toBe(true);
-    expect(host?.querySelector('video')?.getAttribute('aria-label')).toBe('session.mp4');
-    expect(host?.querySelector('[role="group"]')?.getAttribute('aria-label')).toBe('session.mp4');
-    await renderPlayer({ src: '/next.mp4' });
-    expect(mockMountVideoJsPlayer).toHaveBeenCalledTimes(1);
-  });
+  it.each(['import', 'mount'] as const)(
+    'keeps native playback on %s failure and retries on a later source',
+    async (failure) => {
+      let frame!: FrameRequestCallback;
+      if (failure === 'import') {
+        runtime.load.mockRejectedValueOnce(new Error('chunk unavailable'));
+      } else {
+        runtime.mountVideoJsPlayer.mockImplementationOnce(() => {
+          throw new Error('Player unavailable');
+        });
+        vi.mocked(window.requestAnimationFrame).mockImplementationOnce((callback) => {
+          frame = callback;
+          return 1;
+        });
+      }
+      const view = render(player({ hlsSrc: '/master.m3u8', src: '/original.mp4', name: 'session.mp4' }), { messages });
+      if (failure === 'mount') {
+        await waitFor(() => expect(frame).toBeTypeOf('function'));
+        act(() => frame(0));
+      }
+      await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument());
+      const native = screen
+        .getAllByLabelText('session.mp4')
+        .find((element) => element instanceof HTMLVideoElement) as HTMLVideoElement;
+      expect(native).toHaveAttribute('src', '/original.mp4');
+      expect(native.controls).toBe(true);
+      expect(screen.getByRole('group', { name: 'session.mp4' })).toBeInTheDocument();
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      view.rerender(player({ src: '/next.mp4' }));
+      await waitFor(() => expect(runtime.mountVideoJsPlayer).toHaveBeenCalledTimes(failure === 'mount' ? 2 : 1));
+    },
+  );
 });

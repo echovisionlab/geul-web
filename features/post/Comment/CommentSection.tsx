@@ -32,7 +32,7 @@ export function CommentSection(props: CommentSectionProps) {
   if (!props.commentsEnabled) {
     return null;
   }
-  return <EnabledCommentSection {...props} />;
+  return <EnabledCommentSection key={`${props.postId}:${props.shareToken}:${props.sharePassword}`} {...props} />;
 }
 
 function EnabledCommentSection({
@@ -83,7 +83,7 @@ function EnabledCommentSection({
     );
   }
 
-  if (error) {
+  if (error && !data) {
     return (
       <Alert icon={<IconAlertCircle size={16} />} title={tCommonLabels('error')} tone="danger">
         {t('loadFailed')}
@@ -138,6 +138,7 @@ function EnabledCommentSection({
             />
           ))}
 
+          {error ? <Alert tone="danger">{t('loadFailed')}</Alert> : null}
           {hasNextPage && (
             <Button
               tone="neutral"

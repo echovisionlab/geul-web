@@ -262,7 +262,8 @@ export default function AdminEmailTemplatesPage({
           aria-label={`${tCommon('labels.event')} ${row.name}`}
           size="xs"
           value={row.eventKey ?? null}
-          placeholder={tPage('notAssigned')}
+          placeholder={isLoadingEventMappings ? tCommon('states.loading') : tPage('notAssigned')}
+          aria-busy={isLoadingEventMappings || updateEventMapping.isPending}
           clearable
           searchable
           nothingFoundMessage={tPage('noEvents')}
@@ -293,7 +294,13 @@ export default function AdminEmailTemplatesPage({
               });
             }
           }}
-          disabled={updateEventMapping.isPending}
+          disabled={isLoadingEventMappings || isEventMappingsError || updateEventMapping.isPending}
+          error={isEventMappingsError ? tCommon('states.notAvailable') : undefined}
+          description={
+            updateEventMapping.isPending && updateEventMapping.variables?.templateId === row.id
+              ? tCommon('states.syncing')
+              : undefined
+          }
         />
       ),
     },

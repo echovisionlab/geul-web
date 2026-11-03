@@ -173,7 +173,7 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
   });
 
   const handleAddCredit = (id: string) => {
-    if (!canEdit) {
+    if (!canEdit || addCredit.isPending) {
       return;
     }
     if (searchType === 'artist') {
@@ -184,7 +184,7 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
   };
 
   const handleAddByName = () => {
-    if (!canEdit) {
+    if (!canEdit || addCredit.isPending) {
       return;
     }
     const name = creditName.trim();
@@ -195,7 +195,7 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
   };
 
   const handleEditRole = (creditId: string, nextRole: string | null) => {
-    if (!canEdit) {
+    if (!canEdit || addCredit.isPending) {
       return;
     }
     setUpdatingRoleId(creditId);
@@ -203,7 +203,7 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
-    if (!canEdit) {
+    if (!canEdit || addCredit.isPending) {
       return;
     }
     const { active, over } = event;
@@ -319,7 +319,8 @@ export function ProgramEventCreditsSection({ eventId, canEdit, initialCredits }:
                 placeholder={searchType === 'member' ? t('searchPlaceholders.user') : t('searchPlaceholders.artist')}
                 leftSection={<IconUserPlus size={14} />}
                 items={searchResults}
-                isLoading={searchFetching}
+                isLoading={searchFetching || addCredit.isPending}
+                disabled={addCredit.isPending}
                 debouncedSearch={debouncedSearch}
                 onSelect={handleAddCredit}
                 getItemId={(item) => item.id}

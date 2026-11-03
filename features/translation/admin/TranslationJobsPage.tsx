@@ -136,7 +136,7 @@ export function TranslationJobsPage({ client }: { client?: TranslationJobsPageCl
       </DsLayoutInline>
 
       {jobsQuery.isLoading ? (
-        <PageLoader />
+        <PageLoader placement="flow" />
       ) : jobsQuery.error ? (
         <DsText role="alert" size="sm" tone="danger">
           {getTranslationActionErrorMessage(jobsQuery.error, t('states.loadFailed'))}

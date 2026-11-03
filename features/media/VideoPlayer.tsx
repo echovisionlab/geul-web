@@ -8,8 +8,10 @@ import { buildVideoJsMessages } from '@/features/media/runtime/videojs-messages'
 import { resolveVideoPlaybackSource } from '@/features/media/runtime/videojs-source';
 import { loadVideoJsRuntime } from '@/features/media/runtime/videojs-loader';
 import type { mountVideoJsPlayer } from '@/features/media/runtime/videojs-player';
+import { PageLoader } from '@/features/site/PageLoader';
 import { MediaPlayerStatusOverlay } from '@/features/media/ui/MediaPlayerStatusOverlay';
-import { MediaVideoFrame, MediaActionSlot, applyMediaActionSlot } from '@/components/core/MediaControls';
+import { VideoPlayerView } from './ui/VideoPlayerView';
+import { MediaActionSlot, applyMediaActionSlot } from '@/components/core/MediaControls';
 import 'video.js/dist/video-js.css';
 
 interface VideoPlayerProps {
@@ -40,11 +42,16 @@ export function VideoPlayer({
   const locale = useLocale();
   const mountRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<ReturnType<typeof mountVideoJsPlayer> | null>(null);
+  const [preparedTarget, setPreparedTarget] = useState<unknown>(null);
   const [actionSlotElement, setActionSlotElement] = useState<HTMLDivElement | null>(null);
   const messages = useMemo(
     () => ({ ...buildVideoJsMessages(locale, tMedia), ...(name ? { regionLabel: name } : {}) }),
     [locale, name, tMedia],
   );
+
+  const preparationTarget = useMemo(() => ({}), [hlsSrc, isReady, messages, poster, src]);
+  const preparing =
+    isReady && Boolean(resolveVideoPlaybackSource({ hlsSrc, src, poster })) && preparedTarget !== preparationTarget;
 
   const onNaturalSizeRef = useRef(onNaturalSize);
   onNaturalSizeRef.current = onNaturalSize;
@@ -82,6 +89,24 @@ export function VideoPlayer({
       return;
     }
 
+    const mountNativeFallback = () => {
+      if (cancelled || !mountNode.isConnected) {
+        return;
+      }
+      // Keep native playback available when runtime preparation fails.
+      const fallback = document.createElement('video');
+      fallback.setAttribute('aria-label', messages.regionLabel);
+      fallback.controls = true;
+      fallback.playsInline = true;
+      fallback.preload = 'metadata';
+      fallback.src = resolveVideoPlaybackSource({ src })?.src || playbackSource.src;
+      if (poster) {
+        fallback.poster = poster;
+      }
+      mountNode.replaceChildren(fallback);
+      setPreparedTarget(preparationTarget);
+    };
+
     void loadVideoJsRuntime()
       .then((loadedRuntime) => {
         if (cancelled) {
@@ -93,40 +118,30 @@ export function VideoPlayer({
             return;
           }
 
-          const currentVideo = document.createElement('video');
-          currentVideo.className = 'video-js vjs-big-play-centered';
-          currentVideo.setAttribute('aria-label', messages.regionLabel);
-          mountNode.appendChild(currentVideo);
-          const player = loadedRuntime.mountVideoJsPlayer(currentVideo, { hlsSrc, src, poster, messages });
-          playerRef.current = player;
+          try {
+            const currentVideo = document.createElement('video');
+            currentVideo.className = 'video-js vjs-big-play-centered';
+            currentVideo.setAttribute('aria-label', messages.regionLabel);
+            mountNode.appendChild(currentVideo);
+            const player = loadedRuntime.mountVideoJsPlayer(currentVideo, { hlsSrc, src, poster, messages });
+            playerRef.current = player;
+            setPreparedTarget(preparationTarget);
 
-          const controlBar = (player?.el?.() as HTMLElement | null)?.querySelector('.vjs-control-bar');
-          if (controlBar) {
-            const actionSlot = document.createElement('div');
-            actionSlot.className = 'video-player__action-slot';
-            applyMediaActionSlot(actionSlot);
-            actionSlot.dataset.videoPlayerActionSlot = 'true';
-            controlBar.insertBefore(actionSlot, controlBar.querySelector('.vjs-fullscreen-control'));
-            setActionSlotElement(actionSlot);
+            const controlBar = (player?.el?.() as HTMLElement | null)?.querySelector('.vjs-control-bar');
+            if (controlBar) {
+              const actionSlot = document.createElement('div');
+              actionSlot.className = 'video-player__action-slot';
+              applyMediaActionSlot(actionSlot);
+              actionSlot.dataset.videoPlayerActionSlot = 'true';
+              controlBar.insertBefore(actionSlot, controlBar.querySelector('.vjs-fullscreen-control'));
+              setActionSlotElement(actionSlot);
+            }
+          } catch {
+            mountNativeFallback();
           }
         });
       })
-      .catch(() => {
-        if (cancelled || !mountNode.isConnected) {
-          return;
-        }
-        // Keep playback accessible if the runtime chunk could not be fetched.
-        const fallback = document.createElement('video');
-        fallback.setAttribute('aria-label', messages.regionLabel);
-        fallback.controls = true;
-        fallback.playsInline = true;
-        fallback.preload = 'metadata';
-        fallback.src = resolveVideoPlaybackSource({ src })?.src || playbackSource.src;
-        if (poster) {
-          fallback.poster = poster;
-        }
-        mountNode.replaceChildren(fallback);
-      });
+      .catch(mountNativeFallback);
 
     return () => {
       cancelled = true;
@@ -140,19 +155,24 @@ export function VideoPlayer({
       setActionSlotElement(null);
       resetContainer();
     };
-  }, [hlsSrc, isReady, messages, poster, src]);
+  }, [hlsSrc, isReady, messages, poster, src, preparationTarget]);
 
   return (
-    <MediaVideoFrame processing={isProcessing} role="group" aria-label={messages.regionLabel}>
-      <div ref={mountRef} className="video-player__mount" data-video-player-mount />
-      {isProcessing ? (
-        <div data-processing-overlay>
-          <MediaPlayerStatusOverlay message={tMedia('videoEditor.processingOverlay')} kind="processing" />
-        </div>
-      ) : null}
+    <VideoPlayerView
+      name={messages.regionLabel}
+      mountRef={mountRef}
+      preparing={preparing}
+      processing={isProcessing}
+      loadingSurface={
+        <PageLoader height="100%" minHeight={0} message={tMedia('videoPlayer.controls.videoPlayerLoading')} />
+      }
+      processingSurface={
+        <MediaPlayerStatusOverlay message={tMedia('videoEditor.processingOverlay')} kind="processing" />
+      }
+    >
       {action && actionSlotElement
         ? createPortal(<MediaActionSlot>{action}</MediaActionSlot>, actionSlotElement)
         : null}
-    </MediaVideoFrame>
+    </VideoPlayerView>
   );
 }

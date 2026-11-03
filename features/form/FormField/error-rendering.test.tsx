@@ -1,8 +1,10 @@
 // @vitest-environment jsdom
 
-import { act, type ReactNode } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, describe, expect, it } from 'vitest';
+import type { ReactElement } from 'react';
+import { act, render, screen, waitFor } from '@/test/render';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { FormField } from './FormField';
+import { loadPhoneField } from './load-phone-field';
 import type {
   FormFieldSchemaCheckbox,
   FormFieldSchemaDate,
@@ -12,7 +14,6 @@ import type {
   FormFieldSchemaSelect,
   FormFieldSchemaText,
 } from '@/lib/types/form/schema';
-import { TestProviders } from '@/test/TestProviders';
 import { CheckboxField } from './fields/CheckboxField';
 import { DateField } from './fields/DateField';
 import { MultiSelectField } from './fields/MultiSelectField';
@@ -22,62 +23,19 @@ import { SelectField } from './fields/SelectField';
 import { TextareaField } from './fields/TextareaField';
 import { TextField } from './fields/TextField';
 
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: vi.fn().mockImplementation((query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
-});
-
-Object.defineProperty(window, 'ResizeObserver', {
-  writable: true,
-  value: class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  },
-});
-
-let container: HTMLDivElement | null = null;
-let root: Root | null = null;
-
+vi.mock('./load-phone-field', () => ({ loadPhoneField: vi.fn() }));
+let view: ReturnType<typeof render> | undefined;
 afterEach(() => {
-  act(() => {
-    root?.unmount();
-  });
-  container?.remove();
-  root = null;
-  container = null;
+  view = undefined;
+  vi.mocked(loadPhoneField).mockReset();
 });
-
-function renderField(node: ReactNode) {
-  act(() => {
-    root?.unmount();
-  });
-  container?.remove();
-
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-
-  act(() => {
-    root?.render(<TestProviders>{node}</TestProviders>);
-  });
+function renderField(node: ReactElement) {
+  view?.unmount();
+  view = render(node);
+  return view;
 }
-
 function expectSingleError(message: string) {
-  const textContent = container?.textContent ?? '';
-  const occurrences = textContent.split(message).length - 1;
-  expect(occurrences).toBe(1);
+  expect(screen.getAllByText(message)).toHaveLength(1);
 }
 
 describe('form field error rendering', () => {
@@ -119,7 +77,7 @@ describe('form field error rendering', () => {
       />,
     );
     expectSingleError('__TEXTAREA_ERROR__');
-    expect(container?.querySelector('textarea')?.getAttribute('rows')).toBe('1');
+    expect(screen.getByRole('textbox', { name: 'Textarea' })).toHaveAttribute('rows', '1');
 
     const numberField: FormFieldSchemaNumber = {
       id: 'number',
@@ -237,4 +195,21 @@ describe('form field error rendering', () => {
     );
     expectSingleError('__PHONE_ERROR__');
   });
+});
+
+it('preserves the phone field label while its chunk loads and offers recovery after a failure', async () => {
+  const pending = Promise.withResolvers<typeof import('./fields/PhoneField')>();
+  vi.mocked(loadPhoneField).mockReturnValueOnce(pending.promise).mockResolvedValueOnce({ PhoneField });
+  const field = { id: 'phone-pending', type: 'tel' as const, label: 'Phone', description: 'Contact number' };
+  const { user } = renderField(
+    <FormField field={field} value={undefined} onChange={vi.fn()} onValidityChange={vi.fn()} />,
+  );
+  expect(screen.getByRole('textbox', { name: 'Phone' })).toBeDisabled();
+  expect(screen.getByRole('status')).toHaveTextContent('Loading...');
+  await act(async () => pending.reject(new Error('Chunk offline')));
+  expect(screen.getByRole('alert')).toHaveTextContent('Failed to load data.');
+  await user.click(screen.getByRole('button', { name: 'Try again' }));
+  await waitFor(() => expect(screen.getByRole('textbox', { name: 'Phone' })).not.toBeDisabled());
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  expect(screen.getByText('Contact number')).toBeInTheDocument();
 });

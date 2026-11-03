@@ -1,7 +1,7 @@
 'use client';
 
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
-import { SupportingText, Text as DsText } from '@/components/core/Typography';
+import { Text as DsText } from '@/components/core/Typography';
 import { LayoutStack as DsLayoutStack, LayoutGrid as DsLayoutGrid } from '@/components/core/Layout';
 
 import { unwrapQueryResult } from '@/lib/api/query-result';
@@ -22,6 +22,7 @@ import { EditorSessionExpiredDialog } from '@/features/editor/EditorSessionExpir
 import { useEditorPermissionRevocation } from '@/features/editor/useEditorPermissionRevocation';
 import { CountryCodeSelect } from '@/features/location/CountryCodeSelect';
 import { MultiSelect, TextInput } from '@/components/core/Input';
+import { InputValidationGlyph } from '@/components/core/Input/InputGlyphs';
 import { PageLoader } from '@/features/site/PageLoader';
 import { SocialLinksEditor } from '@/features/social-links/SocialLinksEditor';
 import { UrlSection } from '@/features/metadata/UrlSection';
@@ -296,8 +297,16 @@ function useArtistDetailEditorViewModel({ id, artist, baseUrl }: ArtistDetailEdi
     },
   });
 
+  const [flushingCommand, setFlushingCommand] = useState<'back' | 'status' | 'delete' | null>(null);
   const flushPendingSaves = useCallback(
-    () => flushEditorSavesOrNotify(`artist:${id}`, tCommon('notifications.saveFailed')),
+    async (command: 'back' | 'status' | 'delete' = 'back') => {
+      setFlushingCommand(command);
+      try {
+        return await flushEditorSavesOrNotify(`artist:${id}`, tCommon('notifications.saveFailed'));
+      } finally {
+        setFlushingCommand(null);
+      }
+    },
     [id, tCommon],
   );
   const handleBack = useCallback(async () => {
@@ -306,7 +315,7 @@ function useArtistDetailEditorViewModel({ id, artist, baseUrl }: ArtistDetailEdi
     }
   }, [flushPendingSaves, router]);
   const handleDelete = useCallback(async () => {
-    if (await flushPendingSaves()) {
+    if (await flushPendingSaves('delete')) {
       setDeleteDialogOpened(true);
     }
   }, [flushPendingSaves]);
@@ -375,7 +384,7 @@ function useArtistDetailEditorViewModel({ id, artist, baseUrl }: ArtistDetailEdi
       if (!canEditNeutral) {
         return;
       }
-      if (!(await flushPendingSaves())) {
+      if (!(await flushPendingSaves('status'))) {
         return;
       }
       if (nextStatus === 'published' && canPublish) {
@@ -393,7 +402,7 @@ function useArtistDetailEditorViewModel({ id, artist, baseUrl }: ArtistDetailEdi
   const slugError = slugMgmt.error;
 
   if (activeEditLocale.isLoading || (roomLocale && (!provider || !doc))) {
-    return <PageLoader />;
+    return <PageLoader placement="flow" />;
   }
 
   const labelOptions =
@@ -468,9 +477,10 @@ function useArtistDetailEditorViewModel({ id, artist, baseUrl }: ArtistDetailEdi
     canUnpublish,
     handleStatusChange,
     canDelete,
+    deletePreparationPending: flushingCommand === 'delete',
     handleDelete,
-    publishArtist: { isPending: publishArtist.isPending },
-    unpublishArtist: { isPending: unpublishArtist.isPending },
+    publishArtist: { isPending: publishArtist.isPending || flushingCommand === 'status' },
+    unpublishArtist: { isPending: unpublishArtist.isPending || flushingCommand === 'status' },
     activeEditLocale,
     canManageParticipants,
     t,
@@ -551,6 +561,7 @@ export function ArtistDetailEditorView({ model }: { model: ArtistDetailEditorVie
     canUnpublish,
     handleStatusChange,
     canDelete,
+    deletePreparationPending,
     handleDelete,
     publishArtist,
     unpublishArtist,
@@ -590,7 +601,13 @@ export function ArtistDetailEditorView({ model }: { model: ArtistDetailEditorVie
   return (
     <EditorRuntimeProvider provider={currentProvider} entityType="artist" entityId={id} blockRoomProtocol={protocol}>
       <DsLayoutStack>
-        <QueryErrorAlert queries={[labelsQuery, parentArtistOptionsQuery]} />
+        <QueryErrorAlert
+          queries={[
+            labelsQuery,
+            parentArtistOptionsQuery,
+            ...(activeEditLocale.errorQuery ? [activeEditLocale.errorQuery] : []),
+          ]}
+        />
         <EditorHeader
           title={displayedName}
           onTitleChange={canEditLocalizedName ? handleScopedLocaleNameChange : undefined}
@@ -605,6 +622,7 @@ export function ArtistDetailEditorView({ model }: { model: ArtistDetailEditorVie
           backTooltip={tCommon('actions.back')}
           onStatusChange={canEditNeutral && (canPublish || canUnpublish) ? handleStatusChange : undefined}
           onDelete={canEditNeutral && canDelete ? handleDelete : undefined}
+          isDeleting={deletePreparationPending}
           isStatusChanging={publishArtist.isPending || unpublishArtist.isPending}
           groupStatusWithCollab
           controls={<EditorActiveLocaleControl state={activeEditLocale} />}
@@ -714,7 +732,7 @@ export function ArtistDetailEditorView({ model }: { model: ArtistDetailEditorVie
                     structureLocked
                   />
                 ) : (
-                  <SupportingText tone="secondary">{tCommon('states.loading')}</SupportingText>
+                  <PageLoader placement="flow" />
                 )
               ) : (
                 <ActiveEditLocaleContentPreview
@@ -747,7 +765,7 @@ export function ArtistDetailEditorView({ model }: { model: ArtistDetailEditorVie
                 structureLocked={false}
               />
             ) : (
-              <SupportingText tone="secondary">{tCommon('states.loading')}</SupportingText>
+              <PageLoader placement="flow" />
             )}
           </DsLayoutStack>
 
@@ -774,6 +792,8 @@ export function ArtistDetailEditorView({ model }: { model: ArtistDetailEditorVie
             id={`artist-${id}-label-ids`}
             label={tCommon('entities.labels')}
             placeholder={t('placeholders.labels')}
+            aria-busy={labelsQuery.isFetching || undefined}
+            rightSection={labelsQuery.isFetching ? <InputValidationGlyph status="checking" /> : undefined}
             data={labelOptions}
             value={fields.labelIds}
             onChange={handleLabelsChange}
@@ -788,6 +808,7 @@ export function ArtistDetailEditorView({ model }: { model: ArtistDetailEditorVie
               id={`artist-${id}-parent`}
               label={t('relations.parentArtist')}
               placeholder={t('placeholders.parentArtist')}
+              loading={parentArtistOptionsQuery.isFetching}
               options={parentArtistOptions}
               value={fields.parentArtistId}
               onChange={(value) => setField('parentArtistId', value)}

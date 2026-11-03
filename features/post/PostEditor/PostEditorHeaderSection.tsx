@@ -30,13 +30,14 @@ interface PostEditorHeaderSectionProps {
   controls: ReactNode;
   scheduledAt: string | null;
   scheduledTimeZone: string | null;
-  onBack: () => void;
+  onBack: () => void | Promise<unknown>;
   onStatusChange?: (status: PostStatus) => void;
   onDelete?: () => void;
   onOpenVersionHistory?: () => void;
   onOpenParticipants?: () => void;
   onReschedule?: () => void;
   onExportMarkdown: () => void;
+  exportingMarkdown?: boolean;
   onToggleZenMode: () => void;
 }
 
@@ -62,6 +63,7 @@ export function PostEditorHeaderSection({
   onOpenParticipants,
   onReschedule,
   onExportMarkdown,
+  exportingMarkdown = false,
   onToggleZenMode,
 }: PostEditorHeaderSectionProps) {
   const tCommon = useTranslations('common');
@@ -122,6 +124,7 @@ export function PostEditorHeaderSection({
       icon: <IconMarkdown />,
       iconOnly: true,
       onClick: onExportMarkdown,
+      loading: exportingMarkdown,
     });
   }
 

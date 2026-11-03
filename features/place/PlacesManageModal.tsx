@@ -3,6 +3,7 @@ import { SupportingText } from '@/components/core/Typography';
 
 import { LayoutStack as DsLayoutStack, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
 
+import { notifications } from '@/components/core/Notification';
 import { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
@@ -21,7 +22,7 @@ interface PlacesManageModalProps {
   onAddPlace: (placeId: string, placeData: { lat: number; lng: number }) => void;
   onRemovePlace: (placeId: string) => void;
   onCenterOnPlace: (place: MapPlace) => void;
-  onCreatePlace: (data: CreatePlaceFormState) => void;
+  onCreatePlace: (data: CreatePlaceFormState) => Promise<boolean>;
   isCreating?: boolean;
 }
 
@@ -41,6 +42,8 @@ export function PlacesManageModal({
   const tMapModal = useTranslations('editorCommon.mapPlacesModal');
   const [createModalOpened, setCreateModalOpened] = useState(false);
   const [createInitialName, setCreateInitialName] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const tNotifications = useTranslations('common.notifications');
 
   const handleAddPlace = useCallback(
     (placeId: string | null, placeData: unknown) => {
@@ -61,11 +64,22 @@ export function PlacesManageModal({
   }, []);
 
   const handleCreateSubmit = useCallback(
-    (data: CreatePlaceFormState) => {
-      onCreatePlace(data);
-      setCreateModalOpened(false);
+    async (data: CreatePlaceFormState) => {
+      if (submitting || isCreating) {
+        return;
+      }
+      setSubmitting(true);
+      try {
+        if (await onCreatePlace(data)) {
+          setCreateModalOpened(false);
+        }
+      } catch {
+        notifications.show({ message: tNotifications('createPlaceFailed'), tone: 'danger' });
+      } finally {
+        setSubmitting(false);
+      }
     },
-    [onCreatePlace],
+    [onCreatePlace, submitting, isCreating, tNotifications],
   );
 
   return (
@@ -119,7 +133,7 @@ export function PlacesManageModal({
         opened={createModalOpened}
         onClose={() => setCreateModalOpened(false)}
         onSubmit={handleCreateSubmit}
-        isPending={isCreating}
+        isPending={isCreating || submitting}
         initialName={createInitialName}
       />
     </>

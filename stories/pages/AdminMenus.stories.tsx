@@ -8,6 +8,7 @@ import { KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/c
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { LayoutContainer } from '@/components/core/Layout';
 import { AdminMenusPageView, type AdminMenusPageViewModel } from '@/features/menu/AdminMenusPage';
+import { PageLoader } from '@/features/site/PageLoader';
 import {
   appendMenuItem,
   removeMenuItem,
@@ -87,8 +88,11 @@ function Preview({ state = 'ready' }: { state?: 'ready' | 'empty' | 'failed' | '
   };
   const model: AdminMenusPageViewModel = {
     kind: 'ready',
+    loadingSurface: <PageLoader placement="flow" message={tCommon('states.loading')} />,
+    connectingSurface: <PageLoader placement="flow" message={tCommon('states.connectingEditor')} />,
     menuRoom: {
       provider: null,
+      isSynced: true,
       setLabel: (id, value) =>
         setItems((items) =>
           items.map((item) =>
@@ -119,7 +123,7 @@ function Preview({ state = 'ready' }: { state?: 'ready' | 'empty' | 'failed' | '
     selectedMenuId,
     menusQuery: failure,
     selectedMenuFailure: readyQuery,
-    targetsQuery: readyQuery,
+    targetsQuery: { ...readyQuery, isLoading: false },
     selectedMenuQuery: readyQuery,
     tPage,
     handleCreateMenu: () => {

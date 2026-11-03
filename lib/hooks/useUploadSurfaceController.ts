@@ -11,6 +11,7 @@ import {
   useUploadSurfaceLifecycle,
 } from '@/lib/hooks/uploadSurfaceActivity';
 import { useUploadResumeState } from '@/lib/hooks/useUploadResumeNotice';
+import { UploadResumeStateCode } from '@/lib/upload/resume-state';
 
 interface UseUploadSurfaceControllerOptions {
   uploadType: UploadType;
@@ -70,6 +71,8 @@ export function useUploadSurfaceController({
   return {
     surfaceKey,
     resumeState,
+    resumeStateCode: resumeState.code,
+    isResumeLookupPending: resumeState.code === UploadResumeStateCode.LOOKUP_PENDING,
     resumeNotice: resumeState.resumeNotice,
     isActiveUpload,
     activeUploadLifecycle,

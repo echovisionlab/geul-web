@@ -14,7 +14,7 @@ import {
 
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   closestCenter,
@@ -44,6 +44,7 @@ import { PageHeader } from '@/components/core/PageHeader';
 import { EntityTranslationsPanel } from '@/features/translation/EntityTranslationsPanel';
 import { TranslationLocaleControl } from '@/features/translation/TranslationLocaleControl';
 import { useLocaleDocumentSession } from '@/features/translation/useLocaleDocumentSession';
+import { resolveLocaleRoomLocale } from '@/features/translation/locale-document-mode';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import { createMenuAction, deleteMenuAction, getMenuAvailableTargetsAction } from '@/lib/actions/menu';
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
@@ -334,6 +335,8 @@ function useAdminMenusPageModel() {
 
   return {
     kind: 'ready' as const,
+    loadingSurface: <PageLoader placement="flow" />,
+    connectingSurface: <PageLoader placement="flow" message={tCommon('states.connectingEditor')} />,
     menuRoom,
     selectedMenuId,
     menusQuery,
@@ -417,13 +420,20 @@ export type AdminMenusPageViewModel =
       | 'roomState'
       | 'selectedMenu'
       | 'deleteMenu'
+      | 'loadingSurface'
+      | 'connectingSurface'
     > & {
+      loadingSurface: ReactNode;
+      connectingSurface: ReactNode;
       menuRoom:
-        | Pick<NonNullable<AdminMenusPageReadyModel['menuRoom']>, 'provider' | 'setLabel' | 'useSourceLabel'>
+        | Pick<
+            NonNullable<AdminMenusPageReadyModel['menuRoom']>,
+            'provider' | 'isSynced' | 'setLabel' | 'useSourceLabel'
+          >
         | Extract<AdminMenusPageReadyModel['menuRoom'], null | undefined>;
       menusQuery: import('react').ComponentProps<typeof QueryErrorAlert>['queries'][number];
       selectedMenuFailure: import('react').ComponentProps<typeof QueryErrorAlert>['queries'][number];
-      targetsQuery: import('react').ComponentProps<typeof QueryErrorAlert>['queries'][number];
+      targetsQuery: import('react').ComponentProps<typeof QueryErrorAlert>['queries'][number] & { isLoading: boolean };
       selectedMenuQuery: import('react').ComponentProps<typeof QueryErrorAlert>['queries'][number];
       roomState:
         | Pick<NonNullable<AdminMenusPageReadyModel['roomState']>, 'name' | 'locale' | 'requestedLabels'>
@@ -436,6 +446,8 @@ export type AdminMenusPageViewModel =
 export function AdminMenusPageView({ model }: { model: AdminMenusPageViewModel }) {
   const tReorder = useTranslations('pageEditor.a11y');
   const {
+    loadingSurface,
+    connectingSurface,
     menuRoom,
     selectedMenuId,
     menusQuery,
@@ -539,7 +551,15 @@ export function AdminMenusPageView({ model }: { model: AdminMenusPageViewModel }
   return (
     <EditorRuntimeProvider provider={menuRoom.provider} entityType="menu" entityId={selectedMenuId ?? ''}>
       <DsLayoutStack gap="lg">
-        <QueryErrorAlert queries={[menusQuery, selectedMenuFailure, targetsQuery, selectedMenuQuery]} />
+        <QueryErrorAlert
+          queries={[
+            menusQuery,
+            selectedMenuFailure,
+            targetsQuery,
+            selectedMenuQuery,
+            ...(activeEditLocale.errorQuery ? [activeEditLocale.errorQuery] : []),
+          ]}
+        />
         <PageHeader
           title={tPage('title')}
           description={tPage('description')}
@@ -553,7 +573,7 @@ export function AdminMenusPageView({ model }: { model: AdminMenusPageViewModel }
         <DsLayoutStack gap="xl">
           <SettingsSection title={tCommon('entities.menus')}>
             {menusQuery.isError ? null : menusLoading ? (
-              <PageLoader />
+              loadingSurface
             ) : !menus || menus.length === 0 ? (
               <SupportingText role="status" tone="secondary">
                 {tPage('empty')}
@@ -611,7 +631,7 @@ export function AdminMenusPageView({ model }: { model: AdminMenusPageViewModel }
           {selectedMenuFailure.isError ? null : !selectedMenuId ? (
             <SupportingText tone="secondary">{tPage('selectPrompt')}</SupportingText>
           ) : selectedMenuLoading ? (
-            <PageLoader />
+            loadingSurface
           ) : (
             <SettingsSection
               title={roomState?.name ?? selectedMenu?.name ?? tPage('itemsTitle')}
@@ -624,6 +644,8 @@ export function AdminMenusPageView({ model }: { model: AdminMenusPageViewModel }
                       value={activeEditLocale.activeLocale}
                       options={activeEditLocale.localeOptions}
                       sourceLocale={effectiveSourceLocale}
+                      loading={activeEditLocale.localeChanging}
+                      disabled={activeEditLocale.isLoading}
                       onChange={(value) => value && activeEditLocale.setActiveLocale(value)}
                     />
                   ) : null}
@@ -642,11 +664,15 @@ export function AdminMenusPageView({ model }: { model: AdminMenusPageViewModel }
                 </DsLayoutInline>
               }
             >
-              {!activeEditLocale.isSourceLocale && roomState?.locale ? (
+              {activeEditLocale.isLoading ||
+              !menuRoom.isSynced ||
+              roomState?.locale !== resolveLocaleRoomLocale(activeEditLocale) ? (
+                connectingSurface
+              ) : !activeEditLocale.isSourceLocale && activeEditLocale.activeLocale ? (
                 <MenuTargetItemsEditor
                   items={menuItems}
-                  locale={roomState.locale}
-                  requestedLabels={roomState.requestedLabels}
+                  locale={activeEditLocale.activeLocale}
+                  requestedLabels={roomState?.requestedLabels ?? {}}
                   editable={canEditCurrentCopy}
                   onChange={menuRoom.setLabel}
                   onUseSource={menuRoom.useSourceLabel}
@@ -780,13 +806,15 @@ export function AdminMenusPageView({ model }: { model: AdminMenusPageViewModel }
             ) : (
               <Select
                 label={tPage('selectTarget')}
-                placeholder={tPage('targetPlaceholder')}
+                placeholder={targetsQuery.isLoading ? tCommon('states.loading') : tPage('targetPlaceholder')}
+                aria-busy={targetsQuery.isLoading}
+                error={targetsQuery.isError ? tCommon('states.notAvailable') : undefined}
                 value={formTargetId}
                 onChange={(v) => setFormTargetId(v)}
                 data={formTargetSelectData}
                 searchable
                 nothingFoundMessage={tPage('noTargets')}
-                disabled={selectedMenuAuthoringLocked}
+                disabled={selectedMenuAuthoringLocked || targetsQuery.isLoading || targetsQuery.isError}
               />
             )}
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { PageLoader } from '@/features/site/PageLoader/PageLoader';
 import { primitiveTokens } from '@/components/core/design-tokens';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { useTranslations } from 'next-intl';
@@ -36,7 +37,7 @@ export function LabelDescriptionEditor({
   const commonLabels = useTranslations('common.labels');
   const awareness = provider.awareness;
   if (!awareness) {
-    return null;
+    return <PageLoader placement="flow" />;
   }
 
   return (

@@ -1,5 +1,5 @@
 'use client';
-import { useId } from 'react';
+import { useId, useRef, useState } from 'react';
 import {
   LayoutContainer as DsLayoutContainer,
   LayoutInset as DsLayoutInset,
@@ -33,6 +33,21 @@ export function McpConsentPageView({
   approveAction,
   rejectAction,
 }: McpConsentPageViewProps) {
+  const [pending, setPending] = useState<'approve' | 'reject' | null>(null);
+  const submitting = useRef(false);
+  const submit = async (decision: 'approve' | 'reject') => {
+    if (submitting.current) {
+      return;
+    }
+    submitting.current = true;
+    setPending(decision);
+    try {
+      await (decision === 'approve' ? approveAction() : rejectAction());
+    } finally {
+      submitting.current = false;
+      setPending(null);
+    }
+  };
   const clientId = useId();
   const delegationId = useId();
   const permissionsId = useId();
@@ -69,22 +84,46 @@ export function McpConsentPageView({
             </DsText>
           </DsLayoutStack>
           <DsLayoutInline justify="end" gap="xs" align="center" wrap="wrap">
-            <form action={rejectAction}>
+            <form
+              action={() => submit('reject')}
+              onSubmit={(event) => {
+                if (submitting.current) {
+                  event.preventDefault();
+                } else {
+                  setPending('reject');
+                }
+              }}
+              aria-busy={pending === 'reject'}
+            >
               <Button
                 type="submit"
                 tone="neutral"
                 emphasis="low"
+                loading={pending === 'reject'}
+                disabled={pending !== null}
                 labelWrap="wrap"
                 aria-describedby={`${clientId} ${delegationId} ${permissionsId}`}
               >
                 {cancelLabel}
               </Button>
             </form>
-            <form action={approveAction}>
+            <form
+              action={() => submit('approve')}
+              onSubmit={(event) => {
+                if (submitting.current) {
+                  event.preventDefault();
+                } else {
+                  setPending('approve');
+                }
+              }}
+              aria-busy={pending === 'approve'}
+            >
               <Button
                 type="submit"
                 tone="neutral"
                 emphasis="medium"
+                loading={pending === 'approve'}
+                disabled={pending !== null}
                 labelWrap="wrap"
                 aria-describedby={`${clientId} ${delegationId} ${permissionsId}`}
               >

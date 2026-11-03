@@ -1,7 +1,8 @@
 'use client';
+import { Alert } from '@/components/core/Alert';
 import { SearchComboboxView, SearchInput, useInputCombobox } from '@/components/core/Input';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import { useLocale, useTranslations } from 'next-intl';
 import { Spinner as Loader } from '@/components/core/Display';
@@ -29,24 +30,40 @@ export function PlacesAutocomplete({ onPlaceSelect, placeholder }: PlacesAutocom
   const [value, setValue] = useState('');
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | undefined>();
+  const tCommonMessages = useTranslations('common.messages');
+  const requestRef = useRef(0);
+  useEffect(() => {
+    requestRef.current++;
+    setSuggestions([]);
+    setLoading(false);
+    setError(undefined);
+    return () => {
+      requestRef.current++;
+    };
+  }, [locale, placesLib]);
 
   const combobox = useInputCombobox();
 
   const searchPlaces = useCallback(
     async (input: string) => {
+      const request = ++requestRef.current;
       if (!placesLib || !input.trim()) {
         setSuggestions([]);
         return;
       }
 
       setLoading(true);
+      setError(undefined);
+      setSuggestions([]);
       try {
-        const request = {
+        const searchRequest = {
           input,
           language: locale,
         };
 
-        const { suggestions: results } = await placesLib.AutocompleteSuggestion.fetchAutocompleteSuggestions(request);
+        const { suggestions: results } =
+          await placesLib.AutocompleteSuggestion.fetchAutocompleteSuggestions(searchRequest);
 
         const mapped: Suggestion[] = results
           .map((s) => {
@@ -62,14 +79,21 @@ export function PlacesAutocomplete({ onPlaceSelect, placeholder }: PlacesAutocom
           })
           .filter((s): s is Suggestion => s !== null);
 
-        setSuggestions(mapped);
+        if (requestRef.current === request) {
+          setSuggestions(mapped);
+        }
       } catch {
-        setSuggestions([]);
+        if (requestRef.current === request) {
+          setSuggestions([]);
+          setError(tCommonMessages('failedToLoad'));
+        }
       } finally {
-        setLoading(false);
+        if (requestRef.current === request) {
+          setLoading(false);
+        }
       }
     },
-    [placesLib],
+    [placesLib, locale, tCommonMessages],
   );
 
   const handleInputChange = useCallback(
@@ -80,6 +104,9 @@ export function PlacesAutocomplete({ onPlaceSelect, placeholder }: PlacesAutocom
         searchPlaces(val);
       } else {
         combobox.closeDropdown();
+        requestRef.current++;
+        setLoading(false);
+        setError(undefined);
         setSuggestions([]);
       }
     },
@@ -97,6 +124,9 @@ export function PlacesAutocomplete({ onPlaceSelect, placeholder }: PlacesAutocom
         return;
       }
 
+      const request = ++requestRef.current;
+      setLoading(true);
+      setError(undefined);
       setValue(suggestion.mainText);
       combobox.closeDropdown();
 
@@ -106,6 +136,12 @@ export function PlacesAutocomplete({ onPlaceSelect, placeholder }: PlacesAutocom
           fields: ['location', 'displayName', 'formattedAddress', 'addressComponents', 'photos'],
         });
 
+        if (requestRef.current !== request) {
+          return;
+        }
+        if (!place.location) {
+          throw new Error('Missing place location');
+        }
         if (place.location) {
           // Get first photo URL
           let photoUrl: string | undefined;
@@ -126,10 +162,16 @@ export function PlacesAutocomplete({ onPlaceSelect, placeholder }: PlacesAutocom
           });
         }
       } catch {
-        // Silently fail
+        if (requestRef.current === request) {
+          setError(tCommonMessages('failedToLoad'));
+        }
+      } finally {
+        if (requestRef.current === request) {
+          setLoading(false);
+        }
       }
     },
-    [placesLib, suggestions, combobox, onPlaceSelect],
+    [placesLib, suggestions, combobox, onPlaceSelect, tCommonMessages],
   );
 
   if (!placesLib) {
@@ -143,29 +185,37 @@ export function PlacesAutocomplete({ onPlaceSelect, placeholder }: PlacesAutocom
   }
 
   return (
-    <SearchComboboxView
-      combobox={combobox}
-      search={value}
-      onSearchChange={handleInputChange}
-      placeholder={placeholder ?? tCommonPlaceholders('searchPlaces')}
-      items={suggestions}
-      debouncedSearch={value}
-      minQueryLength={1}
-      isLoading={loading}
-      onSelect={(id) => {
-        void handleOptionSubmit(id);
-      }}
-      getItemId={(item) => item.placeId}
-      getItemText={(item) => [item.mainText, item.secondaryText].filter(Boolean).join(' ')}
-      renderItem={(item) => (
-        <div>
-          <strong>{item.mainText}</strong>
-          <div>{item.secondaryText}</div>
-        </div>
-      )}
-      minimumQueryMessage={tCommonPlaceholders('searchPlaces')}
-      noResultsMessage={tMap('noResults')}
-      leadingGlyph="search"
-    />
+    <>
+      {error ? (
+        <Alert tone="danger" role="alert">
+          {error}
+        </Alert>
+      ) : null}
+      <SearchComboboxView
+        combobox={combobox}
+        search={value}
+        onSearchChange={handleInputChange}
+        placeholder={placeholder ?? tCommonPlaceholders('searchPlaces')}
+        items={loading || error ? [] : suggestions}
+        error={error}
+        debouncedSearch={value}
+        minQueryLength={1}
+        isLoading={loading}
+        onSelect={(id) => {
+          void handleOptionSubmit(id);
+        }}
+        getItemId={(item) => item.placeId}
+        getItemText={(item) => [item.mainText, item.secondaryText].filter(Boolean).join(' ')}
+        renderItem={(item) => (
+          <div>
+            <strong>{item.mainText}</strong>
+            <div>{item.secondaryText}</div>
+          </div>
+        )}
+        minimumQueryMessage={tCommonPlaceholders('searchPlaces')}
+        noResultsMessage={tMap('noResults')}
+        leadingGlyph="search"
+      />
+    </>
   );
 }

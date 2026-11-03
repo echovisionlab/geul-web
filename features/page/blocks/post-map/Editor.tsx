@@ -1,4 +1,5 @@
 'use client';
+import { QueryLoadingSurface } from '../QueryLoadingSurface';
 import {
   LayoutInline as DsLayoutInline,
   LayoutInset as DsLayoutInset,
@@ -110,14 +111,16 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
     queryFn: () => listTagsAction().then(unwrapQueryResult),
   });
   const { data: tags } = tagsQuery;
-  const { data: authorsData } = useQuery({
+  const authorsQuery = useQuery({
     queryKey: ['authors', 50],
     queryFn: () => listAuthorOptionsAction(50),
   });
-  const { data: themes } = useQuery({
+  const { data: authorsData } = authorsQuery;
+  const themesQuery = useQuery({
     queryKey: ['mapThemes', 'list'],
     queryFn: () => listMapThemesAction(),
   });
+  const { data: themes } = themesQuery;
 
   const categoryOptions = categories?.map((category) => ({ value: category.id, label: category.name })) || [];
   const seriesOptions = seriesList?.map((series) => ({ value: series.id, label: series.title })) || [];
@@ -157,7 +160,8 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
 
   return (
     <DsLayoutStack gap="lg" data-page-block-editor="post-map">
-      <QueryErrorAlert queries={[categoriesQuery, seriesListQuery, tagsQuery]} />
+      <QueryLoadingSurface queries={[categoriesQuery, seriesListQuery, tagsQuery, authorsQuery, themesQuery]} />
+      <QueryErrorAlert queries={[categoriesQuery, seriesListQuery, tagsQuery, authorsQuery, themesQuery]} />
       <DsLayoutInset blockEnd="md">
         <DsLayoutInline gap="xs">
           <IconMapPin size={18} />

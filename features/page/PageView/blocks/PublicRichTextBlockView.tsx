@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { PageLoader } from '@/features/site/PageLoader';
 import type { ComponentType } from 'react';
 import { useTranslations } from 'next-intl';
 import type { ExternalVideoViewProps } from '@/features/media/ExternalVideoView';
@@ -13,8 +14,9 @@ import type { Block } from '@/lib/types/page-content';
 import { DefaultBlockView } from './DefaultBlockView';
 import { PublicDocumentBlock } from './PublicDocumentBlock';
 
-const ExternalVideoView = dynamic(() =>
-  import('@/features/media/ExternalVideoView').then((module) => module.ExternalVideoView),
+const ExternalVideoView = dynamic(
+  () => import('@/features/media/ExternalVideoView').then((module) => module.ExternalVideoView),
+  { loading: () => <PageLoader placement="flow" /> },
 );
 
 interface PublicRichTextBlockViewProps {

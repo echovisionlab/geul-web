@@ -1,15 +1,16 @@
 'use client';
-import { SupportingText, Text as DsText } from '@/components/core/Typography';
+
+import { PageLoader } from '@/features/site/PageLoader';
+import { Text as DsText } from '@/components/core/Typography';
 import { ConfirmationDialog } from '@/features/confirmation';
 
-import { LayoutStack as DsLayoutStack, LayoutInset as DsLayoutInset, LayoutInset } from '@/components/core/Layout';
+import { LayoutInset } from '@/components/core/Layout';
 
 import { notifications } from '@/components/core/Notification';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
 import { useTranslations } from 'next-intl';
-import { Spinner as Loader } from '@/components/core/Display';
 import { Select, TextInput } from '@/components/core/Input';
 import { FormModal } from '@/components/core/Modal';
 import {
@@ -205,16 +206,45 @@ export function SegmentModals({
     },
     [editType],
   );
+  const estimateIdentity = {
+    create: JSON.stringify([isCreateOpen, createType, createConfig]),
+    edit: JSON.stringify([editingSegmentId, editType, editConfig]),
+  };
+  const estimateIdentityRef = useRef(estimateIdentity);
+  estimateIdentityRef.current = estimateIdentity;
+  const estimateRequests = useRef({ create: 0, edit: 0 });
+  const estimateMounted = useRef(true);
+  useEffect(() => {
+    estimateMounted.current = true;
+    return () => {
+      estimateMounted.current = false;
+    };
+  }, []);
+  useEffect(() => {
+    setCreateEstimatedCount(null);
+    setCreateEstimateLoading(false);
+  }, [estimateIdentity.create]);
+  useEffect(() => {
+    setEditEstimatedCount(null);
+    setEditEstimateLoading(false);
+  }, [estimateIdentity.edit]);
   const handleEstimate = useCallback(
     async (
       type: string | null,
       config: SegmentConfigState,
       setCount: (count: number | null) => void,
       setLoading: (loading: boolean) => void,
+      scope: 'create' | 'edit',
     ) => {
       if (!type) {
         return;
       }
+      const identity = estimateIdentityRef.current[scope];
+      const request = ++estimateRequests.current[scope];
+      const current = () =>
+        estimateMounted.current &&
+        estimateIdentityRef.current[scope] === identity &&
+        estimateRequests.current[scope] === request;
       setLoading(true);
       try {
         const segmentType = Number(type) as SegmentType;
@@ -222,16 +252,25 @@ export function SegmentModals({
           segmentType,
           config: buildSegmentConfig(segmentType, config),
         });
+        if (!current()) {
+          return;
+        }
         if (result.error) {
           notifications.show({ message: result.error, tone: 'danger' });
         } else {
           setCount(result.count ?? null);
         }
+      } catch {
+        if (current()) {
+          notifications.show({ message: tCommon('errors.generic'), tone: 'danger' });
+        }
       } finally {
-        setLoading(false);
+        if (current()) {
+          setLoading(false);
+        }
       }
     },
-    [],
+    [bindings, tCommon],
   );
   const handleCreate = async () => {
     if (!createType) {
@@ -411,7 +450,9 @@ export function SegmentModals({
           config={createConfig}
           onConfigChange={setCreateConfig}
           estimatedCount={createEstimatedCount}
-          onEstimate={() => handleEstimate(createType, createConfig, setCreateEstimatedCount, setCreateEstimateLoading)}
+          onEstimate={() =>
+            handleEstimate(createType, createConfig, setCreateEstimatedCount, setCreateEstimateLoading, 'create')
+          }
           estimateLoading={createEstimateLoading}
         />
       </FormModal>
@@ -430,12 +471,7 @@ export function SegmentModals({
         submitDisabled={!editName.trim() || !editType || editFetchLoading}
       >
         {editFetchLoading ? (
-          <DsLayoutInset block="xl">
-            <DsLayoutStack align="center">
-              <Loader size="sm" />
-              <SupportingText tone="secondary">{tPage('loading')}</SupportingText>
-            </DsLayoutStack>
-          </DsLayoutInset>
+          <PageLoader placement="flow" />
         ) : (
           <>
             <TextInput
@@ -468,7 +504,9 @@ export function SegmentModals({
               config={editConfig}
               onConfigChange={setEditConfig}
               estimatedCount={editEstimatedCount}
-              onEstimate={() => handleEstimate(editType, editConfig, setEditEstimatedCount, setEditEstimateLoading)}
+              onEstimate={() =>
+                handleEstimate(editType, editConfig, setEditEstimatedCount, setEditEstimateLoading, 'edit')
+              }
               estimateLoading={editEstimateLoading}
             />
           </>

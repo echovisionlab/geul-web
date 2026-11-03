@@ -1,18 +1,14 @@
 'use client';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
-import {
-  LayoutStack as DsLayoutStack,
-  LayoutInline as DsLayoutInline,
-  LayoutInset as DsLayoutInset,
-} from '@/components/core/Layout';
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
 
 import { useInputCombobox, SearchComboboxView, Select } from '@/components/core/Input';
 
 import { useId, useMemo, type ReactNode } from 'react';
 import { IconArrowsExchange, IconUserPlus, IconX } from '@tabler/icons-react';
 
-import { Avatar, Spinner as Loader, ScrollArea } from '@/components/core/Display';
+import { Avatar, ScrollArea } from '@/components/core/Display';
 import { IconButton } from '@/components/core/IconButton';
 
 import { ContentModal } from '@/components/core/Modal';
@@ -45,7 +41,11 @@ export interface PostParticipantsDialogViewProps {
   canManageCollaborators: boolean;
   queryFailure?: ReactNode;
   loading?: boolean;
+  loadingSurface: ReactNode;
+  pendingAction?: { memberId: string; action: 'remove' | 'change-role' };
+  failed?: boolean;
   searching?: boolean;
+  searchError?: string;
   mutating?: boolean;
   onSearchQueryChange: (value: string) => void;
   onSelectedRoleChange: (role: 'author' | 'collaborator') => void;
@@ -101,7 +101,11 @@ export function PostParticipantsDialogView({
   canManageCollaborators,
   queryFailure,
   loading = false,
+  loadingSurface,
+  pendingAction,
+  failed = false,
   searching = false,
+  searchError,
   mutating = false,
   onSearchQueryChange,
   onSelectedRoleChange,
@@ -141,10 +145,11 @@ export function PostParticipantsDialogView({
                   placeholder={labels.searchPlaceholder}
                   leftSection={<IconUserPlus size={16} />}
                   items={candidates}
-                  isLoading={searching}
+                  isLoading={searching || mutating}
+                  disabled={loading || failed || mutating}
                   debouncedSearch={searchQuery}
                   onSelect={(memberId) => {
-                    if (normalizedSelectedRole) {
+                    if (normalizedSelectedRole && !mutating && !loading && !failed) {
                       onAdd(memberId, normalizedSelectedRole);
                     }
                     combobox.closeDropdown();
@@ -160,6 +165,8 @@ export function PostParticipantsDialogView({
                   getItemId={(candidate) => candidate.id}
                   getItemText={(candidate) => candidate.nickname}
                   minimumQueryMessage={labels.typeAtLeast2Characters}
+                  error={searchError}
+                  emptyMessage={searchError}
                   noResultsMessage={labels.noUsersFound}
                   size="sm"
                 />
@@ -172,7 +179,7 @@ export function PostParticipantsDialogView({
                 onChange={(value) => value && onSelectedRoleChange(value as 'author' | 'collaborator')}
                 data={roleOptions}
                 allowDeselect={false}
-                disabled={roleOptions.length === 1}
+                disabled={roleOptions.length === 1 || mutating || loading || failed}
                 size="sm"
               />
             </DsLayoutInline>
@@ -180,12 +187,8 @@ export function PostParticipantsDialogView({
         ) : null}
 
         {loading ? (
-          <DsLayoutInset block="md">
-            <DsLayoutInline justify="center">
-              <Loader size="sm" />
-            </DsLayoutInline>
-          </DsLayoutInset>
-        ) : participants.length === 0 ? (
+          loadingSurface
+        ) : failed ? null : participants.length === 0 ? (
           <SupportingText tone="secondary">{labels.empty}</SupportingText>
         ) : (
           <ScrollArea.Autosize size="large">
@@ -250,6 +253,10 @@ export function PostParticipantsDialogView({
                               aria-label={changeRoleAction}
                               aria-describedby={`${dialogId}-${participant.memberId}-${participant.role}${!canChangeRole ? ` ${dialogId}-${participant.memberId}-${participant.role}-change-reason` : ''}`}
                               disabled={!canChangeRole || mutating}
+                              loading={
+                                pendingAction?.memberId === participant.memberId &&
+                                pendingAction.action === 'change-role'
+                              }
                               onClick={() => onChangeRole(participant.memberId, targetRole)}
                             >
                               <IconArrowsExchange size={14} />
@@ -265,6 +272,9 @@ export function PostParticipantsDialogView({
                               aria-label={removeAction}
                               aria-describedby={`${dialogId}-${participant.memberId}-${participant.role}${!canRemove ? ` ${dialogId}-${participant.memberId}-${participant.role}-remove-reason` : ''}`}
                               disabled={!canRemove || mutating}
+                              loading={
+                                pendingAction?.memberId === participant.memberId && pendingAction.action === 'remove'
+                              }
                               onClick={() => onRemove(participant.memberId, participant.role)}
                             >
                               <IconX size={14} />

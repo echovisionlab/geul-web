@@ -1,7 +1,7 @@
 'use client';
 
 import { LayoutStack as DsLayoutStack, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 
 import type { AuthProvider } from '@/features/auth/providers';
@@ -99,11 +99,26 @@ export function LoginController({
   transport,
 }: LoginControllerProps) {
   const locale = useLocale();
+  const requestScope = `${flowId ?? ''}:${locale}`;
+  const currentScope = useRef(requestScope);
+  currentScope.current = requestScope;
+  const generation = useRef(0);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      generation.current += 1;
+    };
+  }, []);
   const t = useTranslations('auth.login');
+  const tVerification = useTranslations('auth.verification');
   const tCommonActions = useTranslations('common.actions');
   const tNewsletter = useTranslations('settings.newsletter');
   const [flow, setFlow] = useState<KratosBrowserFlow | null>(null);
+  const [loadedScope, setLoadedScope] = useState<string | null>(null);
   const [flowLoading, setFlowLoading] = useState(false);
+  const [flowErrorScope, setFlowErrorScope] = useState<string | null>(null);
   const [flowError, setFlowError] = useState<string | null>(null);
   const [email, setEmail] = useState(initialEmail);
   const [code, setCode] = useState('');
@@ -213,12 +228,18 @@ export function LoginController({
   ]);
 
   useEffect(() => {
-    if (!flowId || isSessionPending) {
+    const requestGeneration = ++generation.current;
+    if (!flowId || isSessionPending || errorParam) {
       return;
     }
 
-    let cancelled = false;
+    const active = () => mounted.current && generation.current === requestGeneration;
     setFlowLoading(true);
+    setFlow(null);
+    setFlowError(null);
+    setFlowErrorScope(requestScope);
+    setSubmitError(null);
+    setPendingAction(null);
     const pendingNewsletterContinuation = claimNewsletterAuthContinuation(flowId, navigation.origin);
     const restartUrl = browserUrl(
       pendingNewsletterContinuation
@@ -228,11 +249,12 @@ export function LoginController({
     void transport
       .load(flowId, restartUrl)
       .then((outcome) => {
-        if (cancelled) {
+        if (!active()) {
           return;
         }
         switch (outcome.kind) {
           case 'continued':
+            setLoadedScope(requestScope);
             acceptFlow(outcome.flow);
             setFlowError(null);
             break;
@@ -256,7 +278,7 @@ export function LoginController({
         }
       })
       .catch((error: unknown) => {
-        if (!cancelled) {
+        if (active()) {
           clearNewsletterAuthContinuation();
           setFlowError(
             formatLocalizedLoginErrorMessage(error, {
@@ -268,15 +290,15 @@ export function LoginController({
         }
       })
       .finally(() => {
-        if (!cancelled) {
+        if (active()) {
           setFlowLoading(false);
         }
       });
 
     return () => {
-      cancelled = true;
+      generation.current += 1;
     };
-  }, [acceptFlow, browserUrl, flowId, isSessionPending, navigation, t, transport]);
+  }, [acceptFlow, browserUrl, errorParam, flowId, isSessionPending, navigation, requestScope, t, transport]);
 
   useEffect(() => {
     if (!isSessionPending && !hasSession && !flowId && !errorParam) {
@@ -285,11 +307,22 @@ export function LoginController({
   }, [browserUrl, errorParam, flowId, hasSession, isSessionPending, navigation]);
 
   const submitLogin = async (payload: Record<string, unknown>) => {
-    if (!flow || pendingAction !== null) {
+    if (
+      !flow ||
+      flowLoading ||
+      loadedScope !== requestScope ||
+      isSessionPending ||
+      errorParam ||
+      pendingAction !== null
+    ) {
       return;
     }
 
-    setPendingAction('email');
+    const requestGeneration = ++generation.current;
+    const scope = requestScope;
+    const action = awaitingCode && typeof payload.code !== 'string' ? 'resend' : 'email';
+    const active = () => mounted.current && generation.current === requestGeneration && currentScope.current === scope;
+    setPendingAction(action);
     setSubmitError(null);
     try {
       const codeDeliveryRequest = payload.method === 'code' && typeof payload.code !== 'string';
@@ -301,6 +334,9 @@ export function LoginController({
         },
         browserUrl(flow.return_to),
       );
+      if (!active()) {
+        return;
+      }
       switch (outcome.kind) {
         case 'continued': {
           const nextFlow = outcome.flow;
@@ -339,13 +375,18 @@ export function LoginController({
           break;
       }
     } catch {
-      setSubmitError(t('errors.loginFailed'));
+      if (active()) {
+        setSubmitError(t('errors.loginFailed'));
+      }
     } finally {
-      setPendingAction((current) => (current === 'email' ? null : current));
+      if (active()) {
+        setPendingAction((current) => (current === action ? null : current));
+      }
     }
   };
 
   const startOver = () => {
+    generation.current += 1;
     clearAcceptedDelivery();
     navigation.assign(browserUrl(flow?.return_to, true));
   };
@@ -371,7 +412,7 @@ export function LoginController({
     );
   }
 
-  if (flowError) {
+  if (flowError && flowErrorScope === requestScope) {
     return (
       <LoginStatusView
         kind="error"
@@ -412,7 +453,7 @@ export function LoginController({
     return <PageLoader message={t('redirecting')} />;
   }
 
-  if (!flow) {
+  if (!flow || flowLoading || loadedScope !== requestScope) {
     return <PageLoader message={flowLoading ? t('loading') : t('redirecting')} />;
   }
 
@@ -430,6 +471,9 @@ export function LoginController({
       return;
     }
 
+    const requestGeneration = ++generation.current;
+    const scope = requestScope;
+    const active = () => mounted.current && generation.current === requestGeneration && currentScope.current === scope;
     setPendingAction('passkey');
     setSubmitError(null);
     try {
@@ -438,21 +482,27 @@ export function LoginController({
         resultFieldName: 'passkey_login',
         cancelAfterWindowRefocusMs: 1000,
       });
+      if (!active()) {
+        return;
+      }
       if (!submitted) {
         setPasskeyStatus('unavailable');
         setSubmitError(t('passkeyUnavailable'));
       }
     } catch (error: unknown) {
-      if (!isPasskeyCancellation(error)) {
+      if (active() && !isPasskeyCancellation(error)) {
         setPasskeyStatus('unavailable');
         setSubmitError(t('passkeyUnavailable'));
       }
     } finally {
-      setPendingAction((current) => (current === 'passkey' ? null : current));
+      if (active()) {
+        setPendingAction((current) => (current === 'passkey' ? null : current));
+      }
     }
   };
   const startSocialLogin = (provider: AuthProvider) => {
     if (pendingAction === null) {
+      generation.current += 1;
       setPendingAction(provider);
     }
   };
@@ -488,6 +538,7 @@ export function LoginController({
           passkeyReady={passkeyStatus === 'ready'}
           pendingAction={pendingAction}
           submitError={submitError}
+          loadingSurface={<PageLoader placement="flow" message={tVerification('sentEmail.submitting')} />}
           onEmailChange={setEmail}
           onCodeChange={setCode}
           onRequestCode={() => void submitLogin(buildLoginCodePayload({ flow, enteredEmail: email, locale }))}

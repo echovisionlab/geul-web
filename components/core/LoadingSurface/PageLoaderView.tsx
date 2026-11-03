@@ -16,24 +16,28 @@ const IMAGE_SIZE_MAP: Record<PageLoaderViewSize, number> = {
 };
 
 export type PageLoaderViewSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+export type PageLoaderViewPlacement = 'fill' | 'flow';
 
 export interface PageLoaderViewProps {
-  /** Height of the loader container. Defaults to '100%' for full parent height. */
+  /** Defaults to '100%' in fill placement and 'auto' in flow placement. */
   height?: string | number;
   /** Minimum height safeguard for page-sized loaders. Defaults to 200. */
   minHeight?: string | number;
+  /** Fill a positioned parent, or reserve height in normal document flow. Defaults to fill. */
+  placement?: PageLoaderViewPlacement;
   size?: PageLoaderViewSize;
-  /** Retained for caller compatibility. Configured images keep their colors. */
-
-  message?: string;
+  /** Required nonblank visible text, resolved by the owning controller. */
+  message: string;
   imageSrc?: string | null;
+  /** Accessible name for the image and status; independent of visible message text. */
   imageAlt: string;
   imageUnoptimized?: boolean;
 }
 
 export function PageLoaderView({
-  height = '100%',
+  height,
   minHeight = 200,
+  placement = 'fill',
   size = 'md',
   message,
   imageSrc,
@@ -41,14 +45,18 @@ export function PageLoaderView({
   imageUnoptimized = false,
 }: PageLoaderViewProps) {
   const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
+  if (!message.trim()) {
+    throw new Error('PageLoaderView requires a nonblank visible message');
+  }
   return (
     <div
       className={classes.root}
       data-core-page-loader
+      data-placement={placement}
       role="status"
       aria-label={imageAlt}
       style={{
-        height,
+        height: height ?? (placement === 'flow' ? 'auto' : '100%'),
         minHeight,
       }}
     >
@@ -63,11 +71,9 @@ export function PageLoaderView({
             onError={() => setFailedImageSrc(imageSrc)}
           />
         ) : null}
-        {message ? (
-          <Text size="xs" tone="muted" align="center">
-            {message}
-          </Text>
-        ) : null}
+        <Text size="xs" tone="muted" align="center">
+          {message}
+        </Text>
       </LayoutStack>
     </div>
   );

@@ -42,12 +42,17 @@ const events: EventSeriesEventsTableItem[] = [
     publishedAt: '2026-10-01T09:00:00Z',
   },
 ];
-function EventSeriesPagePreview({ state = 'ready' }: { state?: 'ready' | 'empty' | 'pending' | 'error' }) {
+function EventSeriesPagePreview({
+  state = 'ready',
+}: {
+  state?: 'ready' | 'empty' | 'pending' | 'loading-more' | 'error';
+}) {
   const t = useTranslations();
   const locale = useLocale();
   const [query, setQuery] = useState<EventSeriesEventsQuery>({ page: 1, pageSize: 10 });
   const [share, setShare] = useState(false);
   const [count, setCount] = useState(1);
+  const [loadMoreFailed, setLoadMoreFailed] = useState(state === 'error');
   const filtered = tableRows(
     state === 'empty' ? [] : events,
     { ...query, page: 1, pageSize: 100 },
@@ -109,9 +114,11 @@ function EventSeriesPagePreview({ state = 'ready' }: { state?: 'ready' | 'empty'
               options: Object.entries(locationLabels).map(([value, label]) => ({ value, label })),
             },
           ]}
-          isLoadingMore={false}
-          error={state === 'error' ? t('common.messages.failedToLoad') : null}
+          isLoadingMore={state === 'loading-more'}
+          loadMoreDisabled={state === 'pending'}
+          error={loadMoreFailed ? t('common.messages.failedToLoad') : null}
           onQueryChange={(value) => {
+            setLoadMoreFailed(false);
             setCount(1);
             setQuery({
               ...value,
@@ -122,7 +129,10 @@ function EventSeriesPagePreview({ state = 'ready' }: { state?: 'ready' | 'empty'
               ),
             });
           }}
-          onLoadMore={() => setCount((value) => value + 10)}
+          onLoadMore={() => {
+            setLoadMoreFailed(false);
+            setCount((value) => value + 10);
+          }}
         />
       </ProgramEventSeriesPublicView>
       <ContentModal
@@ -156,5 +166,6 @@ type Story = StoryObj<typeof meta>;
 export const Ready: Story = {};
 export const Empty: Story = { args: { state: 'empty' } };
 export const Loading: Story = { args: { state: 'pending' } };
+export const LoadingMore: Story = { args: { state: 'loading-more' } };
 export const LoadFailed: Story = { args: { state: 'error' } };
 export const Phone: Story = { globals: { viewport: { value: 'phone', isRotated: false } } };

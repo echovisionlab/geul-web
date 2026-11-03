@@ -4,7 +4,7 @@ import { getEditorWriteToken } from '@/lib/editor/editor-write-origin';
 import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
 
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
-import { SupportingText, Text as DsText } from '@/components/core/Typography';
+import { Text as DsText } from '@/components/core/Typography';
 
 import { HierarchyIndent } from '@/components/core/Hierarchy';
 
@@ -19,7 +19,7 @@ import {
 
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { TranslationEntityType } from '@echovisionlab/geul-proto/secure/translation_pb.ts';
 import { IconCode, IconColumns2, IconEye } from '@tabler/icons-react';
@@ -67,6 +67,10 @@ function useEmailLayoutEditPageModel() {
   const layoutId = params.id as string;
   const translationClient = useMemo(() => createTranslationClient(), []);
 
+  const metadataIntent = useRef<{ layoutId: string; name?: string; key?: string }>({ layoutId });
+  if (metadataIntent.current.layoutId !== layoutId) {
+    metadataIntent.current = { layoutId };
+  }
   const [viewMode, setViewMode] = useState<ViewMode>('split');
   const [title, setTitle] = useState('');
   const [key, setKey] = useState('');
@@ -175,7 +179,8 @@ function useEmailLayoutEditPageModel() {
   const canEditCurrentLocale = canEditTranslationSource && activeEditLocale.canEditActiveLocale && isSynced;
 
   useEffect(() => {
-    if (layout) {
+    if (layout && (metadataIntent.current.name === undefined || metadataIntent.current.name === layout.name)) {
+      delete metadataIntent.current.name;
       setTitle(layout.name);
     }
   }, [layout]);
@@ -195,7 +200,8 @@ function useEmailLayoutEditPageModel() {
   }, [activeEditLocale.contentHtml, activeEditLocale.hasLiveRow, activeEditLocale.isSourceLocale, layout]);
 
   useEffect(() => {
-    if (layout) {
+    if (layout && (metadataIntent.current.key === undefined || metadataIntent.current.key === layout.key)) {
+      delete metadataIntent.current.key;
       setKey(layout.key);
     }
   }, [layout]);
@@ -239,6 +245,7 @@ function useEmailLayoutEditPageModel() {
       if (!canEditTranslationSource) {
         return;
       }
+      metadataIntent.current.name = value;
       setTitle(value);
       saveTitleDebounced(value);
     },
@@ -250,6 +257,7 @@ function useEmailLayoutEditPageModel() {
       if (!canEditTranslationSource) {
         return;
       }
+      metadataIntent.current.key = value;
       setKey(value);
       saveKeyDebounced(value);
     },
@@ -273,6 +281,9 @@ function useEmailLayoutEditPageModel() {
   if (layoutQuery.isError && !layout) {
     return { kind: 'state' as const, content: <QueryErrorAlert queries={[layoutQuery]} /> };
   }
+  if (translationEntriesQuery.isError && !translationEntriesQuery.data && !activeEditLocale.isSourceLocaleReady) {
+    return { kind: 'state' as const, content: <QueryErrorAlert queries={[translationEntriesQuery]} /> };
+  }
   guardNotFound(layout);
 
   const showEditor = viewMode === 'split' || viewMode === 'code';
@@ -285,13 +296,25 @@ function useEmailLayoutEditPageModel() {
 
   return {
     kind: 'ready' as const,
+    localeErrorSurface: (
+      <QueryErrorAlert
+        queries={[translationEntriesQuery, ...(activeEditLocale.errorQuery ? [activeEditLocale.errorQuery] : [])]}
+      />
+    ),
+    connectingSurface: <PageLoader placement="flow" message={tCommon('states.connectingEditor')} />,
     currentProvider,
     layoutId,
     title,
     activeEditLocale,
     handleTitleChange,
+    metadataSaveState: updateLayoutMutation.isPending
+      ? ('saving' as const)
+      : updateLayoutMutation.isError || updateLayoutMutation.data?.error
+        ? ('error' as const)
+        : undefined,
     isConnected,
     isSynced,
+    isEditorReady: layoutRoom.isDocumentReady,
     router,
     tPage,
     tCommon,
@@ -325,7 +348,12 @@ type EmailLayoutEditPageControllerModel = ReturnType<typeof useEmailLayoutEditPa
 type EmailLayoutEditPageReadyModel = Extract<EmailLayoutEditPageControllerModel, { kind: 'ready' }>;
 export type EmailLayoutEditPageViewModel =
   | Exclude<EmailLayoutEditPageControllerModel, { kind: 'ready' }>
-  | (Omit<EmailLayoutEditPageReadyModel, 'layout' | 'layoutRoom' | 'translationEntriesQuery'> & {
+  | (Omit<
+      EmailLayoutEditPageReadyModel,
+      'layout' | 'layoutRoom' | 'translationEntriesQuery' | 'localeErrorSurface' | 'connectingSurface'
+    > & {
+      localeErrorSurface: import('react').ReactNode;
+      connectingSurface: import('react').ReactNode;
       layout:
         | Pick<NonNullable<EmailLayoutEditPageReadyModel['layout']>, 'htmlContent'>
         | Extract<EmailLayoutEditPageReadyModel['layout'], null | undefined>;
@@ -350,13 +378,17 @@ export function EmailLayoutEditPageView({
     return model.content;
   }
   const {
+    localeErrorSurface,
+    connectingSurface,
     currentProvider,
     layoutId,
     title,
     activeEditLocale,
     handleTitleChange,
+    metadataSaveState,
     isConnected,
     isSynced,
+    isEditorReady,
     router,
     tPage,
     tCommon,
@@ -386,11 +418,13 @@ export function EmailLayoutEditPageView({
   } = model;
   return (
     <EditorRuntimeProvider provider={currentProvider} entityType="email_layout" entityId={layoutId}>
+      {localeErrorSurface}
       <DsLayoutStack flexible gap="md">
         <EditorHeader
           title={title}
           onTitleChange={canEditTranslationSource && activeEditLocale.isSourceLocale ? handleTitleChange : undefined}
           titleDisabled={!canEditTranslationSource || !activeEditLocale.isSourceLocale}
+          saveState={metadataSaveState}
           isConnected={isConnected}
           isSynced={isSynced}
           onBack={() => router.push('/admin/email-layouts')}
@@ -415,6 +449,8 @@ export function EmailLayoutEditPageView({
                 value={activeEditLocale.activeLocale}
                 options={activeEditLocale.localeOptions}
                 sourceLocale={activeEditLocale.sourceLocale}
+                loading={activeEditLocale.localeChanging}
+                disabled={activeEditLocale.isLoading}
                 onChange={handleActiveLocaleChange}
               />
             </div>
@@ -466,7 +502,7 @@ export function EmailLayoutEditPageView({
                   </DsText>
                 </DsLayoutInset>
                 <DsSectionCard padding="none" border="none" appearance="plain" grow clip>
-                  {currentDoc ? (
+                  {currentDoc && isEditorReady ? (
                     activeEditLocale.isSourceLocale ? (
                       <EmailLayoutEditor
                         key={`email-layout-${layoutId}-${roomLocale ?? 'fallback'}-${currentDoc.clientID}`}
@@ -478,7 +514,9 @@ export function EmailLayoutEditPageView({
                       />
                     ) : (
                       <EmailLayoutTargetEditor
+                        loadingSurface={connectingSurface}
                         units={layoutRoom.targetUnits}
+                        isReady={isEditorReady}
                         editable={canEditCurrentLocale}
                         onChange={layoutRoom.setTargetValue}
                         onUseSource={layoutRoom.useSourceFallback}
@@ -486,7 +524,7 @@ export function EmailLayoutEditPageView({
                     )
                   ) : (
                     <DsSectionCard padding="md" border="none" appearance="plain">
-                      <SupportingText tone="secondary">{tCommon('states.connectingEditor')}</SupportingText>
+                      {connectingSurface}
                     </DsSectionCard>
                   )}
                 </DsSectionCard>

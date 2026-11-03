@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useDebouncedValue } from '@mantine/hooks';
 import { previewEmailLayoutContentAction } from '@/lib/actions/email-layout';
+import { PageLoader } from '@/features/site/PageLoader';
 import { normalizeLocale } from '@/lib/i18n/locale';
 import { previewEmailLayout } from '@/lib/queries/email-layout';
 import type { EmailLayoutValidationError } from '@/lib/types/email-layout/validation';
@@ -50,11 +51,14 @@ export function EmailLayoutPreview({
   bindings = defaultBindings,
 }: EmailLayoutPreviewProps) {
   const tPreviewSample = useTranslations('adminList.emailLayouts.detail.previewSample');
+  const tStates = useTranslations('common.states');
   const [debouncedHtml] = useDebouncedValue(htmlContent, debounceMs);
   const [debouncedRefreshKey] = useDebouncedValue(refreshKey ?? htmlContent, debounceMs);
+  const previewTarget = `${layoutId ?? ''}:${locale ?? ''}`;
+  const resultTargetRef = useRef(previewTarget);
   const [previewHtml, setPreviewHtml] = useState('');
   const [errors, setErrors] = useState<EmailLayoutValidationError[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const sampleContent = useMemo(
     () =>
       `<h1>${tPreviewSample('headline')}</h1><p>${tPreviewSample('bodyPrimary')}</p><p>${tPreviewSample('bodySecondary')}</p>`,
@@ -69,6 +73,7 @@ export function EmailLayoutPreview({
       const useSavedLocalizedLayout = Boolean(layoutId) && requestedPreviewLocale !== normalizedSourceLocale;
 
       if (!useSavedLocalizedLayout && !debouncedHtml.trim()) {
+        resultTargetRef.current = previewTarget;
         setPreviewHtml('');
         setErrors([]);
         setIsLoading(false);
@@ -82,6 +87,7 @@ export function EmailLayoutPreview({
           if (controller.signal.aborted) {
             return;
           }
+          resultTargetRef.current = previewTarget;
           setPreviewHtml(result?.html ?? '');
           setErrors(result ? [] : [{ code: 'UNKNOWN_ERROR', message: '' }]);
           return;
@@ -91,12 +97,14 @@ export function EmailLayoutPreview({
         if (controller.signal.aborted) {
           return;
         }
+        resultTargetRef.current = previewTarget;
         setPreviewHtml(result.html);
         setErrors(result.errors);
       } catch {
         if (controller.signal.aborted) {
           return;
         }
+        resultTargetRef.current = previewTarget;
         setPreviewHtml('');
         setErrors([{ code: 'UNKNOWN_ERROR', message: '' }]);
       } finally {
@@ -107,7 +115,14 @@ export function EmailLayoutPreview({
     };
     void fetchPreview();
     return () => controller.abort();
-  }, [bindings, debouncedHtml, debouncedRefreshKey, layoutId, locale, sampleContent, sourceLocale]);
+  }, [bindings, debouncedHtml, debouncedRefreshKey, layoutId, locale, sampleContent, sourceLocale, previewTarget]);
 
-  return <EmailLayoutPreviewView previewHtml={previewHtml} errors={errors} isLoading={isLoading} />;
+  return (
+    <EmailLayoutPreviewView
+      previewHtml={resultTargetRef.current === previewTarget ? previewHtml : ''}
+      errors={resultTargetRef.current === previewTarget ? errors : []}
+      isLoading={isLoading || resultTargetRef.current !== previewTarget}
+      loadingSurface={<PageLoader placement="flow" message={tStates('loadingPreview')} />}
+    />
+  );
 }

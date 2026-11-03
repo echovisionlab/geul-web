@@ -1,7 +1,7 @@
 'use client';
 
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
-import { SupportingText, Text as DsText } from '@/components/core/Typography';
+import { Text as DsText } from '@/components/core/Typography';
 
 import {
   LayoutStack as DsLayoutStack,
@@ -27,6 +27,7 @@ import { EditorSessionExpiredDialog } from '@/features/editor/EditorSessionExpir
 import { useEditorPermissionRevocation } from '@/features/editor/useEditorPermissionRevocation';
 import { CountryCodeSelect } from '@/features/location/CountryCodeSelect';
 import { Select, TextInput } from '@/components/core/Input';
+import { InputValidationGlyph } from '@/components/core/Input/InputGlyphs';
 import { PageLoader } from '@/features/site/PageLoader';
 import { SocialLinksEditor } from '@/features/social-links/SocialLinksEditor';
 import { UrlSection } from '@/features/metadata/UrlSection';
@@ -284,8 +285,16 @@ function useLabelEditorViewModel({ id, label, baseUrl, backHref = '/admin/labels
     },
   });
 
+  const [flushingCommand, setFlushingCommand] = useState<'back' | 'status' | 'delete' | null>(null);
   const flushPendingSaves = useCallback(
-    () => flushEditorSavesOrNotify(`label:${id}`, tCommon('notifications.saveFailed')),
+    async (command: 'back' | 'status' | 'delete' = 'back') => {
+      setFlushingCommand(command);
+      try {
+        return await flushEditorSavesOrNotify(`label:${id}`, tCommon('notifications.saveFailed'));
+      } finally {
+        setFlushingCommand(null);
+      }
+    },
     [id, tCommon],
   );
   const handleBack = useCallback(async () => {
@@ -295,7 +304,7 @@ function useLabelEditorViewModel({ id, label, baseUrl, backHref = '/admin/labels
   }, [backHref, flushPendingSaves, router]);
   const handleStatusChange = useCallback(
     async (status: LabelStatus) => {
-      if (!canEditNeutral || !(await flushPendingSaves())) {
+      if (!canEditNeutral || !(await flushPendingSaves('status'))) {
         return;
       }
       if (status === 'published') {
@@ -351,7 +360,7 @@ function useLabelEditorViewModel({ id, label, baseUrl, backHref = '/admin/labels
   const localizedDescriptionSession = editorSession;
   const displayedName = roomLocale ? residentName : activeEditLocale.displayTitle;
   if (activeEditLocale.isLoading || (roomLocale && (!provider || !doc))) {
-    return <PageLoader />;
+    return <PageLoader placement="flow" />;
   }
 
   return {
@@ -379,8 +388,8 @@ function useLabelEditorViewModel({ id, label, baseUrl, backHref = '/admin/labels
     canPublish,
     canUnpublish,
     handleStatusChange,
-    publishLabel: { isPending: publishLabel.isPending },
-    unpublishLabel: { isPending: unpublishLabel.isPending },
+    publishLabel: { isPending: publishLabel.isPending || flushingCommand === 'status' },
+    unpublishLabel: { isPending: unpublishLabel.isPending || flushingCommand === 'status' },
     t,
     activeEditLocale: {
       isControlVisible: activeEditLocale.isControlVisible,
@@ -603,7 +612,7 @@ export function LabelEditorView({ model }: { model: LabelEditorViewModel }) {
                     structureLocked
                   />
                 ) : (
-                  <SupportingText tone="secondary">{tCommon('states.loading')}</SupportingText>
+                  <PageLoader placement="flow" />
                 )
               ) : (
                 <ActiveEditLocaleContentPreview
@@ -636,7 +645,7 @@ export function LabelEditorView({ model }: { model: LabelEditorViewModel }) {
                 structureLocked={false}
               />
             ) : (
-              <SupportingText tone="secondary">{tCommon('states.loading')}</SupportingText>
+              <PageLoader placement="flow" />
             )}
           </DsLayoutStack>
 
@@ -663,6 +672,8 @@ export function LabelEditorView({ model }: { model: LabelEditorViewModel }) {
             id={`label-${id}-parent-label-id`}
             label={t('fields.parentLabel')}
             placeholder={t('placeholders.parentLabel')}
+            aria-busy={labelsForParentQuery.isFetching || undefined}
+            rightSection={labelsForParentQuery.isFetching ? <InputValidationGlyph status="checking" /> : undefined}
             data={parentLabelOptions}
             value={fields.parentLabelId}
             onChange={(value) => setField('parentLabelId', value)}

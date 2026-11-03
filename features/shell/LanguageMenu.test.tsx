@@ -1,84 +1,97 @@
 // @vitest-environment jsdom
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { TestProviders } from '@/test/TestProviders';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, render, screen, waitFor } from '@/test/render';
 import { LocaleProvider } from '@/lib/providers/LocaleProvider';
 import { getSupportedLocaleOptions } from '@/lib/i18n/locale';
-import enMessages from '@/messages/en.json';
 import { LanguageMenu } from './LanguageMenu';
-const router = vi.hoisted(() => ({ refresh: vi.fn(), replace: vi.fn() }));
-vi.mock('next/navigation', () => ({ useRouter: () => router }));
-vi.mock('@/lib/auth/client', () => ({ useSession: () => ({ data: null, isPending: false }) }));
-vi.mock('@/lib/actions/user-preference', () => ({ updatePreferredLocaleAction: vi.fn() }));
-let host: HTMLDivElement;
-let root: Root;
-afterEach(() => {
-  act(() => root.unmount());
-  host.remove();
+const mocks = vi.hoisted(() => ({
+  refresh: vi.fn(),
+  replace: vi.fn(),
+  update: vi.fn(),
+  session: { data: null as null | { user: { id: string } }, isPending: false },
+}));
+vi.mock('next/navigation', () => ({ useRouter: () => mocks }));
+vi.mock('@/lib/auth/client', () => ({ useSession: () => mocks.session }));
+vi.mock('@/lib/actions/user-preference', () => ({ updatePreferredLocaleAction: mocks.update }));
+const dutch = getSupportedLocaleOptions().find((option) => option.value === 'nl')!.label;
+function setup() {
+  return render(
+    <LocaleProvider locale="en">
+      <LanguageMenu variant="text" />
+    </LocaleProvider>,
+  );
+}
+beforeEach(() => {
+  mocks.session = { data: null, isPending: false };
+  mocks.refresh.mockReset();
+  mocks.replace.mockReset();
+  mocks.update.mockReset();
+  window.history.replaceState(null, '', '/terms');
 });
-describe('language menu display and accessible name', () => {
-  it('preserves the displayed language in the text trigger name and supplies its purpose separately', () => {
-    host = document.createElement('div');
-    document.body.append(host);
-    root = createRoot(host);
-    act(() =>
-      root.render(
-        <TestProviders>
-          <LocaleProvider locale="en">
-            <LanguageMenu variant="text" />
-          </LocaleProvider>
-        </TestProviders>,
-      ),
-    );
-    const trigger = host.querySelector('button')!;
-    const displayedLanguage = getSupportedLocaleOptions().find((option) => option.value === 'en')!.label;
-    expect(trigger.getAttribute('aria-label')).toBe(displayedLanguage);
-    expect(trigger.textContent).toContain(displayedLanguage);
-    expect(document.getElementById(trigger.getAttribute('aria-describedby')!)?.textContent).toBe(
-      enMessages.shell.actions.language,
-    );
-    expect(['true', 'menu']).toContain(trigger.getAttribute('aria-haspopup'));
+describe('LanguageMenu', () => {
+  it('preserves the visible language in the name and describes its purpose', () => {
+    setup();
+    const trigger = screen.getByRole('button', { name: 'English' });
+    expect(trigger).toHaveTextContent('English');
+    expect(trigger).toHaveAccessibleDescription('Change language');
+    expect(trigger).toHaveAttribute('aria-haspopup', expect.stringMatching(/^(true|menu)$/));
   });
-});
-
-describe('changing the site language', () => {
-  function renderMenu() {
-    host = document.createElement('div');
-    document.body.append(host);
-    root = createRoot(host);
-    act(() =>
-      root.render(
-        <TestProviders>
-          <LocaleProvider locale="en">
-            <LanguageMenu variant="text" />
-          </LocaleProvider>
-        </TestProviders>,
-      ),
-    );
-  }
-
-  async function choose(label: string) {
-    act(() => host.querySelector('button')!.click());
-    const item = await vi.waitFor(() => {
-      const match = [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find(
-        (element) => element.textContent === label,
-      );
-      if (!match) {
-        throw new Error(`No menu item ${label}`);
-      }
-      return match;
+  it.each([false, true])('stays pending through a slow locale navigation (pinned=%s)', async (pinned) => {
+    window.history.replaceState(null, '', pinned ? '/terms?lang=ko&tab=1#scope' : '/terms');
+    let finish!: () => void;
+    const navigation = new Promise<void>((resolve) => {
+      finish = resolve;
     });
-    act(() => item.click());
-  }
-
-  it('drops a content language pinned in the URL so the document follows the new site language', async () => {
-    window.history.replaceState(null, '', '/terms?lang=ko&tab=1#scope');
-    renderMenu();
-    const dutch = getSupportedLocaleOptions().find((option) => option.value === 'nl')!.label;
-    await choose(dutch);
-    await vi.waitFor(() => expect(router.replace).toHaveBeenCalledWith('/terms?tab=1#scope', { scroll: false }));
-    expect(router.refresh).not.toHaveBeenCalled();
+    (pinned ? mocks.replace : mocks.refresh).mockReturnValue(navigation);
+    const { user } = setup();
+    await user.click(screen.getByRole('button', { name: 'English' }));
+    await user.click(await screen.findByRole('menuitem', { name: dutch }));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'English' })).toHaveAttribute('aria-busy', 'true'));
+    if (pinned) {
+      expect(mocks.replace).toHaveBeenCalledWith('/terms?tab=1#scope', { scroll: false });
+      expect(mocks.refresh).not.toHaveBeenCalled();
+    } else {
+      expect(mocks.refresh).toHaveBeenCalledOnce();
+    }
     expect(document.cookie).toContain('locale=nl');
+    await act(async () => finish());
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'English' })).not.toHaveAttribute('aria-busy', 'true'),
+    );
+  });
+  it('keeps preference persistence pending and ignores its response after unmount', async () => {
+    let finish!: (result: { success: boolean; preferred_locale: string }) => void;
+    mocks.session.data = { user: { id: 'user' } };
+    mocks.update.mockReturnValue(
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+    );
+    const { user, unmount } = setup();
+    await user.click(screen.getByRole('button', { name: 'English' }));
+    await user.click(await screen.findByRole('menuitem', { name: dutch }));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'English' })).toHaveAttribute('aria-busy', 'true'));
+    unmount();
+    await act(async () => finish({ success: true, preferred_locale: 'nl' }));
+    expect(mocks.refresh).not.toHaveBeenCalled();
+  });
+  it('recovers from a failed signed-in preference update without navigating', async () => {
+    mocks.session.data = { user: { id: 'user' } };
+    mocks.update.mockResolvedValue({ success: false, error: 'Cannot save preference' });
+    const { user } = setup();
+    await user.click(screen.getByRole('button', { name: 'English' }));
+    await user.click(await screen.findByRole('menuitem', { name: dutch }));
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'English' })).not.toHaveAttribute('aria-busy', 'true'),
+    );
+    expect(mocks.update).toHaveBeenCalledWith('nl');
+    expect(mocks.refresh).not.toHaveBeenCalled();
+    expect(mocks.replace).not.toHaveBeenCalled();
+  });
+
+  it('disables language changes while the session is unresolved', () => {
+    mocks.session.isPending = true;
+    setup();
+    expect(screen.getByRole('button', { name: 'English' })).toBeDisabled();
   });
 });

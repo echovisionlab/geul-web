@@ -1,5 +1,65 @@
 # Design system changes
 
+## 2026-11-03 — shared loading surfaces and command pending (unreleased)
+
+Site `PageLoader` displays localized default text for omitted, empty or whitespace messages and retains
+explicit phase text. Core `PageLoaderView.message` is now required and rejects blank strings; `imageAlt`
+continues to name the image/status separately. Missing or failed images leave visible text. Configured
+image selection, CDN resolution and GIF/SVG delivery remain site-owned. Catalogue bootstrap supplies
+the same visible text directly to Core using its root-resolved image before ManifestProvider exists.
+
+`placement="flow"` adds a normal-flow region; existing `fill` remains the default positioned-parent
+contract. Page blocks, editor preparation, initial lists, previews and modal/drawer bodies consume the
+shared surface through their owning controllers. Consumers must retain loaded content during background
+and incremental requests. Buttons, fields, upload/processing progress, playback buffering and route
+progress keep their granular feedback.
+
+TextButton adds command-only `loading`/`loadingLabel`. TableRowMenu tracks returned action Promises
+and accepts `onError` for domain feedback. EditorHeader Back, ErrorPage command actions and
+ImageUploadField removal track their returned Promises; MenuToggle forwards controlled `loading`.
+SearchCombobox suppresses minimum-query/no-results copy while loading. MultiSelect adds optional
+`isLoading`/`loadingLabel` using the shared checking glyph and suppresses pending empty copy.
+MultiSelectComboboxView gates creation and suppresses empty results while querying or creating;
+existing selections/options remain available. The post taxonomy wrapper supplies localized loading copy.
+The shared pending-action helper preserves Promise values and original rejections while clearing
+pending; domain feedback remains caller-owned.
+
+Core adds `useOnDemandModuleState(module, needed, request?)` with `module`, `status`, `error` and
+`retry`; `useOnDemandModule` keeps its module-only return. ConfirmDialogHost now requires localized
+`loadError: { message, retryLabel }` for both default on-demand and eager loading. Exhausted renderer
+retries end progress and show shared cancel/retry recovery while preserving queued intent and focus
+restoration. A chunk failure never invokes confirmation.
+
+ServerDataTableContent now retains loaded rows by default: `showPendingLoader` defaults to
+`result.data.length === 0`, so initial empty navigation can still show PageLoader. Login and email
+verification submission retain the disabled PIN and supply the common loader; explicit authority
+rechecks retain their result region/focus. Actual PageContentView/EmbedFrame/ToolModule stories cover
+mount pending, failed and ready, including a 320px region and the site loader. Their external module
+fixtures do not exercise stalled downloads or real tool service requests. See the
+[loading contract](loading-surface-contract.md) and [migration with consumer links](migrations/loading-commonization.md).
+
+All 54 feature domains received source audit, alongside platform and support owners. Static candidates
+are review evidence, not defect counts or complete semantic proof. The coordinator reports direct
+visual inspection of the Works GIF and live PortaDJ ready state, plus Storybook common-loader GIF
+phase/generic, no-image/failed-image, tool pending/failed/ready/320px and avatar `33steps`/hover states.
+Most other production/Storybook states, physical coarse-pointer input and actual assistive-technology
+checks remain unverified. No released web version or blanket visual approval is recorded.
+
+## 2026-11-03 — smaller avatar removal visual (unreleased)
+
+Core IconButton adds `appearance="media-overlay"` for inside media-corner commands: a 16px circle and 12px
+glyph/spinner within a rectangular 24px fine-pointer / 44px coarse-pointer target. It rejects local size/shape, links,
+toggles, count and contrast overrides. Existing icon-size, control-height and interaction roles own the geometry.
+ImageUploadField exposes `removeButtonAppearance="avatar"`, requiring a circle preview and inside placement.
+ProfileAvatarControl opts in for UserAvatarUploader's 56px admin and 80px default profile images.
+The previous 24px filled removal circle shrinks visually while its target, keyboard focus, disabled and pending
+behavior remain available. The rectangular hit area includes the painted badge edges; separate hover and active
+selectors also preserve the small visual in Storybook's forced pseudo previews.
+Other image actions and global control sizes retain their existing treatment.
+See [image upload contract and migration](image-upload-contract.md). The coordinator reports inspecting
+the `33steps` avatar and its hover state in Storybook; physical coarse-pointer input and actual
+assistive-technology checks remain unverified. This observation does not approve every avatar state.
+
 ## 2026-10-28 — site logos sized by the uploaded file; search dialog copy (unreleased)
 
 The public header, expanded admin navigation and form pages draw the full site logo at the size its SVG

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconPlus } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
@@ -16,6 +16,7 @@ export function CreateProgramEventSeriesButton({
   const tCommon = useTranslations('common');
   const tCommonEntities = useTranslations('common.entities');
   const [loading, setLoading] = useState(false);
+  const [navigating, startNavigation] = useTransition();
 
   const handleCreate = async () => {
     setLoading(true);
@@ -28,14 +29,18 @@ export function CreateProgramEventSeriesButton({
         });
         return;
       }
-      (navigate ?? router.push)(`/event-series/${result.data.id}?edit=true`);
+      startNavigation(() => {
+        (navigate ?? router.push)(`/event-series/${result.data.id}?edit=true`);
+      });
+    } catch {
+      notifications.show({ message: tCommon('notifications.saveFailed'), tone: 'danger' });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Button leftSection={<IconPlus size={16} />} onClick={handleCreate} loading={loading}>
+    <Button leftSection={<IconPlus size={16} />} onClick={handleCreate} loading={loading || navigating}>
       {tCommon('actions.newItem', { item: tCommonEntities('programEventSeries') })}
     </Button>
   );

@@ -1332,6 +1332,8 @@
       }
     },
     "verification": {
+      "checking": "Checking email change status…",
+      "unavailable": "Unable to check the email change status. Please check again.",
       "loading": "Loading verification form...",
       "startOver": "Start over",
       "errors": {

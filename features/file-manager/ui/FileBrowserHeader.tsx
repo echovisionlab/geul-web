@@ -57,13 +57,15 @@ export interface FileBrowserHeaderProps {
   canManage: boolean;
   batchActionsDisabled: boolean;
   mutationLoading?: boolean;
+  deletionInspecting?: boolean;
+  uploadPending?: boolean;
   onOpenPath: (index: number) => void;
   onQueryChange: (value: string) => void;
   onMimeTypePrefixChange: (value: string) => void;
   onSortChange: (value: string) => void;
   onViewModeChange: (mode: 'grid' | 'list') => void;
   onMoveSelectedFiles: () => void;
-  onDeleteSelectedFiles: () => void;
+  onDeleteSelectedFiles: () => void | Promise<void>;
   onCreateFolder: () => void;
   onUploadRequested: () => void;
 }
@@ -80,6 +82,8 @@ export function FileBrowserHeader({
   canManage,
   batchActionsDisabled,
   mutationLoading,
+  deletionInspecting,
+  uploadPending,
   onOpenPath,
   onQueryChange,
   onMimeTypePrefixChange,
@@ -133,7 +137,13 @@ export function FileBrowserHeader({
                 </IconButton>
               </FileBrowserTooltip>
               <FileBrowserTooltip label={labels.upload}>
-                <IconButton label={labels.upload} tone="accent" emphasis="low" onClick={onUploadRequested}>
+                <IconButton
+                  label={labels.upload}
+                  tone="accent"
+                  emphasis="low"
+                  onClick={onUploadRequested}
+                  disabled={uploadPending}
+                >
                   <IconUpload aria-hidden />
                 </IconButton>
               </FileBrowserTooltip>
@@ -156,6 +166,7 @@ export function FileBrowserHeader({
                   emphasis="low"
                   tone="danger"
                   disabled={managementDisabled}
+                  loading={deletionInspecting}
                   onClick={onDeleteSelectedFiles}
                 >
                   <IconTrash aria-hidden />

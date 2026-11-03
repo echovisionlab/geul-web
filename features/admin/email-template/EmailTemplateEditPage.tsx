@@ -6,6 +6,7 @@ import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
 
 import { describeEmailTemplateVariable } from './email-template-variable-description';
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
+import { Alert } from '@/components/core/Alert';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
 import { HierarchyIndent } from '@/components/core/Hierarchy';
@@ -102,7 +103,16 @@ function useEmailTemplateEditPageModel() {
   const [variablesExpanded, setVariablesExpanded] = useState(false);
   const [previewHtml, setPreviewHtml] = useState<string>('');
   const [previewSubject, setPreviewSubject] = useState<string>('');
-  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(true);
+  const [previewError, setPreviewError] = useState(false);
+  const previewMountedRef = useRef(true);
+  useEffect(() => {
+    previewMountedRef.current = true;
+    return () => {
+      previewMountedRef.current = false;
+      previewRequestIdRef.current += 1;
+    };
+  }, []);
   const editorRef = useRef<EmailCampaignTiptapEditorHandle | null>(null);
   const previewRequestIdRef = useRef(0);
   const previewParamsRef = useRef({
@@ -169,7 +179,11 @@ function useEmailTemplateEditPageModel() {
     await refetchTemplate();
   }, [refetchTemplate]);
 
-  const { data: layouts, isError: layoutsLoadError } = useQuery({
+  const {
+    data: layouts,
+    isError: layoutsLoadError,
+    isLoading: layoutsLoading,
+  } = useQuery({
     queryKey: ['emailLayouts', 'simple'],
     queryFn: listEmailLayoutsSimple,
   });
@@ -232,6 +246,7 @@ function useEmailTemplateEditPageModel() {
   });
 
   useEffect(() => {
+    previewRequestIdRef.current += 1;
     previewParamsRef.current = {
       hasTemplate: Boolean(template),
       subject: currentSubject,
@@ -246,6 +261,12 @@ function useEmailTemplateEditPageModel() {
     mutationFn: (data: { id: string; layoutId: string | null; origin: string }) =>
       updateEmailTemplateLayoutAction(data.id, data.layoutId, data.origin),
   });
+
+  useEffect(() => {
+    setPreviewHtml('');
+    setPreviewSubject('');
+    setPreviewError(false);
+  }, [activeEditorLocale, templateId]);
 
   const sendTest = useMutation({
     mutationFn: (data: { id: string; email: string; locale?: string | null }) =>
@@ -277,7 +298,7 @@ function useEmailTemplateEditPageModel() {
   }, [blockRoomController, isSynced]);
 
   const loadPreview = useCallback(async (document?: LocalizedRichTextDocument) => {
-    if (!previewParamsRef.current.hasTemplate) {
+    if (!previewMountedRef.current || !previewParamsRef.current.hasTemplate) {
       return;
     }
 
@@ -288,6 +309,7 @@ function useEmailTemplateEditPageModel() {
     const requestId = previewRequestIdRef.current + 1;
     previewRequestIdRef.current = requestId;
     setIsPreviewLoading(true);
+    setPreviewError(false);
 
     try {
       const preview = await previewEmailTemplateAction({
@@ -308,8 +330,11 @@ function useEmailTemplateEditPageModel() {
         return;
       }
 
-      setPreviewHtml('');
-      setPreviewSubject('');
+      setPreviewError(true);
+    } catch {
+      if (requestId === previewRequestIdRef.current) {
+        setPreviewError(true);
+      }
     } finally {
       if (requestId === previewRequestIdRef.current) {
         setIsPreviewLoading(false);
@@ -317,13 +342,18 @@ function useEmailTemplateEditPageModel() {
     }
   }, []);
 
-  const schedulePreviewRefresh = useDebouncedCallback(
+  const debouncedPreviewRefresh = useDebouncedCallback(
     async () => {
       const document = getDocumentSnapshot();
       await loadPreview(document);
     },
-    { delay: PREVIEW_DEBOUNCE_MS, flushOnUnmount: true },
+    { delay: PREVIEW_DEBOUNCE_MS, flushOnUnmount: false },
   );
+  const schedulePreviewRefresh = useCallback(() => {
+    previewRequestIdRef.current += 1;
+    setIsPreviewLoading(true);
+    return debouncedPreviewRefresh();
+  }, [debouncedPreviewRefresh]);
   const debouncedSubjectUpdate = useDebouncedRoomMetadata({
     connection: blockRoom,
     document: `email_template:${templateId}`,
@@ -365,29 +395,41 @@ function useEmailTemplateEditPageModel() {
     [activeEditLocale],
   );
 
+  const [preparingTest, setPreparingTest] = useState(false);
+  const preparingTestRef = useRef(false);
   const handleSendTest = () => {
     if (!canEditTranslationSource || !testEmail) {
       return;
     }
+    if (preparingTestRef.current) {
+      return;
+    }
+    preparingTestRef.current = true;
+    setPreparingTest(true);
     void (async () => {
-      if (
-        !(await persistEditorDocumentBeforeAction({
-          document: `email_template:${templateId}`,
-          provider: currentProvider,
-          requiresSync: localeMode.shouldUseLocaleDocument,
-          isSynced,
-          saveFailedMessage: tCommonNotifications('saveFailed'),
-          syncingMessage: tCommonStates('syncing'),
-          syncingTone: 'accent',
-        }))
-      ) {
-        return;
+      try {
+        if (
+          !(await persistEditorDocumentBeforeAction({
+            document: `email_template:${templateId}`,
+            provider: currentProvider,
+            requiresSync: localeMode.shouldUseLocaleDocument,
+            isSynced,
+            saveFailedMessage: tCommonNotifications('saveFailed'),
+            syncingMessage: tCommonStates('syncing'),
+            syncingTone: 'accent',
+          }))
+        ) {
+          return;
+        }
+        sendTest.mutate({
+          id: templateId,
+          email: testEmail,
+          locale: normalizeLocale(testLocale) ?? 'en',
+        });
+      } finally {
+        preparingTestRef.current = false;
+        setPreparingTest(false);
       }
-      sendTest.mutate({
-        id: templateId,
-        email: testEmail,
-        locale: normalizeLocale(testLocale) ?? 'en',
-      });
     })();
   };
 
@@ -519,6 +561,9 @@ function useEmailTemplateEditPageModel() {
 
   return {
     kind: 'ready' as const,
+    localeErrorSurface: activeEditLocale.errorQuery ? (
+      <QueryErrorAlert queries={[activeEditLocale.errorQuery]} />
+    ) : null,
     currentProvider,
     templateId,
     protocol,
@@ -541,6 +586,7 @@ function useEmailTemplateEditPageModel() {
     layoutId,
     handleLayoutChange,
     layoutsLoadError,
+    layoutsLoading,
     tCommonStates,
     updateLayout,
     activeEditLocale,
@@ -558,9 +604,11 @@ function useEmailTemplateEditPageModel() {
     handleEditorContentChange,
     showPreview,
     isPreviewLoading,
+    previewError,
     previewSubject,
     previewSrcDoc: previewHtml,
     sendTest,
+    preparingTest,
     testModalOpened,
     closeTestModal,
     tCommonPlaceholders,
@@ -577,7 +625,11 @@ type EmailTemplateEditPageControllerModel = ReturnType<typeof useEmailTemplateEd
 type EmailTemplateEditPageReadyModel = Extract<EmailTemplateEditPageControllerModel, { kind: 'ready' }>;
 export type EmailTemplateEditPageViewModel =
   | Exclude<EmailTemplateEditPageControllerModel, { kind: 'ready' }>
-  | (Omit<EmailTemplateEditPageReadyModel, 'template' | 'updateLayout' | 'sendTest' | 'editorSession'> & {
+  | (Omit<
+      EmailTemplateEditPageReadyModel,
+      'template' | 'updateLayout' | 'sendTest' | 'editorSession' | 'localeErrorSurface'
+    > & {
+      localeErrorSurface: import('react').ReactNode;
       template:
         | Pick<NonNullable<EmailTemplateEditPageReadyModel['template']>, 'key' | 'isSystem' | 'variables'>
         | Extract<EmailTemplateEditPageReadyModel['template'], null | undefined>;
@@ -597,6 +649,7 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
     return model.content;
   }
   const {
+    localeErrorSurface,
     currentProvider,
     templateId,
     protocol,
@@ -619,6 +672,7 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
     layoutId,
     handleLayoutChange,
     layoutsLoadError,
+    layoutsLoading,
     tCommonStates,
     updateLayout,
     activeEditLocale,
@@ -636,9 +690,11 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
     handleEditorContentChange,
     showPreview,
     isPreviewLoading,
+    previewError,
     previewSubject,
     previewSrcDoc,
     sendTest,
+    preparingTest,
     testModalOpened,
     closeTestModal,
     tCommonPlaceholders,
@@ -657,6 +713,7 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
       blockRoomProtocol={protocol}
     >
       <DsLayoutStack flexible gap="md">
+        {localeErrorSurface}
         <EditorHeader
           title={displayTitle}
           isConnected={isConnected}
@@ -703,7 +760,10 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
           <div style={{ width: 260 }}>
             <Select
               label={tEmailTemplates('detail.fields.layoutLabel')}
-              placeholder={tEmailTemplates('detail.fields.layoutPlaceholder')}
+              placeholder={
+                layoutsLoading ? tCommonStates('loading') : tEmailTemplates('detail.fields.layoutPlaceholder')
+              }
+              aria-busy={layoutsLoading}
               data={
                 layouts?.map((layout) => ({
                   value: layout.id,
@@ -716,7 +776,7 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
               searchable
               nothingFoundMessage={tEmailTemplates('detail.fields.noLayouts')}
               error={layoutsLoadError ? tCommonStates('notAvailable') : undefined}
-              disabled={!canEditTranslationSource || layoutsLoadError || updateLayout.isPending}
+              disabled={!canEditTranslationSource || layoutsLoading || layoutsLoadError || updateLayout.isPending}
             />
           </div>
           {activeEditLocale.isControlVisible ? (
@@ -727,6 +787,8 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
                 value={activeEditLocale.activeLocale}
                 options={activeEditLocale.localeOptions}
                 sourceLocale={activeEditLocale.sourceLocale}
+                loading={activeEditLocale.localeChanging}
+                disabled={activeEditLocale.isLoading}
                 onChange={handleActiveLocaleChange}
               />
             </div>
@@ -803,7 +865,7 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
                     />
                   ) : (
                     <DsSectionCard padding="md" border="none" appearance="plain">
-                      <SupportingText tone="secondary">{tCommonStates('connectingEditor')}</SupportingText>
+                      <PageLoader placement="flow" message={tCommonStates('connectingEditor')} />
                     </DsSectionCard>
                   )}
                 </DsSectionCard>
@@ -817,7 +879,7 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
                     <DsText size="xs" tone="secondary">
                       {tCommonLabels('preview')}
                     </DsText>
-                    {isPreviewLoading && <Loader size="xs" />}
+                    {isPreviewLoading && previewSrcDoc && <Loader size="xs" />}
                   </DsLayoutInline>
                 </DsLayoutInset>
                 <DsLayoutInset blockEnd="xs">
@@ -832,14 +894,15 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
                     </DsLayoutInline>
                   </DsSectionCard>
                 </DsLayoutInset>
-                <DsSectionCard padding="none" appearance="paper" grow clip>
+                {previewError ? <Alert tone="danger">{tCommonStates('notAvailable')}</Alert> : null}
+                <DsSectionCard padding="none" appearance="paper" grow clip aria-busy={isPreviewLoading}>
                   {previewSrcDoc ? (
                     <EmailPreviewFrame srcDoc={previewSrcDoc} title={tCommonLabels('emailPreview')} />
-                  ) : (
+                  ) : isPreviewLoading ? (
+                    <PageLoader placement="flow" message={tCommonStates('loadingPreview')} />
+                  ) : previewError ? null : (
                     <DsLayoutStack align="center" justify="center" fill="block">
-                      <SupportingText tone="secondary">
-                        {isPreviewLoading ? tCommonStates('loadingPreview') : tEmailTemplates('detail.preview.empty')}
-                      </SupportingText>
+                      <SupportingText tone="secondary">{tEmailTemplates('detail.preview.empty')}</SupportingText>
                     </DsLayoutStack>
                   )}
                 </DsSectionCard>
@@ -860,7 +923,7 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
         {/* Test Email Modal */}
         <ContentModal
           closeLabel={tCommonActions('close')}
-          loading={sendTest.isPending}
+          loading={sendTest.isPending || preparingTest}
           opened={testModalOpened}
           onClose={closeTestModal}
           title={tCommonActions('sendTestEmail')}
@@ -894,7 +957,7 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
               <Button
                 emphasis="strong"
                 onClick={handleSendTest}
-                loading={sendTest.isPending}
+                loading={sendTest.isPending || preparingTest}
                 disabled={!canEditTranslationSource || !testEmail}
               >
                 {tCommonActions('sendTest')}

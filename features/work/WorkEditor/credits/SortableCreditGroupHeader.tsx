@@ -17,7 +17,7 @@ import type { WorkCreditGroup } from '@/lib/types/work/credit';
 interface SortableCreditGroupHeaderProps {
   group: WorkCreditGroup;
   canEdit: boolean;
-  onEdit: (groupId: string, name: string) => void;
+  onEdit: (groupId: string, name: string) => void | Promise<boolean | void>;
   onDelete: (groupId: string) => void;
   isDeleting: boolean;
 }
@@ -31,6 +31,7 @@ export function SortableCreditGroupHeader({
 }: SortableCreditGroupHeaderProps) {
   const t = useTranslations('workCredits');
   const tCommon = useTranslations('common.actions');
+  const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(group.name);
   const groupNameId = useId();
@@ -65,12 +66,19 @@ export function SortableCreditGroupHeader({
     [setSortableRef, setDroppableRef],
   );
 
-  const handleSaveEdit = () => {
-    if (!canEdit) {
+  const handleSaveEdit = async () => {
+    if (!canEdit || isSaving) {
       return;
     }
     if (editName.trim() && editName !== group.name) {
-      onEdit(group.id, editName.trim());
+      setIsSaving(true);
+      try {
+        if ((await onEdit(group.id, editName.trim())) === false) {
+          return;
+        }
+      } finally {
+        setIsSaving(false);
+      }
     }
     setIsEditing(false);
   };
@@ -122,7 +130,7 @@ export function SortableCreditGroupHeader({
           {isEditing ? (
             <DsLayoutInline gap="none" wrap="nowrap">
               <TextInput
-                readOnly={!canEdit}
+                readOnly={!canEdit || isSaving}
                 size="xs"
                 aria-label={t('fields.groupPlaceholder')}
                 value={editName}
@@ -136,7 +144,7 @@ export function SortableCreditGroupHeader({
                     e.stopPropagation();
                     if (e.key === 'Enter') {
                       handleSaveEdit();
-                    } else {
+                    } else if (!isSaving) {
                       setEditName(group.name);
                       setIsEditing(false);
                     }
@@ -144,10 +152,17 @@ export function SortableCreditGroupHeader({
                 }}
                 autoFocus
               />
-              <IconButton tone="positive" disabled={!canEdit} onClick={handleSaveEdit} aria-label={tCommon('save')}>
+              <IconButton
+                tone="positive"
+                loading={isSaving}
+                disabled={!canEdit}
+                onClick={handleSaveEdit}
+                aria-label={tCommon('save')}
+              >
                 <IconCheck aria-hidden />
               </IconButton>
               <IconButton
+                disabled={isSaving}
                 onClick={() => {
                   setEditName(group.name);
                   setIsEditing(false);

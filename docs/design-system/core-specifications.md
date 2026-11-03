@@ -117,11 +117,22 @@ Count is a nonnegative safe integer; values of 100 or more display `99+`.
 The naming union requires one of label, aria-label or aria-labelledby.
 Placement allows inline and four overlay start/end positions.
 
+`appearance="media-overlay"` is a small media-corner command. It requires `overlay-start-inside`
+or `overlay-end-inside` placement and rejects size, shape, count, contrast, links and toggles.
+Core owns its circular visual and rectangular target independently of action-row and toolbar sizing.
+Use it for avatar removal through ImageUploadField; keep ordinary toolbar and media commands at their normal size.
+
 **Geometry.** Width=height=`max(control-height, interaction-minimum)`, padding=0, glyph=16px.
+The media-overlay visual uses `icon-size-md` (16px) and its glyph/spinner uses `icon-size-xs` (12px).
+Its rectangular target uses `control-height-compact` (24px), growing to the shared 44px coarse-pointer minimum.
+The target has no corner radius so every painted badge edge accepts pointer input.
+The visual stays at the inside media corner when the target grows inward; keyboard focus outlines the full target.
 
 **States.** Low defaults use `action-ink-muted`; hover/pressed/focus/disabled/pending follow Control.
 Inverse image overlays use `text-on-image` and `overlay-control/strong`.
 Drag handles own grabbing and touch-action and block dragging while disabled.
+Media-overlay hover/press paints the small visual. Disabled and pending retain its geometry,
+and pending shows only the named spinner while blocking repeat activation.
 
 **Content, layout and accessibility.** Do not use a long name as visible content that expands an icon target.
 Use Button when a visible label is needed. Place a drag handle first on the left and connect it to the actual sensor/activator.
@@ -131,6 +142,10 @@ Verify icon-only naming, focus and count meaning in code and consumers.
 **Storybook review.** Check named size, tone/emphasis, square/circle, count, inverse and overlay.
 PendingWithBadge and PendingTransition must preserve name, focus and target while showing only the spinner,
 then restore glyph/count. OpticalGlyphComparison measures SVG frame, path span, padding and target separately.
+MediaOverlay exposes the small media command; MediaOverlayHover and MediaOverlayActive check forced pseudo states
+without painting the full target. ImageUploadField AvatarRemovalComparison and AvatarRemovalStates compare
+56px/80px avatars, the previous full-target treatment, and enabled/disabled/pending states. The state fixture
+hit-tests a painted badge edge before activating the remove action, including RTL placement.
 Review actual drag sensors and tooltip composition in consumers.
 
 ## TextInput

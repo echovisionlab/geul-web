@@ -34,9 +34,27 @@ export function useCampaignPreview({
   const [viewMode, setViewMode] = useState<CampaignViewMode>('split');
   const [previewHtml, setPreviewHtml] = useState('');
   const [previewError, setPreviewError] = useState<unknown>(null);
-  const [previewPending, setPreviewPending] = useState(false);
+  const [previewPending, setPreviewPending] = useState(campaignLoaded);
   const editorRef = useRef<EmailCampaignTiptapEditorHandle | null>(null);
   const requestIdRef = useRef(0);
+  const target = `${campaignId}:${locale}`;
+  const settledTargetRef = useRef(target);
+  const currentTargetRef = useRef(target);
+  currentTargetRef.current = target;
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      requestIdRef.current += 1;
+    };
+  }, []);
+  useEffect(() => {
+    requestIdRef.current += 1;
+    setPreviewHtml('');
+    setPreviewError(null);
+    setPreviewPending(campaignLoaded);
+  }, [target, campaignLoaded]);
   const showEditor = viewMode === 'split' || viewMode === 'edit';
   const showPreview = viewMode === 'split' || viewMode === 'preview';
 
@@ -52,6 +70,10 @@ export function useCampaignPreview({
       if (!campaignLoaded) {
         return;
       }
+      const requestedTarget = target;
+      if (!mountedRef.current) {
+        return;
+      }
       setPreviewPending(true);
       try {
         const preview = await previewCampaignAction(campaignId, {
@@ -60,24 +82,26 @@ export function useCampaignPreview({
           subject,
           document,
         }).then(unwrapQueryResult);
-        if (requestId === requestIdRef.current) {
+        if (mountedRef.current && requestedTarget === currentTargetRef.current && requestId === requestIdRef.current) {
+          settledTargetRef.current = requestedTarget;
           setPreviewHtml(preview?.htmlContent ?? '');
           setPreviewError(null);
         }
       } catch (error) {
-        if (requestId === requestIdRef.current) {
+        if (mountedRef.current && requestedTarget === currentTargetRef.current && requestId === requestIdRef.current) {
+          settledTargetRef.current = requestedTarget;
           setPreviewError(error);
         }
       } finally {
-        if (requestId === requestIdRef.current) {
+        if (mountedRef.current && requestedTarget === currentTargetRef.current && requestId === requestIdRef.current) {
           setPreviewPending(false);
         }
       }
     },
-    [campaignId, campaignLoaded, layoutId, locale, subject],
+    [campaignId, campaignLoaded, layoutId, locale, subject, target],
   );
 
-  const scheduleRefresh = useDebouncedCallback(
+  const debouncedRefresh = useDebouncedCallback(
     async () => {
       const requestId = ++requestIdRef.current;
       const document = getDocumentSnapshot();
@@ -85,8 +109,14 @@ export function useCampaignPreview({
         await refresh(document, requestId);
       }
     },
-    { delay: PREVIEW_DEBOUNCE_MS, flushOnUnmount: true },
+    { delay: PREVIEW_DEBOUNCE_MS, flushOnUnmount: false },
   );
+
+  const scheduleRefresh = useCallback(() => {
+    requestIdRef.current += 1;
+    setPreviewPending(true);
+    return debouncedRefresh();
+  }, [debouncedRefresh]);
 
   const changeViewMode = useCallback(
     (value: string) => {
@@ -101,6 +131,7 @@ export function useCampaignPreview({
 
   useEffect(() => {
     if (showPreview) {
+      setPreviewPending(true);
       void scheduleRefresh();
     }
   }, [editorSynced, layoutId, locale, scheduleRefresh, showPreview, subject]);
@@ -109,11 +140,11 @@ export function useCampaignPreview({
     viewMode,
     showEditor,
     showPreview,
-    previewSrcDoc: previewHtml,
+    previewSrcDoc: settledTargetRef.current === target ? previewHtml : '',
     query: {
-      isError: previewError !== null,
-      error: previewError,
-      isFetching: previewPending,
+      isError: settledTargetRef.current === target && previewError !== null,
+      error: settledTargetRef.current === target ? previewError : null,
+      isFetching: previewPending || settledTargetRef.current !== target,
       refetch: () => refresh(getDocumentSnapshot()),
     },
     scheduleRefresh,

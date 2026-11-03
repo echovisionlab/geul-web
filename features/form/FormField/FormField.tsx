@@ -1,7 +1,15 @@
 'use client';
 
-import { useCallback } from 'react';
-import dynamic from 'next/dynamic';
+import { useCallback, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { Field } from '@/components/core/Field';
+import { TextInput } from '@/components/core/Input';
+import { Spinner } from '@/components/core/Display';
+import { Button } from '@/components/core/Button';
+import { SupportingText } from '@/components/core/Typography';
+import { parseMarkdown } from '@/lib/utils/parse-markdown';
+import { getFieldLabel } from './utils';
+import type { PhoneFieldProps } from './fields/PhoneField';
 import type { FieldValue } from '@/lib/types/form/guards';
 import type { FormFieldSchema } from '@/lib/types/form/schema';
 import { CheckboxField } from './fields/CheckboxField';
@@ -15,7 +23,64 @@ import { TextField } from './fields/TextField';
 import { loadPhoneField } from './load-phone-field';
 import { useFormField } from './useFormField';
 
-const PhoneField = dynamic(() => loadPhoneField().then((module) => module.PhoneField));
+function PhoneField(props: PhoneFieldProps) {
+  const t = useTranslations('common');
+  const [component, setComponent] = useState<typeof import('./fields/PhoneField').PhoneField | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    let current = true;
+    setFailed(false);
+    void loadPhoneField().then(
+      (module) => {
+        if (current) {
+          setComponent(() => module.PhoneField);
+        }
+      },
+      () => {
+        if (current) {
+          setFailed(true);
+        }
+      },
+    );
+    return () => {
+      current = false;
+    };
+  }, [attempt]);
+  const ResolvedField = component;
+  if (ResolvedField) {
+    return <ResolvedField {...props} />;
+  }
+  return (
+    <Field
+      label={parseMarkdown(getFieldLabel(props.field))}
+      description={props.field.description ? parseMarkdown(props.field.description) : undefined}
+      required={props.isRequired}
+      error={failed ? <span role="alert">{t('messages.failedToLoad')}</span> : undefined}
+      actions={
+        failed ? (
+          <Button size="sm" onClick={() => setAttempt((value) => value + 1)}>
+            {t('actions.tryAgain')}
+          </Button>
+        ) : undefined
+      }
+    >
+      <TextInput
+        type="tel"
+        disabled
+        aria-busy={!failed}
+        rightSection={!failed ? <Spinner size="xs" /> : undefined}
+        description={
+          !failed ? (
+            <SupportingText role="status" tone="secondary">
+              {t('states.loading')}
+            </SupportingText>
+          ) : undefined
+        }
+      />
+    </Field>
+  );
+}
 
 export interface FormFieldProps {
   field: FormFieldSchema;

@@ -17,7 +17,7 @@ import { IconExternalLink, IconGripVertical, IconPlus, IconX } from '@tabler/ico
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
-import { Spinner as Loader } from '@/components/core/Display';
+import { PageLoader } from '@/features/site/PageLoader';
 import { Button } from '@/components/core/Button';
 import { IconButton } from '@/components/core/IconButton';
 import { SearchCombobox } from '@/features/search/SearchCombobox';
@@ -41,6 +41,8 @@ interface SortableClientProps {
   canEdit: boolean;
   onRemove: (clientId: string) => void;
   isLoading: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
   reorderAriaLabel: string;
   openWebsiteAriaLabel: string;
   removeAriaLabel: string;
@@ -52,17 +54,21 @@ export function SortableClient({
   canEdit,
   onRemove,
   isLoading,
+  isError = false,
+  onRetry,
   reorderAriaLabel,
   openWebsiteAriaLabel,
   removeAriaLabel,
 }: SortableClientProps) {
-  const tCommonStates = useTranslations('common.states');
+  const tCommonMessages = useTranslations('common.messages');
+  const tCommonActions = useTranslations('common.loadMore');
+  const tEmpty = useTranslations('common.states');
   const sortable = useSortableItem({
     id: clientId,
     disabled: !canEdit,
   });
 
-  if (isLoading || !client) {
+  if (isLoading) {
     return (
       <SortableSurface ref={sortable.setNodeRef} motion={sortable.motion}>
         <DsSectionCard
@@ -85,14 +91,31 @@ export function SortableClient({
                   <IconGripVertical aria-hidden />
                 </IconButton>
               )}
-              <Loader size="xs" />
-              <DsText size="xs" tone="secondary">
-                {tCommonStates('loading')}
-              </DsText>
+              <PageLoader placement="flow" minHeight={0} size="sm" />
             </DsLayoutInline>
           </DsLayoutInline>
         </DsSectionCard>
       </SortableSurface>
+    );
+  }
+
+  if (!client) {
+    return (
+      <DsLayoutInline gap="xs">
+        <DsText size="xs" tone="secondary">
+          {isError ? tCommonMessages('failedToLoad') : tEmpty('notAvailable')}
+        </DsText>
+        {isError && onRetry ? (
+          <Button size="xs" onClick={onRetry}>
+            {tCommonActions('retry')}
+          </Button>
+        ) : null}
+        {canEdit ? (
+          <IconButton aria-label={removeAriaLabel} onClick={() => onRemove(clientId)}>
+            <IconX />
+          </IconButton>
+        ) : null}
+      </DsLayoutInline>
     );
   }
 
@@ -239,11 +262,7 @@ export function WorkClientsSection({ workId: _workId, canEdit, initialClientDeta
   if (!isSynced) {
     return (
       <SectionCard>
-        <DsLayoutInset block="md">
-          <DsLayoutInline justify="center">
-            <Loader size="sm" />
-          </DsLayoutInline>
-        </DsLayoutInset>
+        <PageLoader placement="flow" />
       </SectionCard>
     );
   }
@@ -319,7 +338,7 @@ export function WorkClientsSection({ workId: _workId, canEdit, initialClientDeta
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={clients} strategy={verticalListSortingStrategy}>
             <DsLayoutStack gap="none">
-              {clientsWithDetails.map(({ clientId, details, isLoading }) => (
+              {clientsWithDetails.map(({ clientId, details, isLoading, isError, retry }) => (
                 <SortableClient
                   key={clientId}
                   clientId={clientId}
@@ -327,6 +346,10 @@ export function WorkClientsSection({ workId: _workId, canEdit, initialClientDeta
                   canEdit={canEdit}
                   onRemove={handleRemoveClient}
                   isLoading={isLoading}
+                  isError={isError}
+                  onRetry={() => {
+                    void retry();
+                  }}
                   reorderAriaLabel={t('actions.reorderClient')}
                   openWebsiteAriaLabel={t('actions.openWebsite')}
                   removeAriaLabel={t('actions.removeClient')}

@@ -15,7 +15,7 @@ import {
 import { Text as DsText } from '@/components/core/Typography';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
-import { useId, useState } from 'react';
+import { useEffect, useRef, useId, useState } from 'react';
 import { IconAlertTriangle, IconDots, IconEdit, IconMessageReply, IconTrash } from '@tabler/icons-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
@@ -54,7 +54,15 @@ interface CommentItemProps extends CommentReadAccess {
 
 const MAX_DEPTH = 6;
 
-export function CommentItem({
+export function CommentItem(props: CommentItemProps) {
+  return (
+    <CommentItemSession
+      key={`${props.postId}:${props.comment.id}:${props.shareToken}:${props.sharePassword}`}
+      {...props}
+    />
+  );
+}
+function CommentItemSession({
   comment,
   postId,
   depth = 0,
@@ -63,6 +71,14 @@ export function CommentItem({
   shareToken,
   sharePassword,
 }: CommentItemProps) {
+  const active = useRef(true);
+  const repliesPending = useRef(false);
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+    };
+  }, []);
   const replyPanelId = useId();
   const repliesPanelId = useId();
   const tModalActions = useTranslations('common.actions');
@@ -135,6 +151,10 @@ export function CommentItem({
   };
 
   const handleLoadMoreReplies = async () => {
+    if (repliesPending.current) {
+      return;
+    }
+    repliesPending.current = true;
     setIsLoadingReplies(true);
     try {
       // Use the last displayed reply's ID as cursor
@@ -148,13 +168,25 @@ export function CommentItem({
         shareToken,
         sharePassword,
       }).then(unwrapQueryResult);
-      setLoadedReplies((prev) => [...prev, ...result.replies]);
+      if (!active.current) {
+        return;
+      }
+      setLoadedReplies((prev) => {
+        const seen = new Set([...comment.replies, ...prev].map((reply) => reply.id));
+        return [...prev, ...result.replies.filter((reply) => !seen.has(reply.id))];
+      });
       setReplyCursor(result.nextCursor);
       setHasMoreReplies(result.hasMore);
     } catch {
+      if (!active.current) {
+        return;
+      }
       notifications.show({ message: t('notifications.loadRepliesFailed'), tone: 'danger' });
     } finally {
-      setIsLoadingReplies(false);
+      if (active.current) {
+        repliesPending.current = false;
+        setIsLoadingReplies(false);
+      }
     }
   };
 

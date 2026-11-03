@@ -26,6 +26,7 @@ export function ShellView({
   loginHref,
   navigationOpened,
   userMenuOpened,
+  signOutPending,
   themeMode,
   user,
   headerItems,
@@ -33,19 +34,20 @@ export function ShellView({
   footerItems,
   accountItems,
   footer: { showChangelog, ...footer },
-  labels: { searchTooltip, themeTooltip, ...labels },
+  labels: { searchTooltip, themeTooltip, navigationLoadFailed, retryNavigation, ...labels },
   events,
   slots,
 }: ShellViewProps) {
   const state: ShellState = {
     navigationOpened,
     userMenuOpened,
+    signOutPending,
     themeMode,
     user,
     loginHref,
     showChangelog,
     isItemActive: itemActive,
-    labels: { searchTooltip, themeTooltip },
+    labels: { searchTooltip, themeTooltip, navigationLoadFailed, retryNavigation },
     events,
   };
   return (

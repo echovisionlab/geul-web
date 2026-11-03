@@ -1,13 +1,15 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { PageLoader } from '@/features/site/PageLoader/PageLoader';
 import { withQueryClient } from '@/lib/providers/with-query-client';
 import type { ComponentProps } from 'react';
 
 // The public label route renders this editor only in edit mode; loading it on demand keeps the
 // rich-text editor out of the anonymous label page's first load (same pattern as LazyReleaseEditor).
-const AdminLabelDetailClient = dynamic(() =>
-  withQueryClient(import('./AdminLabelDetailClient').then((module) => module.AdminLabelDetailClient)),
+const AdminLabelDetailClient = dynamic(
+  () => withQueryClient(import('./AdminLabelDetailClient').then((module) => module.AdminLabelDetailClient)),
+  { loading: () => <PageLoader placement="flow" /> },
 );
 
 type Props = ComponentProps<typeof AdminLabelDetailClient>;

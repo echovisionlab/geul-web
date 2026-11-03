@@ -1,149 +1,129 @@
 // @vitest-environment jsdom
 
-import { act, type ComponentProps } from 'react';
-import { createRoot } from 'react-dom/client';
-import { afterEach, describe, expect, it, vi, type TestContext } from 'vitest';
+import type { ComponentProps } from 'react';
+import { afterEach, expect, it, vi } from 'vitest';
+import { act, render, screen, waitFor } from '@/test/render';
+import enMessages from '@/messages/en.json';
 import { EmailLayoutPreview, type EmailLayoutPreviewBindings } from './EmailLayoutPreview';
-import type { EmailLayoutPreviewViewProps } from './EmailLayoutPreviewView';
 
-const adapters = vi.hoisted(() => ({
-  translate: (key: string) => key,
-  content: vi.fn(),
-  saved: vi.fn(),
-}));
-vi.mock('next-intl', () => ({ useTranslations: () => adapters.translate }));
-// These tests own response ordering; Mantine owns the independent debounce delay.
-vi.mock('@mantine/hooks', () => ({ useDebouncedValue: (value: unknown) => [value] }));
+const adapters = vi.hoisted(() => ({ content: vi.fn(), saved: vi.fn() }));
 vi.mock('@/lib/actions/email-layout', () => ({ previewEmailLayoutContentAction: adapters.content }));
 vi.mock('@/lib/queries/email-layout', () => ({ previewEmailLayout: adapters.saved }));
-vi.mock('./EmailLayoutPreviewView', () => ({
-  EmailLayoutPreviewView: (props: EmailLayoutPreviewViewProps) => <output>{JSON.stringify(props)}</output>,
-}));
-
 afterEach(() => vi.clearAllMocks());
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
   let reject!: (error: unknown) => void;
-  const promise = new Promise<T>((resolvePromise, rejectPromise) => {
-    resolve = resolvePromise;
-    reject = rejectPromise;
+  const promise = new Promise<T>((done, fail) => {
+    resolve = done;
+    reject = fail;
   });
   return { promise, resolve, reject };
 }
-
-function contentResult(html: string) {
-  return { html, valid: true, errors: [] };
-}
-
-function renderPreview(context: TestContext, overrides: Partial<ComponentProps<typeof EmailLayoutPreview>> = {}) {
-  const container = document.createElement('div');
-  const root = createRoot(container);
-  let mounted = true;
-  const unmount = () => {
-    if (!mounted) {
-      return;
-    }
-    act(() => root.unmount());
-    mounted = false;
-  };
-  context.onTestFinished(unmount);
-  const props: ComponentProps<typeof EmailLayoutPreview> = {
-    htmlContent: '<html>A</html>',
-    locale: 'ko',
-    sourceLocale: 'ko',
-    ...overrides,
-  };
-  const rerender = (patch: Partial<ComponentProps<typeof EmailLayoutPreview>> = {}) => {
-    Object.assign(props, patch);
-    act(() => root.render(<EmailLayoutPreview {...props} />));
-  };
-  rerender();
+const contentResult = (html: string) => ({ html, valid: true, errors: [] });
+const title = enMessages.adminList.emailLayouts.detail.preview.iframeTitle;
+const loading = enMessages.common.states.loadingPreview;
+const failed = enMessages.adminList.emailLayouts.detail.preview.validationErrors.UNKNOWN_ERROR;
+function renderPreview(overrides: Partial<ComponentProps<typeof EmailLayoutPreview>> = {}) {
+  const props = { htmlContent: '<html>A</html>', locale: 'ko', sourceLocale: 'ko', debounceMs: 0, ...overrides };
+  const view = render(<EmailLayoutPreview {...props} />);
   return {
-    rerender,
-    unmount,
-    state: () => JSON.parse(container.querySelector('output')!.textContent!) as EmailLayoutPreviewViewProps,
+    ...view,
+    rerender: (patch: Partial<ComponentProps<typeof EmailLayoutPreview>>) => {
+      Object.assign(props, patch);
+      view.rerender(<EmailLayoutPreview {...props} />);
+    },
   };
 }
 
-describe('email layout preview request ownership', () => {
-  it('keeps a newer content result when an older request completes last', async (context) => {
-    const previous = deferred<ReturnType<typeof contentResult>>();
-    const content = vi
-      .fn<EmailLayoutPreviewBindings['content']>()
-      .mockReturnValueOnce(previous.promise)
-      .mockResolvedValueOnce(contentResult('<html>B</html>'));
-    const preview = renderPreview(context, { bindings: { content, saved: vi.fn() } });
-    const firstSignal = content.mock.calls[0][3]!;
-    await act(async () => preview.rerender({ htmlContent: '<html>B source</html>' }));
-    expect(firstSignal.aborted).toBe(true);
-    expect(preview.state()).toMatchObject({ previewHtml: '<html>B</html>', errors: [], isLoading: false });
-    await act(async () => previous.resolve(contentResult('<html>stale A</html>')));
-    expect(preview.state()).toMatchObject({ previewHtml: '<html>B</html>', errors: [], isLoading: false });
-  });
+it('shows the shared initial wait, retains a resolved preview while updating, and ignores a late older result', async () => {
+  const previous = deferred<ReturnType<typeof contentResult>>();
+  const current = deferred<ReturnType<typeof contentResult>>();
+  const content = vi
+    .fn<EmailLayoutPreviewBindings['content']>()
+    .mockReturnValueOnce(previous.promise)
+    .mockReturnValueOnce(current.promise)
+    .mockResolvedValueOnce(contentResult('<html>C</html>'));
+  const preview = renderPreview({ bindings: { content, saved: vi.fn() } });
+  expect(screen.getByRole('status')).toHaveTextContent(loading);
+  const firstSignal = content.mock.calls[0][3]!;
+  preview.rerender({ htmlContent: '<html>B source</html>' });
+  await waitFor(() => expect(content).toHaveBeenCalledTimes(2));
+  expect(firstSignal.aborted).toBe(true);
+  await act(async () => previous.resolve(contentResult('<html>stale A</html>')));
+  expect(screen.getByRole('status')).toHaveTextContent(loading);
+  await act(async () => current.resolve(contentResult('<html>B</html>')));
+  expect(screen.getByTitle(title)).toHaveAttribute('srcdoc', '<html>B</html>');
+  preview.rerender({ htmlContent: '<html>C source</html>' });
+  expect(screen.getByTitle(title)).toHaveAttribute('srcdoc', '<html>B</html>');
+  await waitFor(() => expect(screen.getByTitle(title)).toHaveAttribute('srcdoc', '<html>C</html>'));
+});
 
-  it('does not clear the current loading state when an obsolete request rejects', async (context) => {
-    const previous = deferred<ReturnType<typeof contentResult>>();
-    const current = deferred<ReturnType<typeof contentResult>>();
-    const content = vi
-      .fn<EmailLayoutPreviewBindings['content']>()
-      .mockReturnValueOnce(previous.promise)
-      .mockReturnValueOnce(current.promise);
-    const preview = renderPreview(context, { bindings: { content, saved: vi.fn() } });
-    preview.rerender({ htmlContent: '<html>B</html>' });
-    await act(async () => previous.reject(new Error('obsolete request failed')));
-    expect(preview.state()).toMatchObject({ previewHtml: '', errors: [], isLoading: true });
-    await act(async () => current.resolve(contentResult('<html>B</html>')));
-    expect(preview.state()).toMatchObject({ previewHtml: '<html>B</html>', errors: [], isLoading: false });
-  });
+it('does not clear the current wait when an obsolete request rejects', async () => {
+  const previous = deferred<ReturnType<typeof contentResult>>();
+  const current = deferred<ReturnType<typeof contentResult>>();
+  const content = vi
+    .fn<EmailLayoutPreviewBindings['content']>()
+    .mockReturnValueOnce(previous.promise)
+    .mockReturnValueOnce(current.promise);
+  const preview = renderPreview({ bindings: { content, saved: vi.fn() } });
+  preview.rerender({ htmlContent: '<html>B</html>' });
+  await waitFor(() => expect(content).toHaveBeenCalledTimes(2));
+  await act(async () => previous.reject(new Error('obsolete request failed')));
+  expect(screen.getByRole('status')).toHaveTextContent(loading);
+  await act(async () => current.resolve(contentResult('<html>B</html>')));
+  expect(screen.getByTitle(title)).toHaveAttribute('srcdoc', '<html>B</html>');
+});
 
-  it('cancels a pending request before clearing blank content and ignores its late success', async (context) => {
-    const pending = deferred<ReturnType<typeof contentResult>>();
-    const content = vi.fn<EmailLayoutPreviewBindings['content']>().mockReturnValueOnce(pending.promise);
-    const preview = renderPreview(context, { bindings: { content, saved: vi.fn() } });
-    preview.rerender({ htmlContent: '   ' });
-    expect(content.mock.calls[0][3]!.aborted).toBe(true);
-    expect(content).toHaveBeenCalledOnce();
-    expect(preview.state()).toMatchObject({ previewHtml: '', errors: [], isLoading: false });
-    await act(async () => pending.resolve(contentResult('<html>obsolete</html>')));
-    expect(preview.state()).toMatchObject({ previewHtml: '', errors: [], isLoading: false });
-  });
+it('distinguishes resolved blank input from a pending request and ignores its late success', async () => {
+  const pending = deferred<ReturnType<typeof contentResult>>();
+  const content = vi.fn<EmailLayoutPreviewBindings['content']>().mockReturnValueOnce(pending.promise);
+  const preview = renderPreview({ bindings: { content, saved: vi.fn() } });
+  const signal = content.mock.calls[0][3]!;
+  preview.rerender({ htmlContent: '   ' });
+  expect(await screen.findByText(enMessages.adminList.emailLayouts.detail.preview.empty)).toBeVisible();
+  expect(signal.aborted).toBe(true);
+  expect(content).toHaveBeenCalledOnce();
+  await act(async () => pending.resolve(contentResult('<html>obsolete</html>')));
+  expect(screen.queryByTitle(title)).not.toBeInTheDocument();
+  expect(screen.queryByRole('status')).not.toBeInTheDocument();
+});
 
-  it('preserves the latest saved-locale error when a previous locale succeeds later', async (context) => {
-    const previous = deferred<{ html: string }>();
-    const saved = vi
-      .fn<EmailLayoutPreviewBindings['saved']>()
-      .mockReturnValueOnce(previous.promise)
-      .mockResolvedValueOnce(null);
-    const preview = renderPreview(context, { layoutId: 'layout', locale: 'en', bindings: { content: vi.fn(), saved } });
-    await act(async () => preview.rerender({ locale: 'ja' }));
-    expect(saved.mock.calls.map((call) => call[2])).toEqual(['en', 'ja']);
-    expect(saved.mock.calls[0][3]!.aborted).toBe(true);
-    expect(preview.state()).toMatchObject({ previewHtml: '', errors: [{ code: 'UNKNOWN_ERROR' }], isLoading: false });
-    await act(async () => previous.resolve({ html: '<html>obsolete English</html>' }));
-    expect(preview.state()).toMatchObject({ previewHtml: '', errors: [{ code: 'UNKNOWN_ERROR' }], isLoading: false });
-  });
+it('preserves a failed new locale when an older locale completes later', async () => {
+  const previous = deferred<{ html: string }>();
+  const saved = vi
+    .fn<EmailLayoutPreviewBindings['saved']>()
+    .mockReturnValueOnce(previous.promise)
+    .mockResolvedValueOnce(null);
+  const preview = renderPreview({ layoutId: 'layout', locale: 'en', bindings: { content: vi.fn(), saved } });
+  preview.rerender({ locale: 'ja' });
+  expect(await screen.findByRole('alert')).toHaveTextContent(failed);
+  expect(saved.mock.calls.map((call) => call[2])).toEqual(['en', 'ja']);
+  expect(saved.mock.calls[0][3]!.aborted).toBe(true);
+  await act(async () => previous.resolve({ html: '<html>obsolete English</html>' }));
+  expect(screen.getByRole('alert')).toHaveTextContent(failed);
+  expect(screen.queryByTitle(title)).not.toBeInTheDocument();
+});
 
-  it('aborts the owner signal on unmount even when its adapter cannot cancel work', async (context) => {
-    const pending = deferred<ReturnType<typeof contentResult>>();
-    const content = vi.fn<EmailLayoutPreviewBindings['content']>().mockReturnValueOnce(pending.promise);
-    const preview = renderPreview(context, { bindings: { content, saved: vi.fn() } });
-    const signal = content.mock.calls[0][3]!;
-    expect(signal.aborted).toBe(false);
-    preview.unmount();
-    expect(signal.aborted).toBe(true);
-    await act(async () => pending.reject(new Error('completed after unmount')));
-    expect(content).toHaveBeenCalledOnce();
-  });
+it('aborts on unmount even when the adapter cannot cancel work', async () => {
+  const pending = deferred<ReturnType<typeof contentResult>>();
+  const content = vi.fn<EmailLayoutPreviewBindings['content']>().mockReturnValueOnce(pending.promise);
+  const preview = renderPreview({ bindings: { content, saved: vi.fn() } });
+  const signal = content.mock.calls[0][3]!;
+  expect(signal.aborted).toBe(false);
+  preview.unmount();
+  expect(signal.aborted).toBe(true);
+  await act(async () => pending.reject(new Error('completed after unmount')));
+  expect(content).toHaveBeenCalledOnce();
+});
 
-  it('keeps AbortSignal out of the serialized production action and query arguments', async (context) => {
-    adapters.content.mockResolvedValueOnce(contentResult('<html>source</html>'));
-    adapters.saved.mockResolvedValueOnce({ html: '<html>localized</html>' });
-    const preview = renderPreview(context);
-    await act(async () => {});
-    expect(adapters.content).toHaveBeenCalledExactlyOnceWith('<html>A</html>', expect.any(String), 'ko');
-    await act(async () => preview.rerender({ layoutId: 'layout', locale: 'en' }));
-    expect(adapters.saved).toHaveBeenCalledExactlyOnceWith('layout', expect.any(String), 'en');
-    expect(preview.state()).toMatchObject({ previewHtml: '<html>localized</html>', isLoading: false });
-  });
+it('keeps AbortSignal out of production server-action arguments', async () => {
+  adapters.content.mockResolvedValueOnce(contentResult('<html>source</html>'));
+  adapters.saved.mockResolvedValueOnce({ html: '<html>localized</html>' });
+  const preview = renderPreview();
+  expect(await screen.findByTitle(title)).toHaveAttribute('srcdoc', '<html>source</html>');
+  expect(adapters.content).toHaveBeenCalledExactlyOnceWith('<html>A</html>', expect.any(String), 'ko');
+  preview.rerender({ layoutId: 'layout', locale: 'en' });
+  await waitFor(() => expect(screen.getByTitle(title)).toHaveAttribute('srcdoc', '<html>localized</html>'));
+  expect(adapters.saved).toHaveBeenCalledExactlyOnceWith('layout', expect.any(String), 'en');
 });

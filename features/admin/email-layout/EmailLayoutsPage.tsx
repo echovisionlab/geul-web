@@ -1,5 +1,6 @@
 'use client';
 
+import { PageLoader } from '@/features/site/PageLoader';
 import { EmailPreviewFrame } from '@/features/email/EmailPreviewFrame';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 import { ConfirmationDialog } from '@/features/confirmation';
@@ -8,7 +9,7 @@ import { fieldBindings } from '@/components/core/bindings';
 import { LayoutStack as DsLayoutStack, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
 
 import { invariantTokens, tokenVar } from '@/components/core/design-tokens';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconEdit, IconEye, IconLayout, IconPlus, IconTrash } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -115,6 +116,19 @@ export default function AdminEmailLayoutsPage({
   const [previewModalOpened, { open: openPreviewModal, close: closePreviewModal }] = useDisclosure(false);
   const [selectedLayout, setSelectedLayout] = useState<EmailLayout | null>(null);
   const [previewHtml, setPreviewHtml] = useState<string>('');
+  const [previewPending, setPreviewPending] = useState(false);
+  const [previewFailed, setPreviewFailed] = useState(false);
+  const previewRequestRef = useRef(0);
+  useEffect(
+    () => () => {
+      previewRequestRef.current += 1;
+    },
+    [],
+  );
+  const dismissPreview = () => {
+    previewRequestRef.current += 1;
+    closePreviewModal();
+  };
   // New email defaults serialize invariant paper roles: email clients cannot consume app CSS variables.
   const defaultHtmlContent = useMemo(
     () => `<!DOCTYPE html>
@@ -269,13 +283,30 @@ export default function AdminEmailLayoutsPage({
   };
 
   const handlePreview = async (layout: EmailLayout) => {
+    const request = ++previewRequestRef.current;
     setSelectedLayout(layout);
-    const result = await bindings.previewEmailLayout(layout.id, previewSampleContent);
-    if (result) {
-      setPreviewHtml(result.html);
-      openPreviewModal();
-    } else {
-      notifications.show({ message: tPage('loadPreviewFailed'), tone: 'danger' });
+    setPreviewHtml('');
+    setPreviewFailed(false);
+    setPreviewPending(true);
+    openPreviewModal();
+    try {
+      const result = await bindings.previewEmailLayout(layout.id, previewSampleContent);
+      if (request !== previewRequestRef.current) {
+        return;
+      }
+      if (result) {
+        setPreviewHtml(result.html);
+      } else {
+        setPreviewFailed(true);
+      }
+    } catch {
+      if (request === previewRequestRef.current) {
+        setPreviewFailed(true);
+      }
+    } finally {
+      if (request === previewRequestRef.current) {
+        setPreviewPending(false);
+      }
     }
   };
 
@@ -437,7 +468,7 @@ export default function AdminEmailLayoutsPage({
 
       <ContentModal
         opened={previewModalOpened}
-        onClose={closePreviewModal}
+        onClose={dismissPreview}
         title={tPage('previewTitle', { name: selectedLayout?.name ?? '' })}
         closeLabel={tCommon('actions.close')}
         size="large"
@@ -450,7 +481,13 @@ export default function AdminEmailLayoutsPage({
             backgroundColor: tokenVar('paper-background'),
           }}
         >
-          <EmailPreviewFrame srcDoc={previewHtml} title={tCommonLabels('emailPreview')} />
+          {previewPending ? (
+            <PageLoader placement="flow" message={tCommon('states.loadingPreview')} />
+          ) : previewFailed ? (
+            <Alert tone="danger">{tPage('loadPreviewFailed')}</Alert>
+          ) : (
+            <EmailPreviewFrame srcDoc={previewHtml} title={tCommonLabels('emailPreview')} />
+          )}
         </div>
       </ContentModal>
     </>

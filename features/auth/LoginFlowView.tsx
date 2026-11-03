@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useRef } from 'react';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
 
 import { LayoutContainer as DsLayoutContainer, LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
@@ -23,7 +23,7 @@ import {
 } from './kratos-flow';
 import { getAvailableAuthProviders, SocialAuthButtons } from './SocialAuthButtons';
 
-export type LoginPendingAction = 'email' | 'passkey' | AuthProvider;
+export type LoginPendingAction = 'email' | 'resend' | 'passkey' | AuthProvider;
 
 interface LoginFlowViewProps {
   flow: KratosBrowserFlow;
@@ -37,6 +37,7 @@ interface LoginFlowViewProps {
   passkeyReady: boolean;
   pendingAction: LoginPendingAction | null;
   submitError: string | null;
+  loadingSurface: ReactNode;
   onEmailChange: (email: string) => void;
   onCodeChange: (code: string) => void;
   onRequestCode: () => void;
@@ -59,6 +60,7 @@ export function LoginFlowView({
   passkeyReady,
   pendingAction,
   submitError,
+  loadingSurface,
   onEmailChange,
   onCodeChange,
   onRequestCode,
@@ -120,7 +122,7 @@ export function LoginFlowView({
           {accountLinking ? t('accountLinking.title') : t('title')}
         </DsHeading>
 
-        {securityReauthentication && !accountLinking ? (
+        {securityReauthentication && !accountLinking && !visibleError ? (
           <DsText size="sm" tone="secondary" align="center" data-testid="security-reauthentication-message">
             {t('securityReauthentication.description')}
           </DsText>
@@ -180,8 +182,10 @@ export function LoginFlowView({
               onStartOver={onStartOver}
               onSubmit={(completedCode) => onSubmitCode(completedCode)}
               submitting={emailSubmitting}
+              resending={pendingAction === 'resend'}
               timing={codeTiming}
             />
+            {emailSubmitting ? loadingSurface : null}
           </DsLayoutStack>
         ) : (
           <DsLayoutStack gap="lg">

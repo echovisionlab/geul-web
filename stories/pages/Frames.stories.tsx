@@ -203,6 +203,8 @@ export function FramesPreview({
       }}
       labels={{
         navigation: siteTitle,
+        navigationLoadFailed: t('messages.failedToLoad'),
+        retryNavigation: t('loadMore.retry'),
         toggleNavigation: t('actions.toggleNavigation'),
         close: t('actions.close'),
         search: shell('actions.search'),

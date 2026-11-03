@@ -17,7 +17,8 @@ import { ArtistParticipantRole } from '@echovisionlab/geul-proto/secure/artist_p
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
-import { Avatar, Spinner as Loader, ScrollArea } from '@/components/core/Display';
+import { Avatar, ScrollArea } from '@/components/core/Display';
+import { PageLoader } from '@/features/site/PageLoader';
 import { ContentModal } from '@/components/core/Modal';
 import { notifications } from '@/components/core/Notification';
 import { LabelBadge } from '@/components/core/Badge';
@@ -81,29 +82,33 @@ export function ArtistParticipantsDialog({
   });
   const { data: searchResults = [], isFetching } = searchResultsQuery;
 
+  const tCommonNotifications = useTranslations('common.notifications');
+  const showMutationError = () => notifications.show({ message: tCommonNotifications('saveFailed'), tone: 'danger' });
   const setParticipant = useMutation({
+    onError: showMutationError,
     mutationFn: ({ memberId, role }: { memberId: string; role: ArtistParticipantRole }) =>
       setArtistParticipantAction(artistId, memberId, role),
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       notifications.show({ message: t('notifications.updated'), tone: 'positive' });
-      queryClient.invalidateQueries({ queryKey });
+      await queryClient.invalidateQueries({ queryKey });
       reset();
     },
   });
 
   const removeParticipant = useMutation({
+    onError: showMutationError,
     mutationFn: (memberId: string) => removeArtistParticipantAction(artistId, memberId),
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
       notifications.show({ message: t('notifications.removed'), tone: 'positive' });
-      queryClient.invalidateQueries({ queryKey });
+      await queryClient.invalidateQueries({ queryKey });
     },
   });
 
@@ -113,6 +118,8 @@ export function ArtistParticipantsDialog({
       canManageParticipants={canManageParticipants}
       canRemoveOwner={canRemoveOwner}
       pending={setParticipant.isPending || removeParticipant.isPending}
+      changingMemberId={setParticipant.isPending ? setParticipant.variables?.memberId : undefined}
+      removingMemberId={removeParticipant.isPending ? removeParticipant.variables : undefined}
       labels={{
         owner: t('owner'),
         manager: t('manager'),
@@ -128,13 +135,10 @@ export function ArtistParticipantsDialog({
 
   const renderContent = (): ReactNode => {
     if (isLoading) {
-      return (
-        <DsLayoutInset block="md">
-          <DsLayoutInline justify="center">
-            <Loader size="sm" />
-          </DsLayoutInline>
-        </DsLayoutInset>
-      );
+      return <PageLoader placement="flow" />;
+    }
+    if (participantsQuery.isError && participants.length === 0) {
+      return null;
     }
     if (participants.length === 0) {
       return (
@@ -166,9 +170,14 @@ export function ArtistParticipantsDialog({
               placeholder={tCommonPlaceholders('searchByEmailOrName')}
               leftSection={<IconUserPlus size={16} />}
               items={searchResults}
-              isLoading={isFetching}
+              isLoading={isFetching || setParticipant.isPending}
+              disabled={setParticipant.isPending || removeParticipant.isPending || isLoading}
               debouncedSearch={debouncedSearch}
-              onSelect={(memberId) => setParticipant.mutate({ memberId, role: newRole })}
+              onSelect={(memberId) => {
+                if (!setParticipant.isPending && !removeParticipant.isPending) {
+                  setParticipant.mutate({ memberId, role: newRole });
+                }
+              }}
               getItemId={(member) => member.id}
               getItemText={(member) => member.nickname}
               emptyMessage={tCommonMessages('noUsersFound')}
@@ -211,6 +220,8 @@ export function ArtistParticipantsListView({
   canManageParticipants,
   canRemoveOwner,
   pending,
+  changingMemberId,
+  removingMemberId,
   labels,
   onChangeRole,
   onRemove,
@@ -219,6 +230,8 @@ export function ArtistParticipantsListView({
   canManageParticipants: boolean;
   canRemoveOwner: boolean;
   pending: boolean;
+  changingMemberId?: string;
+  removingMemberId?: string;
   labels: {
     owner: string;
     manager: string;
@@ -274,6 +287,7 @@ export function ArtistParticipantsListView({
                   size="sm"
                   aria-label={isOwner ? labels.makeManager : labels.makeOwner}
                   aria-describedby={`${listId}-${participant.memberId}-name`}
+                  loading={changingMemberId === participant.memberId}
                   disabled={!canChangeRole || pending}
                   onClick={() =>
                     onChangeRole(
@@ -292,6 +306,7 @@ export function ArtistParticipantsListView({
                   size="sm"
                   aria-label={labels.remove}
                   aria-describedby={`${listId}-${participant.memberId}-name`}
+                  loading={removingMemberId === participant.memberId}
                   disabled={!canRemove || pending}
                   onClick={() => onRemove(participant.memberId)}
                 >

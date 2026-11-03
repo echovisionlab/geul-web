@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useCallback, useEffect } from 'react';
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useDisclosure, useMounted, useOs } from '@mantine/hooks';
 import { openPostSpotlight, preloadPostSpotlight } from '@/features/post/PostSpotlight/post-spotlight-trigger';
@@ -18,6 +18,8 @@ import type { ShellState, ShellViewNavigationItem, ShellViewUser } from './ui/Sh
 
 /** Server-translated variants of the labels that depend on client state. */
 export interface ShellRuntimeLabels {
+  navigationLoadFailed: string;
+  retryNavigation: string;
   searchTooltipMac: string;
   searchTooltipOther: string;
   lightMode: string;
@@ -97,6 +99,48 @@ export function ShellRuntime({
     isSessionPending,
     session?.onboarded === false ? null : initialUserSnapshot,
   );
+  const [signOutPending, setSignOutPending] = useState(false);
+  const signOutTask = useRef<Promise<void> | null>(null);
+  const active = useRef(true);
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+    };
+  }, []);
+  const handleSignOut = () => {
+    if (signOutTask.current) {
+      return signOutTask.current;
+    }
+    closeUserMenu();
+    setSignOutPending(true);
+    const task = (async () => {
+      const settled = await settleEditsBeforeSignOut();
+      if (!active.current) {
+        return;
+      }
+      if (settled) {
+        await signOut();
+        return;
+      }
+      confirmationDialogs.open({
+        intent: 'discard',
+        title: labels.signOutUnsavedTitle,
+        message: labels.signOutUnsavedMessage,
+        confirmLabel: labels.signOutUnsavedConfirm,
+        cancelLabel: labels.cancel,
+        closeLabel: labels.close,
+        onConfirm: signOut,
+      });
+    })().finally(() => {
+      signOutTask.current = null;
+      if (active.current) {
+        setSignOutPending(false);
+      }
+    });
+    signOutTask.current = task;
+    return task;
+  };
   const queryString = searchParams?.toString();
   const currentPath = queryString ? `${pathname}?${queryString}` : pathname;
   useEffect(() => {
@@ -106,6 +150,7 @@ export function ShellRuntime({
   const themeMode = mounted ? computedColorScheme : null;
   const state: ShellState = {
     navigationOpened,
+    signOutPending,
     userMenuOpened,
     themeMode,
     user,
@@ -113,6 +158,8 @@ export function ShellRuntime({
     showChangelog: session?.user.role === 'admin' || session?.user.role === 'author',
     isItemActive,
     labels: {
+      navigationLoadFailed: labels.navigationLoadFailed,
+      retryNavigation: labels.retryNavigation,
       searchTooltip: os === 'macos' ? labels.searchTooltipMac : labels.searchTooltipOther,
       themeTooltip:
         themeMode === 'dark' ? labels.lightMode : themeMode === 'light' ? labels.darkMode : labels.toggleColorScheme,
@@ -124,25 +171,7 @@ export function ShellRuntime({
       onSearch: openPostSpotlight,
       onSearchIntent: preloadPostSpotlight,
       onToggleColorScheme: toggleColorScheme,
-      onSignOut: () => {
-        closeUserMenu();
-        void settleEditsBeforeSignOut().then((settled) => {
-          if (settled) {
-            signOut();
-            return;
-          }
-          // Signing out now deletes unsaved edits from this device; ask first.
-          confirmationDialogs.open({
-            intent: 'discard',
-            title: labels.signOutUnsavedTitle,
-            message: labels.signOutUnsavedMessage,
-            confirmLabel: labels.signOutUnsavedConfirm,
-            cancelLabel: labels.cancel,
-            closeLabel: labels.close,
-            onConfirm: signOut,
-          });
-        });
-      },
+      onSignOut: handleSignOut,
       onOpenCookieSettings: () => {
         window.dispatchEvent(new Event(COOKIE_CONSENT_OPEN_EVENT));
       },

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { notifications } from '@/components/core/Notification';
@@ -88,6 +88,8 @@ export function SiteAssetUploader({ type, currentUrl, onSuccess, bindings }: Sit
   const description = t(`assets.${type}.description`);
 
   const [uploading, setUploading] = useState(false);
+  const [phase, setPhase] = useState<'preparingImage' | 'uploading' | 'saving'>('preparingImage');
+  const operation = useRef(false);
   const [assetUrl, setAssetUrl] = useState(currentUrl);
 
   useEffect(() => {
@@ -149,7 +151,7 @@ export function SiteAssetUploader({ type, currentUrl, onSuccess, bindings }: Sit
 
   const handleDrop = async (files: File[]) => {
     const file = files[0];
-    if (!file) {
+    if (!file || operation.current) {
       return;
     }
 
@@ -160,16 +162,20 @@ export function SiteAssetUploader({ type, currentUrl, onSuccess, bindings }: Sit
       return;
     }
 
+    operation.current = true;
+    setPhase('preparingImage');
     setUploading(true);
 
     try {
       const preparedFile = isEmailLogo(type) ? await maybeConvertSvg(file) : file;
 
+      setPhase('uploading');
       // Upload via multipart
       const { fileId } = await uploadFile(preparedFile, {
         slotId: type,
       });
 
+      setPhase('saving');
       // Link file to site setting
       await setAsset.mutateAsync({ type, fileId });
     } catch (error) {
@@ -178,12 +184,26 @@ export function SiteAssetUploader({ type, currentUrl, onSuccess, bindings }: Sit
         tone: 'danger',
       });
     } finally {
+      operation.current = false;
       setUploading(false);
     }
   };
 
-  const handleDelete = () => {
-    deleteAsset.mutate({ type });
+  const handleDelete = async () => {
+    if (operation.current) {
+      return;
+    }
+    operation.current = true;
+    try {
+      await deleteAsset.mutateAsync({ type });
+    } catch (error) {
+      notifications.show({
+        message: error instanceof Error ? error.message : tCommon('errors.generic'),
+        tone: 'danger',
+      });
+    } finally {
+      operation.current = false;
+    }
   };
 
   return (
@@ -199,6 +219,7 @@ export function SiteAssetUploader({ type, currentUrl, onSuccess, bindings }: Sit
       label={label}
       description={description}
       uploadPrompt={uploadPrompt}
+      loadingLabel={phase === 'saving' ? tCommon('states.loading') : tCommon(`uploadField.status.${phase}`)}
       errorMessage={errorMessage}
       onDrop={handleDrop}
       onDelete={handleDelete}

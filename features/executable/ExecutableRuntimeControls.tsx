@@ -61,14 +61,16 @@ export function ExecutableRuntimeStatus({
   status,
   running,
   stopped,
+  starting,
 }: {
   status: 'starting' | 'running' | 'stopped' | 'error';
   running: string;
   stopped: string;
+  starting: string;
 }) {
   return (
     <LabelBadge placement="overlay-start" size="sm" data-executable-runtime-status="" aria-live="polite">
-      {status === 'running' || status === 'starting' ? running : status === 'stopped' ? stopped : ''}
+      {status === 'starting' ? starting : status === 'running' ? running : status === 'stopped' ? stopped : ''}
     </LabelBadge>
   );
 }

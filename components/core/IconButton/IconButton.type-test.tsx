@@ -38,3 +38,21 @@ void actionNavigation;
 <IconButton label="Move" interaction="drag-handle" aria-pressed={undefined} />;
 // @ts-expect-error The duplicate geometry prop was removed; use size.
 <IconButton label="Remove" controlSize="xs" />;
+
+<IconButton
+  label="Remove avatar"
+  appearance="media-overlay"
+  placement="overlay-end-inside"
+  tone="danger"
+  emphasis="strong"
+/>;
+// @ts-expect-error Small media visuals have fixed Core geometry, independent of action sizes.
+<IconButton label="Remove avatar" appearance="media-overlay" placement="overlay-end-inside" size="xs" />;
+// @ts-expect-error Media visuals are only offered within the media they act on.
+<IconButton label="Remove avatar" appearance="media-overlay" placement="inline" />;
+// @ts-expect-error The media overlay appearance is for commands, not navigation.
+<IconButton label="Open image" appearance="media-overlay" placement="overlay-end-inside" href="/image" />;
+// @ts-expect-error Media commands cannot be used as toggles.
+<IconButton label="Select image" appearance="media-overlay" placement="overlay-end-inside" pressed />;
+// @ts-expect-error Core owns the circular badge shape.
+<IconButton label="Remove avatar" appearance="media-overlay" placement="overlay-end-inside" shape="square" />;

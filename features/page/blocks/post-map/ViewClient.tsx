@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { PostMapSkeleton } from './Skeleton';
 import { withQueryClient } from '@/lib/providers/with-query-client';
 import type { PostMapFeatureResponse } from '@/lib/types/map/features';
 import type { MapViewConfig } from '@/lib/types/map/model';
@@ -26,8 +27,9 @@ export interface PostMapViewClientProps {
 }
 
 // SSR remains enabled so initial map data and theme keep their server-rendered content.
-const RuntimeView = dynamic(() =>
-  withQueryClient(import('./ViewClientRuntime').then((module) => module.PostMapViewClient)),
+const RuntimeView = dynamic(
+  () => withQueryClient(import('./ViewClientRuntime').then((module) => module.PostMapViewClient)),
+  { loading: () => <PostMapSkeleton /> },
 );
 
 export function PostMapViewClient(props: PostMapViewClientProps) {

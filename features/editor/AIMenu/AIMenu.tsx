@@ -92,6 +92,9 @@ function useAIEditorTurnStore({ client, target, context, initialAction, onApprov
 export function AIMenu({ client, context, target, onClose, dragHandleClassName, initialAction }: AIMenuProps) {
   const t = useTranslations('aiAssistant');
   const tCommonActions = useTranslations('common.actions');
+  const [retrying, setRetrying] = useState(false);
+  const [stopping, setStopping] = useState(false);
+  const [resolution, setResolution] = useState<'approve' | 'deny' | null>(null);
   const [customPrompt, setCustomPrompt] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const { store, state } = useAIEditorTurnStore({
@@ -136,6 +139,9 @@ export function AIMenu({ client, context, target, onClose, dragHandleClassName, 
         ];
 
   useEffect(() => {
+    if (phase !== 'resolving') {
+      setResolution(null);
+    }
     if (phase === 'input') {
       inputRef.current?.focus();
     }
@@ -248,7 +254,15 @@ export function AIMenu({ client, context, target, onClose, dragHandleClassName, 
                   size="xs"
                   tone="danger"
                   emphasis="medium"
-                  onClick={() => void store.stop()}
+                  onClick={async () => {
+                    setStopping(true);
+                    try {
+                      await store.stop();
+                    } finally {
+                      setStopping(false);
+                    }
+                  }}
+                  loading={stopping}
                   leftSection={<IconX size={14} />}
                   fullWidth
                 >
@@ -287,7 +301,11 @@ export function AIMenu({ client, context, target, onClose, dragHandleClassName, 
                   size="sm"
                   tone="neutral"
                   emphasis="medium"
-                  onClick={() => void store.deny()}
+                  onClick={async () => {
+                    setResolution('deny');
+                    await store.deny();
+                  }}
+                  loading={phase === 'resolving' && resolution === 'deny'}
                   leftSection={<IconX size={14} />}
                   disabled={phase === 'resolving'}
                 >
@@ -297,8 +315,12 @@ export function AIMenu({ client, context, target, onClose, dragHandleClassName, 
                   size="sm"
                   tone="positive"
                   emphasis="medium"
-                  onClick={() => void store.approve()}
-                  leftSection={phase === 'resolving' ? <Loader size="xs" /> : <IconCheck size={14} />}
+                  onClick={async () => {
+                    setResolution('approve');
+                    await store.approve();
+                  }}
+                  loading={phase === 'resolving' && resolution === 'approve'}
+                  leftSection={<IconCheck size={14} />}
                   disabled={phase === 'resolving'}
                 >
                   {context.mode === 'modify' ? t('actions.accept') : t('actions.insert')}
@@ -338,7 +360,15 @@ export function AIMenu({ client, context, target, onClose, dragHandleClassName, 
                 <Button
                   size="xs"
                   emphasis="medium"
-                  onClick={() => void store.retry(customPrompt)}
+                  onClick={async () => {
+                    setRetrying(true);
+                    try {
+                      await store.retry(customPrompt);
+                    } finally {
+                      setRetrying(false);
+                    }
+                  }}
+                  loading={retrying}
                   leftSection={<IconRefresh size={14} />}
                 >
                   {t('actions.retry')}

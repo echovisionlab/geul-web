@@ -9,11 +9,12 @@ import {
 } from '@/components/core/Layout';
 
 import { SectionCard as DsSectionCard } from '@/components/core/Section';
+import { Alert } from '@/components/core/Alert';
 import { Text as DsText } from '@/components/core/Typography';
-import { useCallback, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { IconChevronDown, IconChevronUp, IconTrash } from '@tabler/icons-react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { Separator as Divider, ScrollArea } from '@/components/core/Display';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
@@ -94,15 +95,36 @@ function PlaceEditorContent({
   const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
   const [drawerOpened, { toggle: toggleDrawer }] = useDisclosure(true);
 
+  const [locationError, setLocationError] = useState(false);
+  const locationRequestRef = useRef(0);
+  const locale = useLocale();
+  useEffect(() => {
+    locationRequestRef.current++;
+    setLocationError(false);
+    setGeocodingLoading(false);
+    return () => {
+      locationRequestRef.current++;
+    };
+  }, [locale, geocodingLib, placesLib]);
+
   const handleMapClick = useCallback(
     async (lat: number, lng: number) => {
+      const request = ++locationRequestRef.current;
+      setLocationError(false);
+      setGeocodingLoading(false);
       setFormState((prev) => ({ ...prev, lat, lng, googlePlaceId: null }));
 
       if (geocodingLib) {
         setGeocodingLoading(true);
         try {
           const geocoder = new geocodingLib.Geocoder();
-          const response = await geocoder.geocode({ location: { lat, lng } });
+          const response = await geocoder.geocode({ location: { lat, lng }, language: locale });
+          if (locationRequestRef.current !== request) {
+            return;
+          }
+          if (!response.results?.length) {
+            throw new Error('No address result');
+          }
           if (response.results?.[0]) {
             const result = response.results[0];
             setFormState((prev) => ({
@@ -112,17 +134,24 @@ function PlaceEditorContent({
             }));
           }
         } catch {
-          // Ignore
+          if (locationRequestRef.current === request) {
+            setLocationError(true);
+          }
         } finally {
-          setGeocodingLoading(false);
+          if (locationRequestRef.current === request) {
+            setGeocodingLoading(false);
+          }
         }
       }
     },
-    [geocodingLib],
+    [geocodingLib, locale],
   );
 
   const handlePoiClick = useCallback(
     async (placeId: string, lat: number, lng: number) => {
+      const request = ++locationRequestRef.current;
+      setLocationError(false);
+      setGeocodingLoading(false);
       setFormState((prev) => ({ ...prev, lat, lng, googlePlaceId: placeId }));
 
       if (placesLib) {
@@ -132,6 +161,9 @@ function PlaceEditorContent({
           await place.fetchFields({
             fields: ['displayName', 'formattedAddress', 'addressComponents'],
           });
+          if (locationRequestRef.current !== request) {
+            return;
+          }
           setFormState((prev) => ({
             ...prev,
             name: place.displayName ?? prev.name,
@@ -142,11 +174,20 @@ function PlaceEditorContent({
               : prev.addressComponents,
           }));
         } catch {
+          if (locationRequestRef.current !== request) {
+            return;
+          }
           // Fallback to reverse geocoding
           if (geocodingLib) {
             try {
               const geocoder = new geocodingLib.Geocoder();
-              const response = await geocoder.geocode({ location: { lat, lng } });
+              const response = await geocoder.geocode({ location: { lat, lng }, language: locale });
+              if (locationRequestRef.current !== request) {
+                return;
+              }
+              if (!response.results?.length) {
+                throw new Error('No address result');
+              }
               if (response.results?.[0]) {
                 const result = response.results[0];
                 setFormState((prev) => ({
@@ -156,18 +197,25 @@ function PlaceEditorContent({
                 }));
               }
             } catch {
-              // Ignore
+              if (locationRequestRef.current === request) {
+                setLocationError(true);
+              }
             }
           }
         } finally {
-          setGeocodingLoading(false);
+          if (locationRequestRef.current === request) {
+            setGeocodingLoading(false);
+          }
         }
       }
     },
-    [placesLib, geocodingLib],
+    [placesLib, geocodingLib, locale],
   );
 
   const handlePlaceSelect = useCallback((result: GooglePlaceSearchResult) => {
+    locationRequestRef.current++;
+    setLocationError(false);
+    setGeocodingLoading(false);
     setFormState((prev) => ({
       ...prev,
       name: result.name ?? prev.name,
@@ -177,6 +225,13 @@ function PlaceEditorContent({
       googlePlaceId: result.placeId,
       addressComponents: result.addressComponents ?? prev.addressComponents,
     }));
+  }, []);
+
+  const handleFormChange = useCallback((next: PlaceEditorFormState) => {
+    locationRequestRef.current++;
+    setLocationError(false);
+    setGeocodingLoading(false);
+    setFormState(next);
   }, []);
 
   const handleSubmit = useCallback(async () => {
@@ -248,10 +303,15 @@ function PlaceEditorContent({
           </DsLayoutInset>
 
           <Divider />
+          {locationError ? (
+            <Alert tone="danger" role="alert">
+              {tCommonMessages('failedToLoad')}
+            </Alert>
+          ) : null}
 
           {localOnly ? (
             <ScrollArea grow inset="md">
-              <PlaceDetailForm formState={formState} onFormChange={setFormState} />
+              <PlaceDetailForm formState={formState} onFormChange={handleFormChange} />
               {metadata ? <DsLayoutInset block="md">{metadata}</DsLayoutInset> : null}
             </ScrollArea>
           ) : (
@@ -320,7 +380,11 @@ function PlaceEditorContent({
                     </DsLayoutInset>
                     <Divider />
                     <ScrollArea grow inset="md">
-                      <PlaceDetailForm formState={formState} onFormChange={setFormState} loading={geocodingLoading} />
+                      <PlaceDetailForm
+                        formState={formState}
+                        onFormChange={handleFormChange}
+                        loading={geocodingLoading}
+                      />
                     </ScrollArea>
                     {metadata ? (
                       <>
@@ -366,7 +430,7 @@ function PlaceEditorContent({
           }
         >
           <ScrollArea size="viewport">
-            <PlaceDetailForm formState={formState} onFormChange={setFormState} loading={geocodingLoading} />
+            <PlaceDetailForm formState={formState} onFormChange={handleFormChange} loading={geocodingLoading} />
             {metadata ? (
               <>
                 <Divider spaceBefore="md" spaceAfter="md" />

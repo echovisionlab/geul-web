@@ -1,182 +1,16 @@
 // @vitest-environment jsdom
-
-import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { notifications } from '@/components/core/Notification';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, render, screen, waitFor, within } from '@/test/render';
 import { LocaleProvider } from '@/lib/providers/LocaleProvider';
-import type { ColumnDef } from '@/lib/types/common/data-table';
-import type { PaginatedQueryResult } from '@/lib/types/repository/result';
+import { notifications } from '@/components/core/Notification';
 import { ServerDataTableSelectableSection } from './ServerDataTableSelectableSection';
-
-const refreshMock = vi.fn();
-
+const router = vi.hoisted(() => ({ refresh: vi.fn(), push: vi.fn(), params: new URLSearchParams() }));
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({
-    refresh: refreshMock,
-  }),
+  useRouter: () => router,
+  usePathname: () => '/posts',
+  useSearchParams: () => router.params,
 }));
-
-vi.mock('next-intl', () => ({
-  useTranslations: () => (key: string, values?: Record<string, string | number>) => {
-    const messages: Record<string, string> = {
-      'actions.clearAll': 'Clear all',
-      'actions.delete': 'Delete',
-      'labels.actions': 'Actions',
-      'errors.generic': 'Something went wrong',
-    };
-    if (key === 'messages.deleteNamedItemConfirm') {
-      return `Are you sure you want to delete "${values?.name}"? This action cannot be undone.`;
-    }
-    if (key === 'messages.confirmDeleteSelectedCount') {
-      return `Are you sure you want to delete ${values?.count} selected items? This action cannot be undone.`;
-    }
-    return messages[key] ?? key;
-  },
-}));
-
-vi.mock('@/components/core/Notification', () => ({
-  notifications: {
-    show: vi.fn(),
-  },
-}));
-
-vi.mock('./ServerDataTable', () => {
-  function Root({ children }: { children?: React.ReactNode }) {
-    return <div data-testid="server-datatable-root">{children}</div>;
-  }
-
-  function Toolbar({ children }: { children?: React.ReactNode }) {
-    return <div data-testid="server-datatable-toolbar">{children}</div>;
-  }
-
-  function Search(props: { namespace: string; placeholder: string }) {
-    return (
-      <div data-testid="server-datatable-search">
-        {props.namespace}:{props.placeholder}
-      </div>
-    );
-  }
-
-  function MultiFilter(props: { namespace: string }) {
-    return <div data-testid="server-datatable-filter">{props.namespace}:filter</div>;
-  }
-
-  function MultiSort(props: { namespace: string }) {
-    return <div data-testid="server-datatable-sort">{props.namespace}:sort</div>;
-  }
-
-  function Content(props: {
-    result: PaginatedQueryResult<{ id: string; title: string }>;
-    getRowKey: (row: { id: string; title: string }) => string;
-    selection?: {
-      onSelectedRowKeysChange: (keys: string[]) => void;
-      selectedOnPageRowKeys: string[];
-    };
-  }) {
-    return (
-      <div data-testid="server-datatable-content">
-        <button
-          type="button"
-          onClick={() => props.selection?.onSelectedRowKeysChange(props.result.data.map((row) => props.getRowKey(row)))}
-        >
-          Select all
-        </button>
-        <button type="button" onClick={() => props.selection?.onSelectedRowKeysChange(['row-1'])}>
-          Select first
-        </button>
-        <div>{props.selection ? 'selection-enabled' : 'selection-disabled'}</div>
-        <div>selected:{props.selection?.selectedOnPageRowKeys.join(',') ?? ''}</div>
-      </div>
-    );
-  }
-
-  return {
-    ServerDataTable: Object.assign(Root, {
-      Toolbar,
-      Search,
-      MultiFilter,
-      MultiSort,
-      Content,
-    }),
-  };
-});
-
-vi.mock('@/components/core/DataTable', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/components/core/DataTable')>();
-
-  return {
-    ...actual,
-    TableRowMenu: ({
-      items,
-      'aria-label': ariaLabel,
-    }: {
-      items: { label: string; onClick?: () => void; disabled?: boolean }[];
-      'aria-label': string;
-    }) => (
-      <div data-testid="table-row-menu" aria-label={ariaLabel}>
-        {items.map((item) => (
-          <button key={item.label} type="button" disabled={item.disabled} onClick={item.onClick}>
-            {item.label}
-          </button>
-        ))}
-      </div>
-    ),
-  };
-});
-
-vi.mock('@/components/core/Modal', () => ({
-  ConfirmModal: ({
-    opened,
-    title,
-    message,
-    onClose,
-    onConfirm,
-  }: {
-    opened: boolean;
-    title: string;
-    message: React.ReactNode;
-    onClose: () => void;
-    onConfirm: () => void;
-  }) =>
-    opened ? (
-      <div data-testid="confirm-modal">
-        <div>{title}</div>
-        <div>{message}</div>
-        <button type="button" onClick={onClose}>
-          Close
-        </button>
-        <button type="button" onClick={onConfirm}>
-          Confirm
-        </button>
-      </div>
-    ) : null,
-}));
-
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: (query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener() {},
-    removeListener() {},
-    addEventListener() {},
-    removeEventListener() {},
-    dispatchEvent() {
-      return false;
-    },
-  }),
-});
-
-type Row = { id: string; title: string };
-
-const columns: ColumnDef<Row>[] = [{ key: 'title', header: 'Title', accessor: 'title' }];
-const result: PaginatedQueryResult<Row> = {
+const result = {
   data: [
     { id: 'row-1', title: 'First row' },
     { id: 'row-2', title: 'Second row' },
@@ -186,274 +20,108 @@ const result: PaginatedQueryResult<Row> = {
   pageSize: 20,
   totalPages: 1,
 };
-
-let container: HTMLDivElement | null = null;
-let root: Root | null = null;
-
-function render(node: React.ReactNode) {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-
-  act(() => {
-    root?.render(
-      <DesignSystemProvider forceColorScheme="light">
-        <LocaleProvider locale="ko">{node}</LocaleProvider>
-      </DesignSystemProvider>,
-    );
-  });
+const deleteAction = vi.fn<(id: string) => Promise<{ success?: boolean; error?: string }>>();
+function setup(bulk = true) {
+  return render(
+    <LocaleProvider locale="ko">
+      <div role="region" aria-label="Posts" data-datatable-root data-namespace="posts">
+        <ServerDataTableSelectableSection
+          namespace="posts"
+          result={result}
+          columns={[{ key: 'title', header: 'Title', accessor: 'title' }]}
+          getRowKey={(row) => row.id}
+          emptyMessage="No posts"
+          searchPlaceholder="Search posts"
+          filterFields={[]}
+          sortFields={[]}
+          bulkDelete={bulk ? { entityLabel: 'posts', deleteAction, getRowLabel: (row) => row.title } : undefined}
+        />
+      </div>
+    </LocaleProvider>,
+  );
 }
-
-async function flush() {
-  await act(async () => {
-    await Promise.resolve();
-  });
+async function openDelete(user: ReturnType<typeof render>['user']) {
+  await user.click(screen.getByRole('button', { name: 'Actions for posts' }));
+  await user.click(await screen.findByRole('menuitem', { name: 'Delete' }));
+  return screen.findByRole('dialog', { name: 'Delete' });
 }
-
 beforeEach(() => {
-  refreshMock.mockReset();
-  vi.mocked(notifications.show).mockReset();
+  router.refresh.mockReset();
+  deleteAction.mockReset().mockResolvedValue({ success: true });
 });
-
-afterEach(() => {
-  act(() => {
-    root?.unmount();
-  });
-  container?.remove();
-  root = null;
-  container = null;
-});
-
 describe('ServerDataTableSelectableSection', () => {
-  it('does not enable row selection plumbing without bulk delete support', () => {
-    render(
-      <ServerDataTableSelectableSection
-        namespace="posts"
-        result={result}
-        columns={columns}
-        getRowKey={(row) => row.id}
-        emptyMessage="No posts"
-        searchPlaceholder="Search posts"
-        filterFields={[]}
-        sortFields={[]}
-      />,
-    );
-
-    expect(document.body.textContent).toContain('selection-disabled');
-    expect(document.body.textContent).not.toContain('선택');
-    expect(document.body.textContent).not.toContain('Clear all');
+  it('does not enable row selection without bulk delete support', () => {
+    setup(false);
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Actions for posts' })).not.toBeInTheDocument();
   });
-
-  it('tracks current-page selection and clears it through the bulk action menu', async () => {
-    render(
-      <ServerDataTableSelectableSection
-        namespace="posts"
-        result={result}
-        columns={columns}
-        getRowKey={(row) => row.id}
-        emptyMessage="No posts"
-        searchPlaceholder="Search posts"
-        filterFields={[]}
-        sortFields={[]}
-        bulkDelete={{
-          entityLabel: 'posts',
-          deleteAction: vi.fn(),
-          getRowLabel: (row) => row.title,
-        }}
-      />,
-    );
-
-    expect(document.body.textContent).toContain('selection-enabled');
-    expect(document.body.textContent).not.toContain('2개 선택');
-
-    const selectAllButton = Array.from(document.querySelectorAll('button')).find(
-      (button) => button.textContent === 'Select all',
-    );
-    expect(selectAllButton).not.toBeNull();
-
-    act(() => {
-      selectAllButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
-
-    expect(document.body.textContent).toContain('2개 선택');
-    expect(document.body.textContent).toContain('selected:row-1,row-2');
-
-    const clearAllButton = Array.from(document.querySelectorAll('button')).find(
-      (button) => button.textContent === 'Clear all',
-    );
-    expect(clearAllButton).not.toBeNull();
-
-    act(() => {
-      clearAllButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
-
-    expect(document.body.textContent).not.toContain('2개 선택');
-    expect(document.body.textContent).toContain('selected:');
+  it('tracks current-page selection and clears it through the real action menu', async () => {
+    const { user } = setup();
+    await user.click(screen.getByRole('checkbox', { name: 'Select all rows' }));
+    expect(screen.getByText('2개 선택')).toBeInTheDocument();
+    expect(within(screen.getByRole('table')).getByRole('checkbox', { name: 'First row' })).toBeChecked();
+    expect(within(screen.getByRole('table')).getByRole('checkbox', { name: 'Second row' })).toBeChecked();
+    await user.click(screen.getByRole('button', { name: 'Actions for posts' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Clear all' }));
+    expect(screen.queryByText('2개 선택')).not.toBeInTheDocument();
+    expect(within(screen.getByRole('table')).getByRole('checkbox', { name: 'First row' })).not.toBeChecked();
+    expect(within(screen.getByRole('table')).getByRole('checkbox', { name: 'Second row' })).not.toBeChecked();
   });
-
-  it('shows delete errors, clears successful selections, and refreshes the router', async () => {
-    const deleteAction = vi
-      .fn<(_: string) => Promise<{ success?: boolean; error?: string }>>()
-      .mockResolvedValueOnce({ success: true })
-      .mockResolvedValueOnce({ error: 'Second row failed' });
-
-    render(
-      <ServerDataTableSelectableSection
-        namespace="posts"
-        result={result}
-        columns={columns}
-        getRowKey={(row) => row.id}
-        emptyMessage="No posts"
-        searchPlaceholder="Search posts"
-        filterFields={[]}
-        sortFields={[]}
-        bulkDelete={{
-          entityLabel: 'posts',
-          deleteAction,
-          getRowLabel: (row) => row.title,
-        }}
-      />,
+  it('reports partial failures, clears selections and shows table pending until refresh completes', async () => {
+    const notice = vi.spyOn(notifications, 'show');
+    let finish!: () => void;
+    router.refresh.mockReturnValue(
+      new Promise<void>((resolve) => {
+        finish = resolve;
+      }),
     );
-
-    const selectAllButton = Array.from(document.querySelectorAll('button')).find(
-      (button) => button.textContent === 'Select all',
-    );
-    act(() => {
-      selectAllButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
-
-    const deleteButton = Array.from(document.querySelectorAll('button')).find(
-      (button) => button.textContent === 'Delete',
-    );
-    expect(deleteButton).not.toBeNull();
-
-    act(() => {
-      deleteButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
-
-    expect(document.body.textContent).toContain(
-      'Are you sure you want to delete 2 selected items? This action cannot be undone.',
-    );
-
-    const confirmButton = Array.from(document.querySelectorAll('button')).find(
-      (button) => button.textContent === 'Confirm',
-    );
-    expect(confirmButton).not.toBeNull();
-
-    await act(async () => {
-      confirmButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      await Promise.resolve();
-    });
-    await flush();
-
-    expect(deleteAction).toHaveBeenCalledTimes(2);
-    expect(deleteAction).toHaveBeenNthCalledWith(1, 'row-1');
-    expect(deleteAction).toHaveBeenNthCalledWith(2, 'row-2');
-    expect(notifications.show).toHaveBeenCalledWith({
-      message: 'Second row failed',
-      tone: 'danger',
-    });
-    expect(refreshMock).toHaveBeenCalledTimes(1);
-    expect(document.body.textContent).not.toContain('2개 선택');
+    deleteAction.mockResolvedValueOnce({ success: true }).mockResolvedValueOnce({ error: 'Second row failed' });
+    try {
+      const { user } = setup();
+      await user.click(screen.getByRole('checkbox', { name: 'Select all rows' }));
+      const dialog = await openDelete(user);
+      expect(dialog).toHaveTextContent(
+        'Are you sure you want to delete 2 selected items? This action cannot be undone.',
+      );
+      await user.click(within(dialog).getByRole('button', { name: 'Delete' }));
+      await waitFor(() => expect(router.refresh).toHaveBeenCalledOnce());
+      expect(deleteAction).toHaveBeenNthCalledWith(1, 'row-1');
+      expect(deleteAction).toHaveBeenNthCalledWith(2, 'row-2');
+      expect(notice).toHaveBeenCalledWith({ message: 'Second row failed', tone: 'danger' });
+      await waitFor(() => expect(screen.getByRole('region', { name: 'Posts' })).toHaveAttribute('aria-busy', 'true'));
+      expect(screen.queryByText('2개 선택')).not.toBeInTheDocument();
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      await act(async () => finish());
+      expect(await within(screen.getByRole('table')).findByText('First row')).toBeInTheDocument();
+      expect(screen.getByRole('region', { name: 'Posts' })).toHaveAttribute('aria-busy', 'false');
+    } finally {
+      notice.mockRestore();
+    }
   });
-
-  it('does not refresh or clear selection when every bulk delete fails', async () => {
-    const deleteAction = vi
-      .fn<(_: string) => Promise<{ success?: boolean; error?: string }>>()
+  it('preserves selection and confirmation when every deletion fails', async () => {
+    const notice = vi.spyOn(notifications, 'show');
+    deleteAction
       .mockResolvedValueOnce({ error: 'First row failed' })
       .mockResolvedValueOnce({ error: 'Second row failed' });
-
-    render(
-      <ServerDataTableSelectableSection
-        namespace="posts"
-        result={result}
-        columns={columns}
-        getRowKey={(row) => row.id}
-        emptyMessage="No posts"
-        searchPlaceholder="Search posts"
-        filterFields={[]}
-        sortFields={[]}
-        bulkDelete={{
-          entityLabel: 'posts',
-          deleteAction,
-          getRowLabel: (row) => row.title,
-        }}
-      />,
-    );
-
-    const selectAllButton = Array.from(document.querySelectorAll('button')).find(
-      (button) => button.textContent === 'Select all',
-    );
-    act(() => {
-      selectAllButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
-
-    const deleteButton = Array.from(document.querySelectorAll('button')).find(
-      (button) => button.textContent === 'Delete',
-    );
-    act(() => {
-      deleteButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
-
-    const confirmButton = Array.from(document.querySelectorAll('button')).find(
-      (button) => button.textContent === 'Confirm',
-    );
-
-    await act(async () => {
-      confirmButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      await Promise.resolve();
-    });
-    await flush();
-
-    expect(notifications.show).toHaveBeenCalledWith({
-      message: 'First row failed',
-      tone: 'danger',
-    });
-    expect(refreshMock).not.toHaveBeenCalled();
-    expect(document.body.textContent).toContain('2개 선택');
-    expect(document.querySelector('[data-testid="confirm-modal"]')).not.toBeNull();
+    try {
+      const { user } = setup();
+      await user.click(screen.getByRole('checkbox', { name: 'Select all rows' }));
+      const dialog = await openDelete(user);
+      await user.click(within(dialog).getByRole('button', { name: 'Delete' }));
+      await waitFor(() => expect(notice).toHaveBeenCalledWith({ message: 'First row failed', tone: 'danger' }));
+      expect(router.refresh).not.toHaveBeenCalled();
+      expect(screen.getByText('2개 선택')).toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: 'Delete' })).toBeInTheDocument();
+    } finally {
+      notice.mockRestore();
+    }
   });
-
-  it('uses the selected row label when confirming a single bulk delete', async () => {
-    render(
-      <ServerDataTableSelectableSection
-        namespace="posts"
-        result={result}
-        columns={columns}
-        getRowKey={(row) => row.id}
-        emptyMessage="No posts"
-        searchPlaceholder="Search posts"
-        filterFields={[]}
-        sortFields={[]}
-        bulkDelete={{
-          entityLabel: 'posts',
-          deleteAction: vi.fn().mockResolvedValue({ success: true }),
-          getRowLabel: (row) => row.title,
-        }}
-      />,
-    );
-
-    const selectFirstButton = Array.from(document.querySelectorAll('button')).find(
-      (button) => button.textContent === 'Select first',
-    );
-    expect(selectFirstButton).not.toBeNull();
-
-    act(() => {
-      selectFirstButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
-
-    const deleteButton = Array.from(document.querySelectorAll('button')).find(
-      (button) => button.textContent === 'Delete',
-    );
-    expect(deleteButton).not.toBeNull();
-
-    act(() => {
-      deleteButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
-
-    expect(document.body.textContent).toContain(
+  it('uses the selected row name for a single deletion', async () => {
+    const { user } = setup();
+    await user.click(within(screen.getByRole('table')).getByRole('checkbox', { name: 'First row' }));
+    expect(await openDelete(user)).toHaveTextContent(
       'Are you sure you want to delete "First row"? This action cannot be undone.',
     );
-    expect(document.body.textContent).not.toContain('1 posts');
+    expect(screen.queryByText('1 posts')).not.toBeInTheDocument();
   });
 });

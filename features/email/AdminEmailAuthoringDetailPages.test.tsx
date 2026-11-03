@@ -214,6 +214,7 @@ vi.mock('@/features/translation/useSourceDocumentCollaboration', () => ({
     doc: { clientID: 8 },
     isConnected: true,
     isSynced: localeRoom.isSynced,
+    isDocumentReady: true,
     targetUnits: localeRoom.targetUnits,
     setTargetValue: vi.fn(),
     useSourceFallback: vi.fn(),

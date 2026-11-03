@@ -1,4 +1,5 @@
 'use client';
+import { QueryLoadingSurface } from '../QueryLoadingSurface';
 
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
@@ -40,6 +41,7 @@ function ClientMarqueeSettingsForm({ props, updateProps }: ClientMarqueeSettings
 
   return (
     <DsLayoutStack gap="lg" data-page-block-editor="client-marquee">
+      <QueryLoadingSurface queries={[clientsQuery]} />
       <QueryErrorAlert queries={[clientsQuery]} />
       <MarqueeEntityFields
         entityLabel={tCommonEntities('clients')}
@@ -111,8 +113,15 @@ export function ClientMarqueeCanvasPreview({ props }: BlockCanvasPreviewProps<Cl
   const { data: clients } = clientsQuery;
   const items = buildClientMarqueePreviewItems(parsed, clients ?? []);
 
+  if (clientsQuery.isLoading) {
+    return <QueryLoadingSurface queries={[clientsQuery]} />;
+  }
+  if (clientsQuery.isError && clients === undefined) {
+    return <QueryErrorAlert queries={[clientsQuery]} />;
+  }
   return (
     <>
+      <QueryLoadingSurface queries={[clientsQuery]} />
       <QueryErrorAlert queries={[clientsQuery]} />
       <MarqueeView
         items={items}

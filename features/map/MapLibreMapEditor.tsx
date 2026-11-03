@@ -18,7 +18,13 @@ import { buildResolvedThemeConfig, resolveMapLabelVisibility } from '@/lib/utils
 
 const MapLibreMap = dynamic(() => import('@/features/map/MapLibreMap').then((mod) => mod.MapLibreMap), {
   ssr: false,
+  loading: () => <MapEditorLoader />,
 });
+
+function MapEditorLoader() {
+  const t = useTranslations('mapView');
+  return <PageLoader height="100%" minHeight={0} message={t('loading')} />;
+}
 
 interface MapLibreMapEditorProps {
   places: MapRendererPlace[];
@@ -100,7 +106,11 @@ export function MapLibreMapEditor({
   });
 
   if (isThemeLoading) {
-    return <PageLoader height={height} minHeight={0} />;
+    return (
+      <div style={{ height, position: 'relative' }} aria-busy="true">
+        <MapEditorLoader />
+      </div>
+    );
   }
 
   if (isThemeError || !themeConfig) {

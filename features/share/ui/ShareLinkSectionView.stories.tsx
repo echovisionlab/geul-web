@@ -4,6 +4,8 @@ import { withFeatureLabels } from '@/stories/feature-localization';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 
+import { PageLoader } from '@/features/site/PageLoader';
+import { Alert } from '@/components/core/Alert';
 import { ShareLinkSectionView } from './ShareLinkSectionView';
 
 const labels = {
@@ -133,6 +135,7 @@ const meta = {
     hasMore: false,
     showAll: false,
     isLoading: false,
+    loadingSurface: <PageLoader placement="flow" minHeight={140} size="sm" />,
     isCreating: false,
     deletingLinkId: null,
     onToggleForm: () => {},
@@ -185,5 +188,18 @@ export const KeyboardLinkManagement: Story = {
     await expect(document.getElementById(copy.getAttribute('aria-describedby')!)).toHaveTextContent(
       'https://studio.example.com/share/one',
     );
+  },
+};
+
+export const InitialLoading: Story = { args: { isLoading: true, links: [], totalLinkCount: 0 } };
+export const ListFailed: Story = {
+  args: {
+    links: [],
+    totalLinkCount: 0,
+    errorContent: (
+      <Alert role="alert" tone="danger">
+        Failed to load share links.
+      </Alert>
+    ),
   },
 };

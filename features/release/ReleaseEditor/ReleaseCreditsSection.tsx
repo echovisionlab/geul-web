@@ -1,4 +1,5 @@
 'use client';
+import { InputValidationGlyph } from '@/components/core/Input/InputGlyphs';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
 
@@ -129,7 +130,7 @@ export function ReleaseCreditsSection({
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
-  const persistCredits = (
+  const persistCredits = async (
     nextCredits: ReleaseCreditItem[],
     orderIntent?: {
       itemId: string;
@@ -137,7 +138,7 @@ export function ReleaseCreditsSection({
       nextItemId?: string;
     },
   ) => {
-    if (!canEdit) {
+    if (!canEdit || setCredits.isPending) {
       return;
     }
     const normalizedCredits = nextCredits.map((credit, index) => ({
@@ -145,20 +146,31 @@ export function ReleaseCreditsSection({
       sort_order: index,
     }));
     onCreditsChange(normalizedCredits);
-    setCredits.mutate({
-      credits: normalizedCredits.map((credit, index) => ({
-        id: credit.id,
-        artistId: credit.artist_id,
-        memberId: credit.member_id,
-        creditedName: credit.credited_name,
-        creditRole: credit.credit_role,
-        sortOrder: index,
-      })),
-      orderIntent,
-    });
+    try {
+      const result = await setCredits.mutateAsync({
+        credits: normalizedCredits.map((credit, index) => ({
+          id: credit.id,
+          artistId: credit.artist_id,
+          memberId: credit.member_id,
+          creditedName: credit.credited_name,
+          creditRole: credit.credit_role,
+          sortOrder: index,
+        })),
+        orderIntent,
+      });
+      if (!result.error) {
+        return true;
+      }
+    } catch {
+      notifications.show({ message: tCommon('notifications.saveFailed'), tone: 'danger' });
+    }
+    if (!onMutationSettled) {
+      onCreditsChange(credits);
+    }
+    return false;
   };
   const handleDragEnd = (event: DragEndEvent) => {
-    if (!canEdit) {
+    if (!canEdit || setCredits.isPending) {
       return;
     }
     const reorder = reorderWithIntent(credits, event.active.id, event.over?.id, (credit) => credit.id);
@@ -166,8 +178,8 @@ export function ReleaseCreditsSection({
       persistCredits(reorder.items, reorder.intent);
     }
   };
-  const handleAdd = () => {
-    if (!canEdit) {
+  const handleAdd = async () => {
+    if (!canEdit || setCredits.isPending) {
       return;
     }
     // Validate based on credit type
@@ -244,7 +256,9 @@ export function ReleaseCreditsSection({
       };
     }
     const newCredits = [...credits, newCredit];
-    persistCredits(newCredits);
+    if ((await persistCredits(newCredits)) === false) {
+      return;
+    }
     if (canEditNotes && creditNote.trim()) {
       onCreditNoteChange(newCredit.id, creditNote.trim());
     }
@@ -260,7 +274,7 @@ export function ReleaseCreditsSection({
     setCreditNote('');
   };
   const handleRemove = (creditId: string) => {
-    if (!canEdit) {
+    if (!canEdit || setCredits.isPending) {
       return;
     }
     persistCredits(credits.filter((credit) => credit.id !== creditId));
@@ -292,7 +306,7 @@ export function ReleaseCreditsSection({
               size="xs"
               leftSection={<IconPlus size={14} />}
               onClick={openAddModal}
-              disabled={!canEdit}
+              disabled={!canEdit || setCredits.isPending}
             >
               {tCommon('actions.addItem', { item: tCommon('entities.credit') })}
             </Button>
@@ -336,6 +350,7 @@ export function ReleaseCreditsSection({
       </DsLayoutStack>
 
       <ContentModal
+        loading={setCredits.isPending}
         opened={addModalOpened}
         onClose={resetModalState}
         title={tCommon('actions.addItem', { item: tCommon('entities.credit') })}
@@ -352,7 +367,7 @@ export function ReleaseCreditsSection({
               { value: 'text', label: tCommon('labels.text') },
             ]}
             fullWidth
-            disabled={!canEdit}
+            disabled={!canEdit || setCredits.isPending}
           />
 
           {creditType === 'artist' && (
@@ -360,6 +375,8 @@ export function ReleaseCreditsSection({
               id={idPrefix ? `${idPrefix}-artist-id` : undefined}
               label={tCommon('entities.artist')}
               placeholder={t('placeholders.selectArtist')}
+              aria-busy={allArtistsQuery.isFetching || undefined}
+              rightSection={allArtistsQuery.isFetching ? <InputValidationGlyph status="checking" /> : undefined}
               data={
                 allArtists?.map((a) => ({
                   value: a.id,
@@ -369,7 +386,7 @@ export function ReleaseCreditsSection({
               value={selectedArtistId}
               onChange={setSelectedArtistId}
               searchable
-              disabled={!canEdit}
+              disabled={!canEdit || setCredits.isPending}
             />
           )}
 
@@ -378,6 +395,8 @@ export function ReleaseCreditsSection({
               id={idPrefix ? `${idPrefix}-member-id` : undefined}
               label={tCommon('entities.member')}
               placeholder={t('placeholders.selectUser')}
+              aria-busy={allMembersQuery.isFetching || undefined}
+              rightSection={allMembersQuery.isFetching ? <InputValidationGlyph status="checking" /> : undefined}
               data={
                 allMembers?.data?.map((u) => ({
                   value: u.id,
@@ -387,7 +406,7 @@ export function ReleaseCreditsSection({
               value={selectedMemberId}
               onChange={setSelectedUserId}
               searchable
-              disabled={!canEdit}
+              disabled={!canEdit || setCredits.isPending}
             />
           )}
 
@@ -398,7 +417,7 @@ export function ReleaseCreditsSection({
               placeholder={t('placeholders.creditedName')}
               value={creditedName}
               onChange={(e) => setCreditedName(e.currentTarget.value)}
-              disabled={!canEdit}
+              disabled={!canEdit || setCredits.isPending}
             />
           )}
 
@@ -408,7 +427,7 @@ export function ReleaseCreditsSection({
             placeholder={t('placeholders.role')}
             value={creditRole}
             onChange={(e) => setCreditRole(e.currentTarget.value)}
-            disabled={!canEdit}
+            disabled={!canEdit || setCredits.isPending}
           />
           <Textarea
             id={idPrefix ? `${idPrefix}-note` : undefined}
@@ -418,16 +437,17 @@ export function ReleaseCreditsSection({
             onChange={(e) => setCreditNote(e.currentTarget.value)}
             autosize
             minRows={2}
-            disabled={!canEdit || !canEditNotes}
+            disabled={!canEdit || !canEditNotes || setCredits.isPending}
           />
           <DialogActions>
-            <Button emphasis="low" onClick={resetModalState}>
+            <Button emphasis="low" disabled={setCredits.isPending} onClick={resetModalState}>
               {tCommon('actions.cancel')}
             </Button>
             <Button
               tone="neutral"
               emphasis="strong"
               onClick={handleAdd}
+              loading={setCredits.isPending}
               disabled={
                 !canEdit ||
                 (creditType === 'artist' && !selectedArtistId) ||

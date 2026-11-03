@@ -1,83 +1,65 @@
 // @vitest-environment jsdom
 
-import { act } from 'react';
-import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
-import { createRoot, type Root } from 'react-dom/client';
+import { act, render, screen, waitFor } from '@/test/render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { DEFAULT_LIGHT_VARIANT, DEFAULT_THEME_SETTINGS } from '@/lib/types/map-theme/schema';
 import { DEFAULT_MAP_CONFIG } from '@/lib/types/map/model';
 import { MapLibreMapEditor } from './MapLibreMapEditor';
 
 const mocks = vi.hoisted(() => ({
   mapProps: null as Record<string, unknown> | null,
+  pendingChunk: false,
 }));
 
 vi.mock('next/dynamic', () => ({
-  default: () => (props: Record<string, unknown>) => {
+  default: (_load: unknown, options: { loading: () => React.ReactNode }) => (props: Record<string, unknown>) => {
+    if (mocks.pendingChunk) {
+      return options.loading();
+    }
     mocks.mapProps = props;
     return <div data-testid="map" />;
   },
 }));
 
-vi.mock('@tanstack/react-query', () => ({
-  useQuery: () => ({
-    data: {
-      id: 'theme-1',
-      scheme: 'light',
-      settings: { showAreaLabels: true, showPoiLabels: true },
-      variant: {},
-    },
-    isLoading: false,
-    isError: false,
-  }),
-}));
-
-vi.mock('next-intl', () => ({
-  useTranslations: () => (key: string, values?: Record<string, string>) =>
-    values?.label ? `${key}(${values.label})` : key,
-}));
-
-vi.mock('@/features/map/MapParameterControls', () => ({
-  useMapParameterControls: () => ({ model: { Zoom: { kind: 'number', value: 12 } } }),
-}));
-
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-let container: HTMLDivElement | null = null;
-let root: Root | null = null;
-
+const theme = {
+  themeId: 'theme-1',
+  scheme: 'light' as const,
+  settings: DEFAULT_THEME_SETTINGS,
+  variant: { ...DEFAULT_LIGHT_VARIANT, id: 'light' },
+};
+const resolveTheme = vi.fn<NonNullable<React.ComponentProps<typeof MapLibreMapEditor>['resolveTheme']>>();
+let client: QueryClient;
+let view: ReturnType<typeof render> | undefined;
 beforeEach(() => {
   mocks.mapProps = null;
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
+  mocks.pendingChunk = false;
+  client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  resolveTheme.mockReset().mockResolvedValue(theme);
 });
-
 afterEach(() => {
-  act(() => {
-    root?.unmount();
-  });
-  container?.remove();
-  container = null;
-  root = null;
+  view?.unmount();
+  view = undefined;
+  client.clear();
 });
-
-function renderEditor() {
-  act(() => {
-    root?.render(
-      <DesignSystemProvider>
-        <MapLibreMapEditor
-          config={DEFAULT_MAP_CONFIG}
-          onConfigChange={vi.fn()}
-          places={[]}
-          settingsPanel={{ collapsed: false }}
-        />
-      </DesignSystemProvider>,
-    );
-  });
-
-  const target = container?.querySelector<HTMLElement>('button[aria-label*="Zoom"]');
-  expect(target).toBeTruthy();
-  return target as HTMLElement;
+function renderEditor(props: Partial<React.ComponentProps<typeof MapLibreMapEditor>> = {}) {
+  const element = (
+    <QueryClientProvider client={client}>
+      <MapLibreMapEditor
+        config={DEFAULT_MAP_CONFIG}
+        onConfigChange={vi.fn()}
+        places={[]}
+        settingsPanel={{ collapsed: false }}
+        resolveTheme={resolveTheme}
+        {...props}
+      />
+    </QueryClientProvider>
+  );
+  if (view) {
+    view.rerender(element);
+  } else {
+    view = render(element);
+  }
 }
 
 describe('MapLibreMapEditor interactions', () => {
@@ -154,27 +136,38 @@ describe('MapLibreMapEditor interactions', () => {
         pinClickable: false,
       },
     },
-  ])('$name', ({ config, expected, interactive }) => {
-    act(() => {
-      root?.render(
-        <DesignSystemProvider>
-          <MapLibreMapEditor
-            config={{ ...DEFAULT_MAP_CONFIG, ...config }}
-            interactive={interactive}
-            onConfigChange={vi.fn()}
-            places={[]}
-          />
-        </DesignSystemProvider>,
-      );
-    });
+  ])('$name', async ({ config, expected, interactive }) => {
+    renderEditor({ config: { ...DEFAULT_MAP_CONFIG, ...config }, interactive });
 
-    expect(mocks.mapProps).toEqual(expect.objectContaining(expected));
+    await waitFor(() => expect(mocks.mapProps).toEqual(expect.objectContaining(expected)));
   });
 });
 
 describe('MapLibreMapEditor parameter copy localization', () => {
-  it('names each parameter copy action with the copy message for that parameter', () => {
-    const target = renderEditor();
-    expect(target.getAttribute('aria-label')).toBe('copyValueTitle(Zoom)');
+  it('names each parameter copy action with the copy message for that parameter', async () => {
+    renderEditor();
+    await view!.user.click(await screen.findByRole('button', { name: 'Camera' }));
+    expect(screen.getByRole('button', { name: 'Click to copy Zoom value' })).toBeInTheDocument();
   });
+});
+
+it.each(['theme', 'chunk'])('renders the shared loader during %s preparation', async (phase) => {
+  const pending = Promise.withResolvers<typeof theme>();
+  resolveTheme.mockReturnValueOnce(pending.promise);
+  mocks.pendingChunk = phase === 'chunk';
+  renderEditor();
+  expect(screen.getByRole('status')).toHaveTextContent('Unfolding the atlas...');
+  await act(async () => pending.resolve(theme));
+  if (phase === 'chunk') {
+    expect(screen.getByRole('status')).toHaveTextContent('Unfolding the atlas...');
+    mocks.pendingChunk = false;
+    renderEditor();
+  }
+  await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument());
+});
+it('does not leave a theme failure waiting', async () => {
+  resolveTheme.mockRejectedValueOnce(new Error('Theme unavailable'));
+  renderEditor();
+  expect(await screen.findByRole('alert')).toHaveTextContent('The map theme could not be loaded.');
+  expect(screen.queryByRole('status')).not.toBeInTheDocument();
 });

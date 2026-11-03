@@ -189,6 +189,7 @@ const guidance = Object.fromEntries([
       'Choose Button when the command needs visible text. label supplies an accessible name and is not copied into visible text.',
       'Supply exactly one of label, aria-label or aria-labelledby. Place a drag-handle first on the left and connect actual sensor/activator bindings.',
       'Compose Tooltip or ToolbarCommand explicitly when an icon-only command needs a tooltip. The primitive does not create one automatically.',
+      'Use appearance=media-overlay only for small commands inside a media corner. Avatar removal consumes it through ImageUploadField; ordinary controls keep the default appearance.',
     ],
     [
       'Check name, role and focus. Consumers provide additional description when count carries essential meaning.',
@@ -196,11 +197,12 @@ const guidance = Object.fromEntries([
     ],
     [
       'The 16px glyph and hit target are separate rules. Padding is 0; coarse pointers use a minimum 44px target.',
+      'media-overlay uses a 16px circular visual and 12px glyph/spinner within a rectangular 24px target (44px coarse). The target includes every painted badge edge. It requires inside placement and rejects size, shape, count, contrast, links and toggles.',
       'Defaults are neutral/low/square. size accepts compact/chrome/xs/sm/md/lg/xl; the former duplicate controlSize prop was removed. Standalone action size falls back to xs. A drag-handle owns compact geometry and rejects size/type=submit.',
       'A toggle passes pressed; Core sets aria-pressed and owns the neutral resting ink and muted selected surface. Toggles reject tone/emphasis and raw aria-pressed; links and drag-handles are not toggles.',
       'Optional name properties in the table still require one name-union branch. count must be a nonnegative safe integer; values of 100 or more display as 99+.',
     ],
-    ['icon-text-button-api-review.md', 'button-api-review.md', 'spacing-icon-contract.md'],
+    ['icon-text-button-api-review.md', 'button-api-review.md', 'spacing-icon-contract.md', 'image-upload-contract.md'],
   ),
   entry(
     'Actions/TextButton',
@@ -218,7 +220,7 @@ const guidance = Object.fromEntries([
     [
       'Explicit defaults are appearance=default, size=sm, display=inline-flex, nowrap=false, density=inline and gap=xxs. size/controlSize accept xs/sm/md.',
       'Parent action-row/toolbar density affects controlSize and typography. Review content width and wrapping with long labels.',
-      "TextButton does not expose Button's loading prop. Do not assume the two APIs share that state.",
+      'Command loading defaults to false and preserves text/focus while blocking activation and native submit/reset. loadingLabel optionally names progress; otherwise it follows the control name/label. The href branch rejects loading/loadingLabel.',
     ],
     ['icon-text-button-api-review.md', 'spacing-icon-contract.md'],
   ),
@@ -277,7 +279,7 @@ const guidance = Object.fromEntries([
   input(
     'MultiSelect',
     'Selects multiple values displayed as a list or tags.',
-    'Review selection, removal, search and empty results separately. Name every tag-removal control.',
+    'Review selection, removal, search and empty results separately. Name every tag-removal control. Optional isLoading uses the shared checking glyph, exposes busy state and suppresses nothingFoundMessage without disabling selection. Supply localized loadingLabel for a named status; without it the glyph is decorative.',
   ),
   input(
     'TagsInput',
@@ -287,7 +289,7 @@ const guidance = Object.fromEntries([
   input(
     'SearchComboboxView',
     'Connects a search input and external results as a combobox.',
-    'Connect the combobox controller, search/onSearchChange, debouncedSearch, items and onSelect to actual search. getItemId/getItemText supply stable IDs and names. Without label, the implementation uses placeholder as its accessible name; check that the supplied name identifies the task.',
+    'Connect the combobox controller, search/onSearchChange, debouncedSearch, items and onSelect to actual search. getItemId/getItemText supply stable IDs and names. isLoading keeps checking feedback and suppresses minimum-query/no-results copy until settlement. Without label, the implementation uses placeholder as its accessible name; check that the supplied name identifies the task.',
     ['SearchComboboxView'],
   ),
   input(
@@ -423,7 +425,7 @@ const guidance = Object.fromEntries([
     'EditorHeader',
     "Structures an editing task's title, status, tools and primary commands.",
     'header title/status → toolbar/action groups.',
-    'Connect save, cancel, status and navigation callbacks to editor state. Use compact rules rather than shrinking icons independently.',
+    'Connect save, cancel, status and navigation callbacks to editor state. Return the complete leave/save Promise from onBack so Core keeps Back pending until settlement; the shared helper preserves its resolved value or original rejection. Consumers own failure feedback. Use compact rules rather than shrinking icons independently.',
   ),
   layout(
     'Hierarchy',
@@ -590,7 +592,7 @@ const guidance = Object.fromEntries([
     'MenuToggle',
     'Provides a menu opening/dismissal trigger.',
     'Named toggle control → expanded state → connected menu/panel.',
-    'Connect actual opened, onClick and controls relationships. A chevron alone does not implement an interaction.',
+    'Connect actual opened, onClick and controls relationships. Optional controlled loading keeps the shared trigger pending during navigation preparation; omitted loading is inactive, and the caller owns opening and completion. A chevron alone does not implement an interaction.',
     'Expose current state through aria-expanded. Check dismissal and focus return in the connected menu/panel.',
   ),
   navigation(
@@ -645,6 +647,37 @@ const guidance = Object.fromEntries([
     ],
     ['table-api-review.md', 'tables-and-toolbars.md'],
     ['DataTableView'],
+  ),
+  entry(
+    'Data Display/TableRowMenu',
+    'Provides named row actions and links without activating the containing row.',
+    'Named IconButton trigger → DropdownMenu items → optional divider before the destructive group. An empty items array renders nothing.',
+    [
+      'Supply required aria-label and items. TableRowMenuItem is the item type: label is required; icon, onClick, onError, href, tone and disabled are optional.',
+      'Return the whole command Promise from items[].onClick, including preparation and follow-up work that must block another row command. The callback accepts () => void | Promise<unknown>; detached work from a void callback cannot be tracked.',
+      'Selection dismisses the menu normally. A returned Promise keeps progress on the row trigger and gates trigger activation and every item until settlement. Resolution or rejection clears pending so the menu can be opened again; settlement does not reopen it or announce domain success.',
+      'Supply items[].onError(error: unknown) for domain notifications and recovery after a thrown or rejected command. Without onError, Core logs the action failure; a throwing or rejected error handler is also logged. Features own failure meaning and retry feedback.',
+      'Use href for destinations and onClick for commands. disabled prevents item activation. Keep danger items together at the end: Core inserts one divider before the first danger item when it follows another item, preserving supplied order.',
+      'PostRowMenu returns its republish operation and UserRowMenu returns its unban operation, with domain onError notifications. LabelRowMenu returns preparation of the deletion preview; final deletion remains in its confirmation dialog.',
+      'Default demonstrates a link and a danger command. ReturnedPromise exposes manual resolve/reject controls for the trigger pending and recovery contract without calling a service.',
+    ],
+    [
+      'Localize the required trigger aria-label with the row identity. Each item label supplies both visible text and its accessible name; keep labels distinct within the menu. Icons supplement the label.',
+      'Preserve DropdownMenu keyboard navigation, skipping disabled items, selection dismissal, Escape and focus return to the trigger. Check focus after command settlement and after a command opens a confirmation or navigates away.',
+      'The pending trigger retains its accessible name and exposes busy/progress state. Trigger and menu mouse-down and click events stop propagation to the row; verify nested actions do not also activate row selection or navigation.',
+    ],
+    [
+      'TableRowMenu is the component; TableRowMenuItem is a TypeScript interface, not a separately rendered component. There is no controlled loading prop or per-item loading presentation.',
+      'Core owns trigger, menu, divider and tone presentation. Features own available commands, authorization, localized labels, returned operation lifetime and domain feedback.',
+      'A synchronous router callback does not expose navigation completion. Return an actual operation Promise only when the caller owns that completion boundary.',
+    ],
+    [
+      'table-api-review.md',
+      'tables-and-toolbars.md',
+      'loading-surface-contract.md',
+      'migrations/loading-commonization.md',
+    ],
+    ['TableRowMenu'],
   ),
   entry(
     'Data Display/NearEndLoader',
@@ -818,11 +851,37 @@ const guidance = Object.fromEntries([
     'alert root → title/body → optional actions.',
     'Explain the actual state, cause and resolution. Connect retry/correction paths for significant errors and preserve meaning beyond color.',
   ),
+  entry(
+    'Feedback/ErrorPage',
+    'Displays a page error with caller-supplied explanation and navigation or recovery actions. Use Alert for feedback within retained content and PageLoaderView for a pending page or section.',
+    'Named section → inset and centered compact layout → optional codeVisual or plain code → level-one title → optional description → centered action row of low-emphasis Buttons.',
+    [
+      'ErrorPageView requires title: string and actions: readonly ErrorPageAction[]. Optional fields are code: string, codeVisual: ReactNode, description: string and fullScreen: boolean. fullScreen defaults to false, selecting a 50vh minimum height; true selects 100svh.',
+      'A non-nullish codeVisual replaces the plain code. Without it, a nonempty code renders as decorative display text; a nonempty description renders below the title. The graphic slot does not load a renderer or provide its own fallback.',
+      'Each ErrorPageAction requires label: string and exactly one branch: href: string for navigation, or onClick: () => void | Promise<unknown> for a command. The other branch field is never. Preserve native link navigation, including modified and middle clicks.',
+      'Return the complete operation Promise from onClick. Each command tracks its own returned Promise, shows Button loading and blocks duplicate activation until resolution or rejection clears pending. Other actions remain independently usable. Work started by a void callback has no tracked completion.',
+      'The shared pending handler preserves the returned Promise result or rejection and logs rejected commands. Core does not display domain failure feedback or retry automatically; callers own error handling, recovery and any success response.',
+      'Core does not read locale messages or require a message provider. Callers supply localized title, description and action labels, plus any graphic accessibility text. Normal application theme and token setup still applies.',
+      'features/application-error/ApplicationErrorPage.tsx selects localized status content, adds the login link for 401, adds onRetry only for 408, 429 or statuses >=500, and appends the home link. ApplicationErrorPage reads active-locale messages; ApplicationErrorPageView receives explicit messages.',
+      'features/application-error/RootErrorPageView.tsx passes locale fallback messages through ApplicationErrorPageView with fullScreen. Both consumers reach Core through features/application-error/ErrorPageView.tsx, which supplies the deferred particle graphic and a plain-code fallback if its renderer cannot load.',
+      'Core/Feedback/ErrorPage exports AsyncRetry, whose Complete simulated retry control resolves the returned Promise. Feature/Application Error/ErrorPage covers status and root fallback compositions with preview navigation; those callbacks do not demonstrate asynchronous completion.',
+    ],
+    [
+      'title names the section and supplies its level-one heading. Keep the error meaning in text: plain code is aria-hidden, and callers own codeVisual semantics. description is visible supporting text; Core does not attach it as an aria-describedby relationship.',
+      'Action labels supply visible and accessible names. The pending command retains its label and focus while exposing busy/progress state and blocking activation. Check Tab/Enter/Space, focus after settlement and focus recovery when navigation or retry replaces the page; Core does not focus the section automatically.',
+    ],
+    [
+      'The component identity is ErrorPageView with ErrorPageViewProps. ErrorPageAction is a type, not a rendered component. There are no Core status, onRetry, loading or error-feedback props; status policy, service execution and boundary reset remain consumer responsibilities.',
+      'Core owns layout, typography and action presentation. Review mobile/tablet/desktop widths, zoom, long localized labels, RTL, light/dark and custom themes in the Core story and actual application consumers. Story registration and source checks do not establish visual, keyboard or assistive-technology approval.',
+    ],
+    ['core-specifications.md', 'button-api-review.md', 'loading-surface-contract.md', 'page-documentation.md'],
+    ['ErrorPageView'],
+  ),
   feedback(
     'PageLoaderView',
-    'Displays initial page loading.',
-    'Page loading region → named progress/description.',
-    'Connect actual requests to completion/failure pages. Do not leave a loading placeholder as the final empty state.',
+    'Displays blocking page or section loading.',
+    'Named status region → optional configured image → required compact visible message.',
+    'message must be nonblank; imageAlt independently names the image/status. Missing or failed images retain visible text. Defaults are placement=fill, minHeight=200, size=md and imageUnoptimized=false; height defaults to 100% for fill or auto for flow. Fill needs a positioned parent with reserved height; flow reserves its own document space. Site PageLoader owns settings, CDN and localization; pure Views receive a prepared loadingSurface. Retain usable content during background requests and connect terminal error/retry to the request owner.',
   ),
   feedback(
     'ProcessingOverlay',
@@ -874,7 +933,7 @@ const guidance = Object.fromEntries([
     'ImageUploadField',
     'Composes image selection, preview and replacement.',
     'named field → chooser/drop → preview → replace/remove actions.',
-    'Distinguish selection, validation, uploading, completion and failure. Selecting a file does not confirm upload success.',
+    'Distinguish selection, validation, uploading, completion and failure. Selecting a file does not confirm upload success. Return the complete removal Promise from onRemove; Core combines its pending state with removeButtonLoading (default false), preserves rejection and leaves error feedback to the caller. removeButtonAppearance=avatar requires a circle preview and inside placement; other image actions retain the default appearance.',
     'Check field and replace/remove names, error relationships and focus return in the upload flow.',
   ),
   media(
@@ -932,13 +991,15 @@ guidance['Core/Input/MultiSelectComboboxView'] = Object.fromEntries([
     [
       'selectedItems and options contain T extends MultiSelectItem. Connect id/name and onSelect/onDeselect to actual state.',
       'label, placeholder, emptyMessage, notFoundMessage, createOptionLabel and canEdit are required contracts. Do not substitute value/onChange/defaultValue.',
-      'Connect canCreateNew/onCreate/isCreating to actual item creation. canEdit=false projects the internal MultiSelect to disabled.',
+      'Connect canCreateNew/onCreate/isCreating to actual item creation. Creation requires canEdit, canCreateNew, onCreate, a nonblank query, no exact match and neither isLoading nor isCreating. canEdit=false projects the internal MultiSelect to disabled.',
     ],
     [
-      'Check label and removal-control names. Distinguish isLoading/isCreating busy state from empty results.',
+      'Check label and removal-control names. Optional isLoading/isCreating show shared checking feedback and suppress empty/not-found copy while retaining available options and selections. Supply localized loadingLabel to name the status.',
       'Check focus and retention of existing selections after search, selection, removal and creation.',
     ],
-    ["Preserve Core's generic item model. Do not expose all internal MultiSelect props as this view's API."],
+    [
+      "Preserve Core's generic item model. Omitted pending flags are inactive, omitted canCreateNew disables creation, and combineWithSelected defaults to false. Do not expose all internal MultiSelect props as this view's API.",
+    ],
     ['input-contract.md', 'choice-api-review.md'],
     ['MultiSelectComboboxView'],
   ),
@@ -1008,8 +1069,14 @@ guidance['Core/Overlays/Tooltip'].usage.push(
 guidance['Core/Overlays/Drawer'].usage.push(
   'OnDemandDrawer renders nothing while closed and loads the surface on first open (or preloadDrawer() on trigger hover/focus). ApplicationFrame site navigation uses it; the trigger keeps focus until the drawer opens, so focus returns to it on close.',
 );
+guidance['Core/Overlays/ConfirmModal'].components = ['ConfirmModal', 'ConfirmDialogHost', 'ConfirmDialogLoadError'];
+guidance['Core/Overlays/ConfirmModal'].propTypes = {
+  ConfirmDialogHost: 'ConfirmDialogHostProps',
+  ConfirmDialogLoadError: 'ConfirmDialogLoadErrorProps',
+};
 guidance['Core/Overlays/ConfirmModal'].usage.push(
-  'confirmDialogs.open() with one ConfirmDialogHost near the root is the imperative path. The host loads its renderer on the first request (which waits in the queue); loading="eager" is for Storybook and tests.',
+  'confirmDialogs.open() with one ConfirmDialogHost near the root is the imperative path. Every host requires localized loadError: { message, retryLabel }. loading defaults to on-demand: the request stays queued with RouteProgressBar until the renderer loads. Exhausted retries end progress and show shared Alert cancel/retry recovery; retry reloads the renderer without invoking onConfirm. The recovery view restores trigger focus before the loaded dialog mounts. loading="eager" loads on mount for Storybook/tests and still requires loadError.',
+  'ConfirmDialogHost and the exported ConfirmDialogLoadError resolve from components/core/Modal/confirm-dialogs.tsx. ConfirmDialogLoadError requires title, message, retryLabel, cancelLabel, onCancel and onRetry. The host takes title and cancelLabel from the latest queued request and message/retryLabel from loadError; cancellation closes that request. RendererLoadError renders this recovery view directly, without simulating a failed renderer download.',
 );
 guidance['Core/Overlays/Popover'].components = ['Popover', 'Popover.Target', 'Popover.Dropdown'];
 guidance['Core/Overlays/Popover'].propTypes = {

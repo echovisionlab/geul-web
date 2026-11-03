@@ -1,31 +1,20 @@
 // @vitest-environment jsdom
-
-import { act, useRef } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { act } from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { render, screen, within } from '@/test/render';
 import { PersonalAccessTokenSettings } from './PersonalAccessTokenSettings';
-
+import { rememberPersonalAccessTokenContinuation } from './personal-access-token-reauthentication';
 const mocks = vi.hoisted(() => ({
   createAccount: vi.fn(),
   createMy: vi.fn(),
-  copy: vi.fn(),
   deleteAccount: vi.fn(),
   deleteMy: vi.fn(),
   regenerateAccount: vi.fn(),
   regenerateMy: vi.fn(),
   searchParams: new URLSearchParams(),
   startPrivilegedReauthentication: vi.fn(),
-  viewInstanceId: 0,
-  viewMounts: 0,
-  viewProps: null as Record<string, unknown> | null,
 }));
-
-vi.mock('next/navigation', () => ({
-  usePathname: () => '/my/settings',
-  useSearchParams: () => mocks.searchParams,
-}));
-vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
-vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
+vi.mock('next/navigation', () => ({ usePathname: () => '/my/settings', useSearchParams: () => mocks.searchParams }));
 vi.mock('@/features/auth/login-redirect', () => ({
   startPrivilegedReauthentication: mocks.startPrivilegedReauthentication,
 }));
@@ -37,149 +26,78 @@ vi.mock('@/lib/actions/personal-access-token', () => ({
   regenerateAccountPersonalAccessTokenAction: mocks.regenerateAccount,
   regenerateMyPersonalAccessTokenAction: mocks.regenerateMy,
 }));
-vi.mock('@/lib/hooks/useCopyToClipboard', () => ({ useCopyToClipboard: () => ({ copy: mocks.copy }) }));
-vi.mock('@/lib/providers/LocaleProvider', () => ({ useLocale: () => 'en' }));
-vi.mock('./ui/PersonalAccessTokenSettings', () => ({
-  PersonalAccessTokenSettingsView: (props: Record<string, unknown>) => {
-    const instanceId = useRef<number | null>(null);
-    if (instanceId.current === null) {
-      instanceId.current = ++mocks.viewMounts;
-    }
-    mocks.viewInstanceId = instanceId.current;
-    mocks.viewProps = props;
-    return null;
-  },
-}));
-
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-let container: HTMLDivElement;
-let root: Root;
-
-function viewProps() {
-  expect(mocks.viewProps).not.toBeNull();
-  return mocks.viewProps as {
-    token: { id: string; canRegenerate: boolean } | null;
-    pendingAction: string | null;
-    secret: { value: string } | null;
-    onCreate: () => Promise<boolean>;
-    onDelete: (id: string) => Promise<boolean>;
-    onRegenerate: (id: string) => Promise<boolean>;
-  };
-}
-
+const token = { id: 'pat-1', createdAt: '2026-08-23T00:00:00.000Z', canRegenerate: true };
 beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-  mocks.viewProps = null;
-  mocks.viewInstanceId = 0;
-  mocks.viewMounts = 0;
+  vi.resetAllMocks();
   mocks.searchParams = new URLSearchParams();
-  for (const mock of [
-    mocks.createAccount,
-    mocks.createMy,
-    mocks.deleteAccount,
-    mocks.deleteMy,
-    mocks.regenerateAccount,
-    mocks.regenerateMy,
-    mocks.copy,
-    mocks.startPrivilegedReauthentication,
-  ]) {
-    mock.mockReset();
-  }
   sessionStorage.clear();
-
-  act(() => {
-    root.render(<PersonalAccessTokenSettings subjectId="member-1" initialPersonalAccessTokens={[]} />);
-  });
 });
-
-afterEach(() => {
-  act(() => root.unmount());
-  container.remove();
-});
-
 describe('PersonalAccessTokenSettings controller', () => {
-  it('stores only metadata while exposing the credential in the one-time secret surface', async () => {
-    mocks.createMy.mockResolvedValue({
-      personalAccessToken: { id: 'pat-1', createdAt: '2026-08-23T00:00:00.000Z' },
-      secret: 'one-time-secret',
-    });
-
-    await act(async () => viewProps().onCreate());
-
+  it('exposes the secret only in the one-time surface while retaining token metadata', async () => {
+    mocks.createMy.mockResolvedValue({ personalAccessToken: token, secret: 'one-time-secret' });
+    const { user } = render(<PersonalAccessTokenSettings subjectId="member-1" initialPersonalAccessTokens={[]} />);
+    await user.click(screen.getByRole('button', { name: 'Create' }));
+    const dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByText('one-time-secret')).toBeVisible();
+    await user.click(within(dialog).getAllByRole('button', { name: 'Close' })[0]);
+    expect(screen.queryByText('one-time-secret')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Regenerate' })).toBeVisible();
     expect(mocks.createMy).toHaveBeenCalledWith();
-    expect(viewProps().token).toMatchObject({ id: 'pat-1' });
-    expect(viewProps().secret).toEqual({ value: 'one-time-secret' });
-    expect(viewProps().token).not.toHaveProperty('secret');
   });
-
-  it('uses the Admin target actions without changing the one-token view', async () => {
-    mocks.createAccount.mockResolvedValue({
-      personalAccessToken: { id: 'pat-admin', createdAt: '2026-08-23T00:00:00.000Z' },
-      secret: 'admin-created-secret',
-    });
-    act(() => {
-      root.render(<PersonalAccessTokenSettings subjectId="member-2" mode="admin" initialPersonalAccessTokens={[]} />);
-    });
-
-    await act(async () => viewProps().onCreate());
-
+  it('uses the admin target actions with the same token controls', async () => {
+    mocks.createAccount.mockResolvedValue({ personalAccessToken: token, secret: 'admin-created-secret' });
+    const { user } = render(
+      <PersonalAccessTokenSettings subjectId="member-2" mode="admin" initialPersonalAccessTokens={[]} />,
+    );
+    await user.click(screen.getByRole('button', { name: 'Create' }));
+    expect(await screen.findByText('admin-created-secret')).toBeVisible();
     expect(mocks.createAccount).toHaveBeenCalledWith('member-2');
-    expect(viewProps().token).toMatchObject({ id: 'pat-admin' });
   });
-
-  it('preserves a regeneration intent across the freshness redirect', async () => {
+  it('preserves regeneration intent across the freshness redirect', async () => {
     mocks.regenerateMy.mockResolvedValue({ error: 'reauth_required' });
-    act(() => {
-      root.render(
-        <PersonalAccessTokenSettings
-          subjectId="member-1"
-          initialPersonalAccessTokens={[
-            {
-              id: 'pat-1',
-              createdAt: '2026-08-23T00:00:00.000Z',
-              canRegenerate: true,
-            },
-          ]}
-        />,
-      );
-    });
-
-    await act(async () => viewProps().onRegenerate('pat-1'));
-
+    const { user } = render(<PersonalAccessTokenSettings subjectId="member-1" initialPersonalAccessTokens={[token]} />);
+    await user.click(screen.getByRole('button', { name: 'Regenerate' }));
+    await user.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Regenerate' }));
     expect(mocks.startPrivilegedReauthentication).toHaveBeenCalledWith(
       '/my/settings?resume_personal_access_token_action=1',
     );
     expect(sessionStorage.getItem('personal_access_token_continuation:member-1')).toContain('pat-1');
   });
-
-  it('remounts the subject boundary so another Member cannot inherit secret state', async () => {
-    mocks.createMy.mockResolvedValue({
-      personalAccessToken: { id: 'pat-1', createdAt: '2026-08-23T00:00:00.000Z' },
-      secret: 'member-1-secret',
-    });
-    await act(async () => viewProps().onCreate());
-    const firstViewInstance = mocks.viewInstanceId;
-
-    act(() => {
-      root.render(
-        <PersonalAccessTokenSettings
-          subjectId="member-2"
-          initialPersonalAccessTokens={[
-            {
-              id: 'pat-member-2',
-              createdAt: '2026-08-23T00:00:00.000Z',
-              canRegenerate: true,
-            },
-          ]}
-        />,
-      );
-    });
-
-    expect(mocks.viewInstanceId).not.toBe(firstViewInstance);
-    expect(viewProps().secret).toBeNull();
-    expect(viewProps().token).toMatchObject({ id: 'pat-member-2' });
+  it('clears the one-time secret when the member changes', async () => {
+    mocks.createMy.mockResolvedValue({ personalAccessToken: token, secret: 'member-1-secret' });
+    const { user, rerender } = render(
+      <PersonalAccessTokenSettings subjectId="member-1" initialPersonalAccessTokens={[]} />,
+    );
+    await user.click(screen.getByRole('button', { name: 'Create' }));
+    await screen.findByText('member-1-secret');
+    rerender(
+      <PersonalAccessTokenSettings
+        subjectId="member-2"
+        initialPersonalAccessTokens={[{ ...token, id: 'pat-member-2' }]}
+      />,
+    );
+    expect(screen.queryByText('member-1-secret')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Regenerate' })).toBeVisible();
+  });
+  it('shows resumed deletion on its row and ignores completion after a member change', async () => {
+    let finish!: (result: { deleted: boolean }) => void;
+    mocks.deleteMy.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    );
+    rememberPersonalAccessTokenContinuation({ action: 'delete', id: token.id }, 'member-1');
+    mocks.searchParams = new URLSearchParams('resume_personal_access_token_action=1');
+    const { rerender } = render(
+      <PersonalAccessTokenSettings subjectId="member-1" initialPersonalAccessTokens={[token]} />,
+    );
+    expect(screen.getByRole('button', { name: 'Delete' })).toHaveAttribute('aria-busy', 'true');
+    expect(screen.getByRole('button', { name: 'Regenerate' })).toBeDisabled();
+    mocks.searchParams = new URLSearchParams();
+    rerender(<PersonalAccessTokenSettings subjectId="member-2" initialPersonalAccessTokens={[token]} />);
+    await act(async () => finish({ deleted: true }));
+    expect(screen.getByRole('button', { name: 'Regenerate' })).toBeEnabled();
+    expect(mocks.deleteMy).toHaveBeenCalledTimes(1);
   });
 });

@@ -64,7 +64,10 @@ export function useNicknameValidation(
         });
     }, debounceMs);
 
-    return () => window.clearTimeout(timeout);
+    return () => {
+      sequenceRef.current += 1;
+      window.clearTimeout(timeout);
+    };
   }, [check, debounceMs, normalized.normalized, normalized.valid]);
 
   return { ...normalized, status };

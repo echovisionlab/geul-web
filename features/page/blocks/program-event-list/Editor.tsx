@@ -1,4 +1,5 @@
 'use client';
+import { QueryLoadingSurface } from '../QueryLoadingSurface';
 
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
@@ -82,6 +83,7 @@ function ProgramEventListSettingsForm({ props, updateProps, readOnly = false }: 
 
   return (
     <>
+      <QueryLoadingSurface queries={[eventTypesQuery, eventSeriesQuery]} />
       <QueryErrorAlert queries={[eventTypesQuery, eventSeriesQuery]} />
       <ListBlockEditorBase
         readOnly={readOnly}

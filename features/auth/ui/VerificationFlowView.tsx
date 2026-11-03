@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useRef } from 'react';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
 
 import { Heading as DsHeading, Text as DsText } from '@/components/core/Typography';
 import {
@@ -18,7 +18,7 @@ import {
   type AuthCodeTimingViewModel,
 } from './AuthCodeChallengeView';
 
-export type VerificationViewState = 'choose_email' | 'sent_email' | 'applying' | 'passed';
+export type VerificationViewState = 'choose_email' | 'sent_email' | 'applying' | 'unavailable' | 'passed';
 
 export interface VerificationFlowLabels {
   back: string;
@@ -34,9 +34,9 @@ export interface VerificationFlowLabels {
   applyingDescription: string;
   applyingRetry: string;
   applyingTitle: string;
+  unavailableTitle: string;
   sentDescription: string;
   sentTitle: string;
-  submittingCode: string;
 }
 
 interface VerificationFlowViewProps {
@@ -44,6 +44,7 @@ interface VerificationFlowViewProps {
   email: string;
   error: string | null;
   labels: VerificationFlowLabels;
+  loadingSurface: ReactNode;
   onBack: () => void;
   onCodeChange: (value: string) => void;
   onCodeSubmit: (value: string) => void;
@@ -65,6 +66,7 @@ export function VerificationFlowView({
   email,
   error,
   labels,
+  loadingSurface,
   onBack,
   onCodeChange,
   onCodeSubmit,
@@ -189,14 +191,11 @@ export function VerificationFlowView({
               onSubmit={onCodeSubmit}
               pinTestId="verification-code-pin"
               showSubmitButton={false}
-              submitting={submittingCode || requestingCode}
+              submitting={submittingCode}
+              resending={requestingCode}
               timing={timing}
             />
-            {submittingCode ? (
-              <DsText size="sm" tone="secondary" role="status" aria-live="polite">
-                {labels.submittingCode}
-              </DsText>
-            ) : null}
+            {submittingCode ? loadingSurface : null}
             {error ? (
               <DsText id={errorId} size="sm" tone="danger" role="alert">
                 {error}
@@ -220,19 +219,22 @@ export function VerificationFlowView({
         </DsLayoutStack>
       ) : null}
 
-      {state === 'applying' ? (
-        <DsLayoutStack gap="md" align="center">
+      {state === 'applying' || state === 'unavailable' ? (
+        <DsLayoutStack gap="md" align="center" role="region" aria-labelledby={titleId} aria-busy={checkingApplication}>
           <DsHeading id={titleId} tabIndex={-1} level={1} scale={2} align="center">
-            {labels.applyingTitle}
+            {state === 'applying' ? labels.applyingTitle : labels.unavailableTitle}
           </DsHeading>
-          <DsText size="sm" tone="secondary" align="center">
-            {labels.applyingDescription}
-          </DsText>
+          {state === 'applying' ? (
+            <DsText size="sm" tone="secondary" align="center">
+              {labels.applyingDescription}
+            </DsText>
+          ) : null}
           {error ? (
             <DsText size="sm" tone="danger" role="alert" align="center">
               {error}
             </DsText>
           ) : null}
+          {checkingApplication ? loadingSurface : null}
           <Button onClick={onCheckApplied} emphasis="medium" loading={checkingApplication} fullWidth>
             {labels.applyingRetry}
           </Button>

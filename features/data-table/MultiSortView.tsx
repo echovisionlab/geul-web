@@ -38,6 +38,7 @@ interface MultiSortViewProps {
   opened: boolean;
   markerRef: RefObject<HTMLSpanElement | null>;
   disabled?: boolean;
+  applying?: boolean;
   hasChanges?: boolean;
   onOpenedChange: (opened: boolean) => void;
   onToggleField: (field: string) => void;
@@ -57,6 +58,7 @@ export function MultiSortView({
   opened,
   markerRef,
   disabled = false,
+  applying = false,
   hasChanges = false,
   onOpenedChange,
   onToggleField,
@@ -167,7 +169,7 @@ export function MultiSortView({
       <Button size="xs" tone="neutral" emphasis="low" onClick={onClear} disabled={disabled || sorts.length === 0}>
         {tCommonActions('clearAll')}
       </Button>
-      <Button size="xs" onClick={onApply} disabled={disabled || !hasChanges}>
+      <Button size="xs" onClick={onApply} loading={applying} disabled={disabled || !hasChanges}>
         {tCommonActions('apply')}
       </Button>
     </DsLayoutInline>

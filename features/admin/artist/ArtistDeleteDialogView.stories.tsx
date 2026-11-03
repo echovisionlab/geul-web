@@ -1,6 +1,7 @@
 import { useArgs } from 'storybook/preview-api';
 import { withFeatureLabels } from '@/stories/feature-localization';
 import type { Meta, StoryObj } from '@storybook/nextjs';
+import { PageLoader } from '@/features/site/PageLoader';
 
 import { ArtistDeleteDialogView } from './ArtistDeleteDialogView';
 
@@ -13,6 +14,7 @@ const meta = {
     return (
       <ArtistDeleteDialogView
         {...args}
+        loadingSurface={<PageLoader placement="flow" message={args.labels.loading} />}
         onClose={() => updateArgs({ opened: false })}
         onConfirm={() => updateArgs({ opened: false })}
       />
@@ -40,6 +42,7 @@ const meta = {
     opened: true,
     artistName: 'Example Artist',
     previewLoading: false,
+    loadingSurface: <PageLoader placement="flow" />,
     previewError: null,
     deleting: false,
     preview: {

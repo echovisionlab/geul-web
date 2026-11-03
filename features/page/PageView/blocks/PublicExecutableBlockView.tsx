@@ -73,6 +73,7 @@ interface PublicExecutableLabels {
   copied: string;
   resetOriginal: string;
   sourceInput: string;
+  starting: string;
   running: string;
   stopped: string;
   error: string;
@@ -292,6 +293,7 @@ function RuntimeSurface({
             labels={{
               title: labels.title,
               preview: labels.preview,
+              starting: labels.starting,
               running: labels.running,
               stopped: labels.stopped,
               error: labels.error,
@@ -310,7 +312,12 @@ function RuntimeSurface({
         />
       )}
       {type === 'shader' ? null : (
-        <ExecutableRuntimeStatus status={status} running={labels.running} stopped={labels.stopped} />
+        <ExecutableRuntimeStatus
+          status={status}
+          starting={labels.starting}
+          running={labels.running}
+          stopped={labels.stopped}
+        />
       )}
     </div>
   );
@@ -324,8 +331,10 @@ export function PublicExecutableBlockView(props: PublicExecutableBlockViewProps)
   const t = useTranslations('editorCommon.editor.runtimeLabels');
   const actions = useTranslations('common.actions');
   const commonLabels = useTranslations('common.labels');
+  const commonStates = useTranslations('common.states');
   const labels = useMemo<PublicExecutableLabels>(() => {
     const common = {
+      starting: commonStates('loading'),
       apply: actions('apply'),
       resetOriginal: t('p5.resetOriginal'),
       availableInputs: t('shader.availableInputs'),
@@ -398,7 +407,7 @@ export function PublicExecutableBlockView(props: PublicExecutableBlockViewProps)
       error: t('shader.error'),
       ...common,
     };
-  }, [actions, commonLabels, t, type]);
+  }, [actions, commonLabels, commonStates, t, type]);
   const title = props.title ?? '';
   const factories = useMemo(() => ({ ...DEFAULT_RUNTIME_FACTORIES, ...runtimeFactories }), [runtimeFactories]);
   const previewHeight = normalizePreviewHeight(rawPreviewHeight);

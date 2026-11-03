@@ -22,10 +22,23 @@ import { Alert } from '@/components/core/Alert';
 import { notifications } from '@/components/core/Notification';
 import { renderLocalEmailPreview } from './fixtures/email-preview';
 import { LOCAL_EMAIL_VARIABLES, useLocalEmailPreview } from './fixtures/use-email-preview';
-import { expect, userEvent, waitFor } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { operationsLabels } from './fixtures/operations-a11y';
 import { localRichFormattingEmailDocument } from './fixtures/email-rich-formatting';
 import { localEditLocale, localEmailRoom, localEditorQueryClient } from './fixtures/editor-pages';
-type State = 'ready' | 'pending' | 'failed' | 'disconnected' | 'action-failed';
+type State =
+  | 'ready'
+  | 'pending'
+  | 'failed'
+  | 'disconnected'
+  | 'action-failed'
+  | 'layouts-pending'
+  | 'layouts-error'
+  | 'preview-pending'
+  | 'preview-error'
+  | 'test-pending'
+  | 'metadata-saving'
+  | 'metadata-error';
 type Mode = 'split' | 'code' | 'preview';
 const initialHtml = '<html><body><h1>{{subject}}</h1>{{content}}</body></html>';
 function LayoutPreview({ state = 'ready' }: { state?: State }) {
@@ -49,22 +62,36 @@ function LayoutPreview({ state = 'ready' }: { state?: State }) {
     [htmlContent, setHtmlContent] = useState(initialHtml);
   const previewBindings = useMemo<EmailLayoutPreviewBindings>(
     () => ({
-      content: async (layoutHtml, contentHtml, requestedLocale, signal) => ({
-        ...(await renderLocalEmailPreview(
-          {
-            layoutHtml,
-            contentHtml: contentHtml ?? '',
-            locale: requestedLocale ?? locale,
-            subject: 'Listening room',
-            variables: LOCAL_EMAIL_VARIABLES,
-          },
-          signal,
-        )),
-        errors: [],
-        valid: true,
-      }),
-      saved: async (_layoutId, contentHtml, requestedLocale, signal) =>
-        renderLocalEmailPreview(
+      content: async (layoutHtml, contentHtml, requestedLocale, signal) => {
+        if (state === 'preview-pending') {
+          return new Promise<never>(() => {});
+        }
+        if (state === 'preview-error') {
+          throw new Error('Local layout preview unavailable');
+        }
+        return {
+          ...(await renderLocalEmailPreview(
+            {
+              layoutHtml,
+              contentHtml: contentHtml ?? '',
+              locale: requestedLocale ?? locale,
+              subject: 'Listening room',
+              variables: LOCAL_EMAIL_VARIABLES,
+            },
+            signal,
+          )),
+          errors: [],
+          valid: true,
+        };
+      },
+      saved: async (_layoutId, contentHtml, requestedLocale, signal) => {
+        if (state === 'preview-pending') {
+          return new Promise<never>(() => {});
+        }
+        if (state === 'preview-error') {
+          throw new Error('Local layout preview unavailable');
+        }
+        return renderLocalEmailPreview(
           {
             layoutHtml: initialHtml,
             contentHtml: contentHtml ?? '',
@@ -73,9 +100,10 @@ function LayoutPreview({ state = 'ready' }: { state?: State }) {
             variables: LOCAL_EMAIL_VARIABLES,
           },
           signal,
-        ),
+        );
+      },
     }),
-    [locale],
+    [locale, state],
   );
   if (state === 'pending' || !doc) {
     return <PageLoader />;
@@ -89,13 +117,17 @@ function LayoutPreview({ state = 'ready' }: { state?: State }) {
   }
   const model: Extract<EmailLayoutEditPageViewModel, { kind: 'ready' }> = {
     kind: 'ready',
+    localeErrorSurface: null,
     currentProvider: null,
     layoutId: 'local-layout',
     title,
     activeEditLocale: localEditLocale(locale, setLocale),
     handleTitleChange: setTitle,
+    metadataSaveState: state === 'metadata-saving' ? 'saving' : state === 'metadata-error' ? 'error' : undefined,
     isConnected: state !== 'disconnected',
     isSynced: state !== 'disconnected',
+    isEditorReady: true,
+    connectingSurface: <PageLoader placement="flow" message={tCommon('states.connectingEditor')} />,
     router,
     tPage,
     tCommon,
@@ -171,11 +203,12 @@ function TemplatePreview({
     [viewMode, setViewMode] = useState<Mode>('split'),
     [layoutId, setLayoutId] = useState<string | null>('paper'),
     [variablesExpanded, setVariablesExpanded] = useState(true),
+    [preparingTest, setPreparingTest] = useState(false),
     [testModalOpened, setTestModal] = useState(false),
     [testEmail, setTestEmail] = useState(''),
     [testLocale, setTestLocale] = useState('ko');
   const preview = useLocalEmailPreview(
-    state === 'pending' || state === 'failed' ? null : room,
+    state === 'pending' || state === 'failed' || state === 'preview-pending' || state === 'preview-error' ? null : room,
     currentSubject,
     layoutId ? initialHtml : null,
   );
@@ -191,6 +224,7 @@ function TemplatePreview({
   }
   const model: Extract<EmailTemplateEditPageViewModel, { kind: 'ready' }> = {
     kind: 'ready',
+    localeErrorSurface: null,
     currentProvider: null,
     templateId: 'local-template',
     protocol: null,
@@ -216,10 +250,14 @@ function TemplatePreview({
     handleSubjectChange: setSubject,
     canEditTranslationSource: state !== 'disconnected',
     canEditLocalizedSubject: state !== 'disconnected',
-    layouts: [{ id: 'paper', name: 'Paper layout', key: 'paper' }],
-    layoutId,
+    layouts:
+      state === 'layouts-pending' || state === 'layouts-error'
+        ? []
+        : [{ id: 'paper', name: 'Paper layout', key: 'paper' }],
+    layoutId: state === 'layouts-pending' || state === 'layouts-error' ? null : layoutId,
     handleLayoutChange: setLayoutId,
-    layoutsLoadError: false,
+    layoutsLoadError: state === 'layouts-error',
+    layoutsLoading: state === 'layouts-pending',
     tCommonStates,
     updateLayout: { isPending: false },
     activeEditLocale: localEditLocale(locale, setLocale),
@@ -240,10 +278,12 @@ function TemplatePreview({
     handleEditorReady: preview.refresh,
     handleEditorContentChange: preview.refresh,
     showPreview: viewMode !== 'code',
-    isPreviewLoading: preview.isLoading,
+    isPreviewLoading: state === 'preview-pending' || preview.isLoading,
+    previewError: state === 'preview-error' || Boolean(preview.error),
     previewSubject: preview.subject,
     previewSrcDoc: preview.html,
     sendTest: { isPending: false },
+    preparingTest,
     testModalOpened,
     closeTestModal: () => setTestModal(false),
     tCommonPlaceholders,
@@ -256,6 +296,10 @@ function TemplatePreview({
     ],
     setTestLocale,
     handleSendTest: () => {
+      if (state === 'test-pending') {
+        setPreparingTest(true);
+        return;
+      }
       if (state === 'action-failed') {
         notifications.show({ tone: 'danger', message: 'Local test command failed' });
       } else {
@@ -266,11 +310,6 @@ function TemplatePreview({
   return (
     <QueryClientProvider client={client}>
       <LayoutContainer size="wide" inset="md">
-        {preview.error ? (
-          <Alert role="alert" tone="danger">
-            {preview.error}
-          </Alert>
-        ) : null}
         <EmailTemplateEditPageView model={model} />
       </LayoutContainer>
     </QueryClientProvider>
@@ -304,7 +343,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Production email layout/template views with local code or rich text edits, live preview, view modes and test dialogs. Canonical email snapshots and local layout/variables are rendered by the production Go renderer through a Storybook-only endpoint. Service-backed translation panels are omitted. Configure EMAIL_PREVIEW_FIXTURE_BINARY; no email is delivered.',
+          'Production email layout/template views with local code or rich text edits, live preview, view modes and test dialogs. Canonical email snapshots and local layout/variables are rendered by the production Go renderer through a Storybook-only endpoint. Preview pending/error fixtures hold or fail the local boundary; test preparation stays pending after submission. Service-backed translation panels are omitted. Configure EMAIL_PREVIEW_FIXTURE_BINARY; no email is delivered.',
       },
     },
   },
@@ -383,5 +422,90 @@ export const TemplatePending: Story = { args: { page: 'template', state: 'pendin
 export const LayoutFailed: Story = { args: { state: 'failed' } };
 export const TemplateFailed: Story = { args: { page: 'template', state: 'failed' } };
 export const TemplateActionFailed: Story = { args: { page: 'template', state: 'action-failed' } };
+export const TemplateLayoutsPending: Story = {
+  args: { page: 'template', state: 'layouts-pending' },
+  play: async ({ canvasElement, globals }) => {
+    const canvas = within(canvasElement);
+    const t = await operationsLabels(globals);
+    const layout = await canvas.findByRole('combobox', { name: t.emailTemplates('detail.fields.layoutLabel') });
+    await expect(layout).toBeDisabled();
+    await expect(layout.closest('[aria-busy]')).toHaveAttribute('aria-busy', 'true');
+    await expect(layout).toHaveAttribute('placeholder', t.common('states.loading'));
+  },
+};
+export const TemplateLayoutsFailed: Story = {
+  args: { page: 'template', state: 'layouts-error' },
+  play: async ({ canvasElement, globals }) => {
+    const canvas = within(canvasElement);
+    const t = await operationsLabels(globals);
+    const layout = await canvas.findByRole('combobox', { name: t.emailTemplates('detail.fields.layoutLabel') });
+    await expect(layout).toBeDisabled();
+    await expect(layout.closest('[aria-busy]')).toHaveAttribute('aria-busy', 'false');
+    await expect(layout).toHaveAccessibleDescription(t.common('states.notAvailable'));
+  },
+};
+export const TemplatePreviewPending: Story = {
+  args: { page: 'template', state: 'preview-pending' },
+  play: async ({ canvasElement, globals }) => {
+    const canvas = within(canvasElement);
+    const t = await operationsLabels(globals);
+    const phase = await canvas.findByText(t.common('states.loadingPreview'));
+    const loading = phase.closest('[role="status"]');
+    await expect(loading).toHaveTextContent(t.common('states.loadingPreview'));
+    await expect(loading).toHaveAttribute('data-placement', 'flow');
+    await expect(canvas.queryByText(t.emailTemplates('detail.preview.empty'))).not.toBeInTheDocument();
+    await expect(canvas.queryByTitle(t.common('labels.emailPreview'))).not.toBeInTheDocument();
+  },
+};
+export const TemplatePreviewFailed: Story = {
+  args: { page: 'template', state: 'preview-error' },
+  play: async ({ canvasElement, globals }) => {
+    const canvas = within(canvasElement);
+    const t = await operationsLabels(globals);
+    await expect(await canvas.findByText(t.common('states.notAvailable'))).toBeVisible();
+    await expect(canvas.queryByRole('status', { name: t.common('states.loading') })).not.toBeInTheDocument();
+    await expect(canvas.queryByText(t.emailTemplates('detail.preview.empty'))).not.toBeInTheDocument();
+  },
+};
+export const TemplateTestPreparing: Story = {
+  args: { page: 'template', state: 'test-pending' },
+  play: async ({ canvasElement, globals }) => {
+    const canvas = within(canvasElement);
+    const t = await operationsLabels(globals);
+    await userEvent.click(await canvas.findByRole('button', { name: t.common('actions.sendTest') }));
+    const dialog = await within(canvasElement.ownerDocument.body).findByRole('dialog');
+    await userEvent.type(within(dialog).getByRole('textbox', { name: t.common('labels.email') }), 'june@example.com');
+    const send = within(dialog).getByRole('button', { name: t.common('actions.sendTest') });
+    await userEvent.click(send);
+    await expect(send).toHaveAttribute('aria-busy', 'true');
+    await expect(send).toBeDisabled();
+    await expect(dialog).toBeVisible();
+  },
+};
+export const LayoutPreviewPending: Story = {
+  args: { state: 'preview-pending' },
+  play: async ({ canvasElement, globals }) => {
+    const canvas = within(canvasElement);
+    const t = await operationsLabels(globals);
+    const preview = await canvas.findByRole('region', { name: t.common('labels.preview') });
+    const loading = await within(preview).findByRole('status', { name: t.common('states.loading') });
+    await expect(preview).toHaveAttribute('aria-busy', 'true');
+    await expect(loading).toHaveTextContent(t.common('states.loadingPreview'));
+    await expect(loading).toHaveAttribute('data-placement', 'flow');
+  },
+};
+export const LayoutPreviewFailed: Story = {
+  args: { state: 'preview-error' },
+  play: async ({ canvasElement, globals }) => {
+    const canvas = within(canvasElement);
+    const t = await operationsLabels(globals);
+    const preview = await canvas.findByRole('region', { name: t.common('labels.preview') });
+    await expect(await within(preview).findByRole('alert')).toBeVisible();
+    await expect(preview).toHaveAttribute('aria-busy', 'false');
+    await expect(within(preview).queryByRole('status', { name: t.common('states.loading') })).not.toBeInTheDocument();
+  },
+};
+export const LayoutMetadataSaving: Story = { args: { state: 'metadata-saving' } };
+export const LayoutMetadataFailed: Story = { args: { state: 'metadata-error' } };
 export const LayoutDisconnected: Story = { args: { state: 'disconnected' } };
 export const Phone: Story = { globals: { viewport: { value: 'phone', isRotated: false } } };

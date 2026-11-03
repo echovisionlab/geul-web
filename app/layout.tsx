@@ -201,7 +201,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                     <EditorNavigationProvider>
                       <RouteProgressRuntime />
                       <>
-                        <ConfirmDialogHost />
+                        <ConfirmDialogHost
+                          loadError={{
+                            message: fullMessages.common.errors.generic,
+                            retryLabel: fullMessages.common.actions.tryAgain,
+                          }}
+                        />
                         <AppNotificationRegion />
                         {children}
                         <CookieConsentBanner />

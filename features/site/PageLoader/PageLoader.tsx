@@ -1,24 +1,28 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { PageLoaderView, type PageLoaderViewSize } from '@/components/core/LoadingSurface';
+import {
+  PageLoaderView,
+  type PageLoaderViewPlacement,
+  type PageLoaderViewSize,
+} from '@/components/core/LoadingSurface';
 import { useSiteSettings } from '@/lib/contexts/ManifestContext';
 import { resolvePageLoaderImage } from './loader-image';
 
 export interface PageLoaderProps {
-  /** Height of the loader container. Defaults to '100%' for full parent height. */
+  /** Defaults to '100%' in fill placement and 'auto' in flow placement. */
   height?: string | number;
   /** Minimum height safeguard for page-sized loaders. Defaults to 200. */
   minHeight?: string | number;
+  /** Fill a positioned parent, or reserve a bounded section in document flow. Defaults to fill. */
+  placement?: PageLoaderViewPlacement;
   /** Loader size. Defaults to 'md'. */
   size?: PageLoaderViewSize;
-  /** Retained for caller compatibility. Configured loading images keep their colors. */
-
-  /** Optional message to display below the loader. */
+  /** Visible phase text; blank or omitted values use the localized loading message. */
   message?: string;
 }
 
-export function PageLoader({ height = '100%', minHeight = 200, size = 'md', message }: PageLoaderProps) {
+export function PageLoader({ height, minHeight = 200, placement = 'fill', size = 'md', message }: PageLoaderProps) {
   const t = useTranslations('common.states');
   const { settings } = useSiteSettings();
   const image = resolvePageLoaderImage(settings.loader_urls ?? []);
@@ -28,8 +32,9 @@ export function PageLoader({ height = '100%', minHeight = 200, size = 'md', mess
     <PageLoaderView
       height={height}
       minHeight={minHeight}
+      placement={placement}
       size={size}
-      message={message?.trim() === loadingLabel.trim() ? undefined : message}
+      message={message?.trim() || loadingLabel}
       imageSrc={image.src}
       imageAlt={loadingLabel}
       imageUnoptimized={image.unoptimized}

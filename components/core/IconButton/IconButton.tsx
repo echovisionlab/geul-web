@@ -34,17 +34,33 @@ export type IconButtonAccessibleName =
   | { label?: never; 'aria-label': string; 'aria-labelledby'?: never }
   | { label?: never; 'aria-label'?: never; 'aria-labelledby': string };
 export type IconButtonSize = ControlSize | 'chrome' | 'compact';
+type IconButtonPlacement = 'inline' | 'overlay-start' | 'overlay-start-inside' | 'overlay-end' | 'overlay-end-inside';
+type IconButtonAppearance =
+  | {
+      appearance?: 'default';
+      size?: IconButtonSize;
+      shape?: 'square' | 'circle';
+      placement?: IconButtonPlacement;
+    }
+  | {
+      /** Small media-corner badge with an independent, full-size interaction target. */
+      appearance: 'media-overlay';
+      placement: 'overlay-start-inside' | 'overlay-end-inside';
+      size?: never;
+      shape?: never;
+      pressed?: never;
+      count?: never;
+      contrast?: never;
+    };
 interface IconButtonSharedProps extends Omit<ControlNativeProps, 'aria-label' | 'aria-labelledby' | 'aria-pressed'> {
   children?: ReactNode;
   count?: number;
   contrast?: ControlContrast;
   tone?: ControlTone;
   emphasis?: ControlEmphasis;
-  shape?: 'square' | 'circle';
   loading?: boolean;
   disabled?: boolean;
   printVisibility?: 'normal' | 'hidden';
-  placement?: 'inline' | 'overlay-start' | 'overlay-start-inside' | 'overlay-end' | 'overlay-end-inside';
 }
 /**
  * A command chooses its tone and emphasis. A toggle reports `pressed`; Core then owns the
@@ -54,10 +70,17 @@ interface IconButtonSharedProps extends Omit<ControlNativeProps, 'aria-label' | 
 export type IconButtonPressState = { pressed?: undefined } | { pressed: boolean; tone?: never; emphasis?: never };
 /** Reorder geometry is owned by Core; action sizing cannot leak into a sensor handle. */
 type IconButtonGeometry =
-  | { interaction?: 'action'; size?: IconButtonSize; type?: 'button' | 'submit' | 'reset'; 'aria-pressed'?: never }
+  | (IconButtonAppearance & {
+      interaction?: 'action';
+      type?: 'button' | 'submit' | 'reset';
+      'aria-pressed'?: never;
+    })
   | {
       interaction: 'drag-handle';
+      appearance?: never;
       size?: never;
+      shape?: 'square' | 'circle';
+      placement?: IconButtonPlacement;
       type?: 'button';
       pressed?: never;
       /** Sensor libraries report their own pressed state on the activator. */
@@ -78,7 +101,10 @@ export type IconButtonActionProps = IconButtonSharedProps &
   };
 export type IconButtonLinkProps = IconButtonSharedProps & {
   interaction?: 'action';
+  appearance?: 'default';
   size?: IconButtonSize;
+  shape?: 'square' | 'circle';
+  placement?: IconButtonPlacement;
   pressed?: never;
 } & IconButtonAccessibleName &
   NavigationOptions & { type?: never };
@@ -103,6 +129,7 @@ function IconButtonInner(
     loading = false,
     disabled = false,
     interaction = 'action',
+    appearance = 'default',
     printVisibility,
     placement = 'inline',
     ...props
@@ -110,6 +137,10 @@ function IconButtonInner(
   ref: ForwardedRef<HTMLButtonElement | HTMLAnchorElement>,
 ) {
   const { href, onClick, ...native } = props;
+  const mediaOverlay = appearance === 'media-overlay';
+  if (mediaOverlay && (href !== undefined || !['overlay-start-inside', 'overlay-end-inside'].includes(placement))) {
+    throw new TypeError('Media overlay commands require inside media placement');
+  }
   const toggle = interaction !== 'drag-handle' && href === undefined && typeof pressed === 'boolean';
   // A toggle's resting and selected appearance belongs to Core, not to the caller's tone choice.
   const tone = toggle ? 'neutral' : requestedTone;
@@ -134,8 +165,11 @@ function IconButtonInner(
   const rowSize = useActionRowSize();
   const inheritedContrast = useControlContrast();
   const toolbarDensity = useToolbarDensity();
-  const resolvedSize =
-    interaction === 'drag-handle' ? 'compact' : resolveActionSize(size ?? 'xs', rowSize, toolbarDensity);
+  const resolvedSize = mediaOverlay
+    ? 'compact'
+    : interaction === 'drag-handle'
+      ? 'compact'
+      : resolveActionSize(size ?? 'xs', rowSize, toolbarDensity);
   const prefetchHandlers = useNavigationPrefetchHandlers(
     {
       ...navigation,
@@ -147,14 +181,15 @@ function IconButtonInner(
   const shared = {
     ...controlNativeProps(native),
     className: classes.root,
-    'data-contrast': contrast ?? inheritedContrast,
+    'data-contrast': mediaOverlay ? 'standard' : (contrast ?? inheritedContrast),
     'aria-label': ariaLabel ?? label,
     'aria-labelledby': ariaLabelledBy,
     'aria-busy': loading || undefined,
     ...(toggle ? { 'aria-pressed': pressed } : interaction === 'action' ? { 'aria-pressed': undefined } : {}),
     'data-tone': tone,
     'data-emphasis': emphasis,
-    'data-shape': shape,
+    'data-shape': mediaOverlay ? 'square' : shape,
+    'data-appearance': mediaOverlay ? appearance : undefined,
     'data-control-size': resolvedSize,
     'data-geul-control-toolbar-density': toolbarDensity,
     'data-control-kind': 'icon',
@@ -170,7 +205,7 @@ function IconButtonInner(
   if (nameChannels.length !== 1 || typeof nameChannels[0] !== 'string' || !nameChannels[0].trim()) {
     throw new TypeError('Core IconButton requires exactly one nonempty label, aria-label, or aria-labelledby');
   }
-  const content = loading ? (
+  const glyph = loading ? (
     <ProgressBar
       isIndeterminate
       aria-label={ariaLabel ?? label}
@@ -186,6 +221,13 @@ function IconButtonInner(
         </span>
       ) : null}
     </>
+  );
+  const content = mediaOverlay ? (
+    <span className={classes.mediaOverlay} data-emphasis={emphasis}>
+      {glyph}
+    </span>
+  ) : (
+    glyph
   );
   if (href !== undefined) {
     return (

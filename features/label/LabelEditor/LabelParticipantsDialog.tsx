@@ -3,6 +3,7 @@ import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
+import { PageLoader } from '@/features/site/PageLoader';
 import { useState } from 'react';
 import { LabelParticipantRole } from '@echovisionlab/geul-proto/secure/label_pb.ts';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -61,27 +62,31 @@ export function LabelParticipantsDialog({
   const { data: candidates = [], isFetching } = candidatesQuery;
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey });
+  const tCommonNotifications = useTranslations('common.notifications');
+  const showMutationError = () => notifications.show({ message: tCommonNotifications('saveFailed'), tone: 'danger' });
   const setParticipant = useMutation({
+    onError: showMutationError,
     mutationFn: ({ memberId, role }: { memberId: string; role: LabelParticipantRoleName }) =>
       setLabelParticipantAction(labelId, memberId, toProtoRole(role)),
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      void invalidate();
+      await invalidate();
       setSearchQuery('');
       notifications.show({ message: t('notifications.updated'), tone: 'positive' });
     },
   });
   const removeParticipant = useMutation({
+    onError: showMutationError,
     mutationFn: (memberId: string) => removeLabelParticipantAction(labelId, memberId),
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
         return;
       }
-      void invalidate();
+      await invalidate();
       notifications.show({ message: t('notifications.removed'), tone: 'positive' });
     },
   });
@@ -108,6 +113,10 @@ export function LabelParticipantsDialog({
       canManageParticipants={canManageParticipants}
       canRemoveOwner={canRemoveOwner}
       loading={isLoading}
+      loadingSurface={<PageLoader placement="flow" />}
+      loadFailed={participantsQuery.isError}
+      changingMemberId={setParticipant.isPending ? setParticipant.variables?.memberId : undefined}
+      removingMemberId={removeParticipant.isPending ? removeParticipant.variables : undefined}
       searching={isFetching}
       mutating={setParticipant.isPending || removeParticipant.isPending}
       onSearchQueryChange={setSearchQuery}

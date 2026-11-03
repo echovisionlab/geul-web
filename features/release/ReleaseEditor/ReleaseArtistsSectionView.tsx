@@ -1,4 +1,5 @@
 'use client';
+import { InputValidationGlyph } from '@/components/core/Input/InputGlyphs';
 import { useReleaseEditorCanEdit } from './ReleaseEditorAccessContext';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
@@ -32,6 +33,9 @@ export interface ReleaseArtistOption {
   slug: string | null;
 }
 interface ReleaseArtistsSectionViewProps {
+  optionsLoading?: boolean;
+  pending?: boolean;
+  pendingRemovalId?: string;
   idPrefix?: string;
   artists: ReleaseArtistItem[];
   options: ReleaseArtistOption[];
@@ -42,9 +46,17 @@ interface ReleaseArtistsSectionViewProps {
       previousItemId?: string;
       nextItemId?: string;
     },
-  ) => void;
+  ) => void | Promise<boolean | void>;
 }
-export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange }: ReleaseArtistsSectionViewProps) {
+export function ReleaseArtistsSectionView({
+  idPrefix,
+  artists,
+  options,
+  onChange,
+  optionsLoading = false,
+  pending = false,
+  pendingRemovalId,
+}: ReleaseArtistsSectionViewProps) {
   const tModalActions = useTranslations('common.actions');
   const canEdit = useReleaseEditorCanEdit();
   const tCommon = useTranslations('common');
@@ -68,16 +80,16 @@ export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange
       nextItemId?: string;
     },
   ) => {
-    if (!canEdit) {
+    if (!canEdit || pending) {
       return;
     }
-    onChange(
+    return onChange(
       nextArtists.map((artist, index) => ({ ...artist, sort_order: index })),
       orderIntent,
     );
   };
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
-    if (!canEdit) {
+    if (!canEdit || pending) {
       return;
     }
     const reorder = reorderWithIntent(artists, active.id, over?.id, (artist) => artist.artist_id);
@@ -85,12 +97,12 @@ export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange
       normalizeAndChange(reorder.items, reorder.intent);
     }
   };
-  const handleAdd = () => {
+  const handleAdd = async () => {
     const option = options.find((candidate) => candidate.id === selectedArtistId);
     if (!option) {
       return;
     }
-    normalizeAndChange([
+    const saved = await normalizeAndChange([
       ...artists,
       {
         artist_id: option.id,
@@ -99,7 +111,9 @@ export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange
         sort_order: artists.length,
       },
     ]);
-    closeModal();
+    if (saved !== false) {
+      closeModal();
+    }
   };
   return (
     <SectionCard>
@@ -112,7 +126,7 @@ export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange
               emphasis="medium"
               size="xs"
               leftSection={<IconPlus size={14} />}
-              disabled={!canEdit}
+              disabled={!canEdit || pending}
               onClick={open}
             >
               {tCommon('actions.addItem', { item: tCommon('entities.artist') })}
@@ -138,6 +152,8 @@ export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange
                     <SortableArtistRow
                       key={artist.artist_id}
                       artist={artist}
+                      pending={pending}
+                      removing={pendingRemovalId === artist.artist_id}
                       onRemove={() => normalizeAndChange(artists.filter((item) => item.artist_id !== artist.artist_id))}
                     />
                   ))}
@@ -148,23 +164,37 @@ export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange
         )}
       </DsLayoutStack>
 
-      <ContentModal opened={opened} onClose={closeModal} title={t('modal.title')} closeLabel={tModalActions('close')}>
+      <ContentModal
+        loading={pending}
+        opened={opened}
+        onClose={closeModal}
+        title={t('modal.title')}
+        closeLabel={tModalActions('close')}
+      >
         <DsLayoutStack>
           <Select
-            disabled={!canEdit}
+            disabled={!canEdit || pending}
             id={idPrefix ? `${idPrefix}-select` : undefined}
             label={tCommon('entities.artist')}
             placeholder={t('placeholders.selectArtist')}
+            aria-busy={optionsLoading || undefined}
+            rightSection={optionsLoading ? <InputValidationGlyph status="checking" /> : undefined}
             data={availableOptions.map((option) => ({ value: option.id, label: option.name }))}
             value={selectedArtistId}
             onChange={setSelectedArtistId}
             searchable
           />
           <DialogActions>
-            <Button emphasis="low" onClick={closeModal}>
+            <Button emphasis="low" disabled={pending} onClick={closeModal}>
               {tCommon('actions.cancel')}
             </Button>
-            <Button tone="neutral" emphasis="strong" onClick={handleAdd} disabled={!canEdit || !selectedArtistId}>
+            <Button
+              tone="neutral"
+              emphasis="strong"
+              onClick={handleAdd}
+              loading={pending}
+              disabled={!canEdit || !selectedArtistId}
+            >
               {tCommon('actions.add')}
             </Button>
           </DialogActions>
@@ -173,7 +203,17 @@ export function ReleaseArtistsSectionView({ idPrefix, artists, options, onChange
     </SectionCard>
   );
 }
-export function SortableArtistRow({ artist, onRemove }: { artist: ReleaseArtistItem; onRemove: () => void }) {
+export function SortableArtistRow({
+  artist,
+  onRemove,
+  pending = false,
+  removing = false,
+}: {
+  artist: ReleaseArtistItem;
+  onRemove: () => void;
+  pending?: boolean;
+  removing?: boolean;
+}) {
   const artistNameId = useId();
   const canEdit = useReleaseEditorCanEdit();
   const tCommon = useTranslations('common');
@@ -190,7 +230,7 @@ export function SortableArtistRow({ artist, onRemove }: { artist: ReleaseArtistI
           interaction="drag-handle"
           draggable={false}
           {...sortable.handle}
-          disabled={!canEdit}
+          disabled={!canEdit || pending}
           aria-label={tSort('aria.reorder', { label: artist.artist_name })}
         >
           <IconGripVertical aria-hidden />
@@ -208,7 +248,8 @@ export function SortableArtistRow({ artist, onRemove }: { artist: ReleaseArtistI
           size="compact"
           aria-label={tCommon('actions.remove')}
           aria-describedby={artistNameId}
-          disabled={!canEdit}
+          disabled={!canEdit || pending}
+          loading={removing}
           onClick={onRemove}
         >
           <IconX size={14} />

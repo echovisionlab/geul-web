@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
+import { expect, within } from 'storybook/test';
 import { PageLoaderView } from './PageLoaderView';
 
 const meta: Meta<typeof PageLoaderView> = {
@@ -9,30 +10,80 @@ const meta: Meta<typeof PageLoaderView> = {
     docs: {
       description: {
         component:
-          'A quiet page-sized loading region with an optional configured image and Text xs message. The status name remains available when no image or distinct message exists. Message text has no card/background. Site PageLoader selects the first settings.loader_urls entry consistently across server markup, hydration and navigation, resolves managed URLs through the CDN helper, and preserves GIF/SVG delivery without image optimization. The examples use local image fixtures; authored image motion and backend settings persistence require separate review.',
+          'A centered configured image with compact Text xs phase text. The required nonblank message supplies visible text, including when the image is absent or fails. imageAlt names the image and status independently. Fill placement preserves the absolute positioned-parent contract; flow placement reserves its own height in a section. Site PageLoader owns translation, deterministic first-image selection, CDN resolution and unoptimized GIF/SVG delivery. Local fixtures are static; set imageSrc and imageUnoptimized in Controls to review an observed public GIF.',
       },
     },
   },
+  decorators: [
+    (Story, { args }) => (
+      <div style={{ position: 'relative', height: args.placement === 'flow' ? 'auto' : 320 }}>
+        <Story />
+      </div>
+    ),
+  ],
+  argTypes: {
+    placement: { control: 'radio', options: ['fill', 'flow'] },
+    imageSrc: { control: 'text' },
+    imageUnoptimized: { control: 'boolean' },
+  },
   args: {
-    height: 240,
-    imageAlt: 'Loading',
+    imageAlt: 'Loading page',
+    message: 'Loading',
+    imageUnoptimized: true,
   },
 };
 
 export default meta;
 type Story = StoryObj<typeof PageLoaderView>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('status', { name: 'Loading page' })).toHaveTextContent(/^Loading$/);
+  },
+};
 
 export const WithMessage: Story = {
-  args: {
-    message: 'Loading the latest content…',
-  },
+  args: { message: 'Loading the latest content…' },
 };
 
 export const WithResolvedImage: Story = {
   args: {
     imageSrc: '/storybook/media/video-poster.jpg',
     message: 'Preparing your workspace…',
+  },
+};
+
+export const FailedImage: Story = {
+  args: { imageSrc: '/storybook/media/missing-loader.gif' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('status')).toHaveTextContent('Loading');
+  },
+};
+
+export const FlowRegion: Story = {
+  args: {
+    placement: 'flow',
+    minHeight: 200,
+    imageSrc: '/storybook/media/video-poster.jpg',
+    message: 'Loading this section…',
+  },
+  render: (args) => (
+    <section>
+      <p>Section content before the wait</p>
+      <PageLoaderView {...args} />
+      <p>Section content after the wait</p>
+    </section>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const status = canvas.getByRole('status');
+    const before = canvas.getByText('Section content before the wait').getBoundingClientRect();
+    const after = canvas.getByText('Section content after the wait').getBoundingClientRect();
+    const region = status.getBoundingClientRect();
+    await expect(getComputedStyle(status).position).toBe('relative');
+    await expect(region.height).toBeGreaterThanOrEqual(200);
+    await expect(region.top).toBeGreaterThanOrEqual(before.bottom);
+    await expect(after.top).toBeGreaterThanOrEqual(region.bottom);
   },
 };

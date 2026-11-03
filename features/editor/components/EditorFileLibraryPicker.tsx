@@ -1,4 +1,5 @@
 'use client';
+import { PageLoader } from '@/features/site/PageLoader';
 import { useFileBrowserViewSettings } from '@/features/file-manager/useFileBrowserViewSettings';
 import { fileBrowserViewSettingsLabels } from '@/features/file-manager/ui/file-browser-view-settings';
 
@@ -170,6 +171,7 @@ export function EditorFileLibraryPicker({
       }}
       selectedFiles={selectedFiles}
       allowMultiple={allowMultiple}
+      loadingSurface={<PageLoader placement="flow" />}
       loading={loading}
       loadingMore={loadingMore}
       hasMore={Boolean(nextPageToken)}

@@ -16,7 +16,7 @@ import {
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { CampaignTargetMode } from '@echovisionlab/geul-proto/secure/campaign_pb.ts';
 import type { CampaignRecipientScope as CampaignRecipientScopeValue } from '@echovisionlab/geul-common/collaboration/campaign';
@@ -202,7 +202,11 @@ function useCampaignEditPageModel() {
     queryFn: listActiveSegmentsAction,
   });
 
-  const { data: layouts, isError: layoutsLoadError } = useQuery({
+  const {
+    data: layouts,
+    isError: layoutsLoadError,
+    isLoading: layoutsLoading,
+  } = useQuery({
     queryKey: ['emailLayouts', 'simple'],
     queryFn: listEmailLayoutsSimple,
   });
@@ -459,15 +463,28 @@ function useCampaignEditPageModel() {
     segments ?? [],
   );
 
+  const [preparingDelivery, setPreparingDelivery] = useState({ test: false, send: false, schedule: false });
+  const deliveryPreparationRef = useRef({ test: false, send: false, schedule: false });
+
   const handleSendTest = useCallback(() => {
     if (!testEmail) {
       return;
     }
+    if (deliveryPreparationRef.current.test) {
+      return;
+    }
+    deliveryPreparationRef.current.test = true;
+    setPreparingDelivery((current) => ({ ...current, test: true }));
     void (async () => {
-      if (!(await persistEditableCampaignBeforeDelivery())) {
-        return;
+      try {
+        if (!(await persistEditableCampaignBeforeDelivery())) {
+          return;
+        }
+        sendTest.mutate({ email: testEmail, locale: testLocale });
+      } finally {
+        deliveryPreparationRef.current.test = false;
+        setPreparingDelivery((current) => ({ ...current, test: false }));
       }
-      sendTest.mutate({ email: testEmail, locale: testLocale });
     })();
   }, [persistEditableCampaignBeforeDelivery, sendTest, testEmail, testLocale]);
 
@@ -479,14 +496,24 @@ function useCampaignEditPageModel() {
       notifications.show({ message: t('target.audienceRequired'), tone: 'danger' });
       return;
     }
+    if (deliveryPreparationRef.current.send) {
+      return;
+    }
+    deliveryPreparationRef.current.send = true;
+    setPreparingDelivery((current) => ({ ...current, send: true }));
     void (async () => {
-      if (!(await persistEditableCampaignBeforeDelivery())) {
-        return;
+      try {
+        if (!(await persistEditableCampaignBeforeDelivery())) {
+          return;
+        }
+        if (configuration.hasPending()) {
+          return;
+        }
+        sendCampaign.mutate(fields.recipientScope);
+      } finally {
+        deliveryPreparationRef.current.send = false;
+        setPreparingDelivery((current) => ({ ...current, send: false }));
       }
-      if (configuration.hasPending()) {
-        return;
-      }
-      sendCampaign.mutate(fields.recipientScope);
     })();
   }, [
     configuration,
@@ -508,17 +535,27 @@ function useCampaignEditPageModel() {
       }
       return;
     }
+    if (deliveryPreparationRef.current.schedule) {
+      return;
+    }
+    deliveryPreparationRef.current.schedule = true;
+    setPreparingDelivery((current) => ({ ...current, schedule: true }));
     void (async () => {
-      if (!(await persistEditableCampaignBeforeDelivery())) {
-        return;
+      try {
+        if (!(await persistEditableCampaignBeforeDelivery())) {
+          return;
+        }
+        if (configuration.hasPending()) {
+          return;
+        }
+        scheduleCampaign.mutate({
+          scheduledAt,
+          recipientScope: fields.recipientScope,
+        });
+      } finally {
+        deliveryPreparationRef.current.schedule = false;
+        setPreparingDelivery((current) => ({ ...current, schedule: false }));
       }
-      if (configuration.hasPending()) {
-        return;
-      }
-      scheduleCampaign.mutate({
-        scheduledAt,
-        recipientScope: fields.recipientScope,
-      });
     })();
   }, [
     configuration,
@@ -585,6 +622,9 @@ function useCampaignEditPageModel() {
 
   return {
     kind: 'ready' as const,
+    localeErrorSurface: activeEditLocale.errorQuery ? (
+      <QueryErrorAlert queries={[activeEditLocale.errorQuery]} />
+    ) : null,
     currentProvider,
     campaignId,
     protocol,
@@ -604,6 +644,7 @@ function useCampaignEditPageModel() {
     openTestModal,
     canSchedule,
     hasPendingCampaignConfiguration,
+    preparingDelivery,
     currentSubject,
     deliveryTargetComplete,
     openScheduleModal,
@@ -625,6 +666,7 @@ function useCampaignEditPageModel() {
     layouts,
     handleLayoutChange,
     layoutsLoadError,
+    layoutsLoading,
     tStates,
     handleRecipientScopeChange,
     preview,
@@ -672,7 +714,9 @@ export type CampaignEditPageViewModel =
       | 'scheduleCampaign'
       | 'preview'
       | 'editorSession'
+      | 'localeErrorSurface'
     > & {
+      localeErrorSurface: import('react').ReactNode;
       campaignQuery: import('react').ComponentProps<typeof QueryErrorAlert>['queries'][number];
       campaignName:
         | Pick<NonNullable<CampaignEditPageReadyModel['campaignName']>, 'name' | 'changeName' | 'pending'>
@@ -715,6 +759,7 @@ export function CampaignEditPageView({ model }: { model: CampaignEditPageViewMod
     return model.content;
   }
   const {
+    localeErrorSurface,
     currentProvider,
     campaignId,
     protocol,
@@ -734,6 +779,7 @@ export function CampaignEditPageView({ model }: { model: CampaignEditPageViewMod
     openTestModal,
     canSchedule,
     hasPendingCampaignConfiguration,
+    preparingDelivery,
     currentSubject,
     deliveryTargetComplete,
     openScheduleModal,
@@ -755,6 +801,7 @@ export function CampaignEditPageView({ model }: { model: CampaignEditPageViewMod
     layouts,
     handleLayoutChange,
     layoutsLoadError,
+    layoutsLoading,
     tStates,
     handleRecipientScopeChange,
     preview,
@@ -793,6 +840,7 @@ export function CampaignEditPageView({ model }: { model: CampaignEditPageViewMod
       blockRoomProtocol={protocol}
     >
       <QueryErrorAlert queries={[campaignQuery]} />
+      {localeErrorSurface}
       <DsLayoutStack fill="block" gap="md">
         <EditorHeader
           title={campaignName.name}
@@ -886,6 +934,8 @@ export function CampaignEditPageView({ model }: { model: CampaignEditPageViewMod
                 value={activeEditLocale.activeLocale}
                 options={activeEditLocale.localeOptions}
                 sourceLocale={activeEditLocale.sourceLocale}
+                loading={activeEditLocale.localeChanging}
+                disabled={activeEditLocale.isLoading}
                 onChange={handleActiveLocaleChange}
               />
             </div>
@@ -904,7 +954,8 @@ export function CampaignEditPageView({ model }: { model: CampaignEditPageViewMod
               </div>
               <div style={{ width: 200 }}>
                 <Select
-                  placeholder={t('layout.none')}
+                  placeholder={layoutsLoading ? tStates('loading') : t('layout.none')}
+                  aria-busy={layoutsLoading}
                   data={
                     layouts?.map((layout) => ({
                       value: layout.id,
@@ -915,7 +966,7 @@ export function CampaignEditPageView({ model }: { model: CampaignEditPageViewMod
                   onChange={handleLayoutChange}
                   clearable
                   error={layoutsLoadError ? tStates('notAvailable') : undefined}
-                  disabled={!canMutate || layoutsLoadError}
+                  disabled={!canMutate || layoutsLoading || layoutsLoadError}
                 />
               </div>
               <div style={{ width: 260 }}>
@@ -959,21 +1010,24 @@ export function CampaignEditPageView({ model }: { model: CampaignEditPageViewMod
                 onContentChange={preview.editorContentChanged}
               />
             ) : (
-              <DsLayoutInset space="md">
-                <DsLayoutInset space="none">
-                  <SupportingText tone="secondary">{tStates('loading')}</SupportingText>
-                </DsLayoutInset>
-              </DsLayoutInset>
+              <PageLoader placement="flow" message={tStates('connectingEditor')} />
             ))}
 
           {preview.showPreview && (
-            <DsLayoutInset space="none" flexible>
+            <DsLayoutInset space="none" flexible aria-busy={preview.query.isFetching}>
               <QueryErrorAlert queries={[preview.query]} />
+              {preview.previewSrcDoc && preview.query.isFetching ? (
+                <SupportingText role="status" tone="secondary">
+                  {tStates('loadingPreview')}
+                </SupportingText>
+              ) : null}
               {preview.previewSrcDoc ? (
                 <DsSectionCard padding="none" withBorder appearance="paper" clip>
                   <EmailPreviewFrame srcDoc={preview.previewSrcDoc} title={t('preview.frameTitle')} />
                 </DsSectionCard>
-              ) : (
+              ) : preview.query.isFetching ? (
+                <PageLoader placement="flow" message={tStates('loadingPreview')} />
+              ) : preview.query.isError ? null : (
                 <DsLayoutInset block="xl">
                   <SupportingText tone="secondary" align="center">
                     {t('preview.empty')}
@@ -1010,7 +1064,7 @@ export function CampaignEditPageView({ model }: { model: CampaignEditPageViewMod
               : supportedLocaleOptions,
             sourceLocale: activeEditLocale.sourceLocale,
             selectedLocale: activePreviewLocale,
-            pending: sendTest.isPending,
+            pending: sendTest.isPending || preparingDelivery.test,
             labels: {
               title: tActions('sendTestEmail'),
               description: t('testModal.description'),
@@ -1026,7 +1080,7 @@ export function CampaignEditPageView({ model }: { model: CampaignEditPageViewMod
           sendDialog={{
             opened: sendModalOpened,
             includesUnsubscribedUsers: fields.recipientScope === 'ALL_MATCHING_USERS',
-            pending: sendCampaign.isPending || hasPendingCampaignConfiguration,
+            pending: sendCampaign.isPending || preparingDelivery.send || hasPendingCampaignConfiguration,
             labels: {
               title: t('actions.sendCampaign'),
               warning: t('sendModal.warning', { audience: selectedSegmentName }),
@@ -1044,7 +1098,7 @@ export function CampaignEditPageView({ model }: { model: CampaignEditPageViewMod
             minDate: dateToDateTimeValue(new Date()),
             audience: selectedSegmentName,
             includesUnsubscribedUsers: fields.recipientScope === 'ALL_MATCHING_USERS',
-            pending: scheduleCampaign.isPending || hasPendingCampaignConfiguration,
+            pending: scheduleCampaign.isPending || preparingDelivery.schedule || hasPendingCampaignConfiguration,
             labels: {
               title: t('actions.scheduleCampaign'),
               description: t('scheduleModal.description'),

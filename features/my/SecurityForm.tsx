@@ -3,7 +3,7 @@ import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { IconAlertTriangle } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
@@ -218,6 +218,7 @@ export function SecurityForm({
   const [revokingSessionId, setRevokingSessionId] = useState<string | null>(null);
   const [revokeOthersLoading, setRevokeOthersLoading] = useState(false);
 
+  const sessionMutation = useRef(false);
   const currentSessionId = sessions.find((item) => item.current)?.id;
   const connectedProviderIds = connectedProviders.map((p) => p.provider);
   const availableProviders = ALL_PROVIDERS.filter((p) => !connectedProviderIds.includes(p));
@@ -240,6 +241,9 @@ export function SecurityForm({
 
   // Connected Accounts handlers
   const handleLinkProvider = (provider: OidcProvider) => {
+    if (linkingProvider || unlinkingProvider) {
+      return;
+    }
     setLinkingProvider(provider);
     sessionStorage.removeItem(PENDING_UNLINK_PROVIDER_KEY);
     sessionStorage.setItem(PENDING_LINK_PROVIDER_KEY, provider);
@@ -249,6 +253,9 @@ export function SecurityForm({
   };
 
   const handleUnlinkProvider = (provider: OidcProvider) => {
+    if (linkingProvider || unlinkingProvider) {
+      return;
+    }
     const blockedReason = providerUnlinkBlockedReason(provider);
     if (blockedReason) {
       notifications.show({
@@ -271,6 +278,10 @@ export function SecurityForm({
 
   const handleRevokeSession = useCallback(
     async (sessionId: string) => {
+      if (sessionMutation.current) {
+        return;
+      }
+      sessionMutation.current = true;
       setRevokingSessionId(sessionId);
       try {
         const result = await bindings.revokeMySessionAction(sessionId);
@@ -296,6 +307,7 @@ export function SecurityForm({
           tone: 'danger',
         });
       } finally {
+        sessionMutation.current = false;
         setRevokingSessionId(null);
       }
     },
@@ -303,6 +315,10 @@ export function SecurityForm({
   );
 
   const handleRevokeOtherSessions = useCallback(async () => {
+    if (sessionMutation.current) {
+      return;
+    }
+    sessionMutation.current = true;
     setRevokeOthersLoading(true);
     try {
       const result = await bindings.revokeMyOtherSessionsAction();
@@ -328,6 +344,7 @@ export function SecurityForm({
         tone: 'danger',
       });
     } finally {
+      sessionMutation.current = false;
       setRevokeOthersLoading(false);
     }
   }, [currentSessionId, router, subjectId, t, tCommonLabels]);
@@ -438,6 +455,7 @@ export function SecurityForm({
       return;
     }
 
+    let active = true;
     const continueOidcLink = async () => {
       setLinkingProvider(provider);
 
@@ -446,11 +464,17 @@ export function SecurityForm({
           credentials: 'include',
         });
 
+        if (!active) {
+          return;
+        }
         if (!flowRes.ok) {
           throw new Error(t('providerErrors.connectFailed'));
         }
 
         const flow = (await flowRes.json()) as SettingsFlow;
+        if (!active) {
+          return;
+        }
         const accountExistsMessage = flow.ui?.messages?.find((message) => message.id === ACCOUNT_EXISTS_ERROR_ID);
         const firstError = accountExistsMessage ?? flow.ui?.messages?.find((message) => message.type === 'error');
 
@@ -466,6 +490,9 @@ export function SecurityForm({
         }
 
         const connectedResult = await bindings.getConnectedProvidersAction();
+        if (!active) {
+          return;
+        }
         if (!connectedResult.error && connectedResult.providers.some((connected) => connected.provider === provider)) {
           applySecurityResult(connectedResult);
           notifications.show({
@@ -491,6 +518,9 @@ export function SecurityForm({
         sessionStorage.setItem(attemptKey, '1');
         submitOidcSettingsForm(flowId, provider, 'link', getSettingsFlowCsrfToken(flow));
       } catch {
+        if (!active) {
+          return;
+        }
         notifications.show({
           title: tCommonLabels('error'),
           message: t('providerErrors.connectFailed'),
@@ -499,12 +529,17 @@ export function SecurityForm({
         clearFlowState(attemptKey, handledKey, PENDING_LINK_PROVIDER_KEY);
         router.replace('/my/security');
       } finally {
-        setLinkingProvider(null);
+        if (active) {
+          setLinkingProvider(null);
+        }
       }
     };
 
     void continueOidcLink();
-  }, [applySecurityResult, flowId, pendingLinkProvider, router, t, tCommonLabels, tCommonProviders]);
+    return () => {
+      active = false;
+    };
+  }, [applySecurityResult, flowId, pendingLinkProvider, subjectId, router, t, tCommonLabels, tCommonProviders]);
 
   useEffect(() => {
     if (!flowId) {
@@ -530,6 +565,7 @@ export function SecurityForm({
       return;
     }
 
+    let active = true;
     const continueOidcUnlink = async () => {
       setUnlinkingProvider(provider);
 
@@ -538,6 +574,9 @@ export function SecurityForm({
           credentials: 'include',
         });
 
+        if (!active) {
+          return;
+        }
         if (!flowRes.ok) {
           throw new Error(
             t('providerErrors.disconnectFailed', {
@@ -547,6 +586,9 @@ export function SecurityForm({
         }
 
         const flow = (await flowRes.json()) as SettingsFlow;
+        if (!active) {
+          return;
+        }
         const firstError = flow.ui?.messages?.find((message) => message.type === 'error');
 
         if (firstError) {
@@ -561,6 +603,9 @@ export function SecurityForm({
         }
 
         const connectedResult = await bindings.getConnectedProvidersAction();
+        if (!active) {
+          return;
+        }
         if (!connectedResult.error) {
           applySecurityResult(connectedResult);
         }
@@ -590,6 +635,9 @@ export function SecurityForm({
         sessionStorage.setItem(attemptKey, '1');
         submitOidcSettingsForm(flowId, provider, 'unlink', getSettingsFlowCsrfToken(flow));
       } catch {
+        if (!active) {
+          return;
+        }
         notifications.show({
           title: tCommonLabels('error'),
           message: t('providerErrors.disconnectFailed', {
@@ -600,15 +648,21 @@ export function SecurityForm({
         clearFlowState(attemptKey, handledKey, PENDING_UNLINK_PROVIDER_KEY);
         router.replace('/my/security');
       } finally {
-        setUnlinkingProvider(null);
+        if (active) {
+          setUnlinkingProvider(null);
+        }
       }
     };
 
     void continueOidcUnlink();
+    return () => {
+      active = false;
+    };
   }, [
     applySecurityResult,
     flowId,
     pendingUnlinkProvider,
+    subjectId,
     providerUnlinkBlockedReason,
     router,
     t,
@@ -724,6 +778,7 @@ export function SecurityForm({
       {availableMethods.accountDeletion !== false ? (
         <ContentModal
           opened={deleteModalOpened}
+          loading={deleteLoading}
           onClose={closeDeleteModal}
           title={tCommonActions('requestAccountDeletion')}
           centered
@@ -737,7 +792,7 @@ export function SecurityForm({
                 </Alert>
                 <SupportingText tone="secondary">{t('dangerZone.requestedHelper')}</SupportingText>
                 <DialogActions>
-                  <Button tone="neutral" emphasis="medium" onClick={closeDeleteModal}>
+                  <Button tone="neutral" emphasis="medium" onClick={closeDeleteModal} disabled={deleteLoading}>
                     {tCommonActions('close')}
                   </Button>
                 </DialogActions>
@@ -760,7 +815,7 @@ export function SecurityForm({
                 </Alert>
 
                 <DialogActions>
-                  <Button tone="neutral" emphasis="medium" onClick={closeDeleteModal}>
+                  <Button tone="neutral" emphasis="medium" onClick={closeDeleteModal} disabled={deleteLoading}>
                     {tCommonActions('cancel')}
                   </Button>
                   <Button

@@ -1,17 +1,25 @@
 'use client';
 
-import { Fragment, type MouseEvent, type ReactNode } from 'react';
+import { Fragment, useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react';
 import { IconDots } from '@tabler/icons-react';
 import { DropdownMenu } from '../DropdownMenu';
 import { IconButton } from '../IconButton';
 import type { ControlTone } from '../control-style';
+import type { ClosedVisualProps } from '../visual-contract';
 
-export interface TableRowMenuItem {
+function reportUnhandledFailure(stage: 'action' | 'error handler', error: unknown) {
+  // eslint-disable-next-line no-console -- Keep failures observable when the caller provides no domain feedback.
+  console.error(`TableRowMenu ${stage} failed`, error);
+}
+
+export interface TableRowMenuItem extends ClosedVisualProps {
   /** Display label and aria-label for the menu item */
   label: string;
   icon?: ReactNode;
-  /** Click handler - required if href is not provided */
-  onClick?: () => void;
+  /** Return the whole action promise to show trigger progress and prevent duplicate row commands. */
+  onClick?: () => void | Promise<unknown>;
+  /** Handles rejected actions, including domain notifications. Unhandled failures are logged. */
+  onError?: (error: unknown) => void;
   /** Link href - if provided, item will be rendered as a Link */
   href?: string;
   /** Core action tone; `danger` marks the destructive group, separated by a divider. */
@@ -19,7 +27,7 @@ export interface TableRowMenuItem {
   disabled?: boolean;
 }
 
-export interface TableRowMenuProps {
+export interface TableRowMenuProps extends ClosedVisualProps {
   /** Menu items */
   items: TableRowMenuItem[];
   /** Required aria-label for the menu trigger button */
@@ -27,6 +35,58 @@ export interface TableRowMenuProps {
 }
 
 export function TableRowMenu({ items, 'aria-label': ariaLabel }: TableRowMenuProps) {
+  const [pending, setPending] = useState(false);
+  const running = useRef(false);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
+  const reportError = (item: TableRowMenuItem, error: unknown) => {
+    if (!item.onError) {
+      reportUnhandledFailure('action', error);
+      return;
+    }
+    try {
+      void Promise.resolve(item.onError(error)).catch((handlerError: unknown) => {
+        reportUnhandledFailure('error handler', handlerError);
+      });
+    } catch (handlerError) {
+      reportUnhandledFailure('error handler', handlerError);
+    }
+  };
+  const runAction = (item: TableRowMenuItem) => {
+    if (running.current || item.disabled) {
+      return;
+    }
+    try {
+      const result = item.onClick?.();
+      if (!result || typeof result.then !== 'function') {
+        return;
+      }
+      running.current = true;
+      setPending(true);
+      const finish = () => {
+        running.current = false;
+        if (mounted.current) {
+          setPending(false);
+        }
+      };
+      void Promise.resolve(result).then(
+        () => finish(),
+        (error: unknown) => {
+          finish();
+          reportError(item, error);
+        },
+      );
+    } catch (error) {
+      reportError(item, error);
+    }
+  };
+
   if (items.length === 0) {
     return null;
   }
@@ -41,7 +101,14 @@ export function TableRowMenu({ items, 'aria-label': ariaLabel }: TableRowMenuPro
   return (
     <DropdownMenu>
       <DropdownMenu.Target>
-        <IconButton emphasis="low" aria-label={ariaLabel} onMouseDown={stopRowClick} onClick={stopRowClick}>
+        <IconButton
+          emphasis="low"
+          aria-label={ariaLabel}
+          loading={pending}
+          onClickCapture={pending ? stopRowClick : undefined}
+          onMouseDown={stopRowClick}
+          onClick={stopRowClick}
+        >
           <IconDots />
         </IconButton>
       </DropdownMenu.Target>
@@ -53,9 +120,9 @@ export function TableRowMenu({ items, 'aria-label': ariaLabel }: TableRowMenuPro
               <DropdownMenu.Item
                 href={item.href}
                 icon={item.icon}
-                onClick={item.onClick}
+                onClick={() => runAction(item)}
                 tone={item.tone}
-                disabled={item.disabled}
+                disabled={item.disabled || pending}
                 aria-label={item.label}
               >
                 {item.label}
@@ -63,9 +130,9 @@ export function TableRowMenu({ items, 'aria-label': ariaLabel }: TableRowMenuPro
             ) : (
               <DropdownMenu.Item
                 icon={item.icon}
-                onClick={item.onClick}
+                onClick={() => runAction(item)}
                 tone={item.tone}
-                disabled={item.disabled}
+                disabled={item.disabled || pending}
                 aria-label={item.label}
               >
                 {item.label}

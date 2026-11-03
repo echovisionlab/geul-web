@@ -1,4 +1,6 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { QueryLoadingSurface } from '../QueryLoadingSurface';
 
 import {
   LayoutInline as DsLayoutInline,
@@ -86,10 +88,11 @@ function WorkMapSettingsForm({ props, updateProps }: WorkMapSettingsFormProps) {
     hide: tPageEditor('blockEditor.options.labelMode.hide'),
   });
 
-  const { data: themes } = useQuery({
+  const themesQuery = useQuery({
     queryKey: ['mapThemes', 'list'],
     queryFn: () => listMapThemesAction(),
   });
+  const { data: themes } = themesQuery;
 
   const workTypeOptions = WORK_TYPES.map((type) => ({
     value: type,
@@ -125,6 +128,8 @@ function WorkMapSettingsForm({ props, updateProps }: WorkMapSettingsFormProps) {
 
   return (
     <DsLayoutStack gap="lg" data-page-block-editor="work-map">
+      <QueryLoadingSurface queries={[themesQuery]} />
+      <QueryErrorAlert queries={[themesQuery]} />
       <DsLayoutInset blockEnd="md">
         <DsLayoutInline gap="xs">
           <IconMapPin size={18} />

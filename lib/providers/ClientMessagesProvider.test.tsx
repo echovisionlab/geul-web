@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { act, type ReactNode } from 'react';
-import { render, screen, type RenderResult } from '@/test/render';
+import { fireEvent, render, screen, type RenderResult } from '@/test/render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -29,13 +29,22 @@ vi.mock('next/image', () => ({
     alt,
     unoptimized,
     preload,
+    onError,
   }: {
     src: string;
     alt: string;
     unoptimized?: boolean;
     preload?: boolean;
+    onError?: () => void;
   }) => (
-    <img src={src} alt={alt} loading="lazy" data-unoptimized={String(unoptimized)} data-preload={String(preload)} />
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      data-unoptimized={String(unoptimized)}
+      data-preload={String(preload)}
+      onError={onError}
+    />
   ),
 }));
 vi.mock('@/lib/i18n/client-message-loaders', () => ({
@@ -116,12 +125,12 @@ afterEach(() => {
   view?.unmount();
 });
 describe('ClientMessagesProvider', () => {
-  it('uses a quiet accessible pending surface for empty configuration and ignores a cancelled catalogue load', async () => {
+  it('shows localized pending text without an image and ignores a cancelled catalogue load', async () => {
     const pending = deferred<ClientMessages>();
     mocks.pathname = '/login';
     mocks.loadMessages.mockReturnValue(pending.promise);
     await act(async () => renderProvider());
-    expect(screen.queryByRole('status')?.textContent).toBe('');
+    expect(screen.getByRole('status')).toHaveTextContent(enMessages.common.states.loading);
     expect(document.documentElement).toHaveAttribute('data-geul-theme', 'dark');
     expect(screen.queryByRole('img')).toBeNull();
 
@@ -133,6 +142,25 @@ describe('ClientMessagesProvider', () => {
     });
     expect(screen.getByTestId('public-page')).toBeInTheDocument();
     expect(screen.queryByRole('status')).toBeNull();
+  });
+  it('keeps catalogue text visible after image failure and accepts a new root-supplied source', async () => {
+    const pending = deferred<ClientMessages>();
+    mocks.pathname = '/login';
+    mocks.loadMessages.mockReturnValue(pending.promise);
+    renderProvider({ loaderImageSrc: '/loader.gif', loaderImageUnoptimized: true });
+    expect(screen.getByRole('img')).toHaveAttribute('data-unoptimized', 'true');
+    expect(screen.getByRole('status')).toHaveTextContent(enMessages.common.states.loading);
+    fireEvent.error(screen.getByRole('img'));
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent(enMessages.common.states.loading);
+    renderProvider({ loaderImageSrc: '/replacement.gif', loaderImageUnoptimized: true });
+    expect(screen.getByRole('img')).toHaveAttribute('src', '/replacement.gif');
+    await act(async () => {
+      pending.resolve(enMessages);
+      await pending.promise;
+    });
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.getByTestId('auth-title')).toHaveTextContent(enMessages.auth.login.title);
   });
   it('loads the full catalogue before showing private messages after public-to-login navigation', async () => {
     const enLoad = deferred<ClientMessages>();
@@ -227,17 +255,17 @@ describe('ClientMessagesProvider', () => {
     await act(async () =>
       renderProvider({
         locale: 'ko',
-        messages: publicMessages,
+        messages: selectClientMessages(koMessages, { pathWithSearch: '/' }),
       }),
     );
     expect(mocks.loadMessages).toHaveBeenCalledWith('ko');
-    expect(screen.getByRole('status')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent(koMessages.common.states.loading);
     expect(screen.queryByTestId('auth-title')).toBeNull();
     await act(async () => {
       enLoad.resolve(enMessages);
       await enLoad.promise;
     });
-    expect(screen.getByRole('status')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent(koMessages.common.states.loading);
     expect(document.body.textContent).not.toContain('Sign In');
     await act(async () => {
       koLoad.resolve(koMessages);
@@ -249,8 +277,9 @@ describe('ClientMessagesProvider', () => {
     'keeps failed-route children hidden and offers a localized catalogue retry (%s)',
     async (locale) => {
       const expectedMessages = locale === 'ko' ? koMessages : enMessages;
+      const retryLoad = deferred<ClientMessages>();
       mocks.pathname = '/login';
-      mocks.loadMessages.mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce(expectedMessages);
+      mocks.loadMessages.mockRejectedValueOnce(new Error('offline')).mockReturnValueOnce(retryLoad.promise);
       await act(async () =>
         renderProvider({
           locale,
@@ -269,6 +298,13 @@ describe('ClientMessagesProvider', () => {
       expect(screen.queryByTestId('auth-title')).toBeNull();
       await view!.user.click(screen.getByRole('button', { name: expectedMessages.common.actions.tryAgain }));
       expect(mocks.loadMessages).toHaveBeenCalledTimes(2);
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+      expect(screen.getByRole('status')).toHaveTextContent(expectedMessages.common.states.loading);
+      expect(screen.queryByTestId('auth-title')).not.toBeInTheDocument();
+      await act(async () => {
+        retryLoad.resolve(expectedMessages);
+        await retryLoad.promise;
+      });
       expect(screen.queryByTestId('auth-title')?.textContent).toBe(expectedMessages.auth.login.title);
     },
   );

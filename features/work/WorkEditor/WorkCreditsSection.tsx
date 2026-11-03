@@ -25,7 +25,7 @@ import { IconPlus, IconUserPlus } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
-import { Avatar, Separator as Divider, Spinner as Loader } from '@/components/core/Display';
+import { Avatar, Separator as Divider } from '@/components/core/Display';
 import { notifications } from '@/components/core/Notification';
 import { Button } from '@/components/core/Button';
 import { Select, TextInput, SegmentedControl } from '@/components/core/Input';
@@ -58,7 +58,7 @@ import {
   type CreditDragData,
   type CreditDropData,
 } from './credits/credit-order-utils';
-import { CreditGroupHeaderSkeleton, CreditSkeleton } from './credits/CreditSkeletons';
+import { PageLoader } from '@/features/site/PageLoader';
 import { SortableCreditGroupHeader } from './credits/SortableCreditGroupHeader';
 import { SortableCreditRow } from './credits/SortableCreditRow';
 
@@ -237,17 +237,20 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
     creditConfiguration.captureOwnChange,
   );
 
-  const { isLoading } = useQuery({
+  const creditsQuery = useQuery({
     queryKey: creditsQueryKey,
     queryFn: async () => {
       const read = creditConfiguration.beginRead();
       const result = await getWorkGroupsWithCreditsAction(workId);
-      if (!result.error) {
-        creditConfiguration.adoptRead(read, { data: result, order: result.order, groupOverrides: {} });
+      if (result.error) {
+        throw new Error(tCommonMessages('failedToLoad'));
       }
+      creditConfiguration.adoptRead(read, { data: result, order: result.order, groupOverrides: {} });
       return result;
     },
   });
+
+  const { isLoading } = creditsQuery;
 
   // Transform API response to match expected types
   const groups = useMemo(() => {
@@ -605,13 +608,11 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
     ...groups.map((g) => ({ value: g.id, label: g.name })),
   ];
 
-  const showSkeleton = isLoading && creditOrder.length > 0;
-  const showEmptyState = !isLoading && groups.length === 0 && ungrouped.length === 0;
-  const showLoadingSpinner = isLoading && creditOrder.length === 0;
+  const showEmptyState = !isLoading && !creditsQuery.isError && groups.length === 0 && ungrouped.length === 0;
 
   return (
     <SectionCard withBorder padding="md">
-      <QueryErrorAlert queries={[userResultsQuery, artistResultsQuery]} />
+      <QueryErrorAlert queries={[creditsQuery, userResultsQuery, artistResultsQuery]} />
       <DsLayoutInset blockEnd="sm">
         <DsLayoutInline justify="between">
           <DsText size="sm" weight="medium">
@@ -768,25 +769,7 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
         </DsSectionCard>
       )}
 
-      {showLoadingSpinner && (
-        <DsLayoutInset block="md">
-          <DsLayoutInline justify="center">
-            <Loader size="sm" />
-          </DsLayoutInline>
-        </DsLayoutInset>
-      )}
-
-      {showSkeleton && (
-        <DsLayoutStack gap="none">
-          {creditOrder.map((item, index) =>
-            item.type === 'group' ? (
-              <CreditGroupHeaderSkeleton key={`skeleton-group-${index}`} />
-            ) : (
-              <CreditSkeleton key={`skeleton-credit-${index}`} />
-            ),
-          )}
-        </DsLayoutStack>
-      )}
+      {isLoading && <PageLoader placement="flow" />}
 
       {showEmptyState && (
         <DsLayoutInset block="sm">
@@ -807,7 +790,7 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
                     group={item.group}
                     canEdit={canEdit}
                     onEdit={(groupId, name) => {
-                      void trackCreditMutation(() => updateGroup.mutateAsync({ groupId, name }));
+                      return trackCreditMutation(() => updateGroup.mutateAsync({ groupId, name }));
                     }}
                     onDelete={(groupId) => {
                       void trackCreditMutation(() => deleteGroup.mutateAsync(groupId));

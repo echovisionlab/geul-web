@@ -1,5 +1,7 @@
 'use client';
 
+import type { ReactNode } from 'react';
+
 import { EmailPreviewFrame } from '@/features/email/EmailPreviewFrame';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
@@ -22,6 +24,7 @@ export interface EmailLayoutPreviewViewProps {
   previewHtml: string;
   errors?: EmailLayoutValidationError[];
   isLoading?: boolean;
+  loadingSurface: ReactNode;
 }
 
 const LAYOUT_ERROR_MESSAGE_KEYS = {
@@ -34,10 +37,14 @@ const LAYOUT_ERROR_MESSAGE_KEYS = {
   UNKNOWN_ERROR: 'preview.validationErrors.UNKNOWN_ERROR',
 } as const;
 
-export function EmailLayoutPreviewView({ previewHtml, errors = [], isLoading = false }: EmailLayoutPreviewViewProps) {
+export function EmailLayoutPreviewView({
+  previewHtml,
+  errors = [],
+  isLoading = false,
+  loadingSurface,
+}: EmailLayoutPreviewViewProps) {
   const t = useTranslations('adminList.emailLayouts.detail');
   const tCommonLabels = useTranslations('common.labels');
-  const tCommonStates = useTranslations('common.states');
 
   return (
     <DsLayoutStack gap="none" role="region" aria-label={tCommonLabels('preview')} aria-busy={isLoading}>
@@ -47,7 +54,7 @@ export function EmailLayoutPreviewView({ previewHtml, errors = [], isLoading = f
             <DsText size="xs" tone="secondary">
               {tCommonLabels('preview')}
             </DsText>
-            {isLoading ? <Loader size="xs" /> : null}
+            {isLoading && previewHtml ? <Loader size="xs" /> : null}
           </DsLayoutInline>
           <Tooltip label={t('preview.serverHelp')} multiline size="standard">
             <div style={{ cursor: 'help' }}>
@@ -83,11 +90,11 @@ export function EmailLayoutPreviewView({ previewHtml, errors = [], isLoading = f
       <SectionCard padding="none" appearance="paper" clip grow>
         {previewHtml ? (
           <EmailPreviewFrame srcDoc={previewHtml} title={t('preview.iframeTitle')} />
+        ) : isLoading ? (
+          loadingSurface
         ) : (
           <DsLayoutStack align="center" justify="center" fill="block">
-            <SupportingText tone="secondary">
-              {isLoading ? tCommonStates('loadingPreview') : t('preview.empty')}
-            </SupportingText>
+            <SupportingText tone="secondary">{t('preview.empty')}</SupportingText>
           </DsLayoutStack>
         )}
       </SectionCard>

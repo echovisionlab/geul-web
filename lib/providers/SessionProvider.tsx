@@ -16,9 +16,13 @@ interface SessionContextValue {
   isPending: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
+  refetchWithOutcome: () => Promise<SessionRefreshOutcome>;
   updateMemberSummary: (member: MemberSummarySnapshot) => void;
   completeOnboarding: (member: MemberSummarySnapshot) => void;
 }
+
+export type SessionRefreshOutcome =
+  { kind: 'refreshed'; data: SessionData | null } | { kind: 'failed'; error: Error } | { kind: 'superseded' };
 
 export interface MemberSummarySnapshot {
   id: string;
@@ -98,7 +102,7 @@ export function SessionProvider({
   const [error, setError] = useState<Error | null>(null);
   const requestSequenceRef = useRef(0);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const inFlightRef = useRef<Promise<void> | null>(null);
+  const inFlightRef = useRef<Promise<SessionRefreshOutcome> | null>(null);
   const hasResolvedSessionRef = useRef(initialData !== undefined);
 
   const invalidateSession = useCallback(() => {
@@ -113,7 +117,7 @@ export function SessionProvider({
     clearUserDisplaySnapshotCookie();
   }, []);
 
-  const fetchSession = useCallback((background = false): Promise<void> => {
+  const fetchSession = useCallback((background = false): Promise<SessionRefreshOutcome> => {
     if (background && inFlightRef.current) {
       return inFlightRef.current;
     }
@@ -127,22 +131,22 @@ export function SessionProvider({
     }
     setError(null);
 
-    const request = Promise.resolve().then(async () => {
+    const request = Promise.resolve().then(async (): Promise<SessionRefreshOutcome> => {
       try {
         if (requestSequence !== requestSequenceRef.current || abortController.signal.aborted) {
-          return;
+          return { kind: 'superseded' };
         }
         const response = await fetch('/api/auth/session', {
           cache: 'no-store',
           signal: abortController.signal,
         });
         if (requestSequence !== requestSequenceRef.current) {
-          return;
+          return { kind: 'superseded' };
         }
         if (response.status === 401) {
           hasResolvedSessionRef.current = true;
           setData(null);
-          return;
+          return { kind: 'refreshed', data: null };
         }
         if (!response.ok) {
           throw new Error(`Session refresh failed with status ${response.status}`);
@@ -150,18 +154,23 @@ export function SessionProvider({
 
         const json = (await response.json()) as SessionData | null;
         if (requestSequence !== requestSequenceRef.current || abortController.signal.aborted) {
-          return;
+          return { kind: 'superseded' };
         }
         hasResolvedSessionRef.current = true;
         const next = json?.user ? json : null;
         setData((current) => (equalSessionValue(current, next) ? current : next));
+        return { kind: 'refreshed', data: next };
       } catch (caught) {
-        if (caught instanceof DOMException && caught.name === 'AbortError') {
-          return;
+        if (
+          requestSequence !== requestSequenceRef.current ||
+          abortController.signal.aborted ||
+          (caught instanceof DOMException && caught.name === 'AbortError')
+        ) {
+          return { kind: 'superseded' };
         }
-        if (requestSequence === requestSequenceRef.current) {
-          setError(caught instanceof Error ? caught : new Error('Session refresh failed'));
-        }
+        const refreshError = caught instanceof Error ? caught : new Error('Session refresh failed');
+        setError(refreshError);
+        return { kind: 'failed', error: refreshError };
       } finally {
         if (requestSequence === requestSequenceRef.current) {
           abortControllerRef.current = null;
@@ -174,8 +183,8 @@ export function SessionProvider({
     return request;
   }, []);
 
-  const refetch = useCallback(() => {
-    return fetchSession();
+  const refetch = useCallback(async () => {
+    await fetchSession();
   }, [fetchSession]);
 
   const revalidateSession = useCallback(() => {
@@ -338,8 +347,16 @@ export function SessionProvider({
   }, [data]);
 
   const value = useMemo(
-    () => ({ data, isPending, error, refetch, updateMemberSummary, completeOnboarding }),
-    [data, isPending, error, refetch, updateMemberSummary, completeOnboarding],
+    () => ({
+      data,
+      isPending,
+      error,
+      refetch,
+      refetchWithOutcome: fetchSession,
+      updateMemberSummary,
+      completeOnboarding,
+    }),
+    [data, isPending, error, refetch, fetchSession, updateMemberSummary, completeOnboarding],
   );
 
   // During a member switch nothing below may run: an editor would send the previous member's

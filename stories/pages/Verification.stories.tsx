@@ -7,7 +7,10 @@ const meta = {
   args: { state: 'ready', initialStep: 'choose_email' },
   argTypes: {
     state: previewStateControl,
-    initialStep: { control: 'select', options: ['choose_email', 'sent_email', 'applying', 'passed'] },
+    initialStep: {
+      control: 'select',
+      options: ['choose_email', 'sent_email', 'checking', 'applying', 'unavailable', 'passed'],
+    },
   },
   render: (args) => <VerificationPreview key={args.initialStep} {...args} />,
 } satisfies Meta<typeof VerificationPreview>;
@@ -18,3 +21,7 @@ export const AwaitingCode: Story = { args: { initialStep: 'sent_email' } };
 export const Pending: Story = { args: { state: 'pending' } };
 export const Error: Story = { args: { state: 'error' } };
 export const Phone: Story = { globals: { viewport: { value: 'phone', isRotated: false } } };
+
+export const Checking: Story = { args: { initialStep: 'checking', state: 'pending' } };
+export const Applying: Story = { args: { initialStep: 'applying' } };
+export const Unavailable: Story = { args: { initialStep: 'unavailable' } };

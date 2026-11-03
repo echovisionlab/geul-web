@@ -23,6 +23,13 @@ export function useInfiniteItems<T extends { id: string }>(
   const [exhausted, setExhausted] = useState(false);
   const [offset, setOffset] = useState(initialItems.length);
   const pending = useRef(false);
+  const active = useRef(true);
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+    };
+  }, []);
   const hasMore = !exhausted && offset < total;
 
   const loadMore = useCallback(async () => {
@@ -33,6 +40,9 @@ export function useInfiniteItems<T extends { id: string }>(
     setStatus('loading');
     try {
       const next = await loadPage(offset);
+      if (!active.current) {
+        return;
+      }
       setItems((current) => {
         const seen = new Set(current.map((item) => item.id));
         return [...current, ...next.filter((item) => !seen.has(item.id))];
@@ -42,7 +52,9 @@ export function useInfiniteItems<T extends { id: string }>(
       setExhausted(next.length === 0);
       setStatus('idle');
     } catch {
-      setStatus('failed');
+      if (active.current) {
+        setStatus('failed');
+      }
     } finally {
       pending.current = false;
     }

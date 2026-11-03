@@ -138,7 +138,7 @@ export function TranslationOverviewPage({ client }: { client?: TranslationOvervi
       />
 
       {overviewQuery.isLoading ? (
-        <PageLoader />
+        <PageLoader placement="flow" />
       ) : overviewQuery.isError || !stats ? (
         <DsText role="alert" size="sm" tone="danger">
           {t('states.loadFailed')}

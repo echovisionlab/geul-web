@@ -5,7 +5,9 @@ import { confirmDialogs, ConfirmDialogHost, preloadConfirmDialogs } from './conf
 import { getConfirmDialogs } from './confirm-dialog-store';
 
 async function renderHost() {
-  const view = render(<ConfirmDialogHost loading="eager" />);
+  const view = render(
+    <ConfirmDialogHost loading="eager" loadError={{ message: 'Could not open confirmation.', retryLabel: 'Retry' }} />,
+  );
   await act(() => preloadConfirmDialogs());
   return view;
 }

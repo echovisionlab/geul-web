@@ -1,16 +1,12 @@
 'use client';
 import { SupportingText, Heading as DsHeading } from '@/components/core/Typography';
-import {
-  LayoutInline as DsLayoutInline,
-  LayoutStack as DsLayoutStack,
-  LayoutInset as DsLayoutInset,
-} from '@/components/core/Layout';
-import { SectionCard as DsSectionCard } from '@/components/core/Section';
+import { LayoutStack as DsLayoutStack, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
+import { ProcessingOverlay } from '@/components/core/LoadingSurface';
 
 import { useEffect, useMemo, useState, type SubmitEvent } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Skeleton } from '@/components/core/Display';
+import { PageLoader } from '@/features/site/PageLoader';
 import { notifications } from '@/components/core/Notification';
 import { Button } from '@/components/core/Button';
 import { PasswordInput } from '@/components/core/Input';
@@ -149,12 +145,7 @@ export function FormViewClient({ props, requestedLocale, preview = false }: Form
   if (isLoading) {
     return (
       <div className="form-block">
-        <DsLayoutStack gap="md">
-          {showTitle === 'true' && <Skeleton roleType="field" width="short" />}
-          <Skeleton roleType="field" />
-          <Skeleton roleType="field" />
-          <Skeleton roleType="field" />
-        </DsLayoutStack>
+        <PageLoader placement="flow" />
       </div>
     );
   }
@@ -261,13 +252,9 @@ export function FormViewClient({ props, requestedLocale, preview = false }: Form
         </DsLayoutStack>
 
         {submitMutation.isPending ? (
-          <div style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
-            <DsSectionCard padding="none" appearance="overlay" border="none">
-              <DsLayoutInline align="center" justify="center">
-                <FormSubmissionPendingState />
-              </DsLayoutInline>
-            </DsSectionCard>
-          </div>
+          <ProcessingOverlay>
+            <FormSubmissionPendingState />
+          </ProcessingOverlay>
         ) : null}
       </div>
     </div>

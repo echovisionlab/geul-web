@@ -13,7 +13,9 @@ function ErrorPreview({
   status?: number;
 }) {
   const locale = normalizeLocale(useLocale()) ?? DEFAULT_LOCALE;
-  const retry = () => navigatePreview(kind === 'admin' ? '/admin' : '/');
+  const retry = () => {
+    navigatePreview(kind === 'admin' ? '/admin' : '/');
+  };
   const code = status ?? (kind === 'notFound' ? 404 : 500);
   if (kind === 'global') {
     return <RootErrorPageView status={code} locale={locale} onRetry={retry} />;

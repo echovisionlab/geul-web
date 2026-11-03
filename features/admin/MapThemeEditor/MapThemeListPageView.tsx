@@ -15,18 +15,20 @@ import { MapThemeListView } from './MapThemeListView';
 export interface MapThemeListPageViewProps {
   themes: MapTheme[];
   defaultMapThemeId: string;
+  defaultUpdatingId: string | null;
   loadFailed?: boolean;
   copyLoading?: boolean;
   deleteLoading?: boolean;
   onCopy: (theme: MapTheme, name: string) => Promise<boolean>;
   onDelete: (theme: MapTheme) => Promise<boolean>;
-  onSetDefault: (theme: MapTheme) => void;
+  onSetDefault: (theme: MapTheme) => void | Promise<void>;
   createAction: ReactNode;
 }
 
 export function MapThemeListPageView({
   themes,
   defaultMapThemeId,
+  defaultUpdatingId,
   loadFailed = false,
   copyLoading = false,
   deleteLoading = false,
@@ -84,6 +86,7 @@ export function MapThemeListPageView({
       <MapThemeListView
         themes={themes}
         defaultMapThemeId={defaultMapThemeId}
+        defaultUpdatingId={defaultUpdatingId}
         loadFailed={loadFailed}
         onCopy={openCopy}
         onDelete={setDeletingTheme}

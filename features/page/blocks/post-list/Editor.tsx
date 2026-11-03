@@ -1,4 +1,5 @@
 'use client';
+import { QueryLoadingSurface } from '../QueryLoadingSurface';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
@@ -61,10 +62,11 @@ function PostListSettingsForm({ props, updateProps, readOnly = false }: PostList
     queryFn: () => listTagsAction().then(unwrapQueryResult),
   });
   const { data: tags } = tagsQuery;
-  const { data: authorsData } = useQuery({
+  const authorsQuery = useQuery({
     queryKey: ['authors', 50],
     queryFn: () => listAuthorOptionsAction(50),
   });
+  const { data: authorsData } = authorsQuery;
 
   const categoryOptions = categories?.map((category) => ({ value: category.id, label: category.name })) ?? [];
   const seriesOptions = seriesList?.map((series) => ({ value: series.id, label: series.title })) ?? [];
@@ -104,7 +106,8 @@ function PostListSettingsForm({ props, updateProps, readOnly = false }: PostList
 
   return (
     <>
-      <QueryErrorAlert queries={[categoriesQuery, seriesListQuery, tagsQuery]} />
+      <QueryLoadingSurface queries={[categoriesQuery, seriesListQuery, tagsQuery, authorsQuery]} />
+      <QueryErrorAlert queries={[categoriesQuery, seriesListQuery, tagsQuery, authorsQuery]} />
       <ListBlockEditorBase
         readOnly={readOnly}
         editorType="post-list"

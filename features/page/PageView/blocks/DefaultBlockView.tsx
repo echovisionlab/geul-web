@@ -2,6 +2,7 @@
 
 import { PublicSiteVariable, PublicSiteVariableLink, PublicSiteVariableText } from './PublicSiteVariable';
 import dynamic from 'next/dynamic';
+import { PageLoader } from '@/features/site/PageLoader';
 import { useId, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
@@ -33,8 +34,14 @@ import { isBlockId } from '@/lib/editor/block-id';
 import { isPublicListItemKind, PublicDocumentBlock, PublicListItem } from './PublicDocumentBlock';
 import { getContainerStyle } from './DefaultBlockView.utils';
 
-const AudioMediaView = dynamic(() => import('@/features/media/AudioMediaView').then((module) => module.AudioMediaView));
-const VideoMediaView = dynamic(() => import('@/features/media/VideoMediaView').then((module) => module.VideoMediaView));
+const AudioMediaView = dynamic(
+  () => import('@/features/media/AudioMediaView').then((module) => module.AudioMediaView),
+  { loading: () => <PageLoader placement="flow" /> },
+);
+const VideoMediaView = dynamic(
+  () => import('@/features/media/VideoMediaView').then((module) => module.VideoMediaView),
+  { loading: () => <PageLoader placement="flow" /> },
+);
 
 const DefaultInlineMathView = dynamic<{ latex: string }>(() =>
   import('./DefaultInlineMathView').then((module) => module.DefaultInlineMathView),
@@ -42,17 +49,20 @@ const DefaultInlineMathView = dynamic<{ latex: string }>(() =>
 const DefaultMathBlockView = dynamic<{ block: Block }>(() =>
   import('./DefaultMathBlockView').then((module) => module.DefaultMathBlockView),
 );
-const DefaultMapBlockView = dynamic<{ block: Block; requestedLocale?: string }>(() =>
-  import('./DefaultMapBlockView').then((module) => module.DefaultMapBlockView),
+const DefaultMapBlockView = dynamic<{ block: Block; requestedLocale?: string }>(
+  () => import('./DefaultMapBlockView').then((module) => module.DefaultMapBlockView),
+  { loading: () => <PageLoader placement="flow" /> },
 );
 const DefaultCodeBlockView = dynamic<{ block: Block }>(() =>
   import('./DefaultCodeBlockView').then((module) => module.DefaultCodeBlockView),
 );
-const DefaultMermaidBlockView = dynamic<{ source: string; title: string }>(() =>
-  import('./DefaultMermaidBlockView').then((module) => module.DefaultMermaidBlockView),
+const DefaultMermaidBlockView = dynamic<{ source: string; title: string }>(
+  () => import('./DefaultMermaidBlockView').then((module) => module.DefaultMermaidBlockView),
+  { loading: () => <PageLoader placement="flow" /> },
 );
-const DefaultExecutableBlockView = dynamic<{ block: Block; source: string }>(() =>
-  import('./DefaultExecutableBlockView').then((module) => module.DefaultExecutableBlockView),
+const DefaultExecutableBlockView = dynamic<{ block: Block; source: string }>(
+  () => import('./DefaultExecutableBlockView').then((module) => module.DefaultExecutableBlockView),
+  { loading: () => <PageLoader placement="flow" /> },
 );
 
 export { resolveShaderMediaAsset } from './DefaultBlockView.utils';

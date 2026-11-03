@@ -1,16 +1,17 @@
 'use client';
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
-import { useCallback, useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { onDemandModule } from '@/components/core/on-demand-module';
+import { ContentModal } from '@/components/core/Modal';
+import { Alert } from '@/components/core/Alert';
+import { Button } from '@/components/core/Button';
 import { type FileRejection, ImageUploadField, type ImageUploadRejection } from '@/components/core/ImageUpload';
 import { ToolbarDensityProvider } from '@/components/core/control-context';
 import type { CropAccessibility } from '@/components/core/ImageCropper/ImageCropper';
 
 // The cropper (react-image-crop and its stylesheet) renders only after a file is chosen.
 // Loading it on demand keeps it out of every account route that shows the avatar control.
-const ImageCropper = dynamic(() => import('@/components/core/ImageCropper').then((m) => m.ImageCropper), {
-  ssr: false,
-});
+const cropperModule = onDemandModule(() => import('@/components/core/ImageCropper'));
 const USER_AVATAR_OUTPUT_DIMENSION = 1024;
 const USER_AVATAR_OUTPUT_QUALITY = 0.85;
 export interface ProfileAvatarControlLabels {
@@ -23,6 +24,8 @@ export interface ProfileAvatarControlLabels {
   cancel: string;
   confirm: string;
   preparing: string;
+  loadFailed: string;
+  retry: string;
 }
 export interface ProfileAvatarControlProps {
   imageUrl?: string | null;
@@ -30,6 +33,7 @@ export interface ProfileAvatarControlProps {
   accept: readonly string[];
   maxSize: number;
   labels: ProfileAvatarControlLabels;
+  loadingSurface: ReactNode;
   cropAccessibility?: CropAccessibility;
   disabled?: boolean;
   validateFile?: (file: File) => string | null;
@@ -50,6 +54,7 @@ export function ProfileAvatarControl({
   accept,
   maxSize,
   labels,
+  loadingSurface,
   cropAccessibility,
   disabled = false,
   validateFile,
@@ -60,21 +65,57 @@ export function ProfileAvatarControl({
   onSave,
   onRemove,
 }: ProfileAvatarControlProps) {
+  const generation = useRef(0);
+  const [cropper, setCropper] = useState(cropperModule.peek);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [retry, setRetry] = useState(0);
   const [operation, setOperation] = useState<'idle' | 'preparing' | 'removing'>('idle');
   const [cropModalOpen, setCropModalOpen] = useState(false);
+  const cropImageRef = useRef<string | null>(null);
   const [cropImageUrl, setCropImageUrl] = useState<string | null>(null);
   const normalizedImageUrl = imageUrl?.trim() ?? '';
   const hasImage = normalizedImageUrl.length > 0;
   const clearCropImage = useCallback(() => {
-    setCropImageUrl((current) => {
-      if (current) {
-        URL.revokeObjectURL(current);
-      }
-      return null;
-    });
+    if (cropImageRef.current) {
+      URL.revokeObjectURL(cropImageRef.current);
+      cropImageRef.current = null;
+    }
+    setCropImageUrl(null);
     setCropModalOpen(false);
   }, []);
-  useEffect(() => clearCropImage, [clearCropImage]);
+  useEffect(
+    () => () => {
+      generation.current += 1;
+      if (cropImageRef.current) {
+        URL.revokeObjectURL(cropImageRef.current);
+        cropImageRef.current = null;
+      }
+    },
+    [],
+  );
+  useEffect(() => {
+    if (!cropImageUrl || cropper) {
+      return;
+    }
+    let active = true;
+    setLoadFailed(false);
+    void cropperModule.load().then(
+      (module) => {
+        if (active) {
+          setCropper(module);
+        }
+      },
+      () => {
+        if (active) {
+          setLoadFailed(true);
+        }
+      },
+    );
+    return () => {
+      active = false;
+    };
+  }, [cropImageUrl, cropper, retry]);
+  const ImageCropper = cropper?.ImageCropper;
   const openFile = useCallback(
     async (file: File) => {
       const validationError = validateFile?.(file);
@@ -82,16 +123,27 @@ export function ProfileAvatarControl({
         onValidationError?.(validationError);
         return;
       }
+      const request = ++generation.current;
       setOperation('preparing');
       try {
         const previewFile = prepareFile ? await prepareFile(file) : file;
+        if (request !== generation.current) {
+          return;
+        }
         clearCropImage();
-        setCropImageUrl(URL.createObjectURL(previewFile));
+        const previewUrl = URL.createObjectURL(previewFile);
+        cropImageRef.current = previewUrl;
+        setCropImageUrl(previewUrl);
         setCropModalOpen(true);
       } catch (error) {
+        if (request !== generation.current) {
+          return;
+        }
         onValidationError?.(error instanceof Error ? error.message : 'Failed to prepare image.');
       } finally {
-        setOperation('idle');
+        if (request === generation.current) {
+          setOperation('idle');
+        }
       }
     },
     [clearCropImage, onValidationError, prepareFile, validateFile],
@@ -134,6 +186,7 @@ export function ProfileAvatarControl({
           removeButtonLoading={operation === 'removing'}
           removeButtonEmphasis="strong"
           removeButtonPlacement="inside"
+          removeButtonAppearance="avatar"
           preview={{
             mode: 'circle',
             width: size,
@@ -155,7 +208,7 @@ export function ProfileAvatarControl({
         />
       </ToolbarDensityProvider>
 
-      {cropImageUrl ? (
+      {cropImageUrl && ImageCropper ? (
         <ImageCropper
           imageSrc={cropImageUrl}
           opened={cropModalOpen}
@@ -175,6 +228,23 @@ export function ProfileAvatarControl({
           maxOutputHeight={USER_AVATAR_OUTPUT_DIMENSION}
           outputQuality={USER_AVATAR_OUTPUT_QUALITY}
         />
+      ) : cropImageUrl ? (
+        <ContentModal
+          opened={cropModalOpen}
+          onClose={clearCropImage}
+          title={labels.cropTitle}
+          closeLabel={labels.cancel}
+          centered
+        >
+          {loadFailed ? (
+            <DsLayoutStack gap="sm">
+              <Alert tone="danger">{labels.loadFailed}</Alert>
+              <Button onClick={() => setRetry((value) => value + 1)}>{labels.retry}</Button>
+            </DsLayoutStack>
+          ) : (
+            loadingSurface
+          )}
+        </ContentModal>
       ) : null}
     </DsLayoutStack>
   );

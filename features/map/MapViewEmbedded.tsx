@@ -148,7 +148,15 @@ export function MapViewEmbedded({
   if (themeResolution.isLoading || !themeConfig) {
     return (
       <div style={containerStyle}>
-        <div style={{ width: '100%', aspectRatio: getAspectRatioValue(config.aspectRatio), overflow: 'hidden' }}>
+        <div
+          style={{
+            width: '100%',
+            aspectRatio: getAspectRatioValue(config.aspectRatio),
+            overflow: 'hidden',
+            position: 'relative',
+          }}
+          aria-busy="true"
+        >
           <MapEmbeddedLoader />
         </div>
         {caption}

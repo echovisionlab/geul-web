@@ -19,6 +19,7 @@ export interface P5SketchLabels {
   resetOriginal: string;
   sourceInput: string;
   copied: string;
+  starting: string;
   running: string;
   stopped: string;
   error: string;
@@ -68,6 +69,7 @@ const LABEL_KEYS = [
   'resetOriginal',
   'sourceInput',
   'copied',
+  'starting',
   'running',
   'stopped',
   'error',

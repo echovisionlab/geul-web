@@ -46,3 +46,7 @@ export const Disabled: Story = {
     onClick: () => {},
   },
 };
+
+export const Loading: Story = {
+  args: { opened: true, loading: true, controls: 'pending-navigation' },
+};

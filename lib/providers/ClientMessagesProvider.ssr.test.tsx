@@ -38,31 +38,39 @@ function PublicTitle() {
 }
 beforeEach(() => mocks.loadMessages.mockReset());
 
-it('server-renders the configured GIF on the first pending catalogue paint without visible loading text', async () => {
-  mocks.pathname = '/login';
-  const messages = await getMessagesForLocale('ko');
-  const image = 'https://cdn.example.com/loader.gif?version=2';
-  const markup = renderToStaticMarkup(
-    <TestProviders locale="ko">
-      <ClientMessagesProvider
-        locale="ko"
-        messages={selectClientMessages(messages, { pathWithSearch: '/' })}
-        messageCoverage={clientMessageCoverage('/')}
-        loaderImageSrc={image}
-        loaderImageUnoptimized
-      >
-        <AuthTitle />
-      </ClientMessagesProvider>
-    </TestProviders>,
-  );
-  expect(markup).toContain(image);
-  expect(markup).not.toContain('rel="preload"');
-  expect(markup).toContain(`aria-label="${messages.common.states.loading}"`);
-  expect(markup).toContain('data-unoptimized="true"');
-  expect(markup).toContain('data-preload="undefined"');
-  expect(markup).not.toMatch(/>[^<]*로그인[^<]*</);
-  expect(markup.replace(/<[^>]+>/g, '')).not.toContain(messages.common.states.loading);
-});
+it.each([undefined, 'https://cdn.example.com/loader.gif?version=2'])(
+  'server-renders visible localized pending text with root image %s before ManifestProvider exists',
+  async (image) => {
+    mocks.pathname = '/login';
+    const messages = await getMessagesForLocale('ko');
+    const markup = renderToStaticMarkup(
+      <TestProviders locale="ko">
+        <ClientMessagesProvider
+          locale="ko"
+          messages={selectClientMessages(messages, { pathWithSearch: '/' })}
+          messageCoverage={clientMessageCoverage('/')}
+          loaderImageSrc={image}
+          loaderImageUnoptimized
+        >
+          <AuthTitle />
+        </ClientMessagesProvider>
+      </TestProviders>,
+    );
+    if (image) {
+      expect(markup).toContain(image);
+    } else {
+      expect(markup).not.toContain('<img');
+    }
+    expect(markup).not.toContain('rel="preload"');
+    expect(markup).toContain(`aria-label="${messages.common.states.loading}"`);
+    if (image) {
+      expect(markup).toContain('data-unoptimized="true"');
+      expect(markup).toContain('data-preload="undefined"');
+    }
+    expect(markup).not.toMatch(/>[^<]*로그인[^<]*</);
+    expect(markup.replace(/<[^>]+>/g, '')).toContain(messages.common.states.loading);
+  },
+);
 
 it('server-renders public subsets and keeps an initially full unknown route usable', async () => {
   const messages = await getMessagesForLocale('en');

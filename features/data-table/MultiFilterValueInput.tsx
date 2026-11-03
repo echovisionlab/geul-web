@@ -8,6 +8,7 @@ import {
 
 import type { DateInputProps } from '@/components/core/Input';
 import dynamic from 'next/dynamic';
+import { useTranslations } from 'next-intl';
 import { MultiSelect } from '@/components/core/Input/MultiSelect';
 import { NumberInput } from '@/components/core/Input/NumberInput';
 import { Radio } from '@/components/core/Input/Radio';
@@ -15,9 +16,15 @@ import { TextInput } from '@/components/core/Input/TextInput';
 import { isNoValueOperator } from '@/lib/types/common/filter';
 import type { FilterEditState, FilterFieldConfig } from './multi-filter-model';
 
-const DateInput = dynamic<DateInputProps>(() =>
-  import('./DateFilterInputRuntime').then((module) => module.DateFilterInputRuntime),
+const DateInput = dynamic<DateInputProps>(
+  () => import('./DateFilterInputRuntime').then((module) => module.DateFilterInputRuntime),
+  { loading: DateInputLoading },
 );
+
+function DateInputLoading() {
+  const t = useTranslations('common.states');
+  return <TextInput size="xs" disabled aria-busy="true" aria-label={t('loading')} placeholder={t('loading')} />;
+}
 
 interface Labels {
   value: string;

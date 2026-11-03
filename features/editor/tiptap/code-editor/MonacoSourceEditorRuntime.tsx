@@ -15,7 +15,6 @@ import type {
   SourceEditorMarkerSeverity,
 } from './MonacoSourceEditor';
 import './monaco-local';
-import classes from './MonacoSourceEditor.module.css';
 import { sourceEditorOptions, sourceEditorTheme, sourceEditorThemeName } from './source-editor-presentation';
 
 const MARKER_SEVERITY: Record<SourceEditorMarkerSeverity, number> = {
@@ -257,7 +256,7 @@ export function MonacoSourceEditorRuntime({
         domReadOnly: readOnly,
         readOnly,
       }}
-      loading={loading ?? <div className={classes.loading}>{ariaLabel}</div>}
+      loading={loading}
     />
   );
 }

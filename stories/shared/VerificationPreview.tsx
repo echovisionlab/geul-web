@@ -1,5 +1,7 @@
 import { localizeFixtureTree, useStorybookText } from '../../.storybook/fixture-i18n';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { PageLoader } from '@/features/site/PageLoader';
 import { Alert } from '@/components/core/Alert';
 import {
   VerificationFlowView,
@@ -30,10 +32,10 @@ const labels: VerificationFlowLabels = {
   passedTitle: 'Email verified',
   applyingDescription: 'The code was accepted. Check again to complete this local flow.',
   applyingRetry: 'Check again',
+  unavailableTitle: 'Unable to check the email change status. Please check again.',
   applyingTitle: 'Applying verification',
   sentDescription: 'Enter the preview code 123456.',
   sentTitle: 'Check your email',
-  submittingCode: 'Verifying code…',
 };
 
 export function VerificationPreview({
@@ -41,10 +43,11 @@ export function VerificationPreview({
   initialStep = 'choose_email',
 }: {
   state?: PreviewState;
-  initialStep?: VerificationViewState;
+  initialStep?: VerificationViewState | 'checking';
 }) {
   const fixtureText = useStorybookText();
-  const [step, setStep] = useState<VerificationViewState>(initialStep);
+  const t = useTranslations('auth.verification');
+  const [step, setStep] = useState<VerificationViewState | 'checking'>(initialStep);
   const [email, setEmail] = useState('june@example.com');
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -66,68 +69,78 @@ export function VerificationPreview({
         </Alert>
       ) : null}
       <fieldset disabled={state === 'disabled'} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
-        <VerificationFlowView
-          code={code}
-          email={email}
-          state={step}
-          labels={{
-            ...labels,
-            code: {
-              ...labels.code,
-              codeExpiresIn: (time) => fixtureText('Code expires in {time}', { time }),
-              resendIn: (time) => fixtureText('Send a new code in {time}', { time }),
-            },
-          }}
-          error={state === 'error' ? 'The verification request could not be completed.' : error}
-          timing={
-            step === 'sent_email' ? { expiresInSeconds: 300, flowExpiresInSeconds: 900, resendInSeconds: 0 } : null
-          }
-          requestingCode={state === 'pending' && step === 'choose_email'}
-          checkingApplication={state === 'pending' && step === 'applying'}
-          submittingCode={state === 'pending' && step === 'sent_email'}
-          onEmailChange={setEmail}
-          onCodeChange={(value) => {
-            setCode(value);
-            setError(null);
-          }}
-          onBack={startOver}
-          onStartOver={startOver}
-          onPassed={() => setNotice('Verification completed.')}
-          onCheckApplied={() => {
-            if (state === 'ready') {
-              setStep('passed');
+        {step === 'checking' ? (
+          <PageLoader placement="flow" message={t('checking')} />
+        ) : (
+          <VerificationFlowView
+            code={code}
+            email={email}
+            state={step}
+            loadingSurface={
+              <PageLoader
+                placement="flow"
+                message={t(step === 'applying' || step === 'unavailable' ? 'checking' : 'sentEmail.submitting')}
+              />
             }
-          }}
-          onRequestCode={() => {
-            if (state !== 'ready') {
-              return;
+            labels={{
+              ...labels,
+              code: {
+                ...labels.code,
+                codeExpiresIn: (time) => fixtureText('Code expires in {time}', { time }),
+                resendIn: (time) => fixtureText('Send a new code in {time}', { time }),
+              },
+            }}
+            error={state === 'error' ? 'The verification request could not be completed.' : error}
+            timing={
+              step === 'sent_email' ? { expiresInSeconds: 300, flowExpiresInSeconds: 900, resendInSeconds: 0 } : null
             }
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-              setError('Enter a valid email.');
-              return;
-            }
-            setError(null);
-            setStep('sent_email');
-          }}
-          onResendCode={() => {
-            if (state === 'ready') {
-              setCode('');
+            requestingCode={state === 'pending' && step === 'choose_email'}
+            checkingApplication={state === 'pending' && (step === 'applying' || step === 'unavailable')}
+            submittingCode={state === 'pending' && step === 'sent_email'}
+            onEmailChange={setEmail}
+            onCodeChange={(value) => {
+              setCode(value);
               setError(null);
-              setNotice('A new preview code is ready: 123456.');
-            }
-          }}
-          onCodeSubmit={(value) => {
-            if (state !== 'ready') {
-              return;
-            }
-            if (value !== '123456') {
-              setError('The verification code is invalid.');
-              return;
-            }
-            setError(null);
-            setStep('applying');
-          }}
-        />
+            }}
+            onBack={startOver}
+            onStartOver={startOver}
+            onPassed={() => setNotice('Verification completed.')}
+            onCheckApplied={() => {
+              if (state === 'ready') {
+                setStep('passed');
+              }
+            }}
+            onRequestCode={() => {
+              if (state !== 'ready') {
+                return;
+              }
+              if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                setError('Enter a valid email.');
+                return;
+              }
+              setError(null);
+              setStep('sent_email');
+            }}
+            onResendCode={() => {
+              if (state === 'ready') {
+                setCode('');
+                setError(null);
+                setNotice('A new preview code is ready: 123456.');
+              }
+            }}
+            onCodeSubmit={(value) => {
+              if (state !== 'ready') {
+                return;
+              }
+              if (value !== '123456') {
+                setError('The verification code is invalid.');
+                return;
+              }
+              setError(null);
+              setStep('applying');
+            }}
+          />
+        )}
       </fieldset>
     </PreviewFrame>,
     fixtureText,

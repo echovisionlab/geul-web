@@ -9,6 +9,7 @@ import {
   useServerTablePathname as usePathname,
   useServerTableRouter as useRouter,
   useServerTableSearchParams as useSearchParams,
+  useServerTablePending,
 } from './ServerDataTableNavigation';
 import { Alert } from '@/components/core/Alert';
 import { useTranslations } from 'next-intl';
@@ -44,7 +45,7 @@ export interface ServerDataTableContentProps<T> {
   selection?: DataTableRowSelectionState<T> & { selectAllRowsLabel?: string };
   /** Reserve enough vertical space for this many rows even when fewer rows match. */
   reservedRowCount?: number;
-  /** When false, keep stale content during navigation and rely on outer suspense fallback instead. */
+  /** Override navigation loading; by default retain existing rows and show the common loader only without rows. */
   showPendingLoader?: boolean;
 }
 
@@ -57,7 +58,7 @@ export function ServerDataTableContent<T>({
   highlightOnHover = false,
   selection,
   reservedRowCount,
-  showPendingLoader = true,
+  showPendingLoader = result.data.length === 0,
 }: ServerDataTableContentProps<T>) {
   const t = useTranslations('dataTable');
   const tCommonLabels = useTranslations('common.labels');
@@ -68,6 +69,7 @@ export function ServerDataTableContent<T>({
   const [maxSorts, setMaxSorts] = useState(DEFAULT_DATA_TABLE_MAX_SORTS);
   const [tablePending, setTablePending] = useState(false);
   const [isPending, startTransition] = useTransition();
+  useServerTablePending(containerRef, isPending);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -141,8 +143,8 @@ export function ServerDataTableContent<T>({
 
       const url = buildSortUrl(namespace, searchParams, nextSorts.length > 0 ? nextSorts : undefined, pathname);
 
-      startTransition(() => {
-        router.push(url, { scroll: false });
+      startTransition(async () => {
+        await router.push(url, { scroll: false });
       });
     },
     [currentSorts, isPending, maxSorts, namespace, pathname, router, searchParams, supportedSortFields],
@@ -154,7 +156,7 @@ export function ServerDataTableContent<T>({
         columns,
         currentSorts,
         sortConfig,
-        sortDisabled: isPending,
+        sortDisabled: isPending || tablePending,
         getSortAriaLabel: (columnLabel) => t('aria.sortBy', { label: columnLabel }),
         getSortPriorityLabel: (priority, total) => `${tCommonLabels('priority')} ${priority}/${total}`,
         getSortDirectionLabel: (direction) =>
@@ -162,14 +164,17 @@ export function ServerDataTableContent<T>({
         actionColumnLabel: tCommonLabels('actions'),
         onSort: handleHeaderClick,
       }),
-    [columns, currentSorts, handleHeaderClick, isPending, sortConfig, t, tCommonLabels],
+    [columns, currentSorts, handleHeaderClick, isPending, tablePending, sortConfig, t, tCommonLabels],
   );
 
   if (result.error) {
     return (
-      <Alert tone="danger" role="alert">
-        {result.error}
-      </Alert>
+      <div ref={containerRef} aria-busy={tablePending || isPending}>
+        <Alert tone="danger" role="alert">
+          {result.error}
+        </Alert>
+        {(tablePending || isPending) && <PageLoader placement="flow" minHeight={0} />}
+      </div>
     );
   }
 

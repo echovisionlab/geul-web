@@ -1,8 +1,10 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useDisclosure, useMounted } from '@mantine/hooks';
+import { PageLoader } from '@/features/site/PageLoader';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { notifications } from '@/components/core/Notification';
 import { useShareLinks } from '@/lib/hooks/useShareLinks';
 import { useShareLinkServices } from './ShareLinkServicesContext';
@@ -55,7 +57,12 @@ function normalizeShareUrl(rawUrl: string): string | null {
   return rawUrl;
 }
 
-export function ShareLinkSection<T extends ShareEntityType>({
+export function ShareLinkSection<T extends ShareEntityType>(props: ShareLinkSectionProps<T>) {
+  const locale = useLocale();
+  return <ShareLinkSectionTarget key={JSON.stringify([props.entityType, props.entityId, locale])} {...props} />;
+}
+
+function ShareLinkSectionTarget<T extends ShareEntityType>({
   entityType,
   entityId,
   title,
@@ -70,12 +77,23 @@ export function ShareLinkSection<T extends ShareEntityType>({
   const tPlaceholders = useTranslations('common.placeholders');
   const hydrated = useMounted();
   const services = useShareLinkServices();
-  const { shareLinks, isLoading, isCreating, isDeleting, create, remove } = useShareLinks({
+  const { shareLinks, isLoading, isFetching, error, isCreating, create, remove, refetch } = useShareLinks({
     entityType,
     entityId,
     initialData,
     services,
   });
+  const [creating, setCreating] = useState(false);
+  const creatingRef = useRef(false);
+  const [deletingIds, setDeletingIds] = useState<string[]>([]);
+  const deleting = useRef(new Set<string>());
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
   const [formOpened, { open: openForm, close: closeForm }] = useDisclosure(false);
   const [label, setLabel] = useState('');
   const [preset, setPreset] = useState<ExpirationPreset>('7d');
@@ -144,6 +162,11 @@ export function ShareLinkSection<T extends ShareEntityType>({
   const visibleLinks = showAll ? linkViewModels : linkViewModels.slice(0, maxVisibleLinks);
 
   const handleCreate = async () => {
+    if (creatingRef.current) {
+      return;
+    }
+    creatingRef.current = true;
+    setCreating(true);
     try {
       const expiresAt = getExpiresAtFromPreset(preset, customDateTimestamp);
       if (expiresAt && (expiresAt.getTime() <= Date.now() || expiresAt.getTime() > maxDateTimestamp)) {
@@ -155,6 +178,10 @@ export function ShareLinkSection<T extends ShareEntityType>({
         expiresAt,
         password: password.trim() || undefined,
       });
+      await refetch();
+      if (!mounted.current) {
+        return;
+      }
       notifications.show({ message: t('createSuccess'), tone: 'positive' });
       closeForm();
       setLabel('');
@@ -162,24 +189,49 @@ export function ShareLinkSection<T extends ShareEntityType>({
       setCustomDateTimestamp(null);
       setPassword('');
     } catch (error) {
+      if (!mounted.current) {
+        return;
+      }
       const message = error instanceof Error ? error.message : t('createError');
       notifications.show({
         message,
         tone: 'danger',
       });
+    } finally {
+      creatingRef.current = false;
+      if (mounted.current) {
+        setCreating(false);
+      }
     }
   };
 
   const handleDelete = async (id: string) => {
+    if (deleting.current.has(id)) {
+      return;
+    }
+    deleting.current.add(id);
+    setDeletingIds([...deleting.current]);
     try {
       await remove(id);
+      await refetch();
+      if (!mounted.current) {
+        return;
+      }
       notifications.show({ message: t('deleteSuccess'), tone: 'positive' });
     } catch (error) {
+      if (!mounted.current) {
+        return;
+      }
       const message = error instanceof Error ? error.message : t('deleteError');
       notifications.show({
         message,
         tone: 'danger',
       });
+    } finally {
+      deleting.current.delete(id);
+      if (mounted.current) {
+        setDeletingIds([...deleting.current]);
+      }
     }
   };
 
@@ -199,9 +251,12 @@ export function ShareLinkSection<T extends ShareEntityType>({
       password={password}
       hasMore={shareLinks.length > maxVisibleLinks}
       showAll={showAll}
-      isLoading={isLoading}
-      isCreating={isCreating}
-      deletingLinkId={isDeleting || null}
+      isLoading={isLoading && initialData === undefined}
+      loadingSurface={<PageLoader placement="flow" minHeight={140} size="sm" />}
+      errorContent={error ? <QueryErrorAlert queries={[{ isError: true, error, isFetching, refetch }]} /> : null}
+      isCreating={creating || isCreating}
+      deletingLinkId={null}
+      deletingLinkIds={deletingIds}
       disabled={disabled}
       onToggleForm={formOpened ? closeForm : openForm}
       onCloseForm={closeForm}

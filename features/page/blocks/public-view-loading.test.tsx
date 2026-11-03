@@ -2,6 +2,9 @@ import { PassThrough } from 'node:stream';
 import type { ComponentType } from 'react';
 import { renderToPipeableStream } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
+import { NextIntlClientProvider } from 'next-intl';
+import { ManifestProvider } from '@/lib/contexts/ManifestContext';
+import enMessages from '@/messages/en.json';
 import type { BlockViewProps } from './types';
 import { FormView } from './form/View';
 import { MapView } from './map/View';
@@ -64,12 +67,19 @@ function renderServer(View: ComponentType<BlockViewProps & { preview?: boolean }
     });
     output.on('end', () => resolve(html));
     output.on('error', reject);
-    const stream = renderToPipeableStream(<View {...props} />, {
-      onAllReady() {
-        stream.pipe(output);
+    const stream = renderToPipeableStream(
+      <NextIntlClientProvider locale="en" messages={{ common: { states: enMessages.common.states } }} timeZone="UTC">
+        <ManifestProvider>
+          <View {...props} />
+        </ManifestProvider>
+      </NextIntlClientProvider>,
+      {
+        onAllReady() {
+          stream.pipe(output);
+        },
+        onError: reject,
       },
-      onError: reject,
-    });
+    );
   });
 }
 

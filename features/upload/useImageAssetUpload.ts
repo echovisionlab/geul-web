@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { notifications } from '@/components/core/Notification';
 import { useUpload } from '@/lib/hooks/useUpload';
@@ -31,25 +31,56 @@ export function useImageAssetUpload({
   disabledMessage = uploadFailedMessage,
 }: UseImageAssetUploadOptions) {
   const [uploadProgress, setUploadProgress] = useState(0);
-  const { upload, isUploading } = useUpload(uploadType);
+  const { upload } = useUpload(uploadType);
+  const [isUploading, setIsUploading] = useState(false);
+  const generation = useRef(0);
+  const active = useRef(false);
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    generation.current += 1;
+    // Target changes invalidate callbacks, but the shared transport remains owned until settlement.
+    setIsUploading(active.current);
+    setUploadProgress(0);
+    return () => {
+      mounted.current = false;
+      generation.current += 1;
+    };
+  }, [entityId, entityType, uploadType, enabled]);
 
   const handleUpload = useCallback(
     async (blob: Blob) => {
-      setUploadProgress(0);
+      if (active.current) {
+        return;
+      }
       if (!enabled) {
         notifications.show({ message: disabledMessage, tone: 'danger' });
         return;
       }
 
+      const request = generation.current;
+      active.current = true;
+      setIsUploading(true);
+      setUploadProgress(0);
       try {
         const { fileId } = await upload(blob, {
           entityId,
           entityType,
           fileName: typeof fileName === 'function' ? fileName() : fileName,
-          onProgress: (progress) => setUploadProgress(progress.percentage),
+          onProgress: (progress) => {
+            if (generation.current === request) {
+              setUploadProgress(progress.percentage);
+            }
+          },
         });
+        if (generation.current !== request) {
+          return;
+        }
         await onUploaded(fileId);
       } catch (error) {
+        if (generation.current !== request) {
+          return;
+        }
         logger.error('Upload error', {
           error: error instanceof Error ? error.message : String(error),
         });
@@ -58,7 +89,11 @@ export function useImageAssetUpload({
           tone: 'danger',
         });
       } finally {
-        setUploadProgress(0);
+        active.current = false;
+        if (mounted.current) {
+          setIsUploading(false);
+          setUploadProgress(0);
+        }
       }
     },
     [disabledMessage, enabled, entityId, entityType, fileName, onUploaded, upload, uploadFailedMessage],

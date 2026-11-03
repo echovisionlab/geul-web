@@ -47,6 +47,7 @@ interface Props {
   badgeCount: number;
   placeholder?: string;
   disabled?: boolean;
+  applying?: boolean;
   applyMode: 'field' | 'all';
   hasChanges?: boolean;
   valueInputWithinPortal?: boolean;
@@ -75,6 +76,7 @@ export function MultiFilterEditorView({
   badgeCount,
   placeholder,
   disabled = false,
+  applying = false,
   applyMode,
   hasChanges = true,
   valueInputWithinPortal = true,
@@ -242,7 +244,7 @@ export function MultiFilterEditorView({
             <DsSectionCard padding="none" appearance="plain" border="block-start">
               <DsLayoutInset space="xs">
                 <DsLayoutInset space="none">
-                  <Button size="xs" fullWidth onClick={onApply} disabled={disabled}>
+                  <Button size="xs" fullWidth onClick={onApply} loading={applying} disabled={disabled}>
                     {tCommonActions('apply')}
                   </Button>
                 </DsLayoutInset>
@@ -320,7 +322,7 @@ export function MultiFilterEditorView({
               {tCommonActions('clearAll')}
             </Button>
             {applyMode === 'all' ? (
-              <Button size="xs" onClick={onApply} disabled={disabled || !hasChanges}>
+              <Button size="xs" onClick={onApply} loading={applying} disabled={disabled || !hasChanges}>
                 {tCommonActions('apply')}
               </Button>
             ) : null}

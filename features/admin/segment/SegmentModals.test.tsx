@@ -7,12 +7,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SegmentModals } from './SegmentModals';
 import { SegmentModalProvider, useSegmentModal } from './SegmentModalContext';
 
-const actions = vi.hoisted(() => ({ get: vi.fn(), update: vi.fn() }));
+const actions = vi.hoisted(() => ({ get: vi.fn(), update: vi.fn(), estimate: vi.fn() }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 vi.mock('@/lib/actions/audience', () => ({
   archiveSegmentAction: vi.fn(),
   createSegmentAction: vi.fn(),
-  estimateSegmentCountAction: vi.fn(),
+  estimateSegmentCountAction: actions.estimate,
   getSegmentAction: actions.get,
   restoreSegmentAction: vi.fn(),
   updateSegmentAction: actions.update,
@@ -66,6 +66,7 @@ function segment(name: string, accountRoles: string[] = ['user']) {
 beforeEach(() => {
   actions.get.mockReset();
   actions.update.mockReset();
+  actions.estimate.mockReset();
 });
 
 describe('SegmentModals edit lifecycle', () => {
@@ -144,4 +145,22 @@ describe('SegmentModals edit lifecycle', () => {
       });
     }
   });
+});
+
+it('does not apply an estimate to a different segment opened during the request', async () => {
+  const estimate = deferred<{ count: number }>();
+  actions.get.mockImplementation((id: string) =>
+    Promise.resolve(segment(id === 'segment-a' ? 'Segment A' : 'Segment B')),
+  );
+  actions.estimate.mockReturnValueOnce(estimate.promise);
+  const { user } = render(<Scenario />);
+  await user.click(screen.getByRole('button', { name: 'Edit segment A' }));
+  await screen.findByRole('textbox', { name: 'Name' });
+  await user.click(screen.getByRole('button', { name: 'Estimate Count' }));
+  await user.click(screen.getByRole('button', { name: 'Close' }));
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  await user.click(screen.getByRole('button', { name: 'Edit segment B' }));
+  expect(await screen.findByRole('textbox', { name: 'Name' })).toHaveValue('Segment B');
+  await act(async () => estimate.resolve({ count: 999 }));
+  expect(screen.queryByText(/999/)).not.toBeInTheDocument();
 });

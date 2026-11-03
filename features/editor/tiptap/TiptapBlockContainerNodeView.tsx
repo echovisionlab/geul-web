@@ -1,7 +1,9 @@
 'use client';
 
 import { liveNodeView } from '@/features/editor/tiptap/live-node-view';
-import { useCallback, useMemo, useState } from 'react';
+import { PageLoader } from '@/features/site/PageLoader';
+import { Alert } from '@/components/core/Alert';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   NodeViewContent,
   NodeViewWrapper,
@@ -155,6 +157,7 @@ function TiptapBlockContainerNodeView({
   authoringMode,
 }: NodeViewProps & { authoringMode: EditorAuthoringMode | null }) {
   const t = useTranslations('editorCommon.editor');
+  const tCommon = useTranslations('common');
   const emoji = useTranslations('editorCommon.editor.slashMenu.items.emoji');
   const searchCombobox = useTranslations('searchCombobox');
   const textSelected = useEditorState({
@@ -164,8 +167,22 @@ function TiptapBlockContainerNodeView({
   });
   const [iconPickerRequested, setIconPickerRequested] = useState(false);
   const emojiData = useTiptapEmojiData();
-  // The Emoji data loads when the picker is requested; the popover opens once its items exist.
-  const iconPickerOpened = iconPickerRequested && emojiData !== null;
+  const [emojiFailed, setEmojiFailed] = useState(false);
+  const iconPickerOpened = iconPickerRequested;
+  useEffect(() => {
+    let active = true;
+    if (iconPickerRequested && !emojiData) {
+      setEmojiFailed(false);
+      void loadTiptapEmojiData().catch(() => {
+        if (active) {
+          setEmojiFailed(true);
+        }
+      });
+    }
+    return () => {
+      active = false;
+    };
+  }, [iconPickerRequested, emojiData]);
   const [iconQuery, setIconQuery] = useState('');
   const [dragging, setDragging] = useState(false);
   const labels: TiptapBlockMenuLabels = useMemo(
@@ -271,8 +288,6 @@ function TiptapBlockContainerNodeView({
                 setIconPickerRequested(opened);
                 if (!opened) {
                   setIconQuery('');
-                } else if (!emojiData) {
-                  loadTiptapEmojiData().catch(() => setIconPickerRequested(false));
                 }
               }}
               placement="bottom-start"
@@ -294,20 +309,26 @@ function TiptapBlockContainerNodeView({
                 </IconButton>
               </Popover.Target>
               <Popover.Dropdown padding="compact" role="dialog" data-testid="tiptap-callout-icon-popover">
-                <EmojiPickerPanel
-                  density="compact"
-                  title={emoji('title')}
-                  searchPlaceholder={emoji('subtext')}
-                  noResults={searchCombobox('noResults')}
-                  query={iconQuery}
-                  items={iconPickerItems}
-                  onQueryChange={setIconQuery}
-                  onSelect={(item) => {
-                    setIconPickerRequested(false);
-                    setIconQuery('');
-                    setCalloutIcon(item.value);
-                  }}
-                />
+                {emojiFailed ? (
+                  <Alert tone="danger">{tCommon('errors.generic')}</Alert>
+                ) : !emojiData ? (
+                  <PageLoader placement="flow" minHeight={160} size="xs" />
+                ) : (
+                  <EmojiPickerPanel
+                    density="compact"
+                    title={emoji('title')}
+                    searchPlaceholder={emoji('subtext')}
+                    noResults={searchCombobox('noResults')}
+                    query={iconQuery}
+                    items={iconPickerItems}
+                    onQueryChange={setIconQuery}
+                    onSelect={(item) => {
+                      setIconPickerRequested(false);
+                      setIconQuery('');
+                      setCalloutIcon(item.value);
+                    }}
+                  />
+                )}
               </Popover.Dropdown>
             </Popover>
           </div>

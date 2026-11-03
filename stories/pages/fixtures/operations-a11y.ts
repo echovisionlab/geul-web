@@ -17,5 +17,7 @@ export async function operationsLabels(globals: { locale?: unknown }) {
     mapTheme: createTranslator({ locale, messages, namespace: 'adminList.mapThemes.editor' }),
     map: createTranslator({ locale, messages, namespace: 'mapControls' }),
     dataTable: createTranslator({ locale, messages, namespace: 'dataTable' }),
+    emailTemplates: createTranslator({ locale, messages, namespace: 'adminList.emailTemplates' }),
+    localBackups: createTranslator({ locale, messages, namespace: 'localBackups' }),
   };
 }

@@ -25,6 +25,7 @@ import {
 } from '@/lib/actions/program-event';
 import { getUploadSelectionMimeTypes, UPLOAD_CONFIGS } from '@/lib/constants/upload-config';
 import { sanitizeSlugInput, toSlugInputValue } from '@/lib/utils/slug';
+import { useEditorSaveState } from '@/lib/editor/useEditorSaveState';
 import { flushEditorSavesOrNotify } from '@/lib/editor/flush-editor-saves-or-notify';
 import { requireActionSuccess } from '@/lib/editor/require-action-success';
 import { useDebouncedPatch } from '@/lib/editor/useDebouncedPatch';
@@ -59,6 +60,7 @@ function useProgramEventSeriesEditorViewModel({
   baseUrl,
 }: ProgramEventSeriesEditorProps) {
   const router = useRouter();
+  const saveState = useEditorSaveState(`program_event_series:${seriesId}`, true, true);
   const tCommon = useTranslations('common');
   const tCommonEntities = useTranslations('common.entities');
   const tCommonNotifications = useTranslations('common.notifications');
@@ -151,8 +153,16 @@ function useProgramEventSeriesEditorViewModel({
     scope: seriesId,
     document: `program_event_series:${seriesId}`,
   });
+  const [flushingCommand, setFlushingCommand] = useState<'back' | 'status' | 'delete' | null>(null);
   const flushPendingSaves = useCallback(
-    () => flushEditorSavesOrNotify(`program_event_series:${seriesId}`, tCommonNotifications('saveFailed')),
+    async (command: 'back' | 'status' | 'delete' = 'back') => {
+      setFlushingCommand(command);
+      try {
+        return await flushEditorSavesOrNotify(`program_event_series:${seriesId}`, tCommonNotifications('saveFailed'));
+      } finally {
+        setFlushingCommand(null);
+      }
+    },
     [seriesId, tCommonNotifications],
   );
   const handleBack = useCallback(async () => {
@@ -162,7 +172,7 @@ function useProgramEventSeriesEditorViewModel({
   }, [flushPendingSaves, router]);
   const handleStatusChange = useCallback(
     async (nextStatus: SeriesStatus) => {
-      if (nextStatus === status || !(await flushPendingSaves())) {
+      if (nextStatus === status || !(await flushPendingSaves('status'))) {
         return;
       }
       const previousStatus = status;
@@ -174,7 +184,7 @@ function useProgramEventSeriesEditorViewModel({
     [flushPendingSaves, status, updateSeriesStatus.mutate],
   );
   const handleDelete = useCallback(async () => {
-    if (await flushPendingSaves()) {
+    if (await flushPendingSaves('delete')) {
       deleteSeries.mutate();
     }
   }, [deleteSeries.mutate, flushPendingSaves]);
@@ -214,8 +224,9 @@ function useProgramEventSeriesEditorViewModel({
     handleBack,
     handleStatusChange,
     handleDelete,
-    updateSeriesStatus: { isPending: updateSeriesStatus.isPending },
-    deleteSeries: { isPending: deleteSeries.isPending },
+    saveState,
+    updateSeriesStatus: { isPending: updateSeriesStatus.isPending || flushingCommand === 'status' },
+    deleteSeries: { isPending: deleteSeries.isPending || flushingCommand === 'delete' },
     posterUrl,
     isUploading,
     uploadProgress,
@@ -230,7 +241,7 @@ function useProgramEventSeriesEditorViewModel({
     seriesId,
     slug,
     setSlug,
-    updateSeries: { mutate: updateSeries.mutate },
+    updateSeries: { mutate: updateSeries.mutate, isPending: updateSeries.isPending },
     setSummary,
     description,
     setDescription,
@@ -255,6 +266,7 @@ export function ProgramEventSeriesEditorView({ model }: { model: ProgramEventSer
     handleBack,
     handleStatusChange,
     handleDelete,
+    saveState,
     updateSeriesStatus,
     deleteSeries,
     posterUrl,
@@ -287,6 +299,7 @@ export function ProgramEventSeriesEditorView({ model }: { model: ProgramEventSer
         titlePlaceholder={tCommon('states.untitledEntity', { entity: tCommon('entities.programEventSeries') })}
         status={status}
         statusOptions={statusOptions}
+        saveState={saveState}
         isConnected
         isSynced
         onBack={handleBack}
@@ -339,7 +352,8 @@ export function ProgramEventSeriesEditorView({ model }: { model: ProgramEventSer
         entityId={seriesId}
         slug={toSlugInputValue(slug)}
         onChange={(value) => setSlug(sanitizeSlugInput(value))}
-        onBlur={() => updateSeries.mutate({ slug })}
+        onBlur={() => debouncedUpdate({ slug })}
+        saving={updateSeries.isPending}
       />
 
       <SectionCard>

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { UploadSessionStatus } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NotificationRegion, notifications } from '@/components/core/Notification';
@@ -7,6 +8,7 @@ import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
 import type { ReleaseTrackItem } from '@/lib/collab/schemas/release-fields.schema';
 import { act, render, screen, waitFor, within } from '@/test/render';
+import { UploadResumeStateCode } from '@/lib/upload/resume-state';
 import { ReleaseEditorAccessProvider } from './ReleaseEditorAccessContext';
 import { ReleaseTracksSection, SortableTrackListItem } from './ReleaseTracksSection';
 
@@ -17,7 +19,7 @@ const mocks = vi.hoisted(() => ({
   listUsers: vi.fn(),
   runtime: vi.fn((_options: unknown): { value: unknown; isLoading: boolean } => ({ value: null, isLoading: false })),
   resume: vi.fn((): { code: string; resumeNotice: any; hasActiveSession: boolean } => ({
-    code: 'idle',
+    code: UploadResumeStateCode.IDLE,
     resumeNotice: null,
     hasActiveSession: false,
   })),
@@ -66,14 +68,14 @@ function renderSection(tracks = [track()], onTracksChange = vi.fn()) {
 }
 function resumeSession() {
   mocks.resume.mockReturnValue({
-    code: 'available',
+    code: UploadResumeStateCode.AVAILABLE,
     hasActiveSession: true,
     resumeNotice: {
       fileId: 'resume-file',
       uploadId: 'resume-upload',
       attemptId: 'resume-attempt',
       fileName: 'audio.wav',
-      status: 2,
+      status: UploadSessionStatus.UPLOADING,
     },
   });
 }
@@ -89,7 +91,7 @@ afterEach(() => {
   client.clear();
   act(() => notifications.clean());
   vi.clearAllMocks();
-  mocks.resume.mockReturnValue({ code: 'idle', resumeNotice: null, hasActiveSession: false });
+  mocks.resume.mockReturnValue({ code: UploadResumeStateCode.IDLE, resumeNotice: null, hasActiveSession: false });
   mocks.runtime.mockReturnValue({ value: null, isLoading: false });
 });
 
@@ -214,7 +216,8 @@ describe('ReleaseTracksSection', () => {
     expect(await screen.findByText('Track credits')).toBeInTheDocument();
   });
 
-  it('renders a tracked interrupted upload below the desktop track', () => {
+  it('renders a tracked interrupted upload below the desktop track only after availability is confirmed', () => {
+    resumeSession();
     renderSection([
       track({
         pending_upload_file_id: 'pending-file',
@@ -270,4 +273,67 @@ describe('ReleaseTracksSection', () => {
     expect(within(row).getByRole('progressbar', { name: 'Processing 45%' })).toBeInTheDocument();
     expect(screen.getByText('Processing 45%')).toBeInTheDocument();
   });
+});
+
+it.each([
+  [UploadResumeStateCode.LOOKUP_PENDING, 'Loading...'],
+  [UploadResumeStateCode.LOOKUP_ERROR, 'Failed to load data.'],
+  [UploadResumeStateCode.MISSING_SESSION, 'Not available'],
+] as const)('renders %s instead of a persisted resume warning', (code, label) => {
+  mocks.resume.mockReturnValue({ code, resumeNotice: null, hasActiveSession: false });
+  renderSection([track({ pending_upload_file_id: 'pending-file', pending_upload_status: 'pending' })]);
+  expect(screen.getByText(label)).toBeInTheDocument();
+  expect(screen.queryByText('Interrupted upload found')).not.toBeInTheDocument();
+});
+
+it('keeps finalizing recovery ahead of the persisted resume warning', () => {
+  resumeSession();
+  mocks.resume.mockReturnValue({
+    ...mocks.resume(),
+    resumeNotice: { ...mocks.resume().resumeNotice, status: UploadSessionStatus.FINALIZING },
+  });
+  renderSection([track({ pending_upload_file_id: 'pending-file', pending_upload_status: 'pending' })]);
+  expect(screen.getByText('Finalizing')).toBeInTheDocument();
+  expect(screen.queryByText('Interrupted upload found')).not.toBeInTheDocument();
+});
+
+it('preserves an expired marker while resume lookup is pending', () => {
+  mocks.resume.mockReturnValue({
+    code: UploadResumeStateCode.LOOKUP_PENDING,
+    resumeNotice: null,
+    hasActiveSession: false,
+  });
+  renderSection([track({ pending_upload_file_id: 'pending-file', pending_upload_status: 'expired' })]);
+  expect(screen.getByText('Upload session expired. Start a fresh upload.')).toBeInTheDocument();
+  expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+});
+
+it('does not infer desktop resume availability from an idle persisted marker', () => {
+  renderSection([track({ pending_upload_file_id: 'pending-file', pending_upload_status: 'pending' })]);
+  expect(screen.queryByText('Interrupted upload found')).not.toBeInTheDocument();
+});
+
+it('shows local recovery pending in the mobile row without a transfer percentage', () => {
+  mocks.resume.mockReturnValue({
+    code: UploadResumeStateCode.LOOKUP_PENDING,
+    resumeNotice: null,
+    hasActiveSession: false,
+  });
+  render(
+    <QueryClientProvider client={client}>
+      <SortableTrackListItem
+        track={track({ pending_upload_file_id: 'pending-file' })}
+        expanded={false}
+        onToggle={vi.fn()}
+        onDelete={vi.fn()}
+        uploadProgress={null}
+        onUploadProgressChange={vi.fn()}
+        editor={null}
+        formatDuration={() => '1:30'}
+      />
+    </QueryClientProvider>,
+  );
+  expect(screen.getByRole('status')).toHaveTextContent('Loading...');
+  expect(screen.getByRole('progressbar', { name: 'Loading...' })).not.toHaveAttribute('aria-valuenow');
+  expect(screen.queryByText('Interrupted upload found')).not.toBeInTheDocument();
 });

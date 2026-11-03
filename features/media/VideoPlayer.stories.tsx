@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
 import { expect } from 'storybook/test';
+import { VideoPlayerView } from './ui/VideoPlayerView';
+import { PageLoader } from '@/features/site/PageLoader';
 import { VideoPlayer } from './VideoPlayer';
 const meta = {
   title: 'Feature/Media/Video Player',
@@ -36,3 +38,15 @@ export const SmallPreview: Story = {
   },
 };
 export const Processing: Story = { args: { isReady: false, isProcessing: true } };
+
+export const RuntimePreparation: Story = {
+  render: () => (
+    <VideoPlayerView
+      name="Video player"
+      preparing
+      processing={false}
+      loadingSurface={<PageLoader minHeight={0} />}
+      processingSurface={null}
+    />
+  ),
+};

@@ -67,6 +67,7 @@ export function CatalogueLoadingFallback({
       imageSrc={loaderImageSrc}
       imageUnoptimized={loaderImageUnoptimized}
       imageAlt={loadingMessage}
+      message={loadingMessage}
     />
   );
 }

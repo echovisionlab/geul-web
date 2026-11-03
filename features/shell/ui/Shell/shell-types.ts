@@ -34,6 +34,8 @@ export interface ShellViewFooter {
 export interface ShellViewLabels {
   navigation: string;
   toggleNavigation: string;
+  navigationLoadFailed: string;
+  retryNavigation: string;
   close: string;
   search: string;
   searchTooltip: string;
@@ -54,7 +56,7 @@ export interface ShellViewEvents {
   onToggleNavigation: () => void;
   onOpenUserMenu: () => void;
   onCloseUserMenu: () => void;
-  onSearch: () => void;
+  onSearch: () => void | Promise<void>;
   /** Pointer or focus reached a search trigger; start loading search (optional). */
   onSearchIntent?: () => void;
   onToggleColorScheme: () => void;
@@ -80,6 +82,7 @@ export interface ShellViewProps {
   loginHref: string;
   navigationOpened: boolean;
   userMenuOpened: boolean;
+  signOutPending?: boolean;
   themeMode: 'light' | 'dark' | null;
   user: ShellViewUser | null;
   headerItems: ShellViewNavigationItem[];
@@ -92,9 +95,11 @@ export interface ShellViewProps {
   slots: ShellViewSlots;
 }
 
-/** Labels that depend on client state (theme, platform); the rest of `ShellViewLabels` is static. */
+/** Labels whose values depend on the client theme or platform. */
 export type ShellDynamicLabelKey = 'searchTooltip' | 'themeTooltip';
-export type ShellStaticLabels = Omit<ShellViewLabels, ShellDynamicLabelKey>;
+/** Client islands also receive required recovery copy through their controller. */
+export type ShellStateLabelKey = ShellDynamicLabelKey | 'navigationLoadFailed' | 'retryNavigation';
+export type ShellStaticLabels = Omit<ShellViewLabels, ShellStateLabelKey>;
 
 /**
  * Serializable input of the server-rendered layout. Interactive state (open panels, session user,
@@ -115,11 +120,12 @@ export interface ShellLayoutProps {
 export interface ShellState {
   navigationOpened: boolean;
   userMenuOpened: boolean;
+  signOutPending?: boolean;
   themeMode: 'light' | 'dark' | null;
   user: ShellViewUser | null;
   loginHref: string;
   showChangelog: boolean;
   isItemActive: (item: ShellViewNavigationItem) => boolean;
-  labels: Pick<ShellViewLabels, ShellDynamicLabelKey>;
+  labels: Pick<ShellViewLabels, ShellStateLabelKey>;
   events: ShellViewEvents;
 }

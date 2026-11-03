@@ -1,4 +1,5 @@
 'use client';
+import { QueryLoadingSurface } from '../QueryLoadingSurface';
 
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
@@ -68,6 +69,7 @@ function ArtistListSettingsForm({ props, updateProps, readOnly = false }: Artist
 
   return (
     <>
+      <QueryLoadingSurface queries={[labelsQuery]} />
       <QueryErrorAlert queries={[labelsQuery]} />
       <ListBlockEditorBase
         readOnly={readOnly}

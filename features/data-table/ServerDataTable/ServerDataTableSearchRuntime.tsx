@@ -13,6 +13,7 @@ import {
   useServerTablePathname as usePathname,
   useServerTableRouter as useRouter,
   useServerTableSearchParams as useSearchParams,
+  useServerTablePending,
 } from './ServerDataTableNavigation';
 import { useTranslations } from 'next-intl';
 
@@ -66,8 +67,8 @@ export function ServerDataTableSearch({ namespace, placeholder, debounceMs = 300
 
       const url = buildSearchUrl(namespace, searchParams, normalizedDebounced || undefined, pathname);
 
-      startTransition(() => {
-        router.push(url, { scroll: false });
+      startTransition(async () => {
+        await router.push(url, { scroll: false });
       });
     }
   }, [debouncedSearch, namespace, searchParams, pathname, router]);
@@ -92,18 +93,7 @@ export function ServerDataTableSearch({ namespace, placeholder, debounceMs = 300
     }
   }, [isPending]);
 
-  useEffect(() => {
-    const tableRoot = rootRef.current?.closest('[data-datatable-root]');
-    if (!tableRoot) {
-      return;
-    }
-
-    tableRoot.setAttribute('data-pending', isPending ? 'true' : 'false');
-
-    return () => {
-      tableRoot.setAttribute('data-pending', 'false');
-    };
-  }, [isPending]);
+  useServerTablePending(rootRef, isPending);
 
   return (
     <DsLayoutStack flexible ref={rootRef} gap="none">

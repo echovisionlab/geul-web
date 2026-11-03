@@ -4,6 +4,7 @@ import { PublicSiteVariable, PublicSiteVariableLink, PublicSiteVariableText } fr
 import { useSiteSettings } from '@/lib/contexts/ManifestContext';
 import { siteVariableContext } from '@/lib/site-variables';
 import dynamic from 'next/dynamic';
+import { PageLoader } from '@/features/site/PageLoader';
 import { useId, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import type { RichTextInline, RichTextStyledText } from '@echovisionlab/geul-proto/content/block_content_pb.ts';
@@ -35,8 +36,9 @@ import {
 } from './GeneratedRichTextViewUtils';
 import type { GeneratedRichTextBlock, GeneratedRichTextBlockViewProps } from './GeneratedRichTextBlockView.types';
 
-const ExternalVideoView = dynamic(() =>
-  import('@/features/media/ExternalVideoView').then((module) => module.ExternalVideoView),
+const ExternalVideoView = dynamic(
+  () => import('@/features/media/ExternalVideoView').then((module) => module.ExternalVideoView),
+  { loading: () => <PageLoader placement="flow" /> },
 );
 
 const GeneratedInlineMathView = dynamic<{ source: string }>(() =>
@@ -47,20 +49,27 @@ const GeneratedCodeBlockView = dynamic<{ block: GeneratedRichTextBlock<'code-blo
 );
 const GeneratedExecutableBlockView = dynamic<{
   block: GeneratedRichTextBlock<'p5-sketch' | 'three-scene' | 'shader'>;
-}>(() => import('./GeneratedExecutableBlockView').then((module) => module.GeneratedExecutableBlockView));
+}>(() => import('./GeneratedExecutableBlockView').then((module) => module.GeneratedExecutableBlockView), {
+  loading: () => <PageLoader placement="flow" />,
+});
 const GeneratedFileBlockView = dynamic<{
   block: GeneratedRichTextBlock<'file'>;
   downloadOwner?: GeneratedRichTextBlockViewProps['downloadOwner'];
-}>(() => import('./GeneratedFileBlockView').then((module) => module.GeneratedFileBlockView));
+}>(() => import('./GeneratedFileBlockView').then((module) => module.GeneratedFileBlockView), {
+  loading: () => <PageLoader placement="flow" />,
+});
 const GeneratedMapBlockView = dynamic<{
   block: GeneratedRichTextBlock<'map'>;
   requestedLocale?: string;
-}>(() => import('./GeneratedMapBlockView').then((module) => module.GeneratedMapBlockView));
+}>(() => import('./GeneratedMapBlockView').then((module) => module.GeneratedMapBlockView), {
+  loading: () => <PageLoader placement="flow" />,
+});
 const GeneratedMathBlockView = dynamic<{ block: GeneratedRichTextBlock<'math'> }>(() =>
   import('./GeneratedMathBlockView').then((module) => module.GeneratedMathBlockView),
 );
-const GeneratedMermaidBlockView = dynamic<{ block: GeneratedRichTextBlock<'mermaid'> }>(() =>
-  import('./GeneratedMermaidBlockView').then((module) => module.GeneratedMermaidBlockView),
+const GeneratedMermaidBlockView = dynamic<{ block: GeneratedRichTextBlock<'mermaid'> }>(
+  () => import('./GeneratedMermaidBlockView').then((module) => module.GeneratedMermaidBlockView),
+  { loading: () => <PageLoader placement="flow" /> },
 );
 
 function styledText(item: Pick<RichTextStyledText, 'text' | 'styles'>, key: string): ReactNode {

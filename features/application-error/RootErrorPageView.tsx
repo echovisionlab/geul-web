@@ -9,7 +9,7 @@ export function RootErrorPageView({
 }: {
   status?: number;
   locale?: SupportedLocale;
-  onRetry: () => void;
+  onRetry: () => void | Promise<unknown>;
 }) {
   return (
     <ApplicationErrorPageView

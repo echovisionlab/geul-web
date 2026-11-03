@@ -1,4 +1,5 @@
 'use client';
+import { QueryLoadingSurface } from '../QueryLoadingSurface';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
@@ -88,6 +89,7 @@ function ReleaseListSettingsForm({ props, updateProps, readOnly = false }: Relea
 
   return (
     <>
+      <QueryLoadingSurface queries={[labelsQuery, artistsQuery, categoriesQuery]} />
       <QueryErrorAlert queries={[labelsQuery, artistsQuery, categoriesQuery]} />
       <ListBlockEditorBase
         readOnly={readOnly}

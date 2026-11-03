@@ -1,12 +1,14 @@
 'use client';
 import { List, Text as DsText } from '@/components/core/Typography';
+import { PageLoader } from '@/features/site/PageLoader';
+import { Alert } from '@/components/core/Alert';
 import { ConfirmationDialog } from '@/features/confirmation';
 
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 
 import { unwrapQueryResult, type QueryValue } from '@/lib/api/query-result';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconEdit, IconTrash } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
@@ -40,22 +42,49 @@ export function LabelRowMenu({
   const router = useRouter();
   const [deleteOpened, setDeleteOpened] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewFailed, setPreviewFailed] = useState(false);
+  const previewRequestRef = useRef(0);
+  useEffect(() => {
+    setDeleteOpened(false);
+    setDeletePreview(null);
+    return () => {
+      previewRequestRef.current += 1;
+    };
+  }, [label.id]);
+  const closeDelete = () => {
+    previewRequestRef.current += 1;
+    setDeleteOpened(false);
+    setDeletePreview(null);
+  };
   const [deletePreview, setDeletePreview] = useState<QueryValue<
     Awaited<ReturnType<typeof previewDeleteLabelAction>>
   > | null>(null);
 
   const openDelete = async () => {
-    setDeleteLoading(true);
+    const request = ++previewRequestRef.current;
+    setDeleteOpened(true);
+    setDeletePreview(null);
+    setPreviewLoading(true);
+    setPreviewFailed(false);
     try {
       const preview = await previewAction(label.id).then(unwrapQueryResult);
+      if (request !== previewRequestRef.current) {
+        return;
+      }
       if (!preview) {
-        notifications.show({ message: tCommon('messages.failedToLoad'), tone: 'danger' });
+        setPreviewFailed(true);
         return;
       }
       setDeletePreview(preview);
-      setDeleteOpened(true);
+    } catch {
+      if (request === previewRequestRef.current) {
+        setPreviewFailed(true);
+      }
     } finally {
-      setDeleteLoading(false);
+      if (request === previewRequestRef.current) {
+        setPreviewLoading(false);
+      }
     }
   };
 
@@ -107,10 +136,7 @@ export function LabelRowMenu({
       <ConfirmationDialog
         intent="delete"
         opened={deleteOpened}
-        onClose={() => {
-          setDeleteOpened(false);
-          setDeletePreview(null);
-        }}
+        onClose={closeDelete}
         onConfirm={handleDelete}
         title={tCommon('actions.delete')}
         message={
@@ -121,6 +147,8 @@ export function LabelRowMenu({
                 strong: (chunks) => <strong>{chunks}</strong>,
               })}
             </DsText>
+            {previewLoading ? <PageLoader placement="flow" /> : null}
+            {previewFailed ? <Alert tone="danger">{tCommon('messages.failedToLoad')}</Alert> : null}
             {deletePreview && deletePreview.impacts.length > 0 ? (
               <>
                 <DsText size="sm" tone="warning">
@@ -139,6 +167,7 @@ export function LabelRowMenu({
         cancelLabel={tCommon('actions.cancel')}
         closeLabel={tCommon('actions.close')}
         loading={deleteLoading}
+        confirmDisabled={previewLoading || previewFailed || !deletePreview}
       />
     </>
   );

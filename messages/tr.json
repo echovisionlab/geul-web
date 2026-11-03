@@ -1332,6 +1332,8 @@
       }
     },
     "verification": {
+      "checking": "E-posta değişikliği durumu kontrol ediliyor…",
+      "unavailable": "E-posta değişikliği durumu kontrol edilemedi. Lütfen tekrar kontrol edin.",
       "loading": "Doğrulama formu yükleniyor...",
       "startOver": "Yeniden başla",
       "errors": {

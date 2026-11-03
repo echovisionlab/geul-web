@@ -1,4 +1,5 @@
 'use client';
+import type { ReactNode } from 'react';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
 import { SectionCard as DsSectionCard } from '@/components/core/Section';
@@ -16,6 +17,8 @@ import { TextButton } from '@/components/core/TextButton';
 
 interface EmailLayoutTargetEditorProps {
   units: readonly MaterializedEmailLayoutUnit[];
+  isReady: boolean;
+  loadingSurface: ReactNode;
   editable?: boolean;
   onChange: (handle: string, value: string) => void;
   onUseSource: (handle: string) => void;
@@ -27,12 +30,17 @@ function unitLabel(unit: MaterializedEmailLayoutUnit, textLabel: string): string
 
 export function EmailLayoutTargetEditor({
   units,
+  isReady,
+  loadingSurface,
   editable = true,
   onChange,
   onUseSource,
 }: EmailLayoutTargetEditorProps) {
   const t = useTranslations('adminList.emailLayouts.detail.targetEditor');
 
+  if (!isReady) {
+    return loadingSurface;
+  }
   return (
     <ScrollArea size="fill">
       <DsLayoutInset space="sm">

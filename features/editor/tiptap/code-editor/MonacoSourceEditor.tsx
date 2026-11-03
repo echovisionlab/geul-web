@@ -1,5 +1,6 @@
 'use client';
 
+import { PageLoader } from '@/features/site/PageLoader';
 import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
 import type { Monaco } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
@@ -73,13 +74,15 @@ export function MonacoSourceEditor(props: MonacoSourceEditorProps) {
   useEffect(() => {
     setMounted(true);
   }, []);
-  const { ariaLabel, bordered = true, className, height = 320, language, loading } = props;
+  const { bordered = true, className, height = 320, language, loading } = props;
   const rootClassName = bordered ? classes.root : `${classes.root} ${classes.unframed}`;
   const wrapperClassName = className ? `${rootClassName} ${className}` : rootClassName;
-  const placeholder = loading ?? <div className={classes.loading}>{ariaLabel}</div>;
+  const placeholder = loading ?? <PageLoader placement="flow" height="100%" minHeight={0} />;
   return (
     <div
       className={wrapperClassName}
+      role="group"
+      aria-label={props.ariaLabel}
       data-testid="tiptap-monaco-source-editor"
       data-source-editor="monaco"
       dir="ltr"
@@ -89,7 +92,7 @@ export function MonacoSourceEditor(props: MonacoSourceEditorProps) {
     >
       <Suspense fallback={placeholder}>
         {/* SSR and the initial hydration pass keep the same surface without importing the browser engine. */}
-        {mounted ? <MonacoSourceEditorRuntime {...props} className={undefined} /> : placeholder}
+        {mounted ? <MonacoSourceEditorRuntime {...props} loading={placeholder} className={undefined} /> : placeholder}
       </Suspense>
     </div>
   );

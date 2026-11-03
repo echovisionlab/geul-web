@@ -1,3 +1,4 @@
+import { ServerDataTablePaginationNavigation } from './ServerDataTablePaginationNavigation';
 import { Pagination } from '@/components/core/Display';
 import { LayoutInline as DsLayoutInline, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
 
@@ -13,7 +14,7 @@ export interface ServerDataTablePaginationLabels {
 }
 
 export interface ServerDataTablePaginationViewProps {
-  onNavigate?: (href: string) => void;
+  onNavigate?: (href: string) => void | Promise<void>;
   currentPage: number;
   totalPages: number;
   getPageUrl: (page: number) => string;
@@ -40,23 +41,17 @@ export function ServerDataTablePaginationView({
 
   return (
     <DsLayoutInset blockStart="md">
-      <DsLayoutInline justify="center">
-        <Pagination
-          aria-label={navigation}
-          value={currentPage}
-          total={totalPages}
-          getHref={getPageUrl}
-          labels={labels}
-          onNavigate={
-            onNavigate
-              ? (event) => {
-                  event.preventDefault();
-                  onNavigate(event.href);
-                }
-              : undefined
-          }
-        />
-      </DsLayoutInline>
+      <ServerDataTablePaginationNavigation onNavigate={onNavigate}>
+        <DsLayoutInline justify="center">
+          <Pagination
+            aria-label={navigation}
+            value={currentPage}
+            total={totalPages}
+            getHref={getPageUrl}
+            labels={labels}
+          />
+        </DsLayoutInline>
+      </ServerDataTablePaginationNavigation>
     </DsLayoutInset>
   );
 }

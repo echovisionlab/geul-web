@@ -1,127 +1,57 @@
 // @vitest-environment jsdom
 import { mockBrowserNavigation } from '@/components/core/testing/browser-navigation';
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { TestProviders } from '@/test/TestProviders';
+import { describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen, waitFor, within } from '@/test/render';
 import { ServerDataTablePaginationView } from './ServerDataTablePaginationView';
-
+import { NavigationIntentProvider } from '@/components/core/Navigation/NavigationIntentProvider';
+import { ServerDataTableContent } from './ServerDataTableContent';
+const router = vi.hoisted(() => ({ push: vi.fn(), params: new URLSearchParams() }));
+vi.mock('next/navigation', () => ({
+  useRouter: () => router,
+  usePathname: () => '/test',
+  useSearchParams: () => router.params,
+}));
 const browserNavigation = mockBrowserNavigation();
-let host: HTMLDivElement;
-let root: Root;
-afterEach(() => {
-  act(() => root?.unmount());
-  host?.remove();
-});
+const labels = {
+  navigation: 'Post pages',
+  firstPage: 'First page',
+  previousPage: 'Previous page',
+  page: (page: number) => `Page ${page}`,
+  nextPage: 'Next page',
+  lastPage: 'Last page',
+};
+const props = { currentPage: 3, totalPages: 8, getPageUrl: (page: number) => `/admin/posts?page=${page}`, labels };
 describe('server table page navigation', () => {
   it.each(['ctrlKey', 'metaKey', 'shiftKey', 'altKey'] as const)(
-    'preserves native link intent for %s without invoking the client-navigation adapter',
-    (modifier) => {
+    'preserves native %s link intent',
+    async (modifier) => {
       const navigate = vi.fn();
-      host = document.createElement('div');
-      document.body.append(host);
-      root = createRoot(host);
-      browserNavigation.attach(host);
-      act(() =>
-        root.render(
-          <TestProviders>
-            <ServerDataTablePaginationView
-              currentPage={3}
-              totalPages={8}
-              getPageUrl={(page) => `/admin/posts?page=${page}`}
-              onNavigate={navigate}
-              labels={{
-                navigation: 'Post pages',
-                firstPage: 'First page',
-                previousPage: 'Previous page',
-                page: (page) => `Page ${page}`,
-                nextPage: 'Next page',
-                lastPage: 'Last page',
-              }}
-            />
-          </TestProviders>,
-        ),
-      );
-      const next = host.querySelector<HTMLAnchorElement>('a[aria-label="Next page"]')!;
-      const click = new MouseEvent('click', { bubbles: true, cancelable: true, [modifier]: true });
-      act(() => next.dispatchEvent(click));
+      const { user } = render(<ServerDataTablePaginationView {...props} onNavigate={navigate} />);
+      const next = screen.getByRole('link', { name: 'Next page' });
+      browserNavigation.attach(screen.getByRole('navigation', { name: 'Post pages' }));
+      fireEvent.click(next, { [modifier]: true });
       expect(navigate).not.toHaveBeenCalled();
       expect(browserNavigation.navigate).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({ href: next.href, [modifier]: true }),
+        expect.objectContaining({ href: new URL('/admin/posts?page=4', window.location.href).href, [modifier]: true }),
       );
-      expect(next.getAttribute('href')).toBe('/admin/posts?page=4');
-      act(() => next.click());
+      expect(next).toHaveAttribute('href', '/admin/posts?page=4');
+      await user.click(next);
       expect(navigate).toHaveBeenCalledExactlyOnceWith('/admin/posts?page=4');
       expect(browserNavigation.navigate).toHaveBeenCalledTimes(1);
     },
   );
-
-  it('names the navigation, marks the current page, and preserves the visible numbers', () => {
-    const navigate = vi.fn();
-    host = document.createElement('div');
-    document.body.append(host);
-    root = createRoot(host);
-    browserNavigation.attach(host);
-    act(() =>
-      root.render(
-        <TestProviders>
-          <ServerDataTablePaginationView
-            currentPage={3}
-            totalPages={8}
-            getPageUrl={(page) => `/admin/posts?page=${page}`}
-            onNavigate={navigate}
-            labels={{
-              navigation: 'Post pages',
-              firstPage: 'First page',
-              previousPage: 'Previous page',
-              page: (page) => `Page ${page}`,
-              nextPage: 'Next page',
-              lastPage: 'Last page',
-            }}
-          />
-        </TestProviders>,
-      ),
-    );
-    const nav = host.querySelector('nav');
-    expect(nav?.getAttribute('aria-label')).toBe('Post pages');
-    expect(nav?.querySelector('[aria-current="page"]')?.textContent).toBe('3');
-    expect(nav?.querySelectorAll('[aria-current="page"]').length).toBe(1);
-    const next = nav?.querySelector<HTMLAnchorElement>('a[aria-label="Next page"]');
-    expect(next?.getAttribute('href')).toBe('/admin/posts?page=4');
-    act(() => next?.click());
-    expect(navigate).toHaveBeenCalledExactlyOnceWith('/admin/posts?page=4');
-    expect(nav?.querySelector('a[aria-label="Page 8"]')?.textContent).toBe('8');
+  it('names pagination and preserves the current and last visible numbers', () => {
+    render(<ServerDataTablePaginationView {...props} />);
+    const nav = screen.getByRole('navigation', { name: 'Post pages' });
+    expect(within(nav).getByRole('link', { name: 'Page 3' })).toHaveAttribute('aria-current', 'page');
+    expect(within(nav).getByRole('link', { name: 'Page 3' })).toHaveTextContent('3');
+    expect(within(nav).getByRole('link', { name: 'Page 8' })).toHaveTextContent('8');
   });
-
-  it('keeps first/previous bounds as disabled non-links and the server ellipsis range', () => {
-    host = document.createElement('div');
-    document.body.append(host);
-    root = createRoot(host);
-    browserNavigation.attach(host);
-    act(() =>
-      root.render(
-        <TestProviders>
-          <ServerDataTablePaginationView
-            currentPage={1}
-            totalPages={8}
-            getPageUrl={(page) => `/admin/posts?page=${page}`}
-            labels={{
-              firstPage: 'First page',
-              previousPage: 'Previous page',
-              page: (page) => `Page ${page}`,
-              nextPage: 'Next page',
-              lastPage: 'Last page',
-            }}
-          />
-        </TestProviders>,
-      ),
-    );
-    for (const label of ['First page', 'Previous page']) {
-      const bound = host.querySelector<HTMLButtonElement>(`[aria-label="${label}"]`);
-      expect(bound?.tagName).toBe('BUTTON');
-      expect(bound?.disabled).toBe(true);
-    }
-    expect([...host.querySelectorAll('a')].map((link) => link.textContent || link.getAttribute('aria-label'))).toEqual([
+  it('keeps first and previous bounds disabled and the ellipsis range', () => {
+    render(<ServerDataTablePaginationView {...props} currentPage={1} />);
+    expect(screen.getByRole('button', { name: 'First page' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Previous page' })).toBeDisabled();
+    expect(screen.getAllByRole('link').map((link) => link.textContent || link.getAttribute('aria-label'))).toEqual([
       '1',
       '2',
       '3',
@@ -129,43 +59,78 @@ describe('server table page navigation', () => {
       'Next page',
       'Last page',
     ]);
-    expect(host.querySelector('a[aria-label="Last page"]')?.getAttribute('href')).toBe('/admin/posts?page=8');
+    expect(screen.getByRole('link', { name: 'Last page' })).toHaveAttribute('href', '/admin/posts?page=8');
   });
-
-  it('renders nothing for empty data unless the footer slot is reserved', () => {
-    host = document.createElement('div');
-    document.body.append(host);
-    root = createRoot(host);
-    browserNavigation.attach(host);
-    const labels = {
-      firstPage: 'First page',
-      previousPage: 'Previous page',
-      page: (page: number) => `Page ${page}`,
-      nextPage: 'Next page',
-      lastPage: 'Last page',
-    };
-    act(() =>
-      root.render(
-        <TestProviders>
-          <ServerDataTablePaginationView currentPage={1} totalPages={0} getPageUrl={String} labels={labels} />
-        </TestProviders>,
-      ),
+  it('omits navigation for empty data with or without a reserved footer', () => {
+    const { rerender } = render(<ServerDataTablePaginationView {...props} totalPages={0} />);
+    expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
+    rerender(<ServerDataTablePaginationView {...props} totalPages={0} reserveSpaceWhenHidden />);
+    expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
+  });
+  it('preserves the application navigation guard before tracking a page change', async () => {
+    router.push.mockReset();
+    const { user } = render(
+      <NavigationIntentProvider onNavigationIntent={(_intent, event) => event.preventDefault()}>
+        <ServerDataTablePaginationView {...props} />
+      </NavigationIntentProvider>,
     );
-    expect(host.querySelector('nav')).toBeNull();
-    act(() =>
-      root.render(
-        <TestProviders>
-          <ServerDataTablePaginationView
-            currentPage={1}
-            totalPages={0}
-            getPageUrl={String}
-            labels={labels}
-            reserveSpaceWhenHidden
+    await user.click(screen.getByRole('link', { name: 'Next page' }));
+    expect(router.push).not.toHaveBeenCalled();
+  });
+  it('keeps another island pending when the first navigation finishes', async () => {
+    const tasks: Array<() => void> = [];
+    router.push.mockReset().mockImplementation(() => new Promise<void>((resolve) => tasks.push(resolve)));
+    const { user } = render(
+      <div role="region" aria-label="Concurrent posts" data-datatable-root>
+        <ServerDataTableContent
+          columns={[]}
+          result={{ data: [], total: 0, page: 1, pageSize: 1, totalPages: 0 }}
+          getRowKey={() => ''}
+        />
+        <ServerDataTablePaginationView {...props} />
+        <ServerDataTablePaginationView {...props} labels={{ ...labels, navigation: 'Other pages' }} />
+      </div>,
+    );
+    await user.click(
+      within(screen.getByRole('navigation', { name: 'Post pages' })).getByRole('link', { name: 'Next page' }),
+    );
+    await user.click(
+      within(screen.getByRole('navigation', { name: 'Other pages' })).getByRole('link', { name: 'Next page' }),
+    );
+    await act(async () => tasks[0]());
+    expect(screen.getByRole('region', { name: 'Concurrent posts' })).toHaveAttribute('aria-busy', 'true');
+    await act(async () => tasks[1]());
+    await waitFor(() =>
+      expect(screen.getByRole('region', { name: 'Concurrent posts' })).toHaveAttribute('aria-busy', 'false'),
+    );
+  });
+  it.each([undefined, false])(
+    'retains current rows during deferred pagination with showPendingLoader=%s',
+    async (showPendingLoader) => {
+      let finish!: () => void;
+      router.push.mockReset().mockReturnValue(
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        }),
+      );
+      const { user } = render(
+        <div role="region" aria-label="Posts" data-datatable-root>
+          <ServerDataTableContent
+            columns={[{ key: 'title', header: 'Title', cell: (row: { id: string; title: string }) => row.title }]}
+            result={{ data: [{ id: 'one', title: 'Notes' }], total: 8, page: 3, pageSize: 1, totalPages: 8 }}
+            getRowKey={(row) => row.id}
+            showPendingLoader={showPendingLoader}
           />
-        </TestProviders>,
-      ),
-    );
-    expect(host.querySelector('nav')).toBeNull();
-    expect(host.querySelector('[aria-hidden="true"]')).not.toBeNull();
-  });
+          <ServerDataTablePaginationView {...props} />
+        </div>,
+      );
+      const row = screen.getByRole('cell', { name: 'Notes' });
+      await user.click(screen.getByRole('link', { name: 'Next page' }));
+      await waitFor(() => expect(screen.getByRole('region', { name: 'Posts' })).toHaveAttribute('aria-busy', 'true'));
+      expect(screen.getByRole('cell', { name: 'Notes' })).toBe(row);
+      await act(async () => finish());
+      expect(await screen.findByRole('cell', { name: 'Notes' })).toBeInTheDocument();
+      await waitFor(() => expect(screen.getByRole('region', { name: 'Posts' })).toHaveAttribute('aria-busy', 'false'));
+    },
+  );
 });

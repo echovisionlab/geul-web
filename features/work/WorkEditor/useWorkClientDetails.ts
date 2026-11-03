@@ -55,6 +55,8 @@ export function useWorkClientDetails(
     clientId,
     details: queries[index]?.data ?? null,
     isLoading: queries[index]?.isLoading ?? false,
+    isError: queries[index]?.isError ?? false,
+    retry: () => queries[index]?.refetch(),
   }));
   /** A client picked from search results already has its details. */
   const rememberClient = useCallback(

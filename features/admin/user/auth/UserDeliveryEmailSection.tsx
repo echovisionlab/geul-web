@@ -28,6 +28,7 @@ interface UserDeliveryEmailSectionProps {
   user: UserFull;
   suppression: UserEmailSuppressionStatus | null | undefined;
   isSuppressionLoading?: boolean;
+  suppressionError?: unknown;
   isReleasePending?: boolean;
   onReleaseSuppression?: (email: string) => void;
   onSetCanonicalEmail?: (email: string) => boolean | Promise<boolean>;
@@ -44,6 +45,7 @@ export function UserDeliveryEmailSection({
   user,
   suppression,
   isSuppressionLoading,
+  suppressionError,
   isReleasePending,
   onReleaseSuppression,
   onSetCanonicalEmail,
@@ -88,6 +90,7 @@ export function UserDeliveryEmailSection({
               data={candidateOptions}
               value={selectedCandidateValue}
               disabled={isSetCanonicalEmailPending}
+              aria-busy={isSetCanonicalEmailPending}
               allowDeselect={false}
               onChange={(value) => {
                 if (!value || value === selectedCandidateValue) {
@@ -117,9 +120,12 @@ export function UserDeliveryEmailSection({
           </DsLayoutInline>
         </InfoRow>
       )}
+      {suppressionError ? <Alert tone="danger">{tCommonStates('notAvailable')}</Alert> : null}
       {isSuppressionLoading ? (
         <InfoRow label={tPage('emailSuppression.title')}>
-          <DsText tone="secondary">{tCommonStates('loading')}</DsText>
+          <DsText tone="secondary" role="status">
+            {tCommonStates('loading')}
+          </DsText>
         </InfoRow>
       ) : null}
       {suppression ? (

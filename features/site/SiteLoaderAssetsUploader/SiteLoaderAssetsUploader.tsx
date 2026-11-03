@@ -7,7 +7,7 @@ import {
   LayoutInline as DsLayoutInline,
 } from '@/components/core/Layout';
 import { notifications } from '@/components/core/Notification';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { IconTrash } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import { useLocale, useTranslations } from 'next-intl';
@@ -42,6 +42,7 @@ export function SiteLoaderAssetsUploader({ assets, onSuccess, bindings }: SiteLo
   const { isUploading } = transport;
   const uploadFile = bindings?.uploadFile ?? transport.uploadFile;
   const [uploading, setUploading] = useState(false);
+  const operation = useRef(false);
   const label = t('assets.loader.label');
   const description = t('assets.loader.description');
   const uploadPrompt = useMemo(
@@ -87,11 +88,15 @@ export function SiteLoaderAssetsUploader({ assets, onSuccess, bindings }: SiteLo
     },
   });
   const handleFileSelect = async (file: File) => {
+    if (operation.current || removeLoader.isPending) {
+      return;
+    }
     const validation = validateFile(file, uploadType);
     if (!validation.valid) {
       notifications.show({ message: validation.error, tone: 'danger' });
       return;
     }
+    operation.current = true;
     setUploading(true);
     try {
       const { fileId } = await uploadFile(file, { slotId: 'loader' });
@@ -102,6 +107,7 @@ export function SiteLoaderAssetsUploader({ assets, onSuccess, bindings }: SiteLo
         tone: 'danger',
       });
     } finally {
+      operation.current = false;
       setUploading(false);
     }
   };
@@ -142,6 +148,7 @@ export function SiteLoaderAssetsUploader({ assets, onSuccess, bindings }: SiteLo
                     emphasis="medium"
                     placement="overlay-end"
                     loading={removeLoader.isPending}
+                    disabled={uploading || isUploading || addLoader.isPending}
                     aria-label={`${tCommon('actions.remove')} ${label} ${new Intl.NumberFormat(locale).format(index + 1)}`}
                     onClick={() => removeLoader.mutate(asset.file_id)}
                   >
@@ -159,7 +166,8 @@ export function SiteLoaderAssetsUploader({ assets, onSuccess, bindings }: SiteLo
           accept={[...config.permittedMimeTypes]}
           maxSize={config.maxSize}
           loading={uploading || isUploading || addLoader.isPending}
-          loadingLabel={uploadPrompt}
+          loadingLabel={addLoader.isPending ? tCommon('states.loading') : tCommon('uploadField.status.uploading')}
+          disabled={removeLoader.isPending}
           dropzoneAriaLabel={label}
           emptyDescription={uploadPrompt}
           preview={{ mode: 'fixed', width: '100%', height: 96, fit: 'contain' }}

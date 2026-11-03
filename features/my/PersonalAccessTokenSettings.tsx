@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { notifications } from '@/components/core/Notification';
@@ -95,6 +95,14 @@ function SubjectPersonalAccessTokenSettings({
   const searchParams = useSearchParams();
   const t = useTranslations('security.personalAccessTokens');
   const labels = usePersonalAccessTokenLabels();
+  const mounted = useRef(true);
+  const mutationPending = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
   const [tokens, setTokens] = useState(initialPersonalAccessTokens);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const [secret, setSecret] = useState<PersonalAccessTokenSecretViewModel | null>(null);
@@ -133,6 +141,10 @@ function SubjectPersonalAccessTokenSettings({
   );
 
   const createToken = useCallback(async (): Promise<boolean> => {
+    if (mutationPending.current || !mounted.current) {
+      return false;
+    }
+    mutationPending.current = true;
     const continuation: PersonalAccessTokenContinuation = { action: 'create' };
     setPendingAction('create');
     try {
@@ -140,6 +152,9 @@ function SubjectPersonalAccessTokenSettings({
         mode === 'admin'
           ? await bindings.createAccountPersonalAccessTokenAction(subjectId)
           : await bindings.createMyPersonalAccessTokenAction();
+      if (!mounted.current) {
+        return false;
+      }
       if (!result.personalAccessToken || !result.secret) {
         handleError(result.error, continuation);
         return false;
@@ -147,16 +162,28 @@ function SubjectPersonalAccessTokenSettings({
       setTokens([{ ...result.personalAccessToken, canRegenerate: true }]);
       setSecret({ value: result.secret });
       return true;
+    } catch {
+      if (mounted.current) {
+        handleError(undefined, continuation);
+      }
+      return false;
     } finally {
-      setPendingAction(null);
+      mutationPending.current = false;
+      if (mounted.current) {
+        setPendingAction(null);
+      }
     }
-  }, [handleError, mode, subjectId]);
+  }, [bindings, handleError, mode, subjectId]);
 
   const regenerateToken = useCallback(
     async (personalAccessTokenId: string): Promise<boolean> => {
       if (!token?.canRegenerate || token.id !== personalAccessTokenId) {
         return false;
       }
+      if (mutationPending.current || !mounted.current) {
+        return false;
+      }
+      mutationPending.current = true;
       const continuation = mutationContinuation('regenerate', personalAccessTokenId);
       setPendingAction(`regenerate:${personalAccessTokenId}`);
       try {
@@ -164,6 +191,9 @@ function SubjectPersonalAccessTokenSettings({
           mode === 'admin'
             ? await bindings.regenerateAccountPersonalAccessTokenAction(subjectId, personalAccessTokenId)
             : await bindings.regenerateMyPersonalAccessTokenAction(personalAccessTokenId);
+        if (!mounted.current) {
+          return false;
+        }
         if (!result.personalAccessToken || !result.secret) {
           handleError(result.error, continuation);
           return false;
@@ -171,15 +201,27 @@ function SubjectPersonalAccessTokenSettings({
         setTokens([{ ...result.personalAccessToken, canRegenerate: true }]);
         setSecret({ value: result.secret });
         return true;
+      } catch {
+        if (mounted.current) {
+          handleError(undefined, continuation);
+        }
+        return false;
       } finally {
-        setPendingAction(null);
+        mutationPending.current = false;
+        if (mounted.current) {
+          setPendingAction(null);
+        }
       }
     },
-    [handleError, mode, subjectId, token],
+    [bindings, handleError, mode, subjectId, token],
   );
 
   const deleteToken = useCallback(
     async (personalAccessTokenId: string): Promise<boolean> => {
+      if (mutationPending.current || !mounted.current) {
+        return false;
+      }
+      mutationPending.current = true;
       const continuation = mutationContinuation('delete', personalAccessTokenId);
       setPendingAction(`delete:${personalAccessTokenId}`);
       try {
@@ -187,17 +229,28 @@ function SubjectPersonalAccessTokenSettings({
           mode === 'admin'
             ? await bindings.deleteAccountPersonalAccessTokenAction(subjectId, personalAccessTokenId)
             : await bindings.deleteMyPersonalAccessTokenAction(personalAccessTokenId);
+        if (!mounted.current) {
+          return false;
+        }
         if (!result.deleted) {
           handleError(result.error, continuation);
           return false;
         }
         setTokens([]);
         return true;
+      } catch {
+        if (mounted.current) {
+          handleError(undefined, continuation);
+        }
+        return false;
       } finally {
-        setPendingAction(null);
+        mutationPending.current = false;
+        if (mounted.current) {
+          setPendingAction(null);
+        }
       }
     },
-    [handleError, mode, subjectId],
+    [bindings, handleError, mode, subjectId],
   );
 
   useEffect(() => {

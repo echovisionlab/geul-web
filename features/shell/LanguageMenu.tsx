@@ -1,6 +1,6 @@
 'use client';
 
-import { startTransition, useId, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconLanguage } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
@@ -33,7 +33,26 @@ export function LanguageMenu({ variant = 'icon', size = 'chrome', textSize = 'xs
 
   // One request at a time; the controls stay disabled until it settles (shell chrome does not load React Query).
   const [updatingLocale, setUpdatingLocale] = useState(false);
+  const [navigating, startTransition] = useTransition();
+  const operation = useRef(false);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+  useEffect(() => {
+    if (!updatingLocale && !navigating) {
+      operation.current = false;
+    }
+  }, [updatingLocale, navigating]);
+  const busy = updatingLocale || navigating;
   const updateLocale = async (nextLocale: SupportedLocale) => {
+    if (operation.current || isPending) {
+      return;
+    }
+    operation.current = true;
     setUpdatingLocale(true);
     try {
       let resolvedLocale = nextLocale;
@@ -46,27 +65,35 @@ export function LanguageMenu({ variant = 'icon', size = 'chrome', textSize = 'xs
       } else {
         writeLocaleCookie(nextLocale);
       }
+      if (!mounted.current) {
+        return;
+      }
       writeLocaleCookie(resolvedLocale);
       // A content language in the URL (`?lang=`) outranks the site language; changing the site
       // language drops it so the document follows the new choice.
       const url = new URL(window.location.href);
       const pinned = url.searchParams.has(CONTENT_LANGUAGE_QUERY_PARAM);
       url.searchParams.delete(CONTENT_LANGUAGE_QUERY_PARAM);
-      startTransition(() => {
+      startTransition(async () => {
         if (pinned) {
-          router.replace(`${url.pathname}${url.search}${url.hash}`, { scroll: false });
+          await router.replace(`${url.pathname}${url.search}${url.hash}`, { scroll: false });
         } else {
-          router.refresh();
+          await router.refresh();
         }
       });
     } catch (error) {
+      if (!mounted.current) {
+        return;
+      }
       notifications.show({
         tone: 'danger',
         title: tShell('language.errorTitle'),
         message: error instanceof Error ? error.message : tShell('language.errorMessage'),
       });
     } finally {
-      setUpdatingLocale(false);
+      if (mounted.current) {
+        setUpdatingLocale(false);
+      }
     }
   };
 
@@ -77,11 +104,11 @@ export function LanguageMenu({ variant = 'icon', size = 'chrome', textSize = 'xs
       {localeOptions.map((option) => (
         <DropdownMenu.Item
           key={option.value}
-          disabled={isPending || updatingLocale}
+          disabled={isPending || busy}
           selected={option.value === currentLocale}
           onClick={() => {
-            if (option.value !== currentLocale && !updatingLocale) {
-              void updateLocale(option.value);
+            if (option.value !== currentLocale && !busy) {
+              return updateLocale(option.value);
             }
           }}
         >
@@ -104,7 +131,8 @@ export function LanguageMenu({ variant = 'icon', size = 'chrome', textSize = 'xs
             indicator="menu"
             aria-label={currentLocaleLabel}
             aria-describedby={descriptionId}
-            disabled={isPending || updatingLocale}
+            loading={busy}
+            disabled={isPending || busy}
           >
             <Text size="xs">{currentLocaleLabel}</Text>
             <VisuallyHidden id={descriptionId}>{tShell('actions.language')}</VisuallyHidden>
@@ -127,7 +155,8 @@ export function LanguageMenu({ variant = 'icon', size = 'chrome', textSize = 'xs
             indicator="menu"
             aria-label={currentLocaleLabel}
             aria-describedby={descriptionId}
-            disabled={isPending || updatingLocale}
+            loading={busy}
+            disabled={isPending || busy}
           >
             {currentLocaleLabel}
             <VisuallyHidden id={descriptionId}>{tShell('actions.language')}</VisuallyHidden>
@@ -145,7 +174,8 @@ export function LanguageMenu({ variant = 'icon', size = 'chrome', textSize = 'xs
           size={size}
           aria-label={tShell('actions.language')}
           title={tShell('actions.language')}
-          disabled={isPending || updatingLocale}
+          loading={busy}
+          disabled={isPending || busy}
         >
           <IconLanguage size={16} />
         </IconButton>

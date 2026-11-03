@@ -1,4 +1,5 @@
 'use client';
+import { PageLoader } from '@/features/site/PageLoader';
 import { SupportingText } from '@/components/core/Typography';
 
 import { useEffect, useRef, useState } from 'react';
@@ -83,9 +84,7 @@ export function ToolModule({
           {activateLabel}
         </Button>
       ) : status === 'loading' ? (
-        <SupportingText role="status" aria-live="polite" tone="secondary">
-          {loadingLabel}
-        </SupportingText>
+        <PageLoader placement="flow" message={loadingLabel} />
       ) : status === 'error' ? (
         <SupportingText role="alert" tone="secondary">
           {errorLabel}

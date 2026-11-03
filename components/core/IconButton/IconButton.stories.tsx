@@ -2,6 +2,7 @@ import { Text as StoryText } from '@/components/core/Typography';
 import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
 import { localizedRender } from '@/.storybook/fixture-i18n';
 import type { Meta, StoryObj } from '@storybook/nextjs';
+import { expect, within } from 'storybook/test';
 import { IconCheck, IconGripVertical, IconMenu2, IconPencil, IconPlus, IconTrash, IconX } from '@tabler/icons-react';
 
 import type { ControlEmphasis, ControlTone } from '../control-style';
@@ -80,6 +81,50 @@ export const Circular: Story = {
     label: 'Remove',
     children: <IconX size={18} aria-hidden />,
   },
+};
+export const MediaOverlay: Story = {
+  args: {
+    tone: 'danger',
+    emphasis: 'strong',
+    label: 'Remove avatar',
+    children: <IconX aria-hidden />,
+  },
+  render: localizedRender((args) => (
+    <div
+      style={{
+        position: 'relative',
+        width: 56,
+        height: 56,
+        borderRadius: 'var(--geul-radius-circle)',
+        background: 'var(--geul-surface-muted)',
+      }}
+    >
+      <IconButton
+        appearance="media-overlay"
+        placement="overlay-end-inside"
+        label="Remove avatar"
+        tone={args.tone}
+        emphasis={args.emphasis}
+        disabled={args.disabled}
+        loading={args.loading}
+      >
+        {args.children}
+      </IconButton>
+    </div>
+  )),
+};
+export const MediaOverlayHover: Story = {
+  ...MediaOverlay,
+  parameters: { pseudo: { hover: true } },
+  play: async ({ canvasElement }) => {
+    const remove = within(canvasElement).getByRole('button');
+    await expect(getComputedStyle(remove).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+    await expect(remove.firstElementChild?.getBoundingClientRect().width).toBe(16);
+  },
+};
+export const MediaOverlayActive: Story = {
+  ...MediaOverlayHover,
+  parameters: { pseudo: { active: true } },
 };
 export const Disabled: Story = {
   args: { disabled: true, label: 'Disabled edit' },

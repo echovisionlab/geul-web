@@ -1,10 +1,11 @@
 'use client';
+import { PageLoader } from '@/features/site/PageLoader';
 
 import { ReleaseEditorAccessProvider } from './ReleaseEditorAccessContext';
 import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
 
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
-import { SupportingText, Text as DsText } from '@/components/core/Typography';
+import { Text as DsText } from '@/components/core/Typography';
 
 import {
   LayoutStack as DsLayoutStack,
@@ -132,9 +133,9 @@ function useReleaseEditorViewModel({
   const router = useRouter();
   const t = useTranslations('releaseEditor');
   const tCommon = useTranslations('common');
+  const tStates = useTranslations('common.states');
   const tActions = useTranslations('common.actions');
   const tStatuses = useTranslations('common.statuses');
-  const tStates = useTranslations('common.states');
   const tReleaseTypes = useTranslations('releasePage.types');
   const [slug, setSlug] = useState<string | null>(initialSlug);
   const [status, setStatus] = useState<ReleaseStatus>(() => parseReleaseStatus(initialStatus));
@@ -540,8 +541,10 @@ function useReleaseEditorViewModel({
       }
     },
   });
+  const [pendingTransition, setPendingTransition] = useState<'back' | 'status' | 'delete' | null>(null);
   const runReleaseTransition = useCallback(
-    async (transition: () => void | Promise<void>) => {
+    async (transition: () => void | Promise<void>, command: 'back' | 'status' | 'delete' = 'back') => {
+      setPendingTransition(command);
       try {
         if (!(await flushEditorSavesOrNotify(`release:${releaseId}`, tCommon('notifications.saveFailed')))) {
           return false;
@@ -554,6 +557,8 @@ function useReleaseEditorViewModel({
       } catch {
         notifications.show({ message: tCommon('notifications.saveFailed'), tone: 'danger' });
         return false;
+      } finally {
+        setPendingTransition(null);
       }
     },
     [currentProvider, releaseId, tCommon],
@@ -677,11 +682,15 @@ function useReleaseEditorViewModel({
     router: { back: router.back },
     canEditNeutral,
     handleStatusChange,
-    deleteRelease: { mutate: deleteRelease.mutate, isPending: deleteRelease.isPending },
+    deleteRelease: {
+      mutate: deleteRelease.mutate,
+      isPending: deleteRelease.isPending || pendingTransition === 'delete',
+    },
+    tStates,
     tActions,
     t,
-    publishRelease: { isPending: publishRelease.isPending },
-    unpublishRelease: { isPending: unpublishRelease.isPending },
+    publishRelease: { isPending: publishRelease.isPending || pendingTransition === 'status' },
+    unpublishRelease: { isPending: unpublishRelease.isPending || pendingTransition === 'status' },
     activeEditLocale,
     baseUrl,
     slug,
@@ -718,7 +727,6 @@ function useReleaseEditorViewModel({
     localizedDescriptionSession,
     descriptionEditorKey,
     currentLocaleCanEdit,
-    tStates,
     editorSession,
     beginRelationSave,
     settleRelationSave,
@@ -776,7 +784,6 @@ export function ReleaseEditorView({ model }: { model: ReleaseEditorViewModel }) 
     localizedDescriptionSession,
     descriptionEditorKey,
     currentLocaleCanEdit,
-    tStates,
     editorSession,
     beginRelationSave,
     settleRelationSave,
@@ -796,6 +803,7 @@ export function ReleaseEditorView({ model }: { model: ReleaseEditorViewModel }) 
         <DsLayoutStack>
           <QueryErrorAlert
             queries={[
+              ...(activeEditLocale.errorQuery ? [activeEditLocale.errorQuery] : []),
               {
                 isError: relationRefreshError !== null,
                 error: relationRefreshError,
@@ -814,15 +822,13 @@ export function ReleaseEditorView({ model }: { model: ReleaseEditorViewModel }) 
             statusOptions={releaseStatusOptions}
             isConnected={currentIsConnected}
             isSynced={currentIsSynced}
-            onBack={() => {
-              void runReleaseTransition(() => router.back());
-            }}
+            onBack={() => runReleaseTransition(() => router.back())}
             onStatusChange={
               canEditNeutral
-                ? (nextStatus) => void runReleaseTransition(() => handleStatusChange(nextStatus))
+                ? (nextStatus) => runReleaseTransition(() => handleStatusChange(nextStatus), 'status')
                 : undefined
             }
-            onDelete={canEditNeutral ? () => void runReleaseTransition(() => deleteRelease.mutate()) : undefined}
+            onDelete={canEditNeutral ? () => runReleaseTransition(() => deleteRelease.mutate(), 'delete') : undefined}
             deleteConfirmation={{
               title: tActions('delete'),
               message: (
@@ -1064,7 +1070,7 @@ export function ReleaseEditorView({ model }: { model: ReleaseEditorViewModel }) 
                             structureLocked
                           />
                         ) : (
-                          <SupportingText tone="secondary">{tStates('loading')}</SupportingText>
+                          <PageLoader placement="flow" />
                         )
                       ) : (
                         <ActiveEditLocaleContentPreview
@@ -1097,7 +1103,7 @@ export function ReleaseEditorView({ model }: { model: ReleaseEditorViewModel }) 
                         structureLocked={false}
                       />
                     ) : (
-                      <SupportingText tone="secondary">{tStates('loading')}</SupportingText>
+                      <PageLoader placement="flow" />
                     )}
                   </DsLayoutStack>
                 </DsLayoutStack>

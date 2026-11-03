@@ -147,6 +147,7 @@ export function PostViewContent({
               <PostHeader
                 post={post}
                 onExport={handleExport}
+                exportingMarkdown={markdown.isPending}
                 languageControl={
                   post.localizationInfo ? (
                     <ContentLanguageMenu

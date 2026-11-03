@@ -10,6 +10,7 @@ interface EditorActiveLocaleMenuProps {
   localeOptions: TranslationLocaleSelectOption[];
   onChange: (locale: string) => void;
   disabled?: boolean;
+  loading?: boolean;
 }
 
 export function EditorActiveLocaleMenu({
@@ -19,6 +20,7 @@ export function EditorActiveLocaleMenu({
   localeOptions,
   onChange,
   disabled = false,
+  loading = false,
 }: EditorActiveLocaleMenuProps) {
   return (
     <TranslationLocaleControl
@@ -33,6 +35,7 @@ export function EditorActiveLocaleMenu({
         }
       }}
       disabled={disabled}
+      loading={loading}
     />
   );
 }

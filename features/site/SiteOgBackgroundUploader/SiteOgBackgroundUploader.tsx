@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { notifications } from '@/components/core/Notification';
@@ -33,11 +33,14 @@ export function SiteOgBackgroundUploader({
 }: SiteOgBackgroundUploaderProps) {
   const t = useTranslations('adminSettings.site');
   const tCommonNotifications = useTranslations('common.notifications');
+  const tSaveState = useTranslations('editorHeader.saveState');
   const uploadType = SITE_ASSET_TO_UPLOAD_TYPE[type];
   const config = UPLOAD_CONFIGS[uploadType];
   const uploadTransport = useUpload(uploadType);
   const { isUploading } = uploadTransport;
   const upload = bindings?.upload ?? uploadTransport.upload;
+  const operation = useRef(false);
+  const [uploading, setUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState(currentUrl);
   const [uploadProgress, setUploadProgress] = useState(0);
 
@@ -81,9 +84,11 @@ export function SiteOgBackgroundUploader({
   });
 
   const handleUpload = async (blob: Blob) => {
-    if (!canEdit) {
+    if (!canEdit || operation.current) {
       return;
     }
+    operation.current = true;
+    setUploading(true);
     setUploadProgress(0);
 
     try {
@@ -100,6 +105,8 @@ export function SiteOgBackgroundUploader({
         tone: 'danger',
       });
     } finally {
+      operation.current = false;
+      setUploading(false);
       setUploadProgress(0);
     }
   };
@@ -108,13 +115,25 @@ export function SiteOgBackgroundUploader({
     <ImageUploadCropController
       imageUrl={imageUrl}
       canEdit={canEdit}
-      isUploading={isUploading}
+      isUploading={uploading || isUploading || setAsset.isPending}
       uploadProgress={uploadProgress}
+      loadingLabel={setAsset.isPending ? tSaveState('saving') : undefined}
       isRemoving={deleteAsset.isPending}
       onUpload={handleUpload}
-      onRemove={() => {
-        if (canEdit) {
-          deleteAsset.mutate();
+      onRemove={async () => {
+        if (!canEdit || operation.current) {
+          return;
+        }
+        operation.current = true;
+        try {
+          await deleteAsset.mutateAsync();
+        } catch (error) {
+          notifications.show({
+            message: error instanceof Error ? error.message : tCommonNotifications('uploadFailed'),
+            tone: 'danger',
+          });
+        } finally {
+          operation.current = false;
         }
       }}
       label={label}

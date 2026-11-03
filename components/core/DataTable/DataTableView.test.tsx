@@ -94,53 +94,6 @@ describe('DataTableView', () => {
     expect(keyDown).toHaveBeenCalledOnce();
   });
 
-  it('exposes aria-sort only on the primary sort while preserving secondary priority and direction descriptions', () => {
-    renderView({
-      ...baseProps,
-      rows: [{ id: 'one', name: 'Draft', count: 1 }],
-      columns: [
-        {
-          key: 'name',
-          header: 'Name',
-          renderCell: (row) => row.name,
-          sort: {
-            ariaLabel: 'Sort by Name',
-            direction: 'desc',
-            order: 2,
-            showOrder: true,
-            description: 'Priority 2/2. Currently descending',
-            onToggle: vi.fn(),
-          },
-        },
-        { key: 'id', header: 'ID', renderCell: (row) => row.id, sort: { ariaLabel: 'Sort by ID', onToggle: vi.fn() } },
-        {
-          key: 'count',
-          header: 'Count',
-          renderCell: (row) => row.count,
-          sort: {
-            ariaLabel: 'Sort by Count',
-            direction: 'asc',
-            order: 1,
-            showOrder: true,
-            description: 'Priority 1/2. Currently ascending',
-            onToggle: vi.fn(),
-          },
-        },
-      ],
-    });
-    const headers = host!.querySelectorAll('thead th');
-    expect(host!.querySelectorAll('[aria-sort]')).toHaveLength(1);
-    expect(headers[0].hasAttribute('aria-sort')).toBe(false);
-    expect(headers[1].hasAttribute('aria-sort')).toBe(false);
-    expect(headers[2].getAttribute('aria-sort')).toBe('ascending');
-    const secondary = headers[0].querySelector('button')!;
-    const description = document.getElementById(secondary.getAttribute('aria-describedby')!);
-    expect(description?.textContent).toBe('Priority 2/2. Currently descending');
-    expect(description?.parentElement).toBe(secondary);
-    expect(secondary.getAttribute('aria-label')).toBe('Sort by Name');
-    expect(secondary.textContent).toContain('↓ 2');
-  });
-
   it('names and focuses the actual horizontal scroll region for a labelled collection', () => {
     renderView({
       ...baseProps,

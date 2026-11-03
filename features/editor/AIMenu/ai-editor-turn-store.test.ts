@@ -73,11 +73,14 @@ const documentResult = (result: 'accepted' | 'rejected' | 'missing') =>
 const terminal = (status: AIEditorTurnTerminalStatus) =>
   turnEvent({ case: 'terminal', value: create(AIEditorTurnTerminalOutcomeSchema, { status }) });
 
-type ScriptItem = { event: AIEditorTurnEvent } | { end: true } | { error: unknown };
+const deliveries = new Set<Promise<void>>();
+type ScriptItem = ({ event: AIEditorTurnEvent } | { end: true } | { error: unknown }) & { delivered?: () => void };
 
 /** A turn whose stream yields only what the test emits. */
 function scriptedTurn() {
   const queue: ScriptItem[] = [];
+  let closed = false;
+  let started = false;
   let wake: (() => void) | null = null;
   const push = (item: ScriptItem) => {
     queue.push(item);
@@ -85,30 +88,57 @@ function scriptedTurn() {
     wake = null;
   };
   async function* events(): AsyncGenerator<AIEditorTurnEvent> {
-    for (;;) {
-      const item = queue.shift();
-      if (!item) {
-        await new Promise<void>((resolve) => {
-          wake = resolve;
-        });
-        continue;
+    started = true;
+    try {
+      for (;;) {
+        const item = queue.shift();
+        if (!item) {
+          await new Promise<void>((resolve) => {
+            wake = resolve;
+          });
+          continue;
+        }
+        try {
+          if ('error' in item) {
+            throw item.error;
+          }
+          if ('end' in item) {
+            return;
+          }
+          yield item.event;
+        } finally {
+          item.delivered?.();
+        }
       }
-      if ('error' in item) {
-        throw item.error;
+    } finally {
+      closed = true;
+      for (const item of queue) {
+        item.delivered?.();
       }
-      if ('end' in item) {
-        return;
-      }
-      yield item.event;
     }
   }
+  const deliver = (item: ScriptItem) => {
+    if (closed) {
+      return;
+    }
+    if (!started) {
+      push(item);
+      return;
+    }
+    const delivered = new Promise<void>((resolve) => {
+      push({ ...item, delivered: resolve });
+    });
+    deliveries.add(delivered);
+    void delivered.then(() => deliveries.delete(delivered));
+  };
+
   return {
     events: events(),
     resolve: vi.fn<AIEditorTurn['resolve']>(async () => undefined),
     cancel: vi.fn<AIEditorTurn['cancel']>(async () => undefined),
-    emit: (event: AIEditorTurnEvent) => push({ event }),
-    end: () => push({ end: true }),
-    fail: (error: unknown) => push({ error }),
+    emit: (event: AIEditorTurnEvent) => deliver({ event }),
+    end: () => deliver({ end: true }),
+    fail: (error: unknown) => deliver({ error }),
   };
 }
 
@@ -138,9 +168,7 @@ function deferred<T>() {
 }
 
 async function settle() {
-  for (let index = 0; index < 20; index += 1) {
-    await Promise.resolve();
-  }
+  await Promise.all([...deliveries]);
 }
 
 describe('AI editor turn store', () => {
@@ -512,4 +540,39 @@ describe('AI editor turn store', () => {
     await settle();
     expect(state().assistantText).toBe('again');
   });
+  it.each(['approve', 'deny'] as const)(
+    'ignores a late %s failure after disposal and a newer turn',
+    async (decision) => {
+      const older = scriptedTurn();
+      const newer = scriptedTurn();
+      let reject!: (error: Error) => void;
+      const pending = new Promise<never>((_resolve, fail) => {
+        reject = fail;
+      });
+      older.resolve.mockReturnValueOnce(pending);
+      const onApproveFailed = vi.fn();
+      const { store, state } = storeFor(clientFor(older, newer), { onApproveFailed });
+      void store.start('improve-writing');
+      await settle();
+      older.emit(approvalRequired());
+      await settle();
+      const resolving = store[decision]();
+      expect(state().phase).toBe('resolving');
+      store.dispose();
+      void store.start('summarize');
+      await settle();
+      newer.emit(text('Current response'));
+      await settle();
+      reject(new Error('late failure'));
+      await resolving;
+      expect(state()).toMatchObject({
+        phase: 'streaming',
+        action: 'summarize',
+        assistantText: 'Current response',
+        error: null,
+      });
+      expect(onApproveFailed).not.toHaveBeenCalled();
+      store.dispose();
+    },
+  );
 });

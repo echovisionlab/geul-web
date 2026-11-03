@@ -1,4 +1,5 @@
 'use client';
+import { QueryLoadingSurface } from '../QueryLoadingSurface';
 import {
   LayoutInline as DsLayoutInline,
   LayoutInset as DsLayoutInset,
@@ -60,10 +61,11 @@ function PostTableSettingsForm({ props, updateProps }: PostTableSettingsFormProp
     queryFn: () => listTagsAction().then(unwrapQueryResult),
   });
   const { data: tags } = tagsQuery;
-  const { data: authors } = useQuery({
+  const authorsQuery = useQuery({
     queryKey: ['authors', 50],
     queryFn: () => listAuthorOptionsAction(50),
   });
+  const { data: authors } = authorsQuery;
   const seriesQuery = useQuery({
     queryKey: ['series', 'simple'],
     queryFn: () => listSeriesSimple(),
@@ -95,7 +97,8 @@ function PostTableSettingsForm({ props, updateProps }: PostTableSettingsFormProp
 
   return (
     <DsLayoutStack gap="lg" data-page-block-editor="post-table">
-      <QueryErrorAlert queries={[categoriesQuery, tagsQuery, seriesQuery]} />
+      <QueryLoadingSurface queries={[categoriesQuery, tagsQuery, seriesQuery, authorsQuery]} />
+      <QueryErrorAlert queries={[categoriesQuery, tagsQuery, seriesQuery, authorsQuery]} />
       <DsLayoutInset blockEnd="md">
         <DsLayoutInline gap="xs">
           <IconTable size={18} />

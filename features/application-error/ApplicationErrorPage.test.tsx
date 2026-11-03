@@ -3,7 +3,7 @@
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import koMessages from '@/messages/ko.json';
 import { settleInAct } from '@/test/act-wait';
-import { render, screen } from '@/test/render';
+import { act, render, screen } from '@/test/render';
 import { ApplicationErrorPage } from './ApplicationErrorPage';
 
 // The particle visual is a dynamic import; load it once so each render settles inside its own test.
@@ -11,7 +11,7 @@ beforeAll(async () => {
   await import('./ErrorCodeParticles');
 });
 
-async function renderPage(status: number, retry = vi.fn()) {
+async function renderPage(status: number, retry: () => void | Promise<void> = vi.fn()) {
   const view = render(<ApplicationErrorPage status={status} onRetry={retry} fullScreen />, {
     locale: 'ko',
     messages: koMessages,
@@ -33,10 +33,18 @@ describe('shared application error surface', () => {
   });
 
   it('preserves a working retry on server failures', async () => {
-    const retry = vi.fn();
+    const recovery = Promise.withResolvers<void>();
+    const retry = vi.fn(() => recovery.promise);
     const { user } = await renderPage(503, retry);
-    await user.click(screen.getByRole('button'));
+    const button = screen.getByRole('button');
+    await user.click(button);
+    expect(button).toHaveAttribute('aria-busy', 'true');
+    expect(screen.getByRole('progressbar', { name: koMessages.common.actions.tryAgain })).toBeVisible();
+    await user.keyboard('{Enter}');
     expect(retry).toHaveBeenCalledOnce();
+    await act(async () => recovery.resolve());
+    expect(button).not.toHaveAttribute('aria-busy');
+    expect(button).toHaveFocus();
   });
 
   it('provides login for 401 and does not retry denied access', async () => {

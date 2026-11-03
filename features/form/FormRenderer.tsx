@@ -51,13 +51,16 @@ export function FormRenderer<T extends FormValues = FormValues>({
   // Start loading the phone field (and `libphonenumber-js`) before a later step shows it.
   useEffect(() => {
     if (hasPhoneField) {
-      void loadPhoneField();
+      void loadPhoneField().catch(() => {
+        /* The visible field owns retry. */
+      });
     }
   }, [hasPhoneField]);
   // Memoize visible steps to prevent unnecessary recalculations
   const visibleSteps = useMemo(() => form.getVisibleSteps(values), [form, values]);
-  const currentStep = visibleSteps[currentStepIndex];
-  const progress = visibleSteps.length > 0 ? ((currentStepIndex + 1) / visibleSteps.length) * 100 : 0;
+  const effectiveStepIndex = Math.min(currentStepIndex, Math.max(visibleSteps.length - 1, 0));
+  const currentStep = visibleSteps[effectiveStepIndex];
+  const progress = visibleSteps.length > 0 ? ((effectiveStepIndex + 1) / visibleSteps.length) * 100 : 0;
   // Adjust currentStepIndex if it goes out of bounds when steps change
   useEffect(() => {
     if (currentStepIndex >= visibleSteps.length && visibleSteps.length > 0) {
@@ -79,8 +82,8 @@ export function FormRenderer<T extends FormValues = FormValues>({
     if (!currentStep || !isCurrentStepValid || isSubmitting) {
       return;
     }
-    if (currentStepIndex < visibleSteps.length - 1) {
-      setCurrentStepIndex((prev) => prev + 1);
+    if (effectiveStepIndex < visibleSteps.length - 1) {
+      setCurrentStepIndex(effectiveStepIndex + 1);
       setNavigationRequest((request) => request + 1);
     } else if (previewMode) {
       openPreviewModal();
@@ -96,7 +99,7 @@ export function FormRenderer<T extends FormValues = FormValues>({
     }
   }, [
     currentStep,
-    currentStepIndex,
+    effectiveStepIndex,
     visibleSteps.length,
     isCurrentStepValid,
     isSubmitting,
@@ -106,11 +109,11 @@ export function FormRenderer<T extends FormValues = FormValues>({
     openPreviewModal,
   ]);
   const goToPrev = useCallback(() => {
-    if (currentStepIndex > 0) {
-      setCurrentStepIndex((prev) => prev - 1);
+    if (effectiveStepIndex > 0) {
+      setCurrentStepIndex(effectiveStepIndex - 1);
       setNavigationRequest((request) => request + 1);
     }
-  }, [currentStepIndex]);
+  }, [effectiveStepIndex]);
   if (!currentStep) {
     return null;
   }
@@ -147,7 +150,7 @@ export function FormRenderer<T extends FormValues = FormValues>({
             value={progress}
             size="sm"
             aria-label={t('progressAria', {
-              current: currentStepIndex + 1,
+              current: effectiveStepIndex + 1,
               total: visibleSteps.length,
             })}
           />
@@ -156,7 +159,7 @@ export function FormRenderer<T extends FormValues = FormValues>({
         <FormStep
           step={currentStep}
           navigationRequest={navigationRequest}
-          navigationLabel={t('progressAria', { current: currentStepIndex + 1, total: visibleSteps.length })}
+          navigationLabel={t('progressAria', { current: effectiveStepIndex + 1, total: visibleSteps.length })}
           headingLevel={stepHeadingLevel}
           headingAriaLevel={stepHeadingAriaLevel}
           values={values}
@@ -165,8 +168,8 @@ export function FormRenderer<T extends FormValues = FormValues>({
           onStepValidityChange={setIsCurrentStepValid}
           onNext={goToNext}
           onPrev={goToPrev}
-          isFirst={currentStepIndex === 0}
-          isLast={currentStepIndex === visibleSteps.length - 1}
+          isFirst={effectiveStepIndex === 0}
+          isLast={effectiveStepIndex === visibleSteps.length - 1}
           isSubmitting={isSubmitting}
         />
       </DsLayoutStack>
