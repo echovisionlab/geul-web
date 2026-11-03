@@ -68,7 +68,8 @@ it.each([undefined, 'https://cdn.example.com/loader.gif?version=2'])(
       expect(markup).toContain('data-preload="undefined"');
     }
     expect(markup).not.toMatch(/>[^<]*로그인[^<]*</);
-    expect(markup.replace(/<[^>]+>/g, '')).toContain(messages.common.states.loading);
+    // The loading phrase is visible element text, not only the status name.
+    expect(markup).toContain(`>${messages.common.states.loading}</`);
   },
 );
 
