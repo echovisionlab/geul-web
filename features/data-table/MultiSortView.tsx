@@ -292,11 +292,7 @@ export function MultiSortView({
 
   const trigger = (
     <Tooltip label={sortDisplay} disabled={isMobile}>
-      <IconButton
-        count={appliedSorts.length}
-        aria-label={appliedSorts.length ? `${effectivePlaceholder} (${appliedSorts.length})` : effectivePlaceholder}
-        onClick={() => onOpenedChange(!opened)}
-      >
+      <IconButton count={appliedSorts.length} aria-label={effectivePlaceholder} onClick={() => onOpenedChange(!opened)}>
         {appliedSorts[0]?.direction === 'asc' ? <IconSortAscending size={18} /> : <IconSortDescending size={18} />}
       </IconButton>
     </Tooltip>

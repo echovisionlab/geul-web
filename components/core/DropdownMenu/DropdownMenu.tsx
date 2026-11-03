@@ -193,7 +193,7 @@ const DropdownMenuItem = forwardRef<HTMLDivElement, DropdownMenuItemProps>(
         id={id}
         isDisabled={disabled}
         onAction={onClick}
-        onClick={href ? guardNavigation : undefined}
+        onClick={!disabled && href ? guardNavigation : undefined}
         href={href}
         target={target}
         rel={rel}
@@ -207,6 +207,7 @@ const DropdownMenuItem = forwardRef<HTMLDivElement, DropdownMenuItemProps>(
         render={(domProps) =>
           createElement(href ? 'a' : 'div', {
             ...domProps,
+            ...(disabled ? { href: undefined } : {}),
             title,
             'aria-current': ariaCurrent ?? (selected ? 'true' : undefined),
           })

@@ -336,7 +336,7 @@ export function MultiFilterEditorView({
     <Tooltip label={effectivePlaceholder} disabled={isMobile}>
       <IconButton
         count={badgeCount}
-        aria-label={badgeCount ? `${effectivePlaceholder} (${badgeCount})` : effectivePlaceholder}
+        aria-label={effectivePlaceholder}
         onClick={() => onOpenChange(!opened)}
         disabled={disabled}
       >

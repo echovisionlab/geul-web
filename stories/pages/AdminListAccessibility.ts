@@ -7,6 +7,17 @@ interface ListPlayContext {
   globals: Record<string, unknown>;
 }
 
+/** Wait until a lazily mounted control is interactive, not merely named while its loader is pending. */
+function findReadyButton(canvas: ReturnType<typeof within>, name: string) {
+  return waitFor(async () => {
+    const button = canvas.getByRole('button', { name });
+    await expect(button).toBeEnabled();
+    await expect([null, 'false']).toContain(button.getAttribute('aria-busy'));
+    await expect([null, 'false']).toContain(button.getAttribute('aria-disabled'));
+    return button;
+  });
+}
+
 /** Exercise actual list controls with the same translated names as production. */
 export async function verifyAdminListControls({ canvasElement, globals }: ListPlayContext) {
   const locale = normalizeLocale(typeof globals.locale === 'string' ? globals.locale : '') ?? DEFAULT_LOCALE;
@@ -22,7 +33,7 @@ export async function verifyAdminListControls({ canvasElement, globals }: ListPl
   }
 
   // Production filter/sort controls mount through next/dynamic independently of search.
-  const filter = await canvas.findByRole('button', { name: t('filter.button') });
+  const filter = await findReadyButton(canvas, t('filter.button'));
   await userEvent.click(filter);
   const filterDialog = await within(document.body).findByRole('dialog', { name: t('filter.drawerTitle') });
   const filterScope = within(filterDialog);
@@ -35,7 +46,7 @@ export async function verifyAdminListControls({ canvasElement, globals }: ListPl
   await userEvent.keyboard('{Escape}');
   await waitFor(() => expect(filter).toHaveFocus());
 
-  const sort = await canvas.findByRole('button', { name: t('sort.button') });
+  const sort = await findReadyButton(canvas, t('sort.button'));
   await userEvent.click(sort);
   const sortDialog = await within(document.body).findByRole('dialog', { name: t('sort.button') });
   const sortScope = within(sortDialog);

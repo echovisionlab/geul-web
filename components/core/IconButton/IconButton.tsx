@@ -54,6 +54,7 @@ type IconButtonAppearance =
     };
 interface IconButtonSharedProps extends Omit<ControlNativeProps, 'aria-label' | 'aria-labelledby' | 'aria-pressed'> {
   children?: ReactNode;
+  /** Visible badge count; Core appends the same text to a `label`/`aria-label` name (WCAG 2.5.3). */
   count?: number;
   contrast?: ControlContrast;
   tone?: ControlTone;
@@ -178,11 +179,18 @@ function IconButtonInner(
     },
     props,
   );
+  if (count !== undefined && (!Number.isSafeInteger(count) || count < 0)) {
+    throw new RangeError('Core IconButton count must be a nonnegative safe integer');
+  }
+  const countText = count ? (count > 99 ? '99+' : String(count)) : undefined;
+  const baseName = ariaLabel ?? label;
+  // The visible badge must be part of the action name; progress replaces it while pending.
+  const accessibleName = baseName !== undefined && countText && !loading ? `${baseName} ${countText}` : baseName;
   const shared = {
     ...controlNativeProps(native),
     className: classes.root,
     'data-contrast': mediaOverlay ? 'standard' : (contrast ?? inheritedContrast),
-    'aria-label': ariaLabel ?? label,
+    'aria-label': accessibleName,
     'aria-labelledby': ariaLabelledBy,
     'aria-busy': loading || undefined,
     ...(toggle ? { 'aria-pressed': pressed } : interaction === 'action' ? { 'aria-pressed': undefined } : {}),
@@ -198,9 +206,6 @@ function IconButtonInner(
     'data-print-visibility': printVisibility,
     'data-placement': placement,
   };
-  if (count !== undefined && (!Number.isSafeInteger(count) || count < 0)) {
-    throw new RangeError('Core IconButton count must be a nonnegative safe integer');
-  }
   const nameChannels = [label, ariaLabel, ariaLabelledBy].filter((name) => name !== undefined);
   if (nameChannels.length !== 1 || typeof nameChannels[0] !== 'string' || !nameChannels[0].trim()) {
     throw new TypeError('Core IconButton requires exactly one nonempty label, aria-label, or aria-labelledby');
@@ -208,16 +213,16 @@ function IconButtonInner(
   const glyph = loading ? (
     <ProgressBar
       isIndeterminate
-      aria-label={ariaLabel ?? label}
+      aria-label={baseName}
       aria-labelledby={ariaLabelledBy}
       className={`${spinnerClasses.spinner} ${classes.spinner}`}
     />
   ) : (
     <>
       {children}
-      {count ? (
+      {countText ? (
         <span className={classes.counter} aria-hidden>
-          {count > 99 ? '99+' : count}
+          {countText}
         </span>
       ) : null}
     </>

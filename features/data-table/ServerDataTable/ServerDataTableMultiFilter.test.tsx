@@ -30,7 +30,7 @@ describe('ServerDataTableMultiFilter', () => {
         />
       </div>,
     );
-    await user.click(screen.getByRole('button', { name: 'Filter (1)' }));
+    await user.click(screen.getByRole('button', { name: 'Filter 1' }));
     await user.click(await screen.findByRole('button', { name: 'Clear all' }));
     expect(router.push).not.toHaveBeenCalled();
     await user.click(screen.getByRole('button', { name: 'Apply' }));

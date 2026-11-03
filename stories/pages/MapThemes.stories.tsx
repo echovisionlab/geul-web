@@ -101,7 +101,9 @@ export const DefaultUpdating: Story = {
     await expect(deleteItem).not.toHaveAttribute('aria-disabled', 'true');
     await userEvent.click(setDefault);
     await expect(actions).toHaveAttribute('aria-busy', 'true');
-    await expect(actions).toBeDisabled();
+    await expect(actions).toHaveAttribute('aria-disabled', 'true');
+    await expect(actions).toHaveAttribute('data-pending', 'true');
+    await expect(actions).toHaveFocus();
     await expect(canvas.getByText(t.common('statuses.default'))).toBeVisible();
 
     const otherActions = canvas.getByRole('button', {

@@ -274,13 +274,13 @@ describe('IconButton', () => {
     );
   });
 
-  it('keeps the visual count decorative and validates numeric badge input', () => {
+  it('includes the visible count in the action name and validates numeric badge input', () => {
     const button = renderIconButton(
       <IconButton label="Open files" count={100}>
         F
       </IconButton>,
     );
-    expect(button).toHaveAccessibleName('Open files');
+    expect(button).toHaveAccessibleName('Open files 99+');
     expect(button.querySelector('[aria-hidden]')).toHaveTextContent('99+');
     renderIconButton(
       <IconButton label="Open files" count={0}>
@@ -288,6 +288,7 @@ describe('IconButton', () => {
       </IconButton>,
     );
     expect(button.textContent).toBe('F');
+    expect(button).toHaveAccessibleName('Open files');
     vi.spyOn(console, 'error').mockImplementation(() => {});
     expect(() =>
       renderIconButton(

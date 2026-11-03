@@ -3,7 +3,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
-import { render, screen, waitFor } from '@/test/render';
+import { act, render, screen, waitFor, within } from '@/test/render';
 import { registerEditorSave } from '@/lib/editor/editor-save-registry';
 import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
 import CampaignEditPage from '@/features/campaign/CampaignEditPage';
@@ -14,6 +14,8 @@ const transport = vi.hoisted(() => ({
   synced: true,
   id: '11111111-1111-4111-8111-111111111111',
   language: 'en',
+  templatePreviewAvailable: true,
+  replace: vi.fn(),
   provider: {
     on: vi.fn(),
     off: vi.fn(),
@@ -25,7 +27,7 @@ let client: QueryClient;
 const release: Array<() => void> = [];
 vi.mock('next/navigation', () => ({
   useParams: () => ({ id: transport.id }),
-  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+  useRouter: () => ({ push: vi.fn(), replace: transport.replace }),
   usePathname: () => `/admin/email-layouts/${transport.id}`,
   useSearchParams: () => new URLSearchParams(`lang=${transport.language}`),
 }));
@@ -71,7 +73,9 @@ vi.mock('@/lib/actions/email-template', () => ({
     layoutId: null,
   }),
   updateEmailTemplateLayoutAction: vi.fn(),
-  previewEmailTemplateAction: vi.fn(),
+  previewEmailTemplateAction: vi.fn(async () =>
+    transport.templatePreviewAvailable ? { subject: 'Subject', html: '<p>Preview</p>' } : undefined,
+  ),
   sendTestEmailTemplateAction: vi.fn(),
 }));
 vi.mock('@/lib/collab/useBlockRoomConnection', () => ({
@@ -115,6 +119,8 @@ beforeEach(() => {
   transport.synced = true;
   transport.id = '11111111-1111-4111-8111-111111111111';
   transport.language = 'en';
+  transport.templatePreviewAvailable = true;
+  transport.replace.mockClear();
   setProviderAccessLevel(transport.provider, 'edit');
   document = new Y.Doc();
   document.getText('html-content').insert(0, '<main>Admitted</main>');
@@ -179,23 +185,94 @@ it('keeps correction fields and the HTML instance when the locale save barrier f
 });
 
 it.each([
-  { name: 'campaign', Page: CampaignEditPage, documentKey: 'campaign' },
-  { name: 'template', Page: EmailTemplateEditPage, documentKey: 'email_template' },
-])('keeps $name fields mounted after a failed locale save and supports inline retry', async ({ Page, documentKey }) => {
-  const save = vi.fn().mockResolvedValueOnce(false).mockResolvedValueOnce(true);
-  release.push(registerEditorSave(`${documentKey}:${transport.id}`, { flush: save, hasPending: () => false }));
-  const { user } = render(
-    <QueryClientProvider client={client}>
-      <Page />
-    </QueryClientProvider>,
-  );
-  const subject = await screen.findByRole('textbox', { name: 'Subject' });
-  await user.click(await screen.findByRole('combobox', { name: 'Language' }));
-  await user.click(await screen.findByRole('option', { name: '한국어' }));
-  expect(await screen.findByRole('alert')).toBeVisible();
-  expect(screen.getByRole('textbox', { name: 'Subject' })).toBe(subject);
-  expect(subject).toHaveValue('Subject');
-  await user.click(screen.getByRole('button', { name: 'Try again' }));
-  await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
-  expect(save).toHaveBeenCalledTimes(2);
-});
+  { name: 'campaign', Page: CampaignEditPage, documentKey: 'campaign', previewAvailable: true },
+  { name: 'template', Page: EmailTemplateEditPage, documentKey: 'email_template', previewAvailable: true },
+  {
+    name: 'template (preview unavailable)',
+    Page: EmailTemplateEditPage,
+    documentKey: 'email_template',
+    previewAvailable: false,
+  },
+])(
+  'keeps $name fields mounted after a failed locale save and supports inline retry',
+  async ({ Page, documentKey, previewAvailable }) => {
+    transport.templatePreviewAvailable = previewAvailable;
+    const retrySave = Promise.withResolvers<boolean>();
+    const save = vi.fn().mockResolvedValueOnce(false).mockReturnValueOnce(retrySave.promise);
+    release.push(registerEditorSave(`${documentKey}:${transport.id}`, { flush: save, hasPending: () => false }));
+    const { user } = render(
+      <QueryClientProvider client={client}>
+        <Page />
+      </QueryClientProvider>,
+    );
+    const subject = await screen.findByRole('textbox', { name: 'Subject' });
+    let previewError: HTMLElement | undefined;
+    if (documentKey === 'email_template') {
+      if (previewAvailable) {
+        expect(await screen.findByTitle('Email Preview')).toHaveAttribute('srcdoc', '<p>Preview</p>');
+      } else {
+        previewError = await screen.findByRole('alert');
+        expect(previewError).toHaveTextContent(/^Not available$/);
+        expect(screen.queryByTitle('Email Preview')).not.toBeInTheDocument();
+      }
+    }
+    expect(screen.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument();
+    const language = await screen.findByRole('combobox', { name: 'Language' });
+    await user.click(language);
+    await user.click(await screen.findByRole('option', { name: '한국어' }));
+    const retry = await screen.findByRole('button', { name: 'Try again' });
+    const localeError = screen
+      .getAllByRole('alert')
+      .find((alert) => within(alert).queryByRole('button', { name: 'Try again' }));
+    expect(localeError).toBeVisible();
+    expect(localeError).toHaveTextContent('500');
+    expect(screen.getByRole('textbox', { name: 'Subject' })).toBe(subject);
+    expect(subject).toHaveValue('Subject');
+    expect(screen.getByRole('combobox', { name: 'Language' })).toBe(language);
+    expect(language).toBeEnabled();
+    if (previewError) {
+      expect(screen.getAllByRole('alert')).toEqual([localeError, previewError]);
+      expect(previewError).toBeVisible();
+    }
+    expect(save).toHaveBeenCalledTimes(1);
+    expect(transport.replace).not.toHaveBeenCalled();
+    await user.click(retry);
+    expect(save).toHaveBeenCalledTimes(2);
+    expect(language).toBeDisabled();
+    expect(transport.replace).not.toHaveBeenCalled();
+    const layout = documentKey === 'email_template' ? screen.getByRole('combobox', { name: 'Layout' }) : undefined;
+    if (layout) {
+      await user.click(layout);
+      await user.keyboard('{Escape}');
+      expect(layout).toHaveFocus();
+    }
+    await act(async () => retrySave.resolve(true));
+    await waitFor(() =>
+      expect(transport.replace).toHaveBeenCalledExactlyOnceWith(`/admin/email-layouts/${transport.id}?lang=ko`, {
+        scroll: false,
+      }),
+    );
+    expect(localeError).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument();
+    if (previewError) {
+      expect(screen.getAllByRole('alert')).toEqual([previewError]);
+      expect(previewError).toBeVisible();
+      expect(previewError).toHaveTextContent(/^Not available$/);
+      expect(screen.queryByTitle('Email Preview')).not.toBeInTheDocument();
+    } else {
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+      if (documentKey === 'email_template') {
+        expect(screen.getByTitle('Email Preview')).toHaveAttribute('srcdoc', '<p>Preview</p>');
+      }
+    }
+    expect(save).toHaveBeenCalledTimes(2);
+    expect(screen.getByRole('textbox', { name: 'Subject' })).toBe(subject);
+    expect(subject).toHaveValue('Subject');
+    expect(screen.getByRole('combobox', { name: 'Language' })).toBe(language);
+    expect(language).toBeEnabled();
+    if (layout) {
+      expect(screen.getByRole('combobox', { name: 'Layout' })).toBe(layout);
+      expect(layout).toHaveFocus();
+    }
+  },
+);
