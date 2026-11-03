@@ -26,8 +26,8 @@ vi.mock('next-intl', () => ({
 }));
 
 vi.mock('@/features/site/PageLoader', () => ({
-  PageLoader: ({ minHeight }: { minHeight?: string | number }) => (
-    <div data-testid="page-loader" data-min-height={minHeight}>
+  PageLoader: ({ extent }: { extent?: string }) => (
+    <div data-testid="page-loader" data-extent={extent}>
       Loader
     </div>
   ),
@@ -154,7 +154,7 @@ describe('ServerDataTableContent', () => {
     });
     const loader = document.querySelector('[data-testid="page-loader"]');
     expect(loader).not.toBeNull();
-    expect(loader?.getAttribute('data-min-height')).toBe('0');
+    expect(loader?.getAttribute('data-extent')).toBe('container');
     expect(loader?.parentElement?.hasAttribute('data-datatable-loading')).toBe(true);
     expect(loader?.parentElement?.getAttribute('aria-busy')).toBe('true');
     expect(loader?.parentElement?.className).toContain('loading');

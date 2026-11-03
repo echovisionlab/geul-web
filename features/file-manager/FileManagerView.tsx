@@ -382,7 +382,7 @@ export function FileManagerView(props: FileManagerViewProps) {
 
       {props.loading ? (
         <div style={{ position: 'relative', minHeight: 320 }}>
-          <PageLoader height={320} minHeight={320} />
+          <PageLoader extent="tall" />
         </div>
       ) : props.folderNotFound ? (
         <SectionCard padding="xl" data-file-folder-not-found>
@@ -715,7 +715,7 @@ export function FileManagerView(props: FileManagerViewProps) {
                 ) : null}
               </DsLayoutStack>
             ) : props.detailLoading ? (
-              <PageLoader placement="flow" minHeight={120} size="sm" />
+              <PageLoader extent="compact" placement="flow" size="sm" />
             ) : props.detailUsageError ? (
               <DsText role="alert" size="sm" tone="danger">
                 {props.detailUsageError}

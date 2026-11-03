@@ -1,6 +1,5 @@
 'use client';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
-import { QueryLoadingSurface } from '../QueryLoadingSurface';
 
 import {
   LayoutInline as DsLayoutInline,
@@ -128,7 +127,6 @@ function WorkMapSettingsForm({ props, updateProps }: WorkMapSettingsFormProps) {
 
   return (
     <DsLayoutStack gap="lg" data-page-block-editor="work-map">
-      <QueryLoadingSurface queries={[themesQuery]} />
       <QueryErrorAlert queries={[themesQuery]} />
       <DsLayoutInset blockEnd="md">
         <DsLayoutInline gap="xs">
@@ -275,6 +273,7 @@ function WorkMapSettingsForm({ props, updateProps }: WorkMapSettingsFormProps) {
         <Select
           label={tMapControls('fields.theme')}
           placeholder={t('defaultThemePlaceholder')}
+          isLoading={themesQuery.isLoading}
           data={themeOptions}
           value={themeId || null}
           onChange={(value) => updateProp('themeId', value || '')}

@@ -15,6 +15,8 @@ export interface MapLibreMapProps extends MapRendererProps {
   instantTransitions?: boolean;
   /** Callback to receive the map instance after load. */
   onMapReady?: (map: maplibregl.Map) => void;
+  /** Caller data is still loading; the map keeps mounting beneath the shared loading surface. */
+  dataPending?: boolean;
   /** Optional style injection for embedded, offline, or custom map surfaces. */
   mapStyleOverride?: StyleSpecification | string;
 }

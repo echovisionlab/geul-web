@@ -1,6 +1,5 @@
 'use client';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
-import { PageLoader } from '@/features/site/PageLoader';
 
 import { parseAspectRatio } from '@/components/core/ResizeHandle/display-size';
 import { liveNodeView } from '@/features/editor/tiptap/live-node-view';
@@ -412,9 +411,6 @@ function TiptapMapNodeView({
         onResizeBlur={onResizeBlur}
       >
         <QueryErrorAlert queries={[placesQuery, themesQuery]} />
-        {placesQuery.isLoading || themesQuery.isLoading ? (
-          <PageLoader placement="flow" minHeight={80} size="xs" />
-        ) : null}
         <div
           className="editor-visual-media"
           data-map-static-surface=""
@@ -432,6 +428,7 @@ function TiptapMapNodeView({
             themes={themes}
             resolveTheme={resolveTheme}
             height="100%"
+            dataPending={placesQuery.isLoading || themesQuery.isLoading}
             settingsPanel={{ placement: 'map-corner', hidden: !canEditNeutral }}
           />
         </div>

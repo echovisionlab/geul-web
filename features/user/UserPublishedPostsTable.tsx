@@ -79,7 +79,7 @@ export function UserPublishedPostsTableFallback({ message }: UserPublishedPostsT
   return (
     <div style={{ minHeight, position: 'relative' }}>
       <DsLayoutInset space="none">
-        <PageLoader minHeight={minHeight} message={message} />
+        <PageLoader extent="container" message={message} />
       </DsLayoutInset>
     </div>
   );

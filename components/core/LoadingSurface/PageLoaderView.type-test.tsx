@@ -2,7 +2,7 @@ import { PageLoaderView, type PageLoaderViewContrast } from './index';
 import type { PageLoaderViewContrast as PublicContrast } from '../index';
 
 const fill = <PageLoaderView imageAlt="Loading page" message="Connecting" />;
-const flow = <PageLoaderView imageAlt="Loading page" message="Loading content" placement="flow" minHeight={160} />;
+const flow = <PageLoaderView extent="compact" imageAlt="Loading page" message="Loading content" placement="flow" />;
 // @ts-expect-error Visible text is required independently of the accessible name.
 const missingMessage = <PageLoaderView imageAlt="Loading page" />;
 // @ts-expect-error The accessible name is required independently of visible text.
@@ -20,7 +20,24 @@ const styled = <PageLoaderView imageAlt="Loading page" message="Loading" {...sty
 const classBypass = { className: 'feature-color' };
 // @ts-expect-error Typed spreads cannot override Core contrast with feature classes.
 const classed = <PageLoaderView imageAlt="Loading page" message="Loading" {...classBypass} />;
+// @ts-expect-error Region height is a named Core extent, not numeric geometry.
+const numericHeight = <PageLoaderView imageAlt="Loading page" message="Loading" minHeight={80} />;
+// @ts-expect-error Extents are a closed set.
+const invalidExtent = <PageLoaderView imageAlt="Loading page" message="Loading" extent="huge" />;
 // @ts-expect-error Arbitrary colors are not part of the loader contract.
 const colored = <PageLoaderView imageAlt="Loading page" message="Loading" color="red" />;
 
-void [fill, flow, inverse, missingMessage, missingName, invalidPlacement, invalidContrast, styled, classed, colored];
+void [
+  fill,
+  flow,
+  inverse,
+  missingMessage,
+  missingName,
+  invalidPlacement,
+  invalidContrast,
+  styled,
+  classed,
+  numericHeight,
+  invalidExtent,
+  colored,
+];

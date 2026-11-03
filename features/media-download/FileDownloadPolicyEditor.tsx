@@ -174,7 +174,7 @@ export function FileDownloadPolicyEditor({
       </div>
     ) : null;
   const content = loadPending ? (
-    <PageLoader placement="flow" minHeight={120} size="sm" message={t('loading')} />
+    <PageLoader extent="compact" placement="flow" size="sm" message={t('loading')} />
   ) : !enabled ? (
     <Alert role="status" tone="neutral">
       {t('fileRequired')}
@@ -213,7 +213,7 @@ export function FileDownloadPolicyEditor({
         <VisuallyHidden role="status" aria-live="polite" aria-atomic="true" data-file-download-policy-sync>
           {saving ? tStates('syncing') : saved ? tStates('synced') : ''}
         </VisuallyHidden>
-        {loadPending ? <PageLoader placement="flow" minHeight={96} size="xs" message={t('loading')} /> : null}
+        {loadPending ? <PageLoader extent="compact" placement="flow" size="xs" message={t('loading')} /> : null}
         {!loadPending && policyLoaded ? accessControl : null}
         {!loadPending && policyLoaded ? segmentFeedback : null}
         {!loadPending && policyLoaded && error ? (

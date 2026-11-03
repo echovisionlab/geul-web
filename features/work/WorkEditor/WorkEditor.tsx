@@ -982,7 +982,7 @@ export function WorkEditorView({ model }: { model: WorkEditorViewModel }) {
                     </div>
                   ) : (
                     <div id={getEditorBodyLoadingId('work', workId)}>
-                      <PageLoader size="sm" minHeight={300} />
+                      <PageLoader extent="tall" size="sm" />
                     </div>
                   )}
                 </DsLayoutInset>

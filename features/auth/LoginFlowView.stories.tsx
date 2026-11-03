@@ -16,7 +16,10 @@ const meta = {
   render: function LoginFlowPreview(args) {
     const t = useTranslations('auth.verification');
     return (
-      <LoginFlowView {...args} loadingSurface={<PageLoader placement="flow" message={t('sentEmail.submitting')} />} />
+      <LoginFlowView
+        {...args}
+        loadingSurface={<PageLoader placement="flow" extent="compact" size="sm" message={t('sentEmail.submitting')} />}
+      />
     );
   },
   args: {

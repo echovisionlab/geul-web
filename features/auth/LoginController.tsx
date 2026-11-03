@@ -538,7 +538,9 @@ export function LoginController({
           passkeyReady={passkeyStatus === 'ready'}
           pendingAction={pendingAction}
           submitError={submitError}
-          loadingSurface={<PageLoader placement="flow" message={tVerification('sentEmail.submitting')} />}
+          loadingSurface={
+            <PageLoader placement="flow" extent="compact" size="sm" message={tVerification('sentEmail.submitting')} />
+          }
           onEmailChange={setEmail}
           onCodeChange={setCode}
           onRequestCode={() => void submitLogin(buildLoginCodePayload({ flow, enteredEmail: email, locale }))}

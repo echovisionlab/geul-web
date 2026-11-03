@@ -1,5 +1,5 @@
 'use client';
-import { QueryLoadingSurface } from '../QueryLoadingSurface';
+import { PageLoader } from '@/features/site/PageLoader';
 
 import { SectionCard as DsSectionCard } from '@/components/core/Section';
 import {
@@ -111,7 +111,6 @@ function AuthorListSettingsForm({ props, updateProps, readOnly = false }: Author
 
   return (
     <div data-page-block-editor="author-list">
-      <QueryLoadingSurface queries={[selectedAuthorsQuery]} />
       <QueryErrorAlert queries={[selectedAuthorsQuery, candidatesQuery]} />
       <DsLayoutStack gap="md">
         <Select
@@ -181,6 +180,8 @@ function AuthorListSettingsForm({ props, updateProps, readOnly = false }: Author
               <DsText size="xs" tone="secondary">
                 {tPageEditor('blockEditor.authorSelection.empty')}
               </DsText>
+            ) : selectedAuthorsQuery.isLoading ? (
+              <PageLoader placement="flow" extent="compact" size="xs" />
             ) : (
               selectedAuthorsFetched &&
               selectedIds.map((memberId, index) => {

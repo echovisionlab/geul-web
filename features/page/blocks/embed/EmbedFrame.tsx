@@ -88,7 +88,7 @@ export function EmbedFrame({ props, preview = false }: EmbedFrameProps) {
           }
         >
           {url && parentOrigin === null ? (
-            <PageLoader placement="flow" minHeight={0} height="100%" />
+            <PageLoader extent="container" placement="flow" />
           ) : (
             <SupportingText tone="secondary">
               {unsafe ? t('unsafeOrigin') : props.uri.trim() ? t('invalidPreview') : t('emptyPreview')}
@@ -175,7 +175,7 @@ function EmbedDocument({
         }}
         onError={() => setStatus('error')}
       />
-      {status === 'loading' && active ? <PageLoader height="100%" minHeight={0} message={loadingLabel} /> : null}
+      {status === 'loading' && active ? <PageLoader extent="container" message={loadingLabel} /> : null}
       {status === 'error' ? (
         <SupportingText role="alert" tone="danger">
           {errorLabel}

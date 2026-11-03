@@ -135,7 +135,7 @@ const meta = {
     hasMore: false,
     showAll: false,
     isLoading: false,
-    loadingSurface: <PageLoader placement="flow" minHeight={140} size="sm" />,
+    loadingSurface: <PageLoader extent="compact" placement="flow" size="sm" />,
     isCreating: false,
     deletingLinkId: null,
     onToggleForm: () => {},

@@ -480,7 +480,7 @@ export function PasskeySettingsSection({
         removingId={removingId}
         registrationReady={registrationReady}
         registrationPending={registrationPending}
-        loadingSurface={<PageLoader placement="flow" size="sm" minHeight={120} message={t('loading')} />}
+        loadingSurface={<PageLoader extent="compact" placement="flow" size="sm" message={t('loading')} />}
         registration={
           !loading && canRegister && flow?.id
             ? {

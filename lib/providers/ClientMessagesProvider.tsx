@@ -62,8 +62,8 @@ export function CatalogueLoadingFallback({
 
   return (
     <PageLoaderView
-      height="100dvh"
-      minHeight={0}
+      extent="viewport"
+
       imageSrc={loaderImageSrc}
       imageUnoptimized={loaderImageUnoptimized}
       imageAlt={loadingMessage}

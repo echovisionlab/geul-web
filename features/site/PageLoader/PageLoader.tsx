@@ -5,6 +5,7 @@ import {
   PageLoaderView,
   type PageLoaderViewPlacement,
   type PageLoaderViewContrast,
+  type PageLoaderViewExtent,
   type PageLoaderViewSize,
 } from '@/components/core/LoadingSurface';
 import type { ClosedVisualProps } from '@/components/core/visual-contract';
@@ -14,10 +15,8 @@ import { resolvePageLoaderImage } from './loader-image';
 export interface PageLoaderProps extends ClosedVisualProps {
   /** Standard theme text by default; inverse for loading on a dark scrim. */
   contrast?: PageLoaderViewContrast;
-  /** Defaults to '100%' in fill placement and 'auto' in flow placement. */
-  height?: string | number;
-  /** Minimum height safeguard for page-sized loaders. Defaults to 200. */
-  minHeight?: string | number;
+  /** Named region height owned by Core. Defaults to `section`. */
+  extent?: PageLoaderViewExtent;
   /** Fill a positioned parent, or reserve a bounded section in document flow. Defaults to fill. */
   placement?: PageLoaderViewPlacement;
   /** Loader size. Defaults to 'md'. */
@@ -27,8 +26,7 @@ export interface PageLoaderProps extends ClosedVisualProps {
 }
 
 export function PageLoader({
-  height,
-  minHeight = 200,
+  extent = 'section',
   placement = 'fill',
   contrast = 'standard',
   size = 'md',
@@ -41,8 +39,7 @@ export function PageLoader({
 
   return (
     <PageLoaderView
-      height={height}
-      minHeight={minHeight}
+      extent={extent}
       placement={placement}
       contrast={contrast}
       size={size}

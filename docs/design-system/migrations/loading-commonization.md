@@ -7,19 +7,21 @@ The design system is not a separately versioned package; the source and document
 
 ## Select the wait scope
 
-| Wait                                                                                   | Consumer rule                                                                                               |
-| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Initial page, section, editor or preview without usable content                        | Supply site `PageLoader` through the controller's loading/content slot.                                     |
-| Existing content being refreshed                                                       | Keep that content and use local busy/update feedback. A failed refresh must not claim the content is empty. |
-| Additional list page                                                                   | Keep existing items and use NearEndLoader or the existing load/retry command.                               |
-| Button, row command or input lookup                                                    | Use Core command loading or field checking; distinguish pending from settled no-results.                    |
-| Upload, transformation, attachment save or resume lookup                               | Preserve local phases, progress, cancel/retry and target identity through the whole operation.              |
-| Playback buffering, navigation, background synchronization or invisible infrastructure | Retain its existing task-specific owner; classify the actual wait before changing its presentation.         |
+| Wait                                                                                   | Consumer rule                                                                                                |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Initial page, section, editor or preview without usable content                        | Supply site `PageLoader` through the controller's loading/content slot.                                      |
+| Existing content being refreshed                                                       | Keep that content and use local busy/update feedback. A failed refresh must not claim the content is empty.  |
+| Additional list page                                                                   | Keep existing items and use NearEndLoader or the existing load/retry command.                                |
+| Button, row command or input lookup                                                    | Use Core command loading or `Select`/`MultiSelect` `isLoading`; distinguish pending from settled no-results. |
+| Upload, transformation, attachment save or resume lookup                               | Preserve local phases, progress, cancel/retry and target identity through the whole operation.               |
+| Playback buffering, navigation, background synchronization or invisible infrastructure | Retain its existing task-specific owner; classify the actual wait before changing its presentation.          |
 
-Core Spinner and Skeleton remain available for granular feedback and geometry. Shared page-block
-adapters retain hidden structural placeholders where needed to reserve collection space; the visible
-wait uses PageLoader. A null helper result, permission omission, JSON-LD boundary or native image
-loading attribute does not alone identify a missing loading surface.
+Core Spinner and Skeleton remain the feedback for rows, dialogs and regions whose geometry is
+already known, such as list blocks and ordered credits. Do not hide a skeleton to reserve space under
+a PageLoader. Map adapters show their own loading surface while caller data for the first render is
+pending (`MapViewEmbedded pending`, `MapLibreMapEditor dataPending`). A null helper result, permission
+omission, JSON-LD boundary or native image loading attribute does not alone identify a missing
+loading surface.
 
 ## Visible text and placement migration
 
@@ -43,13 +45,19 @@ optional. The first nonblank configured image is selected deterministically; GIF
 unoptimized. Image failure removes that source and retains text without rotating to another image.
 There is no bundled fallback GIF.
 
-`fill` remains the default: absolute positioning with inset zero, `height="100%"` and `minHeight={200}`.
-Its parent must establish the intended containing region and reserve height. Use `minHeight={0}` only
-when the existing map/table container already reserves it. New section replacements can reserve their
-own space with `flow`, whose default height is `auto`:
+`fill` remains the default: absolute positioning with inset zero inside a positioned parent. Region
+height is a named Core `extent`; numeric `height` and `minHeight` were removed. Replace them as follows:
+
+| Removed props                                             | Extent      |
+| --------------------------------------------------------- | ----------- |
+| `minHeight={0}`, `height="100%"`, a reserved map or table | `container` |
+| 80 to 160                                                 | `compact`   |
+| default 200                                               | `section`   |
+| 240 to 320                                                | `tall`      |
+| `100dvh`                                                  | `viewport`  |
 
 ```tsx
-<PageLoader placement="flow" minHeight={200} message={phaseMessage} />
+<PageLoader placement="flow" extent="compact" size="sm" message={phaseMessage} />
 ```
 
 Loaders default to `contrast="standard"` on theme surfaces. Existing dark scrims must explicitly
@@ -73,10 +81,7 @@ The existing map composition provides the pattern:
 
 ```tsx
 // Request-owning controller
-<FeatureView
-  pending={pending}
-  loadingSurface={<PageLoader placement="flow" minHeight={200} message={phaseMessage} />}
-/>;
+<FeatureView pending={pending} loadingSurface={<PageLoader placement="flow" message={phaseMessage} />} />;
 
 // Pure View
 function FeatureView({
@@ -122,7 +127,7 @@ Once media is mounted, standard loaded-media sizing remains owned by the runtime
 The preparation ratio must not become a permanent constraint on loaded media.
 
 The [VideoPlayer controller](../../../features/media/VideoPlayer.tsx) supplies the common loader with
-`contrast="inverse"` and `minHeight={0}` over Core's fixed black video background. The frame reserves
+`contrast="inverse"` and `extent="container"` over Core's fixed black video background. The frame reserves
 space for the fill loader; the controller owns preparation completion through runtime or native
 fallback mounting. `VideoPlayerView` sets mount busy state from `preparing` and shows the loader only
 for `preparing && !processing`. Processing takes priority through its existing media status overlay.

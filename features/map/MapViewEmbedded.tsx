@@ -22,7 +22,7 @@ import { loadPublicMapRuntime, preloadPublicMapRuntime } from './public-map-runt
 function MapEmbeddedLoader() {
   const t = useTranslations('mapView');
 
-  return <PageLoader height="100%" minHeight={0} message={t('loading')} />;
+  return <PageLoader extent="container" message={t('loading')} />;
 }
 
 // Dynamic import for MapLibreMap (requires window)
@@ -48,6 +48,8 @@ interface MapViewEmbeddedProps {
   onViewportSettled?: (viewport: MapViewportSnapshot) => void;
   onMapReady?: (map: maplibregl.Map) => void;
   caption?: ReactNode;
+  /** Caller data needed for the first render is loading; the adapter keeps its frame and shows its loader. */
+  pending?: boolean;
 }
 
 /**
@@ -66,6 +68,7 @@ export function MapViewEmbedded({
   onViewportSettled,
   onMapReady,
   caption,
+  pending = false,
 }: MapViewEmbeddedProps) {
   const computedColorScheme = useComputedColorScheme();
   const currentLocale = useLocale();
@@ -181,6 +184,7 @@ export function MapViewEmbedded({
         onFeatureClusterClick={onFeatureClusterClick}
         onViewportSettled={onViewportSettled}
         onMapReady={onMapReady}
+        pending={pending}
       />
       {caption}
     </div>
@@ -199,6 +203,7 @@ interface MapLibreMapViewProps {
   onFeatureClusterClick?: (featureId: string) => void;
   onViewportSettled?: (viewport: MapViewportSnapshot) => void;
   onMapReady?: (map: maplibregl.Map) => void;
+  pending: boolean;
 }
 
 function getAspectRatioValue(ratio: string): string {
@@ -226,6 +231,7 @@ function MapLibreMapView({
   onFeatureClusterClick,
   onViewportSettled,
   onMapReady,
+  pending,
 }: MapLibreMapViewProps) {
   const containerStyle: React.CSSProperties = {
     width: '100%',
@@ -265,6 +271,7 @@ function MapLibreMapView({
         onFeatureClusterClick={onFeatureClusterClick}
         onViewportSettled={onViewportSettled}
         onMapReady={onMapReady}
+        dataPending={pending}
       />
     </div>
   );

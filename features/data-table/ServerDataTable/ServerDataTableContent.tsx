@@ -173,7 +173,7 @@ export function ServerDataTableContent<T>({
         <Alert tone="danger" role="alert">
           {result.error}
         </Alert>
-        {(tablePending || isPending) && <PageLoader placement="flow" minHeight={0} />}
+        {(tablePending || isPending) && <PageLoader extent="container" placement="flow" />}
       </div>
     );
   }
@@ -193,7 +193,7 @@ export function ServerDataTableContent<T>({
       getRowKey={getRowKey}
       emptyMessage={emptyMessage}
       loading={showPendingLoader && (tablePending || isPending)}
-      loadingContent={<PageLoader minHeight={0} />}
+      loadingContent={<PageLoader extent="container" />}
       highlightOnHover={highlightOnHover}
       selection={
         selection

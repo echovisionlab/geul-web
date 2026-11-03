@@ -19,14 +19,17 @@ const IMAGE_SIZE_MAP: Record<PageLoaderViewSize, number> = {
 export type PageLoaderViewSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 export type PageLoaderViewPlacement = 'fill' | 'flow';
 export type PageLoaderViewContrast = 'standard' | 'inverse';
+/**
+ * Core-owned region height. `container` follows a parent that already reserves height (map, table,
+ * media frame); the others reserve a named minimum: compact panels, sections, tall workspaces and the viewport.
+ */
+export type PageLoaderViewExtent = 'container' | 'compact' | 'section' | 'tall' | 'viewport';
 
 export interface PageLoaderViewProps extends ClosedVisualProps {
   /** Standard text on theme surfaces, or full-strength inverse text on a dark scrim. */
   contrast?: PageLoaderViewContrast;
-  /** Defaults to '100%' in fill placement and 'auto' in flow placement. */
-  height?: string | number;
-  /** Minimum height safeguard for page-sized loaders. Defaults to 200. */
-  minHeight?: string | number;
+  /** Named region height. Defaults to `section`. */
+  extent?: PageLoaderViewExtent;
   /** Fill a positioned parent, or reserve height in normal document flow. Defaults to fill. */
   placement?: PageLoaderViewPlacement;
   size?: PageLoaderViewSize;
@@ -39,8 +42,7 @@ export interface PageLoaderViewProps extends ClosedVisualProps {
 }
 
 export function PageLoaderView({
-  height,
-  minHeight = 200,
+  extent = 'section',
   placement = 'fill',
   contrast = 'standard',
   size = 'md',
@@ -62,12 +64,9 @@ export function PageLoaderView({
       data-core-page-loader
       data-placement={placement}
       data-contrast={contrast}
+      data-extent={extent}
       role="status"
       aria-label={imageAlt}
-      style={{
-        height: height ?? (placement === 'flow' ? 'auto' : '100%'),
-        minHeight,
-      }}
     >
       <LayoutStack align="center" gap="sm">
         {imageSrc && imageSrc !== failedImageSrc ? (

@@ -4,8 +4,7 @@ import { Component, type ComponentType, type ReactNode, useCallback, useEffect, 
 import { LayoutInset } from '@/components/core/Layout';
 import { useTranslations } from 'next-intl';
 import { useDebouncedValue, useHotkeys } from '@mantine/hooks';
-import { PageLoader } from '@/features/site/PageLoader';
-import { CommandPalette } from '@/components/core/CommandPalette';
+import { CommandPalette, CommandPaletteResults } from '@/components/core/CommandPalette';
 import { Alert } from '@/components/core/Alert';
 import { Button } from '@/components/core/Button';
 import { loadPostSpotlightRuntime } from './post-spotlight-runtime-loader';
@@ -40,6 +39,7 @@ export function PostSpotlight() {
   const [debouncedQuery] = useDebouncedValue(query, 300);
   const tPlaceholders = useTranslations('common.placeholders');
   const tShell = useTranslations('shell');
+  const tMessages = useTranslations('common.messages');
   const tStates = useTranslations('common.states');
   const [Runtime, setRuntime] = useState<ComponentType<PostSpotlightRuntimeProps> | null>(null);
   const [openRequest, setOpenRequest] = useState(0);
@@ -107,7 +107,8 @@ export function PostSpotlight() {
     </Alert>
   );
 
-  const pendingMessage = tStates('loading');
+  // The field's placeholder already names the search; before two characters, the empty state says what to do next.
+  const pendingMessage = query.length < 2 ? tMessages('typeAtLeast2Characters', { count: 2 }) : tStates('loading');
 
   return (
     <CommandPalette
@@ -127,7 +128,7 @@ export function PostSpotlight() {
             <Runtime query={query} debouncedQuery={debouncedQuery} opened={opened} />
           </SearchBoundary>
         ) : (
-          <PageLoader placement="flow" message={pendingMessage} />
+          <CommandPaletteResults items={[]} label={tPlaceholders('searchPosts')} emptyLabel={pendingMessage} />
         ))}
     </CommandPalette>
   );

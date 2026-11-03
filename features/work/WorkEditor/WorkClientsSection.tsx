@@ -7,6 +7,7 @@ import {
   LayoutStack as DsLayoutStack,
 } from '@/components/core/Layout';
 import { Text as DsText } from '@/components/core/Typography';
+import { Spinner as Loader } from '@/components/core/Display';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
 import { useCallback, useMemo, useState } from 'react';
@@ -91,7 +92,10 @@ export function SortableClient({
                   <IconGripVertical aria-hidden />
                 </IconButton>
               )}
-              <PageLoader placement="flow" minHeight={0} size="sm" />
+              <Loader size="xs" />
+              <DsText size="xs" tone="secondary">
+                {tEmpty('loading')}
+              </DsText>
             </DsLayoutInline>
           </DsLayoutInline>
         </DsSectionCard>

@@ -41,10 +41,10 @@ async function choose(user: ReturnType<typeof render>['user'], label: string, op
 describe('PageAccessSettings', () => {
   it('shows the tag query wait without mistaking a failure for continuing loading', () => {
     const { refresh } = setup({ loadingTags: true });
-    expect(screen.getByRole('status', { name: 'loading' })).toHaveTextContent('loading');
+    expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument();
     expect(screen.getByRole('combobox', { name: 'userTags' })).toBeDisabled();
     refresh({ loadingTags: false, tagsUnavailable: true });
-    expect(screen.queryByRole('status', { name: 'loading' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('status', { name: 'Loading' })).not.toBeInTheDocument();
     expect(screen.getByRole('combobox', { name: 'userTags' })).toBeDisabled();
     refresh({ tagsUnavailable: false });
     expect(screen.getByRole('combobox', { name: 'userTags' })).toBeEnabled();

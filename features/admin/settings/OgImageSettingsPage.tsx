@@ -359,7 +359,7 @@ function HomeSettingsPanel({ sharingImage, form, onSubmit, onReset, isLoading }:
                     <div style={{ aspectRatio: '1200/630' }}>
                       <DsSectionCard padding="none" border="none" clip>
                         {previewLoading && !previewUrl ? (
-                          <PageLoader placement="flow" message={t('shared.preview.generating')} />
+                          <PageLoader placement="flow" extent="container" message={t('shared.preview.generating')} />
                         ) : previewUrl ? (
                           <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                             {previewLoading && (
@@ -660,7 +660,7 @@ function ContentSettingsPanel({ form, onSubmit, onReset, isLoading }: ContentSet
                     <div style={{ aspectRatio: '1200/630' }}>
                       <DsSectionCard padding="none" border="none" clip>
                         {previewLoading && !previewUrl ? (
-                          <PageLoader placement="flow" message={t('shared.preview.generating')} />
+                          <PageLoader placement="flow" extent="container" message={t('shared.preview.generating')} />
                         ) : previewUrl ? (
                           <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                             {previewLoading && (

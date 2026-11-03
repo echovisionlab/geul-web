@@ -1,5 +1,4 @@
 'use client';
-import { QueryLoadingSurface } from '../QueryLoadingSurface';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
@@ -106,7 +105,6 @@ function PostListSettingsForm({ props, updateProps, readOnly = false }: PostList
 
   return (
     <>
-      <QueryLoadingSurface queries={[categoriesQuery, seriesListQuery, tagsQuery, authorsQuery]} />
       <QueryErrorAlert queries={[categoriesQuery, seriesListQuery, tagsQuery, authorsQuery]} />
       <ListBlockEditorBase
         readOnly={readOnly}
@@ -133,6 +131,7 @@ function PostListSettingsForm({ props, updateProps, readOnly = false }: PostList
               disabled={readOnly}
               label={tCommonEntities('categories')}
               placeholder={tPageEditor('mapEditor.allCategoriesPlaceholder')}
+              isLoading={categoriesQuery.isLoading}
               data={categoryOptions}
               value={categoryIds ? categoryIds.split(',').filter(Boolean) : []}
               onChange={(values) => updateProp('categoryIds', values.join(','))}
@@ -143,6 +142,7 @@ function PostListSettingsForm({ props, updateProps, readOnly = false }: PostList
               disabled={readOnly}
               label={tCommonEntities('series')}
               placeholder={tPageEditor('mapEditor.allSeriesPlaceholder')}
+              isLoading={seriesListQuery.isLoading}
               data={seriesOptions}
               value={seriesId || null}
               onChange={(value) => updateProp('seriesId', value || '')}
@@ -153,6 +153,7 @@ function PostListSettingsForm({ props, updateProps, readOnly = false }: PostList
               disabled={readOnly}
               label={tCommonLabels('authors')}
               placeholder={tPageEditor('mapEditor.allAuthorsPlaceholder')}
+              isLoading={authorsQuery.isLoading}
               data={authorOptions}
               value={authorIds ? authorIds.split(',').filter(Boolean) : []}
               onChange={(values) => updateProp('authorIds', values.join(','))}
@@ -163,6 +164,7 @@ function PostListSettingsForm({ props, updateProps, readOnly = false }: PostList
               disabled={readOnly}
               label={tCommonEntities('tags')}
               placeholder={tPageEditor('mapEditor.allTagsPlaceholder')}
+              isLoading={tagsQuery.isLoading}
               data={tagOptions}
               value={tagIds ? tagIds.split(',').filter(Boolean) : []}
               onChange={(values) => updateProp('tagIds', values.join(','))}

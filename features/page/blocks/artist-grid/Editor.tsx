@@ -1,5 +1,4 @@
 'use client';
-import { QueryLoadingSurface } from '../QueryLoadingSurface';
 
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
@@ -69,7 +68,6 @@ function ArtistListSettingsForm({ props, updateProps, readOnly = false }: Artist
 
   return (
     <>
-      <QueryLoadingSurface queries={[labelsQuery]} />
       <QueryErrorAlert queries={[labelsQuery]} />
       <ListBlockEditorBase
         readOnly={readOnly}
@@ -95,6 +93,7 @@ function ArtistListSettingsForm({ props, updateProps, readOnly = false }: Artist
             disabled={readOnly}
             label={tCommonEntities('labels')}
             placeholder={tPageEditor('blockEditor.placeholders.allLabels')}
+            isLoading={labelsQuery.isLoading}
             data={labelOptions}
             value={labelIds ? labelIds.split(',').filter(Boolean) : []}
             onChange={(values) => updateProp('labelIds', values.join(','))}

@@ -339,7 +339,7 @@ export function BaseMap({
           </SectionCard>
         </div>
       )}
-      {pending ? <PageLoader height="100%" minHeight={0} message={tMap('loading')} /> : null}
+      {pending ? <PageLoader extent="container" message={tMap('loading')} /> : null}
     </div>
   );
 }

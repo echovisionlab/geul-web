@@ -225,7 +225,7 @@ export function SeriesManagersModal({
       )}
 
       {managersLoading ? (
-        <PageLoader placement="flow" />
+        <PageLoader placement="flow" extent="compact" size="sm" />
       ) : managersError ? (
         <SupportingText tone="danger" role="alert">
           {t('states.loadFailed')}

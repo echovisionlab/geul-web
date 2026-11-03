@@ -4,6 +4,7 @@ export type {
   PageLoaderViewSize,
   PageLoaderViewPlacement,
   PageLoaderViewContrast,
+  PageLoaderViewExtent,
 } from './PageLoaderView';
 export { ProcessingOverlay } from './ProcessingOverlay';
 export type { ProcessingOverlayProps } from './ProcessingOverlay';

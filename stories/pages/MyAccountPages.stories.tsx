@@ -103,7 +103,7 @@ export function MyAccountPagesPreview({
                 count: backupEntries.length,
                 bytes: backupEntries.reduce((total, entry) => total + entry.bytes, 0),
                 loading: backupStatus === 'pending',
-                loadingSurface: <PageLoader placement="flow" size="sm" minHeight={120} />,
+                loadingSurface: <PageLoader extent="compact" placement="flow" size="sm" />,
                 error: backupStatus === 'failed',
                 onRefresh: () => {
                   if (backupStatus !== 'pending') {

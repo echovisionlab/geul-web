@@ -83,19 +83,14 @@ describe('Page block initial loading', () => {
             }),
         );
       const { user, unmount } = renderBlock(kind);
-      expect(screen.getByRole('status', { name: en.common.states.loading })).toHaveTextContent(
-        en.common.states.loading,
-      );
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
       expect(screen.queryByText(en.common.messages.noPostsFound)).not.toBeInTheDocument();
       await act(async () => fail(new Error('offline')));
       expect(await screen.findByRole('alert')).toBeVisible();
-      expect(screen.queryByRole('status', { name: en.common.states.loading })).not.toBeInTheDocument();
       expect(screen.queryByText(en.common.messages.noPostsFound)).not.toBeInTheDocument();
       await user.click(screen.getByRole('button', { name: en.common.actions.tryAgain }));
       expect(load).toHaveBeenCalledTimes(2);
-      expect(screen.getByRole('status', { name: en.common.states.loading })).toHaveTextContent(
-        en.common.states.loading,
-      );
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
       unmount();
       await act(async () => finishRetry());
     },

@@ -1,5 +1,4 @@
 'use client';
-import { PageLoader } from '@/features/site/PageLoader';
 
 import { Text as DsText } from '@/components/core/Typography';
 import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline, LayoutInset } from '@/components/core/Layout';
@@ -520,7 +519,7 @@ function MeshOptimizationPanelSession({
         <DsText size="xs" weight="medium">
           {t('blockEditor.labels.meshOptimization')}
         </DsText>
-        {loading ? <PageLoader placement="flow" minHeight={80} size="xs" /> : null}
+        {loading ? <Loader size="xs" /> : null}
       </DsLayoutInline>
 
       {selection ? (

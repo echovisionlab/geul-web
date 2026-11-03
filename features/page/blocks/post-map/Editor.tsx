@@ -1,5 +1,4 @@
 'use client';
-import { QueryLoadingSurface } from '../QueryLoadingSurface';
 import {
   LayoutInline as DsLayoutInline,
   LayoutInset as DsLayoutInset,
@@ -160,7 +159,6 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
 
   return (
     <DsLayoutStack gap="lg" data-page-block-editor="post-map">
-      <QueryLoadingSurface queries={[categoriesQuery, seriesListQuery, tagsQuery, authorsQuery, themesQuery]} />
       <QueryErrorAlert queries={[categoriesQuery, seriesListQuery, tagsQuery, authorsQuery, themesQuery]} />
       <DsLayoutInset blockEnd="md">
         <DsLayoutInline gap="xs">
@@ -186,6 +184,7 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
         <MultiSelect
           label={tCommonEntities('categories')}
           placeholder={t('allCategoriesPlaceholder')}
+          isLoading={categoriesQuery.isLoading}
           data={categoryOptions}
           value={categoryIds ? categoryIds.split(',') : []}
           onChange={(values) => updateProp('categoryIds', values.join(','))}
@@ -196,6 +195,7 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
         <Select
           label={tCommonEntities('series')}
           placeholder={t('allSeriesPlaceholder')}
+          isLoading={seriesListQuery.isLoading}
           data={seriesOptions}
           value={seriesId || null}
           onChange={(value) => updateProp('seriesId', value || '')}
@@ -206,6 +206,7 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
         <MultiSelect
           label={tCommonLabels('authors')}
           placeholder={t('allAuthorsPlaceholder')}
+          isLoading={authorsQuery.isLoading}
           data={authorOptions}
           value={authorIds ? authorIds.split(',') : []}
           onChange={(values) => updateProp('authorIds', values.join(','))}
@@ -216,6 +217,7 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
         <MultiSelect
           label={tCommonEntities('tags')}
           placeholder={t('allTagsPlaceholder')}
+          isLoading={tagsQuery.isLoading}
           data={tagOptions}
           value={tagIds ? tagIds.split(',') : []}
           onChange={(values) => updateProp('tagIds', values.join(','))}
@@ -336,6 +338,7 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
         <Select
           label={tMapControls('fields.theme')}
           placeholder={t('defaultThemePlaceholder')}
+          isLoading={themesQuery.isLoading}
           data={themeOptions}
           value={themeId || null}
           onChange={(value) => updateProp('themeId', value || '')}

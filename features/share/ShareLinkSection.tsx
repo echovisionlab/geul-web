@@ -252,7 +252,7 @@ function ShareLinkSectionTarget<T extends ShareEntityType>({
       hasMore={shareLinks.length > maxVisibleLinks}
       showAll={showAll}
       isLoading={isLoading && initialData === undefined}
-      loadingSurface={<PageLoader placement="flow" minHeight={140} size="sm" />}
+      loadingSurface={<PageLoader extent="compact" placement="flow" size="sm" />}
       errorContent={error ? <QueryErrorAlert queries={[{ isError: true, error, isFetching, refetch }]} /> : null}
       isCreating={creating || isCreating}
       deletingLinkId={null}

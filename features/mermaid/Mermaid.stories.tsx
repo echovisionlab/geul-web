@@ -247,7 +247,7 @@ export const InitialPreparation: Story = {
         source={SOURCE}
         state={{ status: 'loading' }}
         labels={{ empty: t('empty'), invalid: t('invalid'), loading: t('loading') }}
-        loadingSurface={<PageLoader placement="flow" minHeight={100} size="sm" message={t('loading')} />}
+        loadingSurface={<PageLoader extent="compact" placement="flow" size="sm" message={t('loading')} />}
       />
     );
   },

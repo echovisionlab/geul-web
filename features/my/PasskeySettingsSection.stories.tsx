@@ -20,7 +20,7 @@ const meta = {
     registrationReady: false,
     registrationPending: false,
     registration: null,
-    loadingSurface: <PageLoader placement="flow" minHeight={120} size="sm" />,
+    loadingSurface: <PageLoader extent="compact" placement="flow" size="sm" />,
     onAdd: () => {},
     onRemove: () => {},
   },

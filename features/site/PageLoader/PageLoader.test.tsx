@@ -121,16 +121,16 @@ describe('PageLoader', () => {
 
   it('keeps default text on image failure and shows a newly configured source', () => {
     settingsMock.loader_urls = ['https://cdn.example.com/loader.gif', 'https://cdn.example.com/second.webp'];
-    const { rerender } = render(<PageLoader size="sm" minHeight={300} />);
+    const { rerender } = render(<PageLoader extent="tall" size="sm" />);
     expect(screen.getByRole('img')).toHaveAttribute('width', '64');
     fireEvent.error(screen.getByRole('img'));
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
     expect(screen.getByRole('status')).toHaveTextContent('불러오는 중...');
     settingsMock.loader_urls = ['https://cdn.example.com/replacement.svg?version=2'];
-    rerender(<PageLoader size="sm" minHeight={300} placement="flow" />);
+    rerender(<PageLoader extent="tall" size="sm" placement="flow" />);
     expect(screen.getByRole('img')).toHaveAttribute('src', settingsMock.loader_urls[0]);
     expect(screen.getByRole('img')).toHaveAttribute('data-unoptimized', 'true');
     expect(screen.getByRole('status')).toHaveAttribute('data-placement', 'flow');
-    expect(screen.getByRole('status')).toHaveStyle({ height: 'auto', minHeight: '300px' });
+    expect(screen.getByRole('status')).toHaveAttribute('data-extent', 'tall');
   });
 });

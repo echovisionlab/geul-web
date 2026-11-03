@@ -1,5 +1,4 @@
 'use client';
-import { QueryLoadingSurface } from '../QueryLoadingSurface';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
@@ -89,7 +88,6 @@ function ReleaseListSettingsForm({ props, updateProps, readOnly = false }: Relea
 
   return (
     <>
-      <QueryLoadingSurface queries={[labelsQuery, artistsQuery, categoriesQuery]} />
       <QueryErrorAlert queries={[labelsQuery, artistsQuery, categoriesQuery]} />
       <ListBlockEditorBase
         readOnly={readOnly}
@@ -126,6 +124,7 @@ function ReleaseListSettingsForm({ props, updateProps, readOnly = false }: Relea
               disabled={readOnly}
               label={tCommonEntities('categories')}
               placeholder={tPageEditor('blockEditor.options.source.all')}
+              isLoading={categoriesQuery.isLoading}
               data={
                 categories?.map((category) => ({
                   value: category.id,
@@ -141,6 +140,7 @@ function ReleaseListSettingsForm({ props, updateProps, readOnly = false }: Relea
               disabled={readOnly}
               label={tCommonEntities('artists')}
               placeholder={tPageEditor('blockEditor.options.source.all')}
+              isLoading={artistsQuery.isLoading}
               data={
                 artists?.map((artist) => ({
                   value: artist.id,
@@ -156,6 +156,7 @@ function ReleaseListSettingsForm({ props, updateProps, readOnly = false }: Relea
               disabled={readOnly}
               label={tCommonEntities('labels')}
               placeholder={tPageEditor('blockEditor.placeholders.allLabels')}
+              isLoading={labelsQuery.isLoading}
               data={
                 labels?.map((label) => ({
                   value: label.id,

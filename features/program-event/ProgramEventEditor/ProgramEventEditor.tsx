@@ -1267,7 +1267,7 @@ export function ProgramEventEditorView({ model }: { model: ProgramEventEditorVie
                     </div>
                   ) : (
                     <div id={getEditorBodyLoadingId('program_event', eventId)}>
-                      <PageLoader size="sm" minHeight={300} />
+                      <PageLoader extent="tall" size="sm" />
                     </div>
                   )}
                 </DsLayoutInset>

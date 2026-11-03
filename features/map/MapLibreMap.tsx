@@ -14,7 +14,7 @@ export type { MapLibreMapProps } from './MapLibreMap.types';
  * Public map controller. It resolves translations and site-owned loading UI before
  * handing browser and MapLibre behavior to the runtime layer.
  */
-export function MapLibreMap(props: MapLibreMapProps) {
+export function MapLibreMap({ dataPending = false, ...props }: MapLibreMapProps) {
   const t = useTranslations('map');
   const tCommonLabels = useTranslations('common.labels');
   const tActions = useTranslations('common.actions');
@@ -55,8 +55,8 @@ export function MapLibreMap(props: MapLibreMapProps) {
         closeDirections: tActions('close'),
         printPreview: `${tCommonLabels('map')} · ${tCommonLabels('preview')}`,
       }}
-      isReady={isReady}
-      loadingSurface={<PageLoader height="100%" minHeight={0} message={loadingMessage} />}
+      isReady={isReady && !dataPending}
+      loadingSurface={<PageLoader extent="container" message={loadingMessage} />}
       onLoadingStageChange={setLoadingStage}
     />
   );

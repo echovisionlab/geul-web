@@ -59,6 +59,7 @@ import {
   type CreditDropData,
 } from './credits/credit-order-utils';
 import { PageLoader } from '@/features/site/PageLoader';
+import { CreditGroupHeaderSkeleton, CreditSkeleton } from './credits/CreditSkeletons';
 import { SortableCreditGroupHeader } from './credits/SortableCreditGroupHeader';
 import { SortableCreditRow } from './credits/SortableCreditRow';
 
@@ -769,7 +770,20 @@ export function WorkCreditsSection({ workId, canEdit }: WorkCreditsSectionProps)
         </DsSectionCard>
       )}
 
-      {isLoading && <PageLoader placement="flow" />}
+      {isLoading && creditOrder.length > 0 ? (
+        // The persisted order is known: reserve each row so credits do not shift in.
+        <DsLayoutStack gap="none">
+          {creditOrder.map((item, index) =>
+            item.type === 'group' ? (
+              <CreditGroupHeaderSkeleton key={`skeleton-group-${index}`} />
+            ) : (
+              <CreditSkeleton key={`skeleton-credit-${index}`} />
+            ),
+          )}
+        </DsLayoutStack>
+      ) : isLoading ? (
+        <PageLoader placement="flow" />
+      ) : null}
 
       {showEmptyState && (
         <DsLayoutInset block="sm">

@@ -135,7 +135,7 @@ export function ArtistParticipantsDialog({
 
   const renderContent = (): ReactNode => {
     if (isLoading) {
-      return <PageLoader placement="flow" />;
+      return <PageLoader placement="flow" extent="compact" size="sm" />;
     }
     if (participantsQuery.isError && participants.length === 0) {
       return null;

@@ -165,9 +165,9 @@ export function VideoPlayer({
       processing={isProcessing}
       loadingSurface={
         <PageLoader
+          extent="container"
           contrast="inverse"
-          height="100%"
-          minHeight={0}
+
           message={tMedia('videoPlayer.controls.videoPlayerLoading')}
         />
       }

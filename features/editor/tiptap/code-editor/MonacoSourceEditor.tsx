@@ -77,7 +77,7 @@ export function MonacoSourceEditor(props: MonacoSourceEditorProps) {
   const { bordered = true, className, height = 320, language, loading } = props;
   const rootClassName = bordered ? classes.root : `${classes.root} ${classes.unframed}`;
   const wrapperClassName = className ? `${rootClassName} ${className}` : rootClassName;
-  const placeholder = loading ?? <PageLoader placement="flow" height="100%" minHeight={0} />;
+  const placeholder = loading ?? <PageLoader extent="container" placement="flow" />;
   return (
     <div
       className={wrapperClassName}

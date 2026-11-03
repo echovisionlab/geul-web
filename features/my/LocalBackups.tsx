@@ -103,7 +103,7 @@ export function LocalBackups() {
       count={entries.length}
       bytes={entries.reduce((total, entry) => total + entry.bytes, 0)}
       loading={loading}
-      loadingSurface={<PageLoader placement="flow" size="sm" minHeight={120} />}
+      loadingSurface={<PageLoader extent="compact" placement="flow" size="sm" />}
       error={error}
       clearing={clearing}
       unavailable={!repository || !navigator.locks}

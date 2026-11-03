@@ -67,7 +67,7 @@ function RuntimePreparationPreview({ processing = false }: { processing?: boolea
       preparing
       processing={processing}
       loadingSurface={
-        <PageLoader contrast="inverse" minHeight={0} message={t('videoPlayer.controls.videoPlayerLoading')} />
+        <PageLoader extent="container" contrast="inverse" message={t('videoPlayer.controls.videoPlayerLoading')} />
       }
       processingSurface={<MediaPlayerStatusOverlay message={t('videoEditor.processingOverlay')} kind="processing" />}
     />

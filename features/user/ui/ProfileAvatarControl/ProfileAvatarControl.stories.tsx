@@ -76,7 +76,7 @@ const meta = {
     accept: ['image/jpeg', 'image/png', 'image/webp', 'image/avif'],
     maxSize: 20 * 1024 * 1024,
     labels,
-    loadingSurface: <PageLoader placement="flow" minHeight={160} size="sm" />,
+    loadingSurface: <PageLoader extent="compact" placement="flow" size="sm" />,
     onSave: async () => true,
     onRemove: async () => true,
   },

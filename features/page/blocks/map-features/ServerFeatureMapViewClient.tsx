@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import type * as maplibregl from 'maplibre-gl';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
-import { PageLoader } from '@/features/site/PageLoader';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { MapViewEmbedded } from '@/features/map/MapViewEmbedded';
 import type { MapRendererPlace, MapServerFeatureSource } from '@/features/map/types';
@@ -209,67 +208,61 @@ export function ServerFeatureMapViewClient<
   }, []);
 
   return (
-    <div style={{ position: 'relative' }} ref={containerRef} className={className} aria-busy={initialFeaturesPending}>
+    <div style={{ position: 'relative' }} ref={containerRef} className={className}>
       <QueryErrorAlert queries={[featuresQuery]} />
-      <div
-        aria-hidden={initialFeaturesPending || undefined}
-        inert={initialFeaturesPending || undefined}
-        style={{ visibility: initialFeaturesPending ? 'hidden' : undefined }}
-      >
-        <MapViewEmbedded
-          key={`${mapViewConfig.aspectRatio}:${mapViewConfig.displaySize ?? 100}`}
-          config={mapConfigForViewport}
-          allowEmpty
-          labelLocale={requestedLocale}
-          featureSourceData={featureSourceData}
-          onMapReady={(map) => {
-            mapRef.current = map;
-          }}
-          onViewportSettled={(nextViewport) => {
-            const normalizedViewport: MapViewportRequest = {
-              bounds: nextViewport.bounds,
-              zoom: nextViewport.zoom,
-              widthPx: nextViewport.widthPx,
-              heightPx: nextViewport.heightPx,
-              clusterRadiusPx: getClusterRadiusPxForZoom(nextViewport.zoom, nextViewport.widthPx),
-              minClusterPoints: viewport.minClusterPoints,
-            };
-            const boundedViewport = clampMapViewportToZoomBounds(normalizedViewport, mapViewConfig);
+      <MapViewEmbedded
+        key={`${mapViewConfig.aspectRatio}:${mapViewConfig.displaySize ?? 100}`}
+        config={mapConfigForViewport}
+        allowEmpty
+        labelLocale={requestedLocale}
+        featureSourceData={featureSourceData}
+        onMapReady={(map) => {
+          mapRef.current = map;
+        }}
+        onViewportSettled={(nextViewport) => {
+          const normalizedViewport: MapViewportRequest = {
+            bounds: nextViewport.bounds,
+            zoom: nextViewport.zoom,
+            widthPx: nextViewport.widthPx,
+            heightPx: nextViewport.heightPx,
+            clusterRadiusPx: getClusterRadiusPxForZoom(nextViewport.zoom, nextViewport.widthPx),
+            minClusterPoints: viewport.minClusterPoints,
+          };
+          const boundedViewport = clampMapViewportToZoomBounds(normalizedViewport, mapViewConfig);
 
-            if (
-              isSameViewport(viewport, boundedInitialViewport) &&
-              isFullWorldLongitudeBounds(boundedInitialViewport.bounds)
-            ) {
-              const responsiveViewport = clampMapViewportToZoomBounds(
-                getResponsiveMapViewport(boundedInitialViewport, nextViewport.widthPx, nextViewport.heightPx),
-                mapViewConfig,
-              );
-
-              setViewport((current) => (isSameViewport(current, responsiveViewport) ? current : responsiveViewport));
-              return;
-            }
-
-            setViewport((current) => (isSameViewport(current, boundedViewport) ? current : boundedViewport));
-            setMapCenter((current) =>
-              Math.abs(current.lat - nextViewport.center.lat) < 0.00001 &&
-              Math.abs(current.lng - nextViewport.center.lng) < 0.00001
-                ? current
-                : nextViewport.center,
+          if (
+            isSameViewport(viewport, boundedInitialViewport) &&
+            isFullWorldLongitudeBounds(boundedInitialViewport.bounds)
+          ) {
+            const responsiveViewport = clampMapViewportToZoomBounds(
+              getResponsiveMapViewport(boundedInitialViewport, nextViewport.widthPx, nextViewport.heightPx),
+              mapViewConfig,
             );
-          }}
-          onFeatureClusterClick={(clusterId) => {
-            handleClusterClick(clusterById.get(clusterId));
-          }}
-          onPlaceClick={(place) => {
-            const item = itemById.get(place.id);
-            if (!item) {
-              return;
-            }
-            router.push(getItemHref(item));
-          }}
-        />
-      </div>
-      {initialFeaturesPending ? <PageLoader height="100%" minHeight={0} /> : null}
+
+            setViewport((current) => (isSameViewport(current, responsiveViewport) ? current : responsiveViewport));
+            return;
+          }
+
+          setViewport((current) => (isSameViewport(current, boundedViewport) ? current : boundedViewport));
+          setMapCenter((current) =>
+            Math.abs(current.lat - nextViewport.center.lat) < 0.00001 &&
+            Math.abs(current.lng - nextViewport.center.lng) < 0.00001
+              ? current
+              : nextViewport.center,
+          );
+        }}
+        onFeatureClusterClick={(clusterId) => {
+          handleClusterClick(clusterById.get(clusterId));
+        }}
+        onPlaceClick={(place) => {
+          const item = itemById.get(place.id);
+          if (!item) {
+            return;
+          }
+          router.push(getItemHref(item));
+        }}
+        pending={initialFeaturesPending}
+      />
     </div>
   );
 }

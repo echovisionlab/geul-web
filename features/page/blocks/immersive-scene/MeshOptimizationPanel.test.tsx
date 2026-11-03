@@ -499,12 +499,11 @@ describe('MeshOptimizationPanel', () => {
     const { rerender } = render(
       <MeshOptimizationPanel {...props} sourceFile={{ fileId: 'old', name: 'old.glb', size: '1 MB' }} />,
     );
-    expect(screen.getByRole('status', { name: 'Loading...' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Compress GLB' })).toBeDisabled();
     rerender(<MeshOptimizationPanel {...props} sourceFile={{ fileId: 'new', name: 'new.glb', size: '1 MB' }} />);
     await act(async () => resolveOld({ candidates: [] }));
-    expect(screen.getByRole('status', { name: 'Loading...' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Compress GLB' })).toBeDisabled();
     await act(async () => resolveNew({ candidates: [] }));
-    expect(screen.queryByRole('status', { name: 'Loading...' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Compress GLB' })).toBeEnabled();
   });
   it('does not drop a generated candidate when an older poll completes', async () => {

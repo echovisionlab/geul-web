@@ -48,25 +48,31 @@ The overlay's layout, admitted fields and interaction remain owned by the form.
 
 Both components accept the same placement contract:
 
-| Property    | Default                          | Behavior                                                                                         |
-| ----------- | -------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `placement` | `fill`                           | `fill` uses absolute positioning with inset zero; `flow` reserves space in normal document flow. |
-| `height`    | `100%` for fill, `auto` for flow | An explicit value overrides either default.                                                      |
-| `minHeight` | `200`                            | Reserves a minimum region height; use `0` when the containing map/table already reserves height. |
-| `size`      | `md`                             | Existing image sizes remain 48/64/80/100/120 for xs/sm/md/lg/xl.                                 |
+| Property    | Default   | Behavior                                                                                         |
+| ----------- | --------- | ------------------------------------------------------------------------------------------------ |
+| `placement` | `fill`    | `fill` uses absolute positioning with inset zero; `flow` reserves space in normal document flow. |
+| `extent`    | `section` | Named region height owned by Core. See below.                                                    |
+| `size`      | `md`      | Existing image sizes remain 48/64/80/100/120 for xs/sm/md/lg/xl.                                 |
 
-Existing map/table consumers retain fill behavior. The containing element must establish the intended
-positioned region and reserve its height. Fill does not itself reserve document space. A new section
-replacement can use flow without feature CSS to override Core positioning:
+| Extent      | Region                                                                              |
+| ----------- | ----------------------------------------------------------------------------------- |
+| `container` | Follows a parent that already reserves height, such as a map, table or media frame. |
+| `compact`   | Panel, dialog or list slot.                                                         |
+| `section`   | Page section or editor entry.                                                       |
+| `tall`      | Workspace whose content is known to be tall, such as a full editor or file manager. |
+| `viewport`  | Standalone full-screen route.                                                       |
+
+Numeric `height` and `minHeight` are not part of the public type; a region that needs another size
+needs a reviewed extent. Fill does not itself reserve document space; the containing element must
+establish the positioned region. A new section replacement uses flow without feature CSS:
 
 ```tsx
-<PageLoader placement="flow" minHeight={200} />
+<PageLoader placement="flow" extent="compact" />
 ```
 
-The flow variant uses relative positioning with automatic insets and an automatic default height.
-It occupies only its own document region. An explicit percentage height still depends on the
-parent's height. Choose a minimum height appropriate to the section; placement does not disable
-other controls or manage focus.
+Placement does not disable other controls or manage focus. Regions whose geometry is already known
+(list blocks, ordered credit rows, table rows) keep Core Skeleton; do not hide a skeleton under a
+loader to reserve space. Rows, dialogs and fields keep Spinner or field `isLoading`.
 
 Pure Feature Views receive a controller-supplied `loadingSurface` or existing content slot. They
 must not import the site controller to resolve settings or translations. Core tables retain their
@@ -87,7 +93,7 @@ flags to Core and sets the mount's `aria-busy` from `preparing`. It renders `loa
 for `preparing && !processing`; processing takes priority and renders `processingSurface` instead.
 The [VideoPlayer controller](../../features/media/VideoPlayer.tsx) owns preparation identity and
 completion through runtime loading and mounting, including the native fallback. It supplies site
-`PageLoader` with localized loading text, `contrast="inverse"`, fill placement and `minHeight={0}`.
+`PageLoader` with localized loading text, `contrast="inverse"`, fill placement and `extent="container"`.
 Core reserves the containing region and paints its fixed black background with the existing
 `canvas-black` role, so loader contrast stays inverse in both themes.
 

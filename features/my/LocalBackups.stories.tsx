@@ -26,7 +26,7 @@ function Preview({
         bytes={backups.reduce((total, entry) => total + entry.bytes, 0)}
         error={error}
         loading={loading}
-        loadingSurface={<PageLoader placement="flow" size="sm" minHeight={120} />}
+        loadingSurface={<PageLoader extent="compact" placement="flow" size="sm" />}
         unavailable={unavailable}
         onRefresh={() => {}}
         onClear={async () => setBackups([])}

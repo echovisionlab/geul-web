@@ -59,15 +59,15 @@ describe('PageLoaderView', () => {
     );
   });
 
-  it('preserves fill defaults and lets a flow region reserve its own height', () => {
+  it('defaults to a filling section region and projects named extents without inline geometry', () => {
     const props = { imageAlt: 'Loading page', message: 'Loading' };
     const { rerender } = render(<PageLoaderView {...props} />);
-    expect(screen.getByRole('status')).toHaveAttribute('data-placement', 'fill');
-    expect(screen.getByRole('status')).toHaveStyle({ height: '100%', minHeight: '200px' });
-    rerender(<PageLoaderView {...props} placement="flow" minHeight={160} />);
-    expect(screen.getByRole('status')).toHaveAttribute('data-placement', 'flow');
-    expect(screen.getByRole('status')).toHaveStyle({ height: 'auto', minHeight: '160px' });
-    rerender(<PageLoaderView {...props} placement="flow" height={240} minHeight={0} />);
-    expect(screen.getByRole('status')).toHaveStyle({ height: '240px', minHeight: '0' });
+    const status = screen.getByRole('status');
+    expect(status).toHaveAttribute('data-placement', 'fill');
+    expect(status).toHaveAttribute('data-extent', 'section');
+    rerender(<PageLoaderView {...props} extent="compact" placement="flow" />);
+    expect(status).toHaveAttribute('data-placement', 'flow');
+    expect(status).toHaveAttribute('data-extent', 'compact');
+    expect(status).not.toHaveAttribute('style');
   });
 });

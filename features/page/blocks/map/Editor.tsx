@@ -1,5 +1,5 @@
 'use client';
-import { QueryLoadingSurface } from '../QueryLoadingSurface';
+import { PageLoader } from '@/features/site/PageLoader';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
 import {
@@ -282,7 +282,6 @@ function MapSettingsForm({ props, isExpanded = true, updateSharedProps, updateLo
 
   return (
     <div>
-      <QueryLoadingSurface queries={[selectedPlacesDataQuery, themesQuery]} />
       <QueryErrorAlert queries={[selectedPlacesDataQuery, themesQuery]} />
       {/* Header */}
       <DsLayoutInset blockEnd="md">
@@ -333,9 +332,11 @@ function MapSettingsForm({ props, isExpanded = true, updateSharedProps, updateLo
             }
           />
 
-          {places.length === 0 ? (
+          {places.length === 0 && selectedPlacesDataQuery.isLoading ? (
+            <PageLoader placement="flow" extent="compact" size="xs" />
+          ) : places.length === 0 ? (
             <DsText size="xs" tone="secondary">
-              {selectedPlacesDataQuery.isLoading ? null : t('emptyState')}
+              {t('emptyState')}
             </DsText>
           ) : (
             <DsLayoutStack gap="xs">
@@ -507,7 +508,7 @@ export function MapCanvasPreview({ props }: BlockCanvasPreviewProps<MapProps>) {
   const hasRequiredData = (mapPlaceIds.length === 0 || selectedPlacesData !== undefined) && themesData !== undefined;
 
   if (!hasRequiredData && (selectedPlacesDataQueryLoad.isLoading || themesQuery.isLoading)) {
-    return <QueryLoadingSurface queries={[selectedPlacesDataQueryLoad, themesQuery]} />;
+    return <PageLoader placement="flow" extent="compact" size="sm" />;
   }
   if (!hasRequiredData && (selectedPlacesDataQueryLoad.isError || themesQuery.isError)) {
     return <QueryErrorAlert queries={[selectedPlacesDataQueryLoad, themesQuery]} />;

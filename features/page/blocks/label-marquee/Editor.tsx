@@ -1,5 +1,5 @@
 'use client';
-import { QueryLoadingSurface } from '../QueryLoadingSurface';
+import { PageLoader } from '@/features/site/PageLoader';
 
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
@@ -41,9 +41,9 @@ function LabelMarqueeSettingsForm({ props, updateProps }: LabelMarqueeSettingsFo
 
   return (
     <DsLayoutStack gap="lg" data-page-block-editor="label-marquee">
-      <QueryLoadingSurface queries={[labelsQuery]} />
       <QueryErrorAlert queries={[labelsQuery]} />
       <MarqueeEntityFields
+        selectorLoading={labelsQuery.isLoading}
         entityLabel={tCommonEntities('labels')}
         source={props.source || 'all'}
         ids={props.ids || ''}
@@ -111,14 +111,13 @@ export function LabelMarqueeCanvasPreview({ props }: BlockCanvasPreviewProps<Lab
   const items = buildLabelMarqueePreviewItems(parsed, labels ?? []);
 
   if (labelsQuery.isLoading) {
-    return <QueryLoadingSurface queries={[labelsQuery]} />;
+    return <PageLoader placement="flow" extent="compact" size="sm" />;
   }
   if (labelsQuery.isError && labels === undefined) {
     return <QueryErrorAlert queries={[labelsQuery]} />;
   }
   return (
     <>
-      <QueryLoadingSurface queries={[labelsQuery]} />
       <QueryErrorAlert queries={[labelsQuery]} />
       <MarqueeView
         items={items}

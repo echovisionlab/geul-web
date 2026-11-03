@@ -155,7 +155,7 @@ export function UserAvatarUploader({
     <ProfileAvatarControl
       key={memberId}
       imageUrl={currentImage}
-      loadingSurface={<PageLoader placement="flow" minHeight={160} size="sm" />}
+      loadingSurface={<PageLoader extent="compact" placement="flow" size="sm" />}
       size={size}
       accept={userAvatarSelectionAccept}
       maxSize={userAvatarSelectionMaxSize}

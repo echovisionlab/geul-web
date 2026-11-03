@@ -312,7 +312,7 @@ function TiptapBlockContainerNodeView({
                 {emojiFailed ? (
                   <Alert tone="danger">{tCommon('errors.generic')}</Alert>
                 ) : !emojiData ? (
-                  <PageLoader placement="flow" minHeight={160} size="xs" />
+                  <PageLoader extent="compact" placement="flow" size="xs" />
                 ) : (
                   <EmojiPickerPanel
                     density="compact"

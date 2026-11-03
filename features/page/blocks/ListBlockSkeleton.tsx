@@ -9,7 +9,6 @@ import {
   type CollectionMediaProps,
 } from '@/components/core/Collection';
 import { Skeleton } from '@/components/core/Display';
-import { PageLoader } from '@/features/site/PageLoader';
 import { SectionCard } from '@/components/core/Section';
 import { COLLECTION_COLUMN_GROWTH, collectionMinColumnWidth, type CollectionTrackScale } from './content-layout';
 import { getResponsiveSlideSize } from './constants';
@@ -97,13 +96,8 @@ export function ListBlockSkeleton({
       </LayoutGrid>
     );
   return (
-    <div className={className} aria-busy="true" style={{ display: 'grid' }}>
-      <div aria-hidden="true" inert style={{ visibility: 'hidden', gridArea: '1 / 1' }}>
-        <Collection size={itemSize}>{body}</Collection>
-      </div>
-      <div style={{ gridArea: '1 / 1' }}>
-        <PageLoader placement="flow" height="100%" />
-      </div>
+    <div className={className} aria-busy="true">
+      <Collection size={itemSize}>{body}</Collection>
     </div>
   );
 }

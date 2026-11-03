@@ -891,7 +891,7 @@ export function ImmersiveSceneRenderer({ config, preview = false, progress }: Im
         <div className={classes.viewport} data-immersive-scene-viewport>
           {rendererStatus === 'idle' ? (
             <div style={{ position: 'absolute', insetInline: 0, bottom: 0, zIndex: 1, pointerEvents: 'none' }}>
-              <PageLoader placement="flow" minHeight={80} size="xs" />
+              <PageLoader extent="compact" placement="flow" size="xs" />
             </div>
           ) : null}
           <div

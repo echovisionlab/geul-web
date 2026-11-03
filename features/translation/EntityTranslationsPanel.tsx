@@ -361,7 +361,7 @@ export function EntityTranslationsPanel({
     >
       <DsLayoutStack gap="md">
         {isLoading ? (
-          <PageLoader placement="flow" />
+          <PageLoader placement="flow" extent="compact" size="sm" />
         ) : hasError ? (
           <SupportingText tone="danger" role="alert">
             {getTranslationActionErrorMessage(

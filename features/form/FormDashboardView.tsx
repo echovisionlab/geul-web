@@ -96,7 +96,7 @@ export function FormDashboardView({
       <div style={{ minHeight: '100dvh' }}>
         <DsSectionCard padding="none" appearance="surface" border="none">
           <DsLayoutInset space="none">
-            <PageLoader placement="flow" minHeight="100dvh" />
+            <PageLoader extent="viewport" placement="flow" />
           </DsLayoutInset>
         </DsSectionCard>
       </div>

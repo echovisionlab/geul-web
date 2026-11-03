@@ -1,7 +1,6 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { PostMapSkeleton } from '../post-map/Skeleton';
 import { withQueryClient } from '@/lib/providers/with-query-client';
 import type { listWorkMapFeatures } from '@/lib/queries/work-browser';
 import type { MapViewConfig } from '@/lib/types/map/model';
@@ -25,9 +24,8 @@ export interface WorkMapViewClientProps {
 }
 
 // SSR remains enabled so initial map data and theme keep their server-rendered content.
-const RuntimeView = dynamic(
-  () => withQueryClient(import('./ViewClientRuntime').then((module) => module.WorkMapViewClient)),
-  { loading: () => <PostMapSkeleton /> },
+const RuntimeView = dynamic(() =>
+  withQueryClient(import('./ViewClientRuntime').then((module) => module.WorkMapViewClient)),
 );
 
 export function WorkMapViewClient(props: WorkMapViewClientProps) {

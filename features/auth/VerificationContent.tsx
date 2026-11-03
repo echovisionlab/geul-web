@@ -582,7 +582,12 @@ export function VerificationContent() {
           email={email}
           error={flowError}
           loadingSurface={
-            <PageLoader placement="flow" message={t(checkingApplication ? 'checking' : 'sentEmail.submitting')} />
+            <PageLoader
+              placement="flow"
+              extent="compact"
+              size="sm"
+              message={t(checkingApplication ? 'checking' : 'sentEmail.submitting')}
+            />
           }
           labels={{
             back: tCommonActions('back'),

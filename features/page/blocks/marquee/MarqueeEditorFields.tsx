@@ -165,6 +165,7 @@ interface MarqueeEntityFieldsProps {
   logoScale: string;
   fallbackMode: string;
   selectorItems: MarqueeSelectorItem[];
+  selectorLoading?: boolean;
   extra?: ReactNode;
   onUpdate: (key: string, value: string) => void;
 }
@@ -177,6 +178,7 @@ export function MarqueeEntityFields({
   logoScale,
   fallbackMode,
   selectorItems,
+  selectorLoading = false,
   extra,
   onUpdate,
 }: MarqueeEntityFieldsProps) {
@@ -201,6 +203,7 @@ export function MarqueeEntityFields({
       {source === 'selected' ? (
         <MultiSelect
           label={entityLabel}
+          isLoading={selectorLoading}
           data={selectorItems.map((item) => ({ value: item.id, label: item.name }))}
           value={selectedIds}
           onChange={(values) => onUpdate('ids', values.join(','))}
