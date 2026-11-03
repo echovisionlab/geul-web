@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "535f22b0e3050cf1e6969d5a56d213252905166c85eeff6ff677cfe5c60f9b1e",
+  "manifestHash": "42995902c027f72b3590e250dc3d886828b93d0ecff0da7818d119effe5aec6e",
   "counts": {
     "sourceFiles": 3936,
     "productionSourceFiles": 2339,
@@ -88943,7 +88943,7 @@
         },
         {
           "name": "TemplateTestPreparing",
-          "args": "{ page: 'template', state: 'test-pending' }",
+          "args": "{ page: 'template', state: 'test-pending', onSendTest: fn() }",
           "preview": "http://localhost:6010/?path=/story/pages-admin-email-editors--template-test-preparing"
         },
         {

@@ -22,7 +22,7 @@ import { Alert } from '@/components/core/Alert';
 import { notifications } from '@/components/core/Notification';
 import { renderLocalEmailPreview } from './fixtures/email-preview';
 import { LOCAL_EMAIL_VARIABLES, useLocalEmailPreview } from './fixtures/use-email-preview';
-import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { operationsLabels } from './fixtures/operations-a11y';
 import { localRichFormattingEmailDocument } from './fixtures/email-rich-formatting';
 import { localEditLocale, localEmailRoom, localEditorQueryClient } from './fixtures/editor-pages';
@@ -175,10 +175,12 @@ function TemplatePreview({
   state = 'ready',
   lineBreaks = false,
   richFormatting = false,
+  onSendTest,
 }: {
   state?: State;
   lineBreaks?: boolean;
   richFormatting?: boolean;
+  onSendTest?: () => void;
 }) {
   const [client] = useState(() => localEditorQueryClient('email_template', 'local-template'));
   const [room, setRoom] = useState<ReturnType<typeof localEmailRoom> | null>(null);
@@ -296,6 +298,7 @@ function TemplatePreview({
     ],
     setTestLocale,
     handleSendTest: () => {
+      onSendTest?.();
       if (state === 'test-pending') {
         setPreparingTest(true);
         return;
@@ -320,16 +323,18 @@ function Preview({
   state = 'ready',
   lineBreaks = false,
   richFormatting = false,
+  onSendTest,
 }: {
   page?: 'layout' | 'template';
   state?: State;
   lineBreaks?: boolean;
   richFormatting?: boolean;
+  onSendTest?: () => void;
 }) {
   return page === 'layout' ? (
     <LayoutPreview state={state} />
   ) : (
-    <TemplatePreview state={state} lineBreaks={lineBreaks} richFormatting={richFormatting} />
+    <TemplatePreview state={state} lineBreaks={lineBreaks} richFormatting={richFormatting} onSendTest={onSendTest} />
   );
 }
 const meta = {
@@ -427,10 +432,16 @@ export const TemplateLayoutsPending: Story = {
   play: async ({ canvasElement, globals }) => {
     const canvas = within(canvasElement);
     const t = await operationsLabels(globals);
-    const layout = await canvas.findByRole('combobox', { name: t.emailTemplates('detail.fields.layoutLabel') });
+    const layout = await canvas.findByRole('combobox', {
+      name: t.emailTemplates('detail.fields.layoutLabel'),
+      expanded: false,
+    });
     await expect(layout).toBeDisabled();
-    await expect(layout.closest('[aria-busy]')).toHaveAttribute('aria-busy', 'true');
     await expect(layout).toHaveAttribute('placeholder', t.common('states.loading'));
+    await expect(layout).not.toBeInvalid();
+    await expect(layout).toHaveValue('');
+    await expect(layout).not.toHaveAccessibleDescription(t.common('states.notAvailable'));
+    await expect(canvas.queryByText(t.emailTemplates('detail.fields.noLayouts'))).not.toBeInTheDocument();
   },
 };
 export const TemplateLayoutsFailed: Story = {
@@ -438,10 +449,16 @@ export const TemplateLayoutsFailed: Story = {
   play: async ({ canvasElement, globals }) => {
     const canvas = within(canvasElement);
     const t = await operationsLabels(globals);
-    const layout = await canvas.findByRole('combobox', { name: t.emailTemplates('detail.fields.layoutLabel') });
+    const layout = await canvas.findByRole('combobox', {
+      name: t.emailTemplates('detail.fields.layoutLabel'),
+      expanded: false,
+    });
     await expect(layout).toBeDisabled();
-    await expect(layout.closest('[aria-busy]')).toHaveAttribute('aria-busy', 'false');
+    await expect(layout).not.toHaveAttribute('placeholder', t.common('states.loading'));
+    await expect(layout).toBeInvalid();
+    await expect(layout).toHaveValue('');
     await expect(layout).toHaveAccessibleDescription(t.common('states.notAvailable'));
+    await expect(canvas.queryByText(t.emailTemplates('detail.fields.noLayouts'))).not.toBeInTheDocument();
   },
 };
 export const TemplatePreviewPending: Story = {
@@ -468,17 +485,33 @@ export const TemplatePreviewFailed: Story = {
   },
 };
 export const TemplateTestPreparing: Story = {
-  args: { page: 'template', state: 'test-pending' },
-  play: async ({ canvasElement, globals }) => {
+  args: { page: 'template', state: 'test-pending', onSendTest: fn() },
+  play: async ({ args, canvasElement, globals }) => {
     const canvas = within(canvasElement);
     const t = await operationsLabels(globals);
     await userEvent.click(await canvas.findByRole('button', { name: t.common('actions.sendTest') }));
-    const dialog = await within(canvasElement.ownerDocument.body).findByRole('dialog');
-    await userEvent.type(within(dialog).getByRole('textbox', { name: t.common('labels.email') }), 'june@example.com');
-    const send = within(dialog).getByRole('button', { name: t.common('actions.sendTest') });
+    const dialog = await within(canvasElement.ownerDocument.body).findByRole('dialog', {
+      name: t.common('actions.sendTestEmail'),
+    });
+    const modal = within(dialog);
+    const send = modal.getByRole('button', { name: t.common('actions.sendTest') });
+    await expect(send).toBeDisabled();
+    await expect(args.onSendTest).not.toHaveBeenCalled();
+    await userEvent.type(modal.getByRole('textbox', { name: t.common('labels.email') }), 'june@example.com');
+    await expect(send).toBeEnabled();
+    await expect(send).not.toHaveAttribute('aria-disabled', 'true');
     await userEvent.click(send);
     await expect(send).toHaveAttribute('aria-busy', 'true');
-    await expect(send).toBeDisabled();
+    await expect(send).toHaveAttribute('aria-disabled', 'true');
+    await expect(send).toHaveFocus();
+    await expect(modal.getByRole('progressbar', { name: t.common('actions.sendTest') })).toBeVisible();
+    await expect(args.onSendTest).toHaveBeenCalledTimes(1);
+    await userEvent.click(send);
+    await userEvent.keyboard('{Enter} ');
+    await expect(args.onSendTest).toHaveBeenCalledTimes(1);
+    await expect(send).toHaveAttribute('aria-busy', 'true');
+    await expect(send).toHaveAttribute('aria-disabled', 'true');
+    await expect(send).toHaveFocus();
     await expect(dialog).toBeVisible();
   },
 };
