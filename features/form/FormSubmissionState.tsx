@@ -5,20 +5,24 @@ import { Heading as DsHeading, Text as DsText } from '@/components/core/Typograp
 import { IconCheck } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 
-import { PageLoader } from '@/features/site/PageLoader';
+import { PageLoader, type PageLoaderProps } from '@/features/site/PageLoader';
 import { StatusIcon } from '@/components/core/Display';
 
 interface FormSubmissionPendingStateProps {
   minHeight?: number;
+  contrast?: PageLoaderProps['contrast'];
 }
 
-export function FormSubmissionPendingState({ minHeight = 240 }: FormSubmissionPendingStateProps) {
+export function FormSubmissionPendingState({
+  minHeight = 240,
+  contrast = 'standard',
+}: FormSubmissionPendingStateProps) {
   const tCommonStates = useTranslations('common.states');
 
   return (
     <div style={{ position: 'relative', minHeight }}>
       <DsLayoutInset space="none">
-        <PageLoader message={tCommonStates('loading')} />
+        <PageLoader message={tCommonStates('loading')} contrast={contrast} />
       </DsLayoutInset>
     </div>
   );

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
+import { ManifestProvider } from '@/lib/contexts/ManifestContext';
 import { act } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot, type Root } from 'react-dom/client';
@@ -22,6 +23,7 @@ vi.mock('next-intl', () => ({
       'embeddedForm.password.requiredMessage': 'Enter a password',
       'embeddedForm.password.incorrect': 'Incorrect password',
       'common.actions.continue': 'Continue',
+      'common.states.loading': 'Loading...',
       'common.placeholders.password': 'Password',
       'common.messages.formSubmittedSuccessfully': 'Submitted successfully',
       'formSuccessPage.title': 'Thanks',
@@ -91,19 +93,6 @@ vi.mock('@/features/form/FormRenderer', async () => {
   };
 });
 
-vi.mock('@/features/form/FormSubmissionState', () => ({
-  FormSubmissionPendingState: () => <div data-testid="submission-pending">Loading...</div>,
-  FormSubmissionSuccessState: () => <div data-testid="submission-success">Thanks Submitted successfully</div>,
-}));
-
-vi.mock('@/lib/contexts/ManifestContext', () => ({
-  useSiteSettings: () => ({
-    settings: {
-      site_origin: 'https://studio.example.com',
-    },
-  }),
-}));
-
 vi.mock('@/lib/actions/form', () => ({
   checkFormAccessAction: (...args: unknown[]) => checkFormAccessActionMock(...args),
   submitFormAction: (...args: unknown[]) => submitFormActionMock(...args),
@@ -153,7 +142,9 @@ function render(node: React.ReactNode) {
   act(() => {
     root?.render(
       <QueryClientProvider client={queryClient}>
-        <DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>
+        <ManifestProvider>
+          <DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>
+        </ManifestProvider>
       </QueryClientProvider>,
     );
   });
@@ -211,6 +202,7 @@ describe('FormViewClient', () => {
     });
 
     render(<FormViewClient props={{ formId: 'contact', showTitle: 'true' }} requestedLocale="ko" />);
+    expect(document.querySelector('[data-core-page-loader]')).toHaveAttribute('data-contrast', 'standard');
     await flush();
 
     expect(checkFormAccessActionMock).toHaveBeenCalledWith({
@@ -310,7 +302,7 @@ describe('FormViewClient', () => {
     });
   });
 
-  it('shows the success state after a successful submission', async () => {
+  it('shows the inverse pending loader until a successful submission replaces it', async () => {
     checkFormAccessActionMock.mockResolvedValue({
       accessible: true,
       form: {
@@ -319,7 +311,13 @@ describe('FormViewClient', () => {
         schema: { id: 'schema-1' },
       },
     });
-    submitFormActionMock.mockResolvedValue({ success: true });
+    let resolveSubmit: ((value: { success: true }) => void) | undefined;
+    submitFormActionMock.mockImplementation(
+      () =>
+        new Promise<{ success: true }>((resolve) => {
+          resolveSubmit = resolve;
+        }),
+    );
 
     render(<FormViewClient props={{ formId: 'contact', showTitle: 'true' }} requestedLocale="ko" />);
     await waitForAssertion(() => {
@@ -340,9 +338,21 @@ describe('FormViewClient', () => {
 
     await waitForAssertion(() => {
       expect(submitFormActionMock).toHaveBeenCalledWith('form-1', { email: 'hello@example.com' }, undefined, 'ko');
+      expect(document.querySelector('[data-core-page-loader]')).toHaveAttribute('data-contrast', 'inverse');
+    });
+    expect(document.body.textContent).not.toContain('Submitted successfully');
+
+    await act(async () => {
+      resolveSubmit?.({ success: true });
+      await Promise.resolve();
+    });
+
+    await waitForAssertion(() => {
+      expect(document.body.textContent).toContain('Submitted successfully');
+      expect(document.querySelector('[data-core-page-loader]')).toBeNull();
     });
     expect(document.body.textContent).toContain('Thanks');
-    expect(document.body.textContent).toContain('Submitted successfully');
+    expect(document.querySelector('[data-testid="form-renderer"]')).toBeNull();
   });
 
   it('keeps embedded form submissions local in preview mode', async () => {
@@ -376,7 +386,7 @@ describe('FormViewClient', () => {
     expect(document.querySelector('[data-testid="form-renderer"]')).not.toBeNull();
   });
 
-  it('keeps typed values mounted after a handled submit error', async () => {
+  it('keeps typed values and focus mounted through pending and a handled submit error', async () => {
     checkFormAccessActionMock.mockResolvedValue({
       accessible: true,
       form: {
@@ -413,14 +423,22 @@ describe('FormViewClient', () => {
     });
 
     await act(async () => {
+      submitButton?.focus();
       submitButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       await Promise.resolve();
     });
 
     await waitForAssertion(() => {
-      expect(document.querySelector('[data-testid="submission-pending"]')).not.toBeNull();
+      const loader = document.querySelector('[data-core-page-loader]');
+      expect(loader).not.toBeNull();
+      expect(loader).toHaveAttribute('role', 'status');
+      expect(loader).toHaveAttribute('aria-label', 'Loading...');
+      expect(loader).toHaveTextContent('Loading...');
+      expect(loader).toHaveAttribute('data-contrast', 'inverse');
     });
     expect(document.querySelector('[data-testid="form-renderer"]')).not.toBeNull();
+    expect(document.querySelector('[aria-busy="true"]')).not.toBeNull();
+    expect(document.activeElement).toBe(submitButton);
 
     await act(async () => {
       resolveSubmit?.({ error: 'Submission failed' });
@@ -437,5 +455,8 @@ describe('FormViewClient', () => {
 
     expect(document.querySelector('[data-testid="form-email-value"]')?.textContent).toBe('persisted@example.com');
     expect(document.querySelector('[data-testid="form-renderer"]')).not.toBeNull();
+    expect(document.querySelector('[data-core-page-loader]')).toBeNull();
+    expect(document.querySelector('[aria-busy="true"]')).toBeNull();
+    expect(document.activeElement).toBe(submitButton);
   });
 });

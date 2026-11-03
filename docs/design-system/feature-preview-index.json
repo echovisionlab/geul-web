@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceManifestHash": "42995902c027f72b3590e250dc3d886828b93d0ecff0da7818d119effe5aec6e",
+  "sourceManifestHash": "f0dd0a8a471b7c5566965a39f9f2de2527e1994bf74e0df03920c2beffee50d2",
   "methodology": "All inventoried Feature component candidates. Direct value imports, literal lazy imports and transitive source relationships through production owners/local adapters are indexed separately. A dependency can be unused or render conditionally; neither relationship proves rendered states, route parity or design compliance. Empty JSX records include runtime/lazy/controller boundaries and must be inspected before treating them as visual gaps.",
   "counts": { "domains": 54, "componentFiles": 781, "jsxWithoutStoryRelationship": 43 },
   "domains": [
@@ -5029,7 +5029,7 @@
         {
           "file": "features/media/ui/MediaPlayerStatusOverlay.tsx",
           "hasJsx": true,
-          "directStories": [],
+          "directStories": ["Feature/Media/Video Player"],
           "relatedStories": [
             "Pages/Public/Entities",
             "Feature/Editor/Snapshot Handoff",

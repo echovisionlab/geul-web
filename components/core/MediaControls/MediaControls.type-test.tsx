@@ -1,4 +1,10 @@
-import { MediaTransport, MediaAudioFrame, MediaWaveformSeek, applyVideoMediaPresentation } from './index';
+import {
+  MediaTransport,
+  MediaAudioFrame,
+  MediaVideoFrame,
+  MediaWaveformSeek,
+  applyVideoMediaPresentation,
+} from './index';
 import { NativeRange } from '../Input/NativeRange';
 import { applyNativeRange } from '../Input/native-range';
 const transport = {
@@ -13,6 +19,13 @@ const transport = {
   onVolumeChange: (_value: number) => {},
 };
 <MediaTransport {...transport} />;
+<MediaVideoFrame preparing processing aria-label="Preparing video">
+  Video
+</MediaVideoFrame>;
+// @ts-expect-error preparation reserves Core geometry without accepting presentation overrides
+<MediaVideoFrame preparing style={{ aspectRatio: '1' }}>
+  Video
+</MediaVideoFrame>;
 // @ts-expect-error a typed spread cannot open the presentation boundary
 <MediaTransport {...transport} {...{ style: { color: 'red' } }} />;
 // @ts-expect-error arbitrary media skins remain closed

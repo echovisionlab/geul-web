@@ -164,7 +164,12 @@ export function VideoPlayer({
       preparing={preparing}
       processing={isProcessing}
       loadingSurface={
-        <PageLoader height="100%" minHeight={0} message={tMedia('videoPlayer.controls.videoPlayerLoading')} />
+        <PageLoader
+          contrast="inverse"
+          height="100%"
+          minHeight={0}
+          message={tMedia('videoPlayer.controls.videoPlayerLoading')}
+        />
       }
       processingSurface={
         <MediaPlayerStatusOverlay message={tMedia('videoEditor.processingOverlay')} kind="processing" />

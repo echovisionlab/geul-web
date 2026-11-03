@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
 import { expect, within } from 'storybook/test';
+import { SectionCard } from '../Section';
 import { PageLoaderView } from './PageLoaderView';
 
 const meta: Meta<typeof PageLoaderView> = {
@@ -22,6 +23,7 @@ const meta: Meta<typeof PageLoaderView> = {
     ),
   ],
   argTypes: {
+    contrast: { control: 'radio', options: ['standard', 'inverse'] },
     placement: { control: 'radio', options: ['fill', 'flow'] },
     imageSrc: { control: 'text' },
     imageUnoptimized: { control: 'boolean' },
@@ -85,5 +87,29 @@ export const FlowRegion: Story = {
     await expect(region.height).toBeGreaterThanOrEqual(200);
     await expect(region.top).toBeGreaterThanOrEqual(before.bottom);
     await expect(after.top).toBeGreaterThanOrEqual(region.bottom);
+  },
+};
+
+export const InverseOverlay: Story = {
+  args: {
+    contrast: 'inverse',
+    imageSrc: '/storybook/media/video-poster.jpg',
+    message: 'Submitting your response…',
+  },
+  render: (args) => (
+    <SectionCard padding="none" border="none">
+      <SectionCard padding="none" border="none" appearance="overlay">
+        <div style={{ position: 'relative', height: 320 }}>
+          <PageLoaderView {...args} />
+        </div>
+      </SectionCard>
+    </SectionCard>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const status = canvas.getByRole('status', { name: 'Loading page' });
+    await expect(status).toHaveAttribute('data-contrast', 'inverse');
+    await expect(canvas.getByText('Submitting your response…')).toHaveStyle({ color: 'rgb(255, 255, 255)' });
+    await expect(canvas.getByRole('img', { name: 'Loading page' })).toBeVisible();
   },
 };

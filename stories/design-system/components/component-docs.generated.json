@@ -12191,9 +12191,53 @@
       "title": "Core/Feedback/PageLoaderView",
       "sourceFiles": [
         "components/core/LoadingSurface/PageLoaderView.stories.tsx",
-        "components/core/LoadingSurface/PageLoaderView.tsx"
+        "components/core/LoadingSurface/PageLoaderView.tsx",
+        "components/core/visual-contract.ts"
       ],
-      "tokenReferences": [],
+      "tokenReferences": [
+        {
+          "name": "--geul-text-muted",
+          "registered": true,
+          "sources": [
+            { "file": "components/core/LoadingSurface/PageLoaderView.module.css", "line": 6, "property": "color" }
+          ],
+          "definitions": [
+            { "file": "lib/styles/design-tokens.css", "line": 173, "value": "#5d5b56", "context": ":root" },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 264,
+              "value": "#a6a49e",
+              "context": "@media (prefers-color-scheme: dark) → html:not([data-geul-theme='light'])"
+            },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 349,
+              "value": "#5d5b56",
+              "context": "[data-geul-theme='light']"
+            },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 433,
+              "value": "#a6a49e",
+              "context": "[data-geul-theme='dark']"
+            },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 519,
+              "value": "#5d5b56",
+              "context": "@media print → :root,\n  [data-geul-theme]"
+            }
+          ]
+        },
+        {
+          "name": "--geul-text-on-image",
+          "registered": true,
+          "sources": [
+            { "file": "components/core/LoadingSurface/PageLoaderView.module.css", "line": 15, "property": "color" }
+          ],
+          "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 7, "value": "#fff", "context": ":root" }]
+        }
+      ],
       "styleSources": [
         {
           "file": "components/core/LoadingSurface/PageLoaderView.module.css",
@@ -12222,6 +12266,13 @@
           "description": "Required nonblank visible text, resolved by the owning controller."
         },
         {
+          "name": "contrast",
+          "type": "'standard' | 'inverse'",
+          "required": false,
+          "description": "Standard text on theme surfaces, or full-strength inverse text on a dark scrim.",
+          "defaultValue": "'standard'"
+        },
+        {
           "name": "height",
           "type": "string | number",
           "required": false,
@@ -12243,17 +12294,66 @@
           "description": "Fill a positioned parent, or reserve height in normal document flow. Defaults to fill.",
           "defaultValue": "'fill'"
         },
-        { "name": "size", "type": "'xs' | 'sm' | 'md' | 'lg' | 'xl'", "required": false, "defaultValue": "'md'" }
+        { "name": "size", "type": "'xs' | 'sm' | 'md' | 'lg' | 'xl'", "required": false, "defaultValue": "'md'" },
+        { "name": "bd", "type": "never", "required": false },
+        { "name": "bdrs", "type": "never", "required": false },
+        { "name": "bg", "type": "never", "required": false },
+        { "name": "c", "type": "never", "required": false },
+        { "name": "className", "type": "never", "required": false },
+        { "name": "classNames", "type": "never", "required": false },
+        { "name": "color", "type": "never", "required": false },
+        { "name": "component", "type": "never", "required": false },
+        { "name": "ff", "type": "never", "required": false },
+        { "name": "fw", "type": "never", "required": false },
+        { "name": "fz", "type": "never", "required": false },
+        { "name": "h", "type": "never", "required": false },
+        { "name": "lh", "type": "never", "required": false },
+        { "name": "m", "type": "never", "required": false },
+        { "name": "mah", "type": "never", "required": false },
+        { "name": "maw", "type": "never", "required": false },
+        { "name": "mb", "type": "never", "required": false },
+        { "name": "me", "type": "never", "required": false },
+        { "name": "mih", "type": "never", "required": false },
+        { "name": "miw", "type": "never", "required": false },
+        { "name": "ml", "type": "never", "required": false },
+        { "name": "mr", "type": "never", "required": false },
+        { "name": "ms", "type": "never", "required": false },
+        { "name": "mt", "type": "never", "required": false },
+        { "name": "mx", "type": "never", "required": false },
+        { "name": "my", "type": "never", "required": false },
+        { "name": "opacity", "type": "never", "required": false },
+        { "name": "p", "type": "never", "required": false },
+        { "name": "pb", "type": "never", "required": false },
+        { "name": "pe", "type": "never", "required": false },
+        { "name": "pl", "type": "never", "required": false },
+        { "name": "pr", "type": "never", "required": false },
+        { "name": "ps", "type": "never", "required": false },
+        { "name": "pt", "type": "never", "required": false },
+        { "name": "px", "type": "never", "required": false },
+        { "name": "py", "type": "never", "required": false },
+        { "name": "radius", "type": "never", "required": false },
+        { "name": "renderRoot", "type": "never", "required": false },
+        { "name": "shadow", "type": "never", "required": false },
+        { "name": "style", "type": "never", "required": false },
+        { "name": "styles", "type": "never", "required": false },
+        { "name": "ta", "type": "never", "required": false },
+        { "name": "td", "type": "never", "required": false },
+        { "name": "tt", "type": "never", "required": false },
+        { "name": "unstyled", "type": "never", "required": false },
+        { "name": "variant", "type": "never", "required": false },
+        { "name": "vars", "type": "never", "required": false },
+        { "name": "w", "type": "never", "required": false }
       ],
       "stateStories": [
         { "id": "core-feedback-pageloaderview--default", "name": "Default" },
         { "id": "core-feedback-pageloaderview--with-message", "name": "With Message" },
         { "id": "core-feedback-pageloaderview--with-resolved-image", "name": "With Resolved Image" },
         { "id": "core-feedback-pageloaderview--failed-image", "name": "Failed Image" },
-        { "id": "core-feedback-pageloaderview--flow-region", "name": "Flow Region" }
+        { "id": "core-feedback-pageloaderview--flow-region", "name": "Flow Region" },
+        { "id": "core-feedback-pageloaderview--inverse-overlay", "name": "Inverse Overlay" }
       ],
       "usage": [
-        "message must be nonblank; imageAlt independently names the image/status. Missing or failed images retain visible text. Defaults are placement=fill, minHeight=200, size=md and imageUnoptimized=false; height defaults to 100% for fill or auto for flow. Fill needs a positioned parent with reserved height; flow reserves its own document space. Site PageLoader owns settings, CDN and localization; pure Views receive a prepared loadingSurface. Retain usable content during background requests and connect terminal error/retry to the request owner.",
+        "contrast=standard uses theme muted text; contrast=inverse uses full-strength text-on-image on a dark scrim. The public form overlay explicitly selects inverse; omitted contrast stays standard. Select this closed API instead of feature style/class/color overrides. message must be nonblank; imageAlt independently names the image/status. Missing or failed images retain visible text. Defaults are placement=fill, minHeight=200, size=md and imageUnoptimized=false; height defaults to 100% for fill or auto for flow. Fill needs a positioned parent with reserved height; flow reserves its own document space. Site PageLoader owns settings, CDN and localization; pure Views receive a prepared loadingSurface. Retain usable content during background requests and connect terminal error/retry to the request owner.",
         "Consumer: features/site/PageLoader/PageLoader.tsx"
       ],
       "accessibility": [
@@ -60592,7 +60692,6 @@
         "Consumer: components/core/Progress/SegmentedProgress.tsx",
         "Consumer: components/core/Section/ToolbarCommand.tsx",
         "Consumer: components/core/SideNavigation/SideNavigation.tsx",
-        "Consumer: features/admin/MapThemeEditor/MapThemeListView.tsx",
         "Consumer: features/admin/email-layout/EmailLayoutPreviewView.tsx",
         "Consumer: features/admin/ui/AdminNavigation/AdminNavigationView.tsx",
         "Consumer: features/admin/user/auth/UserSsoProvidersSection.tsx",

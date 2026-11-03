@@ -4,6 +4,8 @@ import { ControlContrastProvider } from '../control-context';
 import classes from './VideoControls.module.css';
 export interface MediaVideoFrameProps extends ClosedVisualProps {
   children: ReactNode;
+  /** Reserve the initial fluid region until mounted media supplies its size. */
+  preparing?: boolean;
   processing?: boolean;
   role?: 'group';
   'aria-label'?: string;
@@ -12,6 +14,7 @@ export interface MediaVideoFrameProps extends ClosedVisualProps {
 }
 export function MediaVideoFrame({
   children,
+  preparing = false,
   processing = false,
   role,
   'aria-label': label,
@@ -25,6 +28,7 @@ export function MediaVideoFrame({
       aria-labelledby={labelledBy}
       aria-describedby={describedBy}
       className={`${classes.frame} video-player-container`}
+      data-video-player-preparing={String(preparing)}
       data-video-player-processing={String(processing)}
     >
       {children}

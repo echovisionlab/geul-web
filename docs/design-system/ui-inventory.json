@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "42995902c027f72b3590e250dc3d886828b93d0ecff0da7818d119effe5aec6e",
+  "manifestHash": "f0dd0a8a471b7c5566965a39f9f2de2527e1994bf74e0df03920c2beffee50d2",
   "counts": {
-    "sourceFiles": 3936,
+    "sourceFiles": 3938,
     "productionSourceFiles": 2339,
     "componentFiles": 923,
     "coreFamilies": 57,
     "featureDomains": 54,
     "storyFiles": 284,
-    "storyVariants": 1629,
+    "storyVariants": 1630,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -618,6 +618,7 @@
     "components/core/Layout/breakpoints.ts",
     "components/core/Layout/index.ts",
     "components/core/Layout/layout-contract.ts",
+    "components/core/LoadingSurface/PageLoaderView.contrast.test.ts",
     "components/core/LoadingSurface/PageLoaderView.stories.tsx",
     "components/core/LoadingSurface/PageLoaderView.test.tsx",
     "components/core/LoadingSurface/PageLoaderView.tsx",
@@ -2705,6 +2706,7 @@
     "features/site/PageLoader/PageLoader.stories.tsx",
     "features/site/PageLoader/PageLoader.test.tsx",
     "features/site/PageLoader/PageLoader.tsx",
+    "features/site/PageLoader/PageLoader.type-test.tsx",
     "features/site/PageLoader/index.ts",
     "features/site/PageLoader/loader-image.ts",
     "features/site/SiteAssetUploader/ImageDropzone.policy.test.tsx",
@@ -14022,8 +14024,13 @@
       "propsEvidence": [
         {
           "name": "PageLoaderViewProps",
-          "extends": [],
+          "extends": ["extends ClosedVisualProps"],
           "properties": [
+            {
+              "name": "contrast",
+              "optional": true,
+              "type": "PageLoaderViewContrast"
+            },
             {
               "name": "height",
               "optional": true,
@@ -14075,6 +14082,10 @@
         {
           "name": "PageLoaderViewPlacement",
           "type": "'fill' | 'flow'"
+        },
+        {
+          "name": "PageLoaderViewContrast",
+          "type": "'standard' | 'inverse'"
         }
       ],
       "productionConsumers": ["features/site/PageLoader/PageLoader.tsx", "lib/providers/ClientMessagesProvider.tsx"],
@@ -14380,6 +14391,11 @@
               "name": "children",
               "optional": false,
               "type": "ReactNode"
+            },
+            {
+              "name": "preparing",
+              "optional": true,
+              "type": "boolean"
             },
             {
               "name": "processing",
@@ -16925,6 +16941,7 @@
         "components/core/EmptyState/EmptyState.stories.tsx",
         "components/core/Hierarchy/Hierarchy.stories.tsx",
         "components/core/Layout/Layout.stories.tsx",
+        "components/core/LoadingSurface/PageLoaderView.stories.tsx",
         "components/core/Section/SectionCard.stories.tsx",
         "components/core/Sortable/SortableGroups.stories.tsx",
         "features/work/WorkEditor/WorkWaitingStates.stories.tsx",
@@ -19189,7 +19206,6 @@
         "components/core/Progress/SegmentedProgress.tsx",
         "components/core/Section/ToolbarCommand.tsx",
         "components/core/SideNavigation/SideNavigation.tsx",
-        "features/admin/MapThemeEditor/MapThemeListView.tsx",
         "features/admin/email-layout/EmailLayoutPreviewView.tsx",
         "features/admin/ui/AdminNavigation/AdminNavigationView.tsx",
         "features/admin/user/auth/UserSsoProvidersSection.tsx",
@@ -20928,9 +20944,7 @@
         "LayoutInline",
         "Link",
         "SectionCard",
-        "SupportingText",
-        "Tooltip",
-        "div"
+        "SupportingText"
       ]
     },
     {
@@ -46334,6 +46348,11 @@
               "name": "minHeight",
               "optional": true,
               "type": "number"
+            },
+            {
+              "name": "contrast",
+              "optional": true,
+              "type": "PageLoaderProps['contrast']"
             }
           ]
         }
@@ -46345,7 +46364,7 @@
         "features/page/blocks/form/ViewClient.tsx"
       ],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["features/form/PublicFormView.test.tsx"],
       "stories": [],
       "composedJsx": ["DsHeading", "DsLayoutInset", "DsLayoutStack", "DsText", "PageLoader", "StatusIcon", "div"]
     },
@@ -50172,7 +50191,7 @@
       "productionConsumers": ["features/media/VideoPlayer.tsx"],
       "catalogAdapters": [],
       "tests": ["features/media/ui/MediaPlayerStatusOverlay.test.tsx"],
-      "stories": [],
+      "stories": ["features/media/VideoPlayer.stories.tsx"],
       "composedJsx": ["ProcessingOverlay"]
     },
     {
@@ -70837,8 +70856,13 @@
       "propsEvidence": [
         {
           "name": "PageLoaderProps",
-          "extends": [],
+          "extends": ["extends ClosedVisualProps"],
           "properties": [
+            {
+              "name": "contrast",
+              "optional": true,
+              "type": "PageLoaderViewContrast"
+            },
             {
               "name": "height",
               "optional": true,
@@ -82539,9 +82563,14 @@
           "name": "FlowRegion",
           "args": "{ placement: 'flow', minHeight: 200, imageSrc: '/storybook/media/video-poster.jpg', message: 'Loading this section…', }",
           "preview": "http://localhost:6010/?path=/story/core-feedback-pageloaderview--flow-region"
+        },
+        {
+          "name": "InverseOverlay",
+          "args": "{ contrast: 'inverse', imageSrc: '/storybook/media/video-poster.jpg', message: 'Submitting your response…', }",
+          "preview": "http://localhost:6010/?path=/story/core-feedback-pageloaderview--inverse-overlay"
         }
       ],
-      "importedSources": ["components/core/LoadingSurface/PageLoaderView.tsx"]
+      "importedSources": ["components/core/LoadingSurface/PageLoaderView.tsx", "components/core/Section/index.ts"]
     },
     {
       "file": "components/core/LoadingSurface/ProcessingOverlay.stories.tsx",
@@ -85211,8 +85240,11 @@
       ],
       "importedSources": [
         "features/media/VideoPlayer.tsx",
+        "features/media/ui/MediaPlayerStatusOverlay.tsx",
         "features/media/ui/VideoPlayerView.tsx",
-        "features/site/PageLoader/index.ts"
+        "features/site/PageLoader/index.ts",
+        "lib/i18n/client-message-loaders.ts",
+        "lib/i18n/locale.ts"
       ]
     },
     {
@@ -101185,6 +101217,11 @@
               "exported": "PageLoaderViewPlacement",
               "imported": "PageLoaderViewPlacement",
               "typeOnly": true
+            },
+            {
+              "exported": "PageLoaderViewContrast",
+              "imported": "PageLoaderViewContrast",
+              "typeOnly": true
             }
           ]
         },
@@ -104324,6 +104361,11 @@
             {
               "exported": "PageLoaderViewSize",
               "imported": "PageLoaderViewSize",
+              "typeOnly": true
+            },
+            {
+              "exported": "PageLoaderViewContrast",
+              "imported": "PageLoaderViewContrast",
               "typeOnly": true
             }
           ]

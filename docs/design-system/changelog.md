@@ -8,11 +8,27 @@ continues to name the image/status separately. Missing or failed images leave vi
 image selection, CDN resolution and GIF/SVG delivery remain site-owned. Catalogue bootstrap supplies
 the same visible text directly to Core using its root-resolved image before ManifestProvider exists.
 
+Core and site loaders add closed `contrast="standard" | "inverse"`, defaulting to standard theme
+text. The standalone public form and embedded form block select inverse on their submission scrims
+through their shared submission state; callers that omit contrast retain standard. Core uses existing
+full-strength `text-on-image` on the scrim:
+5.01:1 over the Light form overlay, where 88% inverse text would reach only 4.31:1. The form keeps
+its overlay layout, interaction and admitted fields. No feature color override or new token is added.
+
 `placement="flow"` adds a normal-flow region; existing `fill` remains the default positioned-parent
 contract. Page blocks, editor preparation, initial lists, previews and modal/drawer bodies consume the
 shared surface through their owning controllers. Consumers must retain loaded content during background
 and incremental requests. Buttons, fields, upload/processing progress, playback buffering and route
 progress keep their granular feedback.
+
+Core [MediaVideoFrame](../../components/core/MediaControls/MediaVideoFrame.tsx) adds optional
+`preparing` (default `false`). Core reserves initial 16:9 space while preparing or processing only
+when no `video` or `.video-js` descendant is present to supply sizing; standard loaded-media sizing
+remains runtime-owned. [VideoPlayerView](../../features/media/ui/VideoPlayerView.tsx) forwards `preparing`,
+sets mount `aria-busy` from it and gives processing priority over preparation loading. The
+[controller](../../features/media/VideoPlayer.tsx) supplies an inverse common loader over Core's
+fixed black frame until runtime or native fallback mounting completes. Playback buffering and
+processing retain their existing feedback.
 
 TextButton adds command-only `loading`/`loadingLabel`. TableRowMenu tracks returned action Promises
 and accepts `onError` for domain feedback. EditorHeader Back, ErrorPage command actions and

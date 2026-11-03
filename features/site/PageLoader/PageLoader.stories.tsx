@@ -49,6 +49,7 @@ const meta: Meta<typeof SiteLoaderPreview> = {
   argTypes: {
     loaderImageSrc: { control: 'text' },
     phase: { control: 'select', options: ['default', 'connecting', 'loading', 'rendering'] },
+    contrast: { control: 'radio', options: ['standard', 'inverse'] },
     placement: { control: 'radio', options: ['fill', 'flow'] },
   },
   args: {

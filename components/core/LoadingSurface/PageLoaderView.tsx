@@ -1,5 +1,6 @@
 'use client';
 import { Text } from '../Typography';
+import type { ClosedVisualProps } from '../visual-contract';
 
 import Image from 'next/image';
 import { useState } from 'react';
@@ -17,8 +18,11 @@ const IMAGE_SIZE_MAP: Record<PageLoaderViewSize, number> = {
 
 export type PageLoaderViewSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 export type PageLoaderViewPlacement = 'fill' | 'flow';
+export type PageLoaderViewContrast = 'standard' | 'inverse';
 
-export interface PageLoaderViewProps {
+export interface PageLoaderViewProps extends ClosedVisualProps {
+  /** Standard text on theme surfaces, or full-strength inverse text on a dark scrim. */
+  contrast?: PageLoaderViewContrast;
   /** Defaults to '100%' in fill placement and 'auto' in flow placement. */
   height?: string | number;
   /** Minimum height safeguard for page-sized loaders. Defaults to 200. */
@@ -38,6 +42,7 @@ export function PageLoaderView({
   height,
   minHeight = 200,
   placement = 'fill',
+  contrast = 'standard',
   size = 'md',
   message,
   imageSrc,
@@ -48,11 +53,15 @@ export function PageLoaderView({
   if (!message.trim()) {
     throw new Error('PageLoaderView requires a nonblank visible message');
   }
+  if (contrast !== 'standard' && contrast !== 'inverse') {
+    throw new RangeError('PageLoaderView contrast must be standard or inverse');
+  }
   return (
     <div
       className={classes.root}
       data-core-page-loader
       data-placement={placement}
+      data-contrast={contrast}
       role="status"
       aria-label={imageAlt}
       style={{
@@ -71,7 +80,7 @@ export function PageLoaderView({
             onError={() => setFailedImageSrc(imageSrc)}
           />
         ) : null}
-        <Text size="xs" tone="muted" align="center">
+        <Text size="xs" tone="inherit" align="center">
           {message}
         </Text>
       </LayoutStack>

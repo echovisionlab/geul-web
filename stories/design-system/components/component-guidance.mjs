@@ -881,7 +881,7 @@ const guidance = Object.fromEntries([
     'PageLoaderView',
     'Displays blocking page or section loading.',
     'Named status region → optional configured image → required compact visible message.',
-    'message must be nonblank; imageAlt independently names the image/status. Missing or failed images retain visible text. Defaults are placement=fill, minHeight=200, size=md and imageUnoptimized=false; height defaults to 100% for fill or auto for flow. Fill needs a positioned parent with reserved height; flow reserves its own document space. Site PageLoader owns settings, CDN and localization; pure Views receive a prepared loadingSurface. Retain usable content during background requests and connect terminal error/retry to the request owner.',
+    'contrast=standard uses theme muted text; contrast=inverse uses full-strength text-on-image on a dark scrim. The public form overlay explicitly selects inverse; omitted contrast stays standard. Select this closed API instead of feature style/class/color overrides. message must be nonblank; imageAlt independently names the image/status. Missing or failed images retain visible text. Defaults are placement=fill, minHeight=200, size=md and imageUnoptimized=false; height defaults to 100% for fill or auto for flow. Fill needs a positioned parent with reserved height; flow reserves its own document space. Site PageLoader owns settings, CDN and localization; pure Views receive a prepared loadingSurface. Retain usable content during background requests and connect terminal error/retry to the request owner.',
   ),
   feedback(
     'ProcessingOverlay',

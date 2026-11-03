@@ -5,6 +5,7 @@ import { MyPostsPageView } from './MyPostsPageView';
 const meta = {
   title: 'Feature/My/Posts',
   parameters: {
+    nextjs: { appDirectory: true },
     docs: {
       description: {
         component:

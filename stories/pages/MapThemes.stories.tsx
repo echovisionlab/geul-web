@@ -93,10 +93,34 @@ export const DefaultUpdating: Story = {
     const t = await operationsLabels(globals);
     const actions = canvas.getByRole('button', { name: t.dataTable('aria.rowActions', { label: 'Printed map' }) });
     await userEvent.click(actions);
-    await userEvent.click(await page.findByRole('menuitem', { name: t.common('actions.setAsDefault') }));
+    const setDefault = await page.findByRole('menuitem', { name: t.common('actions.setAsDefault') });
+    await expect(setDefault).toBeVisible();
+    await expect(setDefault).not.toHaveAttribute('aria-disabled', 'true');
+    const deleteItem = page.getByRole('menuitem', { name: t.common('actions.delete') });
+    await expect(deleteItem).toBeVisible();
+    await expect(deleteItem).not.toHaveAttribute('aria-disabled', 'true');
+    await userEvent.click(setDefault);
     await expect(actions).toHaveAttribute('aria-busy', 'true');
     await expect(actions).toBeDisabled();
     await expect(canvas.getByText(t.common('statuses.default'))).toBeVisible();
+
+    const otherActions = canvas.getByRole('button', {
+      name: t.dataTable('aria.rowActions', { label: 'High contrast' }),
+    });
+    await expect(otherActions).toBeEnabled();
+    await expect(otherActions).not.toHaveAttribute('aria-busy', 'true');
+    await userEvent.click(otherActions);
+    for (const action of ['edit', 'copy', 'setAsDefault', 'delete'] as const) {
+      const item = await page.findByRole('menuitem', { name: t.common(`actions.${action}`) });
+      await expect(item).toBeVisible();
+      await expect(item).toHaveAttribute('aria-disabled', 'true');
+      await userEvent.click(item);
+    }
+    await expect(page.queryByRole('dialog')).not.toBeInTheDocument();
+    await expect(actions).toHaveAttribute('aria-busy', 'true');
+    await expect(otherActions).not.toHaveAttribute('aria-busy', 'true');
+    const defaultCard = canvas.getByRole('link', { name: 'Gallery' }).closest<HTMLElement>('[data-map-theme-card]')!;
+    await expect(within(defaultCard).getByText(t.common('statuses.default'))).toBeVisible();
   },
 };
 export const ChangeDefault: Story = {

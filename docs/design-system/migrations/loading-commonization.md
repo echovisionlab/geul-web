@@ -52,6 +52,15 @@ own space with `flow`, whose default height is `auto`:
 <PageLoader placement="flow" minHeight={200} message={phaseMessage} />
 ```
 
+Loaders default to `contrast="standard"` on theme surfaces. Existing dark scrims must explicitly
+select `contrast="inverse"`. Both the [standalone public form](../../../features/form/PublicFormView.tsx)
+and [embedded form block](../../../features/page/blocks/form/ViewClient.tsx) thread it through
+`FormSubmissionPendingState` on their submission scrims while retaining the existing overlays and
+admitted fields. Callers that omit the prop keep standard text.
+Core uses the existing full-strength `text-on-image` role: the 88% white `text-inverse-primary`
+would fail 4.5:1 on the form's 55% black scrim over the Light surface. Use this closed contrast API
+instead of feature styles, classes or colors. No new token or message card is required.
+
 Retain an existing region's geometry rather than adding feature CSS to override Core positioning.
 Placement does not manage focus, disable controls or infer a terminal error state.
 
@@ -100,6 +109,24 @@ Catalogue bootstrap is a separate dependency boundary: `CatalogueLoadingFallback
 text and the root-resolved image directly to Core because ManifestProvider is below it. Preserve its
 error/retry and background-prefetch behavior. Do not move access/visibility checks behind a new
 Suspense boundary merely to show a loader. A feature fallback does not cover earlier server awaits.
+
+## Video runtime preparation
+
+[VideoPlayerView](../../../features/media/ui/VideoPlayerView.tsx) requires `preparing` and forwards it
+with `processing` to Core [MediaVideoFrame](../../../components/core/MediaControls/MediaVideoFrame.tsx).
+Direct Core callers may omit either flag; both default to `false`. Pass preparation state through this
+API instead of adding feature sizing styles. Core's
+[frame CSS](../../../components/core/MediaControls/VideoControls.module.css) reserves initial 16:9
+space while preparing or processing only when no `video` or `.video-js` descendant is present to supply sizing.
+Once media is mounted, standard loaded-media sizing remains owned by the runtime/native video.
+The preparation ratio must not become a permanent constraint on loaded media.
+
+The [VideoPlayer controller](../../../features/media/VideoPlayer.tsx) supplies the common loader with
+`contrast="inverse"` and `minHeight={0}` over Core's fixed black video background. The frame reserves
+space for the fill loader; the controller owns preparation completion through runtime or native
+fallback mounting. `VideoPlayerView` sets mount busy state from `preparing` and shows the loader only
+for `preparing && !processing`. Processing takes priority through its existing media status overlay.
+Keep preparation separate from metadata loading, playback buffering and processing progress.
 
 ## Command and field migration
 

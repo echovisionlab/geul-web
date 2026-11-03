@@ -321,7 +321,7 @@ export function PublicFormView({
             <div style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
               <DsSectionCard padding="none" appearance="overlay" border="none">
                 <DsLayoutInline align="center" justify="center">
-                  <FormSubmissionPendingState minHeight={320} />
+                  <FormSubmissionPendingState minHeight={320} contrast="inverse" />
                 </DsLayoutInline>
               </DsSectionCard>
             </div>

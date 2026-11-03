@@ -253,7 +253,7 @@ export function FormViewClient({ props, requestedLocale, preview = false }: Form
 
         {submitMutation.isPending ? (
           <ProcessingOverlay>
-            <FormSubmissionPendingState />
+            <FormSubmissionPendingState contrast="inverse" />
           </ProcessingOverlay>
         ) : null}
       </div>

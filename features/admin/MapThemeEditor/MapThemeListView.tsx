@@ -11,7 +11,6 @@ import { DropdownMenu } from '@/components/core/DropdownMenu';
 import { IconButton } from '@/components/core/IconButton';
 import { LayoutGrid, LayoutInline } from '@/components/core/Layout';
 import { SectionCard } from '@/components/core/Section';
-import { Tooltip } from '@/components/core/Tooltip';
 import type { MapTheme } from '@/lib/types/map-theme/model';
 
 export interface MapThemeListViewProps {
@@ -95,33 +94,24 @@ export function MapThemeListView({
                   >
                     {tCommon('actions.copy')}
                   </DropdownMenu.Item>
-                  <Tooltip
-                    label={isDefault ? tPage('defaultDisabled') : tCommon('actions.setAsDefault')}
-                    position="left"
+                  <DropdownMenu.Item
+                    icon={<IconStar size={16} />}
+                    title={isDefault ? tPage('defaultDisabled') : tCommon('actions.setAsDefault')}
+                    disabled={isDefault || defaultUpdatingId !== null}
+                    onClick={() => onSetDefault(theme)}
                   >
-                    <div>
-                      <DropdownMenu.Item
-                        icon={<IconStar size={16} />}
-                        disabled={isDefault || defaultUpdatingId !== null}
-                        onClick={() => onSetDefault(theme)}
-                      >
-                        {tCommon('actions.setAsDefault')}
-                      </DropdownMenu.Item>
-                    </div>
-                  </Tooltip>
+                    {tCommon('actions.setAsDefault')}
+                  </DropdownMenu.Item>
                   <DropdownMenu.Divider />
-                  <Tooltip label={deleteDisabledReason ?? tCommon('actions.delete')} position="left">
-                    <div>
-                      <DropdownMenu.Item
-                        icon={<IconTrash size={16} />}
-                        tone="danger"
-                        disabled={Boolean(deleteDisabledReason) || defaultUpdatingId !== null}
-                        onClick={() => onDelete(theme)}
-                      >
-                        {tCommon('actions.delete')}
-                      </DropdownMenu.Item>
-                    </div>
-                  </Tooltip>
+                  <DropdownMenu.Item
+                    icon={<IconTrash size={16} />}
+                    tone="danger"
+                    title={deleteDisabledReason ?? tCommon('actions.delete')}
+                    disabled={Boolean(deleteDisabledReason) || defaultUpdatingId !== null}
+                    onClick={() => onDelete(theme)}
+                  >
+                    {tCommon('actions.delete')}
+                  </DropdownMenu.Item>
                 </DropdownMenu.Dropdown>
               </DropdownMenu>
             </LayoutInline>

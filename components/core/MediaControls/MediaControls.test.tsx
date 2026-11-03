@@ -57,6 +57,49 @@ function luminance(rgb: string) {
   return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
 }
 describe('Core media contracts', () => {
+  it('reserves the fluid preparation region for empty preparing or processing frames, leaving media sizing intact', () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    containers.push(host);
+    reactRoot = createRoot(host);
+    const geometryRules = postcss
+      .parse(readFileSync(resolve(process.cwd(), 'components/core/MediaControls/VideoControls.module.css'), 'utf8'))
+      .nodes.filter(
+        (node) =>
+          node.type === 'rule' && node.nodes.some((decl) => decl.type === 'decl' && decl.prop === 'aspect-ratio'),
+      )
+      .map((node) => node.toString())
+      .join('\n')
+      .replace(/:global\(([^)]+)\)/g, '$1')
+      .replace(/\.frame(?![\w-])/g, `.${videoClasses.frame}`);
+    const style = document.createElement('style');
+    style.dataset.mediaProof = 'true';
+    style.textContent = geometryRules;
+    document.head.append(style);
+    const renderFrame = (preparing: boolean, processing: boolean, media?: 'native' | 'sdk') => {
+      act(() =>
+        reactRoot!.render(
+          <MediaVideoFrame preparing={preparing} processing={processing} aria-label="Video">
+            <div data-video-player-mount>
+              {media === 'native' ? <video muted aria-label="Native video" /> : null}
+              {media === 'sdk' ? <div className="video-js" /> : null}
+            </div>
+          </MediaVideoFrame>,
+        ),
+      );
+      return host.querySelector<HTMLElement>('[role="group"]')!;
+    };
+    expect(getComputedStyle(renderFrame(false, false)).aspectRatio).not.toBe('16 / 9');
+    expect(getComputedStyle(renderFrame(true, false)).aspectRatio).toBe('16 / 9');
+    expect(getComputedStyle(renderFrame(false, true)).aspectRatio).toBe('16 / 9');
+    for (const media of ['native', 'sdk'] as const) {
+      const frame = renderFrame(true, true, media);
+      expect(frame.dataset.videoPlayerPreparing).toBe('true');
+      expect(frame.dataset.videoPlayerProcessing).toBe('true');
+      expect(getComputedStyle(frame).aspectRatio).not.toBe('16 / 9');
+    }
+    expect(getComputedStyle(renderFrame(false, false)).aspectRatio).not.toBe('16 / 9');
+  });
   it('retains semantic media group names and description relationships without exposing presentation overrides', () => {
     const host = document.createElement('div');
     document.body.append(host);

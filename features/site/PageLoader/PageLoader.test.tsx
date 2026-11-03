@@ -48,6 +48,18 @@ beforeEach(() => {
 });
 
 describe('PageLoader', () => {
+  it('passes inverse contrast through the controller while retaining localized fallback and GIF delivery', () => {
+    settingsMock.loader_urls = ['/asset/configured-loader.gif'];
+    const { rerender } = render(<PageLoader contrast="inverse" message=" " />);
+    expect(screen.getByRole('status')).toHaveAttribute('data-contrast', 'inverse');
+    expect(screen.getByRole('status')).toHaveTextContent('불러오는 중...');
+    const image = screen.getByRole('img');
+    expect(image).toHaveAttribute('data-unoptimized', 'true');
+    rerender(<PageLoader />);
+    expect(screen.getByRole('status')).toHaveAttribute('data-contrast', 'standard');
+    expect(screen.getByRole('img')).toBe(image);
+  });
+
   it('uses the same first nonblank GIF for server markup and client rerenders without preload or optimization', () => {
     settingsMock.loader_urls = [
       ' ',

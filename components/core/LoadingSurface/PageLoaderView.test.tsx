@@ -2,9 +2,35 @@
 import { fireEvent, render, screen } from '@/test/render';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { PageLoaderView } from './PageLoaderView';
+import { PageLoaderView, type PageLoaderViewContrast } from './PageLoaderView';
 
 describe('PageLoaderView', () => {
+  it('changes contrast on the same compact status without replacing its image or placement', () => {
+    const props = { imageAlt: 'Loading page', imageSrc: '/loader.gif', message: 'Loading' };
+    const { rerender } = render(<PageLoaderView {...props} />);
+    const status = screen.getByRole('status');
+    const image = screen.getByRole('img');
+    expect(status).toHaveAttribute('data-contrast', 'standard');
+    expect(screen.getByText('Loading')).toHaveAttribute('data-tone', 'inherit');
+    rerender(<PageLoaderView {...props} contrast="inverse" />);
+    expect(screen.getByRole('status')).toBe(status);
+    expect(screen.getByRole('img')).toBe(image);
+    expect(status).toHaveAttribute('data-contrast', 'inverse');
+    expect(status).toHaveAttribute('data-placement', 'fill');
+    expect(screen.getByText('Loading')).toHaveAttribute('data-size', 'xs');
+    fireEvent.error(image);
+    expect(status).toHaveTextContent(/^Loading$/);
+    expect(status).toHaveAttribute('data-contrast', 'inverse');
+  });
+
+  it('rejects an unsupported contrast from an untyped caller', () => {
+    expect(() =>
+      renderToStaticMarkup(
+        <PageLoaderView imageAlt="Loading page" message="Loading" contrast={'image' as PageLoaderViewContrast} />,
+      ),
+    ).toThrow('PageLoaderView contrast must be standard or inverse');
+  });
+
   it('keeps accessible names separate from visible phase text, including after image failure', () => {
     const props = { imageSrc: '/loader.gif', imageAlt: 'Loading page', imageUnoptimized: true };
     const { rerender } = render(<PageLoaderView {...props} message="Connecting" />);

@@ -151,14 +151,18 @@ describe('VideoPlayer preparation and playback handoff', () => {
     runtime.load.mockReturnValueOnce(pending.promise);
     const view = render(player({ src: '/first.mp4' }), { messages });
     expect(screen.getByRole('status')).toHaveTextContent('Video Player is loading.');
+    expect(screen.getByRole('status')).toHaveAttribute('data-contrast', 'inverse');
+    expect(screen.getByRole('group', { name: 'Video player' })).toHaveAttribute('data-video-player-preparing', 'true');
     expect(runtime.mountVideoJsPlayer).not.toHaveBeenCalled();
     await act(async () => pending.resolve(runtime));
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Video player' })).toHaveAttribute('data-video-player-preparing', 'false');
     expect(mountedVideo().isConnected).toBe(true);
     const next = deferred<typeof runtime>();
     runtime.load.mockReturnValueOnce(next.promise);
     view.rerender(player({ src: '/second.mp4' }));
     expect(screen.getByRole('status')).toHaveTextContent('Video Player is loading.');
+    expect(screen.getByRole('group', { name: 'Video player' })).toHaveAttribute('data-video-player-preparing', 'true');
     await act(async () => next.resolve(runtime));
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
@@ -211,6 +215,32 @@ describe('VideoPlayer preparation and playback handoff', () => {
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
     view.rerender(player({ src: 'undefined' }));
     expect(runtime.load).not.toHaveBeenCalled();
+  });
+  it('prioritizes processing during preparation and keeps mounted media when processing ends', async () => {
+    const pending = deferred<typeof runtime>();
+    runtime.load.mockReturnValueOnce(pending.promise);
+    const view = render(player({ src: '/original.mp4', isProcessing: true }), { messages });
+    const frame = screen.getByRole('group', { name: 'Video player' });
+    expect(frame).toHaveAttribute('data-video-player-preparing', 'true');
+    expect(frame).toHaveAttribute('data-video-player-processing', 'true');
+    expect(screen.getAllByRole('status')).toHaveLength(1);
+    expect(screen.getByRole('status')).toHaveTextContent('Video is processing...');
+    expect(screen.queryByText('Video Player is loading.')).not.toBeInTheDocument();
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+
+    await act(async () => pending.resolve(runtime));
+    const video = mountedVideo();
+    expect(video.isConnected).toBe(true);
+    expect(frame).toHaveAttribute('data-video-player-preparing', 'false');
+    expect(screen.getByRole('status')).toHaveTextContent('Video is processing...');
+
+    view.rerender(player({ src: '/original.mp4' }));
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(frame).toHaveAttribute('data-video-player-processing', 'false');
+    expect(mountedVideo()).toBe(video);
+    expect(video.isConnected).toBe(true);
+    expect(runtime.mountVideoJsPlayer).toHaveBeenCalledOnce();
+    expect(runtime.disposeVideoJsPlayer).not.toHaveBeenCalled();
   });
   it('does not mount after unmount while the runtime is loading', async () => {
     const pending = deferred<typeof runtime>();
