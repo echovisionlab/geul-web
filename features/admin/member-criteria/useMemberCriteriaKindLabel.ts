@@ -4,16 +4,16 @@ import { MemberCriteriaKind } from '@echovisionlab/geul-proto/secure/member_crit
 import { useTranslations } from 'next-intl';
 
 export function useMemberCriteriaKindLabel(): (kind: MemberCriteriaKind) => string {
-  const tPage = useTranslations('adminList.memberCriteria');
+  const tTypes = useTranslations('adminList.memberCriteria.types');
   const tCommon = useTranslations('common');
   return (kind) => {
     switch (kind) {
       case MemberCriteriaKind.ALL_MEMBERS:
-        return tPage('types.allUsers');
+        return tTypes('allUsers');
       case MemberCriteriaKind.MEMBER_TAGS:
         return tCommon('entities.userTags');
       case MemberCriteriaKind.FILTER:
-        return tPage('types.usersByFilter');
+        return tTypes('usersByFilter');
       default:
         return tCommon('states.unknown');
     }

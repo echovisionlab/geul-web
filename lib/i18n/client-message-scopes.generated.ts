@@ -188,6 +188,7 @@ export const CLIENT_MESSAGE_SCOPE_PATHS: Record<ClientMessageScope, readonly str
   editor: [
     'adminList.campaigns.statuses',
     'adminList.emailLayouts.detail.viewModes',
+    'adminList.memberCriteria.types',
     'adminSettings.site',
     'aiAssistant',
     'artistAdminDetail',
