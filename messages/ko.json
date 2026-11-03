@@ -257,8 +257,7 @@
       "clients": "클라이언트",
       "campaign": "캠페인",
       "campaigns": "캠페인",
-      "audienceSegment": "오디언스 세그먼트",
-      "audienceSegments": "오디언스 세그먼트",
+      "memberCriteria": "회원 조건",
       "user": "사용자",
       "member": "멤버",
       "users": "사용자",
@@ -613,26 +612,26 @@
         "failed": "발송 실패"
       }
     },
-    "audienceSegments": {
-      "description": "특정 그룹을 대상으로 캠페인을 보낼 수 있도록 재사용 가능한 오디언스 세그먼트를 만듭니다.",
-      "searchPlaceholder": "세그먼트 검색...",
-      "empty": "세그먼트가 없습니다. 특정 오디언스를 대상으로 하려면 세그먼트를 만들어 보세요.",
-      "createTitle": "세그먼트 만들기",
-      "editTitle": "세그먼트 수정",
-      "namePlaceholder": "세그먼트 이름",
-      "typePlaceholder": "세그먼트 유형 선택",
-      "loading": "세그먼트를 불러오는 중...",
-      "includeArchived": "보관된 오디언스 포함",
+    "memberCriteria": {
+      "description": "캠페인 발송 대상과 제한 다운로드에 다시 쓸 회원 조건을 만듭니다.",
+      "searchPlaceholder": "회원 조건 검색...",
+      "empty": "회원 조건이 없습니다. 특정 회원을 고르려면 하나 만드세요.",
+      "createTitle": "회원 조건 만들기",
+      "editTitle": "회원 조건 수정",
+      "namePlaceholder": "회원 조건 이름",
+      "typePlaceholder": "종류 선택",
+      "loading": "회원 조건을 불러오는 중...",
+      "includeArchived": "보관된 회원 조건 포함",
       "archive": "보관",
-      "archiveTitle": "오디언스 보관",
-      "archiveConfirm": "{name} 오디언스를 보관하시겠습니까? 캠페인 {campaigns}개와 파일 정책 {files}개의 연결이 해제됩니다. 전송 기록 {runs}건은 변경 없이 유지됩니다.",
+      "archiveTitle": "회원 조건 보관",
+      "archiveConfirm": "{name} 회원 조건을 보관하시겠습니까? 캠페인 {campaigns}개와 파일 정책 {files}개의 연결이 해제됩니다. 전송 기록 {runs}건은 변경 없이 유지됩니다.",
       "restore": "복구",
-      "restoreTitle": "오디언스 복구",
-      "restoreConfirm": "{name} 오디언스를 복구하시겠습니까? 이전 캠페인 예약과 파일 다운로드 정책은 자동으로 복구되지 않습니다.",
-      "created": "세그먼트를 만들었습니다",
-      "updated": "세그먼트를 수정했습니다",
-      "archived": "오디언스를 보관했습니다",
-      "restored": "오디언스를 복구했습니다",
+      "restoreTitle": "회원 조건 복구",
+      "restoreConfirm": "{name} 회원 조건을 복구하시겠습니까? 이전 캠페인 예약과 파일 다운로드 정책은 자동으로 복구되지 않습니다.",
+      "created": "회원 조건을 만들었습니다",
+      "updated": "회원 조건을 수정했습니다",
+      "archived": "회원 조건을 보관했습니다",
+      "restored": "회원 조건을 복구했습니다",
       "config": {
         "userTagsPlaceholderSelect": "사용자 태그 선택",
         "rolesLabel": "역할",
@@ -640,13 +639,13 @@
         "createdAfterPlaceholder": "시작 날짜",
         "createdBeforeLabel": "생성 종료일",
         "createdBeforePlaceholder": "종료 날짜",
-        "estimateCount": "예상 수 계산",
-        "estimatedRecipients": "~{count, plural, one {#명} other {#명}}의 수신자",
-        "allUsersHelp": "모든 사용자를 대상으로 합니다. 뉴스레터 구독 여부는 캠페인에서 선택합니다."
+        "estimateCount": "해당 회원 수 계산",
+        "estimatedRecipients": "약 {count, plural, other {#명}} 해당",
+        "allUsersHelp": "모든 회원을 고릅니다. 뉴스레터 구독자에게만 보낼지는 캠페인마다 정합니다."
       },
       "types": {
-        "usersByFilter": "필터로 사용자 선택",
-        "allUsers": "모든 사용자"
+        "usersByFilter": "조건으로 회원 선택",
+        "allUsers": "모든 회원"
       }
     },
     "series": {
@@ -2699,13 +2698,13 @@
       "none": "레이아웃 없음"
     },
     "target": {
-      "audienceLabel": "발송 대상",
-      "audiencePlaceholder": "오디언스 선택",
+      "criteriaLabel": "받는 사람",
+      "criteriaPlaceholder": "회원 조건 선택",
       "all": "모든 사용자",
-      "unavailableAudience": "보관되었거나 사용할 수 없는 오디언스",
-      "unavailableAudienceDescription": "이 캠페인은 보관되었거나 사용할 수 없는 오디언스를 대상으로 합니다. 예약하거나 발송하기 전에 활성 오디언스를 선택하세요.",
-      "audienceRequired": "예약하거나 발송하기 전에 활성 오디언스를 선택하세요.",
-      "audienceLoadError": "활성 오디언스를 불러오지 못했습니다. 예약하거나 발송하기 전에 다시 시도하세요."
+      "unavailableCriteria": "보관되었거나 사용할 수 없는 회원 조건",
+      "unavailableCriteriaDescription": "이 캠페인은 보관되었거나 사용할 수 없는 회원 조건을 씁니다. 예약하거나 발송하기 전에 활성 회원 조건을 선택하세요.",
+      "criteriaRequired": "예약하거나 발송하기 전에 활성 회원 조건을 선택하세요.",
+      "criteriaLoadError": "활성 회원 조건을 불러오지 못했습니다. 예약하거나 발송하기 전에 다시 시도하세요."
     },
     "fields": {
       "recipientScope": "수신자",
@@ -2721,7 +2720,7 @@
       "description": "이 캠페인의 테스트 메일을 보낼 이메일 주소를 입력하세요."
     },
     "sendModal": {
-      "warning": "이 캠페인을 오디언스 세그먼트 {audience}에 발송합니다. 이 작업은 되돌릴 수 없습니다.",
+      "warning": "이 캠페인을 {criteria}에 맞는 회원에게 발송합니다. 이 작업은 되돌릴 수 없습니다.",
       "subject": "제목: {subject}",
       "allMatchingUsersWarning": "뉴스레터를 구독 해지한 사용자도 포함됩니다."
     },
@@ -2730,7 +2729,7 @@
       "dateLabel": "예약 발송 일시",
       "previousMonth": "이전 달",
       "nextMonth": "다음 달",
-      "audience": "오디언스: {audience}",
+      "criteria": "받는 사람: {criteria}",
       "allMatchingUsersWarning": "뉴스레터를 구독 해지한 사용자도 포함됩니다."
     },
     "notifications": {
@@ -5306,7 +5305,7 @@
     "editor": {
       "sectionTitle": "다운로드 접근 권한",
       "loading": "다운로드 접근 권한을 불러오는 중…",
-      "audiences": {
+      "access": {
         "disabled": {
           "label": "다운로드 안 함",
           "description": "방문자는 이 파일을 다운로드할 수 없습니다."
@@ -5320,13 +5319,13 @@
           "description": "로그인한 사용자는 누구나 이 파일을 다운로드할 수 있습니다."
         },
         "restricted": {
-          "label": "오디언스",
-          "description": "선택한 오디언스에 속한 사용자만 이 파일을 다운로드할 수 있습니다."
+          "label": "회원 조건",
+          "description": "선택한 회원 조건에 맞는 회원만 이 파일을 다운로드할 수 있습니다."
         }
       },
-      "segmentsLoadError": "정책은 불러왔지만 오디언스를 불러오지 못했습니다.",
-      "segmentsEmpty": "사용 가능한 오디언스 세그먼트가 없습니다.",
-      "restrictedWithoutAudience": "이 제한 정책에 오디언스가 지정되어 있지 않습니다. 하나 이상의 오디언스를 선택할 때까지 모든 사용자의 다운로드가 차단됩니다.",
+      "criteriaLoadError": "정책은 불러왔지만 회원 조건을 불러오지 못했습니다.",
+      "criteriaEmpty": "사용할 수 있는 회원 조건이 없습니다.",
+      "restrictedWithoutCriteria": "이 제한 정책에 회원 조건이 없습니다. 하나 이상 선택할 때까지 모든 사용자의 다운로드가 차단됩니다.",
       "additionalSelected": "{count}개 더 선택됨",
       "loadError": "다운로드 접근 권한을 불러오지 못했습니다.",
       "saveError": "다운로드 접근 권한을 저장하지 못했습니다.",

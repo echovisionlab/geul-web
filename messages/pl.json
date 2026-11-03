@@ -257,8 +257,7 @@
       "clients": "Klienci",
       "campaign": "Kampania",
       "campaigns": "Kampanie",
-      "audienceSegment": "Segment odbiorców",
-      "audienceSegments": "Segmenty odbiorców",
+      "memberCriteria": "Segment odbiorców",
       "user": "Użytkownik",
       "member": "Członek",
       "users": "Użytkownicy",
@@ -613,7 +612,7 @@
         "failed": "Nie udało się"
       }
     },
-    "audienceSegments": {
+    "memberCriteria": {
       "description": "Twórz segmenty odbiorców wielokrotnego użytku, aby kierować kampanie na określone grupy.",
       "searchPlaceholder": "Wyszukaj segmenty...",
       "empty": "Nie znaleziono segmentów. Utwórz taki, aby kierować reklamy do określonych odbiorców.",
@@ -2699,13 +2698,13 @@
       "none": "Brak układu"
     },
     "target": {
-      "audienceLabel": "Grupa docelowa",
-      "audiencePlaceholder": "Wybierz odbiorców",
+      "criteriaLabel": "Grupa docelowa",
+      "criteriaPlaceholder": "Wybierz odbiorców",
       "all": "Wszyscy użytkownicy",
-      "unavailableAudience": "Zarchiwizowani lub niedostępni odbiorcy",
-      "unavailableAudienceDescription": "Ta kampania jest skierowana do zarchiwizowanych lub niedostępnych odbiorców. Wybierz aktywną grupę odbiorców przed zaplanowaniem lub wysłaniem.",
-      "audienceRequired": "Wybierz aktywną grupę odbiorców przed zaplanowaniem lub wysłaniem.",
-      "audienceLoadError": "Nie udało się wczytać aktywnych odbiorców. Spróbuj ponownie przed zaplanowaniem lub wysłaniem."
+      "unavailableCriteria": "Zarchiwizowani lub niedostępni odbiorcy",
+      "unavailableCriteriaDescription": "Ta kampania jest skierowana do zarchiwizowanych lub niedostępnych odbiorców. Wybierz aktywną grupę odbiorców przed zaplanowaniem lub wysłaniem.",
+      "criteriaRequired": "Wybierz aktywną grupę odbiorców przed zaplanowaniem lub wysłaniem.",
+      "criteriaLoadError": "Nie udało się wczytać aktywnych odbiorców. Spróbuj ponownie przed zaplanowaniem lub wysłaniem."
     },
     "fields": {
       "recipientScope": "Odbiorcy",
@@ -2721,7 +2720,7 @@
       "description": "Wpisz adres e-mail, na który chcesz wysłać test tej kampanii."
     },
     "sendModal": {
-      "warning": "Spowoduje to wysłanie kampanii do segmentu odbiorców {audience}. Tej akcji nie można cofnąć.",
+      "warning": "Spowoduje to wysłanie kampanii do segmentu odbiorców {criteria}. Tej akcji nie można cofnąć.",
       "subject": "Temat: {subject}",
       "allMatchingUsersWarning": "Obejmuje pasujących użytkowników, którzy zrezygnowali z subskrypcji biuletynów."
     },
@@ -2730,7 +2729,7 @@
       "dateLabel": "Zaplanowana data i godzina",
       "previousMonth": "Poprzedni miesiąc",
       "nextMonth": "Przyszły miesiąc",
-      "audience": "Publiczność: {audience}",
+      "criteria": "Publiczność: {criteria}",
       "allMatchingUsersWarning": "Obejmuje pasujących użytkowników, którzy zrezygnowali z subskrypcji biuletynów."
     },
     "notifications": {
@@ -5306,7 +5305,7 @@
     "editor": {
       "sectionTitle": "Pobierz dostęp",
       "loading": "Wczytuję dostęp do pobierania…",
-      "audiences": {
+      "access": {
         "disabled": {
           "label": "Bez pobierania",
           "description": "Żaden odwiedzający nie może pobrać tego pliku."
@@ -5324,9 +5323,9 @@
           "description": "Tylko użytkownicy z wybranych odbiorców mogą pobrać ten plik."
         }
       },
-      "segmentsLoadError": "Zasady zostały załadowane, ale nie udało się załadować odbiorców.",
-      "segmentsEmpty": "Brak dostępnych segmentów odbiorców.",
-      "restrictedWithoutAudience": "Ta ograniczona polityka nie ma odbiorców. Pobieranie plików jest blokowane dla wszystkich, dopóki nie wybierzesz co najmniej jednej grupy odbiorców.",
+      "criteriaLoadError": "Zasady zostały załadowane, ale nie udało się załadować odbiorców.",
+      "criteriaEmpty": "Brak dostępnych segmentów odbiorców.",
+      "restrictedWithoutCriteria": "Ta ograniczona polityka nie ma odbiorców. Pobieranie plików jest blokowane dla wszystkich, dopóki nie wybierzesz co najmniej jednej grupy odbiorców.",
       "additionalSelected": "Wybrano jeszcze {count}",
       "loadError": "Nie można załadować dostępu do pobierania.",
       "saveError": "Nie można zapisać dostępu do pobierania.",

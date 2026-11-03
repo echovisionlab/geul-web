@@ -1,8 +1,8 @@
 import { createStore, type StoreApi } from 'zustand/vanilla';
 import type {
-  AudienceSegmentSummary,
+  MemberCriteriaSummary,
   FileDownloadActionResult,
-  FileDownloadAudience,
+  FileDownloadAccess,
   FileDownloadPage,
   FileDownloadPageInput,
   FileDownloadPolicyModel,
@@ -20,13 +20,13 @@ import {
 
 export interface FileDownloadPolicyEditorAdapter {
   loadPolicy: (target: FileDownloadPolicyTarget) => Promise<FileDownloadActionResult<FileDownloadPolicyModel>>;
-  loadSegments: (
+  loadCriteriaList: (
     input: FileDownloadPageInput,
-  ) => Promise<FileDownloadActionResult<FileDownloadPage<AudienceSegmentSummary>>>;
+  ) => Promise<FileDownloadActionResult<FileDownloadPage<MemberCriteriaSummary>>>;
   savePolicy: (
     target: FileDownloadPolicyTarget,
-    audience: FileDownloadAudience,
-    audienceSegmentIds: string[],
+    access: FileDownloadAccess,
+    memberCriteriaIds: string[],
     observedPolicy: FileDownloadPolicyObservedState,
     editorOrigin?: string,
   ) => Promise<FileDownloadActionResult<FileDownloadPolicyModel>>;
@@ -36,15 +36,15 @@ export interface FileDownloadPolicyEditorAdapter {
 export type FileDownloadPolicyError = 'loadError' | 'saveError' | 'reloadRequired';
 
 export interface FileDownloadPolicyState {
-  audience: FileDownloadAudience;
-  audienceSegmentIds: string[];
-  /** Audiences the editor can show, merged from the policy, list pages and searches. */
-  segments: AudienceSegmentSummary[];
-  availableSegmentIds: string[];
-  segmentSearch: string;
-  segmentsLoadingMore: boolean;
-  segmentsLoaded: boolean;
-  segmentsLoadFailed: boolean;
+  access: FileDownloadAccess;
+  memberCriteriaIds: string[];
+  /** AccessList the editor can show, merged from the policy, list pages and searches. */
+  criteriaList: MemberCriteriaSummary[];
+  availableCriteriaIds: string[];
+  criteriaSearch: string;
+  criteriaListLoadingMore: boolean;
+  criteriaListLoaded: boolean;
+  criteriaListLoadFailed: boolean;
   loading: boolean;
   policyLoaded: boolean;
   saving: boolean;
@@ -58,12 +58,12 @@ export interface FileDownloadPolicyStore {
   readonly target: FileDownloadPolicyTarget;
   readonly document: string;
   readonly enabled: boolean;
-  /** Loads the policy and the first Audience page. A later start reloads from a clean state. */
+  /** Loads the policy and the first Access page. A later start reloads from a clean state. */
   start: (adapter: FileDownloadPolicyEditorAdapter) => void;
   /** Stops in-flight work; a pending change is still written, and its failure is reported. */
   stop: () => void;
-  changeAccess: (audience: FileDownloadAudience, audienceSegmentIds: string[]) => void;
-  searchSegments: (search: string) => void;
+  changeAccess: (access: FileDownloadAccess, memberCriteriaIds: string[]) => void;
+  searchCriteriaList: (search: string) => void;
   /** Another editor or the owning entity changed the policy. */
   notifyPeerChange: () => void;
   captureOwnChange: (origin?: string) => () => boolean;
@@ -83,8 +83,8 @@ interface PendingPolicySave {
   generation: number;
   sequence: number;
   observedPolicy: FileDownloadPolicyObservedState;
-  audience: FileDownloadAudience;
-  audienceSegmentIds: string[];
+  access: FileDownloadAccess;
+  memberCriteriaIds: string[];
   retryCount: number;
 }
 
@@ -93,32 +93,32 @@ interface ActivePolicySave {
   request: PendingPolicySave;
 }
 
-interface ActiveSegmentPagination {
+interface ActiveCriteriaPagination {
   search: string;
   token: symbol;
   promise: Promise<void>;
 }
 
-function mergeSegments(
-  current: AudienceSegmentSummary[],
-  incoming: AudienceSegmentSummary[],
-): AudienceSegmentSummary[] {
-  const byId = new Map(current.map((segment) => [segment.id, segment]));
-  for (const segment of incoming) {
-    byId.set(segment.id, segment);
+function mergeCriteriaList(
+  current: MemberCriteriaSummary[],
+  incoming: MemberCriteriaSummary[],
+): MemberCriteriaSummary[] {
+  const byId = new Map(current.map((criteria) => [criteria.id, criteria]));
+  for (const criteria of incoming) {
+    byId.set(criteria.id, criteria);
   }
   return Array.from(byId.values());
 }
 
-function mergeIds(current: string[], incoming: AudienceSegmentSummary[]): string[] {
-  return Array.from(new Set([...current, ...incoming.map((segment) => segment.id)]));
+function mergeIds(current: string[], incoming: MemberCriteriaSummary[]): string[] {
+  return Array.from(new Set([...current, ...incoming.map((criteria) => criteria.id)]));
 }
 
-function sortedPolicySegmentIds(policy: FileDownloadPolicyModel): string[] {
-  return policy.audienceSegments.map((segment) => segment.id).sort();
+function sortedPolicyCriteriaIds(policy: FileDownloadPolicyModel): string[] {
+  return policy.memberCriteria.map((criteria) => criteria.id).sort();
 }
 
-function applySegmentSelectionDelta(current: string[], observed: string[], desired: string[]): string[] {
+function applyCriteriaSelectionDelta(current: string[], observed: string[], desired: string[]): string[] {
   const next = new Set(current);
   const observedSet = new Set(observed);
   const desiredSet = new Set(desired);
@@ -141,43 +141,43 @@ function rebasePendingSave(
   active: PendingPolicySave,
   acknowledged: FileDownloadPolicyObservedState,
 ): PendingPolicySave {
-  const audience = pending.audience === active.audience ? acknowledged.audience : pending.audience;
-  const audienceSegmentIds = applySegmentSelectionDelta(
-    acknowledged.audienceSegmentIds,
-    active.audience === 'restricted' ? active.audienceSegmentIds : [],
-    pending.audience === 'restricted' ? pending.audienceSegmentIds : [],
+  const access = pending.access === active.access ? acknowledged.access : pending.access;
+  const memberCriteriaIds = applyCriteriaSelectionDelta(
+    acknowledged.memberCriteriaIds,
+    active.access === 'restricted' ? active.memberCriteriaIds : [],
+    pending.access === 'restricted' ? pending.memberCriteriaIds : [],
   );
   return {
     ...pending,
     observedPolicy: {
-      audience: acknowledged.audience,
-      audienceSegmentIds: acknowledged.audienceSegmentIds,
+      access: acknowledged.access,
+      memberCriteriaIds: acknowledged.memberCriteriaIds,
     },
-    audience,
-    audienceSegmentIds: audience === 'restricted' ? audienceSegmentIds : [],
+    access,
+    memberCriteriaIds: access === 'restricted' ? memberCriteriaIds : [],
   };
 }
 
 /** After a stale write, the local delta is retried over the freshly read policy. */
 function rebasePendingSaveOntoCurrent(pending: PendingPolicySave, current: FileDownloadPolicyModel): PendingPolicySave {
   const currentState = {
-    audience: current.audience,
-    audienceSegmentIds: sortedPolicySegmentIds(current),
+    access: current.access,
+    memberCriteriaIds: sortedPolicyCriteriaIds(current),
   } satisfies FileDownloadPolicyObservedState;
-  const audience = pending.audience === pending.observedPolicy.audience ? currentState.audience : pending.audience;
-  const audienceSegmentIds =
-    audience === 'restricted'
-      ? applySegmentSelectionDelta(
-          currentState.audienceSegmentIds,
-          pending.observedPolicy.audienceSegmentIds,
-          pending.audienceSegmentIds,
+  const access = pending.access === pending.observedPolicy.access ? currentState.access : pending.access;
+  const memberCriteriaIds =
+    access === 'restricted'
+      ? applyCriteriaSelectionDelta(
+          currentState.memberCriteriaIds,
+          pending.observedPolicy.memberCriteriaIds,
+          pending.memberCriteriaIds,
         )
       : [];
   return {
     ...pending,
     observedPolicy: currentState,
-    audience,
-    audienceSegmentIds,
+    access,
+    memberCriteriaIds,
     retryCount: pending.retryCount + 1,
   };
 }
@@ -197,7 +197,7 @@ export function fileDownloadPolicyTargetKey(target: FileDownloadPolicyTarget): s
 }
 
 /**
- * Loads one File's download policy and saves Audience changes to it. Changes save after a short
+ * Loads one File's download policy and saves Access changes to it. Changes save after a short
  * pause, one at a time per target; a change made during a save is rebased onto that save's result.
  */
 export function createFileDownloadPolicyStore(
@@ -209,21 +209,21 @@ export function createFileDownloadPolicyStore(
   const enabled = Boolean(target.entityId && target.expectedFileId);
   const configuration = new AuthoritativeConfiguration<FileDownloadPolicyObservedState>(
     document,
-    { audience: 'disabled', audienceSegmentIds: [] },
+    { access: 'disabled', memberCriteriaIds: [] },
     () => {
-      const { audience, audienceSegmentIds } = configuration.getConfiguration();
-      api.setState({ audience, audienceSegmentIds });
+      const { access, memberCriteriaIds } = configuration.getConfiguration();
+      api.setState({ access, memberCriteriaIds });
     },
   );
   const api = createStore<FileDownloadPolicyState>()(() => ({
-    audience: 'disabled',
-    audienceSegmentIds: [],
-    segments: [],
-    availableSegmentIds: [],
-    segmentSearch: '',
-    segmentsLoadingMore: false,
-    segmentsLoaded: false,
-    segmentsLoadFailed: false,
+    access: 'disabled',
+    memberCriteriaIds: [],
+    criteriaList: [],
+    availableCriteriaIds: [],
+    criteriaSearch: '',
+    criteriaListLoadingMore: false,
+    criteriaListLoaded: false,
+    criteriaListLoadFailed: false,
     loading: enabled,
     policyLoaded: false,
     saving: false,
@@ -236,10 +236,10 @@ export function createFileDownloadPolicyStore(
   let adapter: FileDownloadPolicyEditorAdapter | null = null;
   let active = false;
   let runGeneration = 0;
-  let segmentPaginationGeneration = 0;
-  let activeSegmentPagination: ActiveSegmentPagination | null = null;
-  let segmentSearchTimer: ReturnType<typeof setTimeout> | null = null;
-  const loadedSegmentSearches = new Set<string>();
+  let criteriaPaginationGeneration = 0;
+  let activeCriteriaPagination: ActiveCriteriaPagination | null = null;
+  let criteriaSearchTimer: ReturnType<typeof setTimeout> | null = null;
+  const loadedCriteriaSearches = new Set<string>();
   let saveGeneration = 0;
   let saveSequence = 0;
   let saveTimer: ReturnType<typeof setTimeout> | null = null;
@@ -251,7 +251,7 @@ export function createFileDownloadPolicyStore(
   let blockedSaveSequence: number | null = null;
   let hydrating = false;
   let initialPolicyReadStarted = false;
-  let persistedPolicy: { audience: FileDownloadAudience; audienceSegments: AudienceSegmentSummary[] } | null = null;
+  let persistedPolicy: { access: FileDownloadAccess; memberCriteria: MemberCriteriaSummary[] } | null = null;
 
   const requireAdapter = (): FileDownloadPolicyEditorAdapter => {
     if (!adapter) {
@@ -265,10 +265,10 @@ export function createFileDownloadPolicyStore(
     set({ targetStale: true, error: 'reloadRequired' });
   };
 
-  const adoptPolicySegments = (policySegments: AudienceSegmentSummary[]) => {
+  const adoptPolicyCriteriaList = (policyCriteriaList: MemberCriteriaSummary[]) => {
     set((state) => ({
-      segments: mergeSegments(state.segments, policySegments),
-      availableSegmentIds: mergeIds(state.availableSegmentIds, policySegments),
+      criteriaList: mergeCriteriaList(state.criteriaList, policyCriteriaList),
+      availableCriteriaIds: mergeIds(state.availableCriteriaIds, policyCriteriaList),
     }));
   };
 
@@ -307,17 +307,17 @@ export function createFileDownloadPolicyStore(
         return;
       }
 
-      persistedPolicy = { audience: result.data.audience, audienceSegments: result.data.audienceSegments };
+      persistedPolicy = { access: result.data.access, memberCriteria: result.data.memberCriteria };
       if (
         !configuration.adoptRead(read, {
-          audience: result.data.audience,
-          audienceSegmentIds: sortedPolicySegmentIds(result.data),
+          access: result.data.access,
+          memberCriteriaIds: sortedPolicyCriteriaIds(result.data),
         })
       ) {
         peerRefreshRequested = true;
         return;
       }
-      adoptPolicySegments(result.data.audienceSegments);
+      adoptPolicyCriteriaList(result.data.memberCriteria);
       set({ error: null, saved: false });
     } catch {
       if (active) {
@@ -344,10 +344,10 @@ export function createFileDownloadPolicyStore(
     }
   };
 
-  const clearSegmentSearchTimer = () => {
-    if (segmentSearchTimer) {
-      clearTimeout(segmentSearchTimer);
-      segmentSearchTimer = null;
+  const clearCriteriaSearchTimer = () => {
+    if (criteriaSearchTimer) {
+      clearTimeout(criteriaSearchTimer);
+      criteriaSearchTimer = null;
     }
   };
 
@@ -369,24 +369,24 @@ export function createFileDownloadPolicyStore(
     persistedPolicy = null;
     hydrating = enabled;
     initialPolicyReadStarted = false;
-    segmentPaginationGeneration += 1;
-    activeSegmentPagination = null;
-    loadedSegmentSearches.clear();
-    clearSegmentSearchTimer();
+    criteriaPaginationGeneration += 1;
+    activeCriteriaPagination = null;
+    loadedCriteriaSearches.clear();
+    clearCriteriaSearchTimer();
     saveGeneration += 1;
     saveSequence += 1;
     clearSaveTimer();
     activeSave = null;
 
     if (!enabled) {
-      configuration.adoptRead(configuration.beginRead(), { audience: 'disabled', audienceSegmentIds: [] });
+      configuration.adoptRead(configuration.beginRead(), { access: 'disabled', memberCriteriaIds: [] });
       set({
-        segments: [],
-        availableSegmentIds: [],
-        segmentSearch: '',
-        segmentsLoadingMore: false,
-        segmentsLoaded: false,
-        segmentsLoadFailed: false,
+        criteriaList: [],
+        availableCriteriaIds: [],
+        criteriaSearch: '',
+        criteriaListLoadingMore: false,
+        criteriaListLoaded: false,
+        criteriaListLoadFailed: false,
         error: null,
         policyLoaded: false,
         loading: false,
@@ -399,10 +399,10 @@ export function createFileDownloadPolicyStore(
     set({
       loading: true,
       saving: false,
-      segmentSearch: '',
-      segmentsLoadingMore: false,
-      segmentsLoaded: false,
-      segmentsLoadFailed: false,
+      criteriaSearch: '',
+      criteriaListLoadingMore: false,
+      criteriaListLoaded: false,
+      criteriaListLoadFailed: false,
       error: null,
       saved: false,
       policyLoaded: false,
@@ -413,9 +413,9 @@ export function createFileDownloadPolicyStore(
         initialRead = configuration.beginRead();
         return nextAdapter.loadPolicy(target);
       }),
-      nextAdapter.loadSegments({ page: 1, pageSize: SEGMENTS_PAGE_SIZE }),
+      nextAdapter.loadCriteriaList({ page: 1, pageSize: SEGMENTS_PAGE_SIZE }),
     ])
-      .then(([policyResult, segmentResult]) => {
+      .then(([policyResult, criteriaResult]) => {
         if (run !== runGeneration) {
           return;
         }
@@ -427,27 +427,27 @@ export function createFileDownloadPolicyStore(
           markTargetStale();
           return;
         }
-        const policySegments = policyResult.data.audienceSegments;
-        const listedSegments = segmentResult.data?.items ?? [];
-        persistedPolicy = { audience: policyResult.data.audience, audienceSegments: policySegments };
+        const policyCriteriaList = policyResult.data.memberCriteria;
+        const listedCriteriaList = criteriaResult.data?.items ?? [];
+        persistedPolicy = { access: policyResult.data.access, memberCriteria: policyCriteriaList };
         if (
           !configuration.adoptRead(initialRead, {
-            audience: policyResult.data.audience,
-            audienceSegmentIds: policySegments.map((segment) => segment.id),
+            access: policyResult.data.access,
+            memberCriteriaIds: policyCriteriaList.map((criteria) => criteria.id),
           })
         ) {
           peerRefreshRequested = true;
           return;
         }
         set({
-          segments: mergeSegments(policySegments, listedSegments),
-          availableSegmentIds: mergeIds(
-            policySegments.map((segment) => segment.id),
-            listedSegments,
+          criteriaList: mergeCriteriaList(policyCriteriaList, listedCriteriaList),
+          availableCriteriaIds: mergeIds(
+            policyCriteriaList.map((criteria) => criteria.id),
+            listedCriteriaList,
           ),
-          segmentsLoaded: Boolean(segmentResult.data),
+          criteriaListLoaded: Boolean(criteriaResult.data),
           policyLoaded: true,
-          ...(segmentResult.data ? {} : { segmentsLoadFailed: true }),
+          ...(criteriaResult.data ? {} : { criteriaListLoadFailed: true }),
         });
       })
       .catch(() => {
@@ -470,9 +470,9 @@ export function createFileDownloadPolicyStore(
     runGeneration += 1;
     active = false;
     hydrating = false;
-    segmentPaginationGeneration += 1;
-    activeSegmentPagination = null;
-    clearSegmentSearchTimer();
+    criteriaPaginationGeneration += 1;
+    activeCriteriaPagination = null;
+    clearCriteriaSearchTimer();
     const detachedRequest = pendingSave;
     saveGeneration += 1;
     clearSaveTimer();
@@ -487,8 +487,8 @@ export function createFileDownloadPolicyStore(
     void enqueueFileDownloadPolicyWrite(targetKey, () =>
       detachedAdapter.savePolicy(
         target,
-        detachedRequest.audience,
-        detachedRequest.audienceSegmentIds,
+        detachedRequest.access,
+        detachedRequest.memberCriteriaIds,
         detachedRequest.observedPolicy,
         detachedOrigin,
       ),
@@ -505,27 +505,31 @@ export function createFileDownloadPolicyStore(
       .catch(() => options.onDetachedSaveFailure(false));
   };
 
-  const loadSegmentsForSearch = (rawSearch: string): Promise<void> => {
+  const loadCriteriaListForSearch = (rawSearch: string): Promise<void> => {
     const search = rawSearch.trim();
-    if (!search || loadedSegmentSearches.has(search)) {
+    if (!search || loadedCriteriaSearches.has(search)) {
       return Promise.resolve();
     }
 
-    const generation = ++segmentPaginationGeneration;
-    if (activeSegmentPagination?.search === search) {
-      return activeSegmentPagination.promise;
+    const generation = ++criteriaPaginationGeneration;
+    if (activeCriteriaPagination?.search === search) {
+      return activeCriteriaPagination.promise;
     }
 
-    const token = Symbol('file-download-segment-pagination');
-    const current = () => segmentPaginationGeneration === generation;
+    const token = Symbol('file-download-criteria-pagination');
+    const current = () => criteriaPaginationGeneration === generation;
     const promise = Promise.resolve().then(async () => {
       let nextPage = 1;
       let hasMore = true;
-      set({ segmentsLoadingMore: true, segmentsLoadFailed: false });
+      set({ criteriaListLoadingMore: true, criteriaListLoadFailed: false });
 
       try {
         while (hasMore) {
-          const result = await requireAdapter().loadSegments({ page: nextPage, pageSize: SEGMENTS_PAGE_SIZE, search });
+          const result = await requireAdapter().loadCriteriaList({
+            page: nextPage,
+            pageSize: SEGMENTS_PAGE_SIZE,
+            search,
+          });
           if (!current()) {
             return;
           }
@@ -534,49 +538,49 @@ export function createFileDownloadPolicyStore(
             result.data.page !== nextPage ||
             (result.data.hasMore && result.data.items.length === 0)
           ) {
-            set({ segmentsLoadFailed: true });
+            set({ criteriaListLoadFailed: true });
             return;
           }
           const items = result.data.items;
           set((state) => ({
-            segments: mergeSegments(state.segments, items),
-            availableSegmentIds: mergeIds(state.availableSegmentIds, items),
-            segmentsLoaded: true,
+            criteriaList: mergeCriteriaList(state.criteriaList, items),
+            availableCriteriaIds: mergeIds(state.availableCriteriaIds, items),
+            criteriaListLoaded: true,
           }));
           hasMore = result.data.hasMore;
           nextPage = result.data.page + 1;
         }
         if (current()) {
-          loadedSegmentSearches.add(search);
+          loadedCriteriaSearches.add(search);
         }
       } catch {
         if (current()) {
-          set({ segmentsLoadFailed: true });
+          set({ criteriaListLoadFailed: true });
         }
       } finally {
-        if (activeSegmentPagination?.token === token && current()) {
-          activeSegmentPagination = null;
-          set({ segmentsLoadingMore: false });
+        if (activeCriteriaPagination?.token === token && current()) {
+          activeCriteriaPagination = null;
+          set({ criteriaListLoadingMore: false });
         }
       }
     });
 
-    activeSegmentPagination = { search, token, promise };
+    activeCriteriaPagination = { search, token, promise };
     return promise;
   };
 
-  const searchSegments = (nextSearch: string) => {
-    set({ segmentSearch: nextSearch });
-    segmentPaginationGeneration += 1;
-    activeSegmentPagination = null;
-    clearSegmentSearchTimer();
-    if (!nextSearch.trim() || loadedSegmentSearches.has(nextSearch.trim())) {
-      set({ segmentsLoadingMore: false });
+  const searchCriteriaList = (nextSearch: string) => {
+    set({ criteriaSearch: nextSearch });
+    criteriaPaginationGeneration += 1;
+    activeCriteriaPagination = null;
+    clearCriteriaSearchTimer();
+    if (!nextSearch.trim() || loadedCriteriaSearches.has(nextSearch.trim())) {
+      set({ criteriaListLoadingMore: false });
       return;
     }
-    segmentSearchTimer = setTimeout(() => {
-      segmentSearchTimer = null;
-      void loadSegmentsForSearch(nextSearch);
+    criteriaSearchTimer = setTimeout(() => {
+      criteriaSearchTimer = null;
+      void loadCriteriaListForSearch(nextSearch);
     }, SEGMENT_SEARCH_DEBOUNCE_MS);
   };
 
@@ -598,8 +602,8 @@ export function createFileDownloadPolicyStore(
   const restorePersistedPolicy = () => {
     const persisted = persistedPolicy;
     if (persisted) {
-      configuration.discard(['audience', 'audienceSegmentIds']);
-      set((state) => ({ segments: mergeSegments(state.segments, persisted.audienceSegments) }));
+      configuration.discard(['access', 'memberCriteriaIds']);
+      set((state) => ({ criteriaList: mergeCriteriaList(state.criteriaList, persisted.memberCriteria) }));
     }
     set({ error: 'saveError' });
   };
@@ -622,14 +626,14 @@ export function createFileDownloadPolicyStore(
       }
       const currentPolicy = currentResult.data;
       configuration.adoptRead(read, {
-        audience: currentPolicy.audience,
-        audienceSegmentIds: sortedPolicySegmentIds(currentPolicy),
+        access: currentPolicy.access,
+        memberCriteriaIds: sortedPolicyCriteriaIds(currentPolicy),
       });
       const rebased = rebasePendingSaveOntoCurrent(retryRequest, currentPolicy);
-      persistedPolicy = { audience: currentPolicy.audience, audienceSegments: currentPolicy.audienceSegments };
-      adoptPolicySegments(currentPolicy.audienceSegments);
+      persistedPolicy = { access: currentPolicy.access, memberCriteria: currentPolicy.memberCriteria };
+      adoptPolicyCriteriaList(currentPolicy.memberCriteria);
       pendingSave = rebased;
-      configuration.edit({ audience: rebased.audience, audienceSegmentIds: rebased.audienceSegmentIds });
+      configuration.edit({ access: rebased.access, memberCriteriaIds: rebased.memberCriteriaIds });
       // A second stale response keeps the rebased draft but stops retrying it automatically.
       if (retryRequest.retryCount >= 1) {
         blockedSaveSequence = rebased.sequence;
@@ -655,7 +659,7 @@ export function createFileDownloadPolicyStore(
     }
 
     pendingSave = null;
-    const write = configuration.beginWrite(['audience', 'audienceSegmentIds']);
+    const write = configuration.beginWrite(['access', 'memberCriteriaIds']);
     const token = Symbol('file-download-policy-save');
     activeSave = { token, request };
     const saveAdapter = requireAdapter();
@@ -663,8 +667,8 @@ export function createFileDownloadPolicyStore(
       try {
         const result = await saveAdapter.savePolicy(
           target,
-          request.audience,
-          request.audienceSegmentIds,
+          request.access,
+          request.memberCriteriaIds,
           request.observedPolicy,
           write.origin,
         );
@@ -695,20 +699,20 @@ export function createFileDownloadPolicyStore(
           return;
         }
         const acknowledgedPolicy = {
-          audience: result.data.audience,
-          audienceSegmentIds: sortedPolicySegmentIds(result.data),
+          access: result.data.access,
+          memberCriteriaIds: sortedPolicyCriteriaIds(result.data),
         } satisfies FileDownloadPolicyObservedState;
         write.acknowledge(acknowledgedPolicy);
-        persistedPolicy = { audience: result.data.audience, audienceSegments: result.data.audienceSegments };
-        adoptPolicySegments(result.data.audienceSegments);
+        persistedPolicy = { access: result.data.access, memberCriteria: result.data.memberCriteria };
+        adoptPolicyCriteriaList(result.data.memberCriteria);
         publishEditorEntityChange(document, write.origin);
         const pending = pendingSave;
         if (pending && pending.generation === request.generation && pending.sequence !== request.sequence) {
           const rebasedPending = rebasePendingSave(pending, request, acknowledgedPolicy);
           pendingSave = rebasedPending;
           configuration.edit({
-            audience: rebasedPending.audience,
-            audienceSegmentIds: rebasedPending.audienceSegmentIds,
+            access: rebasedPending.access,
+            memberCriteriaIds: rebasedPending.memberCriteriaIds,
           });
           set({ saved: false });
           return;
@@ -746,22 +750,22 @@ export function createFileDownloadPolicyStore(
     });
   }
 
-  const changeAccess = (nextAudience: FileDownloadAudience, nextAudienceSegmentIds: string[]) => {
+  const changeAccess = (nextAccess: FileDownloadAccess, nextMemberCriteriaIds: string[]) => {
     set({ saved: false });
     if (!enabled || targetStale || !persistedPolicy) {
       return;
     }
-    const audienceSegmentIds = nextAudience === 'restricted' ? nextAudienceSegmentIds : [];
-    configuration.edit({ audience: nextAudience, audienceSegmentIds });
+    const memberCriteriaIds = nextAccess === 'restricted' ? nextMemberCriteriaIds : [];
+    configuration.edit({ access: nextAccess, memberCriteriaIds });
     pendingSave = {
       generation: saveGeneration,
       sequence: ++saveSequence,
       observedPolicy: {
-        audience: persistedPolicy.audience,
-        audienceSegmentIds: persistedPolicy.audienceSegments.map((segment) => segment.id).sort(),
+        access: persistedPolicy.access,
+        memberCriteriaIds: persistedPolicy.memberCriteria.map((criteria) => criteria.id).sort(),
       },
-      audience: nextAudience,
-      audienceSegmentIds,
+      access: nextAccess,
+      memberCriteriaIds,
       retryCount: 0,
     };
     set({ error: null, saving: true });
@@ -776,7 +780,7 @@ export function createFileDownloadPolicyStore(
     start,
     stop,
     changeAccess,
-    searchSegments,
+    searchCriteriaList,
     notifyPeerChange,
     captureOwnChange: configuration.captureOwnChange,
     hasUnsavedChanges: () => Boolean(pendingSave || activeSave),

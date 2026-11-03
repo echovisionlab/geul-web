@@ -6,7 +6,7 @@ import {
   type FileDownloadPolicyEditorAdapter,
 } from '@/features/media-download/FileDownloadPolicyEditor';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
-import { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
+import { MemberCriteriaKind } from '@echovisionlab/geul-proto/secure/member_criteria_pb.ts';
 import type { FileDownloadPolicyModel } from '@/lib/types/file-download-access';
 function DownloadPolicyPreview({
   state = 'ready',
@@ -24,17 +24,17 @@ function DownloadPolicyPreview({
     expectedFileId: 'file-preview',
   };
   const [adapter] = useState<FileDownloadPolicyEditorAdapter>(() => {
-    const segment = {
-      id: 'audience-preview',
+    const criteria = {
+      id: 'access-preview',
       name: 'Listening room',
       description: '',
-      segmentType: SegmentType.MEMBERS_BY_FILTER,
+      kind: MemberCriteriaKind.FILTER,
     };
     let policy: FileDownloadPolicyModel = {
       ...target,
       fileId: target.expectedFileId,
-      audience: state === 'restricted' ? 'restricted' : 'public',
-      audienceSegments: state === 'restricted' ? [segment] : [],
+      access: state === 'restricted' ? 'restricted' : 'public',
+      memberCriteria: state === 'restricted' ? [criteria] : [],
     };
     return {
       loadPolicy: async () =>
@@ -43,9 +43,9 @@ function DownloadPolicyPreview({
           : state === 'error'
             ? { errorCode: 'loadFailed' }
             : { data: policy },
-      loadSegments: async ({ search = '' }) => ({
+      loadCriteriaList: async ({ search = '' }) => ({
         data: {
-          items: segment.name.toLowerCase().includes(search.toLowerCase()) ? [segment] : [],
+          items: criteria.name.toLowerCase().includes(search.toLowerCase()) ? [criteria] : [],
           page: 1,
           pageSize: 50,
           total: 1,
@@ -53,11 +53,11 @@ function DownloadPolicyPreview({
           hasMore: false,
         },
       }),
-      savePolicy: async (_, audience, ids) => {
+      savePolicy: async (_, access, ids) => {
         if (state === 'save-error') {
           return { errorCode: 'saveFailed' };
         }
-        policy = { ...policy, audience, audienceSegments: ids.includes(segment.id) ? [segment] : [] };
+        policy = { ...policy, access, memberCriteria: ids.includes(criteria.id) ? [criteria] : [] };
         return { data: policy };
       },
     };
@@ -76,7 +76,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Actual production download policy editor with typed in-memory reads and autosave. Audience/segment selection, loading, read/write failure states; no backend access permissions or asset persistence.',
+          'Actual production download policy editor with typed in-memory reads and autosave. Access/criteria selection, loading, read/write failure states; no backend access permissions or asset persistence.',
       },
     },
   },

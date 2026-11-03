@@ -5,18 +5,18 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Switch } from '@/components/core/Input';
 
-interface AudienceArchiveFilterViewProps {
+interface MemberCriteriaArchiveFilterViewProps {
   includeArchived: boolean;
   pending?: boolean;
   onChange: (includeArchived: boolean) => void;
 }
 
-export function AudienceArchiveFilterView({
+export function MemberCriteriaArchiveFilterView({
   includeArchived,
   onChange,
   pending = false,
-}: AudienceArchiveFilterViewProps) {
-  const t = useTranslations('adminList.audienceSegments');
+}: MemberCriteriaArchiveFilterViewProps) {
+  const t = useTranslations('adminList.memberCriteria');
   const tStates = useTranslations('common.states');
 
   return (
@@ -33,7 +33,7 @@ export function AudienceArchiveFilterView({
   );
 }
 
-export function AudienceArchiveFilter() {
+export function MemberCriteriaArchiveFilter() {
   const [pending, startTransition] = useTransition();
   const pathname = usePathname();
   const router = useRouter();
@@ -48,18 +48,18 @@ export function AudienceArchiveFilter() {
       nextParams.delete('includeArchived');
     }
 
-    const tableQuery = nextParams.get('segments');
+    const tableQuery = nextParams.get('memberCriteria');
     if (tableQuery) {
       try {
         const parsed = JSON.parse(tableQuery) as Record<string, unknown>;
         delete parsed.page;
         if (Object.keys(parsed).length === 0) {
-          nextParams.delete('segments');
+          nextParams.delete('memberCriteria');
         } else {
-          nextParams.set('segments', JSON.stringify(parsed));
+          nextParams.set('memberCriteria', JSON.stringify(parsed));
         }
       } catch {
-        nextParams.delete('segments');
+        nextParams.delete('memberCriteria');
       }
     }
 
@@ -70,6 +70,10 @@ export function AudienceArchiveFilter() {
   };
 
   return (
-    <AudienceArchiveFilterView pending={pending} includeArchived={includeArchived} onChange={updateIncludeArchived} />
+    <MemberCriteriaArchiveFilterView
+      pending={pending}
+      includeArchived={includeArchived}
+      onChange={updateIncludeArchived}
+    />
   );
 }

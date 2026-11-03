@@ -9,40 +9,45 @@ import { LayoutInset } from '@/components/core/Layout';
 import { notifications } from '@/components/core/Notification';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
+import { MemberCriteriaKind } from '@echovisionlab/geul-proto/secure/member_criteria_pb.ts';
 import { useTranslations } from 'next-intl';
 import { Select, TextInput } from '@/components/core/Input';
 import { FormModal } from '@/components/core/Modal';
 import {
-  createSegmentAction,
-  archiveSegmentAction,
-  estimateSegmentCountAction,
-  getSegmentAction,
-  restoreSegmentAction,
-  updateSegmentAction,
-} from '@/lib/actions/audience';
-import { buildSegmentConfig, createEmptyConfig, rebasePendingConfig, type SegmentConfigState } from './SegmentConfig';
-import { SegmentConfigFields } from './SegmentConfigFields';
-import { useSegmentModal } from './SegmentModalContext';
-type SegmentEditConfig = SegmentConfigState;
-interface SegmentEditBaseline {
+  createMemberCriteriaAction,
+  archiveMemberCriteriaAction,
+  countMatchingMembersAction,
+  getMemberCriteriaAction,
+  restoreMemberCriteriaAction,
+  updateMemberCriteriaAction,
+} from '@/lib/actions/member-criteria';
+import {
+  buildCriteriaConfig,
+  createEmptyConfig,
+  rebasePendingConfig,
+  type CriteriaConfigState,
+} from './MemberCriteriaConfig';
+import { MemberCriteriaConfigFields } from './MemberCriteriaConfigFields';
+import { useCriteriaModal } from './MemberCriteriaModalContext';
+type CriteriaEditConfig = CriteriaConfigState;
+interface CriteriaEditBaseline {
   name: string;
   description: string;
-  segmentType: SegmentType;
-  config: SegmentEditConfig;
+  kind: MemberCriteriaKind;
+  config: CriteriaEditConfig;
 }
-interface SegmentEditDraft {
+interface CriteriaEditDraft {
   name: string;
   description: string;
-  segmentType: string;
-  config: SegmentEditConfig;
+  kind: string;
+  config: CriteriaEditConfig;
 }
-function segmentConfigState(config: {
+function criteriaConfigState(config: {
   memberTagIds: string[];
   accountRoles: string[];
   createdAfter?: string;
   createdBefore?: string;
-}): SegmentEditConfig {
+}): CriteriaEditConfig {
   return {
     memberTagIds: config.memberTagIds,
     accountRoles: config.accountRoles,
@@ -53,48 +58,55 @@ function segmentConfigState(config: {
 function sameStringSet(left: string[], right: string[]): boolean {
   return left.length === right.length && left.every((value) => right.includes(value));
 }
-function sameSegmentEditDraft(left: SegmentEditDraft, right: SegmentEditDraft): boolean {
+function sameCriteriaEditDraft(left: CriteriaEditDraft, right: CriteriaEditDraft): boolean {
   return (
     left.name === right.name &&
     left.description === right.description &&
-    left.segmentType === right.segmentType &&
+    left.kind === right.kind &&
     sameStringSet(left.config.memberTagIds, right.config.memberTagIds) &&
     sameStringSet(left.config.accountRoles, right.config.accountRoles) &&
     left.config.createdAfter === right.config.createdAfter &&
     left.config.createdBefore === right.config.createdBefore
   );
 }
-export interface SegmentModalsBindings {
-  createSegmentAction: typeof createSegmentAction;
-  archiveSegmentAction: typeof archiveSegmentAction;
-  estimateSegmentCountAction: typeof estimateSegmentCountAction;
-  getSegmentAction: typeof getSegmentAction;
-  restoreSegmentAction: typeof restoreSegmentAction;
-  updateSegmentAction: typeof updateSegmentAction;
+export interface MemberCriteriaModalsBindings {
+  createMemberCriteriaAction: typeof createMemberCriteriaAction;
+  archiveMemberCriteriaAction: typeof archiveMemberCriteriaAction;
+  countMatchingMembersAction: typeof countMatchingMembersAction;
+  getMemberCriteriaAction: typeof getMemberCriteriaAction;
+  restoreMemberCriteriaAction: typeof restoreMemberCriteriaAction;
+  updateMemberCriteriaAction: typeof updateMemberCriteriaAction;
 }
-const defaultBindings: SegmentModalsBindings = {
-  createSegmentAction,
-  archiveSegmentAction,
-  estimateSegmentCountAction,
-  getSegmentAction,
-  restoreSegmentAction,
-  updateSegmentAction,
+const defaultBindings: MemberCriteriaModalsBindings = {
+  createMemberCriteriaAction,
+  archiveMemberCriteriaAction,
+  countMatchingMembersAction,
+  getMemberCriteriaAction,
+  restoreMemberCriteriaAction,
+  updateMemberCriteriaAction,
 };
-export function SegmentModals({
+export function MemberCriteriaModals({
   bindings = defaultBindings,
   refresh,
-}: { bindings?: SegmentModalsBindings; refresh?: () => void } = {}) {
+}: { bindings?: MemberCriteriaModalsBindings; refresh?: () => void } = {}) {
   const tCommon = useTranslations('common');
   const tCommonEntities = useTranslations('common.entities');
-  const tPage = useTranslations('adminList.audienceSegments');
+  const tPage = useTranslations('adminList.memberCriteria');
   const router = useRouter();
-  const { lifecycleSegment, lifecycleAction, closeLifecycle, isCreateOpen, closeCreate, editingSegmentId, closeEdit } =
-    useSegmentModal();
+  const {
+    lifecycleCriteria,
+    lifecycleAction,
+    closeLifecycle,
+    isCreateOpen,
+    closeCreate,
+    editingCriteriaId,
+    closeEdit,
+  } = useCriteriaModal();
   // Create modal state
   const [createName, setCreateName] = useState('');
   const [createDescription, setCreateDescription] = useState('');
   const [createType, setCreateType] = useState<string | null>(null);
-  const [createConfig, setCreateConfig] = useState<SegmentConfigState>(createEmptyConfig());
+  const [createConfig, setCreateConfig] = useState<CriteriaConfigState>(createEmptyConfig());
   const [createLoading, setCreateLoading] = useState(false);
   const [createEstimatedCount, setCreateEstimatedCount] = useState<number | null>(null);
   const [createEstimateLoading, setCreateEstimateLoading] = useState(false);
@@ -102,31 +114,31 @@ export function SegmentModals({
   const [editName, setEditName] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [editType, setEditType] = useState<string | null>(null);
-  const [editConfig, setEditConfig] = useState<SegmentConfigState>(createEmptyConfig());
+  const [editConfig, setEditConfig] = useState<CriteriaConfigState>(createEmptyConfig());
   const [editLoading, setEditLoading] = useState(false);
   const [editFetchLoading, setEditFetchLoading] = useState(false);
   const [editEstimatedCount, setEditEstimatedCount] = useState<number | null>(null);
   const [editEstimateLoading, setEditEstimateLoading] = useState(false);
-  const [editBaseline, setEditBaseline] = useState<SegmentEditBaseline | null>(null);
+  const [editBaseline, setEditBaseline] = useState<CriteriaEditBaseline | null>(null);
   const [lifecycleLoading, setLifecycleLoading] = useState(false);
-  const editingSegmentIdRef = useRef(editingSegmentId);
-  editingSegmentIdRef.current = editingSegmentId;
-  const editDraftRef = useRef<SegmentEditDraft>({
+  const editingCriteriaIdRef = useRef(editingCriteriaId);
+  editingCriteriaIdRef.current = editingCriteriaId;
+  const editDraftRef = useRef<CriteriaEditDraft>({
     name: editName,
     description: editDescription,
-    segmentType: editType ?? '',
+    kind: editType ?? '',
     config: editConfig,
   });
   editDraftRef.current = {
     name: editName,
     description: editDescription,
-    segmentType: editType ?? '',
+    kind: editType ?? '',
     config: editConfig,
   };
-  const segmentTypeOptions = [
-    { value: String(SegmentType.ALL_MEMBERS), label: tPage('types.allUsers') },
-    { value: String(SegmentType.MEMBER_TAGS), label: tCommonEntities('userTags') },
-    { value: String(SegmentType.MEMBERS_BY_FILTER), label: tPage('types.usersByFilter') },
+  const kindOptions = [
+    { value: String(MemberCriteriaKind.ALL_MEMBERS), label: tPage('types.allUsers') },
+    { value: String(MemberCriteriaKind.MEMBER_TAGS), label: tCommonEntities('userTags') },
+    { value: String(MemberCriteriaKind.FILTER), label: tPage('types.usersByFilter') },
   ];
   // Reset create modal
   useEffect(() => {
@@ -144,10 +156,10 @@ export function SegmentModals({
     setCreateConfig(createEmptyConfig());
     setCreateEstimatedCount(null);
   }, []);
-  // Load segment data for edit
+  // Load criteria data for edit
   useEffect(() => {
     let isCurrentRequest = true;
-    if (!editingSegmentId) {
+    if (!editingCriteriaId) {
       setEditName('');
       setEditDescription('');
       setEditType(null);
@@ -161,21 +173,21 @@ export function SegmentModals({
     setEditLoading(false);
     setEditFetchLoading(true);
     bindings
-      .getSegmentAction(editingSegmentId)
+      .getMemberCriteriaAction(editingCriteriaId)
       .then((result) => {
         if (!isCurrentRequest) {
           return;
         }
         if (result.data) {
-          const config = segmentConfigState(result.data.config);
+          const config = criteriaConfigState(result.data.config);
           setEditName(result.data.name);
           setEditDescription(result.data.description);
-          setEditType(String(result.data.segmentType));
+          setEditType(String(result.data.kind));
           setEditConfig(config);
           setEditBaseline({
             name: result.data.name,
             description: result.data.description,
-            segmentType: result.data.segmentType,
+            kind: result.data.kind,
             config,
           });
           setEditEstimatedCount(result.data.estimatedCount);
@@ -193,7 +205,7 @@ export function SegmentModals({
     return () => {
       isCurrentRequest = false;
     };
-  }, [editingSegmentId, closeEdit]);
+  }, [editingCriteriaId, closeEdit]);
   // Reset config when edit type changes
   const handleEditTypeChange = useCallback(
     (value: string | null) => {
@@ -208,7 +220,7 @@ export function SegmentModals({
   );
   const estimateIdentity = {
     create: JSON.stringify([isCreateOpen, createType, createConfig]),
-    edit: JSON.stringify([editingSegmentId, editType, editConfig]),
+    edit: JSON.stringify([editingCriteriaId, editType, editConfig]),
   };
   const estimateIdentityRef = useRef(estimateIdentity);
   estimateIdentityRef.current = estimateIdentity;
@@ -231,7 +243,7 @@ export function SegmentModals({
   const handleEstimate = useCallback(
     async (
       type: string | null,
-      config: SegmentConfigState,
+      config: CriteriaConfigState,
       setCount: (count: number | null) => void,
       setLoading: (loading: boolean) => void,
       scope: 'create' | 'edit',
@@ -247,10 +259,10 @@ export function SegmentModals({
         estimateRequests.current[scope] === request;
       setLoading(true);
       try {
-        const segmentType = Number(type) as SegmentType;
-        const result = await bindings.estimateSegmentCountAction({
-          segmentType,
-          config: buildSegmentConfig(segmentType, config),
+        const kind = Number(type) as MemberCriteriaKind;
+        const result = await bindings.countMatchingMembersAction({
+          kind,
+          config: buildCriteriaConfig(kind, config),
         });
         if (!current()) {
           return;
@@ -278,12 +290,12 @@ export function SegmentModals({
     }
     setCreateLoading(true);
     try {
-      const segmentType = Number(createType) as SegmentType;
-      const result = await bindings.createSegmentAction({
+      const kind = Number(createType) as MemberCriteriaKind;
+      const result = await bindings.createMemberCriteriaAction({
         name: createName,
         description: createDescription || undefined,
-        segmentType,
-        config: buildSegmentConfig(segmentType, createConfig),
+        kind,
+        config: buildCriteriaConfig(kind, createConfig),
       });
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
@@ -297,30 +309,30 @@ export function SegmentModals({
     }
   };
   const handleUpdate = async () => {
-    if (!editingSegmentId || !editType || !editBaseline) {
+    if (!editingCriteriaId || !editType || !editBaseline) {
       return;
     }
-    const segmentId = editingSegmentId;
+    const criteriaId = editingCriteriaId;
     const baseline = editBaseline;
-    const submittedDraft: SegmentEditDraft = {
+    const submittedDraft: CriteriaEditDraft = {
       name: editName,
       description: editDescription,
-      segmentType: editType,
+      kind: editType,
       config: {
         ...editConfig,
         memberTagIds: [...editConfig.memberTagIds],
         accountRoles: [...editConfig.accountRoles],
       },
     };
-    const segmentType = Number(editType) as SegmentType;
+    const kind = Number(editType) as MemberCriteriaKind;
     setEditLoading(true);
     try {
-      const input: Parameters<typeof bindings.updateSegmentAction>[0] = {
-        id: segmentId,
-        config: buildSegmentConfig(segmentType, submittedDraft.config),
+      const input: Parameters<typeof bindings.updateMemberCriteriaAction>[0] = {
+        id: criteriaId,
+        config: buildCriteriaConfig(kind, submittedDraft.config),
         observed: {
-          segmentType: baseline.segmentType,
-          config: buildSegmentConfig(baseline.segmentType, baseline.config),
+          kind: baseline.kind,
+          config: buildCriteriaConfig(baseline.kind, baseline.config),
         },
       };
       if (submittedDraft.name !== baseline.name) {
@@ -329,11 +341,11 @@ export function SegmentModals({
       if (submittedDraft.description !== baseline.description) {
         input.description = submittedDraft.description;
       }
-      if (segmentType !== baseline.segmentType) {
-        input.segmentType = segmentType;
+      if (kind !== baseline.kind) {
+        input.kind = kind;
       }
-      const result = await bindings.updateSegmentAction(input);
-      if (editingSegmentIdRef.current !== segmentId) {
+      const result = await bindings.updateMemberCriteriaAction(input);
+      if (editingCriteriaIdRef.current !== criteriaId) {
         if (result.data) {
           (refresh ?? router.refresh)();
         }
@@ -343,29 +355,27 @@ export function SegmentModals({
         notifications.show({ message: result.error ?? tPage('loading'), tone: 'danger' });
         return;
       }
-      const canonicalConfig = segmentConfigState(result.data.config);
-      const canonicalDraft: SegmentEditDraft = {
+      const canonicalConfig = criteriaConfigState(result.data.config);
+      const canonicalDraft: CriteriaEditDraft = {
         name: result.data.name,
         description: result.data.description,
-        segmentType: String(result.data.segmentType),
+        kind: String(result.data.kind),
         config: canonicalConfig,
       };
       const latestDraft = editDraftRef.current;
-      const hasPendingTyping = !sameSegmentEditDraft(latestDraft, submittedDraft);
-      const typeChangedWhileSaving = latestDraft.segmentType !== submittedDraft.segmentType;
+      const hasPendingTyping = !sameCriteriaEditDraft(latestDraft, submittedDraft);
+      const typeChangedWhileSaving = latestDraft.kind !== submittedDraft.kind;
       setEditBaseline({
         name: result.data.name,
         description: result.data.description,
-        segmentType: result.data.segmentType,
+        kind: result.data.kind,
         config: canonicalConfig,
       });
       setEditName(latestDraft.name === submittedDraft.name ? canonicalDraft.name : latestDraft.name);
       setEditDescription(
         latestDraft.description === submittedDraft.description ? canonicalDraft.description : latestDraft.description,
       );
-      setEditType(
-        latestDraft.segmentType === submittedDraft.segmentType ? canonicalDraft.segmentType : latestDraft.segmentType,
-      );
+      setEditType(latestDraft.kind === submittedDraft.kind ? canonicalDraft.kind : latestDraft.kind);
       setEditConfig(
         typeChangedWhileSaving
           ? latestDraft.config
@@ -377,21 +387,21 @@ export function SegmentModals({
         closeEdit();
       }
     } finally {
-      if (editingSegmentIdRef.current === segmentId) {
+      if (editingCriteriaIdRef.current === criteriaId) {
         setEditLoading(false);
       }
     }
   };
   const handleLifecycleChange = async () => {
-    if (!lifecycleSegment || !lifecycleAction) {
+    if (!lifecycleCriteria || !lifecycleAction) {
       return;
     }
     setLifecycleLoading(true);
     try {
       const result =
         lifecycleAction === 'archive'
-          ? await bindings.archiveSegmentAction(lifecycleSegment.id)
-          : await bindings.restoreSegmentAction(lifecycleSegment.id);
+          ? await bindings.archiveMemberCriteriaAction(lifecycleCriteria.id)
+          : await bindings.restoreMemberCriteriaAction(lifecycleCriteria.id);
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
         return;
@@ -414,7 +424,7 @@ export function SegmentModals({
         onClose={closeCreate}
         onSubmit={handleCreate}
         title={tPage('createTitle')}
-        submitLabel={tCommon('actions.createItem', { item: tCommon('entities.audienceSegment') })}
+        submitLabel={tCommon('actions.createItem', { item: tCommon('entities.memberCriteria') })}
         cancelLabel={tCommon('actions.cancel')}
         closeLabel={tCommon('actions.close')}
         loading={createLoading}
@@ -439,14 +449,14 @@ export function SegmentModals({
           <Select
             label={tCommon('labels.type')}
             placeholder={tPage('typePlaceholder')}
-            data={segmentTypeOptions}
+            data={kindOptions}
             value={createType}
             onChange={handleCreateTypeChange}
             required
           />
         </LayoutInset>
-        <SegmentConfigFields
-          segmentType={createType ? (Number(createType) as SegmentType) : null}
+        <MemberCriteriaConfigFields
+          kind={createType ? (Number(createType) as MemberCriteriaKind) : null}
           config={createConfig}
           onConfigChange={setCreateConfig}
           estimatedCount={createEstimatedCount}
@@ -459,7 +469,7 @@ export function SegmentModals({
 
       {/* Edit Modal */}
       <FormModal
-        opened={!!editingSegmentId}
+        opened={!!editingCriteriaId}
         onClose={closeEdit}
         onSubmit={handleUpdate}
         title={tPage('editTitle')}
@@ -493,14 +503,14 @@ export function SegmentModals({
               <Select
                 label={tCommon('labels.type')}
                 placeholder={tPage('typePlaceholder')}
-                data={segmentTypeOptions}
+                data={kindOptions}
                 value={editType}
                 onChange={handleEditTypeChange}
                 required
               />
             </LayoutInset>
-            <SegmentConfigFields
-              segmentType={editType ? (Number(editType) as SegmentType) : null}
+            <MemberCriteriaConfigFields
+              kind={editType ? (Number(editType) as MemberCriteriaKind) : null}
               config={editConfig}
               onConfigChange={setEditConfig}
               estimatedCount={editEstimatedCount}
@@ -516,17 +526,17 @@ export function SegmentModals({
       {/* Archive / restore modal */}
       <ConfirmationDialog
         intent={lifecycleAction === 'archive' ? 'archive' : 'restore'}
-        opened={!!lifecycleSegment && !!lifecycleAction}
+        opened={!!lifecycleCriteria && !!lifecycleAction}
         onClose={closeLifecycle}
         onConfirm={handleLifecycleChange}
         title={tPage(lifecycleAction === 'restore' ? 'restoreTitle' : 'archiveTitle')}
         message={
           <DsText>
             {tPage(lifecycleAction === 'restore' ? 'restoreConfirm' : 'archiveConfirm', {
-              name: lifecycleSegment?.name ?? '',
-              campaigns: lifecycleSegment?.campaign_count ?? 0,
-              runs: lifecycleSegment?.delivery_run_count ?? 0,
-              files: lifecycleSegment?.download_policy_reference_count ?? 0,
+              name: lifecycleCriteria?.name ?? '',
+              campaigns: lifecycleCriteria?.campaign_count ?? 0,
+              runs: lifecycleCriteria?.delivery_run_count ?? 0,
+              files: lifecycleCriteria?.download_policy_reference_count ?? 0,
             })}
           </DsText>
         }

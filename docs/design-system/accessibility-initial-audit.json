@@ -315,31 +315,31 @@
       "category": "axe-violation"
     },
     {
-      "test": "Pages/Admin/Audience and Users Users smoke-test",
+      "test": "Pages/Admin/Member Criteria and Users Users smoke-test",
       "storyId": "pages-admin-audience-and-users--users",
       "rules": ["empty-table-header"],
       "category": "axe-violation"
     },
     {
-      "test": "Pages/Admin/Audience and Users Users Action Failed smoke-test",
+      "test": "Pages/Admin/Member Criteria and Users Users Action Failed smoke-test",
       "storyId": "pages-admin-audience-and-users--users-action-failed",
       "rules": ["empty-table-header"],
       "category": "axe-violation"
     },
     {
-      "test": "Pages/Admin/Audience and Users Segments smoke-test",
+      "test": "Pages/Admin/Member Criteria and Users Member Criteria smoke-test",
       "storyId": "pages-admin-audience-and-users--segments",
       "rules": ["empty-table-header"],
       "category": "axe-violation"
     },
     {
-      "test": "Pages/Admin/Audience and Users Segments Action Failed smoke-test",
+      "test": "Pages/Admin/Member Criteria and Users Member Criteria Action Failed smoke-test",
       "storyId": "pages-admin-audience-and-users--segments-action-failed",
       "rules": ["empty-table-header"],
       "category": "axe-violation"
     },
     {
-      "test": "Pages/Admin/Audience and Users Phone smoke-test",
+      "test": "Pages/Admin/Member Criteria and Users Phone smoke-test",
       "storyId": "pages-admin-audience-and-users--phone",
       "rules": ["empty-table-header"],
       "category": "axe-violation"

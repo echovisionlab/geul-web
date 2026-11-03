@@ -257,8 +257,7 @@
       "clients": "Clientes",
       "campaign": "Campanha",
       "campaigns": "Campanhas",
-      "audienceSegment": "Segmento de público",
-      "audienceSegments": "Segmentos de público",
+      "memberCriteria": "Segmento de público",
       "user": "Usuário",
       "member": "Membro",
       "users": "Usuários",
@@ -613,7 +612,7 @@
         "failed": "Falha"
       }
     },
-    "audienceSegments": {
+    "memberCriteria": {
       "description": "Crie segmentos de público reutilizáveis para direcionar campanhas a grupos específicos.",
       "searchPlaceholder": "Buscar segmentos...",
       "empty": "Nenhum segmento encontrado. Crie um para direcionar públicos específicos.",
@@ -2699,13 +2698,13 @@
       "none": "Sem layout"
     },
     "target": {
-      "audienceLabel": "Público-alvo",
-      "audiencePlaceholder": "Selecione um público",
+      "criteriaLabel": "Público-alvo",
+      "criteriaPlaceholder": "Selecione um público",
       "all": "Todos os usuários",
-      "unavailableAudience": "Público arquivado ou indisponível",
-      "unavailableAudienceDescription": "Esta campanha está direcionada a um público arquivado ou indisponível. Selecione um público ativo antes de agendar ou enviar.",
-      "audienceRequired": "Selecione um público ativo antes de agendar ou enviar.",
-      "audienceLoadError": "Não foi possível carregar os públicos ativos. Tente novamente antes de agendar ou enviar."
+      "unavailableCriteria": "Público arquivado ou indisponível",
+      "unavailableCriteriaDescription": "Esta campanha está direcionada a um público arquivado ou indisponível. Selecione um público ativo antes de agendar ou enviar.",
+      "criteriaRequired": "Selecione um público ativo antes de agendar ou enviar.",
+      "criteriaLoadError": "Não foi possível carregar os públicos ativos. Tente novamente antes de agendar ou enviar."
     },
     "fields": {
       "recipientScope": "Destinatários",
@@ -2721,7 +2720,7 @@
       "description": "Digite um endereço de e-mail para enviar um teste desta campanha."
     },
     "sendModal": {
-      "warning": "Isso enviará a campanha para o segmento de público {audience}. Esta ação não pode ser desfeita.",
+      "warning": "Isso enviará a campanha para o segmento de público {criteria}. Esta ação não pode ser desfeita.",
       "subject": "Assunto: {subject}",
       "allMatchingUsersWarning": "Inclui usuários correspondentes que cancelaram a newsletter."
     },
@@ -2730,7 +2729,7 @@
       "dateLabel": "Data e hora agendadas",
       "previousMonth": "Mês anterior",
       "nextMonth": "Próximo mês",
-      "audience": "Público: {audience}",
+      "criteria": "Público: {criteria}",
       "allMatchingUsersWarning": "Inclui usuários correspondentes que cancelaram a newsletter."
     },
     "notifications": {
@@ -5306,7 +5305,7 @@
     "editor": {
       "sectionTitle": "Acesso ao download",
       "loading": "Carregando acesso ao download…",
-      "audiences": {
+      "access": {
         "disabled": {
           "label": "Sem downloads",
           "description": "Nenhum visitante pode baixar este arquivo."
@@ -5324,9 +5323,9 @@
           "description": "Somente usuários dos públicos selecionados podem baixar este arquivo."
         }
       },
-      "segmentsLoadError": "A política foi carregada, mas não foi possível carregar os públicos.",
-      "segmentsEmpty": "Não há segmentos de público disponíveis.",
-      "restrictedWithoutAudience": "Esta política restrita não tem nenhum público. Os downloads são negados a todos até que você selecione pelo menos um público.",
+      "criteriaLoadError": "A política foi carregada, mas não foi possível carregar os públicos.",
+      "criteriaEmpty": "Não há segmentos de público disponíveis.",
+      "restrictedWithoutCriteria": "Esta política restrita não tem nenhum público. Os downloads são negados a todos até que você selecione pelo menos um público.",
       "additionalSelected": "Mais {count} selecionados",
       "loadError": "Não foi possível carregar o acesso ao download.",
       "saveError": "Não foi possível salvar o acesso ao download.",

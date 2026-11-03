@@ -1,5 +1,5 @@
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
-import { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
+import { MemberCriteriaKind } from '@echovisionlab/geul-proto/secure/member_criteria_pb.ts';
 
 export function isFileDownloadPolicyEntityType(entityType: TranscodeEntityType): boolean {
   return (
@@ -20,13 +20,13 @@ export function isEditorFileDownloadPolicyEntityType(entityType: TranscodeEntity
   );
 }
 
-export type FileDownloadAudience = 'disabled' | 'public' | 'authenticated' | 'restricted';
+export type FileDownloadAccess = 'disabled' | 'public' | 'authenticated' | 'restricted';
 
-export interface AudienceSegmentSummary {
+export interface MemberCriteriaSummary {
   id: string;
   name: string;
   description: string;
-  segmentType: SegmentType;
+  kind: MemberCriteriaKind;
 }
 
 export interface FileDownloadPolicyModel {
@@ -35,13 +35,13 @@ export interface FileDownloadPolicyModel {
   blockId?: string;
   referencePath?: string;
   fileId: string;
-  audience: FileDownloadAudience;
-  audienceSegments: AudienceSegmentSummary[];
+  access: FileDownloadAccess;
+  memberCriteria: MemberCriteriaSummary[];
 }
 
 export interface FileDownloadPolicyObservedState {
-  audience: FileDownloadAudience;
-  audienceSegmentIds: string[];
+  access: FileDownloadAccess;
+  memberCriteriaIds: string[];
 }
 
 export interface FileDownloadPolicyTarget {

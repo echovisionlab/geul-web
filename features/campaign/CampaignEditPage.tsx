@@ -58,7 +58,7 @@ import { EntityTranslationsPanel } from '@/features/translation/EntityTranslatio
 import { canEditLocaleDocumentField, resolveResidentLocaleField } from '@/features/translation/locale-display-fields';
 import { TranslationLocaleControl } from '@/features/translation/TranslationLocaleControl';
 import { useLocaleDocumentSession } from '@/features/translation/useLocaleDocumentSession';
-import { listActiveSegmentsAction } from '@/lib/actions/audience';
+import { listActiveMemberCriteriaAction } from '@/lib/actions/member-criteria';
 import { getCampaignAction, updateCampaignConfigurationAction } from '@/lib/actions/campaign';
 import { updateBlockRoomLocaleMetadata } from '@/lib/collab/block-room-metadata';
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
@@ -86,13 +86,13 @@ function campaignConfiguration(
   source: Pick<CampaignFields, 'targetMode' | 'recipientScope'> & {
     name: string;
     subject?: string;
-    segmentId?: string | null;
+    memberCriteriaId?: string | null;
     layoutId?: string | null;
   },
 ): CampaignEditorConfiguration {
   return {
     targetMode: source.targetMode,
-    segmentId: source.segmentId ?? null,
+    memberCriteriaId: source.memberCriteriaId ?? null,
     layoutId: source.layoutId ?? null,
     recipientScope: source.recipientScope,
     name: source.name || source.subject || '',
@@ -194,12 +194,12 @@ function useCampaignEditPageModel() {
   const accessInterruption = useEditorPermissionRevocation(currentProvider, 'campaign', campaignId);
 
   const {
-    data: segments,
-    isError: segmentsLoadError,
-    isLoading: segmentsLoading,
+    data: criteriaOptions,
+    isError: criteriaLoadError,
+    isLoading: criteriaListLoading,
   } = useQuery({
-    queryKey: ['segments', 'active'],
-    queryFn: listActiveSegmentsAction,
+    queryKey: ['memberCriteria', 'active'],
+    queryFn: listActiveMemberCriteriaAction,
   });
 
   const {
@@ -365,13 +365,13 @@ function useCampaignEditPageModel() {
       if (!canMutate) {
         return;
       }
-      const request = beginConfigRequest(['targetMode', 'segmentId']);
+      const request = beginConfigRequest(['targetMode', 'memberCriteriaId']);
       try {
         const result = await updateCampaignConfigurationAction(
           campaignId,
           {
             targetMode: selection.targetMode,
-            segmentId: selection.segmentId,
+            memberCriteriaId: selection.memberCriteriaId,
           },
           request.origin,
         );
@@ -379,7 +379,7 @@ function useCampaignEditPageModel() {
           notifications.show({ message: result.error, tone: 'danger' });
         } else {
           request.acknowledge(
-            { targetMode: selection.targetMode, segmentId: selection.segmentId },
+            { targetMode: selection.targetMode, memberCriteriaId: selection.memberCriteriaId },
             { authoritative: false },
           );
           publishEditorEntityChange(`campaign:${campaignId}`, request.origin);
@@ -451,16 +451,17 @@ function useCampaignEditPageModel() {
     [activeEditLocale],
   );
 
-  const selectedSegmentName =
+  const selectedCriteriaName =
     fields.targetMode === CampaignTargetMode.ALL
       ? tLabels('allUsers')
-      : (segments?.find((segment) => segment.id === fields.segmentId)?.name ?? t('target.unavailableAudience'));
+      : (criteriaOptions?.find((criteria) => criteria.id === fields.memberCriteriaId)?.name ??
+        t('target.unavailableCriteria'));
   const deliveryTargetComplete = isDeliverableCampaignTarget(
     {
       targetMode: fields.targetMode,
-      segmentId: fields.segmentId,
+      memberCriteriaId: fields.memberCriteriaId,
     },
-    segments ?? [],
+    criteriaOptions ?? [],
   );
 
   const [preparingDelivery, setPreparingDelivery] = useState({ test: false, send: false, schedule: false });
@@ -493,7 +494,7 @@ function useCampaignEditPageModel() {
       return;
     }
     if (!deliveryTargetComplete) {
-      notifications.show({ message: t('target.audienceRequired'), tone: 'danger' });
+      notifications.show({ message: t('target.criteriaRequired'), tone: 'danger' });
       return;
     }
     if (deliveryPreparationRef.current.send) {
@@ -531,7 +532,7 @@ function useCampaignEditPageModel() {
     const scheduledAt = dateTimeValueToDate(scheduleDate);
     if (!scheduledAt || !deliveryTargetComplete) {
       if (!deliveryTargetComplete) {
-        notifications.show({ message: t('target.audienceRequired'), tone: 'danger' });
+        notifications.show({ message: t('target.criteriaRequired'), tone: 'danger' });
       }
       return;
     }
@@ -659,9 +660,9 @@ function useCampaignEditPageModel() {
     activeEditLocale,
     handleActiveLocaleChange,
     fields,
-    segments,
-    segmentsLoading,
-    segmentsLoadError,
+    criteriaOptions,
+    criteriaListLoading,
+    criteriaLoadError,
     handleTargetChange,
     layouts,
     handleLayoutChange,
@@ -685,7 +686,7 @@ function useCampaignEditPageModel() {
     handleSendTest,
     sendModalOpened,
     sendCampaign,
-    selectedSegmentName,
+    selectedCriteriaName,
     closeSendModal,
     handleSendAll,
     scheduleModalOpened,
@@ -794,9 +795,9 @@ export function CampaignEditPageView({ model }: { model: CampaignEditPageViewMod
     activeEditLocale,
     handleActiveLocaleChange,
     fields,
-    segments,
-    segmentsLoading,
-    segmentsLoadError,
+    criteriaOptions,
+    criteriaListLoading,
+    criteriaLoadError,
     handleTargetChange,
     layouts,
     handleLayoutChange,
@@ -820,7 +821,7 @@ export function CampaignEditPageView({ model }: { model: CampaignEditPageViewMod
     handleSendTest,
     sendModalOpened,
     sendCampaign,
-    selectedSegmentName,
+    selectedCriteriaName,
     closeSendModal,
     handleSendAll,
     scheduleModalOpened,
@@ -945,10 +946,10 @@ export function CampaignEditPageView({ model }: { model: CampaignEditPageViewMod
               <div style={{ width: 250 }}>
                 <CampaignTargetControl
                   targetMode={fields.targetMode}
-                  segmentId={fields.segmentId}
-                  audiences={segments ?? []}
-                  disabled={!canMutate || segmentsLoading}
-                  loadError={segmentsLoadError}
+                  memberCriteriaId={fields.memberCriteriaId}
+                  criteriaOptions={criteriaOptions ?? []}
+                  disabled={!canMutate || criteriaListLoading}
+                  loadError={criteriaLoadError}
                   onChange={handleTargetChange}
                 />
               </div>
@@ -1083,7 +1084,7 @@ export function CampaignEditPageView({ model }: { model: CampaignEditPageViewMod
             pending: sendCampaign.isPending || preparingDelivery.send || hasPendingCampaignConfiguration,
             labels: {
               title: t('actions.sendCampaign'),
-              warning: t('sendModal.warning', { audience: selectedSegmentName }),
+              warning: t('sendModal.warning', { criteria: selectedCriteriaName }),
               subject: t('sendModal.subject', { subject: currentSubject || tStates('noSubject') }),
               allMatchingUsersWarning: t('sendModal.allMatchingUsersWarning'),
               send: t('actions.sendCampaign'),
@@ -1096,7 +1097,7 @@ export function CampaignEditPageView({ model }: { model: CampaignEditPageViewMod
             locale: currentLocale,
             value: scheduleDate,
             minDate: dateToDateTimeValue(new Date()),
-            audience: selectedSegmentName,
+            criteria: selectedCriteriaName,
             includesUnsubscribedUsers: fields.recipientScope === 'ALL_MATCHING_USERS',
             pending: scheduleCampaign.isPending || preparingDelivery.schedule || hasPendingCampaignConfiguration,
             labels: {
@@ -1108,7 +1109,7 @@ export function CampaignEditPageView({ model }: { model: CampaignEditPageViewMod
               nextMonth: t('scheduleModal.nextMonth'),
               hours: tLabels('hours'),
               minutes: tLabels('minutes'),
-              audience: t('scheduleModal.audience', { audience: '{audience}' }),
+              criteria: t('scheduleModal.criteria', { criteria: '{criteria}' }),
               allMatchingUsersWarning: t('scheduleModal.allMatchingUsersWarning'),
               schedule: t('actions.scheduleCampaign'),
             },

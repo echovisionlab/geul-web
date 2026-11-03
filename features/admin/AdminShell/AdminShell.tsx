@@ -141,8 +141,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
         items: [
           { href: '/admin/campaigns', label: tCommonEntities('campaigns'), icon: IconMail },
           {
-            href: '/admin/audience-segments',
-            label: tCommonEntities('audienceSegments'),
+            href: '/admin/member-criteria',
+            label: tCommonEntities('memberCriteria'),
             icon: IconFilter,
           },
           { href: '/admin/user-tags', label: tCommonEntities('userTags'), icon: IconTags },

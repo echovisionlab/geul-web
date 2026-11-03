@@ -257,8 +257,7 @@
       "clients": "Klanten",
       "campaign": "Campagne",
       "campaigns": "Campagnes",
-      "audienceSegment": "Doelgroepsegment",
-      "audienceSegments": "Doelgroepsegmenten",
+      "memberCriteria": "Doelgroepsegment",
       "user": "Gebruiker",
       "member": "Lid",
       "users": "Gebruikers",
@@ -613,7 +612,7 @@
         "failed": "Mislukt"
       }
     },
-    "audienceSegments": {
+    "memberCriteria": {
       "description": "Maak herbruikbare doelgroepsegmenten om campagnes op specifieke groepen te richten.",
       "searchPlaceholder": "Zoek segmenten...",
       "empty": "Geen segmenten gevonden. Maak er een aan om specifieke doelgroepen te bereiken.",
@@ -2699,13 +2698,13 @@
       "none": "Geen lay-out"
     },
     "target": {
-      "audienceLabel": "Doelgroep",
-      "audiencePlaceholder": "Selecteer een doelgroep",
+      "criteriaLabel": "Doelgroep",
+      "criteriaPlaceholder": "Selecteer een doelgroep",
       "all": "Alle gebruikers",
-      "unavailableAudience": "Gearchiveerde of niet-beschikbare doelgroep",
-      "unavailableAudienceDescription": "Deze campagne richt zich op een gearchiveerde of niet-beschikbare doelgroep. Selecteer een actieve doelgroep voordat je plant of verzendt.",
-      "audienceRequired": "Selecteer een actieve doelgroep voordat je plant of verzendt.",
-      "audienceLoadError": "Actieve doelgroepen konden niet worden geladen. Probeer het opnieuw voordat je plant of verzendt."
+      "unavailableCriteria": "Gearchiveerde of niet-beschikbare doelgroep",
+      "unavailableCriteriaDescription": "Deze campagne richt zich op een gearchiveerde of niet-beschikbare doelgroep. Selecteer een actieve doelgroep voordat je plant of verzendt.",
+      "criteriaRequired": "Selecteer een actieve doelgroep voordat je plant of verzendt.",
+      "criteriaLoadError": "Actieve doelgroepen konden niet worden geladen. Probeer het opnieuw voordat je plant of verzendt."
     },
     "fields": {
       "recipientScope": "Ontvangers",
@@ -2721,7 +2720,7 @@
       "description": "Voer een e-mailadres in om een test van deze campagne te verzenden."
     },
     "sendModal": {
-      "warning": "Dit verzendt de campagne naar het doelgroepsegment {audience}. Deze actie kan niet ongedaan worden gemaakt.",
+      "warning": "Dit verzendt de campagne naar het doelgroepsegment {criteria}. Deze actie kan niet ongedaan worden gemaakt.",
       "subject": "Onderwerp: {subject}",
       "allMatchingUsersWarning": "Omvat ook gebruikers die zich voor de nieuwsbrief hebben afgemeld."
     },
@@ -2730,7 +2729,7 @@
       "dateLabel": "Geplande datum en tijd",
       "previousMonth": "Vorige maand",
       "nextMonth": "Volgende maand",
-      "audience": "Doelgroep: {audience}",
+      "criteria": "Doelgroep: {criteria}",
       "allMatchingUsersWarning": "Omvat ook gebruikers die zich voor de nieuwsbrief hebben afgemeld."
     },
     "notifications": {
@@ -5306,7 +5305,7 @@
     "editor": {
       "sectionTitle": "Downloadtoegang",
       "loading": "Downloadtoegang laden…",
-      "audiences": {
+      "access": {
         "disabled": {
           "label": "Geen downloads",
           "description": "Geen enkele bezoeker kan dit bestand downloaden."
@@ -5324,9 +5323,9 @@
           "description": "Alleen gebruikers in de geselecteerde doelgroepen kunnen dit bestand downloaden."
         }
       },
-      "segmentsLoadError": "Het beleid is geladen, maar de doelgroepen konden niet worden geladen.",
-      "segmentsEmpty": "Er zijn geen doelgroepsegmenten beschikbaar.",
-      "restrictedWithoutAudience": "Dit beperkte beleid heeft geen doelgroep. Downloads worden voor iedereen geweigerd totdat je ten minste één doelgroep selecteert.",
+      "criteriaLoadError": "Het beleid is geladen, maar de doelgroepen konden niet worden geladen.",
+      "criteriaEmpty": "Er zijn geen doelgroepsegmenten beschikbaar.",
+      "restrictedWithoutCriteria": "Dit beperkte beleid heeft geen doelgroep. Downloads worden voor iedereen geweigerd totdat je ten minste één doelgroep selecteert.",
       "additionalSelected": "Nog {count} geselecteerd",
       "loadError": "De downloadtoegang kon niet worden geladen.",
       "saveError": "De downloadtoegang kon niet worden opgeslagen.",

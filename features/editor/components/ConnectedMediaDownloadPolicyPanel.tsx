@@ -6,7 +6,7 @@ import type { EditorMediaBlockType } from '@/features/editor/lib/media-block-upd
 import type { FileDownloadPolicyEditorAdapter } from '@/features/media-download/FileDownloadPolicyEditor';
 import {
   getFileDownloadPolicyAction,
-  listAudienceSegmentsForAuthenticatedAccessAction,
+  listMemberCriteriaForAuthenticatedAccessAction,
   updateFileDownloadPolicyAction,
 } from '@/lib/actions/file-download-access';
 import { useOptionalEditorRuntimeContext } from '@/lib/contexts/EditorRuntimeContext';
@@ -14,7 +14,7 @@ import { MediaDownloadPolicyPanel, type MediaDownloadPolicyRuntimeTarget } from 
 
 export const connectedMediaDownloadPolicyAdapter = {
   loadPolicy: getFileDownloadPolicyAction,
-  loadSegments: listAudienceSegmentsForAuthenticatedAccessAction,
+  loadCriteriaList: listMemberCriteriaForAuthenticatedAccessAction,
   savePolicy: updateFileDownloadPolicyAction,
 };
 

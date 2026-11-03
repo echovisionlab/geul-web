@@ -40,14 +40,14 @@ vi.mock('next-intl', () => ({
     if (namespace === 'common.labels' && key === 'allUsers') {
       return 'All users';
     }
-    if (namespace === 'campaignEditor' && key === 'target.unavailableAudience') {
-      return 'Unavailable audience';
+    if (namespace === 'campaignEditor' && key === 'target.unavailableCriteria') {
+      return 'Unavailable criteria';
     }
     if (namespace === 'campaignEditor' && key === 'sendModal.warning') {
-      return `Send to ${String(values?.audience)}`;
+      return `Send to ${String(values?.criteria)}`;
     }
-    if (namespace === 'campaignEditor' && key === 'scheduleModal.audience') {
-      return `Schedule for ${String(values?.audience)}`;
+    if (namespace === 'campaignEditor' && key === 'scheduleModal.criteria') {
+      return `Schedule for ${String(values?.criteria)}`;
     }
     return `${namespace}.${key}`;
   },
@@ -72,11 +72,11 @@ vi.mock('@tanstack/react-query', async () => {
       if (queryKey[0] === 'emailLayouts') {
         return { data: [{ id: 'layout-1', name: 'Layout one' }], isError: false, isLoading: false };
       }
-      if (queryKey[0] === 'segments') {
+      if (queryKey[0] === 'memberCriteria') {
         return {
           data: [
-            { id: 'segment-old', name: 'Old segment' },
-            { id: 'segment-new', name: 'New segment' },
+            { id: 'criteria-old', name: 'Old criteria' },
+            { id: 'criteria-new', name: 'New criteria' },
           ],
           isError: false,
           isLoading: false,
@@ -204,7 +204,7 @@ vi.mock('@/features/campaign/CampaignDeliveryDialogs', () => ({
     sendDialog: { opened: boolean; pending: boolean; labels: { warning: string }; onSend: () => void };
     scheduleDialog: {
       opened: boolean;
-      audience: string;
+      criteria: string;
       pending: boolean;
       onChange: (value: { date: Date | null; time: string }) => void;
       onSchedule: () => void;
@@ -218,7 +218,7 @@ vi.mock('@/features/campaign/CampaignDeliveryDialogs', () => ({
           Confirm test
         </button>
         <div data-testid="send-warning">{sendDialog.labels.warning}</div>
-        <div data-testid="schedule-audience">{scheduleDialog.audience}</div>
+        <div data-testid="schedule-criteria">{scheduleDialog.criteria}</div>
         <button
           type="button"
           data-testid="send-confirm"
@@ -289,24 +289,24 @@ vi.mock('@/features/campaign/CampaignTargetControl', async () => {
       onChange,
       disabled,
     }: {
-      onChange: (value: { targetMode: number; segmentId: string }) => void;
+      onChange: (value: { targetMode: number; memberCriteriaId: string }) => void;
       disabled?: boolean;
     }) => (
       <button
         type="button"
         data-testid="change-target"
         disabled={disabled}
-        onClick={() => onChange({ targetMode: CampaignTargetMode.SEGMENT, segmentId: 'segment-new' })}
+        onClick={() => onChange({ targetMode: CampaignTargetMode.MEMBER_CRITERIA, memberCriteriaId: 'criteria-new' })}
       >
         Change target
       </button>
     ),
     isDeliverableCampaignTarget: (
-      { targetMode, segmentId }: { targetMode: number; segmentId: string | null },
-      segments: Array<{ id: string }>,
+      { targetMode, memberCriteriaId }: { targetMode: number; memberCriteriaId: string | null },
+      criteriaOptions: Array<{ id: string }>,
     ) =>
       targetMode === CampaignTargetMode.ALL ||
-      Boolean(segmentId && segments.some((segment) => segment.id === segmentId)),
+      Boolean(memberCriteriaId && criteriaOptions.some((criteria) => criteria.id === memberCriteriaId)),
   };
 });
 vi.mock('@/features/translation/EntityTranslationsPanel', () => ({ EntityTranslationsPanel: () => null }));
@@ -330,7 +330,7 @@ vi.mock('@/features/translation/useLocaleDocumentSession', () => ({
     hasRoomMutationAuthority: () => true,
   }),
 }));
-vi.mock('@/lib/actions/audience', () => ({ listActiveSegmentsAction: vi.fn() }));
+vi.mock('@/lib/actions/member-criteria', () => ({ listActiveMemberCriteriaAction: vi.fn() }));
 vi.mock('@/lib/actions/campaign', () => ({
   getCampaignAction: mocks.getCampaign,
   updateCampaignConfigurationAction: mocks.updateConfiguration,
@@ -394,7 +394,7 @@ describe('CampaignEditPage delivery target confirmation', () => {
       subject: 'Subject',
       name: 'Campaign',
       targetMode: CampaignTargetMode.ALL,
-      segmentId: null,
+      memberCriteriaId: null,
       layoutId: null,
       recipientScope: 'SUBSCRIBED_USERS',
     };
@@ -471,13 +471,13 @@ describe('CampaignEditPage delivery target confirmation', () => {
     expect(mocks.updateConfiguration).toHaveBeenCalledWith(
       'campaign-1',
       {
-        targetMode: CampaignTargetMode.SEGMENT,
-        segmentId: 'segment-new',
+        targetMode: CampaignTargetMode.MEMBER_CRITERIA,
+        memberCriteriaId: 'criteria-new',
       },
       expect.any(String),
     );
     expect(container.querySelector('[data-testid="send-warning"]')?.textContent).toBe('Send to All users');
-    expect(container.querySelector('[data-testid="schedule-audience"]')?.textContent).toBe('All users');
+    expect(container.querySelector('[data-testid="schedule-criteria"]')?.textContent).toBe('All users');
     expect(container.querySelector<HTMLButtonElement>('[data-testid="send-confirm"]')?.disabled).toBe(true);
     expect(container.querySelector<HTMLButtonElement>('[data-testid="schedule-confirm"]')?.disabled).toBe(true);
     expect(mocks.sendCampaign).not.toHaveBeenCalled();
@@ -488,8 +488,8 @@ describe('CampaignEditPage delivery target confirmation', () => {
       await update.promise;
     });
 
-    expect(container.querySelector('[data-testid="send-warning"]')?.textContent).toBe('Send to New segment');
-    expect(container.querySelector('[data-testid="schedule-audience"]')?.textContent).toBe('New segment');
+    expect(container.querySelector('[data-testid="send-warning"]')?.textContent).toBe('Send to New criteria');
+    expect(container.querySelector('[data-testid="schedule-criteria"]')?.textContent).toBe('New criteria');
     expect(container.querySelector<HTMLButtonElement>('[data-testid="send-confirm"]')?.disabled).toBe(false);
     expect(container.querySelector<HTMLButtonElement>('[data-testid="schedule-confirm"]')?.disabled).toBe(false);
 
@@ -633,11 +633,11 @@ describe('CampaignEditPage delivery target confirmation', () => {
       container.querySelector<HTMLButtonElement>('[data-testid="change-target"]')!.click();
       await Promise.resolve();
     });
-    expect(container.querySelector('[data-testid="send-warning"]')?.textContent).toBe('Send to New segment');
+    expect(container.querySelector('[data-testid="send-warning"]')?.textContent).toBe('Send to New criteria');
     await act(async () => {
       staleRead.resolve({ ok: true, value: staleCampaign });
       await staleRead.promise;
     });
-    expect(container.querySelector('[data-testid="send-warning"]')?.textContent).toBe('Send to New segment');
+    expect(container.querySelector('[data-testid="send-warning"]')?.textContent).toBe('Send to New criteria');
   });
 });

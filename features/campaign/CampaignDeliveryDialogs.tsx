@@ -60,7 +60,7 @@ interface ScheduleDialogProps {
   locale: string;
   value: DateTimeValue;
   minDate: DateTimeValue;
-  audience: string;
+  criteria: string;
   includesUnsubscribedUsers: boolean;
   pending: boolean;
   labels: {
@@ -72,7 +72,7 @@ interface ScheduleDialogProps {
     nextMonth: string;
     hours: string;
     minutes: string;
-    audience: string;
+    criteria: string;
     allMatchingUsersWarning: string;
     schedule: string;
   };
@@ -189,7 +189,7 @@ export function CampaignDeliveryDialogs({
           locale={scheduleDialog.locale}
           value={scheduleDialog.value}
           minDate={scheduleDialog.minDate}
-          audience={scheduleDialog.audience}
+          criteria={scheduleDialog.criteria}
           includesUnsubscribedUsers={scheduleDialog.includesUnsubscribedUsers}
           labels={{
             description: scheduleDialog.labels.description,
@@ -199,7 +199,7 @@ export function CampaignDeliveryDialogs({
             nextMonth: scheduleDialog.labels.nextMonth,
             hours: scheduleDialog.labels.hours,
             minutes: scheduleDialog.labels.minutes,
-            audience: scheduleDialog.labels.audience,
+            criteria: scheduleDialog.labels.criteria,
             allMatchingUsersWarning: scheduleDialog.labels.allMatchingUsersWarning,
             cancel: commonLabels.cancel,
             schedule: scheduleDialog.labels.schedule,

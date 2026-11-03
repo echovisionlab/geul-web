@@ -733,19 +733,6 @@
       ]
     },
     {
-      "route": "/admin/audience-segments",
-      "family": "Admin",
-      "source": "app/admin/audience-segments/page.tsx",
-      "previews": [
-        {
-          "storyTitle": "Pages/Admin/Audience and Users",
-          "variant": "Segments",
-          "scope": "Actual production segment PageView, query controls, estimate/create/edit/archive/restore dialogs with typed local transport. Server evaluation, relation constraints and persistence remain outside.",
-          "storyId": "pages-admin-audience-and-users--segments"
-        }
-      ]
-    },
-    {
       "route": "/admin/campaigns/[id]/analytics",
       "family": "Admin",
       "source": "app/admin/campaigns/[id]/analytics/page.tsx",
@@ -1094,6 +1081,19 @@
       ]
     },
     {
+      "route": "/admin/member-criteria",
+      "family": "Admin",
+      "source": "app/admin/member-criteria/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/Member Criteria and Users",
+          "variant": "MemberCriteria",
+          "scope": "Actual production Member criteria PageView, query controls, count/create/edit/archive/restore dialogs with typed local transport. Server evaluation, relation constraints and persistence remain outside.",
+          "storyId": "pages-admin-member-criteria-and-users--member-criteria"
+        }
+      ]
+    },
+    {
       "route": "/admin/menus",
       "family": "Admin",
       "source": "app/admin/menus/page.tsx",
@@ -1384,10 +1384,10 @@
       "source": "app/admin/users/page.tsx",
       "previews": [
         {
-          "storyTitle": "Pages/Admin/Audience and Users",
+          "storyTitle": "Pages/Admin/Member Criteria and Users",
           "variant": "Users",
           "scope": "Actual production users PageView, table and original modal controllers with local ban/role/unsubscribe/delete callbacks. No real account mutations; server authorization and identity invariants are outside.",
-          "storyId": "pages-admin-audience-and-users--users"
+          "storyId": "pages-admin-member-criteria-and-users--users"
         }
       ]
     },

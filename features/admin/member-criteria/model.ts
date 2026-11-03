@@ -1,11 +1,11 @@
-import type { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
+import type { MemberCriteriaKind } from '@echovisionlab/geul-proto/secure/member_criteria_pb.ts';
 
-export interface AudienceSegmentRow {
+export interface MemberCriteriaRow {
   id: string;
   name: string;
   description: string;
-  segment_type: SegmentType;
-  segment_type_label: string;
+  criteria_type: MemberCriteriaKind;
+  criteria_type_label: string;
   estimated_count: number | null;
   campaign_count: number;
   delivery_run_count: number;

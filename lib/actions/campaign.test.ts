@@ -133,28 +133,28 @@ describe('getCampaignAction', () => {
     subject: 'Subject',
     status: CampaignStatus.DRAFT,
     targetMode: CampaignTargetMode.ALL,
-    segmentId: undefined,
+    memberCriteriaId: undefined,
     recipientScope: CampaignRecipientScope.SUBSCRIBED_USERS,
     sentCount: 0,
   };
 
-  it('maps explicit all and segment targets without null inference', async () => {
+  it('maps explicit all and criteria targets without null inference', async () => {
     getCampaignRpcMock.mockResolvedValueOnce({ campaign });
     await expect(getCampaignAction('campaign-1').then(unwrapQueryResult)).resolves.toMatchObject({
       targetMode: CampaignTargetMode.ALL,
-      segmentId: undefined,
+      memberCriteriaId: undefined,
     });
 
     getCampaignRpcMock.mockResolvedValueOnce({
       campaign: {
         ...campaign,
-        targetMode: CampaignTargetMode.SEGMENT,
-        segmentId: 'audience-1',
+        targetMode: CampaignTargetMode.MEMBER_CRITERIA,
+        memberCriteriaId: 'criteria-1',
       },
     });
     await expect(getCampaignAction('campaign-1').then(unwrapQueryResult)).resolves.toMatchObject({
-      targetMode: CampaignTargetMode.SEGMENT,
-      segmentId: 'audience-1',
+      targetMode: CampaignTargetMode.MEMBER_CRITERIA,
+      memberCriteriaId: 'criteria-1',
     });
   });
 
@@ -168,7 +168,7 @@ describe('getCampaignAction', () => {
       campaign: {
         ...campaign,
         targetMode: CampaignTargetMode.ALL,
-        segmentId: 'audience-1',
+        memberCriteriaId: 'criteria-1',
       },
     });
     await expect(getCampaignAction('campaign-1').then(unwrapQueryResult)).rejects.toMatchObject({ status: 500 });
@@ -415,18 +415,18 @@ describe('updateCampaignConfigurationAction field patches', () => {
     updateCampaignConfigurationRpcMock.mockResolvedValue({ changed: true });
   });
 
-  it('sends target mode and segment as a pair and preserves an explicit null clear', async () => {
+  it('sends target mode and criteria as a pair and preserves an explicit null clear', async () => {
     await expect(
       updateCampaignConfigurationAction('campaign-1', {
         targetMode: CampaignTargetMode.ALL,
-        segmentId: null,
+        memberCriteriaId: null,
       }),
     ).resolves.toEqual({ ok: true, changed: true });
 
     expect(updateCampaignConfigurationRpcMock).toHaveBeenCalledWith({
       id: 'campaign-1',
       targetMode: CampaignTargetMode.ALL,
-      segmentId: '',
+      memberCriteriaId: '',
     });
   });
 

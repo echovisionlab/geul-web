@@ -2,12 +2,12 @@ import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 import { expect, within } from 'storybook/test';
 import { useTranslations } from 'next-intl';
-import { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
+import { MemberCriteriaKind } from '@echovisionlab/geul-proto/secure/member_criteria_pb.ts';
 import { LayoutContainer } from '@/components/core/Layout';
 import { UsersPageView } from '@/features/admin/user/UsersPageView';
-import { SegmentsPageView } from '@/features/admin/segment/SegmentsPageView';
+import { MemberCriteriaPageView } from '@/features/admin/member-criteria/MemberCriteriaPageView';
 import type { UserRow } from '@/features/admin/user/UsersTableView';
-import type { AudienceSegmentRow } from '@/features/admin/segment/model';
+import type { MemberCriteriaRow } from '@/features/admin/member-criteria/model';
 import { ServerDataTableNavigationProvider } from '@/features/data-table/ServerDataTable/ServerDataTableNavigation';
 import { parseTableQuery } from '@/lib/utils/table-url';
 import { tableRows } from './fixtures/table-query';
@@ -55,13 +55,13 @@ const initialUsers: UserRow[] = [
     created_at: date,
   },
 ];
-const initialSegments: AudienceSegmentRow[] = [
+const initialCriteriaList: MemberCriteriaRow[] = [
   {
-    id: 'local-segment',
+    id: 'local-criteria',
     name: 'All listeners',
-    description: 'Local audience fixture',
-    segment_type: SegmentType.ALL_MEMBERS,
-    segment_type_label: 'All members',
+    description: 'Local criteria fixture',
+    criteria_type: MemberCriteriaKind.ALL_MEMBERS,
+    criteria_type_label: 'All members',
     estimated_count: 82,
     campaign_count: 1,
     delivery_run_count: 0,
@@ -73,8 +73,8 @@ const initialSegments: AudienceSegmentRow[] = [
     id: 'local-archived',
     name: 'Previous listeners',
     description: 'Archived local fixture',
-    segment_type: SegmentType.ALL_MEMBERS,
-    segment_type_label: 'All members',
+    criteria_type: MemberCriteriaKind.ALL_MEMBERS,
+    criteria_type_label: 'All members',
     estimated_count: 24,
     campaign_count: 0,
     delivery_run_count: 0,
@@ -83,16 +83,17 @@ const initialSegments: AudienceSegmentRow[] = [
     created_at: date,
   },
 ];
-export function AudienceUsersPreview({
+export function CriteriaUsersPreview({
   domain = 'users',
   state = 'ready',
 }: {
-  domain?: 'users' | 'segments';
+  domain?: 'users' | 'memberCriteria';
   state?: 'ready' | 'empty' | 'failed' | 'action-failed';
 }) {
   const t = useTranslations('common');
+  const tList = useTranslations('adminList.memberCriteria');
   const [users, setUsers] = useState(state === 'empty' ? [] : initialUsers);
-  const [segments, setSegments] = useState(state === 'empty' ? [] : initialSegments);
+  const [criteriaList, setCriteriaList] = useState(state === 'empty' ? [] : initialCriteriaList);
   const [url, setUrl] = useState('');
   const params = new URLSearchParams(url);
   const query = parseTableQuery(params, domain);
@@ -112,7 +113,7 @@ export function AudienceUsersPreview({
     ...(state === 'failed' ? { error: t('messages.failedToLoad') } : {}),
   });
   const shared = {
-    title: t(`entities.${domain === 'users' ? 'users' : 'audienceSegments'}`),
+    title: t(`entities.${domain === 'users' ? 'users' : 'memberCriteria'}`),
     searchParams: params.toString(),
     filterFields: fields,
     sortFields: fields.map(({ field, label }) => ({ field, label })),
@@ -126,11 +127,11 @@ export function AudienceUsersPreview({
     setUsers((rows) => rows.filter((row) => row.id !== id));
     return actionSuccess({ success: true as const });
   };
-  const detail = (row: AudienceSegmentRow) => ({
+  const detail = (row: MemberCriteriaRow) => ({
     id: row.id,
     name: row.name,
     description: row.description,
-    segmentType: row.segment_type,
+    kind: row.criteria_type,
     config: {
       memberTagIds: [],
       accountRoles: [],
@@ -144,7 +145,7 @@ export function AudienceUsersPreview({
   return (
     <ServerDataTableNavigationProvider
       value={{
-        pathname: `/admin/${domain === 'users' ? 'users' : 'audience-segments'}`,
+        pathname: `/admin/${domain === 'users' ? 'users' : 'criteria-criteriaList'}`,
         searchParams: params,
         push: (href) => setUrl(new URL(href, 'https://preview.invalid').search),
         refresh: () => {},
@@ -193,42 +194,42 @@ export function AudienceUsersPreview({
             }}
           />
         ) : (
-          <SegmentsPageView
+          <MemberCriteriaPageView
             {...shared}
-            description="Audience management"
-            result={result(segments.filter((row) => !row.archived_at || params.get('includeArchived') === 'true'))}
+            description={tList('description')}
+            result={result(criteriaList.filter((row) => !row.archived_at || params.get('includeArchived') === 'true'))}
             modalBindings={{
               refresh: () => {},
               bindings: {
-                createSegmentAction: async (input) => {
+                createMemberCriteriaAction: async (input) => {
                   if (error) {
                     return error;
                   }
-                  const id = `local-segment-${segments.length}`;
-                  setSegments((rows) => [
+                  const id = `local-criteria-${criteriaList.length}`;
+                  setCriteriaList((rows) => [
                     ...rows,
                     {
-                      ...initialSegments[0],
+                      ...initialCriteriaList[0],
                       id,
                       name: input.name,
                       description: input.description ?? '',
-                      segment_type: input.segmentType,
+                      criteria_type: input.kind,
                     },
                   ]);
                   return actionSuccess({ data: { id } });
                 },
-                getSegmentAction: async (id) => {
+                getMemberCriteriaAction: async (id) => {
                   if (error) {
                     return error;
                   }
-                  const row = segments.find((row) => row.id === id);
+                  const row = criteriaList.find((row) => row.id === id);
                   return row ? actionSuccess({ data: detail(row) }) : actionFailure('Not found', 'ACTION_FAILED');
                 },
-                updateSegmentAction: async (input) => {
+                updateMemberCriteriaAction: async (input) => {
                   if (error) {
                     return error;
                   }
-                  const row = segments.find((row) => row.id === input.id);
+                  const row = criteriaList.find((row) => row.id === input.id);
                   if (!row) {
                     return actionFailure('Not found', 'ACTION_FAILED');
                   }
@@ -236,26 +237,26 @@ export function AudienceUsersPreview({
                     ...row,
                     name: input.name ?? row.name,
                     description: input.description ?? row.description,
-                    segment_type: input.segmentType ?? row.segment_type,
+                    criteria_type: input.kind ?? row.criteria_type,
                   };
-                  setSegments((rows) => rows.map((row) => (row.id === input.id ? updated : row)));
+                  setCriteriaList((rows) => rows.map((row) => (row.id === input.id ? updated : row)));
                   return actionSuccess({ data: detail(updated) });
                 },
-                archiveSegmentAction: async (id) => {
+                archiveMemberCriteriaAction: async (id) => {
                   if (error) {
                     return error;
                   }
-                  setSegments((rows) => rows.map((row) => (row.id === id ? { ...row, archived_at: date } : row)));
+                  setCriteriaList((rows) => rows.map((row) => (row.id === id ? { ...row, archived_at: date } : row)));
                   return actionSuccess({ success: true as const });
                 },
-                restoreSegmentAction: async (id) => {
+                restoreMemberCriteriaAction: async (id) => {
                   if (error) {
                     return error;
                   }
-                  setSegments((rows) => rows.map((row) => (row.id === id ? { ...row, archived_at: null } : row)));
+                  setCriteriaList((rows) => rows.map((row) => (row.id === id ? { ...row, archived_at: null } : row)));
                   return actionSuccess({ success: true as const });
                 },
-                estimateSegmentCountAction: async () => error ?? actionSuccess({ count: 82 }),
+                countMatchingMembersAction: async () => error ?? actionSuccess({ count: 82 }),
               },
             }}
           />
@@ -265,22 +266,22 @@ export function AudienceUsersPreview({
   );
 }
 const meta = {
-  title: 'Pages/Admin/Audience and Users',
-  excludeStories: ['AudienceUsersPreview'],
-  component: AudienceUsersPreview,
+  title: 'Pages/Admin/Member Criteria and Users',
+  excludeStories: ['CriteriaUsersPreview'],
+  component: CriteriaUsersPreview,
   args: { domain: 'users', state: 'ready' },
-  render: (args) => <AudienceUsersPreview key={`${args.domain}:${args.state}`} {...args} />,
+  render: (args) => <CriteriaUsersPreview key={`${args.domain}:${args.state}`} {...args} />,
   parameters: {
     layout: 'fullscreen',
     nextjs: { appDirectory: true },
     docs: {
       description: {
         component:
-          'Actual production PageViews and original user/segment modal controllers with typed local actions. Search/selection/ban/role/unsubscribe and segment estimate/archive/restore exercise actual UI. No account, role, newsletter or audience changes reach a backend. Server authorization, config evaluation and persistence remain outside.',
+          'Actual production PageViews and original user/criteria modal controllers with typed local actions. Search/selection/ban/role/unsubscribe and criteria estimate/archive/restore exercise actual UI. No account, role, newsletter or criteria changes reach a backend. Server authorization, config evaluation and persistence remain outside.',
       },
     },
   },
-} satisfies Meta<typeof AudienceUsersPreview>;
+} satisfies Meta<typeof CriteriaUsersPreview>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 export const Users: Story = {
@@ -293,8 +294,8 @@ export const Users: Story = {
 export const UsersEmpty: Story = { args: { state: 'empty' } };
 export const UsersFailed: Story = { args: { state: 'failed' } };
 export const UsersActionFailed: Story = { args: { state: 'action-failed' } };
-export const Segments: Story = { args: { domain: 'segments' } };
-export const SegmentsEmpty: Story = { args: { domain: 'segments', state: 'empty' } };
-export const SegmentsFailed: Story = { args: { domain: 'segments', state: 'failed' } };
-export const SegmentsActionFailed: Story = { args: { domain: 'segments', state: 'action-failed' } };
+export const MemberCriteria: Story = { args: { domain: 'memberCriteria' } };
+export const MemberCriteriaEmpty: Story = { args: { domain: 'memberCriteria', state: 'empty' } };
+export const MemberCriteriaFailed: Story = { args: { domain: 'memberCriteria', state: 'failed' } };
+export const MemberCriteriaActionFailed: Story = { args: { domain: 'memberCriteria', state: 'action-failed' } };
 export const Phone: Story = { globals: { viewport: { value: 'phone', isRotated: false } } };

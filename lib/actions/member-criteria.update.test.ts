@@ -3,73 +3,73 @@ import { timestampDate, timestampFromDate } from '@bufbuild/protobuf/wkt';
 import { create } from '@bufbuild/protobuf';
 import { AuthorizationRole } from '@echovisionlab/geul-proto/policy/access_pb.ts';
 import {
-  SegmentConfigSchema,
-  SegmentConfigSnapshotSchema,
-  SegmentType,
-} from '@echovisionlab/geul-proto/secure/audience_pb.ts';
+  MemberCriteriaConfigSchema,
+  MemberCriteriaConfigSnapshotSchema,
+  MemberCriteriaKind,
+} from '@echovisionlab/geul-proto/secure/member_criteria_pb.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createAudienceClient } from '@/lib/api/server-client';
-import { updateSegmentAction } from './audience';
+import { createMemberCriteriaClient } from '@/lib/api/server-client';
+import { updateMemberCriteriaAction } from './member-criteria';
 
-const updateSegment = vi.fn();
+const updateMemberCriteria = vi.fn();
 
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
-vi.mock('@/lib/api/server-client', () => ({ createAudienceClient: vi.fn() }));
+vi.mock('@/lib/api/server-client', () => ({ createMemberCriteriaClient: vi.fn() }));
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.mocked(createAudienceClient).mockResolvedValue({ updateSegment } as never);
+  vi.mocked(createMemberCriteriaClient).mockResolvedValue({ updateMemberCriteria } as never);
 });
 
-describe('updateSegmentAction', () => {
-  it('sends the observed config snapshot and returns the canonical saved segment', async () => {
-    const observedConfig = create(SegmentConfigSchema, {
+describe('updateMemberCriteriaAction', () => {
+  it('sends the observed config snapshot and returns the canonical saved criteria', async () => {
+    const observedConfig = create(MemberCriteriaConfigSchema, {
       accountRoles: [AuthorizationRole.USER],
       createdAfter: timestampFromDate(new Date('2026-01-01T00:00:00.000Z')),
     });
-    const desiredConfig = create(SegmentConfigSchema, {
+    const desiredConfig = create(MemberCriteriaConfigSchema, {
       accountRoles: [AuthorizationRole.ADMIN, AuthorizationRole.USER],
       createdAfter: timestampFromDate(new Date('2026-01-01T00:00:00.000Z')),
     });
     const createdBefore = timestampFromDate(new Date('2026-04-01T00:00:00.000Z'));
     const archivedAt = timestampFromDate(new Date('2026-05-01T00:00:00.000Z'));
-    updateSegment.mockResolvedValue({
-      id: 'segment-a',
+    updateMemberCriteria.mockResolvedValue({
+      id: 'criteria-a',
       name: 'Canonical name',
       description: '',
-      segmentType: SegmentType.MEMBERS_BY_FILTER,
-      config: create(SegmentConfigSchema, {
+      kind: MemberCriteriaKind.FILTER,
+      config: create(MemberCriteriaConfigSchema, {
         accountRoles: [AuthorizationRole.ADMIN],
         createdBefore,
         excludeMemberIds: ['member-a'],
       }),
-      estimatedCount: 42,
+      matchingMemberCount: 42,
       archivedAt,
     });
 
-    const result = await updateSegmentAction({
-      id: 'segment-a',
+    const result = await updateMemberCriteriaAction({
+      id: 'criteria-a',
       name: 'Local name',
       config: desiredConfig,
-      observed: { segmentType: SegmentType.MEMBERS_BY_FILTER, config: observedConfig },
+      observed: { kind: MemberCriteriaKind.FILTER, config: observedConfig },
     });
 
-    expect(updateSegment).toHaveBeenCalledWith({
-      id: 'segment-a',
+    expect(updateMemberCriteria).toHaveBeenCalledWith({
+      id: 'criteria-a',
       name: 'Local name',
       description: undefined,
-      segmentType: undefined,
+      kind: undefined,
       config: desiredConfig,
-      observed: create(SegmentConfigSnapshotSchema, {
-        segmentType: SegmentType.MEMBERS_BY_FILTER,
+      observed: create(MemberCriteriaConfigSnapshotSchema, {
+        kind: MemberCriteriaKind.FILTER,
         config: observedConfig,
       }),
     });
     expect(result.data).toEqual({
-      id: 'segment-a',
+      id: 'criteria-a',
       name: 'Canonical name',
       description: '',
-      segmentType: SegmentType.MEMBERS_BY_FILTER,
+      kind: MemberCriteriaKind.FILTER,
       config: {
         memberTagIds: [],
         accountRoles: ['admin'],
@@ -80,7 +80,7 @@ describe('updateSegmentAction', () => {
       estimatedCount: 42,
       archivedAt: timestampDate(archivedAt),
     });
-    expect(revalidatePath).toHaveBeenCalledWith('/admin/audience-segments');
+    expect(revalidatePath).toHaveBeenCalledWith('/admin/member-criteria');
     expect(revalidatePath).toHaveBeenCalledWith('/admin/campaigns');
   });
 });

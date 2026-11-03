@@ -257,8 +257,7 @@
       "clients": "Khách hàng",
       "campaign": "Chiến dịch",
       "campaigns": "Chiến dịch",
-      "audienceSegment": "Phân khúc đối tượng",
-      "audienceSegments": "Phân khúc đối tượng",
+      "memberCriteria": "Phân khúc đối tượng",
       "user": "người dùng",
       "member": "Thành viên",
       "users": "Người dùng",
@@ -613,7 +612,7 @@
         "failed": "thất bại"
       }
     },
-    "audienceSegments": {
+    "memberCriteria": {
       "description": "Tạo các phân khúc đối tượng có thể sử dụng lại để nhắm mục tiêu chiến dịch đến các nhóm cụ thể.",
       "searchPlaceholder": "Tìm kiếm phân đoạn...",
       "empty": "Không tìm thấy phân đoạn nào. Tạo một cái để nhắm mục tiêu đối tượng cụ thể.",
@@ -2699,13 +2698,13 @@
       "none": "Không có bố cục"
     },
     "target": {
-      "audienceLabel": "Đối tượng mục tiêu",
-      "audiencePlaceholder": "Chọn khán giả",
+      "criteriaLabel": "Đối tượng mục tiêu",
+      "criteriaPlaceholder": "Chọn khán giả",
       "all": "Tất cả người dùng",
-      "unavailableAudience": "Đối tượng được lưu trữ hoặc không có sẵn",
-      "unavailableAudienceDescription": "Chiến dịch này nhắm mục tiêu đến đối tượng đã lưu trữ hoặc không có sẵn. Chọn đối tượng đang hoạt động trước khi lên lịch hoặc gửi.",
-      "audienceRequired": "Chọn đối tượng đang hoạt động trước khi lên lịch hoặc gửi.",
-      "audienceLoadError": "Không thể tải đối tượng đang hoạt động. Hãy thử lại trước khi lên lịch hoặc gửi."
+      "unavailableCriteria": "Đối tượng được lưu trữ hoặc không có sẵn",
+      "unavailableCriteriaDescription": "Chiến dịch này nhắm mục tiêu đến đối tượng đã lưu trữ hoặc không có sẵn. Chọn đối tượng đang hoạt động trước khi lên lịch hoặc gửi.",
+      "criteriaRequired": "Chọn đối tượng đang hoạt động trước khi lên lịch hoặc gửi.",
+      "criteriaLoadError": "Không thể tải đối tượng đang hoạt động. Hãy thử lại trước khi lên lịch hoặc gửi."
     },
     "fields": {
       "recipientScope": "Người nhận",
@@ -2721,7 +2720,7 @@
       "description": "Nhập địa chỉ email để gửi bản thử nghiệm của chiến dịch này."
     },
     "sendModal": {
-      "warning": "Thao tác này sẽ gửi chiến dịch đến phân khúc đối tượng {audience}. Không thể hoàn tác hành động này.",
+      "warning": "Thao tác này sẽ gửi chiến dịch đến phân khúc đối tượng {criteria}. Không thể hoàn tác hành động này.",
       "subject": "Chủ đề: {subject}",
       "allMatchingUsersWarning": "Bao gồm những người dùng phù hợp đã hủy đăng ký nhận bản tin."
     },
@@ -2730,7 +2729,7 @@
       "dateLabel": "Ngày và giờ dự kiến",
       "previousMonth": "Tháng trước",
       "nextMonth": "Tháng tiếp theo",
-      "audience": "Khán giả: {audience}",
+      "criteria": "Khán giả: {criteria}",
       "allMatchingUsersWarning": "Bao gồm những người dùng phù hợp đã hủy đăng ký nhận bản tin."
     },
     "notifications": {
@@ -5306,7 +5305,7 @@
     "editor": {
       "sectionTitle": "Quyền truy cập tải xuống",
       "loading": "Đang tải quyền truy cập tải xuống…",
-      "audiences": {
+      "access": {
         "disabled": {
           "label": "Không cho tải xuống",
           "description": "Không có khách truy cập có thể tải tập tin này."
@@ -5324,9 +5323,9 @@
           "description": "Chỉ những người dùng trong đối tượng đã chọn mới có thể tải xuống tệp này."
         }
       },
-      "segmentsLoadError": "Đã tải chính sách nhưng không thể tải đối tượng.",
-      "segmentsEmpty": "Không có phân khúc Đối tượng nào khả dụng.",
-      "restrictedWithoutAudience": "Chính sách hạn chế này không có Đối tượng. Tải xuống bị từ chối đối với mọi người cho đến khi bạn chọn ít nhất một Đối tượng.",
+      "criteriaLoadError": "Đã tải chính sách nhưng không thể tải đối tượng.",
+      "criteriaEmpty": "Không có phân khúc Đối tượng nào khả dụng.",
+      "restrictedWithoutCriteria": "Chính sách hạn chế này không có Đối tượng. Tải xuống bị từ chối đối với mọi người cho đến khi bạn chọn ít nhất một Đối tượng.",
       "additionalSelected": "Đã chọn thêm {count}",
       "loadError": "Không thể tải quyền truy cập tải xuống.",
       "saveError": "Không thể lưu quyền truy cập tải xuống.",

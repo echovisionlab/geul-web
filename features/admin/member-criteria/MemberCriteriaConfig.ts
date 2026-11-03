@@ -1,18 +1,18 @@
 import { create } from '@bufbuild/protobuf';
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
-import { SegmentConfigSchema, SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
+import { MemberCriteriaConfigSchema, MemberCriteriaKind } from '@echovisionlab/geul-proto/secure/member_criteria_pb.ts';
 import { AuthorizationRole } from '@echovisionlab/geul-proto/policy/access_pb.ts';
 
 export const SEGMENT_ROLE_OPTIONS = [{ value: 'admin' }, { value: 'author' }, { value: 'user' }] as const;
 
-export interface SegmentConfigState {
+export interface CriteriaConfigState {
   memberTagIds: string[];
   accountRoles: string[];
   createdAfter: string;
   createdBefore: string;
 }
 
-export function createEmptyConfig(): SegmentConfigState {
+export function createEmptyConfig(): CriteriaConfigState {
   return {
     memberTagIds: [],
     accountRoles: [],
@@ -40,10 +40,10 @@ function mergePendingStringSet(canonical: string[], submitted: string[], latest:
 
 /** Applies the edits made while a save was pending (`submitted` -> `latest`) on top of the saved `canonical` config. */
 export function rebasePendingConfig(
-  canonical: SegmentConfigState,
-  submitted: SegmentConfigState,
-  latest: SegmentConfigState,
-): SegmentConfigState {
+  canonical: CriteriaConfigState,
+  submitted: CriteriaConfigState,
+  latest: CriteriaConfigState,
+): CriteriaConfigState {
   return {
     memberTagIds: mergePendingStringSet(canonical.memberTagIds, submitted.memberTagIds, latest.memberTagIds),
     accountRoles: mergePendingStringSet(canonical.accountRoles, submitted.accountRoles, latest.accountRoles),
@@ -73,20 +73,18 @@ function timestampFromValue(value: string) {
   return Number.isNaN(date.getTime()) ? undefined : timestampFromDate(date);
 }
 
-export function buildSegmentConfig(type: SegmentType, config: SegmentConfigState) {
-  return create(SegmentConfigSchema, {
-    memberTagIds: type === SegmentType.MEMBER_TAGS ? config.memberTagIds : [],
+export function buildCriteriaConfig(type: MemberCriteriaKind, config: CriteriaConfigState) {
+  return create(MemberCriteriaConfigSchema, {
+    memberTagIds: type === MemberCriteriaKind.MEMBER_TAGS ? config.memberTagIds : [],
     accountRoles:
-      type === SegmentType.MEMBERS_BY_FILTER
+      type === MemberCriteriaKind.FILTER
         ? config.accountRoles.flatMap((role) => {
             const mapped = roleFromValue(role);
             return mapped === null ? [] : [mapped];
           })
         : [],
-    createdAfter: type === SegmentType.MEMBERS_BY_FILTER ? timestampFromValue(config.createdAfter) : undefined,
+    createdAfter: type === MemberCriteriaKind.FILTER ? timestampFromValue(config.createdAfter) : undefined,
     createdBefore:
-      type === SegmentType.MEMBERS_BY_FILTER && config.createdBefore
-        ? timestampFromValue(config.createdBefore)
-        : undefined,
+      type === MemberCriteriaKind.FILTER && config.createdBefore ? timestampFromValue(config.createdBefore) : undefined,
   });
 }

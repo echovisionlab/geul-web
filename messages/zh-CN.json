@@ -257,8 +257,7 @@
       "clients": "客户",
       "campaign": "活动",
       "campaigns": "活动",
-      "audienceSegment": "受众群体",
-      "audienceSegments": "受众群体",
+      "memberCriteria": "受众群体",
       "user": "用户",
       "member": "成员",
       "users": "用户",
@@ -613,7 +612,7 @@
         "failed": "发送失败"
       }
     },
-    "audienceSegments": {
+    "memberCriteria": {
       "description": "创建可重复使用的受众群体，将营销活动定位到特定群体",
       "searchPlaceholder": "搜索片段...",
       "empty": "未找到段。创建一个针对特定受众的产品",
@@ -2699,13 +2698,13 @@
       "none": "无布局"
     },
     "target": {
-      "audienceLabel": "目标受众",
-      "audiencePlaceholder": "选择受众",
+      "criteriaLabel": "目标受众",
+      "criteriaPlaceholder": "选择受众",
       "all": "所有用户",
-      "unavailableAudience": "已归档或不可用的受众",
-      "unavailableAudienceDescription": "此营销活动面向已归档或不可用的受众。请先选择活跃受众，再安排或发送。",
-      "audienceRequired": "请先选择活跃受众，再安排或发送。",
-      "audienceLoadError": "无法加载活跃受众。请在安排或发送前重试。"
+      "unavailableCriteria": "已归档或不可用的受众",
+      "unavailableCriteriaDescription": "此营销活动面向已归档或不可用的受众。请先选择活跃受众，再安排或发送。",
+      "criteriaRequired": "请先选择活跃受众，再安排或发送。",
+      "criteriaLoadError": "无法加载活跃受众。请在安排或发送前重试。"
     },
     "fields": {
       "recipientScope": "收件人",
@@ -2721,7 +2720,7 @@
       "description": "输入电子邮件地址以发送此活动的测试邮件"
     },
     "sendModal": {
-      "warning": "这会将活动发送给受众细分 {audience}。此操作无法撤消",
+      "warning": "这会将活动发送给受众细分 {criteria}。此操作无法撤消",
       "subject": "主题：{subject}",
       "allMatchingUsersWarning": "包括已取消新闻通讯订阅的匹配用户。"
     },
@@ -2730,7 +2729,7 @@
       "dateLabel": "预定日期和时间",
       "previousMonth": "上个月",
       "nextMonth": "下个月",
-      "audience": "受众：{audience}",
+      "criteria": "受众：{criteria}",
       "allMatchingUsersWarning": "包括已取消新闻通讯订阅的匹配用户。"
     },
     "notifications": {
@@ -5306,7 +5305,7 @@
     "editor": {
       "sectionTitle": "下载权限",
       "loading": "正在加载下载权限…",
-      "audiences": {
+      "access": {
         "disabled": {
           "label": "不允许下载",
           "description": "访客无法下载此文件。"
@@ -5324,9 +5323,9 @@
           "description": "只有所选受众中的用户可以下载此文件。"
         }
       },
-      "segmentsLoadError": "策略已加载，但无法加载受众。",
-      "segmentsEmpty": "没有可用的受众细分。",
-      "restrictedWithoutAudience": "此受限策略未指定受众。在选择至少一个受众之前，所有人的下载都将被拒绝。",
+      "criteriaLoadError": "策略已加载，但无法加载受众。",
+      "criteriaEmpty": "没有可用的受众细分。",
+      "restrictedWithoutCriteria": "此受限策略未指定受众。在选择至少一个受众之前，所有人的下载都将被拒绝。",
       "additionalSelected": "另有 {count} 项已选择",
       "loadError": "无法加载下载权限。",
       "saveError": "无法保存下载权限。",

@@ -33,7 +33,7 @@ vi.mock('@/features/media-download/FileDownloadPolicyEditor', () => ({
 }));
 vi.mock('@/lib/actions/file-download-access', () => ({
   getFileDownloadPolicyAction: vi.fn(),
-  listAudienceSegmentsForAuthenticatedAccessAction: vi.fn(),
+  listMemberCriteriaForAuthenticatedAccessAction: vi.fn(),
   updateFileDownloadPolicyAction: vi.fn(),
 }));
 

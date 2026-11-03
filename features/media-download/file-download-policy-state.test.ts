@@ -16,8 +16,8 @@ const policy: FileDownloadPolicyModel = {
   blockId: target.blockId,
   referencePath: target.referencePath,
   fileId: target.expectedFileId,
-  audience: 'public',
-  audienceSegments: [],
+  access: 'public',
+  memberCriteria: [],
 };
 
 describe('file download policy identity', () => {
@@ -47,23 +47,23 @@ describe('file download policy identity', () => {
 
 describe('download access selection', () => {
   it.each([
-    ['remove the last Audience', ['members'], [], { audience: 'disabled', audienceSegmentIds: [] }],
+    ['remove the last Access', ['members'], [], { access: 'disabled', memberCriteriaIds: [] }],
     [
-      'add an Audience',
+      'add an Access',
       ['scope:public'],
       ['scope:public', 'members'],
-      { audience: 'restricted', audienceSegmentIds: ['members'] },
+      { access: 'restricted', memberCriteriaIds: ['members'] },
     ],
-    ['choose Public', ['members'], ['members', 'scope:public'], { audience: 'public', audienceSegmentIds: [] }],
+    ['choose Public', ['members'], ['members', 'scope:public'], { access: 'public', memberCriteriaIds: [] }],
     [
       'choose signed-in users',
       ['members'],
       ['members', 'scope:authenticated'],
-      { audience: 'authenticated', audienceSegmentIds: [] },
+      { access: 'authenticated', memberCriteriaIds: [] },
     ],
-    ['choose Disabled', ['members'], ['members', 'scope:disabled'], { audience: 'disabled', audienceSegmentIds: [] }],
+    ['choose Disabled', ['members'], ['members', 'scope:disabled'], { access: 'disabled', memberCriteriaIds: [] }],
     ['ignore the restricted placeholder', [], ['scope:restricted'], null],
-  ] satisfies Array<[string, string[], string[], { audience: string; audienceSegmentIds: string[] } | null]>)(
+  ] satisfies Array<[string, string[], string[], { access: string; memberCriteriaIds: string[] } | null]>)(
     '%s',
     (_label, selected, next, expected) => {
       expect(accessSelectionChange(selected, next)).toEqual(expected);

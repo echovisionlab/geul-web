@@ -109,19 +109,19 @@ export const routePreviews = [
   },
   {
     route: '/admin/users',
-    storyTitle: 'Pages/Admin/Audience and Users',
+    storyTitle: 'Pages/Admin/Member Criteria and Users',
     variant: 'Users',
     coverage: 'page-view',
     scope:
       'Actual production users PageView, table and original modal controllers with local ban/role/unsubscribe/delete callbacks. No real account mutations; server authorization and identity invariants are outside.',
   },
   {
-    route: '/admin/audience-segments',
-    storyTitle: 'Pages/Admin/Audience and Users',
-    variant: 'Segments',
+    route: '/admin/member-criteria',
+    storyTitle: 'Pages/Admin/Member Criteria and Users',
+    variant: 'MemberCriteria',
     coverage: 'page-view',
     scope:
-      'Actual production segment PageView, query controls, estimate/create/edit/archive/restore dialogs with typed local transport. Server evaluation, relation constraints and persistence remain outside.',
+      'Actual production Member criteria PageView, query controls, count/create/edit/archive/restore dialogs with typed local transport. Server evaluation, relation constraints and persistence remain outside.',
   },
   {
     route: '/admin/settings/og-image',

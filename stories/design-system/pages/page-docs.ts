@@ -92,7 +92,7 @@ export const pageContracts: Record<string, PageContract> = {
   ),
   'Pages/Admin/Audience and Users': contract(
     'list',
-    'Manage members and audience segments.',
+    'Manage members and Member criteria.',
     'Select users or segments → role, ban, unsubscribe, estimate or archive → confirmation or failure → local result. No real account is changed.',
   ),
   'Pages/Admin/Dashboard': contract(

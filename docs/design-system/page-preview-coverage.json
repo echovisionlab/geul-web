@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "methodology": "All App Router visual entry files indexed by TypeScript imports/JSX; exact reviewed route/boundary maps count separately from mere Feature story overlap. Unmapped entrypoints remain explicit gaps. Static source census is not a browser pass.",
-  "sourceManifestHash": "733f92bb9276540d72e4bc43b991065e946f057cb55028597c366c13543e264c",
+  "sourceManifestHash": "749e6ec9823d994a9fccce3b68c05a9ff906bba8daaeeda9362ffef09697274f",
   "counts": {
     "queryEditorBranches": 12,
     "editorBranchPreviews": 12,
@@ -1668,11 +1668,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/FileManager.stories.tsx",
           "title": "Pages/Admin/File Manager",
           "matchingOwners": ["features/file-manager/ui/file-browser-view-settings.ts"]
@@ -1695,6 +1690,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/PageEditorPage.stories.tsx",
@@ -3846,11 +3846,6 @@
           "matchingOwners": ["features/artist/ArtistEditor/ArtistDetailEditor.tsx", "features/site/PageLoader/index.ts"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/FileManager.stories.tsx",
           "title": "Pages/Admin/File Manager",
           "matchingOwners": ["features/file-manager/ui/file-browser-view-settings.ts"]
@@ -3873,6 +3868,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/PageEditorPage.stories.tsx",
@@ -5472,11 +5472,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/FileManager.stories.tsx",
           "title": "Pages/Admin/File Manager",
           "matchingOwners": ["features/file-manager/ui/file-browser-view-settings.ts"]
@@ -5499,6 +5494,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/PageEditorPage.stories.tsx",
@@ -7010,11 +7010,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/CampaignAnalytics.stories.tsx",
           "title": "Pages/Campaign/Analytics",
           "matchingOwners": ["features/campaign/CampaignAnalyticsPage.tsx"]
@@ -7042,6 +7037,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/PageEditorPage.stories.tsx",
@@ -8688,11 +8688,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/CampaignEditorPage.stories.tsx",
           "title": "Pages/Editors/Campaign",
           "matchingOwners": ["features/campaign/CampaignEditPage.tsx", "features/site/PageLoader/index.ts"]
@@ -8720,6 +8715,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/PageEditorPage.stories.tsx",
@@ -10677,11 +10677,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/EventSeries.stories.tsx",
           "title": "Pages/Public/Event Series",
           "matchingOwners": [
@@ -10712,6 +10707,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/PageEditorPage.stories.tsx",
@@ -12364,11 +12364,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/FileManager.stories.tsx",
           "title": "Pages/Admin/File Manager",
           "matchingOwners": ["features/file-manager/ui/file-browser-view-settings.ts"]
@@ -12391,6 +12386,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/PageEditorPage.stories.tsx",
@@ -13998,11 +13998,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/FileManager.stories.tsx",
           "title": "Pages/Admin/File Manager",
           "matchingOwners": ["features/file-manager/ui/file-browser-view-settings.ts"]
@@ -14025,6 +14020,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/PageEditorPage.stories.tsx",
@@ -15738,11 +15738,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/FileManager.stories.tsx",
           "title": "Pages/Admin/File Manager",
           "matchingOwners": ["features/file-manager/ui/file-browser-view-settings.ts"]
@@ -15770,6 +15765,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/PageEditorPage.stories.tsx",
@@ -17369,11 +17369,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/FileManager.stories.tsx",
           "title": "Pages/Admin/File Manager",
           "matchingOwners": ["features/file-manager/ui/file-browser-view-settings.ts"]
@@ -17396,6 +17391,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/PageEditorPage.stories.tsx",
@@ -20343,11 +20343,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/LegalEditorsPage.stories.tsx",
           "title": "Pages/Editors/Legal",
           "matchingOwners": [
@@ -20355,6 +20350,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/ProgramEventLists.stories.tsx",
@@ -22264,11 +22264,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/FileManager.stories.tsx",
           "title": "Pages/Admin/File Manager",
           "matchingOwners": ["features/file-manager/ui/file-browser-view-settings.ts"]
@@ -22291,6 +22286,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/PageEditorPage.stories.tsx",
@@ -23892,11 +23892,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/FileManager.stories.tsx",
           "title": "Pages/Admin/File Manager",
           "matchingOwners": ["features/file-manager/ui/file-browser-view-settings.ts"]
@@ -23919,6 +23914,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/PageEditorPage.stories.tsx",
@@ -26889,11 +26889,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/FileManager.stories.tsx",
           "title": "Pages/Admin/File Manager",
           "matchingOwners": ["features/file-manager/ui/file-browser-view-settings.ts"]
@@ -26916,6 +26911,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/PageEditorPage.stories.tsx",
@@ -28520,11 +28520,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/FileManager.stories.tsx",
           "title": "Pages/Admin/File Manager",
           "matchingOwners": ["features/file-manager/ui/file-browser-view-settings.ts"]
@@ -28547,6 +28542,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/PageEditorPage.stories.tsx",
@@ -30052,11 +30052,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/FileManager.stories.tsx",
           "title": "Pages/Admin/File Manager",
           "matchingOwners": ["features/file-manager/ui/file-browser-view-settings.ts"]
@@ -30079,6 +30074,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/PageEditorPage.stories.tsx",
@@ -32086,8 +32086,8 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
@@ -33863,11 +33863,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/FileManager.stories.tsx",
           "title": "Pages/Admin/File Manager",
           "matchingOwners": ["features/file-manager/ui/file-browser-view-settings.ts"]
@@ -33890,6 +33885,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/PageEditorPage.stories.tsx",
@@ -35494,11 +35494,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/FileManager.stories.tsx",
           "title": "Pages/Admin/File Manager",
           "matchingOwners": ["features/file-manager/ui/file-browser-view-settings.ts"]
@@ -35521,6 +35516,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/PageEditorPage.stories.tsx",
@@ -35787,236 +35787,9 @@
           ]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
-          "file": "stories/pages/ProgramEventLists.stories.tsx",
-          "title": "Pages/Admin/Program Event Lists",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
-          "file": "stories/pages/Taxonomy.stories.tsx",
-          "title": "Pages/Admin/Taxonomy",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
-          "file": "stories/pages/UserProfileFull.stories.tsx",
-          "title": "Pages/User/Profile Full Page",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        }
-      ],
-      "scopeNote": "Source view coverage only. A named story or importing child does not establish complete route state, permission, controller, network, SSR or browser parity."
-    },
-    {
-      "file": "app/admin/audience-segments/page.tsx",
-      "sha256": "dfc28073329334195be145c63fbc94e296f5f27cb65b9b1628244ce71aee7d3e",
-      "kind": "page",
-      "route": "/admin/audience-segments",
-      "family": "Administration",
-      "hasQueryEditorBranch": false,
-      "editorBranchPreview": null,
-      "reviewStatus": "manual-preview-source-mapping",
-      "disposition": "page-view-preview",
-      "directJsx": ["SegmentsPageView"],
-      "visualOwners": [
-        "features/admin/segment/AudienceArchiveFilter.tsx",
-        "features/admin/segment/CreateSegmentButton.tsx",
-        "features/admin/segment/SegmentConfigFields.tsx",
-        "features/admin/segment/SegmentModalContext.tsx",
-        "features/admin/segment/SegmentModals.tsx",
-        "features/admin/segment/SegmentRowMenu.tsx",
-        "features/admin/segment/SegmentsPageView.tsx",
-        "features/admin/segment/SegmentsTableContent.tsx",
-        "features/admin/ui/AdminPageHeader/AdminPageHeader.tsx",
-        "features/confirmation/ui/ConfirmationDialog.tsx",
-        "features/data-table/DateFilterInputRuntime.tsx",
-        "features/data-table/MultiFilterEditorView.tsx",
-        "features/data-table/MultiFilterValueInput.tsx",
-        "features/data-table/MultiSortView.tsx",
-        "features/data-table/ServerDataTable/ServerDataTable.tsx",
-        "features/data-table/ServerDataTable/ServerDataTableContent.tsx",
-        "features/data-table/ServerDataTable/ServerDataTableMultiFilter.tsx",
-        "features/data-table/ServerDataTable/ServerDataTableMultiFilterRuntime.tsx",
-        "features/data-table/ServerDataTable/ServerDataTableMultiSort.tsx",
-        "features/data-table/ServerDataTable/ServerDataTableMultiSortRuntime.tsx",
-        "features/data-table/ServerDataTable/ServerDataTableNavigation.tsx",
-        "features/data-table/ServerDataTable/ServerDataTablePagination.tsx",
-        "features/data-table/ServerDataTable/ServerDataTablePaginationClient.tsx",
-        "features/data-table/ServerDataTable/ServerDataTablePaginationNavigation.tsx",
-        "features/data-table/ServerDataTable/ServerDataTablePaginationView.tsx",
-        "features/data-table/ServerDataTable/ServerDataTableSearch.tsx",
-        "features/data-table/ServerDataTable/ServerDataTableSearchRuntime.tsx",
-        "features/data-table/ServerDataTable/ServerDataTableSelectableSection.tsx",
-        "features/data-table/ServerDataTable/ServerDataTableToolbar.tsx",
-        "features/data-table/TableFocusRecovery.tsx",
-        "features/date-time/DateTime.tsx",
-        "features/site/PageLoader/PageLoader.tsx"
-      ],
-      "dependencyGraph": [
-        "app/admin/audience-segments/page.tsx",
-        "features/admin/segment/AudienceArchiveFilter.tsx",
-        "features/admin/segment/CreateSegmentButton.tsx",
-        "features/admin/segment/SegmentConfig.ts",
-        "features/admin/segment/SegmentConfigFields.tsx",
-        "features/admin/segment/SegmentModalContext.tsx",
-        "features/admin/segment/SegmentModals.tsx",
-        "features/admin/segment/SegmentRowMenu.tsx",
-        "features/admin/segment/SegmentsPageView.tsx",
-        "features/admin/segment/SegmentsTableContent.tsx",
-        "features/admin/segment/segment-date.ts",
-        "features/admin/ui/AdminPageHeader/AdminPageHeader.tsx",
-        "features/admin/ui/AdminPageHeader/index.ts",
-        "features/confirmation/confirmation-dialogs.ts",
-        "features/confirmation/index.ts",
-        "features/confirmation/ui/ConfirmationDialog.tsx",
-        "features/confirmation/ui/confirmation-intent.ts",
-        "features/confirmation/useBulkDeletion.ts",
-        "features/data-table/DateFilterInputRuntime.tsx",
-        "features/data-table/MultiFilterEditorView.tsx",
-        "features/data-table/MultiFilterValueInput.tsx",
-        "features/data-table/MultiSortView.tsx",
-        "features/data-table/ServerDataTable/ServerDataTable.tsx",
-        "features/data-table/ServerDataTable/ServerDataTableContent.tsx",
-        "features/data-table/ServerDataTable/ServerDataTableMultiFilter.tsx",
-        "features/data-table/ServerDataTable/ServerDataTableMultiFilterRuntime.tsx",
-        "features/data-table/ServerDataTable/ServerDataTableMultiSort.tsx",
-        "features/data-table/ServerDataTable/ServerDataTableMultiSortRuntime.tsx",
-        "features/data-table/ServerDataTable/ServerDataTableNavigation.tsx",
-        "features/data-table/ServerDataTable/ServerDataTablePagination.tsx",
-        "features/data-table/ServerDataTable/ServerDataTablePaginationClient.tsx",
-        "features/data-table/ServerDataTable/ServerDataTablePaginationNavigation.tsx",
-        "features/data-table/ServerDataTable/ServerDataTablePaginationView.tsx",
-        "features/data-table/ServerDataTable/ServerDataTableSearch.tsx",
-        "features/data-table/ServerDataTable/ServerDataTableSearchRuntime.tsx",
-        "features/data-table/ServerDataTable/ServerDataTableSelectableSection.tsx",
-        "features/data-table/ServerDataTable/ServerDataTableToolbar.tsx",
-        "features/data-table/ServerDataTable/index.ts",
-        "features/data-table/TableFocusRecovery.tsx",
-        "features/data-table/content-view-model.ts",
-        "features/data-table/filter-i18n.ts",
-        "features/data-table/multi-filter-model.ts",
-        "features/data-table/selection-label.ts",
-        "features/date-time/DateTime.tsx",
-        "features/site/PageLoader/PageLoader.tsx",
-        "features/site/PageLoader/index.ts",
-        "features/site/PageLoader/loader-image.ts"
-      ],
-      "inheritedBoundaries": [
-        "app/admin/error.tsx",
-        "app/admin/layout.tsx",
-        "app/error.tsx",
-        "app/global-error.tsx",
-        "app/layout.tsx",
-        "app/not-found.tsx"
-      ],
-      "inheritedTerminalLayouts": [],
-      "renderability": "normal-or-conditional",
-      "redirects": [],
-      "previews": [
-        {
-          "route": "/admin/audience-segments",
-          "storyTitle": "Pages/Admin/Audience and Users",
-          "variant": "Segments",
-          "coverage": "page-view",
-          "scope": "Actual production segment PageView, query controls, estimate/create/edit/archive/restore dialogs with typed local transport. Server evaluation, relation constraints and persistence remain outside.",
-          "storySource": "stories/pages/AudienceUsers.stories.tsx",
-          "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--segments",
-          "availableStates": [
-            {
-              "variant": "Users",
-              "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--users"
-            },
-            {
-              "variant": "UsersEmpty",
-              "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--users-empty"
-            },
-            {
-              "variant": "UsersFailed",
-              "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--users-failed"
-            },
-            {
-              "variant": "UsersActionFailed",
-              "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--users-action-failed"
-            },
-            {
-              "variant": "Segments",
-              "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--segments"
-            },
-            {
-              "variant": "SegmentsEmpty",
-              "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--segments-empty"
-            },
-            {
-              "variant": "SegmentsFailed",
-              "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--segments-failed"
-            },
-            {
-              "variant": "SegmentsActionFailed",
-              "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--segments-action-failed"
-            },
-            {
-              "variant": "Phone",
-              "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--phone"
-            }
-          ]
-        }
-      ],
-      "relatedFeatureStories": [
-        {
-          "file": "features/admin/ui/AdminPageHeader/AdminPageHeader.stories.tsx",
-          "title": "Feature/Admin/AdminPageHeader",
-          "matchingOwners": ["features/admin/ui/AdminPageHeader/AdminPageHeader.tsx"]
-        },
-        {
-          "file": "features/confirmation/ConfirmationDialog.stories.tsx",
-          "title": "Feature/Confirmation/Dialog",
-          "matchingOwners": ["features/confirmation/ui/ConfirmationDialog.tsx"]
-        },
-        {
-          "file": "features/data-table/ServerDataTable/ServerDataTablePending.stories.tsx",
-          "title": "Feature/Data Table/Server Navigation Wait",
-          "matchingOwners": [
-            "features/data-table/ServerDataTable/ServerDataTableContent.tsx",
-            "features/data-table/ServerDataTable/ServerDataTableMultiFilterRuntime.tsx",
-            "features/data-table/ServerDataTable/ServerDataTableMultiSortRuntime.tsx",
-            "features/data-table/ServerDataTable/ServerDataTableNavigation.tsx",
-            "features/data-table/ServerDataTable/ServerDataTablePaginationView.tsx"
-          ]
-        },
-        {
-          "file": "stories/features/EditorAccessEnded.stories.tsx",
-          "title": "Feature/Editor/Access Ended",
-          "matchingOwners": ["features/confirmation/confirmation-dialogs.ts"]
-        },
-        {
-          "file": "stories/pages/AdminCollections.stories.tsx",
-          "title": "Pages/Admin/Collections",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
-          "file": "stories/pages/AdminCommunicationLists.stories.tsx",
-          "title": "Pages/Admin/Communication Lists",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
-          "file": "stories/pages/AdminContent.stories.tsx",
-          "title": "Pages/Admin/Content Lists",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
-          "file": "stories/pages/AdminEntities.stories.tsx",
-          "title": "Pages/Admin/Entity Lists",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": [
-            "features/admin/segment/SegmentsPageView.tsx",
-            "features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"
-          ]
         },
         {
           "file": "stories/pages/ProgramEventLists.stories.tsx",
@@ -36662,8 +36435,8 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
@@ -36909,8 +36682,8 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
@@ -37268,8 +37041,8 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
@@ -38588,8 +38361,8 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
@@ -38801,8 +38574,8 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
@@ -39234,8 +39007,8 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
@@ -40094,8 +39867,8 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
@@ -40341,8 +40114,8 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
@@ -40573,8 +40346,8 @@
           ]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
@@ -41322,6 +41095,233 @@
       "scopeNote": "Source view coverage only. A named story or importing child does not establish complete route state, permission, controller, network, SSR or browser parity."
     },
     {
+      "file": "app/admin/member-criteria/page.tsx",
+      "sha256": "a59b5acd1e6cb9c91e809cece74b88682267634dcb78d5cb2c41e4ca039a363e",
+      "kind": "page",
+      "route": "/admin/member-criteria",
+      "family": "Administration",
+      "hasQueryEditorBranch": false,
+      "editorBranchPreview": null,
+      "reviewStatus": "manual-preview-source-mapping",
+      "disposition": "page-view-preview",
+      "directJsx": ["MemberCriteriaPageView"],
+      "visualOwners": [
+        "features/admin/member-criteria/CreateMemberCriteriaButton.tsx",
+        "features/admin/member-criteria/MemberCriteriaArchiveFilter.tsx",
+        "features/admin/member-criteria/MemberCriteriaConfigFields.tsx",
+        "features/admin/member-criteria/MemberCriteriaModalContext.tsx",
+        "features/admin/member-criteria/MemberCriteriaModals.tsx",
+        "features/admin/member-criteria/MemberCriteriaPageView.tsx",
+        "features/admin/member-criteria/MemberCriteriaRowMenu.tsx",
+        "features/admin/member-criteria/MemberCriteriaTableContent.tsx",
+        "features/admin/ui/AdminPageHeader/AdminPageHeader.tsx",
+        "features/confirmation/ui/ConfirmationDialog.tsx",
+        "features/data-table/DateFilterInputRuntime.tsx",
+        "features/data-table/MultiFilterEditorView.tsx",
+        "features/data-table/MultiFilterValueInput.tsx",
+        "features/data-table/MultiSortView.tsx",
+        "features/data-table/ServerDataTable/ServerDataTable.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableContent.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableMultiFilter.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableMultiFilterRuntime.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableMultiSort.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableMultiSortRuntime.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableNavigation.tsx",
+        "features/data-table/ServerDataTable/ServerDataTablePagination.tsx",
+        "features/data-table/ServerDataTable/ServerDataTablePaginationClient.tsx",
+        "features/data-table/ServerDataTable/ServerDataTablePaginationNavigation.tsx",
+        "features/data-table/ServerDataTable/ServerDataTablePaginationView.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableSearch.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableSearchRuntime.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableSelectableSection.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableToolbar.tsx",
+        "features/data-table/TableFocusRecovery.tsx",
+        "features/date-time/DateTime.tsx",
+        "features/site/PageLoader/PageLoader.tsx"
+      ],
+      "dependencyGraph": [
+        "app/admin/member-criteria/page.tsx",
+        "features/admin/member-criteria/CreateMemberCriteriaButton.tsx",
+        "features/admin/member-criteria/MemberCriteriaArchiveFilter.tsx",
+        "features/admin/member-criteria/MemberCriteriaConfig.ts",
+        "features/admin/member-criteria/MemberCriteriaConfigFields.tsx",
+        "features/admin/member-criteria/MemberCriteriaModalContext.tsx",
+        "features/admin/member-criteria/MemberCriteriaModals.tsx",
+        "features/admin/member-criteria/MemberCriteriaPageView.tsx",
+        "features/admin/member-criteria/MemberCriteriaRowMenu.tsx",
+        "features/admin/member-criteria/MemberCriteriaTableContent.tsx",
+        "features/admin/member-criteria/criteria-date.ts",
+        "features/admin/ui/AdminPageHeader/AdminPageHeader.tsx",
+        "features/admin/ui/AdminPageHeader/index.ts",
+        "features/confirmation/confirmation-dialogs.ts",
+        "features/confirmation/index.ts",
+        "features/confirmation/ui/ConfirmationDialog.tsx",
+        "features/confirmation/ui/confirmation-intent.ts",
+        "features/confirmation/useBulkDeletion.ts",
+        "features/data-table/DateFilterInputRuntime.tsx",
+        "features/data-table/MultiFilterEditorView.tsx",
+        "features/data-table/MultiFilterValueInput.tsx",
+        "features/data-table/MultiSortView.tsx",
+        "features/data-table/ServerDataTable/ServerDataTable.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableContent.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableMultiFilter.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableMultiFilterRuntime.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableMultiSort.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableMultiSortRuntime.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableNavigation.tsx",
+        "features/data-table/ServerDataTable/ServerDataTablePagination.tsx",
+        "features/data-table/ServerDataTable/ServerDataTablePaginationClient.tsx",
+        "features/data-table/ServerDataTable/ServerDataTablePaginationNavigation.tsx",
+        "features/data-table/ServerDataTable/ServerDataTablePaginationView.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableSearch.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableSearchRuntime.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableSelectableSection.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableToolbar.tsx",
+        "features/data-table/ServerDataTable/index.ts",
+        "features/data-table/TableFocusRecovery.tsx",
+        "features/data-table/content-view-model.ts",
+        "features/data-table/filter-i18n.ts",
+        "features/data-table/multi-filter-model.ts",
+        "features/data-table/selection-label.ts",
+        "features/date-time/DateTime.tsx",
+        "features/site/PageLoader/PageLoader.tsx",
+        "features/site/PageLoader/index.ts",
+        "features/site/PageLoader/loader-image.ts"
+      ],
+      "inheritedBoundaries": [
+        "app/admin/error.tsx",
+        "app/admin/layout.tsx",
+        "app/error.tsx",
+        "app/global-error.tsx",
+        "app/layout.tsx",
+        "app/not-found.tsx"
+      ],
+      "inheritedTerminalLayouts": [],
+      "renderability": "normal-or-conditional",
+      "redirects": [],
+      "previews": [
+        {
+          "route": "/admin/member-criteria",
+          "storyTitle": "Pages/Admin/Member Criteria and Users",
+          "variant": "MemberCriteria",
+          "coverage": "page-view",
+          "scope": "Actual production Member criteria PageView, query controls, count/create/edit/archive/restore dialogs with typed local transport. Server evaluation, relation constraints and persistence remain outside.",
+          "storySource": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--member-criteria",
+          "availableStates": [
+            {
+              "variant": "Users",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--users"
+            },
+            {
+              "variant": "UsersEmpty",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--users-empty"
+            },
+            {
+              "variant": "UsersFailed",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--users-failed"
+            },
+            {
+              "variant": "UsersActionFailed",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--users-action-failed"
+            },
+            {
+              "variant": "MemberCriteria",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--member-criteria"
+            },
+            {
+              "variant": "MemberCriteriaEmpty",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--member-criteria-empty"
+            },
+            {
+              "variant": "MemberCriteriaFailed",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--member-criteria-failed"
+            },
+            {
+              "variant": "MemberCriteriaActionFailed",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--member-criteria-action-failed"
+            },
+            {
+              "variant": "Phone",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--phone"
+            }
+          ]
+        }
+      ],
+      "relatedFeatureStories": [
+        {
+          "file": "features/admin/ui/AdminPageHeader/AdminPageHeader.stories.tsx",
+          "title": "Feature/Admin/AdminPageHeader",
+          "matchingOwners": ["features/admin/ui/AdminPageHeader/AdminPageHeader.tsx"]
+        },
+        {
+          "file": "features/confirmation/ConfirmationDialog.stories.tsx",
+          "title": "Feature/Confirmation/Dialog",
+          "matchingOwners": ["features/confirmation/ui/ConfirmationDialog.tsx"]
+        },
+        {
+          "file": "features/data-table/ServerDataTable/ServerDataTablePending.stories.tsx",
+          "title": "Feature/Data Table/Server Navigation Wait",
+          "matchingOwners": [
+            "features/data-table/ServerDataTable/ServerDataTableContent.tsx",
+            "features/data-table/ServerDataTable/ServerDataTableMultiFilterRuntime.tsx",
+            "features/data-table/ServerDataTable/ServerDataTableMultiSortRuntime.tsx",
+            "features/data-table/ServerDataTable/ServerDataTableNavigation.tsx",
+            "features/data-table/ServerDataTable/ServerDataTablePaginationView.tsx"
+          ]
+        },
+        {
+          "file": "stories/features/EditorAccessEnded.stories.tsx",
+          "title": "Feature/Editor/Access Ended",
+          "matchingOwners": ["features/confirmation/confirmation-dialogs.ts"]
+        },
+        {
+          "file": "stories/pages/AdminCollections.stories.tsx",
+          "title": "Pages/Admin/Collections",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
+        },
+        {
+          "file": "stories/pages/AdminCommunicationLists.stories.tsx",
+          "title": "Pages/Admin/Communication Lists",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
+        },
+        {
+          "file": "stories/pages/AdminContent.stories.tsx",
+          "title": "Pages/Admin/Content Lists",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
+        },
+        {
+          "file": "stories/pages/AdminEntities.stories.tsx",
+          "title": "Pages/Admin/Entity Lists",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": [
+            "features/admin/member-criteria/MemberCriteriaPageView.tsx",
+            "features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"
+          ]
+        },
+        {
+          "file": "stories/pages/ProgramEventLists.stories.tsx",
+          "title": "Pages/Admin/Program Event Lists",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
+        },
+        {
+          "file": "stories/pages/Taxonomy.stories.tsx",
+          "title": "Pages/Admin/Taxonomy",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
+        },
+        {
+          "file": "stories/pages/UserProfileFull.stories.tsx",
+          "title": "Pages/User/Profile Full Page",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
+        }
+      ],
+      "scopeNote": "Source view coverage only. A named story or importing child does not establish complete route state, permission, controller, network, SSR or browser parity."
+    },
+    {
       "file": "app/admin/menus/page.tsx",
       "sha256": "ccf83f37f043868d9cd7c2cf55bf33c00d8a8d39aff14ddefd2c10cab2e679f9",
       "kind": "page",
@@ -41775,8 +41775,8 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
@@ -42006,8 +42006,8 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
@@ -42532,8 +42532,8 @@
           ]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
@@ -42970,8 +42970,8 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
@@ -43546,8 +43546,8 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
@@ -43795,8 +43795,8 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
@@ -44694,8 +44694,8 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
@@ -45001,48 +45001,48 @@
       "previews": [
         {
           "route": "/admin/users",
-          "storyTitle": "Pages/Admin/Audience and Users",
+          "storyTitle": "Pages/Admin/Member Criteria and Users",
           "variant": "Users",
           "coverage": "page-view",
           "scope": "Actual production users PageView, table and original modal controllers with local ban/role/unsubscribe/delete callbacks. No real account mutations; server authorization and identity invariants are outside.",
-          "storySource": "stories/pages/AudienceUsers.stories.tsx",
-          "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--users",
+          "storySource": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--users",
           "availableStates": [
             {
               "variant": "Users",
-              "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--users"
+              "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--users"
             },
             {
               "variant": "UsersEmpty",
-              "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--users-empty"
+              "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--users-empty"
             },
             {
               "variant": "UsersFailed",
-              "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--users-failed"
+              "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--users-failed"
             },
             {
               "variant": "UsersActionFailed",
-              "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--users-action-failed"
+              "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--users-action-failed"
             },
             {
-              "variant": "Segments",
-              "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--segments"
+              "variant": "MemberCriteria",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--member-criteria"
             },
             {
-              "variant": "SegmentsEmpty",
-              "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--segments-empty"
+              "variant": "MemberCriteriaEmpty",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--member-criteria-empty"
             },
             {
-              "variant": "SegmentsFailed",
-              "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--segments-failed"
+              "variant": "MemberCriteriaFailed",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--member-criteria-failed"
             },
             {
-              "variant": "SegmentsActionFailed",
-              "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--segments-action-failed"
+              "variant": "MemberCriteriaActionFailed",
+              "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--member-criteria-action-failed"
             },
             {
               "variant": "Phone",
-              "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--phone"
+              "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--phone"
             }
           ]
         }
@@ -45095,8 +45095,8 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
           "matchingOwners": [
             "features/admin/user/UsersPageView.tsx",
             "features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"
@@ -47350,11 +47350,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/FileManager.stories.tsx",
           "title": "Pages/Admin/File Manager",
           "matchingOwners": ["features/file-manager/ui/file-browser-view-settings.ts"]
@@ -47382,6 +47377,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/PageEditorPage.stories.tsx",
@@ -49120,11 +49120,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/FileManager.stories.tsx",
           "title": "Pages/Admin/File Manager",
           "matchingOwners": ["features/file-manager/ui/file-browser-view-settings.ts"]
@@ -49164,6 +49159,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/PageEditorPage.stories.tsx",
@@ -50725,11 +50725,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/FileManager.stories.tsx",
           "title": "Pages/Admin/File Manager",
           "matchingOwners": ["features/file-manager/ui/file-browser-view-settings.ts"]
@@ -50757,6 +50752,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/PageEditorPage.stories.tsx",
@@ -52333,11 +52333,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/FileManager.stories.tsx",
           "title": "Pages/Admin/File Manager",
           "matchingOwners": ["features/file-manager/ui/file-browser-view-settings.ts"]
@@ -52365,6 +52360,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/PageEditorPage.stories.tsx",
@@ -53957,11 +53957,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/FileManager.stories.tsx",
           "title": "Pages/Admin/File Manager",
           "matchingOwners": ["features/file-manager/ui/file-browser-view-settings.ts"]
@@ -53984,6 +53979,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/PageEditorPage.stories.tsx",
@@ -55133,11 +55133,6 @@
           "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "title": "Pages/Admin/Audience and Users",
-          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
-        },
-        {
           "file": "stories/pages/FormOperations.stories.tsx",
           "title": "Pages/Forms/Operations",
           "matchingOwners": ["features/form/FormDashboardView.tsx"]
@@ -55155,6 +55150,11 @@
             "features/document-layout/ui/document-heading-level.ts",
             "features/site/PageLoader/index.ts"
           ]
+        },
+        {
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "title": "Pages/Admin/Member Criteria and Users",
+          "matchingOwners": ["features/data-table/ServerDataTable/ServerDataTableNavigation.tsx"]
         },
         {
           "file": "stories/pages/ProgramEventLists.stories.tsx",

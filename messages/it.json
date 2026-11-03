@@ -257,8 +257,7 @@
       "clients": "Clienti",
       "campaign": "Campagna",
       "campaigns": "Campagne",
-      "audienceSegment": "Segmento di pubblico",
-      "audienceSegments": "Segmenti di pubblico",
+      "memberCriteria": "Segmento di pubblico",
       "user": "Utente",
       "member": "Membro",
       "users": "Utenti",
@@ -613,7 +612,7 @@
         "failed": "Non riuscita"
       }
     },
-    "audienceSegments": {
+    "memberCriteria": {
       "description": "Crea segmenti di pubblico riutilizzabili per indirizzare le campagne a gruppi specifici.",
       "searchPlaceholder": "Cerca segmenti...",
       "empty": "Nessun segmento trovato. Creane uno per rivolgerti a un pubblico specifico.",
@@ -2699,13 +2698,13 @@
       "none": "Nessuna disposizione"
     },
     "target": {
-      "audienceLabel": "Pubblico di destinazione",
-      "audiencePlaceholder": "Seleziona un pubblico",
+      "criteriaLabel": "Pubblico di destinazione",
+      "criteriaPlaceholder": "Seleziona un pubblico",
       "all": "Tutti gli utenti",
-      "unavailableAudience": "Pubblico archiviato o non disponibile",
-      "unavailableAudienceDescription": "Questa campagna è rivolta a un pubblico archiviato o non disponibile. Seleziona un pubblico attivo prima di programmare o inviare.",
-      "audienceRequired": "Seleziona un pubblico attivo prima di programmare o inviare.",
-      "audienceLoadError": "Impossibile caricare i pubblici attivi. Riprova prima di programmare o inviare."
+      "unavailableCriteria": "Pubblico archiviato o non disponibile",
+      "unavailableCriteriaDescription": "Questa campagna è rivolta a un pubblico archiviato o non disponibile. Seleziona un pubblico attivo prima di programmare o inviare.",
+      "criteriaRequired": "Seleziona un pubblico attivo prima di programmare o inviare.",
+      "criteriaLoadError": "Impossibile caricare i pubblici attivi. Riprova prima di programmare o inviare."
     },
     "fields": {
       "recipientScope": "Destinatari",
@@ -2721,7 +2720,7 @@
       "description": "Inserisci un indirizzo email per inviare un test di questa campagna."
     },
     "sendModal": {
-      "warning": "Ciò invierà la campagna al segmento di pubblico {audience}. Questa azione non può essere annullata.",
+      "warning": "Ciò invierà la campagna al segmento di pubblico {criteria}. Questa azione non può essere annullata.",
       "subject": "Oggetto: {subject}",
       "allMatchingUsersWarning": "Include gli utenti corrispondenti che hanno annullato l’iscrizione."
     },
@@ -2730,7 +2729,7 @@
       "dateLabel": "Data e ora previste",
       "previousMonth": "Mese precedente",
       "nextMonth": "Mese successivo",
-      "audience": "Pubblico: {audience}",
+      "criteria": "Pubblico: {criteria}",
       "allMatchingUsersWarning": "Include gli utenti corrispondenti che hanno annullato l’iscrizione."
     },
     "notifications": {
@@ -5306,7 +5305,7 @@
     "editor": {
       "sectionTitle": "Accesso al download",
       "loading": "Caricamento dell’accesso al download…",
-      "audiences": {
+      "access": {
         "disabled": {
           "label": "Nessun download",
           "description": "Nessun visitatore può scaricare questo file."
@@ -5324,9 +5323,9 @@
           "description": "Solo gli utenti nei destinatari selezionati possono scaricare questo file."
         }
       },
-      "segmentsLoadError": "La policy è stata caricata, ma non è stato possibile caricare i destinatari.",
-      "segmentsEmpty": "Non sono disponibili segmenti di destinatari.",
-      "restrictedWithoutAudience": "Questa policy con restrizioni non ha destinatari. I download sono negati a tutti finché non selezioni almeno un destinatario.",
+      "criteriaLoadError": "La policy è stata caricata, ma non è stato possibile caricare i destinatari.",
+      "criteriaEmpty": "Non sono disponibili segmenti di destinatari.",
+      "restrictedWithoutCriteria": "Questa policy con restrizioni non ha destinatari. I download sono negati a tutti finché non selezioni almeno un destinatario.",
       "additionalSelected": "Altri {count} selezionati",
       "loadError": "Non è stato possibile caricare l’accesso al download.",
       "saveError": "Non è stato possibile salvare l’accesso al download.",

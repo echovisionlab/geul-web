@@ -64,12 +64,17 @@ afterEach(() => {
   container.remove();
 });
 
-const audiences = [{ id: 'audience-1', name: 'Members', segmentTypeLabel: 'Users by Filter' }];
+const criteriaOptions = [{ id: 'criteria-1', name: 'Members', kindLabel: 'Users by Filter' }];
 
 function renderControl(selection: CampaignTargetSelection, onChange = vi.fn(), loadError = false) {
   act(() => {
     root.render(
-      <CampaignTargetControl {...selection} audiences={audiences} loadError={loadError} onChange={onChange} />,
+      <CampaignTargetControl
+        {...selection}
+        criteriaOptions={criteriaOptions}
+        loadError={loadError}
+        onChange={onChange}
+      />,
     );
   });
   return onChange;
@@ -77,80 +82,85 @@ function renderControl(selection: CampaignTargetSelection, onChange = vi.fn(), l
 
 describe('CampaignTargetControl', () => {
   it('accepts only complete explicit ALL and SEGMENT targets', () => {
-    expect(isCompleteCampaignTarget({ targetMode: CampaignTargetMode.ALL, segmentId: null })).toBe(true);
+    expect(isCompleteCampaignTarget({ targetMode: CampaignTargetMode.ALL, memberCriteriaId: null })).toBe(true);
     expect(
       isCompleteCampaignTarget({
-        targetMode: CampaignTargetMode.SEGMENT,
-        segmentId: 'audience-1',
+        targetMode: CampaignTargetMode.MEMBER_CRITERIA,
+        memberCriteriaId: 'criteria-1',
       }),
     ).toBe(true);
     expect(
       isCompleteCampaignTarget({
-        targetMode: CampaignTargetMode.SEGMENT,
-        segmentId: null,
+        targetMode: CampaignTargetMode.MEMBER_CRITERIA,
+        memberCriteriaId: null,
       }),
     ).toBe(false);
     expect(
       isCompleteCampaignTarget({
         targetMode: CampaignTargetMode.ALL,
-        segmentId: 'audience-1',
+        memberCriteriaId: 'criteria-1',
       }),
     ).toBe(false);
   });
 
-  it('allows delivery only to ALL or an active Audience relationship', () => {
-    expect(isDeliverableCampaignTarget({ targetMode: CampaignTargetMode.ALL, segmentId: null }, audiences)).toBe(true);
+  it('allows delivery only to ALL or an active Criteria relationship', () => {
     expect(
-      isDeliverableCampaignTarget({ targetMode: CampaignTargetMode.SEGMENT, segmentId: 'audience-1' }, audiences),
+      isDeliverableCampaignTarget({ targetMode: CampaignTargetMode.ALL, memberCriteriaId: null }, criteriaOptions),
     ).toBe(true);
     expect(
       isDeliverableCampaignTarget(
-        { targetMode: CampaignTargetMode.SEGMENT, segmentId: 'archived-audience' },
-        audiences,
+        { targetMode: CampaignTargetMode.MEMBER_CRITERIA, memberCriteriaId: 'criteria-1' },
+        criteriaOptions,
+      ),
+    ).toBe(true);
+    expect(
+      isDeliverableCampaignTarget(
+        { targetMode: CampaignTargetMode.MEMBER_CRITERIA, memberCriteriaId: 'archived-criteria' },
+        criteriaOptions,
       ),
     ).toBe(false);
   });
 
-  it('maps the single audience control to an explicit mode and relationship', () => {
+  it('maps the single criteria control to an explicit mode and relationship', () => {
     const onChange = renderControl({
       targetMode: CampaignTargetMode.ALL,
-      segmentId: null,
+      memberCriteriaId: null,
     });
     const select = container.querySelector('select');
     expect(select).not.toBeNull();
 
     act(() => {
-      select!.value = 'segment:audience-1';
+      select!.value = 'criteria:criteria-1';
       select!.dispatchEvent(new Event('change', { bubbles: true }));
     });
     expect(onChange).toHaveBeenCalledWith({
-      targetMode: CampaignTargetMode.SEGMENT,
-      segmentId: 'audience-1',
+      targetMode: CampaignTargetMode.MEMBER_CRITERIA,
+      memberCriteriaId: 'criteria-1',
     });
   });
 
   it('shows an archived relationship only as a disabled unavailable value', () => {
     renderControl({
-      targetMode: CampaignTargetMode.SEGMENT,
-      segmentId: 'archived-audience',
+      targetMode: CampaignTargetMode.MEMBER_CRITERIA,
+      memberCriteriaId: 'archived-criteria',
     });
 
-    const option = container.querySelector('option[value="segment:archived-audience"]') as HTMLOptionElement | null;
+    const option = container.querySelector('option[value="criteria:archived-criteria"]') as HTMLOptionElement | null;
     expect(option?.disabled).toBe(true);
-    expect(container.querySelector('[role="alert"]')?.textContent).toBe('unavailableAudienceDescription');
+    expect(container.querySelector('[role="alert"]')?.textContent).toBe('unavailableCriteriaDescription');
   });
 
-  it('distinguishes an Audience query failure from an archived relationship', () => {
+  it('distinguishes an Criteria query failure from an archived relationship', () => {
     renderControl(
       {
-        targetMode: CampaignTargetMode.SEGMENT,
-        segmentId: 'audience-not-yet-verified',
+        targetMode: CampaignTargetMode.MEMBER_CRITERIA,
+        memberCriteriaId: 'criteria-not-yet-verified',
       },
       vi.fn(),
       true,
     );
 
-    expect(container.querySelector('[role="alert"]')?.textContent).toBe('audienceLoadError');
-    expect(container.textContent).not.toContain('unavailableAudienceDescription');
+    expect(container.querySelector('[role="alert"]')?.textContent).toBe('criteriaLoadError');
+    expect(container.textContent).not.toContain('unavailableCriteriaDescription');
   });
 });

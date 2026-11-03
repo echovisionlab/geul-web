@@ -6,7 +6,7 @@ describe('campaign fields schema', () => {
   it('defaults to an explicit all-recipient target', () => {
     expect(DEFAULT_CAMPAIGN_FIELDS).toMatchObject({
       targetMode: CampaignTargetMode.ALL,
-      segmentId: null,
+      memberCriteriaId: null,
       recipientScope: 'SUBSCRIBED_USERS',
     });
   });
