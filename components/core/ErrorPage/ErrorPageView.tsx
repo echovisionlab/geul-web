@@ -18,9 +18,9 @@ export type ErrorPageAction = { label: string } & (
 );
 
 function ErrorPageCommand({ action }: { action: Extract<ErrorPageAction, { onClick: unknown }> }) {
-  const command = usePendingAction(action.onClick);
+  const command = usePendingAction();
   return (
-    <Button emphasis="low" onClick={command.run} loading={command.pending}>
+    <Button emphasis="low" onClick={() => command.run(action.onClick)} loading={command.pending}>
       {action.label}
     </Button>
   );

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest';
+import { ServerDataTablePendingProvider } from './ServerDataTableNavigation';
 import { act, render, screen, waitFor } from '@/test/render';
 import { ServerDataTableMultiFilter } from './ServerDataTableMultiFilterRuntime';
 import { ServerDataTableContent } from './ServerDataTableContent';
@@ -22,12 +23,14 @@ describe('ServerDataTableMultiFilter', () => {
     );
     const { user } = render(
       <div role="region" aria-label="Posts" data-datatable-root data-namespace="posts">
-        <ServerDataTableMultiFilter namespace="posts" fields={[{ field: 'title', label: 'Title', type: 'string' }]} />
-        <ServerDataTableContent
-          columns={[]}
-          result={{ data: [], total: 0, page: 1, pageSize: 20, totalPages: 0, error: 'Could not load posts' }}
-          getRowKey={() => ''}
-        />
+        <ServerDataTablePendingProvider>
+          <ServerDataTableMultiFilter namespace="posts" fields={[{ field: 'title', label: 'Title', type: 'string' }]} />
+          <ServerDataTableContent
+            columns={[]}
+            result={{ data: [], total: 0, page: 1, pageSize: 20, totalPages: 0, error: 'Could not load posts' }}
+            getRowKey={() => ''}
+          />
+        </ServerDataTablePendingProvider>
       </div>,
     );
     await user.click(screen.getByRole('button', { name: 'Filter 1' }));

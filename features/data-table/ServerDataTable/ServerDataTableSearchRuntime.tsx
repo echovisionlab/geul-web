@@ -93,7 +93,7 @@ export function ServerDataTableSearch({ namespace, placeholder, debounceMs = 300
     }
   }, [isPending]);
 
-  useServerTablePending(rootRef, isPending);
+  useServerTablePending(isPending);
 
   return (
     <DsLayoutStack flexible ref={rootRef} gap="none">

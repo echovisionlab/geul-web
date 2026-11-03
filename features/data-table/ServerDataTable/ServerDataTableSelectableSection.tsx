@@ -3,7 +3,7 @@ import { ConfirmationDialog } from '@/features/confirmation';
 import { useBulkDeletion } from '@/features/confirmation/useBulkDeletion';
 
 import { Text as DsText } from '@/components/core/Typography';
-import { useRef, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { useServerTableRouter as useRouter, useServerTablePending } from './ServerDataTableNavigation';
 import { IconTrash } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
@@ -57,8 +57,7 @@ export function ServerDataTableSelectableSection<T>({
 }: ServerDataTableSelectableSectionProps<T>) {
   const router = useRouter();
   const [refreshing, startRefresh] = useTransition();
-  const markerRef = useRef<HTMLSpanElement>(null);
-  useServerTablePending(markerRef, refreshing);
+  useServerTablePending(refreshing);
   const locale = useLocale();
   const tCommon = useTranslations('common');
   const tTableAria = useTranslations('dataTable.aria');
@@ -115,7 +114,6 @@ export function ServerDataTableSelectableSection<T>({
 
   return (
     <>
-      <span ref={markerRef} hidden />
       <ServerDataTable.Toolbar>
         <DataTableSelectionToolbar
           search={<ServerDataTable.Search namespace={namespace} placeholder={searchPlaceholder} />}

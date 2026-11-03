@@ -41,7 +41,7 @@ export function ServerDataTableMultiSort({
   const [isPending, startTransition] = useTransition();
   const [opened, setOpened] = useState(() => sortUiState.get(namespace)?.opened ?? false);
   const markerRef = useRef<HTMLSpanElement>(null);
-  useServerTablePending(markerRef, isPending);
+  useServerTablePending(isPending);
   const shouldCloseAfterTransitionRef = useRef(false);
   const lastSyncedSortsKeyRef = useRef<string | null>(null);
 

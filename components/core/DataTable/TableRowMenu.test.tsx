@@ -126,7 +126,7 @@ describe('TableRowMenu', () => {
       const trigger = screen.getByRole('button', { name: 'Row actions' });
       await user.click(trigger);
       await user.click(await screen.findByRole('menuitem', { name: 'Delete' }));
-      expect(log).toHaveBeenCalledWith('TableRowMenu action failed', error);
+      expect(log).toHaveBeenCalledWith('Core command failed', error);
       expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
       await user.click(trigger);
       expect(await screen.findByRole('menuitem', { name: 'Delete' })).toBeVisible();

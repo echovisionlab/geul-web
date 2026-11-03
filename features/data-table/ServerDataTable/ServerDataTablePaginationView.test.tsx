@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { mockBrowserNavigation } from '@/components/core/testing/browser-navigation';
+import { ServerDataTablePendingProvider } from './ServerDataTableNavigation';
 import { describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen, waitFor, within } from '@/test/render';
 import { ServerDataTablePaginationView } from './ServerDataTablePaginationView';
@@ -82,13 +83,15 @@ describe('server table page navigation', () => {
     router.push.mockReset().mockImplementation(() => new Promise<void>((resolve) => tasks.push(resolve)));
     const { user } = render(
       <div role="region" aria-label="Concurrent posts" data-datatable-root>
-        <ServerDataTableContent
-          columns={[]}
-          result={{ data: [], total: 0, page: 1, pageSize: 1, totalPages: 0 }}
-          getRowKey={() => ''}
-        />
-        <ServerDataTablePaginationView {...props} />
-        <ServerDataTablePaginationView {...props} labels={{ ...labels, navigation: 'Other pages' }} />
+        <ServerDataTablePendingProvider>
+          <ServerDataTableContent
+            columns={[]}
+            result={{ data: [], total: 0, page: 1, pageSize: 1, totalPages: 0 }}
+            getRowKey={() => ''}
+          />
+          <ServerDataTablePaginationView {...props} />
+          <ServerDataTablePaginationView {...props} labels={{ ...labels, navigation: 'Other pages' }} />
+        </ServerDataTablePendingProvider>
       </div>,
     );
     await user.click(
@@ -115,13 +118,15 @@ describe('server table page navigation', () => {
       );
       const { user } = render(
         <div role="region" aria-label="Posts" data-datatable-root>
-          <ServerDataTableContent
-            columns={[{ key: 'title', header: 'Title', cell: (row: { id: string; title: string }) => row.title }]}
-            result={{ data: [{ id: 'one', title: 'Notes' }], total: 8, page: 3, pageSize: 1, totalPages: 8 }}
-            getRowKey={(row) => row.id}
-            showPendingLoader={showPendingLoader}
-          />
-          <ServerDataTablePaginationView {...props} />
+          <ServerDataTablePendingProvider>
+            <ServerDataTableContent
+              columns={[{ key: 'title', header: 'Title', cell: (row: { id: string; title: string }) => row.title }]}
+              result={{ data: [{ id: 'one', title: 'Notes' }], total: 8, page: 3, pageSize: 1, totalPages: 8 }}
+              getRowKey={(row) => row.id}
+              showPendingLoader={showPendingLoader}
+            />
+            <ServerDataTablePaginationView {...props} />
+          </ServerDataTablePendingProvider>
         </div>,
       );
       const row = screen.getByRole('cell', { name: 'Notes' });

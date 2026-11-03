@@ -66,7 +66,7 @@ export const FailedImage: Story = {
 export const FlowRegion: Story = {
   args: {
     placement: 'flow',
-    minHeight: 200,
+    extent: 'section',
     imageSrc: '/storybook/media/video-poster.jpg',
     message: 'Loading this section…',
   },
@@ -87,6 +87,42 @@ export const FlowRegion: Story = {
     await expect(region.height).toBeGreaterThanOrEqual(200);
     await expect(region.top).toBeGreaterThanOrEqual(before.bottom);
     await expect(after.top).toBeGreaterThanOrEqual(region.bottom);
+  },
+};
+
+/** Named region heights replace caller pixel values; `container` follows a parent that reserves height. */
+export const Extents: Story = {
+  render: (args) => (
+    <div>
+      {(['compact', 'section', 'tall'] as const).map((extent) => (
+        <SectionCard key={extent} withBorder padding="none">
+          <PageLoaderView
+            {...args}
+            placement="flow"
+            extent={extent}
+            imageAlt={`Loading ${extent}`}
+            message={`Loading ${extent}`}
+          />
+        </SectionCard>
+      ))}
+      <SectionCard withBorder padding="none">
+        <div style={{ position: 'relative', height: 96 }}>
+          <PageLoaderView {...args} extent="container" imageAlt="Loading container" message="Loading container" />
+        </div>
+      </SectionCard>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const height = (name: string) =>
+      within(canvasElement)
+        .getByRole('status', { name: `Loading ${name}` })
+        .getBoundingClientRect().height;
+    const statuses = within(canvasElement).getAllByRole('status');
+    await expect(statuses).toHaveLength(4);
+    await expect(height('compact')).toBeGreaterThanOrEqual(120);
+    await expect(height('section')).toBeGreaterThanOrEqual(200);
+    await expect(height('tall')).toBeGreaterThanOrEqual(320);
+    await expect(height('container')).toBe(96);
   },
 };
 

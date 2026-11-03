@@ -3,40 +3,25 @@
 import { act, render, renderHook, screen } from '@/test/render';
 import { expect, it, vi } from 'vitest';
 import { EditorHeaderView, type EditorHeaderViewLabels } from './EditorHeader/EditorHeaderView';
-import { ImageUploadField } from './ImageUpload/ImageUploadField';
+import { ErrorPageView } from './ErrorPage/ErrorPageView';
 import { MenuToggle } from './MenuToggle/MenuToggle';
 import { usePendingAction } from './use-pending-action';
 
-it('preserves the command result and rejection while clearing pending for another run', async () => {
-  const task = Promise.withResolvers<string>();
+it('ignores repeated runs while pending and routes a rejection to the caller', async () => {
+  const task = Promise.withResolvers<void>();
   const error = new Error('Removal failed');
-  const report = vi.spyOn(console, 'error').mockImplementation(() => {});
-  const command = vi.fn(() => task.promise).mockRejectedValueOnce(error);
-  const { result } = renderHook(() => usePendingAction(command));
-  try {
-    let rejected: ReturnType<typeof result.current.run>;
-    act(() => {
-      rejected = result.current.run();
-    });
-    expect(result.current.pending).toBe(true);
-    await act(async () => {
-      await expect(rejected).rejects.toBe(error);
-    });
-    expect(result.current.pending).toBe(false);
-
-    let resolved: ReturnType<typeof result.current.run>;
-    act(() => {
-      resolved = result.current.run();
-    });
-    expect(result.current.pending).toBe(true);
-    await act(async () => {
-      task.resolve('removed');
-      await expect(resolved).resolves.toBe('removed');
-    });
-    expect(result.current.pending).toBe(false);
-  } finally {
-    report.mockRestore();
-  }
+  const command = vi.fn(() => task.promise);
+  const onError = vi.fn();
+  const { result } = renderHook(() => usePendingAction());
+  act(() => result.current.run(command, onError));
+  act(() => result.current.run(command, onError));
+  expect(command).toHaveBeenCalledOnce();
+  expect(result.current.pending).toBe(true);
+  await act(async () => task.reject(error));
+  expect(result.current.pending).toBe(false);
+  expect(onError).toHaveBeenCalledWith(error);
+  act(() => result.current.run(() => undefined));
+  expect(result.current.pending).toBe(false);
 });
 
 const labels: EditorHeaderViewLabels = {
@@ -57,7 +42,7 @@ const labels: EditorHeaderViewLabels = {
 
 it.each([
   { control: 'Back', outcome: 'resolve' },
-  { control: 'Remove logo', outcome: 'reject' },
+  { control: 'Try again', outcome: 'reject' },
 ] as const)(
   'tracks the $control promise, blocks duplicates and recovers after $outcome',
   async ({ control, outcome }) => {
@@ -70,13 +55,7 @@ it.each([
         control === 'Back' ? (
           <EditorHeaderView title="Draft post" onBack={command} isConnected isSynced labels={labels} />
         ) : (
-          <ImageUploadField
-            alt="Logo"
-            imageUrl="/logo.png"
-            preview={{ mode: 'hug', maxWidth: 320, maxHeight: 120 }}
-            onRemove={command}
-            removeButtonAriaLabel="Remove logo"
-          />
+          <ErrorPageView title="Not available" actions={[{ label: 'Try again', onClick: command }]} />
         ),
       );
       const button = screen.getByRole('button', { name: control });

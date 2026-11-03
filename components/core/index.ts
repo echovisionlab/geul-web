@@ -351,3 +351,4 @@ export type { BlockSelectionTargetProps } from './SelectionSurface';
 export { InputFrame, InputSizeProvider } from './Input';
 export type { InputFrameProps } from './Input';
 export { preloadOnDemandOverlays } from './on-demand-overlays';
+export { usePendingAction } from './use-pending-action';

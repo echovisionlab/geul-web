@@ -73,8 +73,7 @@ export function ServerDataTableMultiFilter({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
-  const markerRef = useRef<HTMLDivElement>(null);
-  useServerTablePending(markerRef, isPending);
+  useServerTablePending(isPending);
   const [opened, setOpened] = useState(() => filterUiState.get(namespace)?.opened ?? false);
   const [selectedField, setSelectedField] = useState<string | null>(
     () => filterUiState.get(namespace)?.selectedField ?? null,
@@ -213,41 +212,39 @@ export function ServerDataTableMultiFilter({
   };
 
   return (
-    <div ref={markerRef}>
-      <MultiFilterEditorView
-        fields={fields}
-        filters={draftFilters}
-        selectedField={selectedField}
-        editState={editState}
-        availableOperators={availableOperators}
-        filterBy={draftFilterBy}
-        allowLogicToggle={allowLogicToggle}
-        opened={opened}
-        isMobile={isMobile}
-        badgeCount={activeFilters.length}
-        placeholder={placeholder}
-        disabled={isPending}
-        applying={isPending}
-        applyMode="all"
-        hasChanges={hasDraftChanges}
-        valueInputWithinPortal={false}
-        onOpenChange={setOpened}
-        onClose={() => {
-          setOpened(false);
-          setSelectedField(null);
-        }}
-        onSelectField={selectField}
-        onBackToFields={() => setSelectedField(null)}
-        onRemoveFilter={removeFilter}
-        onClearFilters={() => {
-          setDraftFilters([]);
-          setDraftFilterBy('AND');
-        }}
-        onEditStateChange={changeEditState}
-        onOperatorChange={changeOperator}
-        onFilterByChange={setDraftFilterBy}
-        onApply={applyFilters}
-      />
-    </div>
+    <MultiFilterEditorView
+      fields={fields}
+      filters={draftFilters}
+      selectedField={selectedField}
+      editState={editState}
+      availableOperators={availableOperators}
+      filterBy={draftFilterBy}
+      allowLogicToggle={allowLogicToggle}
+      opened={opened}
+      isMobile={isMobile}
+      badgeCount={activeFilters.length}
+      placeholder={placeholder}
+      disabled={isPending}
+      applying={isPending}
+      applyMode="all"
+      hasChanges={hasDraftChanges}
+      valueInputWithinPortal={false}
+      onOpenChange={setOpened}
+      onClose={() => {
+        setOpened(false);
+        setSelectedField(null);
+      }}
+      onSelectField={selectField}
+      onBackToFields={() => setSelectedField(null)}
+      onRemoveFilter={removeFilter}
+      onClearFilters={() => {
+        setDraftFilters([]);
+        setDraftFilterBy('AND');
+      }}
+      onEditStateChange={changeEditState}
+      onOperatorChange={changeOperator}
+      onFilterByChange={setDraftFilterBy}
+      onApply={applyFilters}
+    />
   );
 }

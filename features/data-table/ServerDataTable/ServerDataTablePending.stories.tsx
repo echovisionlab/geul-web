@@ -6,7 +6,7 @@ import { ServerDataTableContent } from './ServerDataTableContent';
 import { ServerDataTableMultiFilter } from './ServerDataTableMultiFilterRuntime';
 import { ServerDataTableMultiSort } from './ServerDataTableMultiSortRuntime';
 import { ServerDataTablePaginationView } from './ServerDataTablePaginationView';
-import { ServerDataTableNavigationProvider } from './ServerDataTableNavigation';
+import { ServerDataTableNavigationProvider, ServerDataTablePendingProvider } from './ServerDataTableNavigation';
 
 function TableNavigationPreview({ failed = false, keepRows = true }: { failed?: boolean; keepRows?: boolean }) {
   const finish = useRef<(() => void) | null>(null);
@@ -38,37 +38,39 @@ function TableNavigationPreview({ failed = false, keepRows = true }: { failed?: 
         value={{ pathname: '/preview', searchParams: new URLSearchParams(), push: navigate, refresh: navigate }}
       >
         <div data-datatable-root data-namespace="preview" data-accessible-label="Preview records">
-          <ServerDataTableMultiFilter
-            namespace="preview"
-            fields={[{ field: 'title', label: 'Title', type: 'string' }]}
-          />
-          <ServerDataTableMultiSort namespace="preview" fields={[{ field: 'title', label: 'Title' }]} />
-          <ServerDataTableContent
-            columns={[{ key: 'title', header: 'Title', accessor: 'title' }]}
-            result={{
-              data: [{ id: 'one', title: 'Notes' }],
-              total: 8,
-              page: 1,
-              pageSize: 1,
-              totalPages: 8,
-              error: failed ? 'Could not load records' : undefined,
-            }}
-            getRowKey={(row) => row.id}
-            showPendingLoader={!keepRows}
-          />
-          <ServerDataTablePaginationView
-            currentPage={1}
-            totalPages={8}
-            getPageUrl={(page) => `/preview?page=${page}`}
-            labels={{
-              navigation: 'Preview pages',
-              firstPage: 'First page',
-              previousPage: 'Previous page',
-              page: (page) => `Page ${page}`,
-              nextPage: 'Next page',
-              lastPage: 'Last page',
-            }}
-          />
+          <ServerDataTablePendingProvider>
+            <ServerDataTableMultiFilter
+              namespace="preview"
+              fields={[{ field: 'title', label: 'Title', type: 'string' }]}
+            />
+            <ServerDataTableMultiSort namespace="preview" fields={[{ field: 'title', label: 'Title' }]} />
+            <ServerDataTableContent
+              columns={[{ key: 'title', header: 'Title', accessor: 'title' }]}
+              result={{
+                data: [{ id: 'one', title: 'Notes' }],
+                total: 8,
+                page: 1,
+                pageSize: 1,
+                totalPages: 8,
+                error: failed ? 'Could not load records' : undefined,
+              }}
+              getRowKey={(row) => row.id}
+              showPendingLoader={!keepRows}
+            />
+            <ServerDataTablePaginationView
+              currentPage={1}
+              totalPages={8}
+              getPageUrl={(page) => `/preview?page=${page}`}
+              labels={{
+                navigation: 'Preview pages',
+                firstPage: 'First page',
+                previousPage: 'Previous page',
+                page: (page) => `Page ${page}`,
+                nextPage: 'Next page',
+                lastPage: 'Last page',
+              }}
+            />
+          </ServerDataTablePendingProvider>
         </div>
       </ServerDataTableNavigationProvider>
     </LayoutStack>

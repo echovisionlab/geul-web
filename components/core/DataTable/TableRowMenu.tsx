@@ -1,16 +1,12 @@
 'use client';
 
-import { Fragment, useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react';
+import { Fragment, type MouseEvent, type ReactNode } from 'react';
 import { IconDots } from '@tabler/icons-react';
 import { DropdownMenu } from '../DropdownMenu';
 import { IconButton } from '../IconButton';
+import { usePendingAction } from '../use-pending-action';
 import type { ControlTone } from '../control-style';
 import type { ClosedVisualProps } from '../visual-contract';
-
-function reportUnhandledFailure(stage: 'action' | 'error handler', error: unknown) {
-  // eslint-disable-next-line no-console -- Keep failures observable when the caller provides no domain feedback.
-  console.error(`TableRowMenu ${stage} failed`, error);
-}
 
 export interface TableRowMenuItem extends ClosedVisualProps {
   /** Display label and aria-label for the menu item */
@@ -18,7 +14,7 @@ export interface TableRowMenuItem extends ClosedVisualProps {
   icon?: ReactNode;
   /** Return the whole action promise to show trigger progress and prevent duplicate row commands. */
   onClick?: () => void | Promise<unknown>;
-  /** Handles rejected actions, including domain notifications. Unhandled failures are logged. */
+  /** Handles rejected actions, including domain notifications. Without it Core logs the failure. */
   onError?: (error: unknown) => void;
   /** Link href - if provided, item will be rendered as a Link */
   href?: string;
@@ -35,55 +31,10 @@ export interface TableRowMenuProps extends ClosedVisualProps {
 }
 
 export function TableRowMenu({ items, 'aria-label': ariaLabel }: TableRowMenuProps) {
-  const [pending, setPending] = useState(false);
-  const running = useRef(false);
-  const mounted = useRef(true);
-  useEffect(() => {
-    mounted.current = true;
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
-
-  const reportError = (item: TableRowMenuItem, error: unknown) => {
-    if (!item.onError) {
-      reportUnhandledFailure('action', error);
-      return;
-    }
-    try {
-      void Promise.resolve(item.onError(error)).catch((handlerError: unknown) => {
-        reportUnhandledFailure('error handler', handlerError);
-      });
-    } catch (handlerError) {
-      reportUnhandledFailure('error handler', handlerError);
-    }
-  };
+  const { pending, run } = usePendingAction();
   const runAction = (item: TableRowMenuItem) => {
-    if (running.current || item.disabled) {
-      return;
-    }
-    try {
-      const result = item.onClick?.();
-      if (!result || typeof result.then !== 'function') {
-        return;
-      }
-      running.current = true;
-      setPending(true);
-      const finish = () => {
-        running.current = false;
-        if (mounted.current) {
-          setPending(false);
-        }
-      };
-      void Promise.resolve(result).then(
-        () => finish(),
-        (error: unknown) => {
-          finish();
-          reportError(item, error);
-        },
-      );
-    } catch (error) {
-      reportError(item, error);
+    if (!item.disabled) {
+      run(item.onClick, item.onError);
     }
   };
 

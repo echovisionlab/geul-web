@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useTransition, type ReactNode } from 'react';
+import { useTransition, type ReactNode } from 'react';
 import { useNavigationIntentHandler } from '@/components/core/Navigation/NavigationIntentProvider';
 import { useServerTablePending, useServerTableRouter } from './ServerDataTableNavigation';
 
@@ -14,12 +14,10 @@ export function ServerDataTablePaginationNavigation({
 }) {
   const router = useServerTableRouter();
   const navigationIntent = useNavigationIntentHandler();
-  const ref = useRef<HTMLDivElement>(null);
   const [pending, startTransition] = useTransition();
-  useServerTablePending(ref, pending);
+  useServerTablePending(pending);
   return (
     <div
-      ref={ref}
       aria-busy={pending}
       onClickCapture={(event) => {
         if (

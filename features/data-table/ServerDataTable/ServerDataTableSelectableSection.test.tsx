@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ServerDataTablePendingProvider } from './ServerDataTableNavigation';
 import { act, render, screen, waitFor, within } from '@/test/render';
 import { LocaleProvider } from '@/lib/providers/LocaleProvider';
 import { notifications } from '@/components/core/Notification';
@@ -25,17 +26,19 @@ function setup(bulk = true) {
   return render(
     <LocaleProvider locale="ko">
       <div role="region" aria-label="Posts" data-datatable-root data-namespace="posts">
-        <ServerDataTableSelectableSection
-          namespace="posts"
-          result={result}
-          columns={[{ key: 'title', header: 'Title', accessor: 'title' }]}
-          getRowKey={(row) => row.id}
-          emptyMessage="No posts"
-          searchPlaceholder="Search posts"
-          filterFields={[]}
-          sortFields={[]}
-          bulkDelete={bulk ? { entityLabel: 'posts', deleteAction, getRowLabel: (row) => row.title } : undefined}
-        />
+        <ServerDataTablePendingProvider>
+          <ServerDataTableSelectableSection
+            namespace="posts"
+            result={result}
+            columns={[{ key: 'title', header: 'Title', accessor: 'title' }]}
+            getRowKey={(row) => row.id}
+            emptyMessage="No posts"
+            searchPlaceholder="Search posts"
+            filterFields={[]}
+            sortFields={[]}
+            bulkDelete={bulk ? { entityLabel: 'posts', deleteAction, getRowLabel: (row) => row.title } : undefined}
+          />
+        </ServerDataTablePendingProvider>
       </div>
     </LocaleProvider>,
   );

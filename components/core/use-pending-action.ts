@@ -1,42 +1,52 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
-/** Tracks a command's returned promise without disabling its focused control. */
-export function usePendingAction<T>(action: () => void | Promise<T>) {
+function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
+  return typeof (value as PromiseLike<unknown> | null)?.then === 'function';
+}
+
+function report(error: unknown, onError?: (error: unknown) => void) {
+  if (!onError) {
+    // eslint-disable-next-line no-console -- The single Core fallback when a caller supplies no domain feedback.
+    console.error('Core command failed', error);
+    return;
+  }
+  void Promise.resolve()
+    .then(() => onError(error))
+    .catch((handlerError: unknown) => report(handlerError));
+}
+
+/**
+ * Pending state for a Core control that owns its command trigger. A command that returns a promise keeps
+ * the trigger pending until it settles and ignores repeated activation meanwhile; a synchronous command
+ * never becomes pending. Failures go to `onError`, which owns domain feedback.
+ */
+export function usePendingAction() {
   const [pending, setPending] = useState(false);
   const running = useRef(false);
-  const mounted = useRef(true);
-  useEffect(() => {
-    mounted.current = true;
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
-
-  const run = () => {
-    if (running.current) {
+  const run = useCallback((action: (() => unknown) | undefined, onError?: (error: unknown) => void) => {
+    if (running.current || !action) {
       return;
     }
-    const result = action();
-    if (!result || typeof result.then !== 'function') {
+    let result: unknown;
+    try {
+      result = action();
+    } catch (error) {
+      report(error, onError);
+      return;
+    }
+    if (!isPromiseLike(result)) {
       return;
     }
     running.current = true;
     setPending(true);
-    const finish = () => {
-      running.current = false;
-      if (mounted.current) {
+    void Promise.resolve(result)
+      .then(undefined, (error: unknown) => report(error, onError))
+      .finally(() => {
+        running.current = false;
         setPending(false);
-      }
-    };
-    const pendingPromise = Promise.resolve(result).finally(finish);
-    // Observe event-handler failures separately so callers still receive the result or rejection.
-    void pendingPromise.catch((error: unknown) => {
-      // eslint-disable-next-line no-console -- Callers own domain feedback; keep unhandled failures observable.
-      console.error('Core command failed', error);
-    });
-    return pendingPromise;
-  };
+      });
+  }, []);
   return { pending, run };
 }

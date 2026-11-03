@@ -10,6 +10,7 @@ import {
   useServerTableRouter as useRouter,
   useServerTableSearchParams as useSearchParams,
   useServerTablePending,
+  useServerTablePendingState,
 } from './ServerDataTableNavigation';
 import { Alert } from '@/components/core/Alert';
 import { useTranslations } from 'next-intl';
@@ -67,9 +68,9 @@ export function ServerDataTableContent<T>({
   const [namespace, setNamespace] = useState<string | null>(null);
   const [sortConfig, setSortConfig] = useState<DataTableSortFieldConfig[]>([]);
   const [maxSorts, setMaxSorts] = useState(DEFAULT_DATA_TABLE_MAX_SORTS);
-  const [tablePending, setTablePending] = useState(false);
   const [isPending, startTransition] = useTransition();
-  useServerTablePending(containerRef, isPending);
+  useServerTablePending(isPending);
+  const tablePending = useServerTablePendingState();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -90,12 +91,10 @@ export function ServerDataTableContent<T>({
       setRootAccessibleLabel(tableRoot.getAttribute('data-accessible-label') ?? undefined);
       const nextSortConfig = parseDataTableSortConfig(tableRoot.getAttribute('data-sort-config'));
       const nextMaxSorts = parseDataTableMaxSorts(tableRoot.getAttribute('data-sort-max'));
-      const nextPending = tableRoot.getAttribute('data-pending') === 'true';
 
       setNamespace((previous) => (previous === (resolvedNamespace || null) ? previous : resolvedNamespace || null));
       setSortConfig((previous) => (areDataTableSortConfigsEqual(previous, nextSortConfig) ? previous : nextSortConfig));
       setMaxSorts((previous) => (previous === nextMaxSorts ? previous : nextMaxSorts));
-      setTablePending((previous) => (previous === nextPending ? previous : nextPending));
     };
 
     syncTableConfig();
@@ -103,7 +102,7 @@ export function ServerDataTableContent<T>({
     const observer = new MutationObserver(syncTableConfig);
     observer.observe(tableRoot, {
       attributes: true,
-      attributeFilter: ['data-accessible-label', 'data-namespace', 'data-sort-config', 'data-sort-max', 'data-pending'],
+      attributeFilter: ['data-accessible-label', 'data-namespace', 'data-sort-config', 'data-sort-max'],
     });
 
     return () => observer.disconnect();

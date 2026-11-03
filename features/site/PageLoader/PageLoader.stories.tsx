@@ -65,7 +65,7 @@ export const MapPhase: Story = { args: { phase: 'loading' } };
 export const WithoutImage: Story = { args: { loaderImageSrc: '' } };
 export const FailedImage: Story = { args: { loaderImageSrc: '/storybook/media/missing-loader.gif' } };
 export const FlowRegion: Story = {
-  args: { placement: 'flow', minHeight: 200 },
+  args: { placement: 'flow', extent: 'section' },
   play: async ({ canvasElement }) => {
     const status = within(canvasElement).getByRole('status');
     await expect(status).toHaveAttribute('data-placement', 'flow');

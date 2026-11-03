@@ -140,7 +140,7 @@ export function EditorHeaderView<TStatus extends string = string>({
   labels,
 }: EditorHeaderViewProps<TStatus>) {
   const syncDescriptionId = useId();
-  const back = usePendingAction(onBack);
+  const back = usePendingAction();
   const isMobile = Boolean(useMediaQuery(breakpointQuery('sm')));
   const [deleteConfirmOpened, setDeleteConfirmOpened] = useState(false);
   const [draftTitle, setDraftTitle] = useState(title);
@@ -194,7 +194,12 @@ export function EditorHeaderView<TStatus extends string = string>({
     <DsLayoutInline flexible gap="xs" wrap="nowrap">
       {!hideBack && (
         <Tooltip label={backTooltip || labels.back}>
-          <IconButton emphasis="low" onClick={back.run} loading={back.pending} aria-label={backTooltip || labels.back}>
+          <IconButton
+            emphasis="low"
+            onClick={() => back.run(onBack)}
+            loading={back.pending}
+            aria-label={backTooltip || labels.back}
+          >
             <IconArrowLeft />
           </IconButton>
         </Tooltip>

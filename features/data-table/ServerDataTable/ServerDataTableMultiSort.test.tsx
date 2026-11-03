@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest';
+import { ServerDataTablePendingProvider } from './ServerDataTableNavigation';
 import { act, render, screen, waitFor } from '@/test/render';
 import { ServerDataTableMultiSort } from './ServerDataTableMultiSortRuntime';
 import { ServerDataTableContent } from './ServerDataTableContent';
@@ -21,12 +22,14 @@ describe('ServerDataTableMultiSort', () => {
     );
     const { user } = render(
       <div role="region" aria-label="Posts" data-datatable-root data-namespace="sort-test">
-        <ServerDataTableMultiSort namespace="sort-test" fields={[{ field: 'title', label: 'Title' }]} />
-        <ServerDataTableContent
-          columns={[{ key: 'title', header: 'Title', cell: (row) => <Button>{row.title}</Button> }]}
-          result={result}
-          getRowKey={(row) => row.id}
-        />
+        <ServerDataTablePendingProvider>
+          <ServerDataTableMultiSort namespace="sort-test" fields={[{ field: 'title', label: 'Title' }]} />
+          <ServerDataTableContent
+            columns={[{ key: 'title', header: 'Title', cell: (row) => <Button>{row.title}</Button> }]}
+            result={result}
+            getRowKey={(row) => row.id}
+          />
+        </ServerDataTablePendingProvider>
       </div>,
     );
     const rowControls = screen.getAllByRole('button', { name: 'Notes' });

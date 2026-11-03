@@ -11,7 +11,6 @@ import classes from './ImageUpload.module.css';
 import { IconButton } from '../IconButton';
 import { ImagePreviewFrame, type ImagePreviewSurface } from './ImagePreviewFrame';
 import { UploadPlaceholder } from './UploadPlaceholder';
-import { usePendingAction } from '../use-pending-action';
 
 type ImageUploadPreviewMode = 'circle' | 'fixed' | 'hug';
 type ImageUploadPreviewFit = 'contain' | 'cover';
@@ -86,7 +85,6 @@ export interface ImageUploadFieldProps extends ClosedVisualProps {
   onFileSelect?: (file: File) => void | Promise<void>;
   onReject?: (rejections: FileRejection[]) => void;
   onValidationReject?: (rejections: ImageUploadRejection[]) => void;
-  /** Return removal completion to keep the existing remove control pending. */
   onRemove?: () => void | Promise<void>;
 }
 
@@ -128,7 +126,6 @@ export function ImageUploadField({
   onValidationReject,
   onRemove,
 }: ImageUploadFieldProps) {
-  const removal = usePendingAction(() => onRemove?.());
   if (removeButtonAppearance === 'avatar' && (preview.mode !== 'circle' || removeButtonPlacement !== 'inside')) {
     throw new TypeError('Avatar removal requires a circle preview and inside placement');
   }
@@ -270,8 +267,8 @@ export function ImageUploadField({
                     })}
                 emphasis={removeButtonEmphasis === 'strong' ? 'strong' : 'medium'}
                 tone="danger"
-                onClick={removal.run}
-                loading={removeButtonLoading || removal.pending}
+                onClick={() => void onRemove()}
+                loading={removeButtonLoading}
                 disabled={disabled || loading}
                 aria-label={removeButtonAriaLabel}
               >
