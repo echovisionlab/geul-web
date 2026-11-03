@@ -32,6 +32,7 @@ import { resolveMediaLifecycleDisplay, resolveMediaStatusDisplay, type MediaStat
 import { UploadType } from '@/lib/types/upload/model';
 import { isRecoverableUploadFailure, resolveUploadFailureCode } from '@/lib/upload/failure';
 import { isUploadResumeSuppressed, type UploadResumeSuppressionIdentity } from '@/lib/upload/resume-suppression';
+import { UploadResumeStateCode } from '@/lib/upload/resume-state';
 import { readUploadSession, disposePreparedSession, forgetUploadSession } from '@/lib/upload/upload-session-store';
 import { createClientLogger } from '@/lib/utils/client-logger';
 import {
@@ -210,6 +211,11 @@ export function TrackAudioUploader({
   const internalResumeState = internalUploadSurface.resumeState;
   const resumeState = resumeStateOverride ?? internalResumeState;
   const resumeNotice = resumeState.resumeNotice;
+  const hasProcessingPrecedence =
+    audioAttached &&
+    (processingActive ||
+      processingStatus === TRACK_PROCESSING_STATUS_PENDING ||
+      processingStatus === TRACK_PROCESSING_STATUS_PROCESSING);
   const externalUploadActive = Boolean(activeUploadState?.active);
   const effectiveUploadProgress = externalUploadActive ? (activeUploadState?.progress ?? 0) : uploadProgress;
   const effectiveUploadStage = externalUploadActive ? (activeUploadState?.stage ?? null) : uploadStage;
@@ -221,8 +227,14 @@ export function TrackAudioUploader({
   });
   isFinalizingOperationRef.current = isFinalizingOperation;
   const isResumeNoticeSuppressed =
-    isUploadResumeSuppressed(resumeNotice, suppressedResumeRef.current) ||
-    isUploadResumeSuppressed(resumeNotice, suppressedResumeIdentity);
+    isUploadResumeSuppressed(
+      resumeNotice ?? { fileId: trackedPendingFileId, attemptId: trackedPendingAttemptId },
+      suppressedResumeRef.current,
+    ) ||
+    isUploadResumeSuppressed(
+      resumeNotice ?? { fileId: trackedPendingFileId, attemptId: trackedPendingAttemptId },
+      suppressedResumeIdentity,
+    );
 
   useEffect(() => {
     const noticeFileId = resumeNotice?.fileId;
@@ -254,7 +266,7 @@ export function TrackAudioUploader({
   ]);
 
   const resumeInstruction = useMemo(() => {
-    if (isResumeNoticeSuppressed) {
+    if (isResumeNoticeSuppressed || isFinalizingOperation || hasProcessingPrecedence) {
       return null;
     }
 
@@ -262,14 +274,33 @@ export function TrackAudioUploader({
       return t('resumeExpired');
     }
 
-    if (!resumeNotice) {
+    if (resumeState.code === UploadResumeStateCode.LOOKUP_PENDING) {
+      return tCommon('states.loading');
+    }
+    if (resumeState.code === UploadResumeStateCode.LOOKUP_ERROR) {
+      return tCommon('messages.failedToLoad');
+    }
+    if (resumeState.code === UploadResumeStateCode.MISSING_SESSION) {
+      return tCommon('states.notAvailable');
+    }
+    if (resumeState.code !== UploadResumeStateCode.AVAILABLE || !resumeNotice) {
       return null;
     }
 
     return resumeNotice.fileName
       ? tIngestDialog('resumeInstructionNamed', { name: resumeNotice.fileName })
       : tIngestDialog('resumeAvailable');
-  }, [isPendingExpired, isResumeNoticeSuppressed, resumeNotice, t, tIngestDialog]);
+  }, [
+    hasProcessingPrecedence,
+    isFinalizingOperation,
+    isPendingExpired,
+    isResumeNoticeSuppressed,
+    resumeNotice,
+    resumeState.code,
+    t,
+    tCommon,
+    tIngestDialog,
+  ]);
   const mediaStatusLabels = useMemo(() => createLocalizedMediaStatusLabels(tMedia), [tMedia]);
   const activeUploadDisplay = useMemo(
     () => resolveMediaLifecycleDisplay(effectiveUploadStage ?? 'uploading', effectiveUploadProgress, mediaStatusLabels),
@@ -570,8 +601,6 @@ export function TrackAudioUploader({
     tone: StatusBadgeTone;
     kind: 'idle' | 'warning' | 'processing' | 'ready' | 'failed';
   } => {
-    const hasActiveProcessingLifecycle = Boolean(audioAttached && processingActive);
-
     if (isFinalizingOperation) {
       return {
         label: mediaStatusLabels.stage.finalizing,
@@ -592,35 +621,25 @@ export function TrackAudioUploader({
       return { label: activeUploadLabel, tone: 'accent', kind: 'processing' };
     }
 
-    if (isPendingExpired) {
-      return { label: resumeInstruction ?? t('resumeExpired'), tone: 'warning', kind: 'warning' };
+    if (hasProcessingPrecedence) {
+      return { label: activeLifecycleLabel ?? t('processing'), tone: 'accent', kind: 'processing' };
     }
 
-    if (hasActiveProcessingLifecycle) {
-      return { label: activeLifecycleLabel ?? t('processing'), tone: 'accent', kind: 'processing' };
+    if (!isResumeNoticeSuppressed && isPendingExpired) {
+      return { label: t('resumeExpired'), tone: 'warning', kind: 'warning' };
+    }
+    if (resumeInstruction && resumeState.code === UploadResumeStateCode.LOOKUP_PENDING) {
+      return { label: resumeInstruction, tone: 'accent', kind: 'processing' };
+    }
+    if (resumeInstruction && resumeState.code === UploadResumeStateCode.LOOKUP_ERROR) {
+      return { label: resumeInstruction, tone: 'danger', kind: 'failed' };
+    }
+    if (resumeInstruction && resumeState.code === UploadResumeStateCode.MISSING_SESSION) {
+      return { label: resumeInstruction, tone: 'warning', kind: 'warning' };
     }
 
     if (processingStatus === TRACK_PROCESSING_STATUS_COMPLETED) {
       return { label: t('ready'), tone: 'positive', kind: 'ready' };
-    }
-
-    if (
-      processingStatus === TRACK_PROCESSING_STATUS_PENDING ||
-      processingStatus === TRACK_PROCESSING_STATUS_PROCESSING
-    ) {
-      if (audioAttached) {
-        return {
-          label: activeLifecycleLabel ?? t('processing'),
-          tone: 'accent',
-          kind: 'processing',
-        };
-      }
-
-      return {
-        label: resumeInstruction ?? (hasTrackedPendingUpload ? tIngestDialog('resumeAvailable') : null),
-        tone: hasTrackedPendingUpload ? 'warning' : 'neutral',
-        kind: hasTrackedPendingUpload ? 'warning' : 'idle',
-      };
     }
 
     if (processingStatus === TRACK_PROCESSING_STATUS_FAILED) {
@@ -628,9 +647,9 @@ export function TrackAudioUploader({
     }
 
     return {
-      label: resumeInstruction ?? (hasTrackedPendingUpload ? tIngestDialog('resumeAvailable') : null),
-      tone: hasTrackedPendingUpload ? 'warning' : 'neutral',
-      kind: hasTrackedPendingUpload ? 'warning' : 'idle',
+      label: resumeInstruction,
+      tone: resumeInstruction ? 'warning' : 'neutral',
+      kind: resumeInstruction ? 'warning' : 'idle',
     };
   };
 

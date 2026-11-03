@@ -1,5 +1,6 @@
 'use client';
 import { useLocale } from 'next-intl';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { useQuery } from '@tanstack/react-query';
 import { listProgramEventsForBlockBrowser } from '@/lib/queries/program-event-browser';
 import { parseBooleanProp, parseIntegerProp, splitCsv } from '../list-view-utils';
@@ -23,11 +24,15 @@ export function ProgramEventListView({ props }: BlockViewProps) {
     sortOrder: p.sortOrder,
     limit,
   };
-  const { data, isLoading } = useQuery({
+  const queryResult = useQuery({
     queryKey: ['program-events', 'forBlock', { ...query, offset: 0, locale }],
     queryFn: () => listProgramEventsForBlockBrowser({ ...query, offset: 0, requestedLocale: locale }),
   });
-  if (isLoading || !data) {
+  const { data, isLoading } = queryResult;
+  if (queryResult.isError && data === undefined) {
+    return <QueryErrorAlert queries={[queryResult]} />;
+  }
+  if (isLoading) {
     return (
       <ListBlockSkeleton
         className="program-event-list-block"
@@ -42,16 +47,24 @@ export function ProgramEventListView({ props }: BlockViewProps) {
       />
     );
   }
-  return showPagination ? (
-    <ProgramEventInfiniteList
-      key={JSON.stringify(query)}
-      initialEvents={data.events}
-      total={data.pagination.total}
-      query={query}
-      parsedProps={p}
-      locale={locale}
-    />
-  ) : (
-    <ProgramEventListViewClient events={data.events} parsedProps={p} locale={locale} />
+  if (!data) {
+    return null;
+  }
+  return (
+    <>
+      <QueryErrorAlert queries={[queryResult]} />
+      {showPagination ? (
+        <ProgramEventInfiniteList
+          key={JSON.stringify(query)}
+          initialEvents={data.events}
+          total={data.pagination.total}
+          query={query}
+          parsedProps={p}
+          locale={locale}
+        />
+      ) : (
+        <ProgramEventListViewClient events={data.events} parsedProps={p} locale={locale} />
+      )}
+    </>
   );
 }

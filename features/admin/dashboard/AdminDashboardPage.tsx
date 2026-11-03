@@ -27,7 +27,7 @@ export default function AdminDashboardPage({ loadStats = getAdminStats }: { load
       <PageHeader title={tCommonLabels('dashboard')} />
 
       {statsQuery.isError ? null : isLoading ? (
-        <PageLoader />
+        <PageLoader placement="flow" />
       ) : (
         <DsLayoutGrid columns={{ base: 2, md: 4 }}>
           <StatCard

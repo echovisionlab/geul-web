@@ -150,6 +150,7 @@ export function PersonalAccessTokenSettingsView({
                     emphasis="medium"
                     leftSection={<IconRefresh size={14} aria-hidden />}
                     onClick={() => setConfirmation('regenerate')}
+                    loading={pendingAction === `regenerate:${token.id}`}
                     disabled={pendingAction !== null}
                     data-testid={`security-regenerate-personal-access-token-${token.id}`}
                   >
@@ -162,6 +163,7 @@ export function PersonalAccessTokenSettingsView({
                   emphasis="medium"
                   leftSection={<IconTrash size={14} aria-hidden />}
                   onClick={() => setConfirmation('delete')}
+                  loading={pendingAction === `delete:${token.id}`}
                   disabled={pendingAction !== null}
                   data-testid={`security-delete-personal-access-token-${token.id}`}
                 >

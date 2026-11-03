@@ -123,7 +123,7 @@ export function DataTableContent<T>({ reservedRowCount }: DataTableContentProps 
       getRowKey={getRowKey}
       emptyMessage={emptyMessage}
       loading={loading}
-      loadingContent={<PageLoader minHeight={0} />}
+      loadingContent={<PageLoader extent="container" />}
       rowAction={rowAction}
       selection={
         selection

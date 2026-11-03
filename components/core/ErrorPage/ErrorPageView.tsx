@@ -1,3 +1,5 @@
+'use client';
+
 import {
   LayoutContainer as DsLayoutContainer,
   LayoutStack as DsLayoutStack,
@@ -8,10 +10,21 @@ import { Heading as DsHeading, Text as DsText } from '../Typography';
 import type { ReactNode } from 'react';
 
 import { Button } from '../Button';
+import { usePendingAction } from '../use-pending-action';
 
+/** Retry commands return completion for the shared pending button; links retain navigation semantics. */
 export type ErrorPageAction = { label: string } & (
-  { href: string; onClick?: never } | { onClick: () => void; href?: never }
+  { href: string; onClick?: never } | { onClick: () => void | Promise<unknown>; href?: never }
 );
+
+function ErrorPageCommand({ action }: { action: Extract<ErrorPageAction, { onClick: unknown }> }) {
+  const command = usePendingAction();
+  return (
+    <Button emphasis="low" onClick={() => command.run(action.onClick)} loading={command.pending}>
+      {action.label}
+    </Button>
+  );
+}
 
 export interface ErrorPageViewProps {
   code?: string;
@@ -57,9 +70,7 @@ export function ErrorPageView({
                       {action.label}
                     </Button>
                   ) : (
-                    <Button key={index} emphasis="low" onClick={action.onClick}>
-                      {action.label}
-                    </Button>
+                    <ErrorPageCommand key={index} action={action} />
                   ),
                 )}
               </DsLayoutInline>

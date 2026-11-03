@@ -181,7 +181,10 @@ export function CookieConsentBanner() {
     let cancelled = false;
     void (async () => {
       const preferences = await fetchCurrentUserConsent();
-      if (cancelled || !preferences) {
+      if (cancelled || readConsentFromCookie()) {
+        return;
+      }
+      if (!preferences) {
         if (!cancelled) {
           setRequiresRenewal(false);
           setIsBannerOpen(true);

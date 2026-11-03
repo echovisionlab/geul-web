@@ -1332,6 +1332,8 @@
       }
     },
     "verification": {
+      "checking": "正在检查邮箱更改状态…",
+      "unavailable": "无法检查邮箱更改状态。请重试。",
       "loading": "正在加载验证表单...",
       "startOver": "重新开始",
       "errors": {

@@ -4,8 +4,9 @@
 // open state, session user, theme, route and events from `useShellState()`. Overlays use the
 // on-demand Core variants, so menu, tooltip and drawer code loads on first hover/focus/press.
 
-import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { IconLogout, IconMoon, IconSearch, IconSun } from '@tabler/icons-react';
+import { Alert } from '@/components/core/Alert';
 import { ApplicationFrame } from '@/components/core/ApplicationFrame';
 import { Avatar, Separator as Divider } from '@/components/core/Display';
 import { Button } from '@/components/core/Button';
@@ -17,6 +18,7 @@ import {
   LayoutInline as DsLayoutInline,
   LayoutInset as DsLayoutInset,
   LayoutStack as DsLayoutStack,
+  LayoutVisibility,
 } from '@/components/core/Layout';
 import { MenuToggle } from '@/components/core/MenuToggle';
 import { NavigationLink } from '@/components/core/Navigation';
@@ -24,7 +26,8 @@ import { TextButton, type TextButtonProps } from '@/components/core/TextButton';
 import { OnDemandTooltip } from '@/components/core/Tooltip/OnDemandTooltip';
 import { Text as DsText, VisuallyHidden } from '@/components/core/Typography';
 import { tokenVar } from '@/components/core/design-tokens';
-import { onDemandModule, useOnDemandModule } from '@/components/core/on-demand-module';
+import { useOnDemandModuleState, type OnDemandModuleState } from '@/components/core/on-demand-module';
+import { mobileNavigation } from './shell-mobile-navigation-module';
 import { useShellState } from './shell-state';
 import type { ShellViewNavigationItem, ShellViewUser } from './shell-types';
 import headerClasses from './HeaderMenu.module.css';
@@ -95,24 +98,76 @@ export function ShellHomeLink({ label, children }: { label: string; children: Re
 }
 
 /** The drawer's navigation list (Disclosure groups) loads with the drawer, not with the page. */
-const mobileNavigation = onDemandModule(() => import('./ShellMobileNavigation'));
 export const preloadShellNavigation = mobileNavigation.preload;
+
+const NavigationLoadContext = createContext<{
+  load: OnDemandModuleState<typeof import('./ShellMobileNavigation')>;
+  toggle: RefObject<HTMLButtonElement | null>;
+  recovery: RefObject<HTMLDivElement | null>;
+} | null>(null);
 
 export function ShellNavigationToggle({ label }: { label: string }) {
   const { navigationOpened, events } = useShellState();
-  const toggle = useRef<HTMLButtonElement>(null);
+  const navigation = useContext(NavigationLoadContext);
+  if (!navigation) {
+    throw new Error('ShellNavigationToggle requires ShellFrame');
+  }
+  const { load, toggle, recovery } = navigation;
+  const pending = load.status === 'pending';
+  const waiting = navigationOpened && !load.module;
+  useEffect(() => {
+    if (!waiting) {
+      return;
+    }
+    let cancelled = false;
+    const close = () => {
+      if (!cancelled) {
+        cancelled = true;
+        events.onToggleNavigation();
+      }
+    };
+    const cancel = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        close();
+        toggle.current?.focus();
+      }
+    };
+    const leave = (event: FocusEvent) => {
+      if (event.target !== toggle.current && !recovery.current?.contains(event.target as Node)) {
+        close();
+      }
+    };
+    const outside = (event: PointerEvent) => {
+      if (!toggle.current?.contains(event.target as Node) && !recovery.current?.contains(event.target as Node)) {
+        close();
+      }
+    };
+    document.addEventListener('keydown', cancel);
+    document.addEventListener('focusin', leave);
+    document.addEventListener('pointerdown', outside);
+    return () => {
+      document.removeEventListener('keydown', cancel);
+      document.removeEventListener('focusin', leave);
+      document.removeEventListener('pointerdown', outside);
+    };
+  }, [waiting, events, toggle, recovery]);
   // Start loading the navigation list on intent; Core ApplicationFrame preloads the drawer itself.
   useEffect(() => {
     const button = toggle.current;
-    const preload = () => void mobileNavigation.preload();
+    const preload = () => {
+      if (load.status !== 'error') {
+        void mobileNavigation.preload();
+      }
+    };
     const types = ['pointerenter', 'focus', 'pointerdown'] as const;
     types.forEach((type) => button?.addEventListener(type, preload));
     return () => types.forEach((type) => button?.removeEventListener(type, preload));
-  }, []);
+  }, [load.status, toggle]);
   return (
     <MenuToggle
       ref={toggle}
       opened={navigationOpened}
+      loading={pending}
       onClick={events.onToggleNavigation}
       label={label}
       visibility="mobile-only"
@@ -121,13 +176,61 @@ export function ShellNavigationToggle({ label }: { label: string }) {
   );
 }
 
+/** Terminal chunk failure; the controller supplies localized copy and starts a fresh load round. */
+export function ShellNavigationRecovery({
+  failureLabel,
+  retryLabel,
+  onRetry,
+}: {
+  failureLabel: string;
+  retryLabel: string;
+  onRetry: () => void;
+}) {
+  return (
+    <Alert tone="danger" density="compact">
+      <DsLayoutStack gap="xs" align="start">
+        <DsText size="sm">{failureLabel}</DsText>
+        <Button onClick={onRetry}>{retryLabel}</Button>
+      </DsLayoutStack>
+    </Alert>
+  );
+}
+
 export function ShellSearchAction({ label, variant }: { label: string; variant: 'desktop' | 'mobile' }) {
   const { events, labels } = useShellState();
   const intent = events.onSearchIntent;
+  const [searchPending, setSearchPending] = useState(false);
+  const searchTask = useRef<Promise<void> | null>(null);
+  const active = useRef(true);
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+    };
+  }, []);
+  const search = () => {
+    if (searchTask.current) {
+      return searchTask.current;
+    }
+    const result = events.onSearch();
+    if (!result) {
+      return;
+    }
+    setSearchPending(true);
+    const task = result.finally(() => {
+      searchTask.current = null;
+      if (active.current) {
+        setSearchPending(false);
+      }
+    });
+    searchTask.current = task;
+    return task;
+  };
   const button = (
     <IconButton
       size="chrome"
-      onClick={events.onSearch}
+      loading={searchPending}
+      onClick={search}
       aria-label={label}
       onPointerEnter={intent}
       onFocus={intent}
@@ -199,7 +302,7 @@ interface AccountLabels {
 }
 
 export function ShellAccountDesktop({ items, labels }: { items: ShellViewNavigationItem[]; labels: AccountLabels }) {
-  const { user, userMenuOpened, loginHref, events } = useShellState();
+  const { user, userMenuOpened, signOutPending, loginHref, events } = useShellState();
   const accountDescriptionId = useId();
   // Phones show the account drawer instead. The hidden desktop menu must neither open with the
   // shared state nor report a close that would dismiss that drawer.
@@ -251,6 +354,7 @@ export function ShellAccountDesktop({ items, labels }: { items: ShellViewNavigat
           size="sm"
           density="chrome"
           data-interactive
+          loading={signOutPending}
           selected={menuOpened}
           aria-label={user.name}
           aria-describedby={accountDescriptionId}
@@ -289,7 +393,7 @@ export function ShellAccountDesktop({ items, labels }: { items: ShellViewNavigat
 }
 
 export function ShellAccountMobile({ labels }: { labels: AccountLabels }) {
-  const { user, userMenuOpened, loginHref, events } = useShellState();
+  const { user, userMenuOpened, signOutPending, loginHref, events } = useShellState();
   if (!user) {
     return (
       <TextButton
@@ -315,6 +419,7 @@ export function ShellAccountMobile({ labels }: { labels: AccountLabels }) {
   return (
     <IconButton
       size="chrome"
+      loading={signOutPending}
       onClick={events.onOpenUserMenu}
       aria-label={labels.account}
       aria-expanded={userMenuOpened}
@@ -404,7 +509,7 @@ function AccountMenuContent({
   items: ShellViewNavigationItem[];
   labels: { logOut: string };
 }) {
-  const { events } = useShellState();
+  const { events, signOutPending } = useShellState();
   return (
     <DsLayoutStack gap="xs">
       <DsLayoutInset space="xs">
@@ -443,6 +548,7 @@ function AccountMenuContent({
             fullWidth
             justify="start"
             leftSection={<IconLogout size={16} aria-hidden />}
+            loading={signOutPending}
             onClick={events.onSignOut}
           >
             {labels.logOut}
@@ -473,53 +579,72 @@ export function ShellFrame({
   labels: { navigation: string; close: string; account: string; logOut: string };
   children: ReactNode;
 }) {
-  const { navigationOpened, userMenuOpened, themeMode, user, events } = useShellState();
+  const { navigationOpened, userMenuOpened, themeMode, user, events, labels: stateLabels } = useShellState();
   const authenticated = user?.kind === 'authenticated';
   // The drawer opens once its navigation list is available, so it never opens empty.
-  const navigation = useOnDemandModule(mobileNavigation, navigationOpened);
+  const load = useOnDemandModuleState(mobileNavigation, navigationOpened);
+  const navigation = load.module;
+  const toggle = useRef<HTMLButtonElement>(null);
+  const recovery = useRef<HTMLDivElement>(null);
   return (
-    <ApplicationFrame
-      kind="site"
-      id="app-shell"
-      data-shell
-      data-navigation-opened={navigationOpened}
-      data-user-menu-opened={userMenuOpened}
-      data-user-state={user?.kind ?? 'anonymous'}
-      data-theme-mode={themeMode ?? 'pending'}
-      header={header}
-      navigation={
-        navigation ? (
-          <>
-            <navigation.ShellMobileNavigation
-              headerItems={headerItems}
-              secondaryItems={secondaryItems}
-              footer={navigationFooter}
-            />
-          </>
-        ) : null
-      }
-      navigationOpened={navigationOpened && Boolean(navigation)}
-      onCloseNavigation={events.onToggleNavigation}
-      navigationLabel={labels.navigation}
-      navigationId={MOBILE_NAVIGATION_ID}
-      footer={footer}
-    >
-      {children}
+    <NavigationLoadContext.Provider value={{ load, toggle, recovery }}>
+      <ApplicationFrame
+        kind="site"
+        id="app-shell"
+        data-shell
+        data-navigation-opened={navigationOpened}
+        data-user-menu-opened={userMenuOpened}
+        data-user-state={user?.kind ?? 'anonymous'}
+        data-theme-mode={themeMode ?? 'pending'}
+        header={header}
+        navigation={
+          navigation ? (
+            <>
+              <navigation.ShellMobileNavigation
+                headerItems={headerItems}
+                secondaryItems={secondaryItems}
+                footer={navigationFooter}
+              />
+            </>
+          ) : null
+        }
+        navigationOpened={navigationOpened && Boolean(navigation)}
+        onCloseNavigation={events.onToggleNavigation}
+        navigationLabel={labels.navigation}
+        navigationId={MOBILE_NAVIGATION_ID}
+        footer={footer}
+      >
+        {load.status === 'error' ? (
+          <LayoutVisibility hiddenFrom="sm" ref={recovery}>
+            <DsLayoutInset space="sm">
+              <ShellNavigationRecovery
+                failureLabel={stateLabels.navigationLoadFailed}
+                retryLabel={stateLabels.retryNavigation}
+                onRetry={() => {
+                  toggle.current?.focus();
+                  load.retry();
+                }}
+              />
+            </DsLayoutInset>
+          </LayoutVisibility>
+        ) : null}
+        {children}
 
-      {authenticated && user ? (
-        <OnDemandDrawer
-          opened={userMenuOpened}
-          onClose={events.onCloseUserMenu}
-          placement="bottom"
-          size="auto"
-          title={labels.account}
-          closeLabel={labels.close}
-          visibility="mobile-only"
-        >
-          <AccountMenuContent user={user} items={accountItems} labels={labels} />
-        </OnDemandDrawer>
-      ) : null}
-    </ApplicationFrame>
+        {authenticated && user ? (
+          <OnDemandDrawer
+            opened={userMenuOpened}
+            onClose={events.onCloseUserMenu}
+            placement="bottom"
+            size="auto"
+            title={labels.account}
+            closeLabel={labels.close}
+            visibility="mobile-only"
+          >
+            <AccountMenuContent user={user} items={accountItems} labels={labels} />
+          </OnDemandDrawer>
+        ) : null}
+      </ApplicationFrame>
+    </NavigationLoadContext.Provider>
   );
 }
 

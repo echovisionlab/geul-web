@@ -89,12 +89,12 @@ describe('closed typography and image chrome', () => {
   it('counts repeated filter/sort state without making the count an extra accessible control', () => {
     const host = document.createElement('div');
     host.innerHTML = renderToStaticMarkup(
-      <IconButton count={120} label="Filters (120)">
+      <IconButton count={120} label="Filters">
         F
       </IconButton>,
     );
     const button = host.querySelector('button')!;
-    expect(button.getAttribute('aria-label')).toBe('Filters (120)');
+    expect(button.getAttribute('aria-label')).toBe('Filters 99+');
     expect(button.querySelector('[aria-hidden]')?.textContent).toBe('99+');
     expect(() =>
       renderToStaticMarkup(

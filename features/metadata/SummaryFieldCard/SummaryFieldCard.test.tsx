@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 
-import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
-import { act } from 'react';
+import { render, screen, userEvent, act } from '@/test/render';
 import { create } from '@bufbuild/protobuf';
 import type { MetadataAiSharedState } from '@echovisionlab/geul-common/collaboration/metadata-ai';
 import {
@@ -15,9 +14,7 @@ import {
   AIEditorTurnTerminalOutcomeSchema,
   AIEditorTurnTerminalStatus,
 } from '@echovisionlab/geul-proto/secure/ai_pb.ts';
-import { NextIntlClientProvider } from 'next-intl';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
 
 import type { AIEditorAssistantClient } from '@/lib/ai/editor-orchestration';
@@ -34,57 +31,8 @@ vi.mock('@/lib/hooks/useCollaborativeMetadataAiState', () => ({
   useCollaborativeMetadataAiState: vi.fn(),
 }));
 
-vi.mock('@/components/core/Button', () => ({
-  Button: ({ children, onClick, disabled, id }: React.ComponentProps<'button'>) => (
-    <button id={id} type="button" onClick={onClick} disabled={disabled}>
-      {children}
-    </button>
-  ),
-}));
-
-vi.mock('@/components/core/IconButton', () => ({
-  IconButton: ({ children, onClick, disabled, id, 'aria-label': ariaLabel }: React.ComponentProps<'button'>) => (
-    <button id={id} type="button" aria-label={ariaLabel} onClick={onClick} disabled={disabled}>
-      {children}
-    </button>
-  ),
-}));
-
-vi.mock('@/components/core/Input', () => ({
-  Textarea: ({ id, value, onChange, readOnly, placeholder }: React.ComponentProps<'textarea'>) => (
-    <textarea id={id} value={value} readOnly={readOnly} placeholder={placeholder} onChange={onChange} />
-  ),
-}));
-
-vi.mock('@/components/core/Section', () => ({
-  SectionCard: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  SectionHeader: ({
-    title,
-    description,
-    actions,
-  }: {
-    title: React.ReactNode;
-    description?: React.ReactNode;
-    actions?: React.ReactNode;
-  }) => (
-    <div>
-      <div>{title}</div>
-      {description ? <div>{description}</div> : null}
-      {actions}
-    </div>
-  ),
-}));
-
-vi.mock('@/components/core/Badge', () => ({
-  StatusBadge: ({ children, id }: { children: React.ReactNode; id?: string }) => <span id={id}>{children}</span>,
-}));
-
 vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-let container: HTMLDivElement | null = null;
-let root: Root | null = null;
 const target = { type: 'post' as const, id: 'post-1', locale: 'en' };
 const mockUseCollaborativeMetadataAiState = vi.mocked(useCollaborativeMetadataAiState);
 
@@ -121,34 +69,13 @@ function setCollaborativeState(overrides: Partial<MetadataAiSharedState> = {}) {
   return state;
 }
 
-function render(node: React.ReactNode) {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-  act(() => {
-    root?.render(
-      <NextIntlClientProvider locale="en" messages={enMessages}>
-        <DesignSystemProvider locale="en" forceColorScheme="light">
-          {node}
-        </DesignSystemProvider>
-      </NextIntlClientProvider>,
-    );
-  });
-}
-
-async function flushUpdates() {
-  await act(async () => {
-    await Promise.resolve();
-  });
-}
-
 async function click(id: string) {
-  const button = document.querySelector<HTMLButtonElement>(`#${id}`);
-  expect(button).not.toBeNull();
-  await act(async () => {
-    button?.click();
-    await Promise.resolve();
-  });
+  const labels: Record<string, string> = {
+    'post-post-1-generate-all-metadata': enMessages.summaryField.actions.generate,
+    'post-post-1-apply-ai-metadata': enMessages.summaryField.actions.apply,
+    'post-post-1-dismiss-ai-metadata': enMessages.common.actions.dismiss,
+  };
+  await userEvent.click(await screen.findByRole('button', { name: labels[id] }));
 }
 
 function exactApproval(fieldHandle = 'summary') {
@@ -213,6 +140,7 @@ function assistantClient(approval = exactApproval()) {
   return {
     client: { start: vi.fn(async () => ({ events: events(), resolve, cancel })) } satisfies AIEditorAssistantClient,
     resolve,
+    complete: () => continueAfterApproval(),
   };
 }
 
@@ -221,18 +149,11 @@ beforeEach(() => {
   setCollaborativeState();
 });
 
-afterEach(() => {
-  act(() => root?.unmount());
-  container?.remove();
-  root = null;
-  container = null;
-});
-
 describe('SummaryFieldCard exact-locale AI', () => {
   it('keeps manual summary editing independent from AI visibility', () => {
     render(<SummaryFieldCard entityType="post" entityId="post-1" title="Title" summary="Summary" hideAiActions />);
-    expect(document.querySelector('textarea')?.hasAttribute('readonly')).toBe(false);
-    expect(document.querySelector('#post-post-1-generate-all-metadata')).toBeNull();
+    expect(screen.getByRole('textbox')).not.toHaveAttribute('readonly');
+    expect(screen.queryByRole('button', { name: enMessages.summaryField.actions.generate })).not.toBeInTheDocument();
   });
 
   it('forbids AI mutation for a read-only viewer even if a target is passed accidentally', async () => {
@@ -275,7 +196,6 @@ describe('SummaryFieldCard exact-locale AI', () => {
     );
 
     await click('post-post-1-generate-all-metadata');
-    await flushUpdates();
 
     expect(runtime.client.start).toHaveBeenCalledWith({
       target,
@@ -283,7 +203,7 @@ describe('SummaryFieldCard exact-locale AI', () => {
       action: 'generate-summary',
       prompt: undefined,
     });
-    expect(document.body.textContent).toContain('Generated English summary');
+    expect(await screen.findByText('Generated English summary')).toBeVisible();
     expect(collaborative.markReady).toHaveBeenCalledWith('generation-1', ['summary'], true);
 
     await click('post-post-1-apply-ai-metadata');
@@ -309,8 +229,85 @@ describe('SummaryFieldCard exact-locale AI', () => {
     );
 
     await click('post-post-1-generate-all-metadata');
-    await flushUpdates();
-    expect(document.body.textContent).toContain('not an exact locale-owned summary mutation');
-    expect(document.querySelector('#post-post-1-apply-ai-metadata')).toBeNull();
+    expect(await screen.findByText(/not an exact locale-owned summary mutation/)).toBeVisible();
+    expect(screen.queryByRole('button', { name: enMessages.summaryField.actions.apply })).not.toBeInTheDocument();
+  });
+  it.each(['apply', 'dismiss'] as const)(
+    'shows pending for %s and ignores completion after locale replacement',
+    async (decision) => {
+      const runtime = assistantClient();
+      let reject!: (error: Error) => void;
+      runtime.resolve.mockImplementationOnce(
+        () =>
+          new Promise<void>((_resolve, fail) => {
+            reject = fail;
+          }),
+      );
+      const doc = new Y.Doc();
+      const props = {
+        entityType: 'post' as const,
+        entityId: 'post-1',
+        title: 'Title',
+        summary: 'Summary',
+        aiTarget: target,
+        aiClient: runtime.client,
+        provider: {} as never,
+        doc,
+        currentMemberId: 'member-1',
+        currentMemberDisplayName: 'Author',
+      };
+      const { user, rerender, unmount } = render(<SummaryFieldCard {...props} />);
+      await user.click(screen.getByRole('button', { name: enMessages.summaryField.actions.generate }));
+      expect(await screen.findByText('Generated English summary')).toBeVisible();
+      const label = decision === 'apply' ? enMessages.summaryField.actions.apply : enMessages.common.actions.dismiss;
+      const command = screen.getByRole('button', { name: label });
+      await user.click(command);
+      expect(command).toHaveAttribute('aria-busy', 'true');
+      await user.click(command);
+      expect(runtime.resolve).toHaveBeenCalledTimes(1);
+      rerender(<SummaryFieldCard {...props} aiTarget={{ ...target, locale: 'ko' }} />);
+      await act(async () => reject(new Error('obsolete resolution')));
+      expect(screen.queryByText('obsolete resolution')).not.toBeInTheDocument();
+      expect(screen.queryByText('Generated English summary')).not.toBeInTheDocument();
+      unmount();
+      doc.destroy();
+    },
+  );
+  it('keeps an accepted summary when its approval transport later rejects', async () => {
+    const collaborative = setCollaborativeState();
+    const runtime = assistantClient();
+    let fail!: (error: Error) => void;
+    runtime.resolve.mockImplementationOnce(
+      () =>
+        new Promise<void>((_resolve, reject) => {
+          fail = reject;
+        }),
+    );
+    const doc = new Y.Doc();
+    const { user, unmount } = render(
+      <SummaryFieldCard
+        entityType="post"
+        entityId="post-1"
+        title="Title"
+        summary="Summary"
+        aiTarget={target}
+        aiClient={runtime.client}
+        provider={{} as never}
+        doc={doc}
+        currentMemberId="member-1"
+        currentMemberDisplayName="Author"
+      />,
+    );
+    await user.click(screen.getByRole('button', { name: enMessages.summaryField.actions.generate }));
+    expect(await screen.findByText('Generated English summary')).toBeVisible();
+    await user.click(screen.getByRole('button', { name: enMessages.summaryField.actions.apply }));
+    await act(async () => runtime.complete());
+    expect(await screen.findByText(enMessages.summaryField.feedback.applied)).toBeVisible();
+    await act(async () => fail(new Error('obsolete approval failure')));
+    expect(screen.queryByText('obsolete approval failure')).not.toBeInTheDocument();
+    expect(screen.getByText(enMessages.summaryField.feedback.applied)).toBeVisible();
+    expect(collaborative.updateReadyFields).not.toHaveBeenCalled();
+    unmount();
+    doc.destroy();
   });
 });

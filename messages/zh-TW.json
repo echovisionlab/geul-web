@@ -1332,6 +1332,8 @@
       }
     },
     "verification": {
+      "checking": "正在檢查電子郵件變更狀態…",
+      "unavailable": "無法檢查電子郵件變更狀態。請再試一次。",
       "loading": "正在載入驗證表單...",
       "startOver": "重新開始",
       "errors": {

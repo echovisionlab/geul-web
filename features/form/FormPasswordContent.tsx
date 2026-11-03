@@ -10,7 +10,7 @@ import {
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconLock } from '@tabler/icons-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -35,7 +35,16 @@ interface FormPasswordContentProps {
   requestedLocale: string;
 }
 
-export function FormPasswordContent({
+export function FormPasswordContent(props: FormPasswordContentProps) {
+  return (
+    <FormPasswordTarget
+      key={JSON.stringify([props.slug, props.shareToken, props.next, props.requestedLocale])}
+      {...props}
+    />
+  );
+}
+
+function FormPasswordTarget({
   slug,
   shareToken,
   next = 'form',
@@ -50,9 +59,14 @@ export function FormPasswordContent({
   const tCommonLabels = useTranslations('common.labels');
   const router = useRouter();
   const [password, setPassword] = useState('');
-  const [storedPassword, setStoredPassword] = useState<string | undefined>(undefined);
-  const [passwordLoaded, setPasswordLoaded] = useState(false);
-
+  const [navigating, setNavigating] = useState(false);
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
   const basePath = useMemo(() => {
     const targetPath = next === 'dashboard' ? `/forms/${slug}/dashboard` : `/forms/${slug}`;
     const params = new URLSearchParams();
@@ -66,53 +80,39 @@ export function FormPasswordContent({
     return search ? `${targetPath}?${search}` : targetPath;
   }, [next, requestedLocale, shareToken, slug]);
 
-  useEffect(() => {
-    const existingPassword = sessionStorage.getItem(`form-password-${slug}`) ?? undefined;
-    setStoredPassword(existingPassword);
-    setPasswordLoaded(true);
-  }, [slug]);
-
+  // A password verified earlier in this browser lives in an HttpOnly cookie the server action reads.
   const accessQuery = useQuery({
-    queryKey: ['form-password-route-access', slug, next, shareToken, storedPassword, requestedLocale],
+    queryKey: ['form-password-route-access', slug, next, shareToken, requestedLocale],
     queryFn: () =>
       accessAction({
         slug,
         context: 'url',
         shareToken,
-        password: storedPassword,
         target: next,
         requestedLocale,
       }),
-    enabled: passwordLoaded,
   });
 
   useEffect(() => {
-    if (!passwordLoaded || accessQuery.isLoading || !accessQuery.data) {
+    if (accessQuery.isLoading || !accessQuery.data || accessQuery.data.reason === 'password_required') {
       return;
     }
-
-    if (accessQuery.data.reason === 'password_required') {
-      if (storedPassword) {
-        sessionStorage.removeItem(`form-password-${slug}`);
-        setStoredPassword(undefined);
-      }
-      return;
-    }
-
     if (onNavigate) {
       onNavigate(basePath);
     } else {
       router.replace(basePath);
     }
-  }, [accessQuery.data, accessQuery.isLoading, basePath, passwordLoaded, router, slug, storedPassword, onNavigate]);
+  }, [accessQuery.data, accessQuery.isLoading, basePath, router, onNavigate]);
 
   const verifyPassword = useMutation({
     mutationFn: (data: { slug: string; password: string }) =>
       verifyAction(data.slug, data.password, shareToken).then(unwrapQueryResult),
     onSuccess: (data) => {
+      if (!mounted.current) {
+        return;
+      }
       if (data.valid) {
-        // Store password in session storage for this form
-        sessionStorage.setItem(`form-password-${slug}`, password);
+        setNavigating(true);
         if (onNavigate) {
           onNavigate(basePath);
         } else {
@@ -122,10 +122,18 @@ export function FormPasswordContent({
         notifications.show({ message: t('errors.incorrectPassword'), tone: 'danger' });
       }
     },
+    onError: () => {
+      if (mounted.current) {
+        setNavigating(false);
+      }
+    },
   });
 
   const handleSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
+    if (verifyPassword.isPending || navigating) {
+      return;
+    }
     if (!password.trim()) {
       notifications.show({ message: t('errors.passwordRequired'), tone: 'danger' });
       return;
@@ -137,12 +145,12 @@ export function FormPasswordContent({
     return <QueryErrorAlert queries={[accessQuery]} />;
   }
 
-  if (!passwordLoaded || accessQuery.isLoading || accessQuery.data?.reason !== 'password_required') {
+  if (accessQuery.isLoading || accessQuery.data?.reason !== 'password_required') {
     return (
       <div style={{ minHeight: '100dvh' }}>
         <DsSectionCard padding="none" appearance="surface" border="none">
           <DsLayoutInset space="none">
-            <PageLoader />
+            <PageLoader extent="viewport" placement="flow" />
           </DsLayoutInset>
         </DsSectionCard>
       </div>
@@ -191,7 +199,7 @@ export function FormPasswordContent({
                           />
                         </div>
 
-                        <Button type="submit" fullWidth loading={verifyPassword.isPending}>
+                        <Button type="submit" fullWidth loading={verifyPassword.isPending || navigating}>
                           {tCommonActions('continue')}
                         </Button>
                       </DsLayoutStack>

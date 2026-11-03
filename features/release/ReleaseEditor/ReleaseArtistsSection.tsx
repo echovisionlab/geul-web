@@ -70,21 +70,46 @@ export function ReleaseArtistsSection({
     },
   });
 
-  const handleChange = (
+  const handleChange = async (
     nextArtists: ReleaseArtistItem[],
     orderIntent?: { itemId: string; previousItemId?: string; nextItemId?: string },
   ) => {
-    if (!canEdit) {
+    if (!canEdit || setArtists.isPending) {
       return;
     }
     onArtistsChange(nextArtists);
-    setArtists.mutate({ nextArtists, orderIntent });
+    try {
+      const result = await setArtists.mutateAsync({ nextArtists, orderIntent });
+      if (!result.error) {
+        return true;
+      }
+    } catch {
+      notifications.show({ message: tCommon('notifications.saveFailed'), tone: 'danger' });
+    }
+    if (!onMutationSettled) {
+      onArtistsChange(artists);
+    }
+    return false;
   };
 
   return (
     <>
       <QueryErrorAlert queries={[optionsQuery]} />
-      <ReleaseArtistsSectionView idPrefix={idPrefix} artists={artists} options={options} onChange={handleChange} />
+      <ReleaseArtistsSectionView
+        idPrefix={idPrefix}
+        artists={artists}
+        options={options}
+        onChange={handleChange}
+        optionsLoading={optionsQuery.isFetching}
+        pending={setArtists.isPending}
+        pendingRemovalId={
+          setArtists.isPending
+            ? artists.find(
+                (artist) => !setArtists.variables?.nextArtists.some((next) => next.artist_id === artist.artist_id),
+              )?.artist_id
+            : undefined
+        }
+      />
     </>
   );
 }

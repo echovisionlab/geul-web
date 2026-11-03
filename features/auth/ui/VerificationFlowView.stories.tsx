@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 
 import { VerificationFlowView } from './VerificationFlowView';
+import { PageLoader } from '@/features/site/PageLoader';
 
 const labels = {
   back: 'Back',
@@ -29,10 +30,10 @@ const labels = {
   passedTitle: 'Email verified',
   applyingDescription: 'Verification succeeded. We are applying the email update.',
   applyingRetry: 'Check again',
+  unavailableTitle: 'Unable to check the email change status. Please check again.',
   applyingTitle: 'Applying email change',
   sentDescription: 'Enter the six-digit code sent to the new address.',
   sentTitle: 'Check your email',
-  submittingCode: 'Verifying code…',
 };
 
 const meta = {
@@ -53,9 +54,9 @@ const meta = {
         applyingDescription: 'auth.verification.applying.description',
         applyingRetry: 'auth.verification.applying.checkAgain',
         applyingTitle: 'auth.verification.applying.title',
+        unavailableTitle: 'auth.verification.unavailable',
         sentDescription: 'auth.verification.sentEmail.description',
         sentTitle: 'auth.common.checkYourEmailTitle',
-        submittingCode: 'auth.verification.sentEmail.submitting',
         code: (t) => ({
           codeAriaLabel: t('auth.verification.sentEmail.codeLabel'),
           codeExpired: t('auth.common.codeTiming.expired'),
@@ -79,12 +80,12 @@ const meta = {
     docs: {
       description: {
         component:
-          'Verification uses the existing Core input and action contracts. Back is a text-only command that preserves its localized name, callback and keyboard focus; it does not submit the email form.',
+          'Verification uses Core input and action contracts. During OTP submission, the controller supplies the site PageLoader in a bounded flow region while the entered code remains mounted and disabled. Authority rechecks retain the applying or unavailable result and show the supplied loader in that result region. Resending has its own pending action. Back preserves its localized name, callback and keyboard focus without submitting the email form. These fixtures do not send email or reconcile a server session.',
       },
     },
   },
   render: function EditableVerificationState(args) {
-    const t = useTranslations('auth.verification.errors');
+    const t = useTranslations('auth.verification');
     const [email, setEmail] = useState(args.email);
     const [code, setCode] = useState(args.code);
     const [state, setState] = useState(args.state);
@@ -96,6 +97,9 @@ const meta = {
     return (
       <VerificationFlowView
         {...args}
+        loadingSurface={
+          <PageLoader placement="flow" message={t(args.checkingApplication ? 'checking' : 'sentEmail.submitting')} />
+        }
         email={email}
         code={code}
         state={state}
@@ -111,7 +115,7 @@ const meta = {
         onBack={goBackPreview}
         onCodeSubmit={(value) => {
           if (value !== '123456') {
-            setError(t('submit'));
+            setError(t('errors.submit'));
             return;
           }
           setError(null);
@@ -146,6 +150,7 @@ const meta = {
     email: 'new@example.com',
     error: null,
     labels,
+    loadingSurface: null,
     onBack: () => {},
     onCodeChange: () => {},
     onCodeSubmit: () => {},
@@ -191,9 +196,25 @@ export const InvalidCode: Story = {
   },
 };
 
-export const Applying: Story = {
-  args: { state: 'applying', checkingApplication: true },
+export const SubmittingCode: Story = {
+  args: { state: 'sent_email', code: '123456', submittingCode: true },
 };
+
+export const ResendingCode: Story = {
+  args: { state: 'sent_email', code: '123', requestingCode: true },
+};
+
+export const Unavailable: Story = {
+  args: { state: 'unavailable' },
+};
+
+export const Applying: Story = {
+  args: { state: 'applying' },
+};
+
+export const RecheckingApplying: Story = { args: { state: 'applying', checkingApplication: true } };
+
+export const RecheckingUnavailable: Story = { args: { state: 'unavailable', checkingApplication: true } };
 
 export const Passed: Story = {
   args: { state: 'passed' },

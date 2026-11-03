@@ -17,7 +17,7 @@ const meta: Meta<typeof MapLibreMapView> = {
     withFeatureLabels({
       project: (args, t) => ({
         closeDirectionsLabel: t('common.actions.close'),
-        loadingSurface: <PageLoader height="100%" minHeight={0} size="sm" message={t('map.loading.rendering')} />,
+        loadingSurface: <PageLoader extent="container" size="sm" message={t('map.loading.rendering')} />,
         printPreviewAlt: `${t('common.labels.map')} · ${t('common.labels.preview')}`,
         directions: args.directions
           ? { ...(args.directions as Record<string, unknown>), title: t('map.directions') }

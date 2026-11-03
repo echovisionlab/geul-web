@@ -323,9 +323,15 @@ function hydrateAudio(
       duration: parseFloat(block?.getAttribute('data-duration') || '0') || undefined,
       interactive: true,
       onStateChange: (state) => {
+        if (cancelled) {
+          return;
+        }
         waveContainer.setAttribute('data-audio-player-wave-ready', state.isReady ? 'true' : 'false');
       },
       onPositionChange: (state) => {
+        if (cancelled) {
+          return;
+        }
         renderPlayer(state.currentTime, state.duration);
         if (state.isPlaying) {
           startPlaybackClock();
@@ -342,6 +348,9 @@ function hydrateAudio(
         renderPlayer();
       })
       .catch(() => {
+        if (cancelled) {
+          return;
+        }
         mountedWaveSurfer = null;
         waveContainer.setAttribute('data-audio-player-wave-ready', 'false');
       });

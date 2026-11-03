@@ -5,6 +5,7 @@ import {
   useServerTablePathname as usePathname,
   useServerTableRouter as useRouter,
   useServerTableSearchParams as useSearchParams,
+  useServerTablePending,
 } from './ServerDataTableNavigation';
 import type { TableSortSpec } from '@/lib/utils/table-query';
 import { buildSortUrl, parseTableQuery } from '@/lib/utils/table-url';
@@ -40,6 +41,7 @@ export function ServerDataTableMultiSort({
   const [isPending, startTransition] = useTransition();
   const [opened, setOpened] = useState(() => sortUiState.get(namespace)?.opened ?? false);
   const markerRef = useRef<HTMLSpanElement>(null);
+  useServerTablePending(isPending);
   const shouldCloseAfterTransitionRef = useRef(false);
   const lastSyncedSortsKeyRef = useRef<string | null>(null);
 
@@ -119,7 +121,9 @@ export function ServerDataTableMultiSort({
   const apply = () => {
     shouldCloseAfterTransitionRef.current = true;
     const url = buildSortUrl(namespace, searchParams, draftSorts.length > 0 ? draftSorts : undefined, pathname);
-    startTransition(() => router.push(url, { scroll: false }));
+    startTransition(async () => {
+      await router.push(url, { scroll: false });
+    });
   };
 
   return (
@@ -132,6 +136,7 @@ export function ServerDataTableMultiSort({
       opened={opened}
       markerRef={markerRef}
       disabled={isPending}
+      applying={isPending}
       hasChanges={hasDraftChanges}
       onOpenedChange={setOpened}
       onToggleField={toggleField}

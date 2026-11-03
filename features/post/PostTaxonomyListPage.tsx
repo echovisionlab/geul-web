@@ -1,4 +1,5 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
 import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
 import { Text as DsText, Heading as DsHeading } from '@/components/core/Typography';
@@ -144,7 +145,7 @@ export function PostTaxonomyListPage({
   );
   const [query, setQuery] = useState<PaginatedQuery>(TAXONOMY_POSTS_INITIAL_QUERY);
 
-  const { data, isLoading } = useQuery({
+  const postsQuery = useQuery({
     queryKey: ['posts', 'taxonomy', kind, taxonomyId, query],
     queryFn: () =>
       listAction({
@@ -156,6 +157,7 @@ export function PostTaxonomyListPage({
     initialDataUpdatedAt: initialResultUpdatedAt,
   });
 
+  const { data, isLoading } = postsQuery;
   return (
     <DsLayoutStack gap="md">
       <DsLayoutStack gap="xxs">
@@ -166,25 +168,28 @@ export function PostTaxonomyListPage({
         {description && <DsText tone="secondary">{description}</DsText>}
       </DsLayoutStack>
 
-      <DataTable
-        columns={columns}
-        result={data}
-        loading={isLoading}
-        query={query}
-        getRowKey={(row) => row.id}
-        onQueryChange={setQuery}
-        emptyMessage={tCommonMessages('noPostsFound')}
-      >
-        <DataTable.Toolbar>
-          <DataTable.Search placeholder={tCommonPlaceholders('searchPosts')} />
-          <DsLayoutInline gap="xxs">
-            <DataTable.MultiFilter fields={filterFields} />
-            <DataTable.MultiSort fields={sortFields} />
-          </DsLayoutInline>
-        </DataTable.Toolbar>
-        <DataTable.Content />
-        <DataTable.Pagination />
-      </DataTable>
+      <QueryErrorAlert queries={[postsQuery]} />
+      {postsQuery.isError && !data ? null : (
+        <DataTable
+          columns={columns}
+          result={data}
+          loading={isLoading}
+          query={query}
+          getRowKey={(row) => row.id}
+          onQueryChange={setQuery}
+          emptyMessage={tCommonMessages('noPostsFound')}
+        >
+          <DataTable.Toolbar>
+            <DataTable.Search placeholder={tCommonPlaceholders('searchPosts')} />
+            <DsLayoutInline gap="xxs">
+              <DataTable.MultiFilter fields={filterFields} />
+              <DataTable.MultiSort fields={sortFields} />
+            </DsLayoutInline>
+          </DataTable.Toolbar>
+          <DataTable.Content />
+          <DataTable.Pagination />
+        </DataTable>
+      )}
     </DsLayoutStack>
   );
 }

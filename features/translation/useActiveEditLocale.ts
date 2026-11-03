@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -50,6 +50,14 @@ export interface UseActiveEditLocaleInput {
 export interface UseActiveEditLocaleResult {
   isControlVisible: boolean;
   isLoading: boolean;
+  localeChanging: boolean;
+  error?: unknown;
+  errorQuery?: {
+    isError: boolean;
+    error: unknown;
+    isFetching: boolean;
+    refetch: () => Promise<unknown>;
+  };
   isSourceLocaleReady: boolean;
   activeLocale: string | null;
   activeLocaleLabel: string | null;
@@ -278,35 +286,74 @@ export function useActiveEditLocale({
     : '';
 
   const localeChangeRequest = useRef(0);
-  useEffect(
-    () => () => {
+  const lastLocaleChangeRef = useRef<string | null>(null);
+  const [localeChanging, setLocaleChanging] = useState(false);
+  const [localeChangeError, setLocaleChangeError] = useState<unknown>(null);
+  useEffect(() => {
+    setLocaleChanging(false);
+    setLocaleChangeError(null);
+    return () => {
       localeChangeRequest.current += 1;
-    },
-    [entityType, entityId, pathname, activeLocale],
-  );
+    };
+  }, [entityType, entityId, pathname, activeLocale]);
   const setActiveLocale = useCallback(
     async (locale: string) => {
       const normalized = normalizeLocale(locale);
       const request = ++localeChangeRequest.current;
-      if (
-        pathname &&
-        normalized &&
-        (await flushEditorSaves(`${entityType}:${entityId}`)) &&
-        request === localeChangeRequest.current
-      ) {
-        router.replace(buildActiveEditLocaleHref(pathname, searchParams, normalized), { scroll: false });
+      if (!pathname || !normalized) {
+        return;
+      }
+      lastLocaleChangeRef.current = normalized;
+      setLocaleChanging(true);
+      setLocaleChangeError(null);
+      try {
+        const saved = await flushEditorSaves(`${entityType}:${entityId}`);
+        if (request === localeChangeRequest.current) {
+          if (saved) {
+            router.replace(buildActiveEditLocaleHref(pathname, searchParams, normalized), { scroll: false });
+          } else {
+            setLocaleChangeError(new Error('Editor save failed'));
+          }
+        }
+      } catch (error) {
+        if (request === localeChangeRequest.current) {
+          setLocaleChangeError(error);
+        }
+      } finally {
+        if (request === localeChangeRequest.current) {
+          setLocaleChanging(false);
+        }
       }
     },
     [entityType, entityId, pathname, router, searchParams],
   );
+  const error = localesQuery.error ?? entriesQuery.error ?? detailQuery.error ?? localeChangeError;
+  const errorQuery = error
+    ? {
+        isError: true,
+        error,
+        isFetching: localeChanging || localesQuery.isFetching || entriesQuery.isFetching || detailQuery.isFetching,
+        refetch: () =>
+          localeChangeError && lastLocaleChangeRef.current
+            ? setActiveLocale(lastLocaleChangeRef.current)
+            : Promise.all([
+                localesQuery.refetch(),
+                entriesQuery.refetch(),
+                ...(!isSourceLocale && activeEntry ? [detailQuery.refetch()] : []),
+              ]),
+      }
+    : undefined;
   return {
     isControlVisible: enabled && localeOptions.length > 0,
     isLoading: localesQuery.isLoading || entriesQuery.isLoading,
+    localeChanging,
+    error,
+    errorQuery,
     isSourceLocaleReady: isSourceLocaleResolutionReady({
       enabled,
       sourceLocale: entriesQuery.data?.sourceLocale ?? normalizedInitialSourceLocale,
-      entriesResolved: entriesQuery.isSuccess || Boolean(normalizedInitialSourceLocale),
-      entriesError: entriesQuery.error,
+      entriesResolved: Boolean(entriesQuery.data || normalizedInitialSourceLocale),
+      entriesError: entriesQuery.data ? null : entriesQuery.error,
     }),
     activeLocale,
     activeLocaleLabel: localeOptions.find((option) => option.value === activeLocale)?.label ?? activeLocale,

@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+import { Alert } from '@/components/core/Alert';
 import { primitiveTokens } from '@/components/core/design-tokens';
 import {
   EmailTiptapEditor,
@@ -36,9 +38,10 @@ export function EmailTemplateEditor({
   onEditorReady,
   onContentChange,
 }: EmailTemplateEditorProps) {
+  const tStates = useTranslations('common.states');
   const awareness = provider.awareness;
   if (!awareness) {
-    return null;
+    return <Alert tone="danger">{tStates('notAvailable')}</Alert>;
   }
   return (
     <EmailTiptapEditor

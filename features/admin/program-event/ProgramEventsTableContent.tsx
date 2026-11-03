@@ -1,5 +1,8 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+import { confirmationDialogs } from '@/features/confirmation';
+import { notifications } from '@/components/core/Notification';
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { Text as DsText } from '@/components/core/Typography';
 import { IconEdit, IconTrash } from '@tabler/icons-react';
@@ -56,6 +59,7 @@ export function ProgramEventsTableContent({
   deleteAction = deleteProgramEventAction,
 }: ProgramEventsTableContentProps) {
   const tCommon = useTranslations('common');
+  const router = useRouter();
   const tCommonEntities = useTranslations('common.entities');
   const tDataTable = useTranslations('dataTable.aria');
   const tProgramEventAdmin = useTranslations('programEventAdmin');
@@ -129,7 +133,28 @@ export function ProgramEventsTableContent({
             label: tCommon('actions.delete'),
             icon: <IconTrash size={16} />,
             tone: 'danger',
-            onClick: () => deleteAction(row.id),
+            onClick: () => {
+              confirmationDialogs.open({
+                intent: 'delete',
+                title: tCommon('actions.delete'),
+                message: tCommon('messages.deleteNamedItemConfirm', { name: row.title || row.slug || row.id }),
+                confirmLabel: tCommon('actions.delete'),
+                cancelLabel: tCommon('actions.cancel'),
+                closeLabel: tCommon('actions.close'),
+                onConfirm: async () => {
+                  const result = await deleteAction(row.id);
+                  if (result.error) {
+                    throw new Error(result.error);
+                  }
+                  router.refresh();
+                },
+                onError: (error) =>
+                  notifications.show({
+                    message: error instanceof Error ? error.message : tCommon('errors.generic'),
+                    tone: 'danger',
+                  }),
+              });
+            },
           },
         ];
         return (

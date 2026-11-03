@@ -1,3 +1,4 @@
+import { PageLoader } from '@/features/site/PageLoader';
 import { useArgs, useState } from 'storybook/preview-api';
 import { Button } from '@/components/core/Button';
 import { TextInput } from '@/components/core/Input';
@@ -96,6 +97,7 @@ const meta = {
         {restored && <TextInput label={args.labels.title} value={restored} readOnly />}
         <VersionHistoryDrawerView
           {...args}
+          loadingSurface={<PageLoader placement="flow" />}
           onClose={() => updateArgs({ opened: false })}
           onSelectVersion={(selectedVersionId) => updateArgs({ selectedVersionId, restoreConfirmationOpened: true })}
           onCloseRestoreConfirmation={() => updateArgs({ restoreConfirmationOpened: false })}
@@ -160,6 +162,7 @@ const meta = {
   ],
   parameters: { layout: 'fullscreen' },
   args: {
+    loadingSurface: <PageLoader placement="flow" />,
     opened: true,
     onClose: () => {},
     versions,

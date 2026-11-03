@@ -1,11 +1,9 @@
 'use client';
+
+import { PageLoader } from '@/features/site/PageLoader';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
-import {
-  LayoutStack as DsLayoutStack,
-  LayoutInline as DsLayoutInline,
-  LayoutInset as DsLayoutInset,
-} from '@/components/core/Layout';
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
 import { useMemo } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -17,7 +15,6 @@ import { IconEye, IconPencil, IconPlayerPause, IconRefresh, IconSparkles, IconTr
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
-import { Spinner as Loader } from '@/components/core/Display';
 import { useMounted } from '@mantine/hooks';
 import { notifications } from '@/components/core/Notification';
 import { confirmationDialogs } from '@/features/confirmation';
@@ -328,9 +325,12 @@ export function EntityTranslationsPanel({
     return null;
   }
 
-  const isLoading = !hydrated || localesQuery.isLoading || entriesQuery.isLoading || !areEntriesReady;
-  const hasError = localesQuery.error || entriesQuery.error;
-  const generationUnavailable = isTranslationGenerationUnavailable(generationAvailabilityQuery);
+  const isLoading =
+    !hydrated || localesQuery.isLoading || entriesQuery.isLoading || jobsQuery.isLoading || !areEntriesReady;
+  const hasError = localesQuery.error || entriesQuery.error || (jobsQuery.error && !jobsQuery.data);
+  const secondaryError = jobsQuery.error || (canAdministerTranslations && generationAvailabilityQuery.error);
+  const generationUnavailable =
+    isTranslationGenerationUnavailable(generationAvailabilityQuery) || Boolean(jobsQuery.error);
   const headerActionsReady = hydrated && !isLoading && !hasError;
   return (
     <TranslationPanelSectionCard
@@ -361,17 +361,21 @@ export function EntityTranslationsPanel({
     >
       <DsLayoutStack gap="md">
         {isLoading ? (
-          <DsLayoutInset block="md" role="status" aria-label={tCommonStates('loading')}>
-            <DsLayoutInline justify="center">
-              <Loader size="sm" />
-            </DsLayoutInline>
-          </DsLayoutInset>
+          <PageLoader placement="flow" extent="compact" size="sm" />
         ) : hasError ? (
           <SupportingText tone="danger" role="alert">
-            {getTranslationActionErrorMessage(localesQuery.error ?? entriesQuery.error, t('states.loadFailed'))}
+            {getTranslationActionErrorMessage(
+              localesQuery.error ?? entriesQuery.error ?? jobsQuery.error ?? generationAvailabilityQuery.error,
+              t('states.loadFailed'),
+            )}
           </SupportingText>
         ) : (
           <DsLayoutStack gap="md">
+            {secondaryError ? (
+              <SupportingText tone="danger" role="alert">
+                {getTranslationActionErrorMessage(secondaryError, t('states.loadFailed'))}
+              </SupportingText>
+            ) : null}
             <Field layout="inline" label={t('sourceLocale.label')} description={t('sourceLocale.description')}>
               <TranslationLocaleControl
                 variant="native-select"

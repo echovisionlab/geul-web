@@ -38,6 +38,7 @@ export interface ArtistImageCropperProps {
   currentImage: string | null | undefined;
   artistName?: string | null;
   inputId?: string;
+  disabled?: boolean;
   label?: string;
   size?: number;
   uploadProgress?: number;
@@ -50,6 +51,7 @@ export function ArtistImageCropper({
   currentImage,
   artistName,
   inputId,
+  disabled = false,
   label,
   size = 120,
   uploadProgress = 0,
@@ -189,7 +191,7 @@ export function ArtistImageCropper({
         dropzoneId={inputId ? `${inputId}-dropzone` : undefined}
         accept={imageSelectionAcceptTypes(selectionMimeTypes)}
         maxSize={Number.isFinite(inputMaxSize) ? inputMaxSize : undefined}
-        disabled={loading}
+        disabled={disabled || loading}
         loading={processing}
         loadingLabel={
           isPreparingImage ? tCommon('uploadField.status.preparingImage') : tCommon('uploadField.status.uploading')

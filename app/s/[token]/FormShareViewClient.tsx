@@ -46,7 +46,6 @@ export function FormShareViewClient({
         accessData={{ accessible: true, form: state.form }}
         requestedLocale={requestedLocale}
         previewShareToken={token}
-        previewSharePassword={sharePassword}
       />
     );
   }

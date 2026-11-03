@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useDebouncedValue } from '@mantine/hooks';
+import { useTranslations } from 'next-intl';
 import { useFormValidationMessages } from '@/features/form/useFormValidationMessages';
 import { isEmpty, validateWithZod } from '@/lib/form/validation-core';
 import { isPhoneValueEmpty } from '@/lib/types/phone/phone-number-data';
@@ -61,6 +62,7 @@ export function useFieldValidation({
   debounceMs = 150,
 }: UseFieldValidationOptions): UseFieldValidationReturn {
   const validationMessages = useFormValidationMessages();
+  const tCommon = useTranslations('common.messages');
   const shouldDebounce = useMemo(() => needsDebounce(field), [field]);
   const [debouncedValue] = useDebouncedValue(value, shouldDebounce ? debounceMs : 0);
 
@@ -122,7 +124,7 @@ export function useFieldValidation({
     if (!shouldDebounce) {
       return;
     }
-    if (isEmpty(valueForFormat)) {
+    if (valueForFormat !== valueForRequired || isEmpty(valueForFormat)) {
       return;
     }
 
@@ -134,17 +136,24 @@ export function useFieldValidation({
       }
 
       let current = true;
-      void import('@/lib/types/phone/PhoneNumber').then(({ extractPhoneValue }) => {
-        if (!current) {
-          return;
-        }
-        const phoneNumber = extractPhoneValue(valueForFormat, field.defaultCountry);
-        setState({
-          isValid: phoneNumber.isValid,
-          error: phoneNumber.isValid ? null : validationMessages.invalidPhoneNumber,
-          isValidating: false,
+      void import('@/lib/types/phone/PhoneNumber')
+        .then(({ extractPhoneValue }) => {
+          if (!current) {
+            return;
+          }
+          const phoneNumber = extractPhoneValue(valueForFormat, field.defaultCountry);
+          setState({
+            isValid: phoneNumber.isValid,
+            error: phoneNumber.isValid ? null : validationMessages.invalidPhoneNumber,
+            isValidating: false,
+          });
+        })
+        .catch(() => {
+          if (!current) {
+            return;
+          }
+          setState({ isValid: false, error: tCommon('failedToLoad'), isValidating: false });
         });
-      });
       return () => {
         current = false;
       };
@@ -156,7 +165,7 @@ export function useFieldValidation({
       error: zodResult.error ?? null,
       isValidating: false,
     });
-  }, [valueForFormat, field, shouldDebounce, validationMessages]);
+  }, [valueForFormat, valueForRequired, field, shouldDebounce, validationMessages, tCommon]);
 
   return state;
 }

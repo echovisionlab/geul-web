@@ -1,4 +1,5 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
 import {
   LayoutInline as DsLayoutInline,
@@ -27,7 +28,6 @@ interface FormSettingsFormProps {
 
 function FormSettingsForm({ props, updateProps }: FormSettingsFormProps) {
   const tPageEditor = useTranslations('pageEditor');
-  const tCommonStates = useTranslations('common.states');
   const tForms = useTranslations('forms');
 
   const formId = props.formId || '';
@@ -37,24 +37,27 @@ function FormSettingsForm({ props, updateProps }: FormSettingsFormProps) {
   const [debouncedSearch] = useDebouncedValue(searchTerm, 300);
 
   // Fetch forms based on search term or default list
-  const { data: searchResults, isLoading: isSearching } = useQuery({
+  const searchFormsQuery = useQuery({
     queryKey: ['forms', 'searchPublished', debouncedSearch],
     queryFn: () => searchPublishedForms(debouncedSearch, 5),
     enabled: debouncedSearch.length > 0,
   });
+  const { data: searchResults, isLoading: isSearching } = searchFormsQuery;
 
-  const { data: defaultForms, isLoading: isLoadingDefault } = useQuery({
+  const defaultFormsQuery = useQuery({
     queryKey: ['forms', 'listPublished', 5],
     queryFn: () => listPublishedForms(5),
     enabled: debouncedSearch.length === 0,
   });
+  const { data: defaultForms, isLoading: isLoadingDefault } = defaultFormsQuery;
 
   // Get selected form info if we have a formId
-  const { data: selectedForm } = useQuery({
+  const selectedFormQuery = useQuery({
     queryKey: ['forms', 'public', formId],
     queryFn: () => getPublicFormById(formId),
     enabled: !!formId,
   });
+  const { data: selectedForm } = selectedFormQuery;
 
   const forms = debouncedSearch.length > 0 ? searchResults : defaultForms;
   const isLoading = debouncedSearch.length > 0 ? isSearching : isLoadingDefault;
@@ -92,6 +95,7 @@ function FormSettingsForm({ props, updateProps }: FormSettingsFormProps) {
 
   return (
     <div data-page-block-editor="form">
+      <QueryErrorAlert queries={[searchFormsQuery, defaultFormsQuery, selectedFormQuery]} />
       {/* Header */}
       <DsLayoutInset blockEnd="md">
         <DsLayoutInline gap="xs">
@@ -114,7 +118,8 @@ function FormSettingsForm({ props, updateProps }: FormSettingsFormProps) {
           searchable
           searchValue={searchTerm}
           onSearchChange={setSearchTerm}
-          nothingFoundMessage={isLoading ? tCommonStates('loading') : tForms('empty')}
+          isLoading={isLoading || selectedFormQuery.isLoading}
+          nothingFoundMessage={tForms('empty')}
         />
 
         {/* Display Options */}

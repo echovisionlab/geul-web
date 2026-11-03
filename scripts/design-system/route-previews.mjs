@@ -712,7 +712,7 @@ export const routePreviews = [
     variant: 'Password',
     coverage: 'page-view',
     scope:
-      'Actual FormPasswordContent access/verification controller and sessionStorage flow with local password signal. Final navigation contained; signed share/token validation, real passwords and authorization outside.',
+      'Actual FormPasswordContent access/verification controller with local password signal; the server action keeps a verified password in an HttpOnly cookie. Final navigation contained; signed share/token validation, real passwords and authorization outside.',
   },
   {
     route: '/admin/forms/[id]/submissions',

@@ -6,6 +6,7 @@ import { EditorActiveLocaleMenu } from './EditorActiveLocaleMenu';
 interface ActiveEditLocaleControlState {
   isControlVisible: boolean;
   isLoading: boolean;
+  localeChanging: boolean;
   activeLocale: string | null;
   activeLocaleLabel: string | null;
   sourceLocale: string | null;
@@ -31,6 +32,7 @@ export function EditorActiveLocaleControl({ state, hidden = false }: EditorActiv
       localeOptions={state.localeOptions}
       onChange={state.setActiveLocale}
       disabled={state.isLoading}
+      loading={state.localeChanging}
     />
   );
 }

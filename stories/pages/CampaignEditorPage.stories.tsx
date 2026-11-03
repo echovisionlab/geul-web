@@ -79,6 +79,7 @@ function Preview({ state = 'ready' }: { state?: 'ready' | 'pending' | 'failed' |
   const canMutate = state !== 'disconnected';
   const model: Extract<CampaignEditPageViewModel, { kind: 'ready' }> = {
     kind: 'ready',
+    localeErrorSurface: null,
     currentProvider: null,
     campaignId: 'local-campaign',
     protocol: null,
@@ -97,6 +98,7 @@ function Preview({ state = 'ready' }: { state?: 'ready' | 'pending' | 'failed' |
     openTestModal: () => setTestModal(true),
     canSchedule: canMutate && status === 'draft',
     hasPendingCampaignConfiguration: false,
+    preparingDelivery: { test: false, send: false, schedule: false },
     currentSubject,
     deliveryTargetComplete: true,
     openScheduleModal: () => setScheduleModal(true),
@@ -119,6 +121,7 @@ function Preview({ state = 'ready' }: { state?: 'ready' | 'pending' | 'failed' |
     layouts: [{ id: 'paper', name: 'Paper layout', key: 'paper' }],
     handleLayoutChange: async (layoutId) => setFields((current) => ({ ...current, layoutId })),
     layoutsLoadError: false,
+    layoutsLoading: false,
     tStates,
     handleRecipientScopeChange: async (recipientScope) => setFields((current) => ({ ...current, recipientScope })),
     preview: {

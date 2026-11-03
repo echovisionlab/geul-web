@@ -20,6 +20,7 @@ import { ActionRowSizeProvider, HeaderDensityProvider } from '../control-context
 import { ToolbarSurface } from '../Section/ToolbarSurface';
 import { ToolbarCommand } from '../Section/ToolbarCommand';
 import classes from './EditorHeaderView.module.css';
+import { usePendingAction } from '../use-pending-action';
 export interface StatusOption<TStatus extends string> {
   value: TStatus;
   label: string;
@@ -59,7 +60,8 @@ export interface EditorHeaderProps<TStatus extends string = string> {
   isConnected: boolean;
   isSynced: boolean;
   hideConnectionStatus?: boolean;
-  onBack: () => void;
+  /** Return the complete leave/save promise to keep Back pending until navigation can proceed. */
+  onBack: () => void | Promise<unknown>;
   backTooltip?: string;
   controls?: ReactNode;
   actionItems?: EditorHeaderActionItem[];
@@ -138,6 +140,7 @@ export function EditorHeaderView<TStatus extends string = string>({
   labels,
 }: EditorHeaderViewProps<TStatus>) {
   const syncDescriptionId = useId();
+  const back = usePendingAction();
   const isMobile = Boolean(useMediaQuery(breakpointQuery('sm')));
   const [deleteConfirmOpened, setDeleteConfirmOpened] = useState(false);
   const [draftTitle, setDraftTitle] = useState(title);
@@ -191,7 +194,12 @@ export function EditorHeaderView<TStatus extends string = string>({
     <DsLayoutInline flexible gap="xs" wrap="nowrap">
       {!hideBack && (
         <Tooltip label={backTooltip || labels.back}>
-          <IconButton emphasis="low" onClick={onBack} aria-label={backTooltip || labels.back}>
+          <IconButton
+            emphasis="low"
+            onClick={() => back.run(onBack)}
+            loading={back.pending}
+            aria-label={backTooltip || labels.back}
+          >
             <IconArrowLeft />
           </IconButton>
         </Tooltip>

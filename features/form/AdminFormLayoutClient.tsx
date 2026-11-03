@@ -128,7 +128,7 @@ function useFormLayoutViewModel({ children, formId, initialStatus }: FormLayoutC
   const titleDisabled = !canEditCurrentLocale;
 
   if (activeEditLocale.isLoading || (shouldUseLocaleDocument && !isConnected)) {
-    return <PageLoader />;
+    return <PageLoader placement="flow" />;
   }
 
   return {

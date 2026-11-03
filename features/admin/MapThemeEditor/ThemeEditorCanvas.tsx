@@ -25,7 +25,7 @@ import type { CalloutField, ThemeSettings, ThemeVariant } from '@/lib/types/map-
 import { DEFAULT_DARK_VARIANT, DEFAULT_LIGHT_VARIANT, DEFAULT_THEME_SETTINGS } from '@/lib/types/map-theme/schema';
 const MapLibreMap = dynamic(() => import('@/features/map/MapLibreMap').then((mod) => mod.MapLibreMap), {
   ssr: false,
-  loading: () => <PageLoader height="100%" />,
+  loading: () => <PageLoader extent="container" />,
 });
 interface ThemeEditorCanvasProps {
   variant: Omit<ThemeVariant, 'id'>;

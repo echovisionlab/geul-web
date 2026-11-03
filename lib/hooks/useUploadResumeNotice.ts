@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { UploadSessionStatus, UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { findMultipartUploadCandidateAction } from '@/lib/actions/file';
@@ -59,16 +59,10 @@ export function useUploadResumeState(
   uploadType: UploadType,
   entityId: string | null | undefined,
   options?: UploadResumeOptions,
-) {
-  const [resumeState, setResumeState] = useState<UploadResumeState>({
-    code: UploadResumeStateCode.IDLE,
-    resumeNotice: null,
-    hasActiveSession: false,
-  });
+): UploadResumeState {
   const lookupFileId = getUploadResumeLookupFileId(options ?? {});
   const hasUploadAttemptIdentity = hasUploadResumeAttemptIdentity(options ?? {});
   const storedSession = lookupFileId ? readUploadSession(lookupFileId) : null;
-  const hasBackendLookupIdentity = Boolean(storedSession);
   const surfaceKey = buildUploadSurfaceKey({
     uploadType,
     entityId: entityId || '',
@@ -81,58 +75,75 @@ export function useUploadResumeState(
     entityId: entityId || '',
     slotId: options?.slotId,
   });
+  const lookup = useMemo(
+    () => ({
+      uploadType,
+      entityId,
+      entityType: options?.entityType,
+      slotId: options?.slotId,
+      expectedCurrentFileId: options?.expectedCurrentFileId,
+      attemptId: options?.attemptId,
+      pendingFileId: options?.pendingFileId,
+      lookupFileId,
+      fileId: storedSession?.fileId,
+      uploadId: storedSession?.uploadId,
+      hasUploadAttemptIdentity,
+      hasDurableSource: options?.hasDurableSource,
+      isActive: isSurfaceActive || isSlotActive,
+    }),
+    [
+      uploadType,
+      entityId,
+      options?.entityType,
+      options?.slotId,
+      options?.expectedCurrentFileId,
+      options?.attemptId,
+      options?.pendingFileId,
+      lookupFileId,
+      storedSession?.fileId,
+      storedSession?.uploadId,
+      hasUploadAttemptIdentity,
+      options?.hasDurableSource,
+      isSurfaceActive,
+      isSlotActive,
+    ],
+  );
+  const initialCode = !lookup.entityId
+    ? UploadResumeStateCode.IDLE
+    : lookup.isActive
+      ? UploadResumeStateCode.ACTIVE_SURFACE
+      : lookup.fileId && lookup.uploadId
+        ? UploadResumeStateCode.LOOKUP_PENDING
+        : lookup.hasUploadAttemptIdentity && !lookup.hasDurableSource
+          ? UploadResumeStateCode.MISSING_SESSION
+          : UploadResumeStateCode.IDLE;
+  const [result, setResult] = useState<{ lookup: typeof lookup; state: UploadResumeState } | null>(null);
 
   useEffect(() => {
-    if (!entityId) {
-      setResumeState({
-        code: UploadResumeStateCode.IDLE,
-        resumeNotice: null,
-        hasActiveSession: false,
-      });
+    if (
+      initialCode !== UploadResumeStateCode.LOOKUP_PENDING ||
+      !lookup.entityId ||
+      !lookup.fileId ||
+      !lookup.uploadId
+    ) {
       return;
     }
 
     let active = true;
+    const input = {
+      uploadType: lookup.uploadType,
+      entityId: lookup.entityId,
+      entityType: lookup.entityType,
+      slotId: lookup.slotId || undefined,
+      expectedCurrentFileId: lookup.expectedCurrentFileId || undefined,
+      fileId: lookup.fileId,
+      uploadId: lookup.uploadId,
+    };
+    const setResumeState = (state: UploadResumeState) => setResult({ lookup, state });
 
     const load = async () => {
-      if (isSurfaceActive || isSlotActive) {
-        if (active) {
-          setResumeState({
-            code: UploadResumeStateCode.ACTIVE_SURFACE,
-            resumeNotice: null,
-            hasActiveSession: false,
-          });
-        }
-        return;
-      }
-
-      if (!hasBackendLookupIdentity) {
-        if (active) {
-          setResumeState({
-            code:
-              hasUploadAttemptIdentity && !options?.hasDurableSource
-                ? UploadResumeStateCode.MISSING_SESSION
-                : UploadResumeStateCode.IDLE,
-            resumeNotice: null,
-            hasActiveSession: false,
-          });
-        }
-        return;
-      }
-
       try {
-        const candidate = await findMultipartUploadCandidateShared(
-          {
-            uploadType,
-            entityId,
-            entityType: options?.entityType,
-            slotId: options?.slotId || undefined,
-            expectedCurrentFileId: options?.expectedCurrentFileId || undefined,
-            fileId: storedSession!.fileId,
-            uploadId: storedSession!.uploadId,
-          },
-          findMultipartUploadCandidateAction,
-        );
+        const candidate = await findMultipartUploadCandidateShared(input, findMultipartUploadCandidateAction);
 
         if (!active) {
           return;
@@ -152,7 +163,7 @@ export function useUploadResumeState(
         );
         const code = hasActiveSession
           ? UploadResumeStateCode.AVAILABLE
-          : hasUploadAttemptIdentity && !options?.hasDurableSource
+          : lookup.hasUploadAttemptIdentity && !lookup.hasDurableSource
             ? UploadResumeStateCode.MISSING_SESSION
             : UploadResumeStateCode.IDLE;
 
@@ -188,23 +199,7 @@ export function useUploadResumeState(
     return () => {
       active = false;
     };
-  }, [
-    entityId,
-    hasBackendLookupIdentity,
-    hasUploadAttemptIdentity,
-    isSurfaceActive,
-    isSlotActive,
-    lookupFileId,
-    options?.entityType,
-    options?.hasDurableSource,
-    options?.attemptId,
-    options?.expectedCurrentFileId,
-    options?.pendingFileId,
-    options?.slotId,
-    storedSession?.fileId,
-    storedSession?.uploadId,
-    uploadType,
-  ]);
+  }, [initialCode, lookup]);
 
-  return resumeState;
+  return result?.lookup === lookup ? result.state : { code: initialCode, resumeNotice: null, hasActiveSession: false };
 }

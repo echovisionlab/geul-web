@@ -175,6 +175,15 @@ export function EventSeriesEventsTable({
   const loadMoreRequestIdRef = useRef(0);
   queryRef.current = query;
   activeContextRef.current = { seriesId, requestedLocale };
+
+  useEffect(() => {
+    setIsLoadingMore(false);
+    setError(null);
+    return () => {
+      loadMoreRequestIdRef.current += 1;
+    };
+  }, [seriesId, requestedLocale, pageSize]);
+
   const locationLabels: Record<BrowserProgramEventLocationMode, string> = {
     map_place: tProgramEventAdmin('locationModes.mapPlace'),
     online: tProgramEventAdmin('locationModes.online'),
@@ -212,7 +221,7 @@ export function EventSeriesEventsTable({
     ],
     [locationLabels, tCommonLabels, typeOptions],
   );
-  const { data, isFetching } = useQuery({
+  const eventsQuery = useQuery({
     queryKey: ['program-event-series-events', seriesId, requestedLocale, query],
     queryFn: () =>
       fetchEventSeriesEvents({
@@ -224,6 +233,7 @@ export function EventSeriesEventsTable({
       }),
     initialData: isDefaultQuery(query) ? initialResult : undefined,
   });
+  const { data, isFetching } = eventsQuery;
 
   useEffect(() => {
     if (data) {
@@ -248,7 +258,7 @@ export function EventSeriesEventsTable({
   };
 
   const handleLoadMore = async () => {
-    if (isLoadingMore || isFetching || result.data.length >= result.total) {
+    if (isLoadingMore || isFetching || eventsQuery.isError || result.data.length >= result.total) {
       return;
     }
 
@@ -295,7 +305,7 @@ export function EventSeriesEventsTable({
         setError(tCommonErrors('generic'));
       }
     } finally {
-      if (requestId === loadMoreRequestIdRef.current) {
+      if (isCurrentRequest()) {
         setIsLoadingMore(false);
       }
     }
@@ -303,7 +313,7 @@ export function EventSeriesEventsTable({
 
   return (
     <>
-      <QueryErrorAlert queries={[typeOptionsQuery]} />
+      <QueryErrorAlert queries={[typeOptionsQuery, eventsQuery]} />
       <EventSeriesEventsTableView
         result={result}
         loading={isFetching && !data}
@@ -324,6 +334,7 @@ export function EventSeriesEventsTable({
         locationLabels={locationLabels}
         filterFields={filterFields}
         isLoadingMore={isLoadingMore}
+        loadMoreDisabled={isFetching || eventsQuery.isError}
         error={error}
         onQueryChange={handleQueryChange}
         onLoadMore={handleLoadMore}

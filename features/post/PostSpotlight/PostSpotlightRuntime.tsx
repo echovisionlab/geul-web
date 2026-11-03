@@ -4,6 +4,7 @@ import NextImage from 'next/image';
 import { IconArticle } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
+import { PageLoader } from '@/features/site/PageLoader';
 import { CommandPaletteResults } from '@/components/core/CommandPalette';
 import { searchPublishedPosts } from '@/lib/queries/post-browser';
 
@@ -58,6 +59,9 @@ export function PostSpotlightRuntime({ query, debouncedQuery, opened }: PostSpot
     return tCommonMessages('noPostsFound');
   };
 
+  if (query.length >= 2 && (isLoading || query !== debouncedQuery)) {
+    return <PageLoader placement="flow" message={tCommonStates('loading')} />;
+  }
   return (
     <CommandPaletteResults
       items={actions}

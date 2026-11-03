@@ -6,7 +6,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { NotificationRegion, notifications } from '@/components/core/Notification';
 import { UploadType } from '@/lib/types/upload/model';
 import { TestProviders } from '@/test/TestProviders';
-import { act, renderHook, screen } from '@/test/render';
+import { act, renderHook, screen, waitFor } from '@/test/render';
 import { useFeaturedImageCommands } from './useFeaturedImageCommands';
 
 const upload = vi.hoisted(() => vi.fn());
@@ -59,3 +59,55 @@ it('reports a rejected presentation update without success or OG-generation call
     client.clear();
   }
 });
+
+it.each(['upload', 'remove'] as const)(
+  'keeps %s pending through the save and ignores completion after target changes',
+  async (operation) => {
+    const save = Promise.withResolvers<{ imageUrl: string; ogGenerationRunId: string }>();
+    upload.mockResolvedValue({ fileId: 'image-file' });
+    const setImage = vi.fn(() => true);
+    const clearImage = vi.fn(() => true);
+    const onOgGenerationRequested = vi.fn();
+    const setImageAction = vi.fn(() => save.promise);
+    const removeImageAction = vi.fn(() => save.promise);
+    const client = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <TestProviders>
+        <QueryClientProvider client={client}>{children}</QueryClientProvider>
+      </TestProviders>
+    );
+    const view = renderHook(
+      ({ entityId }) =>
+        useFeaturedImageCommands({
+          entityId,
+          uploadType: UploadType.FEATURED_IMAGE,
+          setImage,
+          clearImage,
+          setImageAction,
+          removeImageAction,
+          onOgGenerationRequested,
+        }),
+      { wrapper, initialProps: { entityId: 'one' } },
+    );
+    let pending!: Promise<unknown>;
+    await act(async () => {
+      pending =
+        operation === 'upload' ? view.result.current.handleUpload(new Blob()) : view.result.current.handleRemove();
+    });
+    await waitFor(() =>
+      expect(operation === 'upload' ? view.result.current.isUploading : view.result.current.isRemoving).toBe(true),
+    );
+    view.rerender({ entityId: 'two' });
+    await act(async () => {
+      save.resolve({ imageUrl: '/old.webp', ogGenerationRunId: 'old-run' });
+      await pending;
+    });
+    expect(setImage).not.toHaveBeenCalled();
+    expect(clearImage).not.toHaveBeenCalled();
+    expect(onOgGenerationRequested).not.toHaveBeenCalled();
+    expect(view.result.current.isUploading).toBe(false);
+    expect(view.result.current.isRemoving).toBe(false);
+    view.unmount();
+    client.clear();
+  },
+);

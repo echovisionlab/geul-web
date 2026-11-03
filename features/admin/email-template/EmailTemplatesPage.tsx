@@ -263,6 +263,8 @@ export default function AdminEmailTemplatesPage({
           size="xs"
           value={row.eventKey ?? null}
           placeholder={tPage('notAssigned')}
+          isLoading={isLoadingEventMappings}
+          aria-busy={updateEventMapping.isPending || undefined}
           clearable
           searchable
           nothingFoundMessage={tPage('noEvents')}
@@ -293,7 +295,13 @@ export default function AdminEmailTemplatesPage({
               });
             }
           }}
-          disabled={updateEventMapping.isPending}
+          disabled={isLoadingEventMappings || isEventMappingsError || updateEventMapping.isPending}
+          error={isEventMappingsError ? tCommon('states.notAvailable') : undefined}
+          description={
+            updateEventMapping.isPending && updateEventMapping.variables?.templateId === row.id
+              ? tCommon('states.syncing')
+              : undefined
+          }
         />
       ),
     },

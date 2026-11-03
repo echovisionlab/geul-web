@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@/test/render';
+import { act, render, screen, waitFor } from '@/test/render';
 import { PostRowMenu } from './PostRowMenu';
 import { PostModalProvider } from './PostModalContext';
 
@@ -44,4 +44,23 @@ describe('PostRowMenu', () => {
     expect(screen.queryByRole('menuitem', { name: 'View' })).not.toBeInTheDocument();
     expect(screen.queryByRole('menuitem', { name: 'Republish' })).not.toBeInTheDocument();
   });
+});
+
+it('keeps the row trigger pending for the full republish promise', async () => {
+  let finish!: (value: { success: boolean }) => void;
+  actions.republish.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+  );
+  const { user } = renderRow('archived');
+  const trigger = screen.getByRole('button', { name: /Post/ });
+  await user.click(trigger);
+  await user.click(await screen.findByRole('menuitem', { name: 'Republish' }));
+  expect(trigger).toHaveAttribute('aria-busy', 'true');
+  expect(actions.refresh).not.toHaveBeenCalled();
+  await act(async () => finish({ success: true }));
+  await waitFor(() => expect(trigger).not.toHaveAttribute('aria-busy', 'true'));
+  expect(actions.refresh).toHaveBeenCalledOnce();
 });

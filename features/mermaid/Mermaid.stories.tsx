@@ -9,6 +9,8 @@ import { createMermaidExtension } from '@/features/editor/tiptap/mermaid/mermaid
 import { MermaidSettingsEditor } from '@/features/page/blocks/mermaid/Editor';
 import { MermaidCanvasPreview } from '@/features/page/blocks/mermaid/View';
 import { MermaidEditor } from './MermaidEditor';
+import { MermaidDiagramView } from './MermaidDiagramView';
+import { PageLoader } from '@/features/site/PageLoader';
 import { MermaidDiagram } from './MermaidDiagram';
 
 const SOURCE = 'flowchart LR\n  Draft --> Review{Approved?}\n  Review -->|Yes| Publish\n  Review -->|No| Draft';
@@ -236,3 +238,17 @@ export const PageCanvas: Story = {
 };
 
 export const PageTranslation: Story = { render: () => <PageExample translation /> };
+
+export const InitialPreparation: Story = {
+  render: function InitialPreparation() {
+    const t = useTranslations('mermaid');
+    return (
+      <MermaidDiagramView
+        source={SOURCE}
+        state={{ status: 'loading' }}
+        labels={{ empty: t('empty'), invalid: t('invalid'), loading: t('loading') }}
+        loadingSurface={<PageLoader extent="compact" placement="flow" size="sm" message={t('loading')} />}
+      />
+    );
+  },
+};

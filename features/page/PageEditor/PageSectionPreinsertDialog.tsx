@@ -1,7 +1,7 @@
 'use client';
 
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { ContentModal, DialogActions } from '@/components/core/Modal';
@@ -16,6 +16,7 @@ interface PageSectionPreinsertDialogProps {
   title: string;
   formOptions: readonly { value: string; label: string }[];
   formsLoading: boolean;
+  formsFailure?: ReactNode;
   onCancel: () => void;
   onInsert: (type: ConfiguredSectionType, props: Record<string, unknown>) => void;
 }
@@ -34,6 +35,7 @@ export function PageSectionPreinsertDialog({
   title,
   formOptions,
   formsLoading,
+  formsFailure,
   onCancel,
   onInsert,
 }: PageSectionPreinsertDialogProps) {
@@ -44,7 +46,7 @@ export function PageSectionPreinsertDialog({
   const [formId, setFormId] = useState<string | null>(null);
   const validUrl =
     type === 'embed' ? Boolean(resolveEmbedUrl(externalVideoUrl)) : isValidExternalVideoUrl(externalVideoUrl);
-  const canInsert = type === 'form' ? Boolean(formId) : validUrl;
+  const canInsert = type === 'form' ? Boolean(formId) && !formsLoading && !formsFailure : validUrl;
 
   const confirm = useCallback(() => {
     if (type === 'embed' && resolveEmbedUrl(externalVideoUrl)) {
@@ -59,6 +61,7 @@ export function PageSectionPreinsertDialog({
   return (
     <ContentModal opened onClose={onCancel} title={title} centered closeLabel={tModalActions('close')}>
       <DsLayoutStack gap="md">
+        {type === 'form' ? formsFailure : null}
         {type !== 'form' ? (
           <TextInput
             label={type === 'embed' ? t('embed.urlLabel') : 'URL'}
@@ -81,7 +84,8 @@ export function PageSectionPreinsertDialog({
             value={formId}
             onChange={setFormId}
             searchable
-            disabled={formsLoading}
+            isLoading={formsLoading}
+            disabled={formsLoading || Boolean(formsFailure)}
             data-page-section-preinsert-form
           />
         )}

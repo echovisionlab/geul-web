@@ -6,6 +6,7 @@ import {
   useServerTablePathname as usePathname,
   useServerTableRouter as useRouter,
   useServerTableSearchParams as useSearchParams,
+  useServerTablePending,
 } from './ServerDataTableNavigation';
 import { useMediaQuery } from '@mantine/hooks';
 import { getOperatorsForType, isNoValueOperator, type FilterOperator } from '@/lib/types/common/filter';
@@ -72,6 +73,7 @@ export function ServerDataTableMultiFilter({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  useServerTablePending(isPending);
   const [opened, setOpened] = useState(() => filterUiState.get(namespace)?.opened ?? false);
   const [selectedField, setSelectedField] = useState<string | null>(
     () => filterUiState.get(namespace)?.selectedField ?? null,
@@ -204,7 +206,9 @@ export function ServerDataTableMultiFilter({
     const filters = draftFilters.length > 0 ? draftFilters.map(toTableFilterSpec) : undefined;
     setCloseAfterSuccess(true);
     const url = buildFilterUrl(namespace, searchParams, filters, filters ? draftFilterBy : undefined, pathname);
-    startTransition(() => router.push(url, { scroll: false }));
+    startTransition(async () => {
+      await router.push(url, { scroll: false });
+    });
   };
 
   return (
@@ -221,6 +225,7 @@ export function ServerDataTableMultiFilter({
       badgeCount={activeFilters.length}
       placeholder={placeholder}
       disabled={isPending}
+      applying={isPending}
       applyMode="all"
       hasChanges={hasDraftChanges}
       valueInputWithinPortal={false}

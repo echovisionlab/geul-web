@@ -4,16 +4,19 @@ import { expect, userEvent, within } from 'storybook/test';
 import { LayoutContainer } from '@/components/core/Layout';
 import { localBackupEntries } from '@/stories/pages/fixtures/local-backups';
 import type { LocalBackup } from '@/lib/collab/local-backups';
+import { PageLoader } from '@/features/site/PageLoader';
 import { LocalBackupsView } from './LocalBackupsView';
 
 function Preview({
   initialEntries = localBackupEntries,
   error = false,
   unavailable = false,
+  loading = false,
 }: {
   initialEntries?: LocalBackup[];
   error?: boolean;
   unavailable?: boolean;
+  loading?: boolean;
 }) {
   const [backups, setBackups] = useState(initialEntries);
   return (
@@ -22,6 +25,8 @@ function Preview({
         count={backups.length}
         bytes={backups.reduce((total, entry) => total + entry.bytes, 0)}
         error={error}
+        loading={loading}
+        loadingSurface={<PageLoader extent="compact" placement="flow" size="sm" />}
         unavailable={unavailable}
         onRefresh={() => {}}
         onClear={async () => setBackups([])}
@@ -62,3 +67,5 @@ export const DeleteAll: Story = {
 export const LoadFailed: Story = { args: { initialEntries: [], error: true } };
 export const StorageUnavailable: Story = { args: { initialEntries: [], unavailable: true } };
 export const NarrowViewport: Story = { globals: { viewport: { value: 'phone', isRotated: false } } };
+
+export const Loading: Story = { args: { initialEntries: [], loading: true } };

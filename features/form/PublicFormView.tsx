@@ -8,16 +8,13 @@ import {
   LayoutStack as DsLayoutStack,
 } from '@/components/core/Layout';
 import { Heading as DsHeading } from '@/components/core/Typography';
-import { unwrapQueryResult } from '@/lib/api/query-result';
-import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { IconEyeOff } from '@tabler/icons-react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Alert } from '@/components/core/Alert';
 import { notifications } from '@/components/core/Notification';
-import { PageLoader } from '@/features/site/PageLoader';
 import { SiteLogo } from '@/features/site/SiteLogo';
 import { SITE_LOGO_HEIGHT } from '@/features/site/SiteLogo/placements';
 import { FormAccessBoundary } from '@/features/form/FormAccessBoundary';
@@ -26,22 +23,14 @@ import { FormSubmissionPendingState } from '@/features/form/FormSubmissionState'
 import { ContentLanguageMenu } from '@/features/translation/ContentLanguageMenu';
 import { resolvePhoneDefaultCountryCode } from '@/features/form/phone-default-country';
 import { useFormValidationMessages } from '@/features/form/useFormValidationMessages';
-import {
-  checkFormAccessAction,
-  submitFormAction,
-  verifyFormPasswordAction,
-  type FormAccessData,
-  type PublicFormData,
-} from '@/lib/actions/form';
+import { submitFormAction, type FormAccessData, type PublicFormData } from '@/lib/actions/form';
 import { useSiteSettings } from '@/lib/contexts/ManifestContext';
 import { buildForm } from '@/lib/form/build';
 import { resolveSiteHref } from '@/lib/utils/site-url';
 export interface PublicFormBindings {
-  checkFormAccessAction: typeof checkFormAccessAction;
   submitFormAction: typeof submitFormAction;
-  verifyFormPasswordAction: typeof verifyFormPasswordAction;
 }
-const defaultBindings: PublicFormBindings = { checkFormAccessAction, submitFormAction, verifyFormPasswordAction };
+const defaultBindings: PublicFormBindings = { submitFormAction };
 interface PublicFormViewProps {
   slug: string;
   form: PublicFormData | null;
@@ -49,7 +38,6 @@ interface PublicFormViewProps {
   requestedLocale: string;
   viewerCountryCode?: string | null;
   previewShareToken?: string;
-  previewSharePassword?: string;
   bindings?: PublicFormBindings;
   navigate?: (href: string) => void;
 }
@@ -60,7 +48,6 @@ export function PublicFormView({
   requestedLocale,
   viewerCountryCode,
   previewShareToken,
-  previewSharePassword,
   bindings = defaultBindings,
   navigate,
 }: PublicFormViewProps) {
@@ -97,10 +84,6 @@ export function PublicFormView({
       </DsSectionCard>
     </div>
   );
-  const [passwordVerified, setPasswordVerified] = useState(false);
-  const [checkingPassword, setCheckingPassword] = useState(accessReason === 'password_required');
-  const [passwordCheckError, setPasswordCheckError] = useState<unknown>(null);
-  const [passwordCheckAttempt, setPasswordCheckAttempt] = useState(0);
   const [redirectingToSuccess, setRedirectingToSuccess] = useState(false);
   const passwordPath = useMemo(() => {
     const params = new URLSearchParams();
@@ -121,67 +104,8 @@ export function PublicFormView({
     const search = params.toString();
     return search ? `/forms/${slug}/success?${search}` : `/forms/${slug}/success`;
   }, [requestedLocale, slug]);
-  useEffect(() => {
-    if (accessReason !== 'password_required') {
-      setCheckingPassword(false);
-      setPasswordVerified(false);
-      return;
-    }
-    const storedPassword = sessionStorage.getItem(`form-password-${slug}`);
-    if (!storedPassword) {
-      setCheckingPassword(false);
-      setPasswordVerified(false);
-      return;
-    }
-    let cancelled = false;
-    setCheckingPassword(true);
-    const run = async () => {
-      try {
-        const result = await bindings
-          .verifyFormPasswordAction(slug, storedPassword, isShareMode ? shareToken : undefined)
-          .then(unwrapQueryResult);
-        if (cancelled) {
-          return;
-        }
-        setPasswordVerified(result.valid);
-        setPasswordCheckError(null);
-        if (!result.valid) {
-          sessionStorage.removeItem(`form-password-${slug}`);
-        }
-      } catch (error) {
-        if (!cancelled) {
-          setPasswordVerified(false);
-          setPasswordCheckError(error);
-        }
-      } finally {
-        if (!cancelled) {
-          setCheckingPassword(false);
-        }
-      }
-    };
-    run();
-    return () => {
-      cancelled = true;
-    };
-  }, [accessReason, isShareMode, shareToken, slug, passwordCheckAttempt]);
-  const needsProtectedFetch = accessReason === 'password_required' && passwordVerified;
-  const protectedAccessQuery = useQuery({
-    queryKey: ['form-access', slug, shareToken, passwordVerified, requestedLocale],
-    queryFn: async () => {
-      const storedPassword = sessionStorage.getItem(`form-password-${slug}`) ?? undefined;
-      return bindings.checkFormAccessAction({
-        slug,
-        context: 'url',
-        shareToken: isShareMode ? shareToken : undefined,
-        sharePassword: previewSharePassword,
-        password: storedPassword,
-        requestedLocale,
-      });
-    },
-    enabled: needsProtectedFetch,
-  });
-  const { data: protectedAccess, isLoading: protectedAccessLoading } = protectedAccessQuery;
-  const form = initialForm ?? (protectedAccess?.accessible && protectedAccess.form ? protectedAccess.form : null);
+  // A verified Form password reaches the server render through its HttpOnly cookie.
+  const form = initialForm;
   const contentPathname = isShareMode ? `/s/${shareToken}` : `/forms/${slug}`;
   const contentQuery = Object.fromEntries(searchParams.entries());
   const languageControl = form?.localizationInfo ? (
@@ -215,8 +139,8 @@ export function PublicFormView({
     [requestedLocale, viewerCountryCode],
   );
   const submitForm = useMutation({
-    mutationFn: (data: { formId: string; data: Record<string, unknown>; password?: string }) =>
-      bindings.submitFormAction(data.formId, data.data, data.password, requestedLocale),
+    mutationFn: (data: { formId: string; data: Record<string, unknown> }) =>
+      bindings.submitFormAction(data.formId, data.data, { slug }, requestedLocale),
     onError: () => {
       notifications.show({ message: tCommonErrors('generic'), tone: 'danger' });
     },
@@ -229,39 +153,10 @@ export function PublicFormView({
       (navigate ?? router.push)(successPath);
     },
   });
-  const isLoading = checkingPassword || (needsProtectedFetch && protectedAccessLoading);
-  if (passwordCheckError !== null || protectedAccessQuery.isError) {
-    return renderWithHeader(
-      <QueryErrorAlert
-        queries={[
-          protectedAccessQuery,
-          {
-            isError: passwordCheckError !== null,
-            error: passwordCheckError,
-            isFetching: checkingPassword,
-            refetch: async () => {
-              setPasswordCheckAttempt((attempt) => attempt + 1);
-            },
-          },
-        ]}
-      />,
-    );
-  }
-  if (isLoading) {
-    return (
-      <div style={{ minHeight: '100dvh' }}>
-        <DsSectionCard padding="none" appearance="surface" border="none">
-          <DsLayoutInset space="none">
-            <PageLoader />
-          </DsLayoutInset>
-        </DsSectionCard>
-      </div>
-    );
-  }
   if (!form) {
     return renderWithHeader(
       <FormAccessBoundary
-        reason={protectedAccess?.reason ?? accessReason ?? 'form_not_found'}
+        reason={accessReason ?? 'form_not_found'}
         slug={slug}
         shareToken={isShareMode ? shareToken : undefined}
         mode="inline"
@@ -307,12 +202,7 @@ export function PublicFormView({
               form={builtForm}
               phoneDefaultCountry={phoneDefaultCountry}
               onSubmit={async (values) => {
-                const password = sessionStorage.getItem(`form-password-${slug}`) ?? undefined;
-                await submitForm.mutateAsync({
-                  formId: form.id,
-                  data: values,
-                  password,
-                });
+                await submitForm.mutateAsync({ formId: form.id, data: values });
               }}
             />
           </DsLayoutStack>
@@ -321,7 +211,7 @@ export function PublicFormView({
             <div style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
               <DsSectionCard padding="none" appearance="overlay" border="none">
                 <DsLayoutInline align="center" justify="center">
-                  <FormSubmissionPendingState minHeight={320} />
+                  <FormSubmissionPendingState minHeight={320} contrast="inverse" />
                 </DsLayoutInline>
               </DsSectionCard>
             </div>

@@ -201,3 +201,19 @@ button.root[data-display='inline'] {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+
+.content {
+  display: contents;
+}
+
+.spinner {
+  display: inline-block;
+  flex: none;
+  width: var(--geul-chrome-icon-size);
+  height: var(--geul-chrome-icon-size);
+  vertical-align: middle;
+}
+
+.root[data-display='block'] .spinner {
+  margin-inline-start: var(--geul-spacing-xxs);
+}

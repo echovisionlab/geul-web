@@ -1,6 +1,40 @@
 .root {
+  /* Named loading regions; callers choose an extent instead of numeric geometry. */
+  --_loader-min-block-size: 12.5rem;
+
   position: absolute;
   inset: 0;
+  block-size: 100%;
+  min-block-size: var(--_loader-min-block-size);
   display: grid;
   place-items: center;
+  color: var(--geul-text-muted);
+}
+
+.root[data-placement='flow'] {
+  position: relative;
+  inset: auto;
+  block-size: auto;
+}
+
+.root[data-extent='container'] {
+  --_loader-min-block-size: 0;
+
+  block-size: 100%;
+}
+
+.root[data-extent='compact'] {
+  --_loader-min-block-size: 7.5rem;
+}
+
+.root[data-extent='tall'] {
+  --_loader-min-block-size: 20rem;
+}
+
+.root[data-extent='viewport'] {
+  --_loader-min-block-size: 100dvh;
+}
+
+.root[data-contrast='inverse'] {
+  color: var(--geul-text-on-image);
 }

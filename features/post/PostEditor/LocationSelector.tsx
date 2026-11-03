@@ -1,4 +1,5 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { Text as DsText } from '@/components/core/Typography';
 import { Select, useInputCombobox } from '@/components/core/Input';
@@ -30,7 +31,7 @@ export function LocationSelector({ value, idPrefix, canEdit, onChange, onCreateN
     },
   });
 
-  const { data: selectedPlace, isLoading: isSelectedPlaceLoading } = useQuery({
+  const selectedPlaceQuery = useQuery({
     queryKey: ['mapPlace', value],
     queryFn: async () => {
       const response = await mapPlaceClient.getMapPlace({ id: value! });
@@ -45,7 +46,7 @@ export function LocationSelector({ value, idPrefix, canEdit, onChange, onCreateN
     enabled: !!value,
   });
 
-  const { data: searchResults = [], isLoading: isSearchLoading } = useQuery({
+  const searchQuery = useQuery({
     queryKey: ['mapPlace', 'search', search],
     queryFn: async () => {
       const response = await mapPlaceClient.searchMapPlaces({ query: search, limit: 10 });
@@ -60,6 +61,8 @@ export function LocationSelector({ value, idPrefix, canEdit, onChange, onCreateN
     enabled: search.trim().length > 0,
   });
 
+  const { data: selectedPlace, isLoading: isSelectedPlaceLoading } = selectedPlaceQuery;
+  const { data: searchResults = [], isLoading: isSearchLoading } = searchQuery;
   const handleSelect = useCallback(
     (optionValue: string) => {
       if (optionValue === '$create') {
@@ -75,11 +78,14 @@ export function LocationSelector({ value, idPrefix, canEdit, onChange, onCreateN
   );
 
   const exactMatch = searchResults.some((place) => place.name.toLowerCase() === search.trim().toLowerCase());
-  const canCreate = Boolean(onCreateNew && search.trim().length > 0 && !exactMatch);
+  const canCreate = Boolean(
+    !searchQuery.isFetching && !searchQuery.isError && onCreateNew && search.trim().length > 0 && !exactMatch,
+  );
   const isLoading = isSelectedPlaceLoading || isSearchLoading;
 
   return (
     <DsLayoutStack gap="xxs">
+      <QueryErrorAlert queries={[selectedPlaceQuery, searchQuery]} />
       <Select
         id={idPrefix ? `${idPrefix}-trigger` : undefined}
         label={tCommon('labels.location')}
@@ -102,7 +108,7 @@ export function LocationSelector({ value, idPrefix, canEdit, onChange, onCreateN
           }
         }}
         leftSection={<IconMapPin size={16} />}
-        aria-busy={isLoading || undefined}
+        isLoading={isLoading}
         data={[
           ...(selectedPlace ? [{ value: selectedPlace.id, label: selectedPlace.name }] : []),
           ...searchResults
@@ -110,7 +116,7 @@ export function LocationSelector({ value, idPrefix, canEdit, onChange, onCreateN
             .map((place) => ({ value: place.id, label: place.name })),
           ...(canCreate ? [{ value: '$create', label: tCommon('actions.createNamed', { name: search.trim() }) }] : []),
         ]}
-        nothingFoundMessage={search.trim() ? t('emptyResults') : t('emptySearch')}
+        nothingFoundMessage={searchQuery.isError ? null : search.trim() ? t('emptyResults') : t('emptySearch')}
         renderOption={({ option }) => {
           const place = searchResults.find((item) => item.id === option.value);
           return place ? (

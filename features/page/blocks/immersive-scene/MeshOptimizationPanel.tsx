@@ -219,7 +219,16 @@ function CandidateStats({
   );
 }
 
-export function MeshOptimizationPanel({
+export function MeshOptimizationPanel(props: MeshOptimizationPanelProps) {
+  return (
+    <MeshOptimizationPanelSession
+      key={`${props.entityType}:${props.pageId}:${props.sectionId}:${props.unitId}:${props.sourceFile.fileId}`}
+      {...props}
+    />
+  );
+}
+
+function MeshOptimizationPanelSession({
   pageId,
   entityType,
   sectionId,
@@ -237,7 +246,17 @@ export function MeshOptimizationPanel({
   );
   const [candidates, setCandidates] = useState<MeshOptimizationCandidate[]>([]);
   const [status, setStatus] = useState<PanelStatus>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(Boolean(controls && sourceFile.fileId));
+  const active = useRef(true);
+  const readVersion = useRef(0);
+  const readPending = useRef(false);
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+      readVersion.current += 1;
+    };
+  }, []);
   const [generating, setGenerating] = useState(false);
   const [usingCandidateId, setUsingCandidateId] = useState<string | null>(null);
   const [clearing, setClearing] = useState(false);
@@ -267,11 +286,19 @@ export function MeshOptimizationPanel({
         setCandidates([]);
         return;
       }
+      if (silent && readPending.current) {
+        return;
+      }
+      const version = ++readVersion.current;
+      readPending.current = true;
       if (!silent) {
         setLoading(true);
       }
       try {
         const result = await controls.listCandidates(requestContext);
+        if (!active.current || version !== readVersion.current) {
+          return;
+        }
         setCandidates(
           result.candidates.filter(
             (candidate) => candidate.status !== 'cancelled' && !discardedCandidateIdsRef.current.has(candidate.id),
@@ -280,17 +307,26 @@ export function MeshOptimizationPanel({
         if (result.error) {
           setStatus({ tone: 'danger', message: result.error });
         }
+      } catch {
+        if (active.current && version === readVersion.current) {
+          setStatus({ tone: 'danger', message: t('blockEditor.status.meshOptimizationFailed') });
+        }
       } finally {
-        if (!silent) {
+        if (active.current && version === readVersion.current) {
+          readPending.current = false;
           setLoading(false);
         }
       }
     },
-    [controls, requestContext],
+    [controls, requestContext, t],
   );
 
   useEffect(() => {
     void loadCandidates();
+    return () => {
+      readVersion.current += 1;
+      readPending.current = false;
+    };
   }, [loadCandidates]);
 
   const hasRunningCandidate = candidates.some(
@@ -338,6 +374,11 @@ export function MeshOptimizationPanel({
         method: MESH_OPTIMIZATION_METHOD_DRACO,
         targetRatioPercent: normalizeMeshOptimizationTargetRatioPercent(targetRatioPercent),
       });
+      if (!active.current) {
+        return;
+      }
+      readVersion.current += 1;
+      readPending.current = false;
       if (result.error) {
         setStatus({ tone: 'danger', message: result.error });
         return;
@@ -359,7 +400,9 @@ export function MeshOptimizationPanel({
         });
       }
     } finally {
-      setGenerating(false);
+      if (active.current) {
+        setGenerating(false);
+      }
     }
   }, [controls, targetRatioPercent, requestContext, t]);
 
@@ -375,6 +418,11 @@ export function MeshOptimizationPanel({
           ...requestContext,
           candidateId: candidate.id,
         });
+        if (!active.current) {
+          return;
+        }
+        readVersion.current += 1;
+        readPending.current = false;
         if (result.error) {
           setStatus({ tone: 'danger', message: result.error });
           return;
@@ -385,7 +433,9 @@ export function MeshOptimizationPanel({
           message: t('blockEditor.status.meshOptimizationSelected'),
         });
       } finally {
-        setUsingCandidateId(null);
+        if (active.current) {
+          setUsingCandidateId(null);
+        }
       }
     },
     [controls, onUseCandidate, requestContext, t],
@@ -421,6 +471,11 @@ export function MeshOptimizationPanel({
           ...requestContext,
           candidateId: candidate.id,
         });
+        if (!active.current) {
+          return;
+        }
+        readVersion.current += 1;
+        readPending.current = false;
         if (result.error || !result.success) {
           setStatus({
             tone: 'danger',
@@ -438,7 +493,9 @@ export function MeshOptimizationPanel({
           message: t('blockEditor.status.meshOptimizationDeleted'),
         });
       } finally {
-        setDeletingCandidateId(null);
+        if (active.current) {
+          setDeletingCandidateId(null);
+        }
       }
     },
     [controls, onClearSelected, requestContext, selection, t],
@@ -446,6 +503,7 @@ export function MeshOptimizationPanel({
 
   const candidateActionsDisabled =
     disabled ||
+    loading ||
     !controls ||
     !requestContext ||
     deletingCandidateId !== null ||
@@ -469,6 +527,8 @@ export function MeshOptimizationPanel({
           padding="none"
           appearance="plain"
           border="block"
+          role="group"
+          aria-label={t('blockEditor.labels.selectedOptimizedMesh')}
           data-testid={`immersive-scene-selected-mesh-optimization-${unitId}`}
         >
           <LayoutInset block="xs">
@@ -562,6 +622,8 @@ export function MeshOptimizationPanel({
               padding="none"
               appearance="plain"
               border="block-start"
+              role="group"
+              aria-label={formatCandidateDescriptor(candidate)}
               data-testid={`immersive-scene-mesh-optimization-candidate-${candidate.id}`}
             >
               <LayoutInset blockStart="xs">
@@ -604,6 +666,8 @@ export function MeshOptimizationPanel({
               padding="none"
               appearance="plain"
               border="block-start"
+              role="group"
+              aria-label={formatCandidateDescriptor(candidate)}
               data-testid={`immersive-scene-mesh-optimization-candidate-${candidate.id}`}
             >
               <LayoutInset blockStart="xs">
@@ -655,6 +719,8 @@ export function MeshOptimizationPanel({
               padding="none"
               appearance="plain"
               border="block-start"
+              role="group"
+              aria-label={formatCandidateDescriptor(candidate)}
               data-testid={`immersive-scene-mesh-optimization-candidate-${candidate.id}`}
             >
               <LayoutInset blockStart="xs">

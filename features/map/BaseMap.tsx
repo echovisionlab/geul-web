@@ -7,8 +7,11 @@ import { SupportingText } from '@/components/core/Typography';
 import { useComputedColorScheme } from '@/lib/providers/DesignSystemProvider';
 
 import { useCallback, useEffect, useRef } from 'react';
-import { Map, useMap } from '@vis.gl/react-google-maps';
+import { Map, useMap, useApiLoadingStatus } from '@vis.gl/react-google-maps';
 
+import { useTranslations } from 'next-intl';
+import { Alert } from '@/components/core/Alert';
+import { PageLoader } from '@/features/site/PageLoader';
 import { getPublicGoogleMapsApiKey } from '@/lib/public-runtime-config';
 
 const LONG_PRESS_DURATION = 500;
@@ -292,6 +295,11 @@ export function BaseMap({
   children,
 }: BaseMapProps) {
   const apiKey = getPublicGoogleMapsApiKey();
+  const apiStatus = useApiLoadingStatus();
+  const map = useMap();
+  const t = useTranslations('common');
+  const tMap = useTranslations('mapView');
+  const pending = Boolean(apiKey) && apiStatus !== 'FAILED' && apiStatus !== 'AUTH_FAILURE' && !map;
   const colorScheme = useComputedColorScheme();
   const mapColorScheme = colorScheme === 'dark' ? 'DARK' : 'LIGHT';
 
@@ -302,8 +310,12 @@ export function BaseMap({
   };
 
   return (
-    <div style={{ width: '100%', height: '100%' }}>
-      {apiKey ? (
+    <div style={{ width: '100%', height: '100%', position: 'relative' }} aria-busy={pending}>
+      {apiKey && (apiStatus === 'FAILED' || apiStatus === 'AUTH_FAILURE') ? (
+        <Alert role="alert" tone="danger">
+          {t('messages.failedToLoad')}
+        </Alert>
+      ) : apiKey ? (
         <Map
           defaultCenter={center}
           defaultZoom={zoom}
@@ -327,6 +339,7 @@ export function BaseMap({
           </SectionCard>
         </div>
       )}
+      {pending ? <PageLoader extent="container" message={tMap('loading')} /> : null}
     </div>
   );
 }

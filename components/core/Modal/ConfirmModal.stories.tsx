@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 import { localizedRender } from '@/.storybook/fixture-i18n';
 import { Button } from '../Button';
 import { ConfirmModal } from './ConfirmModal';
-import { confirmDialogs, ConfirmDialogHost } from './confirm-dialogs';
+import { confirmDialogs, ConfirmDialogHost, ConfirmDialogLoadError } from './confirm-dialogs';
 const meta: Meta<typeof ConfirmModal> = {
   title: 'Core/Overlays/ConfirmModal',
   component: ConfirmModal,
@@ -55,23 +56,45 @@ export const CompactCentered: Story = {
  * queue); `loading="eager"` loads it on mount, as here.
  */
 export const QueuedConfirmation: Story = {
-  render: localizedRender((args) => (
-    <>
-      <ConfirmDialogHost loading="eager" />
-      <Button
-        onClick={() =>
-          confirmDialogs.open({
-            title: args.title,
-            message: args.message,
-            confirmLabel: args.confirmLabel,
-            cancelLabel: args.cancelLabel,
-            closeLabel: args.closeLabel ?? 'Close dialog',
-            onConfirm: () => undefined,
-          })
-        }
-      >
-        {args.title}
-      </Button>
-    </>
-  )),
+  render: localizedRender((args) => {
+    const t = useTranslations('common');
+    return (
+      <>
+        <ConfirmDialogHost
+          loading="eager"
+          loadError={{ message: t('errors.generic'), retryLabel: t('actions.tryAgain') }}
+        />
+        <Button
+          onClick={() =>
+            confirmDialogs.open({
+              title: args.title,
+              message: args.message,
+              confirmLabel: args.confirmLabel,
+              cancelLabel: args.cancelLabel,
+              closeLabel: args.closeLabel ?? 'Close dialog',
+              onConfirm: () => undefined,
+            })
+          }
+        >
+          {args.title}
+        </Button>
+      </>
+    );
+  }),
+};
+
+export const RendererLoadError: Story = {
+  render: localizedRender((args) => {
+    const t = useTranslations('common');
+    return (
+      <ConfirmDialogLoadError
+        title={args.title}
+        message={t('errors.generic')}
+        retryLabel={t('actions.tryAgain')}
+        cancelLabel={args.cancelLabel}
+        onCancel={() => {}}
+        onRetry={() => {}}
+      />
+    );
+  }),
 };

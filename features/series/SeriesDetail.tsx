@@ -5,6 +5,8 @@ import { useEditorAccessLevel } from '@/features/editor/useEditorAccessLevel';
 import { AuthoringExtension } from '@/features/authoring/AuthoringExtensionsContext';
 import { DocumentEditorPanels } from '@/features/authoring/DocumentEditorPanels';
 import { EditorSettingsSection } from '@/features/authoring/EditorSettingsSection';
+import { PageLoader } from '@/features/site/PageLoader';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { SupportingText, Text as DsText, VisuallyHidden } from '@/components/core/Typography';
 import {
   LayoutStack as DsLayoutStack,
@@ -160,10 +162,11 @@ function useSeriesDetailModel({ initialData, scope }: SeriesDetailProps) {
     }
   }, [ogImage.trackAutomaticGenerationRun, translationOgGenerationRun]);
   const { upload, isUploading } = useUpload(UploadType.SERIES_FEATURED_IMAGE);
-  const { data: posts = [] } = useQuery({
+  const postsQuery = useQuery({
     queryKey: ['series', seriesId, 'posts'],
     queryFn: () => listSeriesPosts(seriesId),
   });
+  const { data: posts = [] } = postsQuery;
   const showPostMutationFailure = useCallback(
     (error: 'post_permission_revoked' | 'series_unavailable' | 'failed') => {
       notifications.show({
@@ -449,6 +452,13 @@ function useSeriesDetailModel({ initialData, scope }: SeriesDetailProps) {
     tActions,
     scope,
     posts,
+    postsQuery: {
+      isLoading: postsQuery.isLoading,
+      isError: postsQuery.isError,
+      error: postsQuery.error,
+      isFetching: postsQuery.isFetching,
+      refetch: postsQuery.refetch,
+    },
     postsPerPage,
     totalPostPages,
     safePostsPage,
@@ -512,7 +522,7 @@ export type SeriesDetailViewModel =
         | Pick<NonNullable<SeriesDetailReadyModel['reorderPosts']>, 'isPending'>
         | Extract<SeriesDetailReadyModel['reorderPosts'], null | undefined>;
       unassignPost:
-        | Pick<NonNullable<SeriesDetailReadyModel['unassignPost']>, 'isPending' | 'mutate'>
+        | Pick<NonNullable<SeriesDetailReadyModel['unassignPost']>, 'isPending' | 'mutate' | 'variables'>
         | Extract<SeriesDetailReadyModel['unassignPost'], null | undefined>;
     });
 export function SeriesDetailView({
@@ -561,6 +571,7 @@ export function SeriesDetailView({
     tActions,
     scope,
     posts,
+    postsQuery,
     postsPerPage,
     totalPostPages,
     safePostsPage,
@@ -746,7 +757,9 @@ export function SeriesDetailView({
                   size="sm"
                   weight="strong"
                 >
-                  {t('posts.title', { count: posts.length })}
+                  {t('posts.title', {
+                    count: postsQuery.isLoading || (postsQuery.isError && posts.length === 0) ? '—' : posts.length,
+                  })}
                 </DsText>
                 {posts.length > postsPerPage && (
                   <Pagination
@@ -764,7 +777,11 @@ export function SeriesDetailView({
               </DsLayoutInline>
             </DsLayoutInset>
 
-            {posts.length === 0 ? (
+            {postsQuery.isLoading ? (
+              <PageLoader placement="flow" />
+            ) : postsQuery.isError && posts.length === 0 ? (
+              <QueryErrorAlert queries={[postsQuery]} />
+            ) : posts.length === 0 ? (
               <SupportingText tone="secondary">{tCommon('messages.noPostsFound')}</SupportingText>
             ) : (
               <Table.ScrollContainer
@@ -871,6 +888,7 @@ export function SeriesDetailView({
                                 tone="danger"
                                 emphasis="low"
                                 disabled={!canEdit || unassignPost.isPending}
+                                loading={unassignPost.isPending && unassignPost.variables === post.id}
                                 onClick={() => {
                                   pendingRemoval.current = {
                                     id: post.id,

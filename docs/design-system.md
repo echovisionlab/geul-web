@@ -47,6 +47,7 @@ pages: [norns](https://monome.org/docs/norns/play/), [TX–6](https://teenage.en
 | Component and page documentation                 | [Components](./design-system/component-documentation.md), [Pages](./design-system/page-documentation.md) |
 | Carbon reference and completion criteria         | [Writing criteria](./design-system/carbon-reference.md)                                                  |
 | Core anatomy, states and source contracts        | [Core specifications](./design-system/core-specifications.md)                                            |
+| Blocking page and section waits                  | [Loading contract](./design-system/loading-surface-contract.md)                                          |
 
 Named editor colors follow the [editor color contract](./design-system/editor-color-contract.md).
 Mermaid diagrams follow the [Mermaid theme contract](./design-system/mermaid-contract.md).
@@ -259,6 +260,33 @@ account remain borderless; `outline` is an explicit functional-boundary exceptio
 underline feedback. IconButton uses surface feedback and retains its accessible name and target
 size. Keyboard focus is a separate visible two-pixel ring.
 
+TextButton commands accept controlled `loading` and optional `loadingLabel`; pending preserves the
+visible label and focus while preventing activation and native submit/reset. Navigation links reject
+these props. TableRowMenu tracks the Promise returned by an item's `onClick`, marks its trigger pending
+and blocks competing row commands until settlement. Return the complete operation, including required
+save barriers and follow-up work; `void` callbacks cannot report that lifetime. Domain errors and retry
+remain caller-owned. See the [loading migration](./design-system/migrations/loading-commonization.md#command-and-field-migration).
+
+EditorHeader Back, ErrorPage command actions and ImageUploadField removal also track returned
+Promises. Their shared helper clears pending on settlement and preserves resolved values and original
+rejections; consumers still own error feedback. MultiSelect adds optional `isLoading`/`loadingLabel`
+with the shared checking glyph. MultiSelectComboboxView combines query and creation pending,
+suppresses premature empty results and gates creation while either operation is active.
+
+ConfirmDialogHost requires localized `loadError: { message, retryLabel }`, including eager hosts.
+Its default `loading="on-demand"` queues the confirmation while the renderer loads. Exhausted retries
+end progress and show shared Alert/Button recovery without losing the queued intent. Core
+`useOnDemandModuleState(module, needed, request?)` exposes `module`, `status`, `error` and `retry`;
+the older `useOnDemandModule` remains compatible. Read the
+[recovery migration](./design-system/migrations/loading-commonization.md#on-demand-modules-and-confirmation-recovery)
+for statuses, retry timing and focus behavior.
+
+Avatar removal uses Core IconButton `appearance="media-overlay"`: a 16px painted circle and 12px
+glyph/spinner inside a rectangular 24px fine-pointer / 44px coarse-pointer target. ImageUploadField
+selects this through `removeButtonAppearance="avatar"` with a circle preview and inside placement.
+ProfileAvatarControl consumes it for the 56px admin and 80px profile images. This scoped danger/strong
+exception retains keyboard focus and pending behavior. See the [image upload contract](./design-system/image-upload-contract.md).
+
 Menu/disclosure openers, add-row entrances, filters, pagination and toolbar
 alignment controls use `medium` or `low`, including their selected state.
 Core derives persistent selection feedback from `aria-pressed="true"` and
@@ -346,6 +374,39 @@ Input values, item labels, table record data and commands retain their control/b
 Authored prose, captions, form-step introductions and whole-page error/recovery explanations
 keep their content roles rather than inheriting the compact helper scale. Alert notices and
 confirmation questions retain their primary message role; their secondary helper copy uses `xs`.
+
+### Page and section loading
+
+Blocking page and section waits reuse site `PageLoader` and Core `PageLoaderView`, following the
+`/works` map's configured image with compact localized text. Site resolves settings and the default
+`common.states.loading` message; Core requires visible nonblank text and keeps it when the image is
+missing or fails. Explicit phase text replaces the generic message. Core's `imageAlt` names the status
+and image independently of that visible text.
+
+`placement="fill"` remains the default for a positioned map/table region with reserved height.
+`placement="flow"` reserves its own section space. Controllers supply a `loadingSurface` or existing
+content slot to pure Views; catalogue bootstrap passes its root-resolved image directly to Core before
+ManifestProvider exists. Request state, busy containers, cancellation and terminal error/retry remain
+with the requesting owner.
+
+ServerDataTableContent defaults `showPendingLoader` to `result.data.length === 0`, retaining existing
+rows during navigation and allowing PageLoader for an initial empty wait. Auth code submission keeps
+the PIN mounted and disabled alongside a supplied common loader; explicit email-update authority
+rechecks retain the result region and focus. Tool startup uses the actual
+PageContentView → EmbedFrame → ToolModule path and waits for `mount()` completion before ready.
+See the [auth and tool references](./design-system/migrations/loading-commonization.md#authentication-and-tool-startup).
+
+Retain loaded content during background requests and incremental loading. Buttons, input checks,
+uploads, processing percentages, playback buffering and route progress keep their granular feedback.
+Read the [loading contract](./design-system/loading-surface-contract.md),
+[migration and consumer examples](./design-system/migrations/loading-commonization.md) and
+[source inventory guide](./design-system/loading-inventory.md). Source audit covers all 54 feature
+domains; candidate counts and story mappings do not establish defect counts, complete semantic
+coverage or browser acceptance. The coordinator reports visual inspection of the Works GIF, live
+PortaDJ ready state, Storybook common-loader GIF phase/generic and no-image/failed-image cases,
+tool pending/failed/ready and a 320px region, and the `33steps` avatar plus hover. Most other
+production/Storybook states, physical coarse-pointer and actual assistive-technology checks remain
+unverified. These scoped observations record no released web version or blanket visual approval.
 
 Core MediaPreviewGrid retains two equal columns at every width for OG/featured-image comparisons.
 ImagePreviewHeader uses the compact-media `xs`/medium text role and reserves the same `xs` control-height

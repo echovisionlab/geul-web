@@ -11,9 +11,11 @@ import type { FileDownloadPolicyModel } from '@/lib/types/file-download-access';
 function DownloadPolicyPreview({
   state = 'ready',
   compact = false,
+  presentation = 'standalone',
 }: {
   state?: 'ready' | 'restricted' | 'pending' | 'error' | 'save-error';
   compact?: boolean;
+  presentation?: 'standalone' | 'block-settings';
 }) {
   const target = {
     entityType: TranscodeEntityType.POST,
@@ -62,7 +64,7 @@ function DownloadPolicyPreview({
   });
   return (
     <LayoutContainer size="compact" inset="md">
-      <FileDownloadPolicyEditor {...target} adapter={adapter} compact={compact} />
+      <FileDownloadPolicyEditor {...target} adapter={adapter} compact={compact} presentation={presentation} />
     </LayoutContainer>
   );
 }
@@ -78,13 +80,16 @@ const meta = {
       },
     },
   },
-  decorators: [(Story, context) => <Story key={`${context.args.state}:${context.args.compact}`} />],
+  decorators: [
+    (Story, context) => <Story key={`${context.args.state}:${context.args.compact}:${context.args.presentation}`} />,
+  ],
 } satisfies Meta<typeof DownloadPolicyPreview>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 export const Public: Story = {};
 export const Restricted: Story = { args: { state: 'restricted' } };
 export const Loading: Story = { args: { state: 'pending' } };
+export const BlockSettingsLoading: Story = { args: { state: 'pending', presentation: 'block-settings' } };
 export const Failed: Story = { args: { state: 'error' } };
 export const SaveFailed: Story = { args: { state: 'save-error' } };
 export const Compact: Story = { args: { compact: true } };

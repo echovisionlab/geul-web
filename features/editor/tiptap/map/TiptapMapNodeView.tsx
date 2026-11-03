@@ -1,4 +1,5 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
 import { parseAspectRatio } from '@/components/core/ResizeHandle/display-size';
 import { liveNodeView } from '@/features/editor/tiptap/live-node-view';
@@ -186,16 +187,18 @@ function TiptapMapNodeView({
     keyboardSession: { owner: editor, key: `map:${blockId}` },
   });
 
-  const { data: placesData } = useQuery({
+  const placesQuery = useQuery({
     queryKey: ['mapPlace', 'byIds', mapPlaceIds],
     queryFn: () => loadPlacesByIds?.(mapPlaceIds) ?? Promise.resolve([]),
     enabled: hasPlaces && Boolean(loadPlacesByIds),
   });
-  const { data: themesData } = useQuery({
+  const { data: placesData } = placesQuery;
+  const themesQuery = useQuery({
     queryKey: ['mapThemes', 'list'],
     queryFn: () => loadThemes?.() ?? Promise.resolve({ themes: [] }),
     enabled: Boolean(loadThemes),
   });
+  const { data: themesData } = themesQuery;
   const places = useMemo(() => (placesData ?? []).map(toMapPlace), [placesData]);
   const rendererPlaces = useMemo<MapRendererPlace[]>(
     () =>
@@ -407,6 +410,7 @@ function TiptapMapNodeView({
         onResizeRightKeyDown={onResizeKeyDown}
         onResizeBlur={onResizeBlur}
       >
+        <QueryErrorAlert queries={[placesQuery, themesQuery]} />
         <div
           className="editor-visual-media"
           data-map-static-surface=""
@@ -424,6 +428,7 @@ function TiptapMapNodeView({
             themes={themes}
             resolveTheme={resolveTheme}
             height="100%"
+            dataPending={placesQuery.isLoading || themesQuery.isLoading}
             settingsPanel={{ placement: 'map-corner', hidden: !canEditNeutral }}
           />
         </div>
@@ -474,15 +479,17 @@ function TiptapMapNodeView({
             onAddPlace={addPlace}
             onRemovePlace={removePlace}
             onCenterOnPlace={(place) => centerPlace(place.id)}
-            onCreatePlace={(data: CreatePlaceFormState) =>
-              createPlace.mutate({
-                name: data.name,
-                address: data.address,
-                lat: data.lat,
-                lng: data.lng,
-                google_place_id: data.googlePlaceId,
-                address_components: data.addressComponents as Record<string, string> | undefined,
-              })
+            onCreatePlace={async (data: CreatePlaceFormState) =>
+              Boolean(
+                await createPlace.mutateAsync({
+                  name: data.name,
+                  address: data.address,
+                  lat: data.lat,
+                  lng: data.lng,
+                  google_place_id: data.googlePlaceId,
+                  address_components: data.addressComponents ? { ...data.addressComponents } : undefined,
+                }),
+              )
             }
             isCreating={createPlace.isPending}
           />

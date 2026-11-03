@@ -220,6 +220,8 @@ function MenuItemForm({
             <Select
               size="xs"
               placeholder={tPage('targetPlaceholder')}
+              isLoading={targetsQuery.isLoading}
+              error={targetsQuery.isError ? tCommon('states.notAvailable') : undefined}
               value={link.targetId}
               onChange={(targetId) =>
                 setDraft((current) => {
@@ -236,7 +238,7 @@ function MenuItemForm({
               data={targetSelectData}
               searchable
               nothingFoundMessage={tPage('noTargets')}
-              disabled={!editable}
+              disabled={!editable || targetsQuery.isLoading || targetsQuery.isError}
             />
           )}
         </DsLayoutInline>

@@ -1,192 +1,112 @@
 // @vitest-environment jsdom
 
-import { act, type ReactNode } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { TestProviders } from '@/test/TestProviders';
+import { act, render, screen, waitFor } from '@/test/render';
 import { CreatePlaceModal } from './CreatePlaceModal';
 
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: vi.fn().mockImplementation((query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
-});
-
+const googleApi = vi.hoisted(() => ({ geocode: vi.fn(), fetchFields: vi.fn() }));
+const geocoding = {
+  Geocoder: class {
+    geocode = googleApi.geocode;
+  },
+};
+const places = {
+  Place: class {
+    displayName = 'Google Place';
+    formattedAddress = 'Google Address';
+    fetchFields = googleApi.fetchFields;
+  },
+};
 vi.mock('@vis.gl/react-google-maps', () => ({
-  useMapsLibrary: () => null,
+  useMapsLibrary: (name: string) => (name === 'geocoding' ? geocoding : places),
 }));
-
-vi.mock('@/features/map/MapProvider', () => ({
-  MapProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
-}));
-
+vi.mock('@/features/map/MapProvider', () => ({ MapProvider: ({ children }: { children: ReactNode }) => children }));
 vi.mock('@/features/map/BaseMap', () => ({
-  BaseMap: ({ children }: { children?: ReactNode }) => <div data-testid="base-map">{children}</div>,
-}));
-
-vi.mock('@/features/map/Marker', () => ({
-  Marker: () => <div data-testid="marker" />,
-}));
-
-vi.mock('@/features/place/PlacesAutocomplete', () => ({
-  PlacesAutocomplete: ({
-    onPlaceSelect,
+  BaseMap: ({
+    onClick,
+    onPoiClick,
   }: {
-    onPlaceSelect: (result: {
-      name: string;
-      address: string;
-      coordinate: { lat: number; lng: number };
-      placeId: string;
-      addressComponents: null;
-    }) => void;
+    onClick: (lat: number, lng: number) => void;
+    onPoiClick: (id: string, lat: number, lng: number) => void;
   }) => (
-    <button
-      type="button"
-      data-testid="places-autocomplete"
-      onClick={() =>
-        onPlaceSelect({
-          name: 'Google Place',
-          address: 'Google Address',
-          coordinate: { lat: 37.5, lng: 127 },
-          placeId: 'google-place-1',
-          addressComponents: null,
-        })
-      }
-    >
-      Pick place
-    </button>
+    <div aria-label="Map">
+      <button type="button" onClick={() => onClick(1, 1)}>
+        Choose first location
+      </button>
+      <button type="button" onClick={() => onClick(2, 2)}>
+        Choose second location
+      </button>
+      <button type="button" onClick={() => onPoiClick('google-place-1', 37.5, 127)}>
+        Pick place
+      </button>
+    </div>
   ),
 }));
+vi.mock('@/features/map/Marker', () => ({ Marker: () => null }));
 
-let container: HTMLDivElement | null = null;
-let root: Root | null = null;
-
-afterEach(() => {
-  act(() => {
-    root?.unmount();
-  });
-  container?.remove();
-  root = null;
-  container = null;
-});
-
-function setInputValue(input: HTMLInputElement, value: string): void {
-  input.focus();
-  const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
-  valueSetter?.call(input, value);
-  input.dispatchEvent(new Event('input', { bubbles: true }));
-  input.blur();
-}
+afterEach(() => vi.resetAllMocks());
 
 describe('CreatePlaceModal', () => {
-  it('submits manually entered place data without mounting map or autocomplete controls', () => {
+  it('submits manual fields without requesting a map and retains the draft until its owner closes', async () => {
     const onSubmit = vi.fn();
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    root = createRoot(container);
-    act(() =>
-      root!.render(
-        <TestProviders>
-          <CreatePlaceModal localOnly opened onClose={vi.fn()} onSubmit={onSubmit} />
-        </TestProviders>,
-      ),
-    );
-    expect(document.querySelector('[data-testid="base-map"]')).toBeNull();
-    expect(document.querySelector('[data-testid="places-autocomplete"]')).toBeNull();
-    act(() => {
-      setInputValue(document.querySelector<HTMLInputElement>('input[placeholder="Place name"]')!, 'Manual place');
-      setInputValue(document.querySelector<HTMLInputElement>('input[placeholder="Full address"]')!, 'Manual address');
-    });
-    const create = Array.from(document.querySelectorAll('button')).find((button) =>
-      button.textContent?.includes('Create & Add'),
-    )!;
-    act(() => create.click());
+    const { user } = render(<CreatePlaceModal localOnly opened onClose={vi.fn()} onSubmit={onSubmit} />);
+    expect(screen.queryByRole('button', { name: 'Pick place' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('textbox', { name: 'Name' }));
+    await user.paste('Manual place');
+    await user.click(screen.getByRole('textbox', { name: 'Address' }));
+    await user.paste('Manual address');
+    await user.click(screen.getByRole('button', { name: 'Create & Add' }));
     expect(onSubmit).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'Manual place', address: 'Manual address', googlePlaceId: null }),
     );
+    expect(screen.getByRole('textbox', { name: 'Address' })).toHaveValue('Manual address');
   });
 
-  it('updates the address input without reading from a cleared change event', () => {
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    root = createRoot(container);
-
-    act(() => {
-      root?.render(
-        <TestProviders>
-          <CreatePlaceModal opened onClose={vi.fn()} onSubmit={vi.fn()} />
-        </TestProviders>,
-      );
-    });
-
-    const addressInput = document.querySelector('input[placeholder="Full address"]') as HTMLInputElement | null;
-
-    expect(addressInput).not.toBeNull();
-
-    act(() => {
-      setInputValue(addressInput!, 'Seoul, South Korea');
-    });
-
-    expect(addressInput?.value).toBe('Seoul, South Korea');
+  it('updates the address input without reading a cleared change event', async () => {
+    const { user } = render(<CreatePlaceModal localOnly opened onClose={vi.fn()} onSubmit={vi.fn()} />);
+    await user.click(screen.getByRole('textbox', { name: 'Address' }));
+    await user.paste('Seoul, South Korea');
+    expect(screen.getByRole('textbox', { name: 'Address' })).toHaveValue('Seoul, South Korea');
   });
 
-  it('clears a selected Google place ID when coordinates are edited manually', () => {
+  it('clears a selected Google place ID when coordinates are edited manually', async () => {
+    googleApi.fetchFields.mockResolvedValue(undefined);
     const onSubmit = vi.fn();
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    root = createRoot(container);
+    const { user } = render(<CreatePlaceModal opened onClose={vi.fn()} onSubmit={onSubmit} />);
+    await user.click(screen.getByRole('button', { name: 'Pick place' }));
+    await waitFor(() => expect(screen.getByRole('textbox', { name: 'Name' })).toHaveValue('Google Place'));
+    const latitude = screen.getByRole('textbox', { name: 'Latitude' });
+    await user.clear(latitude);
+    await user.type(latitude, '37.6');
+    await user.click(screen.getByRole('button', { name: 'Create & Add' }));
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ lat: 37.6, lng: 127, googlePlaceId: null }));
+  });
 
-    act(() => {
-      root?.render(
-        <TestProviders>
-          <CreatePlaceModal opened onClose={vi.fn()} onSubmit={onSubmit} />
-        </TestProviders>,
+  it('ignores an earlier geocode response after a newer location has resolved', async () => {
+    let finishFirst!: (result: unknown) => void;
+    let finishSecond!: (result: unknown) => void;
+    googleApi.geocode
+      .mockReturnValueOnce(
+        new Promise((resolve) => {
+          finishFirst = resolve;
+        }),
+      )
+      .mockReturnValueOnce(
+        new Promise((resolve) => {
+          finishSecond = resolve;
+        }),
       );
-    });
-
-    const pickPlaceButton = document.querySelector('[data-testid="places-autocomplete"]') as HTMLButtonElement | null;
-
-    expect(pickPlaceButton).not.toBeNull();
-
-    act(() => {
-      pickPlaceButton!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
-
-    const latitudeInput = Array.from(document.querySelectorAll('input')).find((input) => input.value === '37.5') as
-      HTMLInputElement | undefined;
-
-    expect(latitudeInput).toBeDefined();
-
-    act(() => {
-      setInputValue(latitudeInput!, '37.6');
-    });
-
-    const submitButton = Array.from(document.querySelectorAll('button')).find((button) =>
-      button.textContent?.includes('Create & Add'),
-    ) as HTMLButtonElement | undefined;
-
-    expect(submitButton).toBeDefined();
-
-    act(() => {
-      submitButton!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
-
-    expect(onSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({
-        lat: 37.6,
-        lng: 127,
-        googlePlaceId: null,
-      }),
+    const { user } = render(<CreatePlaceModal opened onClose={vi.fn()} onSubmit={vi.fn()} />);
+    await user.click(screen.getByRole('button', { name: 'Choose first location' }));
+    await user.click(screen.getByRole('button', { name: 'Choose second location' }));
+    await act(async () =>
+      finishSecond({ results: [{ formatted_address: 'Current address', address_components: [] }] }),
     );
+    expect(screen.getByRole('textbox', { name: 'Address' })).toHaveValue('Current address');
+    await act(async () => finishFirst({ results: [{ formatted_address: 'Old address', address_components: [] }] }));
+    expect(screen.getByRole('textbox', { name: 'Address' })).toHaveValue('Current address');
+    expect(screen.getByRole('textbox', { name: 'Latitude' })).toHaveValue('2');
   });
 });

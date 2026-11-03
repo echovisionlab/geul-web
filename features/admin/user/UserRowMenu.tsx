@@ -51,6 +51,7 @@ export function UserRowMenu({ user }: UserRowMenuProps) {
         label: tCommon('actions.unban'),
         icon: <IconCheck size={16} />,
         onClick: handleUnban,
+        onError: () => notifications.show({ message: tCommon('errors.generic'), tone: 'danger' }),
         disabled: unbanning,
       });
     } else {

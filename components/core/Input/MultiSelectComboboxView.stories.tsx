@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
 import { useArgs } from 'storybook/preview-api';
+import { useState } from 'react';
+import { Button } from '../Button';
 import { MultiSelectComboboxView, type MultiSelectItem } from './MultiSelectComboboxView';
 
 interface ExampleItem extends MultiSelectItem {
@@ -51,6 +53,7 @@ const meta = {
     selectedItems: [options[0]],
     options,
     isLoading: false,
+    loadingLabel: 'Loading genres',
     onSelect: () => {},
     onDeselect: () => {},
     onCreate: () => {},
@@ -65,3 +68,27 @@ type Story = StoryObj<typeof meta>;
 export const Editable: Story = {};
 export const ReadOnly: Story = { args: { canEdit: false } };
 export const Loading: Story = { args: { isLoading: true } };
+export const LoadingEmpty: Story = { args: { isLoading: true, options: [], selectedItems: [] } };
+export const Creating: Story = { args: { isCreating: true } };
+export const DisabledPending: Story = { args: { canEdit: false, isLoading: true } };
+export const CreationRetry: Story = {
+  render: function CreationRetryPreview(args) {
+    const [pending, setPending] = useState(false);
+    const [selectedItems, setSelectedItems] = useState(args.selectedItems);
+    return (
+      <>
+        <MultiSelectComboboxView
+          {...args}
+          selectedItems={selectedItems}
+          isCreating={pending}
+          onSelect={(item) => setSelectedItems((items) => [...items, item])}
+          onDeselect={(item) => setSelectedItems((items) => items.filter((selected) => selected.id !== item.id))}
+          onCreate={() => setPending(true)}
+        />
+        <Button disabled={!pending} onClick={() => setPending(false)}>
+          Simulate failed creation
+        </Button>
+      </>
+    );
+  },
+};

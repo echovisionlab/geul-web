@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useMemo, useRef } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { notifications } from '@/components/core/Notification';
@@ -34,6 +35,17 @@ export function useFeaturedImageCommands({
   enabled = true,
 }: Options) {
   const t = useTranslations('common.notifications');
+  const target = useMemo(() => ({}), [entityId, enabled]);
+  const currentTarget = useRef<object | null>(target);
+  currentTarget.current = target;
+  useEffect(() => {
+    currentTarget.current = target;
+    return () => {
+      if (currentTarget.current === target) {
+        currentTarget.current = null;
+      }
+    };
+  }, [target]);
   const assertEnabled = () => {
     if (!enabled) {
       throw new Error(t('updateFailed'));
@@ -46,11 +58,15 @@ export function useFeaturedImageCommands({
   };
 
   const setMutation = useMutation({
-    mutationFn: async (fileId: string) => {
+    mutationFn: async (request: { fileId: string; target: object }) => {
       assertEnabled();
-      return setImageAction(fileId);
+      return setImageAction(request.fileId);
     },
-    onSuccess: (result, fileId) => {
+    onSuccess: (result, request) => {
+      if (currentTarget.current !== request.target) {
+        return;
+      }
+      const fileId = request.fileId;
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
         return;
@@ -65,11 +81,14 @@ export function useFeaturedImageCommands({
   });
 
   const removeMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (_request: { target: object }) => {
       assertEnabled();
       return removeImageAction();
     },
-    onSuccess: (result) => {
+    onSuccess: (result, request) => {
+      if (currentTarget.current !== request.target) {
+        return;
+      }
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
         return;
@@ -81,7 +100,10 @@ export function useFeaturedImageCommands({
       notifyGeneration(result);
       notifications.show({ message: t('featuredImageRemoved'), tone: 'warning' });
     },
-    onError: (error) => {
+    onError: (error, request) => {
+      if (currentTarget.current !== request.target) {
+        return;
+      }
       notifications.show({
         message: error instanceof Error ? error.message : t('updateFailed'),
         tone: 'danger',
@@ -93,7 +115,7 @@ export function useFeaturedImageCommands({
     uploadType,
     entityId,
     fileName: 'featured',
-    onUploaded: setMutation.mutateAsync,
+    onUploaded: (fileId) => setMutation.mutateAsync({ fileId, target }),
     uploadFailedMessage: t('uploadFailed'),
     enabled,
     disabledMessage: t('updateFailed'),
@@ -103,7 +125,7 @@ export function useFeaturedImageCommands({
     handleUpload: upload.handleUpload,
     uploadProgress: upload.uploadProgress,
     isUploading: upload.isUploading,
-    handleRemove: () => removeMutation.mutate(),
-    isRemoving: removeMutation.isPending,
+    handleRemove: () => removeMutation.mutateAsync({ target }).catch(() => {}),
+    isRemoving: removeMutation.isPending && removeMutation.variables?.target === target,
   };
 }

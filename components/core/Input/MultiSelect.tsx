@@ -25,6 +25,7 @@ import {
   inputPopoverPresentation,
   inputState,
 } from './InputParts';
+import { InputLoadingStatus } from './InputLoadingStatus';
 import {
   inputAttributes,
   flattenOptions,
@@ -47,6 +48,8 @@ export interface MultiSelectProps extends InputBaseProps {
   searchable?: boolean;
   clearable?: boolean;
   nothingFoundMessage?: ReactNode;
+  isLoading?: boolean;
+  loadingLabel?: string;
   withPillsReorder?: boolean;
   maxValues?: number;
   hidePickedOptions?: boolean;
@@ -139,6 +142,7 @@ export const MultiSelect = forwardRef<HTMLInputElement, MultiSelectProps>((props
   return (
     <ComboBox
       {...inputAttributes(props)}
+      aria-busy={props.isLoading || props['aria-busy']}
       {...inputState(props)}
       {...inputPresentation(presentation)}
       selectionMode="multiple"
@@ -253,6 +257,7 @@ export const MultiSelect = forwardRef<HTMLInputElement, MultiSelectProps>((props
             ref={ref}
             id={props.id}
             aria-describedby={props['aria-describedby']}
+            aria-busy={props.isLoading || props['aria-busy']}
             data-type={props.searchable ? 'visible' : 'hidden'}
             className={classes.input}
             placeholder={values.length ? '' : props.placeholder}
@@ -265,6 +270,7 @@ export const MultiSelect = forwardRef<HTMLInputElement, MultiSelectProps>((props
             }}
           />
         </div>
+        {props.isLoading ? <InputLoadingStatus label={props.loadingLabel} /> : null}
         {props.clearable && values.length ? (
           <Button
             slot={null}
@@ -297,7 +303,10 @@ export const MultiSelect = forwardRef<HTMLInputElement, MultiSelectProps>((props
         </span>
       </div>
       <Popover {...inputPopoverPresentation(presentation)}>
-        <ListBox<InputOption> className={classes.list} renderEmptyState={() => props.nothingFoundMessage ?? null}>
+        <ListBox<InputOption>
+          className={classes.list}
+          renderEmptyState={() => (props.isLoading ? null : (props.nothingFoundMessage ?? null))}
+        >
           {(item) => (
             <ListBoxItem id={item.value} textValue={item.label} isDisabled={item.disabled} className={classes.option}>
               {props.renderOption?.({ option: item, checked: values.includes(item.value) }) ?? item.label}

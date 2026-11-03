@@ -1,24 +1,37 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { PageLoaderView, type PageLoaderViewSize } from '@/components/core/LoadingSurface';
+import {
+  PageLoaderView,
+  type PageLoaderViewPlacement,
+  type PageLoaderViewContrast,
+  type PageLoaderViewExtent,
+  type PageLoaderViewSize,
+} from '@/components/core/LoadingSurface';
+import type { ClosedVisualProps } from '@/components/core/visual-contract';
 import { useSiteSettings } from '@/lib/contexts/ManifestContext';
 import { resolvePageLoaderImage } from './loader-image';
 
-export interface PageLoaderProps {
-  /** Height of the loader container. Defaults to '100%' for full parent height. */
-  height?: string | number;
-  /** Minimum height safeguard for page-sized loaders. Defaults to 200. */
-  minHeight?: string | number;
+export interface PageLoaderProps extends ClosedVisualProps {
+  /** Standard theme text by default; inverse for loading on a dark scrim. */
+  contrast?: PageLoaderViewContrast;
+  /** Named region height owned by Core. Defaults to `section`. */
+  extent?: PageLoaderViewExtent;
+  /** Fill a positioned parent, or reserve a bounded section in document flow. Defaults to fill. */
+  placement?: PageLoaderViewPlacement;
   /** Loader size. Defaults to 'md'. */
   size?: PageLoaderViewSize;
-  /** Retained for caller compatibility. Configured loading images keep their colors. */
-
-  /** Optional message to display below the loader. */
+  /** Visible phase text; blank or omitted values use the localized loading message. */
   message?: string;
 }
 
-export function PageLoader({ height = '100%', minHeight = 200, size = 'md', message }: PageLoaderProps) {
+export function PageLoader({
+  extent = 'section',
+  placement = 'fill',
+  contrast = 'standard',
+  size = 'md',
+  message,
+}: PageLoaderProps) {
   const t = useTranslations('common.states');
   const { settings } = useSiteSettings();
   const image = resolvePageLoaderImage(settings.loader_urls ?? []);
@@ -26,10 +39,11 @@ export function PageLoader({ height = '100%', minHeight = 200, size = 'md', mess
 
   return (
     <PageLoaderView
-      height={height}
-      minHeight={minHeight}
+      extent={extent}
+      placement={placement}
+      contrast={contrast}
       size={size}
-      message={message?.trim() === loadingLabel.trim() ? undefined : message}
+      message={message?.trim() || loadingLabel}
       imageSrc={image.src}
       imageAlt={loadingLabel}
       imageUnoptimized={image.unoptimized}

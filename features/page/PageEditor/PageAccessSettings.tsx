@@ -19,6 +19,7 @@ export interface PageAccessSettingsProps {
   value: PageAccessPolicyValue;
   tagOptions: { value: string; label: string }[];
   loadingTags?: boolean;
+  tagsUnavailable?: boolean;
   disabled?: boolean;
   onSave: (
     value: PageAccessPolicyValue,
@@ -31,6 +32,7 @@ export function PageAccessSettings({
   value,
   tagOptions,
   loadingTags = false,
+  tagsUnavailable = false,
   disabled = false,
   onSave,
 }: PageAccessSettingsProps) {
@@ -158,7 +160,8 @@ export function PageAccessSettings({
         searchable
         hidePickedOptions
         nothingFoundMessage={t('noTags')}
-        disabled={disabled || pending || loadingTags}
+        isLoading={loadingTags}
+        disabled={disabled || pending || loadingTags || tagsUnavailable}
       />
       {conditionGroupCount >= 2 ? (
         <Select

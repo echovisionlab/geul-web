@@ -108,7 +108,7 @@ export function ReleaseArtworkUploader({
     <ReleaseArtworkView
       artworkUrl={artworkUrl}
       inputId={inputId}
-      isUploading={isUploading}
+      isUploading={isUploading || setArtwork.isPending}
       uploadProgress={uploadProgress}
       isRemoving={removeArtwork.isPending}
       onUpload={handleUpload}

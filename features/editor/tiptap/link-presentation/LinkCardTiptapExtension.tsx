@@ -84,6 +84,8 @@ export function dismissPastedLink(editor: Editor) {
  * preview and imports its image as the thumbnail File. A link pasted into
  * text moves to its own paragraph first. Refresh re-reads an existing preview.
  */
+const previewRequests = new WeakMap<Editor, Map<string, symbol>>();
+
 export async function chooseLinkPresentation(
   editor: Editor,
   runtime: LinkPresentationRuntime | undefined,
@@ -92,10 +94,20 @@ export async function chooseLinkPresentation(
   { refresh = false }: { refresh?: boolean } = {},
 ): Promise<boolean> {
   const blockId = presentation === 'link' ? target.blockId : isolateLinkBlock(editor, target.blockId, target.url);
+  let requests = previewRequests.get(editor);
+  if (!requests) {
+    requests = new Map();
+    previewRequests.set(editor, requests);
+  }
+  const request = Symbol();
+  if (blockId) {
+    requests.set(blockId, request);
+  }
   dismissPastedLink(editor);
   if (!blockId || !findStandaloneLink(editor.state, blockId)) {
     return presentation === 'link';
   }
+  const isCurrent = () => !editor.isDestroyed && requests.get(blockId) === request;
   if (!setLinkPresentation(editor, blockId, presentation)) {
     return false;
   }
@@ -105,12 +117,13 @@ export async function chooseLinkPresentation(
     attrs.linkSiteName || attrs.linkDescription || attrs.linkThumbnailFileId || attrs.linkIconFileId,
   );
   if (!runtime || !entry || presentation === 'link' || (hasPreview && !refresh)) {
+    setPending(editor, blockId, false);
     return true;
   }
   setPending(editor, blockId, true);
   try {
     const preview = await runtime.loadPreview(entry.url);
-    if (!preview || editor.isDestroyed) {
+    if (!preview || !isCurrent()) {
       return true;
     }
     const importImage = (source: string) =>
@@ -119,6 +132,9 @@ export async function chooseLinkPresentation(
       importImage(preview.imageSource),
       importImage(preview.iconSource),
     ]);
+    if (!isCurrent()) {
+      return true;
+    }
     applyLinkPreview(editor, blockId, entry.url, {
       title: preview.title,
       description: preview.description,
@@ -128,7 +144,10 @@ export async function chooseLinkPresentation(
     });
     return true;
   } finally {
-    setPending(editor, blockId, false);
+    if (isCurrent()) {
+      requests.delete(blockId);
+      setPending(editor, blockId, false);
+    }
   }
 }
 

@@ -1,4 +1,5 @@
 'use client';
+import { PageLoader } from '@/features/site/PageLoader';
 
 import { SectionCard as DsSectionCard } from '@/components/core/Section';
 import {
@@ -59,7 +60,8 @@ function AuthorListSettingsForm({ props, updateProps, readOnly = false }: Author
     queryFn: () => listAuthorsAction(MAX_SELECTED_AUTHORS, selectedIds),
     enabled: source === 'selected' && selectedIds.length > 0,
   });
-  const { data: selectedAuthors = [], isFetched: selectedAuthorsFetched } = selectedAuthorsQuery;
+  const { data: selectedAuthors = [] } = selectedAuthorsQuery;
+  const selectedAuthorsFetched = selectedAuthorsQuery.data !== undefined;
   const selectedAuthorsById = useMemo(
     () => new Map(selectedAuthors.map((author) => [author.id, author])),
     [selectedAuthors],
@@ -109,7 +111,7 @@ function AuthorListSettingsForm({ props, updateProps, readOnly = false }: Author
 
   return (
     <div data-page-block-editor="author-list">
-      <QueryErrorAlert queries={[candidatesQuery, selectedAuthorsQuery]} />
+      <QueryErrorAlert queries={[selectedAuthorsQuery, candidatesQuery]} />
       <DsLayoutStack gap="md">
         <Select
           disabled={readOnly}
@@ -145,6 +147,8 @@ function AuthorListSettingsForm({ props, updateProps, readOnly = false }: Author
                 leftSection={<IconUserPlus size={14} />}
                 items={candidates}
                 isLoading={candidatesFetching}
+                error={candidatesQuery.isError ? t('common.errors.generic') : undefined}
+                emptyMessage={candidatesQuery.isError ? t('common.errors.generic') : undefined}
                 debouncedSearch={debouncedSearch}
                 onSelect={(memberId) => {
                   if (readOnly) {
@@ -176,7 +180,10 @@ function AuthorListSettingsForm({ props, updateProps, readOnly = false }: Author
               <DsText size="xs" tone="secondary">
                 {tPageEditor('blockEditor.authorSelection.empty')}
               </DsText>
+            ) : selectedAuthorsQuery.isLoading ? (
+              <PageLoader placement="flow" extent="compact" size="xs" />
             ) : (
+              selectedAuthorsFetched &&
               selectedIds.map((memberId, index) => {
                 const author = selectedAuthorsById.get(memberId);
                 const authorName = author?.name?.trim() || t('common.states.unknownAuthor');

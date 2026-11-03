@@ -22,6 +22,19 @@ top-end corner. `ImageUploadField` reserves half the control as a block-start/in
 remove action is offered, so the badge never covers the field label, description or neighbouring fields.
 `removeButtonPlacement="inside"` (avatars) keeps the action within the image.
 
+`removeButtonAppearance="avatar"` requires a circle preview and inside placement. It selects Core
+IconButton's `appearance="media-overlay"`: a 16px circular visual with a 12px X or pending spinner,
+using the existing `icon-size-md` and `icon-size-xs` roles. The rectangular native target stays 24px on fine pointers
+and grows inward to the shared 44px coarse-pointer minimum. Its corners accept pointer input across the entire
+painted badge. Hover/press affects the visual; keyboard
+focus outlines the full target. Disabled/pending preserve the visual and block execution through IconButton.
+The strong danger treatment remains an explicit avatar-removal choice.
+
+Use the avatar appearance for profile-photo removal. It does not resize logos, artwork, crop actions,
+ordinary media buttons or the global xs/compact sizes. The default appearance retains the existing full-target
+treatment. `ProfileAvatarControl` selects the avatar appearance; `UserAvatarUploader` consumes it for account
+profiles and the 56px admin `UserProfileFormSection`. The profile control's default image size remains 80px.
+
 ## Source and prepared-file policy
 
 Managed raster sources accepted by their upload type are decoded and resized locally before entering the crop dialog.
@@ -61,7 +74,19 @@ Source tests cover oversized originals entering normalization, target-specific p
 failure, bitmap resize/release, MIME/extension hints, controller captions and preparation-state recovery.
 Browser fixtures do not establish backend authorization, real upload deployment or native VoiceOver results.
 
+For avatar removal, review Core ImageUploadField / AvatarRemovalComparison and AvatarRemovalStates at 56px and
+80px, then Feature User / ProfileAvatarControl / AdminWithImage, WithImage and DisabledWithImage.
+The comparison renders the default and avatar appearances side by side; the state fixture exercises badge-edge
+hit-testing, removal, keyboard activation, disabled and pending behavior. Core IconButton / MediaOverlayHover and
+MediaOverlayActive check that forced hover/active paints only the badge. Review light/dark, hover, keyboard focus,
+RTL and coarse-pointer targets. The coordinator owns final browser regression and visual acceptance.
+
 ## Migration
+
+Avatar consumers opt in with `removeButtonAppearance="avatar"`, `removeButtonPlacement="inside"` and a circle
+preview. `ProfileAvatarControl` supplies these props centrally; account/admin callers need no size overrides.
+Other image consumers keep the default appearance. Direct IconButton consumers must supply inside media placement
+when selecting `appearance="media-overlay"` and cannot provide a local size or shape.
 
 Before this review, managed sources were rejected above 20 MiB, and non-HEIC sources reached the crop dialog
 without normalization. They now enter bounded local preparation before crop and retain final upload validation.

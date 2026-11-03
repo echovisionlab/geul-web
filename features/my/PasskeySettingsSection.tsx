@@ -3,11 +3,12 @@ import { SupportingText, Text as DsText, VisuallyHidden } from '@/components/cor
 
 import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
 
-import { useCallback, useEffect, useId, useMemo, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { IconKey, IconPlus, IconTrash } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 
+import { PageLoader } from '@/features/site/PageLoader';
 import { Alert } from '@/components/core/Alert';
 import { Button } from '@/components/core/Button';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
@@ -53,6 +54,8 @@ export interface PasskeySettingsViewProps {
   error: string | null;
   removingId: string | null;
   registrationReady: boolean;
+  registrationPending?: boolean;
+  loadingSurface: React.ReactNode;
   registration: {
     action: string;
     csrfToken: string;
@@ -101,6 +104,8 @@ export function PasskeySettingsView({
   error,
   removingId,
   registrationReady,
+  registrationPending = false,
+  loadingSurface,
   registration,
   onAdd,
   onRemove,
@@ -129,9 +134,7 @@ export function PasskeySettingsView({
 
         {loading ? (
           <SectionCard appearance="plain" padding="sm">
-            <SupportingText tone="secondary" role="status">
-              {t('loading')}
-            </SupportingText>
+            {loadingSurface}
           </SectionCard>
         ) : passkeys.length > 0 ? (
           passkeys.map((passkey) => (
@@ -166,7 +169,7 @@ export function PasskeySettingsView({
                       emphasis="low"
                       aria-label={t('removeNamed', { name: passkey.displayName })}
                       aria-describedby={passkey.disabled ? `${scopeId}-${passkey.id}-reason` : undefined}
-                      disabled={passkey.disabled}
+                      disabled={passkey.disabled || removingId !== null || registrationPending}
                       loading={removingId === passkey.id}
                       onClick={() => onRemove(passkey)}
                       data-testid={`security-remove-passkey-${passkey.id}`}
@@ -181,11 +184,11 @@ export function PasskeySettingsView({
               ) : null}
             </SectionCard>
           ))
-        ) : (
+        ) : !error ? (
           <SectionCard appearance="plain" padding="sm">
             <SupportingText tone="secondary">{t('empty')}</SupportingText>
           </SectionCard>
-        )}
+        ) : null}
 
         {!loading && registration ? (
           <form action={registration.action} method="POST">
@@ -198,9 +201,8 @@ export function PasskeySettingsView({
               emphasis="medium"
               leftSection={<IconPlus size={16} aria-hidden />}
               onClick={onAdd}
-              disabled={!registrationReady}
-              loading={!registrationReady}
-              aria-busy={!registrationReady}
+              disabled={!registrationReady || removingId !== null}
+              loading={registrationPending}
               data-testid="security-add-passkey"
             >
               {t('add')}
@@ -226,6 +228,17 @@ export function PasskeySettingsSection({
   const [loading, setLoading] = useState(true);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [registrationReady, setRegistrationReady] = useState(false);
+  const [registrationPending, setRegistrationPending] = useState(false);
+  const epoch = useRef(0);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+  const subject = useRef(subjectId);
+  subject.current = subjectId;
   const [registrationRequested, setRegistrationRequested] = useState(false);
   const [resumedAction, setResumedAction] = useState<PasskeySecurityContinuation | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -245,28 +258,44 @@ export function PasskeySettingsSection({
   const canRegister = Boolean(registerNode && registerPayload && createDataNode && csrfToken);
 
   const loadFlow = useCallback(async () => {
+    const request = ++epoch.current;
+    const owner = subjectId;
+    const active = () => epoch.current === request && subject.current === owner;
     setLoading(true);
     setError(null);
     try {
       const next = await requestFlow({ returnTo: '/my/security' });
+      if (!active()) {
+        return;
+      }
       setRegistrationReady(false);
+      setRegistrationPending(true);
       setFlow(next.flow);
       if (hasSettingsFlowError(next.flow)) {
         setError(t('errors.load'));
       }
     } catch (cause) {
+      if (!active()) {
+        return;
+      }
+      setRegistrationPending(false);
       if (isSettingsFlowFreshnessError(cause)) {
         startPrivilegedReauthentication('/my/security');
       } else {
         setError(t('errors.load'));
       }
     } finally {
-      setLoading(false);
+      if (active()) {
+        setLoading(false);
+      }
     }
-  }, [t, requestFlow]);
+  }, [t, requestFlow, subjectId]);
 
   useEffect(() => {
     void loadFlow();
+    return () => {
+      epoch.current += 1;
+    };
   }, [loadFlow]);
 
   useEffect(() => {
@@ -291,6 +320,8 @@ export function PasskeySettingsSection({
         return;
       }
 
+      const owner = subjectId;
+      const active = () => mounted.current && subject.current === owner;
       setRemovingId(passkey.id);
       setError(null);
       try {
@@ -311,11 +342,17 @@ export function PasskeySettingsSection({
           },
         );
 
+        if (!active()) {
+          return;
+        }
         if (!response.ok) {
           throw await readSettingsFlowError(response, t('errors.remove'));
         }
         await loadFlow();
       } catch (cause) {
+        if (!active()) {
+          return;
+        }
         if (isSettingsFlowFreshnessError(cause)) {
           rememberPasskeySecurityContinuation({ action: 'remove_passkey', id: passkey.id }, subjectId);
           startPrivilegedReauthentication(passkeySecurityReauthenticationReturnTo());
@@ -323,20 +360,33 @@ export function PasskeySettingsSection({
           setError(t('errors.remove'));
         }
       } finally {
-        setRemovingId(null);
+        if (active()) {
+          setRemovingId(null);
+        }
       }
     },
     [csrfToken, flow?.id, loadFlow, removingId, subjectId, t],
   );
 
   const requestPasskeyRegistration = useCallback(async () => {
+    const request = ++epoch.current;
+    const owner = subjectId;
+    const active = () => epoch.current === request && subject.current === owner;
+    setRegistrationPending(true);
     setRegistrationReady(false);
     setRegistrationRequested(true);
     setError(null);
     try {
       const next = await requestFlow({ returnTo: '/my/security' });
+      if (!active()) {
+        return;
+      }
       setFlow(next.flow);
     } catch (cause) {
+      if (!active()) {
+        return;
+      }
+      setRegistrationPending(false);
       setRegistrationRequested(false);
       if (isSettingsFlowFreshnessError(cause)) {
         rememberPasskeySecurityContinuation({ action: 'add_passkey' }, subjectId);
@@ -345,7 +395,7 @@ export function PasskeySettingsSection({
         setError(t('errors.load'));
       }
     }
-  }, [subjectId, t]);
+  }, [requestFlow, subjectId, t]);
 
   useEffect(() => {
     if (!resumedAction || loading) {
@@ -369,12 +419,18 @@ export function PasskeySettingsSection({
     if (!registrationRequested || !registrationReady) {
       return;
     }
+    const request = epoch.current;
+    const active = () => request === epoch.current;
+    setRegistrationPending(true);
     setRegistrationRequested(false);
     void invokeKratosBrowserCeremony(registerNode?.attributes.onclickTrigger, {
       operation: 'create',
       resultFieldName: 'passkey_settings_register',
     })
       .then((submitted) => {
+        if (!active()) {
+          return;
+        }
         if (!submitted) {
           setRegistrationReady(isKratosWebAuthnRuntimeReady('create', [registerNode?.attributes.onclickTrigger]));
           setError(t('errors.unsupported'));
@@ -382,9 +438,17 @@ export function PasskeySettingsSection({
         }
       })
       .catch(() => {
+        if (!active()) {
+          return;
+        }
         setRegistrationReady(isKratosWebAuthnRuntimeReady('create', [registerNode?.attributes.onclickTrigger]));
         setError(t('errors.unsupported'));
         router.replace('/my/security');
+      })
+      .finally(() => {
+        if (active()) {
+          setRegistrationPending(false);
+        }
       });
   }, [registerNode?.attributes.onclickTrigger, registrationReady, registrationRequested, router, t]);
 
@@ -397,10 +461,15 @@ export function PasskeySettingsSection({
         requiredTriggers={[registerNode?.attributes.onclickTrigger]}
         onReady={() => {
           setRegistrationReady(true);
+          if (!registrationRequested) {
+            setRegistrationPending(false);
+          }
           setError(null);
         }}
         onError={() => {
           setRegistrationReady(false);
+          setRegistrationPending(false);
+          setRegistrationRequested(false);
           setError(t('errors.unsupported'));
         }}
       />
@@ -410,6 +479,8 @@ export function PasskeySettingsSection({
         error={error}
         removingId={removingId}
         registrationReady={registrationReady}
+        registrationPending={registrationPending}
+        loadingSurface={<PageLoader extent="compact" placement="flow" size="sm" message={t('loading')} />}
         registration={
           !loading && canRegister && flow?.id
             ? {

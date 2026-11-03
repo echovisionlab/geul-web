@@ -70,6 +70,7 @@ export function CookieConsentSettings({
   const [requiresReview, setRequiresReview] = useState(false);
   const [analyticsEnabled, setAnalyticsEnabled] = useState(initialAnalytics ?? false);
   const [lastUpdatedAt, setLastUpdatedAt] = useState(initialUpdatedAt);
+  const [pendingDecision, setPendingDecision] = useState<'reject' | 'save' | null>(null);
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
@@ -104,7 +105,11 @@ export function CookieConsentSettings({
   }, [dateTime, lastUpdatedAt, tMessages]);
   const controlsDisabled = !isHydrated || isPending;
 
-  const saveConsent = (analytics: boolean) => {
+  const saveConsent = (analytics: boolean, decision: 'reject' | 'save') => {
+    if (isPending) {
+      return;
+    }
+    setPendingDecision(decision);
     const preferences = buildCookieConsentPreferences(analytics);
     writeConsentCookie(preferences);
     emitConsentChange(preferences);
@@ -112,30 +117,36 @@ export function CookieConsentSettings({
     setRequiresReview(false);
 
     startTransition(async () => {
-      const result = await persistAction({
-        analytics,
-        source: 'my_settings',
-        version: preferences.version,
-      });
-
-      if (!result.success) {
-        notifications.show({
-          title: tSettingsPage('cookiePreferencesTitle'),
-          message: result.error ?? t('syncError'),
-          tone: 'danger',
+      try {
+        const result = await persistAction({
+          analytics,
+          source: 'my_settings',
+          version: preferences.version,
         });
-        return;
-      }
 
-      if (result.persisted && result.consent?.updated_at) {
-        setLastUpdatedAt(result.consent.updated_at);
-      }
+        if (!result.success) {
+          notifications.show({
+            title: tSettingsPage('cookiePreferencesTitle'),
+            message: result.error ?? t('syncError'),
+            tone: 'danger',
+          });
+          return;
+        }
 
-      notifications.show({
-        // Without a session the choice stays in this browser and is not synced to the account.
-        message: result.persisted ? tNotifications('saveSuccess') : t('savedBrowser'),
-        tone: 'positive',
-      });
+        if (result.persisted && result.consent?.updated_at) {
+          setLastUpdatedAt(result.consent.updated_at);
+        }
+
+        notifications.show({
+          // Without a session the choice stays in this browser and is not synced to the account.
+          message: result.persisted ? tNotifications('saveSuccess') : t('savedBrowser'),
+          tone: 'positive',
+        });
+      } catch {
+        notifications.show({ title: tSettingsPage('cookiePreferencesTitle'), message: t('syncError'), tone: 'danger' });
+      } finally {
+        setPendingDecision(null);
+      }
     });
   };
 
@@ -164,7 +175,8 @@ export function CookieConsentSettings({
           density="chrome"
 
           disabled={controlsDisabled}
-          onClick={() => saveConsent(false)}
+          loading={isPending && pendingDecision === 'reject'}
+          onClick={() => saveConsent(false, 'reject')}
           data-testid="my-cookie-consent-reject"
         >
           {tCommon('rejectNonEssential')}
@@ -175,7 +187,8 @@ export function CookieConsentSettings({
           density="chrome"
 
           disabled={controlsDisabled}
-          onClick={() => saveConsent(analyticsEnabled)}
+          loading={isPending && pendingDecision === 'save'}
+          onClick={() => saveConsent(analyticsEnabled, 'save')}
           data-testid="my-cookie-consent-save"
         >
           {tCommon('savePreferences')}

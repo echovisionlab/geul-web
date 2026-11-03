@@ -96,7 +96,7 @@ export function ListBlockSkeleton({
       </LayoutGrid>
     );
   return (
-    <div className={className}>
+    <div className={className} aria-busy="true">
       <Collection size={itemSize}>{body}</Collection>
     </div>
   );

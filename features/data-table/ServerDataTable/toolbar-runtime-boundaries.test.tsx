@@ -1,4 +1,6 @@
 import { PassThrough } from 'node:stream';
+import { NextIntlClientProvider } from 'next-intl';
+import enMessages from '@/messages/en.json';
 import type { ReactNode } from 'react';
 import { renderToPipeableStream } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
@@ -62,12 +64,17 @@ function renderServer(element: ReactNode) {
     });
     output.on('end', () => resolve(html));
     output.on('error', reject);
-    const stream = renderToPipeableStream(element, {
-      onAllReady() {
-        stream.pipe(output);
+    const stream = renderToPipeableStream(
+      <NextIntlClientProvider locale="en" timeZone="UTC" messages={enMessages}>
+        {element}
+      </NextIntlClientProvider>,
+      {
+        onAllReady() {
+          stream.pipe(output);
+        },
+        onError: reject,
       },
-      onError: reject,
-    });
+    );
   });
 }
 

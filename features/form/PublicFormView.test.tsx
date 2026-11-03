@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { notifications } from '@/components/core/Notification';
 import { PublicFormView } from './PublicFormView';
+import { FormSubmissionPendingState } from './FormSubmissionState';
 
 const pushMock = vi.fn();
 const submitFormActionMock = vi.fn();
@@ -42,10 +43,6 @@ vi.mock('@/features/site/SiteLogo', () => ({
       Logo
     </div>
   ),
-}));
-
-vi.mock('@/features/site/PageLoader', () => ({
-  PageLoader: ({ message }: { message?: string }) => <div data-testid="page-loader">{message}</div>,
 }));
 
 vi.mock('@/features/form/FormAccessBoundary', () => ({
@@ -188,6 +185,11 @@ afterEach(() => {
 });
 
 describe('PublicFormView', () => {
+  it('retains standard contrast when the shared submission state is used without an inverse request', () => {
+    render(<FormSubmissionPendingState />);
+    expect(document.querySelector('[data-core-page-loader]')?.getAttribute('data-contrast')).toBe('standard');
+  });
+
   it('shows the shared pending loader while submitting before routing to success', async () => {
     let resolveSubmit: ((value: { success: true }) => void) | undefined;
     submitFormActionMock.mockImplementation(
@@ -233,7 +235,8 @@ describe('PublicFormView', () => {
     });
 
     await waitForAssertion(() => {
-      expect(document.querySelector('[data-testid="page-loader"]')?.textContent).toContain('Loading...');
+      expect(document.querySelector('[data-core-page-loader]')?.textContent).toContain('Loading...');
+      expect(document.querySelector('[data-core-page-loader]')?.getAttribute('data-contrast')).toBe('inverse');
     });
     expect(document.querySelector('[data-testid="form-renderer"]')).not.toBeNull();
 
@@ -301,7 +304,7 @@ describe('PublicFormView', () => {
     });
 
     await waitForAssertion(() => {
-      expect(document.querySelector('[data-testid="page-loader"]')).not.toBeNull();
+      expect(document.querySelector('[data-core-page-loader]')).not.toBeNull();
     });
     expect(document.querySelector('[data-testid="form-renderer"]')).not.toBeNull();
 

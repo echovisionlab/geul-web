@@ -1332,6 +1332,8 @@
       }
     },
     "verification": {
+      "checking": "Memeriksa status perubahan email…",
+      "unavailable": "Tidak dapat memeriksa status perubahan email. Silakan periksa lagi.",
       "loading": "Memuat formulir verifikasi...",
       "startOver": "Mulai dari awal",
       "errors": {

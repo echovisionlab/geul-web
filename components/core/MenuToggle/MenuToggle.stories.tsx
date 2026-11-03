@@ -46,3 +46,18 @@ export const Disabled: Story = {
     onClick: () => {},
   },
 };
+
+export const Loading: Story = {
+  args: { opened: true, loading: true, controls: 'pending-navigation' },
+  render: function LoadingPreview(args) {
+    const [, updateArgs] = useArgs();
+    return (
+      <>
+        <MenuToggle {...args} onClick={() => updateArgs({ opened: !args.opened })} />
+        <nav id={args.controls} aria-label="Primary navigation" aria-busy={args.loading} hidden={!args.opened}>
+          Loading navigation…
+        </nav>
+      </>
+    );
+  },
+};

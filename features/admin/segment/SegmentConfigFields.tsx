@@ -43,6 +43,7 @@ export function SegmentConfigFields({
   const tPage = useTranslations('adminList.audienceSegments');
   const [userTags, setUserTags] = useState<{ value: string; label: string }[]>([]);
   const [tagsLoading, setTagsLoading] = useState(false);
+  const [tagsError, setTagsError] = useState(false);
 
   const roleOptions = [
     { value: SEGMENT_ROLE_OPTIONS[0].value, label: tCommon('roles.admin') },
@@ -51,14 +52,32 @@ export function SegmentConfigFields({
   ];
 
   useEffect(() => {
-    if (segmentType === SegmentType.MEMBER_TAGS && userTags.length === 0) {
+    let current = true;
+    if (segmentType === SegmentType.MEMBER_TAGS) {
       setTagsLoading(true);
-      listAllUserTagsAction()
+      setTagsError(false);
+      void listAllUserTagsAction()
         .then(unwrapQueryResult)
-        .then((tags) => setUserTags(tags.map((t) => ({ value: t.id, label: t.name }))))
-        .finally(() => setTagsLoading(false));
+        .then((tags) => {
+          if (current) {
+            setUserTags(tags.map((tag) => ({ value: tag.id, label: tag.name })));
+          }
+        })
+        .catch(() => {
+          if (current) {
+            setTagsError(true);
+          }
+        })
+        .finally(() => {
+          if (current) {
+            setTagsLoading(false);
+          }
+        });
     }
-  }, [segmentType, userTags.length]);
+    return () => {
+      current = false;
+    };
+  }, [segmentType]);
 
   if (!segmentType) {
     return null;
@@ -74,11 +93,13 @@ export function SegmentConfigFields({
         {segmentType === SegmentType.MEMBER_TAGS && (
           <MultiSelect
             label={tCommonEntities('userTags')}
-            placeholder={tagsLoading ? tCommon('states.loadingTags') : tPage('config.userTagsPlaceholderSelect')}
+            placeholder={tPage('config.userTagsPlaceholderSelect')}
             data={userTags}
             value={config.memberTagIds}
             onChange={(value) => onConfigChange({ ...config, memberTagIds: value })}
-            disabled={tagsLoading}
+            disabled={tagsLoading || tagsError}
+            isLoading={tagsLoading}
+            error={tagsError ? tCommon('states.notAvailable') : undefined}
             searchable
             clearable
           />

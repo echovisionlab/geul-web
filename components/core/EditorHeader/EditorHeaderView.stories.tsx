@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs';
 import { useArgs, useState } from 'storybook/preview-api';
 import { expect, within, userEvent } from 'storybook/test';
 import { Button } from '../Button';
+import { useRef } from 'react';
 
 import { EditorHeaderView, type EditorHeaderViewLabels } from './EditorHeaderView';
 
@@ -54,6 +55,25 @@ export default meta;
 type Story = StoryObj<typeof EditorHeaderView>;
 
 export const Default: Story = {};
+
+export const AsyncBack: Story = {
+  render: function BackPreview(args) {
+    const finish = useRef<(() => void) | undefined>(undefined);
+    return (
+      <>
+        <EditorHeaderView
+          {...args}
+          onBack={() =>
+            new Promise<void>((resolve) => {
+              finish.current = resolve;
+            })
+          }
+        />
+        <Button onClick={() => finish.current?.()}>Complete simulated navigation</Button>
+      </>
+    );
+  },
+};
 
 export const EditableWithCollaboration: Story = {
   args: {

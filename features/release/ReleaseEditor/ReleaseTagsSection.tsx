@@ -276,6 +276,7 @@ export function ReleaseTagsSection({
             id={idPrefix ? `${idPrefix}-categories` : undefined}
             label={tCommon('entities.categories')}
             placeholder={tCategorySelector('placeholder')}
+            isLoading={allCategoriesQuery.isFetching}
             data={categoryOptions}
             value={categories.map((category) => category.id)}
             onChange={handleCategoriesChange}
@@ -288,6 +289,7 @@ export function ReleaseTagsSection({
             id={idPrefix ? `${idPrefix}-genres` : undefined}
             label={tCommon('entities.genres')}
             placeholder={t('placeholders.genres')}
+            isLoading={allGenresQuery.isFetching}
             data={genreOptions}
             value={genres.map((g) => g.id)}
             onChange={handleGenresChange}
@@ -300,6 +302,7 @@ export function ReleaseTagsSection({
             id={idPrefix ? `${idPrefix}-styles` : undefined}
             label={tCommon('entities.styles')}
             placeholder={t('placeholders.styles')}
+            isLoading={allStylesQuery.isFetching}
             data={styleOptions}
             value={styles.map((s) => s.id)}
             onChange={handleStylesChange}
@@ -312,6 +315,7 @@ export function ReleaseTagsSection({
             id={idPrefix ? `${idPrefix}-formats` : undefined}
             label={tCommon('entities.formats')}
             placeholder={t('placeholders.formats')}
+            isLoading={allFormatsQuery.isFetching}
             data={formatOptions}
             value={formats.map((f) => f.id)}
             onChange={handleFormatsChange}

@@ -416,6 +416,7 @@ export function TiptapEditor({
   const paginationLayout = resolvePaginationLayout(pagination);
   const authoringMode = useOptionalEditorAuthoringMode();
   const runtimeLabels = useTranslations('editorCommon.editor.runtimeLabels');
+  const commonStates = useTranslations('common.states');
   const commonActions = useTranslations('common.actions');
   const commonLabels = useTranslations('common.labels');
   const editorAttributes = useMemo(
@@ -467,6 +468,7 @@ export function TiptapEditor({
       resetOriginal: runtimeLabels('p5.resetOriginal'),
       sourceInput: runtimeLabels('p5.sourceInput'),
       copied: runtimeLabels('p5.copied'),
+      starting: commonStates('loading'),
       running: runtimeLabels('p5.running'),
       stopped: runtimeLabels('p5.stopped'),
       error: runtimeLabels('p5.error'),
@@ -487,7 +489,7 @@ export function TiptapEditor({
         bluetooth: runtimeLabels('p5.capabilityBluetooth'),
       },
     }),
-    [commonActions, commonLabels, runtimeLabels],
+    [commonActions, commonLabels, commonStates, runtimeLabels],
   );
   const threeLabels = useMemo<ThreeSceneLabels>(
     () => ({
@@ -503,13 +505,14 @@ export function TiptapEditor({
       resetOriginal: runtimeLabels('three.resetOriginal'),
       sourceInput: runtimeLabels('three.sourceInput'),
       copied: runtimeLabels('three.copied'),
+      starting: commonStates('loading'),
       running: runtimeLabels('three.running'),
       stopped: runtimeLabels('three.stopped'),
       error: runtimeLabels('three.error'),
       resizeLeft: runtimeLabels('three.resizeLeft'),
       resizeRight: runtimeLabels('three.resizeRight'),
     }),
-    [commonActions, runtimeLabels],
+    [commonActions, commonStates, runtimeLabels],
   );
   const shaderLabels = useMemo<ShaderLabels>(
     () => ({
@@ -524,6 +527,7 @@ export function TiptapEditor({
       copy: runtimeLabels('shader.copy'),
       copied: runtimeLabels('shader.copied'),
       resetOriginal: runtimeLabels('p5.resetOriginal'),
+      starting: commonStates('loading'),
       running: runtimeLabels('shader.running'),
       stopped: runtimeLabels('shader.stopped'),
       error: runtimeLabels('shader.error'),
@@ -536,7 +540,7 @@ export function TiptapEditor({
       close: commonActions('close'),
       audio: commonLabels('audio'),
     }),
-    [commonActions, commonLabels, runtimeLabels],
+    [commonActions, commonLabels, commonStates, runtimeLabels],
   );
   const externalVideoRuntimeLabels = useMemo<TiptapExternalVideoLabels>(
     () => ({

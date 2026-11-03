@@ -99,7 +99,7 @@ export function ConnectedSocialAccountsView({
                       aria-describedby={`${scopeId}-${provider}-name ${scopeId}-${provider}-status${disabledReason ? ` ${scopeId}-${provider}-reason` : ''}`}
                       onClick={() => onUnlink(provider)}
                       loading={isUnlinking}
-                      disabled={isUnlinking || Boolean(disabledReason)}
+                      disabled={linkingProvider !== null || unlinkingProvider !== null || Boolean(disabledReason)}
                       data-testid={`security-disconnect-${provider}`}
                     >
                       <IconUnlink size={16} aria-hidden />
@@ -145,6 +145,7 @@ export function ConnectedSocialAccountsView({
                   aria-describedby={`${scopeId}-${provider}-name ${scopeId}-${provider}-status`}
                   onClick={() => onLink(provider)}
                   loading={isLinking}
+                  disabled={linkingProvider !== null || unlinkingProvider !== null}
                   data-testid={`security-connect-${provider}`}
                 >
                   {labels.connect}

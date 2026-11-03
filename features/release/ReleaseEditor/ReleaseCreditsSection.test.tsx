@@ -36,6 +36,45 @@ afterEach(() => {
 });
 
 describe('ReleaseCreditsSection', () => {
+  it('locks the submitted note until persistence settles and retains the draft after failure', async () => {
+    let finish!: (result: { error: string }) => void;
+    actions.setReleaseCredits.mockReturnValueOnce(
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+    );
+    const onCreditNoteChange = vi.fn();
+    const { user } = render(
+      <ReleaseCreditsSection
+        releaseId="release-1"
+        credits={[]}
+        creditNotes={{}}
+        canEdit
+        canEditNotes
+        onCreditsChange={vi.fn()}
+        onCreditNoteChange={onCreditNoteChange}
+      />,
+    );
+    await user.click(screen.getByRole('button', { name: 'Add Credit' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Add Credit' });
+    await user.click(within(dialog).getByRole('radio', { name: 'Text' }));
+    await user.click(within(dialog).getByRole('textbox', { name: 'Credited name' }));
+    await user.paste('Writer');
+    const note = within(dialog).getByRole('textbox', { name: 'Note (Optional)' });
+    await user.click(note);
+    await user.paste('Submitted note');
+    await user.click(within(dialog).getByRole('button', { name: 'Add' }));
+    expect(note).toBeDisabled();
+    await user.type(note, 'x');
+    expect(note).toHaveValue('Submitted note');
+    await act(async () => finish({ error: 'Save failed' }));
+    await waitFor(() => expect(note).toBeEnabled());
+    expect(note).toHaveValue('Submitted note');
+    expect(onCreditNoteChange).not.toHaveBeenCalled();
+    await user.click(within(dialog).getByRole('button', { name: 'Add' }));
+    await waitFor(() => expect(onCreditNoteChange).toHaveBeenCalledWith(expect.any(String), 'Submitted note'));
+  });
+
   it('adds a text credit and writes its localized note separately', async () => {
     const onCreditsChange = vi.fn();
     const onCreditNoteChange = vi.fn();

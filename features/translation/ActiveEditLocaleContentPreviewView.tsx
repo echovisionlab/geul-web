@@ -1,5 +1,7 @@
 'use client';
-import { SupportingText, Text as DsText } from '@/components/core/Typography';
+
+import { PageLoader } from '@/features/site/PageLoader';
+import { Text as DsText } from '@/components/core/Typography';
 
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 
@@ -38,13 +40,7 @@ export function ActiveEditLocaleContentPreviewView({ localeLabel, hasLiveRow, lo
               ? t('bodyPreviewDescription', { locale: localeLabel })
               : t('missingDescription', { locale: localeLabel })}
           </DsText>
-          {loading ? (
-            <SupportingText tone="secondary" role="status">
-              {t('loading')}
-            </SupportingText>
-          ) : (
-            children
-          )}
+          {loading ? <PageLoader placement="flow" message={t('loading')} /> : children}
         </DsLayoutStack>
       </SectionCard>
     </div>

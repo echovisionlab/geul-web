@@ -13,6 +13,7 @@ import { DataTable } from '@/features/data-table/DataTable';
 import type { FilterFieldConfig } from '@/features/data-table/DataTableMultiFilter';
 import type { SortFieldConfig } from '@/features/data-table/DataTableMultiSort';
 import { CreatePostButton } from '@/features/post/CreatePostButton';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { listMyPosts } from '@/lib/queries/post-browser';
 import type { ColumnDef } from '@/lib/types/common/data-table';
 import { toPaginatedListInput, type PaginatedQuery } from '@/lib/types/common/query';
@@ -86,7 +87,7 @@ export interface MyPostsPageViewProps {
   listAction?: typeof listMyPosts;
   createBindings?: import('react').ComponentProps<typeof CreatePostButton>;
 }
-export function MyPostsPageView({ listAction = listMyPosts, createBindings }: MyPostsPageViewProps = {}) {
+export function MyPostsPageView({ listAction = listMyPosts, createBindings }: MyPostsPageViewProps) {
   const t = useTranslations('posts');
   const tCommon = useTranslations('common');
   const tCommonEntities = useTranslations('common.entities');
@@ -133,13 +134,19 @@ export function MyPostsPageView({ listAction = listMyPosts, createBindings }: My
     pageSize: 20,
   });
 
-  const { data, isLoading } = useQuery({
+  const loadedDataQuery = useQuery({
     queryKey: ['posts', 'my', query],
     queryFn: () => listAction(toPaginatedListInput(query)),
   });
 
+  const { data, isLoading } = loadedDataQuery;
+  if (loadedDataQuery.isError && data === undefined) {
+    return <QueryErrorAlert queries={[loadedDataQuery]} />;
+  }
+
   return (
     <DsLayoutStack>
+      <QueryErrorAlert queries={[loadedDataQuery]} />
       <DsLayoutInline justify="between">
         <DsHeading level={1} scale={2}>
           {tCommonEntities('posts')}

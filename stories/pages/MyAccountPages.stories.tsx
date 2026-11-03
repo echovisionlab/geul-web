@@ -5,10 +5,12 @@ import { LayoutContainer } from '@/components/core/Layout';
 import { MyProfilePageView } from '@/features/my/MyProfilePageView';
 import { MySecurityPageView } from '@/features/my/MySecurityPageView';
 import { MySettingsPageView } from '@/features/my/MySettingsPageView';
+import { PageLoader } from '@/features/site/PageLoader';
 import { createLocalTokenBindings } from './fixtures/personal-access-tokens';
 import { SessionProvider } from '@/lib/providers/SessionProvider';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { accountAccessibilityLabels } from './AccountAccessibility';
+import { operationsLabels } from './fixtures/operations-a11y';
 import { localBackupEntries } from './fixtures/local-backups';
 import { actionFailure, actionSuccess } from '@/lib/actions/action-result';
 export function MyAccountPagesPreview({
@@ -23,6 +25,7 @@ export function MyAccountPagesPreview({
   backups?: boolean;
 }) {
   const [backupEntries, setBackupEntries] = useState(backups ? localBackupEntries : []);
+  const [backupStatus, setBackupStatus] = useState(state);
   const [tokenBindings] = useState(() => createLocalTokenBindings(state === 'failed'));
   const [client] = useState(() => new QueryClient({ defaultOptions: { queries: { retry: false } } }));
   const failed = state === 'failed';
@@ -99,9 +102,15 @@ export function MyAccountPagesPreview({
               localBackups={{
                 count: backupEntries.length,
                 bytes: backupEntries.reduce((total, entry) => total + entry.bytes, 0),
-                loading: state === 'pending',
-                error: failed,
-                onRefresh: () => {},
+                loading: backupStatus === 'pending',
+                loadingSurface: <PageLoader extent="compact" placement="flow" size="sm" />,
+                error: backupStatus === 'failed',
+                onRefresh: () => {
+                  if (backupStatus !== 'pending') {
+                    setBackupStatus('ready');
+                    setBackupEntries(backups ? localBackupEntries : []);
+                  }
+                },
                 onClear: async () => setBackupEntries([]),
               }}
               email="june@example.com"
@@ -180,6 +189,30 @@ export const Settings: Story = {
 export const BasicSettings: Story = { args: { surface: 'settings', role: 'user' } };
 export const SettingsWithLocalBackups: Story = { args: { surface: 'settings', backups: true } };
 export const SettingsFailed: Story = { args: { surface: 'settings', state: 'failed' } };
+export const SettingsPending: Story = {
+  args: { surface: 'settings', state: 'pending' },
+  play: async ({ canvasElement, globals }) => {
+    const canvas = within(canvasElement);
+    const t = await operationsLabels(globals);
+    const loading = canvas.getByRole('status', { name: t.common('states.loading') });
+    await expect(loading).toHaveTextContent(t.common('states.loading'));
+    await expect(loading).toHaveAttribute('data-placement', 'flow');
+    await expect(canvas.queryByText(t.localBackups('empty'))).not.toBeInTheDocument();
+    await expect(canvas.getByRole('heading', { level: 1, name: t.common('labels.settings') })).toBeVisible();
+  },
+};
+export const RetryLocalBackups: Story = {
+  args: { surface: 'settings', state: 'failed' },
+  play: async ({ canvasElement, globals }) => {
+    const canvas = within(canvasElement);
+    const t = await operationsLabels(globals);
+    await expect(canvas.getByText(t.localBackups('error'))).toBeVisible();
+    await expect(canvas.queryByText(t.localBackups('empty'))).not.toBeInTheDocument();
+    await userEvent.click(canvas.getByRole('button', { name: t.localBackups('refresh') }));
+    await expect(await canvas.findByText(t.localBackups('empty'))).toBeVisible();
+    await expect(canvas.queryByText(t.localBackups('error'))).not.toBeInTheDocument();
+  },
+};
 export const Phone: Story = { globals: { viewport: { value: 'phone', isRotated: false } } };
 
 export const KeyboardProfileLinks: Story = {

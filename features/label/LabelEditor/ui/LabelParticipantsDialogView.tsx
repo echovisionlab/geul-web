@@ -1,18 +1,14 @@
 'use client';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
-import {
-  LayoutStack as DsLayoutStack,
-  LayoutInline as DsLayoutInline,
-  LayoutInset as DsLayoutInset,
-} from '@/components/core/Layout';
+import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
 
 import { useInputCombobox, SearchComboboxView, Select } from '@/components/core/Input';
 
 import { useId, useMemo, type ReactNode } from 'react';
 import { IconArrowsExchange, IconUserPlus, IconX } from '@tabler/icons-react';
 
-import { Avatar, Spinner as Loader, ScrollArea } from '@/components/core/Display';
+import { Avatar, ScrollArea } from '@/components/core/Display';
 import { IconButton } from '@/components/core/IconButton';
 
 import { ContentModal } from '@/components/core/Modal';
@@ -45,6 +41,10 @@ export interface LabelParticipantsDialogViewProps {
   canManageParticipants: boolean;
   canRemoveOwner: boolean;
   queryFailure?: ReactNode;
+  loadingSurface: ReactNode;
+  loadFailed?: boolean;
+  changingMemberId?: string;
+  removingMemberId?: string;
   loading?: boolean;
   searching?: boolean;
   mutating?: boolean;
@@ -83,6 +83,10 @@ export function LabelParticipantsDialogView({
   canManageParticipants,
   canRemoveOwner,
   queryFailure,
+  loadingSurface,
+  loadFailed = false,
+  changingMemberId,
+  removingMemberId,
   loading = false,
   searching = false,
   mutating = false,
@@ -123,7 +127,8 @@ export function LabelParticipantsDialogView({
                   placeholder={labels.searchPlaceholder}
                   leftSection={<IconUserPlus size={16} />}
                   items={candidates}
-                  isLoading={searching}
+                  isLoading={searching || mutating}
+                  disabled={mutating || loading}
                   debouncedSearch={searchQuery}
                   onSelect={(memberId) => {
                     onAdd(memberId, selectedRole);
@@ -147,6 +152,7 @@ export function LabelParticipantsDialogView({
               <Select
                 width="content"
                 data-participant-role-select
+                disabled={mutating || loading}
                 label={labels.role}
                 value={selectedRole}
                 onChange={(value) => value && onSelectedRoleChange(value as LabelParticipantRoleName)}
@@ -159,12 +165,8 @@ export function LabelParticipantsDialogView({
         ) : null}
 
         {loading ? (
-          <DsLayoutInset block="md">
-            <DsLayoutInline justify="center">
-              <Loader size="sm" />
-            </DsLayoutInline>
-          </DsLayoutInset>
-        ) : participants.length === 0 ? (
+          loadingSurface
+        ) : loadFailed && participants.length === 0 ? null : participants.length === 0 ? (
           <SupportingText tone="secondary">{labels.empty}</SupportingText>
         ) : (
           <ScrollArea.Autosize size="large">
@@ -204,6 +206,7 @@ export function LabelParticipantsDialogView({
                               size="sm"
                               aria-label={changeLabel}
                               aria-describedby={`${dialogId}-${participant.memberId}${isLastOwner ? ` ${dialogId}-${participant.memberId}-last-owner` : ''}`}
+                              loading={changingMemberId === participant.memberId}
                               disabled={!canChangeRole || mutating}
                               onClick={() => onChangeRole(participant.memberId, targetRole)}
                             >
@@ -219,6 +222,7 @@ export function LabelParticipantsDialogView({
                               size="sm"
                               aria-label={labels.remove}
                               aria-describedby={`${dialogId}-${participant.memberId}${isLastOwner ? ` ${dialogId}-${participant.memberId}-last-owner` : ''}`}
+                              loading={removingMemberId === participant.memberId}
                               disabled={!canRemove || mutating}
                               onClick={() => onRemove(participant.memberId)}
                             >

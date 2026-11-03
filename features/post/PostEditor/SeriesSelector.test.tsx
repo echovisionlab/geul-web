@@ -1,9 +1,8 @@
 // @vitest-environment jsdom
 
-import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { notifyManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen, userEvent, act, waitFor } from '@/test/render';
+import en from '@/messages/en.json';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SeriesSelector } from './SeriesSelector';
@@ -17,10 +16,6 @@ const mocks = vi.hoisted(() => ({
   notification: vi.fn(),
   reorder: vi.fn(),
   unassign: vi.fn(),
-}));
-
-vi.mock('next-intl', () => ({
-  useTranslations: () => (key: string) => key,
 }));
 
 vi.mock('@/components/core/Notification', () => ({
@@ -43,8 +38,6 @@ vi.mock('@/lib/queries/series-browser', () => ({
 const oldSeries = { id: 'series-old', title: 'Old series', slug: 'old-series' };
 const nextSeries = { id: 'series-next', title: 'Next series', slug: 'next-series' };
 
-let container: HTMLDivElement;
-let root: Root;
 let queryClient: QueryClient;
 
 async function renderSelector(options: {
@@ -68,58 +61,34 @@ async function renderSelector(options: {
     return options.posts ?? [{ id: 'post-1', title: 'Post', slug: 'post', status: 'draft', seriesOrder: 0 }];
   });
 
-  await act(async () => {
-    root.render(
-      <QueryClientProvider client={queryClient}>
-        <DesignSystemProvider forceColorScheme="light">
-          <SeriesSelector
-            postId="post-1"
-            idPrefix="series"
-            initialSeriesId={oldSeries.id}
-            initialSeriesOrder={options.initialOrder ?? 0}
-            canEdit
-            isAdmin={false}
-            series={[oldSeries, nextSeries]}
-            onPostPermissionRevoked={options.onPostPermissionRevoked ?? vi.fn()}
-          />
-        </DesignSystemProvider>
-      </QueryClientProvider>,
-    );
-  });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <SeriesSelector
+        postId="post-1"
+        idPrefix="series"
+        initialSeriesId={oldSeries.id}
+        initialSeriesOrder={options.initialOrder ?? 0}
+        canEdit
+        isAdmin={false}
+        series={[oldSeries, nextSeries]}
+        onPostPermissionRevoked={options.onPostPermissionRevoked ?? vi.fn()}
+      />
+    </QueryClientProvider>,
+  );
 }
-
 function seriesField() {
-  const trigger = container.querySelector<HTMLInputElement>('#series-trigger');
-  expect(trigger).not.toBeNull();
-  return trigger!;
+  return screen.getByRole('combobox', { name: en.common.entities.series }) as HTMLInputElement;
 }
-
-/** Core Select opens its listbox from the field's popup button; the field input is the named trigger. */
 async function openSeriesOptions() {
-  const opener = seriesField()
-    .closest('[data-geul-input]')
-    ?.querySelector<HTMLButtonElement>('button[aria-haspopup="listbox"]');
-  expect(opener).toBeDefined();
-  await act(async () => opener?.click());
+  await userEvent.click(screen.getByRole('button', { expanded: false }));
 }
-
 async function selectNextSeries() {
   await openSeriesOptions();
-  await vi.waitFor(() => {
-    const option = Array.from(document.querySelectorAll<HTMLElement>('[role="option"]')).find(
-      (item) => item.textContent === nextSeries.title,
-    );
-    expect(option).toBeDefined();
-  });
-  const option = Array.from(document.querySelectorAll<HTMLElement>('[role="option"]')).find(
-    (item) => item.textContent === nextSeries.title,
-  );
-  await act(async () => option?.click());
+  await userEvent.click(await screen.findByRole('option', { name: nextSeries.title }));
 }
 
 describe('SeriesSelector authority boundary', () => {
   beforeEach(() => {
-    notifyManager.setNotifyFunction((callback) => act(callback));
     queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
     });
@@ -128,45 +97,42 @@ describe('SeriesSelector authority boundary', () => {
     mocks.create.mockResolvedValue({ data: { id: 'series-new' } });
     mocks.reorder.mockResolvedValue({ success: true });
     mocks.unassign.mockResolvedValue({ success: true });
-    container = document.createElement('div');
-    document.body.appendChild(container);
-    root = createRoot(container);
   });
 
   afterEach(async () => {
     await act(async () => {
-      root.unmount();
       await queryClient.cancelQueries();
       queryClient.clear();
     });
-    notifyManager.setNotifyFunction((callback) => callback());
-    container.remove();
   });
 
   it('hides remove and reorder controls when a refreshed managed-Series list drops the current Series', async () => {
     await renderSelector({ available: [] });
 
-    await vi.waitFor(() => expect(seriesField().placeholder).toBe('states.unavailable'));
+    await waitFor(() => expect(seriesField().placeholder).toBe(en.postEditor.seriesSelector.states.unavailable));
     expect(seriesField().value).toBe('');
-    expect(container.querySelector('[aria-label="remove"]')).toBeNull();
-    expect(container.querySelector('[aria-label="Remove series"]')).toBeNull();
-    expect(container.querySelector('[aria-label="Move series up"]')).toBeNull();
-    expect(container.querySelector('[aria-label="Move series down"]')).toBeNull();
+    expect(screen.queryByRole('button', { name: en.seriesDetail.posts.actions.remove })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Remove series' })).toBeNull();
+    expect(screen.queryByRole('button', { name: en.seriesDetail.posts.actions.moveUp })).toBeNull();
+    expect(screen.queryByRole('button', { name: en.seriesDetail.posts.actions.moveDown })).toBeNull();
   });
 
   it('does not open stale options when the required fresh lookup fails', async () => {
     await renderSelector({ loadError: new Error('network down') });
-    await vi.waitFor(() => expect(mocks.listMySeries).toHaveBeenCalled());
+    await waitFor(() => expect(mocks.listMySeries).toHaveBeenCalled());
 
     await openSeriesOptions();
 
-    await vi.waitFor(() =>
-      expect(mocks.notification).toHaveBeenCalledWith({ message: 'updateFailed', tone: 'danger' }),
+    await waitFor(() =>
+      expect(mocks.notification).toHaveBeenCalledWith({
+        message: en.common.notifications.updateFailed,
+        tone: 'danger',
+      }),
     );
     expect(mocks.assign).not.toHaveBeenCalled();
     expect(mocks.listMySeries.mock.calls.length).toBeGreaterThanOrEqual(2);
-    expect(document.querySelector('[role="option"]')).toBeNull();
-    expect(container.querySelector('[aria-label="remove"]')).toBeNull();
+    expect(screen.queryByRole('option')).toBeNull();
+    expect(screen.queryByRole('button', { name: en.seriesDetail.posts.actions.remove })).toBeNull();
   });
 
   it('renders a dense visible ordinal from the ordered result even if a stored order has a legacy gap', async () => {
@@ -178,12 +144,12 @@ describe('SeriesSelector authority boundary', () => {
       ],
     });
 
-    await vi.waitFor(() => expect(container.textContent).toContain('2 / 2'));
-    expect(container.textContent).toContain('#2');
+    expect(await screen.findByText('2 / 2')).toBeVisible();
+    expect(screen.getByText('#2')).toBeVisible();
     // Removal from the Series is the Core Select clear command, named for its effect.
-    expect(container.querySelector('[aria-label="remove"]')).not.toBeNull();
-    expect(container.querySelector('[aria-label="moveUp"]')).not.toBeNull();
-    expect(container.querySelector('[aria-label="moveDown"]')).not.toBeNull();
+    expect(screen.getByRole('button', { name: en.seriesDetail.posts.actions.remove })).not.toBeNull();
+    expect(screen.getByRole('button', { name: en.seriesDetail.posts.actions.moveUp })).not.toBeNull();
+    expect(screen.getByRole('button', { name: en.seriesDetail.posts.actions.moveDown })).not.toBeNull();
   });
 
   it('restores the previous assignment and refreshes options when the target Series is unavailable', async () => {
@@ -193,10 +159,10 @@ describe('SeriesSelector authority boundary', () => {
 
     await selectNextSeries();
 
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(seriesField().value).toBe(oldSeries.title);
       expect(mocks.notification).toHaveBeenCalledWith({
-        message: 'notifications.seriesUnavailable',
+        message: en.postEditor.seriesSelector.notifications.seriesUnavailable,
         tone: 'danger',
       });
     });
@@ -211,10 +177,10 @@ describe('SeriesSelector authority boundary', () => {
 
     await selectNextSeries();
 
-    await vi.waitFor(() => expect(onPostPermissionRevoked).toHaveBeenCalledOnce());
+    await waitFor(() => expect(onPostPermissionRevoked).toHaveBeenCalledOnce());
     expect(seriesField().value).toBe(oldSeries.title);
     expect(mocks.notification).not.toHaveBeenCalledWith({
-      message: 'notifications.seriesUnavailable',
+      message: en.postEditor.seriesSelector.notifications.seriesUnavailable,
       tone: 'danger',
     });
   });

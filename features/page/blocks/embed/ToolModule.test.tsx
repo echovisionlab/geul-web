@@ -1,70 +1,51 @@
 // @vitest-environment jsdom
-import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
+import { act, render, screen, waitFor } from '@/test/render';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ToolModule } from './ToolModule';
 import { loadToolModule, type MountedTool, type ToolModule as Module } from './loadToolModule';
 vi.mock('./loadToolModule', () => ({ loadToolModule: vi.fn() }));
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-let container: HTMLDivElement;
-let root: Root;
 const uri = 'https://portadj.dsub.io/embed/index.js';
-function render(options: { uri?: string; locale?: string; colorScheme?: 'light' | 'dark'; preview?: boolean } = {}) {
-  act(() =>
-    root.render(
-      <DesignSystemProvider forceColorScheme="light">
-        <ToolModule
-          uri={options.uri ?? uri}
-          locale={options.locale ?? 'en'}
-          colorScheme={options.colorScheme ?? 'light'}
-          preview={options.preview ?? false}
-          activateLabel="activate"
-          loadingLabel="loading"
-          errorLabel="error"
-        />
-      </DesignSystemProvider>,
-    ),
+function toolNode(options: { uri?: string; locale?: string; colorScheme?: 'light' | 'dark'; preview?: boolean } = {}) {
+  return (
+    <ToolModule
+      uri={options.uri ?? uri}
+      locale={options.locale ?? 'en'}
+      colorScheme={options.colorScheme ?? 'light'}
+      preview={options.preview ?? false}
+      activateLabel="activate"
+      loadingLabel="loading"
+      errorLabel="error"
+      title="Tool"
+    />
   );
-}
-async function settle() {
-  await act(async () => {
-    await Promise.resolve();
-  });
 }
 function instance(): MountedTool {
   return { update: vi.fn(), destroy: vi.fn() };
 }
 beforeEach(() => {
   vi.mocked(loadToolModule).mockReset();
-  container = document.createElement('div');
-  document.body.append(container);
-  root = createRoot(container);
 });
-afterEach(() => {
-  act(() => root.unmount());
-  container.remove();
-});
+
 describe('tool module lifecycle', () => {
   it('keeps previews inert until activated and updates context without remounting', async () => {
     const tool = instance();
     const mount = vi.fn(async (host: HTMLElement) => {
-      host.attachShadow({ mode: 'open' }).innerHTML = '<button>Tool content</button>';
+      host.textContent = 'Tool content';
       return tool;
     });
     vi.mocked(loadToolModule).mockResolvedValue({ mount });
-    render({ preview: true });
+    const { user, rerender } = render(toolNode({ preview: true }));
     expect(loadToolModule).not.toHaveBeenCalled();
-    act(() => container.querySelector('button')!.click());
-    await settle();
+    await user.click(screen.getByRole('button', { name: 'activate' }));
+    expect(await screen.findByText('Tool content')).toBeVisible();
     expect(mount).toHaveBeenCalledTimes(1);
-    expect(container.querySelector('iframe')).toBeNull();
-    render({ preview: true, locale: 'ko', colorScheme: 'dark' });
+    expect(screen.getByRole('group', { name: 'Tool' }).innerHTML).not.toMatch(/<iframe\b/);
+    rerender(toolNode({ preview: true, locale: 'ko', colorScheme: 'dark' }));
     expect(mount).toHaveBeenCalledTimes(1);
     expect(tool.update).toHaveBeenLastCalledWith({ locale: 'ko', colorScheme: 'dark' });
   });
-  it('aborts, destroys and removes dirty owned hosts on URI replacement without affecting another block', async () => {
+
+  it('aborts and removes dirty owned hosts on URI replacement and unmount', async () => {
     const first = instance();
     const second = instance();
     const hosts: HTMLElement[] = [];
@@ -73,143 +54,124 @@ describe('tool module lifecycle', () => {
       hosts.push(host);
       signals.push(options.signal!);
       host.dataset.dirty = 'yes';
-      host.setAttribute('style', 'height: 9000px');
+      host.style.height = '9000px';
+      host.textContent = `Instance ${hosts.length}`;
       return hosts.length === 1 ? first : second;
     });
     vi.mocked(loadToolModule).mockResolvedValue({ mount });
-    render();
-    await settle();
-    render({ uri: 'https://hwp.dsub.io/embed/index.js' });
-    await settle();
-    expect(signals[0].aborted).toBe(true);
+    const { rerender, unmount } = render(toolNode());
+    expect(await screen.findByText('Instance 1')).toBeVisible();
+    rerender(toolNode({ uri: 'https://hwp.dsub.io/embed/index.js' }));
+    expect(await screen.findByText('Instance 2')).toBeVisible();
+    expect(signals[0]!.aborted).toBe(true);
     expect(first.destroy).toHaveBeenCalledTimes(1);
-    expect(hosts[0].isConnected).toBe(false);
+    expect(hosts[0]!.isConnected).toBe(false);
     expect(hosts[1]).not.toBe(hosts[0]);
-    act(() => root.unmount());
-    root = createRoot(container);
+    unmount();
     expect(second.destroy).toHaveBeenCalledTimes(1);
-    expect(hosts[1].isConnected).toBe(false);
+    expect(hosts[1]!.isConnected).toBe(false);
   });
+
   it('destroys a mount that resolves after cancellation and never installs its handle', async () => {
-    let resolve!: (tool: MountedTool) => void;
+    let finish!: (tool: MountedTool) => void;
     let signal: AbortSignal | undefined;
-    const promise = new Promise<MountedTool>((done) => {
-      resolve = done;
+    const pending = new Promise<MountedTool>((resolve) => {
+      finish = resolve;
     });
-    vi.mocked(loadToolModule).mockResolvedValue({
-      mount: vi.fn((_host, options) => {
-        signal = options.signal;
-        return promise;
-      }),
+    const mount = vi.fn((_host: HTMLElement, options: { signal?: AbortSignal }) => {
+      signal = options.signal;
+      return pending;
     });
-    render();
-    await settle();
-    act(() => root.unmount());
-    root = createRoot(container);
+    vi.mocked(loadToolModule).mockResolvedValue({ mount });
+    const { unmount, container } = render(toolNode());
+    await waitFor(() => expect(mount).toHaveBeenCalledOnce());
+    expect(screen.getByRole('status', { name: 'Loading...' })).toHaveTextContent('loading');
+    unmount();
     expect(signal?.aborted).toBe(true);
     const late = instance();
-    await act(async () => resolve(late));
+    await act(async () => finish(late));
     expect(late.destroy).toHaveBeenCalledTimes(1);
     expect(late.update).not.toHaveBeenCalled();
-    expect(container.childElementCount).toBe(0);
+    expect(container).toBeEmptyDOMElement();
   });
-  it('does not mount after a canceled import and exposes loading/import failures without partial DOM', async () => {
-    let resolve!: (module: Module) => void;
+
+  it('does not mount after a canceled import and distinguishes loading from import failure', async () => {
+    let finish!: (module: Module) => void;
     vi.mocked(loadToolModule).mockReturnValueOnce(
-      new Promise((done) => {
-        resolve = done;
+      new Promise((resolve) => {
+        finish = resolve;
       }),
     );
-    render();
-    expect(container.querySelector('[role="status"]')?.textContent).toBe('loading');
+    const { unmount } = render(toolNode());
+    expect(screen.getByRole('status', { name: 'Loading...' })).toHaveTextContent('loading');
     const mount = vi.fn();
-    act(() => root.unmount());
-    root = createRoot(container);
-    await act(async () => resolve({ mount }));
+    unmount();
+    await act(async () => finish({ mount }));
     expect(mount).not.toHaveBeenCalled();
     vi.mocked(loadToolModule).mockRejectedValueOnce(new Error('network'));
-    render();
-    await settle();
-    expect(container.querySelector('[role="alert"]')?.textContent).toBe('error');
-    expect(container.querySelector('[role="status"]')).toBeNull();
+    render(toolNode());
+    expect(await screen.findByRole('alert')).toHaveTextContent('error');
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
-  it('removes partially mounted content on failure and uses the latest context after an async mount', async () => {
+
+  it('removes partial content on failure and delivers the latest context after an asynchronous mount', async () => {
+    let failedHost: HTMLElement | undefined;
     vi.mocked(loadToolModule).mockResolvedValueOnce({
       mount: vi.fn(async (host) => {
+        failedHost = host;
         host.dataset.dirty = 'yes';
         host.append(document.createElement('input'));
         throw new Error('mount failed');
       }),
     });
-    render();
-    await settle();
-    expect(container.querySelector('input')).toBeNull();
-    expect(container.querySelector('[data-dirty]')).toBeNull();
-    expect(container.querySelector('[role="alert"]')?.textContent).toBe('error');
-    let resolve!: (tool: MountedTool) => void;
-    vi.mocked(loadToolModule).mockResolvedValueOnce({
-      mount: vi.fn(
-        () =>
-          new Promise<MountedTool>((done) => {
-            resolve = done;
-          }),
-      ),
-    });
-    render({ uri: `${uri}?replacement` });
-    await settle();
-    render({ uri: `${uri}?replacement`, locale: 'ko', colorScheme: 'dark' });
+    const { rerender } = render(toolNode());
+    expect(await screen.findByRole('alert')).toHaveTextContent('error');
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    expect(failedHost?.isConnected).toBe(false);
+    let finish!: (tool: MountedTool) => void;
+    const mount = vi.fn(
+      () =>
+        new Promise<MountedTool>((resolve) => {
+          finish = resolve;
+        }),
+    );
+    vi.mocked(loadToolModule).mockResolvedValueOnce({ mount });
+    rerender(toolNode({ uri: `${uri}?replacement` }));
+    await waitFor(() => expect(mount).toHaveBeenCalledOnce());
+    rerender(toolNode({ uri: `${uri}?replacement`, locale: 'ko', colorScheme: 'dark' }));
     const tool = instance();
-    await act(async () => resolve(tool));
+    await act(async () => finish(tool));
     expect(tool.update).toHaveBeenLastCalledWith({ locale: 'ko', colorScheme: 'dark' });
   });
+
   it('keeps simultaneous module instances independent', async () => {
     const instances: MountedTool[] = [];
     vi.mocked(loadToolModule).mockResolvedValue({
-      mount: vi.fn(async () => {
+      mount: vi.fn(async (host) => {
         const tool = instance();
         instances.push(tool);
+        host.textContent = `Instance ${instances.length}`;
         return tool;
       }),
     });
-    act(() =>
-      root.render(
-        <DesignSystemProvider forceColorScheme="light">
-          {['a', 'b'].map((id) => (
-            <ToolModule
-              key={id}
-              uri={`${uri}?id=${id}`}
-              locale="en"
-              colorScheme="light"
-              preview={false}
-              activateLabel="activate"
-              loadingLabel="loading"
-              errorLabel="error"
-            />
-          ))}
-        </DesignSystemProvider>,
-      ),
-    );
-    await settle();
+    const nodes = (ids: string[]) =>
+      ids.map((id) => (
+        <ToolModule
+          key={id}
+          uri={`${uri}?id=${id}`}
+          locale="en"
+          colorScheme="light"
+          preview={false}
+          activateLabel="activate"
+          loadingLabel="loading"
+          errorLabel="error"
+        />
+      ));
+    const { rerender } = render(<>{nodes(['a', 'b'])}</>);
+    expect(await screen.findByText('Instance 2')).toBeVisible();
     expect(instances).toHaveLength(2);
-    act(() =>
-      root.render(
-        <DesignSystemProvider forceColorScheme="light">
-          {['b'].map((id) => (
-            <ToolModule
-              key={id}
-              uri={`${uri}?id=${id}`}
-              locale="en"
-              colorScheme="light"
-              preview={false}
-              activateLabel="activate"
-              loadingLabel="loading"
-              errorLabel="error"
-            />
-          ))}
-        </DesignSystemProvider>,
-      ),
-    );
-    expect(instances[0].destroy).toHaveBeenCalledTimes(1);
-    expect(instances[1].destroy).not.toHaveBeenCalled();
+    rerender(<>{nodes(['b'])}</>);
+    expect(instances[0]!.destroy).toHaveBeenCalledTimes(1);
+    expect(instances[1]!.destroy).not.toHaveBeenCalled();
   });
 });

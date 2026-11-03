@@ -1,8 +1,7 @@
 // @vitest-environment jsdom
 
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+import { render, screen, act, fireEvent } from '@/test/render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const fakes = vi.hoisted(() => ({
@@ -115,56 +114,26 @@ import { MonacoSourceEditor, type MonacoSourceEditorProps } from './MonacoSource
 import { getThemeTokens, themeIds, type ThemeId } from '@/lib/theme/themes';
 
 async function mountEditor(props: MonacoSourceEditorProps, themeId: ThemeId = 'light') {
-  const host = document.createElement('div');
-  document.body.append(host);
-  const root: Root = createRoot(host);
-  // The runtime is a lazy chunk. Once its module is loaded, the lazy boundary resolves within the act scope.
   await import('./MonacoSourceEditorRuntime');
-  await act(async () => {
-    root.render(
-      <DesignSystemProvider forceTheme={themeId}>
-        <MonacoSourceEditor {...props} />
-      </DesignSystemProvider>,
-    );
-  });
-  let input: HTMLTextAreaElement;
-  try {
-    input = await vi.waitFor(() => {
-      const textarea = host.querySelector('textarea');
-      if (!textarea) {
-        throw new Error('Fake Monaco textarea was not mounted');
-      }
-      return textarea;
-    });
-  } catch (error) {
-    await act(async () => root.unmount());
-    host.remove();
-    throw error;
-  }
+  const node = (nextProps: MonacoSourceEditorProps) => (
+    <DesignSystemProvider forceTheme={themeId}>
+      <MonacoSourceEditor {...nextProps} />
+    </DesignSystemProvider>
+  );
+  const view = render(node(props));
+  const input = await screen.findByRole('textbox', { name: props.ariaLabel });
   return {
-    input,
+    input: input as HTMLTextAreaElement,
     async rerender(nextProps: MonacoSourceEditorProps) {
-      await act(async () =>
-        root.render(
-          <DesignSystemProvider forceTheme={themeId}>
-            <MonacoSourceEditor {...nextProps} />
-          </DesignSystemProvider>,
-        ),
-      );
+      view.rerender(node(nextProps));
     },
     async unmount() {
-      await act(async () => root.unmount());
-      host.remove();
+      view.unmount();
     },
   };
 }
-
 async function changeInput(input: HTMLTextAreaElement, value: string) {
-  await act(async () => {
-    const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')?.set;
-    setter?.call(input, value);
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-  });
+  fireEvent.input(input, { target: { value } });
 }
 
 beforeEach(() => {
@@ -198,9 +167,10 @@ describe('MonacoSourceEditor', () => {
         { value: 'const answer = 42;', language: 'javascript', ariaLabel: label, modelPath: 'rtl-source.js' },
         'dark',
       );
-      const sourceViewport = mounted.input.closest<HTMLElement>('[data-source-editor="monaco"]')!;
+      const sourceViewport = screen.getByRole('group', { name: label });
       expect(sourceViewport.dir).toBe('ltr');
-      expect(mounted.input.closest('[dir]')).toBe(sourceViewport);
+      expect(sourceViewport).toContainElement(mounted.input);
+      expect(mounted.input).not.toHaveAttribute('dir');
       expect(mounted.input).toHaveAttribute('aria-label', label);
       expect(mounted.input.value).toBe('const answer = 42;');
       expect(document.documentElement.dir).toBe('rtl');
@@ -298,7 +268,7 @@ describe('MonacoSourceEditor', () => {
         tabFocusMode: true,
       },
     });
-    expect(mounted.input.closest('[data-source-editor="monaco"]')).not.toBeNull();
+    expect(screen.getByRole('group', { name: 'TypeScript source' })).toContainElement(mounted.input);
     await mounted.unmount();
   });
 

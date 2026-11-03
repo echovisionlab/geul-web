@@ -3,5 +3,7 @@ import { expect, it } from 'vitest';
 import { ConfirmDialogHost } from './confirm-dialogs';
 
 it('renders nothing on the server', () => {
-  expect(renderToString(<ConfirmDialogHost />)).toBe('');
+  expect(
+    renderToString(<ConfirmDialogHost loadError={{ message: 'Could not open confirmation.', retryLabel: 'Retry' }} />),
+  ).toBe('');
 });

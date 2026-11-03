@@ -6,7 +6,7 @@ import { ConfirmationDialog } from '@/features/confirmation';
 
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { Text as DsText } from '@/components/core/Typography';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Code } from '@connectrpc/connect';
 import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { notifications } from '@/components/core/Notification';
@@ -71,6 +71,14 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
   const { labels, errorMessage, message: t } = useFileManagerI18n();
   const detailRequestRef = useRef(0);
   const detailMoreRequestRef = useRef<string | null>(null);
+  const uploadActive = useRef(false);
+  useEffect(
+    () => () => {
+      detailRequestRef.current += 1;
+      detailMoreRequestRef.current = null;
+    },
+    [],
+  );
   const { upload } = useFileUpload();
   const { store: browser, state: browserState } = useFileLibraryBrowserStore(fileManagerLibrary, fileManagerBrowsing);
   const {
@@ -96,6 +104,8 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
   const [detailUsages, setDetailUsages] = useState<FileManagerUsageItemView[]>([]);
   const [detailUsageNextPageToken, setDetailUsageNextPageToken] = useState<string | undefined>();
   const [detailLoading, setDetailLoading] = useState(false);
+  const [detailUsageError, setDetailUsageError] = useState<string | null>(null);
+  const [deletionInspecting, setDeletionInspecting] = useState(false);
   const [formOperation, setFormOperation] = useState<FormOperation | null>(null);
   const [moveOperation, setMoveOperation] = useState<MoveOperation | null>(null);
   const [deleteOperation, setDeleteOperation] = useState<DeleteOperation | null>(null);
@@ -117,6 +127,7 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
     detailMoreRequestRef.current = null;
     setDetailFile(null);
     setDetailUsages([]);
+    setDetailUsageError(null);
     setDetailUsageNextPageToken(undefined);
     setDetailLoading(false);
   };
@@ -140,6 +151,7 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
     detailMoreRequestRef.current = null;
     setDetailFile(file);
     setDetailUsages([]);
+    setDetailUsageError(null);
     setDetailUsageNextPageToken(undefined);
     setDetailLoading(true);
     try {
@@ -157,11 +169,15 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
         setDetailUsages(usageResult.usages);
         setDetailUsageNextPageToken(usageResult.nextPageToken);
       }
+      if (!usageResult.success) {
+        setDetailUsageError(errorMessage(usageResult.errorCode ?? 'loadUsages'));
+      }
       if (!detailResult.success || !usageResult.success) {
         showMutationFailure(!detailResult.success ? detailResult.errorCode : usageResult.errorCode);
       }
     } catch {
       if (detailRequestRef.current === requestId) {
+        setDetailUsageError(errorMessage('loadUsages'));
         showMutationFailure('loadFile');
       }
     } finally {
@@ -275,6 +291,10 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
     if (selectedFileIds.length === 0) {
       return;
     }
+    if (mutationLoading) {
+      return;
+    }
+    setDeletionInspecting(true);
     setMutationLoading(true);
     try {
       const result = await getFileDeletionImpactAction(selectedFileIds);
@@ -286,6 +306,7 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
     } catch {
       showMutationFailure('inspectUsage');
     } finally {
+      setDeletionInspecting(false);
       setMutationLoading(false);
     }
   };
@@ -323,6 +344,10 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
   };
 
   const uploadFile = async (file: File) => {
+    if (uploadActive.current) {
+      return;
+    }
+    uploadActive.current = true;
     setUploadPercentage(0);
     browser.setError(null);
     try {
@@ -335,6 +360,7 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
     } catch {
       browser.setError('upload');
     } finally {
+      uploadActive.current = false;
       setUploadPercentage(null);
     }
   };
@@ -393,6 +419,8 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
             detailFile={detailFile}
             detailUsages={detailUsages}
             detailLoading={detailLoading}
+            detailUsageError={detailUsageError}
+            deletionInspecting={deletionInspecting}
             hasMoreDetailUsages={Boolean(detailUsageNextPageToken)}
             uploadPercentage={uploadPercentage}
             error={error ? errorMessage(error) : null}
@@ -429,7 +457,7 @@ export function FileManager({ viewerRole }: { viewerRole: 'author' | 'admin' }) 
               setMoveOperation({ kind: 'files', fileIds: selectedFileIds });
               browser.setSelection([]);
             }}
-            onDeleteSelectedFiles={() => void inspectSelectedDeletion()}
+            onDeleteSelectedFiles={inspectSelectedDeletion}
             onConfirmMoveHere={() => void confirmMoveHere()}
             onCancelMove={() => setMoveOperation(null)}
             onLoadMoreDetailUsages={() => void loadMoreDetailUsages()}

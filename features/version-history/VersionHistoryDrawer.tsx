@@ -1,8 +1,9 @@
 'use client';
 
+import { PageLoader } from '@/features/site/PageLoader';
 import { formatLocaleCode } from '@/components/core/Typography/locale-code';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
@@ -44,7 +45,16 @@ export function formatVersionContributors(contributors: readonly VersionContribu
   return labels.length > 0 ? new Intl.ListFormat(locale, { style: 'long', type: 'conjunction' }).format(labels) : null;
 }
 
-export function VersionHistoryDrawer({
+export function VersionHistoryDrawer(props: VersionHistoryDrawerProps) {
+  return (
+    <VersionHistoryDrawerSession
+      key={`${props.entityType}:${props.entityId}:${props.currentSourceLocale}:${props.opened}`}
+      {...props}
+    />
+  );
+}
+
+function VersionHistoryDrawerSession({
   entityType,
   entityId,
   opened,
@@ -53,6 +63,14 @@ export function VersionHistoryDrawer({
   canRestore = true,
   onRestored,
 }: VersionHistoryDrawerProps) {
+  const active = useRef(true);
+  const restorePending = useRef(false);
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+    };
+  }, []);
   const t = useTranslations('versionHistory');
   const tActions = useTranslations('common.actions');
   const tCommonLabels = useTranslations('common.labels');
@@ -63,6 +81,8 @@ export function VersionHistoryDrawer({
   const queryClient = useQueryClient();
   const history = useVersionHistoryQuery({ entityType, entityId, opened });
   const versions = history.versions;
+  const [retrying, setRetrying] = useState(false);
+  const retryPending = useRef(false);
   const [restoring, setRestoring] = useState(false);
   const [selectedVersion, setSelectedVersion] = useState<VersionInfo | null>(null);
   const [confirmOpened, { open: openConfirm, close: closeConfirm }] = useDisclosure(false);
@@ -75,16 +95,32 @@ export function VersionHistoryDrawer({
     }
   }, [history.fetchNextPage]);
   const retry = useCallback(async () => {
-    await history.refetch();
+    if (retryPending.current) {
+      return;
+    }
+    retryPending.current = true;
+    setRetrying(true);
+    try {
+      await history.refetch();
+    } finally {
+      if (active.current) {
+        retryPending.current = false;
+        setRetrying(false);
+      }
+    }
   }, [history.refetch]);
 
   const handleRestore = async () => {
-    if (!restoreAvailable || !selectedVersion) {
+    if (!restoreAvailable || !selectedVersion || restorePending.current) {
       return;
     }
+    restorePending.current = true;
     setRestoring(true);
     try {
       const result = await restoreVersionRequest(entityType, entityId, selectedVersion.id);
+      if (!active.current) {
+        return;
+      }
       if (result.error) {
         notifications.show({
           message: getBoundedVersionHistoryError(result.error, t('restoreFailed')),
@@ -93,11 +129,17 @@ export function VersionHistoryDrawer({
         return;
       }
       await onRestored?.();
+      if (!active.current) {
+        return;
+      }
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['version-history', entityType, entityId] }),
         queryClient.invalidateQueries({ queryKey: ['entity-translations', entityType, entityId] }),
         queryClient.invalidateQueries({ queryKey: ['entity-translation-jobs', entityType, entityId] }),
       ]);
+      if (!active.current) {
+        return;
+      }
       router.refresh();
       notifications.show({
         message: t('restored', { version: selectedVersion.version }),
@@ -106,9 +148,15 @@ export function VersionHistoryDrawer({
       closeConfirm();
       onClose();
     } catch {
+      if (!active.current) {
+        return;
+      }
       notifications.show({ message: t('restoreFailed'), tone: 'danger' });
     } finally {
-      setRestoring(false);
+      if (active.current) {
+        restorePending.current = false;
+        setRestoring(false);
+      }
     }
   };
 
@@ -170,8 +218,10 @@ export function VersionHistoryDrawer({
       onClose={onClose}
       versions={versionItems}
       labels={labels}
-      loading={history.isLoading}
-      error={history.isError ? labels.loadFailed : null}
+      loadingSurface={<PageLoader placement="flow" />}
+      loading={history.isLoading && !retrying}
+      retrying={retrying || (history.isFetching && !history.isFetchingNextPage)}
+      error={history.isError || retrying ? labels.loadFailed : null}
       onRetry={retry}
       pagination={{
         contextKey: `${entityType}:${entityId}`,

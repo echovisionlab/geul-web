@@ -19,11 +19,3 @@
 .unframed {
   border: 0;
 }
-
-.loading {
-  display: grid;
-  min-height: 10rem;
-  place-items: center;
-  color: var(--geul-text-muted);
-  font-size: var(--geul-font-size-sm);
-}

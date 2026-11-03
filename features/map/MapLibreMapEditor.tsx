@@ -18,7 +18,13 @@ import { buildResolvedThemeConfig, resolveMapLabelVisibility } from '@/lib/utils
 
 const MapLibreMap = dynamic(() => import('@/features/map/MapLibreMap').then((mod) => mod.MapLibreMap), {
   ssr: false,
+  loading: () => <MapEditorLoader />,
 });
+
+function MapEditorLoader() {
+  const t = useTranslations('mapView');
+  return <PageLoader extent="container" message={t('loading')} />;
+}
 
 interface MapLibreMapEditorProps {
   places: MapRendererPlace[];
@@ -38,6 +44,8 @@ interface MapLibreMapEditorProps {
     readonly settings: ThemeSettings;
     readonly variant: ThemeVariant;
   }>;
+  /** Places or themes for the first render are loading; the map keeps its frame and shows its loader. */
+  dataPending?: boolean;
   settingsPanel?: {
     collapsed?: boolean;
     hidden?: boolean;
@@ -59,6 +67,7 @@ export function MapLibreMapEditor({
   onManagePlaces,
   resolveTheme,
   settingsPanel,
+  dataPending = false,
 }: MapLibreMapEditorProps) {
   const tMapControls = useTranslations('mapControls');
   const tMapView = useTranslations('mapView');
@@ -100,7 +109,11 @@ export function MapLibreMapEditor({
   });
 
   if (isThemeLoading) {
-    return <PageLoader height={height} minHeight={0} />;
+    return (
+      <div style={{ height, position: 'relative' }} aria-busy="true">
+        <MapEditorLoader />
+      </div>
+    );
   }
 
   if (isThemeError || !themeConfig) {
@@ -116,6 +129,7 @@ export function MapLibreMapEditor({
 
   const mapComponent = (
     <MapLibreMap
+      dataPending={dataPending}
       places={places}
       center={config.center}
       zoom={config.zoom}

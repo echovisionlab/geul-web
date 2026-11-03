@@ -1,18 +1,12 @@
 // @vitest-environment jsdom
-
-import { DesignSystemTestProvider as DesignSystemProvider } from '@/test/TestProviders';
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
+import { describe, expect, it, vi } from 'vitest';
+import { render, screen, within } from '@/test/render';
+import { PageLoaderView } from '@/components/core/LoadingSurface';
 import {
   normalizeSelectedParticipantRole,
   PostParticipantsDialogView,
   type PostParticipantsDialogViewProps,
 } from './PostParticipantsDialogView';
-
-let container: HTMLDivElement | null = null;
-let root: Root | null = null;
 
 const labels: PostParticipantsDialogViewProps['labels'] = {
   title: 'Authors and collaborators',
@@ -38,42 +32,6 @@ const labels: PostParticipantsDialogViewProps['labels'] = {
   inactiveCannotChangeRole: 'An inactive participant cannot change roles.',
 };
 
-beforeEach(() => {
-  vi.stubGlobal(
-    'ResizeObserver',
-    class {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
-    },
-  );
-  Object.defineProperty(window, 'matchMedia', {
-    writable: true,
-    value: vi.fn().mockImplementation((query: string) => ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    })),
-  });
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-});
-
-afterEach(() => {
-  act(() => root?.unmount());
-  container?.remove();
-  container = null;
-  root = null;
-  vi.unstubAllGlobals();
-  vi.restoreAllMocks();
-});
-
 function renderView(overrides: Partial<PostParticipantsDialogViewProps> = {}) {
   const onChangeRole = vi.fn();
   const onRemove = vi.fn();
@@ -97,88 +55,91 @@ function renderView(overrides: Partial<PostParticipantsDialogViewProps> = {}) {
     onRemove,
     onChangeRole,
     labels,
+    loadingSurface: <PageLoaderView placement="flow" imageAlt="Loading..." message="Loading..." />,
     ...overrides,
   };
 
-  act(() => {
-    root?.render(
-      <DesignSystemProvider forceColorScheme="light">
-        <PostParticipantsDialogView {...props} />
-      </DesignSystemProvider>,
-    );
-  });
-  return { onChangeRole, onRemove };
+  return { ...render(<PostParticipantsDialogView {...props} />), props, onChangeRole, onRemove };
 }
 
 describe('PostParticipantsDialogView role changes', () => {
-  it('lets an Admin atomically change either peer role', () => {
-    const { onChangeRole } = renderView();
-    const authorAction = document.body.querySelector<HTMLButtonElement>(
-      'button[aria-label="Change role to Collaborator"]',
-    );
-    const collaboratorAction = document.body.querySelector<HTMLButtonElement>(
-      'button[aria-label="Change role to Author"]',
-    );
-
-    expect(authorAction?.disabled).toBe(false);
-    expect(collaboratorAction?.disabled).toBe(false);
-    act(() => authorAction?.click());
-    act(() => collaboratorAction?.click());
+  it('lets an admin atomically change either peer role', async () => {
+    const { user, onChangeRole } = renderView();
+    const author = within(screen.getByRole('group', { name: 'Minji Author' })).getByRole('button', {
+      name: labels.changeToCollaborator,
+    });
+    const collaborator = screen.getByRole('button', { name: labels.changeToAuthor });
+    expect(author).toBeEnabled();
+    expect(collaborator).toBeEnabled();
+    await user.click(author);
+    await user.click(collaborator);
     expect(onChangeRole).toHaveBeenNthCalledWith(1, 'author-1', 'collaborator');
     expect(onChangeRole).toHaveBeenNthCalledWith(2, 'collaborator-1', 'author');
   });
 
-  it('does not let a Post Author change another Author or demote the last Author', () => {
-    renderView({ canRemoveAuthor: false });
-    const peerAuthor = document.body.querySelector<HTMLElement>('[data-participant-id="author-1"]');
+  it('prevents peer-author changes and last-author removal', () => {
+    const { props, rerender } = renderView({ canRemoveAuthor: false });
     expect(
-      peerAuthor?.querySelector<HTMLButtonElement>('button[aria-label="Change role to Collaborator"]')?.disabled,
-    ).toBe(true);
-    expect(document.body.querySelector<HTMLButtonElement>('button[aria-label="Change role to Author"]')?.disabled).toBe(
-      false,
+      within(screen.getByRole('group', { name: 'Minji Author' })).getByRole('button', {
+        name: labels.changeToCollaborator,
+      }),
+    ).toBeDisabled();
+    expect(screen.getByRole('button', { name: labels.changeToAuthor })).toBeEnabled();
+    rerender(
+      <PostParticipantsDialogView
+        {...props}
+        canRemoveAuthor
+        participants={[props.participants[0]!, props.participants[2]!]}
+      />,
     );
-
-    act(() => root?.unmount());
-    root = createRoot(container!);
-    renderView({
-      participants: [
-        { memberId: 'author-1', nickname: 'Minji', role: 'author', hasEffectiveAuthority: true },
-        { memberId: 'collaborator-1', nickname: 'Haru', role: 'collaborator', hasEffectiveAuthority: true },
-      ],
-    });
-    const lastAuthor = document.body.querySelector<HTMLElement>('[data-participant-id="author-1"]');
-    expect(
-      lastAuthor?.querySelector<HTMLButtonElement>('button[aria-label="Change role to Collaborator"]')?.disabled,
-    ).toBe(true);
-    expect(lastAuthor?.querySelector<HTMLButtonElement>('button[aria-label="Remove author"]')?.disabled).toBe(true);
+    const lastAuthor = within(screen.getByRole('group', { name: 'Minji Author' }));
+    expect(lastAuthor.getByRole('button', { name: labels.changeToCollaborator })).toBeDisabled();
+    expect(lastAuthor.getByRole('button', { name: labels.removeAuthor })).toBeDisabled();
   });
 
-  it('blocks role changes for inactive participants but still permits authorized removal', () => {
-    const { onChangeRole, onRemove } = renderView({
+  it('prevents inactive role changes while allowing authorized removal', async () => {
+    const { user, onChangeRole, onRemove } = renderView({
       participants: [
         { memberId: 'author-1', nickname: 'Minji', role: 'author', hasEffectiveAuthority: true },
         { memberId: 'author-2', nickname: 'Alex', role: 'author', hasEffectiveAuthority: false },
       ],
     });
-    const inactiveRow = document.body.querySelector<HTMLElement>('[data-participant-id="author-2"]');
-    const changeRole = inactiveRow?.querySelector<HTMLButtonElement>(
-      'button[aria-label="Change role to Collaborator"]',
-    );
-    const remove = inactiveRow?.querySelector<HTMLButtonElement>('button[aria-label="Remove author"]');
-    const inactiveStatus = inactiveRow?.querySelector<HTMLElement>('[data-participant-inactive-status]');
-
-    expect(changeRole?.disabled).toBe(true);
-    expect(remove?.disabled).toBe(false);
-    expect(inactiveStatus?.getAttribute('role')).toBe('img');
-    expect(inactiveStatus?.getAttribute('aria-label')).toBe(labels.inactiveAuthority);
-    expect(inactiveStatus?.closest('button')).toBeNull();
-    expect(inactiveRow?.textContent).not.toContain(labels.inactiveAuthority);
-    act(() => remove?.click());
+    const row = within(screen.getByRole('group', { name: 'Alex Author' }));
+    expect(row.getByRole('button', { name: labels.changeToCollaborator })).toBeDisabled();
+    const remove = row.getByRole('button', { name: labels.removeAuthor });
+    expect(remove).toBeEnabled();
+    expect(row.getByRole('img', { name: labels.inactiveAuthority })).toBeVisible();
+    expect(row.queryByRole('button', { name: labels.inactiveAuthority })).not.toBeInTheDocument();
+    expect(screen.queryByText(labels.inactiveAuthority)).not.toBeInTheDocument();
+    await user.click(remove);
     expect(onChangeRole).not.toHaveBeenCalled();
     expect(onRemove).toHaveBeenCalledWith('author-2', 'author');
   });
 
-  it('normalizes a stale selected role to the roles the current actor may assign', () => {
+  it('shows loading and suppresses false empty on query failure', () => {
+    const { props, rerender } = renderView({ loading: true, participants: [] });
+    expect(screen.getByRole('status', { name: 'Loading...' })).toHaveTextContent('Loading...');
+    expect(screen.queryByText(labels.empty)).not.toBeInTheDocument();
+    rerender(
+      <PostParticipantsDialogView {...props} loading={false} failed queryFailure={<div role="alert">Failed</div>} />,
+    );
+    expect(screen.getByRole('alert')).toHaveTextContent('Failed');
+    expect(screen.queryByText(labels.empty)).not.toBeInTheDocument();
+  });
+
+  it('marks only the active row action pending and gates member selection', async () => {
+    const { props, user } = renderView({ mutating: true, pendingAction: { memberId: 'author-2', action: 'remove' } });
+    const row = within(screen.getByRole('group', { name: 'Alex Author' }));
+    expect(row.getByRole('button', { name: labels.removeAuthor })).toHaveAttribute('aria-busy', 'true');
+    expect(
+      within(screen.getByRole('group', { name: 'Minji Author' })).getByRole('button', { name: labels.removeAuthor }),
+    ).not.toHaveAttribute('aria-busy');
+    expect(screen.getByRole('combobox', { name: labels.memberLabel })).toBeDisabled();
+    await user.click(row.getByRole('button', { name: labels.removeAuthor }));
+    expect(props.onRemove).not.toHaveBeenCalled();
+  });
+
+  it('normalizes a stale role to the actor’s assignable roles', () => {
     expect(normalizeSelectedParticipantRole('author', false, true)).toBe('collaborator');
     expect(normalizeSelectedParticipantRole('collaborator', true, false)).toBe('author');
     expect(normalizeSelectedParticipantRole('author', false, false)).toBeNull();

@@ -39,6 +39,7 @@ export interface AuthCodeChallengeViewProps {
   showStartOver?: boolean;
   showSubmitButton?: boolean;
   submitting: boolean;
+  resending?: boolean;
   timing: AuthCodeTimingViewModel | null;
 }
 
@@ -64,17 +65,18 @@ export function AuthCodeChallengeView({
   showStartOver = true,
   showSubmitButton = true,
   submitting,
+  resending = false,
   timing,
 }: AuthCodeChallengeViewProps) {
   const codeExpired = timing?.expiresInSeconds === 0;
   const flowExpired = timing?.flowExpiresInSeconds === 0;
-  const challengeDisabled = submitting || codeExpired || flowExpired;
+  const challengeDisabled = submitting || resending || codeExpired || flowExpired;
   const resendInSeconds = timing?.resendInSeconds ?? 0;
   const expiryId = useId();
   const hasExpiry = flowExpired || codeExpired || timing?.expiresInSeconds != null;
 
   return (
-    <DsLayoutStack gap="md" role="group" aria-label={labels.codeAriaLabel} aria-busy={submitting}>
+    <DsLayoutStack gap="md" role="group" aria-label={labels.codeAriaLabel} aria-busy={submitting || resending}>
       <PinInput
         align="center"
         ariaLabel={labels.codeAriaLabel}
@@ -127,13 +129,14 @@ export function AuthCodeChallengeView({
             size="sm"
             emphasis="medium"
             onClick={onResend}
-            disabled={submitting || flowExpired || resendInSeconds > 0}
+            disabled={submitting || resending || flowExpired || resendInSeconds > 0}
+            loading={resending}
             data-testid="auth-code-resend"
           >
             {resendInSeconds > 0 ? labels.resendIn(formatDuration(resendInSeconds)) : labels.resend}
           </Button>
           {showStartOver && onStartOver ? (
-            <Button type="button" size="sm" emphasis="low" onClick={onStartOver} disabled={submitting}>
+            <Button type="button" size="sm" emphasis="low" onClick={onStartOver} disabled={submitting || resending}>
               {labels.startOver}
             </Button>
           ) : null}

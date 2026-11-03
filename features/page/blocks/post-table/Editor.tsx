@@ -60,10 +60,11 @@ function PostTableSettingsForm({ props, updateProps }: PostTableSettingsFormProp
     queryFn: () => listTagsAction().then(unwrapQueryResult),
   });
   const { data: tags } = tagsQuery;
-  const { data: authors } = useQuery({
+  const authorsQuery = useQuery({
     queryKey: ['authors', 50],
     queryFn: () => listAuthorOptionsAction(50),
   });
+  const { data: authors } = authorsQuery;
   const seriesQuery = useQuery({
     queryKey: ['series', 'simple'],
     queryFn: () => listSeriesSimple(),
@@ -95,7 +96,7 @@ function PostTableSettingsForm({ props, updateProps }: PostTableSettingsFormProp
 
   return (
     <DsLayoutStack gap="lg" data-page-block-editor="post-table">
-      <QueryErrorAlert queries={[categoriesQuery, tagsQuery, seriesQuery]} />
+      <QueryErrorAlert queries={[categoriesQuery, tagsQuery, seriesQuery, authorsQuery]} />
       <DsLayoutInset blockEnd="md">
         <DsLayoutInline gap="xs">
           <IconTable size={18} />
@@ -119,6 +120,7 @@ function PostTableSettingsForm({ props, updateProps }: PostTableSettingsFormProp
         <MultiSelect
           label={tCommonEntities('categories')}
           placeholder={tPageEditor('mapEditor.allCategoriesPlaceholder')}
+          isLoading={categoriesQuery.isLoading}
           data={(categories ?? []).map((category) => ({
             value: category.id,
             label: category.name,
@@ -132,6 +134,7 @@ function PostTableSettingsForm({ props, updateProps }: PostTableSettingsFormProp
         <Select
           label={tCommonEntities('series')}
           placeholder={tPageEditor('mapEditor.allSeriesPlaceholder')}
+          isLoading={seriesQuery.isLoading}
           data={(series ?? []).map((item) => ({ value: item.id, label: item.title }))}
           value={seriesId || null}
           onChange={(value) => updateProp('seriesId', value || '')}
@@ -151,6 +154,7 @@ function PostTableSettingsForm({ props, updateProps }: PostTableSettingsFormProp
         <MultiSelect
           label={tCommonLabels('authors')}
           placeholder={tPageEditor('mapEditor.allAuthorsPlaceholder')}
+          isLoading={authorsQuery.isLoading}
           data={(authors ?? []).map((author) => ({
             value: author.id,
             label: author.name ?? tCommonStates('unknown'),
@@ -164,6 +168,7 @@ function PostTableSettingsForm({ props, updateProps }: PostTableSettingsFormProp
         <MultiSelect
           label={tCommonEntities('tags')}
           placeholder={tPageEditor('mapEditor.allTagsPlaceholder')}
+          isLoading={tagsQuery.isLoading}
           data={(tags ?? []).map((tag) => ({ value: tag.id, label: tag.name }))}
           value={tagIds ? tagIds.split(',').filter(Boolean) : []}
           onChange={(values) => updateProp('tagIds', values.join(','))}

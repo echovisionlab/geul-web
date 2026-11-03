@@ -5,6 +5,7 @@ import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { useId } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { PageLoader } from '@/features/site/PageLoader';
 import { Spinner as Loader } from '@/components/core/Display';
 import { notifications } from '@/components/core/Notification';
 import { Alert } from '@/components/core/Alert';
@@ -173,9 +174,7 @@ export function FileDownloadPolicyEditor({
       </div>
     ) : null;
   const content = loadPending ? (
-    <Alert role="status" tone="neutral">
-      {t('loading')}
-    </Alert>
+    <PageLoader extent="compact" placement="flow" size="sm" message={t('loading')} />
   ) : !enabled ? (
     <Alert role="status" tone="neutral">
       {t('fileRequired')}
@@ -214,7 +213,7 @@ export function FileDownloadPolicyEditor({
         <VisuallyHidden role="status" aria-live="polite" aria-atomic="true" data-file-download-policy-sync>
           {saving ? tStates('syncing') : saved ? tStates('synced') : ''}
         </VisuallyHidden>
-        {loadPending ? <Loader size="xs" aria-label={t('loading')} /> : null}
+        {loadPending ? <PageLoader extent="compact" placement="flow" size="xs" message={t('loading')} /> : null}
         {!loadPending && policyLoaded ? accessControl : null}
         {!loadPending && policyLoaded ? segmentFeedback : null}
         {!loadPending && policyLoaded && error ? (

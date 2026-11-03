@@ -168,6 +168,8 @@ export function PublicShellStoryHarness({ children, initialPath }: PublicShellSt
       }}
       labels={{
         navigation: 'Example Studio navigation',
+        navigationLoadFailed: 'Could not load navigation.',
+        retryNavigation: 'Retry navigation',
         toggleNavigation: 'Toggle navigation',
         close: 'Close',
         search: 'Search',

@@ -1,107 +1,91 @@
 // @vitest-environment jsdom
 
-import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-
+import { expect, it, vi } from 'vitest';
+import { render, screen } from '@/test/render';
+import { PageLoader } from '@/features/site/PageLoader';
 import type { MaterializedEmailLayoutUnit } from '@echovisionlab/geul-common/collaboration/email-layout';
+import enMessages from '@/messages/en.json';
 import { EmailLayoutTargetEditor } from './EmailLayoutTargetEditor';
 
-vi.mock('next-intl', () => ({
-  useTranslations: () => (key: string, values?: { value?: string }) =>
-    values?.value === undefined ? key : `${key}:${values.value}`,
-}));
+const labels = enMessages.adminList.emailLayouts.detail.targetEditor;
+const unit: MaterializedEmailLayoutUnit = {
+  handle: 'unit:11111111-1111-4111-8111-111111111111:text',
+  kind: 'text',
+  element: '',
+  attribute: '',
+  order: 0,
+  sourceValue: 'Source heading',
+  value: 'Source heading',
+  localeValuePresent: false,
+};
 
-let root: Root | null = null;
-let container: HTMLDivElement | null = null;
-
-class ResizeObserverMock {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-}
-
-globalThis.ResizeObserver = ResizeObserverMock;
-
-afterEach(() => {
-  act(() => root?.unmount());
-  container?.remove();
-  root = null;
-  container = null;
+it('shows source fallback without turning it into a locale-owned value', async () => {
+  const onChange = vi.fn();
+  const onUseSource = vi.fn();
+  const { user } = render(
+    <EmailLayoutTargetEditor
+      loadingSurface={<PageLoader placement="flow" />}
+      isReady
+      units={[unit]}
+      onChange={onChange}
+      onUseSource={onUseSource}
+    />,
+  );
+  const input = screen.getByRole('textbox');
+  expect(input).toHaveValue('Source heading');
+  expect(screen.getByRole('button', { name: labels.useSource })).toBeDisabled();
+  await user.clear(input);
+  expect(onChange).toHaveBeenLastCalledWith(unit.handle, '');
+  expect(onUseSource).not.toHaveBeenCalled();
 });
 
-function renderEditor(units: MaterializedEmailLayoutUnit[], onChange = vi.fn(), onUseSource = vi.fn()) {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-  act(() => {
-    root?.render(
-      <DesignSystemProvider forceColorScheme="light">
-        <EmailLayoutTargetEditor units={units} onChange={onChange} onUseSource={onUseSource} />
-      </DesignSystemProvider>,
-    );
-  });
-  return { onChange, onUseSource };
-}
+it('preserves explicit empty and exposes source fallback removal', async () => {
+  const attributeUnit: MaterializedEmailLayoutUnit = {
+    ...unit,
+    handle: 'unit:attribute',
+    kind: 'attribute',
+    element: 'button',
+    attribute: 'aria-label',
+    sourceValue: 'Unsubscribe',
+    value: '',
+    localeValuePresent: true,
+  };
+  const onUseSource = vi.fn();
+  const { user } = render(
+    <EmailLayoutTargetEditor
+      loadingSurface={<PageLoader placement="flow" />}
+      isReady
+      units={[attributeUnit]}
+      onChange={vi.fn()}
+      onUseSource={onUseSource}
+    />,
+  );
+  expect(screen.getByRole('textbox')).toHaveValue('');
+  await user.click(screen.getByRole('button', { name: labels.useSource }));
+  expect(onUseSource).toHaveBeenCalledWith(attributeUnit.handle);
+});
 
-describe('EmailLayoutTargetEditor', () => {
-  it('shows source fallback without turning it into a locale-owned value', () => {
-    const { onChange, onUseSource } = renderEditor([
-      {
-        handle: 'unit:11111111-1111-4111-8111-111111111111:text',
-        kind: 'text',
-        element: '',
-        attribute: '',
-        order: 0,
-        sourceValue: 'Source heading',
-        value: 'Source heading',
-        localeValuePresent: false,
-      },
-    ]);
-
-    const textarea = document.querySelector<HTMLTextAreaElement>(
-      // Core inputs carry caller data attributes on the field root; the value belongs to its textarea.
-      '[data-email-layout-unit="unit:11111111-1111-4111-8111-111111111111:text"] textarea',
-    );
-    expect(textarea?.value).toBe('Source heading');
-    const useSource = [...document.querySelectorAll('button')].find((button) => button.textContent === 'useSource');
-    expect(useSource?.disabled).toBe(true);
-
-    act(() => {
-      if (!textarea) {
-        throw new Error('textarea missing');
-      }
-      Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')?.set?.call(textarea, '번역 제목');
-      textarea.dispatchEvent(new Event('input', { bubbles: true }));
-    });
-    expect(onChange).toHaveBeenCalledWith('unit:11111111-1111-4111-8111-111111111111:text', '번역 제목');
-    expect(onUseSource).not.toHaveBeenCalled();
-  });
-
-  it('preserves explicit empty and exposes source fallback removal', () => {
-    const { onUseSource } = renderEditor([
-      {
-        handle: 'unit:22222222-2222-4222-8222-222222222222:attr:aria-label',
-        kind: 'attribute',
-        element: 'button',
-        attribute: 'aria-label',
-        order: 0,
-        sourceValue: 'Unsubscribe',
-        value: '',
-        localeValuePresent: true,
-      },
-    ]);
-
-    expect(
-      document.querySelector<HTMLTextAreaElement>(
-        // Core inputs carry caller data attributes on the field root; the value belongs to its textarea.
-        '[data-email-layout-unit="unit:22222222-2222-4222-8222-222222222222:attr:aria-label"] textarea',
-      )?.value,
-    ).toBe('');
-    const useSource = [...document.querySelectorAll('button')].find((button) => button.textContent === 'useSource');
-    expect(useSource?.disabled).toBe(false);
-    act(() => useSource?.click());
-    expect(onUseSource).toHaveBeenCalledWith('unit:22222222-2222-4222-8222-222222222222:attr:aria-label');
-  });
+it('does not present unsynchronized units as a resolved empty layout', () => {
+  const { rerender } = render(
+    <EmailLayoutTargetEditor
+      loadingSurface={<PageLoader placement="flow" />}
+      isReady={false}
+      units={[]}
+      onChange={vi.fn()}
+      onUseSource={vi.fn()}
+    />,
+  );
+  expect(screen.getByRole('status')).toHaveTextContent(enMessages.common.states.loading);
+  expect(screen.queryByText(labels.empty)).not.toBeInTheDocument();
+  rerender(
+    <EmailLayoutTargetEditor
+      loadingSurface={<PageLoader placement="flow" />}
+      isReady
+      units={[]}
+      onChange={vi.fn()}
+      onUseSource={vi.fn()}
+    />,
+  );
+  expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  expect(screen.getByText(labels.empty)).toBeVisible();
 });

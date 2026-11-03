@@ -27,6 +27,7 @@ function Preview({
   translationState = 'ready',
   mediaState = 'ready',
   followRoomAccess = false,
+  command = 'idle',
 }: {
   state?: EditorPreviewState;
   /** Edit authority follows the room's reported access level (room.access_changed), as in PostEditor. */
@@ -35,6 +36,7 @@ function Preview({
   withImages?: boolean;
   translationState?: AuthorTranslationState;
   mediaState?: AuthorMediaState;
+  command?: 'idle' | 'exporting-markdown' | 'changing-locale';
 }) {
   const local = useDocumentEditor('post', state),
     t = useTranslations('postEditor');
@@ -63,12 +65,13 @@ function Preview({
     [participantsOpened, setParticipantsOpened] = useState(false);
   const [scheduledAt, setScheduledAt] = useState<string | null>(null),
     [scheduledTimeZone, setScheduledTimeZone] = useState<string | null>(null);
+  const activeEditLocale = { ...local.activeEditLocale, localeChanging: command === 'changing-locale' };
   if (!local.room || !local.session) {
-    return <PageLoader />;
+    return <PageLoader placement="flow" />;
   }
   const meta: PostMetaContextValue = {
     ...local.connection,
-    localeSession: local.localeSession,
+    localeSession: { ...local.localeSession, activeEditLocale },
     sourceTitle: local.title,
     sourceSummary: local.summary,
     setSourceTitle: local.setTitle,
@@ -128,7 +131,7 @@ function Preview({
     },
     currentIsConnected: local.connected,
     currentIsSynced: local.connected,
-    activeEditLocale: local.activeEditLocale,
+    activeEditLocale,
     scheduledAt,
     scheduledTimeZone,
     handleBack: async () => goBackPreview(),
@@ -141,6 +144,7 @@ function Preview({
     openSchedule: () => setScheduleOpened(true),
     handleExportMarkdown: async () =>
       downloadMarkdown(local.title, `# ${local.title}\n\n${local.room?.controller?.getText() ?? ''}`),
+    exportingMarkdown: command === 'exporting-markdown',
     setIsZenMode,
     showEditorChrome: !isZenMode,
     ...local.site,
@@ -227,6 +231,7 @@ function Preview({
 const meta = {
   argTypes: {
     ...editorStateArgTypes,
+    command: { control: 'select', options: ['idle', 'exporting-markdown', 'changing-locale'] },
     translationState: {
       control: 'select',
       options: [
@@ -247,7 +252,14 @@ const meta = {
   },
   title: 'Pages/Editors/Post',
   component: Preview,
-  args: { state: 'ready', zen: false, withImages: false, translationState: 'ready', mediaState: 'ready' },
+  args: {
+    state: 'ready',
+    command: 'idle',
+    zen: false,
+    withImages: false,
+    translationState: 'ready',
+    mediaState: 'ready',
+  },
   parameters: editorPageParameters,
 } satisfies Meta<typeof Preview>;
 export default meta;
@@ -287,6 +299,8 @@ async function openTranslations(canvasElement: HTMLElement, globals: Record<stri
 }
 
 export const Ready: Story = {};
+export const ExportingMarkdown: Story = { args: { command: 'exporting-markdown' } };
+export const ChangingLocale: Story = { args: { command: 'changing-locale' } };
 export const CommentSetting: Story = {
   play: async ({ canvasElement, globals }) => {
     const canvas = within(canvasElement);

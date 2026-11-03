@@ -62,6 +62,7 @@ export function TrackCreditsEditorSection({
   const [creditedName, setCreditedName] = useState('');
   const [creditRole, setCreditRole] = useState('');
   const creditsId = useId();
+  const [pendingCommand, setPendingCommand] = useState<string | null>(null);
   const allArtistsQuery = useQuery({
     queryKey: ['artist', 'list'],
     queryFn: () => listArtistsAction().then(unwrapQueryResult),
@@ -101,6 +102,8 @@ export function TrackCreditsEditorSection({
 
   const persistCredits = (nextCredits: ReleaseTrackItem['credits'], successMessage: string, onSuccess?: () => void) => {
     setCredits.mutate(nextCredits, {
+      onSettled: () => setPendingCommand(null),
+      onError: () => notifications.show({ message: tCommon('notifications.saveFailed'), tone: 'danger' }),
       onSuccess: (result) => {
         if (result.error) {
           notifications.show({ message: result.error, tone: 'danger' });
@@ -114,7 +117,7 @@ export function TrackCreditsEditorSection({
   };
 
   const handleAddCredit = () => {
-    if (!canEdit) {
+    if (!canEdit || setCredits.isPending) {
       return;
     }
     let newCredit: ReleaseTrackItem['credits'][number] | null = null;
@@ -179,6 +182,7 @@ export function TrackCreditsEditorSection({
     if (!newCredit) {
       return;
     }
+    setPendingCommand('add');
     persistCredits(
       [...credits, newCredit],
       tCommon('messages.itemUpdated', { item: tCommon('entities.credits') }),
@@ -187,9 +191,10 @@ export function TrackCreditsEditorSection({
   };
 
   const handleRemoveCredit = (creditId: string) => {
-    if (!canEdit) {
+    if (!canEdit || setCredits.isPending) {
       return;
     }
+    setPendingCommand(creditId);
     persistCredits(
       credits.filter((credit) => credit.id !== creditId),
       tCommon('messages.itemRemoved', { item: tCommon('entities.credit') }),
@@ -209,7 +214,8 @@ export function TrackCreditsEditorSection({
 
   const removeButton = (credit: ReleaseTrackItem['credits'][number]) => (
     <IconButton
-      disabled={!canEdit}
+      disabled={!canEdit || setCredits.isPending}
+      loading={setCredits.isPending && pendingCommand === credit.id}
       tone="danger"
       emphasis="low"
       size="sm"
@@ -284,7 +290,7 @@ export function TrackCreditsEditorSection({
           {tCommon('actions.addItem', { item: tCommon('entities.credit') })}
         </DsText>
         <SegmentedControl
-          disabled={!canEdit}
+          disabled={!canEdit || setCredits.isPending}
           aria-label={tCommon('entities.credit')}
           id={idPrefix ? `${idPrefix}-track-credit-type-${trackId}` : undefined}
           value={creditType}
@@ -300,10 +306,11 @@ export function TrackCreditsEditorSection({
         <DsLayoutStack gap="sm">
           {creditType === 'artist' ? (
             <Select
-              disabled={!canEdit}
+              disabled={!canEdit || setCredits.isPending}
               aria-label={tCommon('entities.artist')}
               id={idPrefix ? `${idPrefix}-track-credit-artist-${trackId}` : undefined}
               placeholder={tCredits('placeholders.selectArtist')}
+              isLoading={allArtistsQuery.isFetching}
               data={allArtists.map((artist) => ({ value: artist.id, label: artist.name }))}
               value={selectedArtistId}
               onChange={setSelectedArtistId}
@@ -313,10 +320,11 @@ export function TrackCreditsEditorSection({
           ) : null}
           {creditType === 'member' ? (
             <Select
-              disabled={!canEdit}
+              disabled={!canEdit || setCredits.isPending}
               aria-label={tCommon('entities.member')}
               id={idPrefix ? `${idPrefix}-track-credit-member-${trackId}` : undefined}
               placeholder={tCredits('placeholders.selectUser')}
+              isLoading={membersQuery.isFetching}
               data={allMembers.map((member) => ({ value: member.id, label: member.name }))}
               value={selectedMemberId}
               onChange={setSelectedMemberId}
@@ -326,7 +334,7 @@ export function TrackCreditsEditorSection({
           ) : null}
           {creditType === 'text' ? (
             <TextInput
-              disabled={!canEdit}
+              disabled={!canEdit || setCredits.isPending}
               aria-label={tCommon('labels.name')}
               id={idPrefix ? `${idPrefix}-track-credit-name-${trackId}` : undefined}
               placeholder={tCredits('placeholders.creditedName')}
@@ -336,7 +344,7 @@ export function TrackCreditsEditorSection({
             />
           ) : null}
           <TextInput
-            disabled={!canEdit}
+            disabled={!canEdit || setCredits.isPending}
             aria-label={tCommon('labels.role')}
             id={idPrefix ? `${idPrefix}-track-credit-role-${trackId}` : undefined}
             placeholder={tCredits('placeholders.role')}
@@ -351,7 +359,7 @@ export function TrackCreditsEditorSection({
             size="sm"
             onClick={handleAddCredit}
             disabled={!canEdit || isAddDisabled}
-            loading={setCredits.isPending}
+            loading={setCredits.isPending && pendingCommand === 'add'}
           >
             {tCommon('actions.add')}
           </Button>

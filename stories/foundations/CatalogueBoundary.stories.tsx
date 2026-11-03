@@ -2,26 +2,38 @@ import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 import { CatalogueLoadError, CatalogueLoadingFallback } from '@/lib/providers/ClientMessagesProvider';
 
-function RetryBoundaryPreview() {
+function RetryBoundaryPreview(props: Parameters<typeof CatalogueLoadingFallback>[0]) {
   const [retrying, setRetrying] = useState(false);
-  return retrying ? <CatalogueLoadingFallback /> : <CatalogueLoadError onRetry={() => setRetrying(true)} />;
+  return retrying ? <CatalogueLoadingFallback {...props} /> : <CatalogueLoadError onRetry={() => setRetrying(true)} />;
 }
 
-const meta: Meta = {
+const meta: Meta<typeof CatalogueLoadingFallback> = {
   title: 'Foundations/Catalogue Boundary',
-  parameters: { layout: 'fullscreen' },
+  component: CatalogueLoadingFallback,
+  parameters: {
+    layout: 'fullscreen',
+    docs: {
+      description: {
+        component:
+          'Production catalogue fallback views with localized visible text and root-supplied image props, before ManifestProvider exists. ConfiguredLoader uses a static local asset; loaderImageSrc and loaderImageUnoptimized Controls also accept an observed public GIF. Retry demonstrates the error-to-pending view; deferred provider tests cover catalogue completion, locale cancellation and retry recovery.',
+      },
+    },
+  },
+  argTypes: {
+    loaderImageSrc: { control: 'text' },
+    loaderImageUnoptimized: { control: 'boolean' },
+  },
+  args: { loaderImageUnoptimized: true },
 };
 export default meta;
-type Story = StoryObj;
+type Story = StoryObj<typeof CatalogueLoadingFallback>;
 
-// These are the actual production fallback views. The global preview supplies
-// the same shared theme and selected catalogue; no story provider overrides them.
-export const Pending: Story = {
-  render: () => <CatalogueLoadingFallback />,
-};
+// The global preview supplies the shared theme and selected catalogue.
+export const Pending: Story = {};
 export const ConfiguredLoader: Story = {
-  render: () => <CatalogueLoadingFallback loaderImageSrc="/storybook/media/video-poster.jpg" loaderImageUnoptimized />,
+  args: { loaderImageSrc: '/storybook/media/video-poster.jpg' },
 };
-export const Retry: Story = {
-  render: () => <RetryBoundaryPreview />,
+export const FailedImage: Story = {
+  args: { loaderImageSrc: '/storybook/media/missing-loader.gif' },
 };
+export const Retry: Story = { render: (args) => <RetryBoundaryPreview {...args} /> };

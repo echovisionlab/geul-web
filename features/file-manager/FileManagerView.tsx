@@ -24,7 +24,7 @@ import { MediaProcessingStatus } from '@echovisionlab/geul-proto/common/media_pb
 import { FileDerivativeType, FileUsageDomain } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { SectionCard } from '@/components/core/Section';
 import { SelectionEmptyState, SelectionViewport, SelectionMarquee } from '@/components/core/SelectionSurface';
-import { NearEndLoader, Spinner as Loader, type NearEndLoaderLabels } from '@/components/core/Display';
+import { NearEndLoader, type NearEndLoaderLabels } from '@/components/core/Display';
 import { Button } from '@/components/core/Button';
 import { DateTime } from '@/features/date-time/DateTime';
 import { DropdownMenu } from '@/components/core/DropdownMenu';
@@ -148,6 +148,8 @@ export interface FileManagerViewProps {
   detailFile?: FileManagerFileRow | null;
   detailUsages?: FileManagerUsageView[];
   detailLoading?: boolean;
+  detailUsageError?: string | null;
+  deletionInspecting?: boolean;
   hasMoreDetailUsages?: boolean;
   uploadPercentage?: number | null;
   error?: string | null;
@@ -171,7 +173,7 @@ export interface FileManagerViewProps {
   onDeleteFolder: (folder: Extract<FileManagerRow, { kind: 'folder' }>) => void;
   onRenameFile: (file: FileManagerFileRow) => void;
   onMoveSelectedFiles: () => void;
-  onDeleteSelectedFiles: () => void;
+  onDeleteSelectedFiles: () => void | Promise<void>;
   onConfirmMoveHere: () => void;
   onCancelMove: () => void;
   onLoadMoreDetailUsages: () => void;
@@ -326,6 +328,8 @@ export function FileManagerView(props: FileManagerViewProps) {
         canManage={props.role === 'admin'}
         batchActionsDisabled={!onlyFilesSelected}
         mutationLoading={props.mutationLoading}
+        deletionInspecting={props.deletionInspecting}
+        uploadPending={props.uploadPercentage != null}
         onOpenPath={props.onOpenPath}
         onQueryChange={props.onQueryChange}
         onMimeTypePrefixChange={props.onMimeTypePrefixChange}
@@ -378,7 +382,7 @@ export function FileManagerView(props: FileManagerViewProps) {
 
       {props.loading ? (
         <div style={{ position: 'relative', minHeight: 320 }}>
-          <PageLoader height={320} minHeight={320} />
+          <PageLoader extent="tall" />
         </div>
       ) : props.folderNotFound ? (
         <SectionCard padding="xl" data-file-folder-not-found>
@@ -395,7 +399,7 @@ export function FileManagerView(props: FileManagerViewProps) {
             />
           </SelectionEmptyState>
         </SectionCard>
-      ) : props.items.length === 0 ? (
+      ) : props.error && props.items.length === 0 ? null : props.items.length === 0 ? (
         <SectionCard padding="xl">
           <SelectionEmptyState>
             <EmptyState inset="none" icon={IconFolder} title={labels.empty} />
@@ -683,10 +687,10 @@ export function FileManagerView(props: FileManagerViewProps) {
                 <DateTime value={props.detailFile.createdAt} fallback="—" />
               </MetadataPair>
             </DsLayoutStack>
-            {props.detailUsages && props.detailUsages.length > 0 ? (
+            {(props.detailUsages && props.detailUsages.length > 0) || props.hasMoreDetailUsages ? (
               <DsLayoutStack gap="xs">
                 <DsText weight="strong">{labels.usages}</DsText>
-                {props.detailUsages.map((usage, index) => (
+                {props.detailUsages?.map((usage, index) => (
                   <div key={`${usage.domain}-${usage.entityId}-${usage.slot}-${usage.blockId ?? ''}-${index}`}>
                     {usage.link ? (
                       <TextButton href={usage.link} appearance="accent" size="sm">
@@ -711,11 +715,11 @@ export function FileManagerView(props: FileManagerViewProps) {
                 ) : null}
               </DsLayoutStack>
             ) : props.detailLoading ? (
-              <DsLayoutInset block="md">
-                <DsLayoutStack align="center" justify="center">
-                  <Loader size="sm" aria-label={labels.usages} />
-                </DsLayoutStack>
-              </DsLayoutInset>
+              <PageLoader extent="compact" placement="flow" size="sm" />
+            ) : props.detailUsageError ? (
+              <DsText role="alert" size="sm" tone="danger">
+                {props.detailUsageError}
+              </DsText>
             ) : (
               <MetadataPair label={labels.usages} layout="stacked">
                 <SupportingText tone="secondary">

@@ -130,7 +130,7 @@ export function LegalPolicyHistoryClient({
       </DsLayoutInline>
 
       {queriedActiveQuery.isError || queriedArchivedQuery.isError ? null : isLoading ? (
-        <PageLoader />
+        <PageLoader placement="flow" />
       ) : !hasVersions ? (
         <DsSectionCard withBorder padding="xl">
           <EmptyState inset="none" icon={IconFileText} title={labels.noVersions} />

@@ -46,6 +46,12 @@ const submitMock = vi.fn();
 const verifyPasswordMock = vi.fn();
 const regenerateOgImageMock = vi.fn();
 
+const formAccessCookie = vi.hoisted(() => ({
+  readFormPassword: vi.fn<(slug: string) => Promise<string | undefined>>(async () => undefined),
+  rememberFormPassword: vi.fn(async () => undefined),
+}));
+vi.mock('@/lib/forms/form-access-cookie.server', () => formAccessCookie);
+
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }));
@@ -399,7 +405,9 @@ describe('checkFormAccessAction', () => {
   it('submits public forms while trimming blank passwords', async () => {
     submitMock.mockResolvedValue({});
 
-    await expect(submitFormAction('form-1', { email: 'hello@example.com' }, '   ', 'ko')).resolves.toEqual({
+    await expect(
+      submitFormAction('form-1', { email: 'hello@example.com' }, { password: '   ' }, 'ko'),
+    ).resolves.toEqual({
       ok: true,
       success: true,
     });
@@ -413,6 +421,16 @@ describe('checkFormAccessAction', () => {
     expect(JSON.parse(new TextDecoder().decode(vi.mocked(submitMock).mock.calls[0]?.[0].data))).toEqual({
       email: 'hello@example.com',
     });
+  });
+
+  it('proves a Form route submission with the verified access cookie', async () => {
+    submitMock.mockResolvedValue({});
+    formAccessCookie.readFormPassword.mockResolvedValueOnce('open-sesame');
+
+    await submitFormAction('form-1', { email: 'hello@example.com' }, { slug: 'contact' });
+
+    expect(formAccessCookie.readFormPassword).toHaveBeenCalledWith('contact');
+    expect(submitMock).toHaveBeenCalledWith(expect.objectContaining({ formId: 'form-1', password: 'open-sesame' }));
   });
 
   it('returns RPC error messages when public form submission fails', async () => {
@@ -439,13 +457,26 @@ describe('checkFormAccessAction', () => {
       shareToken: ' share-token ',
       sharePassword: undefined,
     });
+    expect(formAccessCookie.rememberFormPassword).toHaveBeenCalledExactlyOnceWith('contact', '  secret  ');
   });
 
-  it('preserves a successful incorrect-password result', async () => {
+  it('preserves a successful incorrect-password result without remembering it', async () => {
     verifyPasswordMock.mockResolvedValue({ valid: false });
     await expect(verifyFormPasswordAction('contact', 'wrong').then(unwrapQueryResult)).resolves.toEqual({
       valid: false,
     });
+    expect(formAccessCookie.rememberFormPassword).not.toHaveBeenCalled();
+  });
+
+  it('checks a Form route with the verified access cookie but never an embed', async () => {
+    checkAccessMock.mockResolvedValue({ accessible: false, reason: FormAccessReason.PASSWORD_REQUIRED });
+    formAccessCookie.readFormPassword.mockResolvedValue('open-sesame');
+
+    await checkFormAccessAction({ slug: 'contact', context: 'url' });
+    expect(checkAccessMock).toHaveBeenLastCalledWith(expect.objectContaining({ password: 'open-sesame' }));
+    await checkFormAccessAction({ slug: 'contact', context: 'embed' });
+    expect(checkAccessMock).toHaveBeenLastCalledWith(expect.objectContaining({ password: undefined }));
+    formAccessCookie.readFormPassword.mockReset();
   });
 });
 

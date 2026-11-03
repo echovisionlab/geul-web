@@ -20,7 +20,7 @@ type CompleteOnboarding = (nickname: string) => Promise<{
 interface NicknameOnboardingProps {
   initialNickname: string;
   onCompleted: (member: MemberSummaryResult) => void;
-  onLogout: () => void;
+  onLogout: () => void | Promise<void>;
   checkAvailability?: NicknameAvailabilityCheck;
   completeOnboarding?: CompleteOnboarding;
 }
@@ -51,6 +51,7 @@ export function NicknameOnboarding({
   const tCommonActions = useTranslations('common.actions');
   const formTitleId = useId();
   const [nickname, setNickname] = useState(initialNickname);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [pending, setPending] = useState(false);
   const [submitError, setSubmitError] = useState<{
     message: string;
@@ -73,6 +74,7 @@ export function NicknameOnboarding({
               : null);
   const submitDisabled =
     pending ||
+    loggingOut ||
     !validation.valid ||
     validation.status === 'checking' ||
     validation.status === 'unavailable' ||
@@ -113,7 +115,7 @@ export function NicknameOnboarding({
 
         <form
           aria-labelledby={formTitleId}
-          aria-busy={pending}
+          aria-busy={pending || loggingOut}
           onSubmit={(event) => {
             event.preventDefault();
             void submit();
@@ -132,7 +134,7 @@ export function NicknameOnboarding({
                 setSubmitError(null);
               }}
               required
-              disabled={pending}
+              disabled={pending || loggingOut}
               status={validationStatus}
               statusLabel={validationMessage || undefined}
               description={
@@ -156,8 +158,19 @@ export function NicknameOnboarding({
                 size="sm"
                 controlSize="sm"
                 weight="medium"
-                onClick={onLogout}
-                disabled={pending}
+                loading={loggingOut}
+                onClick={async () => {
+                  if (pending || loggingOut) {
+                    return;
+                  }
+                  setLoggingOut(true);
+                  try {
+                    await onLogout();
+                  } finally {
+                    setLoggingOut(false);
+                  }
+                }}
+                disabled={pending || loggingOut}
               >
                 {tCommonActions('logOut')}
               </TextButton>

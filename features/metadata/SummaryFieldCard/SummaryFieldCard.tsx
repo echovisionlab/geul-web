@@ -8,7 +8,7 @@ import {
   AIEditorTurnTerminalStatus,
   type AIEditorDocumentToolApprovalRequired,
 } from '@echovisionlab/geul-proto/secure/ai_pb.ts';
-import { IconCircleCheck, IconLoader2, IconSparkles } from '@tabler/icons-react';
+import { IconCircleCheck, IconSparkles } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import type * as Y from 'yjs';
 
@@ -98,6 +98,8 @@ export function SummaryFieldCard({
   const [approval, setApproval] = useState<AIEditorDocumentToolApprovalRequired | null>(null);
   const [proposedSummary, setProposedSummary] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ color: 'red' | 'teal'; message: string } | null>(null);
+  const [resolving, setResolving] = useState<'apply' | 'dismiss' | null>(null);
+  const resolutionPending = useRef(false);
   const [recentlyApplied, setRecentlyApplied] = useState(false);
   const turnRef = useRef<AIEditorTurn | null>(null);
   const generationRef = useRef<string | null>(null);
@@ -128,14 +130,20 @@ export function SummaryFieldCard({
     [collaborativeAi],
   );
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    setApproval(null);
+    setProposedSummary(null);
+    setFeedback(null);
+    setRecentlyApplied(false);
+    setResolving(null);
+    resolutionPending.current = false;
+    return () => {
       turnVersionRef.current += 1;
       void turnRef.current?.cancel().catch(() => undefined);
       turnRef.current = null;
-    },
-    [],
-  );
+      generationRef.current = null;
+    };
+  }, [aiTarget?.type, aiTarget?.id, aiTarget?.locale]);
 
   useEffect(() => {
     if (!recentlyApplied) {
@@ -260,49 +268,81 @@ export function SummaryFieldCard({
   }, [aiPromptAdditions, aiTarget, canGenerate, clearTurnState, client, collaborativeAi, generationTooltip, t]);
 
   const handleApplySuggestion = useCallback(async () => {
+    const turnVersion = turnVersionRef.current;
     const turn = turnRef.current;
     const generationId = generationRef.current;
-    if (summaryReadOnly || !turn || !approval || !generationId || !collaborativeAi.isRequester) {
+    if (
+      resolutionPending.current ||
+      summaryReadOnly ||
+      !turn ||
+      !approval ||
+      !generationId ||
+      !collaborativeAi.isRequester
+    ) {
       return;
     }
     if (!collaborativeAi.markApplying(generationId)) {
       notifications.show({ message: t('feedback.unableToApplyNow'), tone: 'danger' });
       return;
     }
+    resolutionPending.current = true;
+    setResolving('apply');
     try {
       await turn.resolve(approval.toolCallId, 'approve');
     } catch (value) {
+      if (
+        turnVersion !== turnVersionRef.current ||
+        turnRef.current !== turn ||
+        generationRef.current !== generationId
+      ) {
+        return;
+      }
       collaborativeAi.updateReadyFields(generationId, ['summary'], true);
       const message = value instanceof Error ? value.message : t('feedback.applyFailed');
       setFeedback({ color: 'red', message });
       notifications.show({ message, tone: 'danger' });
+    } finally {
+      if (turnVersion === turnVersionRef.current) {
+        resolutionPending.current = false;
+        setResolving(null);
+      }
     }
   }, [summaryReadOnly, approval, collaborativeAi, t]);
 
   const handleDismissSuggestion = useCallback(async () => {
+    const turnVersion = turnVersionRef.current;
     const turn = turnRef.current;
     const generationId = generationRef.current;
-    if (summaryReadOnly || !turn || !approval || !generationId || !collaborativeAi.isRequester) {
+    if (
+      resolutionPending.current ||
+      summaryReadOnly ||
+      !turn ||
+      !approval ||
+      !generationId ||
+      !collaborativeAi.isRequester
+    ) {
       return;
     }
     dismissedRef.current = true;
+    resolutionPending.current = true;
+    setResolving('dismiss');
     try {
       await turn.resolve(approval.toolCallId, 'deny');
+      if (turnVersion !== turnVersionRef.current) {
+        return;
+      }
       await turn.cancel();
     } catch {
       // Local cleanup is authoritative for a dismissed transient Browser turn.
     } finally {
-      clearTurnState(generationId);
-      setFeedback(null);
+      if (turnVersion === turnVersionRef.current) {
+        resolutionPending.current = false;
+        setResolving(null);
+        clearTurnState(generationId);
+        setFeedback(null);
+      }
     }
   }, [summaryReadOnly, approval, clearTurnState, collaborativeAi.isRequester]);
-
-  const generateIcon =
-    collaborativeAi.sharedState.status === 'generating' || collaborativeAi.sharedState.status === 'applying' ? (
-      <IconLoader2 size={16} className="animate-spin" />
-    ) : (
-      <IconSparkles size={16} />
-    );
 
   return (
     <SectionCard padding={{ base: 'none', sm: 'md' }}>
@@ -328,13 +368,17 @@ export function SummaryFieldCard({
                     <IconButton
                       id={`${entityType}-${entityId}-generate-all-metadata`}
                       aria-label={t('actions.generate')}
-                      onClick={() => void startGeneration()}
+                      onClick={startGeneration}
+                      loading={
+                        collaborativeAi.sharedState.status === 'generating' ||
+                        collaborativeAi.sharedState.status === 'applying'
+                      }
                       disabled={!canGenerate}
                       size="lg"
                       tone="neutral"
                       emphasis="low"
                     >
-                      {generateIcon}
+                      <IconSparkles size={16} />
                     </IconButton>
                   </span>
                 </Tooltip>
@@ -378,8 +422,9 @@ export function SummaryFieldCard({
                 <Button
                   id={`${entityType}-${entityId}-apply-ai-metadata`}
                   leftSection={<IconCircleCheck size={16} />}
-                  disabled={summaryReadOnly || collaborativeAi.sharedState.status === 'applying'}
-                  onClick={() => void handleApplySuggestion()}
+                  disabled={summaryReadOnly || resolving !== null || collaborativeAi.sharedState.status === 'applying'}
+                  loading={resolving === 'apply' || collaborativeAi.sharedState.status === 'applying'}
+                  onClick={handleApplySuggestion}
                 >
                   {t('actions.apply')}
                 </Button>
@@ -387,8 +432,9 @@ export function SummaryFieldCard({
                   id={`${entityType}-${entityId}-dismiss-ai-metadata`}
                   tone="neutral"
                   emphasis="medium"
-                  disabled={summaryReadOnly || collaborativeAi.sharedState.status === 'applying'}
-                  onClick={() => void handleDismissSuggestion()}
+                  disabled={summaryReadOnly || resolving !== null || collaborativeAi.sharedState.status === 'applying'}
+                  loading={resolving === 'dismiss'}
+                  onClick={handleDismissSuggestion}
                 >
                   {tCommonActions('dismiss')}
                 </Button>

@@ -6,10 +6,11 @@ import {
   LayoutInline as DsLayoutInline,
 } from '@/components/core/Layout';
 
+import { Alert } from '@/components/core/Alert';
 import { Text as DsText } from '@/components/core/Typography';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { Disclosure } from '@/components/core/Disclosure';
 import { Spinner as Loader } from '@/components/core/Display';
@@ -67,15 +68,31 @@ function CreatePlaceModalContent({
   placesLib,
 }: CreatePlaceModalContentProps) {
   const t = useTranslations('createPlaceModal');
+  const tCommonMessages = useTranslations('common.messages');
   const tCommonActions = useTranslations('common.actions');
   const tCommonLabels = useTranslations('common.labels');
   const tCommonPlaceholders = useTranslations('common.placeholders');
   const [locationPicked, setLocationPicked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [locationError, setLocationError] = useState(false);
+  const locationRequestRef = useRef(0);
+  const locale = useLocale();
+  useEffect(() => {
+    locationRequestRef.current++;
+    setLocationError(false);
+    setIsLoading(false);
+    return () => {
+      locationRequestRef.current++;
+    };
+  }, [locale, geocodingLib, placesLib]);
+
   // Search result: auto-fill all fields (uses Places API - parseAddressComponents)
   const handlePlaceSelect = useCallback(
     (result: GooglePlaceSearchResult) => {
+      locationRequestRef.current++;
+      setLocationError(false);
+      setIsLoading(false);
       setFormState((prev) => ({
         ...prev,
         name: result.name ?? prev.name,
@@ -93,6 +110,9 @@ function CreatePlaceModalContent({
   // Map click/long-press: set coordinates and reverse geocode
   const handleMapSelect = useCallback(
     async (lat: number, lng: number) => {
+      const request = ++locationRequestRef.current;
+      setLocationError(false);
+      setIsLoading(false);
       setFormState((prev) => ({
         ...prev,
         lat,
@@ -106,8 +126,14 @@ function CreatePlaceModalContent({
         setIsLoading(true);
         try {
           const geocoder = new geocodingLib.Geocoder();
-          const response = await geocoder.geocode({ location: { lat, lng } });
+          const response = await geocoder.geocode({ location: { lat, lng }, language: locale });
+          if (locationRequestRef.current !== request) {
+            return;
+          }
 
+          if (!response.results?.length) {
+            throw new Error('No address result');
+          }
           if (response.results && response.results.length > 0) {
             const result = response.results[0];
             setFormState((prev) => ({
@@ -117,18 +143,25 @@ function CreatePlaceModalContent({
             }));
           }
         } catch {
-          // Ignore errors
+          if (locationRequestRef.current === request) {
+            setLocationError(true);
+          }
         } finally {
-          setIsLoading(false);
+          if (locationRequestRef.current === request) {
+            setIsLoading(false);
+          }
         }
       }
     },
-    [geocodingLib, setFormState],
+    [geocodingLib, setFormState, locale],
   );
 
   // POI click: fetch place details and auto-fill (uses Places API - parseAddressComponents)
   const handlePoiClick = useCallback(
     async (placeId: string, lat: number, lng: number) => {
+      const request = ++locationRequestRef.current;
+      setLocationError(false);
+      setIsLoading(false);
       setFormState((prev) => ({
         ...prev,
         lat,
@@ -144,6 +177,9 @@ function CreatePlaceModalContent({
           await place.fetchFields({
             fields: ['displayName', 'formattedAddress', 'addressComponents'],
           });
+          if (locationRequestRef.current !== request) {
+            return;
+          }
 
           setFormState((prev) => ({
             ...prev,
@@ -155,12 +191,21 @@ function CreatePlaceModalContent({
               : prev.addressComponents,
           }));
         } catch {
+          if (locationRequestRef.current !== request) {
+            return;
+          }
           // Fallback to reverse geocoding
           if (geocodingLib) {
             try {
               const geocoder = new geocodingLib.Geocoder();
-              const response = await geocoder.geocode({ location: { lat, lng } });
+              const response = await geocoder.geocode({ location: { lat, lng }, language: locale });
+              if (locationRequestRef.current !== request) {
+                return;
+              }
 
+              if (!response.results?.length) {
+                throw new Error('No address result');
+              }
               if (response.results && response.results.length > 0) {
                 const result = response.results[0];
                 setFormState((prev) => ({
@@ -170,19 +215,28 @@ function CreatePlaceModalContent({
                 }));
               }
             } catch {
-              // Ignore errors
+              if (locationRequestRef.current === request) {
+                setLocationError(true);
+              }
             }
           }
         } finally {
-          setIsLoading(false);
+          if (locationRequestRef.current === request) {
+            setIsLoading(false);
+          }
         }
       }
     },
-    [placesLib, geocodingLib, setFormState],
+    [placesLib, geocodingLib, setFormState, locale],
   );
 
   return (
     <DsLayoutStack>
+      {locationError ? (
+        <Alert tone="danger" role="alert">
+          {tCommonMessages('failedToLoad')}
+        </Alert>
+      ) : null}
       {!localOnly && (
         <>
           <PlacesAutocomplete onPlaceSelect={handlePlaceSelect} placeholder={t('searchPlaceholder')} />
@@ -236,7 +290,12 @@ function CreatePlaceModalContent({
         <NumberInput
           label={tCommonLabels('latitude')}
           value={formState.lat}
-          onChange={(v) => setFormState((prev) => ({ ...prev, lat: Number(v) || 0, googlePlaceId: null }))}
+          onChange={(v) => {
+            locationRequestRef.current++;
+            setLocationError(false);
+            setIsLoading(false);
+            setFormState((prev) => ({ ...prev, lat: Number(v) || 0, googlePlaceId: null }));
+          }}
           decimalScale={6}
           step={0.000001}
           size="xs"
@@ -244,7 +303,12 @@ function CreatePlaceModalContent({
         <NumberInput
           label={tCommonLabels('longitude')}
           value={formState.lng}
-          onChange={(v) => setFormState((prev) => ({ ...prev, lng: Number(v) || 0, googlePlaceId: null }))}
+          onChange={(v) => {
+            locationRequestRef.current++;
+            setLocationError(false);
+            setIsLoading(false);
+            setFormState((prev) => ({ ...prev, lng: Number(v) || 0, googlePlaceId: null }));
+          }}
           decimalScale={6}
           step={0.000001}
           size="xs"
@@ -401,7 +465,6 @@ export function CreatePlaceModal({
 
   const handleSubmit = useCallback(() => {
     onSubmit(formState);
-    setFormState(initialFormState);
   }, [formState, onSubmit]);
 
   const isFormValid = Boolean(formState.name.trim() && formState.address.trim());

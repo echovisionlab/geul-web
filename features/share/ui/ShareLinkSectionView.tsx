@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useId, useRef } from 'react';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
 
 import {
   LayoutStack as DsLayoutStack,
@@ -10,7 +10,6 @@ import {
 import { Text as DsText } from '@/components/core/Typography';
 import { IconExternalLink, IconPlus, IconTrash } from '@tabler/icons-react';
 import { CopyButton } from '@/components/core/CopyButton';
-import { Spinner as Loader } from '@/components/core/Display';
 import { DateTimePicker, PasswordInput, Select, TextInput } from '@/components/core/Input';
 import { LabelBadge } from '@/components/core/Badge';
 import { Button } from '@/components/core/Button';
@@ -77,6 +76,9 @@ export interface ShareLinkSectionViewProps {
   hasMore: boolean;
   showAll: boolean;
   isLoading: boolean;
+  loadingSurface: ReactNode;
+  errorContent?: ReactNode;
+  deletingLinkIds?: readonly string[];
   isCreating: boolean;
   deletingLinkId: string | null;
   disabled?: boolean;
@@ -86,8 +88,8 @@ export interface ShareLinkSectionViewProps {
   onPresetChange: (value: string) => void;
   onCustomDateChange: (timestamp: number | null) => void;
   onPasswordChange: (value: string) => void;
-  onCreate: () => void;
-  onDelete: (id: string) => void;
+  onCreate: () => void | Promise<void>;
+  onDelete: (id: string) => void | Promise<void>;
   onToggleShowAll: () => void;
 }
 
@@ -107,6 +109,9 @@ export function ShareLinkSectionView({
   hasMore,
   showAll,
   isLoading,
+  loadingSurface,
+  errorContent,
+  deletingLinkIds,
   isCreating,
   deletingLinkId,
   disabled,
@@ -230,13 +235,10 @@ export function ShareLinkSectionView({
           </SectionCard>
         ) : null}
 
+        {errorContent}
         {isLoading ? (
-          <DsLayoutInset block="md">
-            <DsLayoutInline justify="center">
-              <Loader size="sm" />
-            </DsLayoutInline>
-          </DsLayoutInset>
-        ) : totalLinkCount === 0 ? (
+          loadingSurface
+        ) : errorContent && totalLinkCount === 0 ? null : totalLinkCount === 0 ? (
           <DsLayoutInset block="md">
             <DsText size="xs" tone="secondary" align="center">
               {labels.noLinks}
@@ -250,7 +252,7 @@ export function ShareLinkSectionView({
                 link={link}
                 labels={labels}
                 disabled={disabled}
-                isDeleting={deletingLinkId === link.id}
+                isDeleting={deletingLinkIds ? deletingLinkIds.includes(link.id) : deletingLinkId === link.id}
                 onDelete={onDelete}
               />
             ))}
@@ -278,7 +280,7 @@ interface ShareLinkItemViewProps {
   labels: ShareLinkSectionViewLabels;
   disabled?: boolean;
   isDeleting: boolean;
-  onDelete: (id: string) => void;
+  onDelete: (id: string) => void | Promise<void>;
 }
 
 function ShareLinkItemView({ link, labels, disabled, isDeleting, onDelete }: ShareLinkItemViewProps) {

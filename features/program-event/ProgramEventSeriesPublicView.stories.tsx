@@ -158,6 +158,7 @@ function StoryView({ withPoster, empty, sparse, longTitle }: StoryViewProps) {
             },
           ]}
           isLoadingMore={false}
+          loadMoreDisabled={false}
           onQueryChange={(value) => setQuery(value as EventSeriesEventsQuery)}
           onLoadMore={() => {}}
         />

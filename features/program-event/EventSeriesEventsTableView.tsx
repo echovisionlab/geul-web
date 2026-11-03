@@ -60,6 +60,7 @@ interface EventSeriesEventsTableViewProps {
   locationLabels: Record<BrowserProgramEventLocationMode, string>;
   filterFields: FilterFieldConfig[];
   isLoadingMore: boolean;
+  loadMoreDisabled: boolean;
   error?: string | null;
   onQueryChange: (query: PaginatedQuery) => void;
   onLoadMore: () => void;
@@ -191,6 +192,7 @@ export function EventSeriesEventsTableView({
   locationLabels,
   filterFields,
   isLoadingMore,
+  loadMoreDisabled,
   error,
   onQueryChange,
   onLoadMore,
@@ -224,7 +226,13 @@ export function EventSeriesEventsTableView({
       ) : null}
       {remaining > 0 ? (
         <DsLayoutInline justify="center">
-          <Button tone="neutral" emphasis="low" loading={isLoadingMore} onClick={onLoadMore}>
+          <Button
+            tone="neutral"
+            emphasis="low"
+            loading={isLoadingMore}
+            disabled={loadMoreDisabled}
+            onClick={onLoadMore}
+          >
             {labels.showMore(remaining)}
           </Button>
         </DsLayoutInline>

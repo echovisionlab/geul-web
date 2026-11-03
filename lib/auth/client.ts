@@ -12,6 +12,7 @@ interface UseSessionReturn {
   isPending: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
+  refetchWithOutcome: () => Promise<import('@/lib/providers/SessionProvider').SessionRefreshOutcome>;
   updateMemberSummary: import('@/lib/providers/SessionProvider').MemberSummarySnapshot extends infer T
     ? (member: T) => void
     : never;
@@ -34,7 +35,7 @@ export function useSession(): UseSessionReturn {
  * then follows the Kratos self-service logout flow. Another account on this browser never adopts
  * them.
  */
-export function signOut() {
+export function signOut(): Promise<void> {
   const memberId = announceSignOut();
   // Unsaved edits were saved or the editor agreed to discard them.
   suspendEditorUnloadGuard();
@@ -44,7 +45,7 @@ export function signOut() {
         clearRoomJournalsForSignOut(memberId),
       )
     : Promise.resolve();
-  void clearJournals
+  return clearJournals
     .catch(() => undefined)
     .finally(() => {
       window.location.href = '/api/auth/logout';

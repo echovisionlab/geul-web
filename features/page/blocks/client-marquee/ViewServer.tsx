@@ -1,3 +1,5 @@
+import { Suspense } from 'react';
+import { PageLoader } from '@/features/site/PageLoader';
 import { unwrapQueryResult } from '@/lib/api/query-result';
 import { getClientsForBlockByIdsAction, listClientsForBlockAction } from '@/lib/actions/client';
 import { parseIntegerProp } from '../list-shared';
@@ -7,7 +9,7 @@ import { parseMarqueeIds } from '../marquee/schema';
 import type { BlockViewProps } from '../types';
 import { parseClientMarqueeProps } from './schema';
 
-export async function ClientMarqueeViewServer({ props, requestedLocale }: BlockViewProps) {
+async function ClientMarqueeContent({ props, requestedLocale }: BlockViewProps) {
   const p = parseClientMarqueeProps(props);
   const selectedIds = parseMarqueeIds(p.ids);
   const clients =
@@ -47,5 +49,13 @@ export async function ClientMarqueeViewServer({ props, requestedLocale }: BlockV
         fallbackMode: p.fallbackMode,
       }}
     />
+  );
+}
+
+export function ClientMarqueeViewServer(props: BlockViewProps) {
+  return (
+    <Suspense fallback={<PageLoader placement="flow" />}>
+      <ClientMarqueeContent {...props} />
+    </Suspense>
   );
 }

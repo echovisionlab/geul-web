@@ -20,6 +20,7 @@ import {
   inputPopoverPresentation,
   inputState,
 } from './InputParts';
+import { InputLoadingStatus } from './InputLoadingStatus';
 import {
   inputAttributes,
   flattenOptions,
@@ -45,6 +46,10 @@ export interface SelectProps extends InputBaseProps {
   clearLabel?: string;
   allowDeselect?: boolean;
   nothingFoundMessage?: ReactNode;
+  /** Options are being fetched; Core shows a named status and keeps the open control. */
+  isLoading?: boolean;
+  /** Overrides Core's localized loading status name. */
+  loadingLabel?: string;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
   dropdownOpened?: boolean;
@@ -127,6 +132,7 @@ export const Select = forwardRef<HTMLInputElement, SelectProps>((props, ref) => 
         <Input
           ref={ref}
           id={props.id}
+          aria-busy={props.isLoading || props['aria-busy']}
           className={classes.input}
           placeholder={props.placeholder}
           readOnly={!props.searchable || props.readOnly}
@@ -141,6 +147,7 @@ export const Select = forwardRef<HTMLInputElement, SelectProps>((props, ref) => 
           onCompositionStart={props.onCompositionStart}
           onCompositionEnd={props.onCompositionEnd}
         />
+        {props.isLoading ? <InputLoadingStatus label={props.loadingLabel} /> : null}
         {props.clearable && value ? (
           <Button
             slot={null}
@@ -155,7 +162,10 @@ export const Select = forwardRef<HTMLInputElement, SelectProps>((props, ref) => 
         <Button className={classes.accessory}>{props.rightSection ?? <InputOpenGlyph />}</Button>
       </Group>
       <Popover {...inputPopoverPresentation(presentation)}>
-        <ListBox className={classes.list} renderEmptyState={() => props.nothingFoundMessage ?? null}>
+        <ListBox
+          className={classes.list}
+          renderEmptyState={() => (props.isLoading ? null : (props.nothingFoundMessage ?? null))}
+        >
           {(props.data ?? []).flatMap((entry, index) => {
             const render = (option: InputOption) => (
               <ListBoxItem

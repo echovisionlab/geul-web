@@ -1,5 +1,6 @@
 'use client';
 
+import { PageLoader } from '@/features/site/PageLoader';
 import type { ReactNode } from 'react';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
@@ -36,7 +37,7 @@ export function LocalizedRichTextFragmentEditor({
   allowNeutralBlockEdits = false,
   allowStructuralEdits = false,
   aiTarget,
-  fallback = null,
+  fallback = <PageLoader placement="flow" />,
 }: LocalizedRichTextFragmentEditorProps) {
   if (!provider || !blockRoomController) {
     return <>{fallback}</>;

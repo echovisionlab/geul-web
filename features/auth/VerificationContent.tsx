@@ -62,7 +62,7 @@ export function VerificationContent() {
   const tCommonPlaceholders = useTranslations('common.placeholders');
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: session, refetch: refetchSession } = useSession();
+  const { data: session, refetchWithOutcome: refetchSession } = useSession();
   const subjectId = session?.user.id ?? '';
   const flowId = searchParams.get('flow');
   const mode = 'change' as const;
@@ -80,9 +80,35 @@ export function VerificationContent() {
   const [submittingCode, setSubmittingCode] = useState(false);
   const [requestingCode, setRequestingCode] = useState(false);
   const [checkingApplication, setCheckingApplication] = useState(false);
-  const [applicationTarget, setApplicationTarget] = useState<string | null>(null);
+  const [application, setApplication] = useState<{
+    targetEmail: string;
+    state: 'applying' | 'unavailable';
+  } | null>(null);
   const [emailApplied, setEmailApplied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const mountedRef = useRef(false);
+  const operationRef = useRef(0);
+  const replacementNavigationRef = useRef<{ flowId: string | null } | null>(null);
+  const isCurrentOperation = useCallback(
+    (operation: number) => mountedRef.current && operationRef.current === operation,
+    [],
+  );
+  const beginOperation = useCallback(() => {
+    operationRef.current += 1;
+    replacementNavigationRef.current = null;
+    setLoading(false);
+    setSubmittingCode(false);
+    setRequestingCode(false);
+    setCheckingApplication(false);
+    return operationRef.current;
+  }, []);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      operationRef.current += 1;
+    };
+  }, []);
   const {
     clearAcceptedDelivery,
     recordAcceptedDelivery,
@@ -94,54 +120,103 @@ export function VerificationContent() {
     purpose: 'verification',
   });
   const reconcileEmailMutation = useCallback(
-    async (targetEmail: string) => {
-      const observation = await observeCanonicalEmailChange({ targetEmail });
-      switch (observation.kind) {
-        case 'applied':
-          await refetchSession();
-          setApplicationTarget(null);
-          setEmailApplied(true);
-          setError(null);
-          return observation;
-        case 'applying':
-          setApplicationTarget(targetEmail);
-          setEmailApplied(false);
-          setError(null);
-          return observation;
-        case 'proof_pending':
-          setApplicationTarget(null);
-          setEmailApplied(false);
-          return observation;
-        case 'conflict':
-          clearAcceptedDelivery();
-          setApplicationTarget(null);
-          setEmailApplied(false);
-          setFlow(null);
-          setCode('');
-          setError(t('errors.alreadyExists'));
-          router.replace(verificationPath);
-          return observation;
-        case 'unavailable':
-          setApplicationTarget(targetEmail);
-          setEmailApplied(false);
-          setError(t('errors.submitRetry'));
-          return observation;
+    async (targetEmail: string, operation: number) => {
+      if (!isCurrentOperation(operation)) {
+        return null;
+      }
+      setCheckingApplication(true);
+      setError(null);
+      try {
+        const observation = await observeCanonicalEmailChange({ targetEmail });
+        if (!isCurrentOperation(operation)) {
+          return null;
+        }
+        switch (observation.kind) {
+          case 'applied': {
+            const refresh = await refetchSession();
+            if (!isCurrentOperation(operation)) {
+              return null;
+            }
+            if (
+              refresh.kind !== 'refreshed' ||
+              !refresh.data?.user.id ||
+              refresh.data.user.email?.trim().toLowerCase() !== targetEmail.trim().toLowerCase()
+            ) {
+              setApplication({ targetEmail, state: 'unavailable' });
+              setEmailApplied(false);
+              return { kind: 'unavailable' } as const;
+            }
+            setApplication(null);
+            setEmailApplied(true);
+            setError(null);
+            return observation;
+          }
+          case 'applying':
+            setApplication({ targetEmail, state: 'applying' });
+            setEmailApplied(false);
+            setError(null);
+            return observation;
+          case 'proof_pending':
+            setApplication(null);
+            setEmailApplied(false);
+            setFlow((current) => (current?.state === 'passed_challenge' ? null : current));
+            setError(t('errors.submit'));
+            return observation;
+          case 'conflict':
+            clearAcceptedDelivery();
+            setApplication(null);
+            setEmailApplied(false);
+            setFlow(null);
+            setCode('');
+            setError(t('errors.alreadyExists'));
+            replacementNavigationRef.current = { flowId: null };
+            router.replace(verificationPath);
+            return observation;
+          case 'unavailable':
+            setApplication({ targetEmail, state: 'unavailable' });
+            setEmailApplied(false);
+            return observation;
+        }
+      } catch {
+        if (!isCurrentOperation(operation)) {
+          return null;
+        }
+        setApplication({ targetEmail, state: 'unavailable' });
+        setEmailApplied(false);
+        return { kind: 'unavailable' } as const;
+      } finally {
+        if (isCurrentOperation(operation)) {
+          setCheckingApplication(false);
+        }
       }
     },
-    [clearAcceptedDelivery, mode, refetchSession, router, t, verificationPath],
+    [clearAcceptedDelivery, isCurrentOperation, refetchSession, router, t, verificationPath],
   );
   const reconcileEmailMutationRef = useRef(reconcileEmailMutation);
   useEffect(() => {
     reconcileEmailMutationRef.current = reconcileEmailMutation;
   }, [reconcileEmailMutation]);
   useEffect(() => {
+    if (replacementNavigationRef.current?.flowId === flowId) {
+      replacementNavigationRef.current = null;
+      return;
+    }
+    replacementNavigationRef.current = null;
+    const operation = beginOperation();
+    submittedCodeParamRef.current = null;
+    setApplication(null);
+    setEmailApplied(false);
+    setError(null);
+    setFlow(null);
     if (!flowId) {
       return;
     }
     setLoading(true);
-    setFlow(null);
     loadVerificationFlow(flowId)
       .then((outcome) => {
+        if (!isCurrentOperation(operation)) {
+          return;
+        }
         if (outcome.kind === 'rate-limited') {
           throw new Error(t('errors.cooldown', { seconds: outcome.retryAfterSeconds }));
         }
@@ -155,32 +230,45 @@ export function VerificationContent() {
         if (flowEmail) {
           setEmail(flowEmail);
           if (validatedFlow.state === 'passed_challenge') {
-            setApplicationTarget(flowEmail);
-            void reconcileEmailMutationRef.current(flowEmail);
+            void reconcileEmailMutationRef.current(flowEmail, operation);
           }
         }
       })
       .catch((err) => {
-        setError(err instanceof Error ? err.message : t('errors.flowNotFound'));
+        if (isCurrentOperation(operation)) {
+          setError(err instanceof Error ? err.message : t('errors.flowNotFound'));
+        }
       })
-      .finally(() => setLoading(false));
-  }, [flowId, t]);
+      .finally(() => {
+        if (isCurrentOperation(operation)) {
+          setLoading(false);
+        }
+      });
+  }, [beginOperation, flowId, isCurrentOperation, t]);
   const submitVerificationCode = async (verificationCode: string) => {
     const trimmedCode = verificationCode.trim();
-    if (!flow || !trimmedCode || submittingCode) {
+    if (!flow || flow.id !== flowId || !trimmedCode || submittingCode) {
       return;
     }
+    const operation = beginOperation();
     setSubmittingCode(true);
     setError(null);
     const targetEmail = getVerificationNodeValue(flow, 'email') || email;
     try {
       const result = await submitVerificationCodeRequest(flow, trimmedCode, locale);
+      if (!isCurrentOperation(operation)) {
+        return;
+      }
       const nextFlow = result.flow;
-      if (!result.ok) {
+      if (!result.ok || hasVerificationFlowError(nextFlow)) {
+        setCheckingApplication(true);
         const replacementFlowId = getReplacementVerificationFlowId(result.payload);
         let replacementFlow: VerificationFlow | null = null;
         if (replacementFlowId) {
           const replacementOutcome = await loadVerificationFlow(replacementFlowId);
+          if (!isCurrentOperation(operation)) {
+            return;
+          }
           replacementFlow = replacementOutcome.kind === 'continued' ? replacementOutcome.flow : null;
           if (replacementFlow) {
             clearAcceptedDelivery();
@@ -189,6 +277,7 @@ export function VerificationContent() {
             if (replacementEmail) {
               setEmail(replacementEmail);
             }
+            replacementNavigationRef.current = { flowId: replacementFlowId };
             router.replace(verificationFlowPath(replacementFlowId));
           }
         }
@@ -196,42 +285,45 @@ export function VerificationContent() {
           setFlow(nextFlow);
         }
         setCode('');
-        if (!replacementFlow && nextFlow && hasVerificationFlowError(nextFlow)) {
-          setError(t('errors.submit'));
+        const observation = await reconcileEmailMutation(targetEmail, operation);
+        if (!isCurrentOperation(operation)) {
           return;
         }
-        const observation = await reconcileEmailMutation(targetEmail);
-        if (observation.kind === 'applied' || observation.kind === 'applying' || observation.kind === 'conflict') {
-          return;
+        if (observation?.kind === 'proof_pending' && !replacementFlow && nextFlow?.state === 'passed_challenge') {
+          setFlow(flow);
         }
-        setError(observation.kind === 'unavailable' ? t('errors.submitRetry') : t('errors.submit'));
-        return;
-      }
-      if (!nextFlow) {
+      } else if (!nextFlow) {
         setCode('');
         setError(t('errors.submit'));
-        return;
-      }
-      setFlow(nextFlow);
-      if (nextFlow.state === 'passed_challenge') {
-        clearAcceptedDelivery();
-        setApplicationTarget(targetEmail);
-        await reconcileEmailMutation(targetEmail);
-        return;
-      }
-      if (hasVerificationFlowError(nextFlow)) {
-        setCode('');
-        setError(t('errors.submit'));
+      } else {
+        setFlow(nextFlow);
+        if (nextFlow.state === 'passed_challenge') {
+          clearAcceptedDelivery();
+          const observation = await reconcileEmailMutation(targetEmail, operation);
+          if (!isCurrentOperation(operation)) {
+            return;
+          }
+          if (observation?.kind === 'proof_pending') {
+            setFlow(flow);
+            setCode('');
+            setError(t('errors.submit'));
+          }
+        }
       }
     } catch {
-      setCode('');
-      setError(t('errors.submitRetry'));
+      if (isCurrentOperation(operation)) {
+        setCode('');
+        setError(t('errors.submitRetry'));
+      }
     } finally {
-      setSubmittingCode(false);
+      if (isCurrentOperation(operation)) {
+        setCheckingApplication(false);
+        setSubmittingCode(false);
+      }
     }
   };
   useEffect(() => {
-    if (!flow || !codeParam || submittedCodeParamRef.current === codeParam) {
+    if (!flow || flow.id !== flowId || !codeParam || submittedCodeParamRef.current === codeParam) {
       return;
     }
     if (flow.state !== 'sent_email' && flow.state !== 'choose_method') {
@@ -240,7 +332,7 @@ export function VerificationContent() {
     submittedCodeParamRef.current = codeParam;
     setCode(codeParam);
     void submitVerificationCode(codeParam);
-  }, [codeParam, flow]);
+  }, [codeParam, flow, flowId]);
   const handleRequestVerificationCode = useCallback(
     async (targetEmail: string) => {
       const trimmedEmail = targetEmail.trim();
@@ -248,9 +340,10 @@ export function VerificationContent() {
         setError(t('errors.emailRequired'));
         return;
       }
+      const operation = beginOperation();
       setRequestingCode(true);
       setError(null);
-      setApplicationTarget(null);
+      setApplication(null);
       setEmailApplied(false);
       try {
         const result = await beginVerification({
@@ -258,6 +351,9 @@ export function VerificationContent() {
           preflight: preflightVerification,
           locale,
         });
+        if (!isCurrentOperation(operation)) {
+          return;
+        }
         switch (result.kind) {
           case 'verification_started':
             setFlow(null);
@@ -280,13 +376,19 @@ export function VerificationContent() {
             setError(t('errors.sendVerificationEmail'));
         }
       } catch {
-        setError(t('errors.sendVerificationEmail'));
+        if (isCurrentOperation(operation)) {
+          setError(t('errors.sendVerificationEmail'));
+        }
       } finally {
-        setRequestingCode(false);
+        if (isCurrentOperation(operation)) {
+          setRequestingCode(false);
+        }
       }
     },
     [
       beginVerification,
+      beginOperation,
+      isCurrentOperation,
       locale,
       preflightVerification,
       recordAcceptedDelivery,
@@ -305,6 +407,7 @@ export function VerificationContent() {
       if (!trimmedEmail || requestingCode) {
         return;
       }
+      const operation = beginOperation();
       setRequestingCode(true);
       setError(null);
       try {
@@ -313,9 +416,12 @@ export function VerificationContent() {
           preflight: preflightVerification,
           locale,
         });
+        if (!isCurrentOperation(operation)) {
+          return;
+        }
         switch (result.kind) {
           case 'verification_started':
-            setApplicationTarget(null);
+            setApplication(null);
             setEmailApplied(false);
             setFlow(null);
             setEmail(result.verifiableAddress);
@@ -338,12 +444,18 @@ export function VerificationContent() {
             setError(t('errors.sendVerificationEmail'));
         }
       } catch {
-        setError(t('errors.sendVerificationEmail'));
+        if (isCurrentOperation(operation)) {
+          setError(t('errors.sendVerificationEmail'));
+        }
       } finally {
-        setRequestingCode(false);
+        if (isCurrentOperation(operation)) {
+          setRequestingCode(false);
+        }
       }
     },
     [
+      beginOperation,
+      isCurrentOperation,
       locale,
       preflightVerification,
       recordAcceptedDelivery,
@@ -379,10 +491,14 @@ export function VerificationContent() {
       return;
     }
     const targetEmail = (getVerificationNodeValue(flow, 'email') || email).trim();
+    const operation = beginOperation();
     setRequestingCode(true);
     setError(null);
     try {
       const { outcome, status } = await resendVerificationCode(flow, targetEmail, locale);
+      if (!isCurrentOperation(operation)) {
+        return;
+      }
       if (outcome.kind === 'rate-limited') {
         setError(t('errors.cooldown', { seconds: outcome.retryAfterSeconds }));
         return;
@@ -396,26 +512,28 @@ export function VerificationContent() {
       recordAcceptedDelivery(nextFlow.id);
       setCode('');
     } catch {
-      setError(t('errors.sendVerificationEmail'));
+      if (isCurrentOperation(operation)) {
+        setError(t('errors.sendVerificationEmail'));
+      }
     } finally {
-      setRequestingCode(false);
+      if (isCurrentOperation(operation)) {
+        setRequestingCode(false);
+      }
     }
   };
   const handleCheckApplied = async () => {
-    if (!applicationTarget) {
+    if (!application || checkingApplication) {
       return;
     }
-    setCheckingApplication(true);
-    try {
-      await reconcileEmailMutation(applicationTarget);
-    } finally {
-      setCheckingApplication(false);
-    }
+    await reconcileEmailMutation(application.targetEmail, beginOperation());
   };
-  if (loading) {
-    return <PageLoader message={t('loading')} />;
+  if (checkingApplication && !application) {
+    return <PageLoader placement="flow" message={t('checking')} />;
   }
-  if (error && flowId && !flow) {
+  if (loading) {
+    return <PageLoader placement="flow" message={t('loading')} />;
+  }
+  if (error && flowId && !flow && !application && !emailApplied) {
     return (
       <DsLayoutInset space="md">
         <DsLayoutStack align="center" justify="center" flexible>
@@ -439,12 +557,13 @@ export function VerificationContent() {
       </DsLayoutInset>
     );
   }
-  if (flowId && !flow) {
+  if (flowId && !flow && !application && !emailApplied) {
     return null;
   }
-  const flowError = error || (hasVerificationFlowError(flow) ? t('errors.submit') : null);
-  const viewState: VerificationViewState | null = applicationTarget
-    ? 'applying'
+  const flowError =
+    application || emailApplied ? null : error || (hasVerificationFlowError(flow) ? t('errors.submit') : null);
+  const viewState: VerificationViewState | null = application
+    ? application.state
     : emailApplied
       ? 'passed'
       : !flowId || flow?.state === 'choose_method'
@@ -462,6 +581,14 @@ export function VerificationContent() {
           code={code}
           email={email}
           error={flowError}
+          loadingSurface={
+            <PageLoader
+              placement="flow"
+              extent="compact"
+              size="sm"
+              message={t(checkingApplication ? 'checking' : 'sentEmail.submitting')}
+            />
+          }
           labels={{
             back: tCommonActions('back'),
             chooseDescription: t('chooseMethod.description'),
@@ -485,9 +612,9 @@ export function VerificationContent() {
             applyingDescription: t('applying.description'),
             applyingRetry: t('applying.checkAgain'),
             applyingTitle: t('applying.title'),
+            unavailableTitle: t('unavailable'),
             sentDescription: t('sentEmail.description'),
             sentTitle: tAuthCommon('checkYourEmailTitle'),
-            submittingCode: t('sentEmail.submitting'),
           }}
           onBack={() => router.push('/my/security')}
           onCodeChange={setCode}

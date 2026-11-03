@@ -15,6 +15,7 @@ import { OG_IMAGE_ASPECT_RATIO } from '@/lib/constants/og-image';
 
 export interface ImageUploadCropControllerProps {
   imageUrl: string | null;
+  targetKey?: unknown;
   idPrefix?: string;
   canEdit: boolean;
   isUploading: boolean;
@@ -28,6 +29,7 @@ export interface ImageUploadCropControllerProps {
   previewMaxWidth?: CSSProperties['maxWidth'];
   previewMinHeight?: CSSProperties['minHeight'];
   label?: string;
+  loadingLabel?: string;
   acceptMimeTypes?: readonly string[];
   maxSize?: number;
   uploadType?: UploadType;
@@ -35,6 +37,7 @@ export interface ImageUploadCropControllerProps {
 
 export function ImageUploadCropController({
   imageUrl,
+  targetKey,
   idPrefix,
   canEdit,
   isUploading,
@@ -47,6 +50,7 @@ export function ImageUploadCropController({
   previewMaxWidth,
   previewMinHeight,
   label,
+  loadingLabel,
   acceptMimeTypes,
   maxSize,
   uploadType = UploadType.FEATURED_IMAGE,
@@ -64,6 +68,8 @@ export function ImageUploadCropController({
     useImageUploadCrop({
       onUpload,
       uploadType,
+      enabled: canEdit && !isUploading && !isRemoving,
+      targetKey: targetKey ?? imageUrl ?? idPrefix,
     });
 
   const handleReject = (rejections: ImageUploadRejection[]) => {
@@ -106,7 +112,7 @@ export function ImageUploadCropController({
         emptyTitle: canEdit ? tCommon('actions.uploadItem', { item: resolvedLabel }) : resolvedLabel,
         emptyDescription: '',
         readOnlyDescription: '',
-        loading: uploadStatusLabel,
+        loading: isPreparing ? tCommon('uploadField.status.preparingImage') : (loadingLabel ?? uploadStatusLabel),
         removeButtonAriaLabel: t('actions.removeAria'),
         cropTitle: t('cropTitle'),
         cropPreviewAlt: resolvedLabel,
@@ -128,7 +134,7 @@ export function ImageUploadCropController({
       onReject={handleReject}
       onRemove={() => {
         if (canEdit) {
-          onRemove();
+          return onRemove();
         }
       }}
       onCrop={(blob) => {

@@ -62,3 +62,33 @@ it('keeps completion disabled for an unavailable nickname', async () => {
   expect(screen.getByRole('textbox', { name: /Nickname/ })).toHaveAttribute('aria-invalid', 'true');
   expect(screen.getByRole('button', { name: 'Continue' })).toBeDisabled();
 });
+
+it('shows logout pending and prevents onboarding while cleanup is unresolved', async () => {
+  let finish!: () => void;
+  const onLogout = vi.fn(
+    () =>
+      new Promise<void>((resolve) => {
+        finish = resolve;
+      }),
+  );
+  render(
+    <NicknameOnboarding
+      initialNickname="June"
+      checkAvailability={async () => ({ available: true })}
+      completeOnboarding={vi.fn()}
+      onCompleted={vi.fn()}
+      onLogout={onLogout}
+    />,
+  );
+  await act(() => vi.advanceTimersByTimeAsync(CHECK_DEBOUNCE_MS));
+  vi.useRealTimers();
+  const user = userEvent.setup();
+  const logout = screen.getByRole('button', { name: 'Log out' });
+  await user.click(logout);
+  expect(logout).toHaveAttribute('aria-busy', 'true');
+  expect(screen.getByRole('button', { name: 'Continue' })).toBeDisabled();
+  await user.click(logout);
+  expect(onLogout).toHaveBeenCalledTimes(1);
+  await act(async () => finish());
+  expect(logout).toBeEnabled();
+});

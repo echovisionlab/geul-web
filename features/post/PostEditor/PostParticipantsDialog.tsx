@@ -1,5 +1,6 @@
 'use client';
 
+import { PageLoader } from '@/features/site/PageLoader';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
 import { useEffect, useState } from 'react';
@@ -37,6 +38,7 @@ export function PostParticipantsDialog({
   canManageCollaborators,
 }: PostParticipantsDialogProps) {
   const t = useTranslations('postParticipants');
+  const tErrors = useTranslations('common.errors');
   const labels = usePostParticipantsDialogLabels();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,11 +50,12 @@ export function PostParticipantsDialog({
       setSelectedRole(normalizedRole);
     }
   }, [canAddAuthor, canManageCollaborators, selectedRole]);
-  const { data: participants = [], isLoading } = useQuery({
+  const participantsQuery = useQuery({
     queryKey: ['post', 'participants', postId],
     queryFn: () => listPostParticipants(postId),
     enabled: opened,
   });
+  const { data: participants = [], isLoading } = participantsQuery;
   const participantIds = participants.map((participant) => participant.memberId);
   const candidatesQuery = useQuery({
     queryKey: ['members', 'post-participant-search', debouncedSearch, participantIds],
@@ -102,7 +105,16 @@ export function PostParticipantsDialog({
 
   return (
     <PostParticipantsDialogView
-      queryFailure={<QueryErrorAlert queries={[candidatesQuery]} />}
+      queryFailure={<QueryErrorAlert queries={[participantsQuery, candidatesQuery]} />}
+      failed={participantsQuery.isError && participantsQuery.data === undefined}
+      loadingSurface={<PageLoader placement="flow" />}
+      pendingAction={
+        removeParticipant.isPending
+          ? { memberId: removeParticipant.variables.memberId, action: 'remove' }
+          : changeParticipantRole.isPending
+            ? { memberId: changeParticipantRole.variables.memberId, action: 'change-role' }
+            : undefined
+      }
       opened={opened}
       onClose={onClose}
       participants={participants
@@ -122,6 +134,7 @@ export function PostParticipantsDialog({
       canManageCollaborators={canManageCollaborators}
       loading={isLoading}
       searching={isFetching}
+      searchError={candidatesQuery.isError ? tErrors('generic') : undefined}
       mutating={addParticipant.isPending || removeParticipant.isPending || changeParticipantRole.isPending}
       onSearchQueryChange={setSearchQuery}
       onSelectedRoleChange={setSelectedRole}

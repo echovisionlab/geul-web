@@ -8,7 +8,7 @@ import { canRetryErrorStatus, getErrorPageContent, type ErrorPageMessages } from
 export interface ApplicationErrorPageProps {
   status: number;
   homeHref?: string;
-  onRetry?: () => void;
+  onRetry?: () => void | Promise<unknown>;
   fullScreen?: boolean;
 }
 

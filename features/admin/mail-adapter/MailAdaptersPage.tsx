@@ -1,4 +1,6 @@
 'use client';
+
+import { PageLoader } from '@/features/site/PageLoader';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 import { ConfirmationDialog } from '@/features/confirmation';
 
@@ -646,9 +648,7 @@ export default function MailAdaptersPage({ bindings = defaultBindings }: { bindi
         }
       >
         {adaptersQuery.isError ? null : isLoading ? (
-          <SupportingText role="status" tone="secondary">
-            {tCommon('states.loading')}
-          </SupportingText>
+          <PageLoader placement="flow" />
         ) : adapters.length === 0 ? (
           <DsSectionCard padding="lg">
             <EmptyState
@@ -725,8 +725,8 @@ export default function MailAdaptersPage({ bindings = defaultBindings }: { bindi
                               testMutation.mutate({ id: adapter.id, email: testEmail });
                             }
                           }}
-                          loading={testMutation.isPending && testingId === adapter.id}
-                          disabled={!testEmail || testingId !== adapter.id}
+                          loading={testMutation.isPending && testMutation.variables?.id === adapter.id}
+                          disabled={testMutation.isPending || !testEmail || testingId !== adapter.id}
                         >
                           {tPage('row.sendTestEmail')}
                         </Button>

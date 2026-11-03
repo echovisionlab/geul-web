@@ -1,14 +1,9 @@
 // @vitest-environment jsdom
-
 import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { NextIntlClientProvider } from 'next-intl';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { DesignSystemTestProvider } from '@/test/TestProviders';
-import en from '@/messages/en.json';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { render, screen, within } from '@/test/render';
 import { LocalBackups } from './LocalBackups';
 import type { LocalBackup } from '@/lib/collab/local-backups';
-
 const mocks = vi.hoisted(() => ({
   member: 'member' as string | null,
   list: vi.fn(),
@@ -28,7 +23,6 @@ vi.mock('@/lib/auth/active-member', () => ({
 vi.mock('@/lib/collab/local-backups', () => ({
   createBrowserLocalBackupRepository: () => ({ list: mocks.list, discard: mocks.discard }),
 }));
-
 const entry: LocalBackup = {
   database: 'geul-block-room-journal',
   id: 'record',
@@ -39,89 +33,88 @@ const entry: LocalBackup = {
   updatedAt: Date.parse('2026-10-14T02:00:00Z'),
   bytes: 1536,
 };
-const other: LocalBackup = { ...entry, id: 'other', tabId: 'closed-other', bytes: 1048576 };
-let root: Root;
-let host: HTMLDivElement;
-async function settle() {
-  await act(async () => {
-    await Promise.resolve();
-    await Promise.resolve();
-  });
-}
-async function click(label: string, scope: ParentNode = host) {
-  const button = [...scope.querySelectorAll<HTMLButtonElement>('button')].find(
-    (item) => item.textContent?.trim() === label,
-  );
-  expect(button).toBeDefined();
-  await act(async () => {
-    button!.click();
-  });
-  await settle();
-}
-async function render() {
-  await act(async () =>
-    root.render(
-      <NextIntlClientProvider locale="en" messages={en} timeZone="UTC">
-        <DesignSystemTestProvider locale="en" forceColorScheme="light">
-          <LocalBackups />
-        </DesignSystemTestProvider>
-      </NextIntlClientProvider>,
-    ),
-  );
-  await settle();
-}
+const other = { ...entry, id: 'other', tabId: 'closed-other', bytes: 1048576 };
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.member = 'member';
   mocks.list.mockResolvedValue([entry]);
   mocks.discard.mockResolvedValue(true);
   Object.defineProperty(navigator, 'locks', { configurable: true, value: {} });
-  host = document.createElement('div');
-  document.body.appendChild(host);
-  root = createRoot(host);
 });
-afterEach(() => {
-  act(() => root.unmount());
-  host.remove();
-});
-
 describe('LocalBackups account surface', () => {
-  it('summarizes how many backups this device keeps and their approximate size', async () => {
+  it('summarizes device backups without listing private document names', async () => {
     mocks.list.mockResolvedValue([entry, other]);
-    await render();
-    expect(host.textContent).toContain('2 unsaved edits · about 1 MB');
-    expect(host.querySelector('[role="list"]')).toBeNull();
+    render(<LocalBackups />);
+    expect(await screen.findByText('2 unsaved edits · about 1 MB')).toBeVisible();
+    expect(screen.queryByRole('list')).not.toBeInTheDocument();
   });
   it('deletes nothing on cancel and every closed-tab backup after confirmation', async () => {
     mocks.list.mockResolvedValue([entry, other]);
-    await render();
-    await click('Delete all');
-    await click('Cancel', document.body.querySelector('[role="dialog"]')!);
+    const { user } = render(<LocalBackups />);
+    await user.click(await screen.findByRole('button', { name: 'Delete all' }));
+    await user.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Cancel' }));
     expect(mocks.discard).not.toHaveBeenCalled();
-    await click('Delete all');
+    await user.click(screen.getByRole('button', { name: 'Delete all' }));
     mocks.discard.mockImplementation(async () => {
       mocks.list.mockResolvedValue([]);
       return true;
     });
-    await click('Delete all', document.body.querySelector('[role="dialog"]')!);
+    await user.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Delete all' }));
+    expect(await screen.findByText('No backups from closed tabs to recover.')).toBeVisible();
     expect(mocks.discard.mock.calls.map(([backup]) => backup.id)).toEqual(['record', 'other']);
-    expect(host.textContent).toContain('No backups from closed tabs to recover');
   });
   it('keeps a backup whose document another tab reopened meanwhile', async () => {
     mocks.list.mockResolvedValue([entry, other]);
-    await render();
-    mocks.discard.mockImplementation(async (backup: LocalBackup) => backup.id === 'record');
-    await click('Delete all');
+    const { user } = render(<LocalBackups />);
+    await user.click(await screen.findByRole('button', { name: 'Delete all' }));
     mocks.list.mockResolvedValueOnce([entry, other]).mockResolvedValue([other]);
-    await click('Delete all', document.body.querySelector('[role="dialog"]')!);
-    expect(host.textContent).toContain('1 unsaved edit · about 1 MB');
+    mocks.discard.mockImplementation(async (backup: LocalBackup) => backup.id === 'record');
+    await user.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Delete all' }));
+    expect(await screen.findByText('1 unsaved edit · about 1 MB')).toBeVisible();
+  });
+  it('shows a shared initial wait without a false empty result', async () => {
+    let finish!: (entries: LocalBackup[]) => void;
+    mocks.list.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    );
+    render(<LocalBackups />);
+    expect(screen.getByRole('status')).toHaveTextContent('Loading');
+    expect(screen.queryByText('No backups from closed tabs to recover.')).not.toBeInTheDocument();
+    await act(async () => finish([]));
+    expect(await screen.findByText('No backups from closed tabs to recover.')).toBeVisible();
   });
   it('removes the member’s rows immediately on sign-out', async () => {
-    await render();
+    render(<LocalBackups />);
+    await screen.findByText('1 unsaved edit · about 1.5 kB');
     act(() => {
       mocks.member = null;
       mocks.signedOut?.();
     });
-    expect(host.textContent).toBe('');
+    expect(screen.queryByText(/unsaved edit/)).not.toBeInTheDocument();
   });
+});
+
+it('stops an old member’s bulk clear after sign-out without starting another refresh', async () => {
+  let finish!: (discarded: boolean) => void;
+  mocks.list.mockResolvedValue([entry, other]);
+  mocks.discard.mockImplementationOnce(
+    () =>
+      new Promise<boolean>((resolve) => {
+        finish = resolve;
+      }),
+  );
+  const { user } = render(<LocalBackups />);
+  await user.click(await screen.findByRole('button', { name: 'Delete all' }));
+  await user.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Delete all' }));
+  act(() => {
+    mocks.member = null;
+    mocks.signedOut?.();
+  });
+  await act(async () => finish(true));
+  expect(mocks.discard).toHaveBeenCalledTimes(1);
+  expect(mocks.list).toHaveBeenCalledTimes(2);
+  expect(screen.queryByText(/unsaved edit/)).not.toBeInTheDocument();
 });

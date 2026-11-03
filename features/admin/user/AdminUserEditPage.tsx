@@ -114,10 +114,12 @@ export default function AdminUserEditPage({
     enabled: Boolean(user?.email),
   });
   const { data: emailSuppression, isLoading: isSuppressionLoading } = emailSuppressionQuery;
-  const { data: personalAccessTokens, isLoading: arePersonalAccessTokensLoading } = useQuery({
+  const personalAccessTokensQuery = useQuery({
     queryKey: ['personalAccessToken', 'admin', id],
     queryFn: () => bindings.listAccountPersonalAccessTokensAction(id),
   });
+
+  const { data: personalAccessTokens, isLoading: arePersonalAccessTokensLoading } = personalAccessTokensQuery;
 
   const [banModalOpened, { open: openBanModal, close: closeBanModal }] = useDisclosure(false);
   const [banReason, setBanReason] = useState('');
@@ -442,6 +444,8 @@ export default function AdminUserEditPage({
             form={form}
             website={website}
             socialLinks={socialLinks}
+            tagsLoading={memberTagsQuery.isLoading}
+            tagsError={memberTagsQuery.isError}
             tagOptions={memberTags.map((tag) => ({ value: tag.id, label: tag.name }))}
             onWebsiteChange={setWebsite}
             onSocialLinksChange={setSocialLinks}
@@ -466,6 +470,7 @@ export default function AdminUserEditPage({
           user={user}
           suppression={emailSuppression}
           isSuppressionLoading={isSuppressionLoading}
+          suppressionError={emailSuppressionQuery.error}
           isReleasePending={releaseSuppression.isPending}
           onReleaseSuppression={(email) => releaseSuppression.mutate(email)}
           onSetCanonicalEmail={handleSetCanonicalEmail}
@@ -487,7 +492,9 @@ export default function AdminUserEditPage({
             ) : null
           }
         />
-        {!arePersonalAccessTokensLoading ? (
+        {personalAccessTokensQuery.isError ? (
+          <QueryErrorAlert queries={[personalAccessTokensQuery]} />
+        ) : !arePersonalAccessTokensLoading ? (
           <DsLayoutStack as="section" gap="lg">
             <PersonalAccessTokenSettings
               subjectId={id}
@@ -499,7 +506,9 @@ export default function AdminUserEditPage({
               initialLoadFailed={Boolean(personalAccessTokens?.error)}
             />
           </DsLayoutStack>
-        ) : null}
+        ) : (
+          <PageLoader placement="flow" />
+        )}
       </DsLayoutStack>
 
       <ContentModal

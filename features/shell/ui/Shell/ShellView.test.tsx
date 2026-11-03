@@ -74,6 +74,8 @@ const defaultProps: ShellViewProps = {
   labels: {
     navigation: 'Example Studio navigation',
     toggleNavigation: 'Toggle navigation',
+    navigationLoadFailed: 'Could not load navigation.',
+    retryNavigation: 'Retry navigation',
     close: 'Close',
     search: 'Search',
     searchTooltip: 'Search (Ctrl+K)',

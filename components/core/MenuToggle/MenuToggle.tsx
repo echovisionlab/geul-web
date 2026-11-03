@@ -15,10 +15,12 @@ export interface MenuToggleProps extends OverlayPresentationProps {
   visibility?: MenuToggleVisibility;
   controls?: string;
   disabled?: boolean;
+  /** Uses the shared pending control while the navigation surface loads; focus remains on the toggle. */
+  loading?: boolean;
   id?: string;
 }
 export const MenuToggle = forwardRef<HTMLButtonElement, MenuToggleProps>(
-  ({ opened, label, onClick, visibility = 'always', controls, disabled, id }, ref) => (
+  ({ opened, label, onClick, visibility = 'always', controls, disabled, loading, id }, ref) => (
     <span className={classes.root} data-visibility={visibility}>
       <IconButton
         ref={ref}
@@ -26,6 +28,7 @@ export const MenuToggle = forwardRef<HTMLButtonElement, MenuToggleProps>(
         size="chrome"
         label={label}
         disabled={disabled}
+        loading={loading}
         onClick={disabled ? undefined : onClick}
         aria-expanded={opened}
         aria-controls={controls}

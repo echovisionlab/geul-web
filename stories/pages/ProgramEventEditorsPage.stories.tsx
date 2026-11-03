@@ -184,6 +184,7 @@ function SeriesPreview({ state = 'ready' }: { state?: EditorPreviewState }) {
     title: local.title,
     setTitle: local.setTitle,
     debouncedUpdate: noop,
+    saveState: local.connected ? 'saved' : 'offline',
     tCommon: local.tCommon,
     status,
     statusOptions: [

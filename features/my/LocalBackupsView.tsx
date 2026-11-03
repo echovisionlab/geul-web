@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Button } from '@/components/core/Button';
 import { LayoutInline, LayoutStack } from '@/components/core/Layout';
@@ -16,6 +16,7 @@ export interface LocalBackupsViewProps {
   /** Approximate total size in bytes. */
   bytes: number;
   loading?: boolean;
+  loadingSurface: ReactNode;
   unavailable?: boolean;
   error?: boolean;
   clearing?: boolean;
@@ -30,6 +31,7 @@ export function LocalBackupsView({
   count,
   bytes,
   loading,
+  loadingSurface,
   unavailable,
   error,
   clearing,
@@ -67,9 +69,7 @@ export function LocalBackupsView({
             {t('unavailable')}
           </Text>
         ) : loading && count === 0 ? (
-          <Text size="sm" role="status">
-            {t('loading')}
-          </Text>
+          loadingSurface
         ) : count === 0 ? (
           error ? null : (
             <EmptyState title={t('empty')} live inset="none" />

@@ -4,6 +4,7 @@ import { SupportingText, ImageChrome, Text, Heading } from '@/components/core/Ty
 
 import { Fragment, useId, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
+import { PageLoader } from '@/features/site/PageLoader';
 import NextImage from 'next/image';
 import { useTranslations } from 'next-intl';
 import { useMediaQuery } from '@mantine/hooks';
@@ -27,7 +28,9 @@ import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-
 const THUMBNAIL_IMAGE_SIZES = '28rem';
 // A hero carousel title grows with the item size from `sm` (phones keep scale 3).
 const HERO_TITLE_SCALE = { xs: 3, s: 3, m: 2, l: 1, xl: 1 } as const satisfies Record<CollectionSize, 1 | 2 | 3>;
-const ListCarousel = dynamic(() => import('./ListCarouselRuntime').then((module) => module.ListCarouselRuntime));
+const ListCarousel = dynamic(() => import('./ListCarouselRuntime').then((module) => module.ListCarouselRuntime), {
+  loading: () => <PageLoader placement="flow" />,
+});
 
 export type ListViewLayout = 'grid' | 'list' | 'cards' | 'minimal' | 'carousel';
 export interface ListViewShellItem {

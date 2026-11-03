@@ -211,7 +211,7 @@ export function SessionManagementView({
                         onRevokeSession(session.id);
                       }}
                       loading={isRevoking}
-                      disabled={isRevoking}
+                      disabled={revokingSessionId !== null || revokeOthersLoading}
                       data-testid={`security-revoke-session-${session.id}`}
                     >
                       <IconX size={16} aria-hidden />
@@ -234,6 +234,7 @@ export function SessionManagementView({
                   onRevokeOtherSessions();
                 }}
                 loading={revokeOthersLoading}
+                disabled={revokingSessionId !== null}
                 data-testid="security-revoke-other-sessions"
               >
                 {labels.logOutOthers}

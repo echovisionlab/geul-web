@@ -1,6 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { PageLoader } from '@/features/site/PageLoader';
+import { ContentModal } from '@/components/core/Modal';
+import { Alert } from '@/components/core/Alert';
+import { Button } from '@/components/core/Button';
+import { useTranslations } from 'next-intl';
+import { useEffect, useMemo, useState } from 'react';
 import type { EmojiItem } from '@tiptap/extension-emoji';
 import { EmojiPicker, type EmojiPickerItem } from '@/components/core/EmojiPicker';
 import { loadTiptapEmojiData, type TiptapEmojiData } from './emoji-runtime';
@@ -108,16 +113,39 @@ export function TiptapEmojiPicker({
 }: TiptapEmojiPickerProps) {
   const [query, setQuery] = useState('');
   const data = useTiptapEmojiData();
-  const closeRef = useRef(onClose);
-  closeRef.current = onClose;
-  // The Emoji data loads when the picker is requested; the picker opens once its items exist.
+  const t = useTranslations('common');
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
+    let active = true;
     if (opened && !data) {
-      loadTiptapEmojiData().catch(() => closeRef.current());
+      setFailed(false);
+      void loadTiptapEmojiData().catch(() => {
+        if (active) {
+          setFailed(true);
+        }
+      });
     }
-  }, [data, opened]);
+    return () => {
+      active = false;
+    };
+  }, [data, opened, attempt]);
   const pickerItems = useMemo(() => (data ? tiptapEmojiPickerItems(data, query) : []), [data, query]);
 
+  if (opened && !data) {
+    return (
+      <ContentModal opened onClose={onClose} title={title} closeLabel={closeLabel} size="compact">
+        {failed ? (
+          <Alert tone="danger">
+            {t('errors.generic')}
+            <Button onClick={() => setAttempt((value) => value + 1)}>{t('actions.tryAgain')}</Button>
+          </Alert>
+        ) : (
+          <PageLoader placement="flow" />
+        )}
+      </ContentModal>
+    );
+  }
   return (
     <EmojiPicker
       opened={opened && data !== null}

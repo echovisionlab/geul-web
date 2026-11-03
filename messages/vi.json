@@ -1332,6 +1332,8 @@
       }
     },
     "verification": {
+      "checking": "Đang kiểm tra trạng thái thay đổi email…",
+      "unavailable": "Không thể kiểm tra trạng thái thay đổi email. Vui lòng kiểm tra lại.",
       "loading": "Đang tải biểu mẫu xác minh...",
       "startOver": "Bắt đầu lại",
       "errors": {

@@ -1,4 +1,5 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 import {
   LayoutInline as DsLayoutInline,
@@ -13,7 +14,8 @@ import { IconUserPlus, IconX } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
-import { Avatar, Spinner as Loader, ScrollArea } from '@/components/core/Display';
+import { Avatar, ScrollArea } from '@/components/core/Display';
+import { PageLoader } from '@/features/site/PageLoader';
 import { ContentModal } from '@/components/core/Modal';
 import { useDebouncedValue } from '@mantine/hooks';
 import { notifications } from '@/components/core/Notification';
@@ -67,8 +69,8 @@ export function SeriesManagersModal({
   const tModalActions = useTranslations('common.actions');
   const t = useTranslations('seriesMembers');
   const tActions = useTranslations('common.actions');
-  const tCommonStates = useTranslations('common.states');
   const tCommonMessages = useTranslations('common.messages');
+  const tCommonErrors = useTranslations('common.errors');
   const tCommonPlaceholders = useTranslations('common.placeholders');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch] = useDebouncedValue(searchQuery, 300);
@@ -90,11 +92,12 @@ export function SeriesManagersModal({
   });
 
   const managerIds = managers.map((m) => m.memberId);
-  const { data: searchResults = [], isFetching: searchFetching } = useQuery<SearchMember[]>({
+  const searchResultsQuery = useQuery<SearchMember[]>({
     queryKey: ['series', seriesId, 'manager-search', debouncedSearch, managerIds],
     queryFn: () => bindings.search(debouncedSearch, managerIds),
     enabled: opened && canManageManagers && !managersError && debouncedSearch.length >= 2,
   });
+  const { data: searchResults = [], isFetching: searchFetching } = searchResultsQuery;
 
   const addManager = useMutation({
     mutationFn: (memberId: string) => bindings.add(seriesId, memberId),
@@ -162,7 +165,8 @@ export function SeriesManagersModal({
             pendingRemoval.current = manager.memberId;
             removeManager.mutate(manager.memberId);
           }}
-          loading={removeManager.isPending}
+          loading={removeManager.isPending && removeManager.variables === manager.memberId}
+          disabled={addManager.isPending || removeManager.isPending}
         >
           <IconX size={14} />
         </IconButton>
@@ -174,10 +178,11 @@ export function SeriesManagersModal({
     <ContentModal
       opened={opened}
       onClose={onClose}
-      title={t('title', { count: managersError ? '—' : managers.length })}
+      title={t('title', { count: managersLoading || managersError ? '—' : managers.length })}
       size="standard"
       closeLabel={tModalActions('close')}
     >
+      <QueryErrorAlert queries={[searchResultsQuery]} />
       {canManageManagers && !managersError && (
         <DsLayoutInset blockEnd="md">
           <DsLayoutStack gap="xs">
@@ -189,8 +194,13 @@ export function SeriesManagersModal({
               placeholder={tCommonPlaceholders('searchByName')}
               items={searchResults}
               debouncedSearch={debouncedSearch}
-              isLoading={searchFetching}
-              onSelect={(memberId) => addManager.mutate(memberId)}
+              isLoading={searchFetching || addManager.isPending}
+              disabled={managersLoading || managersError || addManager.isPending || removeManager.isPending}
+              onSelect={(memberId) => {
+                if (!addManager.isPending && !removeManager.isPending) {
+                  addManager.mutate(memberId);
+                }
+              }}
               getItemId={(item) => item.id}
               getItemText={(item) => item.nickname}
               renderItem={(member) => (
@@ -205,6 +215,8 @@ export function SeriesManagersModal({
                 </DsLayoutInline>
               )}
               minimumQueryMessage={tCommonMessages('typeAtLeast2Characters')}
+              error={searchResultsQuery.isError ? tCommonErrors('generic') : undefined}
+              emptyMessage={searchResultsQuery.isError ? tCommonErrors('generic') : undefined}
               noResultsMessage={tCommonMessages('noUsersFound')}
               leftSection={<IconUserPlus size={16} />}
             />
@@ -213,11 +225,7 @@ export function SeriesManagersModal({
       )}
 
       {managersLoading ? (
-        <DsLayoutInset block="md">
-          <DsLayoutInline justify="center" role="status" aria-label={tCommonStates('loading')}>
-            <Loader size="sm" />
-          </DsLayoutInline>
-        </DsLayoutInset>
+        <PageLoader placement="flow" extent="compact" size="sm" />
       ) : managersError ? (
         <SupportingText tone="danger" role="alert">
           {t('states.loadFailed')}

@@ -134,6 +134,31 @@ describe('Mermaid mounted theme updates', () => {
   });
 });
 
+it('keeps the previous diagram visible while rendering a new source and shows shared loading on the first render', async () => {
+  let resolveFirst!: (image: { src: string }) => void;
+  let resolveNext!: (image: { src: string }) => void;
+  state.render.mockReturnValueOnce(
+    new Promise((resolve) => {
+      resolveFirst = resolve;
+    }),
+  );
+  await renderDiagram();
+  expect(screen.getByRole('status')).toHaveTextContent('loading');
+  await act(async () => resolveFirst({ src: 'data:image/svg+xml,first' }));
+  state.render.mockReturnValueOnce(
+    new Promise((resolve) => {
+      resolveNext = resolve;
+    }),
+  );
+  await renderDiagram({ source: 'flowchart LR\n A --> C' });
+  expect(screen.getByAltText('')).toHaveAttribute('src', 'data:image/svg+xml,first');
+  expect(screen.getByRole('figure')).toHaveAttribute('aria-busy', 'true');
+  expect(screen.getByRole('status')).toHaveTextContent('loading');
+  await act(async () => resolveNext({ src: 'data:image/svg+xml,next' }));
+  expect(screen.getByAltText('')).toHaveAttribute('src', 'data:image/svg+xml,next');
+  expect(screen.queryByRole('status')).not.toBeInTheDocument();
+});
+
 describe('Mermaid image accessibility', () => {
   it('passes host/role and image rules on the rendered diagram', async () => {
     state.render.mockResolvedValue({

@@ -1,35 +1,37 @@
 // @vitest-environment jsdom
-import { act, useCallback } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+import { act, renderHook } from '@/test/render';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { previewCampaignAction } from '@/lib/actions/campaign';
 import { useCampaignPreview } from './useCampaignPreview';
 
 vi.mock('@/lib/actions/campaign', () => ({ previewCampaignAction: vi.fn() }));
-vi.mock('@mantine/hooks', () => ({
-  useDebouncedCallback: () => useCallback(() => undefined, []),
-}));
-let root: Root;
 let preview: ReturnType<typeof useCampaignPreview>;
-function Editor() {
-  preview = useCampaignPreview({
-    campaignId: 'campaign',
-    campaignLoaded: true,
-    locale: 'ko',
-    layoutId: null,
-    subject: 'unsaved subject',
-    editorSynced: false,
-    blockRoomController: null,
-  });
-  return null;
-}
+let rerender: (options: { locale: string }) => void;
+let unmount: () => void;
 beforeEach(() => {
   vi.resetAllMocks();
-  root = createRoot(document.createElement('div'));
-  act(() => root.render(<Editor />));
+  vi.useFakeTimers();
+  const hook = renderHook(
+    ({ locale }) => {
+      preview = useCampaignPreview({
+        campaignId: 'campaign',
+        campaignLoaded: true,
+        locale,
+        layoutId: null,
+        subject: 'unsaved subject',
+        editorSynced: false,
+        blockRoomController: null,
+      });
+      return preview;
+    },
+    { initialProps: { locale: 'ko' } },
+  );
+  rerender = hook.rerender;
+  unmount = hook.unmount;
 });
 afterEach(() => {
-  act(() => root.unmount());
+  unmount();
+  vi.useRealTimers();
 });
 
 it('keeps the last preview while exposing a failed refresh and retrying the current draft', async () => {
@@ -105,4 +107,71 @@ it.each([
   });
   expect(preview.previewSrcDoc).toBe(htmlContent);
   expect(previewCampaignAction).toHaveBeenLastCalledWith('campaign', expect.objectContaining({ locale: 'ko' }));
+});
+
+it('keeps the new locale waiting when an obsolete locale response arrives', async () => {
+  let finish!: (value: Awaited<ReturnType<typeof previewCampaignAction>>) => void;
+  vi.mocked(previewCampaignAction).mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+  );
+  let first!: Promise<void>;
+  act(() => {
+    first = preview.refresh();
+  });
+  rerender({ locale: 'ja' });
+  expect(preview.previewSrcDoc).toBe('');
+  expect(preview.query.isFetching).toBe(true);
+  await act(async () => {
+    finish({ ok: true, value: { htmlContent: '<p>obsolete Korean</p>', subject: 'old', textContent: 'old' } });
+    await first;
+  });
+  expect(preview.previewSrcDoc).toBe('');
+  expect(preview.query.isFetching).toBe(true);
+});
+
+it('does not publish a response or flush a queued preview after unmount', async () => {
+  let finish!: (value: Awaited<ReturnType<typeof previewCampaignAction>>) => void;
+  vi.mocked(previewCampaignAction).mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+  );
+  let first!: Promise<void>;
+  act(() => {
+    first = preview.refresh();
+  });
+  unmount();
+  await act(async () => {
+    finish({ ok: true, value: { htmlContent: '<p>late</p>', subject: 'late', textContent: 'late' } });
+    await first;
+    await vi.advanceTimersByTimeAsync(300);
+  });
+  expect(previewCampaignAction).toHaveBeenCalledOnce();
+});
+
+it('invalidates the current preview as soon as a new edit is scheduled', async () => {
+  let finish!: (value: Awaited<ReturnType<typeof previewCampaignAction>>) => void;
+  vi.mocked(previewCampaignAction).mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+  );
+  let first!: Promise<void>;
+  act(() => {
+    first = preview.refresh();
+  });
+  act(() => {
+    void preview.scheduleRefresh();
+  });
+  await act(async () => {
+    finish({ ok: true, value: { htmlContent: '<p>obsolete before debounce</p>', subject: 'old', textContent: 'old' } });
+    await first;
+  });
+  expect(preview.previewSrcDoc).toBe('');
+  expect(preview.query.isFetching).toBe(true);
 });

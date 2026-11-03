@@ -84,3 +84,45 @@ describe('TrackCreditsEditorSection', () => {
     );
   });
 });
+
+it('keeps removal pending on its own command and blocks repeated removal', async () => {
+  let finish!: (result: { success: boolean }) => void;
+  actions.setTrackCredits.mockReturnValueOnce(
+    new Promise((resolve) => {
+      finish = resolve;
+    }),
+  );
+  const credits: ReleaseTrackItem['credits'] = [
+    {
+      id: 'credit-1',
+      credit_type: 'text',
+      artist_id: null,
+      artist_name: null,
+      artist_slug: null,
+      member_id: null,
+      member_name: null,
+      credited_name: 'Existing',
+      credit_role: null,
+      sort_order: 0,
+    },
+  ];
+  const onCreditsChange = vi.fn();
+  const { user } = render(
+    <TrackCreditsEditorSection
+      releaseId="release-1"
+      trackId="track-1"
+      credits={credits}
+      onCreditsChange={onCreditsChange}
+    />,
+  );
+  const remove = screen.getByRole('button', { name: 'Remove' });
+  await user.click(remove);
+  expect(remove).toHaveAttribute('aria-busy', 'true');
+  expect(screen.getByRole('button', { name: 'Add' })).not.toHaveAttribute('aria-busy', 'true');
+  await user.click(remove);
+  expect(actions.setTrackCredits).toHaveBeenCalledOnce();
+  expect(onCreditsChange).not.toHaveBeenCalled();
+  await act(async () => finish({ success: true }));
+  await waitFor(() => expect(onCreditsChange).toHaveBeenCalledWith([]));
+  expect(remove).not.toHaveAttribute('aria-busy', 'true');
+});

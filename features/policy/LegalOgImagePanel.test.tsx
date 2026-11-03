@@ -1,11 +1,9 @@
 // @vitest-environment jsdom
 
-import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
-import { act } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { render, screen, waitFor } from '@/test/render';
 import type { OgGenerationRunSignal } from '@/lib/types/og-generation';
 import { LegalOgImagePanel } from './LegalOgImagePanel';
 
@@ -18,11 +16,7 @@ const mocks = vi.hoisted(() => ({
   useOgImage: vi.fn(),
 }));
 
-let container: HTMLDivElement | null = null;
-let root: Root | null = null;
-let queryClient: QueryClient | null = null;
-
-vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
+let queryClient: QueryClient;
 
 vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 
@@ -39,19 +33,22 @@ vi.mock('@/features/metadata/OgImagePreview', () => ({
     onRegenerate?: () => void;
   }) => (
     <button
-      data-testid="og-preview"
       data-src={src ?? ''}
       data-status={generationStatus ?? ''}
       data-error={generationError ?? ''}
       onClick={onRegenerate}
       type="button"
-    />
+    >
+      Regenerate OG image
+    </button>
   ),
 }));
 
 vi.mock('@/features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader', () => ({
   SiteOgBackgroundUploader: ({ onSuccess }: { onSuccess?: (runId?: string) => void }) => (
-    <button data-testid="background-success" onClick={() => onSuccess?.('background-run')} type="button" />
+    <button onClick={() => onSuccess?.('background-run')} type="button">
+      Change background
+    </button>
   ),
 }));
 
@@ -65,15 +62,6 @@ vi.mock('@/lib/hooks/useOgImage', () => ({
 }));
 
 beforeEach(() => {
-  Object.defineProperty(window, 'matchMedia', {
-    writable: true,
-    value: vi.fn().mockImplementation((query: string) => ({
-      matches: false,
-      media: query,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    })),
-  });
   mocks.getLegalOgImageAction.mockResolvedValue({
     data: { assetId: 'asset-old', url: 'https://cdn.example.test/asset/asset-old/og.webp' },
   });
@@ -98,12 +86,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  act(() => root?.unmount());
-  container?.remove();
-  container = null;
-  root = null;
-  queryClient?.clear();
-  queryClient = null;
+  queryClient.clear();
   vi.clearAllMocks();
 });
 
@@ -113,40 +96,24 @@ function renderPanel(
   locale = 'ko',
   sourceTitleGeneration?: { locale: string; sequence: number },
 ) {
-  if (!queryClient) {
-    throw new Error('queryClient missing');
-  }
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-  act(() => {
-    root?.render(
-      <QueryClientProvider client={queryClient!}>
-        <DesignSystemProvider forceColorScheme="light">
-          <LegalOgImagePanel
-            entityType={entityType}
-            locale={locale}
-            currentBackgroundUrl={null}
-            sourceTitleGeneration={sourceTitleGeneration}
-            translationGenerationRun={translationGenerationRun}
-          />
-        </DesignSystemProvider>
-      </QueryClientProvider>,
-    );
-  });
-}
-
-async function flush() {
-  await act(async () => {
-    await Promise.resolve();
-    await new Promise((resolve) => setTimeout(resolve, 0));
-  });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <LegalOgImagePanel
+        entityType={entityType}
+        locale={locale}
+        currentBackgroundUrl={null}
+        sourceTitleGeneration={sourceTitleGeneration}
+        translationGenerationRun={translationGenerationRun}
+      />
+    </QueryClientProvider>,
+    { locale: 'en' },
+  );
 }
 
 describe('LegalOgImagePanel', () => {
   it('tracks the concrete legal locale target and renders server status', async () => {
     renderPanel('privacy');
-    await flush();
+    const preview = await screen.findByRole('button', { name: 'Regenerate OG image' });
 
     expect(mocks.useOgImage).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -156,55 +123,47 @@ describe('LegalOgImagePanel', () => {
         provider: null,
       }),
     );
-    const preview = container?.querySelector('[data-testid="og-preview"]');
-    expect(preview?.getAttribute('data-status')).toBe('processing');
+    expect(preview).toHaveAttribute('data-status', 'processing');
   });
 
   it('tracks the generation returned by a manual retry', async () => {
-    renderPanel('terms');
-    await flush();
-    await act(async () => {
-      (container?.querySelector('[data-testid="og-preview"]') as HTMLButtonElement).click();
-    });
+    const { user } = renderPanel('terms');
+    await user.click(await screen.findByRole('button', { name: 'Regenerate OG image' }));
 
     expect(mocks.regenerateLegalOgImageAction).toHaveBeenCalledWith('terms', 'ko');
-    expect(mocks.trackRequestedGeneration).toHaveBeenCalledWith('generation-1', 'privacy:ko');
+    await waitFor(() => expect(mocks.trackRequestedGeneration).toHaveBeenCalledWith('generation-1', 'privacy:ko'));
   });
 
   it('locates the latest generation after an automatic background change', async () => {
-    renderPanel('privacy');
-    await flush();
-    act(() => {
-      (container?.querySelector('[data-testid="background-success"]') as HTMLButtonElement).click();
-    });
+    const { user } = renderPanel('privacy');
+    await screen.findByRole('button', { name: 'Regenerate OG image' });
+    await user.click(screen.getByRole('button', { name: 'Change background' }));
 
     expect(mocks.trackLatest).toHaveBeenCalledTimes(1);
   });
 
   it('uses the active content locale instead of the UI locale', async () => {
-    renderPanel('privacy', { runId: 'translation-run-ja', locale: 'ja', sequence: 1 }, 'ja');
-    await flush();
+    const { user } = renderPanel('privacy', { runId: 'translation-run-ja', locale: 'ja', sequence: 1 }, 'ja');
+    const preview = await screen.findByRole('button', { name: 'Regenerate OG image' });
 
     expect(mocks.getLegalOgImageAction).toHaveBeenCalledWith('privacy', 'ja');
     expect(mocks.useOgImage).toHaveBeenCalledWith(expect.objectContaining({ locale: 'ja' }));
     expect(mocks.trackLatest).toHaveBeenCalledTimes(1);
 
-    await act(async () => {
-      (container?.querySelector('[data-testid="og-preview"]') as HTMLButtonElement).click();
-    });
-    expect(mocks.regenerateLegalOgImageAction).toHaveBeenCalledWith('privacy', 'ja');
+    await user.click(preview);
+    await waitFor(() => expect(mocks.regenerateLegalOgImageAction).toHaveBeenCalledWith('privacy', 'ja'));
   });
 
   it('recovers a source-title generation even when its lifecycle event was missed', async () => {
     renderPanel('privacy', undefined, 'ko', { locale: 'ko', sequence: 1 });
-    await flush();
+    await screen.findByRole('button', { name: 'Regenerate OG image' });
 
     expect(mocks.trackLatest).toHaveBeenCalledTimes(1);
   });
 
   it('refetches the canonical legal asset when a generation becomes ready', async () => {
-    renderPanel('privacy', undefined, 'ko');
-    await flush();
+    const { rerender } = renderPanel('privacy', undefined, 'ko');
+    await screen.findByRole('button', { name: 'Regenerate OG image' });
     expect(mocks.getLegalOgImageAction).toHaveBeenCalledTimes(1);
 
     mocks.useOgImage.mockReturnValue({
@@ -218,17 +177,12 @@ describe('LegalOgImagePanel', () => {
       trackRequestedGeneration: mocks.trackRequestedGeneration,
       targetKey: 'privacy:ko',
     });
-    act(() => {
-      root?.render(
-        <QueryClientProvider client={queryClient!}>
-          <DesignSystemProvider forceColorScheme="light">
-            <LegalOgImagePanel entityType="privacy" locale="ko" currentBackgroundUrl={null} />
-          </DesignSystemProvider>
-        </QueryClientProvider>,
-      );
-    });
-    await flush();
+    rerender(
+      <QueryClientProvider client={queryClient}>
+        <LegalOgImagePanel entityType="privacy" locale="ko" currentBackgroundUrl={null} />
+      </QueryClientProvider>,
+    );
 
-    expect(mocks.getLegalOgImageAction).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(mocks.getLegalOgImageAction).toHaveBeenCalledTimes(2));
   });
 });

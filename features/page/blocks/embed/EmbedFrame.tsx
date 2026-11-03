@@ -1,4 +1,5 @@
 'use client';
+import { PageLoader } from '@/features/site/PageLoader';
 import { SupportingText } from '@/components/core/Typography';
 
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
@@ -30,6 +31,7 @@ export interface EmbedFrameProps {
 
 export function EmbedFrame({ props, preview = false }: EmbedFrameProps) {
   const t = useTranslations('pageEditor.embed');
+  const tCommon = useTranslations('common');
   const locale = useLocale();
   const colorScheme = useComputedColorScheme();
   const [parentOrigin, setParentOrigin] = useState<string | null>(null);
@@ -73,6 +75,8 @@ export function EmbedFrame({ props, preview = false }: EmbedFrameProps) {
           colorScheme={colorScheme}
           title={props.title.trim() || t('playerTitle')}
           activateLabel={t('activatePreview')}
+          loadingLabel={t('toolLoading')}
+          errorLabel={tCommon('errors.generic')}
         />
       ) : (
         <div
@@ -83,15 +87,13 @@ export function EmbedFrame({ props, preview = false }: EmbedFrameProps) {
               : undefined
           }
         >
-          <SupportingText tone="secondary">
-            {unsafe
-              ? t('unsafeOrigin')
-              : url && parentOrigin === null
-                ? null
-                : props.uri.trim()
-                  ? t('invalidPreview')
-                  : t('emptyPreview')}
-          </SupportingText>
+          {url && parentOrigin === null ? (
+            <PageLoader extent="container" placement="flow" />
+          ) : (
+            <SupportingText tone="secondary">
+              {unsafe ? t('unsafeOrigin') : props.uri.trim() ? t('invalidPreview') : t('emptyPreview')}
+            </SupportingText>
+          )}
         </div>
       )}
     </DsLayoutStack>
@@ -106,6 +108,8 @@ function EmbedDocument({
   colorScheme,
   title,
   activateLabel,
+  loadingLabel,
+  errorLabel,
 }: {
   props: EmbedProps;
   url: URL;
@@ -114,7 +118,10 @@ function EmbedDocument({
   colorScheme: string;
   title: string;
   activateLabel: string;
+  loadingLabel: string;
+  errorLabel: string;
 }) {
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const frame = useRef<HTMLIFrameElement>(null);
   const [autoHeight, setAutoHeight] = useState<number | null>(null);
   const [active, setActive] = useState(!preview);
@@ -147,7 +154,7 @@ function EmbedDocument({
         ? (autoHeight ?? Number(props.height))
         : Number(props.height);
   return (
-    <div className={classes.frameContainer}>
+    <div className={classes.frameContainer} aria-busy={status === 'loading'}>
       <iframe
         ref={frame}
         src={url.href}
@@ -162,8 +169,18 @@ function EmbedDocument({
         inert={!active || undefined}
         referrerPolicy="no-referrer"
         loading="lazy"
-        onLoad={initialize}
+        onLoad={() => {
+          initialize();
+          setStatus('ready');
+        }}
+        onError={() => setStatus('error')}
       />
+      {status === 'loading' && active ? <PageLoader extent="container" message={loadingLabel} /> : null}
+      {status === 'error' ? (
+        <SupportingText role="alert" tone="danger">
+          {errorLabel}
+        </SupportingText>
+      ) : null}
       {!active && (
         <div className={classes.activation}>
           <Button

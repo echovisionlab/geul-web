@@ -55,6 +55,19 @@ describe('closed React Aria input behavior', () => {
     expect(container.querySelector('button[aria-label="Clear all"]')).toBeNull();
   });
 
+  it('announces Select option lookup without hiding its open control or field name', () => {
+    render(<Select label="Layout" data={[]} nothingFoundMessage="No layouts" isLoading />);
+    const status = container.querySelector('[role="status"]');
+    expect(status?.getAttribute('aria-label')).toBe('Loading');
+    expect(container.querySelector('input')?.getAttribute('aria-busy')).toBe('true');
+    expect(container.querySelectorAll(`button.${classes.accessory}`)).toHaveLength(1);
+    render(<Select label="Layout" data={[]} isLoading loadingLabel="Loading layouts" />);
+    expect(container.querySelector('[role="status"]')?.getAttribute('aria-label')).toBe('Loading layouts');
+    render(<Select label="Layout" data={[]} />);
+    expect(container.querySelector('[role="status"]')).toBeNull();
+    expect(container.querySelector('input')?.hasAttribute('aria-busy')).toBe(false);
+  });
+
   it('ignores label clicks on standalone disabled and read-only checkboxes', async () => {
     const changed = vi.fn();
     render(

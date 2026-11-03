@@ -6,6 +6,13 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ServerDataTableContent } from './ServerDataTableContent';
+import { ServerDataTablePendingProvider, useServerTablePending } from './ServerDataTableNavigation';
+
+/** Another island of the same table (search, filter, pagination) with an operation in flight. */
+function PendingIsland() {
+  useServerTablePending(true);
+  return null;
+}
 
 const mocks = vi.hoisted(() => ({
   buildSortUrl: vi.fn(),
@@ -26,8 +33,8 @@ vi.mock('next-intl', () => ({
 }));
 
 vi.mock('@/features/site/PageLoader', () => ({
-  PageLoader: ({ minHeight }: { minHeight?: string | number }) => (
-    <div data-testid="page-loader" data-min-height={minHeight}>
+  PageLoader: ({ extent }: { extent?: string }) => (
+    <div data-testid="page-loader" data-extent={extent}>
       Loader
     </div>
   ),
@@ -136,16 +143,18 @@ describe('ServerDataTableContent', () => {
     expect(document.body.textContent).toContain('Nothing found');
 
     await act(async () => {
-      host?.setAttribute('data-pending', 'true');
       root?.render(
         <DesignSystemProvider forceColorScheme="light">
-          <ServerDataTableContent
-            columns={[]}
-            result={{ data: [], total: 0, page: 1, pageSize: 10, totalPages: 0 }}
-            getRowKey={() => ''}
-            emptyMessage="Nothing found"
-            reservedRowCount={2}
-          />
+          <ServerDataTablePendingProvider>
+            <PendingIsland />
+            <ServerDataTableContent
+              columns={[]}
+              result={{ data: [], total: 0, page: 1, pageSize: 10, totalPages: 0 }}
+              getRowKey={() => ''}
+              emptyMessage="Nothing found"
+              reservedRowCount={2}
+            />
+          </ServerDataTablePendingProvider>
         </DesignSystemProvider>,
       );
     });
@@ -154,7 +163,7 @@ describe('ServerDataTableContent', () => {
     });
     const loader = document.querySelector('[data-testid="page-loader"]');
     expect(loader).not.toBeNull();
-    expect(loader?.getAttribute('data-min-height')).toBe('0');
+    expect(loader?.getAttribute('data-extent')).toBe('container');
     expect(loader?.parentElement?.hasAttribute('data-datatable-loading')).toBe(true);
     expect(loader?.parentElement?.getAttribute('aria-busy')).toBe('true');
     expect(loader?.parentElement?.className).toContain('loading');
@@ -266,16 +275,18 @@ it('recovers its table name and sorting contract after an initial read error', (
   expect(mocks.push).toHaveBeenCalledWith('/admin/things?things_sort=title.asc', { scroll: false });
 });
 it('keeps current rows while exposing the pending state when the visual loader is suppressed', () => {
-  host?.setAttribute('data-pending', 'true');
   act(() =>
     root?.render(
       <DesignSystemProvider forceColorScheme="light">
-        <ServerDataTableContent
-          columns={[{ key: 'title', header: 'Title' }]}
-          result={{ data: [{ id: 'one', title: 'Notes' }], total: 1, page: 1, pageSize: 10, totalPages: 1 }}
-          getRowKey={(row) => row.id}
-          showPendingLoader={false}
-        />
+        <ServerDataTablePendingProvider>
+          <PendingIsland />
+          <ServerDataTableContent
+            columns={[{ key: 'title', header: 'Title' }]}
+            result={{ data: [{ id: 'one', title: 'Notes' }], total: 1, page: 1, pageSize: 10, totalPages: 1 }}
+            getRowKey={(row) => row.id}
+            showPendingLoader={false}
+          />
+        </ServerDataTablePendingProvider>
       </DesignSystemProvider>,
     ),
   );

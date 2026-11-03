@@ -1,181 +1,137 @@
 // @vitest-environment jsdom
-
-import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
-import { act } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
+import { act, render, screen, waitFor } from '@/test/render';
 import { SITE_OG_TARGET_ID } from '@/lib/og-generation-targets';
 import { SiteOgImagePanel } from './SiteOgImagePanel';
-
-const mocks = vi.hoisted(() => ({
-  getSiteOgStatusAction: vi.fn(),
-  regenerateSiteOgImageAction: vi.fn(),
-  trackGeneration: vi.fn(),
-  trackLatest: vi.fn(),
-  useOgImage: vi.fn(),
+const actions = vi.hoisted(() => ({
+  status: vi.fn(),
+  regenerate: vi.fn(),
+  latest: vi.fn(),
+  generation: vi.fn(),
+  remove: vi.fn(),
+  refresh: vi.fn(),
 }));
-
-let container: HTMLDivElement | null = null;
-let root: Root | null = null;
-let queryClient: QueryClient | null = null;
-
-vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }));
-vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
-vi.mock('@/components/core/MediaPreviewGrid', () => ({
-  MediaPreviewGrid: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
-vi.mock('@/features/metadata/OgImagePreview', () => ({
-  OgImagePreview: ({ onRegenerate }: { onRegenerate?: () => void }) => (
-    <button data-testid="regenerate" onClick={onRegenerate} type="button" />
-  ),
-}));
-vi.mock('@/features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader', () => ({
-  SiteOgBackgroundUploader: ({ onSuccess }: { onSuccess?: (runId?: string) => void }) => (
-    <div>
-      <button data-testid="background-with-run" onClick={() => onSuccess?.('site-run')} type="button" />
-      <button data-testid="background-without-run" onClick={() => onSuccess?.()} type="button" />
-    </div>
-  ),
-}));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: actions.refresh }) }));
 vi.mock('@/lib/actions/site-setting', () => ({
-  getSiteOgStatusAction: (...args: unknown[]) => mocks.getSiteOgStatusAction(...args),
-  regenerateSiteOgImageAction: (...args: unknown[]) => mocks.regenerateSiteOgImageAction(...args),
+  getSiteOgStatusAction: actions.status,
+  regenerateSiteOgImageAction: actions.regenerate,
+  deleteSiteAssetAction: actions.remove,
+  setSiteAssetAction: vi.fn(),
 }));
-vi.mock('@/lib/hooks/useOgImage', () => ({
-  useOgImage: (...args: unknown[]) => mocks.useOgImage(...args),
-}));
-
+vi.mock('@/lib/hooks/useUpload', () => ({ useUpload: () => ({ upload: vi.fn(), isUploading: false }) }));
+const clients: QueryClient[] = [];
+const read = { latest: actions.latest, generation: actions.generation };
 beforeEach(() => {
-  Object.defineProperty(window, 'matchMedia', {
-    writable: true,
-    value: vi.fn().mockImplementation((query: string) => ({
-      matches: false,
-      media: query,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    })),
+  actions.status.mockReset().mockResolvedValue({ data: { assetId: 'site-asset', url: '/site.webp' } });
+  actions.regenerate.mockReset().mockResolvedValue({ success: true, generationId: 'manual-generation' });
+  actions.latest.mockReset().mockResolvedValue({ generation: null });
+  actions.generation.mockReset().mockResolvedValue({
+    generation: {
+      generationId: 'manual-generation',
+      runId: 'manual-run',
+      status: 'ready',
+      assetUrl: '/new-site.webp',
+    },
   });
-  mocks.getSiteOgStatusAction.mockResolvedValue({
-    data: { assetId: 'site-asset', url: 'https://cdn.example.test/site.webp' },
-  });
-  mocks.regenerateSiteOgImageAction.mockResolvedValue({
-    success: true,
-    runId: 'manual-run',
-    generationId: 'manual-generation',
-  });
-  mocks.useOgImage.mockReturnValue({
-    src: 'https://cdn.example.test/site.webp',
-    status: 'ready',
-    isRegenerating: false,
-    trackGeneration: mocks.trackGeneration,
-    trackLatest: mocks.trackLatest,
-  });
-  queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
-  });
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-  act(() => {
-    root?.render(
-      <QueryClientProvider client={queryClient!}>
-        <DesignSystemProvider forceColorScheme="light">
-          <SiteOgImagePanel currentBackgroundUrl={null} />
-        </DesignSystemProvider>
+  actions.remove.mockReset().mockResolvedValue({ success: true });
+});
+afterEach(() => clients.splice(0).forEach((client) => client.clear()));
+function setup(props: Partial<Parameters<typeof SiteOgImagePanel>[0]> = {}) {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
+  clients.push(client);
+  return {
+    client,
+    ...render(
+      <QueryClientProvider client={client}>
+        <SiteOgImagePanel
+          currentBackgroundUrl={null}
+          bindings={{
+            status: actions.status,
+            regenerate: actions.regenerate,
+            read,
+            asset: { set: vi.fn(), remove: actions.remove, upload: vi.fn(), uploadFile: vi.fn() },
+          }}
+          {...props}
+        />
       </QueryClientProvider>,
-    );
-  });
-});
-
-afterEach(() => {
-  act(() => root?.unmount());
-  container?.remove();
-  queryClient?.clear();
-  container = null;
-  root = null;
-  queryClient = null;
-  vi.clearAllMocks();
-});
-
-async function flush(): Promise<void> {
-  await act(async () => {
-    await Promise.resolve();
-    await new Promise((resolve) => setTimeout(resolve, 0));
-  });
+    ),
+  };
 }
-
 describe('SiteOgImagePanel', () => {
-  it('uses the fixed providerless Site target and tracks a manual generation directly', async () => {
-    await flush();
-    expect(mocks.useOgImage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        entityType: 'site',
-        entityId: SITE_OG_TARGET_ID,
-        provider: null,
+  it.each([true, false])('distinguishes the initial wait from a resolved OG preview (image=%s)', async (hasImage) => {
+    let finish!: (result: { data: { assetId: string | null; url?: string } }) => void;
+    actions.status.mockReturnValue(
+      new Promise((resolve) => {
+        finish = resolve;
       }),
     );
-
+    setup();
+    expect(screen.getAllByRole('status', { name: 'Loading...' }).length).toBeGreaterThan(0);
+    expect(screen.queryByText('No OG image')).not.toBeInTheDocument();
+    await act(async () =>
+      finish({ data: hasImage ? { assetId: 'site-asset', url: '/site.webp' } : { assetId: null } }),
+    );
+    if (hasImage) {
+      expect(await screen.findByRole('img', { name: 'Open Graph preview' })).toHaveAttribute(
+        'src',
+        expect.stringContaining('site.webp'),
+      );
+    } else {
+      expect(await screen.findByText('No OG image')).toBeInTheDocument();
+    }
+  });
+  it.each(['transport', 'action'])(
+    'shows a recoverable %s status failure instead of an empty preview',
+    async (failure) => {
+      if (failure === 'transport') {
+        actions.status.mockRejectedValueOnce(new Error('Status unavailable'));
+      } else {
+        actions.status.mockResolvedValueOnce({ error: 'Status unavailable' });
+      }
+      const { user } = setup();
+      expect(await screen.findByRole('alert')).toBeInTheDocument();
+      expect(screen.queryByText('No OG image')).not.toBeInTheDocument();
+      actions.status.mockResolvedValue({ data: { assetId: 'site-asset', url: '/site.webp' } });
+      await user.click(screen.getByRole('button', { name: 'Try again' }));
+      expect(await screen.findByRole('img', { name: 'Open Graph preview' })).toBeInTheDocument();
+    },
+  );
+  it('retains the resolved preview when a background status refresh fails', async () => {
+    const { client } = setup();
+    await screen.findByRole('img', { name: 'Open Graph preview' });
+    actions.status.mockRejectedValue(new Error('Status unavailable'));
     await act(async () => {
-      (container?.querySelector('[data-testid="regenerate"]') as HTMLButtonElement).click();
-      await Promise.resolve();
+      await client.invalidateQueries({ queryKey: ['siteOgStatus'] });
     });
-    expect(mocks.trackGeneration).toHaveBeenCalledWith('manual-generation');
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Open Graph preview' })).toBeInTheDocument();
   });
 
-  it('starts polling only when an automatic background update created a run', async () => {
-    await flush();
-    act(() => {
-      (container?.querySelector('[data-testid="background-without-run"]') as HTMLButtonElement).click();
-    });
-    expect(mocks.trackLatest).not.toHaveBeenCalled();
-
-    act(() => {
-      (container?.querySelector('[data-testid="background-with-run"]') as HTMLButtonElement).click();
-    });
-    expect(mocks.trackLatest).toHaveBeenCalledTimes(1);
+  it('uses the fixed providerless target and polls manual generations before refetching the canonical asset', async () => {
+    const { user } = setup();
+    await screen.findByRole('img', { name: 'Open Graph preview' });
+    expect(actions.latest).toHaveBeenCalledWith({ entityType: 'site', entityId: SITE_OG_TARGET_ID, locale: undefined });
+    await user.click(screen.getByRole('button', { name: 'Regenerate OG Image' }));
+    await waitFor(() => expect(actions.generation).toHaveBeenCalledWith('manual-generation'));
+    await waitFor(() => expect(actions.status.mock.calls.length).toBeGreaterThan(1));
   });
-
-  it('starts providerless polling when a Site setting or light-logo run is returned', async () => {
-    await flush();
-    act(() => {
-      root?.render(
-        <QueryClientProvider client={queryClient!}>
-          <DesignSystemProvider forceColorScheme="light">
-            <SiteOgImagePanel currentBackgroundUrl={null} automaticGenerationRunId="settings-run" />
-          </DesignSystemProvider>
-        </QueryClientProvider>,
-      );
-    });
-    await flush();
-
-    expect(mocks.trackLatest).toHaveBeenCalledTimes(1);
-  });
-
-  it('refetches the canonical Site asset when a generation becomes ready', async () => {
-    await flush();
-    expect(mocks.getSiteOgStatusAction).toHaveBeenCalledTimes(1);
-
-    mocks.useOgImage.mockReturnValue({
-      src: 'https://cdn.example.test/new-site.webp',
-      status: 'ready',
-      readyGenerationId: 'ready-generation',
-      isRegenerating: false,
-      trackGeneration: mocks.trackGeneration,
-      trackLatest: mocks.trackLatest,
-    });
-    act(() => {
-      root?.render(
-        <QueryClientProvider client={queryClient!}>
-          <DesignSystemProvider forceColorScheme="light">
-            <SiteOgImagePanel currentBackgroundUrl={null} />
-          </DesignSystemProvider>
-        </QueryClientProvider>,
-      );
-    });
-    await flush();
-
-    expect(mocks.getSiteOgStatusAction).toHaveBeenCalledTimes(2);
+  it.each([undefined, 'site-run'])(
+    'discovers a background generation only when its mutation returns a run (%s)',
+    async (runId) => {
+      actions.remove.mockResolvedValue({ success: true, ogGenerationRunId: runId });
+      const { user } = setup({ currentBackgroundUrl: '/background.webp' });
+      await screen.findByRole('img', { name: 'Open Graph preview' });
+      await waitFor(() => expect(actions.latest).toHaveBeenCalled());
+      const initialLookups = actions.latest.mock.calls.length;
+      await user.click(await screen.findByRole('button', { name: 'Remove featured image' }));
+      await waitFor(() => expect(actions.remove).toHaveBeenCalled());
+      await waitFor(() => expect(actions.status.mock.calls.length).toBeGreaterThan(1));
+      expect(actions.latest.mock.calls.length).toBe(initialLookups + (runId ? 1 : 0));
+    },
+  );
+  it('discovers an automatic generation returned by the settings owner', async () => {
+    setup({ automaticGenerationRunId: 'settings-run' });
+    await waitFor(() => expect(actions.latest).toHaveBeenCalledTimes(2));
   });
 });

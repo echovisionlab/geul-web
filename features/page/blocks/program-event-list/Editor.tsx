@@ -108,6 +108,7 @@ function ProgramEventListSettingsForm({ props, updateProps, readOnly = false }: 
               disabled={readOnly}
               label={tPageEditor('blockEditor.labels.programEventTypes')}
               placeholder={tPageEditor('blockEditor.placeholders.allTypes')}
+              isLoading={eventTypesQuery.isLoading}
               data={typeOptions}
               value={typeIds ? typeIds.split(',').filter(Boolean) : []}
               onChange={(values) => updateProp('typeIds', values.join(','))}
@@ -118,6 +119,7 @@ function ProgramEventListSettingsForm({ props, updateProps, readOnly = false }: 
               disabled={readOnly}
               label={tPageEditor('blockEditor.labels.programEventSeries')}
               placeholder={tPageEditor('blockEditor.placeholders.allSeries')}
+              isLoading={eventSeriesQuery.isLoading}
               data={seriesOptions}
               value={seriesId || null}
               onChange={(value) => updateProp('seriesId', value || '')}

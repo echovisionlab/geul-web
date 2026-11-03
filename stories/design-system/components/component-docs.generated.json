@@ -118,7 +118,7 @@
           "sources": [
             { "file": "components/core/Control.module.css", "line": 8, "property": "--_action-boundary" },
             { "file": "components/core/Control.module.css", "line": 165, "property": "border-color" },
-            { "file": "components/core/Control.module.css", "line": 418, "property": "border" }
+            { "file": "components/core/Control.module.css", "line": 495, "property": "border" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 179, "value": "#85827c", "context": ":root" },
@@ -607,7 +607,7 @@
         {
           "name": "--geul-border-default",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 377, "property": "border-color" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 454, "property": "border-color" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 175, "value": "#cfccc5", "context": ":root" },
             {
@@ -642,7 +642,7 @@
           "sources": [
             { "file": "components/core/Control.module.css", "line": 153, "property": "outline" },
             { "file": "components/core/Control.module.css", "line": 154, "property": "outline-offset" },
-            { "file": "components/core/Control.module.css", "line": 447, "property": "outline-offset" },
+            { "file": "components/core/Control.module.css", "line": 524, "property": "outline-offset" },
             { "file": "components/core/Spinner.module.css", "line": 5, "property": "border" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 134, "value": "2px", "context": ":root" }]
@@ -654,7 +654,8 @@
             { "file": "components/core/Control.module.css", "line": 18, "property": "border" },
             { "file": "components/core/Control.module.css", "line": 30, "property": "text-decoration-thickness" },
             { "file": "components/core/Control.module.css", "line": 120, "property": "text-decoration-thickness" },
-            { "file": "components/core/Control.module.css", "line": 418, "property": "border" }
+            { "file": "components/core/Control.module.css", "line": 337, "property": "border" },
+            { "file": "components/core/Control.module.css", "line": 495, "property": "border" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 133, "value": "1px", "context": ":root" }]
         },
@@ -716,14 +717,14 @@
           "sources": [
             { "file": "components/core/Control.module.css", "line": 276, "property": "width" },
             { "file": "components/core/Control.module.css", "line": 277, "property": "height" },
-            { "file": "components/core/Control.module.css", "line": 313, "property": "max-width" },
-            { "file": "components/core/Control.module.css", "line": 314, "property": "max-height" },
-            { "file": "components/core/Control.module.css", "line": 321, "property": "width" },
-            { "file": "components/core/Control.module.css", "line": 322, "property": "height" },
-            { "file": "components/core/Control.module.css", "line": 328, "property": "width" },
-            { "file": "components/core/Control.module.css", "line": 329, "property": "height" },
-            { "file": "components/core/Control.module.css", "line": 339, "property": "width" },
-            { "file": "components/core/Control.module.css", "line": 340, "property": "height" }
+            { "file": "components/core/Control.module.css", "line": 390, "property": "max-width" },
+            { "file": "components/core/Control.module.css", "line": 391, "property": "max-height" },
+            { "file": "components/core/Control.module.css", "line": 398, "property": "width" },
+            { "file": "components/core/Control.module.css", "line": 399, "property": "height" },
+            { "file": "components/core/Control.module.css", "line": 405, "property": "width" },
+            { "file": "components/core/Control.module.css", "line": 406, "property": "height" },
+            { "file": "components/core/Control.module.css", "line": 416, "property": "width" },
+            { "file": "components/core/Control.module.css", "line": 417, "property": "height" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 156, "value": "1rem", "context": ":root" }]
         },
@@ -740,7 +741,7 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 241, "property": "min-height" },
-            { "file": "components/core/Control.module.css", "line": 451, "property": "--_control-height" }
+            { "file": "components/core/Control.module.css", "line": 528, "property": "--_control-height" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 118, "value": "1.5rem", "context": ":root" }
@@ -893,8 +894,8 @@
           "sources": [
             { "file": "components/core/Control.module.css", "line": 223, "property": "font-size" },
             { "file": "components/core/Control.module.css", "line": 243, "property": "font-size" },
-            { "file": "components/core/Control.module.css", "line": 411, "property": "min-width" },
-            { "file": "components/core/Control.module.css", "line": 413, "property": "font-size" }
+            { "file": "components/core/Control.module.css", "line": 488, "property": "min-width" },
+            { "file": "components/core/Control.module.css", "line": 490, "property": "font-size" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 88, "value": "0.625rem", "context": ":root" },
@@ -906,9 +907,29 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 25, "property": "font-weight" },
-            { "file": "components/core/Control.module.css", "line": 415, "property": "font-weight" }
+            { "file": "components/core/Control.module.css", "line": 492, "property": "font-weight" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 100, "value": "400", "context": ":root" }]
+        },
+        {
+          "name": "--geul-icon-size-md",
+          "registered": true,
+          "sources": [
+            { "file": "components/core/Control.module.css", "line": 318, "property": "width" },
+            { "file": "components/core/Control.module.css", "line": 319, "property": "height" }
+          ],
+          "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 95, "value": "1rem", "context": ":root" }]
+        },
+        {
+          "name": "--geul-icon-size-xs",
+          "registered": true,
+          "sources": [
+            { "file": "components/core/Control.module.css", "line": 362, "property": "width" },
+            { "file": "components/core/Control.module.css", "line": 363, "property": "height" }
+          ],
+          "definitions": [
+            { "file": "lib/styles/design-tokens.css", "line": 93, "value": "0.75rem", "context": ":root" }
+          ]
         },
         {
           "name": "--geul-interaction-minimum",
@@ -918,7 +939,7 @@
             { "file": "components/core/Control.module.css", "line": 219, "property": "height" },
             { "file": "components/core/Control.module.css", "line": 241, "property": "min-height" },
             { "file": "components/core/Control.module.css", "line": 247, "property": "width" },
-            { "file": "components/core/Control.module.css", "line": 481, "property": "min-height" }
+            { "file": "components/core/Control.module.css", "line": 558, "property": "min-height" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 125, "value": "0px", "context": ":root" },
@@ -934,10 +955,10 @@
           "name": "--geul-layer-popup",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 363, "property": "z-index" },
-            { "file": "components/core/Control.module.css", "line": 370, "property": "z-index" },
-            { "file": "components/core/Control.module.css", "line": 390, "property": "z-index" },
-            { "file": "components/core/Control.module.css", "line": 458, "property": "z-index" }
+            { "file": "components/core/Control.module.css", "line": 440, "property": "z-index" },
+            { "file": "components/core/Control.module.css", "line": 447, "property": "z-index" },
+            { "file": "components/core/Control.module.css", "line": 467, "property": "z-index" },
+            { "file": "components/core/Control.module.css", "line": 535, "property": "z-index" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 142, "value": "300", "context": ":root" }]
         },
@@ -950,7 +971,7 @@
         {
           "name": "--geul-line-height-xs",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 414, "property": "line-height" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 491, "property": "line-height" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 112, "value": "1.4", "context": ":root" }]
         },
         {
@@ -958,7 +979,7 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 33, "property": "transition" },
-            { "file": "components/core/Control.module.css", "line": 330, "property": "transition" }
+            { "file": "components/core/Control.module.css", "line": 407, "property": "transition" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 150, "value": "ease-out", "context": ":root" }
@@ -969,7 +990,7 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 33, "property": "transition" },
-            { "file": "components/core/Control.module.css", "line": 330, "property": "transition" }
+            { "file": "components/core/Control.module.css", "line": 407, "property": "transition" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 146, "value": "100ms", "context": ":root" }]
         },
@@ -994,8 +1015,8 @@
           "name": "--geul-overlay-control",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 430, "property": "background" },
-            { "file": "components/core/Control.module.css", "line": 467, "property": "background" }
+            { "file": "components/core/Control.module.css", "line": 507, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 544, "property": "background" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 36, "value": "rgb(0 0 0 / 28%)", "context": ":root" }
@@ -1004,7 +1025,7 @@
         {
           "name": "--geul-overlay-control-border",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 439, "property": "border-color" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 516, "property": "border-color" }],
           "definitions": [
             {
               "file": "lib/styles/design-tokens.css",
@@ -1017,7 +1038,7 @@
         {
           "name": "--geul-overlay-strong",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 475, "property": "background" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 552, "property": "background" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 38, "value": "rgb(0 0 0 / 82%)", "context": ":root" }
           ]
@@ -1025,7 +1046,7 @@
         {
           "name": "--geul-paper-ink",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 435, "property": "color" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 512, "property": "color" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 25, "value": "#000", "context": ":root" }]
         },
         {
@@ -1033,6 +1054,7 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 252, "property": "border-radius" },
+            { "file": "components/core/Control.module.css", "line": 320, "property": "border-radius" },
             { "file": "components/core/Spinner.module.css", "line": 7, "property": "border-radius" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 132, "value": "50%", "context": ":root" }]
@@ -1047,8 +1069,8 @@
           "name": "--geul-spacing-md",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 361, "property": "inset-block-start" },
-            { "file": "components/core/Control.module.css", "line": 362, "property": "inset-inline-start" }
+            { "file": "components/core/Control.module.css", "line": 438, "property": "inset-block-start" },
+            { "file": "components/core/Control.module.css", "line": 439, "property": "inset-inline-start" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 65, "value": "0.75rem", "context": ":root" }
@@ -1057,7 +1079,7 @@
         {
           "name": "--geul-spacing-role-control-label",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 294, "property": "gap" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 371, "property": "gap" }],
           "definitions": [
             {
               "file": "lib/styles/design-tokens.css",
@@ -1083,7 +1105,7 @@
         {
           "name": "--geul-spacing-xs",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 395, "property": "padding-block" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 472, "property": "padding-block" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 63, "value": "0.5rem", "context": ":root" }]
         },
         {
@@ -1092,10 +1114,10 @@
           "sources": [
             { "file": "components/core/Control.module.css", "line": 29, "property": "text-underline-offset" },
             { "file": "components/core/Control.module.css", "line": 119, "property": "text-underline-offset" },
-            { "file": "components/core/Control.module.css", "line": 406, "property": "inset-block-start" },
-            { "file": "components/core/Control.module.css", "line": 407, "property": "inset-inline-end" },
-            { "file": "components/core/Control.module.css", "line": 411, "property": "min-width" },
-            { "file": "components/core/Control.module.css", "line": 412, "property": "padding" }
+            { "file": "components/core/Control.module.css", "line": 483, "property": "inset-block-start" },
+            { "file": "components/core/Control.module.css", "line": 484, "property": "inset-inline-end" },
+            { "file": "components/core/Control.module.css", "line": 488, "property": "min-width" },
+            { "file": "components/core/Control.module.css", "line": 489, "property": "padding" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 62, "value": "0.25rem", "context": ":root" }
@@ -1248,7 +1270,10 @@
         {
           "name": "--geul-surface",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 376, "property": "background" }],
+          "sources": [
+            { "file": "components/core/Control.module.css", "line": 321, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 453, "property": "background" }
+          ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 167, "value": "#f8f7f4", "context": ":root" },
             {
@@ -1280,7 +1305,10 @@
         {
           "name": "--geul-surface-active",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 144, "property": "background" }],
+          "sources": [
+            { "file": "components/core/Control.module.css", "line": 144, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 349, "property": "background" }
+          ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 170, "value": "#dcd9d3", "context": ":root" },
             {
@@ -1314,7 +1342,8 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 131, "property": "background" },
-            { "file": "components/core/Control.module.css", "line": 383, "property": "background" }
+            { "file": "components/core/Control.module.css", "line": 341, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 460, "property": "background" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 169, "value": "#e1dfd9", "context": ":root" },
@@ -1349,7 +1378,8 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 104, "property": "background" },
-            { "file": "components/core/Control.module.css", "line": 164, "property": "background" }
+            { "file": "components/core/Control.module.css", "line": 164, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 357, "property": "background" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 168, "value": "#e8e6e1", "context": ":root" },
@@ -1383,10 +1413,10 @@
           "name": "--geul-text-inverse-primary",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 423, "property": "color" },
-            { "file": "components/core/Control.module.css", "line": 429, "property": "color" },
-            { "file": "components/core/Control.module.css", "line": 434, "property": "background" },
-            { "file": "components/core/Control.module.css", "line": 443, "property": "outline-color" }
+            { "file": "components/core/Control.module.css", "line": 500, "property": "color" },
+            { "file": "components/core/Control.module.css", "line": 506, "property": "color" },
+            { "file": "components/core/Control.module.css", "line": 511, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 520, "property": "outline-color" }
           ],
           "definitions": [
             {
@@ -1400,7 +1430,10 @@
         {
           "name": "--geul-text-muted",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 158, "property": "color" }],
+          "sources": [
+            { "file": "components/core/Control.module.css", "line": 158, "property": "color" },
+            { "file": "components/core/Control.module.css", "line": 358, "property": "color" }
+          ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 173, "value": "#5d5b56", "context": ":root" },
             {
@@ -1434,7 +1467,8 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 95, "property": "color" },
-            { "file": "components/core/Control.module.css", "line": 417, "property": "color" }
+            { "file": "components/core/Control.module.css", "line": 333, "property": "color" },
+            { "file": "components/core/Control.module.css", "line": 494, "property": "color" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 181, "value": "#f8f7f4", "context": ":root" },
@@ -1468,8 +1502,8 @@
           "name": "--geul-text-on-image",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 466, "property": "color" },
-            { "file": "components/core/Control.module.css", "line": 474, "property": "color" }
+            { "file": "components/core/Control.module.css", "line": 543, "property": "color" },
+            { "file": "components/core/Control.module.css", "line": 551, "property": "color" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 7, "value": "#fff", "context": ":root" }]
         }
@@ -1973,6 +2007,7 @@
         "Consumer: components/core/Modal/BlockingAlertDialog.tsx",
         "Consumer: components/core/Modal/ConfirmModal.tsx",
         "Consumer: components/core/Modal/FormModal.tsx",
+        "Consumer: components/core/Modal/confirm-dialogs.tsx",
         "Consumer: components/core/OverlayTriggerTarget.tsx",
         "Consumer: components/core/ParameterPanel/ParameterPanel.tsx",
         "Consumer: components/core/Section/ToolbarCommand.tsx",
@@ -2028,6 +2063,7 @@
         "Consumer: features/editor/components/MediaProcessingSurface.tsx",
         "Consumer: features/editor/components/UnifiedFileAttachmentPagePreview.tsx",
         "Consumer: features/editor/tiptap/code/CodeBlockSurface.tsx",
+        "Consumer: features/editor/tiptap/emoji/TiptapEmojiPicker.tsx",
         "Consumer: features/editor/tiptap/menus/SelectionBubbleMenu.tsx",
         "Consumer: features/editor/tiptap/shader/ShaderNode.tsx",
         "Consumer: features/editor/tiptap/site-variables/SiteVariable.tsx",
@@ -2039,6 +2075,7 @@
         "Consumer: features/form/FormBuilder/FieldEditor.tsx",
         "Consumer: features/form/FormBuilder/FormBuilder.tsx",
         "Consumer: features/form/FormBuilder/StepEditor.tsx",
+        "Consumer: features/form/FormField/FormField.tsx",
         "Consumer: features/form/FormPasswordContent.tsx",
         "Consumer: features/form/FormStep.tsx",
         "Consumer: features/label/AdminLabelDetailClient.tsx",
@@ -2105,6 +2142,7 @@
         "Consumer: features/translation/admin/TranslationOverviewPage.tsx",
         "Consumer: features/translation/admin/TranslationSettingsPage.tsx",
         "Consumer: features/translation/settings/TranslationProviderModal.tsx",
+        "Consumer: features/user/ui/ProfileAvatarControl/ProfileAvatarControl.tsx",
         "Consumer: features/user/ui/UserProfile/UserProfileView.tsx",
         "Consumer: features/version-history/ui/VersionHistoryDrawerView.tsx",
         "Consumer: features/work/WorkEditor/WorkClientsSection.tsx",
@@ -2381,7 +2419,7 @@
           "sources": [
             { "file": "components/core/Control.module.css", "line": 8, "property": "--_action-boundary" },
             { "file": "components/core/Control.module.css", "line": 165, "property": "border-color" },
-            { "file": "components/core/Control.module.css", "line": 418, "property": "border" }
+            { "file": "components/core/Control.module.css", "line": 495, "property": "border" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 179, "value": "#85827c", "context": ":root" },
@@ -2870,7 +2908,7 @@
         {
           "name": "--geul-border-default",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 377, "property": "border-color" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 454, "property": "border-color" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 175, "value": "#cfccc5", "context": ":root" },
             {
@@ -2905,7 +2943,7 @@
           "sources": [
             { "file": "components/core/Control.module.css", "line": 153, "property": "outline" },
             { "file": "components/core/Control.module.css", "line": 154, "property": "outline-offset" },
-            { "file": "components/core/Control.module.css", "line": 447, "property": "outline-offset" },
+            { "file": "components/core/Control.module.css", "line": 524, "property": "outline-offset" },
             { "file": "components/core/Spinner.module.css", "line": 5, "property": "border" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 134, "value": "2px", "context": ":root" }]
@@ -2917,7 +2955,8 @@
             { "file": "components/core/Control.module.css", "line": 18, "property": "border" },
             { "file": "components/core/Control.module.css", "line": 30, "property": "text-decoration-thickness" },
             { "file": "components/core/Control.module.css", "line": 120, "property": "text-decoration-thickness" },
-            { "file": "components/core/Control.module.css", "line": 418, "property": "border" }
+            { "file": "components/core/Control.module.css", "line": 337, "property": "border" },
+            { "file": "components/core/Control.module.css", "line": 495, "property": "border" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 133, "value": "1px", "context": ":root" }]
         },
@@ -2979,14 +3018,14 @@
           "sources": [
             { "file": "components/core/Control.module.css", "line": 276, "property": "width" },
             { "file": "components/core/Control.module.css", "line": 277, "property": "height" },
-            { "file": "components/core/Control.module.css", "line": 313, "property": "max-width" },
-            { "file": "components/core/Control.module.css", "line": 314, "property": "max-height" },
-            { "file": "components/core/Control.module.css", "line": 321, "property": "width" },
-            { "file": "components/core/Control.module.css", "line": 322, "property": "height" },
-            { "file": "components/core/Control.module.css", "line": 328, "property": "width" },
-            { "file": "components/core/Control.module.css", "line": 329, "property": "height" },
-            { "file": "components/core/Control.module.css", "line": 339, "property": "width" },
-            { "file": "components/core/Control.module.css", "line": 340, "property": "height" }
+            { "file": "components/core/Control.module.css", "line": 390, "property": "max-width" },
+            { "file": "components/core/Control.module.css", "line": 391, "property": "max-height" },
+            { "file": "components/core/Control.module.css", "line": 398, "property": "width" },
+            { "file": "components/core/Control.module.css", "line": 399, "property": "height" },
+            { "file": "components/core/Control.module.css", "line": 405, "property": "width" },
+            { "file": "components/core/Control.module.css", "line": 406, "property": "height" },
+            { "file": "components/core/Control.module.css", "line": 416, "property": "width" },
+            { "file": "components/core/Control.module.css", "line": 417, "property": "height" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 156, "value": "1rem", "context": ":root" }]
         },
@@ -3003,7 +3042,7 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 241, "property": "min-height" },
-            { "file": "components/core/Control.module.css", "line": 451, "property": "--_control-height" }
+            { "file": "components/core/Control.module.css", "line": 528, "property": "--_control-height" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 118, "value": "1.5rem", "context": ":root" }
@@ -3156,8 +3195,8 @@
           "sources": [
             { "file": "components/core/Control.module.css", "line": 223, "property": "font-size" },
             { "file": "components/core/Control.module.css", "line": 243, "property": "font-size" },
-            { "file": "components/core/Control.module.css", "line": 411, "property": "min-width" },
-            { "file": "components/core/Control.module.css", "line": 413, "property": "font-size" }
+            { "file": "components/core/Control.module.css", "line": 488, "property": "min-width" },
+            { "file": "components/core/Control.module.css", "line": 490, "property": "font-size" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 88, "value": "0.625rem", "context": ":root" },
@@ -3169,9 +3208,29 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 25, "property": "font-weight" },
-            { "file": "components/core/Control.module.css", "line": 415, "property": "font-weight" }
+            { "file": "components/core/Control.module.css", "line": 492, "property": "font-weight" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 100, "value": "400", "context": ":root" }]
+        },
+        {
+          "name": "--geul-icon-size-md",
+          "registered": true,
+          "sources": [
+            { "file": "components/core/Control.module.css", "line": 318, "property": "width" },
+            { "file": "components/core/Control.module.css", "line": 319, "property": "height" }
+          ],
+          "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 95, "value": "1rem", "context": ":root" }]
+        },
+        {
+          "name": "--geul-icon-size-xs",
+          "registered": true,
+          "sources": [
+            { "file": "components/core/Control.module.css", "line": 362, "property": "width" },
+            { "file": "components/core/Control.module.css", "line": 363, "property": "height" }
+          ],
+          "definitions": [
+            { "file": "lib/styles/design-tokens.css", "line": 93, "value": "0.75rem", "context": ":root" }
+          ]
         },
         {
           "name": "--geul-interaction-minimum",
@@ -3181,7 +3240,7 @@
             { "file": "components/core/Control.module.css", "line": 219, "property": "height" },
             { "file": "components/core/Control.module.css", "line": 241, "property": "min-height" },
             { "file": "components/core/Control.module.css", "line": 247, "property": "width" },
-            { "file": "components/core/Control.module.css", "line": 481, "property": "min-height" }
+            { "file": "components/core/Control.module.css", "line": 558, "property": "min-height" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 125, "value": "0px", "context": ":root" },
@@ -3197,10 +3256,10 @@
           "name": "--geul-layer-popup",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 363, "property": "z-index" },
-            { "file": "components/core/Control.module.css", "line": 370, "property": "z-index" },
-            { "file": "components/core/Control.module.css", "line": 390, "property": "z-index" },
-            { "file": "components/core/Control.module.css", "line": 458, "property": "z-index" }
+            { "file": "components/core/Control.module.css", "line": 440, "property": "z-index" },
+            { "file": "components/core/Control.module.css", "line": 447, "property": "z-index" },
+            { "file": "components/core/Control.module.css", "line": 467, "property": "z-index" },
+            { "file": "components/core/Control.module.css", "line": 535, "property": "z-index" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 142, "value": "300", "context": ":root" }]
         },
@@ -3213,7 +3272,7 @@
         {
           "name": "--geul-line-height-xs",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 414, "property": "line-height" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 491, "property": "line-height" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 112, "value": "1.4", "context": ":root" }]
         },
         {
@@ -3221,7 +3280,7 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 33, "property": "transition" },
-            { "file": "components/core/Control.module.css", "line": 330, "property": "transition" }
+            { "file": "components/core/Control.module.css", "line": 407, "property": "transition" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 150, "value": "ease-out", "context": ":root" }
@@ -3232,7 +3291,7 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 33, "property": "transition" },
-            { "file": "components/core/Control.module.css", "line": 330, "property": "transition" }
+            { "file": "components/core/Control.module.css", "line": 407, "property": "transition" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 146, "value": "100ms", "context": ":root" }]
         },
@@ -3257,8 +3316,8 @@
           "name": "--geul-overlay-control",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 430, "property": "background" },
-            { "file": "components/core/Control.module.css", "line": 467, "property": "background" }
+            { "file": "components/core/Control.module.css", "line": 507, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 544, "property": "background" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 36, "value": "rgb(0 0 0 / 28%)", "context": ":root" }
@@ -3267,7 +3326,7 @@
         {
           "name": "--geul-overlay-control-border",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 439, "property": "border-color" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 516, "property": "border-color" }],
           "definitions": [
             {
               "file": "lib/styles/design-tokens.css",
@@ -3280,7 +3339,7 @@
         {
           "name": "--geul-overlay-strong",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 475, "property": "background" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 552, "property": "background" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 38, "value": "rgb(0 0 0 / 82%)", "context": ":root" }
           ]
@@ -3288,7 +3347,7 @@
         {
           "name": "--geul-paper-ink",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 435, "property": "color" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 512, "property": "color" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 25, "value": "#000", "context": ":root" }]
         },
         {
@@ -3296,6 +3355,7 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 252, "property": "border-radius" },
+            { "file": "components/core/Control.module.css", "line": 320, "property": "border-radius" },
             { "file": "components/core/Spinner.module.css", "line": 7, "property": "border-radius" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 132, "value": "50%", "context": ":root" }]
@@ -3310,8 +3370,8 @@
           "name": "--geul-spacing-md",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 361, "property": "inset-block-start" },
-            { "file": "components/core/Control.module.css", "line": 362, "property": "inset-inline-start" }
+            { "file": "components/core/Control.module.css", "line": 438, "property": "inset-block-start" },
+            { "file": "components/core/Control.module.css", "line": 439, "property": "inset-inline-start" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 65, "value": "0.75rem", "context": ":root" }
@@ -3320,7 +3380,7 @@
         {
           "name": "--geul-spacing-role-control-label",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 294, "property": "gap" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 371, "property": "gap" }],
           "definitions": [
             {
               "file": "lib/styles/design-tokens.css",
@@ -3346,7 +3406,7 @@
         {
           "name": "--geul-spacing-xs",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 395, "property": "padding-block" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 472, "property": "padding-block" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 63, "value": "0.5rem", "context": ":root" }]
         },
         {
@@ -3355,10 +3415,10 @@
           "sources": [
             { "file": "components/core/Control.module.css", "line": 29, "property": "text-underline-offset" },
             { "file": "components/core/Control.module.css", "line": 119, "property": "text-underline-offset" },
-            { "file": "components/core/Control.module.css", "line": 406, "property": "inset-block-start" },
-            { "file": "components/core/Control.module.css", "line": 407, "property": "inset-inline-end" },
-            { "file": "components/core/Control.module.css", "line": 411, "property": "min-width" },
-            { "file": "components/core/Control.module.css", "line": 412, "property": "padding" }
+            { "file": "components/core/Control.module.css", "line": 483, "property": "inset-block-start" },
+            { "file": "components/core/Control.module.css", "line": 484, "property": "inset-inline-end" },
+            { "file": "components/core/Control.module.css", "line": 488, "property": "min-width" },
+            { "file": "components/core/Control.module.css", "line": 489, "property": "padding" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 62, "value": "0.25rem", "context": ":root" }
@@ -3511,7 +3571,10 @@
         {
           "name": "--geul-surface",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 376, "property": "background" }],
+          "sources": [
+            { "file": "components/core/Control.module.css", "line": 321, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 453, "property": "background" }
+          ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 167, "value": "#f8f7f4", "context": ":root" },
             {
@@ -3543,7 +3606,10 @@
         {
           "name": "--geul-surface-active",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 144, "property": "background" }],
+          "sources": [
+            { "file": "components/core/Control.module.css", "line": 144, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 349, "property": "background" }
+          ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 170, "value": "#dcd9d3", "context": ":root" },
             {
@@ -3577,7 +3643,8 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 131, "property": "background" },
-            { "file": "components/core/Control.module.css", "line": 383, "property": "background" }
+            { "file": "components/core/Control.module.css", "line": 341, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 460, "property": "background" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 169, "value": "#e1dfd9", "context": ":root" },
@@ -3612,7 +3679,8 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 104, "property": "background" },
-            { "file": "components/core/Control.module.css", "line": 164, "property": "background" }
+            { "file": "components/core/Control.module.css", "line": 164, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 357, "property": "background" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 168, "value": "#e8e6e1", "context": ":root" },
@@ -3646,10 +3714,10 @@
           "name": "--geul-text-inverse-primary",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 423, "property": "color" },
-            { "file": "components/core/Control.module.css", "line": 429, "property": "color" },
-            { "file": "components/core/Control.module.css", "line": 434, "property": "background" },
-            { "file": "components/core/Control.module.css", "line": 443, "property": "outline-color" }
+            { "file": "components/core/Control.module.css", "line": 500, "property": "color" },
+            { "file": "components/core/Control.module.css", "line": 506, "property": "color" },
+            { "file": "components/core/Control.module.css", "line": 511, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 520, "property": "outline-color" }
           ],
           "definitions": [
             {
@@ -3663,7 +3731,10 @@
         {
           "name": "--geul-text-muted",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 158, "property": "color" }],
+          "sources": [
+            { "file": "components/core/Control.module.css", "line": 158, "property": "color" },
+            { "file": "components/core/Control.module.css", "line": 358, "property": "color" }
+          ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 173, "value": "#5d5b56", "context": ":root" },
             {
@@ -3697,7 +3768,8 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 95, "property": "color" },
-            { "file": "components/core/Control.module.css", "line": 417, "property": "color" }
+            { "file": "components/core/Control.module.css", "line": 333, "property": "color" },
+            { "file": "components/core/Control.module.css", "line": 494, "property": "color" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 181, "value": "#f8f7f4", "context": ":root" },
@@ -3731,8 +3803,8 @@
           "name": "--geul-text-on-image",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 466, "property": "color" },
-            { "file": "components/core/Control.module.css", "line": 474, "property": "color" }
+            { "file": "components/core/Control.module.css", "line": 543, "property": "color" },
+            { "file": "components/core/Control.module.css", "line": 551, "property": "color" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 7, "value": "#fff", "context": ":root" }]
         }
@@ -3753,6 +3825,13 @@
       ],
       "api": [
         {
+          "name": "appearance",
+          "type": "'default' | 'media-overlay' | 'default'",
+          "required": false,
+          "description": "Small media-corner badge with an independent, full-size interaction target. Allowed combinations vary by union branch. Check the complete action/link, name and geometry contracts.",
+          "defaultValue": "'default'"
+        },
+        {
           "name": "aria-label",
           "type": "string",
           "required": false,
@@ -3772,8 +3851,18 @@
         },
         { "name": "autoFocus", "type": "boolean", "required": false },
         { "name": "children", "type": "ReactNode", "required": false },
-        { "name": "contrast", "type": "'standard' | 'inverse'", "required": false },
-        { "name": "count", "type": "number", "required": false },
+        {
+          "name": "contrast",
+          "type": "'standard' | 'inverse' & never | 'standard' | 'inverse'",
+          "required": false,
+          "description": "Allowed combinations vary by union branch. Check the complete action/link, name and geometry contracts."
+        },
+        {
+          "name": "count",
+          "type": "number & never | number",
+          "required": false,
+          "description": "Visible badge count; Core appends the same text to a `label`/`aria-label` name (WCAG 2.5.3). Allowed combinations vary by union branch. Check the complete action/link, name and geometry contracts. Visible badge count; Core appends the same text to a `label`/`aria-label` name (WCAG 2.5.3)."
+        },
         { "name": "disabled", "type": "boolean", "required": false, "defaultValue": "false" },
         {
           "name": "download",
@@ -3818,7 +3907,7 @@
         },
         {
           "name": "placement",
-          "type": "'inline' | 'overlay-start' | 'overlay-start-inside' | 'overlay-end' | 'overlay-end-inside'",
+          "type": "'inline' | 'overlay-start' | 'overlay-start-inside' | 'overlay-end' | 'overlay-end-inside' | 'overlay-start-inside' | 'overlay-end-inside' | 'inline' | 'overlay-start' | 'overlay-start-inside' | 'overlay-end' | 'overlay-end-inside' | 'inline' | 'overlay-start' | 'overlay-start-inside' | 'overlay-end' | 'overlay-end-inside'",
           "required": false,
           "defaultValue": "'inline'"
         },
@@ -3854,7 +3943,13 @@
           "required": false,
           "description": "Allowed combinations vary by union branch. Check the complete action/link, name and geometry contracts."
         },
-        { "name": "shape", "type": "'square' | 'circle'", "required": false, "defaultValue": "'square'" },
+        {
+          "name": "shape",
+          "type": "'square' | 'circle'",
+          "required": false,
+          "description": "Allowed combinations vary by union branch. Check the complete action/link, name and geometry contracts.",
+          "defaultValue": "'square'"
+        },
         {
           "name": "size",
           "type": "IconButtonSize",
@@ -4225,6 +4320,9 @@
         { "id": "core-actions-iconbutton--primary", "name": "Primary" },
         { "id": "core-actions-iconbutton--danger", "name": "Danger" },
         { "id": "core-actions-iconbutton--circular", "name": "Circular" },
+        { "id": "core-actions-iconbutton--media-overlay", "name": "Media Overlay" },
+        { "id": "core-actions-iconbutton--media-overlay-hover", "name": "Media Overlay Hover" },
+        { "id": "core-actions-iconbutton--media-overlay-active", "name": "Media Overlay Active" },
         { "id": "core-actions-iconbutton--disabled", "name": "Disabled" },
         { "id": "core-actions-iconbutton--low-emphasis-states", "name": "Low Emphasis States" },
         { "id": "core-actions-iconbutton--semantic-matrix", "name": "Semantic Matrix" },
@@ -4244,6 +4342,7 @@
         "Choose Button when the command needs visible text. label supplies an accessible name and is not copied into visible text.",
         "Supply exactly one of label, aria-label or aria-labelledby. Place a drag-handle first on the left and connect actual sensor/activator bindings.",
         "Compose Tooltip or ToolbarCommand explicitly when an icon-only command needs a tooltip. The primitive does not create one automatically.",
+        "Use appearance=media-overlay only for small commands inside a media corner. Avatar removal consumes it through ImageUploadField; ordinary controls keep the default appearance.",
         "Consumer: app/(general)/artists/[idOrSlug]/ArtistWorkSection.tsx",
         "Consumer: app/(general)/privacy/PrivacyPageClient.tsx",
         "Consumer: app/(general)/privacy/history/[id]/PrivacyHistoryDetailClient.tsx",
@@ -4278,6 +4377,8 @@
         "Consumer: features/campaign/CampaignAnalyticsPage.tsx",
         "Consumer: features/data-table/MultiFilterEditorView.tsx",
         "Consumer: features/data-table/MultiSortView.tsx",
+        "Consumer: features/data-table/ServerDataTable/ServerDataTableMultiFilter.tsx",
+        "Consumer: features/data-table/ServerDataTable/ServerDataTableMultiSort.tsx",
         "Consumer: features/editor/AIMenu/AIMenu.tsx",
         "Consumer: features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
         "Consumer: features/editor/tiptap/TiptapBlockMenu.tsx",
@@ -4359,6 +4460,7 @@
       ],
       "constraints": [
         "The 16px glyph and hit target are separate rules. Padding is 0; coarse pointers use a minimum 44px target.",
+        "media-overlay uses a 16px circular visual and 12px glyph/spinner within a rectangular 24px target (44px coarse). The target includes every painted badge edge. It requires inside placement and rejects size, shape, count, contrast, links and toggles.",
         "Defaults are neutral/low/square. size accepts compact/chrome/xs/sm/md/lg/xl; the former duplicate controlSize prop was removed. Standalone action size falls back to xs. A drag-handle owns compact geometry and rejects size/type=submit.",
         "A toggle passes pressed; Core sets aria-pressed and owns the neutral resting ink and muted selected surface. Toggles reject tone/emphasis and raw aria-pressed; links and drag-handles are not toggles.",
         "Optional name properties in the table still require one name-union branch. count must be a nonnegative safe integer; values of 100 or more display as 99+.",
@@ -4369,7 +4471,8 @@
         "docs/design-system/component-documentation.md",
         "docs/design-system/icon-text-button-api-review.md",
         "docs/design-system/button-api-review.md",
-        "docs/design-system/spacing-icon-contract.md"
+        "docs/design-system/spacing-icon-contract.md",
+        "docs/design-system/image-upload-contract.md"
       ]
     },
     {
@@ -4488,7 +4591,7 @@
           "sources": [
             { "file": "components/core/Control.module.css", "line": 8, "property": "--_action-boundary" },
             { "file": "components/core/Control.module.css", "line": 165, "property": "border-color" },
-            { "file": "components/core/Control.module.css", "line": 418, "property": "border" }
+            { "file": "components/core/Control.module.css", "line": 495, "property": "border" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 179, "value": "#85827c", "context": ":root" },
@@ -4977,7 +5080,7 @@
         {
           "name": "--geul-border-default",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 377, "property": "border-color" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 454, "property": "border-color" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 175, "value": "#cfccc5", "context": ":root" },
             {
@@ -5012,7 +5115,8 @@
           "sources": [
             { "file": "components/core/Control.module.css", "line": 153, "property": "outline" },
             { "file": "components/core/Control.module.css", "line": 154, "property": "outline-offset" },
-            { "file": "components/core/Control.module.css", "line": 447, "property": "outline-offset" }
+            { "file": "components/core/Control.module.css", "line": 524, "property": "outline-offset" },
+            { "file": "components/core/Spinner.module.css", "line": 5, "property": "border" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 134, "value": "2px", "context": ":root" }]
         },
@@ -5023,7 +5127,8 @@
             { "file": "components/core/Control.module.css", "line": 18, "property": "border" },
             { "file": "components/core/Control.module.css", "line": 30, "property": "text-decoration-thickness" },
             { "file": "components/core/Control.module.css", "line": 120, "property": "text-decoration-thickness" },
-            { "file": "components/core/Control.module.css", "line": 418, "property": "border" },
+            { "file": "components/core/Control.module.css", "line": 337, "property": "border" },
+            { "file": "components/core/Control.module.css", "line": 495, "property": "border" },
             {
               "file": "components/core/TextButton/TextButton.module.css",
               "line": 167,
@@ -5105,14 +5210,16 @@
           "sources": [
             { "file": "components/core/Control.module.css", "line": 276, "property": "width" },
             { "file": "components/core/Control.module.css", "line": 277, "property": "height" },
-            { "file": "components/core/Control.module.css", "line": 313, "property": "max-width" },
-            { "file": "components/core/Control.module.css", "line": 314, "property": "max-height" },
-            { "file": "components/core/Control.module.css", "line": 321, "property": "width" },
-            { "file": "components/core/Control.module.css", "line": 322, "property": "height" },
-            { "file": "components/core/Control.module.css", "line": 328, "property": "width" },
-            { "file": "components/core/Control.module.css", "line": 329, "property": "height" },
-            { "file": "components/core/Control.module.css", "line": 339, "property": "width" },
-            { "file": "components/core/Control.module.css", "line": 340, "property": "height" }
+            { "file": "components/core/Control.module.css", "line": 390, "property": "max-width" },
+            { "file": "components/core/Control.module.css", "line": 391, "property": "max-height" },
+            { "file": "components/core/Control.module.css", "line": 398, "property": "width" },
+            { "file": "components/core/Control.module.css", "line": 399, "property": "height" },
+            { "file": "components/core/Control.module.css", "line": 405, "property": "width" },
+            { "file": "components/core/Control.module.css", "line": 406, "property": "height" },
+            { "file": "components/core/Control.module.css", "line": 416, "property": "width" },
+            { "file": "components/core/Control.module.css", "line": 417, "property": "height" },
+            { "file": "components/core/TextButton/TextButton.module.css", "line": 212, "property": "width" },
+            { "file": "components/core/TextButton/TextButton.module.css", "line": 213, "property": "height" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 156, "value": "1rem", "context": ":root" }]
         },
@@ -5132,7 +5239,7 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 241, "property": "min-height" },
-            { "file": "components/core/Control.module.css", "line": 451, "property": "--_control-height" },
+            { "file": "components/core/Control.module.css", "line": 528, "property": "--_control-height" },
             { "file": "components/core/TextButton/TextButton.module.css", "line": 56, "property": "min-width" },
             { "file": "components/core/TextButton/TextButton.module.css", "line": 57, "property": "min-height" },
             { "file": "components/core/TextButton/TextButton.module.css", "line": 189, "property": "min-height" }
@@ -5294,8 +5401,8 @@
           "sources": [
             { "file": "components/core/Control.module.css", "line": 223, "property": "font-size" },
             { "file": "components/core/Control.module.css", "line": 243, "property": "font-size" },
-            { "file": "components/core/Control.module.css", "line": 411, "property": "min-width" },
-            { "file": "components/core/Control.module.css", "line": 413, "property": "font-size" },
+            { "file": "components/core/Control.module.css", "line": 488, "property": "min-width" },
+            { "file": "components/core/Control.module.css", "line": 490, "property": "font-size" },
             { "file": "components/core/TextButton/TextButton.module.css", "line": 11, "property": "font-size" }
           ],
           "definitions": [
@@ -5308,7 +5415,7 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 25, "property": "font-weight" },
-            { "file": "components/core/Control.module.css", "line": 415, "property": "font-weight" },
+            { "file": "components/core/Control.module.css", "line": 492, "property": "font-weight" },
             { "file": "components/core/TextButton/TextButton.module.css", "line": 42, "property": "font-weight" },
             { "file": "components/core/TextButton/TextButton.module.css", "line": 128, "property": "font-weight" }
           ],
@@ -5355,6 +5462,26 @@
           ]
         },
         {
+          "name": "--geul-icon-size-md",
+          "registered": true,
+          "sources": [
+            { "file": "components/core/Control.module.css", "line": 318, "property": "width" },
+            { "file": "components/core/Control.module.css", "line": 319, "property": "height" }
+          ],
+          "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 95, "value": "1rem", "context": ":root" }]
+        },
+        {
+          "name": "--geul-icon-size-xs",
+          "registered": true,
+          "sources": [
+            { "file": "components/core/Control.module.css", "line": 362, "property": "width" },
+            { "file": "components/core/Control.module.css", "line": 363, "property": "height" }
+          ],
+          "definitions": [
+            { "file": "lib/styles/design-tokens.css", "line": 93, "value": "0.75rem", "context": ":root" }
+          ]
+        },
+        {
           "name": "--geul-interaction-minimum",
           "registered": true,
           "sources": [
@@ -5362,7 +5489,7 @@
             { "file": "components/core/Control.module.css", "line": 219, "property": "height" },
             { "file": "components/core/Control.module.css", "line": 241, "property": "min-height" },
             { "file": "components/core/Control.module.css", "line": 247, "property": "width" },
-            { "file": "components/core/Control.module.css", "line": 481, "property": "min-height" },
+            { "file": "components/core/Control.module.css", "line": 558, "property": "min-height" },
             { "file": "components/core/TextButton/TextButton.module.css", "line": 56, "property": "min-width" },
             { "file": "components/core/TextButton/TextButton.module.css", "line": 57, "property": "min-height" },
             { "file": "components/core/TextButton/TextButton.module.css", "line": 124, "property": "min-height" },
@@ -5382,10 +5509,10 @@
           "name": "--geul-layer-popup",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 363, "property": "z-index" },
-            { "file": "components/core/Control.module.css", "line": 370, "property": "z-index" },
-            { "file": "components/core/Control.module.css", "line": 390, "property": "z-index" },
-            { "file": "components/core/Control.module.css", "line": 458, "property": "z-index" }
+            { "file": "components/core/Control.module.css", "line": 440, "property": "z-index" },
+            { "file": "components/core/Control.module.css", "line": 447, "property": "z-index" },
+            { "file": "components/core/Control.module.css", "line": 467, "property": "z-index" },
+            { "file": "components/core/Control.module.css", "line": 535, "property": "z-index" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 142, "value": "300", "context": ":root" }]
         },
@@ -5413,7 +5540,7 @@
           "name": "--geul-line-height-xs",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 414, "property": "line-height" },
+            { "file": "components/core/Control.module.css", "line": 491, "property": "line-height" },
             { "file": "components/core/TextButton/TextButton.module.css", "line": 12, "property": "line-height" },
             { "file": "components/core/TextButton/TextButton.module.css", "line": 127, "property": "line-height" }
           ],
@@ -5424,7 +5551,7 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 33, "property": "transition" },
-            { "file": "components/core/Control.module.css", "line": 330, "property": "transition" }
+            { "file": "components/core/Control.module.css", "line": 407, "property": "transition" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 150, "value": "ease-out", "context": ":root" }
@@ -5435,9 +5562,17 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 33, "property": "transition" },
-            { "file": "components/core/Control.module.css", "line": 330, "property": "transition" }
+            { "file": "components/core/Control.module.css", "line": 407, "property": "transition" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 146, "value": "100ms", "context": ":root" }]
+        },
+        {
+          "name": "--geul-motion-spin",
+          "registered": true,
+          "sources": [{ "file": "components/core/Spinner.module.css", "line": 8, "property": "animation" }],
+          "definitions": [
+            { "file": "lib/styles/design-tokens.css", "line": 149, "value": "1000ms", "context": ":root" }
+          ]
         },
         {
           "name": "--geul-opacity-disabled",
@@ -5452,8 +5587,8 @@
           "name": "--geul-overlay-control",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 430, "property": "background" },
-            { "file": "components/core/Control.module.css", "line": 467, "property": "background" }
+            { "file": "components/core/Control.module.css", "line": 507, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 544, "property": "background" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 36, "value": "rgb(0 0 0 / 28%)", "context": ":root" }
@@ -5462,7 +5597,7 @@
         {
           "name": "--geul-overlay-control-border",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 439, "property": "border-color" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 516, "property": "border-color" }],
           "definitions": [
             {
               "file": "lib/styles/design-tokens.css",
@@ -5475,7 +5610,7 @@
         {
           "name": "--geul-overlay-strong",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 475, "property": "background" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 552, "property": "background" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 38, "value": "rgb(0 0 0 / 82%)", "context": ":root" }
           ]
@@ -5483,13 +5618,17 @@
         {
           "name": "--geul-paper-ink",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 435, "property": "color" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 512, "property": "color" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 25, "value": "#000", "context": ":root" }]
         },
         {
           "name": "--geul-radius-circle",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 252, "property": "border-radius" }],
+          "sources": [
+            { "file": "components/core/Control.module.css", "line": 252, "property": "border-radius" },
+            { "file": "components/core/Control.module.css", "line": 320, "property": "border-radius" },
+            { "file": "components/core/Spinner.module.css", "line": 7, "property": "border-radius" }
+          ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 132, "value": "50%", "context": ":root" }]
         },
         {
@@ -5502,8 +5641,8 @@
           "name": "--geul-spacing-md",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 361, "property": "inset-block-start" },
-            { "file": "components/core/Control.module.css", "line": 362, "property": "inset-inline-start" }
+            { "file": "components/core/Control.module.css", "line": 438, "property": "inset-block-start" },
+            { "file": "components/core/Control.module.css", "line": 439, "property": "inset-inline-start" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 65, "value": "0.75rem", "context": ":root" }
@@ -5512,7 +5651,7 @@
         {
           "name": "--geul-spacing-role-control-label",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 294, "property": "gap" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 371, "property": "gap" }],
           "definitions": [
             {
               "file": "lib/styles/design-tokens.css",
@@ -5547,7 +5686,7 @@
           "name": "--geul-spacing-xs",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 395, "property": "padding-block" },
+            { "file": "components/core/Control.module.css", "line": 472, "property": "padding-block" },
             { "file": "components/core/TextButton/TextButton.module.css", "line": 116, "property": "gap" },
             { "file": "components/core/TextButton/TextButton.module.css", "line": 125, "property": "padding" },
             {
@@ -5564,12 +5703,17 @@
           "sources": [
             { "file": "components/core/Control.module.css", "line": 29, "property": "text-underline-offset" },
             { "file": "components/core/Control.module.css", "line": 119, "property": "text-underline-offset" },
-            { "file": "components/core/Control.module.css", "line": 406, "property": "inset-block-start" },
-            { "file": "components/core/Control.module.css", "line": 407, "property": "inset-inline-end" },
-            { "file": "components/core/Control.module.css", "line": 411, "property": "min-width" },
-            { "file": "components/core/Control.module.css", "line": 412, "property": "padding" },
+            { "file": "components/core/Control.module.css", "line": 483, "property": "inset-block-start" },
+            { "file": "components/core/Control.module.css", "line": 484, "property": "inset-inline-end" },
+            { "file": "components/core/Control.module.css", "line": 488, "property": "min-width" },
+            { "file": "components/core/Control.module.css", "line": 489, "property": "padding" },
             { "file": "components/core/TextButton/TextButton.module.css", "line": 112, "property": "gap" },
-            { "file": "components/core/TextButton/TextButton.module.css", "line": 125, "property": "padding" }
+            { "file": "components/core/TextButton/TextButton.module.css", "line": 125, "property": "padding" },
+            {
+              "file": "components/core/TextButton/TextButton.module.css",
+              "line": 218,
+              "property": "margin-inline-start"
+            }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 62, "value": "0.25rem", "context": ":root" }
@@ -5722,7 +5866,10 @@
         {
           "name": "--geul-surface",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 376, "property": "background" }],
+          "sources": [
+            { "file": "components/core/Control.module.css", "line": 321, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 453, "property": "background" }
+          ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 167, "value": "#f8f7f4", "context": ":root" },
             {
@@ -5754,7 +5901,10 @@
         {
           "name": "--geul-surface-active",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 144, "property": "background" }],
+          "sources": [
+            { "file": "components/core/Control.module.css", "line": 144, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 349, "property": "background" }
+          ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 170, "value": "#dcd9d3", "context": ":root" },
             {
@@ -5788,7 +5938,8 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 131, "property": "background" },
-            { "file": "components/core/Control.module.css", "line": 383, "property": "background" }
+            { "file": "components/core/Control.module.css", "line": 341, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 460, "property": "background" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 169, "value": "#e1dfd9", "context": ":root" },
@@ -5824,6 +5975,7 @@
           "sources": [
             { "file": "components/core/Control.module.css", "line": 104, "property": "background" },
             { "file": "components/core/Control.module.css", "line": 164, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 357, "property": "background" },
             { "file": "components/core/TextButton/TextButton.module.css", "line": 145, "property": "background" }
           ],
           "definitions": [
@@ -5930,10 +6082,10 @@
           "name": "--geul-text-inverse-primary",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 423, "property": "color" },
-            { "file": "components/core/Control.module.css", "line": 429, "property": "color" },
-            { "file": "components/core/Control.module.css", "line": 434, "property": "background" },
-            { "file": "components/core/Control.module.css", "line": 443, "property": "outline-color" },
+            { "file": "components/core/Control.module.css", "line": 500, "property": "color" },
+            { "file": "components/core/Control.module.css", "line": 506, "property": "color" },
+            { "file": "components/core/Control.module.css", "line": 511, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 520, "property": "outline-color" },
             { "file": "components/core/TextButton/TextButton.module.css", "line": 180, "property": "color" }
           ],
           "definitions": [
@@ -5948,7 +6100,10 @@
         {
           "name": "--geul-text-muted",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 158, "property": "color" }],
+          "sources": [
+            { "file": "components/core/Control.module.css", "line": 158, "property": "color" },
+            { "file": "components/core/Control.module.css", "line": 358, "property": "color" }
+          ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 173, "value": "#5d5b56", "context": ":root" },
             {
@@ -5982,7 +6137,8 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 95, "property": "color" },
-            { "file": "components/core/Control.module.css", "line": 417, "property": "color" }
+            { "file": "components/core/Control.module.css", "line": 333, "property": "color" },
+            { "file": "components/core/Control.module.css", "line": 494, "property": "color" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 181, "value": "#f8f7f4", "context": ":root" },
@@ -6016,8 +6172,8 @@
           "name": "--geul-text-on-image",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 466, "property": "color" },
-            { "file": "components/core/Control.module.css", "line": 474, "property": "color" }
+            { "file": "components/core/Control.module.css", "line": 543, "property": "color" },
+            { "file": "components/core/Control.module.css", "line": 551, "property": "color" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 7, "value": "#fff", "context": ":root" }]
         },
@@ -6098,6 +6254,7 @@
           "file": "components/core/Control.module.css",
           "importedBy": ["components/core/TextButton/TextButton.tsx", "components/core/control-indicator.tsx"]
         },
+        { "file": "components/core/Spinner.module.css", "importedBy": ["components/core/TextButton/TextButton.tsx"] },
         {
           "file": "components/core/TextButton/TextButton.module.css",
           "importedBy": ["components/core/TextButton/TextButton.tsx"]
@@ -6172,6 +6329,19 @@
           "type": "'start' | 'center' | 'end' | 'between'",
           "required": false,
           "defaultValue": "'start'"
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "required": false,
+          "description": "Controlled command pending state; keeps the text and focus while blocking activation. Allowed combinations vary by union branch. Check the complete action/link, name and geometry contracts.",
+          "defaultValue": "false"
+        },
+        {
+          "name": "loadingLabel",
+          "type": "string",
+          "required": false,
+          "description": "Allowed combinations vary by union branch. Check the complete action/link, name and geometry contracts."
         },
         { "name": "nested", "type": "boolean", "required": false, "defaultValue": "false" },
         { "name": "nowrap", "type": "boolean", "required": false, "defaultValue": "false" },
@@ -6573,6 +6743,7 @@
         { "id": "core-actions-textbutton--accent", "name": "Accent" },
         { "id": "core-actions-textbutton--accent-hover", "name": "Accent Hover" },
         { "id": "core-actions-textbutton--disabled", "name": "Disabled" },
+        { "id": "core-actions-textbutton--pending", "name": "Pending" },
         { "id": "core-actions-textbutton--accent-disabled", "name": "Accent Disabled" },
         { "id": "core-actions-textbutton--accent-disabled-hover", "name": "Accent Disabled Hover" },
         { "id": "core-actions-textbutton--link", "name": "Link" },
@@ -6654,7 +6825,7 @@
       "constraints": [
         "Explicit defaults are appearance=default, size=sm, display=inline-flex, nowrap=false, density=inline and gap=xxs. size/controlSize accept xs/sm/md.",
         "Parent action-row/toolbar density affects controlSize and typography. Review content width and wrapping with long labels.",
-        "TextButton does not expose Button's loading prop. Do not assume the two APIs share that state.",
+        "Command loading defaults to false and preserves text/focus while blocking activation and native submit/reset. loadingLabel optionally names progress; otherwise it follows the control name/label. The href branch rejects loading/loadingLabel.",
         "External or unresolved inherited types: components/core/control-props.ts: AriaAttributes; components/core/control-props.ts: DOMAttributes<HTMLElement>. The table does not fully expand these declarations.",
         "A story or documentation entry does not establish that a state passed review. Record automated checks, keyboard tests and actual assistive-technology verification separately."
       ],
@@ -8843,7 +9014,6 @@
         "Consumer: features/admin/map-place/MapPlacesPage.tsx",
         "Consumer: features/admin/post/PostsTableContent.tsx",
         "Consumer: features/admin/release/ReleasesTableContent.tsx",
-        "Consumer: features/admin/segment/SegmentModals.tsx",
         "Consumer: features/admin/settings/OgImageSettingsPage.tsx",
         "Consumer: features/admin/ui/AdminNavigation/AdminNavigationView.tsx",
         "Consumer: features/admin/user/UsersTableView.tsx",
@@ -8857,16 +9027,15 @@
         "Consumer: features/data-table/ServerDataTable/ServerDataTablePaginationView.tsx",
         "Consumer: features/editor/AIMenu/AIMenu.tsx",
         "Consumer: features/editor/blocks/FileBlock/FileBlockView.tsx",
-        "Consumer: features/editor/components/EditorFileLibraryPickerView.tsx",
         "Consumer: features/editor/components/MediaProcessingSurface.tsx",
         "Consumer: features/editor/tiptap/TiptapAuthoringControls.tsx",
         "Consumer: features/editor/tiptap/math/TiptapMathNodeViews.tsx",
         "Consumer: features/editor/tiptap/menus/SelectionBubbleMenu.tsx",
         "Consumer: features/editor/tiptap/p5/P5CapabilityControl.tsx",
         "Consumer: features/editor/tiptap/table/TiptapTableMenu.tsx",
-        "Consumer: features/file-manager/FileManagerView.tsx",
         "Consumer: features/form/AdminFormSubmissionsPage.tsx",
         "Consumer: features/form/FormDashboard/FieldStatsChart.tsx",
+        "Consumer: features/form/FormField/FormField.tsx",
         "Consumer: features/label/LabelEditor/ui/LabelParticipantsDialogView.tsx",
         "Consumer: features/media-download/FileDownloadPolicyEditor.tsx",
         "Consumer: features/media/ui/LinkCardView.tsx",
@@ -8881,7 +9050,6 @@
         "Consumer: features/page/blocks/author-list/Editor.tsx",
         "Consumer: features/page/blocks/author-list/Skeleton.tsx",
         "Consumer: features/page/blocks/author-list/ViewClientRuntime.tsx",
-        "Consumer: features/page/blocks/form/ViewClient.tsx",
         "Consumer: features/page/blocks/immersive-scene/MeshOptimizationPanel.tsx",
         "Consumer: features/page/blocks/immersive-scene/SceneRenderer.tsx",
         "Consumer: features/page/blocks/immersive-scene/Workspace.tsx",
@@ -8905,18 +9073,14 @@
         "Consumer: features/series/SeriesDetail.tsx",
         "Consumer: features/series/SeriesManagersModal.tsx",
         "Consumer: features/series/SeriesPublicView.tsx",
-        "Consumer: features/share/ui/ShareLinkSectionView.tsx",
         "Consumer: features/shell/ui/Shell/ShellIslands.tsx",
         "Consumer: features/shell/ui/Shell/ShellLayout.tsx",
         "Consumer: features/shell/ui/Shell/ShellMobileNavigation.tsx",
-        "Consumer: features/site/SiteOgImagePanel/SiteOgImagePanel.tsx",
-        "Consumer: features/translation/EntityTranslationsPanel.tsx",
         "Consumer: features/translation/admin/TranslationJobsPage.tsx",
         "Consumer: features/translation/admin/TranslationOverviewPage.tsx",
         "Consumer: features/user/UserShell/UserShell.tsx",
         "Consumer: features/user/ui/UserInlineLinks/UserInlineLinksView.tsx",
         "Consumer: features/user/ui/UserProfile/UserProfileView.tsx",
-        "Consumer: features/version-history/ui/VersionHistoryDrawerView.tsx",
         "Consumer: features/work/WorkEditor/WorkClientsSection.tsx",
         "Consumer: features/work/WorkEditor/WorkCreditsSection.tsx",
         "Consumer: features/work/WorkEditor/credits/CreditSkeletons.tsx",
@@ -10934,6 +11098,7 @@
         "Consumer: features/campaign/CampaignAnalyticsPage.tsx",
         "Consumer: features/editor/components/MediaProcessingSurface.tsx",
         "Consumer: features/editor/tiptap/p5/P5CapabilityStoryPreview.tsx",
+        "Consumer: features/form/FormSettingsContent.tsx",
         "Consumer: features/media-download/FileDownloadPolicyEditor.tsx",
         "Consumer: features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
         "Consumer: features/my/MyPostsPageView.tsx",
@@ -11233,6 +11398,132 @@
         "A story or documentation entry does not establish that a state passed review. Record automated checks, keyboard tests and actual assistive-technology verification separately."
       ],
       "relatedDocs": ["docs/design-system/component-documentation.md", "docs/design-system/core-specifications.md"]
+    },
+    {
+      "title": "Core/Data Display/TableRowMenu",
+      "sourceFiles": [
+        "components/core/DataTable/TableRowMenu.stories.tsx",
+        "components/core/DataTable/TableRowMenu.tsx",
+        "components/core/visual-contract.ts"
+      ],
+      "tokenReferences": [],
+      "styleSources": [],
+      "computedTokenReferences": [],
+      "tokenReferenceLimitations": [
+        "Tracks static var(--geul-...) references in Core-owned sourceFiles, excluding stories, and their direct CSS imports/local CSS @imports. It does not traverse nested components, ordinary TS imports or complete barrel style graphs.",
+        "registered means a central declaration exists in lib/styles/design-tokens.css. Definitions preserve aliases and theme/media conditions; they do not establish resolved values, runtime application, active state or override outcomes.",
+        "Computed token names are not guessed. computedTokenReferences records unresolved expression locations, not possible token names or evidence of CSS application."
+      ],
+      "summary": "Provides named row actions and links without activating the containing row.",
+      "anatomy": [
+        "Named IconButton trigger → DropdownMenu items → optional divider before the destructive group. An empty items array renders nothing."
+      ],
+      "api": [
+        {
+          "name": "aria-label",
+          "type": "string",
+          "required": true,
+          "description": "Required aria-label for the menu trigger button"
+        },
+        { "name": "items", "type": "TableRowMenuItem[]", "required": true, "description": "Menu items" },
+        { "name": "bd", "type": "never", "required": false },
+        { "name": "bdrs", "type": "never", "required": false },
+        { "name": "bg", "type": "never", "required": false },
+        { "name": "c", "type": "never", "required": false },
+        { "name": "className", "type": "never", "required": false },
+        { "name": "classNames", "type": "never", "required": false },
+        { "name": "color", "type": "never", "required": false },
+        { "name": "component", "type": "never", "required": false },
+        { "name": "ff", "type": "never", "required": false },
+        { "name": "fw", "type": "never", "required": false },
+        { "name": "fz", "type": "never", "required": false },
+        { "name": "h", "type": "never", "required": false },
+        { "name": "lh", "type": "never", "required": false },
+        { "name": "m", "type": "never", "required": false },
+        { "name": "mah", "type": "never", "required": false },
+        { "name": "maw", "type": "never", "required": false },
+        { "name": "mb", "type": "never", "required": false },
+        { "name": "me", "type": "never", "required": false },
+        { "name": "mih", "type": "never", "required": false },
+        { "name": "miw", "type": "never", "required": false },
+        { "name": "ml", "type": "never", "required": false },
+        { "name": "mr", "type": "never", "required": false },
+        { "name": "ms", "type": "never", "required": false },
+        { "name": "mt", "type": "never", "required": false },
+        { "name": "mx", "type": "never", "required": false },
+        { "name": "my", "type": "never", "required": false },
+        { "name": "opacity", "type": "never", "required": false },
+        { "name": "p", "type": "never", "required": false },
+        { "name": "pb", "type": "never", "required": false },
+        { "name": "pe", "type": "never", "required": false },
+        { "name": "pl", "type": "never", "required": false },
+        { "name": "pr", "type": "never", "required": false },
+        { "name": "ps", "type": "never", "required": false },
+        { "name": "pt", "type": "never", "required": false },
+        { "name": "px", "type": "never", "required": false },
+        { "name": "py", "type": "never", "required": false },
+        { "name": "radius", "type": "never", "required": false },
+        { "name": "renderRoot", "type": "never", "required": false },
+        { "name": "shadow", "type": "never", "required": false },
+        { "name": "style", "type": "never", "required": false },
+        { "name": "styles", "type": "never", "required": false },
+        { "name": "ta", "type": "never", "required": false },
+        { "name": "td", "type": "never", "required": false },
+        { "name": "tt", "type": "never", "required": false },
+        { "name": "unstyled", "type": "never", "required": false },
+        { "name": "variant", "type": "never", "required": false },
+        { "name": "vars", "type": "never", "required": false },
+        { "name": "w", "type": "never", "required": false }
+      ],
+      "stateStories": [
+        { "id": "core-data-display-tablerowmenu--default", "name": "Default" },
+        { "id": "core-data-display-tablerowmenu--returned-promise", "name": "Returned Promise" }
+      ],
+      "usage": [
+        "Supply required aria-label and items. TableRowMenuItem is the item type: label is required; icon, onClick, onError, href, tone and disabled are optional.",
+        "Return the whole command Promise from items[].onClick, including preparation and follow-up work that must block another row command. The callback accepts () => void | Promise<unknown>; detached work from a void callback cannot be tracked.",
+        "Selection dismisses the menu normally. A returned Promise keeps progress on the row trigger and gates trigger activation and every item until settlement. Resolution or rejection clears pending so the menu can be opened again; settlement does not reopen it or announce domain success.",
+        "Supply items[].onError(error: unknown) for domain notifications and recovery after a thrown or rejected command. Without onError, Core logs the action failure; a throwing or rejected error handler is also logged. Features own failure meaning and retry feedback.",
+        "Use href for destinations and onClick for commands. disabled prevents item activation. Keep danger items together at the end: Core inserts one divider before the first danger item when it follows another item, preserving supplied order.",
+        "PostRowMenu returns its republish operation and UserRowMenu returns its unban operation, with domain onError notifications. LabelRowMenu returns preparation of the deletion preview; final deletion remains in its confirmation dialog.",
+        "Default demonstrates a link and a danger command. ReturnedPromise exposes manual resolve/reject controls for the trigger pending and recovery contract without calling a service.",
+        "Consumer: features/admin/EntityRowMenu.tsx",
+        "Consumer: features/admin/artist/ArtistRowMenu.tsx",
+        "Consumer: features/admin/campaign/CampaignRowMenu.tsx",
+        "Consumer: features/admin/cms-page/PageRowMenu.tsx",
+        "Consumer: features/admin/email-layout/EmailLayoutsPage.tsx",
+        "Consumer: features/admin/email-template/EmailTemplatesPage.tsx",
+        "Consumer: features/admin/form/FormRowMenu.tsx",
+        "Consumer: features/admin/label/LabelRowMenu.tsx",
+        "Consumer: features/admin/post/PostRowMenu.tsx",
+        "Consumer: features/admin/program-event/ProgramEventSeriesTableContent.tsx",
+        "Consumer: features/admin/program-event/ProgramEventsTableContent.tsx",
+        "Consumer: features/admin/release/ReleaseRowMenu.tsx",
+        "Consumer: features/admin/segment/SegmentRowMenu.tsx",
+        "Consumer: features/admin/user-tag/UserTagRowMenu.tsx",
+        "Consumer: features/admin/user/UserRowMenu.tsx",
+        "Consumer: features/admin/work/WorksPageView.tsx",
+        "Consumer: features/data-table/DataTableSelectableSection.tsx",
+        "Consumer: features/data-table/ServerDataTable/ServerDataTableSelectableSection.tsx"
+      ],
+      "accessibility": [
+        "Localize the required trigger aria-label with the row identity. Each item label supplies both visible text and its accessible name; keep labels distinct within the menu. Icons supplement the label.",
+        "Preserve DropdownMenu keyboard navigation, skipping disabled items, selection dismissal, Escape and focus return to the trigger. Check focus after command settlement and after a command opens a confirmation or navigates away.",
+        "The pending trigger retains its accessible name and exposes busy/progress state. Trigger and menu mouse-down and click events stop propagation to the row; verify nested actions do not also activate row selection or navigation."
+      ],
+      "constraints": [
+        "TableRowMenu is the component; TableRowMenuItem is a TypeScript interface, not a separately rendered component. There is no controlled loading prop or per-item loading presentation.",
+        "Core owns trigger, menu, divider and tone presentation. Features own available commands, authorization, localized labels, returned operation lifetime and domain feedback.",
+        "A synchronous router callback does not expose navigation completion. Return an actual operation Promise only when the caller owns that completion boundary.",
+        "A story or documentation entry does not establish that a state passed review. Record automated checks, keyboard tests and actual assistive-technology verification separately."
+      ],
+      "relatedDocs": [
+        "docs/design-system/component-documentation.md",
+        "docs/design-system/table-api-review.md",
+        "docs/design-system/tables-and-toolbars.md",
+        "docs/design-system/loading-surface-contract.md",
+        "docs/design-system/migrations/loading-commonization.md"
+      ]
     },
     {
       "title": "Core/Feedback/Alert",
@@ -11631,30 +11922,40 @@
         "Consumer: app/(general)/terms/TermsPageClient.tsx",
         "Consumer: app/(general)/terms/history/[id]/TermsHistoryDetailClient.tsx",
         "Consumer: app/admin/emails/page.tsx",
+        "Consumer: components/core/Modal/confirm-dialogs.tsx",
         "Consumer: features/account/CancelDeletionPageView.tsx",
         "Consumer: features/account/ConfirmDeletionPageView.tsx",
         "Consumer: features/account/ConfirmRecoveryPageView.tsx",
         "Consumer: features/account/RecoverAccountContent.tsx",
         "Consumer: features/admin/MapThemeEditor/MapThemeListView.tsx",
         "Consumer: features/admin/MapThemeEditor/ThemeEditorPage.tsx",
+        "Consumer: features/admin/client/ClientDetailPageView.tsx",
         "Consumer: features/admin/email-layout/EmailLayoutPreviewView.tsx",
         "Consumer: features/admin/email-layout/EmailLayoutsPage.tsx",
+        "Consumer: features/admin/email-template/EmailTemplateEditPage.tsx",
         "Consumer: features/admin/email-template/EmailTemplatesPage.tsx",
+        "Consumer: features/admin/label/LabelRowMenu.tsx",
         "Consumer: features/admin/user/AdminUserEditPage.tsx",
         "Consumer: features/admin/user/auth/UserDeliveryEmailSection.tsx",
         "Consumer: features/application-error/QueryErrorAlert.tsx",
         "Consumer: features/campaign/CampaignDeliveryDialogs.tsx",
+        "Consumer: features/campaign/CampaignEditor/CampaignEditor.tsx",
         "Consumer: features/campaign/CampaignRecipientScopeControl.tsx",
         "Consumer: features/campaign/CampaignScheduleForm.tsx",
         "Consumer: features/campaign/CampaignTargetControl.tsx",
         "Consumer: features/data-table/ServerDataTable/ServerDataTableContent.tsx",
         "Consumer: features/draft-mode/ui/DraftModeAlertView.tsx",
+        "Consumer: features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
         "Consumer: features/editor/tiptap/TiptapFileBlockNodeView.tsx",
+        "Consumer: features/editor/tiptap/emoji/TiptapEmojiPicker.tsx",
         "Consumer: features/editor/tiptap/p5/P5CapabilityStoryPreview.tsx",
         "Consumer: features/editor/tiptap/p5/P5PreviewSurface.tsx",
         "Consumer: features/editor/tiptap/shader/ShaderPublicPreview.tsx",
         "Consumer: features/editor/tiptap/three/ThreeSceneNode.tsx",
+        "Consumer: features/email/EmailTemplateEditor/EmailTemplateEditor.tsx",
+        "Consumer: features/form/FormSettingsContent.tsx",
         "Consumer: features/form/PublicFormView.tsx",
+        "Consumer: features/map/BaseMap.tsx",
         "Consumer: features/map/MapLibreMapEditor.tsx",
         "Consumer: features/media-download/FileDownloadPolicyEditor.tsx",
         "Consumer: features/media/ui/MissingMediaView.tsx",
@@ -11669,11 +11970,17 @@
         "Consumer: features/newsletter/UnsubscribeView.tsx",
         "Consumer: features/page/PageView/blocks/PublicExecutableBlockView.tsx",
         "Consumer: features/page/blocks/author-list/Editor.tsx",
+        "Consumer: features/place/CreatePlaceModal.tsx",
+        "Consumer: features/place/PlaceEditor.tsx",
+        "Consumer: features/place/PlacesAutocomplete.tsx",
+        "Consumer: features/policy/LegalOgImagePanel.tsx",
         "Consumer: features/policy/LegalPolicyEditor.tsx",
         "Consumer: features/policy/LegalShareDocumentView.tsx",
         "Consumer: features/post/Comment/CommentSection.tsx",
         "Consumer: features/post/PostSpotlight/PostSpotlight.tsx",
+        "Consumer: features/shell/ui/Shell/ShellIslands.tsx",
         "Consumer: features/translation/ContentLocaleNotice.tsx",
+        "Consumer: features/user/ui/ProfileAvatarControl/ProfileAvatarControl.tsx",
         "Consumer: features/version-history/ui/VersionHistoryDrawerView.tsx"
       ],
       "accessibility": [
@@ -11829,12 +12136,112 @@
       "relatedDocs": ["docs/design-system/component-documentation.md", "docs/design-system/core-specifications.md"]
     },
     {
+      "title": "Core/Feedback/ErrorPage",
+      "sourceFiles": [
+        "components/core/ErrorPage/ErrorPageView.stories.tsx",
+        "components/core/ErrorPage/ErrorPageView.tsx"
+      ],
+      "tokenReferences": [],
+      "styleSources": [],
+      "computedTokenReferences": [],
+      "tokenReferenceLimitations": [
+        "Tracks static var(--geul-...) references in Core-owned sourceFiles, excluding stories, and their direct CSS imports/local CSS @imports. It does not traverse nested components, ordinary TS imports or complete barrel style graphs.",
+        "registered means a central declaration exists in lib/styles/design-tokens.css. Definitions preserve aliases and theme/media conditions; they do not establish resolved values, runtime application, active state or override outcomes.",
+        "Computed token names are not guessed. computedTokenReferences records unresolved expression locations, not possible token names or evidence of CSS application."
+      ],
+      "summary": "Displays a page error with caller-supplied explanation and navigation or recovery actions. Use Alert for feedback within retained content and PageLoaderView for a pending page or section.",
+      "anatomy": [
+        "Named section → inset and centered compact layout → optional codeVisual or plain code → level-one title → optional description → centered action row of low-emphasis Buttons."
+      ],
+      "api": [
+        { "name": "actions", "type": "readonly ErrorPageAction[]", "required": true },
+        { "name": "title", "type": "string", "required": true },
+        { "name": "code", "type": "string", "required": false },
+        { "name": "codeVisual", "type": "ReactNode", "required": false },
+        { "name": "description", "type": "string", "required": false },
+        { "name": "fullScreen", "type": "boolean", "required": false, "defaultValue": "false" }
+      ],
+      "stateStories": [{ "id": "core-feedback-errorpage--async-retry", "name": "Async Retry" }],
+      "usage": [
+        "ErrorPageView requires title: string and actions: readonly ErrorPageAction[]. Optional fields are code: string, codeVisual: ReactNode, description: string and fullScreen: boolean. fullScreen defaults to false, selecting a 50vh minimum height; true selects 100svh.",
+        "A non-nullish codeVisual replaces the plain code. Without it, a nonempty code renders as decorative display text; a nonempty description renders below the title. The graphic slot does not load a renderer or provide its own fallback.",
+        "Each ErrorPageAction requires label: string and exactly one branch: href: string for navigation, or onClick: () => void | Promise<unknown> for a command. The other branch field is never. Preserve native link navigation, including modified and middle clicks.",
+        "Return the complete operation Promise from onClick. Each command tracks its own returned Promise, shows Button loading and blocks duplicate activation until resolution or rejection clears pending. Other actions remain independently usable. Work started by a void callback has no tracked completion.",
+        "The shared pending handler preserves the returned Promise result or rejection and logs rejected commands. Core does not display domain failure feedback or retry automatically; callers own error handling, recovery and any success response.",
+        "Core does not read locale messages or require a message provider. Callers supply localized title, description and action labels, plus any graphic accessibility text. Normal application theme and token setup still applies.",
+        "features/application-error/ApplicationErrorPage.tsx selects localized status content, adds the login link for 401, adds onRetry only for 408, 429 or statuses >=500, and appends the home link. ApplicationErrorPage reads active-locale messages; ApplicationErrorPageView receives explicit messages.",
+        "features/application-error/RootErrorPageView.tsx passes locale fallback messages through ApplicationErrorPageView with fullScreen. Both consumers reach Core through features/application-error/ErrorPageView.tsx, which supplies the deferred particle graphic and a plain-code fallback if its renderer cannot load.",
+        "Core/Feedback/ErrorPage exports AsyncRetry, whose Complete simulated retry control resolves the returned Promise. Feature/Application Error/ErrorPage covers status and root fallback compositions with preview navigation; those callbacks do not demonstrate asynchronous completion.",
+        "Consumer: features/application-error/ErrorPageView.tsx"
+      ],
+      "accessibility": [
+        "title names the section and supplies its level-one heading. Keep the error meaning in text: plain code is aria-hidden, and callers own codeVisual semantics. description is visible supporting text; Core does not attach it as an aria-describedby relationship.",
+        "Action labels supply visible and accessible names. The pending command retains its label and focus while exposing busy/progress state and blocking activation. Check Tab/Enter/Space, focus after settlement and focus recovery when navigation or retry replaces the page; Core does not focus the section automatically."
+      ],
+      "constraints": [
+        "The component identity is ErrorPageView with ErrorPageViewProps. ErrorPageAction is a type, not a rendered component. There are no Core status, onRetry, loading or error-feedback props; status policy, service execution and boundary reset remain consumer responsibilities.",
+        "Core owns layout, typography and action presentation. Review mobile/tablet/desktop widths, zoom, long localized labels, RTL, light/dark and custom themes in the Core story and actual application consumers. Story registration and source checks do not establish visual, keyboard or assistive-technology approval.",
+        "A story or documentation entry does not establish that a state passed review. Record automated checks, keyboard tests and actual assistive-technology verification separately."
+      ],
+      "relatedDocs": [
+        "docs/design-system/component-documentation.md",
+        "docs/design-system/core-specifications.md",
+        "docs/design-system/button-api-review.md",
+        "docs/design-system/loading-surface-contract.md",
+        "docs/design-system/page-documentation.md"
+      ]
+    },
+    {
       "title": "Core/Feedback/PageLoaderView",
       "sourceFiles": [
         "components/core/LoadingSurface/PageLoaderView.stories.tsx",
-        "components/core/LoadingSurface/PageLoaderView.tsx"
+        "components/core/LoadingSurface/PageLoaderView.tsx",
+        "components/core/visual-contract.ts"
       ],
-      "tokenReferences": [],
+      "tokenReferences": [
+        {
+          "name": "--geul-text-muted",
+          "registered": true,
+          "sources": [
+            { "file": "components/core/LoadingSurface/PageLoaderView.module.css", "line": 11, "property": "color" }
+          ],
+          "definitions": [
+            { "file": "lib/styles/design-tokens.css", "line": 173, "value": "#5d5b56", "context": ":root" },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 264,
+              "value": "#a6a49e",
+              "context": "@media (prefers-color-scheme: dark) → html:not([data-geul-theme='light'])"
+            },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 349,
+              "value": "#5d5b56",
+              "context": "[data-geul-theme='light']"
+            },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 433,
+              "value": "#a6a49e",
+              "context": "[data-geul-theme='dark']"
+            },
+            {
+              "file": "lib/styles/design-tokens.css",
+              "line": 519,
+              "value": "#5d5b56",
+              "context": "@media print → :root,\n  [data-geul-theme]"
+            }
+          ]
+        },
+        {
+          "name": "--geul-text-on-image",
+          "registered": true,
+          "sources": [
+            { "file": "components/core/LoadingSurface/PageLoaderView.module.css", "line": 39, "property": "color" }
+          ],
+          "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 7, "value": "#fff", "context": ":root" }]
+        }
+      ],
       "styleSources": [
         {
           "file": "components/core/LoadingSurface/PageLoaderView.module.css",
@@ -11847,41 +12254,105 @@
         "registered means a central declaration exists in lib/styles/design-tokens.css. Definitions preserve aliases and theme/media conditions; they do not establish resolved values, runtime application, active state or override outcomes.",
         "Computed token names are not guessed. computedTokenReferences records unresolved expression locations, not possible token names or evidence of CSS application."
       ],
-      "summary": "Displays initial page loading.",
-      "anatomy": ["Page loading region → named progress/description."],
+      "summary": "Displays blocking page or section loading.",
+      "anatomy": ["Named status region → optional configured image → required compact visible message."],
       "api": [
-        { "name": "imageAlt", "type": "string", "required": true },
         {
-          "name": "height",
-          "type": "string | number",
+          "name": "imageAlt",
+          "type": "string",
+          "required": true,
+          "description": "Accessible name for the image and status; independent of visible message text."
+        },
+        {
+          "name": "message",
+          "type": "string",
+          "required": true,
+          "description": "Required nonblank visible text, resolved by the owning controller."
+        },
+        {
+          "name": "contrast",
+          "type": "'standard' | 'inverse'",
           "required": false,
-          "description": "Height of the loader container. Defaults to '100%' for full parent height.",
-          "defaultValue": "'100%'"
+          "description": "Standard text on theme surfaces, or full-strength inverse text on a dark scrim.",
+          "defaultValue": "'standard'"
+        },
+        {
+          "name": "extent",
+          "type": "'container' | 'compact' | 'section' | 'tall' | 'viewport'",
+          "required": false,
+          "description": "Named region height. Defaults to `section`.",
+          "defaultValue": "'section'"
         },
         { "name": "imageSrc", "type": "string | null", "required": false },
         { "name": "imageUnoptimized", "type": "boolean", "required": false, "defaultValue": "false" },
         {
-          "name": "message",
-          "type": "string",
+          "name": "placement",
+          "type": "'fill' | 'flow'",
           "required": false,
-          "description": "Retained for caller compatibility. Configured images keep their colors."
+          "description": "Fill a positioned parent, or reserve height in normal document flow. Defaults to fill.",
+          "defaultValue": "'fill'"
         },
-        {
-          "name": "minHeight",
-          "type": "string | number",
-          "required": false,
-          "description": "Minimum height safeguard for page-sized loaders. Defaults to 200.",
-          "defaultValue": "200"
-        },
-        { "name": "size", "type": "'xs' | 'sm' | 'md' | 'lg' | 'xl'", "required": false, "defaultValue": "'md'" }
+        { "name": "size", "type": "'xs' | 'sm' | 'md' | 'lg' | 'xl'", "required": false, "defaultValue": "'md'" },
+        { "name": "bd", "type": "never", "required": false },
+        { "name": "bdrs", "type": "never", "required": false },
+        { "name": "bg", "type": "never", "required": false },
+        { "name": "c", "type": "never", "required": false },
+        { "name": "className", "type": "never", "required": false },
+        { "name": "classNames", "type": "never", "required": false },
+        { "name": "color", "type": "never", "required": false },
+        { "name": "component", "type": "never", "required": false },
+        { "name": "ff", "type": "never", "required": false },
+        { "name": "fw", "type": "never", "required": false },
+        { "name": "fz", "type": "never", "required": false },
+        { "name": "h", "type": "never", "required": false },
+        { "name": "lh", "type": "never", "required": false },
+        { "name": "m", "type": "never", "required": false },
+        { "name": "mah", "type": "never", "required": false },
+        { "name": "maw", "type": "never", "required": false },
+        { "name": "mb", "type": "never", "required": false },
+        { "name": "me", "type": "never", "required": false },
+        { "name": "mih", "type": "never", "required": false },
+        { "name": "miw", "type": "never", "required": false },
+        { "name": "ml", "type": "never", "required": false },
+        { "name": "mr", "type": "never", "required": false },
+        { "name": "ms", "type": "never", "required": false },
+        { "name": "mt", "type": "never", "required": false },
+        { "name": "mx", "type": "never", "required": false },
+        { "name": "my", "type": "never", "required": false },
+        { "name": "opacity", "type": "never", "required": false },
+        { "name": "p", "type": "never", "required": false },
+        { "name": "pb", "type": "never", "required": false },
+        { "name": "pe", "type": "never", "required": false },
+        { "name": "pl", "type": "never", "required": false },
+        { "name": "pr", "type": "never", "required": false },
+        { "name": "ps", "type": "never", "required": false },
+        { "name": "pt", "type": "never", "required": false },
+        { "name": "px", "type": "never", "required": false },
+        { "name": "py", "type": "never", "required": false },
+        { "name": "radius", "type": "never", "required": false },
+        { "name": "renderRoot", "type": "never", "required": false },
+        { "name": "shadow", "type": "never", "required": false },
+        { "name": "style", "type": "never", "required": false },
+        { "name": "styles", "type": "never", "required": false },
+        { "name": "ta", "type": "never", "required": false },
+        { "name": "td", "type": "never", "required": false },
+        { "name": "tt", "type": "never", "required": false },
+        { "name": "unstyled", "type": "never", "required": false },
+        { "name": "variant", "type": "never", "required": false },
+        { "name": "vars", "type": "never", "required": false },
+        { "name": "w", "type": "never", "required": false }
       ],
       "stateStories": [
         { "id": "core-feedback-pageloaderview--default", "name": "Default" },
         { "id": "core-feedback-pageloaderview--with-message", "name": "With Message" },
-        { "id": "core-feedback-pageloaderview--with-resolved-image", "name": "With Resolved Image" }
+        { "id": "core-feedback-pageloaderview--with-resolved-image", "name": "With Resolved Image" },
+        { "id": "core-feedback-pageloaderview--failed-image", "name": "Failed Image" },
+        { "id": "core-feedback-pageloaderview--flow-region", "name": "Flow Region" },
+        { "id": "core-feedback-pageloaderview--extents", "name": "Extents" },
+        { "id": "core-feedback-pageloaderview--inverse-overlay", "name": "Inverse Overlay" }
       ],
       "usage": [
-        "Connect actual requests to completion/failure pages. Do not leave a loading placeholder as the final empty state.",
+        "contrast=standard uses theme muted text; contrast=inverse uses full-strength text-on-image on a dark scrim. The public form overlay explicitly selects inverse; omitted contrast stays standard. Select this closed API instead of feature style/class/color overrides. message must be nonblank; imageAlt independently names the image/status. Missing or failed images retain visible text. Defaults are placement=fill, minHeight=200, size=md and imageUnoptimized=false; height defaults to 100% for fill or auto for flow. Fill needs a positioned parent with reserved height; flow reserves its own document space. Site PageLoader owns settings, CDN and localization; pure Views receive a prepared loadingSurface. Retain usable content during background requests and connect terminal error/retry to the request owner.",
         "Consumer: features/site/PageLoader/PageLoader.tsx"
       ],
       "accessibility": [
@@ -12019,7 +12490,8 @@
         "Status content sits directly on the overlay-strong scrim. Review text contrast over actual content, including light media, in the consuming region.",
         "Pass the shared Progress API in progress; the wrapper owns the blocking scope and image contrast. Preserve children only for existing custom processing content, not another independently styled progress bar.",
         "Consumer: features/editor/components/MediaIngestOverlay.tsx",
-        "Consumer: features/media/ui/MediaPlayerStatusOverlay.tsx"
+        "Consumer: features/media/ui/MediaPlayerStatusOverlay.tsx",
+        "Consumer: features/page/blocks/form/ViewClient.tsx"
       ],
       "accessibility": [
         "Connect names and text so users can identify the pending task and current state.",
@@ -12521,7 +12993,8 @@
       ],
       "usage": [
         "Connect route-transition start, completion and failure. Distinguish it from saving within the current screen.",
-        "idle/waiting remain hidden; loading consumes the shared indeterminate Progress xs without surrounding inset, and completing commits 100. Do not present invented numeric completion."
+        "idle/waiting remain hidden; loading consumes the shared indeterminate Progress xs without surrounding inset, and completing commits 100. Do not present invented numeric completion.",
+        "Consumer: components/core/Modal/confirm-dialogs.tsx"
       ],
       "accessibility": [
         "Connect names and text so users can identify the pending task and current state.",
@@ -16584,7 +17057,7 @@
           "sources": [
             { "file": "components/core/Control.module.css", "line": 8, "property": "--_action-boundary" },
             { "file": "components/core/Control.module.css", "line": 165, "property": "border-color" },
-            { "file": "components/core/Control.module.css", "line": 418, "property": "border" }
+            { "file": "components/core/Control.module.css", "line": 495, "property": "border" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 179, "value": "#85827c", "context": ":root" },
@@ -17073,7 +17546,7 @@
         {
           "name": "--geul-border-default",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 377, "property": "border-color" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 454, "property": "border-color" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 175, "value": "#cfccc5", "context": ":root" },
             {
@@ -17108,7 +17581,7 @@
           "sources": [
             { "file": "components/core/Control.module.css", "line": 153, "property": "outline" },
             { "file": "components/core/Control.module.css", "line": 154, "property": "outline-offset" },
-            { "file": "components/core/Control.module.css", "line": 447, "property": "outline-offset" },
+            { "file": "components/core/Control.module.css", "line": 524, "property": "outline-offset" },
             { "file": "components/core/EmojiPicker/EmojiPicker.module.css", "line": 35, "property": "outline" },
             { "file": "components/core/EmojiPicker/EmojiPicker.module.css", "line": 36, "property": "outline-offset" }
           ],
@@ -17121,7 +17594,8 @@
             { "file": "components/core/Control.module.css", "line": 18, "property": "border" },
             { "file": "components/core/Control.module.css", "line": 30, "property": "text-decoration-thickness" },
             { "file": "components/core/Control.module.css", "line": 120, "property": "text-decoration-thickness" },
-            { "file": "components/core/Control.module.css", "line": 418, "property": "border" }
+            { "file": "components/core/Control.module.css", "line": 337, "property": "border" },
+            { "file": "components/core/Control.module.css", "line": 495, "property": "border" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 133, "value": "1px", "context": ":root" }]
         },
@@ -17183,14 +17657,14 @@
           "sources": [
             { "file": "components/core/Control.module.css", "line": 276, "property": "width" },
             { "file": "components/core/Control.module.css", "line": 277, "property": "height" },
-            { "file": "components/core/Control.module.css", "line": 313, "property": "max-width" },
-            { "file": "components/core/Control.module.css", "line": 314, "property": "max-height" },
-            { "file": "components/core/Control.module.css", "line": 321, "property": "width" },
-            { "file": "components/core/Control.module.css", "line": 322, "property": "height" },
-            { "file": "components/core/Control.module.css", "line": 328, "property": "width" },
-            { "file": "components/core/Control.module.css", "line": 329, "property": "height" },
-            { "file": "components/core/Control.module.css", "line": 339, "property": "width" },
-            { "file": "components/core/Control.module.css", "line": 340, "property": "height" }
+            { "file": "components/core/Control.module.css", "line": 390, "property": "max-width" },
+            { "file": "components/core/Control.module.css", "line": 391, "property": "max-height" },
+            { "file": "components/core/Control.module.css", "line": 398, "property": "width" },
+            { "file": "components/core/Control.module.css", "line": 399, "property": "height" },
+            { "file": "components/core/Control.module.css", "line": 405, "property": "width" },
+            { "file": "components/core/Control.module.css", "line": 406, "property": "height" },
+            { "file": "components/core/Control.module.css", "line": 416, "property": "width" },
+            { "file": "components/core/Control.module.css", "line": 417, "property": "height" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 156, "value": "1rem", "context": ":root" }]
         },
@@ -17207,7 +17681,7 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 241, "property": "min-height" },
-            { "file": "components/core/Control.module.css", "line": 451, "property": "--_control-height" }
+            { "file": "components/core/Control.module.css", "line": 528, "property": "--_control-height" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 118, "value": "1.5rem", "context": ":root" }
@@ -17371,8 +17845,8 @@
           "sources": [
             { "file": "components/core/Control.module.css", "line": 223, "property": "font-size" },
             { "file": "components/core/Control.module.css", "line": 243, "property": "font-size" },
-            { "file": "components/core/Control.module.css", "line": 411, "property": "min-width" },
-            { "file": "components/core/Control.module.css", "line": 413, "property": "font-size" }
+            { "file": "components/core/Control.module.css", "line": 488, "property": "min-width" },
+            { "file": "components/core/Control.module.css", "line": 490, "property": "font-size" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 88, "value": "0.625rem", "context": ":root" },
@@ -17384,9 +17858,18 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 25, "property": "font-weight" },
-            { "file": "components/core/Control.module.css", "line": 415, "property": "font-weight" }
+            { "file": "components/core/Control.module.css", "line": 492, "property": "font-weight" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 100, "value": "400", "context": ":root" }]
+        },
+        {
+          "name": "--geul-icon-size-md",
+          "registered": true,
+          "sources": [
+            { "file": "components/core/Control.module.css", "line": 318, "property": "width" },
+            { "file": "components/core/Control.module.css", "line": 319, "property": "height" }
+          ],
+          "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 95, "value": "1rem", "context": ":root" }]
         },
         {
           "name": "--geul-icon-size-xl",
@@ -17399,6 +17882,17 @@
           ]
         },
         {
+          "name": "--geul-icon-size-xs",
+          "registered": true,
+          "sources": [
+            { "file": "components/core/Control.module.css", "line": 362, "property": "width" },
+            { "file": "components/core/Control.module.css", "line": 363, "property": "height" }
+          ],
+          "definitions": [
+            { "file": "lib/styles/design-tokens.css", "line": 93, "value": "0.75rem", "context": ":root" }
+          ]
+        },
+        {
           "name": "--geul-interaction-minimum",
           "registered": true,
           "sources": [
@@ -17406,7 +17900,7 @@
             { "file": "components/core/Control.module.css", "line": 219, "property": "height" },
             { "file": "components/core/Control.module.css", "line": 241, "property": "min-height" },
             { "file": "components/core/Control.module.css", "line": 247, "property": "width" },
-            { "file": "components/core/Control.module.css", "line": 481, "property": "min-height" }
+            { "file": "components/core/Control.module.css", "line": 558, "property": "min-height" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 125, "value": "0px", "context": ":root" },
@@ -17422,10 +17916,10 @@
           "name": "--geul-layer-popup",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 363, "property": "z-index" },
-            { "file": "components/core/Control.module.css", "line": 370, "property": "z-index" },
-            { "file": "components/core/Control.module.css", "line": 390, "property": "z-index" },
-            { "file": "components/core/Control.module.css", "line": 458, "property": "z-index" }
+            { "file": "components/core/Control.module.css", "line": 440, "property": "z-index" },
+            { "file": "components/core/Control.module.css", "line": 447, "property": "z-index" },
+            { "file": "components/core/Control.module.css", "line": 467, "property": "z-index" },
+            { "file": "components/core/Control.module.css", "line": 535, "property": "z-index" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 142, "value": "300", "context": ":root" }]
         },
@@ -17439,7 +17933,7 @@
           "name": "--geul-line-height-xs",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 414, "property": "line-height" },
+            { "file": "components/core/Control.module.css", "line": 491, "property": "line-height" },
             { "file": "components/core/EmojiPicker/EmojiPicker.module.css", "line": 22, "property": "line-height" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 112, "value": "1.4", "context": ":root" }]
@@ -17449,7 +17943,7 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 33, "property": "transition" },
-            { "file": "components/core/Control.module.css", "line": 330, "property": "transition" }
+            { "file": "components/core/Control.module.css", "line": 407, "property": "transition" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 150, "value": "ease-out", "context": ":root" }
@@ -17460,7 +17954,7 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 33, "property": "transition" },
-            { "file": "components/core/Control.module.css", "line": 330, "property": "transition" }
+            { "file": "components/core/Control.module.css", "line": 407, "property": "transition" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 146, "value": "100ms", "context": ":root" }]
         },
@@ -17477,8 +17971,8 @@
           "name": "--geul-overlay-control",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 430, "property": "background" },
-            { "file": "components/core/Control.module.css", "line": 467, "property": "background" }
+            { "file": "components/core/Control.module.css", "line": 507, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 544, "property": "background" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 36, "value": "rgb(0 0 0 / 28%)", "context": ":root" }
@@ -17487,7 +17981,7 @@
         {
           "name": "--geul-overlay-control-border",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 439, "property": "border-color" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 516, "property": "border-color" }],
           "definitions": [
             {
               "file": "lib/styles/design-tokens.css",
@@ -17500,7 +17994,7 @@
         {
           "name": "--geul-overlay-strong",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 475, "property": "background" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 552, "property": "background" }],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 38, "value": "rgb(0 0 0 / 82%)", "context": ":root" }
           ]
@@ -17508,13 +18002,16 @@
         {
           "name": "--geul-paper-ink",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 435, "property": "color" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 512, "property": "color" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 25, "value": "#000", "context": ":root" }]
         },
         {
           "name": "--geul-radius-circle",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 252, "property": "border-radius" }],
+          "sources": [
+            { "file": "components/core/Control.module.css", "line": 252, "property": "border-radius" },
+            { "file": "components/core/Control.module.css", "line": 320, "property": "border-radius" }
+          ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 132, "value": "50%", "context": ":root" }]
         },
         {
@@ -17527,8 +18024,8 @@
           "name": "--geul-spacing-md",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 361, "property": "inset-block-start" },
-            { "file": "components/core/Control.module.css", "line": 362, "property": "inset-inline-start" }
+            { "file": "components/core/Control.module.css", "line": 438, "property": "inset-block-start" },
+            { "file": "components/core/Control.module.css", "line": 439, "property": "inset-inline-start" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 65, "value": "0.75rem", "context": ":root" }
@@ -17537,7 +18034,7 @@
         {
           "name": "--geul-spacing-role-control-label",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 294, "property": "gap" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 371, "property": "gap" }],
           "definitions": [
             {
               "file": "lib/styles/design-tokens.css",
@@ -17563,7 +18060,7 @@
         {
           "name": "--geul-spacing-xs",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 395, "property": "padding-block" }],
+          "sources": [{ "file": "components/core/Control.module.css", "line": 472, "property": "padding-block" }],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 63, "value": "0.5rem", "context": ":root" }]
         },
         {
@@ -17572,10 +18069,10 @@
           "sources": [
             { "file": "components/core/Control.module.css", "line": 29, "property": "text-underline-offset" },
             { "file": "components/core/Control.module.css", "line": 119, "property": "text-underline-offset" },
-            { "file": "components/core/Control.module.css", "line": 406, "property": "inset-block-start" },
-            { "file": "components/core/Control.module.css", "line": 407, "property": "inset-inline-end" },
-            { "file": "components/core/Control.module.css", "line": 411, "property": "min-width" },
-            { "file": "components/core/Control.module.css", "line": 412, "property": "padding" },
+            { "file": "components/core/Control.module.css", "line": 483, "property": "inset-block-start" },
+            { "file": "components/core/Control.module.css", "line": 484, "property": "inset-inline-end" },
+            { "file": "components/core/Control.module.css", "line": 488, "property": "min-width" },
+            { "file": "components/core/Control.module.css", "line": 489, "property": "padding" },
             { "file": "components/core/EmojiPicker/EmojiPicker.module.css", "line": 2, "property": "height" },
             { "file": "components/core/EmojiPicker/EmojiPicker.module.css", "line": 9, "property": "height" },
             { "file": "components/core/EmojiPicker/EmojiPicker.module.css", "line": 13, "property": "height" },
@@ -17732,7 +18229,10 @@
         {
           "name": "--geul-surface",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 376, "property": "background" }],
+          "sources": [
+            { "file": "components/core/Control.module.css", "line": 321, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 453, "property": "background" }
+          ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 167, "value": "#f8f7f4", "context": ":root" },
             {
@@ -17764,7 +18264,10 @@
         {
           "name": "--geul-surface-active",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 144, "property": "background" }],
+          "sources": [
+            { "file": "components/core/Control.module.css", "line": 144, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 349, "property": "background" }
+          ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 170, "value": "#dcd9d3", "context": ":root" },
             {
@@ -17798,7 +18301,8 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 131, "property": "background" },
-            { "file": "components/core/Control.module.css", "line": 383, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 341, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 460, "property": "background" },
             { "file": "components/core/EmojiPicker/EmojiPicker.module.css", "line": 31, "property": "background" }
           ],
           "definitions": [
@@ -17834,7 +18338,8 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 104, "property": "background" },
-            { "file": "components/core/Control.module.css", "line": 164, "property": "background" }
+            { "file": "components/core/Control.module.css", "line": 164, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 357, "property": "background" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 168, "value": "#e8e6e1", "context": ":root" },
@@ -17868,10 +18373,10 @@
           "name": "--geul-text-inverse-primary",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 423, "property": "color" },
-            { "file": "components/core/Control.module.css", "line": 429, "property": "color" },
-            { "file": "components/core/Control.module.css", "line": 434, "property": "background" },
-            { "file": "components/core/Control.module.css", "line": 443, "property": "outline-color" }
+            { "file": "components/core/Control.module.css", "line": 500, "property": "color" },
+            { "file": "components/core/Control.module.css", "line": 506, "property": "color" },
+            { "file": "components/core/Control.module.css", "line": 511, "property": "background" },
+            { "file": "components/core/Control.module.css", "line": 520, "property": "outline-color" }
           ],
           "definitions": [
             {
@@ -17885,7 +18390,10 @@
         {
           "name": "--geul-text-muted",
           "registered": true,
-          "sources": [{ "file": "components/core/Control.module.css", "line": 158, "property": "color" }],
+          "sources": [
+            { "file": "components/core/Control.module.css", "line": 158, "property": "color" },
+            { "file": "components/core/Control.module.css", "line": 358, "property": "color" }
+          ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 173, "value": "#5d5b56", "context": ":root" },
             {
@@ -17919,7 +18427,8 @@
           "registered": true,
           "sources": [
             { "file": "components/core/Control.module.css", "line": 95, "property": "color" },
-            { "file": "components/core/Control.module.css", "line": 417, "property": "color" }
+            { "file": "components/core/Control.module.css", "line": 333, "property": "color" },
+            { "file": "components/core/Control.module.css", "line": 494, "property": "color" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 181, "value": "#f8f7f4", "context": ":root" },
@@ -17953,8 +18462,8 @@
           "name": "--geul-text-on-image",
           "registered": true,
           "sources": [
-            { "file": "components/core/Control.module.css", "line": 466, "property": "color" },
-            { "file": "components/core/Control.module.css", "line": 474, "property": "color" }
+            { "file": "components/core/Control.module.css", "line": 543, "property": "color" },
+            { "file": "components/core/Control.module.css", "line": 551, "property": "color" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 7, "value": "#fff", "context": ":root" }]
         }
@@ -22580,8 +23089,10 @@
         { "name": "hidden", "type": "boolean", "required": false },
         { "name": "hidePickedOptions", "type": "boolean", "required": false },
         { "name": "id", "type": "string", "required": false },
+        { "name": "isLoading", "type": "boolean", "required": false },
         { "name": "label", "type": "ReactNode", "required": false },
         { "name": "leftSection", "type": "ReactNode", "required": false },
+        { "name": "loadingLabel", "type": "string", "required": false },
         { "name": "maxValues", "type": "number", "required": false },
         { "name": "name", "type": "string", "required": false },
         { "name": "nothingFoundMessage", "type": "ReactNode", "required": false },
@@ -22674,7 +23185,7 @@
       ],
       "usage": [
         "Consumers manage values, selections, files and events through the public API below. Check whether the component exposes defaultValue before supplying an initial value.",
-        "Review selection, removal, search and empty results separately. Name every tag-removal control.",
+        "Review selection, removal, search and empty results separately. Name every tag-removal control. Optional isLoading uses the shared checking glyph, exposes busy state and suppresses nothingFoundMessage without disabling selection. Supply localized loadingLabel for a named status; without it the glyph is decorative.",
         "Consumer: components/core/Input/MultiSelectComboboxView.tsx",
         "Consumer: features/admin/segment/SegmentConfigFields.tsx",
         "Consumer: features/admin/user/UserProfileFormSection.tsx",
@@ -22746,25 +23257,30 @@
         { "name": "idPrefix", "type": "string", "required": false },
         { "name": "isCreating", "type": "boolean", "required": false },
         { "name": "isLoading", "type": "boolean", "required": false },
+        { "name": "loadingLabel", "type": "string", "required": false },
         { "name": "onCreate", "type": "(name: string) => void", "required": false }
       ],
       "stateStories": [
         { "id": "core-input-multiselectcomboboxview--editable", "name": "Editable" },
         { "id": "core-input-multiselectcomboboxview--read-only", "name": "Read Only" },
-        { "id": "core-input-multiselectcomboboxview--loading", "name": "Loading" }
+        { "id": "core-input-multiselectcomboboxview--loading", "name": "Loading" },
+        { "id": "core-input-multiselectcomboboxview--loading-empty", "name": "Loading Empty" },
+        { "id": "core-input-multiselectcomboboxview--creating", "name": "Creating" },
+        { "id": "core-input-multiselectcomboboxview--disabled-pending", "name": "Disabled Pending" },
+        { "id": "core-input-multiselectcomboboxview--creation-retry", "name": "Creation Retry" }
       ],
       "usage": [
         "selectedItems and options contain T extends MultiSelectItem. Connect id/name and onSelect/onDeselect to actual state.",
         "label, placeholder, emptyMessage, notFoundMessage, createOptionLabel and canEdit are required contracts. Do not substitute value/onChange/defaultValue.",
-        "Connect canCreateNew/onCreate/isCreating to actual item creation. canEdit=false projects the internal MultiSelect to disabled.",
+        "Connect canCreateNew/onCreate/isCreating to actual item creation. Creation requires canEdit, canCreateNew, onCreate, a nonblank query, no exact match and neither isLoading nor isCreating. canEdit=false projects the internal MultiSelect to disabled.",
         "Consumer: features/post/MultiSelectCombobox.tsx"
       ],
       "accessibility": [
-        "Check label and removal-control names. Distinguish isLoading/isCreating busy state from empty results.",
+        "Check label and removal-control names. Optional isLoading/isCreating show shared checking feedback and suppress empty/not-found copy while retaining available options and selections. Supply localized loadingLabel to name the status.",
         "Check focus and retention of existing selections after search, selection, removal and creation."
       ],
       "constraints": [
-        "Preserve Core's generic item model. Do not expose all internal MultiSelect props as this view's API.",
+        "Preserve Core's generic item model. Omitted pending flags are inactive, omitted canCreateNew disables creation, and combineWithSelected defaults to false. Do not expose all internal MultiSelect props as this view's API.",
         "A story or documentation entry does not establish that a state passed review. Record automated checks, keyboard tests and actual assistive-technology verification separately."
       ],
       "relatedDocs": [
@@ -31406,7 +31922,12 @@
         { "name": "search", "type": "string", "required": true },
         { "name": "disabled", "type": "boolean", "required": false },
         { "name": "emptyMessage", "type": "string", "required": false },
-        { "name": "error", "type": "ReactNode", "required": false },
+        {
+          "name": "error",
+          "type": "ReactNode",
+          "required": false,
+          "description": "Input validation state. Query failures and retry UI belong to the caller."
+        },
         { "name": "grow", "type": "boolean", "required": false },
         { "name": "inputId", "type": "string", "required": false },
         { "name": "isLoading", "type": "boolean", "required": false },
@@ -31470,11 +31991,12 @@
         { "name": "w", "type": "never", "required": false }
       ],
       "stateStories": [
+        { "id": "core-input-searchcomboboxview--pending", "name": "Pending" },
         { "id": "core-input-searchcomboboxview--keyboard-member-selection", "name": "Keyboard Member Selection" }
       ],
       "usage": [
         "Consumers manage values, selections, files and events through the public API below. Check whether the component exposes defaultValue before supplying an initial value.",
-        "Connect the combobox controller, search/onSearchChange, debouncedSearch, items and onSelect to actual search. getItemId/getItemText supply stable IDs and names. Without label, the implementation uses placeholder as its accessible name; check that the supplied name identifies the task.",
+        "Connect the combobox controller, search/onSearchChange, debouncedSearch, items and onSelect to actual search. getItemId/getItemText supply stable IDs and names. isLoading keeps checking feedback and suppresses minimum-query/no-results copy until settlement. Without label, the implementation uses placeholder as its accessible name; check that the supplied name identifies the task.",
         "Consumer: features/label/LabelEditor/ui/LabelParticipantsDialogView.tsx",
         "Consumer: features/place/PlacesAutocomplete.tsx",
         "Consumer: features/post/PostEditor/ui/PostParticipantsDialogView.tsx",
@@ -32665,6 +33187,7 @@
         "TextInput with type=\"search\" and inputmode=\"search\"; the leading glyph follows the input size (14px at xs, 16px otherwise). WebKit native search decorations are hidden. SearchComboboxView uses leadingGlyph=\"search\" for the same glyph in lookup comboboxes.",
         "Consumer: app/(general)/artists/[idOrSlug]/ArtistWorkSection.tsx",
         "Consumer: features/data-table/DataTableSearch.tsx",
+        "Consumer: features/data-table/ServerDataTable/ServerDataTableSearch.tsx",
         "Consumer: features/data-table/ServerDataTable/ServerDataTableSearchRuntime.tsx",
         "Consumer: features/editor/components/EditorFileLibraryPickerView.tsx",
         "Consumer: features/form/AdminFormSubmissionsPage.tsx",
@@ -34949,8 +35472,20 @@
         { "name": "grow", "type": "boolean", "required": false },
         { "name": "hidden", "type": "boolean", "required": false },
         { "name": "id", "type": "string", "required": false },
+        {
+          "name": "isLoading",
+          "type": "boolean",
+          "required": false,
+          "description": "Options are being fetched; Core shows a named status and keeps the open control."
+        },
         { "name": "label", "type": "ReactNode", "required": false },
         { "name": "leftSection", "type": "ReactNode", "required": false },
+        {
+          "name": "loadingLabel",
+          "type": "string",
+          "required": false,
+          "description": "Overrides Core's localized loading status name."
+        },
         { "name": "name", "type": "string", "required": false },
         { "name": "nothingFoundMessage", "type": "ReactNode", "required": false },
         { "name": "onBlur", "type": "FocusEventHandler<HTMLInputElement>", "required": false },
@@ -41088,6 +41623,7 @@
         "Consumer: features/form/FormBuilder/FieldEditor.tsx",
         "Consumer: features/form/FormBuilder/StepEditor.tsx",
         "Consumer: features/form/FormBuilder/validators/ValidatorEditor.tsx",
+        "Consumer: features/form/FormField/FormField.tsx",
         "Consumer: features/form/FormField/fields/DateField.tsx",
         "Consumer: features/form/FormField/fields/NumberField.tsx",
         "Consumer: features/form/FormField/fields/TextField.tsx",
@@ -46864,7 +47400,12 @@
         { "name": "isConnected", "type": "boolean", "required": true },
         { "name": "isSynced", "type": "boolean", "required": true },
         { "name": "labels", "type": "EditorHeaderViewLabels", "required": true },
-        { "name": "onBack", "type": "() => void", "required": true },
+        {
+          "name": "onBack",
+          "type": "() => void | Promise<unknown>",
+          "required": true,
+          "description": "Return the complete leave/save promise to keep Back pending until navigation can proceed."
+        },
         { "name": "title", "type": "string", "required": true },
         { "name": "actionItems", "type": "EditorHeaderActionItem[]", "required": false },
         { "name": "actions", "type": "ReactNode", "required": false },
@@ -46904,6 +47445,7 @@
       ],
       "stateStories": [
         { "id": "core-layout-editorheader--default", "name": "Default" },
+        { "id": "core-layout-editorheader--async-back", "name": "Async Back" },
         { "id": "core-layout-editorheader--editable-with-collaboration", "name": "Editable With Collaboration" },
         { "id": "core-layout-editorheader--destructive", "name": "Destructive" },
         { "id": "core-layout-editorheader--phone-actions", "name": "Phone Actions" },
@@ -46915,7 +47457,7 @@
         { "id": "core-layout-editorheader--reload", "name": "Reload" }
       ],
       "usage": [
-        "Connect save, cancel, status and navigation callbacks to editor state. Use compact rules rather than shrinking icons independently.",
+        "Connect save, cancel, status and navigation callbacks to editor state. Return the complete leave/save Promise from onBack so Core keeps Back pending until settlement; the shared helper preserves its resolved value or original rejection. Consumers own failure feedback. Use compact rules rather than shrinking icons independently.",
         "Consumer: features/authoring/EditorHeader/EditorHeader.tsx"
       ],
       "accessibility": [
@@ -47219,6 +47761,7 @@
         "A single input child receives id, required, aria-describedby and invalid relationships automatically. Existing description IDs are preserved.",
         "Multiple children and composite groups require explicit group naming and relationships. Avoid redundant labels, help and errors.",
         "Consumer: features/admin/settings/OgImageSettingsPage.tsx",
+        "Consumer: features/form/FormField/FormField.tsx",
         "Consumer: features/form/FormField/fields/CheckboxField.tsx",
         "Consumer: features/form/FormField/fields/PhoneField.tsx",
         "Consumer: features/form/FormField/fields/SwitchField.tsx",
@@ -48274,6 +48817,7 @@
         "Consumer: components/core/Modal/ConfirmModal.tsx",
         "Consumer: components/core/Modal/DialogActions.tsx",
         "Consumer: components/core/Modal/FormModal.tsx",
+        "Consumer: components/core/Modal/confirm-dialogs.tsx",
         "Consumer: components/core/PageHeader/PageHeader.tsx",
         "Consumer: components/core/ParameterPanel/ParameterPanel.tsx",
         "Consumer: components/core/Progress/Progress.tsx",
@@ -48299,7 +48843,6 @@
         "Consumer: features/admin/client/ClientsPageView.tsx",
         "Consumer: features/admin/dashboard/AdminDashboardPage.tsx",
         "Consumer: features/admin/email-layout/EmailLayoutEditPage.tsx",
-        "Consumer: features/admin/email-layout/EmailLayoutEditor.tsx",
         "Consumer: features/admin/email-layout/EmailLayoutPreviewView.tsx",
         "Consumer: features/admin/email-layout/EmailLayoutTargetEditor.tsx",
         "Consumer: features/admin/email-layout/EmailLayoutsPage.tsx",
@@ -49178,7 +49721,6 @@
         "Consumer: features/page/blocks/author-list/Editor.tsx",
         "Consumer: features/page/blocks/author-list/Skeleton.tsx",
         "Consumer: features/page/blocks/author-list/ViewClientRuntime.tsx",
-        "Consumer: features/page/blocks/form/ViewClient.tsx",
         "Consumer: features/page/blocks/immersive-scene/MeshOptimizationPanel.tsx",
         "Consumer: features/page/blocks/post-map/Skeleton.tsx",
         "Consumer: features/place/PlaceEditor.tsx",
@@ -50938,6 +51480,13 @@
         { "name": "onValidationReject", "type": "(rejections: ImageUploadRejection[]) => void", "required": false },
         { "name": "placeholder", "type": "ImageUploadPlaceholderConfig", "required": false },
         { "name": "progress", "type": "number", "required": false },
+        {
+          "name": "removeButtonAppearance",
+          "type": "'default' | 'avatar'",
+          "required": false,
+          "description": "Avatar removal uses a small badge over the image; the interaction target stays full size.",
+          "defaultValue": "'default'"
+        },
         { "name": "removeButtonAriaLabel", "type": "string", "required": false },
         {
           "name": "removeButtonEmphasis",
@@ -51006,10 +51555,12 @@
         { "id": "core-media-imageuploadfield--empty", "name": "Empty" },
         { "id": "core-media-imageuploadfield--with-image", "name": "With Image" },
         { "id": "core-media-imageuploadfield--loading", "name": "Loading" },
-        { "id": "core-media-imageuploadfield--avatar", "name": "Avatar" }
+        { "id": "core-media-imageuploadfield--avatar", "name": "Avatar" },
+        { "id": "core-media-imageuploadfield--avatar-removal-comparison", "name": "Avatar Removal Comparison" },
+        { "id": "core-media-imageuploadfield--avatar-removal-states", "name": "Avatar Removal States" }
       ],
       "usage": [
-        "Distinguish selection, validation, uploading, completion and failure. Selecting a file does not confirm upload success.",
+        "Distinguish selection, validation, uploading, completion and failure. Selecting a file does not confirm upload success. Return the complete removal Promise from onRemove; Core combines its pending state with removeButtonLoading (default false), preserves rejection and leaves error feedback to the caller. removeButtonAppearance=avatar requires a circle preview and inside placement; other image actions retain the default appearance.",
         "Consumer: components/core/ImageUpload/ImageUploadCropField.tsx",
         "Consumer: features/artist/ArtistEditor/ArtistImageCropper.tsx",
         "Consumer: features/program-event/ProgramEventEditor/ProgramEventPosterUploader.tsx",
@@ -54700,6 +55251,12 @@
         { "name": "controls", "type": "string", "required": false },
         { "name": "disabled", "type": "boolean", "required": false },
         { "name": "id", "type": "string", "required": false },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "required": false,
+          "description": "Uses the shared pending control while the navigation surface loads; focus remains on the toggle."
+        },
         { "name": "visibility", "type": "'always' | 'mobile-only'", "required": false, "defaultValue": "'always'" },
         { "name": "bd", "type": "never", "required": false },
         { "name": "bdrs", "type": "never", "required": false },
@@ -54753,10 +55310,11 @@
       "stateStories": [
         { "id": "core-navigation-menutoggle--standard", "name": "Standard" },
         { "id": "core-navigation-menutoggle--opened", "name": "Opened" },
-        { "id": "core-navigation-menutoggle--disabled", "name": "Disabled" }
+        { "id": "core-navigation-menutoggle--disabled", "name": "Disabled" },
+        { "id": "core-navigation-menutoggle--loading", "name": "Loading" }
       ],
       "usage": [
-        "Connect actual opened, onClick and controls relationships. A chevron alone does not implement an interaction.",
+        "Connect actual opened, onClick and controls relationships. Optional controlled loading keeps the shared trigger pending during navigation preparation; omitted loading is inactive, and the caller owns opening and completion. A chevron alone does not implement an interaction.",
         "Consumer: components/core/OverlayTriggerTarget.tsx",
         "Consumer: features/shell/ui/Shell/ShellIslands.tsx"
       ],
@@ -57101,6 +57659,7 @@
       "sourceFiles": [
         "components/core/Modal/ConfirmModal.stories.tsx",
         "components/core/Modal/ConfirmModal.tsx",
+        "components/core/Modal/confirm-dialogs.tsx",
         "components/core/control-style.ts",
         "components/core/overlay-contract.ts",
         "components/core/visual-contract.ts"
@@ -57116,78 +57675,198 @@
       "summary": "Confirms consequences before an important action.",
       "anatomy": ["Named dialog → description → cancel/confirm actions."],
       "api": [
-        { "name": "cancelLabel", "type": "string", "required": true },
-        { "name": "closeLabel", "type": "string", "required": true },
-        { "name": "confirmLabel", "type": "string", "required": true },
-        { "name": "message", "type": "ReactNode", "required": true },
-        { "name": "onClose", "type": "() => void", "required": true },
-        { "name": "onConfirm", "type": "() => void", "required": true },
-        { "name": "opened", "type": "boolean", "required": true },
-        { "name": "title", "type": "string", "required": true },
-        { "name": "centered", "type": "boolean", "required": false, "defaultValue": "false" },
-        { "name": "confirmDisabled", "type": "boolean", "required": false, "defaultValue": "false" },
         {
-          "name": "confirmEmphasis",
+          "name": "ConfirmDialogHost.loadError",
+          "type": "ConfirmDialogLoadErrorLabels",
+          "required": true,
+          "description": "App/Feature-owned localized copy for a renderer request that exhausted its retries."
+        },
+        { "name": "ConfirmDialogLoadError.cancelLabel", "type": "string", "required": true },
+        { "name": "ConfirmDialogLoadError.message", "type": "string", "required": true },
+        { "name": "ConfirmDialogLoadError.onCancel", "type": "() => void", "required": true },
+        { "name": "ConfirmDialogLoadError.onRetry", "type": "() => void", "required": true },
+        { "name": "ConfirmDialogLoadError.retryLabel", "type": "string", "required": true },
+        { "name": "ConfirmDialogLoadError.title", "type": "string", "required": true },
+        { "name": "ConfirmModal.cancelLabel", "type": "string", "required": true },
+        { "name": "ConfirmModal.closeLabel", "type": "string", "required": true },
+        { "name": "ConfirmModal.confirmLabel", "type": "string", "required": true },
+        { "name": "ConfirmModal.message", "type": "ReactNode", "required": true },
+        { "name": "ConfirmModal.onClose", "type": "() => void", "required": true },
+        { "name": "ConfirmModal.onConfirm", "type": "() => void", "required": true },
+        { "name": "ConfirmModal.opened", "type": "boolean", "required": true },
+        { "name": "ConfirmModal.title", "type": "string", "required": true },
+        {
+          "name": "ConfirmDialogHost.loading",
+          "type": "'on-demand' | 'eager'",
+          "required": false,
+          "description": "`on-demand` (default) keeps the modal, dialog and focus-scope code out of the first load. The first\n`confirmDialogs.open()` stays queued while the renderer loads and the dialog opens when it arrives;\nthe shared progress bar reports this wait without moving focus from the trigger, so the dialog\nrestores focus to it on close. Exhausted retries show `loadError` recovery controls and retain the\nrequest until it is explicitly cancelled or confirmed. `eager` loads the renderer on mount\n(Storybook, tests).",
+          "defaultValue": "'on-demand'"
+        },
+        { "name": "ConfirmModal.centered", "type": "boolean", "required": false, "defaultValue": "false" },
+        { "name": "ConfirmModal.confirmDisabled", "type": "boolean", "required": false, "defaultValue": "false" },
+        {
+          "name": "ConfirmModal.confirmEmphasis",
           "type": "'strong' | 'medium' | 'low' | 'outline'",
           "required": false,
           "defaultValue": "'strong'"
         },
         {
-          "name": "confirmTone",
+          "name": "ConfirmModal.confirmTone",
           "type": "'accent' | 'neutral' | 'positive' | 'warning' | 'danger'",
           "required": false,
           "defaultValue": "'neutral'"
         },
-        { "name": "loading", "type": "boolean", "required": false, "defaultValue": "false" },
-        { "name": "size", "type": "'compact' | 'standard' | 'large'", "required": false, "defaultValue": "'standard'" },
-        { "name": "bd", "type": "never", "required": false },
-        { "name": "bdrs", "type": "never", "required": false },
-        { "name": "bg", "type": "never", "required": false },
-        { "name": "c", "type": "never", "required": false },
-        { "name": "className", "type": "never", "required": false },
-        { "name": "classNames", "type": "never", "required": false },
-        { "name": "color", "type": "never", "required": false },
-        { "name": "component", "type": "never", "required": false },
-        { "name": "ff", "type": "never", "required": false },
-        { "name": "fw", "type": "never", "required": false },
-        { "name": "fz", "type": "never", "required": false },
-        { "name": "h", "type": "never", "required": false },
-        { "name": "lh", "type": "never", "required": false },
-        { "name": "m", "type": "never", "required": false },
-        { "name": "mah", "type": "never", "required": false },
-        { "name": "maw", "type": "never", "required": false },
-        { "name": "mb", "type": "never", "required": false },
-        { "name": "me", "type": "never", "required": false },
-        { "name": "mih", "type": "never", "required": false },
-        { "name": "miw", "type": "never", "required": false },
-        { "name": "ml", "type": "never", "required": false },
-        { "name": "mr", "type": "never", "required": false },
-        { "name": "ms", "type": "never", "required": false },
-        { "name": "mt", "type": "never", "required": false },
-        { "name": "mx", "type": "never", "required": false },
-        { "name": "my", "type": "never", "required": false },
-        { "name": "opacity", "type": "never", "required": false },
-        { "name": "p", "type": "never", "required": false },
-        { "name": "pb", "type": "never", "required": false },
-        { "name": "pe", "type": "never", "required": false },
-        { "name": "pl", "type": "never", "required": false },
-        { "name": "pr", "type": "never", "required": false },
-        { "name": "ps", "type": "never", "required": false },
-        { "name": "pt", "type": "never", "required": false },
-        { "name": "px", "type": "never", "required": false },
-        { "name": "py", "type": "never", "required": false },
-        { "name": "radius", "type": "never", "required": false },
-        { "name": "renderRoot", "type": "never", "required": false },
-        { "name": "shadow", "type": "never", "required": false },
-        { "name": "style", "type": "never", "required": false },
-        { "name": "styles", "type": "never", "required": false },
-        { "name": "ta", "type": "never", "required": false },
-        { "name": "td", "type": "never", "required": false },
-        { "name": "tt", "type": "never", "required": false },
-        { "name": "unstyled", "type": "never", "required": false },
-        { "name": "variant", "type": "never", "required": false },
-        { "name": "vars", "type": "never", "required": false },
-        { "name": "w", "type": "never", "required": false }
+        { "name": "ConfirmModal.loading", "type": "boolean", "required": false, "defaultValue": "false" },
+        {
+          "name": "ConfirmModal.size",
+          "type": "'compact' | 'standard' | 'large'",
+          "required": false,
+          "defaultValue": "'standard'"
+        },
+        { "name": "ConfirmDialogHost.bd", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.bdrs", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.bg", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.c", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.className", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.classNames", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.color", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.component", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.ff", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.fw", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.fz", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.h", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.lh", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.m", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.mah", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.maw", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.mb", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.me", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.mih", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.miw", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.ml", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.mr", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.ms", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.mt", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.mx", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.my", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.opacity", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.p", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.pb", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.pe", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.pl", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.pr", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.ps", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.pt", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.px", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.py", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.radius", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.renderRoot", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.shadow", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.style", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.styles", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.ta", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.td", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.tt", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.unstyled", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.variant", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.vars", "type": "never", "required": false },
+        { "name": "ConfirmDialogHost.w", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.bd", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.bdrs", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.bg", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.c", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.className", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.classNames", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.color", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.component", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.ff", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.fw", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.fz", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.h", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.lh", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.m", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.mah", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.maw", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.mb", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.me", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.mih", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.miw", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.ml", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.mr", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.ms", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.mt", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.mx", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.my", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.opacity", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.p", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.pb", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.pe", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.pl", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.pr", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.ps", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.pt", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.px", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.py", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.radius", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.renderRoot", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.shadow", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.style", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.styles", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.ta", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.td", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.tt", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.unstyled", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.variant", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.vars", "type": "never", "required": false },
+        { "name": "ConfirmDialogLoadError.w", "type": "never", "required": false },
+        { "name": "ConfirmModal.bd", "type": "never", "required": false },
+        { "name": "ConfirmModal.bdrs", "type": "never", "required": false },
+        { "name": "ConfirmModal.bg", "type": "never", "required": false },
+        { "name": "ConfirmModal.c", "type": "never", "required": false },
+        { "name": "ConfirmModal.className", "type": "never", "required": false },
+        { "name": "ConfirmModal.classNames", "type": "never", "required": false },
+        { "name": "ConfirmModal.color", "type": "never", "required": false },
+        { "name": "ConfirmModal.component", "type": "never", "required": false },
+        { "name": "ConfirmModal.ff", "type": "never", "required": false },
+        { "name": "ConfirmModal.fw", "type": "never", "required": false },
+        { "name": "ConfirmModal.fz", "type": "never", "required": false },
+        { "name": "ConfirmModal.h", "type": "never", "required": false },
+        { "name": "ConfirmModal.lh", "type": "never", "required": false },
+        { "name": "ConfirmModal.m", "type": "never", "required": false },
+        { "name": "ConfirmModal.mah", "type": "never", "required": false },
+        { "name": "ConfirmModal.maw", "type": "never", "required": false },
+        { "name": "ConfirmModal.mb", "type": "never", "required": false },
+        { "name": "ConfirmModal.me", "type": "never", "required": false },
+        { "name": "ConfirmModal.mih", "type": "never", "required": false },
+        { "name": "ConfirmModal.miw", "type": "never", "required": false },
+        { "name": "ConfirmModal.ml", "type": "never", "required": false },
+        { "name": "ConfirmModal.mr", "type": "never", "required": false },
+        { "name": "ConfirmModal.ms", "type": "never", "required": false },
+        { "name": "ConfirmModal.mt", "type": "never", "required": false },
+        { "name": "ConfirmModal.mx", "type": "never", "required": false },
+        { "name": "ConfirmModal.my", "type": "never", "required": false },
+        { "name": "ConfirmModal.opacity", "type": "never", "required": false },
+        { "name": "ConfirmModal.p", "type": "never", "required": false },
+        { "name": "ConfirmModal.pb", "type": "never", "required": false },
+        { "name": "ConfirmModal.pe", "type": "never", "required": false },
+        { "name": "ConfirmModal.pl", "type": "never", "required": false },
+        { "name": "ConfirmModal.pr", "type": "never", "required": false },
+        { "name": "ConfirmModal.ps", "type": "never", "required": false },
+        { "name": "ConfirmModal.pt", "type": "never", "required": false },
+        { "name": "ConfirmModal.px", "type": "never", "required": false },
+        { "name": "ConfirmModal.py", "type": "never", "required": false },
+        { "name": "ConfirmModal.radius", "type": "never", "required": false },
+        { "name": "ConfirmModal.renderRoot", "type": "never", "required": false },
+        { "name": "ConfirmModal.shadow", "type": "never", "required": false },
+        { "name": "ConfirmModal.style", "type": "never", "required": false },
+        { "name": "ConfirmModal.styles", "type": "never", "required": false },
+        { "name": "ConfirmModal.ta", "type": "never", "required": false },
+        { "name": "ConfirmModal.td", "type": "never", "required": false },
+        { "name": "ConfirmModal.tt", "type": "never", "required": false },
+        { "name": "ConfirmModal.unstyled", "type": "never", "required": false },
+        { "name": "ConfirmModal.variant", "type": "never", "required": false },
+        { "name": "ConfirmModal.vars", "type": "never", "required": false },
+        { "name": "ConfirmModal.w", "type": "never", "required": false }
       ],
       "stateStories": [
         { "id": "core-overlays-confirmmodal--confirm", "name": "Confirm" },
@@ -57195,11 +57874,14 @@
         { "id": "core-overlays-confirmmodal--loading", "name": "Loading" },
         { "id": "core-overlays-confirmmodal--disabled", "name": "Disabled" },
         { "id": "core-overlays-confirmmodal--compact-centered", "name": "Compact Centered" },
-        { "id": "core-overlays-confirmmodal--queued-confirmation", "name": "Queued Confirmation" }
+        { "id": "core-overlays-confirmmodal--queued-confirmation", "name": "Queued Confirmation" },
+        { "id": "core-overlays-confirmmodal--renderer-load-error", "name": "Renderer Load Error" }
       ],
       "usage": [
         "Identify the action's target, consequences and cancel/confirm text. Final destructive confirmation uses the shared Confirmation Feature danger/strong contract.",
-        "confirmDialogs.open() with one ConfirmDialogHost near the root is the imperative path. The host loads its renderer on the first request (which waits in the queue); loading=\"eager\" is for Storybook and tests.",
+        "confirmDialogs.open() with one ConfirmDialogHost near the root is the imperative path. Every host requires localized loadError: { message, retryLabel }. loading defaults to on-demand: the request stays queued with RouteProgressBar until the renderer loads. Exhausted retries end progress and show shared Alert cancel/retry recovery; retry reloads the renderer without invoking onConfirm. The recovery view restores trigger focus before the loaded dialog mounts. loading=\"eager\" loads on mount for Storybook/tests and still requires loadError.",
+        "ConfirmDialogHost and the exported ConfirmDialogLoadError resolve from components/core/Modal/confirm-dialogs.tsx. ConfirmDialogLoadError requires title, message, retryLabel, cancelLabel, onCancel and onRetry. The host takes title and cancelLabel from the latest queued request and message/retryLabel from loadError; cancellation closes that request. RendererLoadError renders this recovery view directly, without simulating a failed renderer download.",
+        "Consumer: app/layout.tsx",
         "Consumer: components/core/EditorHeader/EditorHeaderView.tsx",
         "Consumer: components/core/Modal/ConfirmDialogStack.tsx",
         "Consumer: features/confirmation/ui/ConfirmationDialog.tsx"
@@ -57759,6 +58441,7 @@
         "Consumer: features/editor/components/EditorFileLibraryPickerView.tsx",
         "Consumer: features/editor/components/MediaIngestDialog.tsx",
         "Consumer: features/editor/components/UnifiedFileAttachmentPagePreview.tsx",
+        "Consumer: features/editor/tiptap/emoji/TiptapEmojiPicker.tsx",
         "Consumer: features/editor/tiptap/shader/ShaderNode.tsx",
         "Consumer: features/file-manager/FileManagerView.tsx",
         "Consumer: features/form/FormRenderer.tsx",
@@ -57780,7 +58463,8 @@
         "Consumer: features/release/ReleaseEditor/ReleaseLabelsSection.tsx",
         "Consumer: features/release/ReleaseEditor/ReleaseTrackCreateView.tsx",
         "Consumer: features/series/SeriesManagersModal.tsx",
-        "Consumer: features/translation/settings/TranslationProviderModal.tsx"
+        "Consumer: features/translation/settings/TranslationProviderModal.tsx",
+        "Consumer: features/user/ui/ProfileAvatarControl/ProfileAvatarControl.tsx"
       ],
       "accessibility": [
         "Give the open region a name and role appropriate to its purpose. Check its relationships with the visible title and description.",
@@ -57891,6 +58575,7 @@
         "Consumer: components/core/Modal/BlockingAlertDialog.tsx",
         "Consumer: components/core/Modal/ConfirmModal.tsx",
         "Consumer: components/core/Modal/FormModal.tsx",
+        "Consumer: components/core/Modal/confirm-dialogs.tsx",
         "Consumer: features/admin/email-template/EmailTemplateEditPage.tsx",
         "Consumer: features/admin/mail-adapter/MailAdaptersPage.tsx",
         "Consumer: features/admin/program-event/ProgramEventTypeManager.tsx",
@@ -60018,7 +60703,6 @@
         "Consumer: components/core/Progress/SegmentedProgress.tsx",
         "Consumer: components/core/Section/ToolbarCommand.tsx",
         "Consumer: components/core/SideNavigation/SideNavigation.tsx",
-        "Consumer: features/admin/MapThemeEditor/MapThemeListView.tsx",
         "Consumer: features/admin/email-layout/EmailLayoutPreviewView.tsx",
         "Consumer: features/admin/ui/AdminNavigation/AdminNavigationView.tsx",
         "Consumer: features/admin/user/auth/UserSsoProvidersSection.tsx",
@@ -60882,9 +61566,6 @@
         "Consumer: components/core/Section/SectionHeader.tsx",
         "Consumer: components/core/Section/StatCard.tsx",
         "Consumer: features/admin/MapThemeEditor/MapThemeListView.tsx",
-        "Consumer: features/admin/artist/ArtistDeleteDialogView.tsx",
-        "Consumer: features/admin/email-layout/EmailLayoutEditPage.tsx",
-        "Consumer: features/admin/email-layout/EmailLayoutEditor.tsx",
         "Consumer: features/admin/email-layout/EmailLayoutPreviewView.tsx",
         "Consumer: features/admin/email-layout/EmailLayoutTargetEditor.tsx",
         "Consumer: features/admin/email-layout/EmailLayoutsPage.tsx",
@@ -60892,11 +61573,9 @@
         "Consumer: features/admin/email-template/EmailTemplatesPage.tsx",
         "Consumer: features/admin/mail-adapter/MailAdaptersPage.tsx",
         "Consumer: features/admin/segment/SegmentConfigFields.tsx",
-        "Consumer: features/admin/segment/SegmentModals.tsx",
         "Consumer: features/admin/settings/OgImageSettingsPage.tsx",
         "Consumer: features/admin/user/auth/UserBanStateSection.tsx",
         "Consumer: features/admin/user/auth/UserSsoProvidersSection.tsx",
-        "Consumer: features/artist/ArtistEditor/ArtistDetailEditor.tsx",
         "Consumer: features/artist/ArtistEditor/ArtistParticipantsDialog.tsx",
         "Consumer: features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "Consumer: features/campaign/CampaignAnalyticsPage.tsx",
@@ -60913,10 +61592,10 @@
         "Consumer: features/file-manager/FileManagerView.tsx",
         "Consumer: features/form/AdminFormSubmissionsPage.tsx",
         "Consumer: features/form/FormDashboard/FieldStatsChart.tsx",
+        "Consumer: features/form/FormField/FormField.tsx",
         "Consumer: features/form/FormPasswordContent.tsx",
         "Consumer: features/form/FormRenderer.tsx",
         "Consumer: features/form/SubmissionDetail.tsx",
-        "Consumer: features/label/AdminLabelDetailClient.tsx",
         "Consumer: features/label/LabelEditor/ui/LabelParticipantsDialogView.tsx",
         "Consumer: features/map/BaseMap.tsx",
         "Consumer: features/menu/AdminMenusPage.tsx",
@@ -60948,7 +61627,6 @@
         "Consumer: features/post/PostEditor/ui/PostParticipantsDialogView.tsx",
         "Consumer: features/release/ReleaseEditor/ReleaseArtistsSectionView.tsx",
         "Consumer: features/release/ReleaseEditor/ReleaseCreditsSection.tsx",
-        "Consumer: features/release/ReleaseEditor/ReleaseEditor.tsx",
         "Consumer: features/release/ReleaseEditor/ReleaseLabelsSection.tsx",
         "Consumer: features/release/ReleaseEditor/ReleaseTracksSection.tsx",
         "Consumer: features/release/ReleaseEditor/TrackCreditsEditorSection.tsx",
@@ -60956,7 +61634,6 @@
         "Consumer: features/series/SeriesManagersModal.tsx",
         "Consumer: features/series/SeriesPublicView.tsx",
         "Consumer: features/translation/ActiveEditLocaleContentPreview.tsx",
-        "Consumer: features/translation/ActiveEditLocaleContentPreviewView.tsx",
         "Consumer: features/translation/EntityTranslationsPanel.tsx",
         "Consumer: features/translation/admin/TranslationJobsPage.tsx",
         "Consumer: features/translation/admin/TranslationOverviewPage.tsx",
@@ -62559,7 +63236,7 @@
         "Consumer: features/media-download/FileDownloadPolicyEditor.tsx",
         "Consumer: features/media/AudioPlayer.tsx",
         "Consumer: features/member/onboarding/NicknameOnboarding.tsx",
-        "Consumer: features/mermaid/MermaidDiagram.tsx",
+        "Consumer: features/mermaid/MermaidDiagramView.tsx",
         "Consumer: features/metadata/MetadataPanel/MetadataPanel.tsx",
         "Consumer: features/metadata/ui/OgImagePreviewView.tsx",
         "Consumer: features/my/PasskeySettingsSection.tsx",

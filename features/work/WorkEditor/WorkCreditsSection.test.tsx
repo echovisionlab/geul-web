@@ -1,11 +1,10 @@
 // @vitest-environment jsdom
 
-import { act, type PropsWithChildren } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+import type { PropsWithChildren } from 'react';
+import { act, render as renderUI, screen, waitFor } from '@/test/render';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { TestProviders } from '@/test/TestProviders';
 import { getWorkGroupsWithCreditsAction, moveWorkCreditItemAction } from '@/lib/actions/work';
 import { WorkCreditsSection } from './WorkCreditsSection';
 
@@ -26,7 +25,6 @@ vi.mock('@/lib/editor/editor-entity-changes', () => ({
   publishEditorEntityChange: vi.fn(),
   useEditorEntityChanges: vi.fn(),
 }));
-vi.mock('@/components/core/Notification', () => ({ notifications: { show: vi.fn() } }));
 vi.mock('@/lib/hooks/useSortableSensors', () => ({ useSortableSensors: () => [] }));
 vi.mock('@dnd-kit/core', () => ({
   DndContext: ({ children, onDragEnd }: PropsWithChildren<{ onDragEnd: (event: DragEndEvent) => void }>) => {
@@ -43,13 +41,11 @@ vi.mock('@dnd-kit/sortable', () => ({
   verticalListSortingStrategy: vi.fn(),
 }));
 vi.mock('./credits/SortableCreditGroupHeader', () => ({
-  SortableCreditGroupHeader: ({ group }: { group: { id: string; name: string } }) => (
-    <div data-group={group.id}>{group.name}</div>
-  ),
+  SortableCreditGroupHeader: ({ group }: { group: { id: string; name: string } }) => <h3>{group.name}</h3>,
 }));
 vi.mock('./credits/SortableCreditRow', () => ({
   SortableCreditRow: ({ credit, groupId }: { credit: { id: string }; groupId: string | null }) => (
-    <div data-credit={credit.id} data-parent={groupId ?? ''} />
+    <div role="group" aria-label={`Credit ${credit.id} in ${groupId ?? 'none'}`} />
   ),
 }));
 vi.mock('@/lib/contexts/WorkMetaContext', async () => {
@@ -64,9 +60,6 @@ vi.mock('@/lib/contexts/WorkMetaContext', async () => {
   };
 });
 
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-let host: HTMLDivElement;
-let root: Root;
 let queryClient: QueryClient;
 const initial = {
   groups: [
@@ -86,13 +79,15 @@ function deferred<T>() {
   });
   return { promise, resolve };
 }
-async function settle() {
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 0));
-  });
-}
 function order() {
-  return [...host.querySelectorAll('[data-group]')].map((group) => group.getAttribute('data-group'));
+  return screen.getAllByRole('heading', { level: 3 }).map((group) => (group.textContent === 'Group A' ? 'a' : 'b'));
+}
+function editor(canEdit = true) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <WorkCreditsSection workId="work-1" canEdit={canEdit} />
+    </QueryClientProvider>
+  );
 }
 function moveAAfterB() {
   interaction.onDragEnd?.({
@@ -102,15 +97,10 @@ function moveAAfterB() {
 }
 beforeEach(() => {
   vi.clearAllMocks();
-  host = document.createElement('div');
-  document.body.appendChild(host);
-  root = createRoot(host);
   queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 });
 afterEach(() => {
-  act(() => root.unmount());
   queryClient.clear();
-  host.remove();
 });
 
 it('retains the canonical moved order when an earlier credits refetch completes after the save', async () => {
@@ -118,26 +108,15 @@ it('retains the canonical moved order when an earlier credits refetch completes 
   const move = deferred<Awaited<ReturnType<typeof moveWorkCreditItemAction>>>();
   vi.mocked(getWorkGroupsWithCreditsAction).mockResolvedValueOnce(initial).mockReturnValueOnce(olderRead.promise);
   vi.mocked(moveWorkCreditItemAction).mockReturnValueOnce(move.promise);
-  act(() =>
-    root.render(
-      <QueryClientProvider client={queryClient}>
-        <TestProviders>
-          <WorkCreditsSection workId="work-1" canEdit />
-        </TestProviders>
-      </QueryClientProvider>,
-    ),
-  );
-  await settle();
-  await settle();
+  renderUI(editor());
+  await screen.findByText('Group A');
   expect(order()).toEqual(['a', 'b']);
   let refetch!: Promise<unknown>;
   act(() => {
     refetch = queryClient.refetchQueries({ queryKey: ['work', 'groupsWithCredits', 'work-1'] });
   });
-  await settle();
   act(moveAAfterB);
-  await settle();
-  expect(order()).toEqual(['b', 'a']);
+  await waitFor(() => expect(order()).toEqual(['b', 'a']));
   await act(async () =>
     move.resolve({
       ok: true,
@@ -148,13 +127,11 @@ it('retains the canonical moved order when an earlier credits refetch completes 
       ],
     }),
   );
-  await settle();
   await act(async () => {
     olderRead.resolve(initial);
     await refetch;
   });
-  await settle();
-  expect(order()).toEqual(['b', 'a']);
+  await waitFor(() => expect(order()).toEqual(['b', 'a']));
   expect(moveWorkCreditItemAction).toHaveBeenCalledWith(
     'work-1',
     expect.objectContaining({ itemId: 'a' }),
@@ -174,24 +151,13 @@ it('reloads the confirmed order after a failed move and allows another move', as
         { kind: 'group', id: 'a' },
       ],
     });
-  act(() =>
-    root.render(
-      <QueryClientProvider client={queryClient}>
-        <TestProviders>
-          <WorkCreditsSection workId="work-1" canEdit />
-        </TestProviders>
-      </QueryClientProvider>,
-    ),
-  );
-  await settle();
-  await settle();
+  renderUI(editor());
+  await screen.findByText('Group A');
   act(moveAAfterB);
-  await settle();
-  await settle();
+  await waitFor(() => expect(getWorkGroupsWithCreditsAction).toHaveBeenCalledTimes(2));
   expect(order()).toEqual(['a', 'b']);
   act(moveAAfterB);
-  await settle();
-  expect(moveWorkCreditItemAction).toHaveBeenCalledTimes(2);
+  await waitFor(() => expect(moveWorkCreditItemAction).toHaveBeenCalledTimes(2));
 });
 
 it('keeps canonical peer group assignments when the next local move adds an override', async () => {
@@ -221,24 +187,14 @@ it('keeps canonical peer group assignments when the next local move adds an over
     })
     .mockReturnValue(peerRead.promise);
   vi.mocked(moveWorkCreditItemAction).mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
-  act(() =>
-    root.render(
-      <QueryClientProvider client={queryClient}>
-        <TestProviders>
-          <WorkCreditsSection workId="work-1" canEdit />
-        </TestProviders>
-      </QueryClientProvider>,
-    ),
-  );
-  await settle();
-  await settle();
+  renderUI(editor());
+  await screen.findByText('Group A');
   const moveCredit = (creditId: string) =>
     interaction.onDragEnd?.({
       active: { id: `credit-${creditId}`, data: { current: { type: 'credit', creditId, groupId: 'a' } } },
       over: { id: 'group-b', data: { current: { type: 'group', groupId: 'b' } } },
     } as unknown as DragEndEvent);
   act(() => moveCredit('c'));
-  await settle();
   await act(async () =>
     first.resolve({
       ok: true,
@@ -252,12 +208,10 @@ it('keeps canonical peer group assignments when the next local move adds an over
       ],
     }),
   );
-  await settle();
-  expect(host.querySelector('[data-credit="c"]')?.getAttribute('data-parent')).toBe('peer');
+  expect(await screen.findByRole('group', { name: 'Credit c in peer' })).toBeVisible();
   act(() => moveCredit('d'));
-  await settle();
-  expect(host.querySelector('[data-credit="c"]')?.getAttribute('data-parent')).toBe('peer');
-  expect(host.querySelector('[data-credit="d"]')?.getAttribute('data-parent')).toBe('b');
+  expect(await screen.findByRole('group', { name: 'Credit c in peer' })).toBeVisible();
+  expect(await screen.findByRole('group', { name: 'Credit d in b' })).toBeVisible();
 });
 
 it('upgrades and downgrades credits on the same mounted rows and save coordinator', async () => {
@@ -272,32 +226,50 @@ it('upgrades and downgrades credits on the same mounted rows and save coordinato
         { kind: 'group', id: 'a' },
       ],
     });
-  const render = (canEdit: boolean) =>
-    act(() =>
-      root.render(
-        <QueryClientProvider client={queryClient}>
-          <TestProviders>
-            <WorkCreditsSection workId="work-1" canEdit={canEdit} />
-          </TestProviders>
-        </QueryClientProvider>,
-      ),
-    );
-  render(false);
-  await settle();
-  await settle();
-  const group = host.querySelector('[data-group="a"]');
-  expect(group).not.toBeNull();
+  const { rerender } = renderUI(editor(false));
+  const group = await screen.findByText('Group A');
   act(moveAAfterB);
   expect(moveWorkCreditItemAction).not.toHaveBeenCalled();
-  render(true);
-  expect(host.querySelector('[data-group="a"]')).toBe(group);
-  expect(host.textContent).toContain('Group A');
-  expect(host.querySelectorAll('button').length).toBeGreaterThan(0);
+  rerender(editor(true));
+  expect(screen.getByText('Group A')).toBe(group);
+  expect(screen.getByText('Group A')).toBeVisible();
+  expect(screen.getByRole('button', { name: 'Add' })).toBeEnabled();
   act(moveAAfterB);
-  await settle();
-  expect(moveWorkCreditItemAction).toHaveBeenCalledOnce();
-  render(false);
+  await waitFor(() => expect(moveWorkCreditItemAction).toHaveBeenCalledOnce());
+  rerender(editor(false));
   act(moveAAfterB);
-  expect(moveWorkCreditItemAction).toHaveBeenCalledOnce();
-  expect(host.querySelector('[data-group="a"]')).toBe(group);
+  await waitFor(() => expect(moveWorkCreditItemAction).toHaveBeenCalledOnce());
+  expect(screen.getByText('Group A')).toBe(group);
 });
+
+it.each(['returned', 'rejected'])(
+  'shows a %s credits read failure instead of an empty list and can retry',
+  async (failure) => {
+    let finish!: (result: Awaited<ReturnType<typeof getWorkGroupsWithCreditsAction>>) => void;
+    let fail!: (reason: Error) => void;
+    vi.mocked(getWorkGroupsWithCreditsAction)
+      .mockReset()
+      .mockReturnValueOnce(
+        new Promise((resolve, reject) => {
+          finish = resolve;
+          fail = reject;
+        }),
+      )
+      .mockResolvedValue(initial);
+    const { user } = renderUI(editor());
+    expect(screen.getByRole('status')).toHaveTextContent('Loading');
+    expect(screen.queryByText('No credits yet')).not.toBeInTheDocument();
+    await act(async () => {
+      if (failure === 'returned') {
+        finish({ groups: [], credits: [], order: [], error: true });
+      } else {
+        fail(new Error('offline'));
+      }
+    });
+    expect(await screen.findByRole('alert')).toBeVisible();
+    expect(screen.queryByRole('status', { name: 'Loading...' })).not.toBeInTheDocument();
+    expect(screen.queryByText('No credits yet')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Try again' }));
+    expect(await screen.findByText('Group A')).toBeVisible();
+  },
+);

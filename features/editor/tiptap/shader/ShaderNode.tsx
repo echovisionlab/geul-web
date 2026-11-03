@@ -73,6 +73,7 @@ export interface ShaderLabels extends ShaderApiLabels {
   copy: string;
   copied: string;
   resetOriginal: string;
+  starting: string;
   running: string;
   stopped: string;
   error: string;
@@ -95,6 +96,7 @@ export const SHADER_LABEL_KEYS = [
   'copy',
   'copied',
   'resetOriginal',
+  'starting',
   'running',
   'stopped',
   'error',
@@ -117,6 +119,7 @@ export const DEFAULT_SHADER_LABELS = {
   apply: 'Apply',
   copy: 'Copy',
   copied: 'Copied',
+  starting: 'Loading...',
   running: 'Running',
   stopped: 'Stopped',
   resetOriginal: 'Reset to original',
@@ -142,6 +145,7 @@ export const KOREAN_SHADER_LABELS = {
   apply: '적용',
   copy: '복사',
   copied: '복사됨',
+  starting: '불러오는 중...',
   running: '실행 중',
   stopped: '중지됨',
   resetOriginal: '원본으로 초기화',

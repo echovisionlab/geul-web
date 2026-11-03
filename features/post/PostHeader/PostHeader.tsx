@@ -65,12 +65,13 @@ interface PostHeaderPost {
 
 interface PostHeaderProps {
   post: PostHeaderPost;
+  exportingMarkdown?: boolean;
   onExport: (format: 'markdown' | 'pdf') => void;
   /** Interface-language content locale menu; shares the header action row instead of floating over it. */
   languageControl?: ReactNode;
 }
 
-export function PostHeader({ post, onExport, languageControl }: PostHeaderProps) {
+export function PostHeader({ post, onExport, languageControl, exportingMarkdown = false }: PostHeaderProps) {
   const dateTime = useDateTimeFormatter();
   const t = useTranslations('postHeader');
   const tCommon = useTranslations('common');
@@ -128,6 +129,7 @@ export function PostHeader({ post, onExport, languageControl }: PostHeaderProps)
             emphasis="low"
             aria-label={t('actions.exportMarkdown')}
             onClick={() => onExport('markdown')}
+            loading={exportingMarkdown}
           >
             <IconMarkdown size={16} />
           </IconButton>

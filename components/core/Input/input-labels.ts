@@ -12,6 +12,7 @@ const labels = {
     tags: 'Etiketler',
     options: 'Seçenekler',
     code: 'Doğrulama kodu',
+    loading: 'Yükleniyor',
   },
   nl: {
     color: 'Kleur',
@@ -21,6 +22,7 @@ const labels = {
     tags: 'Tags',
     options: 'Opties',
     code: 'Verificatiecode',
+    loading: 'Laden',
   },
   ja: {
     color: '色',
@@ -30,6 +32,7 @@ const labels = {
     tags: 'タグ',
     options: 'オプション',
     code: '認証コード',
+    loading: '読み込み中',
   },
   de: {
     color: 'Farbe',
@@ -39,6 +42,7 @@ const labels = {
     tags: 'Tags',
     options: 'Optionen',
     code: 'Bestätigungscode',
+    loading: 'Wird geladen',
   },
   ru: {
     color: 'Цвет',
@@ -48,6 +52,7 @@ const labels = {
     tags: 'Теги',
     options: 'Опции',
     code: 'Проверочный код',
+    loading: 'Загрузка',
   },
   pl: {
     color: 'Kolor',
@@ -57,6 +62,7 @@ const labels = {
     tags: 'Tagi',
     options: 'Opcje',
     code: 'Kod weryfikacyjny',
+    loading: 'Ładowanie',
   },
   'zh-CN': {
     color: '颜色',
@@ -66,6 +72,7 @@ const labels = {
     tags: '标签',
     options: '选项',
     code: '验证码',
+    loading: '加载中',
   },
   en: {
     color: 'Color',
@@ -75,6 +82,7 @@ const labels = {
     tags: 'Tags',
     options: 'Options',
     code: 'Verification code',
+    loading: 'Loading',
   },
   'pt-PT': {
     color: 'Cor',
@@ -84,6 +92,7 @@ const labels = {
     tags: 'Etiquetas',
     options: 'Opções',
     code: 'Código de verificação',
+    loading: 'Carregando',
   },
   it: {
     color: 'Colore',
@@ -93,6 +102,7 @@ const labels = {
     tags: 'Tag',
     options: 'Opzioni',
     code: 'Codice di verifica',
+    loading: 'Caricamento',
   },
   'es-419': {
     color: 'Color',
@@ -102,6 +112,7 @@ const labels = {
     tags: 'Etiquetas',
     options: 'Opciones',
     code: 'Código de verificación',
+    loading: 'Cargando',
   },
   fr: {
     color: 'Couleur',
@@ -111,6 +122,7 @@ const labels = {
     tags: 'Étiquettes',
     options: 'Options',
     code: 'Code de vérification',
+    loading: 'Chargement',
   },
   'pt-BR': {
     color: 'Cor',
@@ -120,6 +132,7 @@ const labels = {
     tags: 'Tags',
     options: 'Opções',
     code: 'Código de verificação',
+    loading: 'Carregando',
   },
   ko: {
     color: '색상',
@@ -129,6 +142,7 @@ const labels = {
     tags: '태그',
     options: '옵션',
     code: '인증 코드',
+    loading: '불러오는 중',
   },
   'zh-TW': {
     color: '顏色',
@@ -138,6 +152,7 @@ const labels = {
     tags: '標籤',
     options: '選項',
     code: '驗證碼',
+    loading: '載入中',
   },
   vi: {
     color: 'Màu sắc',
@@ -147,6 +162,7 @@ const labels = {
     tags: 'Thẻ',
     options: 'Tùy chọn',
     code: 'Mã xác minh',
+    loading: 'Đang tải',
   },
   id: {
     color: 'Warna',
@@ -156,6 +172,7 @@ const labels = {
     tags: 'Tag',
     options: 'Pilihan',
     code: 'Kode verifikasi',
+    loading: 'Memuat',
   },
   th: {
     color: 'สี',
@@ -165,6 +182,7 @@ const labels = {
     tags: 'แท็ก',
     options: 'ตัวเลือก',
     code: 'รหัสยืนยัน',
+    loading: 'กำลังโหลด',
   },
   es: {
     color: 'Color',
@@ -174,6 +192,7 @@ const labels = {
     tags: 'Etiquetas',
     options: 'Opciones',
     code: 'Código de verificación',
+    loading: 'Cargando',
   },
   ar: {
     color: 'اللون',
@@ -183,6 +202,7 @@ const labels = {
     tags: 'الوسوم',
     options: 'الخيارات',
     code: 'رمز التحقق',
+    loading: 'جارٍ التحميل',
   },
 } as const;
 export function useCoreInputLabels() {

@@ -1,5 +1,6 @@
 'use client';
-import { SupportingText, List, Text as DsText } from '@/components/core/Typography';
+import type { ReactNode } from 'react';
+import { List, Text as DsText } from '@/components/core/Typography';
 import { ConfirmationDialog } from '@/features/confirmation';
 
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
@@ -24,6 +25,7 @@ interface ArtistDeleteDialogViewProps {
   artistName: string;
   preview: ArtistDeletePreviewViewModel | null;
   previewLoading: boolean;
+  loadingSurface: ReactNode;
   previewError?: string | null;
   deleting: boolean;
   labels: {
@@ -45,6 +47,7 @@ export function ArtistDeleteDialogView({
   artistName,
   preview,
   previewLoading,
+  loadingSurface,
   previewError,
   deleting,
   labels,
@@ -61,7 +64,7 @@ export function ArtistDeleteDialogView({
       message={
         <DsLayoutStack gap="sm">
           <DsText>{labels.confirmation.replace('{name}', artistName)}</DsText>
-          {previewLoading ? <SupportingText tone="secondary">{labels.loading}</SupportingText> : null}
+          {previewLoading ? loadingSurface : null}
           {previewError ? <DsText tone="danger">{previewError || labels.failed}</DsText> : null}
           {preview ? (
             <>

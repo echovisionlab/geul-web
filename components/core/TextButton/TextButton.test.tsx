@@ -1,55 +1,16 @@
 // @vitest-environment jsdom
 
+import { createRef } from 'react';
+import { describe, expect, it, vi } from 'vitest';
+import { act, render, screen } from '@/test/render';
 import { mockBrowserNavigation } from '../testing/browser-navigation';
-import { I18nProvider as DesignSystemProvider } from 'react-aria-components';
-import '@testing-library/jest-dom/vitest';
-import { act, createRef, type ReactNode } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DropdownMenu } from '../DropdownMenu';
 import { TextButton } from './TextButton';
 
 const browserNavigation = mockBrowserNavigation();
 
-let container: HTMLDivElement;
-let root: Root;
-
-beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-  browserNavigation.attach(container);
-});
-
-afterEach(() => {
-  act(() => root.unmount());
-  container.remove();
-  vi.restoreAllMocks();
-});
-
-Object.defineProperty(window, 'ResizeObserver', {
-  configurable: true,
-  writable: true,
-  value: class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  },
-});
-
-Object.defineProperty(window.HTMLElement.prototype, 'scrollIntoView', {
-  configurable: true,
-  writable: true,
-  value: vi.fn(),
-});
-
-function render(node: ReactNode) {
-  act(() => root.render(node));
-}
-
 describe('TextButton', () => {
-  it('retains descriptive copy through a hidden relation when React Aria filters aria-description', () => {
+  it('retains descriptions on actions and links without changing their names', () => {
     render(
       <>
         <span id="control-help" hidden>
@@ -58,45 +19,33 @@ describe('TextButton', () => {
         <TextButton aria-description="Cookie settings" aria-describedby="control-help">
           Settings
         </TextButton>
+        <TextButton href="/terms" aria-description="Current terms">
+          Terms
+        </TextButton>
       </>,
     );
-    const button = container.querySelector('button')!;
-    expect(button).toHaveAccessibleName('Settings');
-    expect(button).toHaveAccessibleDescription('Opens preferences Cookie settings');
-    expect(button.querySelector('[hidden]')?.textContent).toBe('Cookie settings');
-  });
-  it('uses the same description contract for links without renaming their visible text', () => {
-    render(
-      <TextButton href="/terms" aria-description="Current terms">
-        Terms
-      </TextButton>,
+    expect(screen.getByRole('button', { name: 'Settings' })).toHaveAccessibleDescription(
+      'Opens preferences Cookie settings',
     );
-    const link = container.querySelector('a')!;
-    expect(link).toHaveAccessibleName('Terms');
-    expect(link).toHaveAccessibleDescription('Current terms');
-    expect(link.querySelectorAll('[hidden]')).toHaveLength(1);
+    expect(screen.getByRole('link', { name: 'Terms' })).toHaveAccessibleDescription('Current terms');
   });
 
-  it('preserves native button type and disabled behavior', () => {
+  it('preserves native button type and disabled behavior', async () => {
     const onClick = vi.fn();
-
-    render(
+    const { user } = render(
       <TextButton type="submit" appearance="accent" disabled onClick={onClick}>
         Submit
       </TextButton>,
     );
-
-    const button = container.querySelector<HTMLButtonElement>('button');
-    expect(button?.type).toBe('submit');
-    expect(button?.disabled).toBe(true);
-
-    act(() => button?.click());
+    const button = screen.getByRole('button', { name: 'Submit' });
+    expect(button).toHaveAttribute('type', 'submit');
+    expect(button).toBeDisabled();
+    await user.click(button);
     expect(onClick).not.toHaveBeenCalled();
   });
 
-  it('renders href actions through an accessible anchor and forwards anchor props and refs', () => {
+  it('forwards native anchor props and refs', () => {
     const ref = createRef<HTMLAnchorElement>();
-
     render(
       <TextButton
         ref={ref}
@@ -111,97 +60,76 @@ describe('TextButton', () => {
         About
       </TextButton>,
     );
-
-    const link = container.querySelector<HTMLAnchorElement>('a');
+    const link = screen.getByRole('link', { name: 'About' });
     expect(link).toBe(ref.current);
-    expect(link?.getAttribute('href')).toBe('/about');
-    expect(link?.getAttribute('target')).toBe('_blank');
-    expect(link?.getAttribute('rel')).toBe('noopener');
-    expect(link?.getAttribute('download')).toBe('about.txt');
-    expect(link?.getAttribute('aria-current')).toBe('page');
-    expect(link?.getAttribute('data-appearance')).toBe('accent');
-  });
-
-  it('runs navigation callbacks for an internal route and leaves external links native', () => {
-    const onNavigate = vi.fn();
-    render(
-      <TextButton href="/privacy" onNavigate={onNavigate}>
-        Privacy
-      </TextButton>,
-    );
-    act(() => container.querySelector('a')?.click());
-    expect(onNavigate).toHaveBeenCalledWith('/privacy');
-  });
-
-  it('distinguishes current navigation, toggle state, and selected visual ancestry', () => {
-    render(
-      <TextButton href="#current" selected aria-current="page">
-        Current
-      </TextButton>,
-    );
-    const link = container.querySelector('a')!;
-    expect(link).toHaveAttribute('data-selected', 'true');
+    expect(link).toHaveAttribute('href', '/about');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener');
+    expect(link).toHaveAttribute('download', 'about.txt');
     expect(link).toHaveAttribute('aria-current', 'page');
-    expect(link.hasAttribute('aria-pressed')).toBe(false);
-    render(
-      <TextButton selected aria-haspopup="menu" aria-expanded={false}>
-        Section
-      </TextButton>,
-    );
-    const menu = container.querySelector('button')!;
-    expect(menu.hasAttribute('aria-pressed')).toBe(false);
-    expect(menu).toHaveAttribute('aria-expanded', 'false');
-    render(<TextButton aria-pressed>Bold</TextButton>);
-    expect(container.querySelector('button')).toHaveAttribute('aria-pressed', 'true');
+    expect(link).toHaveAttribute('data-appearance', 'accent');
   });
 
-  it('does not turn a real navigation link into a Space-activated command', () => {
+  it('keeps navigation native for Space and runs the callback on activation', async () => {
     const onNavigate = vi.fn();
-    render(
+    const { user, container } = render(
       <TextButton href="#target" onNavigate={onNavigate}>
         Target
       </TextButton>,
     );
-    const link = container.querySelector('a')!;
-    act(() => {
-      link.focus();
-      link.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true }));
-      link.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true, cancelable: true }));
-    });
+    browserNavigation.attach(container);
+    await user.tab();
+    await user.keyboard(' ');
     expect(onNavigate).not.toHaveBeenCalled();
-    act(() => link.click());
+    await user.click(screen.getByRole('link', { name: 'Target' }));
     expect(onNavigate).toHaveBeenCalledWith('#target');
   });
 
-  it.each([false, true])('retains a long menu name and trigger semantics with nowrap=%s', (nowrap) => {
-    const name = 'Language and regional formatting preferences';
-    render(
-      <DesignSystemProvider>
-        <DropdownMenu portal={false}>
-          <DropdownMenu.Target>
-            <TextButton indicator="menu" fullWidth display="flex" nowrap={nowrap}>
-              {name}
-            </TextButton>
-          </DropdownMenu.Target>
-          <DropdownMenu.Dropdown>
-            <DropdownMenu.Item>English</DropdownMenu.Item>
-          </DropdownMenu.Dropdown>
-        </DropdownMenu>
-      </DesignSystemProvider>,
+  it('distinguishes current navigation, toggle state and selected ancestry', () => {
+    const { rerender } = render(
+      <TextButton href="#current" selected aria-current="page">
+        Current
+      </TextButton>,
     );
-    const button = container.querySelector('button')!;
-    expect(button).toHaveAccessibleName(name);
+    const link = screen.getByRole('link', { name: 'Current' });
+    expect(link).toHaveAttribute('data-selected', 'true');
+    expect(link).toHaveAttribute('aria-current', 'page');
+    expect(link).not.toHaveAttribute('aria-pressed');
+    rerender(
+      <TextButton selected aria-haspopup="menu" aria-expanded={false}>
+        Section
+      </TextButton>,
+    );
+    expect(screen.getByRole('button', { name: 'Section' })).not.toHaveAttribute('aria-pressed');
+    expect(screen.getByRole('button', { name: 'Section' })).toHaveAttribute('aria-expanded', 'false');
+    rerender(<TextButton aria-pressed>Bold</TextButton>);
+    expect(screen.getByRole('button', { name: 'Bold' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it.each([false, true])('retains a long menu name and trigger semantics with nowrap=%s', async (nowrap) => {
+    const name = 'Language and regional formatting preferences';
+    const { user } = render(
+      <DropdownMenu portal={false}>
+        <DropdownMenu.Target>
+          <TextButton indicator="menu" fullWidth display="flex" nowrap={nowrap}>
+            {name}
+          </TextButton>
+        </DropdownMenu.Target>
+        <DropdownMenu.Dropdown>
+          <DropdownMenu.Item>English</DropdownMenu.Item>
+        </DropdownMenu.Dropdown>
+      </DropdownMenu>,
+    );
+    const button = screen.getByRole('button', { name });
     expect(button.hasAttribute('data-nowrap')).toBe(nowrap);
     expect(button).toHaveAttribute('aria-expanded', 'false');
-    act(() => button.click());
+    await user.click(button);
+    expect(await screen.findByRole('menu')).toBeVisible();
     expect(button).toHaveAccessibleName(name);
     expect(button).toHaveAttribute('aria-expanded', 'true');
-    expect(document.querySelector('[role="menu"]')).not.toBeNull();
-    const glyph = button.querySelector('svg')!;
-    expect(glyph).toHaveAttribute('aria-hidden', 'true');
-    expect(button.firstElementChild?.textContent).toBe(name);
   });
-  it('forwards accepted native advisory text on actions and links', () => {
+
+  it('forwards native advisory text on actions and links', () => {
     render(
       <>
         <TextButton title="Opens preferences">Settings</TextButton>
@@ -210,7 +138,68 @@ describe('TextButton', () => {
         </TextButton>
       </>,
     );
-    expect(container.querySelector('button')!.title).toBe('Opens preferences');
-    expect(container.querySelector('a')!.title).toBe('Opens help');
+    expect(screen.getByRole('button', { name: 'Settings' })).toHaveAttribute('title', 'Opens preferences');
+    expect(screen.getByRole('link', { name: 'Help' })).toHaveAttribute('title', 'Opens help');
+  });
+
+  it.each([
+    { nameProps: {}, name: 'Save preferences', progressName: 'Save preferences' },
+    {
+      nameProps: { 'aria-label': 'Save cookie preferences', loadingLabel: 'Saving preferences' },
+      name: 'Save cookie preferences',
+      progressName: 'Saving preferences',
+    },
+    { nameProps: { 'aria-labelledby': 'save-name' }, name: 'Save settings', progressName: 'Save settings' },
+  ])(
+    'keeps the pending command name and blocks repeated activation: $name',
+    async ({ nameProps, name, progressName }) => {
+      const onClick = vi.fn();
+      const example = (loading: boolean) => (
+        <>
+          <span id="save-name">Save settings</span>
+          <TextButton {...nameProps} loading={loading} onClick={onClick}>
+            Save preferences
+          </TextButton>
+        </>
+      );
+      const { user, rerender } = render(example(false));
+      const button = screen.getByRole('button', { name });
+      await user.tab();
+      rerender(example(true));
+      expect(button).toHaveFocus();
+      expect(button).toHaveAttribute('aria-busy', 'true');
+      expect(button).toHaveTextContent('Save preferences');
+      expect(screen.getByRole('progressbar', { name: progressName })).toBeVisible();
+      expect(button).toHaveAccessibleName(name);
+      await user.keyboard('{Enter} ');
+      await user.click(button);
+      act(() => button.click());
+      expect(onClick).not.toHaveBeenCalled();
+      rerender(example(false));
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+      await user.keyboard('{Enter}');
+      expect(onClick).toHaveBeenCalledOnce();
+    },
+  );
+
+  it.each(['submit', 'reset'] as const)('blocks native %s while pending and restores it afterwards', async (type) => {
+    const onSubmit = vi.fn((event: React.FormEvent) => event.preventDefault());
+    const onReset = vi.fn();
+    const example = (loading: boolean) => (
+      <form onSubmit={onSubmit} onReset={onReset}>
+        <TextButton type={type} loading={loading}>
+          Apply
+        </TextButton>
+      </form>
+    );
+    const { user, rerender } = render(example(true));
+    const button = screen.getByRole('button', { name: 'Apply' });
+    await user.click(button);
+    act(() => button.click());
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(onReset).not.toHaveBeenCalled();
+    rerender(example(false));
+    await user.click(button);
+    expect(type === 'submit' ? onSubmit : onReset).toHaveBeenCalledOnce();
   });
 });

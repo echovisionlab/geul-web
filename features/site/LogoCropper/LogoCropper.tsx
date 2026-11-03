@@ -1,7 +1,7 @@
 'use client';
 
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { UploadType } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { useTranslations } from 'next-intl';
 import { useImageCropAccessibility } from '@/lib/i18n/useImageCropAccessibility';
@@ -59,17 +59,47 @@ export function LogoCropper({
   const placeholderMaxWidth = size * 3;
 
   const [loading, setLoading] = useState(false);
-  const [operation, setOperation] = useState<'idle' | 'uploading' | 'deleting'>('idle');
+  const [operation, setOperation] = useState<'idle' | 'preparing' | 'uploading' | 'saving' | 'deleting'>('idle');
+  const sequence = useRef(0);
+  const mounted = useRef(true);
+  const readerRef = useRef<FileReader | null>(null);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      sequence.current += 1;
+      readerRef.current?.abort();
+    };
+  }, []);
+  const isCurrent = (request: number) => mounted.current && sequence.current === request;
   const [cropModalOpen, setCropModalOpen] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
+  useEffect(() => {
+    sequence.current += 1;
+    readerRef.current?.abort();
+    setLoading(false);
+    setOperation('idle');
+    setCropModalOpen(false);
+    setImageSrc(null);
+  }, [currentImage, disabled]);
 
   const finalizeUpload = useCallback(
-    async (data: Uint8Array<ArrayBuffer>, mimeType: string) => {
+    async (data: Uint8Array<ArrayBuffer>, mimeType: string, request: number) => {
+      if (!isCurrent(request)) {
+        return;
+      }
       setLoading(true);
       setOperation('uploading');
       try {
         const { url } = await onUpload(data, mimeType);
+        if (!isCurrent(request)) {
+          return;
+        }
+        setOperation('saving');
         await onImageChange(url);
+        if (!isCurrent(request)) {
+          return;
+        }
 
         notifications.show({
           message: tCommon('messages.itemUpdated', { item: resolvedLabel }),
@@ -79,13 +109,18 @@ export function LogoCropper({
         setCropModalOpen(false);
         setImageSrc(null);
       } catch (error) {
+        if (!isCurrent(request)) {
+          return;
+        }
         notifications.show({
           message: error instanceof Error ? error.message : tCommon('messages.uploadImageFailed'),
           tone: 'danger',
         });
       } finally {
-        setLoading(false);
-        setOperation('idle');
+        if (isCurrent(request)) {
+          setLoading(false);
+          setOperation('idle');
+        }
       }
     },
     [onImageChange, onUpload, resolvedLabel, tCommon],
@@ -93,25 +128,48 @@ export function LogoCropper({
 
   const openFile = useCallback(
     async (file: File) => {
+      const request = ++sequence.current;
+      readerRef.current?.abort();
+      setLoading(true);
+      setOperation('preparing');
       try {
         if (file.type === 'image/svg+xml') {
           const arrayBuffer = await file.arrayBuffer();
-          await finalizeUpload(new Uint8Array(arrayBuffer), file.type);
+          if (isCurrent(request)) {
+            await finalizeUpload(new Uint8Array(arrayBuffer), file.type, request);
+          }
           return;
         }
-
         const previewFile = await prepareImageFileForPreview(file, UploadType.LABEL_IMAGE);
-        const reader = new FileReader();
-        reader.addEventListener('load', () => {
-          setImageSrc(reader.result as string);
-          setCropModalOpen(true);
+        if (!isCurrent(request)) {
+          return;
+        }
+        const source = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          readerRef.current = reader;
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = () => reject(reader.error ?? new Error(tCommon('messages.uploadImageFailed')));
+          reader.onabort = () => reject(new Error(tCommon('messages.uploadImageFailed')));
+          reader.readAsDataURL(previewFile);
         });
-        reader.readAsDataURL(previewFile);
+        if (!isCurrent(request)) {
+          return;
+        }
+        setImageSrc(source);
+        setCropModalOpen(true);
       } catch (error) {
-        notifications.show({
-          message: error instanceof Error ? error.message : tCommon('messages.uploadImageFailed'),
-          tone: 'danger',
-        });
+        if (isCurrent(request)) {
+          notifications.show({
+            message: error instanceof Error ? error.message : tCommon('messages.uploadImageFailed'),
+            tone: 'danger',
+          });
+        }
+      } finally {
+        if (isCurrent(request)) {
+          readerRef.current = null;
+          setLoading(false);
+          setOperation('idle');
+        }
       }
     },
     [finalizeUpload, tCommon],
@@ -134,35 +192,69 @@ export function LogoCropper({
   );
 
   const handleCrop = async (blob: Blob) => {
-    const arrayBuffer = await blob.arrayBuffer();
-    await finalizeUpload(new Uint8Array(arrayBuffer), 'image/webp');
+    const request = ++sequence.current;
+    setLoading(true);
+    setOperation('preparing');
+    try {
+      const arrayBuffer = await blob.arrayBuffer();
+      if (isCurrent(request)) {
+        await finalizeUpload(new Uint8Array(arrayBuffer), 'image/webp', request);
+      }
+    } catch (error) {
+      if (isCurrent(request)) {
+        notifications.show({
+          message: error instanceof Error ? error.message : tCommon('messages.uploadImageFailed'),
+          tone: 'danger',
+        });
+      }
+    } finally {
+      if (isCurrent(request)) {
+        setLoading(false);
+        setOperation('idle');
+      }
+    }
   };
 
   const handleDelete = async () => {
+    if (loading || disabled) {
+      return;
+    }
+    const request = ++sequence.current;
     setLoading(true);
     setOperation('deleting');
     try {
       if (onDelete) {
         await onDelete();
       }
+      if (!isCurrent(request)) {
+        return;
+      }
       await onImageChange(null);
+      if (!isCurrent(request)) {
+        return;
+      }
 
       notifications.show({
         message: tCommon('messages.itemRemoved', { item: resolvedLabel }),
         tone: 'positive',
       });
     } catch (error) {
+      if (!isCurrent(request)) {
+        return;
+      }
       notifications.show({
         message: error instanceof Error ? error.message : tCommon('messages.removeImageFailed'),
         tone: 'danger',
       });
     } finally {
-      setLoading(false);
-      setOperation('idle');
+      if (isCurrent(request)) {
+        setLoading(false);
+        setOperation('idle');
+      }
     }
   };
 
-  const processing = operation === 'uploading' && loading;
+  const processing = loading && operation !== 'idle' && operation !== 'deleting';
   const previewMaxWidth = Math.max(size * 3.6, 280);
   const uploadPrompt = `${tCommon('uploadField.instruction')} · ${constraintText}`;
 
@@ -180,9 +272,13 @@ export function LogoCropper({
         disabled={disabled || loading}
         loading={processing}
         loadingLabel={
-          uploadProgress <= 0 ? tCommon('uploadField.status.preparingImage') : tCommon('uploadField.status.uploading')
+          operation === 'preparing'
+            ? tCommon('uploadField.status.preparingImage')
+            : operation === 'saving'
+              ? tCommon('states.loading')
+              : tCommon('uploadField.status.uploading')
         }
-        progress={uploadProgress <= 0 ? undefined : uploadProgress}
+        progress={operation === 'uploading' && uploadProgress > 0 ? uploadProgress : undefined}
         emptyTitle={label ? undefined : uploadActionLabel}
         emptyDescription={uploadPrompt}
         changeHint={currentImage && size >= 80 ? tCommon('uploadField.changeHint') : undefined}
@@ -217,6 +313,10 @@ export function LogoCropper({
           imageSrc={imageSrc}
           opened={cropModalOpen}
           onClose={() => {
+            sequence.current += 1;
+            readerRef.current?.abort();
+            setLoading(false);
+            setOperation('idle');
             setCropModalOpen(false);
             setImageSrc(null);
           }}

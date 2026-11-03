@@ -560,12 +560,21 @@ function useProgramEventEditorViewModel({
     },
     [tCommon],
   );
-  const flushPendingSaves = useCallback(async () => {
-    while (pendingAuxiliaryWritesRef.current.size > 0) {
-      await Promise.all([...pendingAuxiliaryWritesRef.current]);
-    }
-    return flushEditorSavesOrNotify(`program_event:${eventId}`, tCommon('notifications.saveFailed'));
-  }, [eventId, tCommon]);
+  const [flushingCommand, setFlushingCommand] = useState<'back' | 'status' | 'delete' | null>(null);
+  const flushPendingSaves = useCallback(
+    async (command: 'back' | 'status' | 'delete' = 'back') => {
+      setFlushingCommand(command);
+      try {
+        while (pendingAuxiliaryWritesRef.current.size > 0) {
+          await Promise.all([...pendingAuxiliaryWritesRef.current]);
+        }
+        return await flushEditorSavesOrNotify(`program_event:${eventId}`, tCommon('notifications.saveFailed'));
+      } finally {
+        setFlushingCommand(null);
+      }
+    },
+    [eventId, tCommon],
+  );
   const handleBack = useCallback(async () => {
     if (await flushPendingSaves()) {
       router.back();
@@ -573,14 +582,14 @@ function useProgramEventEditorViewModel({
   }, [flushPendingSaves, router]);
   const handleStatusChange = useCallback(
     async (nextStatus: ProgramEventStatusValue) => {
-      if (await flushPendingSaves()) {
+      if (await flushPendingSaves('status')) {
         lifecycle.changeStatus(nextStatus);
       }
     },
     [flushPendingSaves, lifecycle.changeStatus],
   );
   const handleDelete = useCallback(async () => {
-    if (await flushPendingSaves()) {
+    if (await flushPendingSaves('delete')) {
       lifecycle.deleteEvent.mutate();
     }
   }, [flushPendingSaves, lifecycle.deleteEvent.mutate]);
@@ -695,8 +704,8 @@ function useProgramEventEditorViewModel({
     lifecycle: {
       statusOptions: lifecycle.statusOptions,
       canDelete: lifecycle.canDelete,
-      isStatusChanging: lifecycle.isStatusChanging,
-      deleteEvent: { isPending: lifecycle.deleteEvent.isPending },
+      isStatusChanging: lifecycle.isStatusChanging || flushingCommand === 'status',
+      deleteEvent: { isPending: lifecycle.deleteEvent.isPending || flushingCommand === 'delete' },
     },
     handleBack,
     handleStatusChange,
@@ -938,7 +947,7 @@ export function ProgramEventEditorView({ model }: { model: ProgramEventEditorVie
                   <Select
                     label={tCommonLabels('type')}
                     searchable
-                    disabled={!canEditNeutral}
+                    disabled={!canEditNeutral || createType.isPending}
                     value={typeId}
                     searchValue={typeCombobox.dropdownOpened ? typeSearch : (selectedType?.name ?? '')}
                     onSearchChange={setTypeSearch}
@@ -948,7 +957,7 @@ export function ProgramEventEditorView({ model }: { model: ProgramEventEditorVie
                     placeholder={tCommon('actions.searchItems', {
                       items: tCommonEntities('programEventTypes').toLowerCase(),
                     })}
-                    aria-busy={createType.isPending || undefined}
+                    isLoading={createType.isPending}
                     onChange={(id) => {
                       if (id) {
                         handleTypeSelect(id);
@@ -1258,7 +1267,7 @@ export function ProgramEventEditorView({ model }: { model: ProgramEventEditorVie
                     </div>
                   ) : (
                     <div id={getEditorBodyLoadingId('program_event', eventId)}>
-                      <PageLoader size="sm" minHeight={300} />
+                      <PageLoader extent="tall" size="sm" />
                     </div>
                   )}
                 </DsLayoutInset>

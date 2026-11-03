@@ -36,6 +36,7 @@ export interface ImageDropzoneProps {
   description: string;
   /** Upload prompt text (instruction and accepted formats) */
   uploadPrompt: string;
+  loadingLabel?: string;
 
   /** Called when files are dropped */
   onDrop: (files: File[]) => void;
@@ -60,13 +61,14 @@ export function ImageDropzone({
   label,
   description,
   uploadPrompt,
+  loadingLabel,
   onDrop,
   onDelete,
   errorMessage,
 }: ImageDropzoneProps) {
   const t = useTranslations('common.uploadField');
   const handleFileSelect = (file: File) => {
-    if (!file) {
+    if (!file || disabled || uploading || deleting) {
       return;
     }
     // The dropzone validates type and maximum size; the minimum is checked here.
@@ -102,6 +104,7 @@ export function ImageDropzone({
       label={label}
       description={description}
       uploadPrompt={uploadPrompt}
+      loadingLabel={loadingLabel ?? t('status.uploading')}
       removeButtonAriaLabel={t('removeLabel', { label })}
       onFileSelect={handleFileSelect}
       onReject={handleReject}

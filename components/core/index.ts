@@ -126,7 +126,7 @@ export type {
 export { MenuToggle } from './MenuToggle';
 export type { MenuToggleProps, MenuToggleVisibility } from './MenuToggle';
 export { PageLoaderView } from './LoadingSurface';
-export type { PageLoaderViewProps, PageLoaderViewSize } from './LoadingSurface';
+export type { PageLoaderViewProps, PageLoaderViewSize, PageLoaderViewContrast } from './LoadingSurface';
 export { Progress, RouteProgressBar } from './Progress';
 export type { ProgressProps, RouteProgressBarPhase, RouteProgressBarProps } from './Progress';
 export { CollabSyncStatusIndicator, EditorHeaderView } from './EditorHeader';
@@ -351,3 +351,4 @@ export type { BlockSelectionTargetProps } from './SelectionSurface';
 export { InputFrame, InputSizeProvider } from './Input';
 export type { InputFrameProps } from './Input';
 export { preloadOnDemandOverlays } from './on-demand-overlays';
+export { usePendingAction } from './use-pending-action';

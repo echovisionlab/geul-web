@@ -1,10 +1,7 @@
 // @vitest-environment jsdom
-
-import { DesignSystemTestProvider as DesignSystemProvider } from '@/test/TestProviders';
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
+import { describe, expect, it, vi } from 'vitest';
+import { render, screen, within } from '@/test/render';
+import { PageLoaderView } from '@/components/core/LoadingSurface';
 import {
   VersionHistoryDrawerView,
   type VersionHistoryDrawerViewLabels,
@@ -40,15 +37,6 @@ const versions = [
   },
 ];
 
-let container: HTMLDivElement;
-let root: Root;
-
-class ResizeObserverMock {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-}
-
 function renderView(overrides: Partial<VersionHistoryDrawerViewProps> = {}) {
   const props: VersionHistoryDrawerViewProps = {
     opened: true,
@@ -56,6 +44,7 @@ function renderView(overrides: Partial<VersionHistoryDrawerViewProps> = {}) {
     versions,
     labels,
     loading: false,
+    loadingSurface: <PageLoaderView placement="flow" imageAlt={labels.loading} message={labels.loading} />,
     error: null,
     onRetry: vi.fn(async () => {}),
     pagination: { contextKey: 'work:one', nextPage: null, loading: false, error: null, onLoad: vi.fn(async () => {}) },
@@ -68,147 +57,74 @@ function renderView(overrides: Partial<VersionHistoryDrawerViewProps> = {}) {
     onRestore: vi.fn(),
     ...overrides,
   };
-
-  act(() => {
-    root.render(
-      <DesignSystemProvider forceColorScheme="light">
-        <VersionHistoryDrawerView {...props} />
-      </DesignSystemProvider>,
-    );
-  });
-
-  return props;
+  return { ...render(<VersionHistoryDrawerView {...props} />), props };
 }
-
-function getButtonByText(rootElement: ParentNode, label: string) {
-  const button = [...rootElement.querySelectorAll<HTMLButtonElement>('button')].find(
-    (candidate) => candidate.textContent?.trim() === label,
-  );
-  if (!button) {
-    throw new Error(`Expected a button labeled "${label}".`);
-  }
-  return button;
-}
-
-beforeEach(() => {
-  Object.defineProperty(window, 'matchMedia', {
-    writable: true,
-    value: vi.fn().mockImplementation((query: string) => ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    })),
-  });
-  Object.defineProperty(globalThis, 'ResizeObserver', {
-    configurable: true,
-    value: ResizeObserverMock,
-  });
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-});
-
-afterEach(() => {
-  act(() => root.unmount());
-  container.remove();
-  vi.restoreAllMocks();
-  vi.unstubAllGlobals();
-});
 
 describe('VersionHistoryDrawerView', () => {
-  it('renders supplied view models and emits selection intent', () => {
-    const props = renderView();
-
-    expect(document.body.textContent).toContain('Version history');
-    expect(document.body.textContent).toContain('Edited title');
-    expect(document.body.textContent).toContain('Locale: en');
-    expect(document.body.textContent).toContain('2 minutes ago');
-    expect(document.body.textContent).toContain('by Mina and user-2');
-    const restore = getButtonByText(document.body, 'Restore');
-    expect(restore.textContent).toBe('Restore');
-    const describedBy = restore.getAttribute('aria-describedby')?.split(' ') ?? [];
-    expect(describedBy.map((id) => document.getElementById(id)?.textContent)).toEqual([
-      'v2',
-      'Edited title',
-      'Locale: en',
-      'July 20, 2026 at 10:00',
-    ]);
-    const row = document.body.querySelector('[role="listitem"]');
-    expect(row).toHaveAccessibleName('Edited title v2');
-    const timestamp = row!.querySelector('time')!;
+  it('renders named version rows, timestamps and selection intent', async () => {
+    const { props, user } = renderView();
+    const row = screen.getByRole('listitem', { name: 'Edited title v2' });
+    expect(row).toHaveTextContent('Locale: en');
+    expect(row).toHaveTextContent('by Mina and user-2');
+    const timestamp = within(row).getByText('2 minutes ago');
     expect(timestamp).toHaveAttribute('datetime', versions[0]!.createdAt);
     expect(timestamp).toHaveAccessibleDescription(versions[0]!.createdAtTooltip);
-    expect(timestamp.hasAttribute('tabindex')).toBe(false);
-
-    act(() => getButtonByText(document.body, 'Restore').click());
-
+    expect(timestamp).not.toHaveAttribute('tabindex');
+    const restore = within(row).getByRole('button', { name: 'Restore' });
+    expect(restore).toHaveAccessibleDescription('v2 Edited title Locale: en July 20, 2026 at 10:00');
+    await user.click(restore);
     expect(props.onSelectVersion).toHaveBeenCalledWith('version-2');
   });
 
-  it('renders loading and delegates restore confirmation actions to callbacks', () => {
-    const onRestore = vi.fn();
-    const onCloseRestoreConfirmation = vi.fn();
-    renderView({
-      selectedVersionId: 'version-2',
-      restoreConfirmationOpened: true,
-      onRestore,
-      onCloseRestoreConfirmation,
-    });
-
-    const confirmation = [...document.body.querySelectorAll<HTMLElement>('[role="dialog"]')].find((dialog) =>
-      dialog.textContent?.includes('Restoring to v2 will replace the current state. Continue?'),
-    );
-    if (!confirmation) {
-      throw new Error('Expected the restore confirmation dialog.');
-    }
-
-    act(() => getButtonByText(confirmation, 'Restore').click());
-    act(() => getButtonByText(confirmation, 'Cancel').click());
-
-    expect(onRestore).toHaveBeenCalledOnce();
-    expect(onCloseRestoreConfirmation).toHaveBeenCalledOnce();
+  it('delegates confirmation and cancellation to the supplied callbacks', async () => {
+    const { props, user, rerender } = renderView();
+    await user.click(screen.getByRole('button', { name: labels.restore }));
+    rerender(<VersionHistoryDrawerView {...props} selectedVersionId="version-2" restoreConfirmationOpened />);
+    const confirmation = await screen.findByRole('dialog', { name: labels.restoreTitle });
+    expect(confirmation).toHaveTextContent(labels.restoreBody);
+    await user.click(within(confirmation).getByRole('button', { name: 'Restore' }));
+    await user.click(within(confirmation).getByRole('button', { name: 'Cancel' }));
+    expect(props.onRestore).toHaveBeenCalledOnce();
+    expect(props.onCloseRestoreConfirmation).toHaveBeenCalledOnce();
   });
 
-  it('uses the supplied loading label without exposing version rows', () => {
+  it('shows the shared loading surface without stale rows or empty history', () => {
     renderView({ loading: true });
-
-    expect(document.body.querySelector('[aria-label="Loading..."]')).not.toBeNull();
-    expect(document.body.textContent).not.toContain('Edited title');
+    expect(screen.getByRole('status', { name: labels.loading })).toHaveTextContent(labels.loading);
+    expect(screen.queryByText('Edited title')).not.toBeInTheDocument();
+    expect(screen.queryByText(labels.empty)).not.toBeInTheDocument();
   });
 
-  it('keeps history visible while restore is disabled', () => {
-    const props = renderView({ canRestore: false });
-    const restoreButton = getButtonByText(document.body, 'Restore');
-
-    expect(document.body.textContent).toContain('Edited title');
-    expect(restoreButton.disabled).toBe(true);
-    act(() => restoreButton.click());
+  it('keeps history readable when restore is disabled', async () => {
+    const { props, user } = renderView({ canRestore: false });
+    const restore = screen.getByRole('button', { name: 'Restore' });
+    expect(screen.getByText('Edited title')).toBeVisible();
+    expect(restore).toBeDisabled();
+    await user.click(restore);
     expect(props.onSelectVersion).not.toHaveBeenCalled();
   });
 
-  it('reports an initial list failure with explicit retry instead of an empty history', async () => {
-    const onRetry = vi.fn(async () => {});
-    renderView({ versions: [], error: labels.loadFailed, onRetry });
-    expect(document.body.querySelector('[role="alert"]')).toHaveTextContent(labels.loadFailed);
-    expect(document.body.textContent).not.toContain(labels.empty);
-    await act(async () => getButtonByText(document.body, labels.retry).click());
-    expect(onRetry).toHaveBeenCalledOnce();
+  it('distinguishes initial failure from empty and shows pending retry', async () => {
+    const { props, user, rerender } = renderView({ versions: [], error: labels.loadFailed });
+    expect(screen.getByRole('alert')).toHaveTextContent(labels.loadFailed);
+    expect(screen.queryByText(labels.empty)).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: labels.retry }));
+    expect(props.onRetry).toHaveBeenCalledOnce();
+    rerender(<VersionHistoryDrawerView {...props} retrying />);
+    expect(screen.getByRole('button', { name: labels.retry })).toHaveAttribute('aria-busy', 'true');
+    await user.click(screen.getByRole('button', { name: labels.retry }));
+    expect(props.onRetry).toHaveBeenCalledOnce();
   });
 
-  it('keeps earlier rows on a page failure and delegates a bounded retry to the same page', async () => {
+  it('keeps earlier rows on continuation failure and retries the same page', async () => {
     const onLoad = vi.fn(async () => {});
-    renderView({
+    const { user } = renderView({
       error: labels.loadFailed,
       pagination: { contextKey: 'work:one', nextPage: 2, loading: false, error: labels.loadFailed, onLoad },
     });
-    expect(document.body.querySelector('[role="listitem"]')).toHaveTextContent('Edited title');
-    expect(document.body.querySelector('[data-near-end-loader] [role="alert"]')).toHaveTextContent(labels.loadFailed);
-    await act(async () => getButtonByText(document.body, labels.retry).click());
+    expect(screen.getByRole('listitem')).toHaveTextContent('Edited title');
+    expect(screen.getByRole('alert')).toHaveTextContent(labels.loadFailed);
+    await user.click(screen.getByRole('button', { name: labels.retry }));
     expect(onLoad).toHaveBeenCalledOnce();
   });
 });

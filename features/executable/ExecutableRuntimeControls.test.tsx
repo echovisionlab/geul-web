@@ -1,19 +1,30 @@
 // @vitest-environment jsdom
 
 import { useState } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@/test/render';
 import { ExecutableBlockTitle, ExecutableRuntimeControls, ExecutableRuntimeStatus } from './ExecutableRuntimeControls';
 
 describe('ExecutableRuntimeControls', () => {
-  it('announces the running and stopped state through one polite live region', () => {
+  it('announces supplied starting, running and stopped labels through one polite live region without a message provider', () => {
+    expect(
+      renderToStaticMarkup(
+        <ExecutableRuntimeStatus status="starting" starting="준비 중" running="Running" stopped="Stopped" />,
+      ),
+    ).toContain('준비 중');
     const politeRegion = (text: string) =>
       screen.getByText((_, element) => element?.getAttribute('aria-live') === 'polite' && element.textContent === text);
-    const { rerender } = render(<ExecutableRuntimeStatus status="running" running="Running" stopped="Stopped" />);
+    const { rerender } = render(
+      <ExecutableRuntimeStatus status="running" running="Running" stopped="Stopped" starting="준비 중" />,
+    );
 
     const status = politeRegion('Running');
 
-    rerender(<ExecutableRuntimeStatus status="stopped" running="Running" stopped="Stopped" />);
+    rerender(<ExecutableRuntimeStatus status="starting" running="Running" stopped="Stopped" starting="준비 중" />);
+    expect(politeRegion('준비 중')).toBe(status);
+    expect(screen.queryByText('Running')).not.toBeInTheDocument();
+    rerender(<ExecutableRuntimeStatus status="stopped" running="Running" stopped="Stopped" starting="준비 중" />);
 
     expect(politeRegion('Stopped')).toBe(status);
   });

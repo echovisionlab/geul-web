@@ -145,7 +145,7 @@ export default function AdminFormSubmissionsPage({
   const hasActiveFilters = search || countryFilter || dateRange[0] || dateRange[1];
 
   if (submissionsLoading) {
-    return <PageLoader />;
+    return <PageLoader placement="flow" />;
   }
 
   if (submissionsFailed) {

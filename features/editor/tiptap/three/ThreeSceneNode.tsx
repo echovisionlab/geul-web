@@ -64,6 +64,7 @@ export interface ThreeSceneLabels {
   resetOriginal: string;
   sourceInput: string;
   copied: string;
+  starting: string;
   running: string;
   stopped: string;
   error: string;
@@ -84,6 +85,7 @@ export const THREE_SCENE_LABEL_KEYS = [
   'resetOriginal',
   'sourceInput',
   'copied',
+  'starting',
   'running',
   'stopped',
   'error',
@@ -105,6 +107,7 @@ export const DEFAULT_THREE_SCENE_LABELS = {
   resetOriginal: 'Reset to original',
   sourceInput: 'Three.js source',
   copied: 'Copied',
+  starting: 'Loading...',
   running: 'Running',
   stopped: 'Stopped',
   error: 'Error',
@@ -124,6 +127,7 @@ export const KOREAN_THREE_SCENE_LABELS = {
   resetOriginal: '원본으로 재설정',
   sourceInput: 'Three.js 소스',
   copied: '복사됨',
+  starting: '불러오는 중...',
   running: '실행 중',
   stopped: '중지됨',
   error: '오류',
@@ -280,7 +284,12 @@ function ThreePreviewSurface({
           aria-label={labels.preview}
         />
       </div>
-      <ExecutableRuntimeStatus status={status} running={labels.running} stopped={labels.stopped} />
+      <ExecutableRuntimeStatus
+        status={status}
+        starting={labels.starting}
+        running={labels.running}
+        stopped={labels.stopped}
+      />
       {error ? (
         <div className={classes.error}>
           <Alert tone="danger" title={labels.error} data-testid="three-error">

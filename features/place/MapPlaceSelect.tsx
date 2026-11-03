@@ -1,6 +1,7 @@
 'use client';
 import { LayoutInline as DsLayoutInline, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
 import { Text as DsText } from '@/components/core/Typography';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { Select, useInputCombobox } from '@/components/core/Input';
 
 import { useCallback, useMemo, useState } from 'react';
@@ -49,7 +50,7 @@ export function MapPlaceSelect({
   const combobox = useInputCombobox();
 
   // Get selected place details
-  const { data: selectedPlace } = useQuery({
+  const selectedPlaceQuery = useQuery({
     queryKey: ['mapPlace', value],
     queryFn: async () => {
       const response = await mapPlaceClient.getMapPlace({ id: value! });
@@ -65,7 +66,7 @@ export function MapPlaceSelect({
   });
 
   // Search places
-  const { data: searchResults, isLoading } = useQuery({
+  const searchQuery = useQuery({
     queryKey: ['mapPlace', 'search', search],
     queryFn: async () => {
       const response = await mapPlaceClient.searchMapPlaces({ query: search, limit: 10 });
@@ -79,6 +80,10 @@ export function MapPlaceSelect({
     },
     enabled: search.length > 0,
   });
+
+  const { data: selectedPlace } = selectedPlaceQuery;
+  const { data: searchResults } = searchQuery;
+  const isLoading = selectedPlaceQuery.isFetching || searchQuery.isFetching;
 
   const handleInputChange = useCallback(
     (val: string) => {
@@ -118,9 +123,11 @@ export function MapPlaceSelect({
 
   return (
     <div>
+      <QueryErrorAlert queries={[selectedPlaceQuery, searchQuery]} />
       <DsLayoutInline gap="xs" wrap="nowrap">
         <Select
           label={label}
+          aria-label={label ? undefined : (placeholder ?? tCommonPlaceholders('searchPlaces'))}
           searchable
           disabled={disabled}
           error={error}
@@ -146,7 +153,7 @@ export function MapPlaceSelect({
             }
           }}
           leftSection={selectedPlace ? <IconMapPin size={16} /> : <IconSearch size={16} />}
-          aria-busy={isLoading || undefined}
+          isLoading={isLoading}
           grow
           renderOption={({ option }) => {
             const place = searchResults?.find((item) => item.id === option.value);

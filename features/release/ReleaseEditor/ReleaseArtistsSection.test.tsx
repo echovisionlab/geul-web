@@ -135,3 +135,53 @@ describe('ReleaseArtistsSection', () => {
     }
   });
 });
+
+it.each([false, true])(
+  'keeps the add dialog open through failure and preserves its recovery owner (controller recovery: %s)',
+  async (controllerRecovery) => {
+    let finish!: (result: { error: string }) => void;
+    actions.listArtistsAction.mockResolvedValue({
+      ok: true,
+      value: [{ id: 'artist-1', name: 'Artist One', slug: 'artist-one' }],
+    });
+    actions.setReleaseArtistsAction.mockReturnValueOnce(
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+    );
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
+    const onArtistsChange = vi.fn();
+    const onMutationSettled = vi.fn();
+    const { user } = render(
+      <QueryClientProvider client={client}>
+        <ReleaseArtistsSection
+          releaseId="release-1"
+          artists={[]}
+          onArtistsChange={onArtistsChange}
+          onMutationSettled={controllerRecovery ? onMutationSettled : undefined}
+        />
+      </QueryClientProvider>,
+    );
+    await user.click(screen.getByRole('button', { name: 'Add Artist' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Add artist' });
+    await user.type(within(dialog).getByRole('combobox', { name: 'Artist' }), 'One');
+    await user.click(await screen.findByRole('option', { name: 'Artist One' }));
+    const add = within(dialog).getByRole('button', { name: 'Add' });
+    await user.click(add);
+    expect(add).toHaveAttribute('aria-busy', 'true');
+    expect(dialog).toBeVisible();
+    await user.click(add);
+    expect(actions.setReleaseArtistsAction).toHaveBeenCalledOnce();
+    await act(async () => finish({ error: 'offline' }));
+    await waitFor(() => expect(add).not.toHaveAttribute('aria-busy', 'true'));
+    expect(dialog).toBeVisible();
+    if (controllerRecovery) {
+      expect(onMutationSettled).toHaveBeenLastCalledWith(false);
+      expect(onArtistsChange).toHaveBeenCalledOnce();
+    } else {
+      expect(onArtistsChange).toHaveBeenLastCalledWith([]);
+    }
+    expect(within(dialog).getByRole('combobox', { name: 'Artist' })).toHaveValue('Artist One');
+    client.clear();
+  },
+);

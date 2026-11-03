@@ -51,6 +51,43 @@ The [accessibility release readiness matrix](./design-system/release-readiness.m
 the ordered review of all actual pages, conditional views, Core families and feature kinds.
 It preserves current visual design and displayed wording; a preview mapping is not a completed check.
 
+## Loading review
+
+Read the [common loading contract](./design-system/loading-surface-contract.md) and
+[consumer migration](./design-system/migrations/loading-commonization.md) before reviewing a wait.
+Use these source-backed entries to compare the shared presentation with actual consumers:
+
+| Entry                                                                                                                                                                    | Review scope                                                                                                                                               |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Core/Feedback/PageLoaderView](../components/core/LoadingSurface/PageLoaderView.stories.tsx)                                                                             | Required visible text, failed image and `FlowRegion` with content before/after the wait                                                                    |
+| [Feature/Site/PageLoader](../features/site/PageLoader/PageLoader.stories.tsx)                                                                                            | Manifest fixture, generic/phase text, no image, failed image and placement Controls                                                                        |
+| [Foundations/Catalogue Boundary](../stories/foundations/CatalogueBoundary.stories.tsx)                                                                                   | Bootstrap pending, configured image, failed image and retry before ManifestProvider                                                                        |
+| [Feature/Page/Block Loading](../features/page/blocks/BlockLoading.stories.tsx)                                                                                           | Grid/list, authors, map and table region geometry                                                                                                          |
+| [Feature/Data Table/Server Navigation Wait](../features/data-table/ServerDataTable/ServerDataTablePending.stories.tsx)                                                   | Filter/sort/page navigation, error recovery and retained rows with a manually settled local Promise                                                        |
+| [Core/Actions/TextButton](../components/core/TextButton/TextButton.stories.tsx), [Core/Data Display/TableRowMenu](../components/core/DataTable/TableRowMenu.stories.tsx) | Controlled command pending and returned-Promise tracking                                                                                                   |
+| [Core/Input/MultiSelectComboboxView](../components/core/Input/MultiSelectComboboxView.stories.tsx)                                                                       | `Loading`, `LoadingEmpty`, `Creating`, `DisabledPending`, `CreationRetry`: checking feedback, retained selection and creation gating                       |
+| [Core/Overlays/ConfirmModal](../components/core/Modal/ConfirmModal.stories.tsx)                                                                                          | `QueuedConfirmation` uses eager loading with required localized `loadError`; `RendererLoadError` renders the actual recovery view with local no-op actions |
+| [Feature/Auth/Login Flow](../features/auth/LoginFlowView.stories.tsx), [Feature/Auth/Verification Flow View](../features/auth/ui/VerificationFlowView.stories.tsx)       | Retained PIN submission, isolated resend pending, retained applying/unavailable result during authority rechecks                                           |
+| [Feature/Page/Tool Startup](../features/page/blocks/embed/ToolStartup.stories.tsx)                                                                                       | Production PageContentView/EmbedFrame/ToolModule pending, failed, ready and `Mobile` 320px region; local external mount fixture, real site loader          |
+| [Feature/User/ProfileAvatarControl](../features/user/ui/ProfileAvatarControl/ProfileAvatarControl.stories.tsx)                                                           | Image removal at profile/admin sizes, disabled state, shared media-overlay glyph and pending treatment                                                     |
+
+The loader image fixtures default to static local images; failed-image examples request a missing local GIF.
+Use loader Controls with the observed public GIF to inspect delivery and playback. A supplied map
+`rendering` phase demonstrates supported copy, not an observed runtime transition.
+Check containing regions, retained content, error/retry, focus, theme, locale and viewport separately.
+Normal Storybook preview preloads on-demand overlays, so it cannot by itself establish cold-chunk
+feedback or exhausted host retries. Tool startup fixtures control the module's `mount()` Promise;
+they do not delay module download or contact real tool services. Server navigation retains existing
+rows by default; an empty pending table can still use PageLoader.
+
+The coordinator reports direct visual inspection of the actual Works GIF and live PortaDJ ready
+state. Storybook observations cover common-loader GIF phase/generic text, no-image/failed-image
+cases, tool pending/failed/ready and the 320px region, and the `33steps` avatar plus hover.
+This documentation pass did not run browser checks. Most other production/Storybook states,
+physical coarse-pointer input and actual assistive-technology announcements remain unverified.
+Source links and play functions are review locations, not execution results. These observations
+record no released web version or blanket visual approval.
+
 ## Editor pages
 
 `Pages` includes Post, Page, Work, Artist, Label, Release, Program Event, Program Event Series,

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import type { ComponentProps } from 'react';
+import { act, type ComponentProps } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { render, screen, within } from '@/test/render';
@@ -97,4 +97,51 @@ describe('SecurityForm', () => {
     expect(navigationMock.router.push).toHaveBeenCalledWith('/verify');
     expect(navigationMock.router.push.mock.calls[0]?.[0]).not.toContain('johndoe@example.com');
   });
+});
+
+it('locks account deletion dismissal and cancel until the request finishes', async () => {
+  let finish!: (result: { success: boolean; message: string }) => void;
+  accountMock.requestAccountDeletionAction.mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+  );
+  const { user } = renderSecurityForm();
+  await user.click(screen.getByRole('button', { name: 'Request account deletion' }));
+  const dialog = await screen.findByRole('dialog');
+  await user.click(within(dialog).getByRole('button', { name: 'Send confirmation email' }));
+  expect(dialog).toHaveAttribute('aria-busy', 'true');
+  expect(within(dialog).getByRole('button', { name: 'Cancel' })).toBeDisabled();
+  await user.keyboard('{Escape}');
+  expect(dialog).toBeVisible();
+  await act(async () => finish({ success: true, message: 'sent' }));
+  expect((await within(dialog).findAllByRole('button', { name: 'Close' }))[0]).toBeEnabled();
+});
+
+it('serializes row and bulk session revocation while retaining the initiating spinner', async () => {
+  let finish!: (result: {}) => void;
+  identityMock.revokeMySessionAction.mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+  );
+  const { user } = renderSecurityForm({
+    initialSessions: [
+      currentSession,
+      { ...currentSession, id: 'other-a', current: false },
+      { ...currentSession, id: 'other-b', current: false },
+    ],
+  });
+  const rows = screen.getAllByRole('button', { name: 'Revoke this session' });
+  await user.click(rows[0]);
+  expect(rows[0]).toHaveAttribute('aria-busy', 'true');
+  expect(rows[1]).toBeDisabled();
+  const bulk = screen.getByRole('button', { name: 'Log out all other sessions' });
+  expect(bulk).toBeDisabled();
+  await user.click(bulk);
+  expect(identityMock.revokeMyOtherSessionsAction).not.toHaveBeenCalled();
+  await act(async () => finish({}));
+  expect(screen.getByRole('button', { name: 'Revoke this session' })).toBeEnabled();
 });

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
+import { TestProviders } from '@/test/TestProviders';
 import { act, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Editor, type NodeType, type TextType } from '@tiptap/core';
@@ -315,9 +316,9 @@ describe('Shader Monaco authoring boundary', () => {
     });
     await act(async () => {
       root.render(
-        <DesignSystemProvider forceColorScheme="light">
+        <TestProviders>
           <EditorContent editor={editorInstance} />
-        </DesignSystemProvider>,
+        </TestProviders>,
       );
     });
     expect(run).toHaveBeenCalledOnce();
@@ -459,9 +460,9 @@ describe('Shader Monaco authoring boundary', () => {
     const root = createRoot(element);
     await act(async () => {
       root.render(
-        <DesignSystemProvider forceColorScheme="light">
+        <TestProviders>
           <RecoveringAuthoringShader />
-        </DesignSystemProvider>,
+        </TestProviders>,
       );
       await vi.advanceTimersByTimeAsync(50);
     });
@@ -523,7 +524,11 @@ describe('Shader preview worker lifecycle', () => {
     await act(async () => {
       root.render(
         <DesignSystemProvider forceColorScheme="light">
-          <ShaderPublicPreview program={programWithImage()} runtimeFactory={runtimeFactory} />
+          <ShaderPublicPreview
+            labels={KOREAN_SHADER_LABELS}
+            program={programWithImage()}
+            runtimeFactory={runtimeFactory}
+          />
         </DesignSystemProvider>,
       );
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -621,6 +626,7 @@ describe('Shader preview worker lifecycle', () => {
       root.render(
         <DesignSystemProvider forceColorScheme="light">
           <ShaderPublicPreview
+            labels={KOREAN_SHADER_LABELS}
             program={programWithImage()}
             active
             revision={1}
@@ -636,6 +642,7 @@ describe('Shader preview worker lifecycle', () => {
       root.render(
         <DesignSystemProvider forceColorScheme="light">
           <ShaderPublicPreview
+            labels={KOREAN_SHADER_LABELS}
             program={programWithImage()}
             active
             revision={1}
@@ -651,6 +658,7 @@ describe('Shader preview worker lifecycle', () => {
       root.render(
         <DesignSystemProvider forceColorScheme="light">
           <ShaderPublicPreview
+            labels={KOREAN_SHADER_LABELS}
             program={programWithImage()}
             active
             revision={2}

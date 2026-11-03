@@ -286,6 +286,83 @@ button.root[data-control-kind='text']:not([data-disabled]):is(:hover, [data-hove
   touch-action: auto;
 }
 
+/* The rectangular native target includes every painted badge edge; only the visual is circular. */
+.root[data-control-kind='icon'][data-appearance='media-overlay'] {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.root[data-control-kind='icon'][data-appearance='media-overlay']:not([data-disabled]):not([data-pending]):is(
+    :hover,
+    [data-hovered]
+  ) {
+  background: transparent;
+}
+
+.root[data-control-kind='icon'][data-appearance='media-overlay']:not([data-disabled]):not([data-pending]):is(
+    :active,
+    [data-pressed]
+  ) {
+  background: transparent;
+}
+
+.mediaOverlay {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--geul-icon-size-md);
+  height: var(--geul-icon-size-md);
+  border-radius: var(--geul-radius-circle);
+  background: var(--geul-surface);
+  color: var(--_action-ink);
+  pointer-events: none;
+}
+
+.root[data-placement='overlay-start-inside'] .mediaOverlay {
+  inset-inline-start: 0;
+  inset-inline-end: auto;
+}
+
+.mediaOverlay[data-emphasis='strong'] {
+  background: var(--_action-fill);
+  color: var(--geul-text-on-action);
+}
+
+.mediaOverlay[data-emphasis='outline'] {
+  border: var(--geul-border-thin) solid var(--_action-boundary);
+}
+
+.root:not([data-disabled]):not([data-pending]):is(:hover, [data-hovered]) .mediaOverlay {
+  background: var(--geul-surface-hover);
+}
+
+.root:not([data-disabled]):not([data-pending]):is(:hover, [data-hovered]) .mediaOverlay[data-emphasis='strong'] {
+  background: var(--_action-fill-hover);
+}
+
+.root:not([data-disabled]):not([data-pending]):is(:active, [data-pressed]) .mediaOverlay {
+  background: var(--geul-surface-active);
+}
+
+.root:not([data-disabled]):not([data-pending]):is(:active, [data-pressed]) .mediaOverlay[data-emphasis='strong'] {
+  background: var(--_action-fill-pressed);
+}
+
+.root:is(:disabled, [data-disabled]) .mediaOverlay {
+  background: var(--geul-surface-muted);
+  color: var(--geul-text-muted);
+}
+
+.root[data-control-kind='icon'] .mediaOverlay > :is(svg, .spinner) {
+  width: var(--geul-icon-size-xs);
+  height: var(--geul-icon-size-xs);
+}
+
 .inner {
   display: flex;
   align-items: center;

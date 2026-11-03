@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+import { act, render, screen, within, fireEvent } from '@/test/render';
+import { PageLoader } from '@/features/site/PageLoader';
+import { editorLibraryFileDisplayName } from '../lib/editor-library-file-selection';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { I18nProvider } from 'react-aria-components';
 import { EditorFileLibraryPickerView, type EditorFileLibraryPickerViewProps } from './EditorFileLibraryPickerView';
 import {
   editorFileLibraryBrowseRows,
@@ -11,71 +11,106 @@ import {
   isEditorFileLibraryStoryRowDisabled,
 } from './EditorFileLibraryPickerView.fixtures';
 
-vi.mock('@/features/media/FilePreview', () => ({
-  FilePreview: ({ file }: { file: { id: string } }) => <div data-file-preview={file.id} />,
+vi.mock('@/lib/media/wavesurfer-player', () => ({
+  mountWaveSurferPlayer: async (
+    options: Parameters<typeof import('@/lib/media/wavesurfer-player').mountWaveSurferPlayer>[0],
+  ) => {
+    options.onStateChange?.({ currentTime: 0, duration: 100, isPlaying: false, isMuted: false, isReady: true });
+    return { setTime: () => undefined, getDuration: () => 100, destroy: () => undefined };
+  },
 }));
 
-let host: HTMLDivElement;
-let root: Root;
-
+const browseRows = editorFileLibraryBrowseRows.map((row) =>
+  row.kind === 'file' && row.mimeType.startsWith('image/')
+    ? { ...row, inlineUrl: '/storybook/media/video-poster.jpg' }
+    : row,
+);
+let rendered: ReturnType<typeof render> | undefined;
+let currentRows = editorFileLibraryBrowseRows;
 beforeEach(() => {
-  class TestResizeObserver implements ResizeObserver {
-    disconnect() {}
-    observe() {}
-    unobserve() {}
-  }
-  vi.stubGlobal('ResizeObserver', TestResizeObserver);
-  host = document.createElement('div');
-  document.body.appendChild(host);
-  root = createRoot(host);
+  rendered = undefined;
 });
-
 afterEach(() => {
-  act(() => root.unmount());
-  host.remove();
   vi.unstubAllGlobals();
 });
+
+function rowNode(id: string) {
+  const item = currentRows.find((row) => row.id === id)!;
+  const label = item.kind === 'folder' ? item.name : editorLibraryFileDisplayName(item);
+  const peers = currentRows.filter(
+    (row) => (row.kind === 'folder' ? row.name : editorLibraryFileDisplayName(row)) === label,
+  );
+  return screen.getAllByRole('row', { name: new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) })[
+    peers.indexOf(item)
+  ]!;
+}
+function mobileRow(id: string) {
+  const item = currentRows.find((row) => row.id === id)!;
+  const label = item.kind === 'folder' ? item.name : editorLibraryFileDisplayName(item);
+  return screen.getByRole('group', { name: new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) });
+}
+function mobileCommand(id: string) {
+  return within(mobileRow(id)).getByRole('button');
+}
+function viewport() {
+  return screen.getByRole('region', { name: /개 (결과|항목)/ });
+}
+function addButton() {
+  return screen.queryByRole('button', { name: editorFileLibraryPickerStoryLabels.add });
+}
 
 function renderView(
   selectedFiles = editorFileLibraryBrowseRows.filter((row) => row.kind === 'file').slice(0, 1),
   overrides: Partial<EditorFileLibraryPickerViewProps> = {},
 ) {
-  act(() => {
-    root.render(
-      <I18nProvider locale="en">
-        <EditorFileLibraryPickerView
-          labels={editorFileLibraryPickerStoryLabels}
-          rows={editorFileLibraryBrowseRows}
-          path={[{ name: '파일' }]}
-          query="recording"
-          searchScope="folder"
-          mimeTypePrefix=""
-          sort="name:asc"
-          searching
-          total={3}
-          viewMode="grid"
-          selectedFiles={selectedFiles}
-          allowMultiple
-          isRowDisabled={isEditorFileLibraryStoryRowDisabled}
-          onQueryChange={() => undefined}
-          onSearchScopeChange={() => undefined}
-          onMimeTypePrefixChange={() => undefined}
-          onSortChange={() => undefined}
-          onOpenPath={() => undefined}
-          onActivateRow={() => undefined}
-          onSelectedFilesChange={() => undefined}
-          onConfirmFiles={() => undefined}
-          onReturnToParent={() => undefined}
-          onLoadMore={async () => undefined}
-          onViewModeChange={() => undefined}
-          {...overrides}
-        />
-      </I18nProvider>,
-    );
-  });
+  currentRows = overrides.rows ?? browseRows;
+  const node = (
+    <EditorFileLibraryPickerView
+      labels={editorFileLibraryPickerStoryLabels}
+      rows={browseRows}
+      path={[{ name: '파일' }]}
+      query="recording"
+      searchScope="folder"
+      mimeTypePrefix=""
+      sort="name:asc"
+      searching
+      total={3}
+      viewMode="grid"
+      selectedFiles={selectedFiles}
+      allowMultiple
+      isRowDisabled={isEditorFileLibraryStoryRowDisabled}
+      onQueryChange={() => undefined}
+      onSearchScopeChange={() => undefined}
+      onMimeTypePrefixChange={() => undefined}
+      onSortChange={() => undefined}
+      onOpenPath={() => undefined}
+      onActivateRow={() => undefined}
+      onSelectedFilesChange={() => undefined}
+      onConfirmFiles={() => undefined}
+      onReturnToParent={() => undefined}
+      onLoadMore={async () => undefined}
+      onViewModeChange={() => undefined}
+      loadingSurface={<PageLoader placement="flow" />}
+      {...overrides}
+    />
+  );
+  if (rendered) {
+    rendered.rerender(node);
+  } else {
+    rendered = render(node);
+  }
+  return rendered;
 }
 
 describe('EditorFileLibraryPickerView', () => {
+  it('shows the common initial wait without rows or a false empty result', () => {
+    renderView([], { loading: true });
+    expect(screen.getByRole('status', { name: 'Loading...' })).toHaveTextContent('Loading...');
+    expect(screen.queryByText(editorFileLibraryPickerStoryLabels.empty)).not.toBeInTheDocument();
+    expect(screen.queryByRole('row')).not.toBeInTheDocument();
+    expect(screen.queryByText(editorFileLibraryPickerStoryLabels.searchResultCount(3))).not.toBeInTheDocument();
+  });
+
   it.each([
     ['grid', false],
     ['grid', true],
@@ -87,11 +122,7 @@ describe('EditorFileLibraryPickerView', () => {
       const onConfirmFiles = vi.fn();
       const onSelectedFilesChange = vi.fn();
       renderView([], { viewMode, allowMultiple, onConfirmFiles, onSelectedFilesChange });
-      const row = host.querySelector<HTMLElement>(
-        viewMode === 'grid'
-          ? '[data-file-viewer-item="story-file-image"]'
-          : '[data-datatable-desktop-row="file:story-file-image"]',
-      )!;
+      const row = rowNode('story-file-image');
       expect(row.hasAttribute('aria-disabled')).toBe(false);
       expect(row).toHaveAccessibleDescription(editorFileLibraryPickerStoryLabels.selectionUnavailableDescription);
       act(() => {
@@ -100,19 +131,14 @@ describe('EditorFileLibraryPickerView', () => {
       });
       expect(onConfirmFiles).not.toHaveBeenCalled();
       expect(onSelectedFilesChange).not.toHaveBeenCalled();
-      const previewCommand =
-        viewMode === 'list'
-          ? host.querySelector<HTMLButtonElement>(
-              '[data-datatable-mobile-row="file:story-file-image"] [data-datatable-row-interaction-control]',
-            )!
-          : row;
+      const previewCommand = viewMode === 'list' ? mobileCommand('story-file-image') : row;
       expect(previewCommand).toHaveAccessibleDescription(
         editorFileLibraryPickerStoryLabels.selectionUnavailableDescription,
       );
       act(() =>
         previewCommand.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })),
       );
-      expect(document.body.querySelector('[role="dialog"] [data-file-preview="story-file-image"]')).not.toBeNull();
+      expect(within(screen.getByRole('dialog')).getByRole('img', { name: 'poster.png' })).not.toBeNull();
       expect(onConfirmFiles).not.toHaveBeenCalled();
       expect(onSelectedFilesChange).not.toHaveBeenCalled();
     },
@@ -123,12 +149,10 @@ describe('EditorFileLibraryPickerView', () => {
     const onConfirmFiles = vi.fn();
     const onSelectedFilesChange = vi.fn();
     renderView([], { viewMode: 'list', allowMultiple, onActivateRow, onConfirmFiles, onSelectedFilesChange });
-    const folder = host.querySelector<HTMLElement>('[data-datatable-mobile-row="folder:story-folder-recordings"]')!;
-    const folderTrigger = folder.querySelector<HTMLButtonElement>('[data-datatable-row-interaction-control]')!;
+    const folder = mobileRow('story-folder-recordings');
+    const folderTrigger = within(folder).getByRole('button');
     expect(folder.getAttribute('role')).toBe('group');
-    expect(document.getElementById(folderTrigger.getAttribute('aria-labelledby')!)?.textContent).toContain(
-      'Recordings',
-    );
+    expect(folderTrigger).toHaveAccessibleName('Recordings');
     const space = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true });
     act(() => folderTrigger.dispatchEvent(space));
     expect(space.defaultPrevented).toBe(true);
@@ -138,11 +162,9 @@ describe('EditorFileLibraryPickerView', () => {
     expect(enter.defaultPrevented).toBe(true);
     expect(onActivateRow).toHaveBeenCalledExactlyOnceWith(editorFileLibraryBrowseRows[0]);
     expect(onConfirmFiles).not.toHaveBeenCalled();
-    const fileTrigger = host.querySelector<HTMLButtonElement>(
-      '[data-datatable-mobile-row="file:story-file-audio"] [data-datatable-row-interaction-control]',
-    )!;
+    const fileTrigger = mobileCommand('story-file-audio');
     act(() => fileTrigger.focus());
-    expect(document.activeElement).toBe(fileTrigger);
+    expect(fileTrigger).toHaveFocus();
     const fileEnter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
     act(() => fileTrigger.dispatchEvent(fileEnter));
     expect(fileEnter.defaultPrevented).toBe(true);
@@ -156,14 +178,12 @@ describe('EditorFileLibraryPickerView', () => {
 
   it('uses type icons for every list row and lowercase type labels', () => {
     renderView([], { viewMode: 'list', labels: { ...editorFileLibraryPickerStoryLabels, folderType: 'Folder' } });
-    const rows = Array.from(host.querySelectorAll('[data-datatable-desktop-row]'));
+    const rows = within(screen.getByRole('table')).getAllByRole('row').slice(1);
     expect(rows).toHaveLength(3);
-    expect(rows.every((row) => row.querySelector('svg'))).toBe(true);
+    expect(rows.every((row) => /<svg[ >]/.test(row.innerHTML))).toBe(true);
     expect(rows[0].textContent).toContain('folder');
     expect(rows[0].textContent).not.toContain('—');
-    expect(
-      host.querySelector('[data-datatable-mobile-row="folder:story-folder-recordings"]')?.textContent,
-    ).not.toContain('—');
+    expect(mobileRow('story-folder-recordings')?.textContent).not.toContain('—');
     expect(rows[1].textContent).toContain('wav');
     expect(rows[1].textContent).not.toContain('audio/wav');
     expect(rows[2].textContent).toContain('png');
@@ -172,9 +192,9 @@ describe('EditorFileLibraryPickerView', () => {
 
   it('omits single-selection checkboxes in both responsive list layouts', () => {
     renderView([], { viewMode: 'list', allowMultiple: false });
-    expect(host.querySelector('input[type="checkbox"]')).toBeNull();
+    expect(screen.queryByRole('checkbox')).toBeNull();
     renderView([], { allowMultiple: false });
-    expect(host.querySelector('[role="grid"]')?.getAttribute('aria-multiselectable')).toBe('false');
+    expect(screen.getByRole('grid')?.getAttribute('aria-multiselectable')).toBe('false');
   });
 
   it('selects only eligible files and adds the entire selection', () => {
@@ -186,17 +206,17 @@ describe('EditorFileLibraryPickerView', () => {
     }
     const rows = [...editorFileLibraryBrowseRows, secondFile];
     renderView([], { rows, viewMode: 'list', onSelectedFilesChange });
-    const desktop = host.querySelector('[data-datatable-desktop-row]')?.closest('table');
-    expect(desktop?.querySelectorAll('input[type="checkbox"]')).toHaveLength(3);
-    act(() => desktop?.querySelector<HTMLInputElement>('input[type="checkbox"]')?.click());
+    const desktop = screen.getByRole('table');
+    expect(within(desktop).getAllByRole('checkbox')).toHaveLength(3);
+    fireEvent.click(within(desktop).getByRole('checkbox', { name: editorFileLibraryPickerStoryLabels.selectAllRows }));
     expect(onSelectedFilesChange).toHaveBeenCalledWith([editorFileLibraryBrowseRows[1], secondFile]);
     const selected = [editorFileLibraryBrowseRows[1], secondFile];
     if (selected[0].kind !== 'file') {
       throw new Error('Expected a file fixture');
     }
     renderView([selected[0], secondFile], { rows, viewMode: 'list', onConfirmFiles });
-    const add = Array.from(host.querySelectorAll('button')).find((button) => button.textContent === '추가');
-    expect(add?.disabled).toBe(false);
+    const add = addButton();
+    expect(add).toBeEnabled();
     act(() => add?.click());
     expect(onConfirmFiles).toHaveBeenCalledWith(selected);
   });
@@ -205,14 +225,11 @@ describe('EditorFileLibraryPickerView', () => {
     const onConfirmFiles = vi.fn();
     const onActivateRow = vi.fn();
     renderView([], { viewMode, allowMultiple: false, onConfirmFiles, onActivateRow });
-    const row =
-      viewMode === 'grid'
-        ? host.querySelector<HTMLElement>('[data-file-viewer-item="story-file-audio"]')
-        : host.querySelector<HTMLElement>('[data-datatable-desktop-row="file:story-file-audio"]');
+    const row = rowNode('story-file-audio');
     act(() => row?.click());
     expect(onConfirmFiles).toHaveBeenCalledWith([editorFileLibraryBrowseRows[1]]);
     expect(onActivateRow).not.toHaveBeenCalled();
-    expect(Array.from(host.querySelectorAll('button')).some((button) => button.textContent === '추가')).toBe(false);
+    expect(Boolean(addButton())).toBe(false);
   });
 
   it.each(['grid', 'list'] as const)(
@@ -222,19 +239,14 @@ describe('EditorFileLibraryPickerView', () => {
       const onConfirmFiles = vi.fn();
       const onSelectedFilesChange = vi.fn();
       const overrides = { viewMode, onActivateRow, onConfirmFiles, onSelectedFilesChange };
-      const folderNode = () =>
-        host.querySelector<HTMLElement>(
-          viewMode === 'grid'
-            ? '[data-file-viewer-item="story-folder-recordings"]'
-            : '[data-datatable-desktop-row="folder:story-folder-recordings"]',
-        );
+      const folderNode = () => rowNode('story-folder-recordings');
       renderView([], overrides);
       act(() => folderNode()?.click());
       expect(onActivateRow).not.toHaveBeenCalled();
       expect(folderNode()?.hasAttribute('data-selected')).toBe(true);
       expect(onSelectedFilesChange).toHaveBeenLastCalledWith([]);
-      const add = Array.from(host.querySelectorAll('button')).find((button) => button.textContent === '추가');
-      expect(add?.disabled).toBe(true);
+      const add = addButton();
+      expect(add).toBeDisabled();
       act(() => folderNode()?.dispatchEvent(new MouseEvent('dblclick', { bubbles: true })));
       expect(onActivateRow).toHaveBeenCalledExactlyOnceWith(editorFileLibraryBrowseRows[0]);
       expect(onConfirmFiles).not.toHaveBeenCalled();
@@ -247,14 +259,12 @@ describe('EditorFileLibraryPickerView', () => {
     const onActivateRow = vi.fn();
     const onConfirmFiles = vi.fn();
     renderView([], { allowMultiple: false, onActivateRow, onConfirmFiles });
-    const folder = host.querySelector<HTMLElement>('[data-file-viewer-item="story-folder-recordings"]');
+    const folder = rowNode('story-folder-recordings');
     act(() => folder?.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true })));
     expect(folder?.getAttribute('aria-selected')).toBe('true');
     expect(onActivateRow).not.toHaveBeenCalled();
-    const viewport = Array.from(host.querySelectorAll<HTMLDivElement>('div')).find((node) =>
-      node.style.getPropertyValue('--_selection-inset'),
-    );
-    act(() => viewport?.click());
+    const selectionViewport = viewport();
+    act(() => selectionViewport.click());
     expect(folder?.getAttribute('aria-selected')).toBe('false');
     act(() => folder?.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true })));
     act(() => folder?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })));
@@ -270,11 +280,11 @@ describe('EditorFileLibraryPickerView', () => {
     const onConfirmFiles = vi.fn();
     const onSelectedFilesChange = vi.fn();
     renderView([file], { onConfirmFiles, onSelectedFilesChange });
-    const folder = host.querySelector<HTMLElement>('[data-file-viewer-item="story-folder-recordings"]');
+    const folder = rowNode('story-folder-recordings');
     act(() => folder?.dispatchEvent(new MouseEvent('click', { bubbles: true, metaKey: true })));
     expect(folder?.getAttribute('aria-selected')).toBe('true');
     expect(onSelectedFilesChange).toHaveBeenLastCalledWith([file]);
-    const add = Array.from(host.querySelectorAll('button')).find((button) => button.textContent === '추가');
+    const add = addButton();
     act(() => add?.click());
     expect(onConfirmFiles).toHaveBeenCalledExactlyOnceWith([file]);
   });
@@ -290,7 +300,7 @@ describe('EditorFileLibraryPickerView', () => {
     const tap = (id: string) => {
       const event = new MouseEvent('click', { bubbles: true });
       Object.defineProperty(event, 'pointerType', { value: 'touch' });
-      host.querySelector(`[data-file-viewer-item="${id}"]`)?.dispatchEvent(event);
+      rowNode(id)?.dispatchEvent(event);
     };
     renderView([], overrides);
     act(() => tap(first.id));
@@ -300,7 +310,7 @@ describe('EditorFileLibraryPickerView', () => {
     renderView([first, last], overrides);
     act(() => tap(first.id));
     expect(onSelectedFilesChange).toHaveBeenLastCalledWith([last]);
-    expect(host.querySelector('input[type="checkbox"]')).toBeNull();
+    expect(screen.queryByRole('checkbox')).toBeNull();
   });
 
   it.each(['grid', 'list'] as const)('supports plain, Ctrl/Cmd and Shift row selection in %s', (viewMode) => {
@@ -312,10 +322,6 @@ describe('EditorFileLibraryPickerView', () => {
     const rows = [...editorFileLibraryBrowseRows, last];
     const onSelectedFilesChange = vi.fn();
     const overrides = { rows, viewMode, onSelectedFilesChange };
-    const rowNode = (id: string) =>
-      host.querySelector<HTMLElement>(
-        viewMode === 'grid' ? `[data-file-viewer-item="${id}"]` : `[data-datatable-desktop-row="file:${id}"]`,
-      );
     renderView([], overrides);
     act(() => rowNode(first.id)?.click());
     expect(onSelectedFilesChange).toHaveBeenLastCalledWith([first]);
@@ -340,7 +346,7 @@ describe('EditorFileLibraryPickerView', () => {
     const last = { ...first, id: 'last-file', fileName: 'last' };
     const onSelectedFilesChange = vi.fn();
     const overrides = { rows: [first, middle, last], viewMode: 'list' as const, onSelectedFilesChange };
-    const checkbox = (id: string) => host.querySelector<HTMLElement>(`[data-datatable-desktop-row="file:${id}"] input`);
+    const checkbox = (id: string) => within(rowNode(id)).getByRole('checkbox');
     renderView([], overrides);
     act(() => checkbox(first.id)?.click());
     renderView([first], overrides);
@@ -369,37 +375,39 @@ describe('EditorFileLibraryPickerView', () => {
       const onSelectedFilesChange = vi.fn();
       renderView([], { viewMode, rows: [...editorFileLibraryBrowseRows, last], onSelectedFilesChange });
       // Locate the shared viewport by its inline inset contract.
-      const viewport = Array.from(host.querySelectorAll<HTMLDivElement>('div')).find((node) =>
-        node.style.getPropertyValue('--_selection-inset'),
-      );
-      if (!viewport) {
+      const selectionViewport = viewport();
+      if (!selectionViewport) {
         throw new Error('Missing selection viewport');
       }
-      viewport.setPointerCapture = vi.fn();
-      viewport.hasPointerCapture = () => true;
-      viewport.releasePointerCapture = vi.fn();
-      vi.spyOn(viewport, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 400, 300));
-      const items = host.querySelectorAll<HTMLElement>(
-        viewMode === 'grid' ? '[data-file-viewer-item]' : '[data-datatable-desktop-row]',
-      );
+      selectionViewport.setPointerCapture = vi.fn();
+      selectionViewport.hasPointerCapture = () => true;
+      selectionViewport.releasePointerCapture = vi.fn();
+      vi.spyOn(selectionViewport, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 400, 300));
+      const items = currentRows.map((row) => rowNode(row.id));
       items.forEach((node, index) =>
         vi.spyOn(node, 'getBoundingClientRect').mockReturnValue(new DOMRect(20, 20 + index * 30, 100, 25)),
       );
       act(() =>
-        viewport.dispatchEvent(
+        selectionViewport.dispatchEvent(
           new TestPointerEvent('pointerdown', { bubbles: true, clientX: 0, clientY: 0, pointerType: 'touch' }),
         ),
       );
       expect(onSelectedFilesChange).not.toHaveBeenCalled();
-      act(() => viewport.dispatchEvent(new TestPointerEvent('pointerdown', { bubbles: true, clientX: 0, clientY: 0 })));
       act(() =>
-        viewport.dispatchEvent(new TestPointerEvent('pointermove', { bubbles: true, clientX: 150, clientY: 160 })),
+        selectionViewport.dispatchEvent(new TestPointerEvent('pointerdown', { bubbles: true, clientX: 0, clientY: 0 })),
+      );
+      act(() =>
+        selectionViewport.dispatchEvent(
+          new TestPointerEvent('pointermove', { bubbles: true, clientX: 150, clientY: 160 }),
+        ),
       );
       expect(onSelectedFilesChange).toHaveBeenLastCalledWith([first, last]);
       act(() =>
-        viewport.dispatchEvent(new TestPointerEvent('pointerup', { bubbles: true, clientX: 150, clientY: 160 })),
+        selectionViewport.dispatchEvent(
+          new TestPointerEvent('pointerup', { bubbles: true, clientX: 150, clientY: 160 }),
+        ),
       );
-      act(() => viewport.click());
+      act(() => selectionViewport.click());
       expect(onSelectedFilesChange).toHaveBeenLastCalledWith([first, last]);
     },
   );
@@ -409,40 +417,34 @@ describe('EditorFileLibraryPickerView', () => {
     renderView([], { onConfirmFiles });
 
     act(() => {
-      host
-        .querySelector<HTMLElement>('[data-file-viewer-item="story-file-audio"]')
-        ?.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+      rowNode('story-file-audio')?.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
     });
 
     expect(onConfirmFiles).not.toHaveBeenCalled();
-    expect(document.body.querySelector('[role="dialog"]')?.textContent).toContain('field-recording.wav');
+    expect(screen.getByRole('dialog')?.textContent).toContain('field-recording.wav');
   });
 
   it('opens Quick Look from the context menu and omits Add for an unavailable file', () => {
     renderView([]);
 
-    const unavailableFile = host.querySelector<HTMLElement>('[data-file-viewer-item="story-file-image"]');
+    const unavailableFile = rowNode('story-file-image');
     act(() => {
       unavailableFile?.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 24, clientY: 32 }));
     });
 
-    const menuItems = Array.from(document.body.querySelectorAll<HTMLElement>('[role="menuitem"]')).map(
-      (item) => item.textContent,
-    );
+    const menuItems = screen.getAllByRole('menuitem').map((item) => item.textContent);
     expect(menuItems).toContain('미리보기');
     expect(menuItems).not.toContain('추가');
 
-    const previewItem = Array.from(document.body.querySelectorAll<HTMLElement>('[role="menuitem"]')).find(
-      (item) => item.textContent === '미리보기',
-    );
+    const previewItem = screen.getAllByRole('menuitem').find((item) => item.textContent === '미리보기');
     act(() => previewItem?.click());
 
-    const dialog = document.body.querySelector<HTMLElement>('[role="dialog"]');
+    const dialog = screen.getByRole('dialog');
     expect(dialog?.textContent).toContain('poster.png');
     expect(dialog?.textContent).toContain('image/png');
     expect(dialog?.textContent).toContain('2.3 MB');
     expect(dialog?.textContent).toContain('파일 / Library');
-    expect(dialog?.querySelector('[data-file-preview="story-file-image"]')).not.toBeNull();
+    expect(within(dialog).getByRole('img', { name: 'poster.png' })).not.toBeNull();
   });
 
   it('requests the next search page when the result sentinel approaches the viewport', async () => {

@@ -37,6 +37,8 @@ interface UserProfileFormSectionProps {
   form: UseFormReturnType<AdminUserProfileFormValues>;
   website: string;
   socialLinks: SocialLinks;
+  tagsLoading?: boolean;
+  tagsError?: boolean;
   tagOptions: { value: string; label: string }[];
   onWebsiteChange: (value: string) => void;
   onSocialLinksChange: (value: SocialLinks) => void;
@@ -55,6 +57,8 @@ export function UserProfileFormSection({
   website,
   socialLinks,
   tagOptions,
+  tagsLoading = false,
+  tagsError = false,
   onWebsiteChange,
   onSocialLinksChange,
   onImageChange,
@@ -173,8 +177,11 @@ export function UserProfileFormSection({
 
       <MultiSelect
         label={tCommonLabels('tags')}
-        placeholder={tCommon('placeholders.searchTags')}
         data={tagOptions}
+        aria-busy={tagsLoading}
+        disabled={tagsLoading || tagsError}
+        placeholder={tagsLoading ? tCommonStates('loadingTags') : tCommon('placeholders.searchTags')}
+        error={tagsError ? tCommonStates('notAvailable') : undefined}
         searchable
         clearable
         {...fieldBindings(form.getInputProps('tagIds'))}

@@ -69,6 +69,15 @@ export function useOgImage(options: UseOgImageOptions) {
   currentTargetRef.current = { entityType, entityId, locale, targetKey, isConcreteTarget };
   const latestLookupSequenceRef = useRef(0);
   const refreshedReadyGenerationRef = useRef<string | null>(null);
+  const mountedRef = useRef(false);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      latestLookupSequenceRef.current += 1;
+    };
+  }, []);
 
   useEffect(() => {
     setOgImageUrl(initialOgImageUrl);
@@ -86,7 +95,7 @@ export function useOgImage(options: UseOgImageOptions) {
 
   const trackGeneration = useCallback(
     (nextGenerationId: string | null | undefined): boolean => {
-      if (currentTargetKeyRef.current !== targetKey) {
+      if (!mountedRef.current || currentTargetKeyRef.current !== targetKey) {
         return false;
       }
       const normalized = nextGenerationId?.trim();
@@ -111,7 +120,7 @@ export function useOgImage(options: UseOgImageOptions) {
     // target that is current when the callback fires, then bind the response
     // to that target key so an in-flight switch still cannot regress the UI.
     const target = currentTargetRef.current;
-    if (!target.isConcreteTarget) {
+    if (!mountedRef.current || !target.isConcreteTarget) {
       return false;
     }
     const requestedTargetKey = target.targetKey;
@@ -125,12 +134,20 @@ export function useOgImage(options: UseOgImageOptions) {
         locale: target.locale,
       });
     } catch (error) {
-      if (sequence === latestLookupSequenceRef.current && currentTargetKeyRef.current === requestedTargetKey) {
+      if (
+        mountedRef.current &&
+        sequence === latestLookupSequenceRef.current &&
+        currentTargetKeyRef.current === requestedTargetKey
+      ) {
         setLookupError(errorMessage(error, 'Failed to load latest OG generation'));
       }
       return false;
     }
-    if (sequence !== latestLookupSequenceRef.current || currentTargetKeyRef.current !== requestedTargetKey) {
+    if (
+      !mountedRef.current ||
+      sequence !== latestLookupSequenceRef.current ||
+      currentTargetKeyRef.current !== requestedTargetKey
+    ) {
       return false;
     }
     if (result.error) {
@@ -217,7 +234,7 @@ export function useOgImage(options: UseOgImageOptions) {
 
   const trackRequestedGeneration = useCallback(
     (nextGenerationId: string | null | undefined, requestedTargetKey: string): boolean => {
-      if (requestedTargetKey !== currentTargetKeyRef.current) {
+      if (!mountedRef.current || requestedTargetKey !== currentTargetKeyRef.current) {
         return false;
       }
       if (nextGenerationId?.trim()) {

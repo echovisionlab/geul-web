@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { DataTable } from '@/features/data-table/DataTable';
@@ -23,7 +24,7 @@ export function WorkTableView({ props }: BlockViewProps) {
   const featuredOnly = parsed.featuredOnly === 'true';
   const statuses = parsed.statuses ? parsed.statuses.split(',').filter(Boolean) : ['WORK_STATUS_PUBLISHED'];
 
-  const { data, isLoading } = useQuery({
+  const queryResult = useQuery({
     queryKey: ['page-block', 'work-table', parsed, query],
     queryFn: () =>
       listPublishedWorksTable({
@@ -35,24 +36,31 @@ export function WorkTableView({ props }: BlockViewProps) {
       }),
   });
 
+  const { data, isLoading } = queryResult;
+  if (queryResult.isError && !data) {
+    return <QueryErrorAlert queries={[queryResult]} />;
+  }
   return (
-    <DataTable
-      columns={getWorkTableColumns({
-        title: tCommon('labels.title'),
-        type: tCommon('labels.type'),
-        period: t('workColumns.period'),
-        published: tCommon('labels.published'),
-        present: t('workColumns.present'),
-      })}
-      result={data}
-      loading={isLoading}
-      query={query}
-      onQueryChange={setQuery}
-      getRowKey={(row) => row.id}
-      emptyMessage={tCommon('messages.noWorksFound')}
-    >
-      <DataTable.Content reservedRowCount={parseInt(parsed.pageSize || '10', 10)} />
-      <DataTable.Pagination />
-    </DataTable>
+    <>
+      <QueryErrorAlert queries={[queryResult]} />
+      <DataTable
+        columns={getWorkTableColumns({
+          title: tCommon('labels.title'),
+          type: tCommon('labels.type'),
+          period: t('workColumns.period'),
+          published: tCommon('labels.published'),
+          present: t('workColumns.present'),
+        })}
+        result={data}
+        loading={isLoading}
+        query={query}
+        onQueryChange={setQuery}
+        getRowKey={(row) => row.id}
+        emptyMessage={tCommon('messages.noWorksFound')}
+      >
+        <DataTable.Content reservedRowCount={parseInt(parsed.pageSize || '10', 10)} />
+        <DataTable.Pagination />
+      </DataTable>
+    </>
   );
 }

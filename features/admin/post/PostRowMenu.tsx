@@ -1,6 +1,5 @@
 'use client';
 
-import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconEye, IconRefresh, IconTrash } from '@tabler/icons-react';
 import { notifications } from '@/components/core/Notification';
@@ -16,7 +15,6 @@ interface PostRowMenuProps {
 
 export function PostRowMenu({ post }: PostRowMenuProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
   const tCommon = useTranslations('common.actions');
   const tDataTable = useTranslations('dataTable.aria');
   const tCommonStates = useTranslations('common.states');
@@ -38,17 +36,15 @@ export function PostRowMenu({ post }: PostRowMenuProps) {
     items.push({
       label: tPostEditor('statusActions.republish'),
       icon: <IconRefresh size={16} />,
-      disabled: isPending,
-      onClick: () => {
-        startTransition(async () => {
-          const result = await republishPostAction(post.id);
-          if (result.error) {
-            notifications.show({ message: result.error, tone: 'danger' });
-            return;
-          }
-          notifications.show({ message: tPostEditor('notifications.republished'), tone: 'positive' });
-          router.refresh();
-        });
+      onError: () => notifications.show({ message: tCommonStates('notAvailable'), tone: 'danger' }),
+      onClick: async () => {
+        const result = await republishPostAction(post.id);
+        if (result.error) {
+          notifications.show({ message: result.error, tone: 'danger' });
+          return;
+        }
+        notifications.show({ message: tPostEditor('notifications.republished'), tone: 'positive' });
+        router.refresh();
       },
     });
   }
@@ -58,7 +54,6 @@ export function PostRowMenu({ post }: PostRowMenuProps) {
     icon: <IconTrash size={16} />,
     onClick: () => openDelete(post),
     tone: 'danger',
-    disabled: isPending,
   });
 
   return (

@@ -93,6 +93,7 @@ function ArtistListSettingsForm({ props, updateProps, readOnly = false }: Artist
             disabled={readOnly}
             label={tCommonEntities('labels')}
             placeholder={tPageEditor('blockEditor.placeholders.allLabels')}
+            isLoading={labelsQuery.isLoading}
             data={labelOptions}
             value={labelIds ? labelIds.split(',').filter(Boolean) : []}
             onChange={(values) => updateProp('labelIds', values.join(','))}

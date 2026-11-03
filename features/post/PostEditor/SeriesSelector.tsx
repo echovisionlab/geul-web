@@ -4,7 +4,7 @@ import { Text as DsText } from '@/components/core/Typography';
 import { Select, useInputCombobox } from '@/components/core/Input';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
@@ -56,6 +56,13 @@ export function SeriesSelector({
   const [isRefreshingOptions, setIsRefreshingOptions] = useState(false);
 
   const combobox = useInputCombobox();
+  const openIntent = useRef(0);
+  useEffect(
+    () => () => {
+      openIntent.current += 1;
+    },
+    [postId],
+  );
 
   const queryClient = useQueryClient();
 
@@ -77,13 +84,7 @@ export function SeriesSelector({
     refetch: refetchAllSeries,
   } = allSeriesListQuery;
 
-  const {
-    data: mySeriesList = initialSeries,
-    isError: myError,
-    isFetching: myFetching,
-    isLoading: myLoading,
-    refetch: refetchMySeries,
-  } = useQuery({
+  const mySeriesListQuery = useQuery({
     queryKey: ['series', 'mySeriesList'],
     queryFn: () => listMySeries(),
     enabled: !isAdmin,
@@ -94,6 +95,14 @@ export function SeriesSelector({
     refetchOnReconnect: 'always',
   });
 
+  const {
+    data: mySeriesList = initialSeries,
+    isError: myError,
+    isFetching: myFetching,
+    isLoading: myLoading,
+    refetch: refetchMySeries,
+  } = mySeriesListQuery;
+
   const seriesList = isAdmin ? allSeriesList : mySeriesList;
   const optionsError = isAdmin ? allError : myError;
   const optionsFetching = isAdmin ? allFetching : myFetching;
@@ -101,11 +110,12 @@ export function SeriesSelector({
   const selectedSeries = seriesList.find((item) => item.id === selectedSeriesId);
   const canManageSelectedSeries = selectedSeries !== undefined && !optionsError && !optionsFetching;
 
-  const { data: seriesPosts = [] } = useQuery({
+  const seriesPostsQuery = useQuery({
     queryKey: ['series', selectedSeriesId, 'posts'],
     queryFn: () => listSeriesPosts(selectedSeriesId!),
     enabled: !!selectedSeriesId && canManageSelectedSeries,
   });
+  const { data: seriesPosts = [] } = seriesPostsQuery;
 
   useEffect(() => {
     if (!selectedSeriesId) {
@@ -331,20 +341,31 @@ export function SeriesSelector({
 
   return (
     <DsLayoutStack gap="xxs">
-      <QueryErrorAlert queries={[allSeriesListQuery]} />
+      <QueryErrorAlert queries={[allSeriesListQuery, mySeriesListQuery, seriesPostsQuery]} />
       <Select
         id={idPrefix ? `${idPrefix}-trigger` : undefined}
         label={tCommonEntities('series')}
         searchable={isAdmin}
         disabled={!canEdit || isPending}
+        aria-busy={seriesPostsQuery.isLoading || undefined}
+        isLoading={isLoading || optionsFetching || isPending}
         value={selectedSeriesId}
         searchValue={combobox.dropdownOpened ? search : (selectedSeries?.title ?? '')}
         onSearchChange={setSearch}
         dropdownOpened={combobox.dropdownOpened}
-        onDropdownClose={combobox.closeDropdown}
+        onDropdownClose={() => {
+          if (combobox.dropdownOpened) {
+            openIntent.current += 1;
+          }
+          combobox.closeDropdown();
+        }}
         onDropdownOpen={() => {
           if (!combobox.dropdownOpened) {
+            const intent = ++openIntent.current;
             void refreshSeriesOptions().then((success) => {
+              if (intent !== openIntent.current) {
+                return;
+              }
               if (success) {
                 combobox.openDropdown();
               } else {
@@ -364,7 +385,7 @@ export function SeriesSelector({
         }}
         placeholder={
           // An assigned Series outside the refreshed managed list keeps its unavailable state visible.
-          selectedSeriesId && !selectedSeries
+          selectedSeriesId && !selectedSeries && !isLoading
             ? t('states.unavailable')
             : isLoading
               ? tCommonStates('loading')
@@ -378,7 +399,9 @@ export function SeriesSelector({
             ? [{ value: '$create', label: t('actions.createNamed', { name: search.trim() }) }]
             : []),
         ]}
-        nothingFoundMessage={seriesList.length === 0 ? t('states.notMember') : t('states.notFound')}
+        nothingFoundMessage={
+          optionsError ? null : seriesList.length === 0 ? t('states.notMember') : t('states.notFound')
+        }
       />
       {selectedSeriesId && displayOrder !== null ? <LabelBadge>#{displayOrder + 1}</LabelBadge> : null}
       {selectedSeriesId && canManageSelectedSeries && displayOrder !== null && canEdit && seriesPosts.length > 1 && (
@@ -388,6 +411,7 @@ export function SeriesSelector({
             emphasis="low"
             aria-label={tSeriesPostActions('moveUp')}
             disabled={!canMoveUp || isPending}
+            loading={reorderPosts.isPending}
             onClick={() => movePost('up')}
           >
             <IconChevronUp size={14} />
@@ -397,6 +421,7 @@ export function SeriesSelector({
             emphasis="low"
             aria-label={tSeriesPostActions('moveDown')}
             disabled={!canMoveDown || isPending}
+            loading={reorderPosts.isPending}
             onClick={() => movePost('down')}
           >
             <IconChevronDown size={14} />

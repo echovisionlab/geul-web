@@ -78,6 +78,8 @@ export interface ImageUploadFieldProps extends ClosedVisualProps {
   /** Keep the default quiet removal; strong is an explicit destructive-action exception. */
   removeButtonEmphasis?: 'medium' | 'strong';
   removeButtonPlacement?: 'outside' | 'inside';
+  /** Avatar removal uses a small badge over the image; the interaction target stays full size. */
+  removeButtonAppearance?: 'default' | 'avatar';
   preview: ImageUploadPreviewConfig;
   placeholder?: ImageUploadPlaceholderConfig;
   onFileSelect?: (file: File) => void | Promise<void>;
@@ -116,6 +118,7 @@ export function ImageUploadField({
   removeButtonLoading = false,
   removeButtonEmphasis = 'medium',
   removeButtonPlacement = 'outside',
+  removeButtonAppearance = 'default',
   preview,
   placeholder,
   onFileSelect,
@@ -123,6 +126,9 @@ export function ImageUploadField({
   onValidationReject,
   onRemove,
 }: ImageUploadFieldProps) {
+  if (removeButtonAppearance === 'avatar' && (preview.mode !== 'circle' || removeButtonPlacement !== 'inside')) {
+    throw new TypeError('Avatar removal requires a circle preview and inside placement');
+  }
   const interactive = canEdit && !disabled && !loading && Boolean(onFileSelect);
   const acceptedTypes = inputAccept(accept);
   const select = (files: readonly File[]) => {
@@ -252,11 +258,15 @@ export function ImageUploadField({
             </DropZone>
             {onRemove && hasImage && removeButtonAriaLabel ? (
               <IconButton
-                size="xs"
-                shape="circle"
+                {...(removeButtonAppearance === 'avatar'
+                  ? { appearance: 'media-overlay', placement: 'overlay-end-inside' }
+                  : {
+                      size: 'xs',
+                      shape: 'circle',
+                      placement: removeButtonPlacement === 'inside' ? 'overlay-end-inside' : 'overlay-end',
+                    })}
                 emphasis={removeButtonEmphasis === 'strong' ? 'strong' : 'medium'}
                 tone="danger"
-                placement={removeButtonPlacement === 'inside' ? 'overlay-end-inside' : 'overlay-end'}
                 onClick={() => void onRemove()}
                 loading={removeButtonLoading}
                 disabled={disabled || loading}

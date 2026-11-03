@@ -1,4 +1,5 @@
 'use client';
+import { PageLoader } from '@/features/site/PageLoader';
 import type { EditorSnapshot } from '@/features/editor/editor-snapshot';
 import { EditorSnapshotHandoff } from '@/features/editor/EditorSnapshotHandoff';
 import { PageEditorSnapshot } from './PageEditorSnapshot';
@@ -707,9 +708,7 @@ export function PageEditorView({ model }: { model: PageEditorViewModel }) {
           statusOptions={pageStatusOptions}
           isConnected={currentIsConnected}
           isSynced={currentIsSynced}
-          onBack={() => {
-            void navigateWithSave(() => router.back());
-          }}
+          onBack={() => navigateWithSave(() => router.back())}
           onStatusChange={canEditNeutral ? handleStatusChange : undefined}
           onDelete={canEditNeutral ? () => deletePage.mutate() : undefined}
           deleteConfirmation={{
@@ -795,7 +794,8 @@ export function PageEditorView({ model }: { model: PageEditorViewModel }) {
                     <Button
                       tone="neutral"
                       emphasis="low"
-                      onClick={() => void accessTags.refetch()}
+                      onClick={() => accessTags.refetch()}
+                      loading={accessTags.isFetching}
                       disabled={!canEditNeutral}
                     >
                       {t('access.tagsRetry')}
@@ -806,7 +806,8 @@ export function PageEditorView({ model }: { model: PageEditorViewModel }) {
                   key={pageId}
                   value={accessPolicy}
                   tagOptions={accessTags.data ?? []}
-                  loadingTags={accessTags.isLoading || accessTags.isError}
+                  loadingTags={accessTags.isLoading}
+                  tagsUnavailable={accessTags.isError}
                   disabled={!canEditNeutral}
                   onSave={handleAccessSave}
                 />
@@ -914,12 +915,8 @@ export function PageEditorView({ model }: { model: PageEditorViewModel }) {
                         activeEditLocale.activeLocale === model.initialSnapshot.locale) ? (
                         <PageEditorSnapshot snapshot={model.initialSnapshot} />
                       ) : (
-                        <div style={{ minHeight: 200 }}>
-                          <DsLayoutStack id={getEditorBodyLoadingId('page', pageId)} justify="center">
-                            <DsText size="sm" tone="secondary">
-                              {tCommon('labels.body')}
-                            </DsText>
-                          </DsLayoutStack>
+                        <div id={getEditorBodyLoadingId('page', pageId)}>
+                          <PageLoader placement="flow" />
                         </div>
                       )
                     }

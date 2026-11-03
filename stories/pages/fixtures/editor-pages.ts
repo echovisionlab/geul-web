@@ -23,6 +23,7 @@ export function localEditLocale(locale: string, setActiveLocale: (locale: string
   return {
     isControlVisible: true,
     isLoading: false,
+    localeChanging: false,
     isSourceLocaleReady: true,
     activeLocale: locale,
     activeLocaleLabel: locale === 'ko' ? '한국어' : 'English',

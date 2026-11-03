@@ -583,6 +583,7 @@ function usePostEditorViewModel({
     canSchedule,
     openSchedule,
     handleExportMarkdown,
+    exportingMarkdown: markdown.isPending,
     setIsZenMode,
     showEditorChrome,
     baseUrl,
@@ -696,6 +697,7 @@ export function PostEditorView({ model }: { model: PostEditorViewModel }) {
     canSchedule,
     openSchedule,
     handleExportMarkdown,
+    exportingMarkdown,
     setIsZenMode,
     showEditorChrome,
     baseUrl,
@@ -802,6 +804,7 @@ export function PostEditorView({ model }: { model: PostEditorViewModel }) {
                 onOpenParticipants={hasParticipantActions ? openParticipants : undefined}
                 onReschedule={status === 'scheduled' && canSchedule ? openSchedule : undefined}
                 onExportMarkdown={handleExportMarkdown}
+                exportingMarkdown={exportingMarkdown}
                 onToggleZenMode={() => setIsZenMode((current) => !current)}
               />
 

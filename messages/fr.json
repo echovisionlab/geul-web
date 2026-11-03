@@ -1332,6 +1332,8 @@
       }
     },
     "verification": {
+      "checking": "Vérification de l’état du changement d’adresse e-mail…",
+      "unavailable": "Impossible de vérifier l’état du changement d’adresse e-mail. Veuillez réessayer.",
       "loading": "Chargement du formulaire de vérification...",
       "startOver": "Recommencer",
       "errors": {

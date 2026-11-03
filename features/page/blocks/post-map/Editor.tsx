@@ -110,14 +110,16 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
     queryFn: () => listTagsAction().then(unwrapQueryResult),
   });
   const { data: tags } = tagsQuery;
-  const { data: authorsData } = useQuery({
+  const authorsQuery = useQuery({
     queryKey: ['authors', 50],
     queryFn: () => listAuthorOptionsAction(50),
   });
-  const { data: themes } = useQuery({
+  const { data: authorsData } = authorsQuery;
+  const themesQuery = useQuery({
     queryKey: ['mapThemes', 'list'],
     queryFn: () => listMapThemesAction(),
   });
+  const { data: themes } = themesQuery;
 
   const categoryOptions = categories?.map((category) => ({ value: category.id, label: category.name })) || [];
   const seriesOptions = seriesList?.map((series) => ({ value: series.id, label: series.title })) || [];
@@ -157,7 +159,7 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
 
   return (
     <DsLayoutStack gap="lg" data-page-block-editor="post-map">
-      <QueryErrorAlert queries={[categoriesQuery, seriesListQuery, tagsQuery]} />
+      <QueryErrorAlert queries={[categoriesQuery, seriesListQuery, tagsQuery, authorsQuery, themesQuery]} />
       <DsLayoutInset blockEnd="md">
         <DsLayoutInline gap="xs">
           <IconMapPin size={18} />
@@ -182,6 +184,7 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
         <MultiSelect
           label={tCommonEntities('categories')}
           placeholder={t('allCategoriesPlaceholder')}
+          isLoading={categoriesQuery.isLoading}
           data={categoryOptions}
           value={categoryIds ? categoryIds.split(',') : []}
           onChange={(values) => updateProp('categoryIds', values.join(','))}
@@ -192,6 +195,7 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
         <Select
           label={tCommonEntities('series')}
           placeholder={t('allSeriesPlaceholder')}
+          isLoading={seriesListQuery.isLoading}
           data={seriesOptions}
           value={seriesId || null}
           onChange={(value) => updateProp('seriesId', value || '')}
@@ -202,6 +206,7 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
         <MultiSelect
           label={tCommonLabels('authors')}
           placeholder={t('allAuthorsPlaceholder')}
+          isLoading={authorsQuery.isLoading}
           data={authorOptions}
           value={authorIds ? authorIds.split(',') : []}
           onChange={(values) => updateProp('authorIds', values.join(','))}
@@ -212,6 +217,7 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
         <MultiSelect
           label={tCommonEntities('tags')}
           placeholder={t('allTagsPlaceholder')}
+          isLoading={tagsQuery.isLoading}
           data={tagOptions}
           value={tagIds ? tagIds.split(',') : []}
           onChange={(values) => updateProp('tagIds', values.join(','))}
@@ -332,6 +338,7 @@ function PostMapSettingsForm({ props, updateProps }: PostMapSettingsFormProps) {
         <Select
           label={tMapControls('fields.theme')}
           placeholder={t('defaultThemePlaceholder')}
+          isLoading={themesQuery.isLoading}
           data={themeOptions}
           value={themeId || null}
           onChange={(value) => updateProp('themeId', value || '')}

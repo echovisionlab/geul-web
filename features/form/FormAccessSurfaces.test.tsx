@@ -1,11 +1,10 @@
 // @vitest-environment jsdom
 
-import { act, type ComponentProps } from 'react';
-import { createRoot } from 'react-dom/client';
+import type { ComponentProps } from 'react';
+import { act, render, screen, waitFor } from '@/test/render';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { expect, it, vi } from 'vitest';
 import { setProviderAccessLevel } from '@/lib/collab/provider-control-state';
-import { TestProviders } from '@/test/TestProviders';
 import { FormSettingsContent } from './FormSettingsContent';
 import { FormTranslationsPanel } from './FormTranslationsPanel';
 
@@ -53,80 +52,144 @@ const settingsProps = {
   initialHasPassword: false,
 } satisfies ComponentProps<typeof FormSettingsContent>;
 
-it('upgrades and downgrades mounted form settings and translation controls', async () => {
-  const host = document.createElement('div');
-  document.body.append(host);
-  const root = createRoot(host);
+function settingsTree(client: QueryClient, props: Partial<ComponentProps<typeof FormSettingsContent>> = {}) {
+  return (
+    <QueryClientProvider client={client}>
+      <FormSettingsContent {...settingsProps} {...props} />
+      <FormTranslationsPanel formId="form-1" />
+    </QueryClientProvider>
+  );
+}
+it('upgrades and downgrades mounted form settings and translation controls', () => {
   const client = new QueryClient();
-  try {
-    setProviderAccessLevel(mocks.provider, 'view');
-    await act(async () =>
-      root.render(
-        <QueryClientProvider client={client}>
-          <TestProviders>
-            <FormSettingsContent {...settingsProps} />
-            <FormTranslationsPanel formId="form-1" />
-          </TestProviders>
-        </QueryClientProvider>,
-      ),
-    );
-    const slug = host.querySelector<HTMLInputElement>('[aria-label="Slug"]')!;
-    const translation = host.querySelector<HTMLInputElement>('[aria-label="Translation"]')!;
-    const settings = [...host.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')];
-    expect(settings.length).toBeGreaterThan(0);
-    expect(slug.disabled).toBe(true);
-    expect(settings.every((input) => input.disabled)).toBe(true);
-    expect(translation.disabled).toBe(true);
-    expect(mocks.updateFromTitle).not.toHaveBeenCalled();
-    act(() => setProviderAccessLevel(mocks.provider, 'edit'));
-    expect(slug.disabled).toBe(false);
-    expect(settings.every((input) => !input.disabled)).toBe(true);
-    expect(translation.disabled).toBe(false);
-    expect(mocks.translations.mock.lastCall?.[0].canAdministerTranslations).toBe(true);
-    expect(mocks.updateFromTitle).toHaveBeenCalled();
-    act(() => setProviderAccessLevel(mocks.provider, 'view'));
-    expect(slug.disabled).toBe(true);
-    expect(settings.every((input) => input.disabled)).toBe(true);
-    expect(translation.disabled).toBe(true);
-    expect(host.querySelector('[aria-label="Slug"]')).toBe(slug);
-    expect(host.querySelector('[aria-label="Translation"]')).toBe(translation);
-  } finally {
-    act(() => root.unmount());
-    client.clear();
-    host.remove();
-  }
+  setProviderAccessLevel(mocks.provider, 'view');
+  mocks.updateFromTitle.mockClear();
+  const view = render(settingsTree(client));
+  const slug = screen.getByRole('textbox', { name: 'Slug' });
+  const translation = screen.getByRole('textbox', { name: 'Translation' });
+  const settings = screen.getAllByRole('switch');
+  expect(settings.length).toBeGreaterThan(0);
+  expect(slug).toBeDisabled();
+  settings.forEach((input) => expect(input).toBeDisabled());
+  expect(translation).toBeDisabled();
+  expect(mocks.updateFromTitle).not.toHaveBeenCalled();
+  act(() => setProviderAccessLevel(mocks.provider, 'edit'));
+  expect(slug).not.toBeDisabled();
+  settings.forEach((input) => expect(input).not.toBeDisabled());
+  expect(translation).not.toBeDisabled();
+  expect(mocks.translations.mock.lastCall?.[0].canAdministerTranslations).toBe(true);
+  expect(mocks.updateFromTitle).toHaveBeenCalled();
+  act(() => setProviderAccessLevel(mocks.provider, 'view'));
+  expect(slug).toBeDisabled();
+  settings.forEach((input) => expect(input).toBeDisabled());
+  expect(translation).toBeDisabled();
+  expect(screen.getByRole('textbox', { name: 'Slug' })).toBe(slug);
+  expect(screen.getByRole('textbox', { name: 'Translation' })).toBe(translation);
+  view.unmount();
+  client.clear();
 });
-
-it('routes source title edits through the shared slug hook instead of saving the slug directly', async () => {
-  const host = document.createElement('div');
-  document.body.append(host);
-  const root = createRoot(host);
+it('routes source title edits through the shared slug hook instead of saving the slug directly', () => {
   const client = new QueryClient();
   const update = vi.fn();
-  const renderSettings = () =>
-    root.render(
-      <QueryClientProvider client={client}>
-        <TestProviders>
-          <FormSettingsContent {...settingsProps} bindings={{ update }} />
-        </TestProviders>
-      </QueryClientProvider>,
-    );
-  try {
-    setProviderAccessLevel(mocks.provider, 'edit');
-    mocks.updateFromTitle.mockClear();
-    mocks.title = 'Form';
-    await act(async () => renderSettings());
-    expect(mocks.updateFromTitle).toHaveBeenLastCalledWith('Form');
-
-    mocks.title = 'Renamed form';
-    await act(async () => renderSettings());
-
-    expect(mocks.updateFromTitle).toHaveBeenLastCalledWith('Renamed form');
-    expect(update).not.toHaveBeenCalled();
-  } finally {
-    act(() => root.unmount());
-    client.clear();
-    host.remove();
-    mocks.title = 'Form';
-  }
+  setProviderAccessLevel(mocks.provider, 'edit');
+  mocks.updateFromTitle.mockClear();
+  mocks.title = 'Form';
+  const view = render(settingsTree(client, { bindings: { update } }));
+  expect(mocks.updateFromTitle).toHaveBeenLastCalledWith('Form');
+  mocks.title = 'Renamed form';
+  view.rerender(settingsTree(client, { bindings: { update } }));
+  expect(mocks.updateFromTitle).toHaveBeenLastCalledWith('Renamed form');
+  expect(update).not.toHaveBeenCalled();
+  view.unmount();
+  client.clear();
+  mocks.title = 'Form';
 });
+it('serializes settings writes and shows synchronization until every queued write completes', async () => {
+  const first = Promise.withResolvers<{}>();
+  const second = Promise.withResolvers<{}>();
+  const update = vi.fn().mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
+  const client = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+  setProviderAccessLevel(mocks.provider, 'edit');
+  const view = render(settingsTree(client, { bindings: { update } }));
+  await view.user.click(screen.getByRole('switch', { name: 'Allow public URL access' }));
+  await view.user.click(screen.getByRole('switch', { name: 'Require Authentication' }));
+  expect(update).toHaveBeenCalledOnce();
+  expect(screen.getByRole('group', { name: 'Access Control' })).toHaveAttribute('aria-busy', 'true');
+  expect(screen.getByText('Syncing...')).toBeInTheDocument();
+  await act(async () => first.resolve({}));
+  await waitFor(() => expect(update).toHaveBeenCalledTimes(2));
+  expect(update).toHaveBeenNthCalledWith(1, 'form-1', { isPublic: false });
+  expect(update).toHaveBeenNthCalledWith(2, 'form-1', { requireAuth: true });
+  expect(screen.getByRole('group', { name: 'Access Control' })).toHaveAttribute('aria-busy', 'true');
+  await act(async () => second.resolve({}));
+  await waitFor(() =>
+    expect(screen.getByRole('group', { name: 'Access Control' })).toHaveAttribute('aria-busy', 'false'),
+  );
+  expect(screen.getByText('Synced')).toBeInTheDocument();
+  view.unmount();
+  client.clear();
+});
+it.each(['result', 'rejection'] as const)(
+  'keeps an unsaved field failure after another queued field succeeds (%s)',
+  async (failure) => {
+    const first = Promise.withResolvers<{ error?: string }>();
+    const second = Promise.withResolvers<{}>();
+    const update = vi.fn().mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise).mockResolvedValue({});
+    const client = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+    setProviderAccessLevel(mocks.provider, 'edit');
+    const view = render(settingsTree(client, { bindings: { update } }));
+    await view.user.click(screen.getByRole('switch', { name: 'Allow public URL access' }));
+    await view.user.click(screen.getByRole('switch', { name: 'Require Authentication' }));
+    await act(async () => {
+      if (failure === 'result') {
+        first.resolve({ error: 'Public access was not saved' });
+      } else {
+        first.reject(new Error('Public access was not saved'));
+      }
+    });
+    await waitFor(() => expect(update).toHaveBeenCalledTimes(2));
+    await act(async () => second.resolve({}));
+    await waitFor(() =>
+      expect(screen.getByRole('group', { name: 'Access Control' })).toHaveAttribute('aria-busy', 'false'),
+    );
+    expect(screen.getByRole('switch', { name: 'Allow public URL access' })).not.toBeChecked();
+    expect(screen.getByRole('alert')).toHaveTextContent('Public access was not saved');
+    expect(screen.queryByText('Synced')).not.toBeInTheDocument();
+    expect(screen.queryByText('Saved')).not.toBeInTheDocument();
+    await view.user.click(screen.getByRole('switch', { name: 'Require Authentication' }));
+    await waitFor(() =>
+      expect(screen.getByRole('group', { name: 'Access Control' })).toHaveAttribute('aria-busy', 'false'),
+    );
+    expect(screen.getByRole('alert')).toHaveTextContent('Public access was not saved');
+    expect(screen.queryByText('Synced')).not.toBeInTheDocument();
+    await view.user.click(screen.getByRole('switch', { name: 'Allow public URL access' }));
+    expect(await screen.findByText('Synced')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    view.unmount();
+    client.clear();
+  },
+);
+it.each([false, true])(
+  'preserves save failure feedback and ignores an old target completion (changed: %s)',
+  async (changed) => {
+    const pending = Promise.withResolvers<{ error: string }>();
+    const update = vi.fn().mockReturnValue(pending.promise);
+    const client = new QueryClient();
+    setProviderAccessLevel(mocks.provider, 'edit');
+    const view = render(settingsTree(client, { bindings: { update } }));
+    await view.user.click(screen.getByRole('switch', { name: 'Allow public URL access' }));
+    if (changed) {
+      view.rerender(settingsTree(client, { formId: 'form-2', bindings: { update } }));
+    }
+    await act(async () => pending.resolve({ error: 'Old save failed' }));
+    if (changed) {
+      expect(screen.queryByText('Old save failed')).not.toBeInTheDocument();
+      expect(screen.getByRole('switch', { name: 'Allow public URL access' })).toBeChecked();
+    } else {
+      expect(await screen.findByRole('alert')).toHaveTextContent('Old save failed');
+      expect(screen.getByRole('switch', { name: 'Allow public URL access' })).not.toBeChecked();
+    }
+    view.unmount();
+    client.clear();
+  },
+);

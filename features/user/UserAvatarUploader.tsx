@@ -20,6 +20,7 @@ import {
   userAvatarSelectionMaxSize,
   validateUserAvatarSelection,
 } from './profile-avatar-upload-policy';
+import { PageLoader } from '@/features/site/PageLoader';
 import { ProfileAvatarControl } from './ui/ProfileAvatarControl/ProfileAvatarControl';
 import { useImageCropAccessibility } from '@/lib/i18n/useImageCropAccessibility';
 
@@ -152,7 +153,9 @@ export function UserAvatarUploader({
 
   return (
     <ProfileAvatarControl
+      key={memberId}
       imageUrl={currentImage}
+      loadingSurface={<PageLoader extent="compact" placement="flow" size="sm" />}
       size={size}
       accept={userAvatarSelectionAccept}
       maxSize={userAvatarSelectionMaxSize}
@@ -167,6 +170,8 @@ export function UserAvatarUploader({
         cancel: tCommon('actions.cancel'),
         confirm: tCommon('actions.confirm'),
         preparing: tCommon('uploadField.status.preparingImage'),
+        loadFailed: tCommonMessages('failedToLoad'),
+        retry: tCommon('actions.tryAgain'),
       }}
       validateFile={validateUserAvatarSelection}
       prepareFile={prepareUserAvatarPreview}

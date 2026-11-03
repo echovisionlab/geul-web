@@ -8,12 +8,12 @@ import {
   LayoutInset as DsLayoutInset,
 } from '@/components/core/Layout';
 
-import { Spinner as Loader, NearEndLoader } from '@/components/core/Display';
+import { NearEndLoader } from '@/components/core/Display';
 import { Button } from '@/components/core/Button';
 import { Drawer } from '@/components/core/Drawer';
 import { Alert } from '@/components/core/Alert';
 
-import { useId } from 'react';
+import { useId, type ReactNode } from 'react';
 
 export interface VersionHistoryItemViewModel {
   id: string;
@@ -48,6 +48,8 @@ export interface VersionHistoryDrawerViewProps {
   versions: readonly VersionHistoryItemViewModel[];
   labels: VersionHistoryDrawerViewLabels;
   loading: boolean;
+  loadingSurface: ReactNode;
+  retrying?: boolean;
   error: string | null;
   onRetry: () => Promise<void>;
   pagination: {
@@ -72,6 +74,8 @@ export function VersionHistoryDrawerView({
   versions,
   labels,
   loading,
+  loadingSurface,
+  retrying = false,
   error,
   onRetry,
   pagination,
@@ -97,14 +101,10 @@ export function VersionHistoryDrawerView({
       >
         <DsLayoutStack gap="sm">
           {loading ? (
-            <DsLayoutInset block="xl">
-              <DsLayoutStack align="center">
-                <Loader size="sm" aria-label={labels.loading} />
-              </DsLayoutStack>
-            </DsLayoutInset>
+            loadingSurface
           ) : error && versions.length === 0 ? (
             <Alert tone="danger" title={error}>
-              <Button onClick={() => void onRetry()} size="compact">
+              <Button onClick={onRetry} loading={retrying} size="compact">
                 {labels.retry}
               </Button>
             </Alert>

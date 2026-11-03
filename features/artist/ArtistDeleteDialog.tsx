@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { notifications } from '@/components/core/Notification';
+import { PageLoader } from '@/features/site/PageLoader';
 import {
   ArtistDeleteDialogView,
   type ArtistDeletePreviewViewModel,
@@ -29,14 +30,22 @@ export function ArtistDeleteDialog({
   previewAction = previewDeleteArtistAction,
   deleteAction = deleteArtistAction,
 }: ArtistDeleteDialogProps) {
+  const targetRef = useRef(artist?.id);
+  targetRef.current = artist?.id;
+  const requestRef = useRef(0);
   const tCommon = useTranslations('common');
   const [deleting, setDeleting] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewArtistId, setPreviewArtistId] = useState<string | undefined>();
+  const previewMatchesTarget = previewArtistId === artist?.id;
   const [preview, setPreview] = useState<ArtistDeletePreviewViewModel | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const loadPreview = useCallback((artistId: string) => previewAction(artistId), [previewAction]);
 
   useEffect(() => {
+    const request = ++requestRef.current;
+    setPreviewArtistId(artist?.id);
+    setDeleting(false);
     if (!artist) {
       setPreview(null);
       setPreviewError(null);
@@ -44,35 +53,50 @@ export function ArtistDeleteDialog({
       return;
     }
 
-    let cancelled = false;
+    const isCurrent = () => requestRef.current === request && targetRef.current === artist.id;
     setPreview(null);
     setPreviewLoading(true);
     setPreviewError(null);
-    void loadPreview(artist.id).then((result) => {
-      if (cancelled) {
-        return;
-      }
-      setPreview(result.data ?? null);
-      setPreviewError(result.error ?? null);
-      setPreviewLoading(false);
-    });
+    void loadPreview(artist.id)
+      .then((result) => {
+        if (!isCurrent()) {
+          return;
+        }
+        setPreview(result.data ?? null);
+        setPreviewError(result.error ?? null);
+        setPreviewLoading(false);
+      })
+      .catch(() => {
+        if (isCurrent()) {
+          setPreviewError(tCommon('messages.failedToLoad'));
+          setPreviewLoading(false);
+        }
+      });
     return () => {
-      cancelled = true;
+      requestRef.current++;
     };
-  }, [artist, loadPreview]);
+  }, [artist?.id, loadPreview, tCommon]);
 
   const handleDelete = async () => {
-    if (!artist || !preview) {
+    if (!artist || !preview || !previewMatchesTarget) {
       return;
     }
 
+    const request = requestRef.current;
+    const isCurrent = () => requestRef.current === request && targetRef.current === artist.id;
     setDeleting(true);
     try {
       const result = await deleteAction(artist.id, preview.revision);
+      if (!isCurrent()) {
+        return;
+      }
       if (result.error) {
         notifications.show({ message: result.error, tone: 'danger' });
         setPreviewLoading(true);
         const refreshed = await loadPreview(artist.id);
+        if (!isCurrent()) {
+          return;
+        }
         setPreview(refreshed.data ?? null);
         setPreviewError(refreshed.error ?? null);
         setPreviewLoading(false);
@@ -83,8 +107,15 @@ export function ArtistDeleteDialog({
         tone: 'positive',
       });
       onDeleted();
+    } catch {
+      if (isCurrent()) {
+        setPreviewError(tCommon('messages.failedToLoad'));
+        setPreviewLoading(false);
+      }
     } finally {
-      setDeleting(false);
+      if (isCurrent()) {
+        setDeleting(false);
+      }
     }
   };
 
@@ -92,9 +123,10 @@ export function ArtistDeleteDialog({
     <ArtistDeleteDialogView
       opened={Boolean(artist)}
       artistName={artist?.name ?? tCommon('entities.artist')}
-      preview={preview}
-      previewLoading={previewLoading}
-      previewError={previewError}
+      preview={previewMatchesTarget ? preview : null}
+      previewLoading={!previewMatchesTarget || previewLoading}
+      loadingSurface={<PageLoader placement="flow" message={tCommon('states.loading')} />}
+      previewError={previewMatchesTarget ? previewError : null}
       deleting={deleting}
       onClose={onClose}
       onConfirm={handleDelete}

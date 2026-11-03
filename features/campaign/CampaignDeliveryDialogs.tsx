@@ -100,6 +100,7 @@ export function CampaignDeliveryDialogs({
     <>
       <ContentModal
         opened={testDialog.opened}
+        loading={testDialog.pending}
         onClose={testDialog.onClose}
         title={testDialog.labels.title}
         closeLabel={commonLabels.close}
@@ -142,6 +143,7 @@ export function CampaignDeliveryDialogs({
 
       <ContentModal
         opened={sendDialog.opened}
+        loading={sendDialog.pending}
         onClose={sendDialog.onClose}
         title={sendDialog.labels.title}
         closeLabel={commonLabels.close}
@@ -177,6 +179,7 @@ export function CampaignDeliveryDialogs({
 
       <ContentModal
         opened={scheduleDialog.opened}
+        loading={scheduleDialog.pending}
         onClose={scheduleDialog.onClose}
         title={scheduleDialog.labels.title}
         closeLabel={commonLabels.close}

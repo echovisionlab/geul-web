@@ -7,10 +7,16 @@ import { confirmDialogs, ConfirmDialogHost, preloadConfirmDialogs } from './conf
 import { getConfirmDialogs } from './confirm-dialog-store';
 
 afterEach(() => {
+  vi.doUnmock('./ConfirmDialogStack');
   act(() => getConfirmDialogs().forEach(({ id }) => confirmDialogs.close(id)));
 });
 
 it('keeps a request made before the host loads, opens it, and restores focus to the trigger', async () => {
+  const renderer = Promise.withResolvers<void>();
+  vi.doMock('./ConfirmDialogStack', async (importOriginal) => {
+    await renderer.promise;
+    return importOriginal();
+  });
   const onConfirm = vi.fn();
   function Example() {
     const [showHost, setShowHost] = useState(false);
@@ -32,14 +38,21 @@ it('keeps a request made before the host loads, opens it, and restores focus to 
         >
           Remove
         </button>
-        {showHost ? <ConfirmDialogHost /> : null}
+        {showHost ? (
+          <ConfirmDialogHost loadError={{ message: 'Could not open confirmation.', retryLabel: 'Retry' }} />
+        ) : null}
       </>
     );
   }
   const { user } = render(<Example />);
   const trigger = screen.getByRole('button', { name: 'Remove' });
   await user.click(trigger);
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(screen.getByRole('progressbar', { name: 'Delete item' })).toBeVisible();
+  expect(trigger).toHaveFocus();
+  renderer.resolve();
   await act(() => preloadConfirmDialogs());
+  expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
   expect(screen.getByRole('dialog', { name: 'Delete item' })).toBeInTheDocument();
   await user.click(screen.getByRole('button', { name: 'Cancel' }));
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();

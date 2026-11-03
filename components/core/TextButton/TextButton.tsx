@@ -9,7 +9,7 @@ import {
   type ReactNode,
   type RefAttributes,
 } from 'react';
-import { Button as AriaButton, Link as AriaLink } from 'react-aria-components';
+import { Button as AriaButton, Link as AriaLink, ProgressBar } from 'react-aria-components';
 import { ariaControlClick, controlNativeProps, type ControlNativeProps } from '../control-props';
 import { controlLinkRender } from '../control-render';
 import {
@@ -20,6 +20,7 @@ import {
   type NavigationOptions,
 } from '../Navigation/navigation-events';
 import controlClasses from '../Control.module.css';
+import spinnerClasses from '../Spinner.module.css';
 import classes from './TextButton.module.css';
 import {
   resolveActionSize,
@@ -55,6 +56,9 @@ interface TextButtonSharedProps extends ControlNativeProps {
   gap?: 'none' | 'xxs' | 'xs' | 'sm';
 }
 export interface TextButtonButtonProps extends TextButtonSharedProps {
+  /** Controlled command pending state; keeps the text and focus while blocking activation. */
+  loading?: boolean;
+  loadingLabel?: string;
   indicator?: ControlIndicatorKind;
   href?: never;
   type?: 'button' | 'submit' | 'reset';
@@ -71,6 +75,8 @@ export interface TextButtonButtonProps extends TextButtonSharedProps {
 export interface TextButtonLinkProps
   extends Omit<TextButtonSharedProps, 'onClick'>, Omit<NavigationOptions, 'onNavigate'> {
   indicator?: never;
+  loading?: never;
+  loadingLabel?: never;
   disabled?: never;
   onClick?: never;
   type?: never;
@@ -101,11 +107,14 @@ function TextButtonInner(
     gap = 'xxs',
     children,
     indicator,
+    loading = false,
+    loadingLabel,
     ...props
   }: TextButtonProps,
   ref: ForwardedRef<HTMLButtonElement | HTMLAnchorElement>,
 ) {
   const descriptionId = useId();
+  const labelId = useId();
   const description = props['aria-description'];
   const rowSize = useActionRowSize();
   const hierarchyStep = useHierarchyStep();
@@ -147,14 +156,25 @@ function TextButtonInner(
     'data-tone': tone ?? (appearance === 'accent' ? 'accent' : 'neutral'),
     'data-emphasis': appearance === 'muted' ? 'low' : 'medium',
   };
-  const content = indicator ? (
-    <>
-      <span className={`${controlClasses.label} ${classes.label}`}>{children}</span>
-      <ControlIndicator kind={indicator} />
-    </>
-  ) : (
-    children
-  );
+  const content =
+    indicator || href === undefined ? (
+      <>
+        <span id={labelId} className={indicator ? `${controlClasses.label} ${classes.label}` : classes.content}>
+          {children}
+        </span>
+        {indicator ? <ControlIndicator kind={indicator} /> : null}
+        {loading ? (
+          <ProgressBar
+            isIndeterminate
+            aria-label={loadingLabel ?? props['aria-label']}
+            aria-labelledby={loadingLabel || props['aria-label'] ? undefined : (props['aria-labelledby'] ?? labelId)}
+            className={`${spinnerClasses.spinner} ${classes.spinner}`}
+          />
+        ) : null}
+      </>
+    ) : (
+      children
+    );
   if (href !== undefined) {
     return (
       <AriaLink
@@ -184,9 +204,10 @@ function TextButtonInner(
     <AriaButton
       {...shared}
       ref={ref as ForwardedRef<HTMLButtonElement>}
-      type={action.type ?? 'button'}
+      type={loading ? 'button' : (action.type ?? 'button')}
       form={action.form}
       isDisabled={action.disabled}
+      isPending={loading}
       excludeFromTabOrder={native.tabIndex === -1}
       render={(domProps) => (
         <button
@@ -194,9 +215,15 @@ function TextButtonInner(
           type={domProps.type === 'submit' ? 'submit' : domProps.type === 'reset' ? 'reset' : 'button'}
           // React Aria filters `title` from DOM props; keep the accepted native advisory text.
           title={native.title}
+          aria-busy={loading || undefined}
+          aria-labelledby={
+            loading
+              ? (props['aria-labelledby'] ?? (props['aria-label'] ? undefined : labelId))
+              : domProps['aria-labelledby']
+          }
         />
       )}
-      onClick={ariaControlClick(onClick)}
+      onClick={ariaControlClick(loading ? undefined : onClick)}
     >
       {content}
       {description ? (

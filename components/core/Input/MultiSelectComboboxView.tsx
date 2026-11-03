@@ -12,6 +12,7 @@ export interface MultiSelectComboboxViewProps<T extends MultiSelectItem> {
   options: T[];
   isLoading?: boolean;
   isCreating?: boolean;
+  loadingLabel?: string;
   onSelect: (item: T) => void;
   onDeselect: (item: T) => void;
   onCreate?: (name: string) => void;
@@ -21,7 +22,11 @@ export interface MultiSelectComboboxViewProps<T extends MultiSelectItem> {
   combineWithSelected?: boolean;
 }
 export function MultiSelectComboboxView<T extends MultiSelectItem>(props: MultiSelectComboboxViewProps<T>) {
-  const state = useMultiSelect({ ...props, onCreate: props.canCreateNew ? props.onCreate : undefined });
+  const pending = props.isLoading || props.isCreating;
+  const state = useMultiSelect({
+    ...props,
+    onCreate: props.canEdit && props.canCreateNew && !pending ? props.onCreate : undefined,
+  });
   // MultiSelect filters the menu; retain the complete data so selected pills keep their labels.
   const options = state.allOptions.map((item) => ({ value: item.id, label: item.name }));
   if (state.canCreate) {
@@ -38,7 +43,8 @@ export function MultiSelectComboboxView<T extends MultiSelectItem>(props: MultiS
       disabled={!props.canEdit}
       searchValue={state.search}
       onSearchChange={state.setSearch}
-      aria-busy={props.isLoading || props.isCreating || undefined}
+      isLoading={pending}
+      loadingLabel={props.loadingLabel}
       nothingFoundMessage={state.search.trim() ? props.notFoundMessage : props.emptyMessage}
       renderOption={({ option }) => (option.value === '$create' ? props.createOptionLabel(state.search) : option.label)}
       onChange={(values) => {

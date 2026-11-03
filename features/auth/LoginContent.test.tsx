@@ -1,18 +1,17 @@
 // @vitest-environment jsdom
 
+import { ManifestProvider } from '@/lib/contexts/ManifestContext';
+import { DEFAULT_SITE_SETTINGS_VIEW } from '@/lib/types/site-setting/config';
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act } from 'react';
-import { NextIntlClientProvider } from 'next-intl';
-import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import enMessages from '@/messages/en.json';
+import { render, screen, waitFor, within } from '@/test/render';
 import { LoginContent } from './LoginContent';
 import { LoginController } from './LoginController';
 import { rememberNewsletterAuthContinuation } from './login-redirect';
-import type { UnifiedLoginTransport } from './unified-login-transport';
-
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+import { createUnifiedLoginTransport, type UnifiedLoginTransport } from './unified-login-transport';
 
 const navigationMock = vi.hoisted(() => ({
   router: {
@@ -193,14 +192,9 @@ const passkeyFlow = {
   },
 };
 
-let container: HTMLDivElement | null = null;
-let root: Root | null = null;
 let credentialsDescriptor: PropertyDescriptor | undefined;
 
 beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
   navigationMock.router.push.mockReset();
   navigationMock.router.replace.mockReset();
   navigationMock.searchParams = new URLSearchParams('flow=flow-1');
@@ -211,12 +205,6 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  act(() => {
-    root?.unmount();
-  });
-  container?.remove();
-  root = null;
-  container = null;
   delete (window as unknown as Record<string, unknown>).__oryWebAuthnInitialized;
   delete (window as unknown as Record<string, unknown>).oryPasskeyLogin;
   if (credentialsDescriptor) {
@@ -234,18 +222,6 @@ function jsonResponse(body: unknown, init: ResponseInit = {}) {
   });
 }
 
-function setInputValue(input: HTMLInputElement, value: string): void {
-  const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
-  valueSetter?.call(input, value);
-  input.dispatchEvent(new Event('input', { bubbles: true }));
-}
-
-async function flush(): Promise<void> {
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 0));
-  });
-}
-
 describe('LoginContent', () => {
   it('keeps legal links distinguishable within their surrounding login prose', async () => {
     const transport: UnifiedLoginTransport = {
@@ -254,63 +230,78 @@ describe('LoginContent', () => {
       load: vi.fn().mockResolvedValue({ kind: 'continued', flow: codeFlow, ok: true }),
       submit: vi.fn(),
     };
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceTheme="ocean-dark">
-            <LoginContent transport={transport} />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
-    const terms = container?.querySelector<HTMLAnchorElement>('a[href="/terms"]');
-    const privacy = container?.querySelector<HTMLAnchorElement>('a[href="/privacy"]');
-    expect(terms?.textContent).toBe('Terms of Service');
-    expect(privacy?.textContent).toBe('Privacy Policy');
-    expect(terms?.dataset.appearance).toBe('content');
-    expect(privacy?.dataset.appearance).toBe('content');
-  });
-
-  it('explains that a privileged refresh will automatically continue the security request', async () => {
-    const refreshFlow = {
-      ...codeFlow,
-      refresh: true,
-      return_to: '/my/security?resume_account_security_action=1',
-    };
-    const transport: UnifiedLoginTransport = {
-      actionUrl: vi.fn(() => '/api/auth/login?flow=flow-1'),
-      browserUrl: vi.fn(() => '/api/auth/login'),
-      load: vi.fn().mockResolvedValue({ kind: 'continued', flow: refreshFlow, ok: true }),
-      submit: vi.fn(),
-    };
-    const navigation = {
-      assign: vi.fn(),
-      origin: 'https://www.example.test',
-      replace: vi.fn(),
-    };
-
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceColorScheme="light">
-            <LoginController
-              flowId="flow-1"
-              hasSession
-              isSessionPending={false}
-              navigation={navigation}
-              transport={transport}
-            />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
-
-    expect(container?.querySelector('[data-testid="security-reauthentication-message"]')?.textContent).toBe(
-      enMessages.auth.login.securityReauthentication.description,
+    render(
+      <DesignSystemProvider locale="en" forceTheme="ocean-dark">
+        <LoginContent transport={transport} />
+      </DesignSystemProvider>,
     );
+    const terms = await screen.findByRole('link', { name: 'Terms of Service' });
+    const privacy = screen.getByRole('link', { name: 'Privacy Policy' });
+    expect(terms).toHaveAttribute('href', '/terms');
+    expect(privacy).toHaveAttribute('href', '/privacy');
+    expect(terms).toHaveAttribute('data-appearance', 'content');
+    expect(privacy).toHaveAttribute('data-appearance', 'content');
   });
+
+  it.each(['submit', 'flow'] as const)(
+    'replaces the privileged refresh intro with one %s failure alert',
+    async (failure) => {
+      const refreshFlow = {
+        ...codeFlow,
+        refresh: true,
+        return_to: '/my/security?resume_account_security_action=1',
+        ui: {
+          ...codeFlow.ui,
+          nodes: codeFlow.ui.nodes.filter((node) => !['code', 'resend'].includes(node.attributes.name)),
+        },
+      };
+      const transport: UnifiedLoginTransport = {
+        actionUrl: vi.fn(() => '/api/auth/login?flow=flow-1'),
+        browserUrl: vi.fn(() => '/api/auth/login'),
+        load: vi.fn().mockResolvedValue({ kind: 'continued', flow: refreshFlow, ok: true }),
+        submit: vi.fn().mockResolvedValue(
+          failure === 'submit'
+            ? { kind: 'failed' }
+            : {
+                kind: 'continued',
+                ok: false,
+                flow: {
+                  ...refreshFlow,
+                  ui: { ...refreshFlow.ui, messages: [{ id: 4000001, type: 'error', text: 'Provider failure' }] },
+                },
+              },
+        ),
+      };
+      const navigation = {
+        assign: vi.fn(),
+        origin: 'https://www.example.test',
+        replace: vi.fn(),
+      };
+
+      const { user } = render(
+        <LoginController
+          flowId="flow-1"
+          hasSession
+          isSessionPending={false}
+          navigation={navigation}
+          transport={transport}
+        />,
+      );
+
+      expect(await screen.findByText(enMessages.auth.login.securityReauthentication.description)).toBeVisible();
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+      await user.type(screen.getByRole('textbox', { name: enMessages.common.labels.email }), 'june@example.com');
+      await user.click(screen.getByRole('button', { name: enMessages.auth.login.emailCode }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(enMessages.auth.login.errors.loginFailed);
+      expect(screen.getAllByRole('alert')).toHaveLength(1);
+      expect(screen.queryByText(enMessages.auth.login.securityReauthentication.description)).not.toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: enMessages.common.labels.email })).toHaveAccessibleDescription(
+        enMessages.auth.login.errors.loginFailed,
+      );
+    },
+  );
 
   it('starts authentication with an absolute same-origin return_to while storing the relative navigation target', async () => {
     const transport: UnifiedLoginTransport = {
@@ -325,22 +316,15 @@ describe('LoginContent', () => {
       replace: vi.fn(),
     };
 
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceColorScheme="light">
-            <LoginController
-              hasSession={false}
-              isSessionPending={false}
-              navigation={navigation}
-              redirectUrl="/admin?tab=users"
-              transport={transport}
-            />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
+    render(
+      <LoginController
+        hasSession={false}
+        isSessionPending={false}
+        navigation={navigation}
+        redirectUrl="/admin?tab=users"
+        transport={transport}
+      />,
+    );
 
     expect(transport.browserUrl).toHaveBeenCalledWith('https://www.example.test/admin?tab=users');
     expect(window.sessionStorage.getItem('auth_redirect')).toBe('/admin?tab=users');
@@ -365,77 +349,51 @@ describe('LoginContent', () => {
     };
     const applyNewsletterSubscription = vi.fn().mockResolvedValue({ success: true });
 
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceColorScheme="light">
-            <LoginController
-              key="newsletter-start"
-              applyNewsletterSubscription={applyNewsletterSubscription}
-              hasSession={false}
-              isSessionPending={false}
-              newsletterIntent
-              navigation={navigation}
-              redirectUrl={finalRedirect}
-              transport={transport}
-            />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
+    const { user, rerender } = render(
+      <LoginController
+        key="newsletter-start"
+        applyNewsletterSubscription={applyNewsletterSubscription}
+        hasSession={false}
+        isSessionPending={false}
+        newsletterIntent
+        navigation={navigation}
+        redirectUrl={finalRedirect}
+        transport={transport}
+      />,
+    );
 
     expect(transport.browserUrl).toHaveBeenCalledWith(continuation);
     expect(window.sessionStorage.getItem('auth_redirect')).toBe(finalRedirect);
     expect(navigation.assign).toHaveBeenCalledWith(`/api/auth/login?return_to=${encodeURIComponent(continuation)}`);
 
     navigation.assign.mockClear();
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceColorScheme="light">
-            <LoginController
-              key="newsletter-callback"
-              applyNewsletterSubscription={applyNewsletterSubscription}
-              flowId="newsletter-flow"
-              hasSession={false}
-              isSessionPending={false}
-              navigation={navigation}
-              transport={transport}
-            />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
+    rerender(
+      <LoginController
+        key="newsletter-callback"
+        applyNewsletterSubscription={applyNewsletterSubscription}
+        flowId="newsletter-flow"
+        hasSession={false}
+        isSessionPending={false}
+        navigation={navigation}
+        transport={transport}
+      />,
+    );
 
     expect(window.sessionStorage.getItem('auth_redirect')).toBe(finalRedirect);
-    expect(container?.textContent).toContain(
-      "After you sign in, we'll ask you to confirm your newsletter subscription.",
-    );
-    const inputs = Array.from(container?.querySelectorAll<HTMLInputElement>('input[inputmode="numeric"]') ?? []);
+    expect(
+      await screen.findByText("After you sign in, we'll ask you to confirm your newsletter subscription."),
+    ).toBeVisible();
+    const inputs = await screen.findAllByRole('textbox', { name: /^6-digit sign-in code [1-6]$/ });
     expect(inputs).toHaveLength(6);
-    await act(async () => {
-      for (const [index, digit] of Array.from('123456').entries()) {
-        setInputValue(inputs[index] as HTMLInputElement, digit);
-        await Promise.resolve();
-      }
-      await Promise.resolve();
-    });
-    await flush();
+    await user.type(inputs[0], '123456');
 
     expect(applyNewsletterSubscription).not.toHaveBeenCalled();
-    expect(container?.textContent).toContain('You are signed in. Subscribe to newsletter and campaign emails?');
+    expect(await screen.findByText('You are signed in. Subscribe to newsletter and campaign emails?')).toBeVisible();
     expect(navigation.assign).not.toHaveBeenCalled();
     expect(navigation.replace).not.toHaveBeenCalled();
 
-    const subscribeButton = Array.from(container?.querySelectorAll('button') ?? []).find(
-      (button) => button.textContent?.trim() === 'Subscribe to newsletter',
-    );
-    await act(async () => {
-      subscribeButton?.click();
-    });
-    await flush();
+    const subscribeButton = await screen.findByRole('button', { name: 'Subscribe to newsletter' });
+    await user.click(subscribeButton);
 
     expect(applyNewsletterSubscription).toHaveBeenCalledTimes(1);
     expect(navigation.replace).toHaveBeenCalledWith(finalRedirect);
@@ -462,39 +420,27 @@ describe('LoginContent', () => {
     };
     const applyNewsletterSubscription = vi.fn().mockResolvedValue({ success: true });
 
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceColorScheme="light">
-            <LoginController
-              applyNewsletterSubscription={applyNewsletterSubscription}
-              flowId="flow-1"
-              hasSession={false}
-              isSessionPending={false}
-              newsletterIntent
-              navigation={navigation}
-              transport={transport}
-            />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
+    const { user } = render(
+      <LoginController
+        applyNewsletterSubscription={applyNewsletterSubscription}
+        flowId="flow-1"
+        hasSession={false}
+        isSessionPending={false}
+        newsletterIntent
+        navigation={navigation}
+        transport={transport}
+      />,
+    );
 
+    const firstCodeInput = await screen.findByRole('textbox', {
+      name: `${enMessages.auth.login.code.label} 1`,
+    });
     expect(window.sessionStorage.getItem('newsletter_auth_continuation')).toBeNull();
 
-    const inputs = Array.from(container?.querySelectorAll<HTMLInputElement>('input[inputmode="numeric"]') ?? []);
-    await act(async () => {
-      for (const [index, digit] of Array.from('123456').entries()) {
-        setInputValue(inputs[index] as HTMLInputElement, digit);
-        await Promise.resolve();
-      }
-      await Promise.resolve();
-    });
-    await flush();
+    await user.type(firstCodeInput, '123456');
 
     expect(applyNewsletterSubscription).not.toHaveBeenCalled();
-    expect(container?.textContent).not.toContain('Subscribe to newsletter and campaign emails?');
+    expect(screen.queryByText('Subscribe to newsletter and campaign emails?')).not.toBeInTheDocument();
     expect(navigation.assign).toHaveBeenCalledWith('/ordinary-destination');
     expect(window.sessionStorage.getItem('auth_redirect')).toBeNull();
   });
@@ -522,35 +468,20 @@ describe('LoginContent', () => {
     const applyNewsletterSubscription = vi.fn().mockResolvedValue({ success: true });
     window.sessionStorage.setItem('auth_redirect', '/stale-auth-redirect');
 
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceColorScheme="light">
-            <LoginController
-              key="expired-newsletter-flow"
-              applyNewsletterSubscription={applyNewsletterSubscription}
-              flowId="expired-newsletter-flow"
-              hasSession={false}
-              isSessionPending={false}
-              navigation={navigation}
-              redirectUrl="/query-must-not-win"
-              transport={expiredTransport}
-            />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
+    const { user, rerender } = render(
+      <LoginController
+        key="expired-newsletter-flow"
+        applyNewsletterSubscription={applyNewsletterSubscription}
+        flowId="expired-newsletter-flow"
+        hasSession={false}
+        isSessionPending={false}
+        navigation={navigation}
+        redirectUrl="/query-must-not-win"
+        transport={expiredTransport}
+      />,
+    );
 
-    const firstInputs = Array.from(container?.querySelectorAll<HTMLInputElement>('input[inputmode="numeric"]') ?? []);
-    await act(async () => {
-      for (const [index, digit] of Array.from('123456').entries()) {
-        setInputValue(firstInputs[index] as HTMLInputElement, digit);
-        await Promise.resolve();
-      }
-      await Promise.resolve();
-    });
-    await flush();
+    await user.type(await screen.findByRole('textbox', { name: `${enMessages.auth.login.code.label} 1` }), '123456');
 
     const canonicalContinuation = '/login?intent=newsletter&redirect=%2Fafter-expired-newsletter';
     const restartUrl = `/api/auth/login?return_to=${encodeURIComponent(`${origin}${canonicalContinuation}`)}`;
@@ -568,50 +499,28 @@ describe('LoginContent', () => {
       load: vi.fn().mockResolvedValue({ kind: 'continued', flow: replacementFlow, ok: true }),
       submit: vi.fn().mockResolvedValue({ kind: 'completed', payload: { return_to: continuation } }),
     };
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceColorScheme="light">
-            <LoginController
-              key="replacement-newsletter-flow"
-              applyNewsletterSubscription={applyNewsletterSubscription}
-              flowId="replacement-newsletter-flow"
-              hasSession={false}
-              isSessionPending={false}
-              navigation={navigation}
-              redirectUrl="/query-must-not-win"
-              transport={replacementTransport}
-            />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
-
-    const replacementInputs = Array.from(
-      container?.querySelectorAll<HTMLInputElement>('input[inputmode="numeric"]') ?? [],
+    rerender(
+      <LoginController
+        key="replacement-newsletter-flow"
+        applyNewsletterSubscription={applyNewsletterSubscription}
+        flowId="replacement-newsletter-flow"
+        hasSession={false}
+        isSessionPending={false}
+        navigation={navigation}
+        redirectUrl="/query-must-not-win"
+        transport={replacementTransport}
+      />,
     );
-    await act(async () => {
-      for (const [index, digit] of Array.from('123456').entries()) {
-        setInputValue(replacementInputs[index] as HTMLInputElement, digit);
-        await Promise.resolve();
-      }
-      await Promise.resolve();
-    });
-    await flush();
 
-    expect(container?.textContent).toContain('You are signed in. Subscribe to newsletter and campaign emails?');
+    await user.type(await screen.findByRole('textbox', { name: `${enMessages.auth.login.code.label} 1` }), '123456');
+
+    expect(await screen.findByText('You are signed in. Subscribe to newsletter and campaign emails?')).toBeVisible();
     expect(applyNewsletterSubscription).not.toHaveBeenCalled();
     expect(navigation.assign).not.toHaveBeenCalled();
     expect(navigation.replace).not.toHaveBeenCalled();
 
-    const subscribeButton = Array.from(container?.querySelectorAll('button') ?? []).find(
-      (button) => button.textContent?.trim() === 'Subscribe to newsletter',
-    );
-    await act(async () => {
-      subscribeButton?.click();
-    });
-    await flush();
+    const subscribeButton = await screen.findByRole('button', { name: 'Subscribe to newsletter' });
+    await user.click(subscribeButton);
 
     expect(applyNewsletterSubscription).toHaveBeenCalledTimes(1);
     expect(navigation.replace).toHaveBeenCalledWith(finalRedirect);
@@ -629,25 +538,18 @@ describe('LoginContent', () => {
       submit: vi.fn(),
     };
 
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceColorScheme="light">
-            <LoginController
-              flowId="terminal-load-failure"
-              hasSession={false}
-              isSessionPending={false}
-              navigation={{ assign: vi.fn(), origin, replace: vi.fn() }}
-              transport={transport}
-            />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
+    render(
+      <LoginController
+        flowId="terminal-load-failure"
+        hasSession={false}
+        isSessionPending={false}
+        navigation={{ assign: vi.fn(), origin, replace: vi.fn() }}
+        transport={transport}
+      />,
+    );
 
+    expect(await screen.findByText('Your login session expired. Please try again.')).toBeVisible();
     expect(window.sessionStorage.getItem('newsletter_auth_continuation')).toBeNull();
-    expect(container?.textContent).toContain('Your login session expired. Please try again.');
   });
 
   it('preserves strict direct newsletter intent when the initial flow load returns 410', async () => {
@@ -671,25 +573,18 @@ describe('LoginContent', () => {
       submit: vi.fn(),
     };
 
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceColorScheme="light">
-            <LoginController
-              key="initial-newsletter-entry"
-              applyNewsletterSubscription={applyNewsletterSubscription}
-              hasSession={false}
-              isSessionPending={false}
-              newsletterIntent
-              navigation={navigation}
-              redirectUrl={finalRedirect}
-              transport={directTransport}
-            />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
+    const { user, rerender } = render(
+      <LoginController
+        key="initial-newsletter-entry"
+        applyNewsletterSubscription={applyNewsletterSubscription}
+        hasSession={false}
+        isSessionPending={false}
+        newsletterIntent
+        navigation={navigation}
+        redirectUrl={finalRedirect}
+        transport={directTransport}
+      />,
+    );
 
     const authRestartUrl = `/api/auth/login?return_to=${encodeURIComponent(absoluteContinuation)}`;
     expect(navigation.assign).toHaveBeenCalledWith(authRestartUrl);
@@ -701,28 +596,21 @@ describe('LoginContent', () => {
       load: vi.fn(async (_flowId, restartUrl) => ({ kind: 'restart' as const, url: restartUrl })),
       submit: vi.fn(),
     };
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceColorScheme="light">
-            <LoginController
-              key="initial-expired-flow"
-              applyNewsletterSubscription={applyNewsletterSubscription}
-              flowId="initial-expired-flow"
-              hasSession={false}
-              isSessionPending={false}
-              navigation={navigation}
-              redirectUrl="/callback-query-must-not-win"
-              transport={expiredTransport}
-            />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
+    rerender(
+      <LoginController
+        key="initial-expired-flow"
+        applyNewsletterSubscription={applyNewsletterSubscription}
+        flowId="initial-expired-flow"
+        hasSession={false}
+        isSessionPending={false}
+        navigation={navigation}
+        redirectUrl="/callback-query-must-not-win"
+        transport={expiredTransport}
+      />,
+    );
 
+    await waitFor(() => expect(navigation.assign).toHaveBeenCalledWith(authRestartUrl));
     expect(expiredTransport.load).toHaveBeenCalledWith('initial-expired-flow', authRestartUrl);
-    expect(navigation.assign).toHaveBeenCalledWith(authRestartUrl);
     navigation.assign.mockClear();
     window.sessionStorage.setItem('auth_redirect', '/stale-auth-redirect');
 
@@ -733,48 +621,28 @@ describe('LoginContent', () => {
       load: vi.fn().mockResolvedValue({ kind: 'continued', flow: replacementFlow, ok: true }),
       submit: vi.fn().mockResolvedValue({ kind: 'completed', payload: { return_to: absoluteContinuation } }),
     };
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceColorScheme="light">
-            <LoginController
-              key="replacement-after-load-410"
-              applyNewsletterSubscription={applyNewsletterSubscription}
-              flowId="replacement-after-load-410"
-              hasSession={false}
-              isSessionPending={false}
-              navigation={navigation}
-              redirectUrl="/callback-query-must-not-win"
-              transport={replacementTransport}
-            />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
+    rerender(
+      <LoginController
+        key="replacement-after-load-410"
+        applyNewsletterSubscription={applyNewsletterSubscription}
+        flowId="replacement-after-load-410"
+        hasSession={false}
+        isSessionPending={false}
+        navigation={navigation}
+        redirectUrl="/callback-query-must-not-win"
+        transport={replacementTransport}
+      />,
+    );
 
-    const inputs = Array.from(container?.querySelectorAll<HTMLInputElement>('input[inputmode="numeric"]') ?? []);
-    await act(async () => {
-      for (const [index, digit] of Array.from('123456').entries()) {
-        setInputValue(inputs[index] as HTMLInputElement, digit);
-        await Promise.resolve();
-      }
-      await Promise.resolve();
-    });
-    await flush();
+    await user.type(await screen.findByRole('textbox', { name: `${enMessages.auth.login.code.label} 1` }), '123456');
 
-    expect(container?.textContent).toContain('You are signed in. Subscribe to newsletter and campaign emails?');
+    expect(await screen.findByText('You are signed in. Subscribe to newsletter and campaign emails?')).toBeVisible();
     expect(applyNewsletterSubscription).not.toHaveBeenCalled();
     expect(navigation.assign).not.toHaveBeenCalled();
     expect(navigation.replace).not.toHaveBeenCalled();
 
-    const subscribeButton = Array.from(container?.querySelectorAll('button') ?? []).find(
-      (button) => button.textContent?.trim() === 'Subscribe to newsletter',
-    );
-    await act(async () => {
-      subscribeButton?.click();
-    });
-    await flush();
+    const subscribeButton = await screen.findByRole('button', { name: 'Subscribe to newsletter' });
+    await user.click(subscribeButton);
 
     expect(applyNewsletterSubscription).toHaveBeenCalledTimes(1);
     expect(navigation.replace).toHaveBeenCalledWith(finalRedirect);
@@ -789,16 +657,7 @@ describe('LoginContent', () => {
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
 
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceColorScheme="light">
-            <LoginContent />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
+    render(<LoginContent />);
 
     expect(navigationMock.router.replace).toHaveBeenCalledWith('/my/security');
     expect(window.sessionStorage.getItem('auth_redirect')).toBeNull();
@@ -811,48 +670,36 @@ describe('LoginContent', () => {
     authMock.newsletterSubscription.mockResolvedValue({ success: true });
     window.sessionStorage.setItem('auth_redirect', '/stale-auth-redirect');
 
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceColorScheme="light">
-            <LoginController
-              applyNewsletterSubscription={authMock.newsletterSubscription}
-              hasSession
-              isSessionPending={false}
-              newsletterIntent
-              navigation={{
-                assign: vi.fn(),
-                origin: 'https://www.example.test',
-                replace: navigationMock.router.replace,
-              }}
-              redirectUrl="/my/settings"
-              transport={{
-                actionUrl: vi.fn(),
-                browserUrl: vi.fn(),
-                load: vi.fn(),
-                submit: vi.fn(),
-              }}
-            />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
+    const { user } = render(
+      <LoginController
+        applyNewsletterSubscription={authMock.newsletterSubscription}
+        hasSession
+        isSessionPending={false}
+        newsletterIntent
+        navigation={{
+          assign: vi.fn(),
+          origin: 'https://www.example.test',
+          replace: navigationMock.router.replace,
+        }}
+        redirectUrl="/my/settings"
+        transport={{
+          actionUrl: vi.fn(),
+          browserUrl: vi.fn(),
+          load: vi.fn(),
+          submit: vi.fn(),
+        }}
+      />,
+    );
 
     expect(authMock.newsletterSubscription).not.toHaveBeenCalled();
     expect(navigationMock.router.replace).not.toHaveBeenCalled();
-    expect(container?.textContent).toContain('You are signed in. Subscribe to newsletter and campaign emails?');
-    expect(container?.textContent).not.toContain('You are not subscribed');
+    expect(await screen.findByText('You are signed in. Subscribe to newsletter and campaign emails?')).toBeVisible();
+    expect(screen.queryByText('You are not subscribed')).not.toBeInTheDocument();
 
-    const subscribeButton = Array.from(container?.querySelectorAll('button') ?? []).find(
-      (button) => button.textContent?.trim() === 'Subscribe to newsletter',
-    );
+    const subscribeButton = await screen.findByRole('button', { name: 'Subscribe to newsletter' });
     expect(subscribeButton).toBeDefined();
 
-    await act(async () => {
-      subscribeButton?.click();
-    });
-    await flush();
+    await user.click(subscribeButton);
 
     expect(authMock.newsletterSubscription).toHaveBeenCalledTimes(1);
     expect(navigationMock.router.replace).toHaveBeenCalledWith('/my/settings');
@@ -868,54 +715,37 @@ describe('LoginContent', () => {
       replace: vi.fn(),
     };
 
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceColorScheme="light">
-            <LoginController
-              applyNewsletterSubscription={authMock.newsletterSubscription}
-              hasSession
-              isSessionPending={false}
-              newsletterIntent
-              navigation={navigation}
-              redirectUrl="/after-newsletter"
-              transport={{
-                actionUrl: vi.fn(),
-                browserUrl: vi.fn(),
-                load: vi.fn(),
-                submit: vi.fn(),
-              }}
-            />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
-
-    const subscribeButton = Array.from(container?.querySelectorAll('button') ?? []).find(
-      (button) => button.textContent?.trim() === 'Subscribe to newsletter',
+    const { user } = render(
+      <LoginController
+        applyNewsletterSubscription={authMock.newsletterSubscription}
+        hasSession
+        isSessionPending={false}
+        newsletterIntent
+        navigation={navigation}
+        redirectUrl="/after-newsletter"
+        transport={{
+          actionUrl: vi.fn(),
+          browserUrl: vi.fn(),
+          load: vi.fn(),
+          submit: vi.fn(),
+        }}
+      />,
     );
-    await act(async () => {
-      subscribeButton?.click();
-    });
-    await flush();
 
-    expect(container?.querySelector('[role="alert"]')?.textContent).toContain('could not be saved');
+    const subscribeButton = await screen.findByRole('button', { name: 'Subscribe to newsletter' });
+    await user.click(subscribeButton);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('could not be saved');
     expect(navigation.replace).not.toHaveBeenCalled();
 
-    const retryButton = Array.from(container?.querySelectorAll('button') ?? []).find(
-      (button) => button.textContent?.trim() === 'Try again',
-    );
-    await act(async () => {
-      retryButton?.click();
-    });
-    await flush();
+    const retryButton = await screen.findByRole('button', { name: 'Try again' });
+    await user.click(retryButton);
 
     expect(authMock.newsletterSubscription).toHaveBeenCalledTimes(2);
     expect(navigation.replace).toHaveBeenCalledWith('/after-newsletter');
   });
 
-  it('submits the exact six-digit value completed by PinInput', async () => {
+  it('keeps the entered PIN, view and site loader through a deferred code POST and permits retry', async () => {
     const rejectedCodeFlow = {
       ...codeFlow,
       ui: {
@@ -936,33 +766,38 @@ describe('LoginContent', () => {
         ),
       },
     };
+    let finish!: (response: Response) => void;
+    const submission = new Promise<Response>((resolve) => {
+      finish = resolve;
+    });
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(jsonResponse(codeFlow))
+      .mockReturnValueOnce(submission)
       .mockResolvedValueOnce(jsonResponse(rejectedCodeFlow, { status: 422 }));
     vi.stubGlobal('fetch', fetchMock);
 
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceColorScheme="light">
-            <LoginContent />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
+    const { user } = render(
+      <ManifestProvider
+        manifest={{
+          settings: {
+            ...DEFAULT_SITE_SETTINGS_VIEW,
+            favicon_asset_set: null,
+            site_og_image_url: null,
+            loader_urls: ['https://assets.example.test/login-loader.gif'],
+          },
+          menus: { $typeName: 'api.open.v1.Menus', header: [], secondary: [], footer: [], avatarDropdown: [] },
+        }}
+      >
+        <LoginContent />
+      </ManifestProvider>,
+    );
 
-    const inputs = Array.from(document.querySelectorAll<HTMLInputElement>('input[inputmode="numeric"]'));
+    const inputs = await screen.findAllByRole('textbox', { name: /^6-digit sign-in code [1-6]$/ });
+    const heading = screen.getByRole('heading', { level: 1 });
+    const view = screen.getByRole('group', { name: enMessages.auth.login.title });
     expect(inputs).toHaveLength(6);
-
-    await act(async () => {
-      for (const [index, digit] of Array.from('123456').entries()) {
-        setInputValue(inputs[index] as HTMLInputElement, digit);
-        await Promise.resolve();
-      }
-      await Promise.resolve();
-    });
+    await user.type(inputs[0], '123456');
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({
@@ -972,7 +807,35 @@ describe('LoginContent', () => {
       code: '123456',
       transient_payload: { preferred_locale: 'en' },
     });
-    expect(document.body.textContent).not.toContain('provider text must not be rendered');
+    expect(inputs[5]).toHaveFocus();
+    const loader = screen.getByRole('status', { name: enMessages.common.states.loading });
+    expect(loader).toHaveTextContent(enMessages.auth.verification.sentEmail.submitting);
+    expect(loader).toHaveAttribute('data-placement', 'flow');
+    expect(within(view).getByRole('img', { name: enMessages.common.states.loading })).toHaveAttribute(
+      'src',
+      'https://assets.example.test/login-loader.gif',
+    );
+    expect(screen.getByRole('heading', { level: 1 })).toBe(heading);
+    expect(inputs.map((input) => (input as HTMLInputElement).value).join('')).toBe('123456');
+    for (const input of inputs) {
+      expect(input).toBeDisabled();
+    }
+    expect(screen.getByRole('button', { name: enMessages.auth.login.code.resend })).toBeDisabled();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    await act(async () => finish(jsonResponse(rejectedCodeFlow, { status: 422 })));
+    const error = await screen.findByRole('alert');
+    expect(error).toHaveTextContent(enMessages.auth.login.code.invalid);
+    expect(inputs[0]).toHaveAttribute('aria-invalid', 'true');
+    expect(inputs[0]).toHaveAttribute('aria-describedby', expect.stringContaining(error.id));
+    expect(screen.queryByText('provider text must not be rendered')).not.toBeInTheDocument();
+    expect(screen.getByRole('group', { name: enMessages.auth.login.title })).toBe(view);
+    expect(screen.getByRole('heading', { level: 1 })).toBe(heading);
+    expect(inputs[5]).toHaveFocus();
+    expect(screen.queryByRole('status', { name: enMessages.common.states.loading })).not.toBeInTheDocument();
+    expect(inputs.map((input) => (input as HTMLInputElement).value).join('')).toBe('123456');
+    expect(screen.getByRole('button', { name: enMessages.auth.login.code.resend })).toBeEnabled();
+    await user.click(screen.getByRole('button', { name: enMessages.auth.login.code.submit }));
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
   it('returns every login action to a retryable state when explicit passkey login is cancelled', async () => {
@@ -995,48 +858,39 @@ describe('LoginContent', () => {
     };
     vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(jsonResponse(passkeyFlow)));
 
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceColorScheme="light">
-            <LoginContent />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
+    const { user } = render(<LoginContent />);
 
-    const passkeyButton = document.querySelector<HTMLButtonElement>('[data-testid="login-passkey"]');
-    const emailButton = document.querySelector<HTMLButtonElement>('#login-email-code-submit');
-    const socialButtons = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="provider"]'))
-      .map((input) => input.form?.querySelector<HTMLButtonElement>('button'))
-      .filter((button): button is HTMLButtonElement => Boolean(button));
-    expect(passkeyButton?.disabled).toBe(false);
-    expect(emailButton?.disabled).toBe(false);
+    const passkeyButton = await screen.findByRole('button', { name: enMessages.auth.login.passkey });
+    await waitFor(() => expect(passkeyButton).toBeEnabled());
+    const emailButton = await screen.findByRole('button', { name: enMessages.auth.login.emailCode });
+    const socialButtons = screen.getAllByRole('button', { name: /Continue with (Google|GitHub)/ });
+    expect(passkeyButton).toBeEnabled();
+    expect(emailButton).toBeEnabled();
     expect(socialButtons).toHaveLength(2);
-    expect(socialButtons.every((button) => !button.disabled)).toBe(true);
-    await act(async () => {
-      passkeyButton?.click();
-      await Promise.resolve();
-    });
+    for (const button of socialButtons) {
+      expect(button).toBeEnabled();
+    }
+    await user.click(passkeyButton);
 
-    expect(passkeyButton?.hasAttribute('data-loading')).toBe(true);
-    expect(emailButton?.disabled).toBe(true);
-    expect(emailButton?.hasAttribute('data-loading')).toBe(false);
-    expect(socialButtons.every((button) => button.disabled)).toBe(true);
+    expect(passkeyButton).toHaveAttribute('data-loading');
+    expect(emailButton).toBeDisabled();
+    expect(emailButton).not.toHaveAttribute('data-loading');
+    for (const button of socialButtons) {
+      expect(button).toBeDisabled();
+    }
     await act(async () => {
       rejectCredential(cancellation);
-      await Promise.resolve();
     });
-    await flush();
 
     expect(credentialGet).toHaveBeenCalledTimes(1);
-    expect(document.querySelector('[role="alert"]')).toBeNull();
-    expect(passkeyButton?.disabled).toBe(false);
-    expect(passkeyButton?.hasAttribute('data-loading')).toBe(false);
-    expect(emailButton?.disabled).toBe(false);
-    expect(emailButton?.hasAttribute('data-loading')).toBe(false);
-    expect(socialButtons.every((button) => !button.disabled)).toBe(true);
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(passkeyButton).toBeEnabled();
+    expect(passkeyButton).not.toHaveAttribute('data-loading');
+    expect(emailButton).toBeEnabled();
+    expect(emailButton).not.toHaveAttribute('data-loading');
+    for (const button of socialButtons) {
+      expect(button).toBeEnabled();
+    }
   });
 
   it('shows only the email action as loading while disabling passkey and social alternatives', async () => {
@@ -1054,40 +908,28 @@ describe('LoginContent', () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(jsonResponse(passkeyFlow)).mockReturnValueOnce(pendingSubmission);
     vi.stubGlobal('fetch', fetchMock);
 
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceColorScheme="light">
-            <LoginContent />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
+    const { user } = render(<LoginContent />);
 
-    const emailInput = document.querySelector<HTMLInputElement>('#login-email-input');
-    const emailButton = document.querySelector<HTMLButtonElement>('#login-email-code-submit');
-    const passkeyButton = document.querySelector<HTMLButtonElement>('[data-testid="login-passkey"]');
-    const socialButtons = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="provider"]'))
-      .map((input) => input.form?.querySelector<HTMLButtonElement>('button'))
-      .filter((button): button is HTMLButtonElement => Boolean(button));
-    act(() => setInputValue(emailInput as HTMLInputElement, 'johndoe@example.com'));
-    await act(async () => {
-      emailButton?.click();
-      await Promise.resolve();
-    });
+    const emailInput = await screen.findByRole('textbox', { name: enMessages.common.labels.email });
+    const emailButton = await screen.findByRole('button', { name: enMessages.auth.login.emailCode });
+    const passkeyButton = await screen.findByRole('button', { name: enMessages.auth.login.passkey });
+    await waitFor(() => expect(passkeyButton).toBeEnabled());
+    const socialButtons = screen.getAllByRole('button', { name: /Continue with (Google|GitHub)/ });
+    await user.type(emailInput, 'johndoe@example.com');
+    await user.click(emailButton);
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(emailButton?.hasAttribute('data-loading')).toBe(true);
-    expect(passkeyButton?.disabled).toBe(true);
-    expect(passkeyButton?.hasAttribute('data-loading')).toBe(false);
-    expect(socialButtons.every((button) => button.disabled)).toBe(true);
+    expect(emailButton).toHaveAttribute('data-loading');
+    expect(passkeyButton).toBeDisabled();
+    expect(passkeyButton).not.toHaveAttribute('data-loading');
+    for (const button of socialButtons) {
+      expect(button).toBeDisabled();
+    }
 
     await act(async () => {
       resolveSubmission(jsonResponse(codeFlow));
       await pendingSubmission;
     });
-    await flush();
   });
 
   it('shows only the selected social action as loading while disabling every alternative', async () => {
@@ -1100,34 +942,25 @@ describe('LoginContent', () => {
     (window as unknown as Record<string, unknown>).oryPasskeyLogin = vi.fn();
     vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(jsonResponse(passkeyFlow)));
 
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceColorScheme="light">
-            <LoginContent />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
+    // Contain the provider's native navigation, which jsdom does not implement.
+    const { user } = render(
+      <div onSubmit={(event) => event.preventDefault()}>
+        <LoginContent />
+      </div>,
+    );
 
-    const providerInputs = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="provider"]'));
-    const googleInput = providerInputs.find((input) => input.value === 'google');
-    const githubInput = providerInputs.find((input) => input.value === 'github');
-    const googleButton = googleInput?.form?.querySelector<HTMLButtonElement>('button');
-    const githubButton = githubInput?.form?.querySelector<HTMLButtonElement>('button');
-    const emailButton = document.querySelector<HTMLButtonElement>('#login-email-code-submit');
-    const passkeyButton = document.querySelector<HTMLButtonElement>('[data-testid="login-passkey"]');
+    const googleButton = await screen.findByRole('button', { name: 'Continue with Google' });
+    const githubButton = screen.getByRole('button', { name: 'Continue with GitHub' });
+    const emailButton = screen.getByRole('button', { name: enMessages.auth.login.emailCode });
+    const passkeyButton = screen.getByRole('button', { name: enMessages.auth.login.passkey });
+    await waitFor(() => expect(passkeyButton).toBeEnabled());
 
-    await act(async () => {
-      googleInput?.form?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-      await Promise.resolve();
-    });
+    await user.click(googleButton);
 
-    expect(googleButton?.hasAttribute('data-loading')).toBe(true);
-    expect(githubButton?.disabled).toBe(true);
-    expect(emailButton?.disabled).toBe(true);
-    expect(passkeyButton?.disabled).toBe(true);
+    expect(googleButton).toHaveAttribute('data-loading');
+    expect(githubButton).toBeDisabled();
+    expect(emailButton).toBeDisabled();
+    expect(passkeyButton).toBeDisabled();
   });
 
   it('keeps the empty-email continue action visibly primary without submitting an empty address', async () => {
@@ -1141,22 +974,116 @@ describe('LoginContent', () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(jsonResponse(emailEntryFlow));
     vi.stubGlobal('fetch', fetchMock);
 
-    await act(async () => {
-      root?.render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <DesignSystemProvider locale="en" forceColorScheme="light">
-            <LoginContent />
-          </DesignSystemProvider>
-        </NextIntlClientProvider>,
-      );
-    });
-    await flush();
+    const { user } = render(<LoginContent />);
 
-    const emailButton = document.querySelector<HTMLButtonElement>('#login-email-code-submit');
-    expect(emailButton?.disabled).toBe(false);
-    expect(emailButton?.getAttribute('data-emphasis')).toBe('strong');
-    act(() => emailButton?.click());
-    await flush();
+    const emailButton = await screen.findByRole('button', { name: enMessages.auth.login.emailCode });
+    expect(emailButton).toBeEnabled();
+    expect(emailButton).toHaveAttribute('data-emphasis', 'strong');
+    await user.click(emailButton);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
+
+it('marks resend as the pending action while the code submit control stays idle', async () => {
+  let finish!: (response: Response) => void;
+  vi.stubGlobal(
+    'fetch',
+    vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(codeFlow))
+      .mockImplementationOnce(
+        () =>
+          new Promise<Response>((resolve) => {
+            finish = resolve;
+          }),
+      ),
+  );
+  const { user } = render(<LoginContent />);
+  const resend = await screen.findByRole('button', { name: enMessages.auth.login.code.resend });
+  await user.click(resend);
+  expect(resend).toHaveAttribute('aria-busy', 'true');
+  expect(screen.getByRole('button', { name: enMessages.auth.login.code.submit })).not.toHaveAttribute(
+    'aria-busy',
+    'true',
+  );
+  expect(screen.getByRole('button', { name: enMessages.auth.login.code.submit })).toBeDisabled();
+  await act(async () => finish(jsonResponse(codeFlow)));
+  expect(resend).not.toHaveAttribute('aria-busy', 'true');
+});
+
+it('hides the previous login flow and ignores its submission after a target change', async () => {
+  let finish!: (response: Response) => void;
+  const fetchMock = vi
+    .fn()
+    .mockResolvedValueOnce(jsonResponse(codeFlow))
+    .mockImplementationOnce(
+      () =>
+        new Promise<Response>((resolve) => {
+          finish = resolve;
+        }),
+    )
+    .mockResolvedValueOnce(jsonResponse({ ...codeFlow, id: 'flow-2' }));
+  vi.stubGlobal('fetch', fetchMock);
+  const { user, rerender } = render(<LoginContent />);
+  await user.click(await screen.findByRole('button', { name: enMessages.auth.login.code.resend }));
+  navigationMock.searchParams = new URLSearchParams('flow=flow-2');
+  rerender(<LoginContent />);
+  await screen.findByRole('button', { name: enMessages.auth.login.code.resend });
+  await act(async () =>
+    finish(
+      jsonResponse({ ...codeFlow, ui: { ...codeFlow.ui, messages: [{ id: 1, type: 'error', text: 'old failure' }] } }),
+    ),
+  );
+  expect(screen.queryByText(enMessages.auth.login.code.invalid)).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: enMessages.auth.login.code.resend })).toBeEnabled();
+});
+
+it.each(['continued', 'completed'] as const)(
+  'ignores an old %s submission after A → B → A without clearing the new pending action',
+  async (outcome) => {
+    let finishOld!: (response: Response) => void;
+    let finishNew!: (response: Response) => void;
+    const oldSubmission = new Promise<Response>((resolve) => {
+      finishOld = resolve;
+    });
+    const newSubmission = new Promise<Response>((resolve) => {
+      finishNew = resolve;
+    });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(codeFlow))
+      .mockReturnValueOnce(oldSubmission)
+      .mockResolvedValueOnce(jsonResponse({ ...codeFlow, id: 'flow-2' }))
+      .mockResolvedValueOnce(jsonResponse(codeFlow))
+      .mockReturnValueOnce(newSubmission);
+    const transport = createUnifiedLoginTransport(fetchMock);
+    const navigation = { origin: window.location.origin, assign: vi.fn(), replace: vi.fn() };
+    const props = { hasSession: false, isSessionPending: false, navigation, transport };
+    const { user, rerender } = render(<LoginController {...props} flowId="flow-1" />);
+    await user.click(await screen.findByRole('button', { name: enMessages.auth.login.code.resend }));
+    rerender(<LoginController {...props} flowId="flow-2" />);
+    await screen.findByRole('button', { name: enMessages.auth.login.code.resend });
+    rerender(<LoginController {...props} flowId="flow-1" />);
+    const resend = await screen.findByRole('button', { name: enMessages.auth.login.code.resend });
+    await user.click(resend);
+    expect(resend).toHaveAttribute('aria-busy', 'true');
+    await act(async () =>
+      finishOld(
+        outcome === 'completed'
+          ? jsonResponse({ session: { id: 'old-session' } })
+          : jsonResponse(
+              { ...codeFlow, ui: { ...codeFlow.ui, messages: [{ id: 1, type: 'error', text: 'old failure' }] } },
+              { status: 422 },
+            ),
+      ),
+    );
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: enMessages.auth.login.code.resend })).toBe(resend);
+    expect(resend).toHaveAttribute('aria-busy', 'true');
+    expect(navigation.assign).not.toHaveBeenCalled();
+    expect(navigation.replace).not.toHaveBeenCalled();
+    await act(async () => finishNew(jsonResponse(codeFlow)));
+    expect(screen.getByRole('button', { name: /Send a new code in/ })).toBeDisabled();
+    expect(resend).not.toHaveAttribute('aria-busy', 'true');
+  },
+);

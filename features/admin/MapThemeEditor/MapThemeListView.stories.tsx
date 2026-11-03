@@ -53,6 +53,7 @@ const meta = {
   component: MapThemeListView,
   parameters: { layout: 'padded' },
   args: {
+    defaultUpdatingId: null,
     themes,
     defaultMapThemeId: 'default',
     onCopy: () => {},
@@ -79,3 +80,5 @@ export const LongName: Story = {
   },
 };
 export const Narrow: Story = { globals: { viewport: { value: 'phone', isRotated: false } } };
+
+export const UpdatingDefault: Story = { args: { defaultUpdatingId: themes[0].id } };

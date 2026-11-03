@@ -22,6 +22,7 @@ export function hasPendingPostSpotlightOpen() {
 export function openPostSpotlight() {
   pendingOpen = true;
   window.dispatchEvent(new Event(POST_SPOTLIGHT_OPEN_EVENT));
+  return postSpotlightPalette.preload();
 }
 
 /** Search triggers call this on hover/focus so the palette is ready by the time it is pressed. */

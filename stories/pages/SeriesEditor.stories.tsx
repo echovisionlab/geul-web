@@ -5,7 +5,7 @@ import { useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { goBackPreview } from '../shared/preview-navigation';
 import type { Meta, StoryObj } from '@storybook/nextjs';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { LayoutContainer } from '@/components/core/Layout';
 import { SeriesDetailView, type SeriesDetailViewModel } from '@/features/series/SeriesDetail';
 import type { SeriesManagerBindings } from '@/features/series/SeriesManagersModal';
@@ -23,21 +23,41 @@ const initialPosts: SeriesDetailViewModel['posts'] = [
   },
   { id: 'room-2', title: 'The closing room', slug: 'closing', status: 'draft', seriesOrder: 1, publishedAt: undefined },
 ];
+const postsQueryKey = ['series', 'local-series', 'posts'];
 function Preview({
   scope = 'admin',
   state = 'ready',
 }: {
   scope?: 'admin' | 'my';
-  state?: 'ready' | 'empty' | 'disconnected';
+  state?: 'ready' | 'empty' | 'disconnected' | 'posts-loading' | 'posts-error' | 'removing-post';
 }) {
   const [client] = useState(() => localEditorQueryClient('post_series', 'local-series'));
+  const failNextPostsRequest = useRef(state === 'posts-error');
+  const postsQuery = useQuery(
+    {
+      queryKey: postsQueryKey,
+      queryFn: async () => {
+        if (state === 'posts-loading') {
+          return new Promise<SeriesDetailViewModel['posts']>(() => {});
+        }
+        if (failNextPostsRequest.current) {
+          failNextPostsRequest.current = false;
+          throw new Error('Fixture series posts load failed');
+        }
+        return initialPosts;
+      },
+      initialData:
+        state === 'posts-loading' || state === 'posts-error' ? undefined : state === 'empty' ? [] : initialPosts,
+    },
+    client,
+  );
+  const { data: posts = [] } = postsQuery;
   const [title, setTitle] = useState('Listening room'),
     [description, setDescription] = useState('A monthly series of evening performances.'),
     [slug, setSlug] = useState('listening-room'),
     [locale, setLocale] = useState('ko');
   const [featuredImageUrl, setFeaturedImageUrl] = useState<string | null>(null);
   const [status, setStatus] = useState<SeriesStatus>('published'),
-    [posts, setPosts] = useState(state === 'empty' ? [] : initialPosts),
     [safePostsPage, setPostsPage] = useState(1),
     [managersOpened, setManagers] = useState(false);
   const tCommon = useTranslations('common'),
@@ -117,6 +137,13 @@ function Preview({
     tActions,
     scope,
     posts,
+    postsQuery: {
+      isLoading: postsQuery.isLoading,
+      isError: postsQuery.isError,
+      error: postsQuery.error,
+      isFetching: postsQuery.isFetching,
+      refetch: postsQuery.refetch,
+    },
     postsPerPage: 10,
     totalPostPages: Math.max(1, Math.ceil(posts.length / 10)),
     safePostsPage,
@@ -126,7 +153,7 @@ function Preview({
     tStatuses,
     reorderPosts: { isPending: false },
     movePost: (id, direction) =>
-      setPosts((items) => {
+      client.setQueryData<SeriesDetailViewModel['posts']>(postsQueryKey, (items = []) => {
         const next = [...items],
           index = next.findIndex((x) => x.id === id),
           target = direction === 'up' ? index - 1 : index + 1;
@@ -135,7 +162,14 @@ function Preview({
         }
         return next;
       }),
-    unassignPost: { isPending: false, mutate: (id) => setPosts((items) => items.filter((x) => x.id !== id)) },
+    unassignPost: {
+      isPending: state === 'removing-post',
+      variables: state === 'removing-post' ? 'room-2' : undefined,
+      mutate: (id) =>
+        client.setQueryData<SeriesDetailViewModel['posts']>(postsQueryKey, (items = []) =>
+          items.filter((x) => x.id !== id),
+        ),
+    },
     managersOpened,
     closeManagers: () => setManagers(false),
     canManageManagers: scope === 'admin',
@@ -170,6 +204,9 @@ export const Admin: Story = {};
 export const Mine: Story = { args: { scope: 'my' } };
 export const Empty: Story = { args: { state: 'empty' } };
 export const Disconnected: Story = { args: { state: 'disconnected' } };
+export const PostsLoading: Story = { args: { state: 'posts-loading' } };
+export const PostsLoadFailed: Story = { args: { state: 'posts-error' } };
+export const RemovingPost: Story = { args: { state: 'removing-post' } };
 export const Phone: Story = { globals: { viewport: { value: 'phone', isRotated: false } } };
 
 export const KeyboardMineAuthoring: Story = {

@@ -1,3 +1,4 @@
+import { PageLoader } from '@/features/site/PageLoader';
 import {
   defaultFileBrowserViewSettings,
   fileBrowserViewSettingsLabels,
@@ -144,6 +145,7 @@ const meta = {
       <LayoutStack gap="md">
         <EditorFileLibraryPickerView
           {...args}
+          loadingSurface={<PageLoader placement="flow" />}
           rows={visibleRows}
           total={args.hasMore ? args.total : visibleRows.length}
           viewOptions={
@@ -279,6 +281,7 @@ const meta = {
     },
   },
   args: {
+    loadingSurface: <PageLoader placement="flow" />,
     labels: editorFileLibraryPickerStoryLabels,
     rows: editorFileLibrarySearchRows,
     path: [{ name: 'Files' }],

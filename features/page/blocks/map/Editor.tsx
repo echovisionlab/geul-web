@@ -1,4 +1,5 @@
 'use client';
+import { PageLoader } from '@/features/site/PageLoader';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 
 import {
@@ -127,10 +128,11 @@ function MapSettingsForm({ props, isExpanded = true, updateSharedProps, updateLo
   const { data: selectedPlacesData } = selectedPlacesDataQuery;
 
   // Fetch themes for Leva dropdown
-  const { data: themesData } = useQuery({
+  const themesQuery = useQuery({
     queryKey: ['mapThemes', 'list'],
     queryFn: () => listMapThemesAction(),
   });
+  const { data: themesData } = themesQuery;
 
   // Convert MapTheme[] to MapThemeListItem[] for MapLibreMapEditor
   const themes = useMemo(() => {
@@ -207,8 +209,8 @@ function MapSettingsForm({ props, isExpanded = true, updateSharedProps, updateLo
   });
 
   const handleCreatePlace = useCallback(
-    (data: CreatePlaceFormState) => {
-      createPlace.mutate({
+    async (data: CreatePlaceFormState) => {
+      const place = await createPlace.mutateAsync({
         name: data.name,
         address: data.address,
         lat: data.lat,
@@ -216,6 +218,7 @@ function MapSettingsForm({ props, isExpanded = true, updateSharedProps, updateLo
         google_place_id: data.googlePlaceId,
         address_components: data.addressComponents || undefined,
       });
+      return Boolean(place);
     },
     [createPlace],
   );
@@ -279,7 +282,7 @@ function MapSettingsForm({ props, isExpanded = true, updateSharedProps, updateLo
 
   return (
     <div>
-      <QueryErrorAlert queries={[selectedPlacesDataQuery]} />
+      <QueryErrorAlert queries={[selectedPlacesDataQuery, themesQuery]} />
       {/* Header */}
       <DsLayoutInset blockEnd="md">
         <DsLayoutInline gap="xs" justify="between">
@@ -329,7 +332,9 @@ function MapSettingsForm({ props, isExpanded = true, updateSharedProps, updateLo
             }
           />
 
-          {places.length === 0 ? (
+          {places.length === 0 && selectedPlacesDataQuery.isLoading ? (
+            <PageLoader placement="flow" extent="compact" size="xs" />
+          ) : places.length === 0 ? (
             <DsText size="xs" tone="secondary">
               {t('emptyState')}
             </DsText>
@@ -467,10 +472,11 @@ export function MapCanvasPreview({ props }: BlockCanvasPreviewProps<MapProps>) {
     enabled: mapPlaceIds.length > 0,
   });
   const { data: selectedPlacesData } = selectedPlacesDataQueryLoad;
-  const { data: themesData } = useQuery({
+  const themesQuery = useQuery({
     queryKey: ['mapThemes', 'list'],
     queryFn: () => listMapThemesAction(),
   });
+  const { data: themesData } = themesQuery;
 
   const places = useMemo<MapPlace[]>(() => {
     if (!selectedPlacesData) {
@@ -499,32 +505,40 @@ export function MapCanvasPreview({ props }: BlockCanvasPreviewProps<MapProps>) {
       ? rawProps.textAlignment
       : undefined;
   const caption = typeof props.caption === 'string' ? props.caption.trim() : '';
+  const hasRequiredData = (mapPlaceIds.length === 0 || selectedPlacesData !== undefined) && themesData !== undefined;
 
-  if (places.length === 0) {
-    return (
-      <DsLayoutInset block="xl">
-        <DsLayoutInset textAlign="center" space="none">
-          <SupportingText tone="secondary">{t('emptyState')}</SupportingText>
-        </DsLayoutInset>
-      </DsLayoutInset>
-    );
+  if (!hasRequiredData && (selectedPlacesDataQueryLoad.isLoading || themesQuery.isLoading)) {
+    return <PageLoader placement="flow" extent="compact" size="sm" />;
+  }
+  if (!hasRequiredData && (selectedPlacesDataQueryLoad.isError || themesQuery.isError)) {
+    return <QueryErrorAlert queries={[selectedPlacesDataQueryLoad, themesQuery]} />;
   }
 
   return (
     <div>
-      <QueryErrorAlert queries={[selectedPlacesDataQueryLoad]} />
-      <MapViewEmbedded config={mapViewConfig} blockAlignment={blockAlignment} />
-      {caption ? (
-        <DsLayoutInset blockStart="xs">
-          <DsText
-            size="xs"
-            tone="muted"
-            align={blockAlignment === 'left' ? 'start' : blockAlignment === 'right' ? 'end' : blockAlignment}
-          >
-            {caption}
-          </DsText>
+      <QueryErrorAlert queries={[selectedPlacesDataQueryLoad, themesQuery]} />
+      {places.length === 0 ? (
+        <DsLayoutInset block="xl">
+          <DsLayoutInset textAlign="center" space="none">
+            <SupportingText tone="secondary">{t('emptyState')}</SupportingText>
+          </DsLayoutInset>
         </DsLayoutInset>
-      ) : null}
+      ) : (
+        <>
+          <MapViewEmbedded config={mapViewConfig} blockAlignment={blockAlignment} />
+          {caption ? (
+            <DsLayoutInset blockStart="xs">
+              <DsText
+                size="xs"
+                tone="muted"
+                align={blockAlignment === 'left' ? 'start' : blockAlignment === 'right' ? 'end' : blockAlignment}
+              >
+                {caption}
+              </DsText>
+            </DsLayoutInset>
+          ) : null}
+        </>
+      )}
     </div>
   );
 }

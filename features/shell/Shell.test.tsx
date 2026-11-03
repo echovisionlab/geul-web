@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 
-import { act, type ReactElement, type ReactNode } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+import { type ReactElement, type ReactNode } from 'react';
+import { act, render, screen, waitFor } from '@/test/render';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { within } from 'storybook/test';
 import type { ShellLayoutProps, ShellState } from './ui/Shell';
 
@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   search: '',
   signOut: vi.fn(),
   settled: true,
+  settle: vi.fn(),
   confirm: vi.fn(),
   toggleColorScheme: vi.fn(),
   openSearch: vi.fn(),
@@ -20,7 +21,10 @@ const mocks = vi.hoisted(() => ({
   state: null as ShellState | null,
 }));
 
-vi.mock('@/lib/providers/DesignSystemProvider', () => ({
+vi.mock('@/lib/providers/DesignSystemProvider', async () => ({
+  ...(await vi.importActual<typeof import('@/lib/providers/DesignSystemProvider')>(
+    '@/lib/providers/DesignSystemProvider',
+  )),
   useColorScheme: () => ({ toggleColorScheme: mocks.toggleColorScheme }),
   useComputedColorScheme: () => 'light',
 }));
@@ -52,7 +56,7 @@ vi.mock('@/features/post/PostSpotlight/post-spotlight-trigger', () => ({
   preloadPostSpotlight: mocks.preloadSearch,
 }));
 vi.mock('@/lib/editor/settle-edits-before-sign-out', () => ({
-  settleEditsBeforeSignOut: async () => mocks.settled,
+  settleEditsBeforeSignOut: mocks.settle,
 }));
 vi.mock('@/features/confirmation/confirmation-dialogs', () => ({
   confirmationDialogs: { open: mocks.confirm },
@@ -105,8 +109,11 @@ import { getManifest } from '@/lib/queries/manifest';
 import { siteVariableManifest } from '@/features/editor/tiptap/site-variables/site-variable.story-fixtures';
 import { siteVariableHrefCases } from '@/test/site-variable-link';
 import { ShellRuntime } from './ShellRuntime';
+import { ShellSearchAction } from './ui/Shell/ShellIslands';
 
 const labels = {
+  navigationLoadFailed: 'Could not load navigation.',
+  retryNavigation: 'Retry navigation',
   searchTooltipMac: 'Search (Cmd+K)',
   searchTooltipOther: 'Search (Ctrl+K)',
   lightMode: 'Light mode',
@@ -124,13 +131,11 @@ function Probe() {
   return null;
 }
 
-let container: HTMLDivElement;
-let root: Root;
+let view: ReturnType<typeof render> | null = null;
 
 beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
+  view = null;
+  mocks.settle.mockReset().mockImplementation(async () => mocks.settled);
   mocks.pathname = '/work';
   mocks.search = '';
   mocks.state = null;
@@ -140,19 +145,18 @@ beforeEach(() => {
   mocks.preloadSearch.mockReset();
 });
 
-afterEach(() => {
-  act(() => root.unmount());
-  container.remove();
-});
-
 function renderRuntime(children: ReactNode = <Probe />) {
-  act(() => {
-    root.render(
-      <ShellRuntime labels={labels} initialUserSnapshot={{ name: 'June', image: null }}>
-        {children}
-      </ShellRuntime>,
-    );
-  });
+  const element = (
+    <ShellRuntime labels={labels} initialUserSnapshot={{ name: 'June', image: null }}>
+      {children}
+    </ShellRuntime>
+  );
+  // This controller-only fixture supplies no Core views; the server composition cases render them below.
+  if (view) {
+    view.rerender(element);
+  } else {
+    view = render(element);
+  }
 }
 
 function state() {
@@ -168,10 +172,35 @@ describe('ShellRuntime client state', () => {
     expect(state().loginHref).toBe('/login?redirect=%2Fwork%3Fshare%3Dshare-token%26lang%3Dko%26table_page%3D3');
     expect(state().labels.searchTooltip).toBe('Search (Cmd+K)');
     expect(state().labels.themeTooltip).toBe('Dark mode');
+    expect(state().labels.navigationLoadFailed).toBe(labels.navigationLoadFailed);
+    expect(state().labels.retryNavigation).toBe(labels.retryNavigation);
     state().events.onSearchIntent?.();
     expect(mocks.preloadSearch).toHaveBeenCalledTimes(1);
     state().events.onSearch();
     expect(mocks.openSearch).toHaveBeenCalledTimes(1);
+  });
+
+  it('tracks a search-launch promise on the real trigger without duplicating activation', async () => {
+    let finish!: () => void;
+    mocks.openSearch.mockReturnValue(
+      new Promise<void>((resolve) => {
+        finish = resolve;
+      }),
+    );
+    renderRuntime(
+      <>
+        <Probe />
+        <ShellSearchAction label="Search" variant="mobile" />
+      </>,
+    );
+    await view!.user.click(screen.getByRole('button', { name: 'Search' }));
+    expect(screen.getByRole('button', { name: 'Search' })).toHaveAttribute('aria-busy', 'true');
+    await view!.user.click(screen.getByRole('button', { name: 'Search' }));
+    expect(mocks.openSearch).toHaveBeenCalledOnce();
+    await act(async () => finish());
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Search' })).not.toHaveAttribute('aria-busy', 'true'),
+    );
   });
 
   it('owns navigation and account state and closes both when navigation completes', () => {
@@ -236,6 +265,55 @@ describe('ShellRuntime client state', () => {
     mocks.settled = true;
   });
 
+  it('keeps sign-out pending through edit settlement and the auth redirect, and deduplicates activation', async () => {
+    let finishEdits!: (settled: boolean) => void;
+    let finishSignOut!: () => void;
+    mocks.settle.mockReturnValue(
+      new Promise<boolean>((resolve) => {
+        finishEdits = resolve;
+      }),
+    );
+    mocks.signOut.mockReturnValue(
+      new Promise<void>((resolve) => {
+        finishSignOut = resolve;
+      }),
+    );
+    renderRuntime();
+    let task!: void | Promise<void>;
+    act(() => {
+      task = state().events.onSignOut();
+      void state().events.onSignOut();
+    });
+    expect(state().signOutPending).toBe(true);
+    expect(mocks.settle).toHaveBeenCalledOnce();
+    await act(async () => finishEdits(true));
+    await waitFor(() => expect(mocks.signOut).toHaveBeenCalledOnce());
+    expect(state().signOutPending).toBe(true);
+    await act(async () => {
+      finishSignOut();
+      await task;
+    });
+    expect(state().signOutPending).toBe(false);
+  });
+
+  it('does not open a stale discard confirmation after unmount', async () => {
+    let finish!: (settled: boolean) => void;
+    mocks.confirm.mockClear();
+    mocks.settle.mockReturnValue(
+      new Promise<boolean>((resolve) => {
+        finish = resolve;
+      }),
+    );
+    renderRuntime();
+    act(() => {
+      void state().events.onSignOut();
+    });
+    view!.unmount();
+    await act(async () => finish(false));
+    expect(mocks.confirm).not.toHaveBeenCalled();
+    expect(mocks.signOut).not.toHaveBeenCalled();
+  });
+
   it('shows the cookie snapshot while the session resolves, then the session user and role-gated links', () => {
     mocks.session = { data: null, isPending: true };
     renderRuntime();
@@ -254,8 +332,13 @@ describe('ShellRuntime client state', () => {
 
 describe('Shell server composition', () => {
   it('renders the manifest menus, translated labels and business footer on the server', async () => {
+    const shell = await Shell({ children: <main>Page</main>, initialUserSnapshot: null });
+    expect(shell.props.labels).toMatchObject({
+      navigationLoadFailed: 'common.messages.failedToLoad',
+      retryNavigation: 'common.loadMore.retry',
+    });
     const host = document.createElement('div');
-    host.innerHTML = renderToStaticMarkup(await Shell({ children: <main>Page</main>, initialUserSnapshot: null }));
+    host.innerHTML = renderToStaticMarkup(shell);
     const page = within(host);
 
     const about = page.getAllByRole('link', { name: 'About' });

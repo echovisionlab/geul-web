@@ -6,6 +6,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
 import { notifications } from '@/components/core/Notification';
+import { PageLoader } from '@/features/site/PageLoader';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { Alert } from '@/components/core/Alert';
 import { MediaPreviewGrid } from '@/components/core/MediaPreviewGrid';
 import { OgImagePreview } from '@/features/metadata/OgImagePreview';
 import { SectionCard, SectionHeader } from '@/components/core/Section';
@@ -84,14 +87,22 @@ export function LegalOgImagePanel({
       <DsLayoutStack gap="md">
         <SectionHeader title={tCommonLabels('ogImage')} />
         <MediaPreviewGrid>
-          <OgImagePreview
-            src={ogImage.src}
-            canRegenerate={canEdit}
-            isRegenerating={regenerate.isPending || ogImage.isRegenerating}
-            generationStatus={ogImage.status}
-            generationError={ogImage.error}
-            onRegenerate={() => regenerate.mutate({ locale, targetKey: ogImage.targetKey })}
-          />
+          {status.isError ? (
+            <QueryErrorAlert queries={[status]} />
+          ) : status.data?.error ? (
+            <Alert tone="danger">{status.data.error}</Alert>
+          ) : status.isLoading ? (
+            <PageLoader placement="flow" />
+          ) : (
+            <OgImagePreview
+              src={ogImage.src}
+              canRegenerate={canEdit}
+              isRegenerating={regenerate.isPending || ogImage.isRegenerating}
+              generationStatus={ogImage.status}
+              generationError={ogImage.error}
+              onRegenerate={() => regenerate.mutate({ locale, targetKey: ogImage.targetKey })}
+            />
+          )}
           <SiteOgBackgroundUploader
             canEdit={canEdit}
             type={assetTypeForEntity(entityType)}

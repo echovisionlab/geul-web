@@ -1,19 +1,11 @@
 // @vitest-environment jsdom
-
-import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+import { fireEvent, render, screen } from '@/test/render';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { TestProviders } from '@/test/TestProviders';
 import { PageLoader } from './PageLoader';
 
-let settingsMock = {
-  loader_urls: [] as string[],
-};
-let container: HTMLDivElement | null = null;
-let root: Root | null = null;
-
+let settingsMock = { loader_urls: [] as string[] };
 vi.mock('next/image', () => ({
   default: ({
     src,
@@ -44,164 +36,101 @@ vi.mock('next/image', () => ({
     />
   ),
 }));
-
 vi.mock('next-intl', () => ({
   useTranslations: () => () => '불러오는 중...',
+  NextIntlClientProvider: ({ children }: { children: import('react').ReactNode }) => children,
 }));
-
-vi.mock('@/lib/contexts/ManifestContext', () => ({
-  useSiteSettings: () => ({
-    settings: settingsMock,
-  }),
-}));
-
+vi.mock('@/lib/contexts/ManifestContext', () => ({ useSiteSettings: () => ({ settings: settingsMock }) }));
 vi.mock('@/lib/public-runtime-config', () => ({ getPublicCdnUrl: () => 'https://cdn.fixture.test' }));
 
 beforeEach(() => {
-  Object.defineProperty(window, 'matchMedia', {
-    writable: true,
-    value: vi.fn().mockImplementation((query: string) => ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    })),
-  });
   settingsMock = { loader_urls: [] };
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-});
-
-afterEach(() => {
-  act(() => {
-    root?.unmount();
-  });
-  container?.remove();
-  container = null;
-  root = null;
-  vi.restoreAllMocks();
 });
 
 describe('PageLoader', () => {
-  it('uses the same first configured GIF for SSR, hydration and rerenders without requesting a second loader', () => {
-    settingsMock = {
-      loader_urls: [
-        'https://cdn.example.com/media/site/loader/first.gif?version=2',
-        'https://cdn.example.com/media/site/loader/second.webp',
-      ],
-    };
+  it('passes inverse contrast through the controller while retaining localized fallback and GIF delivery', () => {
+    settingsMock.loader_urls = ['/asset/configured-loader.gif'];
+    const { rerender } = render(<PageLoader contrast="inverse" message=" " />);
+    expect(screen.getByRole('status')).toHaveAttribute('data-contrast', 'inverse');
+    expect(screen.getByRole('status')).toHaveTextContent('불러오는 중...');
+    const image = screen.getByRole('img');
+    expect(image).toHaveAttribute('data-unoptimized', 'true');
+    rerender(<PageLoader />);
+    expect(screen.getByRole('status')).toHaveAttribute('data-contrast', 'standard');
+    expect(screen.getByRole('img')).toBe(image);
+  });
+
+  it('uses the same first nonblank GIF for server markup and client rerenders without preload or optimization', () => {
+    settingsMock.loader_urls = [
+      ' ',
+      'https://cdn.example.com/first.GIF?version=2#loader',
+      'https://cdn.example.com/second.webp',
+    ];
     const random = vi.spyOn(Math, 'random');
-    const serverMarkup = renderToStaticMarkup(
-      <DesignSystemProvider forceColorScheme="light">
-        <PageLoader />
-      </DesignSystemProvider>,
-    );
-    expect(serverMarkup).toContain('first.gif?version=2');
-    expect(serverMarkup).not.toContain('rel="preload" as="image"');
-
-    act(() => {
-      root?.render(
-        <DesignSystemProvider forceColorScheme="light">
+    try {
+      const markup = renderToStaticMarkup(
+        <TestProviders>
           <PageLoader />
-        </DesignSystemProvider>,
+        </TestProviders>,
       );
-    });
-
-    const image = container?.querySelector('img');
-    expect(image?.getAttribute('src')).toBe('https://cdn.example.com/media/site/loader/first.gif?version=2');
-    expect(image?.getAttribute('data-unoptimized')).toBe('true');
-    expect(image?.getAttribute('data-preload')).toBe('undefined');
-    act(() =>
-      root?.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <PageLoader />
-        </DesignSystemProvider>,
-      ),
-    );
-    expect(container?.querySelector('img')?.getAttribute('src')).toBe(image?.getAttribute('src'));
-    expect(random).not.toHaveBeenCalled();
+      expect(markup).toContain('first.GIF?version=2#loader');
+      expect(markup).not.toContain('rel="preload"');
+      const { rerender } = render(<PageLoader />);
+      const image = screen.getByRole('img');
+      expect(image).toHaveAttribute('src', settingsMock.loader_urls[1]);
+      expect(image).toHaveAttribute('data-unoptimized', 'true');
+      expect(image).toHaveAttribute('data-preload', 'undefined');
+      expect(screen.getByRole('status')).toHaveTextContent('불러오는 중...');
+      rerender(<PageLoader />);
+      expect(screen.getByRole('img')).toBe(image);
+      expect(random).not.toHaveBeenCalled();
+    } finally {
+      random.mockRestore();
+    }
   });
 
-  it('renders a localized quiet status without a spinner when the loader relation is empty', () => {
-    settingsMock = { loader_urls: [] };
+  it.each([undefined, '불러오는 중...', '', '   '])(
+    'shows localized default text for message %j with no configured image',
+    (message) => {
+      render(<PageLoader message={message} />);
+      expect(screen.getByRole('status', { name: '불러오는 중...' })).toHaveTextContent('불러오는 중...');
+      expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    },
+  );
 
-    act(() => {
-      root?.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <PageLoader />
-        </DesignSystemProvider>,
-      );
-    });
-
-    expect(container?.querySelector('img')).toBeNull();
-    expect(container?.querySelector('[role="status"]')?.getAttribute('aria-label')).toBe('불러오는 중...');
-    expect(container?.querySelector('[role="status"]')?.textContent).toBe('');
-    expect(container?.querySelector('.mantine-Loader-root')).toBeNull();
+  it('shows a distinct phase beside the image and keeps it after image failure', () => {
+    settingsMock.loader_urls = ['https://cdn.example.com/loader.gif'];
+    const { rerender } = render(<PageLoader message={' \tConnecting \n'} />);
+    expect(screen.getByRole('status', { name: '불러오는 중...' }).textContent).toBe('Connecting');
+    fireEvent.error(screen.getByRole('img'));
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Connecting');
+    rerender(<PageLoader message="Loading roads and labels" />);
+    expect(screen.getByRole('status')).toHaveTextContent('Loading roads and labels');
   });
 
-  it('removes duplicate generic Loading prose and preserves distinct progress messages', () => {
-    settingsMock = { loader_urls: ['https://cdn.example.com/loader.gif'] };
-    act(() =>
-      root?.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <PageLoader message="불러오는 중..." />
-        </DesignSystemProvider>,
-      ),
-    );
-    expect(container?.querySelector('[role="status"]')?.textContent).toBe('');
-    act(() =>
-      root?.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <PageLoader message="Redirecting to sign in" />
-        </DesignSystemProvider>,
-      ),
-    );
-    expect(container?.textContent).toContain('Redirecting to sign in');
-  });
-
-  it('resolves configured managed GIF paths through the existing CDN contract', () => {
-    settingsMock = { loader_urls: ['/asset/configured-loader.gif?version=2'] };
-    act(() =>
-      root?.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <PageLoader />
-        </DesignSystemProvider>,
-      ),
-    );
-    expect(container?.querySelector('img')?.getAttribute('src')).toBe(
+  it('resolves managed GIF paths through the CDN', () => {
+    settingsMock.loader_urls = ['/asset/configured-loader.gif?version=2'];
+    render(<PageLoader />);
+    expect(screen.getByRole('img')).toHaveAttribute(
+      'src',
       'https://cdn.fixture.test/asset/configured-loader.gif?version=2',
     );
-    expect(container?.querySelector('img')?.getAttribute('data-unoptimized')).toBe('true');
+    expect(screen.getByRole('img')).toHaveAttribute('data-unoptimized', 'true');
   });
 
-  it('keeps a quiet status on image failure and uses updated configuration without a spinner', () => {
-    settingsMock = { loader_urls: ['https://cdn.example.com/loader.gif'] };
-    act(() =>
-      root?.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <PageLoader size="sm" minHeight={300} />
-        </DesignSystemProvider>,
-      ),
-    );
-    expect(container?.querySelector('img')?.getAttribute('width')).toBe('64');
-    act(() => container?.querySelector('img')?.dispatchEvent(new Event('error')));
-    expect(container?.querySelector('img')).toBeNull();
-    expect(container?.querySelector('[role="status"]')).not.toBeNull();
-    expect(container?.querySelector('.mantine-Loader-root')).toBeNull();
-    settingsMock = { loader_urls: ['https://cdn.example.com/replacement.svg?version=2'] };
-    act(() =>
-      root?.render(
-        <DesignSystemProvider forceColorScheme="light">
-          <PageLoader size="sm" minHeight={300} />
-        </DesignSystemProvider>,
-      ),
-    );
-    expect(container?.querySelector('img')?.getAttribute('src')).toContain('replacement.svg');
-    expect(container?.querySelector('img')?.getAttribute('data-unoptimized')).toBe('true');
+  it('keeps default text on image failure and shows a newly configured source', () => {
+    settingsMock.loader_urls = ['https://cdn.example.com/loader.gif', 'https://cdn.example.com/second.webp'];
+    const { rerender } = render(<PageLoader extent="tall" size="sm" />);
+    expect(screen.getByRole('img')).toHaveAttribute('width', '64');
+    fireEvent.error(screen.getByRole('img'));
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('불러오는 중...');
+    settingsMock.loader_urls = ['https://cdn.example.com/replacement.svg?version=2'];
+    rerender(<PageLoader extent="tall" size="sm" placement="flow" />);
+    expect(screen.getByRole('img')).toHaveAttribute('src', settingsMock.loader_urls[0]);
+    expect(screen.getByRole('img')).toHaveAttribute('data-unoptimized', 'true');
+    expect(screen.getByRole('status')).toHaveAttribute('data-placement', 'flow');
+    expect(screen.getByRole('status')).toHaveAttribute('data-extent', 'tall');
   });
 });

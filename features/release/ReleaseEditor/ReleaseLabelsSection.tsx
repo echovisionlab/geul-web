@@ -109,7 +109,7 @@ export function ReleaseLabelsSection({
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
-  const persistLabels = (
+  const persistLabels = async (
     nextLabels: ReleaseLabelItem[],
     orderIntent?: {
       itemId: string;
@@ -117,21 +117,32 @@ export function ReleaseLabelsSection({
       nextItemId?: string;
     },
   ) => {
-    if (!canEdit) {
+    if (!canEdit || setLabels.isPending) {
       return;
     }
     onLabelsChange(nextLabels);
-    setLabels.mutate({
-      nextLabels: nextLabels.map((label, sortOrder) => ({
-        labelId: label.label_id,
-        catalogNumber: label.catalog_number || undefined,
-        sortOrder,
-      })),
-      orderIntent,
-    });
+    try {
+      const result = await setLabels.mutateAsync({
+        nextLabels: nextLabels.map((label, sortOrder) => ({
+          labelId: label.label_id,
+          catalogNumber: label.catalog_number || undefined,
+          sortOrder,
+        })),
+        orderIntent,
+      });
+      if (!result.error) {
+        return true;
+      }
+    } catch {
+      notifications.show({ message: tCommon('notifications.saveFailed'), tone: 'danger' });
+    }
+    if (!onMutationSettled) {
+      onLabelsChange(labels);
+    }
+    return false;
   };
   const handleDragEnd = (event: DragEndEvent) => {
-    if (!canEdit) {
+    if (!canEdit || setLabels.isPending) {
       return;
     }
     const reorder = reorderWithIntent(labels, event.active.id, event.over?.id, (label) => label.label_id);
@@ -140,7 +151,7 @@ export function ReleaseLabelsSection({
     }
   };
   const availableLabels = allLabels?.filter((label) => !labels.some((l) => l.label_id === label.id));
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!selectedLabelId) {
       return;
     }
@@ -158,7 +169,9 @@ export function ReleaseLabelsSection({
         sort_order: labels.length,
       },
     ];
-    persistLabels(newLabels);
+    if ((await persistLabels(newLabels)) === false) {
+      return;
+    }
     closeAddModal();
     setSelectedLabelId(null);
     setCatalogNumber('');
@@ -179,7 +192,7 @@ export function ReleaseLabelsSection({
               emphasis="medium"
               size="xs"
               leftSection={<IconPlus size={14} />}
-              disabled={!canEdit}
+              disabled={!canEdit || setLabels.isPending}
               onClick={openAddModal}
             >
               {tCommon('actions.addItem', { item: tCommon('entities.label') })}
@@ -208,11 +221,12 @@ export function ReleaseLabelsSection({
                       idPrefix={idPrefix}
                       label={label}
                       onRemove={() => handleRemove(label.label_id)}
+                      pending={setLabels.isPending}
                       onCatalogNumberChange={(catalogNumber) => {
                         const newLabels = labels.map((l) =>
                           l.label_id === label.label_id ? { ...l, catalog_number: catalogNumber || null } : l,
                         );
-                        persistLabels(newLabels);
+                        return persistLabels(newLabels);
                       }}
                     />
                   ))}
@@ -224,6 +238,7 @@ export function ReleaseLabelsSection({
       </DsLayoutStack>
 
       <ContentModal
+        loading={setLabels.isPending}
         opened={addModalOpened}
         onClose={closeAddModal}
         title={t('modal.title')}
@@ -231,10 +246,11 @@ export function ReleaseLabelsSection({
       >
         <DsLayoutStack>
           <Select
-            disabled={!canEdit}
+            disabled={!canEdit || setLabels.isPending}
             id={idPrefix ? `${idPrefix}-select` : undefined}
             label={tCommon('entities.label')}
             placeholder={t('placeholders.selectLabel')}
+            isLoading={allLabelsQuery.isFetching}
             data={
               availableLabels?.map((l) => ({
                 value: l.id,
@@ -246,7 +262,7 @@ export function ReleaseLabelsSection({
             searchable
           />
           <TextInput
-            disabled={!canEdit}
+            disabled={!canEdit || setLabels.isPending}
             id={idPrefix ? `${idPrefix}-catalog-number` : undefined}
             label={tCommon('labels.catalogNumber')}
             placeholder={t('placeholders.catalogNumber')}
@@ -254,10 +270,16 @@ export function ReleaseLabelsSection({
             onChange={(e) => setCatalogNumber(e.currentTarget.value)}
           />
           <DialogActions>
-            <Button emphasis="low" onClick={closeAddModal}>
+            <Button emphasis="low" disabled={setLabels.isPending} onClick={closeAddModal}>
               {tCommon('actions.cancel')}
             </Button>
-            <Button tone="neutral" emphasis="strong" onClick={handleAdd} disabled={!canEdit || !selectedLabelId}>
+            <Button
+              tone="neutral"
+              emphasis="strong"
+              onClick={handleAdd}
+              loading={setLabels.isPending}
+              disabled={!canEdit || !selectedLabelId}
+            >
               {tCommon('actions.add')}
             </Button>
           </DialogActions>
@@ -271,9 +293,16 @@ interface SortableLabelRowProps {
   idPrefix?: string;
   label: ReleaseLabelItem;
   onRemove: () => void;
-  onCatalogNumberChange: (catalogNumber: string) => void;
+  onCatalogNumberChange: (catalogNumber: string) => void | Promise<boolean | void>;
+  pending?: boolean;
 }
-export function SortableLabelRow({ idPrefix, label, onRemove, onCatalogNumberChange }: SortableLabelRowProps) {
+export function SortableLabelRow({
+  idPrefix,
+  label,
+  onRemove,
+  onCatalogNumberChange,
+  pending = false,
+}: SortableLabelRowProps) {
   const tModalActions = useTranslations('common.actions');
   const canEdit = useReleaseEditorCanEdit();
   const tCommon = useTranslations('common');
@@ -290,9 +319,10 @@ export function SortableLabelRow({ idPrefix, label, onRemove, onCatalogNumberCha
     setLocalCatalogNumber(label.catalog_number || '');
     setModalOpened(true);
   };
-  const handleSave = () => {
-    onCatalogNumberChange(localCatalogNumber);
-    setModalOpened(false);
+  const handleSave = async () => {
+    if ((await onCatalogNumberChange(localCatalogNumber)) !== false) {
+      setModalOpened(false);
+    }
   };
   return (
     <>
@@ -303,7 +333,7 @@ export function SortableLabelRow({ idPrefix, label, onRemove, onCatalogNumberCha
             interaction="drag-handle"
             draggable={false}
             {...sortable.handle}
-            disabled={!canEdit}
+            disabled={!canEdit || pending}
             aria-label={tSort('aria.reorder', { label: label.label_name })}
           >
             <IconGripVertical aria-hidden />
@@ -325,7 +355,7 @@ export function SortableLabelRow({ idPrefix, label, onRemove, onCatalogNumberCha
               size="compact"
               aria-label={tCommon('actions.edit')}
               aria-describedby={labelNameId}
-              disabled={!canEdit}
+              disabled={!canEdit || pending}
               onClick={handleOpen}
             >
               <IconPencil size={12} />
@@ -339,7 +369,7 @@ export function SortableLabelRow({ idPrefix, label, onRemove, onCatalogNumberCha
             size="compact"
             aria-label={tCommon('actions.remove')}
             aria-describedby={labelNameId}
-            disabled={!canEdit}
+            disabled={!canEdit || pending}
             onClick={onRemove}
           >
             <IconX size={14} />
@@ -348,6 +378,7 @@ export function SortableLabelRow({ idPrefix, label, onRemove, onCatalogNumberCha
       </Table.Tr>
 
       <ContentModal
+        loading={pending}
         opened={modalOpened}
         onClose={() => setModalOpened(false)}
         title={`${tCommon('actions.edit')} ${tCommon('labels.catalogNumber')} - ${label.label_name}`}
@@ -357,7 +388,7 @@ export function SortableLabelRow({ idPrefix, label, onRemove, onCatalogNumberCha
       >
         <DsLayoutStack>
           <TextInput
-            disabled={!canEdit}
+            disabled={!canEdit || pending}
             id={idPrefix ? `${idPrefix}-catalog-number-${label.label_id}` : undefined}
             label={tCommon('labels.catalogNumber')}
             placeholder={t('placeholders.catalogNumber')}
@@ -366,10 +397,10 @@ export function SortableLabelRow({ idPrefix, label, onRemove, onCatalogNumberCha
             autoFocus
           />
           <DialogActions>
-            <Button emphasis="low" onClick={() => setModalOpened(false)}>
+            <Button emphasis="low" disabled={pending} onClick={() => setModalOpened(false)}>
               {tCommon('actions.cancel')}
             </Button>
-            <SaveButton type="button" disabled={!canEdit} onClick={handleSave}>
+            <SaveButton type="button" loading={pending} disabled={!canEdit || pending} onClick={handleSave}>
               {tCommon('actions.save')}
             </SaveButton>
           </DialogActions>

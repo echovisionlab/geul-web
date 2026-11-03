@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 import { expect, within } from 'storybook/test';
 import { Button } from '@/components/core/Button';
@@ -47,6 +48,7 @@ export const PermissionRevoked: Story = {
 
 /** Signing out would delete unsaved edits from this device: the shell asks first. */
 function SignOutWithUnsavedEdits() {
+  const t = useTranslations('common');
   useEffect(() => {
     confirmationDialogs.open({
       intent: 'discard',
@@ -58,7 +60,12 @@ function SignOutWithUnsavedEdits() {
       onConfirm: () => undefined,
     });
   }, []);
-  return <ConfirmDialogHost loading="eager" />;
+  return (
+    <ConfirmDialogHost
+      loading="eager"
+      loadError={{ message: t('errors.generic'), retryLabel: t('actions.tryAgain') }}
+    />
+  );
 }
 
 export const SignOutUnsaved: StoryObj<typeof SignOutWithUnsavedEdits> = {

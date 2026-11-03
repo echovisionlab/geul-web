@@ -1,9 +1,8 @@
 // @vitest-environment jsdom
 
-import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
-import { act, type ReactNode, useState } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { render, screen, userEvent, act, waitFor, fireEvent } from '@/test/render';
+import { useState } from 'react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import { MESH_OPTIMIZATION_METHOD_DRACO } from '@/lib/types/mesh-optimization';
@@ -13,11 +12,6 @@ import {
   type MeshOptimizationMessageKey,
   type MeshOptimizationSelection,
 } from './MeshOptimizationPanel';
-
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-let container: HTMLDivElement | null = null;
-let root: Root | null = null;
 
 const meshOptimizationMessages: Record<MeshOptimizationMessageKey, string> = {
   'blockEditor.status.meshOptimizationPending': 'Queued',
@@ -45,58 +39,15 @@ function translateMeshOptimization(key: MeshOptimizationMessageKey) {
   return meshOptimizationMessages[key];
 }
 
-function installMatchMedia() {
-  Object.defineProperty(window, 'matchMedia', {
-    writable: true,
-    value: (query: string) => ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addListener() {},
-      removeListener() {},
-      addEventListener() {},
-      removeEventListener() {},
-      dispatchEvent() {
-        return false;
-      },
-    }),
-  });
-}
-
-function render(node: ReactNode) {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-  root = createRoot(container);
-
-  act(() => {
-    root?.render(<DesignSystemProvider forceColorScheme="light">{node}</DesignSystemProvider>);
-  });
-}
-
 async function flushEffects() {
-  await act(async () => {
-    await Promise.resolve();
-    await Promise.resolve();
-  });
+  await waitFor(() => expect(screen.queryByRole('status', { name: 'Loading...' })).not.toBeInTheDocument());
 }
-
 afterEach(() => {
-  act(() => {
-    root?.unmount();
-  });
-  container?.remove();
-  document.body.innerHTML = '';
-  root = null;
-  container = null;
   vi.useRealTimers();
   vi.restoreAllMocks();
 });
 
 describe('MeshOptimizationPanel', () => {
-  beforeEach(() => {
-    installMatchMedia();
-  });
-
   it('renders failed candidates by status and error instead of output filename', async () => {
     const controls: ImmersiveSceneMeshOptimizationControls = {
       listCandidates: vi.fn().mockResolvedValue({
@@ -136,14 +87,12 @@ describe('MeshOptimizationPanel', () => {
     );
     await flushEffects();
 
-    const candidate = document.querySelector(
-      '[data-testid="immersive-scene-mesh-optimization-candidate-failed-candidate"]',
-    );
+    const candidate = screen.queryByRole('group', { name: '40%' });
     expect(candidate?.textContent).toContain('40%');
     expect(candidate?.textContent).toContain('Failed');
     expect(candidate?.textContent).toContain('mesh optimization publisher is not configured');
     expect(candidate?.textContent).not.toContain('5c285545-9c7d-442b-b8c7-3bbae5373765.glb');
-    expect(document.querySelector('button[aria-label="Delete compressed GLB (40%)"]')).not.toBeNull();
+    expect(screen.getByRole('button', { name: 'Delete compressed GLB (40%)' })).not.toBeNull();
   });
 
   it('separates file reduction from actual mesh ratios', async () => {
@@ -194,9 +143,7 @@ describe('MeshOptimizationPanel', () => {
     );
     await flushEffects();
 
-    const candidate = document.querySelector(
-      '[data-testid="immersive-scene-mesh-optimization-candidate-completed-candidate"]',
-    );
+    const candidate = screen.queryByRole('group', { name: '1%' });
     expect(candidate?.textContent).toContain('Compressed size 1.0 KB (-75%)');
     expect(candidate?.textContent).toContain('Triangles 150 (15%)');
     expect(candidate?.textContent).not.toContain('Vertices');
@@ -239,25 +186,13 @@ describe('MeshOptimizationPanel', () => {
     );
     await flushEffects();
 
-    const slider = document.querySelector<HTMLInputElement>(
-      '[data-testid="immersive-scene-mesh-optimization-target-ratio-unit-1"] input[type="range"]',
-    );
-    expect(slider?.value).toBe('70');
-    for (let step = 0; step < 10; step += 1) {
-      await act(async () => {
-        slider?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
-        await Promise.resolve();
-      });
-    }
-    expect(slider?.value).toBe('60');
+    const slider = screen.getByRole('slider', { name: 'Target mesh ratio' });
+    expect(slider).toHaveValue('70');
+    slider.focus();
+    await userEvent.keyboard('{ArrowLeft>10/}');
+    expect(slider).toHaveValue('60');
 
-    await act(async () => {
-      [...document.querySelectorAll<HTMLButtonElement>('button')]
-        .find((button) => button.textContent?.includes('Compress GLB'))
-        ?.click();
-      await Promise.resolve();
-      await Promise.resolve();
-    });
+    await userEvent.click(screen.getByRole('button', { name: 'Compress GLB' }));
 
     expect(generateCandidate).toHaveBeenCalledWith({
       sourceFileId: 'source-mesh',
@@ -268,9 +203,7 @@ describe('MeshOptimizationPanel', () => {
       method: MESH_OPTIMIZATION_METHOD_DRACO,
       targetRatioPercent: 60,
     });
-    expect(
-      document.querySelector('[data-testid="immersive-scene-mesh-optimization-candidate-source-mesh-draco-60"]'),
-    ).not.toBeNull();
+    expect(screen.getByRole('group', { name: '60%' })).not.toBeNull();
   });
 
   it('restores the selected candidate and compression target from durable IDs', async () => {
@@ -343,23 +276,18 @@ describe('MeshOptimizationPanel', () => {
     render(<ControlledPanel />);
     await flushEffects();
 
-    const selected = document.querySelector('[data-testid="immersive-scene-selected-mesh-optimization-unit-1"]');
+    const selected = screen.queryByRole('group', { name: 'Selected compressed GLB' });
     expect(selected?.textContent).toContain('Selected compressed GLB');
     expect(selected?.textContent).toContain('1%');
     expect(selected?.textContent).toContain('compressed-mesh.glb');
 
-    const slider = document.querySelector<HTMLInputElement>(
-      '[data-testid="immersive-scene-mesh-optimization-target-ratio-unit-1"] input[type="range"]',
-    );
-    expect(slider?.value).toBe('1');
-    expect(document.body.textContent).not.toContain('Use compressed GLB');
+    const slider = screen.getByRole('slider', { name: 'Target mesh ratio' });
+    expect(slider).toHaveValue('1');
+    expect(screen.queryByRole('button', { name: 'Use compressed GLB' })).not.toBeInTheDocument();
 
-    await act(async () => {
-      document.querySelector<HTMLButtonElement>('button[aria-label="Use original GLB"]')?.click();
-      await Promise.resolve();
-    });
+    await userEvent.click(screen.getByRole('button', { name: 'Use original GLB' }));
     expect(onClearSelected).toHaveBeenCalledOnce();
-    expect(document.body.textContent).toContain('Use compressed GLB');
+    expect(screen.getByRole('button', { name: 'Use compressed GLB' })).toBeVisible();
   });
 
   it('deletes an available candidate through the candidate-specific clear request', async () => {
@@ -398,11 +326,7 @@ describe('MeshOptimizationPanel', () => {
     );
     await flushEffects();
 
-    await act(async () => {
-      document.querySelector<HTMLButtonElement>('button[aria-label="Delete compressed GLB (35%)"]')?.click();
-      await Promise.resolve();
-      await Promise.resolve();
-    });
+    await userEvent.click(screen.getByRole('button', { name: 'Delete compressed GLB (35%)' }));
 
     expect(clearCandidates).toHaveBeenCalledWith({
       sourceFileId: 'source-mesh',
@@ -412,10 +336,8 @@ describe('MeshOptimizationPanel', () => {
       unitId: 'unit-1',
       candidateId: 'candidate-to-delete',
     });
-    expect(
-      document.querySelector('[data-testid="immersive-scene-mesh-optimization-candidate-candidate-to-delete"]'),
-    ).toBeNull();
-    expect(document.body.textContent).toContain('Compressed GLB deleted.');
+    expect(screen.queryByRole('group', { name: '35%' })).toBeNull();
+    expect(screen.getByText('Compressed GLB deleted.')).toBeVisible();
   });
 
   it('clears the durable selection after deleting the selected candidate', async () => {
@@ -467,11 +389,7 @@ describe('MeshOptimizationPanel', () => {
     render(<ControlledPanel />);
     await flushEffects();
 
-    await act(async () => {
-      document.querySelector<HTMLButtonElement>('button[aria-label="Delete compressed GLB (1%)"]')?.click();
-      await Promise.resolve();
-      await Promise.resolve();
-    });
+    await userEvent.click(screen.getByRole('button', { name: 'Delete compressed GLB (1%)' }));
 
     expect(clearCandidates).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -480,8 +398,8 @@ describe('MeshOptimizationPanel', () => {
       }),
     );
     expect(onClearSelected).toHaveBeenCalledOnce();
-    expect(document.querySelector('[data-testid="immersive-scene-selected-mesh-optimization-unit-1"]')).toBeNull();
-    expect(document.body.textContent).toContain('Compressed GLB deleted.');
+    expect(screen.queryByRole('group', { name: 'Selected compressed GLB' })).toBeNull();
+    expect(screen.getByText('Compressed GLB deleted.')).toBeVisible();
   });
 
   it('does not restore a deleted running candidate from an older polling response', async () => {
@@ -526,7 +444,9 @@ describe('MeshOptimizationPanel', () => {
         t={translateMeshOptimization}
       />,
     );
-    await flushEffects();
+    await act(async () => {
+      await listCandidates.mock.results[0]!.value;
+    });
 
     await act(async () => {
       vi.advanceTimersByTime(2000);
@@ -534,22 +454,111 @@ describe('MeshOptimizationPanel', () => {
     });
     expect(listCandidates).toHaveBeenCalledTimes(2);
 
+    fireEvent.click(screen.getByRole('button', { name: 'Delete compressed GLB (55%)' }));
     await act(async () => {
-      document.querySelector<HTMLButtonElement>('button[aria-label="Delete compressed GLB (55%)"]')?.click();
-      await Promise.resolve();
-      await Promise.resolve();
+      await vi.mocked(controls.clearCandidates).mock.results[0]!.value;
     });
-    expect(
-      document.querySelector('[data-testid="immersive-scene-mesh-optimization-candidate-processing-candidate"]'),
-    ).toBeNull();
+    expect(screen.queryByRole('group', { name: '55%' })).toBeNull();
 
     await act(async () => {
       resolveStaleList({ candidates: [processingCandidate] });
       await Promise.resolve();
       await Promise.resolve();
     });
-    expect(
-      document.querySelector('[data-testid="immersive-scene-mesh-optimization-candidate-processing-candidate"]'),
-    ).toBeNull();
+    expect(screen.queryByRole('group', { name: '55%' })).toBeNull();
+  });
+  it('keeps a new source loading and ignores an older source response', async () => {
+    let resolveOld!: (value: { candidates: [] }) => void;
+    let resolveNew!: (value: { candidates: [] }) => void;
+    const listCandidates = vi
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveOld = resolve;
+          }),
+      )
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveNew = resolve;
+          }),
+      );
+    const controls = { listCandidates, generateCandidate: vi.fn(), useCandidate: vi.fn(), clearCandidates: vi.fn() };
+    const props = {
+      pageId: 'page-1',
+      entityType: TranscodeEntityType.PAGE,
+      sectionId: 'section-1',
+      unitId: 'unit-1',
+      selection: null,
+      controls,
+      onUseCandidate: vi.fn(),
+      onClearSelected: vi.fn(),
+      t: translateMeshOptimization,
+    };
+    const { rerender } = render(
+      <MeshOptimizationPanel {...props} sourceFile={{ fileId: 'old', name: 'old.glb', size: '1 MB' }} />,
+    );
+    expect(screen.getByRole('button', { name: 'Compress GLB' })).toBeDisabled();
+    rerender(<MeshOptimizationPanel {...props} sourceFile={{ fileId: 'new', name: 'new.glb', size: '1 MB' }} />);
+    await act(async () => resolveOld({ candidates: [] }));
+    expect(screen.getByRole('button', { name: 'Compress GLB' })).toBeDisabled();
+    await act(async () => resolveNew({ candidates: [] }));
+    expect(screen.getByRole('button', { name: 'Compress GLB' })).toBeEnabled();
+  });
+  it('does not drop a generated candidate when an older poll completes', async () => {
+    vi.useFakeTimers();
+    const initial = {
+      id: 'running-old',
+      sourceFileId: 'source-mesh',
+      fileId: '',
+      url: '',
+      fileName: '',
+      fileSize: 0,
+      method: MESH_OPTIMIZATION_METHOD_DRACO,
+      targetRatioPercent: 55,
+      status: 'processing' as const,
+    };
+    const generated = { ...initial, id: 'running-new', targetRatioPercent: 70 };
+    let finishPoll!: (value: { candidates: (typeof initial)[] }) => void;
+    const listCandidates = vi
+      .fn()
+      .mockResolvedValueOnce({ candidates: [initial] })
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            finishPoll = resolve;
+          }),
+      );
+    const generateCandidate = vi.fn().mockResolvedValue({ candidate: generated });
+    const controls = { listCandidates, generateCandidate, useCandidate: vi.fn(), clearCandidates: vi.fn() };
+    render(
+      <MeshOptimizationPanel
+        pageId="page-1"
+        entityType={TranscodeEntityType.PAGE}
+        sectionId="section-1"
+        unitId="unit-1"
+        sourceFile={{ fileId: 'source-mesh', name: 'source.glb', size: '1 MB' }}
+        selection={null}
+        controls={controls}
+        onUseCandidate={vi.fn()}
+        onClearSelected={vi.fn()}
+        t={translateMeshOptimization}
+      />,
+    );
+    await act(async () => {
+      await listCandidates.mock.results[0]!.value;
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(listCandidates).toHaveBeenCalledTimes(2);
+    fireEvent.click(screen.getByRole('button', { name: 'Compress GLB' }));
+    await act(async () => {
+      await generateCandidate.mock.results[0]!.value;
+    });
+    expect(screen.getByRole('group', { name: '70%' })).toBeVisible();
+    await act(async () => finishPoll({ candidates: [initial] }));
+    expect(screen.getByRole('group', { name: '70%' })).toBeVisible();
   });
 });

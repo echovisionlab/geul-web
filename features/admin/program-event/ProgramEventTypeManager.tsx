@@ -98,9 +98,17 @@ export function ProgramEventTypeManagerView({
   const selectedValue = draft.id ?? '$new';
   return (
     <>
-      <ContentModal opened={opened} onClose={onClose} title={labels.title} closeLabel={labels.close} size="standard">
+      <ContentModal
+        opened={opened}
+        onClose={onClose}
+        title={labels.title}
+        closeLabel={labels.close}
+        size="standard"
+        loading={saving || deleting}
+      >
         <DsLayoutStack gap="md">
           <Select
+            disabled={saving || deleting}
             label={labels.type}
             value={selectedValue}
             data={[
@@ -111,12 +119,14 @@ export function ProgramEventTypeManagerView({
             allowDeselect={false}
           />
           <TextInput
+            disabled={saving || deleting}
             label={labels.name}
             value={draft.name}
             onChange={(event) => onDraftChange({ ...draft, name: event.currentTarget.value })}
             required
           />
           <Textarea
+            disabled={saving || deleting}
             label={labels.description}
             value={draft.description}
             onChange={(event) => onDraftChange({ ...draft, description: event.currentTarget.value })}
@@ -124,6 +134,7 @@ export function ProgramEventTypeManagerView({
             minRows={2}
           />
           <TextInput
+            disabled={saving || deleting}
             label={labels.slug}
             value={draft.slug}
             onChange={(event) => onDraftChange({ ...draft, slug: event.currentTarget.value })}
@@ -138,19 +149,22 @@ export function ProgramEventTypeManagerView({
             ]}
             onChange={(value) => onDraftChange({ ...draft, status: value === 'inactive' ? 'inactive' : 'active' })}
             allowDeselect={false}
-            disabled={!draft.id}
+            disabled={!draft.id || saving || deleting}
           />
           <NumberInput
+            disabled={saving || deleting}
             label={labels.sortOrder}
             value={draft.sortOrder}
             onChange={(value) => onDraftChange({ ...draft, sortOrder: typeof value === 'number' ? value : 0 })}
           />
           <Checkbox
+            disabled={saving || deleting}
             label={labels.requiresPlace}
             checked={draft.requiresPlace}
             onChange={(event) => onDraftChange({ ...draft, requiresPlace: event.currentTarget.checked })}
           />
           <Checkbox
+            disabled={saving || deleting}
             label={labels.requiresStreamUrl}
             checked={draft.requiresStreamUrl}
             onChange={(event) => onDraftChange({ ...draft, requiresStreamUrl: event.currentTarget.checked })}
@@ -249,77 +263,103 @@ export function ProgramEventTypeManagerButton({
     [tCommon, tTypes],
   );
 
-  const selectType = (id: string | null) =>
+  const selectType = (id: string | null) => {
+    if (saving || deleting) {
+      return;
+    }
     setDraft(
       draftFor(
         types.find((type) => type.id === id),
         locale,
       ),
     );
+  };
   const save = async () => {
-    setSaving(true);
-    const result = draft.id
-      ? await bindings.updateProgramEventTypeAction(draft.id, { ...draft, locale })
-      : await bindings.createProgramEventTypeAction({
-          name: draft.name,
-          slug: draft.slug,
-          sortOrder: draft.sortOrder,
-          description: draft.description,
-          requiresPlace: draft.requiresPlace,
-          requiresStreamUrl: draft.requiresStreamUrl,
-        });
-    setSaving(false);
-    if ('error' in result && result.error) {
-      notifications.show({ message: result.error, tone: 'danger' });
+    if (saving || deleting) {
       return;
     }
-    if (!draft.id && 'data' in result && result.data) {
-      const created: AdminProgramEventTypeOption = {
-        id: result.data.id,
-        slug: draft.slug,
-        name: draft.name,
-        status: 'active',
-        sortOrder: draft.sortOrder,
-        requiresPlace: draft.requiresPlace,
-        requiresStreamUrl: draft.requiresStreamUrl,
-        locales: [{ locale, name: draft.name, description: draft.description || null }],
-      };
-      setTypes((current) => [...current, created]);
-      setDraft(draftFor(created, locale));
-    } else {
-      setTypes((current) =>
-        current.map((type) =>
-          type.id === draft.id
-            ? {
-                ...type,
-                ...draft,
-                id: type.id,
-                locales: [
-                  ...type.locales.filter((entry) => entry.locale !== locale),
-                  { locale, name: draft.name, description: draft.description || null },
-                ],
-              }
-            : type,
-        ),
-      );
+    setSaving(true);
+    try {
+      const result = draft.id
+        ? await bindings.updateProgramEventTypeAction(draft.id, { ...draft, locale })
+        : await bindings.createProgramEventTypeAction({
+            name: draft.name,
+            slug: draft.slug,
+            sortOrder: draft.sortOrder,
+            description: draft.description,
+            requiresPlace: draft.requiresPlace,
+            requiresStreamUrl: draft.requiresStreamUrl,
+          });
+      if ('error' in result && result.error) {
+        notifications.show({ message: result.error, tone: 'danger' });
+        return;
+      }
+      if (!draft.id && 'data' in result && result.data) {
+        const created: AdminProgramEventTypeOption = {
+          id: result.data.id,
+          slug: draft.slug,
+          name: draft.name,
+          status: 'active',
+          sortOrder: draft.sortOrder,
+          requiresPlace: draft.requiresPlace,
+          requiresStreamUrl: draft.requiresStreamUrl,
+          locales: [{ locale, name: draft.name, description: draft.description || null }],
+        };
+        setTypes((current) => [...current, created]);
+        setDraft(draftFor(created, locale));
+      } else {
+        setTypes((current) =>
+          current.map((type) =>
+            type.id === draft.id
+              ? {
+                  ...type,
+                  ...draft,
+                  id: type.id,
+                  locales: [
+                    ...type.locales.filter((entry) => entry.locale !== locale),
+                    { locale, name: draft.name, description: draft.description || null },
+                  ],
+                }
+              : type,
+          ),
+        );
+      }
+      notifications.show({ message: tCommon('notifications.saveSuccess'), tone: 'positive' });
+    } catch (error) {
+      notifications.show({
+        message: error instanceof Error ? error.message : tCommon('errors.generic'),
+        tone: 'danger',
+      });
+    } finally {
+      setSaving(false);
     }
-    notifications.show({ message: tCommon('notifications.saveSuccess'), tone: 'positive' });
   };
   const confirmDelete = async () => {
     if (!draft.id) {
       return;
     }
-    setDeleting(true);
-    const result = await bindings.deleteProgramEventTypeAction(draft.id);
-    setDeleting(false);
-    if ('error' in result && result.error) {
-      notifications.show({ message: result.error, tone: 'danger' });
+    if (saving || deleting) {
       return;
     }
-    const remaining = types.filter((type) => type.id !== draft.id);
-    setTypes(remaining);
-    setDraft(draftFor(remaining[0], locale));
-    setDeleteConfirmationOpened(false);
+    setDeleting(true);
+    try {
+      const result = await bindings.deleteProgramEventTypeAction(draft.id);
+      if ('error' in result && result.error) {
+        notifications.show({ message: result.error, tone: 'danger' });
+        return;
+      }
+      const remaining = types.filter((type) => type.id !== draft.id);
+      setTypes(remaining);
+      setDraft(draftFor(remaining[0], locale));
+      setDeleteConfirmationOpened(false);
+    } catch (error) {
+      notifications.show({
+        message: error instanceof Error ? error.message : tCommon('errors.generic'),
+        tone: 'danger',
+      });
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (

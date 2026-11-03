@@ -2,6 +2,24 @@ import { BlockingAlertDialog } from './BlockingAlertDialog';
 import { DialogActions, type DialogActionsProps } from './DialogActions';
 import { ConfirmModal } from './ConfirmModal';
 import { OverlayDialog, type OverlayDialogProps } from './OverlayDialog';
+import { ConfirmDialogHost, ConfirmDialogLoadError, type ConfirmDialogHostProps } from './confirm-dialogs';
+
+const loadError = { message: 'Could not open confirmation.', retryLabel: 'Retry' };
+<ConfirmDialogHost loadError={loadError} />;
+// @ts-expect-error Renderer failure recovery requires caller-owned localized copy.
+<ConfirmDialogHost />;
+// @ts-expect-error Both failure message and retry label are required.
+<ConfirmDialogHost loadError={{ message: 'Could not open confirmation.' }} />;
+// @ts-expect-error The host rejects visual overrides through typed spreads.
+const styledHost: ConfirmDialogHostProps = { loadError, style: { position: 'fixed' } };
+void styledHost;
+<ConfirmDialogLoadError
+  {...loadError}
+  title="Delete item"
+  cancelLabel="Cancel"
+  onCancel={() => {}}
+  onRetry={() => {}}
+/>;
 
 const dialog = { opened: true, onClose: () => {}, title: 'Details', children: 'Content' };
 <OverlayDialog {...dialog} size="wide" bodyLayout="fit" dismissible busy />;

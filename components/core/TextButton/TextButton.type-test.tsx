@@ -93,3 +93,17 @@ const actionNavigation: TextButtonProps = { children: 'Open', prefetch: false };
 // @ts-expect-error Form association belongs to the action branch.
 const formLink: TextButtonProps = { children: 'About', href: '/about', form: 'editor' };
 void [actionNavigation, formLink];
+
+<TextButton loading loadingLabel="Saving preferences">
+  Save preferences
+</TextButton>;
+// @ts-expect-error TextButton pending is a command state, not an unavailable navigation link.
+<TextButton href="/settings" loading>
+  Settings
+</TextButton>;
+// @ts-expect-error Loading copy belongs to the command branch.
+const pendingLink: TextButtonProps = { children: 'Settings', href: '/settings', loadingLabel: 'Opening' };
+const pendingVisualOverride = { loading: true, style: { color: 'red' } };
+// @ts-expect-error Pending does not open a styling escape through typed spreads.
+<TextButton {...pendingVisualOverride}>Save</TextButton>;
+void pendingLink;

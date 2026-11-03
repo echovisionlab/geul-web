@@ -9,7 +9,8 @@ import { useTranslations } from 'next-intl';
 import { notifications } from '@/components/core/Notification';
 import { MediaPreviewGrid } from '@/components/core/MediaPreviewGrid';
 import { OgImagePreview } from '@/features/metadata/OgImagePreview';
-import { Skeleton } from '@/components/core/Display';
+import { PageLoader } from '@/features/site/PageLoader';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { getSiteOgStatusAction, regenerateSiteOgImageAction } from '@/lib/actions/site-setting';
 import { useOgImage } from '@/lib/hooks/useOgImage';
 import { SITE_OG_TARGET_ID } from '@/lib/og-generation-targets';
@@ -21,7 +22,7 @@ const SiteOgBackgroundUploader = dynamic(
     import('@/features/site/SiteOgBackgroundUploader/SiteOgBackgroundUploader').then(
       (module) => module.SiteOgBackgroundUploader,
     ),
-  { loading: () => <Skeleton roleType="media" /> },
+  { loading: () => <PageLoader placement="flow" /> },
 );
 
 export interface SiteOgImageBindings {
@@ -45,7 +46,13 @@ export function SiteOgImagePanel({ currentBackgroundUrl, automaticGenerationRunI
 
   const status = useQuery({
     queryKey,
-    queryFn: bindings?.status ?? getSiteOgStatusAction,
+    queryFn: async () => {
+      const result = await (bindings?.status ?? getSiteOgStatusAction)();
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      return result;
+    },
   });
   const ogImage = useOgImage({
     entityType: 'site',
@@ -87,14 +94,23 @@ export function SiteOgImagePanel({ currentBackgroundUrl, automaticGenerationRunI
   return (
     <MediaPreviewGrid>
       <AuthoringExtension kind="generation">
-        <OgImagePreview
-          src={ogImage.src}
-          canRegenerate
-          isRegenerating={regenerate.isPending || ogImage.isRegenerating}
-          generationStatus={ogImage.status}
-          generationError={ogImage.error}
-          onRegenerate={() => regenerate.mutate()}
-        />
+        {status.isPending ? (
+          <PageLoader placement="flow" />
+        ) : (
+          <>
+            <QueryErrorAlert queries={[status]} />
+            {status.data && (
+              <OgImagePreview
+                src={ogImage.src}
+                canRegenerate
+                isRegenerating={regenerate.isPending || ogImage.isRegenerating}
+                generationStatus={ogImage.status}
+                generationError={ogImage.error}
+                onRegenerate={() => regenerate.mutate()}
+              />
+            )}
+          </>
+        )}
       </AuthoringExtension>
       <SiteOgBackgroundUploader
         type="site_og_background"

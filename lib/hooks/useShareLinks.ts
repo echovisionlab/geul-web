@@ -36,11 +36,13 @@ export interface ShareLinkServices {
 interface UseShareLinksReturn<T extends ShareEntityType> {
   shareLinks: ShareLink<T>[];
   isLoading: boolean;
+  isFetching: boolean;
+  error: Error | null;
   isCreating: boolean;
   isDeleting: string | null;
   create: (options?: CreateShareLinkOptions) => Promise<void>;
   remove: (id: string) => Promise<void>;
-  refetch: () => void;
+  refetch: () => Promise<unknown>;
 }
 
 // Transform ShareLinkItem to ShareLink<T> format
@@ -96,7 +98,7 @@ export function useShareLinks<T extends ShareEntityType>(options: UseShareLinksO
     }
   }, [entityType, entityId, services]);
 
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, isFetching, error, refetch } = useQuery({
     queryKey,
     queryFn,
     ...(services ? { enabled: true } : {}),
@@ -255,6 +257,8 @@ export function useShareLinks<T extends ShareEntityType>(options: UseShareLinksO
   return {
     shareLinks,
     isLoading,
+    isFetching,
+    error,
     isCreating: createMutation.isPending,
     isDeleting: deletingId,
     create,

@@ -1,14 +1,14 @@
 // @vitest-environment jsdom
 
-import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+import { act, render, screen } from '@/test/render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { BaseMap } from './BaseMap';
 
 const mocks = vi.hoisted(() => ({
   apiKey: '',
+  status: 'LOADED',
+  ready: true,
   listeners: new Map<string, (event?: unknown) => void>(),
   panTo: vi.fn(),
 }));
@@ -45,83 +45,47 @@ const fakeMap = vi.hoisted(() => ({
 
 vi.mock('@vis.gl/react-google-maps', () => ({
   Map: ({ children, ...props }: { children: React.ReactNode }) => (
-    <div data-google-map={JSON.stringify(props)}>{children}</div>
+    <div role="region" aria-label="Google map" data-google-map={JSON.stringify(props)}>
+      {children}
+    </div>
   ),
-  useMap: () => fakeMap,
+  useMap: () => (mocks.ready ? fakeMap : null),
+  useApiLoadingStatus: () => mocks.status,
 }));
 
 vi.mock('@/lib/public-runtime-config', () => ({
   getPublicGoogleMapsApiKey: () => mocks.apiKey,
 }));
 
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-Object.defineProperty(window.navigator, 'vibrate', {
-  writable: true,
-  value: vi.fn(),
-});
-
-globalThis.google = {
-  maps: {
-    event: {
-      removeListener: vi.fn(),
-    },
-  },
-} as never;
-
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: (query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener() {},
-    removeListener() {},
-    addEventListener() {},
-    removeEventListener() {},
-    dispatchEvent() {
-      return false;
-    },
-  }),
-});
-
-let host: HTMLDivElement | null = null;
-let root: Root | null = null;
-
+let view: ReturnType<typeof render> | undefined;
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.listeners.clear();
   mocks.apiKey = '';
-  host = document.createElement('div');
-  document.body.appendChild(host);
-  root = createRoot(host);
+  mocks.status = 'LOADED';
+  mocks.ready = true;
+  vi.stubGlobal('google', { maps: { event: { removeListener: vi.fn() } } });
 });
-
 afterEach(() => {
-  act(() => {
-    root?.unmount();
-  });
-  host?.remove();
-  host = null;
-  root = null;
+  view?.unmount();
+  view = undefined;
+  vi.unstubAllGlobals();
 });
-
 function renderMap(props: Partial<React.ComponentProps<typeof BaseMap>> = {}) {
-  act(() => {
-    root?.render(
-      <DesignSystemProvider forceColorScheme="light">
-        <BaseMap center={{ lat: 37, lng: 127 }} {...props} />
-      </DesignSystemProvider>,
-    );
-  });
+  const element = <BaseMap center={{ lat: 37, lng: 127 }} {...props} />;
+  if (view) {
+    view.rerender(element);
+  } else {
+    view = render(element);
+  }
 }
 
 describe('BaseMap', () => {
   it('renders an explanatory fallback when the Google Maps key is missing', () => {
     renderMap();
 
-    expect(document.body.textContent).toContain('Google Maps API key not configured');
-    expect(document.querySelector('[data-google-map]')).toBeNull();
+    expect(screen.getByText('Google Maps API key not configured')).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Google map' })).not.toBeInTheDocument();
   });
 
   it('wires map options, pan targets, mouse clicks, POI clicks, and touch taps', () => {
@@ -139,7 +103,7 @@ describe('BaseMap', () => {
       children: <div data-child>Child</div>,
     });
 
-    expect(document.querySelector('[data-child]')).not.toBeNull();
+    expect(screen.getByText('Child')).toBeInTheDocument();
     expect(mocks.panTo).toHaveBeenCalledWith({ lat: 38, lng: 128 });
     expect(fakeMap.addListener).toHaveBeenCalledWith('mousedown', expect.any(Function));
     expect(fakeMap.addListener).toHaveBeenCalledWith('mouseup', expect.any(Function));
@@ -170,4 +134,26 @@ describe('BaseMap', () => {
     });
     expect(onClick).toHaveBeenCalledWith(35, 125);
   });
+});
+
+it('keeps initial SDK and map creation visible until ready', () => {
+  mocks.apiKey = 'key';
+  mocks.status = 'LOADING';
+  mocks.ready = false;
+  renderMap();
+  expect(screen.getByRole('status')).toHaveTextContent('Unfolding the atlas...');
+  mocks.status = 'LOADED';
+  renderMap();
+  expect(screen.getByRole('status')).toBeInTheDocument();
+  mocks.ready = true;
+  renderMap();
+  expect(screen.queryByRole('status')).not.toBeInTheDocument();
+});
+it.each(['FAILED', 'AUTH_FAILURE'])('ends the SDK wait on %s', (status) => {
+  mocks.apiKey = 'key';
+  mocks.status = status;
+  mocks.ready = false;
+  renderMap();
+  expect(screen.getByRole('alert')).toHaveTextContent('Failed to load data.');
+  expect(screen.queryByRole('status')).not.toBeInTheDocument();
 });

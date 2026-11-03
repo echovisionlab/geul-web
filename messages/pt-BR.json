@@ -1332,6 +1332,8 @@
       }
     },
     "verification": {
+      "checking": "Verificando o status da alteração de e-mail…",
+      "unavailable": "Não foi possível verificar o status da alteração de e-mail. Tente novamente.",
       "loading": "Carregando formulário de verificação...",
       "startOver": "Começar de novo",
       "errors": {

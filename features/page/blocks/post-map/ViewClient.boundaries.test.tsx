@@ -2,6 +2,9 @@
 
 import { renderToReadableStream } from 'react-dom/server.browser';
 import { describe, expect, it, vi } from 'vitest';
+import { NextIntlClientProvider } from 'next-intl';
+import { ManifestProvider } from '@/lib/contexts/ManifestContext';
+import enMessages from '@/messages/en.json';
 import type { MapViewportRequest } from '../map-features/viewport';
 import type { MapViewConfig } from '@/lib/types/map/model';
 import { PostMapViewClient } from './ViewClient';
@@ -61,26 +64,28 @@ describe('post/work map client runtime boundaries', () => {
     const postFilters = { requirePlace: true, sortBy: 'published_at', sortOrder: 'desc' } as const;
     const workFilters = { featuredOnly: true, sortBy: 'title', sortOrder: 'asc' } as const;
     const stream = await renderToReadableStream(
-      <>
-        <PostMapViewClient
-          sectionId="posts"
-          mapViewConfig={mapViewConfig}
-          initialViewport={viewport}
-          initialFeatures={initialFeatures}
-          requestedLocale="ko"
-          primaryLabel="content_title"
-          filters={postFilters}
-        />
-        <WorkMapViewClient
-          sectionId="works"
-          mapViewConfig={mapViewConfig}
-          initialViewport={viewport}
-          initialFeatures={initialFeatures}
-          requestedLocale="en"
-          primaryLabel="content_title"
-          filters={workFilters}
-        />
-      </>,
+      <NextIntlClientProvider locale="en" messages={{ common: { states: enMessages.common.states } }} timeZone="UTC">
+        <ManifestProvider>
+          <PostMapViewClient
+            sectionId="posts"
+            mapViewConfig={mapViewConfig}
+            initialViewport={viewport}
+            initialFeatures={initialFeatures}
+            requestedLocale="ko"
+            primaryLabel="content_title"
+            filters={postFilters}
+          />
+          <WorkMapViewClient
+            sectionId="works"
+            mapViewConfig={mapViewConfig}
+            initialViewport={viewport}
+            initialFeatures={initialFeatures}
+            requestedLocale="en"
+            primaryLabel="content_title"
+            filters={workFilters}
+          />
+        </ManifestProvider>
+      </NextIntlClientProvider>,
     );
     await stream.allReady;
     const html = await new Response(stream).text();

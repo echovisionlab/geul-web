@@ -40,6 +40,7 @@ import type { ReactNode } from 'react';
 
 import { TableFocusRecovery } from '../TableFocusRecovery';
 import { ServerDataTableContent } from './ServerDataTableContent';
+import { ServerDataTablePendingProvider } from './ServerDataTableNavigation';
 import { ServerDataTableMultiFilter } from './ServerDataTableMultiFilter';
 import { ServerDataTableMultiSort } from './ServerDataTableMultiSort';
 import { ServerDataTablePagination } from './ServerDataTablePagination';
@@ -67,7 +68,7 @@ function ServerDataTableRoot({ namespace, accessibleLabel, children }: ServerDat
   return (
     <DsLayoutStack gap="md" data-datatable-root data-namespace={namespace} data-accessible-label={accessibleLabel}>
       <TableFocusRecovery />
-      {children}
+      <ServerDataTablePendingProvider>{children}</ServerDataTablePendingProvider>
     </DsLayoutStack>
   );
 }

@@ -35,6 +35,9 @@ export function LanguagePreferenceSettings({
 
   const updateLocaleMutation = useMutation({
     mutationFn: async () => updateAction(selectedLocale ?? DEFAULT_LOCALE),
+    onError: () => {
+      notifications.show({ title: t('errorTitle'), message: t('errorMessage'), tone: 'danger' });
+    },
     onSuccess: (result) => {
       if (result.success && result.preferred_locale) {
         const nextLocale = result.preferred_locale as SupportedLocale;

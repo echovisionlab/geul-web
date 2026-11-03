@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import type * as maplibregl from 'maplibre-gl';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { MapViewEmbedded } from '@/features/map/MapViewEmbedded';
 import type { MapRendererPlace, MapServerFeatureSource } from '@/features/map/types';
 import type { MapViewConfig } from '@/lib/types/map/model';
@@ -158,6 +159,7 @@ export function ServerFeatureMapViewClient<
   });
 
   const currentFeatures = featuresQuery.data;
+  const initialFeaturesPending = !currentFeatures && featuresQuery.isLoading;
   const featureItems = useMemo<TItem[]>(() => currentFeatures?.items ?? [], [currentFeatures]);
   const featureClusters = useMemo<TCluster[]>(() => currentFeatures?.clusters ?? [], [currentFeatures]);
   const featureSourceData = useMemo(
@@ -205,25 +207,9 @@ export function ServerFeatureMapViewClient<
     window.history.replaceState(window.history.state, '', nextUrl);
   }, []);
 
-  if (
-    featureSourceData.features.length === 0 &&
-    featurePlaces.length === 0 &&
-    (featuresQuery.isLoading || featuresQuery.isFetching)
-  ) {
-    return (
-      <div style={{ position: 'relative' }} ref={containerRef} className={className}>
-        <MapViewEmbedded
-          key={`${mapViewConfig.aspectRatio}:${mapViewConfig.displaySize ?? 100}`}
-          config={mapConfigForViewport}
-          allowEmpty
-          labelLocale={requestedLocale}
-        />
-      </div>
-    );
-  }
-
   return (
     <div style={{ position: 'relative' }} ref={containerRef} className={className}>
+      <QueryErrorAlert queries={[featuresQuery]} />
       <MapViewEmbedded
         key={`${mapViewConfig.aspectRatio}:${mapViewConfig.displaySize ?? 100}`}
         config={mapConfigForViewport}
@@ -275,6 +261,7 @@ export function ServerFeatureMapViewClient<
           }
           router.push(getItemHref(item));
         }}
+        pending={initialFeaturesPending}
       />
     </div>
   );

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useMutation } from '@tanstack/react-query';
 import { PageLoader } from '@/features/site/PageLoader';
 import { unsubscribeNewsletterAction } from '@/lib/actions/newsletter';
 import { UnsubscribeView, type UnsubscribeViewStatus } from './UnsubscribeView';
@@ -13,21 +12,32 @@ export function UnsubscribeContent({
 }: { token?: string | null; unsubscribeAction?: typeof unsubscribeNewsletterAction } = {}) {
   const searchParams = useSearchParams();
   const token = tokenOverride === undefined ? searchParams.get('token') : tokenOverride;
-  const [status, setStatus] = useState<'loading' | UnsubscribeViewStatus>('loading');
-
-  const { mutate: requestUnsubscribe } = useMutation({
-    mutationFn: (data: { token: string }) => unsubscribeAction(data.token),
-    onSuccess: (data) => setStatus(data.success ? 'success' : 'error'),
-    onError: () => setStatus('error'),
-  });
+  const [result, setResult] = useState<{ token: string; status: UnsubscribeViewStatus } | null>(null);
 
   useEffect(() => {
     if (!token) {
-      setStatus('missing-token');
       return;
     }
-    requestUnsubscribe({ token });
-  }, [requestUnsubscribe, token]);
+    let active = true;
+    void unsubscribeAction(token).then(
+      (data) => {
+        if (active) {
+          setResult({ token, status: data.success ? 'success' : 'error' });
+        }
+      },
+      () => {
+        if (active) {
+          setResult({ token, status: 'error' });
+        }
+      },
+    );
+    return () => {
+      active = false;
+    };
+  }, [unsubscribeAction, token]);
 
-  return status === 'loading' ? <PageLoader /> : <UnsubscribeView status={status} />;
+  if (!token) {
+    return <UnsubscribeView status="missing-token" />;
+  }
+  return result?.token === token ? <UnsubscribeView status={result.status} /> : <PageLoader />;
 }

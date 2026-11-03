@@ -1,7 +1,6 @@
 'use client';
-import { SupportingText } from '@/components/core/Typography';
 
-import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
+import { PageLoader } from '@/features/site/PageLoader';
 
 import { useCallback, useEffect, useRef } from 'react';
 import type { Monaco } from '@monaco-editor/react';
@@ -31,11 +30,7 @@ const MONACO_OPTIONS: SourceEditorBehaviorOptions = {
 
 function LoadingPlaceholder() {
   const t = useTranslations('adminList.emailLayouts.detail');
-  return (
-    <DsLayoutStack align="center" justify="center" fill="block">
-      <SupportingText tone="secondary">{t('states.loadingEditor')}</SupportingText>
-    </DsLayoutStack>
-  );
+  return <PageLoader placement="flow" message={t('states.loadingEditor')} />;
 }
 
 export function EmailLayoutEditor({

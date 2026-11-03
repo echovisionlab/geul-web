@@ -24,6 +24,7 @@ type BaseProps = {
   value: string | null;
   onChange: (locale: string | null) => void;
   disabled?: boolean;
+  loading?: boolean;
   fallbackLabel?: string | null;
 };
 
@@ -124,6 +125,7 @@ export function TranslationLocaleControl(props: TranslationLocaleControlProps) {
         value,
         onChange,
         disabled = false,
+        loading = false,
         withinPortal = true,
         buttonEmphasis = 'medium',
         buttonSize = 'xs',
@@ -141,6 +143,7 @@ export function TranslationLocaleControl(props: TranslationLocaleControlProps) {
                 leftSection={compact ? undefined : <IconLanguage size="1em" />}
                 indicator="menu"
                 disabled={disabled}
+                loading={loading}
                 aria-label={buttonAriaLabel ?? t('ariaLabel', { locale: buttonLabel })}
               >
                 {buttonName}
@@ -186,12 +189,16 @@ export function TranslationLocaleControl(props: TranslationLocaleControlProps) {
         fallbackLabel: _fallbackLabel,
         value,
         onChange,
+        loading = false,
+        disabled = false,
         ...rest
       } = props;
 
       return (
         <Select
           {...componentBindings(rest)}
+          disabled={disabled || loading}
+          aria-busy={loading || undefined}
           data={groupedOptions}
           value={value}
           onChange={(locale) => onChange(locale)}
@@ -206,12 +213,16 @@ export function TranslationLocaleControl(props: TranslationLocaleControlProps) {
         fallbackLabel: _fallbackLabel,
         value,
         onChange,
+        loading = false,
+        disabled = false,
         ...rest
       } = props;
 
       return (
         <NativeSelect
           {...componentBindings(rest)}
+          disabled={disabled || loading}
+          aria-busy={loading || undefined}
           data={groupedOptions}
           value={value ?? ''}
           onChange={(event) => onChange(event.currentTarget.value || null)}

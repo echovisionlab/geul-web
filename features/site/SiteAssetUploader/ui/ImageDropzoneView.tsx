@@ -23,6 +23,7 @@ interface ImageDropzoneViewProps {
   label: string;
   description: string;
   uploadPrompt: string;
+  loadingLabel: string;
   removeButtonAriaLabel: string;
   onFileSelect: (file: File) => void;
   onReject: (rejections: ImageUploadRejection[]) => void;
@@ -42,6 +43,7 @@ export function ImageDropzoneView({
   label,
   description,
   uploadPrompt,
+  loadingLabel,
   removeButtonAriaLabel,
   onFileSelect,
   onReject,
@@ -67,9 +69,9 @@ export function ImageDropzoneView({
         alt={label}
         accept={accept}
         maxSize={maxSize}
-        disabled={disabled || uploading}
+        disabled={disabled || uploading || deleting}
         loading={uploading}
-        loadingLabel={uploadPrompt}
+        loadingLabel={loadingLabel}
         dropzoneAriaLabel={label}
         emptyDescription={uploadPrompt}
         changeHint={currentUrl ? uploadPrompt : undefined}

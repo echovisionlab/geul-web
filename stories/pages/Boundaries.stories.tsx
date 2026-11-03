@@ -6,10 +6,13 @@ import { normalizeLocale } from '@/lib/i18n/locale';
 import { navigatePreview } from '../shared/preview-navigation';
 function BoundaryPagePreview({ status = 500, root = false }: { status?: number; root?: boolean }) {
   const locale = normalizeLocale(useLocale()) ?? 'en';
+  const handleRetry = () => {
+    navigatePreview('/');
+  };
   return root ? (
-    <RootErrorPageView status={status} locale={locale} onRetry={() => navigatePreview('/')} />
+    <RootErrorPageView status={status} locale={locale} onRetry={handleRetry} />
   ) : (
-    <ApplicationErrorPage status={status} onRetry={() => navigatePreview('/')} />
+    <ApplicationErrorPage status={status} onRetry={handleRetry} />
   );
 }
 

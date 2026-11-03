@@ -94,7 +94,11 @@ export function ProgramEventPosterUploader({
   });
 
   const reorderPosters = useMutation({
-    mutationFn: (variables: { nextMedia: ProgramEventPosterMedia[]; previousMedia: ProgramEventPosterMedia[] }) =>
+    mutationFn: (variables: {
+      nextMedia: ProgramEventPosterMedia[];
+      previousMedia: ProgramEventPosterMedia[];
+      movedId: string;
+    }) =>
       reorderProgramEventPosterMediaAction(
         eventId,
         variables.nextMedia.map((item) => item.id),
@@ -140,6 +144,9 @@ export function ProgramEventPosterUploader({
   });
 
   const handleDragEnd = (event: DragEndEvent) => {
+    if (!canEdit || isMutating || isUploading) {
+      return;
+    }
     const { active, over } = event;
     if (!over || active.id === over.id) {
       return;
@@ -155,7 +162,7 @@ export function ProgramEventPosterUploader({
       isPrimary: index === 0,
     }));
     onMediaChange(nextMedia);
-    reorderPosters.mutate({ nextMedia, previousMedia: sortedMedia });
+    reorderPosters.mutate({ nextMedia, previousMedia: sortedMedia, movedId: String(active.id) });
   };
 
   const isMutating = addPoster.isPending || reorderPosters.isPending || deletePoster.isPending;
@@ -171,7 +178,9 @@ export function ProgramEventPosterUploader({
                   key={item.id}
                   item={item}
                   canEdit={canEdit}
-                  disabled={isMutating}
+                  disabled={isMutating || isUploading}
+                  reordering={reorderPosters.isPending && reorderPosters.variables?.movedId === item.id}
+                  removing={deletePoster.isPending && deletePoster.variables === item.id}
                   onRemove={() => deletePoster.mutate(item.id)}
                   labels={{
                     drag: tProgramEventPoster('drag'),
@@ -203,6 +212,8 @@ interface SortablePosterCardProps {
   item: ProgramEventPosterMedia;
   canEdit: boolean;
   disabled: boolean;
+  removing?: boolean;
+  reordering?: boolean;
   labels: {
     drag: string;
     main: string;
@@ -212,7 +223,15 @@ interface SortablePosterCardProps {
   onRemove: () => void;
 }
 
-export function SortablePosterCard({ item, canEdit, disabled, labels, onRemove }: SortablePosterCardProps) {
+export function SortablePosterCard({
+  item,
+  canEdit,
+  disabled,
+  removing = false,
+  reordering = false,
+  labels,
+  onRemove,
+}: SortablePosterCardProps) {
   const sortable = useSortableItem({
     id: item.id,
     disabled: !canEdit || disabled,
@@ -276,6 +295,7 @@ export function SortablePosterCard({ item, canEdit, disabled, labels, onRemove }
               interaction="drag-handle"
               draggable={false}
               {...sortable.handle}
+              loading={reordering}
               aria-label={labels.drag}
               disabled={disabled}
             >
@@ -291,6 +311,7 @@ export function SortablePosterCard({ item, canEdit, disabled, labels, onRemove }
                 tone="danger"
                 emphasis="medium"
                 aria-label={labels.remove}
+                loading={removing}
                 disabled={disabled}
                 onPointerDown={(event) => event.stopPropagation()}
                 onClick={(event) => {
@@ -322,10 +343,11 @@ function PosterAddTile({ idPrefix, disabled, isUploading, uploadProgress, onUplo
   const cropAccessibility = useImageCropAccessibility(tFeaturedImage('cropTitle'));
   const tCommon = useTranslations('common');
   const inputMaxSize = getUploadSelectionMaxSize(UploadType.PROGRAM_EVENT_POSTER, 'image/jpeg', posterConfig.maxSize);
-  const { tempImageSrc, cropModalOpened, handleFileDrop, handleCropComplete, handleCropCancel } = useImageUploadCrop({
-    onUpload,
-    uploadType: UploadType.PROGRAM_EVENT_POSTER,
-  });
+  const { tempImageSrc, cropModalOpened, handleFileDrop, handleCropComplete, handleCropCancel, isPreparing } =
+    useImageUploadCrop({
+      onUpload,
+      uploadType: UploadType.PROGRAM_EVENT_POSTER,
+    });
 
   const handleReject = (rejections: ImageUploadRejection[]) => {
     const rejection = rejections[0];
@@ -340,7 +362,7 @@ function PosterAddTile({ idPrefix, disabled, isUploading, uploadProgress, onUplo
     notifications.show({ message, tone: 'danger' });
   };
 
-  const isPreparingImage = isUploading && uploadProgress <= 0;
+  const isPreparingImage = isPreparing || (isUploading && uploadProgress <= 0);
   const uploadStatusLabel = isPreparingImage
     ? tCommon('uploadField.status.preparingImage')
     : tCommon('uploadField.status.uploading');
@@ -357,8 +379,8 @@ function PosterAddTile({ idPrefix, disabled, isUploading, uploadProgress, onUplo
             accept={getUploadSelectionMimeTypes(UploadType.PROGRAM_EVENT_POSTER)}
             maxSize={inputMaxSize}
             canEdit
-            disabled={disabled || isUploading}
-            loading={isUploading}
+            disabled={disabled || isUploading || isPreparing}
+            loading={isUploading || isPreparing}
             loadingLabel={uploadStatusLabel}
             progress={isPreparingImage ? undefined : uploadProgress}
             emptyTitle={label}

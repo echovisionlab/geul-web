@@ -90,6 +90,7 @@ export default function AdminMapThemesPage() {
     <MapThemeListPageView
       themes={themeList?.themes ?? []}
       defaultMapThemeId={themeList?.defaultMapThemeId ?? ''}
+      defaultUpdatingId={setDefaultTheme.isPending ? (setDefaultTheme.variables ?? null) : null}
       loadFailed={isError}
       copyLoading={copyTheme.isPending}
       deleteLoading={deleteTheme.isPending}

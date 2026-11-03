@@ -7,8 +7,19 @@
   background: var(--geul-canvas-black);
 }
 
+/* Match the runtime's initial fluid ratio only while no media can supply its own size. */
+.frame:is([data-video-player-preparing='true'], [data-video-player-processing='true']):not(
+    :has(video, :global(.video-js))
+  ) {
+  aspect-ratio: 16 / 9;
+}
+
 .frame :global([data-video-player-mount]) {
   line-height: 0;
+}
+
+.frame :global([data-video-player-mount]:empty) {
+  aspect-ratio: inherit;
 }
 
 .frame :global(video),

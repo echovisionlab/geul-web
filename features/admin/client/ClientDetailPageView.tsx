@@ -15,6 +15,8 @@ import { notifications } from '@/components/core/Notification';
 import { Button, SaveButton } from '@/components/core/Button';
 import { EditorHeader } from '@/features/editor/EditorHeader';
 import { TextInput } from '@/components/core/Input';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
+import { Alert } from '@/components/core/Alert';
 import { PageLoader } from '@/features/site/PageLoader';
 import { ClientLogoUploader } from '@/features/client/ClientLogoUploader';
 import { createClientAction, updateClientAction } from '@/lib/actions/client';
@@ -57,11 +59,13 @@ export function ClientDetailPageView({
 
   const queryClient = useQueryClient();
 
-  const { data: client, isLoading } = useQuery({
+  const clientQuery = useQuery({
     queryKey: ['clients', 'detail', id],
     queryFn: () => readAction(id),
     enabled: !isNew,
   });
+
+  const { data: client, isLoading } = clientQuery;
 
   const createClient = useMutation({
     mutationFn: (data: { name: string; website?: string | null }) => createAction(data.name, data.website),
@@ -167,6 +171,13 @@ export function ClientDetailPageView({
 
   if (!isNew && isLoading) {
     return <PageLoader />;
+  }
+
+  if (!isNew && clientQuery.isError) {
+    return <QueryErrorAlert queries={[clientQuery]} />;
+  }
+  if (!isNew && !client) {
+    return <Alert tone="danger">{tCommon('errors.entityNotFound', { entity: tCommon('entities.client') })}</Alert>;
   }
 
   return (

@@ -12,7 +12,7 @@ import {
   hydrateCanonicalBlockRoom,
   materializeCanonicalBlockRoom,
 } from '@echovisionlab/geul-common/collaboration/block-room-codec';
-import { afterEach, expect, it } from 'vitest';
+import { afterEach, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
 import { createBlockRoomProseMirrorBridge } from '../block-room-prosemirror-bridge';
 import { createPostBlockRoomTiptapController } from '../block-room-tiptap-controller';
@@ -20,6 +20,7 @@ import { createTiptapExternalVideoExtension, DEFAULT_TIPTAP_EXTERNAL_VIDEO_LABEL
 import { createTiptapWireExtensions } from '../wire-schema';
 import { createMarkdownPasteExtension } from '../markdown-paste';
 import {
+  chooseLinkPresentation,
   createTiptapLinkCardExtension,
   getLinkPresentationState,
   LinkPresentationPaste,
@@ -85,7 +86,7 @@ function mountPost(label: string) {
   document.body.append(element);
   const editor = new Editor({
     element,
-    extensions: [...extensions(), controller.extension],
+    extensions: [...extensions(), LinkPresentationPaste, controller.extension],
     content: controller.initialContent,
   });
   const disconnect = controller.connect(editor);
@@ -237,4 +238,99 @@ it.each([
   expect(editor.state.doc.firstChild!.firstChild!.firstChild!.type.name).toBe(projected);
   editor.commands.insertContent('x');
   expect(getLinkPresentationState(editor.state).pasted).toBeNull();
+});
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((finish) => {
+    resolve = finish;
+  });
+  return { promise, resolve };
+}
+
+it('keeps the latest preview pending when an older image import finishes', async () => {
+  const post = mountPost(URL);
+  const image = deferred<string | null>();
+  const imported = deferred<void>();
+  const older = chooseLinkPresentation(
+    post.editor,
+    {
+      loadPreview: async () => ({
+        title: 'Old',
+        description: 'Old description',
+        siteName: 'Old site',
+        imageSource: 'https://old.example/image',
+        iconSource: '',
+      }),
+      importImage: () => {
+        imported.resolve();
+        return image.promise;
+      },
+    },
+    { blockId: BLOCK_ID, url: URL },
+    'card',
+    { refresh: true },
+  );
+  await imported.promise;
+  const current = deferred<{
+    title: string;
+    description: string;
+    siteName: string;
+    imageSource: string;
+    iconSource: string;
+  }>();
+  const newer = chooseLinkPresentation(
+    post.editor,
+    { loadPreview: () => current.promise },
+    { blockId: BLOCK_ID, url: URL },
+    'card',
+    { refresh: true },
+  );
+  image.resolve(FILE_ID);
+  await older;
+  expect(getLinkPresentationState(post.editor.state).pending).toContain(BLOCK_ID);
+  expect(post.stored().props?.linkThumbnail?.state.value).not.toBe(FILE_ID);
+  current.resolve({
+    title: 'Current',
+    description: 'Current description',
+    siteName: 'Current site',
+    imageSource: '',
+    iconSource: '',
+  });
+  await newer;
+  expect(getLinkPresentationState(post.editor.state).pending).not.toContain(BLOCK_ID);
+  expect(post.stored().localeProps?.linkDescription).toBe('Current description');
+});
+
+it('does not apply an imported preview after editor disposal', async () => {
+  const post = mountPost(URL);
+  const imported = deferred<void>();
+  const image = deferred<string | null>();
+  const request = chooseLinkPresentation(
+    post.editor,
+    {
+      loadPreview: async () => ({
+        title: 'Late',
+        description: 'Late',
+        siteName: 'Site',
+        imageSource: 'https://old.example/image',
+        iconSource: '',
+      }),
+      importImage: () => {
+        imported.resolve();
+        return image.promise;
+      },
+    },
+    { blockId: BLOCK_ID, url: URL },
+    'card',
+    { refresh: true },
+  );
+  await imported.promise;
+  const dispatch = vi.spyOn(post.editor.view, 'dispatch');
+  cleanup?.();
+  cleanup = null;
+  dispatch.mockClear();
+  image.resolve(FILE_ID);
+  await expect(request).resolves.toBe(true);
+  expect(dispatch).not.toHaveBeenCalled();
 });

@@ -1,4 +1,5 @@
 'use client';
+import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -49,11 +50,12 @@ export function SectionList() {
     return () => cancelAnimationFrame(frame);
   }, [sections]);
   const [pendingType, setPendingType] = useState<ConfiguredSectionType | null>(null);
-  const { data: publishedForms, isLoading: formsLoading } = useQuery({
+  const formsQuery = useQuery({
     queryKey: ['forms', 'listPublished', 50, 'page-preinsert'],
     queryFn: () => listPublishedForms(50),
     enabled: pendingType === 'form',
   });
+  const { data: publishedForms, isLoading: formsLoading } = formsQuery;
   const formOptions = useMemo(
     () => (publishedForms ?? []).map((form) => ({ value: form.id, label: form.title })),
     [publishedForms],
@@ -187,6 +189,7 @@ export function SectionList() {
           title={sectionTypeLabels[pendingType]}
           formOptions={formOptions}
           formsLoading={formsLoading}
+          formsFailure={formsQuery.isError ? <QueryErrorAlert queries={[formsQuery]} /> : undefined}
           onCancel={closePreinsert}
           onInsert={confirmPreinsert}
         />
