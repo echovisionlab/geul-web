@@ -39,19 +39,6 @@ interface CriteriaListInput {
   includeArchived?: boolean;
 }
 
-function kindToLabel(type: MemberCriteriaKind): string {
-  switch (type) {
-    case MemberCriteriaKind.ALL_MEMBERS:
-      return 'All Users';
-    case MemberCriteriaKind.MEMBER_TAGS:
-      return 'User Tags';
-    case MemberCriteriaKind.FILTER:
-      return 'Users by Filter';
-    default:
-      return 'Unknown';
-  }
-}
-
 function accountRoleToValue(role: AuthorizationRole): string | null {
   switch (role) {
     case AuthorizationRole.ADMIN:
@@ -94,7 +81,6 @@ export async function listMemberCriteriaAdminAction(input: CriteriaListInput) {
         name: s.name,
         description: s.description ?? '',
         criteria_type: s.kind,
-        criteria_type_label: kindToLabel(s.kind),
         estimated_count: s.matchingMemberCount ?? null,
         campaign_count: s.campaignCount,
         delivery_run_count: s.deliveryRunCount,
@@ -165,10 +151,12 @@ export async function restoreMemberCriteriaAction(id: string): Promise<ActionRes
   );
 }
 
-export async function listActiveMemberCriteriaAction(): Promise<{ id: string; name: string; kindLabel: string }[]> {
+export async function listActiveMemberCriteriaAction(): Promise<
+  { id: string; name: string; kind: MemberCriteriaKind }[]
+> {
   try {
     const client = await createMemberCriteriaClient();
-    const criteriaListById = new Map<string, { id: string; name: string; kindLabel: string }>();
+    const criteriaListById = new Map<string, { id: string; name: string; kind: MemberCriteriaKind }>();
     let offset = 0;
 
     for (;;) {
@@ -184,7 +172,7 @@ export async function listActiveMemberCriteriaAction(): Promise<{ id: string; na
         criteriaListById.set(criteria.id, {
           id: criteria.id,
           name: criteria.name,
-          kindLabel: kindToLabel(criteria.kind),
+          kind: criteria.kind,
         });
       }
 

@@ -2,6 +2,7 @@
 
 import { act, type ChangeEvent, type ReactNode } from 'react';
 import { CampaignTargetMode } from '@echovisionlab/geul-proto/secure/campaign_pb.ts';
+import { MemberCriteriaKind } from '@echovisionlab/geul-proto/secure/member_criteria_pb.ts';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
@@ -64,7 +65,7 @@ afterEach(() => {
   container.remove();
 });
 
-const criteriaOptions = [{ id: 'criteria-1', name: 'Members', kindLabel: 'Users by Filter' }];
+const criteriaOptions = [{ id: 'criteria-1', name: 'Members', kind: MemberCriteriaKind.FILTER }];
 
 function renderControl(selection: CampaignTargetSelection, onChange = vi.fn(), loadError = false) {
   act(() => {

@@ -5,7 +5,6 @@ export interface MemberCriteriaRow {
   name: string;
   description: string;
   criteria_type: MemberCriteriaKind;
-  criteria_type_label: string;
   estimated_count: number | null;
   campaign_count: number;
   delivery_run_count: number;

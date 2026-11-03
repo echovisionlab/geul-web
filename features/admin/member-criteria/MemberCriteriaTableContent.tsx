@@ -13,9 +13,11 @@ import { useLocale } from '@/lib/providers/LocaleProvider';
 import type { ColumnDef } from '@/lib/types/common/data-table';
 import type { MemberCriteriaRow } from './model';
 import { MemberCriteriaRowMenu } from './MemberCriteriaRowMenu';
+import { useMemberCriteriaKindLabel } from './useMemberCriteriaKindLabel';
 
 function getColumns(
   locale: string,
+  kindLabel: (kind: MemberCriteriaRow['criteria_type']) => string,
   labels: {
     name: string;
     type: string;
@@ -39,7 +41,7 @@ function getColumns(
     {
       key: 'type',
       header: labels.type,
-      cell: (row) => <LabelBadge size="sm">{row.criteria_type_label}</LabelBadge>,
+      cell: (row) => <LabelBadge size="sm">{kindLabel(row.criteria_type)}</LabelBadge>,
     },
     {
       key: 'status',
@@ -94,7 +96,8 @@ export function MemberCriteriaTableContent({
   const tCommon = useTranslations('common');
   const tPage = useTranslations('adminList.memberCriteria');
   const locale = useLocale();
-  const columns = getColumns(locale, {
+  const kindLabel = useMemberCriteriaKindLabel();
+  const columns = getColumns(locale, kindLabel, {
     name: tCommon('labels.name'),
     type: tCommon('labels.type'),
     status: tCommon('labels.status'),
