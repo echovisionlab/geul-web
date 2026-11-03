@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.24.1](https://github.com/echovisionlab/geul-web/compare/v0.24.0...v0.24.1) (2026-11-03)
+
+
+### Bug Fixes
+
+* translate Member criteria kind labels ([#226](https://github.com/echovisionlab/geul-web/issues/226)) ([0088215](https://github.com/echovisionlab/geul-web/commit/00882155c86a01daa48579b017c7fc67c12474ad))
+
 ## [0.24.0](https://github.com/echovisionlab/geul-web/compare/v0.23.5...v0.24.0) (2026-11-03)
 
 
