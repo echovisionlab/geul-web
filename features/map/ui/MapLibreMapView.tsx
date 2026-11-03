@@ -111,11 +111,7 @@ export function MapLibreMapView({
         {mapSurface}
 
         {!isReady ? (
-          // The surface covers partial tiles and stale data until the map and its caller data are ready.
-          <div
-            data-map-loading-surface
-            style={{ zIndex: 20, position: 'absolute', inset: 0, background: 'var(--geul-background)' }}
-          >
+          <div data-map-loading-surface style={{ zIndex: 20, position: 'absolute', inset: 0 }}>
             {loadingSurface}
           </div>
         ) : null}

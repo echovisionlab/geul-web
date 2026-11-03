@@ -59,6 +59,8 @@ interface MapLibreMapRuntimeLabels {
 interface MapLibreMapRuntimeProps extends MapLibreMapProps {
   labels: MapLibreMapRuntimeLabels;
   isReady: boolean;
+  /** Caller data is pending: the ready map stays transparent under the loading surface. */
+  dataPending?: boolean;
   loadingSurface: ReactNode;
   onLoadingStageChange: (stage: MapLoadingStage) => void;
 }
@@ -155,6 +157,7 @@ export function MapLibreMapRuntime({
   cluster = false,
   labels,
   isReady,
+  dataPending = false,
   loadingSurface,
   onLoadingStageChange,
 }: MapLibreMapRuntimeProps) {
@@ -595,7 +598,7 @@ export function MapLibreMapRuntime({
             width: '100%',
             height: '100%',
             backgroundColor: bgColor,
-            opacity: isReady ? 1 : 0,
+            opacity: isReady && !dataPending ? 1 : 0,
             transition: 'opacity 0.3s ease',
           }}
           mapStyle={initialMapStyleRef.current}
@@ -803,7 +806,7 @@ export function MapLibreMapRuntime({
             })}
         </MapView>
       }
-      isReady={isReady}
+      isReady={isReady && !dataPending}
       loadingSurface={loadingSurface}
       attributionItems={[
         { label: '© OpenMapTiles', href: 'https://openmaptiles.org' },

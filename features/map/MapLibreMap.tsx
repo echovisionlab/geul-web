@@ -55,7 +55,8 @@ export function MapLibreMap({ dataPending = false, ...props }: MapLibreMapProps)
         closeDirections: tActions('close'),
         printPreview: `${tCommonLabels('map')} · ${tCommonLabels('preview')}`,
       }}
-      isReady={isReady && !dataPending}
+      isReady={isReady}
+      dataPending={dataPending}
       loadingSurface={<PageLoader extent="container" message={loadingMessage} />}
       onLoadingStageChange={setLoadingStage}
     />
