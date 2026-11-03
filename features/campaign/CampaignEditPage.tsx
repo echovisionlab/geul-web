@@ -954,8 +954,8 @@ export function CampaignEditPageView({ model }: { model: CampaignEditPageViewMod
               </div>
               <div style={{ width: 200 }}>
                 <Select
-                  placeholder={layoutsLoading ? tStates('loading') : t('layout.none')}
-                  aria-busy={layoutsLoading}
+                  placeholder={t('layout.none')}
+                  isLoading={layoutsLoading}
                   data={
                     layouts?.map((layout) => ({
                       value: layout.id,

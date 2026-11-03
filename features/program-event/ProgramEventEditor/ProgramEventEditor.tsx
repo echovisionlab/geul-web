@@ -33,7 +33,6 @@ import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@/components/core/Notification';
 import { EditorHeader } from '@/features/editor/EditorHeader';
 
-import { InputValidationGlyph } from '@/components/core/Input/InputGlyphs';
 import { PageLoader } from '@/features/site/PageLoader';
 import { SectionCard } from '@/components/core/Section';
 import { UrlSection } from '@/features/metadata/UrlSection';
@@ -958,8 +957,7 @@ export function ProgramEventEditorView({ model }: { model: ProgramEventEditorVie
                     placeholder={tCommon('actions.searchItems', {
                       items: tCommonEntities('programEventTypes').toLowerCase(),
                     })}
-                    aria-busy={createType.isPending || undefined}
-                    rightSection={createType.isPending ? <InputValidationGlyph status="checking" /> : undefined}
+                    isLoading={createType.isPending}
                     onChange={(id) => {
                       if (id) {
                         handleTypeSelect(id);

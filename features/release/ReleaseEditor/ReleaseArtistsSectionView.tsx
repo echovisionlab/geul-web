@@ -1,5 +1,4 @@
 'use client';
-import { InputValidationGlyph } from '@/components/core/Input/InputGlyphs';
 import { useReleaseEditorCanEdit } from './ReleaseEditorAccessContext';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
@@ -177,8 +176,7 @@ export function ReleaseArtistsSectionView({
             id={idPrefix ? `${idPrefix}-select` : undefined}
             label={tCommon('entities.artist')}
             placeholder={t('placeholders.selectArtist')}
-            aria-busy={optionsLoading || undefined}
-            rightSection={optionsLoading ? <InputValidationGlyph status="checking" /> : undefined}
+            isLoading={optionsLoading}
             data={availableOptions.map((option) => ({ value: option.id, label: option.name }))}
             value={selectedArtistId}
             onChange={setSelectedArtistId}

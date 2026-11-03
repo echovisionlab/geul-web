@@ -1,5 +1,4 @@
 'use client';
-import { InputValidationGlyph } from '@/components/core/Input/InputGlyphs';
 import { useReleaseEditorCanEdit } from './ReleaseEditorAccessContext';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
@@ -251,8 +250,7 @@ export function ReleaseLabelsSection({
             id={idPrefix ? `${idPrefix}-select` : undefined}
             label={tCommon('entities.label')}
             placeholder={t('placeholders.selectLabel')}
-            aria-busy={allLabelsQuery.isFetching || undefined}
-            rightSection={allLabelsQuery.isFetching ? <InputValidationGlyph status="checking" /> : undefined}
+            isLoading={allLabelsQuery.isFetching}
             data={
               availableLabels?.map((l) => ({
                 value: l.id,

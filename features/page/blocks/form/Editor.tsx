@@ -1,5 +1,4 @@
 'use client';
-import { InputValidationGlyph } from '@/components/core/Input/InputGlyphs';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 
 import {
@@ -29,7 +28,6 @@ interface FormSettingsFormProps {
 
 function FormSettingsForm({ props, updateProps }: FormSettingsFormProps) {
   const tPageEditor = useTranslations('pageEditor');
-  const tCommonStates = useTranslations('common.states');
   const tForms = useTranslations('forms');
 
   const formId = props.formId || '';
@@ -120,11 +118,8 @@ function FormSettingsForm({ props, updateProps }: FormSettingsFormProps) {
           searchable
           searchValue={searchTerm}
           onSearchChange={setSearchTerm}
-          aria-busy={isLoading || selectedFormQuery.isLoading}
-          rightSection={
-            isLoading || selectedFormQuery.isLoading ? <InputValidationGlyph status="checking" /> : undefined
-          }
-          nothingFoundMessage={isLoading ? tCommonStates('loading') : tForms('empty')}
+          isLoading={isLoading || selectedFormQuery.isLoading}
+          nothingFoundMessage={tForms('empty')}
         />
 
         {/* Display Options */}

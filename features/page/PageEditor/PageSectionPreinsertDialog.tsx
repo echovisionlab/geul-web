@@ -1,5 +1,4 @@
 'use client';
-import { InputValidationGlyph } from '@/components/core/Input/InputGlyphs';
 
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { useCallback, useState, type ReactNode } from 'react';
@@ -85,8 +84,7 @@ export function PageSectionPreinsertDialog({
             value={formId}
             onChange={setFormId}
             searchable
-            aria-busy={formsLoading}
-            rightSection={formsLoading ? <InputValidationGlyph status="checking" /> : undefined}
+            isLoading={formsLoading}
             disabled={formsLoading || Boolean(formsFailure)}
             data-page-section-preinsert-form
           />

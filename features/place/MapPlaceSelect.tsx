@@ -2,7 +2,6 @@
 import { LayoutInline as DsLayoutInline, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
 import { Text as DsText } from '@/components/core/Typography';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
-import { InputValidationGlyph } from '@/components/core/Input/InputGlyphs';
 import { Select, useInputCombobox } from '@/components/core/Input';
 
 import { useCallback, useMemo, useState } from 'react';
@@ -154,8 +153,7 @@ export function MapPlaceSelect({
             }
           }}
           leftSection={selectedPlace ? <IconMapPin size={16} /> : <IconSearch size={16} />}
-          aria-busy={isLoading || undefined}
-          rightSection={isLoading ? <InputValidationGlyph status="checking" /> : undefined}
+          isLoading={isLoading}
           grow
           renderOption={({ option }) => {
             const place = searchResults?.find((item) => item.id === option.value);

@@ -806,8 +806,8 @@ export function AdminMenusPageView({ model }: { model: AdminMenusPageViewModel }
             ) : (
               <Select
                 label={tPage('selectTarget')}
-                placeholder={targetsQuery.isLoading ? tCommon('states.loading') : tPage('targetPlaceholder')}
-                aria-busy={targetsQuery.isLoading}
+                placeholder={tPage('targetPlaceholder')}
+                isLoading={targetsQuery.isLoading}
                 error={targetsQuery.isError ? tCommon('states.notAvailable') : undefined}
                 value={formTargetId}
                 onChange={(v) => setFormTargetId(v)}

@@ -1,6 +1,5 @@
 'use client';
 
-import { InputValidationGlyph } from '@/components/core/Input/InputGlyphs';
 import { Select } from '@/components/core/Input';
 
 export interface ArtistParentOption {
@@ -35,8 +34,7 @@ export function ArtistParentSelect({
       data={options.map((option) => ({ value: option.id, label: option.name }))}
       value={value}
       onChange={onChange}
-      aria-busy={loading || undefined}
-      rightSection={loading ? <InputValidationGlyph status="checking" /> : undefined}
+      isLoading={loading}
       searchable
       clearable
     />

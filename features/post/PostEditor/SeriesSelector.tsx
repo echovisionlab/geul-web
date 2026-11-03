@@ -1,5 +1,4 @@
 'use client';
-import { InputValidationGlyph } from '@/components/core/Input/InputGlyphs';
 import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
 import { Text as DsText } from '@/components/core/Typography';
 import { Select, useInputCombobox } from '@/components/core/Input';
@@ -348,10 +347,8 @@ export function SeriesSelector({
         label={tCommonEntities('series')}
         searchable={isAdmin}
         disabled={!canEdit || isPending}
-        aria-busy={isLoading || optionsFetching || isPending || seriesPostsQuery.isLoading}
-        rightSection={
-          isLoading || optionsFetching || isPending ? <InputValidationGlyph status="checking" /> : undefined
-        }
+        aria-busy={seriesPostsQuery.isLoading || undefined}
+        isLoading={isLoading || optionsFetching || isPending}
         value={selectedSeriesId}
         searchValue={combobox.dropdownOpened ? search : (selectedSeries?.title ?? '')}
         onSearchChange={setSearch}
@@ -403,13 +400,7 @@ export function SeriesSelector({
             : []),
         ]}
         nothingFoundMessage={
-          isLoading || optionsFetching
-            ? tCommonStates('loading')
-            : optionsError
-              ? null
-              : seriesList.length === 0
-                ? t('states.notMember')
-                : t('states.notFound')
+          optionsError ? null : seriesList.length === 0 ? t('states.notMember') : t('states.notFound')
         }
       />
       {selectedSeriesId && displayOrder !== null ? <LabelBadge>#{displayOrder + 1}</LabelBadge> : null}

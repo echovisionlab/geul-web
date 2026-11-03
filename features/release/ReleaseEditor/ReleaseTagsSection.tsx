@@ -1,5 +1,4 @@
 'use client';
-import { InputValidationGlyph } from '@/components/core/Input/InputGlyphs';
 import { useReleaseEditorCanEdit } from './ReleaseEditorAccessContext';
 import { LayoutStack as DsLayoutStack, LayoutGrid as DsLayoutGrid } from '@/components/core/Layout';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
@@ -277,8 +276,7 @@ export function ReleaseTagsSection({
             id={idPrefix ? `${idPrefix}-categories` : undefined}
             label={tCommon('entities.categories')}
             placeholder={tCategorySelector('placeholder')}
-            aria-busy={allCategoriesQuery.isFetching || undefined}
-            rightSection={allCategoriesQuery.isFetching ? <InputValidationGlyph status="checking" /> : undefined}
+            isLoading={allCategoriesQuery.isFetching}
             data={categoryOptions}
             value={categories.map((category) => category.id)}
             onChange={handleCategoriesChange}
@@ -291,8 +289,7 @@ export function ReleaseTagsSection({
             id={idPrefix ? `${idPrefix}-genres` : undefined}
             label={tCommon('entities.genres')}
             placeholder={t('placeholders.genres')}
-            aria-busy={allGenresQuery.isFetching || undefined}
-            rightSection={allGenresQuery.isFetching ? <InputValidationGlyph status="checking" /> : undefined}
+            isLoading={allGenresQuery.isFetching}
             data={genreOptions}
             value={genres.map((g) => g.id)}
             onChange={handleGenresChange}
@@ -305,8 +302,7 @@ export function ReleaseTagsSection({
             id={idPrefix ? `${idPrefix}-styles` : undefined}
             label={tCommon('entities.styles')}
             placeholder={t('placeholders.styles')}
-            aria-busy={allStylesQuery.isFetching || undefined}
-            rightSection={allStylesQuery.isFetching ? <InputValidationGlyph status="checking" /> : undefined}
+            isLoading={allStylesQuery.isFetching}
             data={styleOptions}
             value={styles.map((s) => s.id)}
             onChange={handleStylesChange}
@@ -319,8 +315,7 @@ export function ReleaseTagsSection({
             id={idPrefix ? `${idPrefix}-formats` : undefined}
             label={tCommon('entities.formats')}
             placeholder={t('placeholders.formats')}
-            aria-busy={allFormatsQuery.isFetching || undefined}
-            rightSection={allFormatsQuery.isFetching ? <InputValidationGlyph status="checking" /> : undefined}
+            isLoading={allFormatsQuery.isFetching}
             data={formatOptions}
             value={formats.map((f) => f.id)}
             onChange={handleFormatsChange}

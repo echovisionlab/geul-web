@@ -1,5 +1,4 @@
 'use client';
-import { InputValidationGlyph } from '@/components/core/Input/InputGlyphs';
 import { QueryErrorAlert } from '@/features/application-error/QueryErrorAlert';
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { Text as DsText } from '@/components/core/Typography';
@@ -109,8 +108,7 @@ export function LocationSelector({ value, idPrefix, canEdit, onChange, onCreateN
           }
         }}
         leftSection={<IconMapPin size={16} />}
-        aria-busy={isLoading || undefined}
-        rightSection={isLoading ? <InputValidationGlyph status="checking" /> : undefined}
+        isLoading={isLoading}
         data={[
           ...(selectedPlace ? [{ value: selectedPlace.id, label: selectedPlace.name }] : []),
           ...searchResults
@@ -118,15 +116,7 @@ export function LocationSelector({ value, idPrefix, canEdit, onChange, onCreateN
             .map((place) => ({ value: place.id, label: place.name })),
           ...(canCreate ? [{ value: '$create', label: tCommon('actions.createNamed', { name: search.trim() }) }] : []),
         ]}
-        nothingFoundMessage={
-          isLoading
-            ? tCommon('states.loading')
-            : searchQuery.isError
-              ? null
-              : search.trim()
-                ? t('emptyResults')
-                : t('emptySearch')
-        }
+        nothingFoundMessage={searchQuery.isError ? null : search.trim() ? t('emptyResults') : t('emptySearch')}
         renderOption={({ option }) => {
           const place = searchResults.find((item) => item.id === option.value);
           return place ? (

@@ -219,8 +219,8 @@ function MenuItemForm({
           ) : (
             <Select
               size="xs"
-              placeholder={targetsQuery.isLoading ? tCommon('states.loading') : tPage('targetPlaceholder')}
-              aria-busy={targetsQuery.isLoading}
+              placeholder={tPage('targetPlaceholder')}
+              isLoading={targetsQuery.isLoading}
               error={targetsQuery.isError ? tCommon('states.notAvailable') : undefined}
               value={link.targetId}
               onChange={(targetId) =>

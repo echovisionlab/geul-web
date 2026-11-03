@@ -22,7 +22,6 @@ import { EditorSessionExpiredDialog } from '@/features/editor/EditorSessionExpir
 import { useEditorPermissionRevocation } from '@/features/editor/useEditorPermissionRevocation';
 import { CountryCodeSelect } from '@/features/location/CountryCodeSelect';
 import { MultiSelect, TextInput } from '@/components/core/Input';
-import { InputValidationGlyph } from '@/components/core/Input/InputGlyphs';
 import { PageLoader } from '@/features/site/PageLoader';
 import { SocialLinksEditor } from '@/features/social-links/SocialLinksEditor';
 import { UrlSection } from '@/features/metadata/UrlSection';
@@ -792,8 +791,7 @@ export function ArtistDetailEditorView({ model }: { model: ArtistDetailEditorVie
             id={`artist-${id}-label-ids`}
             label={tCommon('entities.labels')}
             placeholder={t('placeholders.labels')}
-            aria-busy={labelsQuery.isFetching || undefined}
-            rightSection={labelsQuery.isFetching ? <InputValidationGlyph status="checking" /> : undefined}
+            isLoading={labelsQuery.isFetching}
             data={labelOptions}
             value={fields.labelIds}
             onChange={handleLabelsChange}

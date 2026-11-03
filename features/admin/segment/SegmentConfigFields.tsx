@@ -93,12 +93,12 @@ export function SegmentConfigFields({
         {segmentType === SegmentType.MEMBER_TAGS && (
           <MultiSelect
             label={tCommonEntities('userTags')}
-            placeholder={tagsLoading ? tCommon('states.loadingTags') : tPage('config.userTagsPlaceholderSelect')}
+            placeholder={tPage('config.userTagsPlaceholderSelect')}
             data={userTags}
             value={config.memberTagIds}
             onChange={(value) => onConfigChange({ ...config, memberTagIds: value })}
             disabled={tagsLoading || tagsError}
-            aria-busy={tagsLoading}
+            isLoading={tagsLoading}
             error={tagsError ? tCommon('states.notAvailable') : undefined}
             searchable
             clearable

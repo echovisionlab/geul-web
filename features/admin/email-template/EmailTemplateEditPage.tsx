@@ -760,10 +760,8 @@ export function EmailTemplateEditPageView({ model }: { model: EmailTemplateEditP
           <div style={{ width: 260 }}>
             <Select
               label={tEmailTemplates('detail.fields.layoutLabel')}
-              placeholder={
-                layoutsLoading ? tCommonStates('loading') : tEmailTemplates('detail.fields.layoutPlaceholder')
-              }
-              aria-busy={layoutsLoading}
+              placeholder={tEmailTemplates('detail.fields.layoutPlaceholder')}
+              isLoading={layoutsLoading}
               data={
                 layouts?.map((layout) => ({
                   value: layout.id,

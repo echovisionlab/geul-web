@@ -3,6 +3,8 @@
 import { createContext, useContext, type ReactNode } from 'react';
 import { FieldError, Label, Text } from 'react-aria-components';
 import { useToolbarDensity } from '../control-context';
+import { InputValidationGlyph } from './InputGlyphs';
+import { useCoreInputLabels } from './input-labels';
 import type { InputBaseProps, InputSize } from './input-contract';
 import classes from './Input.module.css';
 
@@ -56,6 +58,16 @@ export function InputHelp({ description, error }: Pick<InputBaseProps, 'descript
     </>
   );
 }
+/** Option lookup status shared by choice fields; it names itself so the field name stays unchanged. */
+export function InputLoadingStatus({ label }: { label?: string }) {
+  const labels = useCoreInputLabels();
+  return (
+    <span className={classes.validationStatus} role="status" aria-label={label ?? labels.loading}>
+      <InputValidationGlyph status="checking" />
+    </span>
+  );
+}
+
 export function inputState(props: Pick<InputBaseProps, 'disabled' | 'readOnly' | 'required' | 'error'>) {
   return {
     isDisabled: props.disabled,

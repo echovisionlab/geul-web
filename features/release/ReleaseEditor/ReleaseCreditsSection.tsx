@@ -1,5 +1,4 @@
 'use client';
-import { InputValidationGlyph } from '@/components/core/Input/InputGlyphs';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
 import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
 
@@ -375,8 +374,7 @@ export function ReleaseCreditsSection({
               id={idPrefix ? `${idPrefix}-artist-id` : undefined}
               label={tCommon('entities.artist')}
               placeholder={t('placeholders.selectArtist')}
-              aria-busy={allArtistsQuery.isFetching || undefined}
-              rightSection={allArtistsQuery.isFetching ? <InputValidationGlyph status="checking" /> : undefined}
+              isLoading={allArtistsQuery.isFetching}
               data={
                 allArtists?.map((a) => ({
                   value: a.id,
@@ -395,8 +393,7 @@ export function ReleaseCreditsSection({
               id={idPrefix ? `${idPrefix}-member-id` : undefined}
               label={tCommon('entities.member')}
               placeholder={t('placeholders.selectUser')}
-              aria-busy={allMembersQuery.isFetching || undefined}
-              rightSection={allMembersQuery.isFetching ? <InputValidationGlyph status="checking" /> : undefined}
+              isLoading={allMembersQuery.isFetching}
               data={
                 allMembers?.data?.map((u) => ({
                   value: u.id,

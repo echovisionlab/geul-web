@@ -1,5 +1,4 @@
 'use client';
-import { InputValidationGlyph } from '@/components/core/Input/InputGlyphs';
 import { useReleaseEditorCanEdit } from './ReleaseEditorAccessContext';
 import { breakpointQuery } from '@/components/core/Layout/breakpoints';
 import { SupportingText, Text as DsText } from '@/components/core/Typography';
@@ -311,8 +310,7 @@ export function TrackCreditsEditorSection({
               aria-label={tCommon('entities.artist')}
               id={idPrefix ? `${idPrefix}-track-credit-artist-${trackId}` : undefined}
               placeholder={tCredits('placeholders.selectArtist')}
-              aria-busy={allArtistsQuery.isFetching || undefined}
-              rightSection={allArtistsQuery.isFetching ? <InputValidationGlyph status="checking" /> : undefined}
+              isLoading={allArtistsQuery.isFetching}
               data={allArtists.map((artist) => ({ value: artist.id, label: artist.name }))}
               value={selectedArtistId}
               onChange={setSelectedArtistId}
@@ -326,8 +324,7 @@ export function TrackCreditsEditorSection({
               aria-label={tCommon('entities.member')}
               id={idPrefix ? `${idPrefix}-track-credit-member-${trackId}` : undefined}
               placeholder={tCredits('placeholders.selectUser')}
-              aria-busy={membersQuery.isFetching || undefined}
-              rightSection={membersQuery.isFetching ? <InputValidationGlyph status="checking" /> : undefined}
+              isLoading={membersQuery.isFetching}
               data={allMembers.map((member) => ({ value: member.id, label: member.name }))}
               value={selectedMemberId}
               onChange={setSelectedMemberId}

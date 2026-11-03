@@ -262,8 +262,9 @@ export default function AdminEmailTemplatesPage({
           aria-label={`${tCommon('labels.event')} ${row.name}`}
           size="xs"
           value={row.eventKey ?? null}
-          placeholder={isLoadingEventMappings ? tCommon('states.loading') : tPage('notAssigned')}
-          aria-busy={isLoadingEventMappings || updateEventMapping.isPending}
+          placeholder={tPage('notAssigned')}
+          isLoading={isLoadingEventMappings}
+          aria-busy={updateEventMapping.isPending || undefined}
           clearable
           searchable
           nothingFoundMessage={tPage('noEvents')}

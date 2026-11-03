@@ -24,6 +24,7 @@ import {
   inputPresentation,
   inputPopoverPresentation,
   inputState,
+  InputLoadingStatus,
 } from './InputParts';
 import {
   inputAttributes,
@@ -35,7 +36,7 @@ import {
 import { ComboboxOpenBridge } from './ComboboxOpenBridge';
 import classes from './Input.module.css';
 import { useCoreInputLabels } from './input-labels';
-import { InputClearGlyph, InputOpenGlyph, InputValidationGlyph } from './InputGlyphs';
+import { InputClearGlyph, InputOpenGlyph } from './InputGlyphs';
 import { countVisiblePills } from './multi-select-overflow';
 
 export interface MultiSelectProps extends InputBaseProps {
@@ -269,16 +270,7 @@ export const MultiSelect = forwardRef<HTMLInputElement, MultiSelectProps>((props
             }}
           />
         </div>
-        {props.isLoading ? (
-          <span
-            className={classes.validationStatus}
-            role={props.loadingLabel ? 'status' : undefined}
-            aria-label={props.loadingLabel}
-            aria-hidden={!props.loadingLabel}
-          >
-            <InputValidationGlyph status="checking" />
-          </span>
-        ) : null}
+        {props.isLoading ? <InputLoadingStatus label={props.loadingLabel} /> : null}
         {props.clearable && values.length ? (
           <Button
             slot={null}

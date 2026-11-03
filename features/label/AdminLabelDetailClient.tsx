@@ -27,7 +27,6 @@ import { EditorSessionExpiredDialog } from '@/features/editor/EditorSessionExpir
 import { useEditorPermissionRevocation } from '@/features/editor/useEditorPermissionRevocation';
 import { CountryCodeSelect } from '@/features/location/CountryCodeSelect';
 import { Select, TextInput } from '@/components/core/Input';
-import { InputValidationGlyph } from '@/components/core/Input/InputGlyphs';
 import { PageLoader } from '@/features/site/PageLoader';
 import { SocialLinksEditor } from '@/features/social-links/SocialLinksEditor';
 import { UrlSection } from '@/features/metadata/UrlSection';
@@ -672,8 +671,7 @@ export function LabelEditorView({ model }: { model: LabelEditorViewModel }) {
             id={`label-${id}-parent-label-id`}
             label={t('fields.parentLabel')}
             placeholder={t('placeholders.parentLabel')}
-            aria-busy={labelsForParentQuery.isFetching || undefined}
-            rightSection={labelsForParentQuery.isFetching ? <InputValidationGlyph status="checking" /> : undefined}
+            isLoading={labelsForParentQuery.isFetching}
             data={parentLabelOptions}
             value={fields.parentLabelId}
             onChange={(value) => setField('parentLabelId', value)}
