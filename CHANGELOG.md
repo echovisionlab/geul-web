@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.24.0](https://github.com/echovisionlab/geul-web/compare/v0.23.5...v0.24.0) (2026-11-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* rename audience segments to Member criteria ([#224](https://github.com/echovisionlab/geul-web/issues/224))
+
+### Code Refactoring
+
+* rename audience segments to Member criteria ([#224](https://github.com/echovisionlab/geul-web/issues/224)) ([5d4f03c](https://github.com/echovisionlab/geul-web/commit/5d4f03c4890afa5fc320ffceea7da037addb73b7))
+
 ## [0.23.5](https://github.com/echovisionlab/geul-web/compare/v0.23.4...v0.23.5) (2026-11-03)
 
 
