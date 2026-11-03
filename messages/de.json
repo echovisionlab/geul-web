@@ -257,7 +257,7 @@
       "clients": "Kunden",
       "campaign": "Kampagne",
       "campaigns": "Kampagnen",
-      "memberCriteria": "Zielgruppensegment",
+      "memberCriteria": "Mitgliederkriterien",
       "user": "Benutzer",
       "member": "Mitglied",
       "users": "Benutzer",
@@ -1073,25 +1073,25 @@
       }
     },
     "memberCriteria": {
-      "description": "Erstellen Sie wiederverwendbare Zielgruppensegmente, um Kampagnen auf bestimmte Gruppen auszurichten.",
-      "searchPlaceholder": "Segmente suchen...",
-      "empty": "Keine Segmente gefunden. Erstellen Sie eins, um bestimmte Zielgruppen anzusprechen.",
-      "createTitle": "Segment erstellen",
-      "editTitle": "Segment bearbeiten",
-      "namePlaceholder": "Segmentname",
-      "typePlaceholder": "Segmenttyp auswählen",
-      "loading": "Segment wird geladen...",
+      "description": "Erstelle wiederverwendbare Mitgliederkriterien, die Mitglieder für Kampagnen und eingeschränkte Downloads auswählen.",
+      "searchPlaceholder": "Mitgliederkriterien suchen...",
+      "empty": "Noch keine Mitgliederkriterien. Erstelle welche, um bestimmte Mitglieder auszuwählen.",
+      "createTitle": "Mitgliederkriterien erstellen",
+      "editTitle": "Mitgliederkriterien bearbeiten",
+      "namePlaceholder": "Name der Mitgliederkriterien",
+      "typePlaceholder": "Art auswählen",
+      "loading": "Mitgliederkriterien werden geladen...",
       "includeArchived": "Archivierte einbeziehen",
       "archive": "Archivieren",
-      "archiveTitle": "Zielgruppe archivieren",
+      "archiveTitle": "Mitgliederkriterien archivieren",
       "archiveConfirm": "{name} archivieren? {campaigns} Kampagnenbeziehungen und {files} Dateirichtlinien werden getrennt. {runs} Versandverläufe bleiben unverändert.",
       "restore": "Wiederherstellen",
-      "restoreTitle": "Zielgruppe wiederherstellen",
+      "restoreTitle": "Mitgliederkriterien wiederherstellen",
       "restoreConfirm": "{name} wiederherstellen? Frühere Kampagnenpläne und Datei-Downloadrichtlinien werden nicht automatisch wiederhergestellt.",
-      "created": "Segment erstellt",
-      "updated": "Segment aktualisiert",
-      "archived": "Zielgruppe archiviert",
-      "restored": "Zielgruppe wiederhergestellt",
+      "created": "Mitgliederkriterien erstellt",
+      "updated": "Mitgliederkriterien aktualisiert",
+      "archived": "Mitgliederkriterien archiviert",
+      "restored": "Mitgliederkriterien wiederhergestellt",
       "config": {
         "userTagsPlaceholderSelect": "Benutzer-Tags auswählen",
         "rolesLabel": "Rollen",
@@ -1100,8 +1100,8 @@
         "createdBeforeLabel": "Erstellt vor",
         "createdBeforePlaceholder": "Enddatum",
         "estimateCount": "Anzahl schätzen",
-        "estimatedRecipients": "~{count, plural, one {# Empfänger} other {# Empfänger}}",
-        "allUsersHelp": "Richtet sich an alle Benutzer. Die Newsletter-Berechtigung wird pro Kampagne gewählt."
+        "estimatedRecipients": "~{count, plural, one {# passendes Mitglied} other {# passende Mitglieder}}",
+        "allUsersHelp": "Wählt alle Mitglieder aus. Jede Kampagne legt fest, ob nur Newsletter-Abonnenten sie erhalten."
       },
       "types": {
         "usersByFilter": "Benutzer nach Filter",
@@ -2345,13 +2345,13 @@
       "none": "Kein Layout"
     },
     "target": {
-      "criteriaLabel": "Zielgruppe",
-      "criteriaPlaceholder": "Zielgruppe auswählen",
+      "criteriaLabel": "Empfänger",
+      "criteriaPlaceholder": "Mitgliederkriterien auswählen",
       "all": "Alle Benutzer",
-      "unavailableCriteria": "Archivierte oder nicht verfügbare Zielgruppe",
-      "unavailableCriteriaDescription": "Diese Kampagne richtet sich an eine archivierte oder nicht verfügbare Zielgruppe. Wählen Sie vor Planung oder Versand eine aktive Zielgruppe.",
-      "criteriaRequired": "Wählen Sie vor Planung oder Versand eine aktive Zielgruppe.",
-      "criteriaLoadError": "Aktive Zielgruppen konnten nicht geladen werden. Versuchen Sie es vor Planung oder Versand erneut."
+      "unavailableCriteria": "Archivierte oder nicht verfügbare Mitgliederkriterien",
+      "unavailableCriteriaDescription": "Diese Kampagne verwendet archivierte oder nicht verfügbare Mitgliederkriterien. Wähle vor dem Planen oder Senden aktive Mitgliederkriterien aus.",
+      "criteriaRequired": "Wähle vor dem Planen oder Senden aktive Mitgliederkriterien aus.",
+      "criteriaLoadError": "Aktive Mitgliederkriterien konnten nicht geladen werden. Versuche es vor dem Planen oder Senden erneut."
     },
     "fields": {
       "recipientScope": "Empfänger",
@@ -2367,7 +2367,7 @@
       "description": "Geben Sie eine E-Mail-Adresse ein, um diese Kampagne testweise zu senden."
     },
     "sendModal": {
-      "warning": "Dies sendet die Kampagne an das Zielgruppensegment {criteria}. Diese Aktion kann nicht rückgängig gemacht werden.",
+      "warning": "Die Kampagne wird an Mitglieder gesendet, die {criteria} entsprechen. Diese Aktion kann nicht rückgängig gemacht werden.",
       "subject": "Betreff: {subject}",
       "allMatchingUsersWarning": "Bezieht auch Benutzer ein, die den Newsletter abbestellt haben."
     },
@@ -2376,7 +2376,7 @@
       "dateLabel": "Geplantes Datum und Uhrzeit",
       "previousMonth": "Vorheriger Monat",
       "nextMonth": "Nächster Monat",
-      "criteria": "Zielgruppe: {criteria}",
+      "criteria": "Empfänger: {criteria}",
       "allMatchingUsersWarning": "Bezieht auch Benutzer ein, die den Newsletter abbestellt haben."
     },
     "notifications": {
@@ -5431,13 +5431,13 @@
           "description": "Alle angemeldeten Benutzer können diese Datei herunterladen."
         },
         "restricted": {
-          "label": "Zielgruppen",
-          "description": "Nur Benutzer in den ausgewählten Zielgruppen können diese Datei herunterladen."
+          "label": "Mitgliederkriterien",
+          "description": "Nur Mitglieder, die den ausgewählten Mitgliederkriterien entsprechen, können diese Datei herunterladen."
         }
       },
-      "criteriaLoadError": "Die Richtlinie wurde geladen, die Zielgruppen jedoch nicht.",
-      "criteriaEmpty": "Es sind keine Zielgruppensegmente verfügbar.",
-      "restrictedWithoutCriteria": "Dieser eingeschränkten Richtlinie ist keine Zielgruppe zugewiesen. Downloads werden für alle verweigert, bis Sie mindestens eine Zielgruppe auswählen.",
+      "criteriaLoadError": "Die Richtlinie wurde geladen, aber die Mitgliederkriterien konnten nicht geladen werden.",
+      "criteriaEmpty": "Keine Mitgliederkriterien verfügbar.",
+      "restrictedWithoutCriteria": "Diese eingeschränkte Richtlinie hat keine Mitgliederkriterien. Downloads sind für alle gesperrt, bis du mindestens eines auswählst.",
       "additionalSelected": "{count} weitere ausgewählt",
       "loadError": "Der Download-Zugriff konnte nicht geladen werden.",
       "saveError": "Der Download-Zugriff konnte nicht gespeichert werden.",

@@ -257,7 +257,7 @@
       "clients": "客户",
       "campaign": "活动",
       "campaigns": "活动",
-      "memberCriteria": "受众群体",
+      "memberCriteria": "会员条件",
       "user": "用户",
       "member": "成员",
       "users": "用户",
@@ -614,25 +614,25 @@
       }
     },
     "memberCriteria": {
-      "description": "创建可重复使用的受众群体，将营销活动定位到特定群体",
-      "searchPlaceholder": "搜索片段...",
-      "empty": "未找到段。创建一个针对特定受众的产品",
-      "createTitle": "创建细分",
-      "editTitle": "编辑段",
-      "namePlaceholder": "段名称",
-      "typePlaceholder": "选择段类型",
-      "loading": "正在加载段...",
+      "description": "创建可重复使用的会员条件，为活动和受限下载选择会员。",
+      "searchPlaceholder": "搜索会员条件...",
+      "empty": "还没有会员条件。创建一个以选择特定会员。",
+      "createTitle": "创建会员条件",
+      "editTitle": "编辑会员条件",
+      "namePlaceholder": "会员条件名称",
+      "typePlaceholder": "选择类型",
+      "loading": "正在加载会员条件...",
       "includeArchived": "包括已归档",
       "archive": "归档",
-      "archiveTitle": "归档受众",
+      "archiveTitle": "归档会员条件",
       "archiveConfirm": "归档 {name}？将解除 {campaigns} 个营销活动关系和 {files} 个文件策略。{runs} 条发送记录保持不变。",
       "restore": "恢复",
-      "restoreTitle": "恢复受众",
+      "restoreTitle": "恢复会员条件",
       "restoreConfirm": "恢复 {name}？以前的营销活动计划和文件下载策略不会自动恢复。",
-      "created": "已创建段",
-      "updated": "细分已更新",
-      "archived": "受众已归档",
-      "restored": "受众已恢复",
+      "created": "已创建会员条件",
+      "updated": "已更新会员条件",
+      "archived": "已归档会员条件",
+      "restored": "已恢复会员条件",
       "config": {
         "userTagsPlaceholderSelect": "选择用户标签",
         "rolesLabel": "角色",
@@ -641,8 +641,8 @@
         "createdBeforeLabel": "之前创建",
         "createdBeforePlaceholder": "结束日期",
         "estimateCount": "估计数量",
-        "estimatedRecipients": "~{count, plural, one {# 位收件人} other {# 位收件人}}",
-        "allUsersHelp": "面向所有用户。新闻通讯资格由每个活动选择。"
+        "estimatedRecipients": "约 {count, plural, one {# 位符合条件的会员} other {# 位符合条件的会员}}",
+        "allUsersHelp": "选择所有会员。是否只发送给订阅简报的会员由每个活动决定。"
       },
       "types": {
         "usersByFilter": "按筛选的用户",
@@ -2810,13 +2810,13 @@
       "none": "无布局"
     },
     "target": {
-      "criteriaLabel": "目标受众",
-      "criteriaPlaceholder": "选择受众",
+      "criteriaLabel": "收件人",
+      "criteriaPlaceholder": "选择会员条件",
       "all": "所有用户",
-      "unavailableCriteria": "已归档或不可用的受众",
-      "unavailableCriteriaDescription": "此营销活动面向已归档或不可用的受众。请先选择活跃受众，再安排或发送。",
-      "criteriaRequired": "请先选择活跃受众，再安排或发送。",
-      "criteriaLoadError": "无法加载活跃受众。请在安排或发送前重试。"
+      "unavailableCriteria": "已归档或不可用的会员条件",
+      "unavailableCriteriaDescription": "此活动使用了已归档或不可用的会员条件。请在安排或发送前选择有效的会员条件。",
+      "criteriaRequired": "请在安排或发送前选择有效的会员条件。",
+      "criteriaLoadError": "无法加载有效的会员条件。请在安排或发送前重试。"
     },
     "fields": {
       "recipientScope": "收件人",
@@ -2832,7 +2832,7 @@
       "description": "输入电子邮件地址以发送此活动的测试邮件"
     },
     "sendModal": {
-      "warning": "这会将活动发送给受众细分 {criteria}。此操作无法撤消",
+      "warning": "活动将发送给符合 {criteria} 的会员。此操作无法撤消。",
       "subject": "主题：{subject}",
       "allMatchingUsersWarning": "包括已取消新闻通讯订阅的匹配用户。"
     },
@@ -2841,7 +2841,7 @@
       "dateLabel": "预定日期和时间",
       "previousMonth": "上个月",
       "nextMonth": "下个月",
-      "criteria": "受众：{criteria}",
+      "criteria": "收件人：{criteria}",
       "allMatchingUsersWarning": "包括已取消新闻通讯订阅的匹配用户。"
     },
     "notifications": {
@@ -5431,13 +5431,13 @@
           "description": "任何已登录用户都可以下载此文件。"
         },
         "restricted": {
-          "label": "受众",
-          "description": "只有所选受众中的用户可以下载此文件。"
+          "label": "会员条件",
+          "description": "只有符合所选会员条件的会员才能下载此文件。"
         }
       },
-      "criteriaLoadError": "策略已加载，但无法加载受众。",
-      "criteriaEmpty": "没有可用的受众细分。",
-      "restrictedWithoutCriteria": "此受限策略未指定受众。在选择至少一个受众之前，所有人的下载都将被拒绝。",
+      "criteriaLoadError": "已加载策略，但无法加载会员条件。",
+      "criteriaEmpty": "没有可用的会员条件。",
+      "restrictedWithoutCriteria": "此受限策略没有会员条件。在至少选择一个之前，所有人都无法下载。",
       "additionalSelected": "另有 {count} 项已选择",
       "loadError": "无法加载下载权限。",
       "saveError": "无法保存下载权限。",

@@ -257,7 +257,7 @@
       "clients": "クライアント",
       "campaign": "キャンペーン",
       "campaigns": "キャンペーン",
-      "memberCriteria": "オーディエンスセグメント",
+      "memberCriteria": "会員条件",
       "user": "ユーザー",
       "member": "メンバー",
       "users": "ユーザー",
@@ -614,25 +614,25 @@
       }
     },
     "memberCriteria": {
-      "description": "特定のグループを対象にキャンペーンを配信するための再利用可能なオーディエンスセグメントを作成します",
-      "searchPlaceholder": "セグメントを検索...",
-      "empty": "セグメントが見つかりません。特定のオーディエンスを対象にするには作成してください",
-      "createTitle": "セグメントを作成",
-      "editTitle": "セグメントを編集",
-      "namePlaceholder": "セグメント名",
-      "typePlaceholder": "セグメントタイプを選択",
-      "loading": "セグメントを読み込み中...",
+      "description": "キャンペーンや制限付きダウンロードで会員を選ぶ、再利用できる会員条件を作成します。",
+      "searchPlaceholder": "会員条件を検索...",
+      "empty": "会員条件はまだありません。特定の会員を選ぶには作成してください。",
+      "createTitle": "会員条件を作成",
+      "editTitle": "会員条件を編集",
+      "namePlaceholder": "会員条件の名前",
+      "typePlaceholder": "種類を選択",
+      "loading": "会員条件を読み込んでいます...",
       "includeArchived": "アーカイブ済みを含める",
       "archive": "アーカイブ",
-      "archiveTitle": "オーディエンスをアーカイブ",
+      "archiveTitle": "会員条件をアーカイブ",
       "archiveConfirm": "{name} をアーカイブしますか。キャンペーン{campaigns}件とファイルポリシー{files}件の関連が解除されます。配信履歴{runs}件は変更されません。",
       "restore": "復元",
-      "restoreTitle": "オーディエンスを復元",
+      "restoreTitle": "会員条件を復元",
       "restoreConfirm": "{name} を復元しますか。以前の配信予約とダウンロードポリシーは自動では復元されません。",
-      "created": "セグメントを作成しました",
-      "updated": "セグメントを更新しました",
-      "archived": "オーディエンスをアーカイブしました",
-      "restored": "オーディエンスを復元しました",
+      "created": "会員条件を作成しました",
+      "updated": "会員条件を更新しました",
+      "archived": "会員条件をアーカイブしました",
+      "restored": "会員条件を復元しました",
       "config": {
         "userTagsPlaceholderSelect": "ユーザータグを選択",
         "rolesLabel": "ロール",
@@ -641,8 +641,8 @@
         "createdBeforeLabel": "作成終了日",
         "createdBeforePlaceholder": "終了日",
         "estimateCount": "推定件数",
-        "estimatedRecipients": "約 {count, plural, one {# 人} other {# 人}}",
-        "allUsersHelp": "すべてのユーザーを対象にします。ニュースレター購読条件はキャンペーンごとに選択します。"
+        "estimatedRecipients": "約 {count, plural, one {# 人が該当} other {# 人が該当}}",
+        "allUsersHelp": "すべての会員を選択します。ニュースレター購読者だけに送るかどうかはキャンペーンごとに決めます。"
       },
       "types": {
         "usersByFilter": "フィルターでユーザーを絞り込み",
@@ -2810,13 +2810,13 @@
       "none": "レイアウトなし"
     },
     "target": {
-      "criteriaLabel": "配信対象",
-      "criteriaPlaceholder": "オーディエンスを選択",
+      "criteriaLabel": "受信者",
+      "criteriaPlaceholder": "会員条件を選択",
       "all": "すべてのユーザー",
-      "unavailableCriteria": "アーカイブ済みまたは利用できないオーディエンス",
-      "unavailableCriteriaDescription": "このキャンペーンはアーカイブ済みまたは利用できないオーディエンスを対象にしています。予約または送信する前に有効なオーディエンスを選択してください。",
-      "criteriaRequired": "予約または送信する前に有効なオーディエンスを選択してください。",
-      "criteriaLoadError": "有効なオーディエンスを読み込めませんでした。予約または送信の前に再試行してください。"
+      "unavailableCriteria": "アーカイブ済みまたは使用できない会員条件",
+      "unavailableCriteriaDescription": "このキャンペーンはアーカイブ済みまたは使用できない会員条件を使っています。予約または送信の前に有効な会員条件を選択してください。",
+      "criteriaRequired": "予約または送信の前に有効な会員条件を選択してください。",
+      "criteriaLoadError": "有効な会員条件を読み込めませんでした。予約または送信の前にもう一度お試しください。"
     },
     "fields": {
       "recipientScope": "受信者",
@@ -2832,7 +2832,7 @@
       "description": "このキャンペーンのテスト送信先メールアドレスを入力してください"
     },
     "sendModal": {
-      "warning": "このキャンペーンはオーディエンスセグメント {criteria} に送信されます。この操作は元に戻せません",
+      "warning": "{criteria} に当てはまる会員にキャンペーンを送信します。この操作は元に戻せません。",
       "subject": "件名: {subject}",
       "allMatchingUsersWarning": "ニュースレターを購読解除したユーザーも含まれます。"
     },
@@ -2841,7 +2841,7 @@
       "dateLabel": "送信予定日時",
       "previousMonth": "前の月",
       "nextMonth": "次の月",
-      "criteria": "オーディエンス: {criteria}",
+      "criteria": "受信者: {criteria}",
       "allMatchingUsersWarning": "ニュースレターを購読解除したユーザーも含まれます。"
     },
     "notifications": {
@@ -5431,13 +5431,13 @@
           "description": "ログインしたユーザーはこのファイルをダウンロードできます。"
         },
         "restricted": {
-          "label": "オーディエンス",
-          "description": "選択したオーディエンスのユーザーのみ、このファイルをダウンロードできます。"
+          "label": "会員条件",
+          "description": "選択した会員条件に当てはまる会員だけがこのファイルをダウンロードできます。"
         }
       },
-      "criteriaLoadError": "ポリシーは読み込まれましたが、オーディエンスを読み込めませんでした。",
-      "criteriaEmpty": "利用可能なオーディエンスセグメントがありません。",
-      "restrictedWithoutCriteria": "この制限付きポリシーにはオーディエンスが指定されていません。少なくとも1つのオーディエンスを選択するまで、すべてのユーザーのダウンロードが拒否されます。",
+      "criteriaLoadError": "ポリシーは読み込みましたが、会員条件を読み込めませんでした。",
+      "criteriaEmpty": "使用できる会員条件がありません。",
+      "restrictedWithoutCriteria": "この制限付きポリシーには会員条件がありません。1 つ以上選択するまで、すべてのダウンロードが拒否されます。",
       "additionalSelected": "他に{count}件選択済み",
       "loadError": "ダウンロードアクセスを読み込めませんでした。",
       "saveError": "ダウンロードアクセスを保存できませんでした。",

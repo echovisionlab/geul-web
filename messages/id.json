@@ -257,7 +257,7 @@
       "clients": "Klien",
       "campaign": "Kampanye",
       "campaigns": "Kampanye",
-      "memberCriteria": "Segmen Audiens",
+      "memberCriteria": "Kriteria anggota",
       "user": "Pengguna",
       "member": "Anggota",
       "users": "Pengguna",
@@ -614,25 +614,25 @@
       }
     },
     "memberCriteria": {
-      "description": "Buat segmen audiens yang dapat digunakan kembali untuk menargetkan kampanye ke kelompok tertentu.",
-      "searchPlaceholder": "Segmen penelusuran...",
-      "empty": "Tidak ada segmen yang ditemukan. Buat satu untuk menargetkan audiens tertentu.",
-      "createTitle": "Buat Segmen",
-      "editTitle": "Sunting Segmen",
-      "namePlaceholder": "Nama segmen",
-      "typePlaceholder": "Pilih jenis segmen",
-      "loading": "Memuat segmen...",
+      "description": "Buat kriteria anggota yang dapat dipakai ulang untuk memilih anggota bagi kampanye dan unduhan terbatas.",
+      "searchPlaceholder": "Cari kriteria anggota...",
+      "empty": "Belum ada kriteria anggota. Buat satu untuk memilih anggota tertentu.",
+      "createTitle": "Buat kriteria anggota",
+      "editTitle": "Edit kriteria anggota",
+      "namePlaceholder": "Nama kriteria anggota",
+      "typePlaceholder": "Pilih jenis",
+      "loading": "Memuat kriteria anggota...",
       "includeArchived": "Sertakan diarsipkan",
       "archive": "Arsip",
-      "archiveTitle": "Arsip Pemirsa",
+      "archiveTitle": "Arsipkan kriteria anggota",
       "archiveConfirm": "Arsipkan {name}? {campaigns} hubungan kampanye dan kebijakan file {files} terlepas. Proses pengiriman {runs} menyimpan riwayatnya yang tidak dapat diubah.",
       "restore": "Memulihkan",
-      "restoreTitle": "Pulihkan Pemirsa",
+      "restoreTitle": "Pulihkan kriteria anggota",
       "restoreConfirm": "Pulihkan {name}? Jadwal kampanye dan kebijakan file sebelumnya tidak dipulihkan secara otomatis.",
-      "created": "Segmen dibuat",
-      "updated": "Segmen diperbarui",
-      "archived": "Arsip audiens",
-      "restored": "Penonton dipulihkan",
+      "created": "Kriteria anggota dibuat",
+      "updated": "Kriteria anggota diperbarui",
+      "archived": "Kriteria anggota diarsipkan",
+      "restored": "Kriteria anggota dipulihkan",
       "config": {
         "userTagsPlaceholderSelect": "Pilih tag pengguna",
         "rolesLabel": "Peran",
@@ -641,8 +641,8 @@
         "createdBeforeLabel": "Dibuat Sebelumnya",
         "createdBeforePlaceholder": "Tanggal akhir",
         "estimateCount": "Jumlah Perkiraan",
-        "estimatedRecipients": "~{count, plural, one {# penerima} other {# penerima}}",
-        "allUsersHelp": "Menargetkan semua pengguna. Kelayakan buletin dipilih oleh setiap kampanye."
+        "estimatedRecipients": "~{count, plural, one {# anggota yang cocok} other {# anggota yang cocok}}",
+        "allUsersHelp": "Memilih semua anggota. Setiap kampanye menentukan apakah hanya pelanggan buletin yang menerimanya."
       },
       "types": {
         "usersByFilter": "Pengguna berdasarkan Filter",
@@ -2810,13 +2810,13 @@
       "none": "Tanpa Tata Letak"
     },
     "target": {
-      "criteriaLabel": "Target audiens",
-      "criteriaPlaceholder": "Pilih audiens",
+      "criteriaLabel": "Penerima",
+      "criteriaPlaceholder": "Pilih kriteria anggota",
       "all": "Semua pengguna",
-      "unavailableCriteria": "Audiens yang diarsipkan atau tidak tersedia",
-      "unavailableCriteriaDescription": "Kampanye ini menargetkan audiens yang diarsipkan atau tidak tersedia. Pilih audiens aktif sebelum menjadwalkan atau mengirim.",
-      "criteriaRequired": "Pilih audiens aktif sebelum menjadwalkan atau mengirim.",
-      "criteriaLoadError": "Audiens aktif tidak dapat dimuat. Coba lagi sebelum menjadwalkan atau mengirim."
+      "unavailableCriteria": "Kriteria anggota yang diarsipkan atau tidak tersedia",
+      "unavailableCriteriaDescription": "Kampanye ini memakai kriteria anggota yang diarsipkan atau tidak tersedia. Pilih kriteria anggota aktif sebelum menjadwalkan atau mengirim.",
+      "criteriaRequired": "Pilih kriteria anggota aktif sebelum menjadwalkan atau mengirim.",
+      "criteriaLoadError": "Kriteria anggota aktif tidak dapat dimuat. Coba lagi sebelum menjadwalkan atau mengirim."
     },
     "fields": {
       "recipientScope": "Penerima",
@@ -2832,7 +2832,7 @@
       "description": "Masukkan alamat email untuk mengirim pengujian kampanye ini."
     },
     "sendModal": {
-      "warning": "Tindakan ini akan mengarahkan kampanye ke segmen audiens {criteria}. Tindakan ini tidak dapat dibatalkan.",
+      "warning": "Kampanye akan dikirim ke anggota yang cocok dengan {criteria}. Tindakan ini tidak dapat dibatalkan.",
       "subject": "Subjek: {subject}",
       "allMatchingUsersWarning": "Termasuk pengguna yang cocok yang telah berhenti berlangganan buletin."
     },
@@ -2841,7 +2841,7 @@
       "dateLabel": "Tanggal dan waktu yang dijadwalkan",
       "previousMonth": "Bulan sebelumnya",
       "nextMonth": "Bulan depan",
-      "criteria": "Penonton: {criteria}",
+      "criteria": "Penerima: {criteria}",
       "allMatchingUsersWarning": "Termasuk pengguna yang cocok yang telah berhenti berlangganan buletin."
     },
     "notifications": {
@@ -5431,13 +5431,13 @@
           "description": "Setiap pengguna yang masuk dapat mengunduh file ini."
         },
         "restricted": {
-          "label": "Audiens",
-          "description": "Hanya pengguna di audiens terpilih yang dapat mendownload file ini."
+          "label": "Kriteria anggota",
+          "description": "Hanya anggota yang cocok dengan kriteria anggota yang dipilih yang dapat mengunduh file ini."
         }
       },
-      "criteriaLoadError": "Kebijakan telah dimuat, namun audiens tidak dapat dimuat.",
-      "criteriaEmpty": "Tidak ada segmen Audiens yang tersedia.",
-      "restrictedWithoutCriteria": "Kebijakan terbatas ini tidak memiliki Audiens. Pengunduhan ditolak untuk semua orang sampai Anda memilih setidaknya satu Pemirsa.",
+      "criteriaLoadError": "Kebijakan dimuat, tetapi kriteria anggota tidak dapat dimuat.",
+      "criteriaEmpty": "Tidak ada kriteria anggota yang tersedia.",
+      "restrictedWithoutCriteria": "Kebijakan terbatas ini tidak memiliki kriteria anggota. Unduhan ditolak untuk semua orang sampai Anda memilih setidaknya satu.",
       "additionalSelected": "{count} lainnya dipilih",
       "loadError": "Akses download tidak dapat dimuat.",
       "saveError": "Akses unduhan tidak dapat disimpan.",

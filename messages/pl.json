@@ -257,7 +257,7 @@
       "clients": "Klienci",
       "campaign": "Kampania",
       "campaigns": "Kampanie",
-      "memberCriteria": "Segment odbiorców",
+      "memberCriteria": "Kryteria członków",
       "user": "Użytkownik",
       "member": "Członek",
       "users": "Użytkownicy",
@@ -614,25 +614,25 @@
       }
     },
     "memberCriteria": {
-      "description": "Twórz segmenty odbiorców wielokrotnego użytku, aby kierować kampanie na określone grupy.",
-      "searchPlaceholder": "Wyszukaj segmenty...",
-      "empty": "Nie znaleziono segmentów. Utwórz taki, aby kierować reklamy do określonych odbiorców.",
-      "createTitle": "Utwórz segment",
-      "editTitle": "Edytuj segment",
-      "namePlaceholder": "Nazwa segmentu",
-      "typePlaceholder": "Wybierz typ segmentu",
-      "loading": "Ładowanie segmentu...",
+      "description": "Twórz kryteria członków wielokrotnego użytku, które wybierają członków do kampanii i pobierania z ograniczeniami.",
+      "searchPlaceholder": "Szukaj kryteriów członków...",
+      "empty": "Nie ma jeszcze kryteriów członków. Utwórz je, aby wybrać konkretnych członków.",
+      "createTitle": "Utwórz kryteria członków",
+      "editTitle": "Edytuj kryteria członków",
+      "namePlaceholder": "Nazwa kryteriów członków",
+      "typePlaceholder": "Wybierz rodzaj",
+      "loading": "Wczytywanie kryteriów członków...",
       "includeArchived": "Uwzględnij zarchiwizowane",
       "archive": "Archiwum",
-      "archiveTitle": "Archiwum odbiorców",
+      "archiveTitle": "Archiwizuj kryteria członków",
       "archiveConfirm": "Zarchiwizować {name}? Relacje kampanii {campaigns} i zasady plików {files} zostały odłączone. Przebiegi dostaw {runs} zachowują niezmienną historię.",
       "restore": "Przywrócić",
-      "restoreTitle": "Przywróć publiczność",
+      "restoreTitle": "Przywróć kryteria członków",
       "restoreConfirm": "Przywrócić {name}? Poprzednie harmonogramy kampanii i zasady dotyczące plików nie są przywracane automatycznie.",
-      "created": "Utworzono segment",
-      "updated": "Segment zaktualizowany",
-      "archived": "Publiczność zarchiwizowana",
-      "restored": "Publiczność przywrócona",
+      "created": "Utworzono kryteria członków",
+      "updated": "Zaktualizowano kryteria członków",
+      "archived": "Zarchiwizowano kryteria członków",
+      "restored": "Przywrócono kryteria członków",
       "config": {
         "userTagsPlaceholderSelect": "Wybierz tagi użytkownika",
         "rolesLabel": "Role",
@@ -641,8 +641,8 @@
         "createdBeforeLabel": "Utworzono wcześniej",
         "createdBeforePlaceholder": "Data końcowa",
         "estimateCount": "Szacunkowa liczba",
-        "estimatedRecipients": "~{count, plural, one {# odbiorca} few {# odbiorców} many {# odbiorców} other {# odbiorcy}}",
-        "allUsersHelp": "Kieruje reklamy na wszystkich użytkowników. Możliwość otrzymywania biuletynu jest wybierana w ramach każdej kampanii."
+        "estimatedRecipients": "~{count, plural, one {# pasujący członek} few {# pasujących członków} many {# pasujących członków} other {# pasującego członka}}",
+        "allUsersHelp": "Wybiera wszystkich członków. Każda kampania decyduje, czy otrzymują ją tylko subskrybenci newslettera."
       },
       "types": {
         "usersByFilter": "Użytkownicy według filtra",
@@ -2810,13 +2810,13 @@
       "none": "Brak układu"
     },
     "target": {
-      "criteriaLabel": "Grupa docelowa",
-      "criteriaPlaceholder": "Wybierz odbiorców",
+      "criteriaLabel": "Odbiorcy",
+      "criteriaPlaceholder": "Wybierz kryteria członków",
       "all": "Wszyscy użytkownicy",
-      "unavailableCriteria": "Zarchiwizowani lub niedostępni odbiorcy",
-      "unavailableCriteriaDescription": "Ta kampania jest skierowana do zarchiwizowanych lub niedostępnych odbiorców. Wybierz aktywną grupę odbiorców przed zaplanowaniem lub wysłaniem.",
-      "criteriaRequired": "Wybierz aktywną grupę odbiorców przed zaplanowaniem lub wysłaniem.",
-      "criteriaLoadError": "Nie udało się wczytać aktywnych odbiorców. Spróbuj ponownie przed zaplanowaniem lub wysłaniem."
+      "unavailableCriteria": "Zarchiwizowane lub niedostępne kryteria członków",
+      "unavailableCriteriaDescription": "Ta kampania używa zarchiwizowanych lub niedostępnych kryteriów członków. Przed zaplanowaniem lub wysłaniem wybierz aktywne kryteria członków.",
+      "criteriaRequired": "Przed zaplanowaniem lub wysłaniem wybierz aktywne kryteria członków.",
+      "criteriaLoadError": "Nie udało się wczytać aktywnych kryteriów członków. Spróbuj ponownie przed zaplanowaniem lub wysłaniem."
     },
     "fields": {
       "recipientScope": "Odbiorcy",
@@ -2832,7 +2832,7 @@
       "description": "Wpisz adres e-mail, na który chcesz wysłać test tej kampanii."
     },
     "sendModal": {
-      "warning": "Spowoduje to wysłanie kampanii do segmentu odbiorców {criteria}. Tej akcji nie można cofnąć.",
+      "warning": "Kampania zostanie wysłana do członków spełniających {criteria}. Tej czynności nie można cofnąć.",
       "subject": "Temat: {subject}",
       "allMatchingUsersWarning": "Obejmuje pasujących użytkowników, którzy zrezygnowali z subskrypcji biuletynów."
     },
@@ -2841,7 +2841,7 @@
       "dateLabel": "Zaplanowana data i godzina",
       "previousMonth": "Poprzedni miesiąc",
       "nextMonth": "Przyszły miesiąc",
-      "criteria": "Publiczność: {criteria}",
+      "criteria": "Odbiorcy: {criteria}",
       "allMatchingUsersWarning": "Obejmuje pasujących użytkowników, którzy zrezygnowali z subskrypcji biuletynów."
     },
     "notifications": {
@@ -5431,13 +5431,13 @@
           "description": "Każdy zalogowany użytkownik może pobrać ten plik."
         },
         "restricted": {
-          "label": "Publiczność",
-          "description": "Tylko użytkownicy z wybranych odbiorców mogą pobrać ten plik."
+          "label": "Kryteria członków",
+          "description": "Ten plik mogą pobrać tylko członkowie spełniający wybrane kryteria członków."
         }
       },
-      "criteriaLoadError": "Zasady zostały załadowane, ale nie udało się załadować odbiorców.",
-      "criteriaEmpty": "Brak dostępnych segmentów odbiorców.",
-      "restrictedWithoutCriteria": "Ta ograniczona polityka nie ma odbiorców. Pobieranie plików jest blokowane dla wszystkich, dopóki nie wybierzesz co najmniej jednej grupy odbiorców.",
+      "criteriaLoadError": "Zasady wczytano, ale nie udało się wczytać kryteriów członków.",
+      "criteriaEmpty": "Brak dostępnych kryteriów członków.",
+      "restrictedWithoutCriteria": "Te zasady z ograniczeniami nie mają kryteriów członków. Pobieranie jest zablokowane dla wszystkich, dopóki nie wybierzesz co najmniej jednego.",
       "additionalSelected": "Wybrano jeszcze {count}",
       "loadError": "Nie można załadować dostępu do pobierania.",
       "saveError": "Nie można zapisać dostępu do pobierania.",

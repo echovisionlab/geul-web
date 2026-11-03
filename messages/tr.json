@@ -257,7 +257,7 @@
       "clients": "Müşteriler",
       "campaign": "Kampanya",
       "campaigns": "Kampanyalar",
-      "memberCriteria": "Kitle Segmenti",
+      "memberCriteria": "Üye ölçütleri",
       "user": "Kullanıcı",
       "member": "Üye",
       "users": "Kullanıcılar",
@@ -614,25 +614,25 @@
       }
     },
     "memberCriteria": {
-      "description": "Kampanyaları belirli gruplara hedeflemek için yeniden kullanılabilir kitle segmentleri oluşturun.",
-      "searchPlaceholder": "Segmentleri ara...",
-      "empty": "Hiçbir segment bulunamadı. Belirli kitleleri hedeflemek için bir tane oluşturun.",
-      "createTitle": "Segment Oluştur",
-      "editTitle": "Segmenti Düzenle",
-      "namePlaceholder": "Segment adı",
-      "typePlaceholder": "Segment türünü seçin",
-      "loading": "Bölüm yükleniyor...",
+      "description": "Kampanyalar ve kısıtlı indirmeler için üyeleri seçen, yeniden kullanılabilir üye ölçütleri oluşturun.",
+      "searchPlaceholder": "Üye ölçütlerinde ara...",
+      "empty": "Henüz üye ölçütü yok. Belirli üyeleri seçmek için bir tane oluşturun.",
+      "createTitle": "Üye ölçütü oluştur",
+      "editTitle": "Üye ölçütünü düzenle",
+      "namePlaceholder": "Üye ölçütü adı",
+      "typePlaceholder": "Bir tür seçin",
+      "loading": "Üye ölçütleri yükleniyor...",
       "includeArchived": "Arşivlenenleri dahil et",
       "archive": "Arşiv",
-      "archiveTitle": "Arşiv Kitlesi",
+      "archiveTitle": "Üye ölçütlerini arşivle",
       "archiveConfirm": "{name} arşivlensin mi? {campaigns} kampanya ilişkileri ve {files} dosya politikaları birbirinden ayrılmıştır. {runs} dağıtım çalıştırmaları değişmez geçmişlerini korur.",
       "restore": "Eski haline getirmek",
-      "restoreTitle": "Kitleyi Geri Yükle",
+      "restoreTitle": "Üye ölçütünü geri yükle",
       "restoreConfirm": "{name} geri yüklensin mi? Önceki kampanya programları ve dosya politikaları otomatik olarak geri yüklenmez.",
-      "created": "Segment oluşturuldu",
-      "updated": "Segment güncellendi",
-      "archived": "Kitle arşivlendi",
-      "restored": "Kitle geri yüklendi",
+      "created": "Üye ölçütü oluşturuldu",
+      "updated": "Üye ölçütü güncellendi",
+      "archived": "Üye ölçütleri arşivlendi",
+      "restored": "Üye ölçütü geri yüklendi",
       "config": {
         "userTagsPlaceholderSelect": "Kullanıcı etiketlerini seçin",
         "rolesLabel": "Roller",
@@ -641,8 +641,8 @@
         "createdBeforeLabel": "Daha Önce Oluşturuldu",
         "createdBeforePlaceholder": "Bitiş tarihi",
         "estimateCount": "Tahmin Sayısı",
-        "estimatedRecipients": "~{count, plural, one {# alıcı} other {# alıcı}}",
-        "allUsersHelp": "Tüm kullanıcıları hedefler. Bülten uygunluğu her kampanya tarafından seçilir."
+        "estimatedRecipients": "~{count, plural, one {# eşleşen üye} other {# eşleşen üye}}",
+        "allUsersHelp": "Tüm üyeleri seçer. Her kampanya, yalnızca bülten abonelerinin alıp almayacağına kendisi karar verir."
       },
       "types": {
         "usersByFilter": "Filtreye Göre Kullanıcılar",
@@ -2810,13 +2810,13 @@
       "none": "Düzen Yok"
     },
     "target": {
-      "criteriaLabel": "Hedef kitle",
-      "criteriaPlaceholder": "Bir kitle seçin",
+      "criteriaLabel": "Alıcılar",
+      "criteriaPlaceholder": "Üye ölçütü seçin",
       "all": "Tüm kullanıcılar",
-      "unavailableCriteria": "Arşivlenmiş veya kullanılamayan kitle",
-      "unavailableCriteriaDescription": "Bu kampanya arşivlenmiş veya kullanılamayan bir hedef kitleyi hedefliyor. Planlamadan veya göndermeden önce aktif bir hedef kitle seçin.",
-      "criteriaRequired": "Planlamadan veya göndermeden önce aktif bir hedef kitle seçin.",
-      "criteriaLoadError": "Aktif kitleler yüklenemedi. Planlamadan veya göndermeden önce tekrar deneyin."
+      "unavailableCriteria": "Arşivlenmiş veya kullanılamayan üye ölçütleri",
+      "unavailableCriteriaDescription": "Bu kampanya arşivlenmiş veya kullanılamayan üye ölçütlerini kullanıyor. Zamanlamadan veya göndermeden önce etkin üye ölçütlerini seçin.",
+      "criteriaRequired": "Zamanlamadan veya göndermeden önce etkin üye ölçütlerini seçin.",
+      "criteriaLoadError": "Etkin üye ölçütleri yüklenemedi. Zamanlamadan veya göndermeden önce tekrar deneyin."
     },
     "fields": {
       "recipientScope": "Alıcılar",
@@ -2832,7 +2832,7 @@
       "description": "Bu kampanyanın testini göndermek için bir e-posta adresi girin."
     },
     "sendModal": {
-      "warning": "Bu, kampanyayı {criteria} kitle segmentine gönderecektir. Bu eylem geri alınamaz.",
+      "warning": "Kampanya {criteria} ile eşleşen üyelere gönderilecek. Bu işlem geri alınamaz.",
       "subject": "Konu: {subject}",
       "allMatchingUsersWarning": "Bülten aboneliğinden çıkan eşleşen kullanıcıları içerir."
     },
@@ -2841,7 +2841,7 @@
       "dateLabel": "Planlanan tarih ve saat",
       "previousMonth": "Önceki ay",
       "nextMonth": "Gelecek ay",
-      "criteria": "Kitle: {criteria}",
+      "criteria": "Alıcılar: {criteria}",
       "allMatchingUsersWarning": "Bülten aboneliğinden çıkan eşleşen kullanıcıları içerir."
     },
     "notifications": {
@@ -5431,13 +5431,13 @@
           "description": "Oturum açan herhangi bir kullanıcı bu dosyayı indirebilir."
         },
         "restricted": {
-          "label": "Kitleler",
-          "description": "Bu dosyayı yalnızca seçilen hedef kitlelerdeki kullanıcılar indirebilir."
+          "label": "Üye ölçütleri",
+          "description": "Bu dosyayı yalnızca seçilen üye ölçütleriyle eşleşen üyeler indirebilir."
         }
       },
-      "criteriaLoadError": "Politika yüklendi ancak kitleler yüklenemedi.",
-      "criteriaEmpty": "Hiçbir Kitle segmenti mevcut değil.",
-      "restrictedWithoutCriteria": "Bu kısıtlı politikanın Hedef Kitlesi yok. Siz en az bir Hedef Kitle seçene kadar herkesin indirme işlemi reddedilir.",
+      "criteriaLoadError": "Politika yüklendi ancak üye ölçütleri yüklenemedi.",
+      "criteriaEmpty": "Kullanılabilir üye ölçütü yok.",
+      "restrictedWithoutCriteria": "Bu kısıtlı politikanın üye ölçütü yok. En az birini seçene kadar indirmeler herkese kapalıdır.",
       "additionalSelected": "{count} tane daha seçildi",
       "loadError": "İndirme erişimi yüklenemedi.",
       "saveError": "İndirme erişimi kaydedilemedi.",

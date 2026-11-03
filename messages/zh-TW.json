@@ -257,7 +257,7 @@
       "clients": "客戶",
       "campaign": "活動",
       "campaigns": "活動",
-      "memberCriteria": "受眾群體",
+      "memberCriteria": "會員條件",
       "user": "使用者",
       "member": "成員",
       "users": "使用者",
@@ -614,25 +614,25 @@
       }
     },
     "memberCriteria": {
-      "description": "建立可重複使用的受眾群體，將行銷活動定位到特定群體",
-      "searchPlaceholder": "搜尋片段...",
-      "empty": "未找到段。建立一個針對特定受眾的產品",
-      "createTitle": "建立細分",
-      "editTitle": "編輯段",
-      "namePlaceholder": "段名稱",
-      "typePlaceholder": "選擇段類型",
-      "loading": "正在加載段...",
+      "description": "建立可重複使用的會員條件，為活動和受限下載選取會員。",
+      "searchPlaceholder": "搜尋會員條件...",
+      "empty": "目前沒有會員條件。建立一個以選取特定會員。",
+      "createTitle": "建立會員條件",
+      "editTitle": "編輯會員條件",
+      "namePlaceholder": "會員條件名稱",
+      "typePlaceholder": "選取類型",
+      "loading": "正在載入會員條件...",
       "includeArchived": "包含已封存",
       "archive": "封存",
-      "archiveTitle": "封存受眾",
+      "archiveTitle": "封存會員條件",
       "archiveConfirm": "封存 {name}？將解除 {campaigns} 個行銷活動關係及 {files} 個檔案政策。{runs} 筆傳送記錄保持不變。",
       "restore": "還原",
-      "restoreTitle": "還原受眾",
+      "restoreTitle": "還原會員條件",
       "restoreConfirm": "還原 {name}？先前的行銷活動排程與檔案下載政策不會自動還原。",
-      "created": "已建立段",
-      "updated": "細分已更新",
-      "archived": "受眾已封存",
-      "restored": "受眾已還原",
+      "created": "已建立會員條件",
+      "updated": "已更新會員條件",
+      "archived": "已封存會員條件",
+      "restored": "已還原會員條件",
       "config": {
         "userTagsPlaceholderSelect": "選擇用戶標籤",
         "rolesLabel": "角色",
@@ -641,8 +641,8 @@
         "createdBeforeLabel": "之前創建",
         "createdBeforePlaceholder": "結束日期",
         "estimateCount": "估計數量",
-        "estimatedRecipients": "~{count, plural, one {# 位收件人} other {# 位收件人}}",
-        "allUsersHelp": "面向所有使用者。電子報資格由每個活動選擇。"
+        "estimatedRecipients": "約 {count, plural, one {# 位符合條件的會員} other {# 位符合條件的會員}}",
+        "allUsersHelp": "選取所有會員。是否只寄給訂閱電子報的會員，由每個活動決定。"
       },
       "types": {
         "usersByFilter": "按篩選的用戶",
@@ -2810,13 +2810,13 @@
       "none": "無佈局"
     },
     "target": {
-      "criteriaLabel": "目標受眾",
-      "criteriaPlaceholder": "選擇受眾",
+      "criteriaLabel": "收件人",
+      "criteriaPlaceholder": "選取會員條件",
       "all": "所有使用者",
-      "unavailableCriteria": "已封存或無法使用的受眾",
-      "unavailableCriteriaDescription": "此行銷活動以已封存或無法使用的受眾為目標。請先選擇有效受眾，再排程或傳送。",
-      "criteriaRequired": "請先選擇有效受眾，再排程或傳送。",
-      "criteriaLoadError": "無法載入有效受眾。請在排程或傳送前重試。"
+      "unavailableCriteria": "已封存或無法使用的會員條件",
+      "unavailableCriteriaDescription": "此活動使用了已封存或無法使用的會員條件。請在排程或傳送前選取使用中的會員條件。",
+      "criteriaRequired": "請在排程或傳送前選取使用中的會員條件。",
+      "criteriaLoadError": "無法載入使用中的會員條件。請在排程或傳送前再試一次。"
     },
     "fields": {
       "recipientScope": "收件者",
@@ -2832,7 +2832,7 @@
       "description": "輸入電子郵件地址以已傳送此活動的測試"
     },
     "sendModal": {
-      "warning": "這會將行銷活動已傳送至細分受眾群 {criteria}。此操作無法撤銷",
+      "warning": "活動將寄給符合 {criteria} 的會員。此動作無法復原。",
       "subject": "主題：{subject}",
       "allMatchingUsersWarning": "包括已取消電子報訂閱的符合條件使用者。"
     },
@@ -2841,7 +2841,7 @@
       "dateLabel": "已排程日期和時間",
       "previousMonth": "上個月",
       "nextMonth": "下個月",
-      "criteria": "觀眾：{criteria}",
+      "criteria": "收件人：{criteria}",
       "allMatchingUsersWarning": "包括已取消電子報訂閱的符合條件使用者。"
     },
     "notifications": {
@@ -5431,13 +5431,13 @@
           "description": "任何已登入使用者都可以下載此檔案。"
         },
         "restricted": {
-          "label": "受眾",
-          "description": "只有所選受眾中的使用者可以下載此檔案。"
+          "label": "會員條件",
+          "description": "只有符合所選會員條件的會員才能下載這個檔案。"
         }
       },
-      "criteriaLoadError": "政策已載入，但無法載入受眾。",
-      "criteriaEmpty": "沒有可用的受眾區隔。",
-      "restrictedWithoutCriteria": "此受限政策未指定受眾。在選取至少一個受眾之前，所有人的下載都會被拒絕。",
+      "criteriaLoadError": "已載入政策，但無法載入會員條件。",
+      "criteriaEmpty": "沒有可用的會員條件。",
+      "restrictedWithoutCriteria": "這個受限政策沒有會員條件。在選取至少一個之前，所有人都無法下載。",
       "additionalSelected": "另有 {count} 項已選取",
       "loadError": "無法載入下載權限。",
       "saveError": "無法儲存下載權限。",

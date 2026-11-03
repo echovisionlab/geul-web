@@ -257,7 +257,7 @@
       "clients": "Clientes",
       "campaign": "Campanha",
       "campaigns": "Campanhas",
-      "memberCriteria": "Segmento de público",
+      "memberCriteria": "Critérios de membros",
       "user": "Usuário",
       "member": "Membro",
       "users": "Usuários",
@@ -614,25 +614,25 @@
       }
     },
     "memberCriteria": {
-      "description": "Crie segmentos de público reutilizáveis para direcionar campanhas a grupos específicos.",
-      "searchPlaceholder": "Buscar segmentos...",
-      "empty": "Nenhum segmento encontrado. Crie um para direcionar públicos específicos.",
-      "createTitle": "Criar segmento",
-      "editTitle": "Editar segmento",
-      "namePlaceholder": "Nome do segmento",
-      "typePlaceholder": "Selecione o tipo de segmento",
-      "loading": "Carregando segmento...",
+      "description": "Crie critérios de membros reutilizáveis que selecionam membros para campanhas e downloads restritos.",
+      "searchPlaceholder": "Buscar critérios de membros...",
+      "empty": "Ainda não há critérios de membros. Crie um para selecionar membros específicos.",
+      "createTitle": "Criar critérios de membros",
+      "editTitle": "Editar critérios de membros",
+      "namePlaceholder": "Nome dos critérios de membros",
+      "typePlaceholder": "Selecione um tipo",
+      "loading": "Carregando critérios de membros...",
       "includeArchived": "Incluir arquivados",
       "archive": "Arquivar",
-      "archiveTitle": "Arquivar público",
+      "archiveTitle": "Arquivar critérios de membros",
       "archiveConfirm": "Arquivar {name}? Serão desvinculados {campaigns} relacionamentos de campanha e {files} políticas de arquivo. Os {runs} históricos de envio permanecerão inalterados.",
       "restore": "Restaurar",
-      "restoreTitle": "Restaurar público",
+      "restoreTitle": "Restaurar critérios de membros",
       "restoreConfirm": "Restaurar {name}? Os agendamentos e as políticas de download anteriores não serão restaurados automaticamente.",
-      "created": "Segmento criado",
-      "updated": "Segmento atualizado",
-      "archived": "Público arquivado",
-      "restored": "Público restaurado",
+      "created": "Critérios de membros criados",
+      "updated": "Critérios de membros atualizados",
+      "archived": "Critérios de membros arquivados",
+      "restored": "Critérios de membros restaurados",
       "config": {
         "userTagsPlaceholderSelect": "Selecione tags de usuário",
         "rolesLabel": "Funções",
@@ -641,8 +641,8 @@
         "createdBeforeLabel": "Criado antes de",
         "createdBeforePlaceholder": "Data de término",
         "estimateCount": "Estimar quantidade",
-        "estimatedRecipients": "~{count, plural, one {# destinatário} many {# destinatários} other {# destinatários}}",
-        "allUsersHelp": "Segmenta todos os usuários. A elegibilidade da newsletter é escolhida por campanha."
+        "estimatedRecipients": "~{count, plural, one {# membro correspondente} many {# membros correspondentes} other {# membros correspondentes}}",
+        "allUsersHelp": "Seleciona todos os membros. Cada campanha decide se só os inscritos na newsletter a recebem."
       },
       "types": {
         "usersByFilter": "Usuários por filtro",
@@ -2810,13 +2810,13 @@
       "none": "Sem layout"
     },
     "target": {
-      "criteriaLabel": "Público-alvo",
-      "criteriaPlaceholder": "Selecione um público",
+      "criteriaLabel": "Destinatários",
+      "criteriaPlaceholder": "Selecione critérios de membros",
       "all": "Todos os usuários",
-      "unavailableCriteria": "Público arquivado ou indisponível",
-      "unavailableCriteriaDescription": "Esta campanha está direcionada a um público arquivado ou indisponível. Selecione um público ativo antes de agendar ou enviar.",
-      "criteriaRequired": "Selecione um público ativo antes de agendar ou enviar.",
-      "criteriaLoadError": "Não foi possível carregar os públicos ativos. Tente novamente antes de agendar ou enviar."
+      "unavailableCriteria": "Critérios de membros arquivados ou indisponíveis",
+      "unavailableCriteriaDescription": "Esta campanha usa critérios de membros arquivados ou indisponíveis. Selecione critérios de membros ativos antes de agendar ou enviar.",
+      "criteriaRequired": "Selecione critérios de membros ativos antes de agendar ou enviar.",
+      "criteriaLoadError": "Não foi possível carregar os critérios de membros ativos. Tente de novo antes de agendar ou enviar."
     },
     "fields": {
       "recipientScope": "Destinatários",
@@ -2832,7 +2832,7 @@
       "description": "Digite um endereço de e-mail para enviar um teste desta campanha."
     },
     "sendModal": {
-      "warning": "Isso enviará a campanha para o segmento de público {criteria}. Esta ação não pode ser desfeita.",
+      "warning": "A campanha será enviada aos membros que atendem a {criteria}. Esta ação não pode ser desfeita.",
       "subject": "Assunto: {subject}",
       "allMatchingUsersWarning": "Inclui usuários correspondentes que cancelaram a newsletter."
     },
@@ -2841,7 +2841,7 @@
       "dateLabel": "Data e hora agendadas",
       "previousMonth": "Mês anterior",
       "nextMonth": "Próximo mês",
-      "criteria": "Público: {criteria}",
+      "criteria": "Destinatários: {criteria}",
       "allMatchingUsersWarning": "Inclui usuários correspondentes que cancelaram a newsletter."
     },
     "notifications": {
@@ -5431,13 +5431,13 @@
           "description": "Qualquer usuário conectado pode baixar este arquivo."
         },
         "restricted": {
-          "label": "Públicos",
-          "description": "Somente usuários dos públicos selecionados podem baixar este arquivo."
+          "label": "Critérios de membros",
+          "description": "Só membros que atendem aos critérios de membros selecionados podem baixar este arquivo."
         }
       },
-      "criteriaLoadError": "A política foi carregada, mas não foi possível carregar os públicos.",
-      "criteriaEmpty": "Não há segmentos de público disponíveis.",
-      "restrictedWithoutCriteria": "Esta política restrita não tem nenhum público. Os downloads são negados a todos até que você selecione pelo menos um público.",
+      "criteriaLoadError": "A política foi carregada, mas não foi possível carregar os critérios de membros.",
+      "criteriaEmpty": "Nenhum critério de membros disponível.",
+      "restrictedWithoutCriteria": "Esta política restrita não tem critérios de membros. Os downloads ficam bloqueados para todos até você selecionar pelo menos um.",
       "additionalSelected": "Mais {count} selecionados",
       "loadError": "Não foi possível carregar o acesso ao download.",
       "saveError": "Não foi possível salvar o acesso ao download.",

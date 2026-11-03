@@ -257,7 +257,7 @@
       "clients": "Khách hàng",
       "campaign": "Chiến dịch",
       "campaigns": "Chiến dịch",
-      "memberCriteria": "Phân khúc đối tượng",
+      "memberCriteria": "Tiêu chí thành viên",
       "user": "người dùng",
       "member": "Thành viên",
       "users": "Người dùng",
@@ -614,25 +614,25 @@
       }
     },
     "memberCriteria": {
-      "description": "Tạo các phân khúc đối tượng có thể sử dụng lại để nhắm mục tiêu chiến dịch đến các nhóm cụ thể.",
-      "searchPlaceholder": "Tìm kiếm phân đoạn...",
-      "empty": "Không tìm thấy phân đoạn nào. Tạo một cái để nhắm mục tiêu đối tượng cụ thể.",
-      "createTitle": "Tạo phân đoạn",
-      "editTitle": "Chỉnh sửa phân đoạn",
-      "namePlaceholder": "Tên phân đoạn",
-      "typePlaceholder": "Chọn loại phân đoạn",
-      "loading": "Đang tải phân đoạn...",
+      "description": "Tạo tiêu chí thành viên dùng lại được để chọn thành viên cho chiến dịch và lượt tải xuống bị giới hạn.",
+      "searchPlaceholder": "Tìm tiêu chí thành viên...",
+      "empty": "Chưa có tiêu chí thành viên nào. Hãy tạo một tiêu chí để chọn những thành viên cụ thể.",
+      "createTitle": "Tạo tiêu chí thành viên",
+      "editTitle": "Sửa tiêu chí thành viên",
+      "namePlaceholder": "Tên tiêu chí thành viên",
+      "typePlaceholder": "Chọn loại",
+      "loading": "Đang tải tiêu chí thành viên...",
       "includeArchived": "Bao gồm lưu trữ",
       "archive": "Lưu trữ",
-      "archiveTitle": "Đối tượng lưu trữ",
+      "archiveTitle": "Lưu trữ tiêu chí thành viên",
       "archiveConfirm": "Lưu trữ {name}? Mối quan hệ của chiến dịch {campaigns} và chính sách tệp {files} được tách rời. Các lần phân phối {runs} sẽ giữ nguyên lịch sử bất biến của chúng.",
       "restore": "Khôi phục",
-      "restoreTitle": "Khôi phục đối tượng",
+      "restoreTitle": "Khôi phục tiêu chí thành viên",
       "restoreConfirm": "Khôi phục {name}? Lịch trình chiến dịch và chính sách tệp trước đó không được khôi phục tự động.",
-      "created": "Đã tạo phân đoạn",
-      "updated": "Đã cập nhật phân đoạn",
-      "archived": "Đã lưu trữ đối tượng",
-      "restored": "Đã khôi phục đối tượng",
+      "created": "Đã tạo tiêu chí thành viên",
+      "updated": "Đã cập nhật tiêu chí thành viên",
+      "archived": "Đã lưu trữ tiêu chí thành viên",
+      "restored": "Đã khôi phục tiêu chí thành viên",
       "config": {
         "userTagsPlaceholderSelect": "Chọn thẻ người dùng",
         "rolesLabel": "Vai trò",
@@ -641,8 +641,8 @@
         "createdBeforeLabel": "Đã tạo trước đó",
         "createdBeforePlaceholder": "Ngày kết thúc",
         "estimateCount": "Ước tính số lượng",
-        "estimatedRecipients": "~{count, plural, one {# người nhận} other {# người nhận}}",
-        "allUsersHelp": "Nhắm mục tiêu tất cả người dùng. Tính đủ điều kiện của bản tin được chọn bởi mỗi chiến dịch."
+        "estimatedRecipients": "~{count, plural, one {# thành viên phù hợp} other {# thành viên phù hợp}}",
+        "allUsersHelp": "Chọn tất cả thành viên. Mỗi chiến dịch tự quyết định có chỉ gửi cho người đăng ký bản tin hay không."
       },
       "types": {
         "usersByFilter": "Người dùng theo bộ lọc",
@@ -2810,13 +2810,13 @@
       "none": "Không có bố cục"
     },
     "target": {
-      "criteriaLabel": "Đối tượng mục tiêu",
-      "criteriaPlaceholder": "Chọn khán giả",
+      "criteriaLabel": "Người nhận",
+      "criteriaPlaceholder": "Chọn tiêu chí thành viên",
       "all": "Tất cả người dùng",
-      "unavailableCriteria": "Đối tượng được lưu trữ hoặc không có sẵn",
-      "unavailableCriteriaDescription": "Chiến dịch này nhắm mục tiêu đến đối tượng đã lưu trữ hoặc không có sẵn. Chọn đối tượng đang hoạt động trước khi lên lịch hoặc gửi.",
-      "criteriaRequired": "Chọn đối tượng đang hoạt động trước khi lên lịch hoặc gửi.",
-      "criteriaLoadError": "Không thể tải đối tượng đang hoạt động. Hãy thử lại trước khi lên lịch hoặc gửi."
+      "unavailableCriteria": "Tiêu chí thành viên đã lưu trữ hoặc không khả dụng",
+      "unavailableCriteriaDescription": "Chiến dịch này dùng tiêu chí thành viên đã lưu trữ hoặc không khả dụng. Chọn tiêu chí thành viên đang hoạt động trước khi lên lịch hoặc gửi.",
+      "criteriaRequired": "Chọn tiêu chí thành viên đang hoạt động trước khi lên lịch hoặc gửi.",
+      "criteriaLoadError": "Không thể tải tiêu chí thành viên đang hoạt động. Hãy thử lại trước khi lên lịch hoặc gửi."
     },
     "fields": {
       "recipientScope": "Người nhận",
@@ -2832,7 +2832,7 @@
       "description": "Nhập địa chỉ email để gửi bản thử nghiệm của chiến dịch này."
     },
     "sendModal": {
-      "warning": "Thao tác này sẽ gửi chiến dịch đến phân khúc đối tượng {criteria}. Không thể hoàn tác hành động này.",
+      "warning": "Chiến dịch sẽ được gửi đến những thành viên khớp với {criteria}. Không thể hoàn tác thao tác này.",
       "subject": "Chủ đề: {subject}",
       "allMatchingUsersWarning": "Bao gồm những người dùng phù hợp đã hủy đăng ký nhận bản tin."
     },
@@ -2841,7 +2841,7 @@
       "dateLabel": "Ngày và giờ dự kiến",
       "previousMonth": "Tháng trước",
       "nextMonth": "Tháng tiếp theo",
-      "criteria": "Khán giả: {criteria}",
+      "criteria": "Người nhận: {criteria}",
       "allMatchingUsersWarning": "Bao gồm những người dùng phù hợp đã hủy đăng ký nhận bản tin."
     },
     "notifications": {
@@ -5431,13 +5431,13 @@
           "description": "Bất kỳ người dùng đã đăng nhập nào cũng có thể tải xuống tệp này."
         },
         "restricted": {
-          "label": "Khán giả",
-          "description": "Chỉ những người dùng trong đối tượng đã chọn mới có thể tải xuống tệp này."
+          "label": "Tiêu chí thành viên",
+          "description": "Chỉ những thành viên khớp với tiêu chí thành viên đã chọn mới có thể tải xuống tệp này."
         }
       },
-      "criteriaLoadError": "Đã tải chính sách nhưng không thể tải đối tượng.",
-      "criteriaEmpty": "Không có phân khúc Đối tượng nào khả dụng.",
-      "restrictedWithoutCriteria": "Chính sách hạn chế này không có Đối tượng. Tải xuống bị từ chối đối với mọi người cho đến khi bạn chọn ít nhất một Đối tượng.",
+      "criteriaLoadError": "Đã tải chính sách nhưng không thể tải tiêu chí thành viên.",
+      "criteriaEmpty": "Không có tiêu chí thành viên nào khả dụng.",
+      "restrictedWithoutCriteria": "Chính sách giới hạn này không có tiêu chí thành viên. Mọi lượt tải xuống đều bị từ chối cho đến khi bạn chọn ít nhất một tiêu chí.",
       "additionalSelected": "Đã chọn thêm {count}",
       "loadError": "Không thể tải quyền truy cập tải xuống.",
       "saveError": "Không thể lưu quyền truy cập tải xuống.",

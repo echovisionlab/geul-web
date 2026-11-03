@@ -257,7 +257,7 @@
       "clients": "Clientes",
       "campaign": "Campaña",
       "campaigns": "Campañas",
-      "memberCriteria": "Segmento de audiencia",
+      "memberCriteria": "Criterios de miembros",
       "user": "Usuario",
       "member": "Miembro",
       "users": "Usuarios",
@@ -614,25 +614,25 @@
       }
     },
     "memberCriteria": {
-      "description": "Crea segmentos de audiencia reutilizables para dirigir campañas a grupos específicos.",
-      "searchPlaceholder": "Buscar segmentos...",
-      "empty": "No se encontraron segmentos. Crea uno para dirigirte a audiencias específicas.",
-      "createTitle": "Crear segmento",
-      "editTitle": "Editar segmento",
-      "namePlaceholder": "Nombre del segmento",
-      "typePlaceholder": "Seleccionar tipo de segmento",
-      "loading": "Cargando segmento...",
+      "description": "Crea criterios de miembros reutilizables que seleccionan miembros para campañas y descargas restringidas.",
+      "searchPlaceholder": "Buscar criterios de miembros...",
+      "empty": "Todavía no hay criterios de miembros. Crea uno para seleccionar miembros concretos.",
+      "createTitle": "Crear criterios de miembros",
+      "editTitle": "Editar criterios de miembros",
+      "namePlaceholder": "Nombre de los criterios de miembros",
+      "typePlaceholder": "Selecciona un tipo",
+      "loading": "Cargando criterios de miembros...",
       "includeArchived": "Incluir archivados",
       "archive": "Archivar",
-      "archiveTitle": "Archivar audiencia",
+      "archiveTitle": "Archivar criterios de miembros",
       "archiveConfirm": "¿Archivar {name}? Se desvincularán {campaigns} relaciones de campañas y {files} políticas de archivos. Los {runs} historiales de entrega permanecerán sin cambios.",
       "restore": "Restaurar",
-      "restoreTitle": "Restaurar audiencia",
+      "restoreTitle": "Restaurar criterios de miembros",
       "restoreConfirm": "¿Restaurar {name}? Las programaciones y políticas de descarga anteriores no se restauran automáticamente.",
-      "created": "Segmento creado",
-      "updated": "Segmento actualizado",
-      "archived": "Audiencia archivada",
-      "restored": "Audiencia restaurada",
+      "created": "Criterios de miembros creados",
+      "updated": "Criterios de miembros actualizados",
+      "archived": "Criterios de miembros archivados",
+      "restored": "Criterios de miembros restaurados",
       "config": {
         "userTagsPlaceholderSelect": "Seleccionar etiquetas de usuario",
         "rolesLabel": "Roles",
@@ -641,8 +641,8 @@
         "createdBeforeLabel": "Creado antes",
         "createdBeforePlaceholder": "Fecha de finalización",
         "estimateCount": "Recuento estimado",
-        "estimatedRecipients": "~{count, plural, one {# destinatario} many {# destinatarios} other {# destinatarios}}",
-        "allUsersHelp": "Incluye a todos los usuarios. La elegibilidad del boletín se elige por campaña."
+        "estimatedRecipients": "~{count, plural, one {# miembro coincidente} many {# miembros coincidentes} other {# miembros coincidentes}}",
+        "allUsersHelp": "Selecciona a todos los miembros. Cada campaña decide si solo la reciben los suscriptores del boletín."
       },
       "types": {
         "usersByFilter": "Usuarios filtrados",
@@ -2810,13 +2810,13 @@
       "none": "Sin diseño"
     },
     "target": {
-      "criteriaLabel": "Audiencia objetivo",
-      "criteriaPlaceholder": "Seleccionar una audiencia",
+      "criteriaLabel": "Destinatarios",
+      "criteriaPlaceholder": "Selecciona criterios de miembros",
       "all": "Todos los usuarios",
-      "unavailableCriteria": "Audiencia archivada o no disponible",
-      "unavailableCriteriaDescription": "Esta campaña apunta a una audiencia archivada o no disponible. Selecciona una audiencia activa antes de programar o enviar.",
-      "criteriaRequired": "Selecciona una audiencia activa antes de programar o enviar.",
-      "criteriaLoadError": "No se pudieron cargar las audiencias activas. Inténtalo de nuevo antes de programar o enviar."
+      "unavailableCriteria": "Criterios de miembros archivados o no disponibles",
+      "unavailableCriteriaDescription": "Esta campaña usa criterios de miembros archivados o no disponibles. Selecciona criterios de miembros activos antes de programar o enviar.",
+      "criteriaRequired": "Selecciona criterios de miembros activos antes de programar o enviar.",
+      "criteriaLoadError": "No se pudieron cargar los criterios de miembros activos. Vuelve a intentarlo antes de programar o enviar."
     },
     "fields": {
       "recipientScope": "Destinatarios",
@@ -2832,7 +2832,7 @@
       "description": "Introduce una dirección de correo electrónico para enviar una prueba de esta campaña"
     },
     "sendModal": {
-      "warning": "Esto enviará la campaña al segmento de audiencia {criteria}. Esta acción no se puede deshacer.",
+      "warning": "La campaña se enviará a los miembros que cumplan {criteria}. Esta acción no se puede deshacer.",
       "subject": "Asunto: {subject}",
       "allMatchingUsersWarning": "Incluye usuarios coincidentes que cancelaron el boletín."
     },
@@ -2841,7 +2841,7 @@
       "dateLabel": "Fecha y hora previstas",
       "previousMonth": "Mes anterior",
       "nextMonth": "Mes siguiente",
-      "criteria": "Audiencia: {criteria}",
+      "criteria": "Destinatarios: {criteria}",
       "allMatchingUsersWarning": "Incluye usuarios coincidentes que cancelaron el boletín."
     },
     "notifications": {
@@ -5431,13 +5431,13 @@
           "description": "Cualquier usuario con sesión iniciada puede descargar este archivo."
         },
         "restricted": {
-          "label": "Audiencias",
-          "description": "Solo los usuarios de las audiencias seleccionadas pueden descargar este archivo."
+          "label": "Criterios de miembros",
+          "description": "Solo los miembros que cumplan los criterios de miembros seleccionados pueden descargar este archivo."
         }
       },
-      "criteriaLoadError": "La política se cargó, pero no se pudieron cargar las audiencias.",
-      "criteriaEmpty": "No hay segmentos de audiencia disponibles.",
-      "restrictedWithoutCriteria": "Esta política restringida no tiene ninguna audiencia. Las descargas se deniegan a todo el mundo hasta que selecciones al menos una audiencia.",
+      "criteriaLoadError": "La política se cargó, pero no se pudieron cargar los criterios de miembros.",
+      "criteriaEmpty": "No hay criterios de miembros disponibles.",
+      "restrictedWithoutCriteria": "Esta política restringida no tiene criterios de miembros. Las descargas se deniegan a todos hasta que selecciones al menos uno.",
       "additionalSelected": "{count} más seleccionados",
       "loadError": "No se pudo cargar el acceso de descarga.",
       "saveError": "No se pudo guardar el acceso de descarga.",

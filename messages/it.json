@@ -257,7 +257,7 @@
       "clients": "Clienti",
       "campaign": "Campagna",
       "campaigns": "Campagne",
-      "memberCriteria": "Segmento di pubblico",
+      "memberCriteria": "Criteri dei membri",
       "user": "Utente",
       "member": "Membro",
       "users": "Utenti",
@@ -614,25 +614,25 @@
       }
     },
     "memberCriteria": {
-      "description": "Crea segmenti di pubblico riutilizzabili per indirizzare le campagne a gruppi specifici.",
-      "searchPlaceholder": "Cerca segmenti...",
-      "empty": "Nessun segmento trovato. Creane uno per rivolgerti a un pubblico specifico.",
-      "createTitle": "Crea segmento",
-      "editTitle": "Modifica segmento",
-      "namePlaceholder": "Nome del segmento",
-      "typePlaceholder": "Seleziona il tipo di segmento",
-      "loading": "Caricamento segmento...",
+      "description": "Crea criteri dei membri riutilizzabili che selezionano i membri per campagne e download riservati.",
+      "searchPlaceholder": "Cerca criteri dei membri...",
+      "empty": "Nessun criterio dei membri. Creane uno per selezionare membri specifici.",
+      "createTitle": "Crea criteri dei membri",
+      "editTitle": "Modifica criteri dei membri",
+      "namePlaceholder": "Nome dei criteri dei membri",
+      "typePlaceholder": "Seleziona un tipo",
+      "loading": "Caricamento dei criteri dei membri...",
       "includeArchived": "Includi archiviati",
       "archive": "Archivia",
-      "archiveTitle": "Archivia pubblico",
+      "archiveTitle": "Archivia criteri dei membri",
       "archiveConfirm": "Archiviare {name}? Verranno scollegate {campaigns} relazioni di campagna e {files} regole file. Le {runs} cronologie di invio resteranno invariate.",
       "restore": "Ripristina",
-      "restoreTitle": "Ripristina pubblico",
+      "restoreTitle": "Ripristina criteri dei membri",
       "restoreConfirm": "Ripristinare {name}? Le programmazioni e le regole di download precedenti non vengono ripristinate automaticamente.",
-      "created": "Segmento creato",
-      "updated": "Segmento aggiornato",
-      "archived": "Pubblico archiviato",
-      "restored": "Pubblico ripristinato",
+      "created": "Criteri dei membri creati",
+      "updated": "Criteri dei membri aggiornati",
+      "archived": "Criteri dei membri archiviati",
+      "restored": "Criteri dei membri ripristinati",
       "config": {
         "userTagsPlaceholderSelect": "Seleziona i tag utente",
         "rolesLabel": "Ruoli",
@@ -641,8 +641,8 @@
         "createdBeforeLabel": "Creato prima",
         "createdBeforePlaceholder": "Data di fine",
         "estimateCount": "Conteggio stima",
-        "estimatedRecipients": "~{count, plural, one {# destinatario} many {# destinatari} other {# destinatari}}",
-        "allUsersHelp": "Include tutti gli utenti. L’idoneità alla newsletter si sceglie per campagna."
+        "estimatedRecipients": "~{count, plural, one {# membro corrispondente} many {# membri corrispondenti} other {# membri corrispondenti}}",
+        "allUsersHelp": "Seleziona tutti i membri. Ogni campagna decide se la ricevono solo gli iscritti alla newsletter."
       },
       "types": {
         "usersByFilter": "Utenti per filtro",
@@ -2810,13 +2810,13 @@
       "none": "Nessuna disposizione"
     },
     "target": {
-      "criteriaLabel": "Pubblico di destinazione",
-      "criteriaPlaceholder": "Seleziona un pubblico",
+      "criteriaLabel": "Destinatari",
+      "criteriaPlaceholder": "Seleziona criteri dei membri",
       "all": "Tutti gli utenti",
-      "unavailableCriteria": "Pubblico archiviato o non disponibile",
-      "unavailableCriteriaDescription": "Questa campagna è rivolta a un pubblico archiviato o non disponibile. Seleziona un pubblico attivo prima di programmare o inviare.",
-      "criteriaRequired": "Seleziona un pubblico attivo prima di programmare o inviare.",
-      "criteriaLoadError": "Impossibile caricare i pubblici attivi. Riprova prima di programmare o inviare."
+      "unavailableCriteria": "Criteri dei membri archiviati o non disponibili",
+      "unavailableCriteriaDescription": "Questa campagna usa criteri dei membri archiviati o non disponibili. Seleziona criteri dei membri attivi prima di programmare o inviare.",
+      "criteriaRequired": "Seleziona criteri dei membri attivi prima di programmare o inviare.",
+      "criteriaLoadError": "Impossibile caricare i criteri dei membri attivi. Riprova prima di programmare o inviare."
     },
     "fields": {
       "recipientScope": "Destinatari",
@@ -2832,7 +2832,7 @@
       "description": "Inserisci un indirizzo email per inviare un test di questa campagna."
     },
     "sendModal": {
-      "warning": "Ciò invierà la campagna al segmento di pubblico {criteria}. Questa azione non può essere annullata.",
+      "warning": "La campagna verrà inviata ai membri che corrispondono a {criteria}. L'azione non può essere annullata.",
       "subject": "Oggetto: {subject}",
       "allMatchingUsersWarning": "Include gli utenti corrispondenti che hanno annullato l’iscrizione."
     },
@@ -2841,7 +2841,7 @@
       "dateLabel": "Data e ora previste",
       "previousMonth": "Mese precedente",
       "nextMonth": "Mese successivo",
-      "criteria": "Pubblico: {criteria}",
+      "criteria": "Destinatari: {criteria}",
       "allMatchingUsersWarning": "Include gli utenti corrispondenti che hanno annullato l’iscrizione."
     },
     "notifications": {
@@ -5431,13 +5431,13 @@
           "description": "Qualsiasi utente autenticato può scaricare questo file."
         },
         "restricted": {
-          "label": "Destinatari",
-          "description": "Solo gli utenti nei destinatari selezionati possono scaricare questo file."
+          "label": "Criteri dei membri",
+          "description": "Solo i membri che corrispondono ai criteri dei membri selezionati possono scaricare questo file."
         }
       },
-      "criteriaLoadError": "La policy è stata caricata, ma non è stato possibile caricare i destinatari.",
-      "criteriaEmpty": "Non sono disponibili segmenti di destinatari.",
-      "restrictedWithoutCriteria": "Questa policy con restrizioni non ha destinatari. I download sono negati a tutti finché non selezioni almeno un destinatario.",
+      "criteriaLoadError": "La regola è stata caricata, ma non è stato possibile caricare i criteri dei membri.",
+      "criteriaEmpty": "Nessun criterio dei membri disponibile.",
+      "restrictedWithoutCriteria": "Questa regola riservata non ha criteri dei membri. I download sono negati a tutti finché non ne selezioni almeno uno.",
       "additionalSelected": "Altri {count} selezionati",
       "loadError": "Non è stato possibile caricare l’accesso al download.",
       "saveError": "Non è stato possibile salvare l’accesso al download.",
