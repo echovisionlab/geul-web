@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "sourceManifestHash": "ecef398cbe648db6c570ca7c38ecc33b7c0f803f2a506976da0cacb2ac30271e",
+  "sourceManifestHash": "b9867bc94366bc6b09336c1584cd37df176b3dae6ea65d3ffe8e956eb0d3969d",
   "methodology": "All inventoried Feature component candidates. Direct value imports, literal lazy imports and transitive source relationships through production owners/local adapters are indexed separately. A dependency can be unused or render conditionally; neither relationship proves rendered states, route parity or design compliance. Empty JSX records include runtime/lazy/controller boundaries and must be inspected before treating them as visual gaps.",
-  "counts": { "domains": 54, "componentFiles": 781, "jsxWithoutStoryRelationship": 43 },
+  "counts": { "domains": 54, "componentFiles": 788, "jsxWithoutStoryRelationship": 46 },
   "domains": [
     {
       "domain": "account",
@@ -557,6 +557,48 @@
           "relatedStories": ["Pages/Admin/Member Criteria and Users"]
         },
         {
+          "file": "features/admin/oauth-app/OAuthAppEditor.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": []
+        },
+        {
+          "file": "features/admin/oauth-app/OAuthAppEditorView.tsx",
+          "hasJsx": true,
+          "directStories": ["Pages/Admin/OAuth Apps"],
+          "relatedStories": ["Pages/Admin/OAuth Apps"]
+        },
+        {
+          "file": "features/admin/oauth-app/OAuthAppListView.tsx",
+          "hasJsx": true,
+          "directStories": ["Pages/Admin/OAuth Apps"],
+          "relatedStories": ["Pages/Admin/OAuth Apps"]
+        },
+        {
+          "file": "features/admin/oauth-app/OAuthAppSecretDialog.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": ["Pages/Admin/OAuth Apps"]
+        },
+        {
+          "file": "features/admin/oauth-app/OAuthAppsPage.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": []
+        },
+        {
+          "file": "features/admin/oauth-app/OAuthConnectionDetail.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": []
+        },
+        {
+          "file": "features/admin/oauth-app/OAuthConnectionDetailView.tsx",
+          "hasJsx": true,
+          "directStories": ["Pages/Admin/OAuth Apps"],
+          "relatedStories": ["Pages/Admin/OAuth Apps"]
+        },
+        {
           "file": "features/admin/post/CreatePostButton.tsx",
           "hasJsx": true,
           "directStories": [],
@@ -817,6 +859,7 @@
             "Pages/Admin/Legal Policies",
             "Pages/Admin/Map Places",
             "Pages/Admin/Member Criteria and Users",
+            "Pages/Admin/OAuth Apps",
             "Pages/Admin/Program Event Lists",
             "Pages/Admin/Taxonomy"
           ]
@@ -950,7 +993,10 @@
       ],
       "jsxWithoutStoryRelationship": [
         "features/admin/AdminShell/AdminShell.tsx",
-        "features/admin/MapThemeEditor/CreateMapThemeButton.tsx"
+        "features/admin/MapThemeEditor/CreateMapThemeButton.tsx",
+        "features/admin/oauth-app/OAuthAppEditor.tsx",
+        "features/admin/oauth-app/OAuthAppsPage.tsx",
+        "features/admin/oauth-app/OAuthConnectionDetail.tsx"
       ]
     },
     {
@@ -1415,6 +1461,7 @@
             "Pages/Admin/Member Criteria and Users",
             "Pages/Account/Full Pages",
             "Pages/Account/Owned Lists",
+            "Pages/Admin/OAuth Apps",
             "Pages/Editors/Page",
             "Pages/Editors/Post",
             "Pages/Editors/Program Events",
@@ -2076,6 +2123,7 @@
             "Pages/Admin/Member Criteria and Users",
             "Pages/Account/Full Pages",
             "Pages/Account/Owned Lists",
+            "Pages/Admin/OAuth Apps",
             "Pages/Editors/Page",
             "Pages/Editors/Post",
             "Pages/Public/Post Taxonomy",

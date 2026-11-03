@@ -257,7 +257,7 @@
       "clients": "Klienci",
       "campaign": "Kampania",
       "campaigns": "Kampanie",
-      "memberCriteria": "Segment odbiorców",
+      "memberCriteria": "Kryteria członków",
       "user": "Użytkownik",
       "member": "Członek",
       "users": "Użytkownicy",
@@ -502,7 +502,8 @@
       "system": "System"
     },
     "items": {
-      "mailSettings": "Ustawienia poczty"
+      "mailSettings": "Ustawienia poczty",
+      "oauthApps": "Aplikacje OAuth"
     }
   },
   "adminList": {
@@ -613,25 +614,25 @@
       }
     },
     "memberCriteria": {
-      "description": "Twórz segmenty odbiorców wielokrotnego użytku, aby kierować kampanie na określone grupy.",
-      "searchPlaceholder": "Wyszukaj segmenty...",
-      "empty": "Nie znaleziono segmentów. Utwórz taki, aby kierować reklamy do określonych odbiorców.",
-      "createTitle": "Utwórz segment",
-      "editTitle": "Edytuj segment",
-      "namePlaceholder": "Nazwa segmentu",
-      "typePlaceholder": "Wybierz typ segmentu",
-      "loading": "Ładowanie segmentu...",
+      "description": "Twórz kryteria członków wielokrotnego użytku, które wybierają członków do kampanii i pobierania z ograniczeniami.",
+      "searchPlaceholder": "Szukaj kryteriów członków...",
+      "empty": "Nie ma jeszcze kryteriów członków. Utwórz je, aby wybrać konkretnych członków.",
+      "createTitle": "Utwórz kryteria członków",
+      "editTitle": "Edytuj kryteria członków",
+      "namePlaceholder": "Nazwa kryteriów członków",
+      "typePlaceholder": "Wybierz rodzaj",
+      "loading": "Wczytywanie kryteriów członków...",
       "includeArchived": "Uwzględnij zarchiwizowane",
       "archive": "Archiwum",
-      "archiveTitle": "Archiwum odbiorców",
+      "archiveTitle": "Archiwizuj kryteria członków",
       "archiveConfirm": "Zarchiwizować {name}? Relacje kampanii {campaigns} i zasady plików {files} zostały odłączone. Przebiegi dostaw {runs} zachowują niezmienną historię.",
       "restore": "Przywrócić",
-      "restoreTitle": "Przywróć publiczność",
+      "restoreTitle": "Przywróć kryteria członków",
       "restoreConfirm": "Przywrócić {name}? Poprzednie harmonogramy kampanii i zasady dotyczące plików nie są przywracane automatycznie.",
-      "created": "Utworzono segment",
-      "updated": "Segment zaktualizowany",
-      "archived": "Publiczność zarchiwizowana",
-      "restored": "Publiczność przywrócona",
+      "created": "Utworzono kryteria członków",
+      "updated": "Zaktualizowano kryteria członków",
+      "archived": "Zarchiwizowano kryteria członków",
+      "restored": "Przywrócono kryteria członków",
       "config": {
         "userTagsPlaceholderSelect": "Wybierz tagi użytkownika",
         "rolesLabel": "Role",
@@ -640,12 +641,123 @@
         "createdBeforeLabel": "Utworzono wcześniej",
         "createdBeforePlaceholder": "Data końcowa",
         "estimateCount": "Szacunkowa liczba",
-        "estimatedRecipients": "~{count, plural, one {# odbiorca} few {# odbiorców} many {# odbiorców} other {# odbiorcy}}",
-        "allUsersHelp": "Kieruje reklamy na wszystkich użytkowników. Możliwość otrzymywania biuletynu jest wybierana w ramach każdej kampanii."
+        "estimatedRecipients": "~{count, plural, one {# pasujący członek} few {# pasujących członków} many {# pasujących członków} other {# pasującego członka}}",
+        "allUsersHelp": "Wybiera wszystkich członków. Każda kampania decyduje, czy otrzymują ją tylko subskrybenci newslettera."
       },
       "types": {
         "usersByFilter": "Użytkownicy według filtra",
         "allUsers": "Wszyscy użytkownicy"
+      }
+    },
+    "oauthApps": {
+      "title": "Aplikacje OAuth",
+      "description": "Aplikacje, które logują użytkowników kontem {siteName}, oraz narzędzia AI połączone z narzędziami edycji witryny.",
+      "create": "Nowa aplikacja",
+      "createTitle": "Nowa aplikacja logowania",
+      "createSubmit": "Utwórz aplikację",
+      "untitled": "Aplikacja bez nazwy",
+      "createdAt": "Zarejestrowano {date}",
+      "loadFailed": "Nie udało się wczytać aplikacji OAuth.",
+      "openApp": "Otwórz {name}",
+      "openConnection": "Otwórz {name}",
+      "connectionActions": "Działania dla {name}",
+      "copyClientId": "Kopiuj identyfikator klienta",
+      "copySecret": "Kopiuj sekret",
+      "rotateSecret": "Wydaj nowy sekret",
+      "rotateTitle": "Wydać nowy sekret klienta?",
+      "rotateConfirm": "Obecny sekret natychmiast przestaje działać. Od razu zaktualizuj konfigurację aplikacji nowym sekretem.",
+      "delete": "Usuń aplikację",
+      "deleteTitle": "Usunąć tę aplikację?",
+      "deleteConfirm": "{name} nie będzie już mogła nikogo logować, a jej tokeny przestaną działać.",
+      "deleted": "Usunięto {name}",
+      "saved": "Zapisano aplikację",
+      "disconnect": "Rozłącz",
+      "disconnectTitle": "Rozłączyć to narzędzie AI?",
+      "disconnectConfirm": "{name} natychmiast traci dostęp. Może połączyć się ponownie dopiero po ponownej zgodzie członka.",
+      "disconnected": "Rozłączono {name}",
+      "secretTitle": "Sekret klienta",
+      "secretWarning": "Skopiuj sekret teraz. Jest wyświetlany tylko raz; jeśli go zgubisz, wydaj nowy.",
+      "apps": {
+        "title": "Aplikacje logowania",
+        "description": "Zarejestrowane tutaj aplikacje logują użytkowników kontem {siteName}.",
+        "empty": "Nie ma jeszcze aplikacji logowania."
+      },
+      "connections": {
+        "title": "Połączone narzędzia AI",
+        "description": "Narzędzia, które członkowie połączyli z narzędziami edycji witryny. Każde narzędzie zarejestrowało się samo.",
+        "empty": "Brak połączonych narzędzi AI.",
+        "generatedId": "Zarejestrowano z wygenerowanym identyfikatorem",
+        "active": "Połączono",
+        "stale": "Stary adres",
+        "staleWarning": "To połączenie wciąż wskazuje adres, którego witryna już nie obsługuje, więc nie da się go używać. Rozłącz je, aby uporządkować listę.",
+        "detailDescription": "To narzędzie zarejestrowało się samo, więc jego ustawień nie można tu edytować."
+      },
+      "sections": {
+        "basics": "Podstawowe informacje",
+        "signIn": "Logowanie",
+        "tokens": "Tokeny",
+        "manage": "Zarządzanie",
+        "connection": "Połączenie"
+      },
+      "fields": {
+        "clientId": "Identyfikator klienta",
+        "clientSecret": "Sekret klienta",
+        "redirectUris": "Adresy URI przekierowania",
+        "redirectHosts": "Przekierowuje do",
+        "postLogoutRedirectUris": "Adresy URI przekierowania po wylogowaniu",
+        "scopes": "Udostępniane dane profilu",
+        "authMethod": "Uwierzytelnianie klienta",
+        "accessTokenLifespan": "Ważność tokenu dostępu",
+        "idTokenLifespan": "Ważność tokenu ID",
+        "publisher": "Opublikowane przez",
+        "resource": "Cel tokenu",
+        "signInAccess": "Kto może się logować"
+      },
+      "scopes": {
+        "openid": "Identyfikator konta (zawsze udostępniany)",
+        "email": "Adres e-mail",
+        "profile": "Pseudonim"
+      },
+      "authMethods": {
+        "client_secret_basic": "Sekret klienta (HTTP Basic)",
+        "client_secret_post": "Sekret klienta (treść formularza)",
+        "private_key_jwt": "Podpisany klucz (private_key_jwt)",
+        "none": "Brak: aplikacja publiczna z PKCE"
+      },
+      "lifespans": {
+        "5m": "5 minut",
+        "15m": "15 minut",
+        "1h": "1 godzina"
+      },
+      "placeholders": {
+        "clientId": "np. team-dashboard",
+        "redirectUri": "https://…/callback"
+      },
+      "help": {
+        "name": "Widoczna dla administratorów na tej liście.",
+        "clientIdCreate": "Pozostaw puste, aby go wygenerować. Później nie da się go zmienić.",
+        "clientIdFixed": "Jest ustawiony w konfiguracji aplikacji. Nie można go zmienić.",
+        "signIn": "Aplikacje logowania nie dostają tokenu odświeżania, więc dostęp jest sprawdzany przy każdym logowaniu. Członek, który przestał spełniać warunki, traci dostęp, gdy wygasną jego tokeny.",
+        "redirectUris": "Dokładne adresy HTTPS, do których aplikacja wraca po zalogowaniu. Po każdym naciśnij Enter.",
+        "postLogoutRedirectUris": "Opcjonalne adresy, do których aplikacja może wrócić po wylogowaniu.",
+        "scopes": "Dane profilu, które aplikacja może odczytać oprócz identyfikatora konta.",
+        "tokens": "Krótsza ważność wcześniej kończy dostęp, gdy członek przestanie spełniać warunki.",
+        "authMethodSecret": "Aplikacja przechowuje sekret klienta na swoim serwerze.",
+        "authMethodPublic": "Dla aplikacji, które nie mogą przechowywać sekretu, np. aplikacji przeglądarkowych lub desktopowych.",
+        "manage": "Nowy sekret lub usunięcie aplikacji działa natychmiast.",
+        "disconnect": "Rozłączenie usuwa rejestrację narzędzia i kończy jego dostęp dla wszystkich członków."
+      },
+      "access": {
+        "none": "Nikt (logowanie wstrzymane)",
+        "admins": "Tylko administratorzy",
+        "members": "Wszyscy członkowie",
+        "memberCriteria": "Kryteria członków"
+      },
+      "accessHelp": {
+        "none": "Aplikacja pozostaje zarejestrowana, ale odrzuca każde logowanie.",
+        "admins": "Logować mogą się tylko aktywni administratorzy.",
+        "members": "Każdy aktywny członek może się zalogować.",
+        "memberCriteria": "Członkowie spełniający wybrane kryteria członków mogą się logować. Są sprawdzani tak samo jak przy pobieraniu z ograniczeniami."
       }
     },
     "series": {
@@ -2698,13 +2810,13 @@
       "none": "Brak układu"
     },
     "target": {
-      "criteriaLabel": "Grupa docelowa",
-      "criteriaPlaceholder": "Wybierz odbiorców",
+      "criteriaLabel": "Odbiorcy",
+      "criteriaPlaceholder": "Wybierz kryteria członków",
       "all": "Wszyscy użytkownicy",
-      "unavailableCriteria": "Zarchiwizowani lub niedostępni odbiorcy",
-      "unavailableCriteriaDescription": "Ta kampania jest skierowana do zarchiwizowanych lub niedostępnych odbiorców. Wybierz aktywną grupę odbiorców przed zaplanowaniem lub wysłaniem.",
-      "criteriaRequired": "Wybierz aktywną grupę odbiorców przed zaplanowaniem lub wysłaniem.",
-      "criteriaLoadError": "Nie udało się wczytać aktywnych odbiorców. Spróbuj ponownie przed zaplanowaniem lub wysłaniem."
+      "unavailableCriteria": "Zarchiwizowane lub niedostępne kryteria członków",
+      "unavailableCriteriaDescription": "Ta kampania używa zarchiwizowanych lub niedostępnych kryteriów członków. Przed zaplanowaniem lub wysłaniem wybierz aktywne kryteria członków.",
+      "criteriaRequired": "Przed zaplanowaniem lub wysłaniem wybierz aktywne kryteria członków.",
+      "criteriaLoadError": "Nie udało się wczytać aktywnych kryteriów członków. Spróbuj ponownie przed zaplanowaniem lub wysłaniem."
     },
     "fields": {
       "recipientScope": "Odbiorcy",
@@ -2720,7 +2832,7 @@
       "description": "Wpisz adres e-mail, na który chcesz wysłać test tej kampanii."
     },
     "sendModal": {
-      "warning": "Spowoduje to wysłanie kampanii do segmentu odbiorców {criteria}. Tej akcji nie można cofnąć.",
+      "warning": "Kampania zostanie wysłana do członków spełniających {criteria}. Tej czynności nie można cofnąć.",
       "subject": "Temat: {subject}",
       "allMatchingUsersWarning": "Obejmuje pasujących użytkowników, którzy zrezygnowali z subskrypcji biuletynów."
     },
@@ -2729,7 +2841,7 @@
       "dateLabel": "Zaplanowana data i godzina",
       "previousMonth": "Poprzedni miesiąc",
       "nextMonth": "Przyszły miesiąc",
-      "criteria": "Publiczność: {criteria}",
+      "criteria": "Odbiorcy: {criteria}",
       "allMatchingUsersWarning": "Obejmuje pasujących użytkowników, którzy zrezygnowali z subskrypcji biuletynów."
     },
     "notifications": {
@@ -5319,13 +5431,13 @@
           "description": "Każdy zalogowany użytkownik może pobrać ten plik."
         },
         "restricted": {
-          "label": "Publiczność",
-          "description": "Tylko użytkownicy z wybranych odbiorców mogą pobrać ten plik."
+          "label": "Kryteria członków",
+          "description": "Ten plik mogą pobrać tylko członkowie spełniający wybrane kryteria członków."
         }
       },
-      "criteriaLoadError": "Zasady zostały załadowane, ale nie udało się załadować odbiorców.",
-      "criteriaEmpty": "Brak dostępnych segmentów odbiorców.",
-      "restrictedWithoutCriteria": "Ta ograniczona polityka nie ma odbiorców. Pobieranie plików jest blokowane dla wszystkich, dopóki nie wybierzesz co najmniej jednej grupy odbiorców.",
+      "criteriaLoadError": "Zasady wczytano, ale nie udało się wczytać kryteriów członków.",
+      "criteriaEmpty": "Brak dostępnych kryteriów członków.",
+      "restrictedWithoutCriteria": "Te zasady z ograniczeniami nie mają kryteriów członków. Pobieranie jest zablokowane dla wszystkich, dopóki nie wybierzesz co najmniej jednego.",
       "additionalSelected": "Wybrano jeszcze {count}",
       "loadError": "Nie można załadować dostępu do pobierania.",
       "saveError": "Nie można zapisać dostępu do pobierania.",

@@ -257,7 +257,7 @@
       "clients": "Müşteriler",
       "campaign": "Kampanya",
       "campaigns": "Kampanyalar",
-      "memberCriteria": "Kitle Segmenti",
+      "memberCriteria": "Üye ölçütleri",
       "user": "Kullanıcı",
       "member": "Üye",
       "users": "Kullanıcılar",
@@ -502,7 +502,8 @@
       "system": "Sistem"
     },
     "items": {
-      "mailSettings": "Posta Ayarları"
+      "mailSettings": "Posta Ayarları",
+      "oauthApps": "OAuth uygulamaları"
     }
   },
   "adminList": {
@@ -613,25 +614,25 @@
       }
     },
     "memberCriteria": {
-      "description": "Kampanyaları belirli gruplara hedeflemek için yeniden kullanılabilir kitle segmentleri oluşturun.",
-      "searchPlaceholder": "Segmentleri ara...",
-      "empty": "Hiçbir segment bulunamadı. Belirli kitleleri hedeflemek için bir tane oluşturun.",
-      "createTitle": "Segment Oluştur",
-      "editTitle": "Segmenti Düzenle",
-      "namePlaceholder": "Segment adı",
-      "typePlaceholder": "Segment türünü seçin",
-      "loading": "Bölüm yükleniyor...",
+      "description": "Kampanyalar ve kısıtlı indirmeler için üyeleri seçen, yeniden kullanılabilir üye ölçütleri oluşturun.",
+      "searchPlaceholder": "Üye ölçütlerinde ara...",
+      "empty": "Henüz üye ölçütü yok. Belirli üyeleri seçmek için bir tane oluşturun.",
+      "createTitle": "Üye ölçütü oluştur",
+      "editTitle": "Üye ölçütünü düzenle",
+      "namePlaceholder": "Üye ölçütü adı",
+      "typePlaceholder": "Bir tür seçin",
+      "loading": "Üye ölçütleri yükleniyor...",
       "includeArchived": "Arşivlenenleri dahil et",
       "archive": "Arşiv",
-      "archiveTitle": "Arşiv Kitlesi",
+      "archiveTitle": "Üye ölçütlerini arşivle",
       "archiveConfirm": "{name} arşivlensin mi? {campaigns} kampanya ilişkileri ve {files} dosya politikaları birbirinden ayrılmıştır. {runs} dağıtım çalıştırmaları değişmez geçmişlerini korur.",
       "restore": "Eski haline getirmek",
-      "restoreTitle": "Kitleyi Geri Yükle",
+      "restoreTitle": "Üye ölçütünü geri yükle",
       "restoreConfirm": "{name} geri yüklensin mi? Önceki kampanya programları ve dosya politikaları otomatik olarak geri yüklenmez.",
-      "created": "Segment oluşturuldu",
-      "updated": "Segment güncellendi",
-      "archived": "Kitle arşivlendi",
-      "restored": "Kitle geri yüklendi",
+      "created": "Üye ölçütü oluşturuldu",
+      "updated": "Üye ölçütü güncellendi",
+      "archived": "Üye ölçütleri arşivlendi",
+      "restored": "Üye ölçütü geri yüklendi",
       "config": {
         "userTagsPlaceholderSelect": "Kullanıcı etiketlerini seçin",
         "rolesLabel": "Roller",
@@ -640,12 +641,123 @@
         "createdBeforeLabel": "Daha Önce Oluşturuldu",
         "createdBeforePlaceholder": "Bitiş tarihi",
         "estimateCount": "Tahmin Sayısı",
-        "estimatedRecipients": "~{count, plural, one {# alıcı} other {# alıcı}}",
-        "allUsersHelp": "Tüm kullanıcıları hedefler. Bülten uygunluğu her kampanya tarafından seçilir."
+        "estimatedRecipients": "~{count, plural, one {# eşleşen üye} other {# eşleşen üye}}",
+        "allUsersHelp": "Tüm üyeleri seçer. Her kampanya, yalnızca bülten abonelerinin alıp almayacağına kendisi karar verir."
       },
       "types": {
         "usersByFilter": "Filtreye Göre Kullanıcılar",
         "allUsers": "Tüm kullanıcılar"
+      }
+    },
+    "oauthApps": {
+      "title": "OAuth uygulamaları",
+      "description": "Kişilerin {siteName} hesabıyla giriş yaptığı uygulamalar ve sitenin düzenleme araçlarına bağlı yapay zekâ araçları.",
+      "create": "Yeni uygulama",
+      "createTitle": "Yeni giriş uygulaması",
+      "createSubmit": "Uygulama oluştur",
+      "untitled": "Adsız uygulama",
+      "createdAt": "{date} tarihinde kaydedildi",
+      "loadFailed": "OAuth uygulamaları yüklenemedi.",
+      "openApp": "{name} uygulamasını aç",
+      "openConnection": "{name} aracını aç",
+      "connectionActions": "{name} için işlemler",
+      "copyClientId": "İstemci kimliğini kopyala",
+      "copySecret": "Gizli anahtarı kopyala",
+      "rotateSecret": "Yeni gizli anahtar oluştur",
+      "rotateTitle": "Yeni istemci gizli anahtarı oluşturulsun mu?",
+      "rotateConfirm": "Mevcut gizli anahtar hemen çalışmayı durdurur. Uygulamanın yapılandırmasını hemen yeni gizli anahtarla güncelleyin.",
+      "delete": "Uygulamayı sil",
+      "deleteTitle": "Bu uygulama silinsin mi?",
+      "deleteConfirm": "{name} artık kimseyi giriş yaptıramaz ve token'ları çalışmayı durdurur.",
+      "deleted": "{name} silindi",
+      "saved": "Uygulama kaydedildi",
+      "disconnect": "Bağlantıyı kes",
+      "disconnectTitle": "Bu yapay zekâ aracının bağlantısı kesilsin mi?",
+      "disconnectConfirm": "{name} erişimini hemen kaybeder. Ancak bir üye yeniden onaylarsa tekrar bağlanabilir.",
+      "disconnected": "{name} bağlantısı kesildi",
+      "secretTitle": "İstemci gizli anahtarı",
+      "secretWarning": "Gizli anahtarı şimdi kopyalayın. Yalnızca bir kez gösterilir; kaybolursa yenisini oluşturun.",
+      "apps": {
+        "title": "Giriş uygulamaları",
+        "description": "Burada kayıtlı uygulamalar kişileri {siteName} hesabıyla giriş yaptırır.",
+        "empty": "Henüz giriş uygulaması yok."
+      },
+      "connections": {
+        "title": "Bağlı yapay zekâ araçları",
+        "description": "Üyelerin sitenin düzenleme araçlarına bağladığı araçlar. Her araç kendini kaydetti.",
+        "empty": "Bağlı yapay zekâ aracı yok.",
+        "generatedId": "Oluşturulan bir kimlikle kaydedildi",
+        "active": "Bağlı",
+        "stale": "Eski adres",
+        "staleWarning": "Bu bağlantı, sitenin artık sunmadığı bir adresi gösterdiği için kullanılamaz. Temizlemek için bağlantıyı kesin.",
+        "detailDescription": "Bu araç kendini kaydettiği için ayarları burada düzenlenemez."
+      },
+      "sections": {
+        "basics": "Temel bilgiler",
+        "signIn": "Giriş",
+        "tokens": "Token'lar",
+        "manage": "Yönet",
+        "connection": "Bağlantı"
+      },
+      "fields": {
+        "clientId": "İstemci kimliği",
+        "clientSecret": "İstemci gizli anahtarı",
+        "redirectUris": "Yönlendirme URI'leri",
+        "redirectHosts": "Yönlendirdiği yer",
+        "postLogoutRedirectUris": "Çıkış sonrası yönlendirme URI'leri",
+        "scopes": "Paylaşılan profil bilgileri",
+        "authMethod": "İstemci kimlik doğrulaması",
+        "accessTokenLifespan": "Erişim token'ı süresi",
+        "idTokenLifespan": "Kimlik token'ı süresi",
+        "publisher": "Yayımlayan",
+        "resource": "Token hedefi",
+        "signInAccess": "Kimler giriş yapabilir"
+      },
+      "scopes": {
+        "openid": "Hesap kimliği (her zaman paylaşılır)",
+        "email": "E-posta adresi",
+        "profile": "Takma ad"
+      },
+      "authMethods": {
+        "client_secret_basic": "İstemci gizli anahtarı (HTTP Basic)",
+        "client_secret_post": "İstemci gizli anahtarı (form gövdesi)",
+        "private_key_jwt": "İmzalı anahtar (private_key_jwt)",
+        "none": "Yok: PKCE kullanan genel uygulama"
+      },
+      "lifespans": {
+        "5m": "5 dakika",
+        "15m": "15 dakika",
+        "1h": "1 saat"
+      },
+      "placeholders": {
+        "clientId": "ör. team-dashboard",
+        "redirectUri": "https://…/callback"
+      },
+      "help": {
+        "name": "Bu listede yöneticilere gösterilir.",
+        "clientIdCreate": "Otomatik oluşturmak için boş bırakın. Daha sonra değiştirilemez.",
+        "clientIdFixed": "Uygulamanın yapılandırmasında yer alır. Değiştirilemez.",
+        "signIn": "Giriş uygulamaları yenileme token'ı almaz; bu yüzden erişim her girişte kontrol edilir. Artık koşulları karşılamayan bir üye, token'larının süresi dolunca erişimini kaybeder.",
+        "redirectUris": "Uygulamanın girişten sonra döndüğü tam HTTPS adresleri. Her birinden sonra Enter'a basın.",
+        "postLogoutRedirectUris": "Uygulamanın çıkıştan sonra dönebileceği isteğe bağlı adresler.",
+        "scopes": "Uygulamanın hesap kimliğine ek olarak okuyabileceği profil bilgileri.",
+        "tokens": "Kısa süreler, bir üye koşulları karşılamayı bıraktığında erişimi daha erken sonlandırır.",
+        "authMethodSecret": "Uygulama, istemci gizli anahtarını kendi sunucusunda saklar.",
+        "authMethodPublic": "Tarayıcı veya masaüstü uygulamaları gibi gizli anahtar saklayamayan uygulamalar için.",
+        "manage": "Yeni gizli anahtar veya silinen uygulama hemen geçerli olur.",
+        "disconnect": "Bağlantıyı kesmek aracın kaydını siler ve tüm üyeler için erişimini sonlandırır."
+      },
+      "access": {
+        "none": "Kimse (giriş duraklatıldı)",
+        "admins": "Yalnızca yöneticiler",
+        "members": "Tüm üyeler",
+        "memberCriteria": "Üye ölçütleri"
+      },
+      "accessHelp": {
+        "none": "Uygulama kayıtlı kalır ama her girişi reddeder.",
+        "admins": "Yalnızca etkin yöneticiler giriş yapabilir.",
+        "members": "Etkin her üye giriş yapabilir.",
+        "memberCriteria": "Seçilen üye ölçütlerine uyan üyeler giriş yapabilir. Kısıtlı indirmelerdeki ile aynı şekilde kontrol edilir."
       }
     },
     "series": {
@@ -2698,13 +2810,13 @@
       "none": "Düzen Yok"
     },
     "target": {
-      "criteriaLabel": "Hedef kitle",
-      "criteriaPlaceholder": "Bir kitle seçin",
+      "criteriaLabel": "Alıcılar",
+      "criteriaPlaceholder": "Üye ölçütü seçin",
       "all": "Tüm kullanıcılar",
-      "unavailableCriteria": "Arşivlenmiş veya kullanılamayan kitle",
-      "unavailableCriteriaDescription": "Bu kampanya arşivlenmiş veya kullanılamayan bir hedef kitleyi hedefliyor. Planlamadan veya göndermeden önce aktif bir hedef kitle seçin.",
-      "criteriaRequired": "Planlamadan veya göndermeden önce aktif bir hedef kitle seçin.",
-      "criteriaLoadError": "Aktif kitleler yüklenemedi. Planlamadan veya göndermeden önce tekrar deneyin."
+      "unavailableCriteria": "Arşivlenmiş veya kullanılamayan üye ölçütleri",
+      "unavailableCriteriaDescription": "Bu kampanya arşivlenmiş veya kullanılamayan üye ölçütlerini kullanıyor. Zamanlamadan veya göndermeden önce etkin üye ölçütlerini seçin.",
+      "criteriaRequired": "Zamanlamadan veya göndermeden önce etkin üye ölçütlerini seçin.",
+      "criteriaLoadError": "Etkin üye ölçütleri yüklenemedi. Zamanlamadan veya göndermeden önce tekrar deneyin."
     },
     "fields": {
       "recipientScope": "Alıcılar",
@@ -2720,7 +2832,7 @@
       "description": "Bu kampanyanın testini göndermek için bir e-posta adresi girin."
     },
     "sendModal": {
-      "warning": "Bu, kampanyayı {criteria} kitle segmentine gönderecektir. Bu eylem geri alınamaz.",
+      "warning": "Kampanya {criteria} ile eşleşen üyelere gönderilecek. Bu işlem geri alınamaz.",
       "subject": "Konu: {subject}",
       "allMatchingUsersWarning": "Bülten aboneliğinden çıkan eşleşen kullanıcıları içerir."
     },
@@ -2729,7 +2841,7 @@
       "dateLabel": "Planlanan tarih ve saat",
       "previousMonth": "Önceki ay",
       "nextMonth": "Gelecek ay",
-      "criteria": "Kitle: {criteria}",
+      "criteria": "Alıcılar: {criteria}",
       "allMatchingUsersWarning": "Bülten aboneliğinden çıkan eşleşen kullanıcıları içerir."
     },
     "notifications": {
@@ -5319,13 +5431,13 @@
           "description": "Oturum açan herhangi bir kullanıcı bu dosyayı indirebilir."
         },
         "restricted": {
-          "label": "Kitleler",
-          "description": "Bu dosyayı yalnızca seçilen hedef kitlelerdeki kullanıcılar indirebilir."
+          "label": "Üye ölçütleri",
+          "description": "Bu dosyayı yalnızca seçilen üye ölçütleriyle eşleşen üyeler indirebilir."
         }
       },
-      "criteriaLoadError": "Politika yüklendi ancak kitleler yüklenemedi.",
-      "criteriaEmpty": "Hiçbir Kitle segmenti mevcut değil.",
-      "restrictedWithoutCriteria": "Bu kısıtlı politikanın Hedef Kitlesi yok. Siz en az bir Hedef Kitle seçene kadar herkesin indirme işlemi reddedilir.",
+      "criteriaLoadError": "Politika yüklendi ancak üye ölçütleri yüklenemedi.",
+      "criteriaEmpty": "Kullanılabilir üye ölçütü yok.",
+      "restrictedWithoutCriteria": "Bu kısıtlı politikanın üye ölçütü yok. En az birini seçene kadar indirmeler herkese kapalıdır.",
       "additionalSelected": "{count} tane daha seçildi",
       "loadError": "İndirme erişimi yüklenemedi.",
       "saveError": "İndirme erişimi kaydedilemedi.",

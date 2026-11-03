@@ -1107,6 +1107,58 @@
       ]
     },
     {
+      "route": "/admin/oauth-apps/apps/[clientId]",
+      "family": "Admin",
+      "source": "app/admin/oauth-apps/apps/[clientId]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/OAuth Apps",
+          "variant": "Edit",
+          "scope": "Actual production sign-in app editor view with access, redirect, scope and token settings, secret rotation and deletion dialogs on local callbacks. Persistence and Hydra writes remain outside.",
+          "storyId": "pages-admin-oauth-apps--edit"
+        }
+      ]
+    },
+    {
+      "route": "/admin/oauth-apps/new",
+      "family": "Admin",
+      "source": "app/admin/oauth-apps/new/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/OAuth Apps",
+          "variant": "Create",
+          "scope": "Actual production sign-in app editor view in create mode with local callbacks. Client registration and secret issuance remain outside.",
+          "storyId": "pages-admin-oauth-apps--create"
+        }
+      ]
+    },
+    {
+      "route": "/admin/oauth-apps",
+      "family": "Admin",
+      "source": "app/admin/oauth-apps/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/OAuth Apps",
+          "variant": "List",
+          "scope": "Actual production OAuth apps list view with sign-in apps and connected AI tools from local data. Hydra, the API and the disconnect transport remain outside.",
+          "storyId": "pages-admin-oauth-apps--list"
+        }
+      ]
+    },
+    {
+      "route": "/admin/oauth-apps/tools/[clientId]",
+      "family": "Admin",
+      "source": "app/admin/oauth-apps/tools/[clientId]/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Admin/OAuth Apps",
+          "variant": "StaleConnection",
+          "scope": "Actual production connected AI tool detail view with the disconnect dialog on local callbacks. Hydra deletion remains outside.",
+          "storyId": "pages-admin-oauth-apps--stale-connection"
+        }
+      ]
+    },
+    {
       "route": "/admin",
       "family": "Admin",
       "source": "app/admin/page.tsx",

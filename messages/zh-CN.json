@@ -257,7 +257,7 @@
       "clients": "客户",
       "campaign": "活动",
       "campaigns": "活动",
-      "memberCriteria": "受众群体",
+      "memberCriteria": "会员条件",
       "user": "用户",
       "member": "成员",
       "users": "用户",
@@ -502,7 +502,8 @@
       "system": "系统"
     },
     "items": {
-      "mailSettings": "邮件设置"
+      "mailSettings": "邮件设置",
+      "oauthApps": "OAuth 应用"
     }
   },
   "adminList": {
@@ -613,25 +614,25 @@
       }
     },
     "memberCriteria": {
-      "description": "创建可重复使用的受众群体，将营销活动定位到特定群体",
-      "searchPlaceholder": "搜索片段...",
-      "empty": "未找到段。创建一个针对特定受众的产品",
-      "createTitle": "创建细分",
-      "editTitle": "编辑段",
-      "namePlaceholder": "段名称",
-      "typePlaceholder": "选择段类型",
-      "loading": "正在加载段...",
+      "description": "创建可重复使用的会员条件，为活动和受限下载选择会员。",
+      "searchPlaceholder": "搜索会员条件...",
+      "empty": "还没有会员条件。创建一个以选择特定会员。",
+      "createTitle": "创建会员条件",
+      "editTitle": "编辑会员条件",
+      "namePlaceholder": "会员条件名称",
+      "typePlaceholder": "选择类型",
+      "loading": "正在加载会员条件...",
       "includeArchived": "包括已归档",
       "archive": "归档",
-      "archiveTitle": "归档受众",
+      "archiveTitle": "归档会员条件",
       "archiveConfirm": "归档 {name}？将解除 {campaigns} 个营销活动关系和 {files} 个文件策略。{runs} 条发送记录保持不变。",
       "restore": "恢复",
-      "restoreTitle": "恢复受众",
+      "restoreTitle": "恢复会员条件",
       "restoreConfirm": "恢复 {name}？以前的营销活动计划和文件下载策略不会自动恢复。",
-      "created": "已创建段",
-      "updated": "细分已更新",
-      "archived": "受众已归档",
-      "restored": "受众已恢复",
+      "created": "已创建会员条件",
+      "updated": "已更新会员条件",
+      "archived": "已归档会员条件",
+      "restored": "已恢复会员条件",
       "config": {
         "userTagsPlaceholderSelect": "选择用户标签",
         "rolesLabel": "角色",
@@ -640,12 +641,123 @@
         "createdBeforeLabel": "之前创建",
         "createdBeforePlaceholder": "结束日期",
         "estimateCount": "估计数量",
-        "estimatedRecipients": "~{count, plural, one {# 位收件人} other {# 位收件人}}",
-        "allUsersHelp": "面向所有用户。新闻通讯资格由每个活动选择。"
+        "estimatedRecipients": "约 {count, plural, one {# 位符合条件的会员} other {# 位符合条件的会员}}",
+        "allUsersHelp": "选择所有会员。是否只发送给订阅简报的会员由每个活动决定。"
       },
       "types": {
         "usersByFilter": "按筛选的用户",
         "allUsers": "所有用户"
+      }
+    },
+    "oauthApps": {
+      "title": "OAuth 应用",
+      "description": "使用 {siteName} 账号登录的应用，以及连接到网站编辑工具的 AI 工具。",
+      "create": "新建应用",
+      "createTitle": "新建登录应用",
+      "createSubmit": "创建应用",
+      "untitled": "未命名应用",
+      "createdAt": "注册于 {date}",
+      "loadFailed": "无法加载 OAuth 应用。",
+      "openApp": "打开 {name}",
+      "openConnection": "打开 {name}",
+      "connectionActions": "{name} 的操作",
+      "copyClientId": "复制客户端 ID",
+      "copySecret": "复制密钥",
+      "rotateSecret": "签发新密钥",
+      "rotateTitle": "要签发新的客户端密钥吗？",
+      "rotateConfirm": "当前密钥会立即失效。请马上用新密钥更新应用配置。",
+      "delete": "删除应用",
+      "deleteTitle": "要删除此应用吗？",
+      "deleteConfirm": "{name} 将无法再为任何人登录，其令牌也会失效。",
+      "deleted": "已删除 {name}",
+      "saved": "应用已保存",
+      "disconnect": "断开连接",
+      "disconnectTitle": "要断开此 AI 工具的连接吗？",
+      "disconnectConfirm": "{name} 会立即失去访问权限。只有在会员再次批准后才能重新连接。",
+      "disconnected": "已断开 {name}",
+      "secretTitle": "客户端密钥",
+      "secretWarning": "请立即复制密钥。它只显示一次；如果丢失，请签发新密钥。",
+      "apps": {
+        "title": "登录应用",
+        "description": "在此注册的应用使用 {siteName} 账号为用户登录。",
+        "empty": "还没有登录应用。"
+      },
+      "connections": {
+        "title": "已连接的 AI 工具",
+        "description": "会员连接到网站编辑工具的工具。每个工具都是自行注册的。",
+        "empty": "没有已连接的 AI 工具。",
+        "generatedId": "使用自动生成的 ID 注册",
+        "active": "已连接",
+        "stale": "旧地址",
+        "staleWarning": "此连接仍指向网站已不再提供的地址，因此无法使用。请断开连接以进行清理。",
+        "detailDescription": "此工具是自行注册的，因此无法在此编辑其设置。"
+      },
+      "sections": {
+        "basics": "基本信息",
+        "signIn": "登录",
+        "tokens": "令牌",
+        "manage": "管理",
+        "connection": "连接信息"
+      },
+      "fields": {
+        "clientId": "客户端 ID",
+        "clientSecret": "客户端密钥",
+        "redirectUris": "重定向 URI",
+        "redirectHosts": "重定向到",
+        "postLogoutRedirectUris": "退出后重定向 URI",
+        "scopes": "共享的个人资料信息",
+        "authMethod": "客户端认证",
+        "accessTokenLifespan": "访问令牌有效期",
+        "idTokenLifespan": "ID 令牌有效期",
+        "publisher": "发布方",
+        "resource": "令牌用途",
+        "signInAccess": "谁可以登录"
+      },
+      "scopes": {
+        "openid": "账号 ID（始终共享）",
+        "email": "电子邮件地址",
+        "profile": "昵称"
+      },
+      "authMethods": {
+        "client_secret_basic": "客户端密钥（HTTP Basic）",
+        "client_secret_post": "客户端密钥（表单正文）",
+        "private_key_jwt": "签名密钥（private_key_jwt）",
+        "none": "无：使用 PKCE 的公开应用"
+      },
+      "lifespans": {
+        "5m": "5 分钟",
+        "15m": "15 分钟",
+        "1h": "1 小时"
+      },
+      "placeholders": {
+        "clientId": "例如 team-dashboard",
+        "redirectUri": "https://…/callback"
+      },
+      "help": {
+        "name": "在此列表中向管理员显示。",
+        "clientIdCreate": "留空则自动生成。之后无法更改。",
+        "clientIdFixed": "写在应用配置中，无法更改。",
+        "signIn": "登录应用不会获得刷新令牌，因此每次登录都会检查访问权限。不再符合条件的会员会在令牌过期后失去访问权限。",
+        "redirectUris": "应用登录后返回的确切 HTTPS 地址。每输入一个按一次 Enter。",
+        "postLogoutRedirectUris": "应用退出后可以返回的可选地址。",
+        "scopes": "除账号 ID 外，应用可以读取的个人资料信息。",
+        "tokens": "有效期越短，会员不再符合条件后访问结束得越早。",
+        "authMethodSecret": "应用在其服务器上保存客户端密钥。",
+        "authMethodPublic": "适用于无法保存密钥的应用，例如浏览器或桌面应用。",
+        "manage": "签发新密钥或删除应用会立即生效。",
+        "disconnect": "断开连接会删除该工具的注册，并结束所有会员对它的访问。"
+      },
+      "access": {
+        "none": "无人（已暂停登录）",
+        "admins": "仅管理员",
+        "members": "所有会员",
+        "memberCriteria": "会员条件"
+      },
+      "accessHelp": {
+        "none": "保留应用注册，但拒绝所有登录。",
+        "admins": "只有活跃的管理员可以登录。",
+        "members": "所有活跃会员都可以登录。",
+        "memberCriteria": "符合所选会员条件的会员可以登录。判断方式与受限下载相同。"
       }
     },
     "series": {
@@ -2698,13 +2810,13 @@
       "none": "无布局"
     },
     "target": {
-      "criteriaLabel": "目标受众",
-      "criteriaPlaceholder": "选择受众",
+      "criteriaLabel": "收件人",
+      "criteriaPlaceholder": "选择会员条件",
       "all": "所有用户",
-      "unavailableCriteria": "已归档或不可用的受众",
-      "unavailableCriteriaDescription": "此营销活动面向已归档或不可用的受众。请先选择活跃受众，再安排或发送。",
-      "criteriaRequired": "请先选择活跃受众，再安排或发送。",
-      "criteriaLoadError": "无法加载活跃受众。请在安排或发送前重试。"
+      "unavailableCriteria": "已归档或不可用的会员条件",
+      "unavailableCriteriaDescription": "此活动使用了已归档或不可用的会员条件。请在安排或发送前选择有效的会员条件。",
+      "criteriaRequired": "请在安排或发送前选择有效的会员条件。",
+      "criteriaLoadError": "无法加载有效的会员条件。请在安排或发送前重试。"
     },
     "fields": {
       "recipientScope": "收件人",
@@ -2720,7 +2832,7 @@
       "description": "输入电子邮件地址以发送此活动的测试邮件"
     },
     "sendModal": {
-      "warning": "这会将活动发送给受众细分 {criteria}。此操作无法撤消",
+      "warning": "活动将发送给符合 {criteria} 的会员。此操作无法撤消。",
       "subject": "主题：{subject}",
       "allMatchingUsersWarning": "包括已取消新闻通讯订阅的匹配用户。"
     },
@@ -2729,7 +2841,7 @@
       "dateLabel": "预定日期和时间",
       "previousMonth": "上个月",
       "nextMonth": "下个月",
-      "criteria": "受众：{criteria}",
+      "criteria": "收件人：{criteria}",
       "allMatchingUsersWarning": "包括已取消新闻通讯订阅的匹配用户。"
     },
     "notifications": {
@@ -5319,13 +5431,13 @@
           "description": "任何已登录用户都可以下载此文件。"
         },
         "restricted": {
-          "label": "受众",
-          "description": "只有所选受众中的用户可以下载此文件。"
+          "label": "会员条件",
+          "description": "只有符合所选会员条件的会员才能下载此文件。"
         }
       },
-      "criteriaLoadError": "策略已加载，但无法加载受众。",
-      "criteriaEmpty": "没有可用的受众细分。",
-      "restrictedWithoutCriteria": "此受限策略未指定受众。在选择至少一个受众之前，所有人的下载都将被拒绝。",
+      "criteriaLoadError": "已加载策略，但无法加载会员条件。",
+      "criteriaEmpty": "没有可用的会员条件。",
+      "restrictedWithoutCriteria": "此受限策略没有会员条件。在至少选择一个之前，所有人都无法下载。",
       "additionalSelected": "另有 {count} 项已选择",
       "loadError": "无法加载下载权限。",
       "saveError": "无法保存下载权限。",

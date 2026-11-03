@@ -257,7 +257,7 @@
       "clients": "Klanten",
       "campaign": "Campagne",
       "campaigns": "Campagnes",
-      "memberCriteria": "Doelgroepsegment",
+      "memberCriteria": "Ledencriteria",
       "user": "Gebruiker",
       "member": "Lid",
       "users": "Gebruikers",
@@ -502,7 +502,8 @@
       "system": "Systeem"
     },
     "items": {
-      "mailSettings": "E-mailinstellingen"
+      "mailSettings": "E-mailinstellingen",
+      "oauthApps": "OAuth-apps"
     }
   },
   "adminList": {
@@ -613,25 +614,25 @@
       }
     },
     "memberCriteria": {
-      "description": "Maak herbruikbare doelgroepsegmenten om campagnes op specifieke groepen te richten.",
-      "searchPlaceholder": "Zoek segmenten...",
-      "empty": "Geen segmenten gevonden. Maak er een aan om specifieke doelgroepen te bereiken.",
-      "createTitle": "Segment maken",
-      "editTitle": "Segment bewerken",
-      "namePlaceholder": "Segmentnaam",
-      "typePlaceholder": "Selecteer segmenttype",
-      "loading": "Segment laden...",
+      "description": "Maak herbruikbare ledencriteria die leden selecteren voor campagnes en beperkte downloads.",
+      "searchPlaceholder": "Ledencriteria zoeken...",
+      "empty": "Nog geen ledencriteria. Maak er een om bepaalde leden te selecteren.",
+      "createTitle": "Ledencriteria maken",
+      "editTitle": "Ledencriteria bewerken",
+      "namePlaceholder": "Naam van de ledencriteria",
+      "typePlaceholder": "Kies een soort",
+      "loading": "Ledencriteria laden...",
       "includeArchived": "Gearchiveerde opnemen",
       "archive": "Archiveren",
-      "archiveTitle": "Doelgroep archiveren",
+      "archiveTitle": "Ledencriteria archiveren",
       "archiveConfirm": "{name} archiveren? {campaigns} campagnerelaties en {files} bestandsregels worden losgekoppeld. {runs} verzendgeschiedenissen blijven ongewijzigd.",
       "restore": "Herstellen",
-      "restoreTitle": "Doelgroep herstellen",
+      "restoreTitle": "Ledencriteria herstellen",
       "restoreConfirm": "{name} herstellen? Eerdere planningen en downloadregels worden niet automatisch hersteld.",
-      "created": "Segment aangemaakt",
-      "updated": "Segment bijgewerkt",
-      "archived": "Doelgroep gearchiveerd",
-      "restored": "Doelgroep hersteld",
+      "created": "Ledencriteria gemaakt",
+      "updated": "Ledencriteria bijgewerkt",
+      "archived": "Ledencriteria gearchiveerd",
+      "restored": "Ledencriteria hersteld",
       "config": {
         "userTagsPlaceholderSelect": "Selecteer gebruikerstags",
         "rolesLabel": "Rollen",
@@ -640,12 +641,123 @@
         "createdBeforeLabel": "Aangemaakt vóór",
         "createdBeforePlaceholder": "Einddatum",
         "estimateCount": "Aantal schatten",
-        "estimatedRecipients": "~{count, plural, one {# ontvanger} other {# ontvangers}}",
-        "allUsersHelp": "Richt zich op alle gebruikers. Nieuwsbriefgeschiktheid wordt per campagne gekozen."
+        "estimatedRecipients": "~{count, plural, one {# passend lid} other {# passende leden}}",
+        "allUsersHelp": "Selecteert alle leden. Elke campagne bepaalt of alleen nieuwsbriefabonnees haar ontvangen."
       },
       "types": {
         "usersByFilter": "Gebruikers op filter",
         "allUsers": "Alle gebruikers"
+      }
+    },
+    "oauthApps": {
+      "title": "OAuth-apps",
+      "description": "Apps die mensen laten inloggen met hun {siteName}-account, en AI-tools die verbonden zijn met de bewerkingstools van de site.",
+      "create": "Nieuwe app",
+      "createTitle": "Nieuwe inlogapp",
+      "createSubmit": "App maken",
+      "untitled": "Naamloze app",
+      "createdAt": "Geregistreerd op {date}",
+      "loadFailed": "OAuth-apps konden niet worden geladen.",
+      "openApp": "{name} openen",
+      "openConnection": "{name} openen",
+      "connectionActions": "Acties voor {name}",
+      "copyClientId": "Client-ID kopiëren",
+      "copySecret": "Secret kopiëren",
+      "rotateSecret": "Nieuw secret uitgeven",
+      "rotateTitle": "Een nieuw client-secret uitgeven?",
+      "rotateConfirm": "Het huidige secret werkt meteen niet meer. Werk de configuratie van de app direct bij met het nieuwe secret.",
+      "delete": "App verwijderen",
+      "deleteTitle": "Deze app verwijderen?",
+      "deleteConfirm": "{name} kan niemand meer laten inloggen, en de tokens werken niet meer.",
+      "deleted": "{name} verwijderd",
+      "saved": "App opgeslagen",
+      "disconnect": "Ontkoppelen",
+      "disconnectTitle": "Deze AI-tool ontkoppelen?",
+      "disconnectConfirm": "{name} verliest meteen de toegang. De tool kan pas weer verbinden nadat een lid hem opnieuw goedkeurt.",
+      "disconnected": "{name} ontkoppeld",
+      "secretTitle": "Client-secret",
+      "secretWarning": "Kopieer het secret nu. Het wordt maar één keer getoond; geef een nieuw uit als het kwijt is.",
+      "apps": {
+        "title": "Inlogapps",
+        "description": "Apps die hier geregistreerd zijn, laten mensen inloggen met hun {siteName}-account.",
+        "empty": "Nog geen inlogapps."
+      },
+      "connections": {
+        "title": "Verbonden AI-tools",
+        "description": "Tools die leden met de bewerkingstools van de site hebben verbonden. Elke tool heeft zichzelf geregistreerd.",
+        "empty": "Er zijn geen AI-tools verbonden.",
+        "generatedId": "Geregistreerd met een gegenereerde ID",
+        "active": "Verbonden",
+        "stale": "Oud adres",
+        "staleWarning": "Deze verbinding verwijst nog naar een adres dat de site niet meer bedient en is daarom onbruikbaar. Ontkoppel haar om op te ruimen.",
+        "detailDescription": "Deze tool heeft zichzelf geregistreerd, dus de instellingen kunnen hier niet worden bewerkt."
+      },
+      "sections": {
+        "basics": "Basisgegevens",
+        "signIn": "Inloggen",
+        "tokens": "Tokens",
+        "manage": "Beheren",
+        "connection": "Verbinding"
+      },
+      "fields": {
+        "clientId": "Client-ID",
+        "clientSecret": "Client-secret",
+        "redirectUris": "Redirect-URI's",
+        "redirectHosts": "Stuurt door naar",
+        "postLogoutRedirectUris": "Redirect-URI's na uitloggen",
+        "scopes": "Gedeelde profielgegevens",
+        "authMethod": "Clientauthenticatie",
+        "accessTokenLifespan": "Geldigheid toegangstoken",
+        "idTokenLifespan": "Geldigheid ID-token",
+        "publisher": "Gepubliceerd door",
+        "resource": "Tokendoel",
+        "signInAccess": "Wie kan inloggen"
+      },
+      "scopes": {
+        "openid": "Account-ID (altijd gedeeld)",
+        "email": "E-mailadres",
+        "profile": "Bijnaam"
+      },
+      "authMethods": {
+        "client_secret_basic": "Client-secret (HTTP Basic)",
+        "client_secret_post": "Client-secret (formulierbody)",
+        "private_key_jwt": "Ondertekende sleutel (private_key_jwt)",
+        "none": "Geen: openbare app met PKCE"
+      },
+      "lifespans": {
+        "5m": "5 minuten",
+        "15m": "15 minuten",
+        "1h": "1 uur"
+      },
+      "placeholders": {
+        "clientId": "bijv. team-dashboard",
+        "redirectUri": "https://…/callback"
+      },
+      "help": {
+        "name": "Wordt in deze lijst aan beheerders getoond.",
+        "clientIdCreate": "Laat leeg om er een te genereren. Je kunt dit later niet wijzigen.",
+        "clientIdFixed": "Staat in de configuratie van de app en kan niet worden gewijzigd.",
+        "signIn": "Inlogapps krijgen geen refresh-token, dus de toegang wordt bij elke inlog gecontroleerd. Een lid dat niet meer voldoet, verliest de toegang zodra de tokens verlopen.",
+        "redirectUris": "Exacte HTTPS-adressen waarnaar de app na het inloggen terugkeert. Druk na elk adres op Enter.",
+        "postLogoutRedirectUris": "Optionele adressen waarnaar de app na het uitloggen mag terugkeren.",
+        "scopes": "Profielgegevens die de app naast de account-ID mag lezen.",
+        "tokens": "Een kortere geldigheid beëindigt de toegang eerder nadat een lid niet meer voldoet.",
+        "authMethodSecret": "De app bewaart een client-secret op de eigen server.",
+        "authMethodPublic": "Voor apps die geen secret kunnen bewaren, zoals browser- of desktopapps.",
+        "manage": "Een nieuw secret of een verwijderde app geldt meteen.",
+        "disconnect": "Ontkoppelen verwijdert de registratie van de tool en beëindigt de toegang voor alle leden."
+      },
+      "access": {
+        "none": "Niemand (inloggen gepauzeerd)",
+        "admins": "Alleen beheerders",
+        "members": "Alle leden",
+        "memberCriteria": "Ledencriteria"
+      },
+      "accessHelp": {
+        "none": "De app blijft geregistreerd maar weigert elke inlog.",
+        "admins": "Alleen actieve beheerders kunnen inloggen.",
+        "members": "Elk actief lid kan inloggen.",
+        "memberCriteria": "Leden die aan de gekozen ledencriteria voldoen, kunnen inloggen. Ze worden op dezelfde manier gecontroleerd als bij beperkte downloads."
       }
     },
     "series": {
@@ -2698,13 +2810,13 @@
       "none": "Geen lay-out"
     },
     "target": {
-      "criteriaLabel": "Doelgroep",
-      "criteriaPlaceholder": "Selecteer een doelgroep",
+      "criteriaLabel": "Ontvangers",
+      "criteriaPlaceholder": "Ledencriteria kiezen",
       "all": "Alle gebruikers",
-      "unavailableCriteria": "Gearchiveerde of niet-beschikbare doelgroep",
-      "unavailableCriteriaDescription": "Deze campagne richt zich op een gearchiveerde of niet-beschikbare doelgroep. Selecteer een actieve doelgroep voordat je plant of verzendt.",
-      "criteriaRequired": "Selecteer een actieve doelgroep voordat je plant of verzendt.",
-      "criteriaLoadError": "Actieve doelgroepen konden niet worden geladen. Probeer het opnieuw voordat je plant of verzendt."
+      "unavailableCriteria": "Gearchiveerde of niet-beschikbare ledencriteria",
+      "unavailableCriteriaDescription": "Deze campagne gebruikt gearchiveerde of niet-beschikbare ledencriteria. Kies actieve ledencriteria voordat je inplant of verzendt.",
+      "criteriaRequired": "Kies actieve ledencriteria voordat je inplant of verzendt.",
+      "criteriaLoadError": "Actieve ledencriteria konden niet worden geladen. Probeer het opnieuw voordat je inplant of verzendt."
     },
     "fields": {
       "recipientScope": "Ontvangers",
@@ -2720,7 +2832,7 @@
       "description": "Voer een e-mailadres in om een test van deze campagne te verzenden."
     },
     "sendModal": {
-      "warning": "Dit verzendt de campagne naar het doelgroepsegment {criteria}. Deze actie kan niet ongedaan worden gemaakt.",
+      "warning": "De campagne wordt verzonden naar leden die voldoen aan {criteria}. Dit kan niet ongedaan worden gemaakt.",
       "subject": "Onderwerp: {subject}",
       "allMatchingUsersWarning": "Omvat ook gebruikers die zich voor de nieuwsbrief hebben afgemeld."
     },
@@ -2729,7 +2841,7 @@
       "dateLabel": "Geplande datum en tijd",
       "previousMonth": "Vorige maand",
       "nextMonth": "Volgende maand",
-      "criteria": "Doelgroep: {criteria}",
+      "criteria": "Ontvangers: {criteria}",
       "allMatchingUsersWarning": "Omvat ook gebruikers die zich voor de nieuwsbrief hebben afgemeld."
     },
     "notifications": {
@@ -5319,13 +5431,13 @@
           "description": "Elke ingelogde gebruiker kan dit bestand downloaden."
         },
         "restricted": {
-          "label": "Doelgroepen",
-          "description": "Alleen gebruikers in de geselecteerde doelgroepen kunnen dit bestand downloaden."
+          "label": "Ledencriteria",
+          "description": "Alleen leden die aan de gekozen ledencriteria voldoen, kunnen dit bestand downloaden."
         }
       },
-      "criteriaLoadError": "Het beleid is geladen, maar de doelgroepen konden niet worden geladen.",
-      "criteriaEmpty": "Er zijn geen doelgroepsegmenten beschikbaar.",
-      "restrictedWithoutCriteria": "Dit beperkte beleid heeft geen doelgroep. Downloads worden voor iedereen geweigerd totdat je ten minste één doelgroep selecteert.",
+      "criteriaLoadError": "Het beleid is geladen, maar de ledencriteria konden niet worden geladen.",
+      "criteriaEmpty": "Er zijn geen ledencriteria beschikbaar.",
+      "restrictedWithoutCriteria": "Dit beperkte beleid heeft geen ledencriteria. Downloads worden voor iedereen geweigerd totdat je er minstens één kiest.",
       "additionalSelected": "Nog {count} geselecteerd",
       "loadError": "De downloadtoegang kon niet worden geladen.",
       "saveError": "De downloadtoegang kon niet worden opgeslagen.",

@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => ({
   approve: vi.fn(),
   reject: vi.fn(),
   acceptSignIn: vi.fn(),
-  signInClient: vi.fn(),
+  clientSignIn: vi.fn(),
 }));
 
 vi.mock('next/navigation', () => ({
@@ -35,10 +35,8 @@ vi.mock('@/features/auth/hydra-mcp-oauth-actions', () => ({
 }));
 vi.mock('@/features/auth/hydra-mcp-oauth', () => ({
   acceptHydraSignInConsent: mocks.acceptSignIn,
-  isActiveAdmin: (session: { user: { role: string; status: string } }) =>
-    session.user.role === 'admin' && session.user.status === 'active',
   assertMcpConsentRequest: mocks.assertRequest,
-  isSignInClient: mocks.signInClient,
+  clientSignIn: mocks.clientSignIn,
   getHydraConsentRequest: mocks.getRequest,
   isMcpAuthor: () => true,
   mcpClientDisplayName: () => 'Example AI client',
@@ -60,12 +58,11 @@ describe('MCP consent explanation', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.getSession.mockResolvedValue({ user: { id: 'author-id', role: 'author' } });
-    mocks.signInClient.mockReturnValue(false);
+    mocks.clientSignIn.mockResolvedValue('mcp');
   });
 
-  it('signs an Admin in to an operator tool without a consent screen', async () => {
-    mocks.getSession.mockResolvedValue({ user: { id: 'admin-id', role: 'admin', status: 'active' } });
-    mocks.signInClient.mockReturnValue(true);
+  it('signs a Member in to a sign-in app that admits them without a consent screen', async () => {
+    mocks.clientSignIn.mockResolvedValue('allowed');
     mocks.acceptSignIn.mockResolvedValue('https://sso.example/oauth2/auth?consent_verifier=accepted');
 
     await expect(renderConsent(['openid', 'email'])).rejects.toThrow(
@@ -75,12 +72,8 @@ describe('MCP consent explanation', () => {
     expect(mocks.assertRequest).not.toHaveBeenCalled();
   });
 
-  it.each([
-    { role: 'author', status: 'active' },
-    { role: 'admin', status: 'banned' },
-  ])('hides an operator tool from a $status $role', async (user) => {
-    mocks.getSession.mockResolvedValue({ user: { id: 'member-id', ...user } });
-    mocks.signInClient.mockReturnValue(true);
+  it('hides a sign-in app from a Member it does not admit', async () => {
+    mocks.clientSignIn.mockResolvedValue('denied');
 
     await expect(renderConsent(['openid', 'email'])).rejects.toThrow('not-found');
     expect(mocks.acceptSignIn).not.toHaveBeenCalled();

@@ -58,11 +58,6 @@ export function getMcpOAuthIssuerUrl(): string {
   return env.MCP_OAUTH_ISSUER_URL;
 }
 
-/** Hydra clients of first-party operator tools that sign Admins in with OpenID Connect. */
-export function getOAuthSignInClientIds(): string[] {
-  return (env.OAUTH_SIGN_IN_CLIENT_IDS ?? '').split(/[\s,]+/).filter(Boolean);
-}
-
 export const env = createEnv({
   server: {
     // Oathkeeper (API Gateway)
@@ -82,7 +77,6 @@ export const env = createEnv({
     // Public origins used to derive the MCP OAuth issuer and resource.
     SITE_ORIGIN: originWithoutTrailingSlash(),
     MCP_OAUTH_ISSUER_URL: originWithoutTrailingSlash(),
-    OAUTH_SIGN_IN_CLIENT_IDS: z.string().optional(),
 
     // Draft Preview
     DRAFT_SECRET: z.string().min(16),
@@ -106,7 +100,6 @@ export const env = createEnv({
     HYDRA_ADMIN_URL: process.env.HYDRA_ADMIN_URL,
     SITE_ORIGIN: process.env.SITE_ORIGIN,
     MCP_OAUTH_ISSUER_URL: process.env.MCP_OAUTH_ISSUER_URL,
-    OAUTH_SIGN_IN_CLIENT_IDS: process.env.OAUTH_SIGN_IN_CLIENT_IDS,
 
     // Draft Preview
     DRAFT_SECRET: process.env.DRAFT_SECRET,

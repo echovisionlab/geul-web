@@ -7,7 +7,9 @@ import {
 } from '@echovisionlab/geul-proto/intra/gateway_authorization_pb.ts';
 import { z } from 'zod';
 import type { SessionWithUser } from '@/lib/auth/types';
-import { getHydraAdminUrl, getMcpOAuthIssuerUrl, getOAuthSignInClientIds, getSiteOrigin } from '@/lib/env';
+import { SignInDecision } from '@echovisionlab/geul-proto/secure/oauth_app_pb.ts';
+import { createOAuthAppClient } from '@/lib/api/server-client';
+import { getHydraAdminUrl, getMcpOAuthIssuerUrl, getSiteOrigin } from '@/lib/env';
 
 const MCP_SCOPE = 'mcp';
 const OFFLINE_ACCESS_SCOPE = 'offline_access';
@@ -124,9 +126,23 @@ export function isMcpAuthor(session: SessionWithUser): boolean {
 
 const SIGN_IN_SCOPES = new Set(['openid', 'email', 'profile', OFFLINE_ACCESS_SCOPE]);
 
-/** A first-party operator tool, such as Grafana, that signs Admins in instead of connecting MCP. */
-export function isSignInClient(clientId: string): boolean {
-  return getOAuthSignInClientIds().includes(clientId);
+/** How the signed-in Member may use a client: a sign-in app admits or refuses them; any other client is an MCP connection. */
+export type ClientSignIn = 'mcp' | 'allowed' | 'denied';
+
+/**
+ * Asks the API whether the client is a sign-in app an Admin registered and whether it admits the signed-in Member.
+ * The answer is per request: sign-in apps get no refresh token, so every sign-in asks again.
+ */
+export async function clientSignIn(clientId: string): Promise<ClientSignIn> {
+  const { decision } = await (await createOAuthAppClient()).authorizeOAuthSignIn({ clientId });
+  switch (decision) {
+    case SignInDecision.NOT_SIGN_IN_APP:
+      return 'mcp';
+    case SignInDecision.ALLOWED:
+      return 'allowed';
+    default:
+      return 'denied';
+  }
 }
 
 function isSignInScopeSet(scopes: string[]): boolean {
@@ -137,29 +153,23 @@ function isSignInScopeSet(scopes: string[]): boolean {
   );
 }
 
-/** Operator tools admit only Admins in good standing; nothing re-checks the member after sign-in. */
-export function isActiveAdmin(session: SessionWithUser): boolean {
-  return session.user.role === 'admin' && session.user.status === 'active';
+/** A sign-in app admits who its access allows; an MCP client connects Authors and Admins. */
+export function maySignIn(signIn: ClientSignIn, session: SessionWithUser): boolean {
+  return signIn === 'mcp' ? isMcpAuthor(session) : signIn === 'allowed';
 }
 
-/** Operator tools are for active Admins only; MCP clients connect Authors and Admins. */
-export function maySignInWith(clientId: string, session: SessionWithUser): boolean {
-  return isSignInClient(clientId) ? isActiveAdmin(session) : isMcpAuthor(session);
-}
-
+/** The caller has the API's decision that the sign-in app admits the Member; this checks the request itself. */
 export function assertSignInConsentRequest(request: HydraConsentRequest, session: SessionWithUser): void {
   if (
-    !isSignInClient(request.client.client_id) ||
-    !isActiveAdmin(session) ||
     request.subject !== session.account_identity_id ||
     !isSignInScopeSet(request.requested_scope) ||
     request.requested_access_token_audience.length !== 0
   ) {
-    throw new Error('Hydra consent request does not match an Admin sign-in');
+    throw new Error('Hydra consent request does not match a sign-in app sign-in');
   }
 }
 
-/** Claims a sign-in client reads from the ID token; `role` lets it re-check that the member is an Admin. */
+/** Claims a sign-in app reads from the ID token; `role` lets it map the Member's role, such as Admin. */
 function signInIdTokenClaims(scopes: string[], session: SessionWithUser): Record<string, string> {
   return {
     role: session.user.role,
@@ -283,7 +293,8 @@ export async function acceptHydraLogin(challenge: string, session: SessionWithUs
   if (!loginRequest.client.client_id) {
     throw new Error('Hydra login request is missing its client');
   }
-  if (!maySignInWith(loginRequest.client.client_id, session)) {
+  const signIn = await clientSignIn(loginRequest.client.client_id);
+  if (!maySignIn(signIn, session)) {
     return null;
   }
   return assertHydraContinuation(
@@ -291,7 +302,7 @@ export async function acceptHydraLogin(challenge: string, session: SessionWithUs
       method: 'PUT',
       body: JSON.stringify({ remember: false, subject: session.account_identity_id }),
     }),
-    !isSignInClient(loginRequest.client.client_id),
+    signIn === 'mcp',
   );
 }
 
@@ -328,7 +339,7 @@ export async function acceptHydraConsent(
   );
 }
 
-/** An operator tool's consent needs no screen: the Admin signs in to a first-party tool. */
+/** A sign-in app's consent needs no screen: an Admin registered the app and the API admitted the Member. */
 export async function acceptHydraSignInConsent(
   challenge: string,
   request: HydraConsentRequest,

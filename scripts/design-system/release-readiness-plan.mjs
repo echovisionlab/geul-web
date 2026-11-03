@@ -1032,7 +1032,7 @@ export const routePlans = {
     'Member criteria',
     '05',
     'M04 L01 L02',
-    'Condition editing, audience count, preview, create/delete and failure.',
+    'Condition editing, matching member count, preview, create/delete and failure.',
   ),
   '/admin/files': row(
     'File management',

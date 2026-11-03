@@ -257,7 +257,7 @@
       "clients": "Khách hàng",
       "campaign": "Chiến dịch",
       "campaigns": "Chiến dịch",
-      "memberCriteria": "Phân khúc đối tượng",
+      "memberCriteria": "Tiêu chí thành viên",
       "user": "người dùng",
       "member": "Thành viên",
       "users": "Người dùng",
@@ -502,7 +502,8 @@
       "system": "Hệ thống"
     },
     "items": {
-      "mailSettings": "Cài đặt thư"
+      "mailSettings": "Cài đặt thư",
+      "oauthApps": "Ứng dụng OAuth"
     }
   },
   "adminList": {
@@ -613,25 +614,25 @@
       }
     },
     "memberCriteria": {
-      "description": "Tạo các phân khúc đối tượng có thể sử dụng lại để nhắm mục tiêu chiến dịch đến các nhóm cụ thể.",
-      "searchPlaceholder": "Tìm kiếm phân đoạn...",
-      "empty": "Không tìm thấy phân đoạn nào. Tạo một cái để nhắm mục tiêu đối tượng cụ thể.",
-      "createTitle": "Tạo phân đoạn",
-      "editTitle": "Chỉnh sửa phân đoạn",
-      "namePlaceholder": "Tên phân đoạn",
-      "typePlaceholder": "Chọn loại phân đoạn",
-      "loading": "Đang tải phân đoạn...",
+      "description": "Tạo tiêu chí thành viên dùng lại được để chọn thành viên cho chiến dịch và lượt tải xuống bị giới hạn.",
+      "searchPlaceholder": "Tìm tiêu chí thành viên...",
+      "empty": "Chưa có tiêu chí thành viên nào. Hãy tạo một tiêu chí để chọn những thành viên cụ thể.",
+      "createTitle": "Tạo tiêu chí thành viên",
+      "editTitle": "Sửa tiêu chí thành viên",
+      "namePlaceholder": "Tên tiêu chí thành viên",
+      "typePlaceholder": "Chọn loại",
+      "loading": "Đang tải tiêu chí thành viên...",
       "includeArchived": "Bao gồm lưu trữ",
       "archive": "Lưu trữ",
-      "archiveTitle": "Đối tượng lưu trữ",
+      "archiveTitle": "Lưu trữ tiêu chí thành viên",
       "archiveConfirm": "Lưu trữ {name}? Mối quan hệ của chiến dịch {campaigns} và chính sách tệp {files} được tách rời. Các lần phân phối {runs} sẽ giữ nguyên lịch sử bất biến của chúng.",
       "restore": "Khôi phục",
-      "restoreTitle": "Khôi phục đối tượng",
+      "restoreTitle": "Khôi phục tiêu chí thành viên",
       "restoreConfirm": "Khôi phục {name}? Lịch trình chiến dịch và chính sách tệp trước đó không được khôi phục tự động.",
-      "created": "Đã tạo phân đoạn",
-      "updated": "Đã cập nhật phân đoạn",
-      "archived": "Đã lưu trữ đối tượng",
-      "restored": "Đã khôi phục đối tượng",
+      "created": "Đã tạo tiêu chí thành viên",
+      "updated": "Đã cập nhật tiêu chí thành viên",
+      "archived": "Đã lưu trữ tiêu chí thành viên",
+      "restored": "Đã khôi phục tiêu chí thành viên",
       "config": {
         "userTagsPlaceholderSelect": "Chọn thẻ người dùng",
         "rolesLabel": "Vai trò",
@@ -640,12 +641,123 @@
         "createdBeforeLabel": "Đã tạo trước đó",
         "createdBeforePlaceholder": "Ngày kết thúc",
         "estimateCount": "Ước tính số lượng",
-        "estimatedRecipients": "~{count, plural, one {# người nhận} other {# người nhận}}",
-        "allUsersHelp": "Nhắm mục tiêu tất cả người dùng. Tính đủ điều kiện của bản tin được chọn bởi mỗi chiến dịch."
+        "estimatedRecipients": "~{count, plural, one {# thành viên phù hợp} other {# thành viên phù hợp}}",
+        "allUsersHelp": "Chọn tất cả thành viên. Mỗi chiến dịch tự quyết định có chỉ gửi cho người đăng ký bản tin hay không."
       },
       "types": {
         "usersByFilter": "Người dùng theo bộ lọc",
         "allUsers": "Tất cả người dùng"
+      }
+    },
+    "oauthApps": {
+      "title": "Ứng dụng OAuth",
+      "description": "Ứng dụng cho mọi người đăng nhập bằng tài khoản {siteName}, và các công cụ AI được kết nối với công cụ chỉnh sửa của trang.",
+      "create": "Ứng dụng mới",
+      "createTitle": "Ứng dụng đăng nhập mới",
+      "createSubmit": "Tạo ứng dụng",
+      "untitled": "Ứng dụng chưa đặt tên",
+      "createdAt": "Đã đăng ký {date}",
+      "loadFailed": "Không thể tải ứng dụng OAuth.",
+      "openApp": "Mở {name}",
+      "openConnection": "Mở {name}",
+      "connectionActions": "Thao tác cho {name}",
+      "copyClientId": "Sao chép ID ứng dụng khách",
+      "copySecret": "Sao chép khóa bí mật",
+      "rotateSecret": "Cấp khóa bí mật mới",
+      "rotateTitle": "Cấp khóa bí mật ứng dụng khách mới?",
+      "rotateConfirm": "Khóa bí mật hiện tại ngừng hoạt động ngay. Hãy cập nhật cấu hình ứng dụng bằng khóa bí mật mới ngay lập tức.",
+      "delete": "Xóa ứng dụng",
+      "deleteTitle": "Xóa ứng dụng này?",
+      "deleteConfirm": "{name} sẽ không thể cho ai đăng nhập nữa, và các token của nó ngừng hoạt động.",
+      "deleted": "Đã xóa {name}",
+      "saved": "Đã lưu ứng dụng",
+      "disconnect": "Ngắt kết nối",
+      "disconnectTitle": "Ngắt kết nối công cụ AI này?",
+      "disconnectConfirm": "{name} mất quyền truy cập ngay. Công cụ chỉ có thể kết nối lại sau khi một thành viên phê duyệt lại.",
+      "disconnected": "Đã ngắt kết nối {name}",
+      "secretTitle": "Khóa bí mật ứng dụng khách",
+      "secretWarning": "Hãy sao chép khóa bí mật ngay. Khóa chỉ hiển thị một lần; nếu bị mất, hãy cấp khóa mới.",
+      "apps": {
+        "title": "Ứng dụng đăng nhập",
+        "description": "Các ứng dụng đăng ký ở đây cho mọi người đăng nhập bằng tài khoản {siteName}.",
+        "empty": "Chưa có ứng dụng đăng nhập nào."
+      },
+      "connections": {
+        "title": "Công cụ AI đã kết nối",
+        "description": "Các công cụ mà thành viên đã kết nối với công cụ chỉnh sửa của trang. Mỗi công cụ tự đăng ký.",
+        "empty": "Không có công cụ AI nào được kết nối.",
+        "generatedId": "Đăng ký bằng ID được tạo tự động",
+        "active": "Đã kết nối",
+        "stale": "Địa chỉ cũ",
+        "staleWarning": "Kết nối này vẫn trỏ đến một địa chỉ mà trang không còn phục vụ, nên không thể sử dụng. Hãy ngắt kết nối để dọn dẹp.",
+        "detailDescription": "Công cụ này tự đăng ký, nên không thể chỉnh sửa cài đặt của nó ở đây."
+      },
+      "sections": {
+        "basics": "Thông tin cơ bản",
+        "signIn": "Đăng nhập",
+        "tokens": "Token",
+        "manage": "Quản lý",
+        "connection": "Kết nối"
+      },
+      "fields": {
+        "clientId": "ID ứng dụng khách",
+        "clientSecret": "Khóa bí mật ứng dụng khách",
+        "redirectUris": "URI chuyển hướng",
+        "redirectHosts": "Chuyển hướng đến",
+        "postLogoutRedirectUris": "URI chuyển hướng sau khi đăng xuất",
+        "scopes": "Dữ liệu hồ sơ được chia sẻ",
+        "authMethod": "Xác thực ứng dụng khách",
+        "accessTokenLifespan": "Thời hạn token truy cập",
+        "idTokenLifespan": "Thời hạn token ID",
+        "publisher": "Phát hành bởi",
+        "resource": "Mục tiêu token",
+        "signInAccess": "Ai có thể đăng nhập"
+      },
+      "scopes": {
+        "openid": "ID tài khoản (luôn được chia sẻ)",
+        "email": "Địa chỉ email",
+        "profile": "Biệt danh"
+      },
+      "authMethods": {
+        "client_secret_basic": "Khóa bí mật ứng dụng khách (HTTP Basic)",
+        "client_secret_post": "Khóa bí mật ứng dụng khách (nội dung biểu mẫu)",
+        "private_key_jwt": "Khóa đã ký (private_key_jwt)",
+        "none": "Không có: ứng dụng công khai dùng PKCE"
+      },
+      "lifespans": {
+        "5m": "5 phút",
+        "15m": "15 phút",
+        "1h": "1 giờ"
+      },
+      "placeholders": {
+        "clientId": "vd: team-dashboard",
+        "redirectUri": "https://…/callback"
+      },
+      "help": {
+        "name": "Hiển thị cho quản trị viên trong danh sách này.",
+        "clientIdCreate": "Để trống để tạo tự động. Không thể thay đổi sau này.",
+        "clientIdFixed": "Được đặt trong cấu hình của ứng dụng. Không thể thay đổi.",
+        "signIn": "Ứng dụng đăng nhập không nhận token làm mới, nên quyền truy cập được kiểm tra mỗi lần đăng nhập. Thành viên không còn đủ điều kiện sẽ mất quyền truy cập khi token hết hạn.",
+        "redirectUris": "Các địa chỉ HTTPS chính xác mà ứng dụng quay lại sau khi đăng nhập. Nhấn Enter sau mỗi địa chỉ.",
+        "postLogoutRedirectUris": "Các địa chỉ tùy chọn mà ứng dụng có thể quay lại sau khi đăng xuất.",
+        "scopes": "Dữ liệu hồ sơ mà ứng dụng có thể đọc ngoài ID tài khoản.",
+        "tokens": "Thời hạn ngắn hơn sẽ kết thúc quyền truy cập sớm hơn khi thành viên không còn đủ điều kiện.",
+        "authMethodSecret": "Ứng dụng lưu khóa bí mật ứng dụng khách trên máy chủ của mình.",
+        "authMethodPublic": "Dành cho ứng dụng không thể lưu khóa bí mật, như ứng dụng trình duyệt hoặc máy tính.",
+        "manage": "Khóa bí mật mới hoặc ứng dụng đã xóa có hiệu lực ngay.",
+        "disconnect": "Ngắt kết nối sẽ xóa đăng ký của công cụ và chấm dứt quyền truy cập của nó cho mọi thành viên."
+      },
+      "access": {
+        "none": "Không ai (tạm dừng đăng nhập)",
+        "admins": "Chỉ quản trị viên",
+        "members": "Tất cả thành viên",
+        "memberCriteria": "Tiêu chí thành viên"
+      },
+      "accessHelp": {
+        "none": "Giữ ứng dụng đã đăng ký nhưng từ chối mọi lượt đăng nhập.",
+        "admins": "Chỉ quản trị viên đang hoạt động mới có thể đăng nhập.",
+        "members": "Mọi thành viên đang hoạt động đều có thể đăng nhập.",
+        "memberCriteria": "Thành viên khớp với tiêu chí thành viên đã chọn có thể đăng nhập. Cách so khớp giống như với lượt tải xuống bị giới hạn."
       }
     },
     "series": {
@@ -2698,13 +2810,13 @@
       "none": "Không có bố cục"
     },
     "target": {
-      "criteriaLabel": "Đối tượng mục tiêu",
-      "criteriaPlaceholder": "Chọn khán giả",
+      "criteriaLabel": "Người nhận",
+      "criteriaPlaceholder": "Chọn tiêu chí thành viên",
       "all": "Tất cả người dùng",
-      "unavailableCriteria": "Đối tượng được lưu trữ hoặc không có sẵn",
-      "unavailableCriteriaDescription": "Chiến dịch này nhắm mục tiêu đến đối tượng đã lưu trữ hoặc không có sẵn. Chọn đối tượng đang hoạt động trước khi lên lịch hoặc gửi.",
-      "criteriaRequired": "Chọn đối tượng đang hoạt động trước khi lên lịch hoặc gửi.",
-      "criteriaLoadError": "Không thể tải đối tượng đang hoạt động. Hãy thử lại trước khi lên lịch hoặc gửi."
+      "unavailableCriteria": "Tiêu chí thành viên đã lưu trữ hoặc không khả dụng",
+      "unavailableCriteriaDescription": "Chiến dịch này dùng tiêu chí thành viên đã lưu trữ hoặc không khả dụng. Chọn tiêu chí thành viên đang hoạt động trước khi lên lịch hoặc gửi.",
+      "criteriaRequired": "Chọn tiêu chí thành viên đang hoạt động trước khi lên lịch hoặc gửi.",
+      "criteriaLoadError": "Không thể tải tiêu chí thành viên đang hoạt động. Hãy thử lại trước khi lên lịch hoặc gửi."
     },
     "fields": {
       "recipientScope": "Người nhận",
@@ -2720,7 +2832,7 @@
       "description": "Nhập địa chỉ email để gửi bản thử nghiệm của chiến dịch này."
     },
     "sendModal": {
-      "warning": "Thao tác này sẽ gửi chiến dịch đến phân khúc đối tượng {criteria}. Không thể hoàn tác hành động này.",
+      "warning": "Chiến dịch sẽ được gửi đến những thành viên khớp với {criteria}. Không thể hoàn tác thao tác này.",
       "subject": "Chủ đề: {subject}",
       "allMatchingUsersWarning": "Bao gồm những người dùng phù hợp đã hủy đăng ký nhận bản tin."
     },
@@ -2729,7 +2841,7 @@
       "dateLabel": "Ngày và giờ dự kiến",
       "previousMonth": "Tháng trước",
       "nextMonth": "Tháng tiếp theo",
-      "criteria": "Khán giả: {criteria}",
+      "criteria": "Người nhận: {criteria}",
       "allMatchingUsersWarning": "Bao gồm những người dùng phù hợp đã hủy đăng ký nhận bản tin."
     },
     "notifications": {
@@ -5319,13 +5431,13 @@
           "description": "Bất kỳ người dùng đã đăng nhập nào cũng có thể tải xuống tệp này."
         },
         "restricted": {
-          "label": "Khán giả",
-          "description": "Chỉ những người dùng trong đối tượng đã chọn mới có thể tải xuống tệp này."
+          "label": "Tiêu chí thành viên",
+          "description": "Chỉ những thành viên khớp với tiêu chí thành viên đã chọn mới có thể tải xuống tệp này."
         }
       },
-      "criteriaLoadError": "Đã tải chính sách nhưng không thể tải đối tượng.",
-      "criteriaEmpty": "Không có phân khúc Đối tượng nào khả dụng.",
-      "restrictedWithoutCriteria": "Chính sách hạn chế này không có Đối tượng. Tải xuống bị từ chối đối với mọi người cho đến khi bạn chọn ít nhất một Đối tượng.",
+      "criteriaLoadError": "Đã tải chính sách nhưng không thể tải tiêu chí thành viên.",
+      "criteriaEmpty": "Không có tiêu chí thành viên nào khả dụng.",
+      "restrictedWithoutCriteria": "Chính sách giới hạn này không có tiêu chí thành viên. Mọi lượt tải xuống đều bị từ chối cho đến khi bạn chọn ít nhất một tiêu chí.",
       "additionalSelected": "Đã chọn thêm {count}",
       "loadError": "Không thể tải quyền truy cập tải xuống.",
       "saveError": "Không thể lưu quyền truy cập tải xuống.",

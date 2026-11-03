@@ -257,7 +257,7 @@
       "clients": "Clientes",
       "campaign": "Campanha",
       "campaigns": "Campanhas",
-      "memberCriteria": "Segmento de público",
+      "memberCriteria": "Critérios de membros",
       "user": "Usuário",
       "member": "Membro",
       "users": "Usuários",
@@ -502,7 +502,8 @@
       "system": "Sistema"
     },
     "items": {
-      "mailSettings": "Configurações de e-mail"
+      "mailSettings": "Configurações de e-mail",
+      "oauthApps": "Apps OAuth"
     }
   },
   "adminList": {
@@ -613,25 +614,25 @@
       }
     },
     "memberCriteria": {
-      "description": "Crie segmentos de público reutilizáveis para direcionar campanhas a grupos específicos.",
-      "searchPlaceholder": "Buscar segmentos...",
-      "empty": "Nenhum segmento encontrado. Crie um para direcionar públicos específicos.",
-      "createTitle": "Criar segmento",
-      "editTitle": "Editar segmento",
-      "namePlaceholder": "Nome do segmento",
-      "typePlaceholder": "Selecione o tipo de segmento",
-      "loading": "Carregando segmento...",
+      "description": "Crie critérios de membros reutilizáveis que selecionam membros para campanhas e downloads restritos.",
+      "searchPlaceholder": "Buscar critérios de membros...",
+      "empty": "Ainda não há critérios de membros. Crie um para selecionar membros específicos.",
+      "createTitle": "Criar critérios de membros",
+      "editTitle": "Editar critérios de membros",
+      "namePlaceholder": "Nome dos critérios de membros",
+      "typePlaceholder": "Selecione um tipo",
+      "loading": "Carregando critérios de membros...",
       "includeArchived": "Incluir arquivados",
       "archive": "Arquivar",
-      "archiveTitle": "Arquivar público",
+      "archiveTitle": "Arquivar critérios de membros",
       "archiveConfirm": "Arquivar {name}? Serão desvinculados {campaigns} relacionamentos de campanha e {files} políticas de arquivo. Os {runs} históricos de envio permanecerão inalterados.",
       "restore": "Restaurar",
-      "restoreTitle": "Restaurar público",
+      "restoreTitle": "Restaurar critérios de membros",
       "restoreConfirm": "Restaurar {name}? Os agendamentos e as políticas de download anteriores não serão restaurados automaticamente.",
-      "created": "Segmento criado",
-      "updated": "Segmento atualizado",
-      "archived": "Público arquivado",
-      "restored": "Público restaurado",
+      "created": "Critérios de membros criados",
+      "updated": "Critérios de membros atualizados",
+      "archived": "Critérios de membros arquivados",
+      "restored": "Critérios de membros restaurados",
       "config": {
         "userTagsPlaceholderSelect": "Selecione tags de usuário",
         "rolesLabel": "Funções",
@@ -640,12 +641,123 @@
         "createdBeforeLabel": "Criado antes de",
         "createdBeforePlaceholder": "Data de término",
         "estimateCount": "Estimar quantidade",
-        "estimatedRecipients": "~{count, plural, one {# destinatário} many {# destinatários} other {# destinatários}}",
-        "allUsersHelp": "Segmenta todos os usuários. A elegibilidade da newsletter é escolhida por campanha."
+        "estimatedRecipients": "~{count, plural, one {# membro correspondente} many {# membros correspondentes} other {# membros correspondentes}}",
+        "allUsersHelp": "Seleciona todos os membros. Cada campanha decide se só os inscritos na newsletter a recebem."
       },
       "types": {
         "usersByFilter": "Usuários por filtro",
         "allUsers": "Todos os usuários"
+      }
+    },
+    "oauthApps": {
+      "title": "Apps OAuth",
+      "description": "Apps que fazem o login das pessoas com a conta {siteName} e ferramentas de IA conectadas às ferramentas de edição do site.",
+      "create": "Novo app",
+      "createTitle": "Novo app de login",
+      "createSubmit": "Criar app",
+      "untitled": "App sem nome",
+      "createdAt": "Registrado em {date}",
+      "loadFailed": "Não foi possível carregar os apps OAuth.",
+      "openApp": "Abrir {name}",
+      "openConnection": "Abrir {name}",
+      "connectionActions": "Ações de {name}",
+      "copyClientId": "Copiar ID do cliente",
+      "copySecret": "Copiar segredo",
+      "rotateSecret": "Emitir novo segredo",
+      "rotateTitle": "Emitir um novo segredo do cliente?",
+      "rotateConfirm": "O segredo atual para de funcionar imediatamente. Atualize a configuração do app com o novo segredo o quanto antes.",
+      "delete": "Excluir app",
+      "deleteTitle": "Excluir este app?",
+      "deleteConfirm": "{name} não poderá mais fazer o login de ninguém, e os tokens dele param de funcionar.",
+      "deleted": "{name} excluído",
+      "saved": "App salvo",
+      "disconnect": "Desconectar",
+      "disconnectTitle": "Desconectar esta ferramenta de IA?",
+      "disconnectConfirm": "{name} perde o acesso na hora. Só poderá se conectar de novo depois que um membro aprovar outra vez.",
+      "disconnected": "{name} desconectada",
+      "secretTitle": "Segredo do cliente",
+      "secretWarning": "Copie o segredo agora. Ele aparece só uma vez; se perder, emita um novo.",
+      "apps": {
+        "title": "Apps de login",
+        "description": "Os apps registrados aqui fazem o login das pessoas com a conta {siteName}.",
+        "empty": "Ainda não há apps de login."
+      },
+      "connections": {
+        "title": "Ferramentas de IA conectadas",
+        "description": "Ferramentas que os membros conectaram às ferramentas de edição do site. Cada ferramenta se registrou sozinha.",
+        "empty": "Nenhuma ferramenta de IA conectada.",
+        "generatedId": "Registrada com um ID gerado",
+        "active": "Conectada",
+        "stale": "Endereço antigo",
+        "staleWarning": "Esta conexão ainda aponta para um endereço que o site não usa mais, então não pode ser usada. Desconecte para limpar.",
+        "detailDescription": "Esta ferramenta se registrou sozinha, então as configurações dela não podem ser editadas aqui."
+      },
+      "sections": {
+        "basics": "Informações básicas",
+        "signIn": "Login",
+        "tokens": "Tokens",
+        "manage": "Gerenciar",
+        "connection": "Conexão"
+      },
+      "fields": {
+        "clientId": "ID do cliente",
+        "clientSecret": "Segredo do cliente",
+        "redirectUris": "URIs de redirecionamento",
+        "redirectHosts": "Redireciona para",
+        "postLogoutRedirectUris": "URIs de redirecionamento após sair",
+        "scopes": "Dados de perfil compartilhados",
+        "authMethod": "Autenticação do cliente",
+        "accessTokenLifespan": "Validade do token de acesso",
+        "idTokenLifespan": "Validade do token de ID",
+        "publisher": "Publicada por",
+        "resource": "Destino do token",
+        "signInAccess": "Quem pode fazer login"
+      },
+      "scopes": {
+        "openid": "ID da conta (sempre compartilhado)",
+        "email": "Endereço de e-mail",
+        "profile": "Apelido"
+      },
+      "authMethods": {
+        "client_secret_basic": "Segredo do cliente (HTTP Basic)",
+        "client_secret_post": "Segredo do cliente (corpo do formulário)",
+        "private_key_jwt": "Chave assinada (private_key_jwt)",
+        "none": "Nenhuma: app público com PKCE"
+      },
+      "lifespans": {
+        "5m": "5 minutos",
+        "15m": "15 minutos",
+        "1h": "1 hora"
+      },
+      "placeholders": {
+        "clientId": "ex.: team-dashboard",
+        "redirectUri": "https://…/callback"
+      },
+      "help": {
+        "name": "Mostrado aos administradores nesta lista.",
+        "clientIdCreate": "Deixe em branco para gerar um. Não pode ser alterado depois.",
+        "clientIdFixed": "Fica na configuração do app. Não pode ser alterado.",
+        "signIn": "Apps de login não recebem token de atualização, então o acesso é verificado a cada login. Um membro que deixa de atender aos requisitos perde o acesso quando os tokens expiram.",
+        "redirectUris": "Endereços HTTPS exatos para onde o app volta depois do login. Pressione Enter após cada um.",
+        "postLogoutRedirectUris": "Endereços opcionais para onde o app pode voltar depois de sair.",
+        "scopes": "Dados de perfil que o app pode ler além do ID da conta.",
+        "tokens": "Validades mais curtas encerram o acesso mais cedo depois que um membro deixa de atender aos requisitos.",
+        "authMethodSecret": "O app guarda um segredo do cliente no próprio servidor.",
+        "authMethodPublic": "Para apps que não conseguem guardar um segredo, como apps de navegador ou desktop.",
+        "manage": "Um novo segredo ou um app excluído têm efeito imediato.",
+        "disconnect": "Desconectar remove o registro da ferramenta e encerra o acesso dela para todos os membros."
+      },
+      "access": {
+        "none": "Ninguém (login pausado)",
+        "admins": "Só administradores",
+        "members": "Todos os membros",
+        "memberCriteria": "Critérios de membros"
+      },
+      "accessHelp": {
+        "none": "Mantém o app registrado, mas recusa todos os logins.",
+        "admins": "Só administradores ativos podem fazer login.",
+        "members": "Qualquer membro ativo pode fazer login.",
+        "memberCriteria": "Membros que atendem aos critérios de membros selecionados podem fazer login. A verificação é a mesma dos downloads restritos."
       }
     },
     "series": {
@@ -2698,13 +2810,13 @@
       "none": "Sem layout"
     },
     "target": {
-      "criteriaLabel": "Público-alvo",
-      "criteriaPlaceholder": "Selecione um público",
+      "criteriaLabel": "Destinatários",
+      "criteriaPlaceholder": "Selecione critérios de membros",
       "all": "Todos os usuários",
-      "unavailableCriteria": "Público arquivado ou indisponível",
-      "unavailableCriteriaDescription": "Esta campanha está direcionada a um público arquivado ou indisponível. Selecione um público ativo antes de agendar ou enviar.",
-      "criteriaRequired": "Selecione um público ativo antes de agendar ou enviar.",
-      "criteriaLoadError": "Não foi possível carregar os públicos ativos. Tente novamente antes de agendar ou enviar."
+      "unavailableCriteria": "Critérios de membros arquivados ou indisponíveis",
+      "unavailableCriteriaDescription": "Esta campanha usa critérios de membros arquivados ou indisponíveis. Selecione critérios de membros ativos antes de agendar ou enviar.",
+      "criteriaRequired": "Selecione critérios de membros ativos antes de agendar ou enviar.",
+      "criteriaLoadError": "Não foi possível carregar os critérios de membros ativos. Tente de novo antes de agendar ou enviar."
     },
     "fields": {
       "recipientScope": "Destinatários",
@@ -2720,7 +2832,7 @@
       "description": "Digite um endereço de e-mail para enviar um teste desta campanha."
     },
     "sendModal": {
-      "warning": "Isso enviará a campanha para o segmento de público {criteria}. Esta ação não pode ser desfeita.",
+      "warning": "A campanha será enviada aos membros que atendem a {criteria}. Esta ação não pode ser desfeita.",
       "subject": "Assunto: {subject}",
       "allMatchingUsersWarning": "Inclui usuários correspondentes que cancelaram a newsletter."
     },
@@ -2729,7 +2841,7 @@
       "dateLabel": "Data e hora agendadas",
       "previousMonth": "Mês anterior",
       "nextMonth": "Próximo mês",
-      "criteria": "Público: {criteria}",
+      "criteria": "Destinatários: {criteria}",
       "allMatchingUsersWarning": "Inclui usuários correspondentes que cancelaram a newsletter."
     },
     "notifications": {
@@ -5319,13 +5431,13 @@
           "description": "Qualquer usuário conectado pode baixar este arquivo."
         },
         "restricted": {
-          "label": "Públicos",
-          "description": "Somente usuários dos públicos selecionados podem baixar este arquivo."
+          "label": "Critérios de membros",
+          "description": "Só membros que atendem aos critérios de membros selecionados podem baixar este arquivo."
         }
       },
-      "criteriaLoadError": "A política foi carregada, mas não foi possível carregar os públicos.",
-      "criteriaEmpty": "Não há segmentos de público disponíveis.",
-      "restrictedWithoutCriteria": "Esta política restrita não tem nenhum público. Os downloads são negados a todos até que você selecione pelo menos um público.",
+      "criteriaLoadError": "A política foi carregada, mas não foi possível carregar os critérios de membros.",
+      "criteriaEmpty": "Nenhum critério de membros disponível.",
+      "restrictedWithoutCriteria": "Esta política restrita não tem critérios de membros. Os downloads ficam bloqueados para todos até você selecionar pelo menos um.",
       "additionalSelected": "Mais {count} selecionados",
       "loadError": "Não foi possível carregar o acesso ao download.",
       "saveError": "Não foi possível salvar o acesso ao download.",

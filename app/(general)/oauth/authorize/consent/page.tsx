@@ -7,10 +7,9 @@ import { approveMcpConsent, rejectMcpConsentAction } from '@/features/auth/hydra
 import {
   acceptHydraSignInConsent,
   assertMcpConsentRequest,
+  clientSignIn,
   getHydraConsentRequest,
-  isActiveAdmin,
   isMcpAuthor,
-  isSignInClient,
   mcpClientDisplayName,
   mcpDelegationDisplayName,
   parseHydraChallenge,
@@ -45,8 +44,9 @@ export default async function McpConsentPage({ searchParams }: PageProps) {
     redirect(buildLoginRedirectHref(consentContinuation(challenge)));
   }
   const request = await getHydraConsentRequest(challenge);
-  if (isSignInClient(request.client.client_id)) {
-    if (!isActiveAdmin(session)) {
+  const signIn = await clientSignIn(request.client.client_id);
+  if (signIn !== 'mcp') {
+    if (signIn !== 'allowed') {
       notFound();
     }
     redirect(await acceptHydraSignInConsent(challenge, request, session));

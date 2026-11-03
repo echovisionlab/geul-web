@@ -257,7 +257,7 @@
       "clients": "クライアント",
       "campaign": "キャンペーン",
       "campaigns": "キャンペーン",
-      "memberCriteria": "オーディエンスセグメント",
+      "memberCriteria": "会員条件",
       "user": "ユーザー",
       "member": "メンバー",
       "users": "ユーザー",
@@ -502,7 +502,8 @@
       "system": "システム"
     },
     "items": {
-      "mailSettings": "メール設定"
+      "mailSettings": "メール設定",
+      "oauthApps": "OAuth アプリ"
     }
   },
   "adminList": {
@@ -613,25 +614,25 @@
       }
     },
     "memberCriteria": {
-      "description": "特定のグループを対象にキャンペーンを配信するための再利用可能なオーディエンスセグメントを作成します",
-      "searchPlaceholder": "セグメントを検索...",
-      "empty": "セグメントが見つかりません。特定のオーディエンスを対象にするには作成してください",
-      "createTitle": "セグメントを作成",
-      "editTitle": "セグメントを編集",
-      "namePlaceholder": "セグメント名",
-      "typePlaceholder": "セグメントタイプを選択",
-      "loading": "セグメントを読み込み中...",
+      "description": "キャンペーンや制限付きダウンロードで会員を選ぶ、再利用できる会員条件を作成します。",
+      "searchPlaceholder": "会員条件を検索...",
+      "empty": "会員条件はまだありません。特定の会員を選ぶには作成してください。",
+      "createTitle": "会員条件を作成",
+      "editTitle": "会員条件を編集",
+      "namePlaceholder": "会員条件の名前",
+      "typePlaceholder": "種類を選択",
+      "loading": "会員条件を読み込んでいます...",
       "includeArchived": "アーカイブ済みを含める",
       "archive": "アーカイブ",
-      "archiveTitle": "オーディエンスをアーカイブ",
+      "archiveTitle": "会員条件をアーカイブ",
       "archiveConfirm": "{name} をアーカイブしますか。キャンペーン{campaigns}件とファイルポリシー{files}件の関連が解除されます。配信履歴{runs}件は変更されません。",
       "restore": "復元",
-      "restoreTitle": "オーディエンスを復元",
+      "restoreTitle": "会員条件を復元",
       "restoreConfirm": "{name} を復元しますか。以前の配信予約とダウンロードポリシーは自動では復元されません。",
-      "created": "セグメントを作成しました",
-      "updated": "セグメントを更新しました",
-      "archived": "オーディエンスをアーカイブしました",
-      "restored": "オーディエンスを復元しました",
+      "created": "会員条件を作成しました",
+      "updated": "会員条件を更新しました",
+      "archived": "会員条件をアーカイブしました",
+      "restored": "会員条件を復元しました",
       "config": {
         "userTagsPlaceholderSelect": "ユーザータグを選択",
         "rolesLabel": "ロール",
@@ -640,12 +641,123 @@
         "createdBeforeLabel": "作成終了日",
         "createdBeforePlaceholder": "終了日",
         "estimateCount": "推定件数",
-        "estimatedRecipients": "約 {count, plural, one {# 人} other {# 人}}",
-        "allUsersHelp": "すべてのユーザーを対象にします。ニュースレター購読条件はキャンペーンごとに選択します。"
+        "estimatedRecipients": "約 {count, plural, one {# 人が該当} other {# 人が該当}}",
+        "allUsersHelp": "すべての会員を選択します。ニュースレター購読者だけに送るかどうかはキャンペーンごとに決めます。"
       },
       "types": {
         "usersByFilter": "フィルターでユーザーを絞り込み",
         "allUsers": "すべてのユーザー"
+      }
+    },
+    "oauthApps": {
+      "title": "OAuth アプリ",
+      "description": "{siteName} アカウントでサインインさせるアプリと、サイトの編集ツールに接続された AI ツールです。",
+      "create": "新しいアプリ",
+      "createTitle": "新しいサインインアプリ",
+      "createSubmit": "アプリを作成",
+      "untitled": "名前のないアプリ",
+      "createdAt": "{date} に登録",
+      "loadFailed": "OAuth アプリを読み込めませんでした。",
+      "openApp": "{name} を開く",
+      "openConnection": "{name} を開く",
+      "connectionActions": "{name} の操作",
+      "copyClientId": "クライアント ID をコピー",
+      "copySecret": "シークレットをコピー",
+      "rotateSecret": "新しいシークレットを発行",
+      "rotateTitle": "新しいクライアントシークレットを発行しますか?",
+      "rotateConfirm": "現在のシークレットはすぐに使えなくなります。アプリの設定を新しいシークレットにすぐ更新してください。",
+      "delete": "アプリを削除",
+      "deleteTitle": "このアプリを削除しますか?",
+      "deleteConfirm": "{name} は誰もサインインさせられなくなり、発行済みのトークンも使えなくなります。",
+      "deleted": "{name} を削除しました",
+      "saved": "アプリを保存しました",
+      "disconnect": "接続を解除",
+      "disconnectTitle": "この AI ツールの接続を解除しますか?",
+      "disconnectConfirm": "{name} はすぐにアクセスを失います。会員が再び承認するまで再接続できません。",
+      "disconnected": "{name} の接続を解除しました",
+      "secretTitle": "クライアントシークレット",
+      "secretWarning": "今すぐシークレットをコピーしてください。表示は一度だけです。なくした場合は新しく発行してください。",
+      "apps": {
+        "title": "サインインアプリ",
+        "description": "ここに登録したアプリは {siteName} アカウントでサインインさせます。",
+        "empty": "サインインアプリはまだありません。"
+      },
+      "connections": {
+        "title": "接続された AI ツール",
+        "description": "会員がサイトの編集ツールに接続したツールです。各ツールは自身で登録しました。",
+        "empty": "接続された AI ツールはありません。",
+        "generatedId": "自動生成された ID で登録",
+        "active": "接続中",
+        "stale": "古いアドレス",
+        "staleWarning": "この接続はサイトがもう提供していないアドレスを指しているため使えません。接続を解除して整理してください。",
+        "detailDescription": "このツールは自身で登録したため、ここでは設定を編集できません。"
+      },
+      "sections": {
+        "basics": "基本情報",
+        "signIn": "サインイン",
+        "tokens": "トークン",
+        "manage": "管理",
+        "connection": "接続情報"
+      },
+      "fields": {
+        "clientId": "クライアント ID",
+        "clientSecret": "クライアントシークレット",
+        "redirectUris": "リダイレクト URI",
+        "redirectHosts": "リダイレクト先",
+        "postLogoutRedirectUris": "サインアウト後のリダイレクト URI",
+        "scopes": "共有するプロフィール情報",
+        "authMethod": "クライアント認証",
+        "accessTokenLifespan": "アクセストークンの有効期間",
+        "idTokenLifespan": "ID トークンの有効期間",
+        "publisher": "登録元",
+        "resource": "トークンの対象",
+        "signInAccess": "サインインできる人"
+      },
+      "scopes": {
+        "openid": "アカウント ID (常に共有)",
+        "email": "メールアドレス",
+        "profile": "ニックネーム"
+      },
+      "authMethods": {
+        "client_secret_basic": "クライアントシークレット (HTTP Basic)",
+        "client_secret_post": "クライアントシークレット (フォーム本文)",
+        "private_key_jwt": "署名鍵 (private_key_jwt)",
+        "none": "なし: PKCE を使う公開アプリ"
+      },
+      "lifespans": {
+        "5m": "5 分",
+        "15m": "15 分",
+        "1h": "1 時間"
+      },
+      "placeholders": {
+        "clientId": "例: team-dashboard",
+        "redirectUri": "https://…/callback"
+      },
+      "help": {
+        "name": "この一覧で管理者に表示されます。",
+        "clientIdCreate": "空欄にすると自動で生成します。後から変更できません。",
+        "clientIdFixed": "アプリの設定に入る値のため、変更できません。",
+        "signIn": "サインインアプリにはリフレッシュトークンを渡さないため、サインインのたびにアクセスを確認します。条件を満たさなくなった会員は、トークンの期限が切れるとアクセスを失います。",
+        "redirectUris": "サインイン後にアプリが戻る正確な HTTPS アドレスです。1 つ入力するごとに Enter を押してください。",
+        "postLogoutRedirectUris": "サインアウト後にアプリが戻れる任意のアドレスです。",
+        "scopes": "アカウント ID のほかにアプリが読めるプロフィール情報です。",
+        "tokens": "有効期間が短いほど、会員が条件を満たさなくなった後のアクセスが早く終わります。",
+        "authMethodSecret": "アプリがサーバーにクライアントシークレットを保管します。",
+        "authMethodPublic": "ブラウザやデスクトップのアプリなど、シークレットを保管できないアプリ向けです。",
+        "manage": "新しいシークレットの発行とアプリの削除はすぐに反映されます。",
+        "disconnect": "接続を解除するとツールの登録が削除され、すべての会員のアクセスが終了します。"
+      },
+      "access": {
+        "none": "なし (サインイン停止中)",
+        "admins": "管理者のみ",
+        "members": "すべての会員",
+        "memberCriteria": "会員条件"
+      },
+      "accessHelp": {
+        "none": "アプリの登録は残したまま、すべてのサインインを拒否します。",
+        "admins": "有効な管理者だけがサインインできます。",
+        "members": "有効なすべての会員がサインインできます。",
+        "memberCriteria": "選択した会員条件に当てはまる会員がサインインできます。判定は制限付きダウンロードと同じです。"
       }
     },
     "series": {
@@ -2698,13 +2810,13 @@
       "none": "レイアウトなし"
     },
     "target": {
-      "criteriaLabel": "配信対象",
-      "criteriaPlaceholder": "オーディエンスを選択",
+      "criteriaLabel": "受信者",
+      "criteriaPlaceholder": "会員条件を選択",
       "all": "すべてのユーザー",
-      "unavailableCriteria": "アーカイブ済みまたは利用できないオーディエンス",
-      "unavailableCriteriaDescription": "このキャンペーンはアーカイブ済みまたは利用できないオーディエンスを対象にしています。予約または送信する前に有効なオーディエンスを選択してください。",
-      "criteriaRequired": "予約または送信する前に有効なオーディエンスを選択してください。",
-      "criteriaLoadError": "有効なオーディエンスを読み込めませんでした。予約または送信の前に再試行してください。"
+      "unavailableCriteria": "アーカイブ済みまたは使用できない会員条件",
+      "unavailableCriteriaDescription": "このキャンペーンはアーカイブ済みまたは使用できない会員条件を使っています。予約または送信の前に有効な会員条件を選択してください。",
+      "criteriaRequired": "予約または送信の前に有効な会員条件を選択してください。",
+      "criteriaLoadError": "有効な会員条件を読み込めませんでした。予約または送信の前にもう一度お試しください。"
     },
     "fields": {
       "recipientScope": "受信者",
@@ -2720,7 +2832,7 @@
       "description": "このキャンペーンのテスト送信先メールアドレスを入力してください"
     },
     "sendModal": {
-      "warning": "このキャンペーンはオーディエンスセグメント {criteria} に送信されます。この操作は元に戻せません",
+      "warning": "{criteria} に当てはまる会員にキャンペーンを送信します。この操作は元に戻せません。",
       "subject": "件名: {subject}",
       "allMatchingUsersWarning": "ニュースレターを購読解除したユーザーも含まれます。"
     },
@@ -2729,7 +2841,7 @@
       "dateLabel": "送信予定日時",
       "previousMonth": "前の月",
       "nextMonth": "次の月",
-      "criteria": "オーディエンス: {criteria}",
+      "criteria": "受信者: {criteria}",
       "allMatchingUsersWarning": "ニュースレターを購読解除したユーザーも含まれます。"
     },
     "notifications": {
@@ -5319,13 +5431,13 @@
           "description": "ログインしたユーザーはこのファイルをダウンロードできます。"
         },
         "restricted": {
-          "label": "オーディエンス",
-          "description": "選択したオーディエンスのユーザーのみ、このファイルをダウンロードできます。"
+          "label": "会員条件",
+          "description": "選択した会員条件に当てはまる会員だけがこのファイルをダウンロードできます。"
         }
       },
-      "criteriaLoadError": "ポリシーは読み込まれましたが、オーディエンスを読み込めませんでした。",
-      "criteriaEmpty": "利用可能なオーディエンスセグメントがありません。",
-      "restrictedWithoutCriteria": "この制限付きポリシーにはオーディエンスが指定されていません。少なくとも1つのオーディエンスを選択するまで、すべてのユーザーのダウンロードが拒否されます。",
+      "criteriaLoadError": "ポリシーは読み込みましたが、会員条件を読み込めませんでした。",
+      "criteriaEmpty": "使用できる会員条件がありません。",
+      "restrictedWithoutCriteria": "この制限付きポリシーには会員条件がありません。1 つ以上選択するまで、すべてのダウンロードが拒否されます。",
       "additionalSelected": "他に{count}件選択済み",
       "loadError": "ダウンロードアクセスを読み込めませんでした。",
       "saveError": "ダウンロードアクセスを保存できませんでした。",

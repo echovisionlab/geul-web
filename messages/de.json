@@ -257,7 +257,7 @@
       "clients": "Kunden",
       "campaign": "Kampagne",
       "campaigns": "Kampagnen",
-      "memberCriteria": "Zielgruppensegment",
+      "memberCriteria": "Mitgliederkriterien",
       "user": "Benutzer",
       "member": "Mitglied",
       "users": "Benutzer",
@@ -502,7 +502,8 @@
       "system": "System"
     },
     "items": {
-      "mailSettings": "Mail-Einstellungen"
+      "mailSettings": "Mail-Einstellungen",
+      "oauthApps": "OAuth-Apps"
     }
   },
   "map": {
@@ -1072,25 +1073,25 @@
       }
     },
     "memberCriteria": {
-      "description": "Erstellen Sie wiederverwendbare Zielgruppensegmente, um Kampagnen auf bestimmte Gruppen auszurichten.",
-      "searchPlaceholder": "Segmente suchen...",
-      "empty": "Keine Segmente gefunden. Erstellen Sie eins, um bestimmte Zielgruppen anzusprechen.",
-      "createTitle": "Segment erstellen",
-      "editTitle": "Segment bearbeiten",
-      "namePlaceholder": "Segmentname",
-      "typePlaceholder": "Segmenttyp auswählen",
-      "loading": "Segment wird geladen...",
+      "description": "Erstelle wiederverwendbare Mitgliederkriterien, die Mitglieder für Kampagnen und eingeschränkte Downloads auswählen.",
+      "searchPlaceholder": "Mitgliederkriterien suchen...",
+      "empty": "Noch keine Mitgliederkriterien. Erstelle welche, um bestimmte Mitglieder auszuwählen.",
+      "createTitle": "Mitgliederkriterien erstellen",
+      "editTitle": "Mitgliederkriterien bearbeiten",
+      "namePlaceholder": "Name der Mitgliederkriterien",
+      "typePlaceholder": "Art auswählen",
+      "loading": "Mitgliederkriterien werden geladen...",
       "includeArchived": "Archivierte einbeziehen",
       "archive": "Archivieren",
-      "archiveTitle": "Zielgruppe archivieren",
+      "archiveTitle": "Mitgliederkriterien archivieren",
       "archiveConfirm": "{name} archivieren? {campaigns} Kampagnenbeziehungen und {files} Dateirichtlinien werden getrennt. {runs} Versandverläufe bleiben unverändert.",
       "restore": "Wiederherstellen",
-      "restoreTitle": "Zielgruppe wiederherstellen",
+      "restoreTitle": "Mitgliederkriterien wiederherstellen",
       "restoreConfirm": "{name} wiederherstellen? Frühere Kampagnenpläne und Datei-Downloadrichtlinien werden nicht automatisch wiederhergestellt.",
-      "created": "Segment erstellt",
-      "updated": "Segment aktualisiert",
-      "archived": "Zielgruppe archiviert",
-      "restored": "Zielgruppe wiederhergestellt",
+      "created": "Mitgliederkriterien erstellt",
+      "updated": "Mitgliederkriterien aktualisiert",
+      "archived": "Mitgliederkriterien archiviert",
+      "restored": "Mitgliederkriterien wiederhergestellt",
       "config": {
         "userTagsPlaceholderSelect": "Benutzer-Tags auswählen",
         "rolesLabel": "Rollen",
@@ -1099,12 +1100,123 @@
         "createdBeforeLabel": "Erstellt vor",
         "createdBeforePlaceholder": "Enddatum",
         "estimateCount": "Anzahl schätzen",
-        "estimatedRecipients": "~{count, plural, one {# Empfänger} other {# Empfänger}}",
-        "allUsersHelp": "Richtet sich an alle Benutzer. Die Newsletter-Berechtigung wird pro Kampagne gewählt."
+        "estimatedRecipients": "~{count, plural, one {# passendes Mitglied} other {# passende Mitglieder}}",
+        "allUsersHelp": "Wählt alle Mitglieder aus. Jede Kampagne legt fest, ob nur Newsletter-Abonnenten sie erhalten."
       },
       "types": {
         "usersByFilter": "Benutzer nach Filter",
         "allUsers": "Alle Benutzer"
+      }
+    },
+    "oauthApps": {
+      "title": "OAuth-Apps",
+      "description": "Apps, die Personen mit ihrem {siteName}-Konto anmelden, und KI-Tools, die mit den Bearbeitungswerkzeugen der Website verbunden sind.",
+      "create": "Neue App",
+      "createTitle": "Neue Anmelde-App",
+      "createSubmit": "App erstellen",
+      "untitled": "Unbenannte App",
+      "createdAt": "Registriert am {date}",
+      "loadFailed": "OAuth-Apps konnten nicht geladen werden.",
+      "openApp": "{name} öffnen",
+      "openConnection": "{name} öffnen",
+      "connectionActions": "Aktionen für {name}",
+      "copyClientId": "Client-ID kopieren",
+      "copySecret": "Secret kopieren",
+      "rotateSecret": "Neues Secret ausstellen",
+      "rotateTitle": "Neues Client-Secret ausstellen?",
+      "rotateConfirm": "Das aktuelle Secret funktioniert sofort nicht mehr. Aktualisiere die App-Konfiguration umgehend mit dem neuen Secret.",
+      "delete": "App löschen",
+      "deleteTitle": "Diese App löschen?",
+      "deleteConfirm": "{name} kann niemanden mehr anmelden, und ihre Tokens funktionieren nicht mehr.",
+      "deleted": "{name} gelöscht",
+      "saved": "App gespeichert",
+      "disconnect": "Trennen",
+      "disconnectTitle": "Dieses KI-Tool trennen?",
+      "disconnectConfirm": "{name} verliert sofort den Zugriff. Es kann sich erst wieder verbinden, wenn ein Mitglied es erneut genehmigt.",
+      "disconnected": "{name} getrennt",
+      "secretTitle": "Client-Secret",
+      "secretWarning": "Kopiere das Secret jetzt. Es wird nur einmal angezeigt; stelle ein neues aus, wenn es verloren geht.",
+      "apps": {
+        "title": "Anmelde-Apps",
+        "description": "Hier registrierte Apps melden Personen mit ihrem {siteName}-Konto an.",
+        "empty": "Noch keine Anmelde-Apps."
+      },
+      "connections": {
+        "title": "Verbundene KI-Tools",
+        "description": "Tools, die Mitglieder mit den Bearbeitungswerkzeugen der Website verbunden haben. Jedes Tool hat sich selbst registriert.",
+        "empty": "Keine KI-Tools verbunden.",
+        "generatedId": "Mit einer generierten ID registriert",
+        "active": "Verbunden",
+        "stale": "Alte Adresse",
+        "staleWarning": "Diese Verbindung verweist noch auf eine Adresse, die die Website nicht mehr bereitstellt, und kann daher nicht verwendet werden. Trenne sie, um aufzuräumen.",
+        "detailDescription": "Dieses Tool hat sich selbst registriert, daher können seine Einstellungen hier nicht bearbeitet werden."
+      },
+      "sections": {
+        "basics": "Grundlagen",
+        "signIn": "Anmeldung",
+        "tokens": "Tokens",
+        "manage": "Verwalten",
+        "connection": "Verbindung"
+      },
+      "fields": {
+        "clientId": "Client-ID",
+        "clientSecret": "Client-Secret",
+        "redirectUris": "Weiterleitungs-URIs",
+        "redirectHosts": "Leitet weiter an",
+        "postLogoutRedirectUris": "Weiterleitungs-URIs nach Abmeldung",
+        "scopes": "Geteilte Profildaten",
+        "authMethod": "Client-Authentifizierung",
+        "accessTokenLifespan": "Gültigkeit des Zugriffstokens",
+        "idTokenLifespan": "Gültigkeit des ID-Tokens",
+        "publisher": "Veröffentlicht von",
+        "resource": "Token-Ziel",
+        "signInAccess": "Wer sich anmelden kann"
+      },
+      "scopes": {
+        "openid": "Konto-ID (immer geteilt)",
+        "email": "E-Mail-Adresse",
+        "profile": "Spitzname"
+      },
+      "authMethods": {
+        "client_secret_basic": "Client-Secret (HTTP Basic)",
+        "client_secret_post": "Client-Secret (Formular-Body)",
+        "private_key_jwt": "Signierter Schlüssel (private_key_jwt)",
+        "none": "Keine: öffentliche App mit PKCE"
+      },
+      "lifespans": {
+        "5m": "5 Minuten",
+        "15m": "15 Minuten",
+        "1h": "1 Stunde"
+      },
+      "placeholders": {
+        "clientId": "z. B. team-dashboard",
+        "redirectUri": "https://…/callback"
+      },
+      "help": {
+        "name": "Wird Admins in dieser Liste angezeigt.",
+        "clientIdCreate": "Leer lassen, um eine zu generieren. Sie kann später nicht geändert werden.",
+        "clientIdFixed": "Ist in der Konfiguration der App hinterlegt und kann nicht geändert werden.",
+        "signIn": "Anmelde-Apps erhalten kein Refresh-Token, daher wird der Zugriff bei jeder Anmeldung geprüft. Ein Mitglied, das die Voraussetzungen nicht mehr erfüllt, verliert den Zugriff, wenn seine Tokens ablaufen.",
+        "redirectUris": "Exakte HTTPS-Adressen, zu denen die App nach der Anmeldung zurückkehrt. Drücke nach jeder Adresse die Eingabetaste.",
+        "postLogoutRedirectUris": "Optionale Adressen, zu denen die App nach der Abmeldung zurückkehren darf.",
+        "scopes": "Profildaten, die die App zusätzlich zur Konto-ID lesen darf.",
+        "tokens": "Kürzere Gültigkeiten beenden den Zugriff früher, nachdem ein Mitglied die Voraussetzungen nicht mehr erfüllt.",
+        "authMethodSecret": "Die App bewahrt ein Client-Secret auf ihrem Server auf.",
+        "authMethodPublic": "Für Apps, die kein Secret aufbewahren können, etwa Browser- oder Desktop-Apps.",
+        "manage": "Ein neues Secret oder eine gelöschte App wirkt sofort.",
+        "disconnect": "Das Trennen entfernt die Registrierung des Tools und beendet seinen Zugriff für alle Mitglieder."
+      },
+      "access": {
+        "none": "Niemand (Anmeldung pausiert)",
+        "admins": "Nur Admins",
+        "members": "Alle Mitglieder",
+        "memberCriteria": "Mitgliederkriterien"
+      },
+      "accessHelp": {
+        "none": "Die App bleibt registriert, lehnt aber jede Anmeldung ab.",
+        "admins": "Nur aktive Admins können sich anmelden.",
+        "members": "Jedes aktive Mitglied kann sich anmelden.",
+        "memberCriteria": "Mitglieder, die den ausgewählten Mitgliederkriterien entsprechen, können sich anmelden. Sie werden genauso geprüft wie bei eingeschränkten Downloads."
       }
     },
     "series": {
@@ -2233,13 +2345,13 @@
       "none": "Kein Layout"
     },
     "target": {
-      "criteriaLabel": "Zielgruppe",
-      "criteriaPlaceholder": "Zielgruppe auswählen",
+      "criteriaLabel": "Empfänger",
+      "criteriaPlaceholder": "Mitgliederkriterien auswählen",
       "all": "Alle Benutzer",
-      "unavailableCriteria": "Archivierte oder nicht verfügbare Zielgruppe",
-      "unavailableCriteriaDescription": "Diese Kampagne richtet sich an eine archivierte oder nicht verfügbare Zielgruppe. Wählen Sie vor Planung oder Versand eine aktive Zielgruppe.",
-      "criteriaRequired": "Wählen Sie vor Planung oder Versand eine aktive Zielgruppe.",
-      "criteriaLoadError": "Aktive Zielgruppen konnten nicht geladen werden. Versuchen Sie es vor Planung oder Versand erneut."
+      "unavailableCriteria": "Archivierte oder nicht verfügbare Mitgliederkriterien",
+      "unavailableCriteriaDescription": "Diese Kampagne verwendet archivierte oder nicht verfügbare Mitgliederkriterien. Wähle vor dem Planen oder Senden aktive Mitgliederkriterien aus.",
+      "criteriaRequired": "Wähle vor dem Planen oder Senden aktive Mitgliederkriterien aus.",
+      "criteriaLoadError": "Aktive Mitgliederkriterien konnten nicht geladen werden. Versuche es vor dem Planen oder Senden erneut."
     },
     "fields": {
       "recipientScope": "Empfänger",
@@ -2255,7 +2367,7 @@
       "description": "Geben Sie eine E-Mail-Adresse ein, um diese Kampagne testweise zu senden."
     },
     "sendModal": {
-      "warning": "Dies sendet die Kampagne an das Zielgruppensegment {criteria}. Diese Aktion kann nicht rückgängig gemacht werden.",
+      "warning": "Die Kampagne wird an Mitglieder gesendet, die {criteria} entsprechen. Diese Aktion kann nicht rückgängig gemacht werden.",
       "subject": "Betreff: {subject}",
       "allMatchingUsersWarning": "Bezieht auch Benutzer ein, die den Newsletter abbestellt haben."
     },
@@ -2264,7 +2376,7 @@
       "dateLabel": "Geplantes Datum und Uhrzeit",
       "previousMonth": "Vorheriger Monat",
       "nextMonth": "Nächster Monat",
-      "criteria": "Zielgruppe: {criteria}",
+      "criteria": "Empfänger: {criteria}",
       "allMatchingUsersWarning": "Bezieht auch Benutzer ein, die den Newsletter abbestellt haben."
     },
     "notifications": {
@@ -5319,13 +5431,13 @@
           "description": "Alle angemeldeten Benutzer können diese Datei herunterladen."
         },
         "restricted": {
-          "label": "Zielgruppen",
-          "description": "Nur Benutzer in den ausgewählten Zielgruppen können diese Datei herunterladen."
+          "label": "Mitgliederkriterien",
+          "description": "Nur Mitglieder, die den ausgewählten Mitgliederkriterien entsprechen, können diese Datei herunterladen."
         }
       },
-      "criteriaLoadError": "Die Richtlinie wurde geladen, die Zielgruppen jedoch nicht.",
-      "criteriaEmpty": "Es sind keine Zielgruppensegmente verfügbar.",
-      "restrictedWithoutCriteria": "Dieser eingeschränkten Richtlinie ist keine Zielgruppe zugewiesen. Downloads werden für alle verweigert, bis Sie mindestens eine Zielgruppe auswählen.",
+      "criteriaLoadError": "Die Richtlinie wurde geladen, aber die Mitgliederkriterien konnten nicht geladen werden.",
+      "criteriaEmpty": "Keine Mitgliederkriterien verfügbar.",
+      "restrictedWithoutCriteria": "Diese eingeschränkte Richtlinie hat keine Mitgliederkriterien. Downloads sind für alle gesperrt, bis du mindestens eines auswählst.",
       "additionalSelected": "{count} weitere ausgewählt",
       "loadError": "Der Download-Zugriff konnte nicht geladen werden.",
       "saveError": "Der Download-Zugriff konnte nicht gespeichert werden.",

@@ -257,7 +257,7 @@
       "clients": "Clientes",
       "campaign": "Campaña",
       "campaigns": "Campañas",
-      "memberCriteria": "Segmento de audiencia",
+      "memberCriteria": "Criterios de miembros",
       "user": "Usuario",
       "member": "Miembro",
       "users": "Usuarios",
@@ -502,7 +502,8 @@
       "system": "Sistema"
     },
     "items": {
-      "mailSettings": "Configuración de correo"
+      "mailSettings": "Configuración de correo",
+      "oauthApps": "Aplicaciones OAuth"
     }
   },
   "adminList": {
@@ -613,25 +614,25 @@
       }
     },
     "memberCriteria": {
-      "description": "Cree segmentos de audiencia reutilizables para dirigir campañas a grupos específicos.",
-      "searchPlaceholder": "Buscar segmentos...",
-      "empty": "No se encontraron segmentos. Cree uno para dirigirse a audiencias específicas.",
-      "createTitle": "Crear segmento",
-      "editTitle": "Editar segmento",
-      "namePlaceholder": "Nombre del segmento",
-      "typePlaceholder": "Seleccionar tipo de segmento",
-      "loading": "Cargando segmento...",
+      "description": "Crea criterios de miembros reutilizables que seleccionan miembros para campañas y descargas restringidas.",
+      "searchPlaceholder": "Buscar criterios de miembros...",
+      "empty": "Todavía no hay criterios de miembros. Crea uno para seleccionar miembros concretos.",
+      "createTitle": "Crear criterios de miembros",
+      "editTitle": "Editar criterios de miembros",
+      "namePlaceholder": "Nombre de los criterios de miembros",
+      "typePlaceholder": "Selecciona un tipo",
+      "loading": "Cargando criterios de miembros...",
       "includeArchived": "Incluir archivado",
       "archive": "Archivo",
-      "archiveTitle": "Archivar audiencia",
+      "archiveTitle": "Archivar criterios de miembros",
       "archiveConfirm": "¿Archivar {name}? {campaigns} relaciones de campaña y {files} políticas de archivos están separadas. {runs} ejecuciones de entrega mantienen su historial inmutable.",
       "restore": "Restaurar",
-      "restoreTitle": "Restaurar audiencia",
+      "restoreTitle": "Restaurar criterios de miembros",
       "restoreConfirm": "¿Restaurar {name}? Los programas de campañas anteriores y las políticas de archivos no se restauran automáticamente.",
-      "created": "Segmento creado",
-      "updated": "Segmento actualizado",
-      "archived": "Audiencia archivada",
-      "restored": "Audiencia restaurada",
+      "created": "Criterios de miembros creados",
+      "updated": "Criterios de miembros actualizados",
+      "archived": "Criterios de miembros archivados",
+      "restored": "Criterios de miembros restaurados",
       "config": {
         "userTagsPlaceholderSelect": "Seleccionar etiquetas de usuario",
         "rolesLabel": "Roles",
@@ -640,12 +641,123 @@
         "createdBeforeLabel": "Creado antes",
         "createdBeforePlaceholder": "Fecha de finalización",
         "estimateCount": "Recuento estimado",
-        "estimatedRecipients": "~{count, plural, one {# destinatario} many {# destinatarios} other {# destinatarios}}",
-        "allUsersHelp": "Se dirige a todos los usuarios. La elegibilidad para el boletín la elige cada campaña."
+        "estimatedRecipients": "~{count, plural, one {# miembro coincidente} many {# miembros coincidentes} other {# miembros coincidentes}}",
+        "allUsersHelp": "Selecciona a todos los miembros. Cada campaña decide si solo la reciben los suscriptores del boletín."
       },
       "types": {
         "usersByFilter": "Usuarios por filtro",
         "allUsers": "Todos los usuarios"
+      }
+    },
+    "oauthApps": {
+      "title": "Aplicaciones OAuth",
+      "description": "Aplicaciones que inician sesión con la cuenta de {siteName} y herramientas de IA conectadas a las herramientas de edición del sitio.",
+      "create": "Nueva aplicación",
+      "createTitle": "Nueva aplicación de inicio de sesión",
+      "createSubmit": "Crear aplicación",
+      "untitled": "Aplicación sin nombre",
+      "createdAt": "Registrada el {date}",
+      "loadFailed": "No se pudieron cargar las aplicaciones OAuth.",
+      "openApp": "Abrir {name}",
+      "openConnection": "Abrir {name}",
+      "connectionActions": "Acciones de {name}",
+      "copyClientId": "Copiar ID de cliente",
+      "copySecret": "Copiar secreto",
+      "rotateSecret": "Emitir nuevo secreto",
+      "rotateTitle": "¿Emitir un nuevo secreto de cliente?",
+      "rotateConfirm": "El secreto actual deja de funcionar de inmediato. Actualiza la configuración de la aplicación con el nuevo secreto cuanto antes.",
+      "delete": "Eliminar aplicación",
+      "deleteTitle": "¿Eliminar esta aplicación?",
+      "deleteConfirm": "{name} ya no podrá iniciar la sesión de nadie y sus tokens dejan de funcionar.",
+      "deleted": "{name} eliminada",
+      "saved": "Aplicación guardada",
+      "disconnect": "Desconectar",
+      "disconnectTitle": "¿Desconectar esta herramienta de IA?",
+      "disconnectConfirm": "{name} pierde el acceso de inmediato. Solo podrá volver a conectarse cuando un miembro la apruebe de nuevo.",
+      "disconnected": "{name} desconectada",
+      "secretTitle": "Secreto de cliente",
+      "secretWarning": "Copia el secreto ahora. Solo se muestra una vez; si lo pierdes, emite uno nuevo.",
+      "apps": {
+        "title": "Aplicaciones de inicio de sesión",
+        "description": "Las aplicaciones registradas aquí inician sesión con la cuenta de {siteName}.",
+        "empty": "Todavía no hay aplicaciones de inicio de sesión."
+      },
+      "connections": {
+        "title": "Herramientas de IA conectadas",
+        "description": "Herramientas que los miembros conectaron a las herramientas de edición del sitio. Cada herramienta se registró por sí misma.",
+        "empty": "No hay herramientas de IA conectadas.",
+        "generatedId": "Registrada con un ID generado",
+        "active": "Conectada",
+        "stale": "Dirección antigua",
+        "staleWarning": "Esta conexión todavía apunta a una dirección que el sitio ya no ofrece, así que no se puede usar. Desconéctala para limpiarla.",
+        "detailDescription": "Esta herramienta se registró por sí misma, así que su configuración no se puede editar aquí."
+      },
+      "sections": {
+        "basics": "Datos básicos",
+        "signIn": "Inicio de sesión",
+        "tokens": "Tokens",
+        "manage": "Gestión",
+        "connection": "Conexión"
+      },
+      "fields": {
+        "clientId": "ID de cliente",
+        "clientSecret": "Secreto de cliente",
+        "redirectUris": "URI de redirección",
+        "redirectHosts": "Redirige a",
+        "postLogoutRedirectUris": "URI de redirección tras cerrar sesión",
+        "scopes": "Datos de perfil compartidos",
+        "authMethod": "Autenticación del cliente",
+        "accessTokenLifespan": "Duración del token de acceso",
+        "idTokenLifespan": "Duración del token de ID",
+        "publisher": "Publicada por",
+        "resource": "Destino del token",
+        "signInAccess": "Quién puede iniciar sesión"
+      },
+      "scopes": {
+        "openid": "ID de cuenta (siempre se comparte)",
+        "email": "Correo electrónico",
+        "profile": "Apodo"
+      },
+      "authMethods": {
+        "client_secret_basic": "Secreto de cliente (HTTP Basic)",
+        "client_secret_post": "Secreto de cliente (cuerpo del formulario)",
+        "private_key_jwt": "Clave firmada (private_key_jwt)",
+        "none": "Ninguna: aplicación pública con PKCE"
+      },
+      "lifespans": {
+        "5m": "5 minutos",
+        "15m": "15 minutos",
+        "1h": "1 hora"
+      },
+      "placeholders": {
+        "clientId": "p. ej. team-dashboard",
+        "redirectUri": "https://…/callback"
+      },
+      "help": {
+        "name": "Se muestra a los administradores en esta lista.",
+        "clientIdCreate": "Déjalo vacío para generar uno. No se puede cambiar después.",
+        "clientIdFixed": "Está en la configuración de la aplicación. No se puede cambiar.",
+        "signIn": "Las aplicaciones de inicio de sesión no reciben token de actualización, así que el acceso se comprueba en cada inicio de sesión. Un miembro que deja de cumplir los requisitos pierde el acceso cuando caducan sus tokens.",
+        "redirectUris": "Direcciones HTTPS exactas a las que vuelve la aplicación tras iniciar sesión. Presiona Enter después de cada una.",
+        "postLogoutRedirectUris": "Direcciones opcionales a las que la aplicación puede volver tras cerrar sesión.",
+        "scopes": "Datos de perfil que la aplicación puede leer además del ID de cuenta.",
+        "tokens": "Una duración más corta termina el acceso antes cuando un miembro deja de cumplir los requisitos.",
+        "authMethodSecret": "La aplicación guarda un secreto de cliente en su servidor.",
+        "authMethodPublic": "Para aplicaciones que no pueden guardar un secreto, como las de navegador o de escritorio.",
+        "manage": "Un nuevo secreto o una aplicación eliminada se aplican de inmediato.",
+        "disconnect": "Al desconectar se elimina el registro de la herramienta y termina su acceso para todos los miembros."
+      },
+      "access": {
+        "none": "Nadie (inicio de sesión en pausa)",
+        "admins": "Solo administradores",
+        "members": "Todos los miembros",
+        "memberCriteria": "Criterios de miembros"
+      },
+      "accessHelp": {
+        "none": "Mantiene la aplicación registrada pero rechaza todos los inicios de sesión.",
+        "admins": "Solo los administradores activos pueden iniciar sesión.",
+        "members": "Cualquier miembro activo puede iniciar sesión.",
+        "memberCriteria": "Los miembros que cumplen los criterios de miembros seleccionados pueden iniciar sesión. Se evalúan igual que en las descargas restringidas."
       }
     },
     "series": {
@@ -2698,13 +2810,13 @@
       "none": "Sin diseño"
     },
     "target": {
-      "criteriaLabel": "Público objetivo",
-      "criteriaPlaceholder": "Seleccione una audiencia",
+      "criteriaLabel": "Destinatarios",
+      "criteriaPlaceholder": "Selecciona criterios de miembros",
       "all": "Todos los usuarios",
-      "unavailableCriteria": "Audiencia archivada o no disponible",
-      "unavailableCriteriaDescription": "Esta campaña se dirige a una audiencia archivada o no disponible. Seleccione una audiencia activa antes de programar o enviar.",
-      "criteriaRequired": "Seleccione una audiencia activa antes de programar o enviar.",
-      "criteriaLoadError": "No se pudieron cargar las audiencias activas. Inténtelo nuevamente antes de programar o enviar."
+      "unavailableCriteria": "Criterios de miembros archivados o no disponibles",
+      "unavailableCriteriaDescription": "Esta campaña usa criterios de miembros archivados o no disponibles. Selecciona criterios de miembros activos antes de programar o enviar.",
+      "criteriaRequired": "Selecciona criterios de miembros activos antes de programar o enviar.",
+      "criteriaLoadError": "No se pudieron cargar los criterios de miembros activos. Vuelve a intentarlo antes de programar o enviar."
     },
     "fields": {
       "recipientScope": "Destinatarios",
@@ -2720,7 +2832,7 @@
       "description": "Ingrese una dirección de correo electrónico para enviar una prueba de esta campaña."
     },
     "sendModal": {
-      "warning": "Esto enviará la campaña al segmento de audiencia {criteria}. Esta acción no se puede deshacer.",
+      "warning": "La campaña se enviará a los miembros que cumplan {criteria}. Esta acción no se puede deshacer.",
       "subject": "Asunto: {subject}",
       "allMatchingUsersWarning": "Incluye usuarios coincidentes que se han dado de baja de los boletines."
     },
@@ -2729,7 +2841,7 @@
       "dateLabel": "Fecha y hora previstas",
       "previousMonth": "Mes anterior",
       "nextMonth": "Mes próximo",
-      "criteria": "Audiencia: {criteria}",
+      "criteria": "Destinatarios: {criteria}",
       "allMatchingUsersWarning": "Incluye usuarios coincidentes que se han dado de baja de los boletines."
     },
     "notifications": {
@@ -5319,13 +5431,13 @@
           "description": "Cualquier usuario que haya iniciado sesión puede descargar este archivo."
         },
         "restricted": {
-          "label": "Audiencias",
-          "description": "Solo los usuarios de las audiencias seleccionadas pueden descargar este archivo."
+          "label": "Criterios de miembros",
+          "description": "Solo los miembros que cumplan los criterios de miembros seleccionados pueden descargar este archivo."
         }
       },
-      "criteriaLoadError": "La política se cargó, pero no se pudieron cargar las audiencias.",
-      "criteriaEmpty": "No hay segmentos de audiencia disponibles.",
-      "restrictedWithoutCriteria": "Esta política restringida no tiene audiencia. Las descargas se niegan a todos hasta que seleccione al menos una audiencia.",
+      "criteriaLoadError": "La política se cargó, pero no se pudieron cargar los criterios de miembros.",
+      "criteriaEmpty": "No hay criterios de miembros disponibles.",
+      "restrictedWithoutCriteria": "Esta política restringida no tiene criterios de miembros. Las descargas se deniegan a todos hasta que selecciones al menos uno.",
       "additionalSelected": "{count} más seleccionados",
       "loadError": "No se pudo cargar el acceso de descarga.",
       "saveError": "No se pudo guardar el acceso de descarga.",
