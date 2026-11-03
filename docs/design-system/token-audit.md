@@ -12,7 +12,7 @@ This report is generated from production source by `node scripts/design-system/c
 - 0 existing literal CSS spacing/typography occurrences covered by the migration baseline.
 - 0 existing custom-property declarations/inline assignments outside central files (private `--_*` implementation variables are permitted).
 - 175 literal CSS dimension occurrences in spacing, typography and geometry properties; 67 distinct values. These are audit findings, not blanket errors: canvas dimensions, geometry and responsive layouts require context.
-- 782 CSS custom-property declarations, 305 distinct names, 144 names declared more than once. Theme/state/media overrides are expected; equal values alone do not establish semantic duplication.
+- 787 CSS custom-property declarations, 306 distinct names, 145 names declared more than once. Theme/state/media overrides are expected; equal values alone do not establish semantic duplication.
 - 0 findings match the reviewed migration baseline; 0 new violations; 0 obsolete baseline keys eligible for removal.
 
 ## Enforcement contract
@@ -109,6 +109,7 @@ Authored typography exceptions (artwork, not interface roles):
 | `--_input-font`                      |            6 | `components/core/Input/Input.module.css`                                                               |
 | `--_switch-travel`                   |            2 | `components/core/Input/Input.module.css`                                                               |
 | `--_pin-length`                      |            3 | `components/core/Input/Input.module.css`                                                               |
+| `--_loader-min-block-size`           |            5 | `components/core/LoadingSurface/PageLoaderView.module.css`                                             |
 | `--_surface-inset`                   |            7 | `components/core/MediaControls/MediaControls.module.css`, `components/core/Section/Surface.module.css` |
 | `--_toast-ink`                       |            5 | `components/core/Notification/Notification.module.css`                                                 |
 | `--_overlay-inset-top`               |            2 | `components/core/Overlay.module.css`                                                                   |

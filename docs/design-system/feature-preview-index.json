@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceManifestHash": "9eeba3ad28b35ac649ea107268131a01c245554750a2d003f44decd16dd375ce",
+  "sourceManifestHash": "d74c3f3d150a4f058b016149284b41cf136441b04470cadb4585456dab0eb404",
   "methodology": "All inventoried Feature component candidates. Direct value imports, literal lazy imports and transitive source relationships through production owners/local adapters are indexed separately. A dependency can be unused or render conditionally; neither relationship proves rendered states, route parity or design compliance. Empty JSX records include runtime/lazy/controller boundaries and must be inspected before treating them as visual gaps.",
   "counts": { "domains": 54, "componentFiles": 781, "jsxWithoutStoryRelationship": 43 },
   "domains": [
@@ -6235,12 +6235,6 @@
           "relatedStories": ["Feature/Page/Embed", "Feature/Page/Tool Startup", "Pages/Public/Documents"]
         },
         {
-          "file": "features/page/blocks/QueryLoadingSurface.tsx",
-          "hasJsx": true,
-          "directStories": [],
-          "relatedStories": ["Pages/Editors/Page"]
-        },
-        {
           "file": "features/page/blocks/TableLoadingFallback.tsx",
           "hasJsx": true,
           "directStories": ["Feature/Page/Block Loading"],
@@ -6906,26 +6900,11 @@
           "hasJsx": true,
           "directStories": ["Feature/Page/Block Loading"],
           "relatedStories": [
-            "Pages/Public/Entities",
-            "Feature/Editor/Snapshot Handoff",
-            "Feature/Editor/File Insertion",
-            "Feature/Editor/Executables",
-            "Feature/Editor/Tiptap Playground",
-            "Feature/Editor/Public Block Comparison",
-            "Feature/Editor/Menus",
-            "Feature/Editor/Site Variables",
             "Feature/Page/Block Loading",
             "Feature/Page/Embed",
             "Feature/Page/Tool Startup",
-            "Pages/Legal/Public Document",
-            "Pages/Admin/Legal Policies",
-            "Pages/Editors/Legal",
-            "Pages/Legal/History Detail",
             "Pages/Editors/Page",
-            "Pages/Editors/Post",
-            "Pages/Public/Catalog Entity Detail",
-            "Pages/Public/Documents",
-            "Pages/Public/Entity Detail"
+            "Pages/Public/Documents"
           ]
         },
         {
@@ -8083,7 +8062,6 @@
             "Feature/My/Local Backups",
             "Feature/My/Posts",
             "Feature/My/Passkey Settings",
-            "Feature/Page/Editor Settings",
             "Feature/Page/Editor Blocks",
             "Feature/Page/Block Loading",
             "Feature/Page/Collection Blocks",
@@ -8748,6 +8726,12 @@
         },
         {
           "file": "features/work/WorkEditor/WorkMetaForm.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": ["Pages/Editors/Work"]
+        },
+        {
+          "file": "features/work/WorkEditor/credits/CreditSkeletons.tsx",
           "hasJsx": true,
           "directStories": [],
           "relatedStories": ["Pages/Editors/Work"]

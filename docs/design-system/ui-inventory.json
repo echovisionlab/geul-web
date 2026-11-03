@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "9eeba3ad28b35ac649ea107268131a01c245554750a2d003f44decd16dd375ce",
+  "manifestHash": "d74c3f3d150a4f058b016149284b41cf136441b04470cadb4585456dab0eb404",
   "counts": {
     "sourceFiles": 3939,
     "productionSourceFiles": 2339,
@@ -10,7 +10,7 @@
     "coreFamilies": 57,
     "featureDomains": 54,
     "storyFiles": 284,
-    "storyVariants": 1630,
+    "storyVariants": 1631,
     "pageEntrypoints": 115,
     "layouts": 17
   },
@@ -2230,7 +2230,6 @@
     "features/page/blocks/ListViewShell.tsx",
     "features/page/blocks/MobileBlockTablePaginationScroll.test.tsx",
     "features/page/blocks/MobileBlockTablePaginationScroll.tsx",
-    "features/page/blocks/QueryLoadingSurface.tsx",
     "features/page/blocks/TableLoadingFallback.tsx",
     "features/page/blocks/artist-grid/Editor.tsx",
     "features/page/blocks/artist-grid/InfiniteList.tsx",
@@ -2883,6 +2882,7 @@
     "features/work/WorkEditor/WorkMetaForm.test.tsx",
     "features/work/WorkEditor/WorkMetaForm.tsx",
     "features/work/WorkEditor/WorkWaitingStates.stories.tsx",
+    "features/work/WorkEditor/credits/CreditSkeletons.tsx",
     "features/work/WorkEditor/credits/SortableCreditEditing.a11y.test.tsx",
     "features/work/WorkEditor/credits/SortableCreditGroupHeader.tsx",
     "features/work/WorkEditor/credits/SortableCreditRow.tsx",
@@ -6728,10 +6728,12 @@
         "features/page/PageView/blocks/GeneratedMathBlockView.tsx",
         "features/page/blocks/ListBlockSkeleton.tsx",
         "features/page/blocks/author-list/Editor.tsx",
+        "features/page/blocks/author-list/Skeleton.tsx",
         "features/page/blocks/author-list/ViewClientRuntime.tsx",
         "features/page/blocks/immersive-scene/MeshOptimizationPanel.tsx",
         "features/page/blocks/immersive-scene/SceneRenderer.tsx",
         "features/page/blocks/immersive-scene/Workspace.tsx",
+        "features/page/blocks/post-map/Skeleton.tsx",
         "features/participants/ParticipantRow.tsx",
         "features/place/CreatePlaceModal.tsx",
         "features/place/PlaceDetailForm.tsx",
@@ -6759,7 +6761,9 @@
         "features/user/UserShell/UserShell.tsx",
         "features/user/ui/UserInlineLinks/UserInlineLinksView.tsx",
         "features/user/ui/UserProfile/UserProfileView.tsx",
+        "features/work/WorkEditor/WorkClientsSection.tsx",
         "features/work/WorkEditor/WorkCreditsSection.tsx",
+        "features/work/WorkEditor/credits/CreditSkeletons.tsx",
         "features/work/WorkEditor/credits/SortableCreditRow.tsx"
       ],
       "catalogAdapters": [".storybook/DesignSystemDocs.tsx", "stories/foundations/FoundationDocs.tsx"],
@@ -8619,7 +8623,7 @@
       ],
       "productionConsumers": ["features/application-error/ErrorPageView.tsx"],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": ["components/core/pending-command-controls.test.tsx"],
       "stories": ["components/core/ErrorPage/ErrorPageView.stories.tsx"],
       "composedJsx": [
         "Button",
@@ -9926,8 +9930,7 @@
       "catalogAdapters": [],
       "tests": [
         "components/core/ImageUpload/ImageUploadField.rejection.test.tsx",
-        "components/core/ImageUpload/ImageUploadField.test.tsx",
-        "components/core/pending-command-controls.test.tsx"
+        "components/core/ImageUpload/ImageUploadField.test.tsx"
       ],
       "stories": ["components/core/ImageUpload/ImageUpload.stories.tsx"],
       "composedJsx": [
@@ -11023,27 +11026,14 @@
         "components/core/Input/DateInputs.tsx",
         "components/core/Input/DateTimeInput.tsx",
         "components/core/Input/FileInput.tsx",
+        "components/core/Input/InputParts.tsx",
         "components/core/Input/MultiSelect.tsx",
         "components/core/Input/NativeSelect.tsx",
         "components/core/Input/PasswordInput.tsx",
         "components/core/Input/SearchComboboxView.tsx",
         "components/core/Input/Select.tsx",
         "components/core/Input/TagsInput.tsx",
-        "components/core/Input/ValidatingTextInput.tsx",
-        "features/artist/ArtistEditor/ArtistDetailEditor.tsx",
-        "features/artist/ArtistEditor/ArtistParentSelect.tsx",
-        "features/label/AdminLabelDetailClient.tsx",
-        "features/page/PageEditor/PageSectionPreinsertDialog.tsx",
-        "features/page/blocks/form/Editor.tsx",
-        "features/place/MapPlaceSelect.tsx",
-        "features/post/PostEditor/LocationSelector.tsx",
-        "features/post/PostEditor/SeriesSelector.tsx",
-        "features/program-event/ProgramEventEditor/ProgramEventEditor.tsx",
-        "features/release/ReleaseEditor/ReleaseArtistsSectionView.tsx",
-        "features/release/ReleaseEditor/ReleaseCreditsSection.tsx",
-        "features/release/ReleaseEditor/ReleaseLabelsSection.tsx",
-        "features/release/ReleaseEditor/ReleaseTagsSection.tsx",
-        "features/release/ReleaseEditor/TrackCreditsEditorSection.tsx"
+        "components/core/Input/ValidatingTextInput.tsx"
       ],
       "catalogAdapters": [],
       "tests": [],
@@ -11064,6 +11054,10 @@
         },
         {
           "name": "InputHelp",
+          "kind": "function"
+        },
+        {
+          "name": "InputLoadingStatus",
           "kind": "function"
         }
       ],
@@ -11099,7 +11093,7 @@
         "features/page/blocks/ListBlockEditorBase.stories.tsx",
         "features/page/blocks/embed/Embed.stories.tsx"
       ],
-      "composedJsx": ["FieldError", "InputSizeContext.Provider", "Label", "Text", "span"]
+      "composedJsx": ["FieldError", "InputSizeContext.Provider", "InputValidationGlyph", "Label", "Text", "span"]
     },
     {
       "file": "components/core/Input/MultiSelect.tsx",
@@ -11271,8 +11265,8 @@
         "InputClearGlyph",
         "InputHelp",
         "InputLabel",
+        "InputLoadingStatus",
         "InputOpenGlyph",
-        "InputValidationGlyph",
         "ListBox",
         "ListBoxItem",
         "MultiSelectInput",
@@ -12353,6 +12347,16 @@
               "type": "ReactNode"
             },
             {
+              "name": "isLoading",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
+              "name": "loadingLabel",
+              "optional": true,
+              "type": "string"
+            },
+            {
               "name": "searchValue",
               "optional": true,
               "type": "string"
@@ -12492,6 +12496,7 @@
         "InputClearGlyph",
         "InputHelp",
         "InputLabel",
+        "InputLoadingStatus",
         "InputOpenGlyph",
         "ListBox",
         "ListBoxItem",
@@ -13650,6 +13655,7 @@
         "features/page/blocks/TableLoadingFallback.tsx",
         "features/page/blocks/artist-grid/ViewClientRuntime.tsx",
         "features/page/blocks/author-list/Editor.tsx",
+        "features/page/blocks/author-list/Skeleton.tsx",
         "features/page/blocks/author-list/View.tsx",
         "features/page/blocks/author-list/ViewClientRuntime.tsx",
         "features/page/blocks/client-marquee/Editor.tsx",
@@ -13673,6 +13679,7 @@
         "features/page/blocks/post-list/View.tsx",
         "features/page/blocks/post-list/ViewClientRuntime.tsx",
         "features/page/blocks/post-map/Editor.tsx",
+        "features/page/blocks/post-map/Skeleton.tsx",
         "features/page/blocks/post-table/Editor.tsx",
         "features/page/blocks/post-table/ViewServer.tsx",
         "features/page/blocks/post-table/columns.tsx",
@@ -13765,6 +13772,7 @@
         "features/work/WorkEditor/WorkCreditsSection.tsx",
         "features/work/WorkEditor/WorkEditor.tsx",
         "features/work/WorkEditor/WorkMetaForm.tsx",
+        "features/work/WorkEditor/credits/CreditSkeletons.tsx",
         "features/work/WorkEditor/credits/SortableCreditGroupHeader.tsx",
         "features/work/WorkEditor/credits/SortableCreditRow.tsx",
         "lib/providers/ClientMessagesProvider.tsx"
@@ -14034,14 +14042,9 @@
               "type": "PageLoaderViewContrast"
             },
             {
-              "name": "height",
+              "name": "extent",
               "optional": true,
-              "type": "string | number"
-            },
-            {
-              "name": "minHeight",
-              "optional": true,
-              "type": "string | number"
+              "type": "PageLoaderViewExtent"
             },
             {
               "name": "placement",
@@ -14088,6 +14091,10 @@
         {
           "name": "PageLoaderViewContrast",
           "type": "'standard' | 'inverse'"
+        },
+        {
+          "name": "PageLoaderViewExtent",
+          "type": "'container' | 'compact' | 'section' | 'tall' | 'viewport'"
         }
       ],
       "productionConsumers": ["features/site/PageLoader/PageLoader.tsx", "lib/providers/ClientMessagesProvider.tsx"],
@@ -16901,8 +16908,10 @@
         "features/page/blocks/ListBlockSkeleton.tsx",
         "features/page/blocks/ListViewShell.tsx",
         "features/page/blocks/author-list/Editor.tsx",
+        "features/page/blocks/author-list/Skeleton.tsx",
         "features/page/blocks/author-list/ViewClientRuntime.tsx",
         "features/page/blocks/immersive-scene/MeshOptimizationPanel.tsx",
+        "features/page/blocks/post-map/Skeleton.tsx",
         "features/place/PlaceEditor.tsx",
         "features/policy/LegalOgImagePanel.tsx",
         "features/policy/LegalPolicyEditor.tsx",
@@ -29501,7 +29510,6 @@
         "EditorSessionExpiredDialog",
         "EntityTranslationsPanel",
         "IconUsers",
-        "InputValidationGlyph",
         "MultiSelect",
         "OgImagePreview",
         "PageLoader",
@@ -29760,7 +29768,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": ["InputValidationGlyph", "Select"]
+      "composedJsx": ["Select"]
     },
     {
       "file": "features/artist/ArtistEditor/ArtistParticipantsDialog.tsx",
@@ -33444,7 +33452,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": ["DsLayoutStack", "TableFocusRecovery"]
+      "composedJsx": ["DsLayoutStack", "ServerDataTablePendingProvider", "TableFocusRecovery"]
     },
     {
       "file": "features/data-table/ServerDataTable/ServerDataTableContent.tsx",
@@ -33585,7 +33593,7 @@
       "catalogAdapters": [],
       "tests": ["features/data-table/ServerDataTable/ServerDataTableMultiFilter.test.tsx"],
       "stories": ["features/data-table/ServerDataTable/ServerDataTablePending.stories.tsx"],
-      "composedJsx": ["MultiFilterEditorView", "div"]
+      "composedJsx": ["MultiFilterEditorView"]
     },
     {
       "file": "features/data-table/ServerDataTable/ServerDataTableMultiSort.tsx",
@@ -33660,6 +33668,10 @@
         {
           "name": "ServerDataTableNavigationProvider",
           "kind": "function"
+        },
+        {
+          "name": "ServerDataTablePendingProvider",
+          "kind": "function"
         }
       ],
       "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
@@ -33689,10 +33701,27 @@
               "type": "() => void | Promise<void>"
             }
           ]
+        },
+        {
+          "name": "ServerTablePendingRegistry",
+          "extends": [],
+          "properties": [
+            {
+              "name": "pending",
+              "optional": false,
+              "type": "boolean"
+            },
+            {
+              "name": "register",
+              "optional": false,
+              "type": "() => () => void"
+            }
+          ]
         }
       ],
       "typeAliasEvidence": [],
       "productionConsumers": [
+        "features/data-table/ServerDataTable/ServerDataTable.tsx",
         "features/data-table/ServerDataTable/ServerDataTableContent.tsx",
         "features/data-table/ServerDataTable/ServerDataTableMultiFilterRuntime.tsx",
         "features/data-table/ServerDataTable/ServerDataTableMultiSortRuntime.tsx",
@@ -33702,7 +33731,13 @@
         "features/data-table/ServerDataTable/ServerDataTableSelectableSection.tsx"
       ],
       "catalogAdapters": [],
-      "tests": [],
+      "tests": [
+        "features/data-table/ServerDataTable/ServerDataTableContent.test.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableMultiFilter.test.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableMultiSort.test.tsx",
+        "features/data-table/ServerDataTable/ServerDataTablePaginationView.test.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableSelectableSection.test.tsx"
+      ],
       "stories": [
         "features/data-table/ServerDataTable/ServerDataTablePending.stories.tsx",
         "stories/pages/AdminCollections.stories.tsx",
@@ -33714,7 +33749,7 @@
         "stories/pages/Taxonomy.stories.tsx",
         "stories/pages/UserProfileFull.stories.tsx"
       ],
-      "composedJsx": ["NavigationContext.Provider"]
+      "composedJsx": ["NavigationContext.Provider", "PendingContext.Provider"]
     },
     {
       "file": "features/data-table/ServerDataTable/ServerDataTablePagination.tsx",
@@ -34105,8 +34140,7 @@
         "ServerDataTable.MultiSort",
         "ServerDataTable.Search",
         "ServerDataTable.Toolbar",
-        "TableRowMenu",
-        "span"
+        "TableRowMenu"
       ]
     },
     {
@@ -38705,7 +38739,6 @@
         "EditorMediaBlockFrame",
         "MapLibreMapEditor",
         "NodeViewWrapper",
-        "PageLoader",
         "PlacesManageModal",
         "QueryErrorAlert",
         "TextButton",
@@ -46866,7 +46899,6 @@
         "EditorSessionExpiredDialog",
         "EntityTranslationsPanel",
         "IconUsers",
-        "InputValidationGlyph",
         "LabelDescriptionEditor",
         "LabelEditorView",
         "LabelLogoUploader",
@@ -47865,6 +47897,11 @@
               "type": "( themeId: string | undefined, scheme: 'light' | 'dark', ) => Promise<{ readonly themeId: string; readonly scheme: 'light' | 'dark'; readonly settings: ThemeSettings; readonly variant: ThemeVariant; }>"
             },
             {
+              "name": "dataPending",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
               "name": "settingsPanel",
               "optional": true,
               "type": "{ collapsed?: boolean; hidden?: boolean; placement?: 'inline' | 'map-corner'; }"
@@ -48123,6 +48160,11 @@
               "name": "caption",
               "optional": true,
               "type": "ReactNode"
+            },
+            {
+              "name": "pending",
+              "optional": true,
+              "type": "boolean"
             }
           ]
         },
@@ -48184,6 +48226,11 @@
               "name": "onMapReady",
               "optional": true,
               "type": "(map: maplibregl.Map) => void"
+            },
+            {
+              "name": "pending",
+              "optional": false,
+              "type": "boolean"
             }
           ]
         }
@@ -54471,7 +54518,6 @@
         "DsLayoutStack",
         "DsText",
         "MultiSelect",
-        "PageLoader",
         "SaveButton",
         "Select",
         "SupportingText"
@@ -55116,15 +55162,7 @@
       "catalogAdapters": [],
       "tests": ["features/page/PageEditor/SectionList.test.tsx"],
       "stories": [],
-      "composedJsx": [
-        "Button",
-        "ContentModal",
-        "DialogActions",
-        "DsLayoutStack",
-        "InputValidationGlyph",
-        "Select",
-        "TextInput"
-      ]
+      "composedJsx": ["Button", "ContentModal", "DialogActions", "DsLayoutStack", "Select", "TextInput"]
     },
     {
       "file": "features/page/PageEditor/SectionContent.tsx",
@@ -57018,7 +57056,6 @@
       "productionConsumers": [
         "features/page/blocks/artist-grid/Skeleton.tsx",
         "features/page/blocks/artist-grid/View.tsx",
-        "features/page/blocks/author-list/Skeleton.tsx",
         "features/page/blocks/label-list/Skeleton.tsx",
         "features/page/blocks/label-list/View.tsx",
         "features/page/blocks/post-list/Skeleton.tsx",
@@ -57040,7 +57077,6 @@
         "LayoutInset",
         "LayoutStack",
         "ListCarousel",
-        "PageLoader",
         "SectionCard",
         "Skeleton",
         "div"
@@ -57284,48 +57320,6 @@
       "composedJsx": []
     },
     {
-      "file": "features/page/blocks/QueryLoadingSurface.tsx",
-      "owner": "Feature/page",
-      "exports": [
-        {
-          "name": "QueryLoadingSurface",
-          "kind": "function"
-        }
-      ],
-      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [
-        {
-          "name": "QueryLoadingSurfaceProps",
-          "extends": [],
-          "properties": [
-            {
-              "name": "queries",
-              "optional": false,
-              "type": "readonly { isLoading: boolean }[]"
-            }
-          ]
-        }
-      ],
-      "typeAliasEvidence": [],
-      "productionConsumers": [
-        "features/page/blocks/artist-grid/Editor.tsx",
-        "features/page/blocks/author-list/Editor.tsx",
-        "features/page/blocks/client-marquee/Editor.tsx",
-        "features/page/blocks/label-marquee/Editor.tsx",
-        "features/page/blocks/map/Editor.tsx",
-        "features/page/blocks/post-list/Editor.tsx",
-        "features/page/blocks/post-map/Editor.tsx",
-        "features/page/blocks/post-table/Editor.tsx",
-        "features/page/blocks/program-event-list/Editor.tsx",
-        "features/page/blocks/releases-gallery/Editor.tsx",
-        "features/page/blocks/work-map/Editor.tsx"
-      ],
-      "catalogAdapters": [],
-      "tests": [],
-      "stories": [],
-      "composedJsx": ["PageLoader"]
-    },
-    {
       "file": "features/page/blocks/TableLoadingFallback.tsx",
       "owner": "Feature/page",
       "exports": [
@@ -57415,7 +57409,6 @@
         "ListBlockEditorBase",
         "MultiSelect",
         "QueryErrorAlert",
-        "QueryLoadingSurface",
         "Switch"
       ]
     },
@@ -57695,8 +57688,8 @@
         "IconTrash",
         "IconUserPlus",
         "NumberInput",
+        "PageLoader",
         "QueryErrorAlert",
-        "QueryLoadingSurface",
         "SearchCombobox",
         "SegmentedControl",
         "Select",
@@ -57745,7 +57738,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": ["features/page/blocks/BlockLoading.stories.tsx"],
-      "composedJsx": ["ListBlockSkeleton"]
+      "composedJsx": ["DsLayoutGrid", "DsLayoutInline", "DsLayoutStack", "SectionCard", "Skeleton", "div"]
     },
     {
       "file": "features/page/blocks/author-list/View.tsx",
@@ -57946,8 +57939,8 @@
         "MarqueeCommonFields",
         "MarqueeEntityFields",
         "MarqueeView",
-        "QueryErrorAlert",
-        "QueryLoadingSurface"
+        "PageLoader",
+        "QueryErrorAlert"
       ]
     },
     {
@@ -58399,7 +58392,6 @@
         "FormSettingsForm",
         "FormView",
         "IconForms",
-        "InputValidationGlyph",
         "LabelBadge",
         "QueryErrorAlert",
         "Select",
@@ -59280,7 +59272,6 @@
         "LayoutInset",
         "Loader",
         "MeshOptimizationPanelSession",
-        "PageLoader",
         "SectionCard",
         "Slider",
         "strong"
@@ -60099,8 +60090,8 @@
         "MarqueeCommonFields",
         "MarqueeEntityFields",
         "MarqueeView",
-        "QueryErrorAlert",
-        "QueryLoadingSurface"
+        "PageLoader",
+        "QueryErrorAlert"
       ]
     },
     {
@@ -60238,7 +60229,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": ["MapViewEmbedded", "PageLoader", "QueryErrorAlert", "div"]
+      "composedJsx": ["MapViewEmbedded", "QueryErrorAlert", "div"]
     },
     {
       "file": "features/page/blocks/map/Editor.tsx",
@@ -60308,10 +60299,10 @@
         "MapPlaceSelect",
         "MapSettingsForm",
         "MapViewEmbedded",
+        "PageLoader",
         "PlaceListRow",
         "PlacesManageModal",
         "QueryErrorAlert",
-        "QueryLoadingSurface",
         "SupportingText",
         "Textarea",
         "div"
@@ -60340,7 +60331,7 @@
       "catalogAdapters": [],
       "tests": ["features/page/blocks/public-view-loading.test.tsx"],
       "stories": [],
-      "composedJsx": ["PostMapSkeleton", "RuntimeView"]
+      "composedJsx": ["RuntimeView"]
     },
     {
       "file": "features/page/blocks/map/ViewRuntime.tsx",
@@ -60464,6 +60455,11 @@
               "name": "selectorItems",
               "optional": false,
               "type": "MarqueeSelectorItem[]"
+            },
+            {
+              "name": "selectorLoading",
+              "optional": true,
+              "type": "boolean"
             },
             {
               "name": "extra",
@@ -60664,7 +60660,6 @@
         "PostListSettingsForm",
         "PostListView",
         "QueryErrorAlert",
-        "QueryLoadingSurface",
         "Select",
         "Switch"
       ]
@@ -61065,7 +61060,6 @@
         "PostMapSettingsForm",
         "PostMapView",
         "QueryErrorAlert",
-        "QueryLoadingSurface",
         "Select",
         "Switch"
       ]
@@ -61083,18 +61077,16 @@
       "propsEvidence": [],
       "typeAliasEvidence": [],
       "productionConsumers": [
-        "features/page/blocks/map/View.tsx",
         "features/page/blocks/post-map/View.tsx",
         "features/page/blocks/post-map/ViewClient.tsx",
         "features/page/blocks/post-map/ViewServer.tsx",
         "features/page/blocks/work-map/View.tsx",
-        "features/page/blocks/work-map/ViewClient.tsx",
         "features/page/blocks/work-map/ViewServer.tsx"
       ],
       "catalogAdapters": [],
       "tests": [],
       "stories": ["features/page/blocks/BlockLoading.stories.tsx"],
-      "composedJsx": ["PageLoader", "div"]
+      "composedJsx": ["DsLayoutInset", "DsLayoutStack", "LayoutGrid", "SectionCard", "Skeleton", "div"]
     },
     {
       "file": "features/page/blocks/post-map/View.tsx",
@@ -61267,7 +61259,6 @@
         "PostTableSettingsForm",
         "PostTableView",
         "QueryErrorAlert",
-        "QueryLoadingSurface",
         "Select"
       ]
     },
@@ -61453,7 +61444,6 @@
         "ProgramEventListSettingsForm",
         "ProgramEventListView",
         "QueryErrorAlert",
-        "QueryLoadingSurface",
         "Select"
       ]
     },
@@ -61745,7 +61735,6 @@
         "ListBlockEditorBase",
         "MultiSelect",
         "QueryErrorAlert",
-        "QueryLoadingSurface",
         "ReleaseListSettingsForm",
         "ReleaseListView",
         "Select",
@@ -62204,7 +62193,6 @@
         "MultiSelect",
         "NumberInput",
         "QueryErrorAlert",
-        "QueryLoadingSurface",
         "Select",
         "Switch",
         "WorkMapSettingsForm",
@@ -62287,7 +62275,7 @@
       "catalogAdapters": [],
       "tests": ["features/page/blocks/post-map/ViewClient.boundaries.test.tsx"],
       "stories": [],
-      "composedJsx": ["PostMapSkeleton", "RuntimeView"]
+      "composedJsx": ["RuntimeView"]
     },
     {
       "file": "features/page/blocks/work-map/ViewClientRuntime.tsx",
@@ -63086,7 +63074,6 @@
         "IconMapPin",
         "IconPlus",
         "IconSearch",
-        "InputValidationGlyph",
         "QueryErrorAlert",
         "Select",
         "div",
@@ -64881,16 +64868,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": [
-        "DsLayoutStack",
-        "DsText",
-        "IconMapPin",
-        "InputValidationGlyph",
-        "QueryErrorAlert",
-        "Select",
-        "div",
-        "strong"
-      ]
+      "composedJsx": ["DsLayoutStack", "DsText", "IconMapPin", "QueryErrorAlert", "Select", "div", "strong"]
     },
     {
       "file": "features/post/PostEditor/PostEditor.tsx",
@@ -65617,7 +65595,6 @@
         "IconButton",
         "IconChevronDown",
         "IconChevronUp",
-        "InputValidationGlyph",
         "LabelBadge",
         "QueryErrorAlert",
         "Select"
@@ -66137,7 +66114,15 @@
         "features/post/PostSpotlight/PostSpotlightRuntime.modal.test.tsx"
       ],
       "stories": [],
-      "composedJsx": ["Alert", "Button", "CommandPalette", "LayoutInset", "PageLoader", "Runtime", "SearchBoundary"]
+      "composedJsx": [
+        "Alert",
+        "Button",
+        "CommandPalette",
+        "CommandPaletteResults",
+        "LayoutInset",
+        "Runtime",
+        "SearchBoundary"
+      ]
     },
     {
       "file": "features/post/PostSpotlight/PostSpotlightLauncher.tsx",
@@ -67216,7 +67201,6 @@
         "EditorRuntimeProvider",
         "EditorSettingsSection",
         "EntityTranslationsPanel",
-        "InputValidationGlyph",
         "LocalizedRichTextFragmentEditor",
         "LocationSelector",
         "MapPlaceActionProvider",
@@ -67741,7 +67725,6 @@
         "IconGripVertical",
         "IconPlus",
         "IconX",
-        "InputValidationGlyph",
         "SectionCard",
         "SectionHeader",
         "Select",
@@ -67997,7 +67980,6 @@
         "IconPencil",
         "IconPlus",
         "IconX",
-        "InputValidationGlyph",
         "QueryErrorAlert",
         "SaveButton",
         "SectionCard",
@@ -68395,7 +68377,6 @@
         "IconPencil",
         "IconPlus",
         "IconX",
-        "InputValidationGlyph",
         "QueryErrorAlert",
         "SaveButton",
         "SectionCard",
@@ -68526,15 +68507,7 @@
       "catalogAdapters": [],
       "tests": [],
       "stories": [],
-      "composedJsx": [
-        "DsLayoutGrid",
-        "DsLayoutStack",
-        "InputValidationGlyph",
-        "MultiSelect",
-        "QueryErrorAlert",
-        "SectionCard",
-        "SectionHeader"
-      ]
+      "composedJsx": ["DsLayoutGrid", "DsLayoutStack", "MultiSelect", "QueryErrorAlert", "SectionCard", "SectionHeader"]
     },
     {
       "file": "features/release/ReleaseEditor/ReleaseTrackCreateView.tsx",
@@ -68980,7 +68953,6 @@
         "DsText",
         "IconButton",
         "IconX",
-        "InputValidationGlyph",
         "QueryErrorAlert",
         "SegmentedControl",
         "Select",
@@ -70867,14 +70839,9 @@
               "type": "PageLoaderViewContrast"
             },
             {
-              "name": "height",
+              "name": "extent",
               "optional": true,
-              "type": "string | number"
-            },
-            {
-              "name": "minHeight",
-              "optional": true,
-              "type": "string | number"
+              "type": "PageLoaderViewExtent"
             },
             {
               "name": "placement",
@@ -70941,7 +70908,6 @@
         "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
         "features/editor/tiptap/code-editor/MonacoSourceEditor.tsx",
         "features/editor/tiptap/emoji/TiptapEmojiPicker.tsx",
-        "features/editor/tiptap/map/TiptapMapNodeView.tsx",
         "features/file-manager/FileManagerView.tsx",
         "features/form/AdminFormLayoutClient.tsx",
         "features/form/AdminFormSubmissionsPage.tsx",
@@ -70966,30 +70932,28 @@
         "features/my/PasskeySettingsSection.tsx",
         "features/newsletter/UnsubscribeContent.tsx",
         "features/page/PageEditor/LazyPageEditor.tsx",
-        "features/page/PageEditor/PageAccessSettings.tsx",
         "features/page/PageEditor/PageEditor.tsx",
         "features/page/PageView/blocks/DefaultBlockView.tsx",
         "features/page/PageView/blocks/GeneratedRichTextBlockViewRuntime.tsx",
         "features/page/PageView/blocks/PublicRichTextBlockView.tsx",
-        "features/page/blocks/ListBlockSkeleton.tsx",
         "features/page/blocks/ListViewShell.tsx",
-        "features/page/blocks/QueryLoadingSurface.tsx",
         "features/page/blocks/TableLoadingFallback.tsx",
         "features/page/blocks/artist-grid/ViewClient.tsx",
+        "features/page/blocks/author-list/Editor.tsx",
         "features/page/blocks/author-list/ViewClient.tsx",
+        "features/page/blocks/client-marquee/Editor.tsx",
         "features/page/blocks/client-marquee/ViewServer.tsx",
         "features/page/blocks/embed/EmbedFrame.tsx",
         "features/page/blocks/embed/ToolModule.tsx",
         "features/page/blocks/form/View.tsx",
         "features/page/blocks/form/ViewClient.tsx",
-        "features/page/blocks/immersive-scene/MeshOptimizationPanel.tsx",
         "features/page/blocks/immersive-scene/SceneRenderer.tsx",
         "features/page/blocks/immersive-scene/View.tsx",
         "features/page/blocks/label-list/ViewClient.tsx",
+        "features/page/blocks/label-marquee/Editor.tsx",
         "features/page/blocks/label-marquee/ViewServer.tsx",
-        "features/page/blocks/map-features/ServerFeatureMapViewClient.tsx",
+        "features/page/blocks/map/Editor.tsx",
         "features/page/blocks/post-list/ViewClient.tsx",
-        "features/page/blocks/post-map/Skeleton.tsx",
         "features/page/blocks/program-event-list/ViewClient.tsx",
         "features/page/blocks/releases-gallery/ViewClient.tsx",
         "features/page/blocks/works-gallery/ViewClient.tsx",
@@ -71003,7 +70967,6 @@
         "features/post/PostEditor/LazyPostEditor.tsx",
         "features/post/PostEditor/PostEditorBody.tsx",
         "features/post/PostEditor/PostParticipantsDialog.tsx",
-        "features/post/PostSpotlight/PostSpotlight.tsx",
         "features/post/PostSpotlight/PostSpotlightRuntime.tsx",
         "features/program-event/ProgramEventEditor/LazyProgramEventEditor.tsx",
         "features/program-event/ProgramEventEditor/ProgramEventEditor.tsx",
@@ -75439,6 +75402,7 @@
         "IconGripVertical",
         "IconPlus",
         "IconX",
+        "Loader",
         "PageLoader",
         "QueryErrorAlert",
         "SearchCombobox",
@@ -75486,6 +75450,8 @@
       "composedJsx": [
         "Avatar",
         "Button",
+        "CreditGroupHeaderSkeleton",
+        "CreditSkeleton",
         "Divider",
         "DndContext",
         "DsLayoutInline",
@@ -75851,6 +75817,28 @@
         "TextInput",
         "fieldset"
       ]
+    },
+    {
+      "file": "features/work/WorkEditor/credits/CreditSkeletons.tsx",
+      "owner": "Feature/work",
+      "exports": [
+        {
+          "name": "CreditGroupHeaderSkeleton",
+          "kind": "function"
+        },
+        {
+          "name": "CreditSkeleton",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["features/work/WorkEditor/WorkCreditsSection.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["DsLayoutInline", "DsLayoutInset", "Skeleton"]
     },
     {
       "file": "features/work/WorkEditor/credits/SortableCreditGroupHeader.tsx",
@@ -78777,7 +78765,6 @@
         "features/page/blocks/ListCarouselRuntime.tsx",
         "features/page/blocks/ListViewShell.tsx",
         "features/page/blocks/MobileBlockTablePaginationScroll.tsx",
-        "features/page/blocks/QueryLoadingSurface.tsx",
         "features/page/blocks/TableLoadingFallback.tsx",
         "features/page/blocks/artist-grid/Editor.tsx",
         "features/page/blocks/artist-grid/InfiniteList.tsx",
@@ -79016,7 +79003,6 @@
         "features/page/blocks/ListCarouselRuntime.tsx",
         "features/page/blocks/ListViewShell.tsx",
         "features/page/blocks/MobileBlockTablePaginationScroll.tsx",
-        "features/page/blocks/QueryLoadingSurface.tsx",
         "features/page/blocks/TableLoadingFallback.tsx",
         "features/page/blocks/artist-grid/Editor.tsx",
         "features/page/blocks/artist-grid/InfiniteList.tsx",
@@ -79995,6 +79981,7 @@
         "features/work/WorkEditor/WorkEditor.tsx",
         "features/work/WorkEditor/WorkFeaturedImageUploader.tsx",
         "features/work/WorkEditor/WorkMetaForm.tsx",
+        "features/work/WorkEditor/credits/CreditSkeletons.tsx",
         "features/work/WorkEditor/credits/SortableCreditGroupHeader.tsx",
         "features/work/WorkEditor/credits/SortableCreditRow.tsx",
         "features/work/WorkEditor/credits/credit-order-utils.ts",
@@ -80013,6 +80000,7 @@
         "features/work/WorkEditor/WorkEditor.tsx",
         "features/work/WorkEditor/WorkFeaturedImageUploader.tsx",
         "features/work/WorkEditor/WorkMetaForm.tsx",
+        "features/work/WorkEditor/credits/CreditSkeletons.tsx",
         "features/work/WorkEditor/credits/SortableCreditGroupHeader.tsx",
         "features/work/WorkEditor/credits/SortableCreditRow.tsx",
         "features/work/WorkMediaDeliveryContext.tsx"
@@ -82564,8 +82552,13 @@
         },
         {
           "name": "FlowRegion",
-          "args": "{ placement: 'flow', minHeight: 200, imageSrc: '/storybook/media/video-poster.jpg', message: 'Loading this section…', }",
+          "args": "{ placement: 'flow', extent: 'section', imageSrc: '/storybook/media/video-poster.jpg', message: 'Loading this section…', }",
           "preview": "http://localhost:6010/?path=/story/core-feedback-pageloaderview--flow-region"
+        },
+        {
+          "name": "Extents",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/core-feedback-pageloaderview--extents"
         },
         {
           "name": "InverseOverlay",
@@ -86702,7 +86695,7 @@
         },
         {
           "name": "FlowRegion",
-          "args": "{ placement: 'flow', minHeight: 200 }",
+          "args": "{ placement: 'flow', extent: 'section' }",
           "preview": "http://localhost:6010/?path=/story/feature-site-pageloader--flow-region"
         }
       ],
@@ -101225,6 +101218,11 @@
               "exported": "PageLoaderViewContrast",
               "imported": "PageLoaderViewContrast",
               "typeOnly": true
+            },
+            {
+              "exported": "PageLoaderViewExtent",
+              "imported": "PageLoaderViewExtent",
+              "typeOnly": true
             }
           ]
         },
@@ -105724,6 +105722,16 @@
             {
               "exported": "preloadOnDemandOverlays",
               "imported": "preloadOnDemandOverlays",
+              "typeOnly": false
+            }
+          ]
+        },
+        {
+          "target": "components/core/use-pending-action.ts",
+          "symbols": [
+            {
+              "exported": "usePendingAction",
+              "imported": "usePendingAction",
               "typeOnly": false
             }
           ]

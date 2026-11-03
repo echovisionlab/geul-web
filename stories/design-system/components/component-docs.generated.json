@@ -3861,7 +3861,7 @@
           "name": "count",
           "type": "number & never | number",
           "required": false,
-          "description": "Allowed combinations vary by union branch. Check the complete action/link, name and geometry contracts."
+          "description": "Visible badge count; Core appends the same text to a `label`/`aria-label` name (WCAG 2.5.3). Allowed combinations vary by union branch. Check the complete action/link, name and geometry contracts. Visible badge count; Core appends the same text to a `label`/`aria-label` name (WCAG 2.5.3)."
         },
         { "name": "disabled", "type": "boolean", "required": false, "defaultValue": "false" },
         {
@@ -9048,10 +9048,12 @@
         "Consumer: features/page/PageView/blocks/GeneratedMathBlockView.tsx",
         "Consumer: features/page/blocks/ListBlockSkeleton.tsx",
         "Consumer: features/page/blocks/author-list/Editor.tsx",
+        "Consumer: features/page/blocks/author-list/Skeleton.tsx",
         "Consumer: features/page/blocks/author-list/ViewClientRuntime.tsx",
         "Consumer: features/page/blocks/immersive-scene/MeshOptimizationPanel.tsx",
         "Consumer: features/page/blocks/immersive-scene/SceneRenderer.tsx",
         "Consumer: features/page/blocks/immersive-scene/Workspace.tsx",
+        "Consumer: features/page/blocks/post-map/Skeleton.tsx",
         "Consumer: features/participants/ParticipantRow.tsx",
         "Consumer: features/place/CreatePlaceModal.tsx",
         "Consumer: features/place/PlaceDetailForm.tsx",
@@ -9079,7 +9081,9 @@
         "Consumer: features/user/UserShell/UserShell.tsx",
         "Consumer: features/user/ui/UserInlineLinks/UserInlineLinksView.tsx",
         "Consumer: features/user/ui/UserProfile/UserProfileView.tsx",
+        "Consumer: features/work/WorkEditor/WorkClientsSection.tsx",
         "Consumer: features/work/WorkEditor/WorkCreditsSection.tsx",
+        "Consumer: features/work/WorkEditor/credits/CreditSkeletons.tsx",
         "Consumer: features/work/WorkEditor/credits/SortableCreditRow.tsx"
       ],
       "accessibility": [
@@ -12199,7 +12203,7 @@
           "name": "--geul-text-muted",
           "registered": true,
           "sources": [
-            { "file": "components/core/LoadingSurface/PageLoaderView.module.css", "line": 6, "property": "color" }
+            { "file": "components/core/LoadingSurface/PageLoaderView.module.css", "line": 11, "property": "color" }
           ],
           "definitions": [
             { "file": "lib/styles/design-tokens.css", "line": 173, "value": "#5d5b56", "context": ":root" },
@@ -12233,7 +12237,7 @@
           "name": "--geul-text-on-image",
           "registered": true,
           "sources": [
-            { "file": "components/core/LoadingSurface/PageLoaderView.module.css", "line": 15, "property": "color" }
+            { "file": "components/core/LoadingSurface/PageLoaderView.module.css", "line": 39, "property": "color" }
           ],
           "definitions": [{ "file": "lib/styles/design-tokens.css", "line": 7, "value": "#fff", "context": ":root" }]
         }
@@ -12273,20 +12277,14 @@
           "defaultValue": "'standard'"
         },
         {
-          "name": "height",
-          "type": "string | number",
+          "name": "extent",
+          "type": "'container' | 'compact' | 'section' | 'tall' | 'viewport'",
           "required": false,
-          "description": "Defaults to '100%' in fill placement and 'auto' in flow placement."
+          "description": "Named region height. Defaults to `section`.",
+          "defaultValue": "'section'"
         },
         { "name": "imageSrc", "type": "string | null", "required": false },
         { "name": "imageUnoptimized", "type": "boolean", "required": false, "defaultValue": "false" },
-        {
-          "name": "minHeight",
-          "type": "string | number",
-          "required": false,
-          "description": "Minimum height safeguard for page-sized loaders. Defaults to 200.",
-          "defaultValue": "200"
-        },
         {
           "name": "placement",
           "type": "'fill' | 'flow'",
@@ -12350,6 +12348,7 @@
         { "id": "core-feedback-pageloaderview--with-resolved-image", "name": "With Resolved Image" },
         { "id": "core-feedback-pageloaderview--failed-image", "name": "Failed Image" },
         { "id": "core-feedback-pageloaderview--flow-region", "name": "Flow Region" },
+        { "id": "core-feedback-pageloaderview--extents", "name": "Extents" },
         { "id": "core-feedback-pageloaderview--inverse-overlay", "name": "Inverse Overlay" }
       ],
       "usage": [
@@ -35473,8 +35472,20 @@
         { "name": "grow", "type": "boolean", "required": false },
         { "name": "hidden", "type": "boolean", "required": false },
         { "name": "id", "type": "string", "required": false },
+        {
+          "name": "isLoading",
+          "type": "boolean",
+          "required": false,
+          "description": "Options are being fetched; Core shows a named status and keeps the open control."
+        },
         { "name": "label", "type": "ReactNode", "required": false },
         { "name": "leftSection", "type": "ReactNode", "required": false },
+        {
+          "name": "loadingLabel",
+          "type": "string",
+          "required": false,
+          "description": "Overrides Core's localized loading status name."
+        },
         { "name": "name", "type": "string", "required": false },
         { "name": "nothingFoundMessage", "type": "ReactNode", "required": false },
         { "name": "onBlur", "type": "FocusEventHandler<HTMLInputElement>", "required": false },
@@ -49028,6 +49039,7 @@
         "Consumer: features/page/blocks/TableLoadingFallback.tsx",
         "Consumer: features/page/blocks/artist-grid/ViewClientRuntime.tsx",
         "Consumer: features/page/blocks/author-list/Editor.tsx",
+        "Consumer: features/page/blocks/author-list/Skeleton.tsx",
         "Consumer: features/page/blocks/author-list/View.tsx",
         "Consumer: features/page/blocks/author-list/ViewClientRuntime.tsx",
         "Consumer: features/page/blocks/client-marquee/Editor.tsx",
@@ -49051,6 +49063,7 @@
         "Consumer: features/page/blocks/post-list/View.tsx",
         "Consumer: features/page/blocks/post-list/ViewClientRuntime.tsx",
         "Consumer: features/page/blocks/post-map/Editor.tsx",
+        "Consumer: features/page/blocks/post-map/Skeleton.tsx",
         "Consumer: features/page/blocks/post-table/Editor.tsx",
         "Consumer: features/page/blocks/post-table/ViewServer.tsx",
         "Consumer: features/page/blocks/post-table/columns.tsx",
@@ -49143,6 +49156,7 @@
         "Consumer: features/work/WorkEditor/WorkCreditsSection.tsx",
         "Consumer: features/work/WorkEditor/WorkEditor.tsx",
         "Consumer: features/work/WorkEditor/WorkMetaForm.tsx",
+        "Consumer: features/work/WorkEditor/credits/CreditSkeletons.tsx",
         "Consumer: features/work/WorkEditor/credits/SortableCreditGroupHeader.tsx",
         "Consumer: features/work/WorkEditor/credits/SortableCreditRow.tsx"
       ],
@@ -49705,8 +49719,10 @@
         "Consumer: features/page/blocks/ListBlockSkeleton.tsx",
         "Consumer: features/page/blocks/ListViewShell.tsx",
         "Consumer: features/page/blocks/author-list/Editor.tsx",
+        "Consumer: features/page/blocks/author-list/Skeleton.tsx",
         "Consumer: features/page/blocks/author-list/ViewClientRuntime.tsx",
         "Consumer: features/page/blocks/immersive-scene/MeshOptimizationPanel.tsx",
+        "Consumer: features/page/blocks/post-map/Skeleton.tsx",
         "Consumer: features/place/PlaceEditor.tsx",
         "Consumer: features/policy/LegalOgImagePanel.tsx",
         "Consumer: features/policy/LegalPolicyEditor.tsx",
@@ -51460,12 +51476,7 @@
         { "name": "maxSize", "type": "number", "required": false },
         { "name": "onFileSelect", "type": "(file: File) => void | Promise<void>", "required": false },
         { "name": "onReject", "type": "(rejections: FileRejection[]) => void", "required": false },
-        {
-          "name": "onRemove",
-          "type": "() => void | Promise<void>",
-          "required": false,
-          "description": "Return removal completion to keep the existing remove control pending."
-        },
+        { "name": "onRemove", "type": "() => void | Promise<void>", "required": false },
         { "name": "onValidationReject", "type": "(rejections: ImageUploadRejection[]) => void", "required": false },
         { "name": "placeholder", "type": "ImageUploadPlaceholderConfig", "required": false },
         { "name": "progress", "type": "number", "required": false },
