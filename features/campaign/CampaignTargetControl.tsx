@@ -2,15 +2,17 @@
 
 import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { CampaignTargetMode } from '@echovisionlab/geul-proto/secure/campaign_pb.ts';
+import type { MemberCriteriaKind } from '@echovisionlab/geul-proto/secure/member_criteria_pb.ts';
 import { useTranslations } from 'next-intl';
 
 import { Alert } from '@/components/core/Alert';
 import { Select } from '@/components/core/Input';
+import { useMemberCriteriaKindLabel } from '@/features/admin/member-criteria/useMemberCriteriaKindLabel';
 
 export interface ActiveCampaignCriteria {
   id: string;
   name: string;
-  kindLabel: string;
+  kind: MemberCriteriaKind;
 }
 
 export interface CampaignTargetSelection {
@@ -54,6 +56,7 @@ export function CampaignTargetControl({
   onChange,
 }: CampaignTargetControlProps) {
   const t = useTranslations('campaignEditor.target');
+  const kindLabel = useMemberCriteriaKindLabel();
   const allValue = 'all';
   const criteriaValue = (id: string) => `criteria:${id}`;
   const selectedCriteriaIsActive =
@@ -62,7 +65,7 @@ export function CampaignTargetControl({
     { value: allValue, label: t('all') },
     ...criteriaOptions.map((criteria) => ({
       value: criteriaValue(criteria.id),
-      label: `${criteria.name} (${criteria.kindLabel})`,
+      label: `${criteria.name} (${kindLabel(criteria.kind)})`,
     })),
   ];
 

@@ -4,14 +4,14 @@ Run `node scripts/design-system/inventory.mjs` to regenerate; `--check` fails wh
 
 Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.
 
-Source manifest SHA-256: `782504acec8bd76fa6f9cbfe6499b05561f9757b7b5bc0f23ca3ee59dd639858`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
+Source manifest SHA-256: `391cfeb9e178b135a969c8050382d434689095b1c4184eba30756a6ccbed6f9f`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
 
 ## Counts
 
 | Metric                | Count |
 | --------------------- | ----: |
-| sourceFiles           |  3942 |
-| productionSourceFiles |  2341 |
+| sourceFiles           |  3943 |
+| productionSourceFiles |  2342 |
 | componentFiles        |   924 |
 | coreFamilies          |    57 |
 | featureDomains        |    54 |
@@ -119,7 +119,7 @@ Counts include every production JS/TS file in the domain; component files are Pa
 | ----------------------------------------------------- | -----: | ---------: | ------: | ----: | ------------: |
 | [account](../../features/account)                     |      4 |          4 |       0 |     1 |             4 |
 | [account-email](../../features/account-email)         |      1 |          1 |       0 |     1 |             0 |
-| [admin](../../features/admin)                         |    179 |        147 |       6 |    32 |            31 |
+| [admin](../../features/admin)                         |    180 |        147 |       6 |    32 |            31 |
 | [analytics](../../features/analytics)                 |      1 |          1 |       0 |     0 |             0 |
 | [application-error](../../features/application-error) |      9 |          5 |       2 |     5 |             1 |
 | [artist](../../features/artist)                       |      9 |          9 |       1 |     2 |             0 |

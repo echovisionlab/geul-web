@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "782504acec8bd76fa6f9cbfe6499b05561f9757b7b5bc0f23ca3ee59dd639858",
+  "manifestHash": "391cfeb9e178b135a969c8050382d434689095b1c4184eba30756a6ccbed6f9f",
   "counts": {
-    "sourceFiles": 3942,
-    "productionSourceFiles": 2341,
+    "sourceFiles": 3943,
+    "productionSourceFiles": 2342,
     "componentFiles": 924,
     "coreFamilies": 57,
     "featureDomains": 54,
@@ -1019,6 +1019,7 @@
     "features/admin/member-criteria/MemberCriteriaTableContent.tsx",
     "features/admin/member-criteria/criteria-date.ts",
     "features/admin/member-criteria/model.ts",
+    "features/admin/member-criteria/useMemberCriteriaKindLabel.ts",
     "features/admin/modal-context.test.tsx",
     "features/admin/modal-context.tsx",
     "features/admin/post/CreatePostButton.tsx",
@@ -31874,9 +31875,9 @@
               "type": "string"
             },
             {
-              "name": "kindLabel",
+              "name": "kind",
               "optional": false,
-              "type": "string"
+              "type": "MemberCriteriaKind"
             }
           ]
         },
@@ -76710,6 +76711,7 @@
         "features/admin/member-criteria/MemberCriteriaTableContent.tsx",
         "features/admin/member-criteria/criteria-date.ts",
         "features/admin/member-criteria/model.ts",
+        "features/admin/member-criteria/useMemberCriteriaKindLabel.ts",
         "features/admin/modal-context.tsx",
         "features/admin/post/CreatePostButton.tsx",
         "features/admin/post/PostModalContext.tsx",

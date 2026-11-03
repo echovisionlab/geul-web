@@ -92,7 +92,7 @@ describe('Criteria lifecycle actions', () => {
     expect(result[100]).toEqual({
       id: 'criteria-101',
       name: 'Criteria 101',
-      kindLabel: 'User Tags',
+      kind: MemberCriteriaKind.MEMBER_TAGS,
     });
     expect(listMemberCriteriaAdmin).toHaveBeenNthCalledWith(
       1,

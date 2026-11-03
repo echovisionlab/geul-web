@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { LayoutContainer, LayoutStack } from '@/components/core/Layout';
 import { Alert } from '@/components/core/Alert';
 import { CampaignTargetMode } from '@echovisionlab/geul-proto/secure/campaign_pb.ts';
+import { MemberCriteriaKind } from '@echovisionlab/geul-proto/secure/member_criteria_pb.ts';
 import type { CampaignRecipientScope } from '@echovisionlab/geul-common/collaboration/campaign';
 import { CampaignScheduleForm } from '@/features/campaign/CampaignScheduleForm';
 import { CampaignRecipientScopeControl } from '@/features/campaign/CampaignRecipientScopeControl';
@@ -37,7 +38,7 @@ function DeliveryPreview({
           <>
             <CampaignTargetControl
               {...target}
-              criteriaOptions={[{ id: 'room', name: 'Listening room', kindLabel: labels('members') }]}
+              criteriaOptions={[{ id: 'room', name: 'Listening room', kind: MemberCriteriaKind.MEMBER_TAGS }]}
               loadError={state === 'error'}
               disabled={state === 'pending'}
               onChange={setTarget}
