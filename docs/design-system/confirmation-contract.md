@@ -17,7 +17,7 @@ becoming filled commit buttons. Content/image overlay contrast keeps its existin
 | Feature intent            | Core treatment    | Typical command                                   |
 | ------------------------- | ----------------- | ------------------------------------------------- |
 | delete / discard / revoke | danger / strong   | Delete a record, discard changes, revoke a grant  |
-| archive                   | warning / strong  | Archive an audience segment                       |
+| archive                   | warning / strong  | Archive Member criteria                           |
 | restore                   | positive / strong | Restore a segment or document version             |
 | regenerate                | warning / strong  | Replace a token, invalidating its previous secret |
 | confirm                   | neutral / strong  | Change source locale or unsubscribe               |

@@ -257,8 +257,7 @@
       "clients": "Clients",
       "campaign": "Campaign",
       "campaigns": "Campaigns",
-      "audienceSegment": "Audience Segment",
-      "audienceSegments": "Audience Segments",
+      "memberCriteria": "Member criteria",
       "user": "User",
       "member": "Member",
       "users": "Users",
@@ -613,26 +612,26 @@
         "failed": "Failed"
       }
     },
-    "audienceSegments": {
-      "description": "Create reusable audience segments for targeting campaigns to specific groups.",
-      "searchPlaceholder": "Search segments...",
-      "empty": "No segments found. Create one to target specific audiences.",
-      "createTitle": "Create Segment",
-      "editTitle": "Edit Segment",
-      "namePlaceholder": "Segment name",
-      "typePlaceholder": "Select segment type",
-      "loading": "Loading segment...",
+    "memberCriteria": {
+      "description": "Create reusable Member criteria that select members for campaigns and restricted downloads.",
+      "searchPlaceholder": "Search Member criteria...",
+      "empty": "No Member criteria yet. Create one to select specific members.",
+      "createTitle": "Create Member criteria",
+      "editTitle": "Edit Member criteria",
+      "namePlaceholder": "Member criteria name",
+      "typePlaceholder": "Select a kind",
+      "loading": "Loading Member criteria...",
       "includeArchived": "Include archived",
       "archive": "Archive",
-      "archiveTitle": "Archive Audience",
+      "archiveTitle": "Archive Member criteria",
       "archiveConfirm": "Archive {name}? {campaigns} campaign relationships and {files} file policies are detached. {runs} delivery runs keep their immutable history.",
       "restore": "Restore",
-      "restoreTitle": "Restore Audience",
+      "restoreTitle": "Restore Member criteria",
       "restoreConfirm": "Restore {name}? Previous campaign schedules and file policies are not restored automatically.",
-      "created": "Segment created",
-      "updated": "Segment updated",
-      "archived": "Audience archived",
-      "restored": "Audience restored",
+      "created": "Member criteria created",
+      "updated": "Member criteria updated",
+      "archived": "Member criteria archived",
+      "restored": "Member criteria restored",
       "config": {
         "userTagsPlaceholderSelect": "Select user tags",
         "rolesLabel": "Roles",
@@ -640,13 +639,13 @@
         "createdAfterPlaceholder": "Start date",
         "createdBeforeLabel": "Created Before",
         "createdBeforePlaceholder": "End date",
-        "estimateCount": "Estimate Count",
-        "estimatedRecipients": "~{count, plural, one {# recipient} other {# recipients}}",
-        "allUsersHelp": "Targets all users. Newsletter eligibility is chosen by each campaign."
+        "estimateCount": "Count matching members",
+        "estimatedRecipients": "~{count, plural, one {# matching member} other {# matching members}}",
+        "allUsersHelp": "Selects every member. Each campaign decides whether only newsletter subscribers receive it."
       },
       "types": {
-        "usersByFilter": "Users by Filter",
-        "allUsers": "All users"
+        "usersByFilter": "Members by filter",
+        "allUsers": "All members"
       }
     },
     "series": {
@@ -2699,13 +2698,13 @@
       "none": "No Layout"
     },
     "target": {
-      "audienceLabel": "Target audience",
-      "audiencePlaceholder": "Select an audience",
+      "criteriaLabel": "Recipients",
+      "criteriaPlaceholder": "Select Member criteria",
       "all": "All users",
-      "unavailableAudience": "Archived or unavailable audience",
-      "unavailableAudienceDescription": "This campaign targets an archived or unavailable audience. Select an active audience before scheduling or sending.",
-      "audienceRequired": "Select an active audience before scheduling or sending.",
-      "audienceLoadError": "Active audiences could not be loaded. Try again before scheduling or sending."
+      "unavailableCriteria": "Archived or unavailable Member criteria",
+      "unavailableCriteriaDescription": "This campaign uses archived or unavailable Member criteria. Select active Member criteria before scheduling or sending.",
+      "criteriaRequired": "Select active Member criteria before scheduling or sending.",
+      "criteriaLoadError": "Active Member criteria could not be loaded. Try again before scheduling or sending."
     },
     "fields": {
       "recipientScope": "Recipients",
@@ -2721,7 +2720,7 @@
       "description": "Enter an email address to send a test of this campaign."
     },
     "sendModal": {
-      "warning": "This will send the campaign to the audience segment {audience}. This action cannot be undone.",
+      "warning": "This will send the campaign to members matching {criteria}. This action cannot be undone.",
       "subject": "Subject: {subject}",
       "allMatchingUsersWarning": "Includes matching users who have unsubscribed from newsletters."
     },
@@ -2730,7 +2729,7 @@
       "dateLabel": "Scheduled date and time",
       "previousMonth": "Previous month",
       "nextMonth": "Next month",
-      "audience": "Audience: {audience}",
+      "criteria": "Recipients: {criteria}",
       "allMatchingUsersWarning": "Includes matching users who have unsubscribed from newsletters."
     },
     "notifications": {
@@ -5306,7 +5305,7 @@
     "editor": {
       "sectionTitle": "Download access",
       "loading": "Loading download access…",
-      "audiences": {
+      "access": {
         "disabled": {
           "label": "No downloads",
           "description": "No visitor can download this file."
@@ -5320,13 +5319,13 @@
           "description": "Any signed-in user can download this file."
         },
         "restricted": {
-          "label": "Audiences",
-          "description": "Only users in the selected audiences can download this file."
+          "label": "Member criteria",
+          "description": "Only members matching the selected Member criteria can download this file."
         }
       },
-      "segmentsLoadError": "The policy loaded, but audiences could not be loaded.",
-      "segmentsEmpty": "No Audience segments are available.",
-      "restrictedWithoutAudience": "This restricted policy has no Audience. Downloads are denied for everyone until you select at least one Audience.",
+      "criteriaLoadError": "The policy loaded, but Member criteria could not be loaded.",
+      "criteriaEmpty": "No Member criteria are available.",
+      "restrictedWithoutCriteria": "This restricted policy has no Member criteria. Downloads are denied for everyone until you select at least one.",
       "additionalSelected": "{count} more selected",
       "loadError": "Download access could not be loaded.",
       "saveError": "Download access could not be saved.",

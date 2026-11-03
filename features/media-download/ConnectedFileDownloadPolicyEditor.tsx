@@ -2,7 +2,7 @@
 
 import {
   getFileDownloadPolicyAction,
-  listAudienceSegmentsForAuthenticatedAccessAction,
+  listMemberCriteriaForAuthenticatedAccessAction,
   updateFileDownloadPolicyAction,
 } from '@/lib/actions/file-download-access';
 import type { FileDownloadPolicyTarget } from '@/lib/types/file-download-access';
@@ -10,7 +10,7 @@ import { FileDownloadPolicyEditor, type FileDownloadPolicyEditorAdapter } from '
 
 const connectedAdapter: FileDownloadPolicyEditorAdapter = {
   loadPolicy: getFileDownloadPolicyAction,
-  loadSegments: listAudienceSegmentsForAuthenticatedAccessAction,
+  loadCriteriaList: listMemberCriteriaForAuthenticatedAccessAction,
   savePolicy: updateFileDownloadPolicyAction,
 };
 

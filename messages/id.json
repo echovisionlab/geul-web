@@ -257,8 +257,7 @@
       "clients": "Klien",
       "campaign": "Kampanye",
       "campaigns": "Kampanye",
-      "audienceSegment": "Segmen Audiens",
-      "audienceSegments": "Segmen Audiens",
+      "memberCriteria": "Segmen Audiens",
       "user": "Pengguna",
       "member": "Anggota",
       "users": "Pengguna",
@@ -613,7 +612,7 @@
         "failed": "Gagal"
       }
     },
-    "audienceSegments": {
+    "memberCriteria": {
       "description": "Buat segmen audiens yang dapat digunakan kembali untuk menargetkan kampanye ke kelompok tertentu.",
       "searchPlaceholder": "Segmen penelusuran...",
       "empty": "Tidak ada segmen yang ditemukan. Buat satu untuk menargetkan audiens tertentu.",
@@ -2699,13 +2698,13 @@
       "none": "Tanpa Tata Letak"
     },
     "target": {
-      "audienceLabel": "Target audiens",
-      "audiencePlaceholder": "Pilih audiens",
+      "criteriaLabel": "Target audiens",
+      "criteriaPlaceholder": "Pilih audiens",
       "all": "Semua pengguna",
-      "unavailableAudience": "Audiens yang diarsipkan atau tidak tersedia",
-      "unavailableAudienceDescription": "Kampanye ini menargetkan audiens yang diarsipkan atau tidak tersedia. Pilih audiens aktif sebelum menjadwalkan atau mengirim.",
-      "audienceRequired": "Pilih audiens aktif sebelum menjadwalkan atau mengirim.",
-      "audienceLoadError": "Audiens aktif tidak dapat dimuat. Coba lagi sebelum menjadwalkan atau mengirim."
+      "unavailableCriteria": "Audiens yang diarsipkan atau tidak tersedia",
+      "unavailableCriteriaDescription": "Kampanye ini menargetkan audiens yang diarsipkan atau tidak tersedia. Pilih audiens aktif sebelum menjadwalkan atau mengirim.",
+      "criteriaRequired": "Pilih audiens aktif sebelum menjadwalkan atau mengirim.",
+      "criteriaLoadError": "Audiens aktif tidak dapat dimuat. Coba lagi sebelum menjadwalkan atau mengirim."
     },
     "fields": {
       "recipientScope": "Penerima",
@@ -2721,7 +2720,7 @@
       "description": "Masukkan alamat email untuk mengirim pengujian kampanye ini."
     },
     "sendModal": {
-      "warning": "Tindakan ini akan mengarahkan kampanye ke segmen audiens {audience}. Tindakan ini tidak dapat dibatalkan.",
+      "warning": "Tindakan ini akan mengarahkan kampanye ke segmen audiens {criteria}. Tindakan ini tidak dapat dibatalkan.",
       "subject": "Subjek: {subject}",
       "allMatchingUsersWarning": "Termasuk pengguna yang cocok yang telah berhenti berlangganan buletin."
     },
@@ -2730,7 +2729,7 @@
       "dateLabel": "Tanggal dan waktu yang dijadwalkan",
       "previousMonth": "Bulan sebelumnya",
       "nextMonth": "Bulan depan",
-      "audience": "Penonton: {audience}",
+      "criteria": "Penonton: {criteria}",
       "allMatchingUsersWarning": "Termasuk pengguna yang cocok yang telah berhenti berlangganan buletin."
     },
     "notifications": {
@@ -5306,7 +5305,7 @@
     "editor": {
       "sectionTitle": "Akses unduhan",
       "loading": "Memuat akses unduhan…",
-      "audiences": {
+      "access": {
         "disabled": {
           "label": "Tanpa unduhan",
           "description": "Tidak ada pengunjung yang dapat mengunduh file ini."
@@ -5324,9 +5323,9 @@
           "description": "Hanya pengguna di audiens terpilih yang dapat mendownload file ini."
         }
       },
-      "segmentsLoadError": "Kebijakan telah dimuat, namun audiens tidak dapat dimuat.",
-      "segmentsEmpty": "Tidak ada segmen Audiens yang tersedia.",
-      "restrictedWithoutAudience": "Kebijakan terbatas ini tidak memiliki Audiens. Pengunduhan ditolak untuk semua orang sampai Anda memilih setidaknya satu Pemirsa.",
+      "criteriaLoadError": "Kebijakan telah dimuat, namun audiens tidak dapat dimuat.",
+      "criteriaEmpty": "Tidak ada segmen Audiens yang tersedia.",
+      "restrictedWithoutCriteria": "Kebijakan terbatas ini tidak memiliki Audiens. Pengunduhan ditolak untuk semua orang sampai Anda memilih setidaknya satu Pemirsa.",
       "additionalSelected": "{count} lainnya dipilih",
       "loadError": "Akses download tidak dapat dimuat.",
       "saveError": "Akses unduhan tidak dapat disimpan.",

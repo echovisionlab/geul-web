@@ -19,7 +19,7 @@ interface SectionTitle {
  */
 const ADMIN_SECTION_TITLES: Record<string, SectionTitle> = {
   artists: { list: 'Artists', detail: 'Artist' },
-  'audience-segments': { list: 'Audience Segments', detail: 'Audience Segment' },
+  'member-criteria': { list: 'Member Criteria', detail: 'Member Criteria' },
   campaigns: { list: 'Campaigns', detail: 'Campaign' },
   categories: { list: 'Categories', detail: 'Category' },
   clients: { list: 'Clients', detail: 'Client' },

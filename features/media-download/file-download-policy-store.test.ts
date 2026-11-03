@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
+import { MemberCriteriaKind } from '@echovisionlab/geul-proto/secure/member_criteria_pb.ts';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import type {
-  AudienceSegmentSummary,
+  MemberCriteriaSummary,
   FileDownloadActionResult,
   FileDownloadPolicyModel,
   FileDownloadPolicyTarget,
@@ -22,13 +22,13 @@ const defaultTarget: FileDownloadPolicyTarget = {
 };
 
 type SaveResult = FileDownloadActionResult<FileDownloadPolicyModel>;
-type LoadSegmentsResult = Awaited<ReturnType<FileDownloadPolicyEditorAdapter['loadSegments']>>;
+type LoadCriteriaListResult = Awaited<ReturnType<FileDownloadPolicyEditorAdapter['loadCriteriaList']>>;
 
-function segment(id: string, name: string): AudienceSegmentSummary {
-  return { id, name, description: '', segmentType: SegmentType.MEMBERS_BY_FILTER };
+function criteria(id: string, name: string): MemberCriteriaSummary {
+  return { id, name, description: '', kind: MemberCriteriaKind.FILTER };
 }
 
-function page(items: AudienceSegmentSummary[], pageNumber = 1, hasMore = false) {
+function page(items: MemberCriteriaSummary[], pageNumber = 1, hasMore = false) {
   return {
     data: {
       items,
@@ -41,7 +41,7 @@ function page(items: AudienceSegmentSummary[], pageNumber = 1, hasMore = false) 
   };
 }
 
-/** The API echoes the exact selector of the request; tests supply only the File and Audience. */
+/** The API echoes the exact selector of the request; tests supply only the File and Access. */
 function echoTarget(adapter: FileDownloadPolicyEditorAdapter): FileDownloadPolicyEditorAdapter {
   const echo = (result: SaveResult, target: FileDownloadPolicyTarget): SaveResult =>
     result.data
@@ -57,9 +57,9 @@ function echoTarget(adapter: FileDownloadPolicyEditorAdapter): FileDownloadPolic
       : result;
   return {
     loadPolicy: async (target) => echo(await adapter.loadPolicy(target), target),
-    loadSegments: adapter.loadSegments,
-    savePolicy: async (target, audience, audienceSegmentIds, observedPolicy, editorOrigin) =>
-      echo(await adapter.savePolicy(target, audience, audienceSegmentIds, observedPolicy, editorOrigin), target),
+    loadCriteriaList: adapter.loadCriteriaList,
+    savePolicy: async (target, access, memberCriteriaIds, observedPolicy, editorOrigin) =>
+      echo(await adapter.savePolicy(target, access, memberCriteriaIds, observedPolicy, editorOrigin), target),
   };
 }
 
@@ -84,8 +84,8 @@ async function flushAutosave(delay = 250) {
   await settle();
 }
 
-function policy(audience: FileDownloadPolicyModel['audience'], audienceSegments: AudienceSegmentSummary[] = []) {
-  return { data: { fileId: 'file-1', audience, audienceSegments } };
+function policy(access: FileDownloadPolicyModel['access'], memberCriteria: MemberCriteriaSummary[] = []) {
+  return { data: { fileId: 'file-1', access, memberCriteria } };
 }
 
 afterEach(() => {
@@ -106,7 +106,7 @@ describe('file download policy store', () => {
       .mockReturnValueOnce(olderRead.promise)
       .mockResolvedValue(canonical);
     const savePolicy = vi.fn<FileDownloadPolicyEditorAdapter['savePolicy']>().mockResolvedValue(canonical);
-    const { store, state } = startStore({ loadPolicy, savePolicy, loadSegments: vi.fn(async () => page([])) });
+    const { store, state } = startStore({ loadPolicy, savePolicy, loadCriteriaList: vi.fn(async () => page([])) });
     await settle();
     store.notifyPeerChange();
     await settle();
@@ -114,11 +114,11 @@ describe('file download policy store', () => {
 
     store.changeAccess('authenticated', []);
     await flushAutosave();
-    expect(state().audience).toBe('authenticated');
+    expect(state().access).toBe('authenticated');
     olderRead.resolve(policy('public'));
     await settle();
 
-    expect(state().audience).toBe('authenticated');
+    expect(state().access).toBe('authenticated');
     expect(savePolicy).toHaveBeenCalledTimes(1);
   });
 
@@ -128,16 +128,16 @@ describe('file download policy store', () => {
     const loadPolicy = vi
       .fn<FileDownloadPolicyEditorAdapter['loadPolicy']>()
       .mockResolvedValueOnce(policy('public'))
-      .mockResolvedValueOnce({ data: { fileId: 'replacement-file', audience: 'disabled', audienceSegments: [] } });
+      .mockResolvedValueOnce({ data: { fileId: 'replacement-file', access: 'disabled', memberCriteria: [] } });
     const savePolicy = vi.fn<FileDownloadPolicyEditorAdapter['savePolicy']>().mockReturnValueOnce(saving.promise);
-    const { store, state } = startStore({ loadPolicy, savePolicy, loadSegments: vi.fn(async () => page([])) });
+    const { store, state } = startStore({ loadPolicy, savePolicy, loadCriteriaList: vi.fn(async () => page([])) });
     await settle();
     store.changeAccess('authenticated', []);
     await flushAutosave();
     store.notifyPeerChange();
     await flushAutosave();
     expect(loadPolicy).toHaveBeenCalledTimes(1);
-    expect(state().audience).toBe('authenticated');
+    expect(state().access).toBe('authenticated');
 
     saving.resolve(policy('authenticated'));
     await settle();
@@ -151,9 +151,9 @@ describe('file download policy store', () => {
     const loadPolicy = vi
       .fn<FileDownloadPolicyEditorAdapter['loadPolicy']>()
       .mockResolvedValueOnce(policy('public'))
-      .mockResolvedValueOnce({ data: { fileId: 'file-2', audience: 'authenticated', audienceSegments: [] } });
+      .mockResolvedValueOnce({ data: { fileId: 'file-2', access: 'authenticated', memberCriteria: [] } });
     const savePolicy = vi.fn<FileDownloadPolicyEditorAdapter['savePolicy']>();
-    const { store, state } = startStore({ loadPolicy, savePolicy, loadSegments: vi.fn(async () => page([])) });
+    const { store, state } = startStore({ loadPolicy, savePolicy, loadCriteriaList: vi.fn(async () => page([])) });
     await settle();
     store.notifyPeerChange();
     await settle();
@@ -165,27 +165,31 @@ describe('file download policy store', () => {
     expect(savePolicy).not.toHaveBeenCalled();
   });
 
-  it('refetches the exact policy after a stale write and retries the local segment delta over the fresh baseline', async () => {
+  it('refetches the exact policy after a stale write and retries the local criteria delta over the fresh baseline', async () => {
     const loadPolicy = vi
       .fn<FileDownloadPolicyEditorAdapter['loadPolicy']>()
-      .mockResolvedValueOnce(policy('restricted', [segment('segment-a', 'A')]))
-      .mockResolvedValueOnce(policy('restricted', [segment('segment-a', 'A'), segment('segment-peer', 'Peer')]));
+      .mockResolvedValueOnce(policy('restricted', [criteria('criteria-a', 'A')]))
+      .mockResolvedValueOnce(policy('restricted', [criteria('criteria-a', 'A'), criteria('criteria-peer', 'Peer')]));
     const savePolicy = vi
       .fn<FileDownloadPolicyEditorAdapter['savePolicy']>()
       .mockResolvedValueOnce({ errorCode: 'staleTarget' })
       .mockResolvedValueOnce(
-        policy('restricted', [segment('segment-a', 'A'), segment('segment-b', 'B'), segment('segment-peer', 'Peer')]),
+        policy('restricted', [
+          criteria('criteria-a', 'A'),
+          criteria('criteria-b', 'B'),
+          criteria('criteria-peer', 'Peer'),
+        ]),
       );
     const { store, state } = startStore({
       loadPolicy,
-      loadSegments: vi.fn(async () =>
-        page([segment('segment-a', 'A'), segment('segment-b', 'B'), segment('segment-peer', 'Peer')]),
+      loadCriteriaList: vi.fn(async () =>
+        page([criteria('criteria-a', 'A'), criteria('criteria-b', 'B'), criteria('criteria-peer', 'Peer')]),
       ),
       savePolicy,
     });
     await settle();
     vi.useFakeTimers();
-    store.changeAccess('restricted', ['segment-a', 'segment-b']);
+    store.changeAccess('restricted', ['criteria-a', 'criteria-b']);
     await flushAutosave();
     await flushAutosave(1);
 
@@ -195,30 +199,30 @@ describe('file download policy store', () => {
       1,
       defaultTarget,
       'restricted',
-      ['segment-a', 'segment-b'],
-      { audience: 'restricted', audienceSegmentIds: ['segment-a'] },
+      ['criteria-a', 'criteria-b'],
+      { access: 'restricted', memberCriteriaIds: ['criteria-a'] },
       expect.any(String),
     );
     expect(savePolicy).toHaveBeenNthCalledWith(
       2,
       defaultTarget,
       'restricted',
-      ['segment-a', 'segment-b', 'segment-peer'],
-      { audience: 'restricted', audienceSegmentIds: ['segment-a', 'segment-peer'] },
+      ['criteria-a', 'criteria-b', 'criteria-peer'],
+      { access: 'restricted', memberCriteriaIds: ['criteria-a', 'criteria-peer'] },
       expect.any(String),
     );
-    expect(state().audienceSegmentIds).toEqual(['segment-a', 'segment-b', 'segment-peer']);
+    expect(state().memberCriteriaIds).toEqual(['criteria-a', 'criteria-b', 'criteria-peer']);
   });
 
   it('stops a stale-target retry when the exact selector resolves to a replacement file', async () => {
     const loadPolicy = vi
       .fn<FileDownloadPolicyEditorAdapter['loadPolicy']>()
       .mockResolvedValueOnce(policy('public'))
-      .mockResolvedValueOnce({ data: { fileId: 'file-2', audience: 'authenticated', audienceSegments: [] } });
+      .mockResolvedValueOnce({ data: { fileId: 'file-2', access: 'authenticated', memberCriteria: [] } });
     const savePolicy = vi
       .fn<FileDownloadPolicyEditorAdapter['savePolicy']>()
       .mockResolvedValue({ errorCode: 'staleTarget' });
-    const { store, state } = startStore({ loadPolicy, savePolicy, loadSegments: vi.fn(async () => page([])) });
+    const { store, state } = startStore({ loadPolicy, savePolicy, loadCriteriaList: vi.fn(async () => page([])) });
     await settle();
     vi.useFakeTimers();
     store.changeAccess('disabled', []);
@@ -235,7 +239,7 @@ describe('file download policy store', () => {
     const savePolicy = vi
       .fn<FileDownloadPolicyEditorAdapter['savePolicy']>()
       .mockResolvedValue({ errorCode: 'staleTarget' });
-    const { store, state } = startStore({ loadPolicy, savePolicy, loadSegments: vi.fn(async () => page([])) });
+    const { store, state } = startStore({ loadPolicy, savePolicy, loadCriteriaList: vi.fn(async () => page([])) });
     await settle();
     vi.useFakeTimers();
     store.changeAccess('disabled', []);
@@ -244,16 +248,14 @@ describe('file download policy store', () => {
 
     expect(savePolicy).toHaveBeenCalledTimes(2);
     expect(loadPolicy).toHaveBeenCalledTimes(3);
-    expect(state()).toMatchObject({ audience: 'disabled', targetStale: false, error: 'saveError' });
+    expect(state()).toMatchObject({ access: 'disabled', targetStale: false, error: 'saveError' });
   });
 
-  it('auto-saves a changed audience after the pause and reports it saved', async () => {
-    const savePolicy = vi.fn<FileDownloadPolicyEditorAdapter['savePolicy']>(async (_target, audience) =>
-      policy(audience),
-    );
+  it('auto-saves a changed access after the pause and reports it saved', async () => {
+    const savePolicy = vi.fn<FileDownloadPolicyEditorAdapter['savePolicy']>(async (_target, access) => policy(access));
     const { store, state } = startStore({
       loadPolicy: vi.fn(async () => policy('public')),
-      loadSegments: vi.fn(async () => page([])),
+      loadCriteriaList: vi.fn(async () => page([])),
       savePolicy,
     });
     await settle();
@@ -265,15 +267,15 @@ describe('file download policy store', () => {
     await flushAutosave(1);
 
     expect(savePolicy).toHaveBeenCalledWith(defaultTarget, 'authenticated', [], expect.any(Object), expect.any(String));
-    expect(state()).toMatchObject({ audience: 'authenticated', saving: false, saved: true, error: null });
+    expect(state()).toMatchObject({ access: 'authenticated', saving: false, saved: true, error: null });
   });
 
-  it('serializes rapid changes so the latest audience wins', async () => {
+  it('serializes rapid changes so the latest access wins', async () => {
     const latestSave = Promise.withResolvers<SaveResult>();
     const savePolicy = vi.fn<FileDownloadPolicyEditorAdapter['savePolicy']>(() => latestSave.promise);
     const { store, state } = startStore({
       loadPolicy: vi.fn(async () => policy('disabled')),
-      loadSegments: vi.fn(async () => page([])),
+      loadCriteriaList: vi.fn(async () => page([])),
       savePolicy,
     });
     await settle();
@@ -290,26 +292,26 @@ describe('file download policy store', () => {
     await settle();
 
     expect(savePolicy).toHaveBeenCalledTimes(1);
-    expect(state()).toMatchObject({ audience: 'disabled', saved: true });
+    expect(state()).toMatchObject({ access: 'disabled', saved: true });
   });
 
-  it('rebases a queued segment removal onto the canonical first save without dropping a peer addition', async () => {
-    const base = segment('segment-base', 'Base segment');
-    const local = segment('segment-local', 'Local segment');
-    const peer = segment('segment-peer', 'Peer segment');
+  it('rebases a queued criteria removal onto the canonical first save without dropping a peer addition', async () => {
+    const base = criteria('criteria-base', 'Base criteria');
+    const local = criteria('criteria-local', 'Local criteria');
+    const peer = criteria('criteria-peer', 'Peer criteria');
     const firstSave = Promise.withResolvers<SaveResult>();
     const savePolicy = vi
       .fn<FileDownloadPolicyEditorAdapter['savePolicy']>()
       .mockImplementationOnce(() => firstSave.promise)
-      .mockImplementation(async (_target, audience, audienceSegmentIds) =>
+      .mockImplementation(async (_target, access, memberCriteriaIds) =>
         policy(
-          audience,
-          [base, local, peer].filter((item) => audienceSegmentIds.includes(item.id)),
+          access,
+          [base, local, peer].filter((item) => memberCriteriaIds.includes(item.id)),
         ),
       );
     const { store, state } = startStore({
       loadPolicy: vi.fn(async () => policy('restricted', [base])),
-      loadSegments: vi.fn(async () => page([base, local, peer])),
+      loadCriteriaList: vi.fn(async () => page([base, local, peer])),
       savePolicy,
     });
     await settle();
@@ -323,7 +325,7 @@ describe('file download policy store', () => {
       defaultTarget,
       'restricted',
       [base.id, local.id],
-      { audience: 'restricted', audienceSegmentIds: [base.id] },
+      { access: 'restricted', memberCriteriaIds: [base.id] },
       expect.any(String),
     );
 
@@ -338,10 +340,10 @@ describe('file download policy store', () => {
       defaultTarget,
       'restricted',
       [local.id, peer.id],
-      { audience: 'restricted', audienceSegmentIds: [base.id, local.id, peer.id] },
+      { access: 'restricted', memberCriteriaIds: [base.id, local.id, peer.id] },
       expect.any(String),
     );
-    expect(state().audienceSegmentIds).toEqual([local.id, peer.id]);
+    expect(state().memberCriteriaIds).toEqual([local.id, peer.id]);
   });
 
   it('rolls a failed queued change back to the most recent confirmed save', async () => {
@@ -352,7 +354,7 @@ describe('file download policy store', () => {
       .mockResolvedValueOnce({ errorCode: 'saveFailed' });
     const { store, state } = startStore({
       loadPolicy: vi.fn(async () => policy('disabled')),
-      loadSegments: vi.fn(async () => page([])),
+      loadCriteriaList: vi.fn(async () => page([])),
       savePolicy,
     });
     await settle();
@@ -375,16 +377,14 @@ describe('file download policy store', () => {
       expect.any(Object),
       expect.any(String),
     );
-    expect(state()).toMatchObject({ audience: 'public', error: 'saveError', saved: false });
+    expect(state()).toMatchObject({ access: 'public', error: 'saveError', saved: false });
   });
 
   it('writes the latest pending value when stopped before the pause, once and without a failure', async () => {
-    const savePolicy = vi.fn<FileDownloadPolicyEditorAdapter['savePolicy']>(async (_target, audience) =>
-      policy(audience),
-    );
+    const savePolicy = vi.fn<FileDownloadPolicyEditorAdapter['savePolicy']>(async (_target, access) => policy(access));
     const { store, onDetachedSaveFailure } = startStore({
       loadPolicy: vi.fn(async () => policy('disabled')),
-      loadSegments: vi.fn(async () => page([])),
+      loadCriteriaList: vi.fn(async () => page([])),
       savePolicy,
     });
     await settle();
@@ -407,7 +407,7 @@ describe('file download policy store', () => {
     const savePolicy = vi.fn<FileDownloadPolicyEditorAdapter['savePolicy']>(async () => result);
     const adapter = {
       loadPolicy: vi.fn(async () => policy('public')),
-      loadSegments: vi.fn(async () => page([])),
+      loadCriteriaList: vi.fn(async () => page([])),
       savePolicy,
     };
     const { store, onDetachedSaveFailure } = startStore(adapter);
@@ -422,14 +422,14 @@ describe('file download policy store', () => {
 
     const remounted = startStore(adapter);
     await settle();
-    expect(remounted.state()).toMatchObject({ audience: 'public', saved: false });
+    expect(remounted.state()).toMatchObject({ access: 'public', saved: false });
   });
 
   it('has unsaved changes while a policy write is pending or active', async () => {
     const activeSave = Promise.withResolvers<SaveResult>();
     const { store, onDetachedSaveFailure } = startStore({
       loadPolicy: vi.fn(async () => policy('public')),
-      loadSegments: vi.fn(async () => page([])),
+      loadCriteriaList: vi.fn(async () => page([])),
       savePolicy: vi.fn(() => activeSave.promise),
     });
     await settle();
@@ -451,10 +451,10 @@ describe('file download policy store', () => {
     const savePolicy = vi
       .fn<FileDownloadPolicyEditorAdapter['savePolicy']>()
       .mockImplementationOnce(() => activeSave.promise)
-      .mockImplementation(async (_target, audience) => policy(audience));
+      .mockImplementation(async (_target, access) => policy(access));
     const { store } = startStore({
       loadPolicy: vi.fn(async () => policy('disabled')),
-      loadSegments: vi.fn(async () => page([])),
+      loadCriteriaList: vi.fn(async () => page([])),
       savePolicy,
     });
     await settle();
@@ -483,25 +483,25 @@ describe('file download policy store', () => {
 
   it('drains old same-target writes before a new editor reads, and saves its latest value last', async () => {
     const activeSave = Promise.withResolvers<SaveResult>();
-    let persistedAudience: FileDownloadPolicyModel['audience'] = 'disabled';
+    let persistedAccess: FileDownloadPolicyModel['access'] = 'disabled';
     let saveInvocation = 0;
     const order: string[] = [];
     const adapter: FileDownloadPolicyEditorAdapter = {
       loadPolicy: vi.fn(async () => {
-        order.push(`load:${persistedAudience}`);
-        return policy(persistedAudience);
+        order.push(`load:${persistedAccess}`);
+        return policy(persistedAccess);
       }),
-      loadSegments: vi.fn(async () => page([])),
-      savePolicy: vi.fn(async (_target, audience) => {
+      loadCriteriaList: vi.fn(async () => page([])),
+      savePolicy: vi.fn(async (_target, access) => {
         saveInvocation += 1;
-        order.push(`save:${audience}`);
+        order.push(`save:${access}`);
         if (saveInvocation === 1) {
           const result = await activeSave.promise;
-          persistedAudience = result.data?.audience ?? persistedAudience;
+          persistedAccess = result.data?.access ?? persistedAccess;
           return result;
         }
-        persistedAudience = audience;
-        return policy(audience);
+        persistedAccess = access;
+        return policy(access);
       }),
     };
     const first = startStore(adapter);
@@ -521,7 +521,7 @@ describe('file download policy store', () => {
     await settle();
     expect(adapter.savePolicy).toHaveBeenCalledTimes(2);
     expect(adapter.loadPolicy).toHaveBeenCalledTimes(2);
-    expect(second.state().audience).toBe('authenticated');
+    expect(second.state().access).toBe('authenticated');
 
     second.store.changeAccess('public', []);
     await flushAutosave();
@@ -530,16 +530,16 @@ describe('file download policy store', () => {
 
   it('keeps a pending write to an old target from blocking or overwriting a new target', async () => {
     const oldTargetSave = Promise.withResolvers<SaveResult>();
-    const savePolicy = vi.fn<FileDownloadPolicyEditorAdapter['savePolicy']>((target, audience) =>
+    const savePolicy = vi.fn<FileDownloadPolicyEditorAdapter['savePolicy']>((target, access) =>
       target.expectedFileId === 'file-1'
         ? oldTargetSave.promise
-        : Promise.resolve({ data: { fileId: target.expectedFileId, audience, audienceSegments: [] } }),
+        : Promise.resolve({ data: { fileId: target.expectedFileId, access, memberCriteria: [] } }),
     );
     const adapter: FileDownloadPolicyEditorAdapter = {
       loadPolicy: vi.fn(async (target) => ({
-        data: { fileId: target.expectedFileId, audience: 'disabled' as const, audienceSegments: [] },
+        data: { fileId: target.expectedFileId, access: 'disabled' as const, memberCriteria: [] },
       })),
-      loadSegments: vi.fn(async () => page([])),
+      loadCriteriaList: vi.fn(async () => page([])),
       savePolicy,
     };
     const first = startStore(adapter);
@@ -565,7 +565,7 @@ describe('file download policy store', () => {
     );
     oldTargetSave.resolve(policy('public'));
     await settle();
-    expect(second.state().audience).toBe('authenticated');
+    expect(second.state().access).toBe('authenticated');
   });
 
   it('ignores a load for an old target that completes after the editor moved on', async () => {
@@ -576,10 +576,10 @@ describe('file download policy store', () => {
         target.expectedFileId === 'file-1'
           ? oldTargetLoad.promise
           : Promise.resolve({
-              data: { fileId: target.expectedFileId, audience: 'public' as const, audienceSegments: [] },
+              data: { fileId: target.expectedFileId, access: 'public' as const, memberCriteria: [] },
             }),
       ),
-      loadSegments: vi.fn(async () => page([])),
+      loadCriteriaList: vi.fn(async () => page([])),
       savePolicy,
     };
     vi.useFakeTimers();
@@ -594,17 +594,17 @@ describe('file download policy store', () => {
     await vi.runAllTimersAsync();
 
     expect(first.state().policyLoaded).toBe(false);
-    expect(second.state().audience).toBe('public');
+    expect(second.state().access).toBe('public');
     expect(savePolicy).not.toHaveBeenCalled();
   });
 
-  it('searches every page of matching Audiences once per search', async () => {
-    const audiences = Array.from({ length: 125 }, (_, index) =>
-      segment(`segment-${index + 1}`, `Audience ${index + 1}`),
+  it('searches every page of matching Member criteria once per search', async () => {
+    const criteriaList = Array.from({ length: 125 }, (_, index) =>
+      criteria(`criteria-${index + 1}`, `Criteria ${index + 1}`),
     );
-    const loadSegments = vi.fn<FileDownloadPolicyEditorAdapter['loadSegments']>(
+    const loadCriteriaList = vi.fn<FileDownloadPolicyEditorAdapter['loadCriteriaList']>(
       async ({ page: pageNumber = 1, pageSize = 50, search = '' }) => {
-        const matching = search ? audiences.filter((audience) => audience.name.includes(search)) : audiences;
+        const matching = search ? criteriaList.filter((item) => item.name.includes(search)) : criteriaList;
         const start = (pageNumber - 1) * pageSize;
         return {
           data: {
@@ -620,78 +620,78 @@ describe('file download policy store', () => {
     );
     vi.useFakeTimers();
     const { store, state } = startStore({
-      loadPolicy: vi.fn(async () => policy('restricted', [audiences[0]])),
-      loadSegments,
+      loadPolicy: vi.fn(async () => policy('restricted', [criteriaList[0]])),
+      loadCriteriaList,
       savePolicy: vi.fn(),
     });
     await settle();
 
-    store.searchSegments('Audience');
+    store.searchCriteriaList('Criteria');
     await flushAutosave(200);
 
-    expect(loadSegments).toHaveBeenNthCalledWith(1, { page: 1, pageSize: 50 });
-    expect(loadSegments).toHaveBeenNthCalledWith(2, { page: 1, pageSize: 50, search: 'Audience' });
-    expect(loadSegments).toHaveBeenNthCalledWith(3, { page: 2, pageSize: 50, search: 'Audience' });
-    expect(loadSegments).toHaveBeenNthCalledWith(4, { page: 3, pageSize: 50, search: 'Audience' });
-    expect(loadSegments).toHaveBeenCalledTimes(4);
-    expect(state().segments.map((item) => item.name)).toContain('Audience 125');
-    expect(state().segmentsLoadingMore).toBe(false);
+    expect(loadCriteriaList).toHaveBeenNthCalledWith(1, { page: 1, pageSize: 50 });
+    expect(loadCriteriaList).toHaveBeenNthCalledWith(2, { page: 1, pageSize: 50, search: 'Criteria' });
+    expect(loadCriteriaList).toHaveBeenNthCalledWith(3, { page: 2, pageSize: 50, search: 'Criteria' });
+    expect(loadCriteriaList).toHaveBeenNthCalledWith(4, { page: 3, pageSize: 50, search: 'Criteria' });
+    expect(loadCriteriaList).toHaveBeenCalledTimes(4);
+    expect(state().criteriaList.map((item) => item.name)).toContain('Criteria 125');
+    expect(state().criteriaListLoadingMore).toBe(false);
 
-    store.searchSegments('');
-    store.searchSegments('Audience');
+    store.searchCriteriaList('');
+    store.searchCriteriaList('Criteria');
     await flushAutosave(200);
-    expect(loadSegments).toHaveBeenCalledTimes(4);
+    expect(loadCriteriaList).toHaveBeenCalledTimes(4);
   });
 
-  it('reports Audience loading until a later search page arrives', async () => {
-    const laterPage = Promise.withResolvers<LoadSegmentsResult>();
-    const firstAudience = segment('segment-1', 'Audience 1');
-    const loadSegments = vi.fn<FileDownloadPolicyEditorAdapter['loadSegments']>(({ page: pageNumber = 1 }) =>
-      pageNumber === 1 ? Promise.resolve(page([firstAudience], 1, true)) : laterPage.promise,
+  it('reports Access loading until a later search page arrives', async () => {
+    const laterPage = Promise.withResolvers<LoadCriteriaListResult>();
+    const firstAccess = criteria('criteria-1', 'Access 1');
+    const loadCriteriaList = vi.fn<FileDownloadPolicyEditorAdapter['loadCriteriaList']>(({ page: pageNumber = 1 }) =>
+      pageNumber === 1 ? Promise.resolve(page([firstAccess], 1, true)) : laterPage.promise,
     );
     const { store, state } = startStore({
-      loadPolicy: vi.fn(async () => policy('restricted', [firstAudience])),
-      loadSegments,
+      loadPolicy: vi.fn(async () => policy('restricted', [firstAccess])),
+      loadCriteriaList,
       savePolicy: vi.fn(),
     });
     await settle();
     vi.useFakeTimers();
-    store.searchSegments('Audience');
+    store.searchCriteriaList('Criteria');
     await flushAutosave(200);
 
-    expect(loadSegments).toHaveBeenCalledTimes(3);
-    expect(state().segmentsLoadingMore).toBe(true);
-    laterPage.resolve(page([segment('segment-2', 'Audience 2')], 2, false));
+    expect(loadCriteriaList).toHaveBeenCalledTimes(3);
+    expect(state().criteriaListLoadingMore).toBe(true);
+    laterPage.resolve(page([criteria('criteria-2', 'Access 2')], 2, false));
     await settle();
-    expect(state().segmentsLoadingMore).toBe(false);
-    expect(state().segments.map((item) => item.name)).toContain('Audience 2');
+    expect(state().criteriaListLoadingMore).toBe(false);
+    expect(state().criteriaList.map((item) => item.name)).toContain('Access 2');
   });
 
-  it('keeps a selected Audience that is outside the first list page', async () => {
+  it('keeps a selected Access that is outside the first list page', async () => {
     const { state } = startStore({
-      loadPolicy: vi.fn(async () => policy('restricted', [segment('later-page-segment', 'Tour members')])),
-      loadSegments: vi.fn(async () => page([segment('first-page-segment', 'Members')])),
+      loadPolicy: vi.fn(async () => policy('restricted', [criteria('later-page-criteria', 'Tour members')])),
+      loadCriteriaList: vi.fn(async () => page([criteria('first-page-criteria', 'Members')])),
       savePolicy: vi.fn(),
     });
     await settle();
 
-    expect(state().audienceSegmentIds).toEqual(['later-page-segment']);
-    expect(state().segments.map((item) => item.id)).toEqual(['later-page-segment', 'first-page-segment']);
+    expect(state().memberCriteriaIds).toEqual(['later-page-criteria']);
+    expect(state().criteriaList.map((item) => item.id)).toEqual(['later-page-criteria', 'first-page-criteria']);
     expect(state()).toMatchObject({ loading: false, targetStale: false });
   });
 
-  it('keeps a restricted policy without Audiences unchanged instead of saving it', async () => {
+  it('keeps a restricted policy without AccessList unchanged instead of saving it', async () => {
     const savePolicy = vi.fn<FileDownloadPolicyEditorAdapter['savePolicy']>();
     vi.useFakeTimers();
     const { state } = startStore({
       loadPolicy: vi.fn(async () => policy('restricted')),
-      loadSegments: vi.fn(async () => page([segment('active-segment', 'Members')])),
+      loadCriteriaList: vi.fn(async () => page([criteria('active-criteria', 'Members')])),
       savePolicy,
     });
     await settle();
     await flushAutosave();
 
     expect(savePolicy).not.toHaveBeenCalled();
-    expect(state()).toMatchObject({ audience: 'restricted', audienceSegmentIds: [], saved: false });
+    expect(state()).toMatchObject({ access: 'restricted', memberCriteriaIds: [], saved: false });
   });
 });

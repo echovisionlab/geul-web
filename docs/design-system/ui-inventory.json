@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "ed2f3d8c91b07adc56f0d453e607c2ac09961a8ed6651b806c545463cb88ff64",
+  "manifestHash": "782504acec8bd76fa6f9cbfe6499b05561f9757b7b5bc0f23ca3ee59dd639858",
   "counts": {
     "sourceFiles": 3942,
     "productionSourceFiles": 2341,
@@ -179,7 +179,6 @@
     "app/(general)/works/page.tsx",
     "app/_shared/page-route-fallback.ts",
     "app/admin/artists/page.tsx",
-    "app/admin/audience-segments/page.tsx",
     "app/admin/campaigns/[id]/analytics/page.tsx",
     "app/admin/campaigns/[id]/page.tsx",
     "app/admin/campaigns/page.tsx",
@@ -216,6 +215,7 @@
     "app/admin/map/themes/[id]/page.test.tsx",
     "app/admin/map/themes/[id]/page.tsx",
     "app/admin/map/themes/page.tsx",
+    "app/admin/member-criteria/page.tsx",
     "app/admin/menus/page.tsx",
     "app/admin/page.tsx",
     "app/admin/pages/page.tsx",
@@ -1005,6 +1005,20 @@
     "features/admin/mail-adapter/MailAdaptersPage.tsx",
     "features/admin/map-place/MapPlaceDetailPage.tsx",
     "features/admin/map-place/MapPlacesPage.tsx",
+    "features/admin/member-criteria/CreateMemberCriteriaButton.tsx",
+    "features/admin/member-criteria/MemberCriteriaArchiveFilter.test.tsx",
+    "features/admin/member-criteria/MemberCriteriaArchiveFilter.tsx",
+    "features/admin/member-criteria/MemberCriteriaConfig.test.ts",
+    "features/admin/member-criteria/MemberCriteriaConfig.ts",
+    "features/admin/member-criteria/MemberCriteriaConfigFields.tsx",
+    "features/admin/member-criteria/MemberCriteriaModalContext.tsx",
+    "features/admin/member-criteria/MemberCriteriaModals.test.tsx",
+    "features/admin/member-criteria/MemberCriteriaModals.tsx",
+    "features/admin/member-criteria/MemberCriteriaPageView.tsx",
+    "features/admin/member-criteria/MemberCriteriaRowMenu.tsx",
+    "features/admin/member-criteria/MemberCriteriaTableContent.tsx",
+    "features/admin/member-criteria/criteria-date.ts",
+    "features/admin/member-criteria/model.ts",
     "features/admin/modal-context.test.tsx",
     "features/admin/modal-context.tsx",
     "features/admin/post/CreatePostButton.tsx",
@@ -1031,20 +1045,6 @@
     "features/admin/release/ReleasesPageView.tsx",
     "features/admin/release/ReleasesTableContent.tsx",
     "features/admin/release/index.ts",
-    "features/admin/segment/AudienceArchiveFilter.test.tsx",
-    "features/admin/segment/AudienceArchiveFilter.tsx",
-    "features/admin/segment/CreateSegmentButton.tsx",
-    "features/admin/segment/SegmentConfig.test.ts",
-    "features/admin/segment/SegmentConfig.ts",
-    "features/admin/segment/SegmentConfigFields.tsx",
-    "features/admin/segment/SegmentModalContext.tsx",
-    "features/admin/segment/SegmentModals.test.tsx",
-    "features/admin/segment/SegmentModals.tsx",
-    "features/admin/segment/SegmentRowMenu.tsx",
-    "features/admin/segment/SegmentsPageView.tsx",
-    "features/admin/segment/SegmentsTableContent.tsx",
-    "features/admin/segment/model.ts",
-    "features/admin/segment/segment-date.ts",
     "features/admin/series/CreateSeriesButton.tsx",
     "features/admin/series/SeriesModalContext.tsx",
     "features/admin/series/SeriesModals.tsx",
@@ -2908,9 +2908,6 @@
     "lib/actions/admin.ts",
     "lib/actions/artist.edit-route.test.ts",
     "lib/actions/artist.ts",
-    "lib/actions/audience.lifecycle.test.ts",
-    "lib/actions/audience.ts",
-    "lib/actions/audience.update.test.ts",
     "lib/actions/campaign.test.ts",
     "lib/actions/campaign.ts",
     "lib/actions/category.ts",
@@ -2953,6 +2950,9 @@
     "lib/actions/map-place.ts",
     "lib/actions/map-theme.test.ts",
     "lib/actions/map-theme.ts",
+    "lib/actions/member-criteria.lifecycle.test.ts",
+    "lib/actions/member-criteria.ts",
+    "lib/actions/member-criteria.update.test.ts",
     "lib/actions/menu.ts",
     "lib/actions/newsletter.test.ts",
     "lib/actions/newsletter.ts",
@@ -3851,7 +3851,6 @@
     "stories/pages/AdminMenus.stories.tsx",
     "stories/pages/AdminUserEdit.stories.tsx",
     "stories/pages/ArtistEditorPage.stories.tsx",
-    "stories/pages/AudienceUsers.stories.tsx",
     "stories/pages/Boundaries.stories.tsx",
     "stories/pages/CampaignAnalytics.stories.tsx",
     "stories/pages/CampaignEditorPage.stories.tsx",
@@ -3879,6 +3878,7 @@
     "stories/pages/MapPlaces.stories.tsx",
     "stories/pages/MapThemeEditorPage.stories.tsx",
     "stories/pages/MapThemes.stories.tsx",
+    "stories/pages/MemberCriteriaUsers.stories.tsx",
     "stories/pages/MyAccountPages.stories.tsx",
     "stories/pages/MyLists.stories.tsx",
     "stories/pages/OAuth.stories.tsx",
@@ -4404,9 +4404,9 @@
         "features/admin/genre/GenresTableContent.tsx",
         "features/admin/label/LabelsTableContent.tsx",
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
+        "features/admin/member-criteria/MemberCriteriaConfigFields.tsx",
+        "features/admin/member-criteria/MemberCriteriaTableContent.tsx",
         "features/admin/release/ReleasesTableContent.tsx",
-        "features/admin/segment/SegmentConfigFields.tsx",
-        "features/admin/segment/SegmentsTableContent.tsx",
         "features/admin/style/StylesTableContent.tsx",
         "features/admin/tag/TagsTableContent.tsx",
         "features/admin/user-tag/UserTagsTableContent.tsx",
@@ -4710,13 +4710,13 @@
         "features/admin/genre/CreateGenreButton.tsx",
         "features/admin/label/CreateLabelButton.tsx",
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
+        "features/admin/member-criteria/CreateMemberCriteriaButton.tsx",
+        "features/admin/member-criteria/MemberCriteriaConfigFields.tsx",
         "features/admin/post/CreatePostButton.tsx",
         "features/admin/program-event/CreateProgramEventButton.tsx",
         "features/admin/program-event/CreateProgramEventSeriesButton.tsx",
         "features/admin/program-event/ProgramEventTypeManager.tsx",
         "features/admin/release/CreateReleaseButtonView.tsx",
-        "features/admin/segment/CreateSegmentButton.tsx",
-        "features/admin/segment/SegmentConfigFields.tsx",
         "features/admin/series/CreateSeriesButton.tsx",
         "features/admin/settings/OgImageSettingsPage.tsx",
         "features/admin/style/CreateStyleButton.tsx",
@@ -6096,11 +6096,11 @@
         "features/admin/email-template/EmailTemplatesPage.tsx",
         "features/admin/form/FormRowMenu.tsx",
         "features/admin/label/LabelRowMenu.tsx",
+        "features/admin/member-criteria/MemberCriteriaRowMenu.tsx",
         "features/admin/post/PostRowMenu.tsx",
         "features/admin/program-event/ProgramEventSeriesTableContent.tsx",
         "features/admin/program-event/ProgramEventsTableContent.tsx",
         "features/admin/release/ReleaseRowMenu.tsx",
-        "features/admin/segment/SegmentRowMenu.tsx",
         "features/admin/user-tag/UserTagRowMenu.tsx",
         "features/admin/user/UserRowMenu.tsx",
         "features/admin/work/WorksPageView.tsx",
@@ -10568,7 +10568,7 @@
         }
       ],
       "productionConsumers": [
-        "features/admin/segment/SegmentConfigFields.tsx",
+        "features/admin/member-criteria/MemberCriteriaConfigFields.tsx",
         "features/data-table/DateFilterInputRuntime.tsx",
         "features/form/AdminFormSubmissionsPage.tsx",
         "features/form/FormBuilder/ConditionEditor.tsx",
@@ -11243,7 +11243,7 @@
       "typeAliasEvidence": [],
       "productionConsumers": [
         "components/core/Input/MultiSelectComboboxView.tsx",
-        "features/admin/segment/SegmentConfigFields.tsx",
+        "features/admin/member-criteria/MemberCriteriaConfigFields.tsx",
         "features/admin/user/UserProfileFormSection.tsx",
         "features/artist/ArtistEditor/ArtistDetailEditor.tsx",
         "features/data-table/MultiFilterValueInput.tsx",
@@ -12418,8 +12418,8 @@
         "features/admin/email-template/EmailTemplateEditPage.tsx",
         "features/admin/email-template/EmailTemplatesPage.tsx",
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
+        "features/admin/member-criteria/MemberCriteriaModals.tsx",
         "features/admin/program-event/ProgramEventTypeManager.tsx",
-        "features/admin/segment/SegmentModals.tsx",
         "features/admin/user/AdminUserEditPage.tsx",
         "features/admin/user/UserModals.tsx",
         "features/admin/user/UserProfileFormSection.tsx",
@@ -12666,7 +12666,7 @@
       "productionConsumers": [
         "features/admin/MapThemeEditor/ThemeEditorCanvas.tsx",
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
-        "features/admin/segment/AudienceArchiveFilter.tsx",
+        "features/admin/member-criteria/MemberCriteriaArchiveFilter.tsx",
         "features/document-layout/ui/ContentLayoutFieldView.tsx",
         "features/form/FormField/fields/SwitchField.tsx",
         "features/form/FormSettingsContent.tsx",
@@ -12855,8 +12855,8 @@
         "features/admin/format/FormatModals.tsx",
         "features/admin/genre/GenreModals.tsx",
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
+        "features/admin/member-criteria/MemberCriteriaModals.tsx",
         "features/admin/program-event/ProgramEventTypeManager.tsx",
-        "features/admin/segment/SegmentModals.tsx",
         "features/admin/series/SeriesModals.tsx",
         "features/admin/settings/OgImageSettingsPage.tsx",
         "features/admin/style/StyleModals.tsx",
@@ -13489,14 +13489,14 @@
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/map-place/MapPlaceDetailPage.tsx",
         "features/admin/map-place/MapPlacesPage.tsx",
+        "features/admin/member-criteria/MemberCriteriaConfigFields.tsx",
+        "features/admin/member-criteria/MemberCriteriaModals.tsx",
         "features/admin/post/PostsTableContent.tsx",
         "features/admin/program-event/ProgramEventSeriesTableContent.tsx",
         "features/admin/program-event/ProgramEventTypeManager.tsx",
         "features/admin/program-event/ProgramEventsTableContent.tsx",
         "features/admin/release/ReleasesPageView.tsx",
         "features/admin/release/ReleasesTableContent.tsx",
-        "features/admin/segment/SegmentConfigFields.tsx",
-        "features/admin/segment/SegmentModals.tsx",
         "features/admin/series/SeriesTableContent.tsx",
         "features/admin/settings/OgImageSettingsPage.tsx",
         "features/admin/settings/SiteSettingsPage.tsx",
@@ -13921,7 +13921,6 @@
         "stories/pages/AdminEntities.stories.tsx",
         "stories/pages/AdminMenus.stories.tsx",
         "stories/pages/AdminUserEdit.stories.tsx",
-        "stories/pages/AudienceUsers.stories.tsx",
         "stories/pages/CampaignAnalytics.stories.tsx",
         "stories/pages/CampaignEditorPage.stories.tsx",
         "stories/pages/ClientEditor.stories.tsx",
@@ -13938,6 +13937,7 @@
         "stories/pages/MailAdapters.stories.tsx",
         "stories/pages/MapPlaces.stories.tsx",
         "stories/pages/MapThemes.stories.tsx",
+        "stories/pages/MemberCriteriaUsers.stories.tsx",
         "stories/pages/MyAccountPages.stories.tsx",
         "stories/pages/MyLists.stories.tsx",
         "stories/pages/OAuth.stories.tsx",
@@ -15282,7 +15282,7 @@
         "features/admin/email-template/EmailTemplatesPage.tsx",
         "features/admin/format/FormatModals.tsx",
         "features/admin/genre/GenreModals.tsx",
-        "features/admin/segment/SegmentModals.tsx",
+        "features/admin/member-criteria/MemberCriteriaModals.tsx",
         "features/admin/series/SeriesModals.tsx",
         "features/admin/style/StyleModals.tsx",
         "features/admin/tag/TagModals.tsx",
@@ -19632,7 +19632,7 @@
         "features/admin/email-template/EmailTemplateEditPage.tsx",
         "features/admin/email-template/EmailTemplatesPage.tsx",
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
-        "features/admin/segment/SegmentConfigFields.tsx",
+        "features/admin/member-criteria/MemberCriteriaConfigFields.tsx",
         "features/admin/settings/OgImageSettingsPage.tsx",
         "features/admin/user/auth/UserBanStateSection.tsx",
         "features/admin/user/auth/UserSsoProvidersSection.tsx",
@@ -19955,14 +19955,14 @@
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/map-place/MapPlaceDetailPage.tsx",
         "features/admin/map-place/MapPlacesPage.tsx",
+        "features/admin/member-criteria/MemberCriteriaModals.tsx",
+        "features/admin/member-criteria/MemberCriteriaTableContent.tsx",
         "features/admin/post/PostModals.tsx",
         "features/admin/post/PostsTableContent.tsx",
         "features/admin/program-event/ProgramEventSeriesTableContent.tsx",
         "features/admin/program-event/ProgramEventsTableContent.tsx",
         "features/admin/release/ReleaseModals.tsx",
         "features/admin/release/ReleasesTableContent.tsx",
-        "features/admin/segment/SegmentModals.tsx",
-        "features/admin/segment/SegmentsTableContent.tsx",
         "features/admin/series/SeriesModals.tsx",
         "features/admin/series/SeriesTableContent.tsx",
         "features/admin/settings/OgImageSettingsPage.tsx",
@@ -24745,6 +24745,468 @@
       ]
     },
     {
+      "file": "features/admin/member-criteria/CreateMemberCriteriaButton.tsx",
+      "owner": "Feature/admin",
+      "exports": [
+        {
+          "name": "CreateMemberCriteriaButton",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["features/admin/member-criteria/MemberCriteriaPageView.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["Button", "IconPlus"]
+    },
+    {
+      "file": "features/admin/member-criteria/MemberCriteriaArchiveFilter.tsx",
+      "owner": "Feature/admin",
+      "exports": [
+        {
+          "name": "MemberCriteriaArchiveFilterView",
+          "kind": "function"
+        },
+        {
+          "name": "MemberCriteriaArchiveFilter",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "MemberCriteriaArchiveFilterViewProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "includeArchived",
+              "optional": false,
+              "type": "boolean"
+            },
+            {
+              "name": "pending",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
+              "name": "onChange",
+              "optional": false,
+              "type": "(includeArchived: boolean) => void"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["features/admin/member-criteria/MemberCriteriaPageView.tsx"],
+      "catalogAdapters": [],
+      "tests": ["features/admin/member-criteria/MemberCriteriaArchiveFilter.test.tsx"],
+      "stories": [],
+      "composedJsx": ["MemberCriteriaArchiveFilterView", "Switch", "div"]
+    },
+    {
+      "file": "features/admin/member-criteria/MemberCriteriaConfigFields.tsx",
+      "owner": "Feature/admin",
+      "exports": [
+        {
+          "name": "MemberCriteriaConfigFields",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "MemberCriteriaConfigFieldsProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "kind",
+              "optional": false,
+              "type": "MemberCriteriaKind | null"
+            },
+            {
+              "name": "config",
+              "optional": false,
+              "type": "CriteriaConfigState"
+            },
+            {
+              "name": "onConfigChange",
+              "optional": false,
+              "type": "(config: CriteriaConfigState) => void"
+            },
+            {
+              "name": "estimatedCount",
+              "optional": false,
+              "type": "number | null"
+            },
+            {
+              "name": "onEstimate",
+              "optional": false,
+              "type": "() => void"
+            },
+            {
+              "name": "estimateLoading",
+              "optional": false,
+              "type": "boolean"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["features/admin/member-criteria/MemberCriteriaModals.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": [
+        "Button",
+        "DateInput",
+        "DsLayoutInline",
+        "DsLayoutInset",
+        "DsLayoutStack",
+        "IconUsers",
+        "LabelBadge",
+        "MultiSelect",
+        "SupportingText"
+      ]
+    },
+    {
+      "file": "features/admin/member-criteria/MemberCriteriaModalContext.tsx",
+      "owner": "Feature/admin",
+      "exports": [
+        {
+          "name": "CriteriaModalProvider",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "MemberCriteriaModalContextValue",
+          "extends": [],
+          "properties": [
+            {
+              "name": "lifecycleCriteria",
+              "optional": false,
+              "type": "MemberCriteriaRow | null"
+            },
+            {
+              "name": "lifecycleAction",
+              "optional": false,
+              "type": "'archive' | 'restore' | null"
+            },
+            {
+              "name": "openArchive",
+              "optional": false,
+              "type": "(criteria: MemberCriteriaRow) => void"
+            },
+            {
+              "name": "openRestore",
+              "optional": false,
+              "type": "(criteria: MemberCriteriaRow) => void"
+            },
+            {
+              "name": "closeLifecycle",
+              "optional": false,
+              "type": "() => void"
+            },
+            {
+              "name": "isCreateOpen",
+              "optional": false,
+              "type": "boolean"
+            },
+            {
+              "name": "openCreate",
+              "optional": false,
+              "type": "() => void"
+            },
+            {
+              "name": "closeCreate",
+              "optional": false,
+              "type": "() => void"
+            },
+            {
+              "name": "editingCriteriaId",
+              "optional": false,
+              "type": "string | null"
+            },
+            {
+              "name": "openEdit",
+              "optional": false,
+              "type": "(id: string) => void"
+            },
+            {
+              "name": "closeEdit",
+              "optional": false,
+              "type": "() => void"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": [
+        "features/admin/member-criteria/CreateMemberCriteriaButton.tsx",
+        "features/admin/member-criteria/MemberCriteriaModals.tsx",
+        "features/admin/member-criteria/MemberCriteriaPageView.tsx",
+        "features/admin/member-criteria/MemberCriteriaRowMenu.tsx"
+      ],
+      "catalogAdapters": [],
+      "tests": ["features/admin/member-criteria/MemberCriteriaModals.test.tsx"],
+      "stories": [],
+      "composedJsx": ["MemberCriteriaModalContext.Provider"]
+    },
+    {
+      "file": "features/admin/member-criteria/MemberCriteriaModals.tsx",
+      "owner": "Feature/admin",
+      "exports": [
+        {
+          "name": "MemberCriteriaModals",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "CriteriaEditBaseline",
+          "extends": [],
+          "properties": [
+            {
+              "name": "name",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "description",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "kind",
+              "optional": false,
+              "type": "MemberCriteriaKind"
+            },
+            {
+              "name": "config",
+              "optional": false,
+              "type": "CriteriaEditConfig"
+            }
+          ]
+        },
+        {
+          "name": "CriteriaEditDraft",
+          "extends": [],
+          "properties": [
+            {
+              "name": "name",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "description",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "kind",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "config",
+              "optional": false,
+              "type": "CriteriaEditConfig"
+            }
+          ]
+        },
+        {
+          "name": "MemberCriteriaModalsBindings",
+          "extends": [],
+          "properties": [
+            {
+              "name": "createMemberCriteriaAction",
+              "optional": false,
+              "type": "typeof createMemberCriteriaAction"
+            },
+            {
+              "name": "archiveMemberCriteriaAction",
+              "optional": false,
+              "type": "typeof archiveMemberCriteriaAction"
+            },
+            {
+              "name": "countMatchingMembersAction",
+              "optional": false,
+              "type": "typeof countMatchingMembersAction"
+            },
+            {
+              "name": "getMemberCriteriaAction",
+              "optional": false,
+              "type": "typeof getMemberCriteriaAction"
+            },
+            {
+              "name": "restoreMemberCriteriaAction",
+              "optional": false,
+              "type": "typeof restoreMemberCriteriaAction"
+            },
+            {
+              "name": "updateMemberCriteriaAction",
+              "optional": false,
+              "type": "typeof updateMemberCriteriaAction"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [
+        {
+          "name": "CriteriaEditConfig",
+          "type": "CriteriaConfigState"
+        }
+      ],
+      "productionConsumers": ["features/admin/member-criteria/MemberCriteriaPageView.tsx"],
+      "catalogAdapters": [],
+      "tests": ["features/admin/member-criteria/MemberCriteriaModals.test.tsx"],
+      "stories": [],
+      "composedJsx": [
+        "ConfirmationDialog",
+        "DsText",
+        "FormModal",
+        "LayoutInset",
+        "MemberCriteriaConfigFields",
+        "PageLoader",
+        "Select",
+        "TextInput"
+      ]
+    },
+    {
+      "file": "features/admin/member-criteria/MemberCriteriaPageView.tsx",
+      "owner": "Feature/admin",
+      "exports": [
+        {
+          "name": "MemberCriteriaPageView",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "Props",
+          "extends": ["extends ComponentProps<typeof MemberCriteriaTableContent>"],
+          "properties": [
+            {
+              "name": "title",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "searchParams",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "modalBindings",
+              "optional": true,
+              "type": "ComponentProps<typeof MemberCriteriaModals>"
+            },
+            {
+              "name": "description",
+              "optional": false,
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["app/admin/member-criteria/page.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": ["stories/pages/MemberCriteriaUsers.stories.tsx"],
+      "composedJsx": [
+        "AdminPageHeader",
+        "CreateMemberCriteriaButton",
+        "CriteriaModalProvider",
+        "MemberCriteriaArchiveFilter",
+        "MemberCriteriaModals",
+        "MemberCriteriaTableContent",
+        "ServerDataTable",
+        "ServerDataTablePaginationClient"
+      ]
+    },
+    {
+      "file": "features/admin/member-criteria/MemberCriteriaRowMenu.tsx",
+      "owner": "Feature/admin",
+      "exports": [
+        {
+          "name": "MemberCriteriaRowMenu",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "MemberCriteriaRowMenuProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "criteria",
+              "optional": false,
+              "type": "MemberCriteriaRow"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["features/admin/member-criteria/MemberCriteriaTableContent.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["IconArchive", "IconPencil", "IconRestore", "TableRowMenu"]
+    },
+    {
+      "file": "features/admin/member-criteria/MemberCriteriaTableContent.tsx",
+      "owner": "Feature/admin",
+      "exports": [
+        {
+          "name": "MemberCriteriaTableContent",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "MemberCriteriaTableContentProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "result",
+              "optional": false,
+              "type": "ServerDataTableSelectableSectionProps<MemberCriteriaRow>['result']"
+            },
+            {
+              "name": "searchPlaceholder",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "filterFields",
+              "optional": false,
+              "type": "ServerDataTableSelectableSectionProps<MemberCriteriaRow>['filterFields']"
+            },
+            {
+              "name": "sortFields",
+              "optional": false,
+              "type": "ServerDataTableSelectableSectionProps<MemberCriteriaRow>['sortFields']"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["features/admin/member-criteria/MemberCriteriaPageView.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": ["DateTime", "DsText", "LabelBadge", "MemberCriteriaRowMenu", "ServerDataTableSelectableSection"]
+    },
+    {
       "file": "features/admin/post/CreatePostButton.tsx",
       "owner": "Feature/admin",
       "exports": [
@@ -25821,468 +26283,6 @@
         "TextButton",
         "div"
       ]
-    },
-    {
-      "file": "features/admin/segment/AudienceArchiveFilter.tsx",
-      "owner": "Feature/admin",
-      "exports": [
-        {
-          "name": "AudienceArchiveFilterView",
-          "kind": "function"
-        },
-        {
-          "name": "AudienceArchiveFilter",
-          "kind": "function"
-        }
-      ],
-      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [
-        {
-          "name": "AudienceArchiveFilterViewProps",
-          "extends": [],
-          "properties": [
-            {
-              "name": "includeArchived",
-              "optional": false,
-              "type": "boolean"
-            },
-            {
-              "name": "pending",
-              "optional": true,
-              "type": "boolean"
-            },
-            {
-              "name": "onChange",
-              "optional": false,
-              "type": "(includeArchived: boolean) => void"
-            }
-          ]
-        }
-      ],
-      "typeAliasEvidence": [],
-      "productionConsumers": ["features/admin/segment/SegmentsPageView.tsx"],
-      "catalogAdapters": [],
-      "tests": ["features/admin/segment/AudienceArchiveFilter.test.tsx"],
-      "stories": [],
-      "composedJsx": ["AudienceArchiveFilterView", "Switch", "div"]
-    },
-    {
-      "file": "features/admin/segment/CreateSegmentButton.tsx",
-      "owner": "Feature/admin",
-      "exports": [
-        {
-          "name": "CreateSegmentButton",
-          "kind": "function"
-        }
-      ],
-      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [],
-      "typeAliasEvidence": [],
-      "productionConsumers": ["features/admin/segment/SegmentsPageView.tsx"],
-      "catalogAdapters": [],
-      "tests": [],
-      "stories": [],
-      "composedJsx": ["Button", "IconPlus"]
-    },
-    {
-      "file": "features/admin/segment/SegmentConfigFields.tsx",
-      "owner": "Feature/admin",
-      "exports": [
-        {
-          "name": "SegmentConfigFields",
-          "kind": "function"
-        }
-      ],
-      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [
-        {
-          "name": "SegmentConfigFieldsProps",
-          "extends": [],
-          "properties": [
-            {
-              "name": "segmentType",
-              "optional": false,
-              "type": "SegmentType | null"
-            },
-            {
-              "name": "config",
-              "optional": false,
-              "type": "SegmentConfigState"
-            },
-            {
-              "name": "onConfigChange",
-              "optional": false,
-              "type": "(config: SegmentConfigState) => void"
-            },
-            {
-              "name": "estimatedCount",
-              "optional": false,
-              "type": "number | null"
-            },
-            {
-              "name": "onEstimate",
-              "optional": false,
-              "type": "() => void"
-            },
-            {
-              "name": "estimateLoading",
-              "optional": false,
-              "type": "boolean"
-            }
-          ]
-        }
-      ],
-      "typeAliasEvidence": [],
-      "productionConsumers": ["features/admin/segment/SegmentModals.tsx"],
-      "catalogAdapters": [],
-      "tests": [],
-      "stories": [],
-      "composedJsx": [
-        "Button",
-        "DateInput",
-        "DsLayoutInline",
-        "DsLayoutInset",
-        "DsLayoutStack",
-        "IconUsers",
-        "LabelBadge",
-        "MultiSelect",
-        "SupportingText"
-      ]
-    },
-    {
-      "file": "features/admin/segment/SegmentModalContext.tsx",
-      "owner": "Feature/admin",
-      "exports": [
-        {
-          "name": "SegmentModalProvider",
-          "kind": "function"
-        }
-      ],
-      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [
-        {
-          "name": "SegmentModalContextValue",
-          "extends": [],
-          "properties": [
-            {
-              "name": "lifecycleSegment",
-              "optional": false,
-              "type": "AudienceSegmentRow | null"
-            },
-            {
-              "name": "lifecycleAction",
-              "optional": false,
-              "type": "'archive' | 'restore' | null"
-            },
-            {
-              "name": "openArchive",
-              "optional": false,
-              "type": "(segment: AudienceSegmentRow) => void"
-            },
-            {
-              "name": "openRestore",
-              "optional": false,
-              "type": "(segment: AudienceSegmentRow) => void"
-            },
-            {
-              "name": "closeLifecycle",
-              "optional": false,
-              "type": "() => void"
-            },
-            {
-              "name": "isCreateOpen",
-              "optional": false,
-              "type": "boolean"
-            },
-            {
-              "name": "openCreate",
-              "optional": false,
-              "type": "() => void"
-            },
-            {
-              "name": "closeCreate",
-              "optional": false,
-              "type": "() => void"
-            },
-            {
-              "name": "editingSegmentId",
-              "optional": false,
-              "type": "string | null"
-            },
-            {
-              "name": "openEdit",
-              "optional": false,
-              "type": "(id: string) => void"
-            },
-            {
-              "name": "closeEdit",
-              "optional": false,
-              "type": "() => void"
-            }
-          ]
-        }
-      ],
-      "typeAliasEvidence": [],
-      "productionConsumers": [
-        "features/admin/segment/CreateSegmentButton.tsx",
-        "features/admin/segment/SegmentModals.tsx",
-        "features/admin/segment/SegmentRowMenu.tsx",
-        "features/admin/segment/SegmentsPageView.tsx"
-      ],
-      "catalogAdapters": [],
-      "tests": ["features/admin/segment/SegmentModals.test.tsx"],
-      "stories": [],
-      "composedJsx": ["SegmentModalContext.Provider"]
-    },
-    {
-      "file": "features/admin/segment/SegmentModals.tsx",
-      "owner": "Feature/admin",
-      "exports": [
-        {
-          "name": "SegmentModals",
-          "kind": "function"
-        }
-      ],
-      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [
-        {
-          "name": "SegmentEditBaseline",
-          "extends": [],
-          "properties": [
-            {
-              "name": "name",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "description",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "segmentType",
-              "optional": false,
-              "type": "SegmentType"
-            },
-            {
-              "name": "config",
-              "optional": false,
-              "type": "SegmentEditConfig"
-            }
-          ]
-        },
-        {
-          "name": "SegmentEditDraft",
-          "extends": [],
-          "properties": [
-            {
-              "name": "name",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "description",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "segmentType",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "config",
-              "optional": false,
-              "type": "SegmentEditConfig"
-            }
-          ]
-        },
-        {
-          "name": "SegmentModalsBindings",
-          "extends": [],
-          "properties": [
-            {
-              "name": "createSegmentAction",
-              "optional": false,
-              "type": "typeof createSegmentAction"
-            },
-            {
-              "name": "archiveSegmentAction",
-              "optional": false,
-              "type": "typeof archiveSegmentAction"
-            },
-            {
-              "name": "estimateSegmentCountAction",
-              "optional": false,
-              "type": "typeof estimateSegmentCountAction"
-            },
-            {
-              "name": "getSegmentAction",
-              "optional": false,
-              "type": "typeof getSegmentAction"
-            },
-            {
-              "name": "restoreSegmentAction",
-              "optional": false,
-              "type": "typeof restoreSegmentAction"
-            },
-            {
-              "name": "updateSegmentAction",
-              "optional": false,
-              "type": "typeof updateSegmentAction"
-            }
-          ]
-        }
-      ],
-      "typeAliasEvidence": [
-        {
-          "name": "SegmentEditConfig",
-          "type": "SegmentConfigState"
-        }
-      ],
-      "productionConsumers": ["features/admin/segment/SegmentsPageView.tsx"],
-      "catalogAdapters": [],
-      "tests": ["features/admin/segment/SegmentModals.test.tsx"],
-      "stories": [],
-      "composedJsx": [
-        "ConfirmationDialog",
-        "DsText",
-        "FormModal",
-        "LayoutInset",
-        "PageLoader",
-        "SegmentConfigFields",
-        "Select",
-        "TextInput"
-      ]
-    },
-    {
-      "file": "features/admin/segment/SegmentRowMenu.tsx",
-      "owner": "Feature/admin",
-      "exports": [
-        {
-          "name": "SegmentRowMenu",
-          "kind": "function"
-        }
-      ],
-      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [
-        {
-          "name": "SegmentRowMenuProps",
-          "extends": [],
-          "properties": [
-            {
-              "name": "segment",
-              "optional": false,
-              "type": "AudienceSegmentRow"
-            }
-          ]
-        }
-      ],
-      "typeAliasEvidence": [],
-      "productionConsumers": ["features/admin/segment/SegmentsTableContent.tsx"],
-      "catalogAdapters": [],
-      "tests": [],
-      "stories": [],
-      "composedJsx": ["IconArchive", "IconPencil", "IconRestore", "TableRowMenu"]
-    },
-    {
-      "file": "features/admin/segment/SegmentsPageView.tsx",
-      "owner": "Feature/admin",
-      "exports": [
-        {
-          "name": "SegmentsPageView",
-          "kind": "function"
-        }
-      ],
-      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [
-        {
-          "name": "Props",
-          "extends": ["extends ComponentProps<typeof SegmentsTableContent>"],
-          "properties": [
-            {
-              "name": "title",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "searchParams",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "modalBindings",
-              "optional": true,
-              "type": "ComponentProps<typeof SegmentModals>"
-            },
-            {
-              "name": "description",
-              "optional": false,
-              "type": "string"
-            }
-          ]
-        }
-      ],
-      "typeAliasEvidence": [],
-      "productionConsumers": ["app/admin/audience-segments/page.tsx"],
-      "catalogAdapters": [],
-      "tests": [],
-      "stories": ["stories/pages/AudienceUsers.stories.tsx"],
-      "composedJsx": [
-        "AdminPageHeader",
-        "AudienceArchiveFilter",
-        "CreateSegmentButton",
-        "SegmentModalProvider",
-        "SegmentModals",
-        "SegmentsTableContent",
-        "ServerDataTable",
-        "ServerDataTablePaginationClient"
-      ]
-    },
-    {
-      "file": "features/admin/segment/SegmentsTableContent.tsx",
-      "owner": "Feature/admin",
-      "exports": [
-        {
-          "name": "SegmentsTableContent",
-          "kind": "function"
-        }
-      ],
-      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [
-        {
-          "name": "SegmentsTableContentProps",
-          "extends": [],
-          "properties": [
-            {
-              "name": "result",
-              "optional": false,
-              "type": "ServerDataTableSelectableSectionProps<AudienceSegmentRow>['result']"
-            },
-            {
-              "name": "searchPlaceholder",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "filterFields",
-              "optional": false,
-              "type": "ServerDataTableSelectableSectionProps<AudienceSegmentRow>['filterFields']"
-            },
-            {
-              "name": "sortFields",
-              "optional": false,
-              "type": "ServerDataTableSelectableSectionProps<AudienceSegmentRow>['sortFields']"
-            }
-          ]
-        }
-      ],
-      "typeAliasEvidence": [],
-      "productionConsumers": ["features/admin/segment/SegmentsPageView.tsx"],
-      "catalogAdapters": [],
-      "tests": [],
-      "stories": [],
-      "composedJsx": ["DateTime", "DsText", "LabelBadge", "SegmentRowMenu", "ServerDataTableSelectableSection"]
     },
     {
       "file": "features/admin/series/CreateSeriesButton.tsx",
@@ -27645,11 +27645,11 @@
         "features/admin/genre/GenresPageView.tsx",
         "features/admin/label/LabelsPageView.tsx",
         "features/admin/map-place/MapPlacesPage.tsx",
+        "features/admin/member-criteria/MemberCriteriaPageView.tsx",
         "features/admin/post/PostsPageView.tsx",
         "features/admin/program-event/ProgramEventSeriesPageView.tsx",
         "features/admin/program-event/ProgramEventsPageView.tsx",
         "features/admin/release/ReleasesPageView.tsx",
-        "features/admin/segment/SegmentsPageView.tsx",
         "features/admin/series/SeriesPageView.tsx",
         "features/admin/style/StylesPageView.tsx",
         "features/admin/tag/TagsPageView.tsx",
@@ -28522,7 +28522,7 @@
       "productionConsumers": ["app/admin/users/page.tsx"],
       "catalogAdapters": [],
       "tests": [],
-      "stories": ["stories/pages/AudienceUsers.stories.tsx"],
+      "stories": ["stories/pages/MemberCriteriaUsers.stories.tsx"],
       "composedJsx": [
         "AdminPageHeader",
         "ServerDataTable",
@@ -31381,7 +31381,7 @@
               "type": "DateTimeValue"
             },
             {
-              "name": "audience",
+              "name": "criteria",
               "optional": false,
               "type": "string"
             },
@@ -31398,7 +31398,7 @@
             {
               "name": "labels",
               "optional": false,
-              "type": "{ title: string; description: string; date: string; time: string; previousMonth: string; nextMonth: string; hours: string; minutes: string; audience: string; allMatchingUsersWarning: string; schedule: string; }"
+              "type": "{ title: string; description: string; date: string; time: string; previousMonth: string; nextMonth: string; hours: string; minutes: string; criteria: string; allMatchingUsersWarning: string; schedule: string; }"
             },
             {
               "name": "onClose",
@@ -31748,7 +31748,7 @@
               "type": "string"
             },
             {
-              "name": "audience",
+              "name": "criteria",
               "optional": false,
               "type": "string"
             },
@@ -31789,7 +31789,7 @@
               "type": "DateTimeValue"
             },
             {
-              "name": "audience",
+              "name": "criteria",
               "optional": false,
               "type": "string"
             },
@@ -31860,7 +31860,7 @@
       "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
       "propsEvidence": [
         {
-          "name": "ActiveCampaignAudience",
+          "name": "ActiveCampaignCriteria",
           "extends": [],
           "properties": [
             {
@@ -31874,7 +31874,7 @@
               "type": "string"
             },
             {
-              "name": "segmentTypeLabel",
+              "name": "kindLabel",
               "optional": false,
               "type": "string"
             }
@@ -31887,10 +31887,10 @@
             {
               "name": "targetMode",
               "optional": false,
-              "type": "CampaignTargetMode.ALL | CampaignTargetMode.SEGMENT"
+              "type": "CampaignTargetMode.ALL | CampaignTargetMode.MEMBER_CRITERIA"
             },
             {
-              "name": "segmentId",
+              "name": "memberCriteriaId",
               "optional": false,
               "type": "string | null"
             }
@@ -31901,9 +31901,9 @@
           "extends": ["extends CampaignTargetSelection"],
           "properties": [
             {
-              "name": "audiences",
+              "name": "criteriaOptions",
               "optional": false,
-              "type": "ActiveCampaignAudience[]"
+              "type": "ActiveCampaignCriteria[]"
             },
             {
               "name": "disabled",
@@ -32150,10 +32150,10 @@
         "features/admin/label/LabelRowMenu.tsx",
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/map-place/MapPlacesPage.tsx",
+        "features/admin/member-criteria/MemberCriteriaModals.tsx",
         "features/admin/post/PostModals.tsx",
         "features/admin/program-event/ProgramEventTypeManager.tsx",
         "features/admin/release/ReleaseModals.tsx",
-        "features/admin/segment/SegmentModals.tsx",
         "features/admin/series/SeriesModals.tsx",
         "features/admin/style/StyleModals.tsx",
         "features/admin/tag/TagModals.tsx",
@@ -33447,11 +33447,11 @@
         "features/admin/format/FormatsPageView.tsx",
         "features/admin/genre/GenresPageView.tsx",
         "features/admin/label/LabelsPageView.tsx",
+        "features/admin/member-criteria/MemberCriteriaPageView.tsx",
         "features/admin/post/PostsPageView.tsx",
         "features/admin/program-event/ProgramEventSeriesPageView.tsx",
         "features/admin/program-event/ProgramEventsPageView.tsx",
         "features/admin/release/ReleasesPageView.tsx",
-        "features/admin/segment/SegmentsPageView.tsx",
         "features/admin/series/SeriesPageView.tsx",
         "features/admin/style/StylesPageView.tsx",
         "features/admin/tag/TagsPageView.tsx",
@@ -33760,7 +33760,7 @@
         "stories/pages/AdminCommunicationLists.stories.tsx",
         "stories/pages/AdminContent.stories.tsx",
         "stories/pages/AdminEntities.stories.tsx",
-        "stories/pages/AudienceUsers.stories.tsx",
+        "stories/pages/MemberCriteriaUsers.stories.tsx",
         "stories/pages/ProgramEventLists.stories.tsx",
         "stories/pages/Taxonomy.stories.tsx",
         "stories/pages/UserProfileFull.stories.tsx"
@@ -33842,11 +33842,11 @@
         "features/admin/format/FormatsPageView.tsx",
         "features/admin/genre/GenresPageView.tsx",
         "features/admin/label/LabelsPageView.tsx",
+        "features/admin/member-criteria/MemberCriteriaPageView.tsx",
         "features/admin/post/PostsPageView.tsx",
         "features/admin/program-event/ProgramEventSeriesPageView.tsx",
         "features/admin/program-event/ProgramEventsPageView.tsx",
         "features/admin/release/ReleasesPageView.tsx",
-        "features/admin/segment/SegmentsPageView.tsx",
         "features/admin/series/SeriesPageView.tsx",
         "features/admin/style/StylesPageView.tsx",
         "features/admin/tag/TagsPageView.tsx",
@@ -34132,11 +34132,11 @@
         "features/admin/format/FormatsTableContent.tsx",
         "features/admin/genre/GenresTableContent.tsx",
         "features/admin/label/LabelsTableContent.tsx",
+        "features/admin/member-criteria/MemberCriteriaTableContent.tsx",
         "features/admin/post/PostsTableContent.tsx",
         "features/admin/program-event/ProgramEventSeriesTableContent.tsx",
         "features/admin/program-event/ProgramEventsTableContent.tsx",
         "features/admin/release/ReleasesTableContent.tsx",
-        "features/admin/segment/SegmentsTableContent.tsx",
         "features/admin/series/SeriesTableContent.tsx",
         "features/admin/style/StylesTableContent.tsx",
         "features/admin/tag/TagsTableContent.tsx",
@@ -34241,11 +34241,11 @@
         "features/admin/genre/GenresTableContent.tsx",
         "features/admin/map-place/MapPlaceDetailPage.tsx",
         "features/admin/map-place/MapPlacesPage.tsx",
+        "features/admin/member-criteria/MemberCriteriaTableContent.tsx",
         "features/admin/post/PostsTableContent.tsx",
         "features/admin/program-event/ProgramEventSeriesTableContent.tsx",
         "features/admin/program-event/ProgramEventsTableContent.tsx",
         "features/admin/release/ReleasesTableContent.tsx",
-        "features/admin/segment/SegmentsTableContent.tsx",
         "features/admin/series/SeriesTableContent.tsx",
         "features/admin/style/StylesTableContent.tsx",
         "features/admin/tag/TagsTableContent.tsx",
@@ -70893,7 +70893,7 @@
         "features/admin/label/LabelRowMenu.tsx",
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/map-place/MapPlaceDetailPage.tsx",
-        "features/admin/segment/SegmentModals.tsx",
+        "features/admin/member-criteria/MemberCriteriaModals.tsx",
         "features/admin/settings/OgImageSettingsPage.tsx",
         "features/admin/settings/SiteSettingsPage.tsx",
         "features/admin/user/AdminUserEditPage.tsx",
@@ -76699,6 +76699,17 @@
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/map-place/MapPlaceDetailPage.tsx",
         "features/admin/map-place/MapPlacesPage.tsx",
+        "features/admin/member-criteria/CreateMemberCriteriaButton.tsx",
+        "features/admin/member-criteria/MemberCriteriaArchiveFilter.tsx",
+        "features/admin/member-criteria/MemberCriteriaConfig.ts",
+        "features/admin/member-criteria/MemberCriteriaConfigFields.tsx",
+        "features/admin/member-criteria/MemberCriteriaModalContext.tsx",
+        "features/admin/member-criteria/MemberCriteriaModals.tsx",
+        "features/admin/member-criteria/MemberCriteriaPageView.tsx",
+        "features/admin/member-criteria/MemberCriteriaRowMenu.tsx",
+        "features/admin/member-criteria/MemberCriteriaTableContent.tsx",
+        "features/admin/member-criteria/criteria-date.ts",
+        "features/admin/member-criteria/model.ts",
         "features/admin/modal-context.tsx",
         "features/admin/post/CreatePostButton.tsx",
         "features/admin/post/PostModalContext.tsx",
@@ -76722,17 +76733,6 @@
         "features/admin/release/ReleasesPageView.tsx",
         "features/admin/release/ReleasesTableContent.tsx",
         "features/admin/release/index.ts",
-        "features/admin/segment/AudienceArchiveFilter.tsx",
-        "features/admin/segment/CreateSegmentButton.tsx",
-        "features/admin/segment/SegmentConfig.ts",
-        "features/admin/segment/SegmentConfigFields.tsx",
-        "features/admin/segment/SegmentModalContext.tsx",
-        "features/admin/segment/SegmentModals.tsx",
-        "features/admin/segment/SegmentRowMenu.tsx",
-        "features/admin/segment/SegmentsPageView.tsx",
-        "features/admin/segment/SegmentsTableContent.tsx",
-        "features/admin/segment/model.ts",
-        "features/admin/segment/segment-date.ts",
         "features/admin/series/CreateSeriesButton.tsx",
         "features/admin/series/SeriesModalContext.tsx",
         "features/admin/series/SeriesModals.tsx",
@@ -76866,6 +76866,14 @@
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/map-place/MapPlaceDetailPage.tsx",
         "features/admin/map-place/MapPlacesPage.tsx",
+        "features/admin/member-criteria/CreateMemberCriteriaButton.tsx",
+        "features/admin/member-criteria/MemberCriteriaArchiveFilter.tsx",
+        "features/admin/member-criteria/MemberCriteriaConfigFields.tsx",
+        "features/admin/member-criteria/MemberCriteriaModalContext.tsx",
+        "features/admin/member-criteria/MemberCriteriaModals.tsx",
+        "features/admin/member-criteria/MemberCriteriaPageView.tsx",
+        "features/admin/member-criteria/MemberCriteriaRowMenu.tsx",
+        "features/admin/member-criteria/MemberCriteriaTableContent.tsx",
         "features/admin/post/CreatePostButton.tsx",
         "features/admin/post/PostModalContext.tsx",
         "features/admin/post/PostModals.tsx",
@@ -76886,14 +76894,6 @@
         "features/admin/release/ReleaseRowMenu.tsx",
         "features/admin/release/ReleasesPageView.tsx",
         "features/admin/release/ReleasesTableContent.tsx",
-        "features/admin/segment/AudienceArchiveFilter.tsx",
-        "features/admin/segment/CreateSegmentButton.tsx",
-        "features/admin/segment/SegmentConfigFields.tsx",
-        "features/admin/segment/SegmentModalContext.tsx",
-        "features/admin/segment/SegmentModals.tsx",
-        "features/admin/segment/SegmentRowMenu.tsx",
-        "features/admin/segment/SegmentsPageView.tsx",
-        "features/admin/segment/SegmentsTableContent.tsx",
         "features/admin/series/CreateSeriesButton.tsx",
         "features/admin/series/SeriesModalContext.tsx",
         "features/admin/series/SeriesModals.tsx",
@@ -76967,12 +76967,12 @@
         "features/admin/email-template/delete-error-message.test.ts",
         "features/admin/email-template/email-template-variable-description.test.ts",
         "features/admin/label/LabelRowMenu.test.tsx",
+        "features/admin/member-criteria/MemberCriteriaArchiveFilter.test.tsx",
+        "features/admin/member-criteria/MemberCriteriaConfig.test.ts",
+        "features/admin/member-criteria/MemberCriteriaModals.test.tsx",
         "features/admin/modal-context.test.tsx",
         "features/admin/post/PostRowMenu.test.tsx",
         "features/admin/program-event/ProgramEventTypeManager.test.tsx",
-        "features/admin/segment/AudienceArchiveFilter.test.tsx",
-        "features/admin/segment/SegmentConfig.test.ts",
-        "features/admin/segment/SegmentModals.test.tsx",
         "features/admin/taxonomy-description-clear.test.tsx",
         "features/admin/ui/AdminNavigation/AdminNavigationView.test.tsx",
         "features/admin/ui/AdminPageHeader/AdminPageHeader.test.tsx",
@@ -76982,7 +76982,6 @@
       ],
       "directlyImportingRoutes": [
         "/admin/artists",
-        "/admin/audience-segments",
         "/admin/campaigns",
         "/admin/categories",
         "/admin/clients/[id]",
@@ -76999,6 +76998,7 @@
         "/admin/map/places",
         "/admin/map/themes/[id]",
         "/admin/map/themes",
+        "/admin/member-criteria",
         "/admin",
         "/admin/pages",
         "/admin/posts",
@@ -77387,7 +77387,6 @@
       "directlyImportingRoutes": [
         "/series/[idOrSlug]",
         "/admin/artists",
-        "/admin/audience-segments",
         "/admin/campaigns",
         "/admin/categories",
         "/admin/clients",
@@ -77397,6 +77396,7 @@
         "/admin/forms",
         "/admin/genres",
         "/admin/labels",
+        "/admin/member-criteria",
         "/admin/pages",
         "/admin/posts",
         "/admin/releases",
@@ -87422,9 +87422,9 @@
       "component": "DeliveryPreview",
       "variants": [
         {
-          "name": "Audience",
+          "name": "Target",
           "args": null,
-          "preview": "http://localhost:6010/?path=/story/feature-campaign-delivery-controls--audience"
+          "preview": "http://localhost:6010/?path=/story/feature-campaign-delivery-controls--target"
         },
         {
           "name": "AllMatching",
@@ -88593,67 +88593,6 @@
         "stories/pages/fixtures/editor-pages.ts",
         "stories/pages/fixtures/use-document-editor.tsx",
         "stories/shared/preview-navigation.ts"
-      ]
-    },
-    {
-      "file": "stories/pages/AudienceUsers.stories.tsx",
-      "title": "Pages/Admin/Audience and Users",
-      "component": "AudienceUsersPreview",
-      "variants": [
-        {
-          "name": "Users",
-          "args": null,
-          "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--users"
-        },
-        {
-          "name": "UsersEmpty",
-          "args": "{ state: 'empty' }",
-          "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--users-empty"
-        },
-        {
-          "name": "UsersFailed",
-          "args": "{ state: 'failed' }",
-          "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--users-failed"
-        },
-        {
-          "name": "UsersActionFailed",
-          "args": "{ state: 'action-failed' }",
-          "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--users-action-failed"
-        },
-        {
-          "name": "Segments",
-          "args": "{ domain: 'segments' }",
-          "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--segments"
-        },
-        {
-          "name": "SegmentsEmpty",
-          "args": "{ domain: 'segments', state: 'empty' }",
-          "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--segments-empty"
-        },
-        {
-          "name": "SegmentsFailed",
-          "args": "{ domain: 'segments', state: 'failed' }",
-          "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--segments-failed"
-        },
-        {
-          "name": "SegmentsActionFailed",
-          "args": "{ domain: 'segments', state: 'action-failed' }",
-          "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--segments-action-failed"
-        },
-        {
-          "name": "Phone",
-          "args": null,
-          "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--phone"
-        }
-      ],
-      "importedSources": [
-        "components/core/Layout/index.ts",
-        "features/admin/segment/SegmentsPageView.tsx",
-        "features/admin/user/UsersPageView.tsx",
-        "features/data-table/ServerDataTable/ServerDataTableNavigation.tsx",
-        "lib/actions/action-result.ts",
-        "lib/utils/table-url.ts",
-        "stories/pages/fixtures/table-query.ts"
       ]
     },
     {
@@ -90165,6 +90104,67 @@
         "features/admin/MapThemeEditor/MapThemeListPageView.tsx",
         "lib/types/map-theme/schema.ts",
         "stories/pages/fixtures/operations-a11y.ts"
+      ]
+    },
+    {
+      "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+      "title": "Pages/Admin/Member Criteria and Users",
+      "component": "CriteriaUsersPreview",
+      "variants": [
+        {
+          "name": "Users",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--users"
+        },
+        {
+          "name": "UsersEmpty",
+          "args": "{ state: 'empty' }",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--users-empty"
+        },
+        {
+          "name": "UsersFailed",
+          "args": "{ state: 'failed' }",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--users-failed"
+        },
+        {
+          "name": "UsersActionFailed",
+          "args": "{ state: 'action-failed' }",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--users-action-failed"
+        },
+        {
+          "name": "MemberCriteria",
+          "args": "{ domain: 'memberCriteria' }",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--member-criteria"
+        },
+        {
+          "name": "MemberCriteriaEmpty",
+          "args": "{ domain: 'memberCriteria', state: 'empty' }",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--member-criteria-empty"
+        },
+        {
+          "name": "MemberCriteriaFailed",
+          "args": "{ domain: 'memberCriteria', state: 'failed' }",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--member-criteria-failed"
+        },
+        {
+          "name": "MemberCriteriaActionFailed",
+          "args": "{ domain: 'memberCriteria', state: 'action-failed' }",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--member-criteria-action-failed"
+        },
+        {
+          "name": "Phone",
+          "args": null,
+          "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--phone"
+        }
+      ],
+      "importedSources": [
+        "components/core/Layout/index.ts",
+        "features/admin/member-criteria/MemberCriteriaPageView.tsx",
+        "features/admin/user/UsersPageView.tsx",
+        "features/data-table/ServerDataTable/ServerDataTableNavigation.tsx",
+        "lib/actions/action-result.ts",
+        "lib/utils/table-url.ts",
+        "stories/pages/fixtures/table-query.ts"
       ]
     },
     {
@@ -94965,59 +94965,6 @@
       ]
     },
     {
-      "route": "/admin/audience-segments",
-      "file": "app/admin/audience-segments/page.tsx",
-      "family": "Admin",
-      "sourceKind": "renders JSX",
-      "imports": [
-        {
-          "file": "features/admin/segment/SegmentsPageView.tsx",
-          "symbols": ["SegmentsPageView"]
-        },
-        {
-          "file": "lib/api/query-result.ts",
-          "symbols": ["unwrapQueryResult"]
-        },
-        {
-          "file": "features/data-table/ServerDataTable/index.ts",
-          "symbols": []
-        },
-        {
-          "file": "lib/actions/audience.ts",
-          "symbols": ["listSegmentsAdminAction"]
-        },
-        {
-          "file": "lib/types/common/query.ts",
-          "symbols": ["toPaginatedListInput"]
-        },
-        {
-          "file": "lib/utils/table-url.ts",
-          "symbols": ["parseTableQuery"]
-        }
-      ],
-      "reexports": [],
-      "composedJsx": ["SegmentsPageView"],
-      "controllerEvidence": [
-        "getTranslations",
-        "listSegmentsAdminAction({\n    ...toPaginatedListInput(query),\n    includeArchived: params.get('includeArchived') === 'true',\n  }).then",
-        "params.get"
-      ],
-      "inheritedLayouts": ["app/admin/layout.tsx", "app/layout.tsx"],
-      "directStoryImports": ["stories/pages/AudienceUsers.stories.tsx"],
-      "coverageNote": "Import relationship only; no route behavior, permission, interaction, or nested story coverage is inferred.",
-      "interactivePreviews": [
-        {
-          "route": "/admin/audience-segments",
-          "storyTitle": "Pages/Admin/Audience and Users",
-          "variant": "Segments",
-          "coverage": "page-view",
-          "scope": "Actual production segment PageView, query controls, estimate/create/edit/archive/restore dialogs with typed local transport. Server evaluation, relation constraints and persistence remain outside.",
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--segments"
-        }
-      ]
-    },
-    {
       "route": "/admin/campaigns/[id]/analytics",
       "file": "app/admin/campaigns/[id]/analytics/page.tsx",
       "family": "Admin",
@@ -96096,6 +96043,59 @@
       ]
     },
     {
+      "route": "/admin/member-criteria",
+      "file": "app/admin/member-criteria/page.tsx",
+      "family": "Admin",
+      "sourceKind": "renders JSX",
+      "imports": [
+        {
+          "file": "features/admin/member-criteria/MemberCriteriaPageView.tsx",
+          "symbols": ["MemberCriteriaPageView"]
+        },
+        {
+          "file": "lib/api/query-result.ts",
+          "symbols": ["unwrapQueryResult"]
+        },
+        {
+          "file": "features/data-table/ServerDataTable/index.ts",
+          "symbols": []
+        },
+        {
+          "file": "lib/actions/member-criteria.ts",
+          "symbols": ["listMemberCriteriaAdminAction"]
+        },
+        {
+          "file": "lib/types/common/query.ts",
+          "symbols": ["toPaginatedListInput"]
+        },
+        {
+          "file": "lib/utils/table-url.ts",
+          "symbols": ["parseTableQuery"]
+        }
+      ],
+      "reexports": [],
+      "composedJsx": ["MemberCriteriaPageView"],
+      "controllerEvidence": [
+        "getTranslations",
+        "listMemberCriteriaAdminAction({\n    ...toPaginatedListInput(query),\n    includeArchived: params.get('includeArchived') === 'true',\n  }).then",
+        "params.get"
+      ],
+      "inheritedLayouts": ["app/admin/layout.tsx", "app/layout.tsx"],
+      "directStoryImports": ["stories/pages/MemberCriteriaUsers.stories.tsx"],
+      "coverageNote": "Import relationship only; no route behavior, permission, interaction, or nested story coverage is inferred.",
+      "interactivePreviews": [
+        {
+          "route": "/admin/member-criteria",
+          "storyTitle": "Pages/Admin/Member Criteria and Users",
+          "variant": "MemberCriteria",
+          "coverage": "page-view",
+          "scope": "Actual production Member criteria PageView, query controls, count/create/edit/archive/restore dialogs with typed local transport. Server evaluation, relation constraints and persistence remain outside.",
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--member-criteria"
+        }
+      ]
+    },
+    {
       "route": "/admin/menus",
       "file": "app/admin/menus/page.tsx",
       "family": "Admin",
@@ -96921,17 +96921,17 @@
       "composedJsx": ["UsersPageView"],
       "controllerEvidence": ["getTranslations"],
       "inheritedLayouts": ["app/admin/layout.tsx", "app/layout.tsx"],
-      "directStoryImports": ["stories/pages/AudienceUsers.stories.tsx"],
+      "directStoryImports": ["stories/pages/MemberCriteriaUsers.stories.tsx"],
       "coverageNote": "Import relationship only; no route behavior, permission, interaction, or nested story coverage is inferred.",
       "interactivePreviews": [
         {
           "route": "/admin/users",
-          "storyTitle": "Pages/Admin/Audience and Users",
+          "storyTitle": "Pages/Admin/Member Criteria and Users",
           "variant": "Users",
           "coverage": "page-view",
           "scope": "Actual production users PageView, table and original modal controllers with local ban/role/unsubscribe/delete callbacks. No real account mutations; server authorization and identity invariants are outside.",
-          "file": "stories/pages/AudienceUsers.stories.tsx",
-          "preview": "http://localhost:6010/?path=/story/pages-admin-audience-and-users--users"
+          "file": "stories/pages/MemberCriteriaUsers.stories.tsx",
+          "preview": "http://localhost:6010/?path=/story/pages-admin-member-criteria-and-users--users"
         }
       ]
     },
@@ -97890,17 +97890,17 @@
     },
     {
       "route": "/admin/users",
-      "storyTitle": "Pages/Admin/Audience and Users",
+      "storyTitle": "Pages/Admin/Member Criteria and Users",
       "variant": "Users",
       "coverage": "page-view",
       "scope": "Actual production users PageView, table and original modal controllers with local ban/role/unsubscribe/delete callbacks. No real account mutations; server authorization and identity invariants are outside."
     },
     {
-      "route": "/admin/audience-segments",
-      "storyTitle": "Pages/Admin/Audience and Users",
-      "variant": "Segments",
+      "route": "/admin/member-criteria",
+      "storyTitle": "Pages/Admin/Member Criteria and Users",
+      "variant": "MemberCriteria",
       "coverage": "page-view",
-      "scope": "Actual production segment PageView, query controls, estimate/create/edit/archive/restore dialogs with typed local transport. Server evaluation, relation constraints and persistence remain outside."
+      "scope": "Actual production Member criteria PageView, query controls, count/create/edit/archive/restore dialogs with typed local transport. Server evaluation, relation constraints and persistence remain outside."
     },
     {
       "route": "/admin/settings/og-image",

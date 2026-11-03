@@ -290,8 +290,8 @@ Migrated (43 modules): the public form runtime (`lib/form/validation-zod.ts`, `b
 `lib/types/trpc/schema.ts` and the release/user schemas built on it, `lib/types/common/social-links.ts`,
 `lib/types/map-block/schema.ts`, all 25 page-block schema modules under `features/page/blocks`, the collaboration
 protocol (`lib/collab/block-room-bootstrap.ts`, `block-room-protocol.ts`, `TypedMetaMap.ts`, the form and
-campaign field schemas), `lib/upload/upload-session-store.ts`, and the audience-segment date picker
-(`features/admin/segment/segment-date.ts`, extracted from `SegmentConfigFields`). `TypedMetaMap` and
+campaign field schemas), `lib/upload/upload-session-store.ts`, and the Member criteria date picker
+(`features/admin/member-criteria/criteria-date.ts`, extracted from `MemberCriteriaConfigFields`). `TypedMetaMap` and
 `useCollaborativeTypedState` accept any `zod/v4/core` object schema, because map-theme and metadata-AI maps use
 Common's classic schemas. Two moves avoided a migration: `createMapThemeInputSchema` (only used by the
 create-theme server action; it extends Common's classic schemas) moved to `lib/types/map-theme/input-schema.ts`
@@ -338,11 +338,11 @@ below loaded the same 89.6 kB classic zod chunk (core, classic API and all 40+ l
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------: | --------: | -------: | ------------------------------------------------------------------------------------- |
 | `/my`, `/my/artists`, `/my/posts`, `/my/profile`, `/my/security`, `/my/series`, `/my/settings`, `/my/works`                                                                                           |       89.6 |         0 |    −89.6 | none                                                                                  |
 | `/admin/clients/[id]`, `/admin/files`, `/admin/settings`, `/admin/translations`, `/admin/translations/jobs`, `/admin/users/[id]`, `/admin/map/themes`                                                 |       89.6 |         0 |    −89.6 | none                                                                                  |
-| `/forms/[slug]`, `/s/[token]`, `/admin/audience-segments`                                                                                                                                             |       89.6 |      27.1 |    −62.5 | `zod/mini` 2, core 24.4, English locale 0.7                                           |
+| `/forms/[slug]`, `/s/[token]`, `/admin/member-criteria`                                                                                                                                               |       89.6 |      27.1 |    −62.5 | `zod/mini` 2, core 24.4, English locale 0.7                                           |
 | Editors and editor-backed admin pages (`/campaigns/[id]`, `/admin/campaigns/[id]`, email templates/layouts, form builder/settings/translations, menus, series, map theme editor, `/editor-lab-local`) |       89.6 | 92.8–94.8 | +3 to +5 | classic zod via Common, plus `zod/mini` (1.9) where editor code uses migrated schemas |
 
 Route totals in the same builds: `/forms/[slug]` 522.8 → 418.6, `/s/[token]` 726.1 → 564.1, `/my/security`
-528.9 → 424.2, `/admin/audience-segments` 533.2 → 467.7 kB (these include concurrent changes; the zod column is
+528.9 → 424.2, `/admin/member-criteria` 533.2 → 467.7 kB (these include concurrent changes; the zod column is
 the part this item explains). `zod/mini` core is 24 kB under Turbopack, not the 6.7 kB esbuild fixture: Turbopack
 keeps the whole `core/schemas.js` and `core/api.js` modules. On editors the attribution total is a little higher
 partly because the classic chunk is now split across more chunks. `pnpm perf:bundle` passes; the budget was

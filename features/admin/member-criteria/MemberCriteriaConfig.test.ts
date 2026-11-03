@@ -1,13 +1,18 @@
-import { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
+import { MemberCriteriaKind } from '@echovisionlab/geul-proto/secure/member_criteria_pb.ts';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { AuthorizationRole } from '@echovisionlab/geul-proto/policy/access_pb.ts';
 import { describe, expect, it } from 'vitest';
-import { buildSegmentConfig, createEmptyConfig, rebasePendingConfig, SEGMENT_ROLE_OPTIONS } from './SegmentConfig';
+import {
+  buildCriteriaConfig,
+  createEmptyConfig,
+  rebasePendingConfig,
+  SEGMENT_ROLE_OPTIONS,
+} from './MemberCriteriaConfig';
 
-describe('audience segment config helpers', () => {
-  it('turns every offered role option into exactly one segment role', () => {
+describe('criteria criteria config helpers', () => {
+  it('turns every offered role option into exactly one criteria role', () => {
     const roles = SEGMENT_ROLE_OPTIONS.map(({ value }) => {
-      const { accountRoles } = buildSegmentConfig(SegmentType.MEMBERS_BY_FILTER, {
+      const { accountRoles } = buildCriteriaConfig(MemberCriteriaKind.FILTER, {
         ...createEmptyConfig(),
         accountRoles: [value],
       });
@@ -18,26 +23,26 @@ describe('audience segment config helpers', () => {
     expect(roles).toEqual([AuthorizationRole.ADMIN, AuthorizationRole.AUTHOR, AuthorizationRole.USER]);
   });
 
-  it('keeps each user-only Audience configuration scoped to its segment type', () => {
+  it('keeps each user-only Criteria configuration scoped to its criteria type', () => {
     const config = {
       ...createEmptyConfig(),
       memberTagIds: ['user-tag'],
       accountRoles: ['admin'],
     };
 
-    expect(buildSegmentConfig(SegmentType.MEMBER_TAGS, config).memberTagIds).toEqual(['user-tag']);
-    expect(buildSegmentConfig(SegmentType.MEMBERS_BY_FILTER, config).memberTagIds).toEqual([]);
-    expect(buildSegmentConfig(SegmentType.ALL_MEMBERS, config).memberTagIds).toEqual([]);
+    expect(buildCriteriaConfig(MemberCriteriaKind.MEMBER_TAGS, config).memberTagIds).toEqual(['user-tag']);
+    expect(buildCriteriaConfig(MemberCriteriaKind.FILTER, config).memberTagIds).toEqual([]);
+    expect(buildCriteriaConfig(MemberCriteriaKind.ALL_MEMBERS, config).memberTagIds).toEqual([]);
   });
 
-  it('keeps role filters scoped to users-by-filter segments', () => {
+  it('keeps role filters scoped to users-by-filter criteriaList', () => {
     const config = {
       ...createEmptyConfig(),
       accountRoles: ['author'],
     };
 
-    expect(buildSegmentConfig(SegmentType.MEMBERS_BY_FILTER, config).accountRoles).toEqual([AuthorizationRole.AUTHOR]);
-    expect(buildSegmentConfig(SegmentType.MEMBER_TAGS, config).accountRoles).toEqual([]);
+    expect(buildCriteriaConfig(MemberCriteriaKind.FILTER, config).accountRoles).toEqual([AuthorizationRole.AUTHOR]);
+    expect(buildCriteriaConfig(MemberCriteriaKind.MEMBER_TAGS, config).accountRoles).toEqual([]);
   });
 
   it('converts user-filter date strings to typed timestamps', () => {
@@ -46,11 +51,11 @@ describe('audience segment config helpers', () => {
       createdAfter: '2026-01-02T00:00:00.000Z',
       createdBefore: '2026-02-03T00:00:00.000Z',
     };
-    const result = buildSegmentConfig(SegmentType.MEMBERS_BY_FILTER, config);
+    const result = buildCriteriaConfig(MemberCriteriaKind.FILTER, config);
 
     expect(result.createdAfter && timestampDate(result.createdAfter).toISOString()).toBe(config.createdAfter);
     expect(result.createdBefore && timestampDate(result.createdBefore).toISOString()).toBe(config.createdBefore);
-    expect(buildSegmentConfig(SegmentType.MEMBER_TAGS, config).createdAfter).toBeUndefined();
+    expect(buildCriteriaConfig(MemberCriteriaKind.MEMBER_TAGS, config).createdAfter).toBeUndefined();
   });
 
   describe('rebasing edits made while a save was pending', () => {

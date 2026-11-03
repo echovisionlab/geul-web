@@ -32,8 +32,8 @@ export interface Campaign {
   subject: string;
   document?: RichTextDocument;
   status: 'draft' | 'scheduled' | 'sending' | 'sent' | 'failed';
-  segmentId?: string;
-  targetMode: CampaignTargetMode.ALL | CampaignTargetMode.SEGMENT;
+  memberCriteriaId?: string;
+  targetMode: CampaignTargetMode.ALL | CampaignTargetMode.MEMBER_CRITERIA;
   layoutId?: string;
   recipientScope: CampaignRecipientScopeValue;
   scheduledAt?: Date;
@@ -106,11 +106,11 @@ function protoStatusToString(status: CampaignStatus): 'draft' | 'scheduled' | 's
 }
 
 function mapCampaign(c: ProtoCampaign): Campaign {
-  const segmentId = c.segmentId?.trim() || undefined;
+  const memberCriteriaId = c.memberCriteriaId?.trim() || undefined;
   if (
-    (c.targetMode === CampaignTargetMode.ALL && segmentId !== undefined) ||
-    (c.targetMode === CampaignTargetMode.SEGMENT && segmentId === undefined) ||
-    (c.targetMode !== CampaignTargetMode.ALL && c.targetMode !== CampaignTargetMode.SEGMENT)
+    (c.targetMode === CampaignTargetMode.ALL && memberCriteriaId !== undefined) ||
+    (c.targetMode === CampaignTargetMode.MEMBER_CRITERIA && memberCriteriaId === undefined) ||
+    (c.targetMode !== CampaignTargetMode.ALL && c.targetMode !== CampaignTargetMode.MEMBER_CRITERIA)
   ) {
     throw new Error('Campaign has an invalid explicit target');
   }
@@ -121,7 +121,7 @@ function mapCampaign(c: ProtoCampaign): Campaign {
     subject: c.subject,
     document: c.document,
     status: protoStatusToString(c.status),
-    segmentId,
+    memberCriteriaId,
     targetMode: c.targetMode,
     layoutId: c.layoutId,
     recipientScope: campaignRecipientScopeFromProto(c.recipientScope),
@@ -300,21 +300,21 @@ export async function updateCampaignNameAction(
 
 export type CampaignConfigurationPatch =
   | {
-      targetMode: CampaignTargetMode.ALL | CampaignTargetMode.SEGMENT;
-      segmentId: string | null;
+      targetMode: CampaignTargetMode.ALL | CampaignTargetMode.MEMBER_CRITERIA;
+      memberCriteriaId: string | null;
       layoutId?: never;
       recipientScope?: never;
     }
   | {
       layoutId: string | null;
       targetMode?: never;
-      segmentId?: never;
+      memberCriteriaId?: never;
       recipientScope?: never;
     }
   | {
       recipientScope: CampaignRecipientScopeValue;
       targetMode?: never;
-      segmentId?: never;
+      memberCriteriaId?: never;
       layoutId?: never;
     };
 
@@ -333,7 +333,7 @@ export async function updateCampaignConfigurationAction(
           ? {
               targetMode: configuration.targetMode,
               // An empty optional string is the explicit null/clear for the pair.
-              segmentId: configuration.segmentId ?? '',
+              memberCriteriaId: configuration.memberCriteriaId ?? '',
             }
           : {}),
         ...(configuration.layoutId !== undefined ? { layoutId: configuration.layoutId ?? '' } : {}),

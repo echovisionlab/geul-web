@@ -11,7 +11,7 @@ import { notifications } from '@/components/core/Notification';
 import { Alert } from '@/components/core/Alert';
 import { StatusBadge } from '@/components/core/Badge';
 import { MultiSelect } from '@/components/core/Input';
-import type { FileDownloadAudience, FileDownloadPolicyTarget } from '@/lib/types/file-download-access';
+import type { FileDownloadAccess, FileDownloadPolicyTarget } from '@/lib/types/file-download-access';
 import { ACCESS_SCOPE_VALUES, accessSelectionChange } from './file-download-policy-state';
 import type { FileDownloadPolicyEditorAdapter } from './file-download-policy-store';
 import { useFileDownloadPolicyStore } from './useFileDownloadPolicyStore';
@@ -57,13 +57,13 @@ export function FileDownloadPolicyEditor({
       }),
   });
   const {
-    audience,
-    audienceSegmentIds: selectedAudienceSegmentIds,
-    segments,
-    availableSegmentIds,
-    segmentSearch,
-    segmentsLoadingMore,
-    segmentsLoaded,
+    access,
+    memberCriteriaIds: selectedMemberCriteriaIds,
+    criteriaList,
+    availableCriteriaIds,
+    criteriaSearch,
+    criteriaListLoadingMore,
+    criteriaListLoaded,
     loading,
     policyLoaded,
     saving,
@@ -72,63 +72,63 @@ export function FileDownloadPolicyEditor({
   } = state;
   const enabled = store.enabled;
   const error = state.error === 'reloadRequired' ? tReloadRequired('message') : state.error ? t(state.error) : '';
-  const segmentsLoadError = state.segmentsLoadFailed ? t('segmentsLoadError') : '';
+  const criteriaLoadError = state.criteriaListLoadFailed ? t('criteriaLoadError') : '';
   const loadPending = enabled && loading;
   const blockSettings = presentation === 'block-settings';
   const selectedAccessValues =
-    audience === 'restricted'
-      ? selectedAudienceSegmentIds.length > 0
-        ? selectedAudienceSegmentIds
+    access === 'restricted'
+      ? selectedMemberCriteriaIds.length > 0
+        ? selectedMemberCriteriaIds
         : [ACCESS_SCOPE_VALUES.restricted]
-      : [ACCESS_SCOPE_VALUES[audience as Exclude<FileDownloadAudience, 'restricted'>]];
+      : [ACCESS_SCOPE_VALUES[access as Exclude<FileDownloadAccess, 'restricted'>]];
   const accessControl = policyLoaded ? (
     <div style={{ width: '100%' }}>
       <MultiSelect
         label={t('sectionTitle')}
         aria-describedby={error ? errorId : undefined}
-        description={t(`audiences.${audience}.description`)}
+        description={t(`access.${access}.description`)}
         value={selectedAccessValues}
         data={[
-          { value: ACCESS_SCOPE_VALUES.disabled, label: t('audiences.disabled.label') },
-          { value: ACCESS_SCOPE_VALUES.public, label: t('audiences.public.label') },
-          { value: ACCESS_SCOPE_VALUES.authenticated, label: t('audiences.authenticated.label') },
-          ...(audience === 'restricted' && selectedAudienceSegmentIds.length === 0
+          { value: ACCESS_SCOPE_VALUES.disabled, label: t('access.disabled.label') },
+          { value: ACCESS_SCOPE_VALUES.public, label: t('access.public.label') },
+          { value: ACCESS_SCOPE_VALUES.authenticated, label: t('access.authenticated.label') },
+          ...(access === 'restricted' && selectedMemberCriteriaIds.length === 0
             ? [
                 {
                   value: ACCESS_SCOPE_VALUES.restricted,
-                  label: t('audiences.restricted.label'),
+                  label: t('access.restricted.label'),
                   disabled: true,
                 },
               ]
             : []),
-          ...segments.map((segment) => ({
-            value: segment.id,
-            label: segment.name,
+          ...criteriaList.map((criteria) => ({
+            value: criteria.id,
+            label: criteria.name,
           })),
         ]}
         searchable
-        searchValue={segmentSearch}
-        onSearchChange={store.searchSegments}
+        searchValue={criteriaSearch}
+        onSearchChange={store.searchCriteriaList}
         collapseSelectedValuesToOneLine
         getCollapsedSummaryLabel={(count) => t('additionalSelected', { count })}
         size="xs"
         disabled={readOnly || !enabled || loading || targetStale}
-        rightSection={saving || segmentsLoadingMore ? <Loader size="xs" /> : undefined}
+        rightSection={saving || criteriaListLoadingMore ? <Loader size="xs" /> : undefined}
         onChange={(values) => {
           const change = accessSelectionChange(selectedAccessValues, values);
           if (!change) {
             return;
           }
           if (!readOnly) {
-            store.changeAccess(change.audience, change.audienceSegmentIds);
+            store.changeAccess(change.access, change.memberCriteriaIds);
           }
         }}
       />
     </div>
   ) : null;
-  const segmentFeedback = policyLoaded ? (
+  const criteriaFeedback = policyLoaded ? (
     <>
-      {segmentsLoadingMore ? (
+      {criteriaListLoadingMore ? (
         <StatusBadge
           role="status"
           aria-live="polite"
@@ -139,19 +139,19 @@ export function FileDownloadPolicyEditor({
           {t('loading')}
         </StatusBadge>
       ) : null}
-      {segmentsLoadError ? (
+      {criteriaLoadError ? (
         <Alert role="alert" tone="danger">
-          {segmentsLoadError}
+          {criteriaLoadError}
         </Alert>
       ) : null}
-      {segmentsLoaded && availableSegmentIds.length === 0 ? (
+      {criteriaListLoaded && availableCriteriaIds.length === 0 ? (
         <Alert role="status" aria-live="polite" tone="neutral">
-          {t('segmentsEmpty')}
+          {t('criteriaEmpty')}
         </Alert>
       ) : null}
-      {audience === 'restricted' && selectedAudienceSegmentIds.length === 0 ? (
+      {access === 'restricted' && selectedMemberCriteriaIds.length === 0 ? (
         <Alert role="alert" tone="warning">
-          {t('restrictedWithoutAudience')}
+          {t('restrictedWithoutCriteria')}
         </Alert>
       ) : null}
     </>
@@ -188,7 +188,7 @@ export function FileDownloadPolicyEditor({
   ) : (
     <>
       {accessControl}
-      {segmentFeedback}
+      {criteriaFeedback}
       {error ? (
         <Alert id={errorId} role="alert" tone="danger">
           {error}
@@ -215,7 +215,7 @@ export function FileDownloadPolicyEditor({
         </VisuallyHidden>
         {loadPending ? <PageLoader extent="compact" placement="flow" size="xs" message={t('loading')} /> : null}
         {!loadPending && policyLoaded ? accessControl : null}
-        {!loadPending && policyLoaded ? segmentFeedback : null}
+        {!loadPending && policyLoaded ? criteriaFeedback : null}
         {!loadPending && policyLoaded && error ? (
           <Alert id={errorId} role="alert" tone="danger">
             {error}

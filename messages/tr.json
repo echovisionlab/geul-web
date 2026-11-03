@@ -257,8 +257,7 @@
       "clients": "Müşteriler",
       "campaign": "Kampanya",
       "campaigns": "Kampanyalar",
-      "audienceSegment": "Kitle Segmenti",
-      "audienceSegments": "Kitle Segmentleri",
+      "memberCriteria": "Kitle Segmenti",
       "user": "Kullanıcı",
       "member": "Üye",
       "users": "Kullanıcılar",
@@ -613,7 +612,7 @@
         "failed": "Başarısız"
       }
     },
-    "audienceSegments": {
+    "memberCriteria": {
       "description": "Kampanyaları belirli gruplara hedeflemek için yeniden kullanılabilir kitle segmentleri oluşturun.",
       "searchPlaceholder": "Segmentleri ara...",
       "empty": "Hiçbir segment bulunamadı. Belirli kitleleri hedeflemek için bir tane oluşturun.",
@@ -2699,13 +2698,13 @@
       "none": "Düzen Yok"
     },
     "target": {
-      "audienceLabel": "Hedef kitle",
-      "audiencePlaceholder": "Bir kitle seçin",
+      "criteriaLabel": "Hedef kitle",
+      "criteriaPlaceholder": "Bir kitle seçin",
       "all": "Tüm kullanıcılar",
-      "unavailableAudience": "Arşivlenmiş veya kullanılamayan kitle",
-      "unavailableAudienceDescription": "Bu kampanya arşivlenmiş veya kullanılamayan bir hedef kitleyi hedefliyor. Planlamadan veya göndermeden önce aktif bir hedef kitle seçin.",
-      "audienceRequired": "Planlamadan veya göndermeden önce aktif bir hedef kitle seçin.",
-      "audienceLoadError": "Aktif kitleler yüklenemedi. Planlamadan veya göndermeden önce tekrar deneyin."
+      "unavailableCriteria": "Arşivlenmiş veya kullanılamayan kitle",
+      "unavailableCriteriaDescription": "Bu kampanya arşivlenmiş veya kullanılamayan bir hedef kitleyi hedefliyor. Planlamadan veya göndermeden önce aktif bir hedef kitle seçin.",
+      "criteriaRequired": "Planlamadan veya göndermeden önce aktif bir hedef kitle seçin.",
+      "criteriaLoadError": "Aktif kitleler yüklenemedi. Planlamadan veya göndermeden önce tekrar deneyin."
     },
     "fields": {
       "recipientScope": "Alıcılar",
@@ -2721,7 +2720,7 @@
       "description": "Bu kampanyanın testini göndermek için bir e-posta adresi girin."
     },
     "sendModal": {
-      "warning": "Bu, kampanyayı {audience} kitle segmentine gönderecektir. Bu eylem geri alınamaz.",
+      "warning": "Bu, kampanyayı {criteria} kitle segmentine gönderecektir. Bu eylem geri alınamaz.",
       "subject": "Konu: {subject}",
       "allMatchingUsersWarning": "Bülten aboneliğinden çıkan eşleşen kullanıcıları içerir."
     },
@@ -2730,7 +2729,7 @@
       "dateLabel": "Planlanan tarih ve saat",
       "previousMonth": "Önceki ay",
       "nextMonth": "Gelecek ay",
-      "audience": "Kitle: {audience}",
+      "criteria": "Kitle: {criteria}",
       "allMatchingUsersWarning": "Bülten aboneliğinden çıkan eşleşen kullanıcıları içerir."
     },
     "notifications": {
@@ -5306,7 +5305,7 @@
     "editor": {
       "sectionTitle": "İndirme erişimi",
       "loading": "İndirme erişimi yükleniyor…",
-      "audiences": {
+      "access": {
         "disabled": {
           "label": "İndirme yok",
           "description": "Hiçbir ziyaretçi bu dosyayı indiremez."
@@ -5324,9 +5323,9 @@
           "description": "Bu dosyayı yalnızca seçilen hedef kitlelerdeki kullanıcılar indirebilir."
         }
       },
-      "segmentsLoadError": "Politika yüklendi ancak kitleler yüklenemedi.",
-      "segmentsEmpty": "Hiçbir Kitle segmenti mevcut değil.",
-      "restrictedWithoutAudience": "Bu kısıtlı politikanın Hedef Kitlesi yok. Siz en az bir Hedef Kitle seçene kadar herkesin indirme işlemi reddedilir.",
+      "criteriaLoadError": "Politika yüklendi ancak kitleler yüklenemedi.",
+      "criteriaEmpty": "Hiçbir Kitle segmenti mevcut değil.",
+      "restrictedWithoutCriteria": "Bu kısıtlı politikanın Hedef Kitlesi yok. Siz en az bir Hedef Kitle seçene kadar herkesin indirme işlemi reddedilir.",
       "additionalSelected": "{count} tane daha seçildi",
       "loadError": "İndirme erişimi yüklenemedi.",
       "saveError": "İndirme erişimi kaydedilemedi.",

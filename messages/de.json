@@ -257,8 +257,7 @@
       "clients": "Kunden",
       "campaign": "Kampagne",
       "campaigns": "Kampagnen",
-      "audienceSegment": "Zielgruppensegment",
-      "audienceSegments": "Zielgruppensegmente",
+      "memberCriteria": "Zielgruppensegment",
       "user": "Benutzer",
       "member": "Mitglied",
       "users": "Benutzer",
@@ -1072,7 +1071,7 @@
         "failed": "Fehlgeschlagen"
       }
     },
-    "audienceSegments": {
+    "memberCriteria": {
       "description": "Erstellen Sie wiederverwendbare Zielgruppensegmente, um Kampagnen auf bestimmte Gruppen auszurichten.",
       "searchPlaceholder": "Segmente suchen...",
       "empty": "Keine Segmente gefunden. Erstellen Sie eins, um bestimmte Zielgruppen anzusprechen.",
@@ -2234,13 +2233,13 @@
       "none": "Kein Layout"
     },
     "target": {
-      "audienceLabel": "Zielgruppe",
-      "audiencePlaceholder": "Zielgruppe auswählen",
+      "criteriaLabel": "Zielgruppe",
+      "criteriaPlaceholder": "Zielgruppe auswählen",
       "all": "Alle Benutzer",
-      "unavailableAudience": "Archivierte oder nicht verfügbare Zielgruppe",
-      "unavailableAudienceDescription": "Diese Kampagne richtet sich an eine archivierte oder nicht verfügbare Zielgruppe. Wählen Sie vor Planung oder Versand eine aktive Zielgruppe.",
-      "audienceRequired": "Wählen Sie vor Planung oder Versand eine aktive Zielgruppe.",
-      "audienceLoadError": "Aktive Zielgruppen konnten nicht geladen werden. Versuchen Sie es vor Planung oder Versand erneut."
+      "unavailableCriteria": "Archivierte oder nicht verfügbare Zielgruppe",
+      "unavailableCriteriaDescription": "Diese Kampagne richtet sich an eine archivierte oder nicht verfügbare Zielgruppe. Wählen Sie vor Planung oder Versand eine aktive Zielgruppe.",
+      "criteriaRequired": "Wählen Sie vor Planung oder Versand eine aktive Zielgruppe.",
+      "criteriaLoadError": "Aktive Zielgruppen konnten nicht geladen werden. Versuchen Sie es vor Planung oder Versand erneut."
     },
     "fields": {
       "recipientScope": "Empfänger",
@@ -2256,7 +2255,7 @@
       "description": "Geben Sie eine E-Mail-Adresse ein, um diese Kampagne testweise zu senden."
     },
     "sendModal": {
-      "warning": "Dies sendet die Kampagne an das Zielgruppensegment {audience}. Diese Aktion kann nicht rückgängig gemacht werden.",
+      "warning": "Dies sendet die Kampagne an das Zielgruppensegment {criteria}. Diese Aktion kann nicht rückgängig gemacht werden.",
       "subject": "Betreff: {subject}",
       "allMatchingUsersWarning": "Bezieht auch Benutzer ein, die den Newsletter abbestellt haben."
     },
@@ -2265,7 +2264,7 @@
       "dateLabel": "Geplantes Datum und Uhrzeit",
       "previousMonth": "Vorheriger Monat",
       "nextMonth": "Nächster Monat",
-      "audience": "Zielgruppe: {audience}",
+      "criteria": "Zielgruppe: {criteria}",
       "allMatchingUsersWarning": "Bezieht auch Benutzer ein, die den Newsletter abbestellt haben."
     },
     "notifications": {
@@ -5306,7 +5305,7 @@
     "editor": {
       "sectionTitle": "Download-Zugriff",
       "loading": "Download-Zugriff wird geladen…",
-      "audiences": {
+      "access": {
         "disabled": {
           "label": "Kein Download",
           "description": "Niemand kann diese Datei herunterladen."
@@ -5324,9 +5323,9 @@
           "description": "Nur Benutzer in den ausgewählten Zielgruppen können diese Datei herunterladen."
         }
       },
-      "segmentsLoadError": "Die Richtlinie wurde geladen, die Zielgruppen jedoch nicht.",
-      "segmentsEmpty": "Es sind keine Zielgruppensegmente verfügbar.",
-      "restrictedWithoutAudience": "Dieser eingeschränkten Richtlinie ist keine Zielgruppe zugewiesen. Downloads werden für alle verweigert, bis Sie mindestens eine Zielgruppe auswählen.",
+      "criteriaLoadError": "Die Richtlinie wurde geladen, die Zielgruppen jedoch nicht.",
+      "criteriaEmpty": "Es sind keine Zielgruppensegmente verfügbar.",
+      "restrictedWithoutCriteria": "Dieser eingeschränkten Richtlinie ist keine Zielgruppe zugewiesen. Downloads werden für alle verweigert, bis Sie mindestens eine Zielgruppe auswählen.",
       "additionalSelected": "{count} weitere ausgewählt",
       "loadError": "Der Download-Zugriff konnte nicht geladen werden.",
       "saveError": "Der Download-Zugriff konnte nicht gespeichert werden.",

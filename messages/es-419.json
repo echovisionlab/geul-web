@@ -257,8 +257,7 @@
       "clients": "Clientes",
       "campaign": "Campaña",
       "campaigns": "Campañas",
-      "audienceSegment": "Segmento de audiencia",
-      "audienceSegments": "Segmentos de audiencia",
+      "memberCriteria": "Segmento de audiencia",
       "user": "Usuario",
       "member": "Miembro",
       "users": "Usuarios",
@@ -613,7 +612,7 @@
         "failed": "Fallido"
       }
     },
-    "audienceSegments": {
+    "memberCriteria": {
       "description": "Cree segmentos de audiencia reutilizables para dirigir campañas a grupos específicos.",
       "searchPlaceholder": "Buscar segmentos...",
       "empty": "No se encontraron segmentos. Cree uno para dirigirse a audiencias específicas.",
@@ -2699,13 +2698,13 @@
       "none": "Sin diseño"
     },
     "target": {
-      "audienceLabel": "Público objetivo",
-      "audiencePlaceholder": "Seleccione una audiencia",
+      "criteriaLabel": "Público objetivo",
+      "criteriaPlaceholder": "Seleccione una audiencia",
       "all": "Todos los usuarios",
-      "unavailableAudience": "Audiencia archivada o no disponible",
-      "unavailableAudienceDescription": "Esta campaña se dirige a una audiencia archivada o no disponible. Seleccione una audiencia activa antes de programar o enviar.",
-      "audienceRequired": "Seleccione una audiencia activa antes de programar o enviar.",
-      "audienceLoadError": "No se pudieron cargar las audiencias activas. Inténtelo nuevamente antes de programar o enviar."
+      "unavailableCriteria": "Audiencia archivada o no disponible",
+      "unavailableCriteriaDescription": "Esta campaña se dirige a una audiencia archivada o no disponible. Seleccione una audiencia activa antes de programar o enviar.",
+      "criteriaRequired": "Seleccione una audiencia activa antes de programar o enviar.",
+      "criteriaLoadError": "No se pudieron cargar las audiencias activas. Inténtelo nuevamente antes de programar o enviar."
     },
     "fields": {
       "recipientScope": "Destinatarios",
@@ -2721,7 +2720,7 @@
       "description": "Ingrese una dirección de correo electrónico para enviar una prueba de esta campaña."
     },
     "sendModal": {
-      "warning": "Esto enviará la campaña al segmento de audiencia {audience}. Esta acción no se puede deshacer.",
+      "warning": "Esto enviará la campaña al segmento de audiencia {criteria}. Esta acción no se puede deshacer.",
       "subject": "Asunto: {subject}",
       "allMatchingUsersWarning": "Incluye usuarios coincidentes que se han dado de baja de los boletines."
     },
@@ -2730,7 +2729,7 @@
       "dateLabel": "Fecha y hora previstas",
       "previousMonth": "Mes anterior",
       "nextMonth": "Mes próximo",
-      "audience": "Audiencia: {audience}",
+      "criteria": "Audiencia: {criteria}",
       "allMatchingUsersWarning": "Incluye usuarios coincidentes que se han dado de baja de los boletines."
     },
     "notifications": {
@@ -5306,7 +5305,7 @@
     "editor": {
       "sectionTitle": "Acceso de descarga",
       "loading": "Cargando acceso de descarga…",
-      "audiences": {
+      "access": {
         "disabled": {
           "label": "Sin descargas",
           "description": "Ningún visitante puede descargar este archivo."
@@ -5324,9 +5323,9 @@
           "description": "Solo los usuarios de las audiencias seleccionadas pueden descargar este archivo."
         }
       },
-      "segmentsLoadError": "La política se cargó, pero no se pudieron cargar las audiencias.",
-      "segmentsEmpty": "No hay segmentos de audiencia disponibles.",
-      "restrictedWithoutAudience": "Esta política restringida no tiene audiencia. Las descargas se niegan a todos hasta que seleccione al menos una audiencia.",
+      "criteriaLoadError": "La política se cargó, pero no se pudieron cargar las audiencias.",
+      "criteriaEmpty": "No hay segmentos de audiencia disponibles.",
+      "restrictedWithoutCriteria": "Esta política restringida no tiene audiencia. Las descargas se niegan a todos hasta que seleccione al menos una audiencia.",
       "additionalSelected": "{count} más seleccionados",
       "loadError": "No se pudo cargar el acceso de descarga.",
       "saveError": "No se pudo guardar el acceso de descarga.",

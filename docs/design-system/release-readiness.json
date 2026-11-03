@@ -17092,13 +17092,13 @@
       "notes": []
     },
     {
-      "id": "page:/admin/audience-segments",
-      "label": "Audience segments",
+      "id": "page:/admin/member-criteria",
+      "label": "Member criteria",
       "phase": "05",
       "features": ["M04", "L01", "L02"],
       "detail": "Condition editing, audience count, preview, create/delete and failure.",
-      "route": "/admin/audience-segments",
-      "source": "app/admin/audience-segments/page.tsx",
+      "route": "/admin/member-criteria",
+      "source": "app/admin/member-criteria/page.tsx",
       "sourceHash": "4348f9ac577a564185fd466c13e33a1818a2f5bc3398caf65d190af5204e7dc0",
       "disposition": "service-view",
       "inheritedBoundaries": [
@@ -17112,14 +17112,14 @@
       "blockedBy": [],
       "redirects": [],
       "owners": [
-        "features/admin/segment/AudienceArchiveFilter.tsx",
-        "features/admin/segment/CreateSegmentButton.tsx",
-        "features/admin/segment/SegmentConfigFields.tsx",
-        "features/admin/segment/SegmentModalContext.tsx",
-        "features/admin/segment/SegmentModals.tsx",
-        "features/admin/segment/SegmentRowMenu.tsx",
-        "features/admin/segment/SegmentsPageView.tsx",
-        "features/admin/segment/SegmentsTableContent.tsx",
+        "features/admin/member-criteria/MemberCriteriaArchiveFilter.tsx",
+        "features/admin/member-criteria/CreateMemberCriteriaButton.tsx",
+        "features/admin/member-criteria/MemberCriteriaConfigFields.tsx",
+        "features/admin/member-criteria/MemberCriteriaModalContext.tsx",
+        "features/admin/member-criteria/MemberCriteriaModals.tsx",
+        "features/admin/member-criteria/MemberCriteriaRowMenu.tsx",
+        "features/admin/member-criteria/MemberCriteriaPageView.tsx",
+        "features/admin/member-criteria/MemberCriteriaTableContent.tsx",
         "features/admin/ui/AdminPageHeader/AdminPageHeader.tsx",
         "features/confirmation/ui/ConfirmationDialog.tsx",
         "features/data-table/DateFilterInputRuntime.tsx",
@@ -17148,7 +17148,7 @@
         {
           "title": "Pages/Admin/Audience and Users",
           "variant": "Segments",
-          "source": "stories/pages/AudienceUsers.stories.tsx",
+          "source": "stories/pages/MemberCriteriaUsers.stories.tsx",
           "path": "?path=/story/pages-admin-audience-and-users--segments",
           "composition": "page-view",
           "scope": "Actual production segment PageView, query controls, estimate/create/edit/archive/restore dialogs with typed local transport. Server evaluation, relation constraints and persistence remain outside."
@@ -20019,7 +20019,7 @@
         {
           "title": "Pages/Admin/Audience and Users",
           "variant": "Users",
-          "source": "stories/pages/AudienceUsers.stories.tsx",
+          "source": "stories/pages/MemberCriteriaUsers.stories.tsx",
           "path": "?path=/story/pages-admin-audience-and-users--users",
           "composition": "page-view",
           "scope": "Actual production users PageView, table and original modal controllers with local ban/role/unsubscribe/delete callbacks. No real account mutations; server authorization and identity invariants are outside."

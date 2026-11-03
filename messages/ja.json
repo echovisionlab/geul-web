@@ -257,8 +257,7 @@
       "clients": "クライアント",
       "campaign": "キャンペーン",
       "campaigns": "キャンペーン",
-      "audienceSegment": "オーディエンスセグメント",
-      "audienceSegments": "オーディエンスセグメント",
+      "memberCriteria": "オーディエンスセグメント",
       "user": "ユーザー",
       "member": "メンバー",
       "users": "ユーザー",
@@ -613,7 +612,7 @@
         "failed": "送信失敗"
       }
     },
-    "audienceSegments": {
+    "memberCriteria": {
       "description": "特定のグループを対象にキャンペーンを配信するための再利用可能なオーディエンスセグメントを作成します",
       "searchPlaceholder": "セグメントを検索...",
       "empty": "セグメントが見つかりません。特定のオーディエンスを対象にするには作成してください",
@@ -2699,13 +2698,13 @@
       "none": "レイアウトなし"
     },
     "target": {
-      "audienceLabel": "配信対象",
-      "audiencePlaceholder": "オーディエンスを選択",
+      "criteriaLabel": "配信対象",
+      "criteriaPlaceholder": "オーディエンスを選択",
       "all": "すべてのユーザー",
-      "unavailableAudience": "アーカイブ済みまたは利用できないオーディエンス",
-      "unavailableAudienceDescription": "このキャンペーンはアーカイブ済みまたは利用できないオーディエンスを対象にしています。予約または送信する前に有効なオーディエンスを選択してください。",
-      "audienceRequired": "予約または送信する前に有効なオーディエンスを選択してください。",
-      "audienceLoadError": "有効なオーディエンスを読み込めませんでした。予約または送信の前に再試行してください。"
+      "unavailableCriteria": "アーカイブ済みまたは利用できないオーディエンス",
+      "unavailableCriteriaDescription": "このキャンペーンはアーカイブ済みまたは利用できないオーディエンスを対象にしています。予約または送信する前に有効なオーディエンスを選択してください。",
+      "criteriaRequired": "予約または送信する前に有効なオーディエンスを選択してください。",
+      "criteriaLoadError": "有効なオーディエンスを読み込めませんでした。予約または送信の前に再試行してください。"
     },
     "fields": {
       "recipientScope": "受信者",
@@ -2721,7 +2720,7 @@
       "description": "このキャンペーンのテスト送信先メールアドレスを入力してください"
     },
     "sendModal": {
-      "warning": "このキャンペーンはオーディエンスセグメント {audience} に送信されます。この操作は元に戻せません",
+      "warning": "このキャンペーンはオーディエンスセグメント {criteria} に送信されます。この操作は元に戻せません",
       "subject": "件名: {subject}",
       "allMatchingUsersWarning": "ニュースレターを購読解除したユーザーも含まれます。"
     },
@@ -2730,7 +2729,7 @@
       "dateLabel": "送信予定日時",
       "previousMonth": "前の月",
       "nextMonth": "次の月",
-      "audience": "オーディエンス: {audience}",
+      "criteria": "オーディエンス: {criteria}",
       "allMatchingUsersWarning": "ニュースレターを購読解除したユーザーも含まれます。"
     },
     "notifications": {
@@ -5306,7 +5305,7 @@
     "editor": {
       "sectionTitle": "ダウンロードアクセス",
       "loading": "ダウンロードアクセスを読み込み中…",
-      "audiences": {
+      "access": {
         "disabled": {
           "label": "ダウンロード不可",
           "description": "このファイルはダウンロードできません。"
@@ -5324,9 +5323,9 @@
           "description": "選択したオーディエンスのユーザーのみ、このファイルをダウンロードできます。"
         }
       },
-      "segmentsLoadError": "ポリシーは読み込まれましたが、オーディエンスを読み込めませんでした。",
-      "segmentsEmpty": "利用可能なオーディエンスセグメントがありません。",
-      "restrictedWithoutAudience": "この制限付きポリシーにはオーディエンスが指定されていません。少なくとも1つのオーディエンスを選択するまで、すべてのユーザーのダウンロードが拒否されます。",
+      "criteriaLoadError": "ポリシーは読み込まれましたが、オーディエンスを読み込めませんでした。",
+      "criteriaEmpty": "利用可能なオーディエンスセグメントがありません。",
+      "restrictedWithoutCriteria": "この制限付きポリシーにはオーディエンスが指定されていません。少なくとも1つのオーディエンスを選択するまで、すべてのユーザーのダウンロードが拒否されます。",
       "additionalSelected": "他に{count}件選択済み",
       "loadError": "ダウンロードアクセスを読み込めませんでした。",
       "saveError": "ダウンロードアクセスを保存できませんでした。",

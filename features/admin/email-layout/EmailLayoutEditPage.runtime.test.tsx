@@ -51,7 +51,7 @@ vi.mock('@/lib/actions/campaign', () => ({
       targetMode: 1,
       recipientScope: 'SUBSCRIBED_USERS',
       layoutId: null,
-      segmentId: null,
+      memberCriteriaId: null,
     },
   }),
   updateCampaignConfigurationAction: vi.fn(),
@@ -62,7 +62,7 @@ vi.mock('@/lib/actions/campaign', () => ({
   sendCampaignNowAction: vi.fn(),
   sendTestCampaignAction: vi.fn(),
 }));
-vi.mock('@/lib/actions/audience', () => ({ listActiveSegmentsAction: async () => [] }));
+vi.mock('@/lib/actions/member-criteria', () => ({ listActiveMemberCriteriaAction: async () => [] }));
 vi.mock('@/lib/actions/email-template', () => ({
   getEmailTemplateAction: async () => ({
     id: transport.id,

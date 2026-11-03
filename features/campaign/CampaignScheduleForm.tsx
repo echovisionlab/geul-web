@@ -17,7 +17,7 @@ export interface CampaignScheduleFormLabels {
   nextMonth: string;
   hours: string;
   minutes: string;
-  audience: string;
+  criteria: string;
   allMatchingUsersWarning: string;
   cancel: string;
   schedule: string;
@@ -27,7 +27,7 @@ interface CampaignScheduleFormProps {
   locale: string;
   value: DateTimeValue;
   minDate: DateTimeValue;
-  audience: string;
+  criteria: string;
   includesUnsubscribedUsers: boolean;
   labels: CampaignScheduleFormLabels;
   loading?: boolean;
@@ -41,7 +41,7 @@ export function CampaignScheduleForm({
   locale,
   value,
   minDate,
-  audience,
+  criteria,
   includesUnsubscribedUsers,
   labels,
   loading = false,
@@ -69,7 +69,7 @@ export function CampaignScheduleForm({
         onChange={onChange}
         required
       />
-      <DsText size="sm">{labels.audience.replace('{audience}', audience)}</DsText>
+      <DsText size="sm">{labels.criteria.replace('{criteria}', criteria)}</DsText>
       {includesUnsubscribedUsers ? (
         <Alert icon={<IconAlertCircle size={16} />} tone="warning">
           {labels.allMatchingUsersWarning}

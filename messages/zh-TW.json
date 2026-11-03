@@ -257,8 +257,7 @@
       "clients": "客戶",
       "campaign": "活動",
       "campaigns": "活動",
-      "audienceSegment": "受眾群體",
-      "audienceSegments": "受眾群體",
+      "memberCriteria": "受眾群體",
       "user": "使用者",
       "member": "成員",
       "users": "使用者",
@@ -613,7 +612,7 @@
         "failed": "傳送失敗"
       }
     },
-    "audienceSegments": {
+    "memberCriteria": {
       "description": "建立可重複使用的受眾群體，將行銷活動定位到特定群體",
       "searchPlaceholder": "搜尋片段...",
       "empty": "未找到段。建立一個針對特定受眾的產品",
@@ -2699,13 +2698,13 @@
       "none": "無佈局"
     },
     "target": {
-      "audienceLabel": "目標受眾",
-      "audiencePlaceholder": "選擇受眾",
+      "criteriaLabel": "目標受眾",
+      "criteriaPlaceholder": "選擇受眾",
       "all": "所有使用者",
-      "unavailableAudience": "已封存或無法使用的受眾",
-      "unavailableAudienceDescription": "此行銷活動以已封存或無法使用的受眾為目標。請先選擇有效受眾，再排程或傳送。",
-      "audienceRequired": "請先選擇有效受眾，再排程或傳送。",
-      "audienceLoadError": "無法載入有效受眾。請在排程或傳送前重試。"
+      "unavailableCriteria": "已封存或無法使用的受眾",
+      "unavailableCriteriaDescription": "此行銷活動以已封存或無法使用的受眾為目標。請先選擇有效受眾，再排程或傳送。",
+      "criteriaRequired": "請先選擇有效受眾，再排程或傳送。",
+      "criteriaLoadError": "無法載入有效受眾。請在排程或傳送前重試。"
     },
     "fields": {
       "recipientScope": "收件者",
@@ -2721,7 +2720,7 @@
       "description": "輸入電子郵件地址以已傳送此活動的測試"
     },
     "sendModal": {
-      "warning": "這會將行銷活動已傳送至細分受眾群 {audience}。此操作無法撤銷",
+      "warning": "這會將行銷活動已傳送至細分受眾群 {criteria}。此操作無法撤銷",
       "subject": "主題：{subject}",
       "allMatchingUsersWarning": "包括已取消電子報訂閱的符合條件使用者。"
     },
@@ -2730,7 +2729,7 @@
       "dateLabel": "已排程日期和時間",
       "previousMonth": "上個月",
       "nextMonth": "下個月",
-      "audience": "觀眾：{audience}",
+      "criteria": "觀眾：{criteria}",
       "allMatchingUsersWarning": "包括已取消電子報訂閱的符合條件使用者。"
     },
     "notifications": {
@@ -5306,7 +5305,7 @@
     "editor": {
       "sectionTitle": "下載權限",
       "loading": "正在載入下載權限…",
-      "audiences": {
+      "access": {
         "disabled": {
           "label": "不允許下載",
           "description": "訪客無法下載此檔案。"
@@ -5324,9 +5323,9 @@
           "description": "只有所選受眾中的使用者可以下載此檔案。"
         }
       },
-      "segmentsLoadError": "政策已載入，但無法載入受眾。",
-      "segmentsEmpty": "沒有可用的受眾區隔。",
-      "restrictedWithoutAudience": "此受限政策未指定受眾。在選取至少一個受眾之前，所有人的下載都會被拒絕。",
+      "criteriaLoadError": "政策已載入，但無法載入受眾。",
+      "criteriaEmpty": "沒有可用的受眾區隔。",
+      "restrictedWithoutCriteria": "此受限政策未指定受眾。在選取至少一個受眾之前，所有人的下載都會被拒絕。",
       "additionalSelected": "另有 {count} 項已選取",
       "loadError": "無法載入下載權限。",
       "saveError": "無法儲存下載權限。",

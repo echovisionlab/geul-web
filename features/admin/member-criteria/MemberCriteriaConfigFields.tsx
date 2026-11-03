@@ -9,7 +9,7 @@ import {
 import { unwrapQueryResult } from '@/lib/api/query-result';
 
 import { useEffect, useState } from 'react';
-import { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
+import { MemberCriteriaKind } from '@echovisionlab/geul-proto/secure/member_criteria_pb.ts';
 import { IconUsers } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 
@@ -18,29 +18,29 @@ import { LabelBadge } from '@/components/core/Badge';
 import { Button } from '@/components/core/Button';
 
 import { listAllUserTagsAction } from '@/lib/actions/user-tag';
-import { SEGMENT_ROLE_OPTIONS, type SegmentConfigState } from './SegmentConfig';
-import { coerceDateValue } from './segment-date';
+import { SEGMENT_ROLE_OPTIONS, type CriteriaConfigState } from './MemberCriteriaConfig';
+import { coerceDateValue } from './criteria-date';
 
-interface SegmentConfigFieldsProps {
-  segmentType: SegmentType | null;
-  config: SegmentConfigState;
-  onConfigChange: (config: SegmentConfigState) => void;
+interface MemberCriteriaConfigFieldsProps {
+  kind: MemberCriteriaKind | null;
+  config: CriteriaConfigState;
+  onConfigChange: (config: CriteriaConfigState) => void;
   estimatedCount: number | null;
   onEstimate: () => void;
   estimateLoading: boolean;
 }
 
-export function SegmentConfigFields({
-  segmentType,
+export function MemberCriteriaConfigFields({
+  kind,
   config,
   onConfigChange,
   estimatedCount,
   onEstimate,
   estimateLoading,
-}: SegmentConfigFieldsProps) {
+}: MemberCriteriaConfigFieldsProps) {
   const tCommon = useTranslations('common');
   const tCommonEntities = useTranslations('common.entities');
-  const tPage = useTranslations('adminList.audienceSegments');
+  const tPage = useTranslations('adminList.memberCriteria');
   const [userTags, setUserTags] = useState<{ value: string; label: string }[]>([]);
   const [tagsLoading, setTagsLoading] = useState(false);
   const [tagsError, setTagsError] = useState(false);
@@ -53,7 +53,7 @@ export function SegmentConfigFields({
 
   useEffect(() => {
     let current = true;
-    if (segmentType === SegmentType.MEMBER_TAGS) {
+    if (kind === MemberCriteriaKind.MEMBER_TAGS) {
       setTagsLoading(true);
       setTagsError(false);
       void listAllUserTagsAction()
@@ -77,20 +77,20 @@ export function SegmentConfigFields({
     return () => {
       current = false;
     };
-  }, [segmentType]);
+  }, [kind]);
 
-  if (!segmentType) {
+  if (!kind) {
     return null;
   }
 
   return (
     <DsLayoutInset blockStart="sm">
       <DsLayoutStack gap="sm">
-        {segmentType === SegmentType.ALL_MEMBERS && (
+        {kind === MemberCriteriaKind.ALL_MEMBERS && (
           <SupportingText tone="secondary">{tPage('config.allUsersHelp')}</SupportingText>
         )}
 
-        {segmentType === SegmentType.MEMBER_TAGS && (
+        {kind === MemberCriteriaKind.MEMBER_TAGS && (
           <MultiSelect
             label={tCommonEntities('userTags')}
             placeholder={tPage('config.userTagsPlaceholderSelect')}
@@ -105,7 +105,7 @@ export function SegmentConfigFields({
           />
         )}
 
-        {segmentType === SegmentType.MEMBERS_BY_FILTER && (
+        {kind === MemberCriteriaKind.FILTER && (
           <>
             <MultiSelect
               label={tPage('config.rolesLabel')}

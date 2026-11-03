@@ -1,32 +1,32 @@
 // @vitest-environment jsdom
 
 import { act, render, screen, waitFor, within } from '@/test/render';
-import { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
+import { MemberCriteriaKind } from '@echovisionlab/geul-proto/secure/member_criteria_pb.ts';
 import { AuthorizationRole } from '@echovisionlab/geul-proto/policy/access_pb.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { SegmentModals } from './SegmentModals';
-import { SegmentModalProvider, useSegmentModal } from './SegmentModalContext';
+import { MemberCriteriaModals } from './MemberCriteriaModals';
+import { CriteriaModalProvider, useCriteriaModal } from './MemberCriteriaModalContext';
 
 const actions = vi.hoisted(() => ({ get: vi.fn(), update: vi.fn(), estimate: vi.fn() }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
-vi.mock('@/lib/actions/audience', () => ({
-  archiveSegmentAction: vi.fn(),
-  createSegmentAction: vi.fn(),
-  estimateSegmentCountAction: actions.estimate,
-  getSegmentAction: actions.get,
-  restoreSegmentAction: vi.fn(),
-  updateSegmentAction: actions.update,
+vi.mock('@/lib/actions/member-criteria', () => ({
+  archiveMemberCriteriaAction: vi.fn(),
+  createMemberCriteriaAction: vi.fn(),
+  countMatchingMembersAction: actions.estimate,
+  getMemberCriteriaAction: actions.get,
+  restoreMemberCriteriaAction: vi.fn(),
+  updateMemberCriteriaAction: actions.update,
 }));
 
 function Controls() {
-  const { openEdit } = useSegmentModal();
+  const { openEdit } = useCriteriaModal();
   return (
     <>
-      <button type="button" onClick={() => openEdit('segment-a')}>
-        Edit segment A
+      <button type="button" onClick={() => openEdit('criteria-a')}>
+        Edit criteria A
       </button>
-      <button type="button" onClick={() => openEdit('segment-b')}>
-        Edit segment B
+      <button type="button" onClick={() => openEdit('criteria-b')}>
+        Edit criteria B
       </button>
     </>
   );
@@ -34,10 +34,10 @@ function Controls() {
 
 function Scenario() {
   return (
-    <SegmentModalProvider>
+    <CriteriaModalProvider>
       <Controls />
-      <SegmentModals refresh={() => {}} />
-    </SegmentModalProvider>
+      <MemberCriteriaModals refresh={() => {}} />
+    </CriteriaModalProvider>
   );
 }
 
@@ -49,13 +49,13 @@ function deferred<T>() {
   return { promise, resolve };
 }
 
-function segment(name: string, accountRoles: string[] = ['user']) {
+function criteria(name: string, accountRoles: string[] = ['user']) {
   return {
     data: {
-      id: 'segment-a',
+      id: 'criteria-a',
       name,
       description: 'A description',
-      segmentType: SegmentType.MEMBERS_BY_FILTER,
+      kind: MemberCriteriaKind.FILTER,
       config: { memberTagIds: [], accountRoles, createdAfter: undefined, createdBefore: undefined },
       estimatedCount: 20,
       archivedAt: null,
@@ -69,50 +69,50 @@ beforeEach(() => {
   actions.estimate.mockReset();
 });
 
-describe('SegmentModals edit lifecycle', () => {
-  it('ignores a stale load after closing one segment and opening another', async () => {
-    const segmentA = deferred<ReturnType<typeof segment>>();
-    const segmentB = deferred<ReturnType<typeof segment>>();
-    actions.get.mockImplementation((id: string) => (id === 'segment-a' ? segmentA.promise : segmentB.promise));
+describe('MemberCriteriaModals edit lifecycle', () => {
+  it('ignores a stale load after closing one criteria and opening another', async () => {
+    const criteriaA = deferred<ReturnType<typeof criteria>>();
+    const criteriaB = deferred<ReturnType<typeof criteria>>();
+    actions.get.mockImplementation((id: string) => (id === 'criteria-a' ? criteriaA.promise : criteriaB.promise));
     const { user } = render(<Scenario />);
-    await user.click(screen.getByRole('button', { name: 'Edit segment A' }));
+    await user.click(screen.getByRole('button', { name: 'Edit criteria A' }));
     let dialog = await screen.findByRole('dialog');
     await user.click(within(dialog).getByRole('button', { name: 'Close' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
-    await user.click(screen.getByRole('button', { name: 'Edit segment B' }));
+    await user.click(screen.getByRole('button', { name: 'Edit criteria B' }));
     await act(async () => {
-      segmentB.resolve(segment('Segment B'));
-      await segmentB.promise;
+      criteriaB.resolve(criteria('Criteria B'));
+      await criteriaB.promise;
     });
     dialog = await screen.findByRole('dialog');
-    expect(within(dialog).getByRole('textbox', { name: 'Name' })).toHaveValue('Segment B');
+    expect(within(dialog).getByRole('textbox', { name: 'Name' })).toHaveValue('Criteria B');
     await act(async () => {
-      segmentA.resolve(segment('Segment A'));
-      await segmentA.promise;
+      criteriaA.resolve(criteria('Criteria A'));
+      await criteriaA.promise;
     });
-    expect(within(dialog).getByRole('textbox', { name: 'Name' })).toHaveValue('Segment B');
+    expect(within(dialog).getByRole('textbox', { name: 'Name' })).toHaveValue('Criteria B');
   });
 
   it('sends touched scalar fields and keeps typing over the canonical save response', async () => {
-    const pending = deferred<ReturnType<typeof segment>>();
-    actions.get.mockResolvedValue(segment('Segment A'));
+    const pending = deferred<ReturnType<typeof criteria>>();
+    actions.get.mockResolvedValue(criteria('Criteria A'));
     actions.update
       .mockReturnValueOnce(pending.promise)
-      .mockResolvedValueOnce(segment('Typed while saving', ['admin', 'user']));
+      .mockResolvedValueOnce(criteria('Typed while saving', ['admin', 'user']));
     const view = render(<Scenario />);
     const { user } = view;
     try {
-      await user.click(screen.getByRole('button', { name: 'Edit segment A' }));
+      await user.click(screen.getByRole('button', { name: 'Edit criteria A' }));
       const name = await screen.findByRole('textbox', { name: 'Name' });
       await user.clear(name);
       await user.paste('Local name');
       await user.click(screen.getByRole('button', { name: 'Save' }));
       expect(actions.update).toHaveBeenNthCalledWith(1, {
-        id: 'segment-a',
+        id: 'criteria-a',
         name: 'Local name',
         config: expect.objectContaining({ accountRoles: [AuthorizationRole.USER] }),
         observed: {
-          segmentType: SegmentType.MEMBERS_BY_FILTER,
+          kind: MemberCriteriaKind.FILTER,
           config: expect.objectContaining({ accountRoles: [AuthorizationRole.USER] }),
         },
       });
@@ -120,7 +120,7 @@ describe('SegmentModals edit lifecycle', () => {
       await user.clear(name);
       await user.paste('Typed while saving');
       await act(async () => {
-        pending.resolve(segment('Local name', ['admin', 'user']));
+        pending.resolve(criteria('Local name', ['admin', 'user']));
         await pending.promise;
       });
       await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled());
@@ -128,11 +128,11 @@ describe('SegmentModals edit lifecycle', () => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
       await user.click(screen.getByRole('button', { name: 'Save' }));
       expect(actions.update).toHaveBeenNthCalledWith(2, {
-        id: 'segment-a',
+        id: 'criteria-a',
         name: 'Typed while saving',
         config: expect.objectContaining({ accountRoles: [AuthorizationRole.ADMIN, AuthorizationRole.USER] }),
         observed: {
-          segmentType: SegmentType.MEMBERS_BY_FILTER,
+          kind: MemberCriteriaKind.FILTER,
           config: expect.objectContaining({ accountRoles: [AuthorizationRole.ADMIN, AuthorizationRole.USER] }),
         },
       });
@@ -140,27 +140,27 @@ describe('SegmentModals edit lifecycle', () => {
     } finally {
       view.unmount();
       await act(async () => {
-        pending.resolve(segment('Local name', ['admin', 'user']));
+        pending.resolve(criteria('Local name', ['admin', 'user']));
         await pending.promise;
       });
     }
   });
 });
 
-it('does not apply an estimate to a different segment opened during the request', async () => {
+it('does not apply an estimate to a different criteria opened during the request', async () => {
   const estimate = deferred<{ count: number }>();
   actions.get.mockImplementation((id: string) =>
-    Promise.resolve(segment(id === 'segment-a' ? 'Segment A' : 'Segment B')),
+    Promise.resolve(criteria(id === 'criteria-a' ? 'Criteria A' : 'Criteria B')),
   );
   actions.estimate.mockReturnValueOnce(estimate.promise);
   const { user } = render(<Scenario />);
-  await user.click(screen.getByRole('button', { name: 'Edit segment A' }));
+  await user.click(screen.getByRole('button', { name: 'Edit criteria A' }));
   await screen.findByRole('textbox', { name: 'Name' });
-  await user.click(screen.getByRole('button', { name: 'Estimate Count' }));
+  await user.click(screen.getByRole('button', { name: 'Count matching members' }));
   await user.click(screen.getByRole('button', { name: 'Close' }));
   await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
-  await user.click(screen.getByRole('button', { name: 'Edit segment B' }));
-  expect(await screen.findByRole('textbox', { name: 'Name' })).toHaveValue('Segment B');
+  await user.click(screen.getByRole('button', { name: 'Edit criteria B' }));
+  expect(await screen.findByRole('textbox', { name: 'Name' })).toHaveValue('Criteria B');
   await act(async () => estimate.resolve({ count: 999 }));
   expect(screen.queryByText(/999/)).not.toBeInTheDocument();
 });

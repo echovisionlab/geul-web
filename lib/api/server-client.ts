@@ -33,7 +33,7 @@ import { MemberService as PublicMemberService } from '@echovisionlab/geul-proto/
 import { WorkService as PublicWorkService } from '@echovisionlab/geul-proto/public/work_pb.ts';
 import { AdminService } from '@echovisionlab/geul-proto/secure/admin_pb.ts';
 import { ArtistService } from '@echovisionlab/geul-proto/secure/artist_pb.ts';
-import { AudienceService } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
+import { MemberCriteriaService } from '@echovisionlab/geul-proto/secure/member_criteria_pb.ts';
 import { CampaignService } from '@echovisionlab/geul-proto/secure/campaign_pb.ts';
 import { CategoryService } from '@echovisionlab/geul-proto/secure/category_pb.ts';
 import { ClientService } from '@echovisionlab/geul-proto/secure/client_pb.ts';
@@ -499,8 +499,8 @@ export async function createShareLinkClient() {
   return createClient(ShareLinkService, await createServerTransport());
 }
 
-export async function createAudienceClient() {
-  return createClient(AudienceService, await createServerTransport());
+export async function createMemberCriteriaClient() {
+  return createClient(MemberCriteriaService, await createServerTransport());
 }
 
 export async function createMailAdapterClient() {

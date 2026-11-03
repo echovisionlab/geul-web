@@ -5,18 +5,18 @@ import { logServerFailure } from '@/lib/logging/logger';
 import { create } from '@bufbuild/protobuf';
 import { Code, ConnectError } from '@connectrpc/connect';
 import { FilterOp, FilterSpecSchema, PaginationRequestSchema } from '@echovisionlab/geul-proto/common/common_pb.ts';
-import type { AudienceSegmentSummary as ProtoAudienceSegmentSummary } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
+import type { MemberCriteriaSummary as ProtoMemberCriteriaSummary } from '@echovisionlab/geul-proto/secure/member_criteria_pb.ts';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import {
-  FileDownloadAudience as ProtoFileDownloadAudience,
+  FileDownloadAccess as ProtoFileDownloadAccess,
   type FileDownloadPolicy,
 } from '@echovisionlab/geul-proto/secure/file_pb.ts';
-import { createAudienceClient, createFileClient } from '@/lib/api/server-client';
+import { createMemberCriteriaClient, createFileClient } from '@/lib/api/server-client';
 import {
   isFileDownloadPolicyEntityType,
-  type AudienceSegmentSummary,
+  type MemberCriteriaSummary,
   type FileDownloadActionResult,
-  type FileDownloadAudience,
+  type FileDownloadAccess,
   type FileDownloadPage,
   type FileDownloadPageInput,
   type FileDownloadPolicyModel,
@@ -72,36 +72,36 @@ function isValidTarget(target: FileDownloadPolicyTarget): boolean {
   return Boolean(target.blockId?.trim() && target.referencePath?.trim());
 }
 
-function audienceFromProto(audience: ProtoFileDownloadAudience): FileDownloadAudience {
-  switch (audience) {
-    case ProtoFileDownloadAudience.DISABLED:
+function accessFromProto(access: ProtoFileDownloadAccess): FileDownloadAccess {
+  switch (access) {
+    case ProtoFileDownloadAccess.DISABLED:
       return 'disabled';
-    case ProtoFileDownloadAudience.PUBLIC:
+    case ProtoFileDownloadAccess.PUBLIC:
       return 'public';
-    case ProtoFileDownloadAudience.AUTHENTICATED:
+    case ProtoFileDownloadAccess.AUTHENTICATED:
       return 'authenticated';
-    case ProtoFileDownloadAudience.RESTRICTED:
+    case ProtoFileDownloadAccess.RESTRICTED:
       return 'restricted';
-    case ProtoFileDownloadAudience.UNSPECIFIED:
+    case ProtoFileDownloadAccess.UNSPECIFIED:
     default:
-      throw new Error('Invalid file download audience');
+      throw new Error('Invalid file download access');
   }
 }
 
-function audienceToProto(audience: FileDownloadAudience): ProtoFileDownloadAudience {
-  switch (audience) {
+function accessToProto(access: FileDownloadAccess): ProtoFileDownloadAccess {
+  switch (access) {
     case 'public':
-      return ProtoFileDownloadAudience.PUBLIC;
+      return ProtoFileDownloadAccess.PUBLIC;
     case 'authenticated':
-      return ProtoFileDownloadAudience.AUTHENTICATED;
+      return ProtoFileDownloadAccess.AUTHENTICATED;
     case 'restricted':
-      return ProtoFileDownloadAudience.RESTRICTED;
+      return ProtoFileDownloadAccess.RESTRICTED;
     case 'disabled':
-      return ProtoFileDownloadAudience.DISABLED;
+      return ProtoFileDownloadAccess.DISABLED;
   }
 }
 
-function isFileDownloadAudience(value: unknown): value is FileDownloadAudience {
+function isFileDownloadAccess(value: unknown): value is FileDownloadAccess {
   return value === 'disabled' || value === 'public' || value === 'authenticated' || value === 'restricted';
 }
 
@@ -111,9 +111,9 @@ function isObservedPolicy(value: unknown): value is FileDownloadPolicyObservedSt
   }
   const candidate = value as Partial<FileDownloadPolicyObservedState>;
   return (
-    isFileDownloadAudience(candidate.audience) &&
-    Array.isArray(candidate.audienceSegmentIds) &&
-    candidate.audienceSegmentIds.every((id) => typeof id === 'string')
+    isFileDownloadAccess(candidate.access) &&
+    Array.isArray(candidate.memberCriteriaIds) &&
+    candidate.memberCriteriaIds.every((id) => typeof id === 'string')
   );
 }
 
@@ -124,17 +124,17 @@ function mapPolicy(policy: FileDownloadPolicy): FileDownloadPolicyModel {
     ...(policy.blockId ? { blockId: policy.blockId } : {}),
     ...(policy.referencePath ? { referencePath: policy.referencePath } : {}),
     fileId: policy.fileId,
-    audience: audienceFromProto(policy.audience),
-    audienceSegments: policy.audienceSegments.map(mapAudienceSegment),
+    access: accessFromProto(policy.access),
+    memberCriteria: policy.memberCriteria.map(mapMemberCriteria),
   };
 }
 
-function mapAudienceSegment(segment: ProtoAudienceSegmentSummary): AudienceSegmentSummary {
+function mapMemberCriteria(criteria: ProtoMemberCriteriaSummary): MemberCriteriaSummary {
   return {
-    id: segment.id,
-    name: segment.name,
-    description: segment.description ?? '',
-    segmentType: segment.segmentType,
+    id: criteria.id,
+    name: criteria.name,
+    description: criteria.description ?? '',
+    kind: criteria.kind,
   };
 }
 
@@ -165,8 +165,8 @@ export async function getFileDownloadPolicyAction(
 
 export async function updateFileDownloadPolicyAction(
   target: FileDownloadPolicyTarget,
-  audience: FileDownloadAudience,
-  audienceSegmentIds: string[],
+  access: FileDownloadAccess,
+  memberCriteriaIds: string[],
   observedPolicy: FileDownloadPolicyObservedState,
   editorOrigin?: string,
 ): Promise<FileDownloadActionResult<FileDownloadPolicyModel>> {
@@ -177,10 +177,10 @@ export async function updateFileDownloadPolicyAction(
     return { errorCode: 'invalidPolicyBaseline' };
   }
 
-  const segmentIds =
-    audience === 'restricted' ? Array.from(new Set(audienceSegmentIds.map((id) => id.trim()).filter(Boolean))) : [];
-  const observedSegmentIds = Array.from(
-    new Set(observedPolicy.audienceSegmentIds.map((id) => id.trim()).filter(Boolean)),
+  const criteriaIds =
+    access === 'restricted' ? Array.from(new Set(memberCriteriaIds.map((id) => id.trim()).filter(Boolean))) : [];
+  const observedCriteriaIds = Array.from(
+    new Set(observedPolicy.memberCriteriaIds.map((id) => id.trim()).filter(Boolean)),
   ).sort();
 
   try {
@@ -188,11 +188,11 @@ export async function updateFileDownloadPolicyAction(
     const response = await client.updateFileDownloadPolicy({
       ...target,
       expectedFileId: target.expectedFileId,
-      audience: audienceToProto(audience),
-      audienceSegmentIds: segmentIds,
+      access: accessToProto(access),
+      memberCriteriaIds: criteriaIds,
       observedPolicy: {
-        audience: audienceToProto(observedPolicy.audience),
-        audienceSegmentIds: observedSegmentIds,
+        access: accessToProto(observedPolicy.access),
+        memberCriteriaIds: observedCriteriaIds,
       },
     });
     if (!response.policy) {
@@ -208,13 +208,13 @@ export async function updateFileDownloadPolicyAction(
   }
 }
 
-export async function listAudienceSegmentsForAuthenticatedAccessAction(
+export async function listMemberCriteriaForAuthenticatedAccessAction(
   input: FileDownloadPageInput = {},
-): Promise<FileDownloadActionResult<FileDownloadPage<AudienceSegmentSummary>>> {
+): Promise<FileDownloadActionResult<FileDownloadPage<MemberCriteriaSummary>>> {
   const { page, pageSize, offset, search } = normalizePageInput(input);
   try {
-    const client = await createAudienceClient();
-    const response = await client.listSegmentsForAuthenticatedAccess({
+    const client = await createMemberCriteriaClient();
+    const response = await client.listMemberCriteriaForAuthenticatedAccess({
       pagination: create(PaginationRequestSchema, { limit: pageSize, offset }),
       filters: search
         ? [
@@ -227,10 +227,10 @@ export async function listAudienceSegmentsForAuthenticatedAccessAction(
         : [],
     });
     return {
-      data: mapPage(response.segments.map(mapAudienceSegment), response.pagination, page, pageSize),
+      data: mapPage(response.memberCriteria.map(mapMemberCriteria), response.pagination, page, pageSize),
     };
   } catch (error) {
-    logServerFailure('file-download-access-actions', 'listAudienceSegmentsForAuthenticatedAccessAction', error);
+    logServerFailure('file-download-access-actions', 'listMemberCriteriaForAuthenticatedAccessAction', error);
     return { errorCode: 'loadFailed' };
   }
 }

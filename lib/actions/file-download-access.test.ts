@@ -1,23 +1,23 @@
-import { SegmentType } from '@echovisionlab/geul-proto/secure/audience_pb.ts';
+import { MemberCriteriaKind } from '@echovisionlab/geul-proto/secure/member_criteria_pb.ts';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
-import { FileDownloadAudience } from '@echovisionlab/geul-proto/secure/file_pb.ts';
+import { FileDownloadAccess } from '@echovisionlab/geul-proto/secure/file_pb.ts';
 import { FilterOp } from '@echovisionlab/geul-proto/common/common_pb.ts';
 import { Code, ConnectError } from '@connectrpc/connect';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createAudienceClient, createFileClient } from '@/lib/api/server-client';
+import { createMemberCriteriaClient, createFileClient } from '@/lib/api/server-client';
 import {
   getFileDownloadPolicyAction,
-  listAudienceSegmentsForAuthenticatedAccessAction,
+  listMemberCriteriaForAuthenticatedAccessAction,
   updateFileDownloadPolicyAction,
 } from './file-download-access';
 
 vi.mock('@/lib/api/server-client', () => ({
-  createAudienceClient: vi.fn(),
+  createMemberCriteriaClient: vi.fn(),
   createFileClient: vi.fn(),
 }));
 
 beforeEach(() => {
-  vi.mocked(createAudienceClient).mockReset();
+  vi.mocked(createMemberCriteriaClient).mockReset();
   vi.mocked(createFileClient).mockReset();
 });
 
@@ -32,7 +32,7 @@ describe('file download access actions', () => {
     ).resolves.toEqual({ errorCode: 'invalidTarget' });
 
     expect(createFileClient).not.toHaveBeenCalled();
-    expect(createAudienceClient).not.toHaveBeenCalled();
+    expect(createMemberCriteriaClient).not.toHaveBeenCalled();
   });
 
   it.each([TranscodeEntityType.WORK, TranscodeEntityType.PROGRAM_EVENT])(
@@ -82,7 +82,7 @@ describe('file download access actions', () => {
         },
         'public',
         [],
-        { audience: 'disabled', audienceSegmentIds: [] },
+        { access: 'disabled', memberCriteriaIds: [] },
       ),
     ).resolves.toEqual({ errorCode: 'staleTarget' });
   });
@@ -106,7 +106,7 @@ describe('file download access actions', () => {
     expect(createFileClient).not.toHaveBeenCalled();
   });
 
-  it('maps the canonical Audience summaries returned with a file policy', async () => {
+  it('maps the canonical Access summaries returned with a file policy', async () => {
     const getFileDownloadPolicy = vi.fn().mockResolvedValue({
       policy: {
         entityType: TranscodeEntityType.POST,
@@ -114,13 +114,13 @@ describe('file download access actions', () => {
         blockId: 'block-1',
         referencePath: 'file',
         fileId: 'file-1',
-        audience: FileDownloadAudience.RESTRICTED,
-        audienceSegments: [
+        access: FileDownloadAccess.RESTRICTED,
+        memberCriteria: [
           {
-            id: 'audience-1',
+            id: 'access-1',
             name: 'Members',
             description: 'Registered members',
-            segmentType: SegmentType.MEMBERS_BY_FILTER,
+            kind: MemberCriteriaKind.FILTER,
           },
         ],
       },
@@ -142,13 +142,13 @@ describe('file download access actions', () => {
         blockId: 'block-1',
         referencePath: 'file',
         fileId: 'file-1',
-        audience: 'restricted',
-        audienceSegments: [
+        access: 'restricted',
+        memberCriteria: [
           {
-            id: 'audience-1',
+            id: 'access-1',
             name: 'Members',
             description: 'Registered members',
-            segmentType: SegmentType.MEMBERS_BY_FILTER,
+            kind: MemberCriteriaKind.FILTER,
           },
         ],
       },
@@ -162,9 +162,9 @@ describe('file download access actions', () => {
   });
 
   it.each([
-    ['UNSPECIFIED', FileDownloadAudience.UNSPECIFIED],
-    ['unknown', 999 as FileDownloadAudience],
-  ])('rejects a persisted %s audience instead of normalizing it to disabled', async (_label, audience) => {
+    ['UNSPECIFIED', FileDownloadAccess.UNSPECIFIED],
+    ['unknown', 999 as FileDownloadAccess],
+  ])('rejects a persisted %s access instead of normalizing it to disabled', async (_label, access) => {
     const getFileDownloadPolicy = vi.fn().mockResolvedValue({
       policy: {
         entityType: TranscodeEntityType.POST,
@@ -172,8 +172,8 @@ describe('file download access actions', () => {
         blockId: 'block-1',
         referencePath: 'file',
         fileId: 'file-1',
-        audience,
-        audienceSegments: [],
+        access,
+        memberCriteria: [],
       },
     });
     vi.mocked(createFileClient).mockResolvedValue({ getFileDownloadPolicy } as never);
@@ -189,7 +189,7 @@ describe('file download access actions', () => {
     ).resolves.toEqual({ errorCode: 'loadFailed' });
   });
 
-  it('writes only normalized audienceSegmentIds for restricted policies', async () => {
+  it('writes only normalized memberCriteriaIds for restricted policies', async () => {
     const updateFileDownloadPolicy = vi.fn().mockResolvedValue({
       policy: {
         entityType: TranscodeEntityType.POST,
@@ -197,8 +197,8 @@ describe('file download access actions', () => {
         blockId: 'block-1',
         referencePath: 'file',
         fileId: 'file-1',
-        audience: FileDownloadAudience.RESTRICTED,
-        audienceSegments: [],
+        access: FileDownloadAccess.RESTRICTED,
+        memberCriteria: [],
       },
     });
     vi.mocked(createFileClient).mockResolvedValue({ updateFileDownloadPolicy } as never);
@@ -212,8 +212,8 @@ describe('file download access actions', () => {
         expectedFileId: 'file-1',
       },
       'restricted',
-      [' audience-1 ', 'audience-1', 'audience-2'],
-      { audience: 'public', audienceSegmentIds: ['audience-0', ' audience-0 '] },
+      [' access-1 ', 'access-1', 'access-2'],
+      { access: 'public', memberCriteriaIds: ['access-0', ' access-0 '] },
     );
 
     expect(updateFileDownloadPolicy).toHaveBeenCalledWith({
@@ -222,16 +222,16 @@ describe('file download access actions', () => {
       blockId: 'block-1',
       referencePath: 'file',
       expectedFileId: 'file-1',
-      audience: FileDownloadAudience.RESTRICTED,
-      audienceSegmentIds: ['audience-1', 'audience-2'],
+      access: FileDownloadAccess.RESTRICTED,
+      memberCriteriaIds: ['access-1', 'access-2'],
       observedPolicy: {
-        audience: FileDownloadAudience.PUBLIC,
-        audienceSegmentIds: ['audience-0'],
+        access: FileDownloadAccess.PUBLIC,
+        memberCriteriaIds: ['access-0'],
       },
     });
   });
 
-  it('persists restricted with no Audience segments as explicit deny-all', async () => {
+  it('persists restricted with no Access criteriaList as explicit deny-all', async () => {
     const updateFileDownloadPolicy = vi.fn().mockResolvedValue({
       policy: {
         entityType: TranscodeEntityType.POST,
@@ -239,8 +239,8 @@ describe('file download access actions', () => {
         blockId: 'block-1',
         referencePath: 'file',
         fileId: 'file-1',
-        audience: FileDownloadAudience.RESTRICTED,
-        audienceSegments: [],
+        access: FileDownloadAccess.RESTRICTED,
+        memberCriteria: [],
       },
     });
     vi.mocked(createFileClient).mockResolvedValue({ updateFileDownloadPolicy } as never);
@@ -256,7 +256,7 @@ describe('file download access actions', () => {
         },
         'restricted',
         [],
-        { audience: 'disabled', audienceSegmentIds: [] },
+        { access: 'disabled', memberCriteriaIds: [] },
       ),
     ).resolves.toEqual({
       data: {
@@ -265,8 +265,8 @@ describe('file download access actions', () => {
         blockId: 'block-1',
         referencePath: 'file',
         fileId: 'file-1',
-        audience: 'restricted',
-        audienceSegments: [],
+        access: 'restricted',
+        memberCriteria: [],
       },
     });
     expect(updateFileDownloadPolicy).toHaveBeenCalledWith({
@@ -275,37 +275,37 @@ describe('file download access actions', () => {
       blockId: 'block-1',
       referencePath: 'file',
       expectedFileId: 'file-1',
-      audience: FileDownloadAudience.RESTRICTED,
-      audienceSegmentIds: [],
+      access: FileDownloadAccess.RESTRICTED,
+      memberCriteriaIds: [],
       observedPolicy: {
-        audience: FileDownloadAudience.DISABLED,
-        audienceSegmentIds: [],
+        access: FileDownloadAccess.DISABLED,
+        memberCriteriaIds: [],
       },
     });
   });
 
-  it('loads paginated Audience summaries through the author-safe Audience RPC', async () => {
-    const listSegmentsForAuthenticatedAccess = vi.fn().mockResolvedValue({
-      segments: [
+  it('loads paginated Access summaries through the author-safe Access RPC', async () => {
+    const listMemberCriteriaForAuthenticatedAccess = vi.fn().mockResolvedValue({
+      memberCriteria: [
         {
-          id: 'audience-51',
-          name: 'Audience 51',
+          id: 'access-51',
+          name: 'Access 51',
           description: '',
-          segmentType: SegmentType.MEMBER_TAGS,
+          kind: MemberCriteriaKind.MEMBER_TAGS,
         },
       ],
       pagination: { total: 525, hasMore: true },
     });
-    vi.mocked(createAudienceClient).mockResolvedValue({
-      listSegmentsForAuthenticatedAccess,
+    vi.mocked(createMemberCriteriaClient).mockResolvedValue({
+      listMemberCriteriaForAuthenticatedAccess,
     } as never);
 
-    const result = await listAudienceSegmentsForAuthenticatedAccessAction({
+    const result = await listMemberCriteriaForAuthenticatedAccessAction({
       page: 3,
       pageSize: 25,
     });
 
-    expect(listSegmentsForAuthenticatedAccess).toHaveBeenCalledWith({
+    expect(listMemberCriteriaForAuthenticatedAccess).toHaveBeenCalledWith({
       pagination: expect.objectContaining({ limit: 25, offset: 50 }),
       filters: [],
     });
@@ -319,29 +319,29 @@ describe('file download access actions', () => {
       }),
     );
     expect(result.data?.items[0]).toEqual({
-      id: 'audience-51',
-      name: 'Audience 51',
+      id: 'access-51',
+      name: 'Access 51',
       description: '',
-      segmentType: SegmentType.MEMBER_TAGS,
+      kind: MemberCriteriaKind.MEMBER_TAGS,
     });
   });
 
-  it('passes normalized server search to the author-safe Audience RPC', async () => {
-    const listSegmentsForAuthenticatedAccess = vi.fn().mockResolvedValue({
-      segments: [],
+  it('passes normalized server search to the author-safe Access RPC', async () => {
+    const listMemberCriteriaForAuthenticatedAccess = vi.fn().mockResolvedValue({
+      memberCriteria: [],
       pagination: { total: 0, hasMore: false },
     });
-    vi.mocked(createAudienceClient).mockResolvedValue({
-      listSegmentsForAuthenticatedAccess,
+    vi.mocked(createMemberCriteriaClient).mockResolvedValue({
+      listMemberCriteriaForAuthenticatedAccess,
     } as never);
 
-    await listAudienceSegmentsForAuthenticatedAccessAction({
+    await listMemberCriteriaForAuthenticatedAccessAction({
       page: 2,
       pageSize: 50,
       search: '  Press  ',
     });
 
-    expect(listSegmentsForAuthenticatedAccess).toHaveBeenCalledWith({
+    expect(listMemberCriteriaForAuthenticatedAccess).toHaveBeenCalledWith({
       pagination: expect.objectContaining({ limit: 50, offset: 50 }),
       filters: [
         expect.objectContaining({

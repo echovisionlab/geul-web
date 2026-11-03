@@ -3,18 +3,18 @@ import type { ComponentProps } from 'react';
 import { AdminPageHeader } from '@/features/admin/ui/AdminPageHeader';
 import { ServerDataTable } from '@/features/data-table/ServerDataTable';
 import { ServerDataTablePaginationClient } from '@/features/data-table/ServerDataTable/ServerDataTablePaginationClient';
-import { SegmentsTableContent } from './SegmentsTableContent';
-import { SegmentModals } from './SegmentModals';
-import { SegmentModalProvider } from './SegmentModalContext';
-import { AudienceArchiveFilter } from './AudienceArchiveFilter';
-import { CreateSegmentButton } from './CreateSegmentButton';
-interface Props extends ComponentProps<typeof SegmentsTableContent> {
+import { MemberCriteriaTableContent } from './MemberCriteriaTableContent';
+import { MemberCriteriaModals } from './MemberCriteriaModals';
+import { CriteriaModalProvider } from './MemberCriteriaModalContext';
+import { MemberCriteriaArchiveFilter } from './MemberCriteriaArchiveFilter';
+import { CreateMemberCriteriaButton } from './CreateMemberCriteriaButton';
+interface Props extends ComponentProps<typeof MemberCriteriaTableContent> {
   title: string;
   searchParams: string;
-  modalBindings?: ComponentProps<typeof SegmentModals>;
+  modalBindings?: ComponentProps<typeof MemberCriteriaModals>;
   description: string;
 }
-export function SegmentsPageView({
+export function MemberCriteriaPageView({
   result,
   filterFields,
   sortFields,
@@ -25,7 +25,7 @@ export function SegmentsPageView({
   description,
 }: Props) {
   return (
-    <SegmentModalProvider>
+    <CriteriaModalProvider>
       <AdminPageHeader
         title={title}
         description={description}
@@ -33,27 +33,27 @@ export function SegmentsPageView({
           {
             key: 'include-archived',
             type: 'custom',
-            content: <AudienceArchiveFilter />,
+            content: <MemberCriteriaArchiveFilter />,
           },
-          { key: 'create-segment', type: 'custom', content: <CreateSegmentButton /> },
+          { key: 'create-criteria', type: 'custom', content: <CreateMemberCriteriaButton /> },
         ]}
       />
 
-      <ServerDataTable namespace="segments" accessibleLabel={title}>
-        <SegmentsTableContent
+      <ServerDataTable namespace="memberCriteria" accessibleLabel={title}>
+        <MemberCriteriaTableContent
           result={result}
           searchPlaceholder={searchPlaceholder}
           filterFields={filterFields}
           sortFields={sortFields}
         />
         <ServerDataTablePaginationClient
-          namespace="segments"
+          namespace="memberCriteria"
           result={result}
           searchParams={new URLSearchParams(searchParams)}
         />
       </ServerDataTable>
 
-      <SegmentModals bindings={modalBindings?.bindings} refresh={modalBindings?.refresh} />
-    </SegmentModalProvider>
+      <MemberCriteriaModals bindings={modalBindings?.bindings} refresh={modalBindings?.refresh} />
+    </CriteriaModalProvider>
   );
 }

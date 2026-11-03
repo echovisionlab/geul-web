@@ -257,8 +257,7 @@
       "clients": "Clients",
       "campaign": "Campagne",
       "campaigns": "Campagnes",
-      "audienceSegment": "Segment d'audience",
-      "audienceSegments": "Segments d'audience",
+      "memberCriteria": "Segment d'audience",
       "user": "Utilisateur",
       "member": "Membre",
       "users": "Utilisateurs",
@@ -613,7 +612,7 @@
         "failed": "Échec"
       }
     },
-    "audienceSegments": {
+    "memberCriteria": {
       "description": "Créez des segments d'audience réutilisables pour cibler vos campagnes sur des groupes précis.",
       "searchPlaceholder": "Rechercher des segments...",
       "empty": "Aucun segment trouvé. Créez-en un pour cibler des audiences spécifiques.",
@@ -2699,13 +2698,13 @@
       "none": "Aucune mise en page"
     },
     "target": {
-      "audienceLabel": "Audience cible",
-      "audiencePlaceholder": "Sélectionner une audience",
+      "criteriaLabel": "Audience cible",
+      "criteriaPlaceholder": "Sélectionner une audience",
       "all": "Tous les utilisateurs",
-      "unavailableAudience": "Audience archivée ou indisponible",
-      "unavailableAudienceDescription": "Cette campagne cible une audience archivée ou indisponible. Sélectionnez une audience active avant de planifier ou d’envoyer.",
-      "audienceRequired": "Sélectionnez une audience active avant de planifier ou d’envoyer.",
-      "audienceLoadError": "Impossible de charger les audiences actives. Réessayez avant de planifier ou d’envoyer."
+      "unavailableCriteria": "Audience archivée ou indisponible",
+      "unavailableCriteriaDescription": "Cette campagne cible une audience archivée ou indisponible. Sélectionnez une audience active avant de planifier ou d’envoyer.",
+      "criteriaRequired": "Sélectionnez une audience active avant de planifier ou d’envoyer.",
+      "criteriaLoadError": "Impossible de charger les audiences actives. Réessayez avant de planifier ou d’envoyer."
     },
     "fields": {
       "recipientScope": "Destinataires",
@@ -2721,7 +2720,7 @@
       "description": "Entrez une adresse e-mail pour envoyer un test de cette campagne."
     },
     "sendModal": {
-      "warning": "Cela enverra la campagne au segment d'audience {audience}. Cette action est irréversible.",
+      "warning": "Cela enverra la campagne au segment d'audience {criteria}. Cette action est irréversible.",
       "subject": "Objet : {subject}",
       "allMatchingUsersWarning": "Inclut les utilisateurs correspondants désabonnés de la newsletter."
     },
@@ -2730,7 +2729,7 @@
       "dateLabel": "Date et heure planifiées",
       "previousMonth": "Mois précédent",
       "nextMonth": "Mois suivant",
-      "audience": "Audience : {audience}",
+      "criteria": "Audience : {criteria}",
       "allMatchingUsersWarning": "Inclut les utilisateurs correspondants désabonnés de la newsletter."
     },
     "notifications": {
@@ -5306,7 +5305,7 @@
     "editor": {
       "sectionTitle": "Accès au téléchargement",
       "loading": "Chargement de l’accès au téléchargement…",
-      "audiences": {
+      "access": {
         "disabled": {
           "label": "Aucun téléchargement",
           "description": "Aucun visiteur ne peut télécharger ce fichier."
@@ -5324,9 +5323,9 @@
           "description": "Seuls les utilisateurs des publics sélectionnés peuvent télécharger ce fichier."
         }
       },
-      "segmentsLoadError": "La règle a été chargée, mais pas les publics.",
-      "segmentsEmpty": "Aucun segment de public n’est disponible.",
-      "restrictedWithoutAudience": "Cette politique restreinte n’a aucun public. Les téléchargements sont refusés à tous tant que vous n’avez pas sélectionné au moins un public.",
+      "criteriaLoadError": "La règle a été chargée, mais pas les publics.",
+      "criteriaEmpty": "Aucun segment de public n’est disponible.",
+      "restrictedWithoutCriteria": "Cette politique restreinte n’a aucun public. Les téléchargements sont refusés à tous tant que vous n’avez pas sélectionné au moins un public.",
       "additionalSelected": "{count} sélectionnés en plus",
       "loadError": "Impossible de charger l’accès au téléchargement.",
       "saveError": "Impossible d’enregistrer l’accès au téléchargement.",

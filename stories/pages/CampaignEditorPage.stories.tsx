@@ -114,9 +114,9 @@ function Preview({ state = 'ready' }: { state?: 'ready' | 'pending' | 'failed' |
     activeEditLocale: localEditLocale(locale, setLocale),
     handleActiveLocaleChange: (value) => value && setLocale(value),
     fields,
-    segments: [],
-    segmentsLoading: false,
-    segmentsLoadError: false,
+    criteriaOptions: [],
+    criteriaListLoading: false,
+    criteriaLoadError: false,
     handleTargetChange: async (selection) => setFields((current) => ({ ...current, ...selection })),
     layouts: [{ id: 'paper', name: 'Paper layout', key: 'paper' }],
     handleLayoutChange: async (layoutId) => setFields((current) => ({ ...current, layoutId })),
@@ -165,7 +165,7 @@ function Preview({ state = 'ready' }: { state?: 'ready' | 'pending' | 'failed' |
     handleSendTest: () => feedback(() => setTestModal(false)),
     sendModalOpened,
     sendCampaign: { isPending: false },
-    selectedSegmentName: 'All users',
+    selectedCriteriaName: 'All users',
     closeSendModal: () => setSendModal(false),
     handleSendAll: () =>
       feedback(() => {
@@ -211,7 +211,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Production campaign editor with a local rich text room, live preview, audience/layout controls and test/send/schedule dialogs. Send and schedule change local lifecycle state; no email is delivered. Canonical snapshots use the production Go email renderer with local layout/variables through a Storybook-only endpoint. Configure EMAIL_PREVIEW_FIXTURE_BINARY. Service-backed translation panels are omitted.',
+          'Production campaign editor with a local rich text room, live preview, criteria/layout controls and test/send/schedule dialogs. Send and schedule change local lifecycle state; no email is delivered. Canonical snapshots use the production Go email renderer with local layout/variables through a Storybook-only endpoint. Configure EMAIL_PREVIEW_FIXTURE_BINARY. Service-backed translation panels are omitted.',
       },
     },
   },

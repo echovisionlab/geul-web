@@ -3,8 +3,8 @@ import { campaignRecipientScopeSchema } from '@echovisionlab/geul-common/collabo
 import * as z from '@/lib/zod-mini';
 
 export const CampaignFieldsSchema = z.object({
-  targetMode: z.union([z.literal(CampaignTargetMode.ALL), z.literal(CampaignTargetMode.SEGMENT)]),
-  segmentId: z.nullable(z.string()),
+  targetMode: z.union([z.literal(CampaignTargetMode.ALL), z.literal(CampaignTargetMode.MEMBER_CRITERIA)]),
+  memberCriteriaId: z.nullable(z.string()),
   layoutId: z.nullable(z.string()),
   recipientScope: campaignRecipientScopeSchema,
 });
@@ -13,7 +13,7 @@ export type CampaignFields = z.infer<typeof CampaignFieldsSchema>;
 
 export const DEFAULT_CAMPAIGN_FIELDS: CampaignFields = {
   targetMode: CampaignTargetMode.ALL,
-  segmentId: null,
+  memberCriteriaId: null,
   layoutId: null,
   recipientScope: 'SUBSCRIBED_USERS',
 };

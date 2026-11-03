@@ -1028,8 +1028,8 @@ export const routePlans = {
     'M04 I05',
     'Actual permitted role, suspension, account-state and tag fields/commands.',
   ),
-  '/admin/audience-segments': row(
-    'Audience segments',
+  '/admin/member-criteria': row(
+    'Member criteria',
     '05',
     'M04 L01 L02',
     'Condition editing, audience count, preview, create/delete and failure.',

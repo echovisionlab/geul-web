@@ -3,43 +3,43 @@
 import { IconArchive, IconPencil, IconRestore } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { TableRowMenu } from '@/components/core/DataTable';
-import { useSegmentModal } from './SegmentModalContext';
-import type { AudienceSegmentRow } from './model';
+import { useCriteriaModal } from './MemberCriteriaModalContext';
+import type { MemberCriteriaRow } from './model';
 
-interface SegmentRowMenuProps {
-  segment: AudienceSegmentRow;
+interface MemberCriteriaRowMenuProps {
+  criteria: MemberCriteriaRow;
 }
 
-export function SegmentRowMenu({ segment }: SegmentRowMenuProps) {
+export function MemberCriteriaRowMenu({ criteria }: MemberCriteriaRowMenuProps) {
   const tCommon = useTranslations('common');
   const tTable = useTranslations('dataTable');
-  const tPage = useTranslations('adminList.audienceSegments');
-  const { openArchive, openEdit, openRestore } = useSegmentModal();
+  const tPage = useTranslations('adminList.memberCriteria');
+  const { openArchive, openEdit, openRestore } = useCriteriaModal();
 
-  const lifecycleItem = segment.archived_at
+  const lifecycleItem = criteria.archived_at
     ? {
         label: tPage('restore'),
         icon: <IconRestore size={16} />,
-        onClick: () => openRestore(segment),
+        onClick: () => openRestore(criteria),
       }
     : {
         label: tPage('archive'),
         icon: <IconArchive size={16} />,
-        onClick: () => openArchive(segment),
+        onClick: () => openArchive(criteria),
         tone: 'warning' as const,
       };
 
   return (
     <TableRowMenu
-      aria-label={tTable('aria.rowActions', { label: segment.name })}
+      aria-label={tTable('aria.rowActions', { label: criteria.name })}
       items={[
-        ...(segment.archived_at
+        ...(criteria.archived_at
           ? []
           : [
               {
                 label: tCommon('actions.edit'),
                 icon: <IconPencil size={16} />,
-                onClick: () => openEdit(segment.id),
+                onClick: () => openEdit(criteria.id),
               },
             ]),
         lifecycleItem,

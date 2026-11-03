@@ -11,8 +11,8 @@ import {
 } from '@/features/data-table/ServerDataTable';
 import { useLocale } from '@/lib/providers/LocaleProvider';
 import type { ColumnDef } from '@/lib/types/common/data-table';
-import type { AudienceSegmentRow } from './model';
-import { SegmentRowMenu } from './SegmentRowMenu';
+import type { MemberCriteriaRow } from './model';
+import { MemberCriteriaRowMenu } from './MemberCriteriaRowMenu';
 
 function getColumns(
   locale: string,
@@ -25,7 +25,7 @@ function getColumns(
     estimatedCount: string;
     created: string;
   },
-): ColumnDef<AudienceSegmentRow>[] {
+): ColumnDef<MemberCriteriaRow>[] {
   return [
     {
       key: 'name',
@@ -39,7 +39,7 @@ function getColumns(
     {
       key: 'type',
       header: labels.type,
-      cell: (row) => <LabelBadge size="sm">{row.segment_type_label}</LabelBadge>,
+      cell: (row) => <LabelBadge size="sm">{row.criteria_type_label}</LabelBadge>,
     },
     {
       key: 'status',
@@ -73,26 +73,26 @@ function getColumns(
       kind: 'action',
       header: '',
       width: 50,
-      cell: (row) => <SegmentRowMenu segment={row} />,
+      cell: (row) => <MemberCriteriaRowMenu criteria={row} />,
     },
   ];
 }
 
-interface SegmentsTableContentProps {
-  result: ServerDataTableSelectableSectionProps<AudienceSegmentRow>['result'];
+interface MemberCriteriaTableContentProps {
+  result: ServerDataTableSelectableSectionProps<MemberCriteriaRow>['result'];
   searchPlaceholder: string;
-  filterFields: ServerDataTableSelectableSectionProps<AudienceSegmentRow>['filterFields'];
-  sortFields: ServerDataTableSelectableSectionProps<AudienceSegmentRow>['sortFields'];
+  filterFields: ServerDataTableSelectableSectionProps<MemberCriteriaRow>['filterFields'];
+  sortFields: ServerDataTableSelectableSectionProps<MemberCriteriaRow>['sortFields'];
 }
 
-export function SegmentsTableContent({
+export function MemberCriteriaTableContent({
   result,
   searchPlaceholder,
   filterFields,
   sortFields,
-}: SegmentsTableContentProps) {
+}: MemberCriteriaTableContentProps) {
   const tCommon = useTranslations('common');
-  const tPage = useTranslations('adminList.audienceSegments');
+  const tPage = useTranslations('adminList.memberCriteria');
   const locale = useLocale();
   const columns = getColumns(locale, {
     name: tCommon('labels.name'),
@@ -106,7 +106,7 @@ export function SegmentsTableContent({
 
   return (
     <ServerDataTableSelectableSection
-      namespace="segments"
+      namespace="memberCriteria"
       result={result}
       columns={columns}
       getRowKey={(row) => row.id}

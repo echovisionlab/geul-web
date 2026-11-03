@@ -57,17 +57,17 @@ export function accessSelectionChange(
     if (addedValue === ACCESS_SCOPE_VALUES.restricted) {
       return null;
     }
-    const audience =
+    const access =
       addedValue === ACCESS_SCOPE_VALUES.disabled
         ? 'disabled'
         : addedValue === ACCESS_SCOPE_VALUES.public
           ? 'public'
           : 'authenticated';
-    return { audience, audienceSegmentIds: [] };
+    return { access, memberCriteriaIds: [] };
   }
-  const audienceSegmentIds = nextValues.filter((value) => !isAccessScopeValue(value));
+  const memberCriteriaIds = nextValues.filter((value) => !isAccessScopeValue(value));
   return {
-    audience: audienceSegmentIds.length === 0 ? 'disabled' : 'restricted',
-    audienceSegmentIds,
+    access: memberCriteriaIds.length === 0 ? 'disabled' : 'restricted',
+    memberCriteriaIds,
   };
 }
