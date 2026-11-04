@@ -10,6 +10,7 @@ import type { SessionWithUser } from '@/lib/auth/types';
 import { SignInDecision } from '@echovisionlab/geul-proto/secure/oauth_app_pb.ts';
 import { createOAuthAppClient } from '@/lib/api/server-client';
 import { getHydraAdminUrl, getMcpOAuthIssuerUrl, getSiteOrigin } from '@/lib/env';
+import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
 
 const MCP_SCOPE = 'mcp';
 const OFFLINE_ACCESS_SCOPE = 'offline_access';
@@ -169,12 +170,19 @@ export function assertSignInConsentRequest(request: HydraConsentRequest, session
   }
 }
 
-/** Claims a sign-in app reads from the ID token; `role` lets it map the Member's role, such as Admin. */
+/**
+ * Claims a sign-in app reads from the ID token; `role` lets it map the Member's role, such as Admin. With the
+ * `profile` scope, `picture` is the Member's avatar as the site header shows it: an absolute CDN URL.
+ */
 function signInIdTokenClaims(scopes: string[], session: SessionWithUser): Record<string, string> {
+  const picture = scopes.includes('profile')
+    ? buildManagedImageUrl(session.user.image, MANAGED_IMAGE_PRESET.AVATAR_SM)
+    : null;
   return {
     role: session.user.role,
     ...(scopes.includes('email') && session.user.email ? { email: session.user.email } : {}),
     ...(scopes.includes('profile') ? { name: session.user.nickname, preferred_username: session.user.nickname } : {}),
+    ...(picture ? { picture } : {}),
   };
 }
 
