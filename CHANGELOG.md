@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.26.0](https://github.com/echovisionlab/geul-web/compare/v0.25.0...v0.26.0) (2026-11-04)
+
+
+### Features
+
+* **auth:** share the Member avatar with sign-in apps as the picture claim ([#230](https://github.com/echovisionlab/geul-web/issues/230)) ([6adf2df](https://github.com/echovisionlab/geul-web/commit/6adf2df5e5f6122cd6cbe9d067e146de675603fc))
+
 ## [0.25.0](https://github.com/echovisionlab/geul-web/compare/v0.24.1...v0.25.0) (2026-11-03)
 
 
