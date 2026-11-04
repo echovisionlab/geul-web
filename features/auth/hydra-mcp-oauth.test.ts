@@ -5,6 +5,7 @@ import {
 } from '@echovisionlab/geul-proto/intra/gateway_authorization_pb.ts';
 import { SignInDecision } from '@echovisionlab/geul-proto/secure/oauth_app_pb.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { buildManagedImageUrl, MANAGED_IMAGE_PRESET } from '@/lib/utils/managed-image-url';
 import type { SessionWithUser } from '@/lib/auth/types';
 import {
   acceptHydraConsent,
@@ -155,6 +156,37 @@ describe('Hydra MCP OAuth controller', () => {
         },
       },
     });
+  });
+
+  it('shares the Member avatar as the picture claim with the profile scope only', async () => {
+    const image = '/asset/11111111-1111-4111-8111-111111111111/avatar.webp';
+    const admin: SessionWithUser = { ...session, user: { ...session.user, role: 'admin', image } };
+    const picture = buildManagedImageUrl(image, MANAGED_IMAGE_PRESET.AVATAR_SM);
+    expect(picture).toContain('/asset/11111111-1111-4111-8111-111111111111/avatar.webp?w=96&h=96');
+    const idToken = async (scopes: string[]) => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce(
+          jsonResponse({ redirect_to: 'https://sso.example/oauth2/auth?consent_verifier=accepted' }),
+        );
+      vi.stubGlobal('fetch', fetchMock);
+      const request = {
+        client: { client_id: 'monitor-client' },
+        requested_access_token_audience: [],
+        requested_scope: scopes,
+        subject: session.account_identity_id,
+      };
+      await acceptHydraSignInConsent(challenge, request, admin);
+      return JSON.parse(String((fetchMock.mock.calls[0]?.[1] as RequestInit).body)).session.id_token;
+    };
+
+    expect(await idToken(['openid', 'profile'])).toEqual({
+      role: 'admin',
+      name: 'Example Member',
+      preferred_username: 'Example Member',
+      picture,
+    });
+    expect(await idToken(['openid'])).toEqual({ role: 'admin' });
   });
 
   it('refuses a sign-in app consent that does not ask for identity scopes for the Member', () => {
