@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.1](https://github.com/echovisionlab/geul-web/compare/v0.27.0...v0.27.1) (2026-11-05)
+
+
+### Bug Fixes
+
+* **deps:** adopt geul-telemetry 0.7.0 ([#234](https://github.com/echovisionlab/geul-web/issues/234)) ([d0b2fed](https://github.com/echovisionlab/geul-web/commit/d0b2fedc09d11267824612235606d2ab31966129))
+
 ## [0.27.0](https://github.com/echovisionlab/geul-web/compare/v0.26.0...v0.27.0) (2026-11-05)
 
 
