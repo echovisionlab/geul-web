@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.27.0](https://github.com/echovisionlab/geul-web/compare/v0.26.0...v0.27.0) (2026-11-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove machine translation and in-app AI editing ([#232](https://github.com/echovisionlab/geul-web/issues/232))
+
+### Features
+
+* remove machine translation and in-app AI editing ([#232](https://github.com/echovisionlab/geul-web/issues/232)) ([9436730](https://github.com/echovisionlab/geul-web/commit/9436730fc87da31240b3d779860ea0e2a3b8545b))
+
 ## [0.26.0](https://github.com/echovisionlab/geul-web/compare/v0.25.0...v0.26.0) (2026-11-04)
 
 
