@@ -4343,9 +4343,6 @@
         "copyJson": "Kopia sceny"
       }
     },
-    "statuses": {
-      "existing": "Existing"
-    },
     "states": {
       "loadFailed": "Nie udało się załadować tłumaczeń.",
       "missingTarget": "Nie ma jeszcze dokumentu docelowego.",

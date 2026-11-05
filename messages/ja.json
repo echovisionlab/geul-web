@@ -4343,9 +4343,6 @@
         "copyJson": "シーンの文言"
       }
     },
-    "statuses": {
-      "existing": "Existing"
-    },
     "states": {
       "loadFailed": "翻訳の読み込みに失敗しました",
       "missingTarget": "翻訳先文書はまだありません。",

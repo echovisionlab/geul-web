@@ -4343,9 +4343,6 @@
         "copyJson": "Копия сцены"
       }
     },
-    "statuses": {
-      "existing": "Existing"
-    },
     "states": {
       "loadFailed": "Не удалось загрузить переводы.",
       "missingTarget": "Документ перевода ещё не создан.",

@@ -4343,9 +4343,6 @@
         "copyJson": "씬 문구"
       }
     },
-    "statuses": {
-      "existing": "기존"
-    },
     "states": {
       "loadFailed": "번역 정보를 불러오지 못했습니다.",
       "missingTarget": "대상 문서가 아직 없습니다.",

@@ -4343,9 +4343,6 @@
         "copyJson": "สำเนาฉาก"
       }
     },
-    "statuses": {
-      "existing": "Existing"
-    },
     "states": {
       "loadFailed": "โหลดคำแปลไม่สำเร็จ",
       "missingTarget": "ยังไม่มีเอกสารปลายทาง",

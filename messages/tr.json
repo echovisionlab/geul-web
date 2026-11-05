@@ -4343,9 +4343,6 @@
         "copyJson": "Sahne kopyası"
       }
     },
-    "statuses": {
-      "existing": "Existing"
-    },
     "states": {
       "loadFailed": "Çeviriler yüklenemedi.",
       "missingTarget": "Henüz hedef belge yok.",

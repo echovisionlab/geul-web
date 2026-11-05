@@ -4343,9 +4343,6 @@
         "copyJson": "Salinan adegan"
       }
     },
-    "statuses": {
-      "existing": "Existing"
-    },
     "states": {
       "loadFailed": "Gagal memuat terjemahan.",
       "missingTarget": "Belum ada dokumen target.",

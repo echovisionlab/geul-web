@@ -61,6 +61,7 @@
     "storybook:typecheck": "tsc --noEmit --project .storybook/tsconfig.json",
     "design-system:generate": "node scripts/design-system/validate.mjs --generate",
     "design-system:check": "node scripts/design-system/validate.mjs",
+    "design-system:readiness:check": "node scripts/design-system/release-readiness.mjs --check",
     "design-system:typecheck": "tsc --noEmit --project components/core/tsconfig.type-test.json",
     "design-system:test": "node --test scripts/design-system/*.test.mjs",
     "i18n:test": "node --test scripts/i18n/*.test.mjs",

@@ -1740,9 +1740,6 @@
         "copyJson": "نص المشهد"
       }
     },
-    "statuses": {
-      "existing": "Existing"
-    },
     "states": {
       "loadFailed": "فشل تحميل الترجمات",
       "missingTarget": "لا يوجد مستند ترجمة بعد.",

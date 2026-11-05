@@ -1740,9 +1740,6 @@
         "copyJson": "Szenentext"
       }
     },
-    "statuses": {
-      "existing": "Existing"
-    },
     "states": {
       "loadFailed": "Übersetzungen konnten nicht geladen werden.",
       "missingTarget": "Noch kein Zieldokument vorhanden.",

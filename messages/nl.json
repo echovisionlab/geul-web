@@ -4343,9 +4343,6 @@
         "copyJson": "Scènetekst"
       }
     },
-    "statuses": {
-      "existing": "Existing"
-    },
     "states": {
       "loadFailed": "Vertalingen laden mislukt.",
       "missingTarget": "Nog geen doeldocument.",

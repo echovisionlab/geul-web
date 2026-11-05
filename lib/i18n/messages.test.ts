@@ -309,7 +309,6 @@ describe('getMessagesForLocale', () => {
     expect(messages.common.entities.translations).toBe('번역');
     expect(messages.translationPanel.sourceLocale.label).toBe('원문 언어');
     expect(messages.translationPanel.actions.expand).toBe('펼치기');
-    expect(messages.translationPanel.statuses.existing).toBe('기존');
     expect(messages.localizationNotice.translated.title).toBe('번역본');
     expect(messages.localizationNotice.actions.viewOriginal).toBe('원문 보기 ({source})');
     expect(messages.contentLanguageMenu.label).toBe('번역 보기');

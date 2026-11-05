@@ -4343,9 +4343,6 @@
         "copyJson": "Scene copy"
       }
     },
-    "statuses": {
-      "existing": "Existing"
-    },
     "states": {
       "loadFailed": "Failed to load translations.",
       "missingTarget": "No target document yet.",

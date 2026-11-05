@@ -318,7 +318,8 @@ const boundaries = entrypoints
     };
   });
 const coreFamilies = readdirSync(path.join(root, 'components/core'), { withFileTypes: true })
-  .filter((entry) => entry.isDirectory())
+  // Families are PascalCase component directories; lowercase directories hold shared helpers.
+  .filter((entry) => entry.isDirectory() && /^[A-Z]/.test(entry.name))
   .map((entry) => entry.name)
   .sort();
 exactKeys(coreFamilies, corePlans, 'Core families');

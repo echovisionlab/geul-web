@@ -4343,9 +4343,6 @@
         "copyJson": "場景文案"
       }
     },
-    "statuses": {
-      "existing": "Existing"
-    },
     "states": {
       "loadFailed": "無法載入翻譯",
       "missingTarget": "尚無目標文件。",

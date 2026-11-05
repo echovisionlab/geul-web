@@ -4343,9 +4343,6 @@
         "copyJson": "Sao chép cảnh"
       }
     },
-    "statuses": {
-      "existing": "Existing"
-    },
     "states": {
       "loadFailed": "Không tải được bản dịch.",
       "missingTarget": "Chưa có tài liệu đích.",

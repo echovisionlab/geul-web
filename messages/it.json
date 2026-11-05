@@ -4343,9 +4343,6 @@
         "copyJson": "Testo della scena"
       }
     },
-    "statuses": {
-      "existing": "Existing"
-    },
     "states": {
       "loadFailed": "Impossibile caricare le traduzioni.",
       "missingTarget": "Nessun documento di destinazione ancora.",
