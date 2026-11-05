@@ -267,8 +267,8 @@ importers:
         specifier: 0.17.0
         version: 0.17.0
       '@echovisionlab/geul-telemetry':
-        specifier: 0.6.0
-        version: 0.6.0
+        specifier: 0.7.0
+        version: 0.7.0
       '@echovisionlab/ionian':
         specifier: https://registry.npmjs.org/@echovisionlab/ionian/-/ionian-0.2.0.tgz
         version: https://registry.npmjs.org/@echovisionlab/ionian/-/ionian-0.2.0.tgz(mitt@3.0.1)(three-stdlib@2.36.1(three@0.186.1))(three@0.186.1)
@@ -1478,8 +1478,8 @@ packages:
   '@echovisionlab/geul-proto@0.17.0':
     resolution: {integrity: sha512-d7teOKFWsvyVO4+nHpQwXqPchhFHwvmxbYn1yI+qvMjREgnIZ6R3NoO0SSMS3uwGn+lxiFLgTtXkKCtagSwm8A==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-proto/0.17.0/9ccb5bead74a53b1b2e54063022a0082c0801f4d}
 
-  '@echovisionlab/geul-telemetry@0.6.0':
-    resolution: {integrity: sha512-wbon+zuzy52PfTGPFpiIAjiLOMasTIz0tSk8bLnCRiC5iqPutiRCR2IZuXtqb1+EvKgnp520ZkWHdfHizQm/dA==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-telemetry/0.6.0/31966ae72049e3479559b210ba324abe2b737ee1}
+  '@echovisionlab/geul-telemetry@0.7.0':
+    resolution: {integrity: sha512-ce4cumtOYH/jZMuY3iu4Uu48CrVHQuKCRid/VJJLoosFDECwc+8Z556j7JeVIxXR3b5A88YQSGPaUlI5HrvDZw==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-telemetry/0.7.0/94af516362d11c38c5ed6566dedeae8fd2223554}
     engines: {node: 24.22.1}
 
   '@echovisionlab/ionian@https://registry.npmjs.org/@echovisionlab/ionian/-/ionian-0.2.0.tgz':
@@ -10192,7 +10192,7 @@ snapshots:
     dependencies:
       '@bufbuild/protobuf': 2.16.0
 
-  '@echovisionlab/geul-telemetry@0.6.0':
+  '@echovisionlab/geul-telemetry@0.7.0':
     dependencies:
       '@opentelemetry/api': 1.10.0
 

@@ -92,7 +92,7 @@
     "@echovisionlab/geul-common": "0.12.0",
     "@echovisionlab/geul-event": "0.17.0",
     "@echovisionlab/geul-proto": "0.17.0",
-    "@echovisionlab/geul-telemetry": "0.6.0",
+    "@echovisionlab/geul-telemetry": "0.7.0",
     "@echovisionlab/ionian": "https://registry.npmjs.org/@echovisionlab/ionian/-/ionian-0.2.0.tgz",
     "@hocuspocus/provider": "^4.7.1",
     "@internationalized/date": "3.12.4",
