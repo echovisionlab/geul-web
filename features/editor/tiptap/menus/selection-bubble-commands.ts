@@ -6,7 +6,6 @@ import { CellSelection } from '@tiptap/pm/tables';
 import { canJoin, liftTarget, ReplaceAroundStep } from '@tiptap/pm/transform';
 import { normalizeRichTextHref } from '@echovisionlab/geul-common/editor/link-normalization';
 import type { EditorColor } from '@/features/editor/toolbars/EditorColorStyleButton';
-import { resolveTiptapAIContext, type TiptapAIContext } from '../ai/tiptap-ai';
 import { setCurrentBlockAlignment, type TextAlignment } from '../block-commands';
 import { isTextRangeSelection } from '../integration/block-mixed-selection';
 import { isSelectionInsideInlineMath, selectionTouchesInlineMath } from '../math/math-selection';
@@ -52,7 +51,6 @@ export interface SelectionBubbleMenuState {
   linkHref: string | null;
   linkSelection: SelectionRangeSnapshot | null;
   canConvertToInlineMath: boolean;
-  canOpenAI: boolean;
   hasTextSelection: boolean;
   hasSafeInlineSelection: boolean;
   inlineCodeActive: boolean;
@@ -71,7 +69,6 @@ export interface SelectionRangeSnapshot {
 }
 
 export interface SelectionBubbleMenuCommandOptions {
-  onAIActivate?: (context: TiptapAIContext) => void;
   onOpenLink?: (href: string) => void;
 }
 
@@ -88,7 +85,6 @@ export interface SelectionBubbleMenuCommands extends SelectionBubbleMenuState {
   openLink: () => boolean;
   removeLink: () => boolean;
   convertToInlineMath: () => boolean;
-  openAI: () => boolean;
 }
 
 interface CurrentBlockContext {
@@ -367,17 +363,6 @@ function alignmentState(
   };
 }
 
-function canOpenAI(editor: Editor, onAIActivate: SelectionBubbleMenuCommandOptions['onAIActivate']): boolean {
-  if (!onAIActivate) {
-    return false;
-  }
-  try {
-    return resolveTiptapAIContext(editor).isSupported;
-  } catch {
-    return false;
-  }
-}
-
 const ALLOWED_LINK_PROTOCOLS = new Set(['http:', 'https:', 'mailto:', 'tel:']);
 
 /** Applies the Geul rich-text protocol policy. */
@@ -411,10 +396,7 @@ export function normalizeSelectionLinkHref(value: string): string | null {
   }
 }
 
-export function resolveSelectionBubbleMenuState(
-  editor: Editor,
-  options: SelectionBubbleMenuCommandOptions = {},
-): SelectionBubbleMenuState {
+export function resolveSelectionBubbleMenuState(editor: Editor): SelectionBubbleMenuState {
   const context = currentBlockContext(editor);
   const activeTextStyles = new Set(TEXT_STYLES.filter((style) => editor.isActive(style)));
   const alignment = alignmentState(editor, context);
@@ -448,12 +430,6 @@ export function resolveSelectionBubbleMenuState(
       capabilities.canFormatText &&
       !editor.isActive('code') &&
       canConvertToInlineMath(editor),
-    canOpenAI:
-      localizedEditable &&
-      hasSafeInlineSelection &&
-      capabilities.canFormatText &&
-      !editor.isActive('code') &&
-      canOpenAI(editor, options.onAIActivate),
     hasTextSelection,
     hasSafeInlineSelection,
     inlineCodeActive: editor.isActive('code'),
@@ -699,15 +675,14 @@ function openLink(href: string, callback?: (href: string) => void): boolean {
 }
 
 /**
- * The view only invokes this adapter. Block tree mutations, marks, link, math,
- * and AI selection resolution stay centralized here instead of being recreated
- * in individual buttons.
+ * The view only invokes this adapter. Block tree mutations, marks, link and
+ * math stay centralized here instead of being recreated in individual buttons.
  */
 export function createSelectionBubbleMenuCommands(
   editor: Editor,
   options: SelectionBubbleMenuCommandOptions = {},
 ): SelectionBubbleMenuCommands {
-  const state = resolveSelectionBubbleMenuState(editor, options);
+  const state = resolveSelectionBubbleMenuState(editor);
   return {
     ...state,
     setBlockType: (type) => setBlockType(editor, type),
@@ -732,22 +707,5 @@ export function createSelectionBubbleMenuCommands(
     openLink: () => openLink(state.linkHref ?? '', options.onOpenLink),
     removeLink: () => updateLink(editor, null, activeLinkRange(editor) ?? undefined),
     convertToInlineMath: () => convertToInlineMath(editor),
-    openAI: () => {
-      if (
-        !canEditLocalized(editor) ||
-        !isSafeInlineSelection(editor) ||
-        editor.isActive('code') ||
-        !selectionCapabilities(editor).canFormatText ||
-        !options.onAIActivate
-      ) {
-        return false;
-      }
-      const context = resolveTiptapAIContext(editor);
-      if (!context.isSupported) {
-        return false;
-      }
-      options.onAIActivate(context);
-      return true;
-    },
   };
 }

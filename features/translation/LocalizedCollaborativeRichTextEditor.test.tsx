@@ -173,26 +173,6 @@ describe('typed Block-room collaborative rich-text editor', () => {
     );
   });
 
-  it('passes the exact active locale AI target for localized edits even while neutral structure is locked', () => {
-    render(
-      <LocalizedCollaborativeRichTextEditor
-        provider={provider()}
-        blockRoomController={controller()}
-        userName="translator"
-        editable
-        entityId="post-1"
-        entityType={TranscodeEntityType.POST}
-        aiTarget={{ type: 'post', id: 'post-1', locale: 'ko' }}
-      />,
-    );
-
-    expect(editorSpy.mock.calls[0]?.[0]).toMatchObject({
-      editable: true,
-      structureLocked: true,
-      ai: { target: { type: 'post', id: 'post-1', locale: 'ko' } },
-    });
-  });
-
   it('opens the insert picker when slash file targets a non-file paragraph block', () => {
     const paragraphBlockId = '10000000-0000-4000-8000-000000000001';
     const context = {

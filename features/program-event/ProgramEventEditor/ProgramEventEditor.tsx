@@ -1202,12 +1202,10 @@ export function ProgramEventEditorView({ model }: { model: ProgramEventEditorVie
               <SummaryFieldCard
                 entityType="program_event"
                 entityId={eventId}
-                title={displayedTitle}
                 summary={displayedSummary}
                 summaryReadOnly={
                   !shouldUseLocaleDocument || !canEditCurrentLocale || !blockRoom.isSynced || !canEditTranslationSource
                 }
-                hideAiActions
                 onSummaryChange={shouldUseLocaleDocument ? handleSummaryChange : undefined}
               />
               <EditorSettingsSection title={tCommonLabels('images')}>
@@ -1258,11 +1256,6 @@ export function ProgramEventEditorView({ model }: { model: ProgramEventEditorVie
                         entityType={TranscodeEntityType.PROGRAM_EVENT}
                         allowNeutralBlockEdits={activeEditLocale.isSourceLocale}
                         allowStructuralEdits={activeEditLocale.isSourceLocale}
-                        aiTarget={
-                          canEditCurrentLocale && activeEditLocale.activeLocale
-                            ? { type: 'program-event', id: eventId, locale: activeEditLocale.activeLocale }
-                            : undefined
-                        }
                       />
                     </div>
                   ) : (

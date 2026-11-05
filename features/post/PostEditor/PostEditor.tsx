@@ -57,7 +57,6 @@ import { normalizeOgRegenerationLocale } from '@/lib/utils/og-regeneration';
 import { toNullableSlug, toSlugInputValue } from '@/lib/utils/slug';
 import { resolvePostEditorBodyMode } from './body-mode';
 import { CategorySelector } from './CategorySelector';
-import { resolvePostEditorAiTarget } from './collaboration-mode';
 import { FeaturedImageUploader } from './FeaturedImageUploader';
 import { LocationSelector } from './LocationSelector';
 import { PostEditorBody } from './PostEditorBody';
@@ -77,7 +76,6 @@ import { useBlockRoomMetadataUpdates } from '@/lib/editor/useBlockRoomMetadataUp
 interface PostEditorProps {
   initialSnapshot?: EditorSnapshot;
   postId: string;
-  currentMemberId: string;
   initialTitle: string;
   initialSourceLocale?: string | null;
   initialSummary: string | null;
@@ -138,7 +136,6 @@ export function PostEditor(props: PostEditorProps) {
 function usePostEditorViewModel({
   initialSnapshot,
   postId,
-  currentMemberId,
   initialTitle,
   initialSummary,
   initialStatus,
@@ -541,7 +538,6 @@ function usePostEditorViewModel({
     ],
   );
   const canEditSharedTaxonomy = canMutateSourceDocument && isSynced;
-  const editorAiTarget = resolvePostEditorAiTarget({ postId, roomLocale, canEditLocaleDocument });
   const canRestoreCurrentVersion = canRestoreVersion && !permissionRevocation.blocked;
   const bodyPreviewLoading = activeEditLocale.contentPreviewLoading;
   const showEditorChrome = !isZenMode;
@@ -619,9 +615,6 @@ function usePostEditorViewModel({
     tLayout,
     tToc,
     displayedSummary,
-    editorAiTarget,
-    currentDoc,
-    currentMemberId,
     userName,
     handleScopedLocaleSummaryChange,
     canonicalOrigin,
@@ -720,9 +713,6 @@ export function PostEditorView({ model }: { model: PostEditorViewModel }) {
     tLayout,
     tToc,
     displayedSummary,
-    editorAiTarget,
-    currentDoc,
-    currentMemberId,
     userName,
     handleScopedLocaleSummaryChange,
     canonicalOrigin,
@@ -898,15 +888,8 @@ export function PostEditorView({ model }: { model: PostEditorViewModel }) {
                       <SummaryFieldCard
                         entityType="post"
                         entityId={postId}
-                        title={displayedTitle}
                         summary={displayedSummary}
                         summaryReadOnly={!canEditLocaleDocument}
-                        hideAiActions={!editorAiTarget}
-                        aiTarget={editorAiTarget}
-                        provider={activeEditLocale.isSourceLocaleReady ? currentProvider : null}
-                        doc={activeEditLocale.isSourceLocaleReady ? currentDoc : null}
-                        currentMemberId={currentMemberId}
-                        currentMemberDisplayName={userName}
                         onSummaryChange={canEditLocaleDocument ? handleScopedLocaleSummaryChange : undefined}
                       />
                     )}

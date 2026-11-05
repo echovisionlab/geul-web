@@ -2262,8 +2262,8 @@
     "systemOrLegacy": "システムまたは以前のバージョン",
     "restore": "復元",
     "restoreTitle": "バージョンを復元",
-    "restoreSameLocaleBody": "原文v{version} ({locale})を復元すると、原文文書のみ変更されます。既存の翻訳先文書と翻訳ジョブは変更されず、翻訳は自動生成されません。続行しますか?",
-    "restoreCrossLocaleBody": "原文v{version}を復元すると、原文ロケールが{currentLocale}から{selectedLocale}に切り替わり、原文の参照先のみ変更されます。既存の翻訳先文書と翻訳ジョブは変更されず、翻訳は自動生成されません。続行しますか?",
+    "restoreSameLocaleBody": "原文v{version} ({locale})を復元すると、原文文書のみ変更されます。既存の翻訳先文書は変更されません。続行しますか?",
+    "restoreCrossLocaleBody": "原文v{version}を復元すると、原文ロケールが{currentLocale}から{selectedLocale}に切り替わり、原文の参照先のみ変更されます。既存の翻訳先文書は変更されません。続行しますか?",
     "restoreFailed": "原文文書の復元に失敗しました。",
     "loadFailed": "バージョン履歴を読み込めませんでした。",
     "end": "すべてのバージョンを読み込みました。"
@@ -3853,8 +3853,7 @@
           "math": "数式",
           "inline": "インライン",
           "embeds": "埋め込み",
-          "media": "メディア",
-          "ai": "AI"
+          "media": "メディア"
         },
         "items": {
           "heading": {
@@ -3977,12 +3976,6 @@
             "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\n添付\nファイル\n文書\nダウンロード",
             "group": "メディア"
           },
-          "aiAssistant": {
-            "title": "AIアシスタント",
-            "subtext": "AI で文章を作成、改善、変換",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\nアシスタント\n執筆\n改善\n人工知能",
-            "group": "AI"
-          },
           "shader": {
             "title": "GLSLシェーダー",
             "subtext": "インタラクティブなGLSLシェーダーを追加します",
@@ -4022,8 +4015,7 @@
         "displaySizeXl": "特大",
         "nest": "インデント増",
         "unnest": "インデント減",
-        "inlineMath": "インライン数式",
-        "ai": "AIアシスタント"
+        "inlineMath": "インライン数式"
       },
       "link": {
         "create": "リンク",
@@ -4223,47 +4215,6 @@
       "message": "再び編集できるようになりました。閲覧のみの間に保持された変更を保存しています。"
     }
   },
-  "aiAssistant": {
-    "title": "AI アシスタント",
-    "modes": {
-      "modify": "修正",
-      "generate": "生成"
-    },
-    "placeholders": {
-      "modify": "このテキストをどう修正しますか",
-      "generate": "何を書きたいですか"
-    },
-    "quickActions": {
-      "title": "クイックアクション",
-      "improve": "改善",
-      "fixSpelling": "スペル修正",
-      "simplify": "簡潔にする",
-      "summarize": "要約",
-      "translateKorean": "韓国語",
-      "translateEnglish": "英語",
-      "continueWriting": "続きを書く",
-      "brainstorm": "アイデア出し"
-    },
-    "sections": {
-      "result": "AI 結果"
-    },
-    "actions": {
-      "close": "AI アシスタントを閉じる",
-      "submitPrompt": "カスタム AI プロンプトを送信",
-      "stop": "停止",
-      "reject": "却下",
-      "retry": "再試行",
-      "accept": "反映",
-      "insert": "挿入"
-    },
-    "errors": {
-      "generic": "問題が発生しました。もう一度お試しください"
-    },
-    "notifications": {
-      "applyFailedTitle": "AI 結果の適用に失敗しました",
-      "applyFailedMessage": "AI 応答を解析できませんでした。もう一度お試しください"
-    }
-  },
   "mapControls": {
     "managePlaces": "場所を管理",
     "managePlacesWithCount": "場所を管理 ({count})",
@@ -4366,20 +4317,15 @@
     "description": "原文言語と各ロケールの既存の翻訳文書を確認します。",
     "actions": {
       "expand": "展開",
-      "collapse": "折りたたむ",
-      "regenerateAll": "対象となるすべてのロケールで生成/再生成",
-      "regenerateLocale": "再生成",
-      "regenerateLocaleAria": "{locale} の翻訳を再生成",
-      "generateLocale": "Generate",
-      "generateLocaleAria": "{locale}の翻訳を生成"
+      "collapse": "折りたたむ"
     },
     "sourceLocale": {
       "label": "原文言語",
       "description": "このエンティティの翻訳の基準となる原文言語です",
       "confirm": {
         "title": "原文言語を変更",
-        "description": "原文言語を変更すると、原文の参照先のみ更新されます。既存の翻訳先文書と翻訳ジョブは変更されず、翻訳は自動生成されません。",
-        "detail": "{locale}が編集可能な原文文書の言語になります。既存の翻訳先文書と翻訳ジョブは変更されません。",
+        "description": "原文言語を変更すると、原文の参照先のみ更新されます。既存の翻訳先文書は変更されません。",
+        "detail": "{locale}が編集可能な原文文書の言語になります。既存の翻訳先文書は変更されません。",
         "confirm": "変更して再翻訳"
       }
     },
@@ -4387,7 +4333,7 @@
       "ariaLabel": "コンテンツの言語を切り替えます。現在: {locale}",
       "sourceOption": "{locale}（原文）",
       "loading": "言語を読み込み中...",
-      "missingDescription": "{locale}の翻訳先文書はまだありません。翻訳パネルから生成してください。",
+      "missingDescription": "{locale}の翻訳先文書はまだありません。翻訳パネルから作成してください。",
       "bodyPreviewTitle": "{locale} 本文プレビュー",
       "bodyPreviewDescription": "既存の翻訳文書を構造と書式を保持して表示します。",
       "bodyPreviewEmpty": "本文プレビューはまだありません",
@@ -4397,9 +4343,6 @@
         "copyJson": "シーンの文言"
       }
     },
-    "statuses": {
-      "existing": "Existing"
-    },
     "states": {
       "loadFailed": "翻訳の読み込みに失敗しました",
       "missingTarget": "翻訳先文書はまだありません。",
@@ -4408,10 +4351,7 @@
     },
     "notifications": {
       "sourceLocaleUpdated": "原文言語を更新しました",
-      "sourceLocaleUpdateFailed": "原文言語の更新に失敗しました",
-      "allQueued": "すべてのロケールの翻訳再生成をキューに追加しました",
-      "localeQueued": "このロケールの翻訳再生成をキューに追加しました",
-      "regenerateFailed": "翻訳再生成のキュー追加に失敗しました"
+      "sourceLocaleUpdateFailed": "原文言語の更新に失敗しました"
     }
   },
   "translationPanelMenu": {
@@ -4451,13 +4391,11 @@
   },
   "translationOverviewPage": {
     "actions": {
-      "openJobs": "ジョブを開く",
       "openSettings": "設定を開く"
     },
     "stats": {
       "totalLocales": "総ロケール数",
       "sourceEntities": "原文エンティティ数",
-      "activeJobs": "進行中のジョブ",
       "existingEntries": "既存の翻訳"
     },
     "sections": {
@@ -4476,119 +4414,23 @@
       "emptyEntityHealth": "エンティティ健全性データはまだありません"
     },
     "policy": {
-      "internal": "内部のみ",
-      "machineDisabled": "機械無効"
-    }
-  },
-  "translationJobsPage": {
-    "title": "翻訳ジョブ",
-    "stats": {
-      "active": "進行中 {count} 件"
-    },
-    "columns": {
-      "entity": "エンティティ"
-    },
-    "locale": {
-      "fromTo": "{source} から {target} へ"
-    },
-    "states": {
-      "loadFailed": "翻訳ジョブの読み込みに失敗しました",
-      "empty": "翻訳ジョブはまだありません"
-    },
-    "notifications": {
-      "cancelled": "翻訳ジョブをキャンセルしました",
-      "cancelFailed": "翻訳ジョブのキャンセルに失敗しました"
+      "internal": "内部のみ"
     }
   },
   "translationSettingsPage": {
     "title": "翻訳設定",
-    "description": "デフォルトの原文言語と自動翻訳プロバイダーを管理します。管理者が各エディターから翻訳の生成を明示的に開始します。",
+    "description": "翻訳に使うデフォルトの原文言語を管理します。",
     "actions": {
-      "jobs": "ジョブ",
-      "save": "設定を保存",
-      "addProvider": "プロバイダーを追加",
-      "editProvider": "プロバイダーを編集",
-      "deleteProvider": "プロバイダーを削除",
-      "createProvider": "プロバイダーを作成"
+      "save": "設定を保存"
     },
     "sections": {
       "runtime": "原文のデフォルト設定",
-      "runtimeDescription": "原文言語が未設定の場合に使用する言語のみ設定します。原文を変更しても、翻訳の生成は自動的に開始されません。",
-      "providers": "翻訳プロバイダー",
-      "providersDescription": "機械翻訳プロバイダーを管理します。有効な認証情報を持つアクティブなプロバイダーが少なくとも1つ必要です。"
+      "runtimeDescription": "原文言語が未設定の場合に使用する言語のみ設定します。"
     },
     "fields": {
       "defaultLocale": {
         "label": "デフォルトロケール",
         "description": "原文ロケールがまだ設定されていない場合や、リクエストがサポート対象のコンテンツロケールに解決されない場合に使われます"
-      },
-      "protectedTerms": {
-        "label": "保護用語",
-        "description": "翻訳の生成時にそのまま保持する、大文字と小文字を区別した正確な表記です。用語の自動学習や自動提案は行いません。",
-        "placeholder": "保護用語を追加",
-        "examples": "例: Photoshop, React Native"
-      },
-      "providerName": {
-        "label": "プロバイダー名"
-      },
-      "providerType": {
-        "label": "プロバイダー種別"
-      },
-      "providerPriority": {
-        "label": "優先度",
-        "description": "複数のプロバイダーが有効な場合、値が小さいものから実行されます。"
-      },
-      "providerActive": {
-        "label": "有効",
-        "shortLabel": "有効",
-        "description": "有効なプロバイダーだけが翻訳生成に使われます。"
-      },
-      "deeplApiKey": {
-        "label": "DeepL APIキー",
-        "descriptionEdit": "保存済みのキーを保持する場合は空欄にします。"
-      },
-      "deeplApiBaseUrl": {
-        "label": "DeepL APIベースURL",
-        "description": "プロキシや専用エンドポイントを使う場合以外は既定値を使用します。"
-      },
-      "llmPreset": {
-        "label": "LLMプリセット"
-      },
-      "llmApiKey": {
-        "label": "LLM APIキー",
-        "descriptionEdit": "空欄にすると保存済みのキーを保持します。"
-      },
-      "llmApiBaseUrl": {
-        "label": "LLM APIベースURL",
-        "description": "OpenAI互換エンドポイントでは必須です。Geminiでは空欄にできます。"
-      },
-      "llmModel": {
-        "label": "モデル",
-        "description": "翻訳生成に使用するモデルID。"
-      },
-      "llmInputPrice": {
-        "label": "入力USD / 100万トークン",
-        "description": "プロバイダー比較とコスト計画用の任意の見積もり。"
-      },
-      "llmOutputPrice": {
-        "label": "出力USD / 100万トークン",
-        "description": "プロバイダー比較とコスト計画用の任意の見積もり。"
-      },
-      "llmMaxContextTokens": {
-        "label": "最大コンテキストトークン",
-        "description": "大きな翻訳バッチのルーティング用の任意ヒント。"
-      },
-      "llmMaxOutputTokens": {
-        "label": "最大出力トークン",
-        "description": "互換プロバイダーへ渡す任意のリクエスト上限。"
-      },
-      "llmTemperature": {
-        "label": "Temperature",
-        "description": "低い値ほど構造化された翻訳出力が安定します。"
-      },
-      "llmSupportsJsonMode": {
-        "label": "構造化JSONモード",
-        "description": "プロバイダーがJSON schemaまたはJSON mode応答をサポートする場合に有効化します。"
       }
     },
     "states": {
@@ -4596,82 +4438,13 @@
     },
     "notifications": {
       "saved": "翻訳設定を保存しました",
-      "saveFailed": "翻訳設定の保存に失敗しました",
-      "providerCreated": "翻訳プロバイダーを作成しました。",
-      "providerUpdated": "翻訳プロバイダーを更新しました。",
-      "providerDeleted": "翻訳プロバイダーを削除しました。",
-      "providerSaveFailed": "翻訳プロバイダーを保存できませんでした。",
-      "providerToggleFailed": "プロバイダー状態を更新できませんでした。",
-      "providerDeleteFailed": "翻訳プロバイダーを削除できませんでした。"
-    },
-    "generation": {
-      "enabled": "生成は有効",
-      "disabled": "生成は無効"
-    },
-    "providerTypes": {
-      "deepl": "DeepL",
-      "llm": "LLM"
-    },
-    "providerStates": {
-      "empty": "翻訳プロバイダーが設定されていません。",
-      "active": "有効",
-      "inactive": "無効",
-      "priority": "優先度 {priority}",
-      "modelUnset": "モデル未設定"
-    },
-    "validation": {
-      "providerNameRequired": "プロバイダー名は必須です。",
-      "providerApiKeyRequired": "このプロバイダーにはAPIキーが必要です。",
-      "providerModelRequired": "LLMプロバイダーにはモデルが必要です。",
-      "providerBaseUrlRequired": "OpenAI互換LLMプロバイダーにはAPIベースURLが必要です。"
-    },
-    "modal": {
-      "createProviderTitle": "翻訳プロバイダーを作成",
-      "editProviderTitle": "翻訳プロバイダーを編集",
-      "deleteProviderTitle": "翻訳プロバイダーを削除",
-      "deleteProviderMessage": "{name} を削除しますか？有効なプロバイダーが残らない場合、翻訳生成は無効になります。",
-      "credentialsSection": "認証情報"
-    },
-    "llmPresets": {
-      "gemini": "Gemini",
-      "openaiCompatible": "OpenAI互換"
+      "saveFailed": "翻訳設定の保存に失敗しました"
     }
   },
   "summaryField": {
     "description": "ティーザー、一覧、検索、共有、AI が読める説明に使われます",
-    "status": {
-      "idle": "準備完了",
-      "generating": "生成中",
-      "applying": "適用中",
-      "stale": "生成結果が古くなりました",
-      "applied": "適用済み",
-      "ready": "適用待ち"
-    },
-    "actions": {
-      "generate": "要約を生成",
-      "apply": "要約を適用"
-    },
     "placeholders": {
       "summary": "簡潔な要約を追加..."
-    },
-    "tooltips": {
-      "generatingNamed": "{name} が要約を生成しています"
-    },
-    "feedback": {
-      "failedDefault": "要約生成の処理に失敗しました",
-      "alreadyRunning": "要約生成はすでに実行中です",
-      "missingSuggestionPayload": "要約生成は完了しましたが suggestion payload がありませんでした",
-      "staleSuggestion": "この提案は古くなっています。適用する前に再生成するか閉じてください",
-      "unableToApplyNow": "現在は生成された要約を適用できません",
-      "applyFailed": "生成された要約の適用に失敗しました",
-      "applied": "生成された要約を適用しました",
-      "readyToApply": "生成された要約を適用できます。"
-    },
-    "ready": {
-      "title": "生成された要約",
-      "suggestedSummary": "提案された要約",
-      "anotherCollaborator": "他の共同編集者",
-      "anotherCollaboratorNamed": "{name}が生成済みの要約を用意しています。"
     }
   },
   "userProfile": {

@@ -158,7 +158,6 @@ export default async function PublicPageView({ params, searchParams }: Props) {
       <LazyPageEditor
         initialSnapshot={editorDocument.snapshot}
         pageId={page.id}
-        currentMemberId={session.user.id}
         canManageTranslations={session.user.role === 'admin'}
         initialTitle={page.title}
         initialSummary={page.summary}

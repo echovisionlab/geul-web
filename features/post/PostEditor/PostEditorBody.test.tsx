@@ -128,7 +128,6 @@ describe('PostEditorBody', () => {
         editable: true,
         allowNeutralBlockEdits: false,
         allowStructuralEdits: false,
-        aiTarget: { type: 'post', id: 'post-1', locale: 'en' },
       }),
     );
   });
@@ -148,7 +147,6 @@ describe('PostEditorBody', () => {
       expect.objectContaining({
         provider: editorSession.provider,
         editable: false,
-        aiTarget: undefined,
       }),
     );
   });

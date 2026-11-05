@@ -5,19 +5,10 @@ import type { QueryClient } from '@tanstack/react-query';
 import * as proto from '@echovisionlab/geul-proto/secure/translation_pb.ts';
 import type { TranslationServices } from '@/features/translation/TranslationServicesContext';
 
-export type FormTranslationState =
-  'ready' | 'loading' | 'load-error' | 'request-error' | 'queued' | 'running' | 'completed' | 'generation-disabled';
+export type FormTranslationState = 'ready' | 'loading' | 'load-error' | 'completed';
 
 /** Real Connect client/schema, routed entirely in memory. Each story owns its state. */
 export function formTranslationFixture(state: FormTranslationState) {
-  let requestFails = state === 'request-error';
-  let requestedAt = 0;
-  let currentStatus =
-    state === 'queued'
-      ? proto.TranslationJobStatus.QUEUED
-      : state === 'running'
-        ? proto.TranslationJobStatus.RUNNING
-        : null;
   let targetExists = state === 'completed';
   const locales = ['ko', 'en'].map((code) =>
     create(proto.TranslationLocaleSchema, {
@@ -25,7 +16,6 @@ export function formTranslationFixture(state: FormTranslationState) {
       displayName: code === 'ko' ? '한국어' : 'English',
       enabled: true,
       isPublic: true,
-      machineTranslationAllowed: true,
     }),
   );
   const entries = () =>
@@ -45,29 +35,6 @@ export function formTranslationFixture(state: FormTranslationState) {
           : []),
       ],
     });
-  const jobs = () => {
-    if (requestedAt && state !== 'queued' && state !== 'running') {
-      const elapsed = Date.now() - requestedAt;
-      currentStatus =
-        elapsed < 1500 ? proto.TranslationJobStatus.QUEUED : elapsed < 3500 ? proto.TranslationJobStatus.RUNNING : null;
-      if (!currentStatus) {
-        targetExists = true;
-      }
-    }
-    return create(proto.ListTranslationJobsResponseSchema, {
-      jobs: currentStatus
-        ? [
-            create(proto.TranslationJobSchema, {
-              id: 'form-translation-en',
-              target: { entityType: proto.TranslationEntityType.FORM, entityId: 'local-form' },
-              sourceLocale: 'ko',
-              targetLocale: 'en',
-              status: currentStatus,
-            }),
-          ]
-        : [],
-    });
-  };
   async function read<T>(value: T): Promise<T> {
     if (state === 'loading') {
       return new Promise(() => {});
@@ -83,22 +50,6 @@ export function formTranslationFixture(state: FormTranslationState) {
       router.service(proto.TranslationService, {
         listTranslationLocales: () => read({ locales }),
         listEntityTranslations: () => read(entries()),
-        listTranslationJobs: () => read(jobs()),
-        getTranslationSettings: () => read({ generationEnabled: state !== 'generation-disabled' }),
-        regenerateEntityTranslations: () => {
-          if (requestFails) {
-            requestFails = false;
-            throw new ConnectError('Fixture translation request failed', Code.Unavailable);
-          }
-          requestedAt = Date.now();
-          currentStatus = proto.TranslationJobStatus.QUEUED;
-          return {};
-        },
-        cancelTranslationJob: () => {
-          requestedAt = 0;
-          currentStatus = null;
-          return {};
-        },
         setEntitySourceLocale: () => {
           throw new ConnectError('Changing the fixture source language is unavailable', Code.FailedPrecondition);
         },
@@ -118,12 +69,7 @@ export function formTranslationFixture(state: FormTranslationState) {
     },
   };
   function seed(queryClient: QueryClient) {
-    const keys = [
-      ['translation-locales'],
-      ['entity-translations', 'form', 'local-form'],
-      ['entity-translation-jobs', 'form', 'local-form', 'all'],
-      ['translation-settings'],
-    ];
+    const keys = [['translation-locales'], ['entity-translations', 'form', 'local-form']];
     for (const queryKey of keys) {
       queryClient.removeQueries({ queryKey, exact: true });
       queryClient.setQueryDefaults(queryKey, { staleTime: 0, refetchOnMount: 'always', retry: false });

@@ -37,7 +37,6 @@ function splitAliases(messages: typeof enMessages.editorCommon.editor.slashMenu)
       threeScene: splitItemAliases(messages.items.threeScene),
       shader: splitItemAliases(messages.items.shader),
       file: splitItemAliases(messages.items.file),
-      aiAssistant: splitItemAliases(messages.items.aiAssistant),
     },
   };
 }
@@ -50,7 +49,7 @@ function catalog(options: Partial<CreateTiptapSlashCatalogOptions> = {}) {
 }
 
 describe('Tiptap slash catalog policy', () => {
-  it('keeps a basic-first order with contiguous executable workflows before AI', () => {
+  it('keeps a basic-first order with contiguous executable workflows', () => {
     expect(catalog().map((item) => item.key)).toEqual([
       'paragraph',
       'heading',
@@ -75,7 +74,6 @@ describe('Tiptap slash catalog policy', () => {
       'three',
       'shader',
       'emoji',
-      'ai',
     ]);
   });
 
@@ -107,7 +105,6 @@ describe('Tiptap slash catalog policy', () => {
       ['three', '임베드'],
       ['shader', '임베드'],
       ['emoji', '기타'],
-      ['ai', 'AI'],
     ]);
   });
 
@@ -187,11 +184,10 @@ describe('Tiptap slash catalog policy', () => {
       p5: true,
       three: true,
       shader: true,
-      ai: true,
     } as const;
     const missingCallbacks = createTiptapSlashCatalog(messages, { capabilities });
 
-    for (const key of ['emoji', 'map', 'external-video', 'file', 'p5', 'three', 'shader', 'ai']) {
+    for (const key of ['emoji', 'map', 'external-video', 'file', 'p5', 'three', 'shader']) {
       expect(missingCallbacks.find((item) => item.key === key)).toMatchObject({
         enabled: false,
         unavailableReason: expect.any(String),
@@ -207,13 +203,12 @@ describe('Tiptap slash catalog policy', () => {
       p5: callback,
       three: callback,
       shader: callback,
-      ai: callback,
     };
     const enabled = createTiptapSlashCatalog(messages, {
       capabilities,
       callbacks,
     });
-    for (const key of ['emoji', 'map', 'external-video', 'file', 'p5', 'three', 'shader', 'ai']) {
+    for (const key of ['emoji', 'map', 'external-video', 'file', 'p5', 'three', 'shader']) {
       expect(enabled.find((item) => item.key === key)).toMatchObject({ enabled: true, unavailableReason: undefined });
     }
 

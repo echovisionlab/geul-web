@@ -109,7 +109,6 @@ export async function renderPostEditRoute(idOrSlug: string, query: SearchParamRe
     <LazyPostEditor
       initialSnapshot={snapshot}
       postId={post.id}
-      currentMemberId={session.user.id}
       initialTitle={post.title}
       initialSourceLocale={post.sourceLocale}
       initialSummary={post.summary ?? null}

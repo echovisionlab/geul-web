@@ -43,22 +43,4 @@ describe('locale domain editor wiring', () => {
     expect(work).toContain('allowNeutralBlockEdits={activeEditLocale.isSourceLocale}');
     expect(work).toContain('if (canEditNeutral) {\n        slugMgmt.updateFromTitle(value);\n      }');
   });
-
-  it('binds Page and Work summary AI to the exact active locale room without replacing editor AI', () => {
-    const page = source('../page/PageEditor/PageEditor.tsx');
-    const work = source('../work/WorkEditor/WorkEditor.tsx');
-    const tiptap = source('../editor/tiptap/TiptapEditor.tsx');
-
-    expect(page).toContain("{ type: 'page', id: pageId, locale: roomLocale }");
-    expect(page).toContain('provider={canEditLocaleDocument ? provider : null}');
-    expect(page).toContain('currentMemberId={currentMemberId}');
-
-    expect(work).toContain("{ type: 'work', id: workId, locale: roomLocale }");
-    expect(work).toContain('provider={currentLocaleCanEdit ? currentProvider : null}');
-    expect(work).toContain('currentMemberId={currentMemberId}');
-
-    expect(tiptap).toContain('useTiptapAIController');
-    expect(tiptap).toContain('<TiptapAIAssistantSurface');
-    expect(tiptap).not.toContain('/mcp');
-  });
 });

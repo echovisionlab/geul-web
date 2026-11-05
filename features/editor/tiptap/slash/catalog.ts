@@ -19,7 +19,6 @@ import {
   IconMathFunction,
   IconMinus,
   IconMoodSmile,
-  IconSparkles,
   IconTable,
   IconVariable,
   type Icon,
@@ -110,7 +109,7 @@ function workflowItem({
 
 /**
  * Geul catalog order. Executable creative workflows are appended
- * after the unified file item and before AI.
+ * after the unified file item.
  */
 export function createTiptapSlashCatalog(
   messages: TiptapSlashMenuMessages,
@@ -293,15 +292,6 @@ export function createTiptapSlashCatalog(
       callbacks,
       unavailableReason: messages.unavailable,
     }),
-    workflowItem({
-      key: 'ai',
-      translation: itemCopy(messages.items.aiAssistant, messages.groups.ai),
-      icon: IconSparkles,
-      workflow: 'ai',
-      capabilities,
-      callbacks,
-      unavailableReason: messages.unavailable,
-    }),
   ];
   // A single coherent section per category; this is also the keyboard traversal order.
   const order = [
@@ -328,7 +318,6 @@ export function createTiptapSlashCatalog(
     'three',
     'shader',
     'emoji',
-    'ai',
   ];
   return items.sort((left, right) => order.indexOf(left.key) - order.indexOf(right.key));
 }

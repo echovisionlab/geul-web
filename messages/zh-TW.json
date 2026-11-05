@@ -2262,8 +2262,8 @@
     "systemOrLegacy": "系統或較早版本",
     "restore": "恢復",
     "restoreTitle": "恢復版本",
-    "restoreSameLocaleBody": "還原來源文件v{version} ({locale})僅變更來源文件。現有目標文件和翻譯作業保持不變，且不會自動產生翻譯。是否繼續?",
-    "restoreCrossLocaleBody": "還原來源文件v{version}會將來源區域設定從{currentLocale}切換為{selectedLocale}，並僅變更來源指標。現有目標文件和翻譯作業保持不變，且不會自動產生翻譯。是否繼續?",
+    "restoreSameLocaleBody": "還原來源文件v{version} ({locale})僅變更來源文件。現有目標文件保持不變。是否繼續?",
+    "restoreCrossLocaleBody": "還原來源文件v{version}會將來源區域設定從{currentLocale}切換為{selectedLocale}，並僅變更來源指標。現有目標文件保持不變。是否繼續?",
     "restoreFailed": "還原來源文件失敗。",
     "loadFailed": "無法載入版本歷史記錄。",
     "end": "已載入所有版本。"
@@ -3853,8 +3853,7 @@
           "math": "數學",
           "inline": "行內",
           "embeds": "嵌入",
-          "media": "媒體",
-          "ai": "AI"
+          "media": "媒體"
         },
         "items": {
           "heading": {
@@ -3977,12 +3976,6 @@
             "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\n附件\n檔案\n文件\n下載",
             "group": "媒體"
           },
-          "aiAssistant": {
-            "title": "AI 助理",
-            "subtext": "使用 AI 撰寫、改善或轉換文字",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\n人工智慧\n助理\n寫作\n改善",
-            "group": "AI"
-          },
           "shader": {
             "title": "GLSL 著色器",
             "subtext": "新增互動式 GLSL 著色器",
@@ -4022,8 +4015,7 @@
         "displaySizeXl": "特大",
         "nest": "巢狀",
         "unnest": "取消巢狀",
-        "inlineMath": "行內公式",
-        "ai": "AI 助理"
+        "inlineMath": "行內公式"
       },
       "link": {
         "create": "新增連結",
@@ -4223,47 +4215,6 @@
       "message": "你可以再次編輯。僅可檢視期間保留的變更正在儲存。"
     }
   },
-  "aiAssistant": {
-    "title": "AI 助理",
-    "modes": {
-      "modify": "修改",
-      "generate": "生成"
-    },
-    "placeholders": {
-      "modify": "我該如何修改這段文字",
-      "generate": "你想寫什麼"
-    },
-    "quickActions": {
-      "title": "快速操作",
-      "improve": "提升",
-      "fixSpelling": "修復拼字",
-      "simplify": "簡化",
-      "summarize": "總結",
-      "translateKorean": "韓國人",
-      "translateEnglish": "英語",
-      "continueWriting": "繼續寫作",
-      "brainstorm": "腦力激盪"
-    },
-    "sections": {
-      "result": "AI 結果"
-    },
-    "actions": {
-      "close": "關閉 AI 助理",
-      "submitPrompt": "提交自訂 AI 提示",
-      "stop": "停止",
-      "reject": "拒絕",
-      "retry": "重試",
-      "accept": "接受",
-      "insert": "插入"
-    },
-    "errors": {
-      "generic": "發生錯誤。請再試一次"
-    },
-    "notifications": {
-      "applyFailedTitle": "套用 AI 結果失敗",
-      "applyFailedMessage": "無法解析 AI 回應。請再試一次"
-    }
-  },
   "mapControls": {
     "managePlaces": "管理地點",
     "managePlacesWithCount": "管理地點（{count}）",
@@ -4366,20 +4317,15 @@
     "description": "查看來源語言和各區域設定的現有翻譯文件。",
     "actions": {
       "expand": "擴張",
-      "collapse": "坍塌",
-      "regenerateAll": "產生/重新產生所有符合條件的區域設定的翻譯",
-      "regenerateLocale": "再生",
-      "regenerateLocaleAria": "重新產生 {locale} 翻譯",
-      "generateLocale": "Generate",
-      "generateLocaleAria": "產生{locale}翻譯"
+      "collapse": "坍塌"
     },
     "sourceLocale": {
       "label": "原始語言",
       "description": "這是用作該實體翻譯基礎的來源語言",
       "confirm": {
         "title": "變更來源語言",
-        "description": "變更來源語言僅更新來源指標。現有目標文件和翻譯作業保持不變，且不會自動產生翻譯。",
-        "detail": "{locale}將成為可編輯來源文件的語言。現有目標文件和翻譯作業保持不變。",
+        "description": "變更來源語言僅更新來源指標。現有目標文件保持不變。",
+        "detail": "{locale}將成為可編輯來源文件的語言。現有目標文件保持不變。",
         "confirm": "更改並重新翻譯"
       }
     },
@@ -4387,7 +4333,7 @@
       "ariaLabel": "切換內容語言。目前: {locale}",
       "sourceOption": "{locale}（來源）",
       "loading": "正在載入語言...",
-      "missingDescription": "尚無{locale}目標文件。請從翻譯面板產生。",
+      "missingDescription": "尚無{locale}目標文件。請從翻譯面板建立。",
       "bodyPreviewTitle": "{locale} 身體預覽",
       "bodyPreviewDescription": "保留結構和格式顯示現有翻譯文件。",
       "bodyPreviewEmpty": "還沒有本地化的身體預覽",
@@ -4397,9 +4343,6 @@
         "copyJson": "場景文案"
       }
     },
-    "statuses": {
-      "existing": "Existing"
-    },
     "states": {
       "loadFailed": "無法載入翻譯",
       "missingTarget": "尚無目標文件。",
@@ -4408,10 +4351,7 @@
     },
     "notifications": {
       "sourceLocaleUpdated": "來源語言已更新",
-      "sourceLocaleUpdateFailed": "更新來源語言失敗",
-      "allQueued": "所有語言環境的翻譯重新生成均已排隊",
-      "localeQueued": "翻譯重新產生已為此區域設定排隊",
-      "regenerateFailed": "無法對翻譯重新生成進行排隊"
+      "sourceLocaleUpdateFailed": "更新來源語言失敗"
     }
   },
   "translationPanelMenu": {
@@ -4451,13 +4391,11 @@
   },
   "translationOverviewPage": {
     "actions": {
-      "openJobs": "開啟作業",
       "openSettings": "開啟設定"
     },
     "stats": {
       "totalLocales": "語言環境總數",
       "sourceEntities": "來源實體",
-      "activeJobs": "工作正在進行中",
       "existingEntries": "現有翻譯"
     },
     "sections": {
@@ -4476,119 +4414,23 @@
       "emptyEntityHealth": "尚無實體健康數據"
     },
     "policy": {
-      "internal": "僅限內部",
-      "machineDisabled": "機器已禁用"
-    }
-  },
-  "translationJobsPage": {
-    "title": "翻譯工作",
-    "stats": {
-      "active": "{count} 正在進行中"
-    },
-    "columns": {
-      "entity": "實體"
-    },
-    "locale": {
-      "fromTo": "從 {source} 到 {target}"
-    },
-    "states": {
-      "loadFailed": "無法載入翻譯作業",
-      "empty": "還沒有翻譯工作"
-    },
-    "notifications": {
-      "cancelled": "翻譯工作已取消",
-      "cancelFailed": "無法取消翻譯作業"
+      "internal": "僅限內部"
     }
   },
   "translationSettingsPage": {
     "title": "翻譯設定",
-    "description": "管理預設來源語言和自動翻譯提供者。管理員在各編輯器中明確啟動翻譯產生。",
+    "description": "管理翻譯使用的預設來源語言。",
     "actions": {
-      "jobs": "作業",
-      "save": "儲存設定",
-      "addProvider": "新增提供者",
-      "editProvider": "編輯提供者",
-      "deleteProvider": "刪除提供者",
-      "createProvider": "建立提供者"
+      "save": "儲存設定"
     },
     "sections": {
       "runtime": "來源預設設定",
-      "runtimeDescription": "僅設定尚未確立來源語言時使用的語言。變更來源內容絕不會自動啟動翻譯產生。",
-      "providers": "翻譯提供者",
-      "providersDescription": "管理機器翻譯提供者。至少有一個啟用且憑證有效的提供者後，翻譯生成才會啟用。"
+      "runtimeDescription": "僅設定尚未確立來源語言時使用的語言。"
     },
     "fields": {
       "defaultLocale": {
         "label": "預設區域設定",
         "description": "當尚未設定來源區域設定以及請求未解析為支援的內容區域設定時使用"
-      },
-      "protectedTerms": {
-        "label": "受保護術語",
-        "description": "產生翻譯時必須保持不變的精確拼寫，區分大小寫。不會自動學習或建議任何術語。",
-        "placeholder": "新增受保護術語",
-        "examples": "範例: Photoshop, React Native"
-      },
-      "providerName": {
-        "label": "提供者名稱"
-      },
-      "providerType": {
-        "label": "提供者類型"
-      },
-      "providerPriority": {
-        "label": "優先順序",
-        "description": "多個提供者啟用時，優先順序數值較低者會先執行。"
-      },
-      "providerActive": {
-        "label": "啟用",
-        "shortLabel": "啟用",
-        "description": "只有啟用的提供者可用於翻譯生成。"
-      },
-      "deeplApiKey": {
-        "label": "DeepL API 金鑰",
-        "descriptionEdit": "留空以保留已儲存的金鑰。"
-      },
-      "deeplApiBaseUrl": {
-        "label": "DeepL API 基礎 URL",
-        "description": "除非使用代理或專用端點，否則請使用預設值。"
-      },
-      "llmPreset": {
-        "label": "LLM 預設"
-      },
-      "llmApiKey": {
-        "label": "LLM API 金鑰",
-        "descriptionEdit": "留空可保留已儲存的金鑰。"
-      },
-      "llmApiBaseUrl": {
-        "label": "LLM API 基礎 URL",
-        "description": "OpenAI 相容端點必填；Gemini 可留空。"
-      },
-      "llmModel": {
-        "label": "模型",
-        "description": "用於翻譯生成的模型 ID。"
-      },
-      "llmInputPrice": {
-        "label": "輸入 USD / 100 萬 tokens",
-        "description": "用於 provider 比較和成本規劃的選填估算。"
-      },
-      "llmOutputPrice": {
-        "label": "輸出 USD / 100 萬 tokens",
-        "description": "用於 provider 比較和成本規劃的選填估算。"
-      },
-      "llmMaxContextTokens": {
-        "label": "最大上下文 tokens",
-        "description": "大型翻譯批次路由的選填提示。"
-      },
-      "llmMaxOutputTokens": {
-        "label": "最大輸出 tokens",
-        "description": "傳給相容 provider 的選填請求上限。"
-      },
-      "llmTemperature": {
-        "label": "Temperature",
-        "description": "較低值會讓結構化翻譯輸出更穩定。"
-      },
-      "llmSupportsJsonMode": {
-        "label": "結構化 JSON 模式",
-        "description": "當 provider 支援 JSON schema 或 JSON mode 回應時啟用。"
       }
     },
     "states": {
@@ -4596,82 +4438,13 @@
     },
     "notifications": {
       "saved": "已儲存翻譯設定",
-      "saveFailed": "無法儲存翻譯設定",
-      "providerCreated": "已建立翻譯提供者。",
-      "providerUpdated": "已更新翻譯提供者。",
-      "providerDeleted": "已刪除翻譯提供者。",
-      "providerSaveFailed": "儲存翻譯提供者失敗。",
-      "providerToggleFailed": "更新提供者狀態失敗。",
-      "providerDeleteFailed": "刪除翻譯提供者失敗。"
-    },
-    "generation": {
-      "enabled": "生成已啟用",
-      "disabled": "生成已停用"
-    },
-    "providerTypes": {
-      "deepl": "DeepL",
-      "llm": "LLM"
-    },
-    "providerStates": {
-      "empty": "尚未設定翻譯提供者。",
-      "active": "啟用",
-      "inactive": "停用",
-      "priority": "優先順序 {priority}",
-      "modelUnset": "未設定模型"
-    },
-    "validation": {
-      "providerNameRequired": "必須填寫提供者名稱。",
-      "providerApiKeyRequired": "此提供者需要 API 金鑰。",
-      "providerModelRequired": "LLM provider 需要模型。",
-      "providerBaseUrlRequired": "OpenAI 相容 LLM provider 需要 API 基礎 URL。"
-    },
-    "modal": {
-      "createProviderTitle": "建立翻譯提供者",
-      "editProviderTitle": "編輯翻譯提供者",
-      "deleteProviderTitle": "刪除翻譯提供者",
-      "deleteProviderMessage": "刪除 {name}？如果沒有剩餘啟用的提供者，翻譯生成將被停用。",
-      "credentialsSection": "憑證"
-    },
-    "llmPresets": {
-      "gemini": "Gemini",
-      "openaiCompatible": "OpenAI 相容"
+      "saveFailed": "無法儲存翻譯設定"
     }
   },
   "summaryField": {
     "description": "用於預告片、清單、搜尋、分享和人工智慧可讀的描述",
-    "status": {
-      "idle": "就緒",
-      "generating": "產生",
-      "applying": "正在申請",
-      "stale": "產生結果已過期",
-      "applied": "已套用",
-      "ready": "待套用"
-    },
-    "actions": {
-      "generate": "產生摘要",
-      "apply": "應用總結"
-    },
     "placeholders": {
       "summary": "新增一個簡潔的摘要..."
-    },
-    "tooltips": {
-      "generatingNamed": "{name} 正在產生摘要"
-    },
-    "feedback": {
-      "failedDefault": "無法處理摘要產生",
-      "alreadyRunning": "摘要生成已在運行",
-      "missingSuggestionPayload": "摘要產生已完成，無需建議負載",
-      "staleSuggestion": "這個建議已經過時了。在應用之前重新生成或駁回它",
-      "unableToApplyNow": "目前無法套用產生的摘要",
-      "applyFailed": "無法套用產生的摘要",
-      "applied": "應用產生的摘要",
-      "readyToApply": "產生的摘要可以套用了。"
-    },
-    "ready": {
-      "title": "產生的摘要",
-      "suggestedSummary": "建議摘要",
-      "anotherCollaborator": "其他協作者",
-      "anotherCollaboratorNamed": "{name}已準備好產生的摘要。"
     }
   },
   "userProfile": {

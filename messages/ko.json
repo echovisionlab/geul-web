@@ -2262,8 +2262,8 @@
     "systemOrLegacy": "시스템 또는 이전 버전",
     "restore": "복원",
     "restoreTitle": "버전 복원",
-    "restoreSameLocaleBody": "원문 v{version}({locale})을 복원하면 원문 문서만 변경됩니다. 기존 대상 문서와 번역 작업은 그대로 유지되며 번역은 자동 생성되지 않습니다. 계속하시겠습니까?",
-    "restoreCrossLocaleBody": "원문 v{version}을 복원하면 원문 언어가 {currentLocale}에서 {selectedLocale}(으)로 전환되고 원문 포인터만 변경됩니다. 기존 대상 문서와 번역 작업은 그대로 유지되며 번역은 자동 생성되지 않습니다. 계속하시겠습니까?",
+    "restoreSameLocaleBody": "원문 v{version}({locale})을 복원하면 원문 문서만 변경됩니다. 기존 대상 문서는 그대로 유지됩니다. 계속하시겠습니까?",
+    "restoreCrossLocaleBody": "원문 v{version}을 복원하면 원문 언어가 {currentLocale}에서 {selectedLocale}(으)로 전환되고 원문 포인터만 변경됩니다. 기존 대상 문서는 그대로 유지됩니다. 계속하시겠습니까?",
     "restoreFailed": "원문 문서를 복원하지 못했습니다.",
     "loadFailed": "버전 기록을 불러오지 못했습니다.",
     "end": "모든 버전을 불러왔습니다."
@@ -3853,8 +3853,7 @@
           "math": "수학",
           "inline": "인라인",
           "embeds": "임베드",
-          "media": "미디어",
-          "ai": "AI"
+          "media": "미디어"
         },
         "items": {
           "heading": {
@@ -3977,12 +3976,6 @@
             "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\n첨부\n파일\n문서\n다운로드",
             "group": "미디어"
           },
-          "aiAssistant": {
-            "title": "AI 도우미",
-            "subtext": "AI로 글을 작성하거나 다듬고 변환합니다",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\n인공지능\n도우미\n글쓰기\n개선",
-            "group": "AI"
-          },
           "shader": {
             "title": "GLSL 셰이더",
             "subtext": "인터랙티브 GLSL 셰이더를 추가합니다",
@@ -4022,8 +4015,7 @@
         "displaySizeXl": "아주 크게",
         "nest": "들여쓰기",
         "unnest": "내어쓰기",
-        "inlineMath": "인라인 수식",
-        "ai": "AI 도우미"
+        "inlineMath": "인라인 수식"
       },
       "link": {
         "create": "링크 추가",
@@ -4223,47 +4215,6 @@
       "message": "다시 편집할 수 있습니다. 보기 전용이던 동안 보관된 변경을 저장하고 있습니다."
     }
   },
-  "aiAssistant": {
-    "title": "AI 도우미",
-    "modes": {
-      "modify": "수정",
-      "generate": "생성"
-    },
-    "placeholders": {
-      "modify": "이 텍스트를 어떻게 수정할까요",
-      "generate": "무엇을 작성하고 싶으신가요"
-    },
-    "quickActions": {
-      "title": "빠른 작업",
-      "improve": "다듬기",
-      "fixSpelling": "맞춤법 수정",
-      "simplify": "쉽게 쓰기",
-      "summarize": "요약",
-      "translateKorean": "한국어",
-      "translateEnglish": "영어",
-      "continueWriting": "이어 쓰기",
-      "brainstorm": "아이디어 확장"
-    },
-    "sections": {
-      "result": "AI 결과"
-    },
-    "actions": {
-      "close": "AI 도우미 닫기",
-      "submitPrompt": "사용자 지정 프롬프트 제출",
-      "stop": "중지",
-      "reject": "거절",
-      "retry": "다시 시도",
-      "accept": "수락",
-      "insert": "삽입"
-    },
-    "errors": {
-      "generic": "문제가 발생했습니다. 다시 시도해 주세요."
-    },
-    "notifications": {
-      "applyFailedTitle": "AI 결과 적용에 실패했습니다",
-      "applyFailedMessage": "AI 응답을 해석할 수 없습니다. 다시 시도해 주세요."
-    }
-  },
   "mapControls": {
     "managePlaces": "장소 관리",
     "managePlacesWithCount": "장소 관리 ({count})",
@@ -4366,20 +4317,15 @@
     "description": "원문 언어와 언어별 기존 번역 문서를 관리합니다.",
     "actions": {
       "expand": "펼치기",
-      "collapse": "접기",
-      "regenerateAll": "모든 대상 생성/재생성",
-      "regenerateLocale": "재생성",
-      "regenerateLocaleAria": "{locale} 번역 재생성",
-      "generateLocale": "생성",
-      "generateLocaleAria": "{locale} 번역 생성"
+      "collapse": "접기"
     },
     "sourceLocale": {
       "label": "원문 언어",
       "description": "이 엔티티 번역의 기준이 되는 원문 언어입니다.",
       "confirm": {
         "title": "원문 언어 변경",
-        "description": "원문 언어를 바꾸면 원문 포인터만 변경됩니다. 기존 대상 문서와 번역 작업은 그대로 유지되며 번역은 자동 생성되지 않습니다.",
-        "detail": "{locale}이(가) 편집 가능한 원문 문서의 언어가 됩니다. 기존 대상 문서와 번역 작업은 그대로 유지됩니다.",
+        "description": "원문 언어를 바꾸면 원문 포인터만 변경됩니다. 기존 대상 문서는 그대로 유지됩니다.",
+        "detail": "{locale}이(가) 편집 가능한 원문 문서의 언어가 됩니다. 기존 대상 문서는 그대로 유지됩니다.",
         "confirm": "원문 언어 변경"
       }
     },
@@ -4387,7 +4333,7 @@
       "ariaLabel": "콘텐츠 언어 전환. 현재: {locale}",
       "sourceOption": "{locale} (원문)",
       "loading": "언어 불러오는 중...",
-      "missingDescription": "아직 {locale} 대상 문서가 없습니다. 번역 패널에서 생성하세요.",
+      "missingDescription": "아직 {locale} 대상 문서가 없습니다. 번역 패널에서 만드세요.",
       "bodyPreviewTitle": "{locale} 본문 미리보기",
       "bodyPreviewDescription": "기존 번역 문서를 구조와 서식을 유지한 채 표시합니다.",
       "bodyPreviewEmpty": "현지화 본문 미리보기가 아직 없습니다.",
@@ -4397,9 +4343,6 @@
         "copyJson": "씬 문구"
       }
     },
-    "statuses": {
-      "existing": "기존"
-    },
     "states": {
       "loadFailed": "번역 정보를 불러오지 못했습니다.",
       "missingTarget": "대상 문서가 아직 없습니다.",
@@ -4408,10 +4351,7 @@
     },
     "notifications": {
       "sourceLocaleUpdated": "원문 언어를 변경했습니다",
-      "sourceLocaleUpdateFailed": "원문 언어를 변경하지 못했습니다.",
-      "allQueued": "전체 언어 번역 재생성을 예약했습니다.",
-      "localeQueued": "이 언어의 번역 재생성을 예약했습니다.",
-      "regenerateFailed": "번역 재생성을 예약하지 못했습니다."
+      "sourceLocaleUpdateFailed": "원문 언어를 변경하지 못했습니다."
     }
   },
   "translationPanelMenu": {
@@ -4451,13 +4391,11 @@
   },
   "translationOverviewPage": {
     "actions": {
-      "openJobs": "작업 열기",
       "openSettings": "설정 열기"
     },
     "stats": {
       "totalLocales": "전체 언어",
       "sourceEntities": "원문 엔티티",
-      "activeJobs": "진행 중 작업",
       "existingEntries": "기존 번역"
     },
     "sections": {
@@ -4476,119 +4414,23 @@
       "emptyEntityHealth": "엔티티 health 데이터가 아직 없습니다."
     },
     "policy": {
-      "internal": "내부 전용",
-      "machineDisabled": "기계 번역 꺼짐"
-    }
-  },
-  "translationJobsPage": {
-    "title": "번역 작업",
-    "stats": {
-      "active": "진행 중 {count}개"
-    },
-    "columns": {
-      "entity": "엔티티"
-    },
-    "locale": {
-      "fromTo": "{source} -> {target}"
-    },
-    "states": {
-      "loadFailed": "번역 작업을 불러오지 못했습니다.",
-      "empty": "번역 작업이 아직 없습니다."
-    },
-    "notifications": {
-      "cancelled": "번역 작업을 취소했습니다",
-      "cancelFailed": "번역 작업을 취소하지 못했습니다."
+      "internal": "내부 전용"
     }
   },
   "translationSettingsPage": {
     "title": "번역 설정",
-    "description": "기본 원문 언어와 자동 번역 provider를 관리합니다. 번역 생성은 편집 화면에서 관리자가 명시적으로 실행합니다.",
+    "description": "번역에 쓰는 기본 원문 언어를 관리합니다.",
     "actions": {
-      "jobs": "작업",
-      "save": "설정 저장",
-      "addProvider": "프로바이더 추가",
-      "editProvider": "프로바이더 수정",
-      "deleteProvider": "프로바이더 삭제",
-      "createProvider": "프로바이더 생성"
+      "save": "설정 저장"
     },
     "sections": {
       "runtime": "원문 기본값",
-      "runtimeDescription": "원문 언어가 정해지지 않았을 때 사용할 기본 언어만 설정합니다. 원문 변경은 번역을 자동 생성하지 않습니다.",
-      "providers": "번역 프로바이더",
-      "providersDescription": "기계 번역 프로바이더를 관리합니다. 유효한 자격 증명을 가진 active provider가 하나 이상 있어야 번역 생성이 활성화됩니다."
+      "runtimeDescription": "원문 언어가 정해지지 않았을 때 사용할 기본 언어만 설정합니다."
     },
     "fields": {
       "defaultLocale": {
         "label": "기본 언어",
         "description": "원문 언어가 아직 정해지지 않았거나 요청 locale이 지원 언어로 해석되지 않을 때 사용하는 기본값입니다."
-      },
-      "protectedTerms": {
-        "label": "보호 용어",
-        "description": "번역 생성 시 그대로 유지할 대소문자 구분 고정 표기입니다. 이 관리자 목록 외의 용어를 자동 학습하거나 제안하지 않습니다.",
-        "placeholder": "보호 용어 추가",
-        "examples": "예: Photoshop, React Native"
-      },
-      "providerName": {
-        "label": "프로바이더 이름"
-      },
-      "providerType": {
-        "label": "프로바이더 유형"
-      },
-      "providerPriority": {
-        "label": "우선순위",
-        "description": "여러 provider가 활성화된 경우 낮은 우선순위가 먼저 실행됩니다."
-      },
-      "providerActive": {
-        "label": "활성",
-        "shortLabel": "활성",
-        "description": "활성화된 provider만 번역 생성에 사용됩니다."
-      },
-      "deeplApiKey": {
-        "label": "DeepL API 키",
-        "descriptionEdit": "저장된 키를 유지하려면 비워 두세요."
-      },
-      "deeplApiBaseUrl": {
-        "label": "DeepL API 기본 URL",
-        "description": "프록시나 별도 endpoint를 쓰는 경우가 아니면 기본값을 사용하세요."
-      },
-      "llmPreset": {
-        "label": "LLM 프리셋"
-      },
-      "llmApiKey": {
-        "label": "LLM API 키",
-        "descriptionEdit": "비워두면 저장된 키를 유지한다."
-      },
-      "llmApiBaseUrl": {
-        "label": "LLM API 기본 URL",
-        "description": "OpenAI 호환 엔드포인트에는 필요하다. Gemini는 비워둘 수 있다."
-      },
-      "llmModel": {
-        "label": "모델",
-        "description": "번역 생성에 사용할 모델 ID."
-      },
-      "llmInputPrice": {
-        "label": "입력 USD / 100만 토큰",
-        "description": "Provider 비교와 비용 계획에 쓰는 선택 추정값."
-      },
-      "llmOutputPrice": {
-        "label": "출력 USD / 100만 토큰",
-        "description": "Provider 비교와 비용 계획에 쓰는 선택 추정값."
-      },
-      "llmMaxContextTokens": {
-        "label": "최대 컨텍스트 토큰",
-        "description": "대형 번역 배치 라우팅에 쓰는 선택 힌트."
-      },
-      "llmMaxOutputTokens": {
-        "label": "최대 출력 토큰",
-        "description": "호환 provider에 전달하는 선택 요청 한도."
-      },
-      "llmTemperature": {
-        "label": "Temperature",
-        "description": "낮은 값일수록 구조화된 번역 출력이 더 결정적이다."
-      },
-      "llmSupportsJsonMode": {
-        "label": "구조화 JSON 모드",
-        "description": "Provider가 JSON schema 또는 JSON mode 응답을 지원할 때 켠다."
       }
     },
     "states": {
@@ -4596,82 +4438,13 @@
     },
     "notifications": {
       "saved": "번역 설정을 저장했습니다.",
-      "saveFailed": "번역 설정 저장에 실패했습니다.",
-      "providerCreated": "번역 프로바이더를 생성했습니다.",
-      "providerUpdated": "번역 프로바이더를 수정했습니다.",
-      "providerDeleted": "번역 프로바이더를 삭제했습니다.",
-      "providerSaveFailed": "번역 프로바이더를 저장하지 못했습니다.",
-      "providerToggleFailed": "프로바이더 상태를 변경하지 못했습니다.",
-      "providerDeleteFailed": "번역 프로바이더를 삭제하지 못했습니다."
-    },
-    "generation": {
-      "enabled": "생성 활성화됨",
-      "disabled": "생성 비활성화됨"
-    },
-    "providerTypes": {
-      "deepl": "DeepL",
-      "llm": "LLM"
-    },
-    "providerStates": {
-      "empty": "설정된 번역 프로바이더가 없습니다.",
-      "active": "활성",
-      "inactive": "비활성",
-      "priority": "우선순위 {priority}",
-      "modelUnset": "모델 미설정"
-    },
-    "validation": {
-      "providerNameRequired": "프로바이더 이름이 필요합니다.",
-      "providerApiKeyRequired": "이 provider에는 API 키가 필요합니다.",
-      "providerModelRequired": "LLM provider에는 모델이 필요하다.",
-      "providerBaseUrlRequired": "OpenAI 호환 LLM provider에는 API 기본 URL이 필요하다."
-    },
-    "modal": {
-      "createProviderTitle": "번역 프로바이더 생성",
-      "editProviderTitle": "번역 프로바이더 수정",
-      "deleteProviderTitle": "번역 프로바이더 삭제",
-      "deleteProviderMessage": "{name}을(를) 삭제할까요? 남은 active provider가 없으면 번역 생성이 비활성화됩니다.",
-      "credentialsSection": "자격 증명"
-    },
-    "llmPresets": {
-      "gemini": "Gemini",
-      "openaiCompatible": "OpenAI 호환"
+      "saveFailed": "번역 설정 저장에 실패했습니다."
     }
   },
   "summaryField": {
     "description": "티저, 목록, 검색, 공유, AI가 읽을 설명에 사용됩니다.",
-    "status": {
-      "idle": "준비됨",
-      "generating": "생성 중",
-      "applying": "적용 중",
-      "stale": "생성본 오래됨",
-      "applied": "적용됨",
-      "ready": "적용 대기"
-    },
-    "actions": {
-      "generate": "요약 생성",
-      "apply": "요약 적용"
-    },
     "placeholders": {
       "summary": "간결한 요약을 입력하세요..."
-    },
-    "tooltips": {
-      "generatingNamed": "{name}님이 요약을 생성 중입니다"
-    },
-    "feedback": {
-      "failedDefault": "요약 생성 처리에 실패했습니다.",
-      "alreadyRunning": "요약 생성이 이미 진행 중입니다.",
-      "missingSuggestionPayload": "요약 생성은 완료되었지만 suggestion payload가 없습니다.",
-      "staleSuggestion": "이 제안은 오래되었습니다. 적용 전에 다시 생성하거나 닫아주세요.",
-      "unableToApplyNow": "지금은 생성된 요약을 적용할 수 없습니다.",
-      "applyFailed": "생성된 요약을 적용하지 못했습니다.",
-      "applied": "생성된 요약을 적용했습니다.",
-      "readyToApply": "생성된 요약을 적용할 수 있습니다."
-    },
-    "ready": {
-      "title": "생성된 요약",
-      "suggestedSummary": "제안된 요약",
-      "anotherCollaborator": "다른 협업자",
-      "anotherCollaboratorNamed": "{name}님이 생성된 요약을 준비해 두었습니다."
     }
   },
   "userProfile": {

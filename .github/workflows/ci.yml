@@ -241,6 +241,8 @@ jobs:
         run: pnpm lint:styles
       - name: Design system
         run: pnpm design-system:check
+      - name: Release readiness scope
+        run: pnpm design-system:readiness:check
       - name: Core contracts
         run: pnpm design-system:typecheck
       - name: Prepare MapLibre worker

@@ -808,15 +808,7 @@ export const routePreviews = [
     variant: 'Overview',
     coverage: 'page-view',
     scope:
-      'Actual production overview controller with typed in-memory RPC data, refresh and empty/error/pending states. Locale/entity health tables use production owners. Backend auth, translation execution, collaboration events and server data remain outside.',
-  },
-  {
-    route: '/admin/translations/jobs',
-    storyTitle: 'Pages/Admin/Translation',
-    variant: 'Jobs',
-    coverage: 'page-view',
-    scope:
-      'Actual production active-jobs controller and cancellation using typed local RPC data. Refresh, empty and read failure states; machine translation, runtime lifecycle stream and server cancellation remain outside.',
+      'Actual production overview controller with typed in-memory RPC data, refresh and empty/error/pending states. Locale/entity health tables use production owners. Backend auth and server data remain outside.',
   },
   {
     route: '/admin/translations/settings',
@@ -824,7 +816,7 @@ export const routePreviews = [
     variant: 'Settings',
     coverage: 'page-view',
     scope:
-      'Actual production dirty settings form and provider CRUD/toggle/confirmation controller with typed in-memory RPC. Ready/empty/read-error/pending/save-error states. Backend CAS, credentials, auth and persistence remain outside.',
+      'Actual production dirty default-locale settings form with typed in-memory RPC. Ready/read-error/pending/save-error states. Backend CAS, auth and persistence remain outside.',
   },
   {
     route: '/terms/history/[id]',

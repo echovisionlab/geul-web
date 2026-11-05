@@ -1,5 +1,21 @@
 import { TranslationEntityType } from '@echovisionlab/geul-proto/secure/translation_pb.ts';
-import type { TranslationEntityTypeKey } from '@/lib/translation/lifecycle';
+
+export type TranslationEntityTypeKey =
+  | 'page'
+  | 'post'
+  | 'post_series'
+  | 'work'
+  | 'program_event'
+  | 'artist'
+  | 'label'
+  | 'release'
+  | 'menu'
+  | 'email_template'
+  | 'email_layout'
+  | 'campaign'
+  | 'form'
+  | 'privacy'
+  | 'terms';
 
 const PROTO_ENTITY_TYPE = {
   page: TranslationEntityType.PAGE,

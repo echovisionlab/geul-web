@@ -91,7 +91,6 @@ const labels: SelectionBubbleMenuLabels = {
     cancel: 'Cancel',
   },
   inlineMath: 'Inline math',
-  ai: 'AI',
 };
 
 function commands(overrides: Partial<SelectionBubbleMenuCommands> = {}): SelectionBubbleMenuCommands {
@@ -110,7 +109,6 @@ function commands(overrides: Partial<SelectionBubbleMenuCommands> = {}): Selecti
     linkHref: null,
     linkSelection: null,
     canConvertToInlineMath: false,
-    canOpenAI: false,
     hasTextSelection: true,
     hasSafeInlineSelection: true,
     inlineCodeActive: false,
@@ -127,7 +125,6 @@ function commands(overrides: Partial<SelectionBubbleMenuCommands> = {}): Selecti
     openLink: () => true,
     removeLink: () => true,
     convertToInlineMath: () => false,
-    openAI: () => false,
     ...overrides,
   };
 }
@@ -210,7 +207,7 @@ describe('SelectionBubbleMenuView keyboard navigation', () => {
   it('shows every available control in the established order, with secondary commands behind More', async () => {
     render(
       <SelectionBubbleMenuView
-        commands={commands({ canNest: true, canUnnest: true, canConvertToInlineMath: true, canOpenAI: true })}
+        commands={commands({ canNest: true, canUnnest: true, canConvertToInlineMath: true })}
         labels={labels}
       />,
     );
@@ -238,16 +235,14 @@ describe('SelectionBubbleMenuView keyboard navigation', () => {
       'Nest',
       'Unnest',
       'Inline math',
-      expect.stringMatching(/^AI/u),
     ]);
   });
 
-  it('keeps secondary formatting and AI commands in the actual compact menu', async () => {
-    const openAI = vi.fn(() => true);
+  it('keeps secondary formatting commands in the actual compact menu', async () => {
     const toggleTextStyle = vi.fn(() => true);
     render(
       <SelectionBubbleMenuView
-        commands={commands({ canConvertToInlineMath: true, canOpenAI: true, openAI, toggleTextStyle })}
+        commands={commands({ canConvertToInlineMath: true, toggleTextStyle })}
         labels={labels}
       />,
     );
@@ -257,12 +252,7 @@ describe('SelectionBubbleMenuView keyboard navigation', () => {
     expect(toolbar.querySelector('button[aria-label="Strike"]')).toBeNull();
     await act(async () => toolbar.querySelector<HTMLButtonElement>('[data-testid="tiptap-selection-more"]')!.click());
     const items = [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')];
-    const ai = items.find((item) => item.textContent?.startsWith('AI'))!;
-    expect(ai.querySelector('kbd')?.textContent).toBe('Ctrl J');
     expect(items.some((item) => item.textContent === 'Inline math')).toBe(true);
-    await act(async () => ai.click());
-    expect(openAI).toHaveBeenCalledOnce();
-    await act(async () => toolbar.querySelector<HTMLButtonElement>('[data-testid="tiptap-selection-more"]')!.click());
     await act(async () =>
       [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')]
         .find((item) => item.textContent === 'Code')!

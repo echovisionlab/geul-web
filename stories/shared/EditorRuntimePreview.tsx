@@ -356,12 +356,10 @@ function ResidentPlayground({
                       mediaRuntimeStore={runtimeStore}
                       awareness={room.awareness}
                       localUser={localUser}
-                      ai={false}
                       editable={view === 'edit'}
                       autoRunReadOnlyExecutables={false}
                       onEditorReady={editorReady}
                       authoringCapabilities={{
-                        ai: false,
                         file: !initialScenario || initialScenario === 'file',
                         map: false,
                       }}

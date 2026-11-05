@@ -120,7 +120,6 @@ function Preview({ state = 'ready' }: { state?: EditorPreviewState }) {
     handleMetaChange: (value) => setFields((current) => ({ ...current, ...value })),
     displayedSummary: local.summary,
     canEditTranslationSource: local.locale === 'ko' && local.canEdit,
-    currentDoc: local.room.document,
     ...local.identity,
     handleSummaryChange: local.setSummary,
     featuredImageUrl: local.featuredImageUrl,

@@ -35,7 +35,6 @@ function createPolicyContentGuard(report: (message: string) => void) {
 }
 
 const POLICY_AUTHORING_CAPABILITIES = {
-  ai: false,
   externalVideo: false,
   file: false,
   map: false,
@@ -131,7 +130,6 @@ export function PolicyTiptapEditor({
           editable={editable}
           structureLocked={structureLocked}
           externalVideo={false}
-          ai={false}
           authoringCapabilities={POLICY_AUTHORING_CAPABILITIES}
           additionalExtensions={additionalExtensions}
           onEditorReady={handleEditorReady}

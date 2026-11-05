@@ -77,7 +77,6 @@ export interface TiptapAuthoringControlsCallbacks {
   onTableActivate?: (context: TiptapSlashActionContext) => void;
   onMapActivate?: (context: TiptapSlashActionContext) => void;
   onFileActivate?: (blockId: string, context?: TiptapSlashActionContext) => void;
-  onAIAssistantActivate?: (context: TiptapSlashActionContext) => void;
   onExternalVideoActivate?: (context: TiptapSlashActionContext) => void;
 }
 
@@ -92,7 +91,6 @@ function callbackWorkflows(callbacks: TiptapAuthoringControlsCallbacks): TiptapS
     map: createDelegatedWorkflow(callbacks.onMapActivate),
     file: createFileWorkflow(callbacks.onFileActivate),
     externalVideo: createDelegatedWorkflow(callbacks.onExternalVideoActivate),
-    ai: createDelegatedWorkflow(callbacks.onAIAssistantActivate),
   };
 }
 
@@ -132,7 +130,6 @@ function buildSlashMenuMessages(messages: Messages['editorCommon']['editor']['sl
       threeScene: { ...messages.items.threeScene, aliases: splitSlashAliases(messages.items.threeScene.aliases) },
       shader: { ...messages.items.shader, aliases: splitSlashAliases(messages.items.shader.aliases) },
       file: { ...messages.items.file, aliases: splitSlashAliases(messages.items.file.aliases) },
-      aiAssistant: { ...messages.items.aiAssistant, aliases: splitSlashAliases(messages.items.aiAssistant.aliases) },
     },
   };
 }
@@ -549,7 +546,6 @@ export function TiptapAuthoringControls({
   onTableActivate,
   onMapActivate,
   onFileActivate,
-  onAIAssistantActivate,
   onExternalVideoActivate,
 }: TiptapAuthoringControlsProps) {
   const locale = useLocale();
@@ -571,7 +567,6 @@ export function TiptapAuthoringControls({
         inline: slash('groups.inline'),
         embeds: slash('groups.embeds'),
         media: slash('groups.media'),
-        ai: slash('groups.ai'),
       },
       items: {
         heading: {
@@ -712,12 +707,6 @@ export function TiptapAuthoringControls({
           aliases: slash('items.file.aliases').split('\n'),
           group: slash('items.file.group'),
         },
-        aiAssistant: {
-          title: slash('items.aiAssistant.title'),
-          subtext: slash('items.aiAssistant.subtext'),
-          aliases: slash('items.aiAssistant.aliases').split('\n'),
-          group: slash('items.aiAssistant.group'),
-        },
       },
     }),
     [slash],
@@ -729,7 +718,6 @@ export function TiptapAuthoringControls({
         onTableActivate,
         onMapActivate,
         onFileActivate,
-        onAIAssistantActivate,
         onExternalVideoActivate,
       }),
       mermaid: createImmediateNodeWorkflow(editor, 'mermaid'),
@@ -739,15 +727,7 @@ export function TiptapAuthoringControls({
       emoji: (context) => setEmojiContext(context),
       siteVariable: (context) => setVariableContext(context),
     }),
-    [
-      editor,
-      onAIAssistantActivate,
-      onExternalVideoActivate,
-      onFileActivate,
-      onMapActivate,
-      onMathActivate,
-      onTableActivate,
-    ],
+    [editor, onExternalVideoActivate, onFileActivate, onMapActivate, onMathActivate, onTableActivate],
   );
   const siteVariableAvailable = Boolean(editor.schema.nodes.siteVariable) && !editor.isActive('codeBlock');
   const items = useMemo(() => {

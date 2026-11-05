@@ -18,7 +18,6 @@ afterEach(() => {
 function renderCommands(overrides: Partial<Options> = {}) {
   const client = {
     setEntitySourceLocale: vi.fn(async () => ({})),
-    regenerateEntityTranslations: vi.fn(async () => ({ jobIds: ['job-1'] })),
   };
   const snapshot = vi.fn(async () => ({ documentRevision: 'revision-1' }));
   const afterSourceChange = vi.fn();
@@ -37,13 +36,11 @@ function renderCommands(overrides: Partial<Options> = {}) {
         messages: {
           sourceUpdated: 'Source updated',
           sourceUpdateFailed: 'Source change failed',
-          regenerateFailed: 'Regeneration failed',
           sourceConfirmTitle: 'Change source',
           sourceConfirmCancel: 'Cancel',
           sourceConfirmAction: 'Change',
           sourceConfirmDescription: 'Change source locale',
           sourceConfirmDetail: (locale) => locale,
-          regenerateSuccess: () => 'Queued',
         },
         ...overrides,
       }),
@@ -94,33 +91,25 @@ describe('translation locale command save boundaries', () => {
     });
   });
 
-  it.each(['regenerate', 'source'] as const)(
-    'reports a failed %s barrier without issuing the command',
-    async (command) => {
-      const rejectSave = async () => {
+  it('reports a failed source barrier without issuing the command', async () => {
+    const { result, client, snapshot, afterSourceChange } = renderCommands({
+      beforeSourceChange: async () => {
         throw new Error('Pending editor saves did not complete.');
-      };
-      const { result, client, snapshot, afterSourceChange } = renderCommands({
-        beforeRegenerate: rejectSave,
-        beforeSourceChange: rejectSave,
-      });
+      },
+    });
 
-      await act(async () => {
-        const pending =
-          command === 'source'
-            ? result.current.setSourceLocale.mutateAsync('fr')
-            : result.current.regenerateTranslations.mutateAsync(['fr']);
-        await expect(pending).rejects.toThrow('Pending editor saves did not complete.');
-      });
+    await act(async () => {
+      await expect(result.current.setSourceLocale.mutateAsync('fr')).rejects.toThrow(
+        'Pending editor saves did not complete.',
+      );
+    });
 
-      expect(snapshot).not.toHaveBeenCalled();
-      expect(client.setEntitySourceLocale).not.toHaveBeenCalled();
-      expect(client.regenerateEntityTranslations).not.toHaveBeenCalled();
-      expect(afterSourceChange).not.toHaveBeenCalled();
-      expect(notificationQueue.visibleToasts.map((toast) => toast.content)).toContainEqual({
-        tone: 'danger',
-        message: command === 'source' ? 'Source change failed' : 'Regeneration failed',
-      });
-    },
-  );
+    expect(snapshot).not.toHaveBeenCalled();
+    expect(client.setEntitySourceLocale).not.toHaveBeenCalled();
+    expect(afterSourceChange).not.toHaveBeenCalled();
+    expect(notificationQueue.visibleToasts.map((toast) => toast.content)).toContainEqual({
+      tone: 'danger',
+      message: 'Source change failed',
+    });
+  });
 });

@@ -37,7 +37,6 @@ const slashMessages = {
     threeScene: splitItemAliases(serializedSlashMessages.items.threeScene),
     shader: splitItemAliases(serializedSlashMessages.items.shader),
     file: splitItemAliases(serializedSlashMessages.items.file),
-    aiAssistant: splitItemAliases(serializedSlashMessages.items.aiAssistant),
   },
 } satisfies TiptapSlashMenuMessages;
 

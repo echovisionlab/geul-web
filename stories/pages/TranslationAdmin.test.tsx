@@ -43,7 +43,7 @@ async function expectEventually(assertion: () => void) {
     assertion();
   });
 }
-async function render(surface: 'overview' | 'settings' | 'jobs', state: 'ready' | 'error' = 'ready') {
+async function render(surface: 'overview' | 'settings', state: 'ready' | 'error' = 'ready') {
   host = document.createElement('div');
   document.body.append(host);
   root = createRoot(host);
@@ -65,23 +65,6 @@ describe('translation page preview controllers', () => {
     for (const section of page.getAllByRole('heading', { level: 2 })) {
       expect(title.compareDocumentPosition(section) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     }
-    expect(createTranslationClient).not.toHaveBeenCalled();
-  });
-  it('cancels an active job through the local RPC and refreshes the production table', async () => {
-    await render('jobs');
-    await expectEventually(() => expect(host.textContent).toContain('night-signals'));
-    const cancel = Array.from(host.querySelectorAll<HTMLButtonElement>('button')).find((b) =>
-      b.textContent?.includes('Cancel'),
-    )!;
-    expect(cancel).toBeDefined();
-    expect(host.querySelector('table[aria-label="Translation Jobs"]')).not.toBeNull();
-    expect(cancel.getAttribute('aria-label')).toContain('night-signals');
-    expect(cancel.getAttribute('aria-label')).toContain('KO');
-    act(() => cancel.focus());
-    await act(async () => cancel.click());
-    await expectEventually(() => expect(host.textContent).not.toContain('night-signals'));
-    expect(host.querySelector('[role="status"]')?.textContent).toBe('No translation jobs yet.');
-    expect((document.activeElement as HTMLButtonElement).textContent).toContain('Refresh');
     expect(createTranslationClient).not.toHaveBeenCalled();
   });
   it('projects failed local reads onto the production settings error branch', async () => {

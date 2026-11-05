@@ -44,7 +44,6 @@ const EMAIL_CAPABILITIES = {
   mermaid: false,
   three: false,
   shader: false,
-  ai: false,
 };
 
 /**

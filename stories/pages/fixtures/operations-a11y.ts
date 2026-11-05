@@ -9,8 +9,6 @@ export async function operationsLabels(globals: { locale?: unknown }) {
     common: createTranslator({ locale, messages, namespace: 'common' }),
     reorder: createTranslator({ locale, messages, namespace: 'pageEditor.a11y' }),
     menus: createTranslator({ locale, messages, namespace: 'adminList.menus' }),
-    jobs: createTranslator({ locale, messages, namespace: 'translationJobsPage' }),
-    providers: createTranslator({ locale, messages, namespace: 'translationSettingsPage' }),
     site: createTranslator({ locale, messages, namespace: 'adminSettings.site' }),
     og: createTranslator({ locale, messages, namespace: 'ogImageSettings' }),
     mail: createTranslator({ locale, messages, namespace: 'adminSettings.mail' }),

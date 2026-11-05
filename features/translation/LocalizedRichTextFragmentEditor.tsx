@@ -4,7 +4,6 @@ import { PageLoader } from '@/features/site/PageLoader';
 import type { ReactNode } from 'react';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
-import type { AIDocumentTarget } from '@/lib/ai/document-client';
 import type { RichTextBlockRoomTiptapController } from '@/features/editor/tiptap/block-room-tiptap-controller';
 import { LocalizedCollaborativeRichTextEditor } from './LocalizedCollaborativeRichTextEditor';
 
@@ -19,7 +18,6 @@ interface LocalizedRichTextFragmentEditorSharedProps {
   entityType: TranscodeEntityType;
   allowNeutralBlockEdits?: boolean;
   allowStructuralEdits?: boolean;
-  aiTarget?: AIDocumentTarget;
   fallback?: ReactNode;
 }
 
@@ -36,7 +34,6 @@ export function LocalizedRichTextFragmentEditor({
   entityType,
   allowNeutralBlockEdits = false,
   allowStructuralEdits = false,
-  aiTarget,
   fallback = <PageLoader placement="flow" />,
 }: LocalizedRichTextFragmentEditorProps) {
   if (!provider || !blockRoomController) {
@@ -53,7 +50,6 @@ export function LocalizedRichTextFragmentEditor({
       editable={editable}
       allowNeutralBlockEdits={allowNeutralBlockEdits}
       allowStructuralEdits={allowStructuralEdits}
-      aiTarget={aiTarget}
       entityId={entityId}
       entityType={entityType}
     />

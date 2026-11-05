@@ -19,14 +19,7 @@ import {
   type TranslationEntityHealth,
   type TranslationLocaleHealth,
 } from '@echovisionlab/geul-proto/secure/translation_pb.ts';
-import {
-  IconChecklist,
-  IconLanguage,
-  IconLayersIntersect,
-  IconRefresh,
-  IconSettings2,
-  IconWorld,
-} from '@tabler/icons-react';
+import { IconLanguage, IconLayersIntersect, IconRefresh, IconSettings2, IconWorld } from '@tabler/icons-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocale, useTranslations } from 'next-intl';
 import { StatCard } from '@/components/core/Section';
@@ -35,8 +28,6 @@ import { type BadgeTone, LabelBadge } from '@/components/core/Badge';
 import { Button } from '@/components/core/Button';
 import { useDateTimeFormatter } from '@/features/date-time/DateTime';
 import { PageLoader } from '@/features/site/PageLoader';
-import { translationOverviewRefetchInterval } from '@/features/translation/translation-job-polling';
-import { useTranslationLifecycleSubscription } from '@/features/translation/useTranslationLifecycleSubscription';
 import { createTranslationClient } from '@/lib/api/browser/secure-translation';
 import { getCommonTranslationEntityLabelKey } from '@/lib/translation/entity-type';
 import { toDate } from '@/lib/utils/proto';
@@ -59,10 +50,6 @@ function getLocalePolicyBadges(
     },
   ];
 
-  if (!row.locale?.machineTranslationAllowed) {
-    badges.push({ label: t('policy.machineDisabled'), tone: 'neutral' });
-  }
-
   return badges;
 }
 
@@ -73,7 +60,6 @@ export function TranslationOverviewPage({ client }: { client?: TranslationOvervi
   const tCommonActions = useTranslations('common.actions');
   const tCommonEntities = useTranslations('common.entities');
   const tCommonLabels = useTranslations('common.labels');
-  const tCommonStatuses = useTranslations('common.statuses');
   const tCommonStates = useTranslations('common.states');
   const locale = useLocale();
   const dateTime = useDateTimeFormatter();
@@ -87,21 +73,11 @@ export function TranslationOverviewPage({ client }: { client?: TranslationOvervi
   const overviewQuery = useQuery({
     queryKey: overviewQueryKey,
     queryFn: async () => translationClient.getTranslationOverview({}),
-    refetchInterval: (query) =>
-      translationOverviewRefetchInterval(query.state.data?.stats?.activeJobs, query.state.error),
-  });
-
-  useTranslationLifecycleSubscription({
-    onEvent: async () => {
-      await queryClient.invalidateQueries({ queryKey: overviewQueryKey });
-    },
   });
 
   const stats = overviewQuery.data?.stats;
   const entityHealth =
-    overviewQuery.data?.entityHealth.filter(
-      (row) => row.sourceEntities > 0 || row.existingEntries > 0 || row.activeJobs > 0,
-    ) ?? [];
+    overviewQuery.data?.entityHealth.filter((row) => row.sourceEntities > 0 || row.existingEntries > 0) ?? [];
 
   return (
     <DsLayoutStack gap="md">
@@ -109,14 +85,6 @@ export function TranslationOverviewPage({ client }: { client?: TranslationOvervi
         title={tCommonEntities('translations')}
         actions={
           <DsLayoutInline gap="sm">
-            <Button
-              href="/admin/translations/jobs"
-              tone="neutral"
-              emphasis="medium"
-              leftSection={<IconChecklist size={16} />}
-            >
-              {t('actions.openJobs')}
-            </Button>
             <Button
               href="/admin/translations/settings"
               tone="neutral"
@@ -145,7 +113,7 @@ export function TranslationOverviewPage({ client }: { client?: TranslationOvervi
         </DsText>
       ) : (
         <>
-          <DsLayoutGrid columns={{ base: 2, md: 4 }}>
+          <DsLayoutGrid columns={{ base: 2, md: 3 }}>
             <StatCard
               label={t('stats.totalLocales')}
               value={formatMetricCount(stats.totalLocales, locale)}
@@ -155,11 +123,6 @@ export function TranslationOverviewPage({ client }: { client?: TranslationOvervi
               label={t('stats.sourceEntities')}
               value={formatMetricCount(stats.sourceEntities, locale)}
               icon={IconWorld}
-            />
-            <StatCard
-              label={t('stats.activeJobs')}
-              value={formatMetricCount(stats.activeJobs, locale)}
-              icon={IconRefresh}
             />
             <StatCard
               label={t('stats.existingEntries')}
@@ -184,7 +147,6 @@ export function TranslationOverviewPage({ client }: { client?: TranslationOvervi
                     <Table.Tr>
                       <Table.Th>{tCommonLabels('locale')}</Table.Th>
                       <Table.Th>{t('stats.existingEntries')}</Table.Th>
-                      <Table.Th>{tCommonStatuses('inProgress')}</Table.Th>
                       <Table.Th>{t('columns.policy')}</Table.Th>
                       <Table.Th>{t('columns.lastTargetUpdate')}</Table.Th>
                     </Table.Tr>
@@ -202,7 +164,6 @@ export function TranslationOverviewPage({ client }: { client?: TranslationOvervi
                           </DsLayoutStack>
                         </Table.Td>
                         <Table.Td>{formatMetricCount(row.existingEntries, locale)}</Table.Td>
-                        <Table.Td>{formatMetricCount(row.activeJobs, locale)}</Table.Td>
                         <Table.Td>
                           <DsLayoutInline gap="xxs" wrap="wrap">
                             {getLocalePolicyBadges(row, t, tCommonLabels).map((badge) => (
@@ -245,7 +206,6 @@ export function TranslationOverviewPage({ client }: { client?: TranslationOvervi
                         <Table.Th>{t('columns.entity')}</Table.Th>
                         <Table.Th>{t('columns.sources')}</Table.Th>
                         <Table.Th>{t('stats.existingEntries')}</Table.Th>
-                        <Table.Th>{tCommonStatuses('inProgress')}</Table.Th>
                         <Table.Th>{t('columns.lastSourceUpdate')}</Table.Th>
                       </Table.Tr>
                     </Table.Thead>
@@ -263,7 +223,6 @@ export function TranslationOverviewPage({ client }: { client?: TranslationOvervi
                           </Table.Td>
                           <Table.Td>{formatMetricCount(row.sourceEntities, locale)}</Table.Td>
                           <Table.Td>{formatMetricCount(row.existingEntries, locale)}</Table.Td>
-                          <Table.Td>{formatMetricCount(row.activeJobs, locale)}</Table.Td>
                           <Table.Td>
                             {row.lastSourceUpdateAt
                               ? formatProtoDateTime(row.lastSourceUpdateAt)

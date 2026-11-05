@@ -69,7 +69,6 @@ export function useSelectionBubbleMenuLabels() {
         cancel: commonActions('cancel'),
       },
       inlineMath: editorMessages('formatting.inlineMath'),
-      ai: editorMessages('formatting.ai'),
     }),
     [commonActions, commonLabels, editorMessages],
   );
