@@ -1366,19 +1366,6 @@
       ]
     },
     {
-      "route": "/admin/translations/jobs",
-      "family": "Admin",
-      "source": "app/admin/translations/jobs/page.tsx",
-      "previews": [
-        {
-          "storyTitle": "Pages/Admin/Translation",
-          "variant": "Jobs",
-          "scope": "Actual production active-jobs controller and cancellation using typed local RPC data. Refresh, empty and read failure states; machine translation, runtime lifecycle stream and server cancellation remain outside.",
-          "storyId": "pages-admin-translation--jobs"
-        }
-      ]
-    },
-    {
       "route": "/admin/translations",
       "family": "Admin",
       "source": "app/admin/translations/page.tsx",
@@ -1386,7 +1373,7 @@
         {
           "storyTitle": "Pages/Admin/Translation",
           "variant": "Overview",
-          "scope": "Actual production overview controller with typed in-memory RPC data, refresh and empty/error/pending states. Locale/entity health tables use production owners. Backend auth, translation execution, collaboration events and server data remain outside.",
+          "scope": "Actual production overview controller with typed in-memory RPC data, refresh and empty/error/pending states. Locale/entity health tables use production owners. Backend auth and server data remain outside.",
           "storyId": "pages-admin-translation--overview"
         }
       ]
@@ -1399,7 +1386,7 @@
         {
           "storyTitle": "Pages/Admin/Translation",
           "variant": "Settings",
-          "scope": "Actual production dirty settings form and provider CRUD/toggle/confirmation controller with typed in-memory RPC. Ready/empty/read-error/pending/save-error states. Backend CAS, credentials, auth and persistence remain outside.",
+          "scope": "Actual production dirty default-locale settings form with typed in-memory RPC. Ready/read-error/pending/save-error states. Backend CAS, auth and persistence remain outside.",
           "storyId": "pages-admin-translation--settings"
         }
       ]

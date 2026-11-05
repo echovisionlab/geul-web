@@ -1,75 +1,45 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildSettingsUpdateMutation,
-  canonicalizeSettingsForm,
   mergeRefreshedSettingsForm,
   preserveSettingsEditsMadeDuringSave,
   settingsFormsEqual,
   toUpdateSettingsRequest,
 } from './settings-form';
 
-const baseline = { defaultLocale: 'en', protectedTerms: ['Photoshop', 'React Native'] };
+const baseline = { defaultLocale: 'en' };
 
 describe('translation settings drafts', () => {
-  it('treats blank and exact duplicate protected terms as a canonical no-op', () => {
-    const form = canonicalizeSettingsForm({
-      defaultLocale: 'en',
-      protectedTerms: [' Photoshop', ' Photoshop', 'React Native', '  '],
-    });
-    expect(buildSettingsUpdateMutation(baseline, form)).toBeNull();
+  it('sends nothing when the default locale is unchanged', () => {
+    expect(buildSettingsUpdateMutation(baseline, { defaultLocale: 'en' })).toBeNull();
   });
 
-  it('keeps a dirty field while adopting remote changes to untouched fields', () => {
-    const incoming = { ...baseline, protectedTerms: ['Remote term'] };
-    const merged = mergeRefreshedSettingsForm({ ...baseline, defaultLocale: 'ko' }, baseline, incoming);
-    expect(merged).toEqual({ defaultLocale: 'ko', protectedTerms: ['Remote term'] });
-    expect(settingsFormsEqual(merged, incoming)).toBe(false);
+  it('keeps a local edit when the server value did not change', () => {
+    const merged = mergeRefreshedSettingsForm({ defaultLocale: 'ko' }, baseline, baseline);
+    expect(merged).toEqual({ defaultLocale: 'ko' });
+    expect(settingsFormsEqual(merged, baseline)).toBe(false);
   });
 
-  it('adopts the server value when the same field changed remotely', () => {
-    const incoming = { ...baseline, defaultLocale: 'ja' };
-    const merged = mergeRefreshedSettingsForm({ ...baseline, defaultLocale: 'ko' }, baseline, incoming);
+  it('adopts the server value when the default locale changed remotely', () => {
+    const incoming = { defaultLocale: 'ja' };
+    const merged = mergeRefreshedSettingsForm({ defaultLocale: 'ko' }, baseline, incoming);
     expect(merged).toEqual(incoming);
     expect(settingsFormsEqual(merged, incoming)).toBe(true);
   });
 
-  it('preserves edits made during a save while adopting canonical values for untouched fields', () => {
-    const submitted = { ...baseline, defaultLocale: 'ko' };
-    expect(
-      preserveSettingsEditsMadeDuringSave({ ...submitted, protectedTerms: ['Photoshop', 'draft term'] }, submitted, {
-        defaultLocale: 'ja',
-        protectedTerms: baseline.protectedTerms,
-      }),
-    ).toEqual({ defaultLocale: 'ja', protectedTerms: ['Photoshop', 'draft term'] });
+  it('preserves an edit made during a save and otherwise adopts the saved value', () => {
+    const submitted = { defaultLocale: 'ko' };
+    expect(preserveSettingsEditsMadeDuringSave({ defaultLocale: 'fr' }, submitted, { defaultLocale: 'ko' })).toEqual({
+      defaultLocale: 'fr',
+    });
+    expect(preserveSettingsEditsMadeDuringSave(submitted, submitted, { defaultLocale: 'ko' })).toEqual(submitted);
   });
 
-  it('sends only canonical protected terms with their observed baseline', () => {
-    const mutation = buildSettingsUpdateMutation(
-      baseline,
-      canonicalizeSettingsForm({
-        defaultLocale: 'en',
-        protectedTerms: [' Photoshop ', 'Photoshop', 'photoshop', 'React Native'],
-      }),
-    );
+  it('masks the default locale in the update request', () => {
+    const mutation = buildSettingsUpdateMutation(baseline, { defaultLocale: 'ko' });
     expect(toUpdateSettingsRequest(mutation!)).toEqual({
-      settings: { defaultLocale: '', protectedTerms: ['Photoshop', 'photoshop', 'React Native'] },
-      updateMask: { paths: ['protected_terms'] },
-      baseSettings: baseline,
+      settings: { defaultLocale: 'ko' },
+      updateMask: { paths: ['default_locale'] },
     });
-  });
-
-  it('builds independent touched-field patches from two stale settings forms', () => {
-    const observed = { defaultLocale: 'en', protectedTerms: ['Observed term', 'Remove me'] };
-    const localeEdit = buildSettingsUpdateMutation(observed, { ...observed, defaultLocale: 'ko' });
-    const termsEdit = buildSettingsUpdateMutation(observed, {
-      defaultLocale: 'en',
-      protectedTerms: ['Observed term', 'Local addition'],
-    });
-    expect(localeEdit?.paths).toEqual(['default_locale']);
-    expect(termsEdit?.paths).toEqual(['protected_terms']);
-    expect(termsEdit?.baseline).toEqual(observed);
-    expect(buildSettingsUpdateMutation(observed, { defaultLocale: 'en', protectedTerms: [] })?.paths).toEqual([
-      'protected_terms',
-    ]);
   });
 });

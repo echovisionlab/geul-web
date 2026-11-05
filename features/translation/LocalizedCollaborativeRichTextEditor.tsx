@@ -10,7 +10,6 @@ import { notifications } from '@/components/core/Notification';
 import { TranscodeEntityType } from '@echovisionlab/geul-proto/secure/events_pb.ts';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import { useTranslations } from 'next-intl';
-import type { AIDocumentTarget } from '@/lib/ai/document-client';
 import { MediaFilePanel } from '@/features/editor/components/MediaFilePanel';
 import { MediaIngestDialog, type MediaIngestDialogCloseReason } from '@/features/editor/components/MediaIngestDialog';
 import { MediaIngestOverlay } from '@/features/editor/components/MediaIngestOverlay';
@@ -61,7 +60,6 @@ interface LocalizedCollaborativeRichTextEditorSharedProps {
   blockRoomController: RichTextBlockRoomTiptapController;
   entityId?: string | null;
   entityType?: TranscodeEntityType | null;
-  aiTarget?: AIDocumentTarget;
 }
 
 export type LocalizedCollaborativeRichTextEditorProps = LocalizedCollaborativeRichTextEditorSharedProps;
@@ -97,7 +95,6 @@ function LocalizedCollaborativeRichTextEditorSurface({
   allowStructuralEdits = false,
   entityId = null,
   entityType = null,
-  aiTarget,
 }: LocalizedCollaborativeRichTextEditorProps) {
   if (!provider.awareness) {
     throw new Error('Typed Block-room editor requires provider awareness.');
@@ -396,7 +393,6 @@ function LocalizedCollaborativeRichTextEditorSurface({
             linkPresentation={canEditNeutral ? linkPresentation : undefined}
             externalVideo={blockRoomController.paragraphExternalVideo ? undefined : false}
             map={map}
-            ai={canEditLocalized && aiTarget ? { target: aiTarget } : false}
             authoringCallbacks={{ onMapActivate: canEditNeutral ? activateMap : undefined }}
           />
         </EditorAuthoringModeProvider>

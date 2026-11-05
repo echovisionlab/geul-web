@@ -109,7 +109,6 @@ export function EditorSelectionPreview({
             <TiptapAuthoringControls
               editor={editor}
               capabilities={{
-                ai: false,
                 file: false,
                 map: false,
                 externalVideo: false,

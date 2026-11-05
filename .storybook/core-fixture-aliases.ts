@@ -87,7 +87,6 @@ export const coreFixtureAliases: Record<string, string> = {
   'Section settings': 'common.labels.settings',
   'Filter fields': 'common.labels.fields',
   'Created date': 'common.labels.created',
-  'Generate text': 'aiAssistant.modes.generate',
   'Processing files': 'common.statuses.inProgress',
   'Loading audio engine': 'common.states.loading',
   'Loading page': 'common.states.loading',

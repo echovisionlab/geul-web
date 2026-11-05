@@ -2262,8 +2262,8 @@
     "systemOrLegacy": "Systeem of eerdere versie",
     "restore": "Herstellen",
     "restoreTitle": "Versie herstellen",
-    "restoreSameLocaleBody": "Het herstellen van bron v{version} ({locale}) verandert alleen het brondocument. Bestaande doeldocumenten en vertaalopdrachten blijven ongewijzigd en vertalingen worden niet automatisch gegenereerd. Doorgaan?",
-    "restoreCrossLocaleBody": "Het herstellen van bron v{version} wijzigt de bronlocale van {currentLocale} naar {selectedLocale} en verandert alleen de bronverwijzing. Bestaande doeldocumenten en vertaalopdrachten blijven ongewijzigd en vertalingen worden niet automatisch gegenereerd. Doorgaan?",
+    "restoreSameLocaleBody": "Het herstellen van bron v{version} ({locale}) verandert alleen het brondocument. Bestaande doeldocumenten blijven ongewijzigd. Doorgaan?",
+    "restoreCrossLocaleBody": "Het herstellen van bron v{version} wijzigt de bronlocale van {currentLocale} naar {selectedLocale} en verandert alleen de bronverwijzing. Bestaande doeldocumenten blijven ongewijzigd. Doorgaan?",
     "restoreFailed": "Brondocument herstellen mislukt.",
     "loadFailed": "De versiegeschiedenis kon niet worden geladen.",
     "end": "Alle versies zijn geladen."
@@ -3853,8 +3853,7 @@
           "math": "Wiskunde",
           "inline": "Inline",
           "embeds": "Insluitingen",
-          "media": "Media",
-          "ai": "AI"
+          "media": "Media"
         },
         "items": {
           "heading": {
@@ -3977,12 +3976,6 @@
             "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\nbijlage\nbestand\ndocument\ndownloaden",
             "group": "Media"
           },
-          "aiAssistant": {
-            "title": "AI-assistent",
-            "subtext": "Tekst schrijven, verbeteren of transformeren met AI",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\nassistent\nschrijven\nverbeteren",
-            "group": "AI"
-          },
           "shader": {
             "title": "GLSL-shader",
             "subtext": "Voeg een interactieve GLSL-shader toe",
@@ -4022,8 +4015,7 @@
         "displaySizeXl": "Extra groot",
         "nest": "Nest blok",
         "unnest": "Ontnest blok",
-        "inlineMath": "Inline-wiskunde",
-        "ai": "AI-assistent"
+        "inlineMath": "Inline-wiskunde"
       },
       "link": {
         "create": "Maak link",
@@ -4223,47 +4215,6 @@
       "message": "Je kunt weer bewerken. Wijzigingen die werden bewaard terwijl je alleen kon bekijken, worden opgeslagen."
     }
   },
-  "aiAssistant": {
-    "title": "AI-assistent",
-    "modes": {
-      "modify": "Aanpassen",
-      "generate": "Genereren"
-    },
-    "placeholders": {
-      "modify": "Hoe moet ik deze tekst aanpassen",
-      "generate": "Wat wil je schrijven"
-    },
-    "quickActions": {
-      "title": "Snelle acties",
-      "improve": "Verbeteren",
-      "fixSpelling": "Spelling corrigeren",
-      "simplify": "Vereenvoudigen",
-      "summarize": "Samenvatten",
-      "translateKorean": "Koreaans",
-      "translateEnglish": "Engels",
-      "continueWriting": "Verder schrijven",
-      "brainstorm": "Brainstormen"
-    },
-    "sections": {
-      "result": "AI-resultaat"
-    },
-    "actions": {
-      "close": "AI-assistent sluiten",
-      "submitPrompt": "Aangepaste AI-prompt verzenden",
-      "stop": "Stoppen",
-      "reject": "Afwijzen",
-      "retry": "Opnieuw proberen",
-      "accept": "Accepteren",
-      "insert": "Invoegen"
-    },
-    "errors": {
-      "generic": "Er is iets misgegaan. Probeer het opnieuw"
-    },
-    "notifications": {
-      "applyFailedTitle": "AI-resultaat toepassen mislukt",
-      "applyFailedMessage": "De AI-reactie kon niet worden geparseerd. Probeer het opnieuw"
-    }
-  },
   "mapControls": {
     "managePlaces": "Plaatsen beheren",
     "managePlacesWithCount": "Plaatsen beheren ({count})",
@@ -4366,20 +4317,15 @@
     "description": "Controleer de brontaal en het bestaande vertaaldocument voor elke locale.",
     "actions": {
       "expand": "Uitvouwen",
-      "collapse": "Samenvouwen",
-      "regenerateAll": "Alle geschikte locales genereren/opnieuw genereren",
-      "regenerateLocale": "Opnieuw genereren",
-      "regenerateLocaleAria": "{locale}-vertaling opnieuw genereren",
-      "generateLocale": "Generate",
-      "generateLocaleAria": "{locale}-vertaling genereren"
+      "collapse": "Samenvouwen"
     },
     "sourceLocale": {
       "label": "Brontaal",
       "description": "Dit is de brontaal die als basis dient voor vertalingen van dit onderdeel.",
       "confirm": {
         "title": "Brontaal wijzigen",
-        "description": "Het wijzigen van de brontaal werkt alleen de bronverwijzing bij. Bestaande doeldocumenten en vertaalopdrachten blijven ongewijzigd en vertalingen worden niet automatisch gegenereerd.",
-        "detail": "{locale} wordt de taal van het bewerkbare brondocument. Bestaande doeldocumenten en vertaalopdrachten blijven ongewijzigd.",
+        "description": "Het wijzigen van de brontaal werkt alleen de bronverwijzing bij. Bestaande doeldocumenten blijven ongewijzigd.",
+        "detail": "{locale} wordt de taal van het bewerkbare brondocument. Bestaande doeldocumenten blijven ongewijzigd.",
         "confirm": "Wijzigen en opnieuw vertalen"
       }
     },
@@ -4387,7 +4333,7 @@
       "ariaLabel": "Inhoudstaal wijzigen. Huidig: {locale}",
       "sourceOption": "{locale} (Bron)",
       "loading": "Talen laden...",
-      "missingDescription": "Er is nog geen doeldocument voor {locale}. Genereer het via het vertaalpaneel.",
+      "missingDescription": "Er is nog geen doeldocument voor {locale}. Maak het aan via het vertaalpaneel.",
       "bodyPreviewTitle": "{locale}-bodyvoorvertoning",
       "bodyPreviewDescription": "Het bestaande vertaaldocument wordt weergegeven met de bijbehorende structuur en opmaak.",
       "bodyPreviewEmpty": "Nog geen bodyvoorvertoning.",
@@ -4408,10 +4354,7 @@
     },
     "notifications": {
       "sourceLocaleUpdated": "Brontaal bijgewerkt",
-      "sourceLocaleUpdateFailed": "Brontaal bijwerken mislukt.",
-      "allQueued": "Vertaalregeneratie is in de wachtrij gezet voor alle locales.",
-      "localeQueued": "Vertaalregeneratie is in de wachtrij gezet voor deze locale.",
-      "regenerateFailed": "Vertaalregeneratie in de wachtrij zetten mislukt."
+      "sourceLocaleUpdateFailed": "Brontaal bijwerken mislukt."
     }
   },
   "translationPanelMenu": {
@@ -4451,13 +4394,11 @@
   },
   "translationOverviewPage": {
     "actions": {
-      "openJobs": "Opdrachten openen",
       "openSettings": "Instellingen openen"
     },
     "stats": {
       "totalLocales": "Totaal aantal locales",
       "sourceEntities": "Bronitems",
-      "activeJobs": "Opdrachten in uitvoering",
       "existingEntries": "Bestaande vertalingen"
     },
     "sections": {
@@ -4476,119 +4417,23 @@
       "emptyEntityHealth": "Nog geen itemgezondheidsgegevens."
     },
     "policy": {
-      "internal": "Alleen intern",
-      "machineDisabled": "Machine uitgeschakeld"
-    }
-  },
-  "translationJobsPage": {
-    "title": "Vertaalopdrachten",
-    "stats": {
-      "active": "{count} in uitvoering"
-    },
-    "columns": {
-      "entity": "Item"
-    },
-    "locale": {
-      "fromTo": "{source} -> {target}"
-    },
-    "states": {
-      "loadFailed": "Vertaalopdrachten laden mislukt.",
-      "empty": "Er zijn nog geen vertaalopdrachten."
-    },
-    "notifications": {
-      "cancelled": "Vertaalopdracht geannuleerd",
-      "cancelFailed": "Vertaalopdracht annuleren mislukt."
+      "internal": "Alleen intern"
     }
   },
   "translationSettingsPage": {
     "title": "Vertaalinstellingen",
-    "description": "Beheer de standaardbrontaal en providers voor automatische vertaling. Een beheerder start het genereren van vertalingen expliciet vanuit elke editor.",
+    "description": "Beheer de standaardbrontaal voor vertalingen.",
     "actions": {
-      "jobs": "Opdrachten",
-      "save": "Instellingen opslaan",
-      "addProvider": "Provider toevoegen",
-      "editProvider": "Provider bewerken",
-      "deleteProvider": "Provider verwijderen",
-      "createProvider": "Provider maken"
+      "save": "Instellingen opslaan"
     },
     "sections": {
       "runtime": "Standaardwaarden voor de bron",
-      "runtimeDescription": "Stel alleen de taal in die wordt gebruikt wanneer er nog geen brontaal is vastgesteld. Wijzigingen aan de bron starten nooit automatisch het genereren van vertalingen.",
-      "providers": "Vertaalproviders",
-      "providersDescription": "Beheer providers voor machinevertaling. Genereren blijft uitgeschakeld totdat minstens één actieve provider geldige gegevens heeft."
+      "runtimeDescription": "Stel alleen de taal in die wordt gebruikt wanneer er nog geen brontaal is vastgesteld."
     },
     "fields": {
       "defaultLocale": {
         "label": "Standaardtaal",
         "description": "Wordt gebruikt wanneer nog geen brontaal is ingesteld en wanneer een aanvraag niet wordt gekoppeld aan een ondersteunde contenttaal."
-      },
-      "protectedTerms": {
-        "label": "Beschermde termen",
-        "description": "Exacte, hoofdlettergevoelige schrijfwijzen die bij het genereren van vertalingen ongewijzigd moeten blijven. Termen worden niet automatisch geleerd of voorgesteld.",
-        "placeholder": "Beschermde term toevoegen",
-        "examples": "Voorbeelden: Photoshop, React Native"
-      },
-      "providerName": {
-        "label": "Providernaam"
-      },
-      "providerType": {
-        "label": "Providertype"
-      },
-      "providerPriority": {
-        "label": "Prioriteit",
-        "description": "Een lagere prioriteit wordt eerst uitgevoerd wanneer meerdere providers actief zijn."
-      },
-      "providerActive": {
-        "label": "Actief",
-        "shortLabel": "Actief",
-        "description": "Alleen actieve providers kunnen vertalingen genereren."
-      },
-      "deeplApiKey": {
-        "label": "DeepL API-sleutel",
-        "descriptionEdit": "Laat leeg om de opgeslagen sleutel te behouden."
-      },
-      "deeplApiBaseUrl": {
-        "label": "DeepL API basis-URL",
-        "description": "Gebruik de standaardwaarde tenzij je via een proxy of eigen endpoint routeert."
-      },
-      "llmPreset": {
-        "label": "LLM preset"
-      },
-      "llmApiKey": {
-        "label": "LLM API key",
-        "descriptionEdit": "Laat leeg om de opgeslagen sleutel te behouden."
-      },
-      "llmApiBaseUrl": {
-        "label": "LLM API base URL",
-        "description": "Vereist voor OpenAI-compatibele eindpunten; laat leeg voor Gemini."
-      },
-      "llmModel": {
-        "label": "Model",
-        "description": "Model-ID dat wordt gebruikt om vertalingen te genereren."
-      },
-      "llmInputPrice": {
-        "label": "Invoer USD / 1M tokens",
-        "description": "Optionele schatting voor het vergelijken van providers en het plannen van kosten."
-      },
-      "llmOutputPrice": {
-        "label": "Uitvoer USD / 1M tokens",
-        "description": "Optionele schatting voor het vergelijken van providers en het plannen van kosten."
-      },
-      "llmMaxContextTokens": {
-        "label": "Max. contexttokens",
-        "description": "Optionele routingaanwijzing voor grote vertaalbatches."
-      },
-      "llmMaxOutputTokens": {
-        "label": "Max. uitvoertokens",
-        "description": "Optionele limiet per verzoek die aan compatibele providers wordt doorgegeven."
-      },
-      "llmTemperature": {
-        "label": "Temperature",
-        "description": "Lagere waarden maken gestructureerde vertaaluitvoer deterministischer."
-      },
-      "llmSupportsJsonMode": {
-        "label": "Gestructureerde JSON-modus",
-        "description": "Schakel in als de provider antwoorden met een JSON-schema of in JSON-modus ondersteunt."
       }
     },
     "states": {
@@ -4596,82 +4441,13 @@
     },
     "notifications": {
       "saved": "Vertaalinstellingen opgeslagen.",
-      "saveFailed": "Vertaalinstellingen opslaan mislukt.",
-      "providerCreated": "Vertaalprovider gemaakt.",
-      "providerUpdated": "Vertaalprovider bijgewerkt.",
-      "providerDeleted": "Vertaalprovider verwijderd.",
-      "providerSaveFailed": "Vertaalprovider opslaan is mislukt.",
-      "providerToggleFailed": "Providerstatus bijwerken is mislukt.",
-      "providerDeleteFailed": "Vertaalprovider verwijderen is mislukt."
-    },
-    "generation": {
-      "enabled": "Genereren ingeschakeld",
-      "disabled": "Genereren uitgeschakeld"
-    },
-    "providerTypes": {
-      "deepl": "DeepL",
-      "llm": "LLM"
-    },
-    "providerStates": {
-      "empty": "Er is geen vertaalprovider geconfigureerd.",
-      "active": "Actief",
-      "inactive": "Inactief",
-      "priority": "Prioriteit {priority}",
-      "modelUnset": "Model not set"
-    },
-    "validation": {
-      "providerNameRequired": "Providernaam is verplicht.",
-      "providerApiKeyRequired": "Voor deze provider is een API-sleutel vereist.",
-      "providerModelRequired": "Een model is vereist voor LLM-providers.",
-      "providerBaseUrlRequired": "Een API-basis-URL is vereist voor OpenAI-compatibele LLM-providers."
-    },
-    "modal": {
-      "createProviderTitle": "Vertaalprovider maken",
-      "editProviderTitle": "Vertaalprovider bewerken",
-      "deleteProviderTitle": "Vertaalprovider verwijderen",
-      "deleteProviderMessage": "{name} verwijderen? Genereren wordt uitgeschakeld als er geen actieve provider overblijft.",
-      "credentialsSection": "Inloggegevens"
-    },
-    "llmPresets": {
-      "gemini": "Gemini",
-      "openaiCompatible": "OpenAI-compatibel"
+      "saveFailed": "Vertaalinstellingen opslaan mislukt."
     }
   },
   "summaryField": {
     "description": "Gebruikt voor teasers, lijsten, zoeken, delen en door AI leesbare beschrijvingen.",
-    "status": {
-      "idle": "Klaar",
-      "generating": "Wordt gegenereerd",
-      "applying": "Wordt toegepast",
-      "stale": "Gegenereerde samenvatting verouderd",
-      "applied": "Toegepast",
-      "ready": "Klaar om toe te passen"
-    },
-    "actions": {
-      "generate": "Samenvatting genereren",
-      "apply": "Samenvatting toepassen"
-    },
     "placeholders": {
       "summary": "Voeg een bondige samenvatting toe..."
-    },
-    "tooltips": {
-      "generatingNamed": "{name} is een samenvatting aan het genereren"
-    },
-    "feedback": {
-      "failedDefault": "Het genereren van de samenvatting is mislukt.",
-      "alreadyRunning": "Samenvattingsgeneratie is al bezig.",
-      "missingSuggestionPayload": "Samenvattingsgeneratie is voltooid zonder suggestie-payload.",
-      "staleSuggestion": "Deze suggestie is verouderd. Genereer opnieuw of sluit deze voordat je toepast.",
-      "unableToApplyNow": "De gegenereerde samenvatting kan nu niet worden toegepast.",
-      "applyFailed": "De gegenereerde samenvatting toepassen is mislukt.",
-      "applied": "De gegenereerde samenvatting is toegepast.",
-      "readyToApply": "De gegenereerde samenvatting is klaar om toe te passen."
-    },
-    "ready": {
-      "title": "Gegenereerde samenvatting",
-      "suggestedSummary": "Voorgestelde samenvatting",
-      "anotherCollaborator": "Een andere medewerker",
-      "anotherCollaboratorNamed": "{name} heeft een gegenereerde samenvatting klaarstaan."
     }
   },
   "userProfile": {

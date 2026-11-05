@@ -2262,8 +2262,8 @@
     "systemOrLegacy": "系统或早期版本",
     "restore": "恢复",
     "restoreTitle": "恢复版本",
-    "restoreSameLocaleBody": "恢复源文档v{version} ({locale})仅更改源文档。现有目标文档和翻译作业保持不变，且不会自动生成翻译。是否继续?",
-    "restoreCrossLocaleBody": "恢复源文档v{version}会将源语言环境从{currentLocale}切换为{selectedLocale}，并仅更改源指针。现有目标文档和翻译作业保持不变，且不会自动生成翻译。是否继续?",
+    "restoreSameLocaleBody": "恢复源文档v{version} ({locale})仅更改源文档。现有目标文档保持不变。是否继续?",
+    "restoreCrossLocaleBody": "恢复源文档v{version}会将源语言环境从{currentLocale}切换为{selectedLocale}，并仅更改源指针。现有目标文档保持不变。是否继续?",
     "restoreFailed": "恢复源文档失败。",
     "loadFailed": "无法加载版本历史记录。",
     "end": "已加载所有版本。"
@@ -3853,8 +3853,7 @@
           "math": "数学",
           "inline": "行内",
           "embeds": "嵌入",
-          "media": "媒体",
-          "ai": "AI"
+          "media": "媒体"
         },
         "items": {
           "heading": {
@@ -3977,12 +3976,6 @@
             "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\n附件\n文件\n文档\n下载",
             "group": "媒体"
           },
-          "aiAssistant": {
-            "title": "AI 助手",
-            "subtext": "使用 AI 写作、改写或转换文本",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\n人工智能\n助手\n写作\n改进",
-            "group": "AI"
-          },
           "shader": {
             "title": "GLSL 着色器",
             "subtext": "添加交互式 GLSL 着色器",
@@ -4022,8 +4015,7 @@
         "displaySizeXl": "特大",
         "nest": "嵌套",
         "unnest": "取消嵌套",
-        "inlineMath": "行内公式",
-        "ai": "AI 助手"
+        "inlineMath": "行内公式"
       },
       "link": {
         "create": "添加链接",
@@ -4223,47 +4215,6 @@
       "message": "你可以再次编辑。仅可查看期间保留的更改正在保存。"
     }
   },
-  "aiAssistant": {
-    "title": "AI 助手",
-    "modes": {
-      "modify": "修改",
-      "generate": "生成"
-    },
-    "placeholders": {
-      "modify": "我该如何修改这段文字",
-      "generate": "你想写什么"
-    },
-    "quickActions": {
-      "title": "快捷操作",
-      "improve": "提升",
-      "fixSpelling": "修复拼写",
-      "simplify": "简化",
-      "summarize": "总结",
-      "translateKorean": "韩国人",
-      "translateEnglish": "英语",
-      "continueWriting": "继续写作",
-      "brainstorm": "头脑风暴"
-    },
-    "sections": {
-      "result": "AI 结果"
-    },
-    "actions": {
-      "close": "关闭 AI 助手",
-      "submitPrompt": "提交自定义 AI 提示",
-      "stop": "停止",
-      "reject": "拒绝",
-      "retry": "重试",
-      "accept": "接受",
-      "insert": "插入"
-    },
-    "errors": {
-      "generic": "出了一些问题。请重试"
-    },
-    "notifications": {
-      "applyFailedTitle": "应用 AI 结果失败",
-      "applyFailedMessage": "无法解析 AI 响应。请重试"
-    }
-  },
   "mapControls": {
     "managePlaces": "管理地点",
     "managePlacesWithCount": "管理地点（{count}）",
@@ -4366,20 +4317,15 @@
     "description": "查看源语言和各语言环境的现有翻译文档。",
     "actions": {
       "expand": "扩张",
-      "collapse": "坍塌",
-      "regenerateAll": "生成/重新生成所有符合条件的语言环境的翻译",
-      "regenerateLocale": "再生",
-      "regenerateLocaleAria": "重新生成 {locale} 翻译",
-      "generateLocale": "Generate",
-      "generateLocaleAria": "生成{locale}翻译"
+      "collapse": "坍塌"
     },
     "sourceLocale": {
       "label": "源语言",
       "description": "这是用作该实体翻译基础的源语言",
       "confirm": {
         "title": "更改源语言",
-        "description": "更改源语言仅更新源指针。现有目标文档和翻译作业保持不变，且不会自动生成翻译。",
-        "detail": "{locale}将成为可编辑源文档的语言。现有目标文档和翻译作业保持不变。",
+        "description": "更改源语言仅更新源指针。现有目标文档保持不变。",
+        "detail": "{locale}将成为可编辑源文档的语言。现有目标文档保持不变。",
         "confirm": "更改并重新翻译"
       }
     },
@@ -4387,7 +4333,7 @@
       "ariaLabel": "切换内容语言。当前: {locale}",
       "sourceOption": "{locale}（来源）",
       "loading": "正在加载语言...",
-      "missingDescription": "尚无{locale}目标文档。请从翻译面板生成。",
+      "missingDescription": "尚无{locale}目标文档。请从翻译面板创建。",
       "bodyPreviewTitle": "{locale} 身体预览",
       "bodyPreviewDescription": "保留结构和格式显示现有翻译文档。",
       "bodyPreviewEmpty": "还没有本地化的身体预览",
@@ -4408,10 +4354,7 @@
     },
     "notifications": {
       "sourceLocaleUpdated": "源语言已更新",
-      "sourceLocaleUpdateFailed": "更新源语言失败",
-      "allQueued": "所有语言环境的翻译重新生成均已排队",
-      "localeQueued": "翻译重新生成已为此区域设置排队",
-      "regenerateFailed": "无法对翻译重新生成进行排队"
+      "sourceLocaleUpdateFailed": "更新源语言失败"
     }
   },
   "translationPanelMenu": {
@@ -4451,13 +4394,11 @@
   },
   "translationOverviewPage": {
     "actions": {
-      "openJobs": "打开作业",
       "openSettings": "打开设置"
     },
     "stats": {
       "totalLocales": "语言环境总数",
       "sourceEntities": "源实体数",
-      "activeJobs": "进行中的作业",
       "existingEntries": "现有翻译"
     },
     "sections": {
@@ -4476,119 +4417,23 @@
       "emptyEntityHealth": "尚无实体健康数据"
     },
     "policy": {
-      "internal": "仅内部",
-      "machineDisabled": "机器已停用"
-    }
-  },
-  "translationJobsPage": {
-    "title": "翻译作业",
-    "stats": {
-      "active": "{count} 个进行中"
-    },
-    "columns": {
-      "entity": "实体"
-    },
-    "locale": {
-      "fromTo": "从 {source} 到 {target}"
-    },
-    "states": {
-      "loadFailed": "无法加载翻译作业",
-      "empty": "尚无翻译作业"
-    },
-    "notifications": {
-      "cancelled": "翻译作业已取消",
-      "cancelFailed": "无法取消翻译作业"
+      "internal": "仅内部"
     }
   },
   "translationSettingsPage": {
     "title": "翻译设置",
-    "description": "管理默认源语言和自动翻译提供商。管理员在各编辑器中明确启动翻译生成。",
+    "description": "管理翻译使用的默认源语言。",
     "actions": {
-      "jobs": "作业",
-      "save": "保存设置",
-      "addProvider": "添加提供商",
-      "editProvider": "编辑提供商",
-      "deleteProvider": "删除提供商",
-      "createProvider": "创建提供商"
+      "save": "保存设置"
     },
     "sections": {
       "runtime": "源默认设置",
-      "runtimeDescription": "仅设置尚未确定源语言时使用的语言。更改源内容绝不会自动启动翻译生成。",
-      "providers": "翻译提供商",
-      "providersDescription": "管理机器翻译提供商。至少有一个启用且凭证有效的提供商后，翻译生成才会启用。"
+      "runtimeDescription": "仅设置尚未确定源语言时使用的语言。"
     },
     "fields": {
       "defaultLocale": {
         "label": "默认语言环境",
         "description": "当尚未设置源语言环境，或请求未解析到受支持的内容语言环境时使用"
-      },
-      "protectedTerms": {
-        "label": "受保护术语",
-        "description": "翻译生成时必须保持不变的准确拼写，区分大小写。不会自动学习或建议任何术语。",
-        "placeholder": "添加受保护术语",
-        "examples": "示例: Photoshop, React Native"
-      },
-      "providerName": {
-        "label": "提供商名称"
-      },
-      "providerType": {
-        "label": "提供商类型"
-      },
-      "providerPriority": {
-        "label": "优先级",
-        "description": "多个提供商启用时，优先级数值较低者先执行。"
-      },
-      "providerActive": {
-        "label": "启用",
-        "shortLabel": "启用",
-        "description": "只有启用的提供商可用于翻译生成。"
-      },
-      "deeplApiKey": {
-        "label": "DeepL API 密钥",
-        "descriptionEdit": "留空以保留已保存的密钥。"
-      },
-      "deeplApiBaseUrl": {
-        "label": "DeepL API 基础 URL",
-        "description": "除非使用代理或专用端点，否则请使用默认值。"
-      },
-      "llmPreset": {
-        "label": "LLM 预设"
-      },
-      "llmApiKey": {
-        "label": "LLM API 密钥",
-        "descriptionEdit": "留空以保留已保存的密钥。"
-      },
-      "llmApiBaseUrl": {
-        "label": "LLM API 基础 URL",
-        "description": "OpenAI 兼容端点必填；Gemini 可留空。"
-      },
-      "llmModel": {
-        "label": "模型",
-        "description": "用于翻译生成的模型 ID。"
-      },
-      "llmInputPrice": {
-        "label": "输入 USD / 100 万 tokens",
-        "description": "用于 provider 比较和成本规划的可选估算。"
-      },
-      "llmOutputPrice": {
-        "label": "输出 USD / 100 万 tokens",
-        "description": "用于 provider 比较和成本规划的可选估算。"
-      },
-      "llmMaxContextTokens": {
-        "label": "最大上下文 tokens",
-        "description": "大型翻译批次路由的可选提示。"
-      },
-      "llmMaxOutputTokens": {
-        "label": "最大输出 tokens",
-        "description": "传递给兼容 provider 的可选请求上限。"
-      },
-      "llmTemperature": {
-        "label": "Temperature",
-        "description": "较低值会让结构化翻译输出更稳定。"
-      },
-      "llmSupportsJsonMode": {
-        "label": "结构化 JSON 模式",
-        "description": "当 provider 支持 JSON schema 或 JSON mode 响应时启用。"
       }
     },
     "states": {
@@ -4596,82 +4441,13 @@
     },
     "notifications": {
       "saved": "翻译设置已保存",
-      "saveFailed": "无法保存翻译设置",
-      "providerCreated": "已创建翻译提供商。",
-      "providerUpdated": "已更新翻译提供商。",
-      "providerDeleted": "已删除翻译提供商。",
-      "providerSaveFailed": "保存翻译提供商失败。",
-      "providerToggleFailed": "更新提供商状态失败。",
-      "providerDeleteFailed": "删除翻译提供商失败。"
-    },
-    "generation": {
-      "enabled": "生成已启用",
-      "disabled": "生成已停用"
-    },
-    "providerTypes": {
-      "deepl": "DeepL",
-      "llm": "LLM"
-    },
-    "providerStates": {
-      "empty": "尚未配置翻译提供商。",
-      "active": "启用",
-      "inactive": "停用",
-      "priority": "优先级 {priority}",
-      "modelUnset": "未设置模型"
-    },
-    "validation": {
-      "providerNameRequired": "必须填写提供商名称。",
-      "providerApiKeyRequired": "此提供商需要 API 密钥。",
-      "providerModelRequired": "LLM provider 需要模型。",
-      "providerBaseUrlRequired": "OpenAI 兼容 LLM provider 需要 API 基础 URL。"
-    },
-    "modal": {
-      "createProviderTitle": "创建翻译提供商",
-      "editProviderTitle": "编辑翻译提供商",
-      "deleteProviderTitle": "删除翻译提供商",
-      "deleteProviderMessage": "删除 {name}？如果没有剩余启用的提供商，翻译生成将被停用。",
-      "credentialsSection": "凭证"
-    },
-    "llmPresets": {
-      "gemini": "Gemini",
-      "openaiCompatible": "OpenAI 兼容"
+      "saveFailed": "无法保存翻译设置"
     }
   },
   "summaryField": {
     "description": "用于摘要、列表、搜索、分享以及 AI 可读描述",
-    "status": {
-      "idle": "就绪",
-      "generating": "生成中",
-      "applying": "应用中",
-      "stale": "生成结果已过期",
-      "applied": "已应用",
-      "ready": "待应用"
-    },
-    "actions": {
-      "generate": "生成摘要",
-      "apply": "应用摘要"
-    },
     "placeholders": {
       "summary": "添加一个简洁的摘要..."
-    },
-    "tooltips": {
-      "generatingNamed": "{name} 正在生成摘要"
-    },
-    "feedback": {
-      "failedDefault": "处理摘要生成失败",
-      "alreadyRunning": "摘要生成已在运行",
-      "missingSuggestionPayload": "摘要生成已完成，无需建议负载",
-      "staleSuggestion": "此建议已过时。请先重新生成或关闭后再应用",
-      "unableToApplyNow": "目前无法应用生成的摘要",
-      "applyFailed": "应用生成的摘要失败",
-      "applied": "已应用生成的摘要",
-      "readyToApply": "生成的摘要可以应用了。"
-    },
-    "ready": {
-      "title": "生成的摘要",
-      "suggestedSummary": "建议摘要",
-      "anotherCollaborator": "其他协作者",
-      "anotherCollaboratorNamed": "{name}已准备好生成的摘要。"
     }
   },
   "userProfile": {

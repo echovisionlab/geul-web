@@ -4,20 +4,17 @@ import { useEffect, useState } from 'react';
 import type { Editor } from '@tiptap/core';
 import { CellSelection } from '@tiptap/pm/tables';
 import { TiptapSelectionBubbleMenu, type SelectionBubbleMenuLabels } from '../menus';
-import type { TiptapAIContext } from '../ai';
 import { TiptapTableMenu } from '../table';
 
 /** Exactly one text/table floating surface owns the current selection. */
 export function TiptapContextualMenuRouter({
   editor,
   selectionLabels,
-  onAIActivate,
   allowTableMenu = true,
   formattingOnly = false,
 }: {
   editor: Editor;
   selectionLabels: SelectionBubbleMenuLabels;
-  onAIActivate?: (context: TiptapAIContext) => void;
   allowTableMenu?: boolean;
   formattingOnly?: boolean;
 }) {
@@ -34,12 +31,5 @@ export function TiptapContextualMenuRouter({
   if (editor.state.selection instanceof CellSelection) {
     return allowTableMenu ? <TiptapTableMenu editor={editor} /> : null;
   }
-  return (
-    <TiptapSelectionBubbleMenu
-      formattingOnly={formattingOnly}
-      editor={editor}
-      labels={selectionLabels}
-      onAIActivate={onAIActivate}
-    />
-  );
+  return <TiptapSelectionBubbleMenu formattingOnly={formattingOnly} editor={editor} labels={selectionLabels} />;
 }

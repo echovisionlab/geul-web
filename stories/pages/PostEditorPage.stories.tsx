@@ -167,8 +167,6 @@ function Preview({
     tToc: local.tToc,
     tLayout: local.tLayout,
     displayedSummary: local.summary,
-    editorAiTarget: undefined,
-    currentDoc: local.room.document,
     ...local.identity,
     handleScopedLocaleSummaryChange: local.setSummary,
     featuredImageUrl: local.featuredImageUrl ?? (withImages ? '/storybook/media/video-poster.jpg' : null),
@@ -234,16 +232,7 @@ const meta = {
     command: { control: 'select', options: ['idle', 'exporting-markdown', 'changing-locale'] },
     translationState: {
       control: 'select',
-      options: [
-        'ready',
-        'loading',
-        'load-error',
-        'request-error',
-        'queued',
-        'running',
-        'completed',
-        'generation-disabled',
-      ],
+      options: ['ready', 'loading', 'load-error', 'completed'],
     },
     mediaState: {
       control: 'select',
@@ -442,55 +431,16 @@ export const TranslationLoadError: Story = {
     });
   },
 };
-export const TranslationQueued: Story = { args: { translationState: 'queued' } };
-export const TranslationRunning: Story = { args: { translationState: 'running' } };
 export const TranslationCompleted: Story = { args: { translationState: 'completed' } };
-export const TranslationUnavailable: Story = {
-  args: { translationState: 'generation-disabled' },
-  tags: ['a11y-author'],
-  play: async ({ canvasElement, globals, step }) => {
-    const { canvas, t } = await openTranslations(canvasElement, globals);
-    await step('Unavailable generation cannot submit a translation request', async () => {
-      await expect(
-        canvas.getByRole('button', { name: t('translationPanel.actions.generateLocaleAria', { locale: 'English' }) }),
-      ).toBeDisabled();
-    });
-  },
-};
-export const RequestTranslation: Story = {
+export const CreateTranslation: Story = {
   tags: ['a11y-author'],
   play: async ({ canvasElement, globals, step }) => {
     const { canvas, t } = await openTranslations(canvasElement, globals);
     const row = await canvas.findByTestId('translation-locale-row-en');
-    const generate = within(row).getByRole('button', {
-      name: t('translationPanel.actions.generateLocaleAria', { locale: 'English' }),
+    await step('A missing English target is labelled as missing', async () => {
+      await expect(within(row).getByRole('status')).toHaveTextContent(t('translationPanel.states.missingTarget'));
     });
-    await step('Author requests the named English translation', async () => {
-      await reachWithKeyboard(canvasElement, generate);
-      await userEvent.keyboard('{Enter}');
-      await waitFor(() => expect(within(row).getByRole('status')).toHaveTextContent(t('common.statuses.queued')));
-    });
-    await step('Queued and running states identify the language and keep its active command reachable', async () => {
-      await waitFor(() => expect(within(row).getByRole('status')).toHaveTextContent(t('common.statuses.running')), {
-        timeout: 6000,
-      });
-      await expect(within(row).getByRole('button', { name: `${t('common.actions.cancel')}: English` })).toHaveFocus();
-    });
-    await step('Completion exposes an editable target, and returning preserves source text', async () => {
-      await waitFor(
-        () => {
-          const status = within(row).getByRole('status');
-          expect(status).toHaveTextContent('English');
-          expect(status).not.toHaveTextContent(t('translationPanel.states.missingTarget'));
-          expect(
-            within(row).getByRole('button', {
-              name: t('translationPanel.actions.regenerateLocaleAria', { locale: 'English' }),
-            }),
-          ).toBeEnabled();
-          expect(within(row).queryByRole('button', { name: `${t('common.actions.cancel')}: English` })).toBeNull();
-        },
-        { timeout: 7000 },
-      );
+    await step('Editing the missing target creates it and opens the English body', async () => {
       const edit = within(row).getByRole('button', { name: `${t('common.actions.edit')}: English` });
       await reachWithKeyboard(canvasElement, edit);
       await userEvent.keyboard('{Enter}');
@@ -504,59 +454,6 @@ export const RequestTranslation: Story = {
       await reachWithKeyboard(canvasElement, body);
       await userEvent.keyboard('Edited translation. ');
       await expect(body).toHaveTextContent('Edited translation.');
-    });
-  },
-};
-export const TranslationRequestRecovery: Story = {
-  args: { translationState: 'request-error' },
-  tags: ['a11y-author'],
-  play: async ({ canvasElement, globals, step }) => {
-    const { canvas, t } = await openTranslations(canvasElement, globals);
-    const generate = await canvas.findByRole('button', {
-      name: t('translationPanel.actions.generateLocaleAria', { locale: 'English' }),
-    });
-    await step('Failed request gives an error and leaves the target available for retry', async () => {
-      await reachWithKeyboard(canvasElement, generate);
-      await userEvent.keyboard('{Enter}');
-      await expect(
-        await within(canvasElement.ownerDocument.body).findByText(t('translationPanel.notifications.regenerateFailed')),
-      ).toBeVisible();
-      await waitFor(() => expect(generate).toBeEnabled());
-      await expect(generate).toHaveFocus();
-      await userEvent.keyboard('{Enter}');
-      await waitFor(() =>
-        expect(within(canvas.getByTestId('translation-locale-row-en')).getByRole('status')).toHaveTextContent(
-          t('common.statuses.queued'),
-        ),
-      );
-    });
-  },
-};
-export const CancelTranslation: Story = {
-  args: { translationState: 'queued' },
-  tags: ['a11y-author'],
-  play: async ({ canvasElement, globals, step }) => {
-    const { canvas, t } = await openTranslations(canvasElement, globals);
-    const row = await canvas.findByTestId('translation-locale-row-en');
-    await step('Author cancels the English job and can request it again', async () => {
-      const cancel = within(row).getByRole('button', { name: `${t('common.actions.cancel')}: English` });
-      await reachWithKeyboard(canvasElement, cancel);
-      await userEvent.keyboard('{Enter}');
-      await waitFor(() =>
-        expect(
-          within(row).queryByRole('button', { name: `${t('common.actions.cancel')}: English` }),
-        ).not.toBeInTheDocument(),
-      );
-      await expect(
-        within(row).getByRole('button', {
-          name: t('translationPanel.actions.generateLocaleAria', { locale: 'English' }),
-        }),
-      ).toBeEnabled();
-      await expect(
-        within(row).getByRole('button', {
-          name: t('translationPanel.actions.generateLocaleAria', { locale: 'English' }),
-        }),
-      ).toHaveFocus();
     });
   },
 };

@@ -69,7 +69,6 @@ import { useAuthoritativeConfiguration } from '@/lib/editor/useAuthoritativeConf
 
 interface WorkEditorProps {
   workId: string;
-  currentMemberId: string;
   initialTitle: string;
   initialSlug: string | null;
   initialType: WorkType;
@@ -147,7 +146,6 @@ export function WorkEditor(props: WorkEditorProps) {
 
 function useWorkEditorViewModel({
   workId,
-  currentMemberId,
   initialTitle,
   initialSummary: _initialSummary,
   initialMetadata,
@@ -688,8 +686,6 @@ function useWorkEditorViewModel({
     handleMetaChange,
     displayedSummary,
     canEditTranslationSource,
-    currentDoc,
-    currentMemberId,
     userName,
     handleSummaryChange,
     canonicalOrigin,
@@ -758,8 +754,6 @@ export function WorkEditorView({ model }: { model: WorkEditorViewModel }) {
     handleMetaChange,
     displayedSummary,
     canEditTranslationSource,
-    currentDoc,
-    currentMemberId,
     userName,
     handleSummaryChange,
     canonicalOrigin,
@@ -879,19 +873,8 @@ export function WorkEditorView({ model }: { model: WorkEditorViewModel }) {
               <SummaryFieldCard
                 entityType="work"
                 entityId={workId}
-                title={displayedTitle}
                 summary={displayedSummary}
                 summaryReadOnly={!canEditTranslationSource || !roomLocale || !currentLocaleCanEdit || !currentIsSynced}
-                hideAiActions={!currentLocaleCanEdit || !currentIsSynced || !roomLocale}
-                aiTarget={
-                  currentLocaleCanEdit && currentIsSynced && roomLocale
-                    ? { type: 'work', id: workId, locale: roomLocale }
-                    : undefined
-                }
-                provider={currentLocaleCanEdit ? currentProvider : null}
-                doc={currentLocaleCanEdit ? currentDoc : null}
-                currentMemberId={currentMemberId}
-                currentMemberDisplayName={userName}
                 onSummaryChange={currentLocaleCanEdit ? handleSummaryChange : undefined}
               />
 
@@ -973,11 +956,6 @@ export function WorkEditorView({ model }: { model: WorkEditorViewModel }) {
                         entityType={TranscodeEntityType.WORK}
                         allowNeutralBlockEdits={activeEditLocale.isSourceLocale}
                         allowStructuralEdits={activeEditLocale.isSourceLocale}
-                        aiTarget={
-                          currentLocaleCanEdit && activeEditLocale.activeLocale
-                            ? { type: 'work', id: workId, locale: activeEditLocale.activeLocale }
-                            : undefined
-                        }
                       />
                     </div>
                   ) : (

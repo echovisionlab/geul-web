@@ -309,7 +309,6 @@ describe('getMessagesForLocale', () => {
     expect(messages.common.entities.translations).toBe('번역');
     expect(messages.translationPanel.sourceLocale.label).toBe('원문 언어');
     expect(messages.translationPanel.actions.expand).toBe('펼치기');
-    expect(messages.translationPanel.actions.regenerateAll).toBe('모든 대상 생성/재생성');
     expect(messages.translationPanel.statuses.existing).toBe('기존');
     expect(messages.localizationNotice.translated.title).toBe('번역본');
     expect(messages.localizationNotice.actions.viewOriginal).toBe('원문 보기 ({source})');
@@ -318,17 +317,13 @@ describe('getMessagesForLocale', () => {
     expect(messages.userProfile.modals.delete.title).toBe('사용자 삭제');
     expect(messages.common.entities.translations).toBe('번역');
     expect(messages.translationOverviewPage.actions.openSettings).toBe('설정 열기');
-    expect(messages.translationJobsPage.title).toBe('번역 작업');
     expect(messages.common.labels.settings).toBe('설정');
     expect(messages.common.labels.priority).toBe('우선순위');
     expect(messages.translationSettingsPage.title).toBe('번역 설정');
-    expect('machineGeneratedPublicServe' in messages.translationSettingsPage.fields).toBe(false);
     expect(messages.common.statuses.running).toBe('실행 중');
     expect(messages.common.statuses.inProgress).toBe('진행 중');
     expect(messages.common.statuses.default).toBe('기본값');
     expect(messages.common.statuses.custom).toBe('사용자 설정');
-    expect(messages.translationJobsPage.stats.active).toBe('진행 중 {count}개');
-    expect(messages.translationPanel.actions.generateLocale).toBe('생성');
     expect(messages.pageEditor.externalVideo.aspectRatioAuto).toBe('자동');
     expect(messages.editorCommon.editor.slashMenu.items.externalVideo.title).toBe('외부 영상');
     expect(messages.editorCommon.externalVideoInsert.insert).toBe('외부 영상 삽입');
@@ -363,9 +358,7 @@ describe('getMessagesForLocale', () => {
     expect(messages.unsubscribe.token.error.title).toBe('購読を解除できません');
     expect(messages.campaignEditor.actions.sendNow).toBe('今すぐ送信');
     expect(messages.campaignAnalytics.title).toBe('キャンペーン分析');
-    expect(messages.translationJobsPage.title).toBe('翻訳ジョブ');
     expect(messages.translationSettingsPage.title).toBe('翻訳設定');
-    expect(messages.translationPanel.actions.regenerateAll).toBe('対象となるすべてのロケールで生成/再生成');
     expect(messages.adminList.emailTemplates.detail.fields.layoutLabel).toBe('レイアウト');
     expect(messages.contentLanguageMenu.label).toBe('翻訳を表示');
 

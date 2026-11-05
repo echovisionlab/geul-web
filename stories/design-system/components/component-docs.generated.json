@@ -2059,7 +2059,6 @@
         "Consumer: features/campaign/CampaignScheduleForm.tsx",
         "Consumer: features/data-table/MultiFilterEditorView.tsx",
         "Consumer: features/data-table/MultiSortView.tsx",
-        "Consumer: features/editor/AIMenu/AIMenu.tsx",
         "Consumer: features/editor/ExternalVideoInsertDialog.tsx",
         "Consumer: features/editor/components/EditorFileInsertView.tsx",
         "Consumer: features/editor/components/EditorFileLibraryPickerView.tsx",
@@ -2088,7 +2087,6 @@
         "Consumer: features/menu/AdminMenusPage.tsx",
         "Consumer: features/menu/MenuItemsEditor.tsx",
         "Consumer: features/menu/MenuTargetItemsEditor.tsx",
-        "Consumer: features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
         "Consumer: features/my/LocalBackupsView.tsx",
         "Consumer: features/my/McpOAuthGrantSettings.tsx",
         "Consumer: features/my/PasskeySettingsSection.tsx",
@@ -2141,10 +2139,8 @@
         "Consumer: features/translation/ContentLocaleNotice.tsx",
         "Consumer: features/translation/TranslationLocaleControl.tsx",
         "Consumer: features/translation/TranslationPanelSectionCard.tsx",
-        "Consumer: features/translation/admin/TranslationJobsPage.tsx",
         "Consumer: features/translation/admin/TranslationOverviewPage.tsx",
         "Consumer: features/translation/admin/TranslationSettingsPage.tsx",
-        "Consumer: features/translation/settings/TranslationProviderModal.tsx",
         "Consumer: features/user/ui/ProfileAvatarControl/ProfileAvatarControl.tsx",
         "Consumer: features/user/ui/UserProfile/UserProfileView.tsx",
         "Consumer: features/version-history/ui/VersionHistoryDrawerView.tsx",
@@ -4383,7 +4379,6 @@
         "Consumer: features/data-table/MultiSortView.tsx",
         "Consumer: features/data-table/ServerDataTable/ServerDataTableMultiFilter.tsx",
         "Consumer: features/data-table/ServerDataTable/ServerDataTableMultiSort.tsx",
-        "Consumer: features/editor/AIMenu/AIMenu.tsx",
         "Consumer: features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
         "Consumer: features/editor/tiptap/TiptapBlockMenu.tsx",
         "Consumer: features/editor/tiptap/code/CodeBlockSurface.tsx",
@@ -4413,7 +4408,6 @@
         "Consumer: features/media/ui/ExternalVideoView.tsx",
         "Consumer: features/menu/AdminMenusPage.tsx",
         "Consumer: features/menu/MenuItemsEditor.tsx",
-        "Consumer: features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
         "Consumer: features/metadata/ui/OgImagePreviewView.tsx",
         "Consumer: features/metadata/ui/UrlSectionView.tsx",
         "Consumer: features/my/PasskeySettingsSection.tsx",
@@ -4452,7 +4446,6 @@
         "Consumer: features/social-links/ui/SocialLinkInputView.tsx",
         "Consumer: features/social-links/ui/SocialLinksDisplayView.tsx",
         "Consumer: features/social-links/ui/SocialLinksEditorView.tsx",
-        "Consumer: features/translation/admin/TranslationSettingsPage.tsx",
         "Consumer: features/user/ui/UserProfile/UserProfileView.tsx",
         "Consumer: features/work/WorkEditor/WorkClientsSection.tsx",
         "Consumer: features/work/WorkEditor/credits/SortableCreditGroupHeader.tsx",
@@ -9030,7 +9023,6 @@
         "Consumer: features/data-table/MultiFilterEditorView.tsx",
         "Consumer: features/data-table/MultiSortView.tsx",
         "Consumer: features/data-table/ServerDataTable/ServerDataTablePaginationView.tsx",
-        "Consumer: features/editor/AIMenu/AIMenu.tsx",
         "Consumer: features/editor/blocks/FileBlock/FileBlockView.tsx",
         "Consumer: features/editor/components/MediaProcessingSurface.tsx",
         "Consumer: features/editor/tiptap/TiptapAuthoringControls.tsx",
@@ -9081,7 +9073,6 @@
         "Consumer: features/shell/ui/Shell/ShellIslands.tsx",
         "Consumer: features/shell/ui/Shell/ShellLayout.tsx",
         "Consumer: features/shell/ui/Shell/ShellMobileNavigation.tsx",
-        "Consumer: features/translation/admin/TranslationJobsPage.tsx",
         "Consumer: features/translation/admin/TranslationOverviewPage.tsx",
         "Consumer: features/user/UserShell/UserShell.tsx",
         "Consumer: features/user/ui/UserInlineLinks/UserInlineLinksView.tsx",
@@ -9843,10 +9834,7 @@
         "Consumer: features/post/PostViewContent.tsx",
         "Consumer: features/program-event/ProgramEventEditor/ProgramEventPosterUploader.tsx",
         "Consumer: features/share/ui/ShareLinkSectionView.tsx",
-        "Consumer: features/translation/EntityTranslationsPanel.tsx",
-        "Consumer: features/translation/admin/TranslationJobsPage.tsx",
         "Consumer: features/translation/admin/TranslationOverviewPage.tsx",
-        "Consumer: features/translation/admin/TranslationSettingsPage.tsx",
         "Consumer: features/user/ui/UserShell/UserShellView.tsx",
         "Consumer: features/work/WorkEditor/credits/SortableCreditRow.tsx"
       ],
@@ -11109,12 +11097,10 @@
         "Consumer: features/editor/tiptap/p5/P5CapabilityStoryPreview.tsx",
         "Consumer: features/form/FormSettingsContent.tsx",
         "Consumer: features/media-download/FileDownloadPolicyEditor.tsx",
-        "Consumer: features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
         "Consumer: features/my/MyPostsPageView.tsx",
         "Consumer: features/my/MySeriesPageView.tsx",
         "Consumer: features/my/ui/MyArtistsTable/MyArtistsTableCellView.tsx",
         "Consumer: features/policy/LegalPolicyListClient.tsx",
-        "Consumer: features/translation/admin/TranslationJobsPage.tsx",
         "Consumer: features/user/ui/UserProfile/UserProfileView.tsx"
       ],
       "accessibility": [
@@ -25920,8 +25906,7 @@
         "Consumer: features/page/blocks/work-table/Editor.tsx",
         "Consumer: features/place/CreatePlaceModal.tsx",
         "Consumer: features/place/PlaceDetailForm.tsx",
-        "Consumer: features/program-event/ProgramEventEditor/ProgramEventEditor.tsx",
-        "Consumer: features/translation/settings/TranslationProviderModal.tsx"
+        "Consumer: features/program-event/ProgramEventEditor/ProgramEventEditor.tsx"
       ],
       "accessibility": [
         "Name the input with label or aria-label/aria-labelledby. A placeholder does not replace a label.",
@@ -27232,8 +27217,7 @@
         "Consumer: features/form/FormSettingsContent.tsx",
         "Consumer: features/page/blocks/form/ViewClient.tsx",
         "Consumer: features/share/SharePasswordView.tsx",
-        "Consumer: features/share/ui/ShareLinkSectionView.tsx",
-        "Consumer: features/translation/settings/TranslationProviderModal.tsx"
+        "Consumer: features/share/ui/ShareLinkSectionView.tsx"
       ],
       "accessibility": [
         "Name the input with label or aria-label/aria-labelledby. A placeholder does not replace a label.",
@@ -35662,7 +35646,6 @@
         "Consumer: features/social-links/ui/SocialLinkInputView.tsx",
         "Consumer: features/translation/TranslationLocaleControl.tsx",
         "Consumer: features/translation/admin/TranslationSettingsPage.tsx",
-        "Consumer: features/translation/settings/TranslationProviderModal.tsx",
         "Consumer: features/user/ui/UserProfile/UserProfileView.tsx",
         "Consumer: features/work/WorkEditor/WorkCreditsSection.tsx"
       ],
@@ -38027,8 +38010,6 @@
         "Consumer: features/page/blocks/works-gallery/Editor.tsx",
         "Consumer: features/post/PostEditor/PostEditor.tsx",
         "Consumer: features/site/SiteSettingsForm/SiteSettingsForm.tsx",
-        "Consumer: features/translation/admin/TranslationSettingsPage.tsx",
-        "Consumer: features/translation/settings/TranslationProviderModal.tsx",
         "Consumer: features/work/WorkEditor/WorkMetaForm.tsx"
       ],
       "accessibility": [
@@ -39200,7 +39181,6 @@
         "Connect commitment, duplicate, empty-tag and removal rules to the actual data policy. Compare MultiSelect for fixed options.",
         "Consumer: features/admin/oauth-app/OAuthAppEditorView.tsx",
         "Consumer: features/form/FormBuilder/ConditionEditor.tsx",
-        "Consumer: features/translation/admin/TranslationSettingsPage.tsx",
         "Consumer: features/work/WorkEditor/WorkMetaForm.tsx"
       ],
       "accessibility": [
@@ -41626,7 +41606,6 @@
         "Consumer: features/campaign/CampaignDeliveryDialogs.tsx",
         "Consumer: features/campaign/CampaignEditPage.tsx",
         "Consumer: features/data-table/MultiFilterValueInput.tsx",
-        "Consumer: features/editor/AIMenu/AIMenu.tsx",
         "Consumer: features/editor/ExternalVideoInsertDialog.tsx",
         "Consumer: features/editor/tiptap/TiptapAuthoringControls.tsx",
         "Consumer: features/editor/tiptap/code/CodeBlockSurface.tsx",
@@ -41673,7 +41652,6 @@
         "Consumer: features/site/SiteSettingsForm/SiteSettingsForm.tsx",
         "Consumer: features/social-links/ui/SocialLinkInputView.tsx",
         "Consumer: features/translation/PageSectionLocalePropFields.tsx",
-        "Consumer: features/translation/settings/TranslationProviderModal.tsx",
         "Consumer: features/user/ui/UserProfile/UserProfileView.tsx",
         "Consumer: features/work/WorkEditor/WorkCreditsSection.tsx",
         "Consumer: features/work/WorkEditor/WorkMetaForm.tsx",
@@ -48114,7 +48092,6 @@
         "Consumer: features/menu/AdminMenusPage.tsx",
         "Consumer: features/share/SharePasswordView.tsx",
         "Consumer: features/site/SiteSettingsForm/SiteSettingsForm.tsx",
-        "Consumer: features/translation/admin/TranslationJobsPage.tsx",
         "Consumer: features/translation/admin/TranslationOverviewPage.tsx",
         "Consumer: features/translation/admin/TranslationSettingsPage.tsx"
       ],
@@ -48941,7 +48918,6 @@
         "Consumer: features/data-table/ServerDataTable/ServerDataTableSearchRuntime.tsx",
         "Consumer: features/document-layout/ui/ContentChrome.tsx",
         "Consumer: features/document-layout/ui/ContentLayoutFieldView.tsx",
-        "Consumer: features/editor/AIMenu/AIMenu.tsx",
         "Consumer: features/editor/ExternalVideoInsertDialog.tsx",
         "Consumer: features/editor/MapInsertModal.tsx",
         "Consumer: features/editor/blocks/FileBlock/FileBlockView.tsx",
@@ -49160,11 +49136,9 @@
         "Consumer: features/translation/PageSectionLocalePropFields.tsx",
         "Consumer: features/translation/TranslationLocaleRow.tsx",
         "Consumer: features/translation/TranslationPanelSectionCard.tsx",
-        "Consumer: features/translation/admin/TranslationJobsPage.tsx",
         "Consumer: features/translation/admin/TranslationOverviewPage.tsx",
         "Consumer: features/translation/admin/TranslationSettingsPage.tsx",
         "Consumer: features/translation/openTranslationDeleteConfirm.tsx",
-        "Consumer: features/translation/settings/TranslationProviderModal.tsx",
         "Consumer: features/translation/useTranslationLocaleCommands.tsx",
         "Consumer: features/user/UserProfilePageView.tsx",
         "Consumer: features/user/UserPublishedPostsTable.tsx",
@@ -49697,7 +49671,6 @@
         "Consumer: features/cookie-consent/ui/CookieConsentBannerView.tsx",
         "Consumer: features/data-table/MultiFilterEditorView.tsx",
         "Consumer: features/data-table/MultiSortView.tsx",
-        "Consumer: features/editor/AIMenu/AIMenu.tsx",
         "Consumer: features/editor/components/MediaProcessingSurface.tsx",
         "Consumer: features/editor/components/UnifiedFileAttachmentPagePreview.tsx",
         "Consumer: features/editor/tiptap/code/CodeBlockSurface.tsx",
@@ -49770,7 +49743,6 @@
         "Consumer: features/translation/ActiveEditLocaleContentPreviewView.tsx",
         "Consumer: features/translation/TranslationPanelSectionCard.tsx",
         "Consumer: features/translation/admin/TranslationOverviewPage.tsx",
-        "Consumer: features/translation/admin/TranslationSettingsPage.tsx",
         "Consumer: features/work/WorkEditor/WorkClientsSection.tsx",
         "Consumer: features/work/WorkEditor/WorkCreditsSection.tsx",
         "Consumer: features/work/WorkEditor/WorkEditor.tsx",
@@ -49853,7 +49825,6 @@
         "Consumer: features/release/ReleaseEditor/ReleaseTracksSection.tsx",
         "Consumer: features/share/ui/ShareLinkSectionView.tsx",
         "Consumer: features/translation/TranslationPanelSectionCard.tsx",
-        "Consumer: features/translation/settings/TranslationProviderModal.tsx",
         "Consumer: features/work/WorkEditor/WorkClientsSection.tsx",
         "Consumer: features/work/WorkEditor/WorkMetaForm.tsx"
       ],
@@ -58487,7 +58458,6 @@
         "Consumer: features/release/ReleaseEditor/ReleaseLabelsSection.tsx",
         "Consumer: features/release/ReleaseEditor/ReleaseTrackCreateView.tsx",
         "Consumer: features/series/SeriesManagersModal.tsx",
-        "Consumer: features/translation/settings/TranslationProviderModal.tsx",
         "Consumer: features/user/ui/ProfileAvatarControl/ProfileAvatarControl.tsx"
       ],
       "accessibility": [
@@ -58620,8 +58590,7 @@
         "Consumer: features/release/ReleaseEditor/ReleaseArtistsSectionView.tsx",
         "Consumer: features/release/ReleaseEditor/ReleaseCreditsSection.tsx",
         "Consumer: features/release/ReleaseEditor/ReleaseLabelsSection.tsx",
-        "Consumer: features/release/ReleaseEditor/ReleaseTrackCreateView.tsx",
-        "Consumer: features/translation/settings/TranslationProviderModal.tsx"
+        "Consumer: features/release/ReleaseEditor/ReleaseTrackCreateView.tsx"
       ],
       "accessibility": [
         "Buttons own names, disabled/pending state and activation. DOM order remains keyboard and reading order.",
@@ -59406,8 +59375,7 @@
       ],
       "stateStories": [{ "id": "core-overlays-floatingpanel--drag", "name": "Drag" }],
       "usage": [
-        "Consumers connect panel position and task. Check that other sticky/overlay regions do not obscure focus or dismissal controls.",
-        "Consumer: features/editor/AIMenu/AIMenu.tsx"
+        "Consumers connect panel position and task. Check that other sticky/overlay regions do not obscure focus or dismissal controls."
       ],
       "accessibility": [
         "Give the open region a name and role appropriate to its purpose. Check its relationships with the visible title and description.",
@@ -60744,7 +60712,6 @@
         "Consumer: features/form/SubmissionDeleteButton.tsx",
         "Consumer: features/label/LabelEditor/ui/LabelParticipantsDialogView.tsx",
         "Consumer: features/media-download/AuthorizedDownloadAction.tsx",
-        "Consumer: features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
         "Consumer: features/metadata/ui/OgImagePreviewView.tsx",
         "Consumer: features/metadata/ui/UrlSectionView.tsx",
         "Consumer: features/my/PasskeySettingsSection.tsx",
@@ -60863,7 +60830,6 @@
       ],
       "usage": [
         "Supply actual locale values. Distinguish user-facing language names from technical identifiers.",
-        "Consumer: features/translation/admin/TranslationJobsPage.tsx",
         "Consumer: features/translation/admin/TranslationOverviewPage.tsx"
       ],
       "accessibility": [
@@ -61663,9 +61629,7 @@
         "Consumer: features/series/SeriesPublicView.tsx",
         "Consumer: features/translation/ActiveEditLocaleContentPreview.tsx",
         "Consumer: features/translation/EntityTranslationsPanel.tsx",
-        "Consumer: features/translation/admin/TranslationJobsPage.tsx",
         "Consumer: features/translation/admin/TranslationOverviewPage.tsx",
-        "Consumer: features/translation/admin/TranslationSettingsPage.tsx",
         "Consumer: features/version-history/ui/VersionHistoryDrawerView.tsx"
       ],
       "accessibility": [
@@ -62590,7 +62554,6 @@
         "Consumer: features/document-layout/ui/ContentChrome.tsx",
         "Consumer: features/document-layout/ui/ContentLayoutFieldView.tsx",
         "Consumer: features/document-layout/ui/EntityDetailLayout.tsx",
-        "Consumer: features/editor/AIMenu/AIMenu.tsx",
         "Consumer: features/editor/components/EditorFileInsertView.tsx",
         "Consumer: features/editor/components/EditorFileLibraryPickerView.tsx",
         "Consumer: features/editor/components/MediaProcessingSurface.tsx",
@@ -62651,7 +62614,6 @@
         "Consumer: features/menu/MenuTargetItemsEditor.tsx",
         "Consumer: features/menu/VisibilityEditor.tsx",
         "Consumer: features/metadata/MetadataPanel/MetadataPanel.tsx",
-        "Consumer: features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
         "Consumer: features/metadata/ui/OgGenerationRunProgressView.tsx",
         "Consumer: features/metadata/ui/OgImagePreviewView.tsx",
         "Consumer: features/my/CookieConsentSettings.tsx",
@@ -62768,7 +62730,6 @@
         "Consumer: features/translation/ContentLocaleNotice.tsx",
         "Consumer: features/translation/EntityTranslationsPanel.tsx",
         "Consumer: features/translation/TranslationLocaleRow.tsx",
-        "Consumer: features/translation/admin/TranslationJobsPage.tsx",
         "Consumer: features/translation/admin/TranslationOverviewPage.tsx",
         "Consumer: features/translation/admin/TranslationSettingsPage.tsx",
         "Consumer: features/translation/openTranslationDeleteConfirm.tsx",

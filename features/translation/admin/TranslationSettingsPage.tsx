@@ -1,43 +1,26 @@
 'use client';
 
 import { formatLocaleCode } from '@/components/core/Typography/locale-code';
-import { SupportingText, Text as DsText } from '@/components/core/Typography';
+import { Text as DsText } from '@/components/core/Typography';
 import { PageHeader } from '@/components/core/PageHeader';
 import { SettingsSection } from '@/components/core/Section';
-import { ConfirmationDialog } from '@/features/confirmation';
-
-import { SectionCard as DsSectionCard } from '@/components/core/Section/SectionCard';
 import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { TranslationProviderType, type TranslationProvider } from '@echovisionlab/geul-proto/secure/translation_pb.ts';
-import { IconChecklist, IconDeviceFloppy, IconEdit, IconPlus, IconSettings2, IconTrash } from '@tabler/icons-react';
+import { IconDeviceFloppy, IconSettings2 } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
 import { notifications } from '@/components/core/Notification';
-import { LabelBadge } from '@/components/core/Badge';
 import { Button, SaveButton } from '@/components/core/Button';
-import { IconButton } from '@/components/core/IconButton';
-import { Select, Switch, TagsInput } from '@/components/core/Input';
+import { Select } from '@/components/core/Input';
 
 import { PageLoader } from '@/features/site/PageLoader';
-import { TranslationProviderModal } from '@/features/translation/settings/TranslationProviderModal';
-import {
-  buildProviderConfig,
-  DEFAULT_PROVIDER_FORM,
-  providerToForm,
-  providerTypeToProto,
-  type ProviderFormState,
-  validateProviderForm,
-} from '@/features/translation/settings/provider-form';
 import { createTranslationClient } from '@/lib/api/browser/secure-translation';
 import { getTranslationActionErrorMessage } from '@/lib/translation/action-error';
-import { normalizeProtectedTerms } from '@/lib/translation/protected-terms';
 import {
   buildSettingsUpdateMutation,
-  canonicalizeSettingsForm,
   mergeRefreshedSettingsForm,
   preserveSettingsEditsMadeDuringSave,
   settingsFormsEqual,
@@ -48,23 +31,15 @@ import {
 
 const settingsQueryKey = ['translation-settings'] as const;
 const localesQueryKey = ['translation-locales'] as const;
-const providersQueryKey = ['translation-providers'] as const;
 
 export type TranslationSettingsPageClient = Pick<
   ReturnType<typeof createTranslationClient>,
-  | 'getTranslationSettings'
-  | 'listTranslationLocales'
-  | 'listTranslationProviders'
-  | 'updateTranslationSettings'
-  | 'createTranslationProvider'
-  | 'updateTranslationProvider'
-  | 'deleteTranslationProvider'
+  'getTranslationSettings' | 'listTranslationLocales' | 'updateTranslationSettings'
 >;
 
 export function TranslationSettingsPage({ client }: { client?: TranslationSettingsPageClient } = {}) {
   const t = useTranslations('translationSettingsPage');
   const tCommonLabels = useTranslations('common.labels');
-  const tCommonActions = useTranslations('common.actions');
   const queryClient = useQueryClient();
   const translationClient = useMemo(() => client ?? createTranslationClient(), [client]);
 
@@ -78,32 +53,17 @@ export function TranslationSettingsPage({ client }: { client?: TranslationSettin
     queryFn: async () => translationClient.listTranslationLocales({}),
   });
 
-  const providersQuery = useQuery({
-    queryKey: providersQueryKey,
-    queryFn: async () => translationClient.listTranslationProviders({}),
-  });
-
-  const [form, setForm] = useState<FormState>({
-    defaultLocale: 'en',
-    protectedTerms: [],
-  });
+  const [form, setForm] = useState<FormState>({ defaultLocale: 'en' });
   const [persistedForm, setPersistedForm] = useState<FormState | null>(null);
   const formRef = useRef(form);
   const persistedFormRef = useRef<FormState | null>(null);
-  const [providerForm, setProviderForm] = useState<ProviderFormState>(DEFAULT_PROVIDER_FORM);
-  const [providerModalOpen, setProviderModalOpen] = useState(false);
-  const [editingProvider, setEditingProvider] = useState<TranslationProvider | null>(null);
-  const [deleteProvider, setDeleteProvider] = useState<TranslationProvider | null>(null);
 
   useEffect(() => {
     const settings = settingsQuery.data?.settings;
     if (!settings) {
       return;
     }
-    const nextForm = canonicalizeSettingsForm({
-      defaultLocale: settings.defaultLocale,
-      protectedTerms: normalizeProtectedTerms(settings.protectedTerms),
-    });
+    const nextForm = { defaultLocale: settings.defaultLocale };
     const mergedForm = mergeRefreshedSettingsForm(formRef.current, persistedFormRef.current, nextForm);
     formRef.current = mergedForm;
     setForm(mergedForm);
@@ -112,30 +72,18 @@ export function TranslationSettingsPage({ client }: { client?: TranslationSettin
   }, [settingsQuery.data]);
 
   const updateSettingsForm = (update: (current: FormState) => FormState) => {
-    const nextForm = canonicalizeSettingsForm(update(formRef.current));
+    const nextForm = update(formRef.current);
     formRef.current = nextForm;
     setForm(nextForm);
   };
 
-  const canonicalForm = useMemo(() => canonicalizeSettingsForm(form), [form]);
-  const hasSettingsChanges = persistedForm !== null && !settingsFormsEqual(canonicalForm, persistedForm);
-
-  const invalidateProviderState = async () => {
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: providersQueryKey }),
-      queryClient.invalidateQueries({ queryKey: settingsQueryKey }),
-      queryClient.invalidateQueries({ queryKey: ['translation-overview'] }),
-    ]);
-  };
+  const hasSettingsChanges = persistedForm !== null && !settingsFormsEqual(form, persistedForm);
 
   const saveMutation = useMutation({
     mutationFn: async (mutation: SettingsUpdateMutation) =>
       translationClient.updateTranslationSettings(toUpdateSettingsRequest(mutation)),
     onSuccess: async (result, mutation) => {
-      const savedForm = canonicalizeSettingsForm({
-        defaultLocale: result.settings?.defaultLocale ?? mutation.form.defaultLocale,
-        protectedTerms: result.settings?.protectedTerms ?? mutation.form.protectedTerms,
-      });
+      const savedForm = { defaultLocale: result.settings?.defaultLocale ?? mutation.form.defaultLocale };
       const nextForm = preserveSettingsEditsMadeDuringSave(formRef.current, mutation.form, savedForm);
       formRef.current = nextForm;
       setForm(nextForm);
@@ -158,123 +106,16 @@ export function TranslationSettingsPage({ client }: { client?: TranslationSettin
     },
   });
 
-  const createProviderMutation = useMutation({
-    mutationFn: async (values: ProviderFormState) =>
-      translationClient.createTranslationProvider({
-        name: values.name.trim(),
-        type: providerTypeToProto(values.type),
-        isActive: values.isActive,
-        priority: values.priority,
-        config: buildProviderConfig(values),
-      }),
-    onSuccess: async () => {
-      notifications.show({ tone: 'positive', message: t('notifications.providerCreated') });
-      setProviderModalOpen(false);
-      setProviderForm(DEFAULT_PROVIDER_FORM);
-      await invalidateProviderState();
-    },
-    onError: (error) => {
-      notifications.show({
-        tone: 'danger',
-        message: getTranslationActionErrorMessage(error, t('notifications.providerSaveFailed')),
-      });
-    },
-  });
-
-  const updateProviderMutation = useMutation({
-    mutationFn: async (values: ProviderFormState & { id: string }) =>
-      translationClient.updateTranslationProvider({
-        id: values.id,
-        name: values.name.trim(),
-        type: providerTypeToProto(values.type),
-        isActive: values.isActive,
-        priority: values.priority,
-        config: buildProviderConfig(values),
-      }),
-    onSuccess: async () => {
-      notifications.show({ tone: 'positive', message: t('notifications.providerUpdated') });
-      setEditingProvider(null);
-      setProviderModalOpen(false);
-      setProviderForm(DEFAULT_PROVIDER_FORM);
-      await invalidateProviderState();
-    },
-    onError: (error) => {
-      notifications.show({
-        tone: 'danger',
-        message: getTranslationActionErrorMessage(error, t('notifications.providerSaveFailed')),
-      });
-    },
-  });
-
-  const toggleProviderMutation = useMutation({
-    mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) =>
-      translationClient.updateTranslationProvider({ id, isActive }),
-    onSuccess: invalidateProviderState,
-    onError: (error) => {
-      notifications.show({
-        tone: 'danger',
-        message: getTranslationActionErrorMessage(error, t('notifications.providerToggleFailed')),
-      });
-    },
-  });
-
-  const deleteProviderMutation = useMutation({
-    mutationFn: async (id: string) => translationClient.deleteTranslationProvider({ id }),
-    onSuccess: async () => {
-      notifications.show({ tone: 'positive', message: t('notifications.providerDeleted') });
-      setDeleteProvider(null);
-      await invalidateProviderState();
-    },
-    onError: (error) => {
-      notifications.show({
-        tone: 'danger',
-        message: getTranslationActionErrorMessage(error, t('notifications.providerDeleteFailed')),
-      });
-    },
-  });
-
   const localeOptions = (localesQuery.data?.locales ?? []).map((locale) => ({
     value: locale.code,
     label: `${locale.displayName} (${formatLocaleCode(locale.code)})`,
   }));
-  const providers = providersQuery.data?.providers ?? [];
-  const generationEnabled = settingsQuery.data?.generationEnabled ?? false;
 
-  const openCreateProvider = () => {
-    setEditingProvider(null);
-    setProviderForm(DEFAULT_PROVIDER_FORM);
-    setProviderModalOpen(true);
-  };
-
-  const openEditProvider = (provider: TranslationProvider) => {
-    setEditingProvider(provider);
-    setProviderForm(providerToForm(provider));
-    setProviderModalOpen(true);
-  };
-
-  const submitProviderForm = () => {
-    const validationError = validateProviderForm(providerForm, editingProvider);
-    if (validationError) {
-      notifications.show({ tone: 'danger', message: t(`validation.${validationError}`) });
-      return;
-    }
-    if (editingProvider) {
-      updateProviderMutation.mutate({ ...providerForm, id: editingProvider.id });
-      return;
-    }
-    createProviderMutation.mutate(providerForm);
-  };
-
-  const getProviderTypeLabel = (type: TranslationProviderType) =>
-    type === TranslationProviderType.LLM ? t('providerTypes.llm') : t('providerTypes.deepl');
-
-  const isProviderSaving = createProviderMutation.isPending || updateProviderMutation.isPending;
-
-  if (settingsQuery.isLoading || localesQuery.isLoading || providersQuery.isLoading) {
+  if (settingsQuery.isLoading || localesQuery.isLoading) {
     return <PageLoader />;
   }
 
-  if (settingsQuery.isError || localesQuery.isError || providersQuery.isError) {
+  if (settingsQuery.isError || localesQuery.isError) {
     return (
       <DsText role="alert" size="sm" tone="danger">
         {t('states.loadFailed')}
@@ -297,14 +138,6 @@ export function TranslationSettingsPage({ client }: { client?: TranslationSettin
             >
               {tCommonLabels('overview')}
             </Button>
-            <Button
-              href="/admin/translations/jobs"
-              tone="neutral"
-              emphasis="medium"
-              leftSection={<IconChecklist size={16} />}
-            >
-              {t('actions.jobs')}
-            </Button>
             <SaveButton
               type="button"
               leftSection={<IconDeviceFloppy size={16} />}
@@ -313,7 +146,7 @@ export function TranslationSettingsPage({ client }: { client?: TranslationSettin
                 if (!baseline) {
                   return;
                 }
-                const mutation = buildSettingsUpdateMutation(baseline, canonicalForm);
+                const mutation = buildSettingsUpdateMutation(baseline, form);
                 if (mutation) {
                   saveMutation.mutate(mutation);
                 }
@@ -327,143 +160,18 @@ export function TranslationSettingsPage({ client }: { client?: TranslationSettin
         }
       />
 
-      <DsLayoutStack gap="xl">
-        <SettingsSection
-          title={t('sections.providers')}
-          description={t('sections.providersDescription')}
-          actions={
-            <Button leftSection={<IconPlus size={16} />} emphasis="medium" onClick={openCreateProvider}>
-              {t('actions.addProvider')}
-            </Button>
+      <SettingsSection title={t('sections.runtime')} description={t('sections.runtimeDescription')}>
+        <Select
+          label={t('fields.defaultLocale.label')}
+          description={t('fields.defaultLocale.description')}
+          data={localeOptions}
+          value={form.defaultLocale}
+          onChange={(value) =>
+            updateSettingsForm((current) => ({ ...current, defaultLocale: value ?? current.defaultLocale }))
           }
-        >
-          <DsLayoutInline gap="sm">
-            <LabelBadge tone={generationEnabled ? 'positive' : 'neutral'}>
-              {generationEnabled ? t('generation.enabled') : t('generation.disabled')}
-            </LabelBadge>
-            {!generationEnabled && settingsQuery.data?.generationDisabledReason && (
-              <SupportingText tone="secondary">{settingsQuery.data.generationDisabledReason}</SupportingText>
-            )}
-          </DsLayoutInline>
-
-          {providers.length === 0 ? (
-            <SupportingText tone="secondary">{t('providerStates.empty')}</SupportingText>
-          ) : (
-            <DsLayoutStack gap="sm">
-              {providers.map((provider) => (
-                <DsSectionCard key={provider.id} padding="md">
-                  <DsLayoutStack gap="xs" role="group" aria-label={provider.name}>
-                    <DsLayoutInline justify="between" align="center">
-                      <DsLayoutInline gap="sm">
-                        <DsText size="sm" weight="strong">
-                          {provider.name}
-                        </DsText>
-                        <LabelBadge tone="neutral">{getProviderTypeLabel(provider.type)}</LabelBadge>
-                        <LabelBadge tone={provider.isActive ? 'positive' : 'neutral'}>
-                          {provider.isActive ? t('providerStates.active') : t('providerStates.inactive')}
-                        </LabelBadge>
-                      </DsLayoutInline>
-                      <DsLayoutInline gap="xs">
-                        <Switch
-                          checked={provider.isActive}
-                          onChange={(event) =>
-                            toggleProviderMutation.mutate({
-                              id: provider.id,
-                              isActive: event.currentTarget.checked,
-                            })
-                          }
-                          disabled={toggleProviderMutation.isPending}
-                          label={t('fields.providerActive.shortLabel')}
-                          aria-label={`${t('fields.providerActive.shortLabel')} ${provider.name}`}
-                        />
-                        <IconButton
-                          emphasis="medium"
-                          aria-label={`${t('actions.editProvider')} ${provider.name}`}
-                          title={t('actions.editProvider')}
-                          onClick={() => openEditProvider(provider)}
-                        >
-                          <IconEdit size={16} />
-                        </IconButton>
-                        <IconButton
-                          aria-label={`${t('actions.deleteProvider')} ${provider.name}`}
-                          title={t('actions.deleteProvider')}
-                          tone="danger"
-                          onClick={() => setDeleteProvider(provider)}
-                        >
-                          <IconTrash size={16} />
-                        </IconButton>
-                      </DsLayoutInline>
-                    </DsLayoutInline>
-                    <DsText size="sm" tone="secondary">
-                      {t('providerStates.priority', { priority: provider.priority })}
-                      {provider.config.case === 'llmConfig'
-                        ? ` · ${provider.config.value.model || t('providerStates.modelUnset')}`
-                        : ''}
-                      {provider.config.case === 'deeplConfig' && provider.config.value.apiBaseUrl
-                        ? ` · ${provider.config.value.apiBaseUrl}`
-                        : ''}
-                    </DsText>
-                  </DsLayoutStack>
-                </DsSectionCard>
-              ))}
-            </DsLayoutStack>
-          )}
-        </SettingsSection>
-
-        <SettingsSection title={t('sections.runtime')} description={t('sections.runtimeDescription')}>
-          <Select
-            label={t('fields.defaultLocale.label')}
-            description={t('fields.defaultLocale.description')}
-            data={localeOptions}
-            value={form.defaultLocale}
-            onChange={(value) =>
-              updateSettingsForm((current) => ({ ...current, defaultLocale: value ?? current.defaultLocale }))
-            }
-            allowDeselect={false}
-          />
-          <TagsInput
-            label={t('fields.protectedTerms.label')}
-            description={`${t('fields.protectedTerms.description')} ${t('fields.protectedTerms.examples')}`}
-            placeholder={t('fields.protectedTerms.placeholder')}
-            value={form.protectedTerms}
-            splitChars={[',', '\n']}
-            onChange={(value) =>
-              updateSettingsForm((current) => ({ ...current, protectedTerms: normalizeProtectedTerms(value) }))
-            }
-          />
-        </SettingsSection>
-      </DsLayoutStack>
-
-      <TranslationProviderModal
-        opened={providerModalOpen}
-        editing={editingProvider !== null}
-        form={providerForm}
-        saving={isProviderSaving}
-        onChange={setProviderForm}
-        onClose={() => {
-          setProviderModalOpen(false);
-          setEditingProvider(null);
-          setProviderForm(DEFAULT_PROVIDER_FORM);
-        }}
-        onSubmit={submitProviderForm}
-      />
-
-      <ConfirmationDialog
-        intent="delete"
-        opened={deleteProvider !== null}
-        onClose={() => setDeleteProvider(null)}
-        onConfirm={() => {
-          if (deleteProvider) {
-            deleteProviderMutation.mutate(deleteProvider.id);
-          }
-        }}
-        title={t('modal.deleteProviderTitle')}
-        message={deleteProvider ? t('modal.deleteProviderMessage', { name: deleteProvider.name }) : ''}
-        confirmLabel={t('actions.deleteProvider')}
-        cancelLabel={tCommonActions('cancel')}
-        closeLabel={tCommonActions('close')}
-        loading={deleteProviderMutation.isPending}
-      />
+          allowDeselect={false}
+        />
+      </SettingsSection>
     </DsLayoutStack>
   );
 }

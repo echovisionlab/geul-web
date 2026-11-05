@@ -2,16 +2,16 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "c7f37af01f1320521f1a6639d0c45efff4c59e65baedffd96b41045dfecf79dc",
+  "manifestHash": "4067711ed756fc3a85c3713e6a3422fcbbf5b5127579c1ba7525a4d439a03684",
   "counts": {
-    "sourceFiles": 3961,
-    "productionSourceFiles": 2358,
-    "componentFiles": 931,
+    "sourceFiles": 3923,
+    "productionSourceFiles": 2333,
+    "componentFiles": 926,
     "coreFamilies": 57,
     "featureDomains": 54,
     "storyFiles": 285,
-    "storyVariants": 1640,
-    "pageEntrypoints": 119,
+    "storyVariants": 1629,
+    "pageEntrypoints": 118,
     "layouts": 17
   },
   "sourceFiles": [
@@ -241,7 +241,6 @@
     "app/admin/terms/[id]/page.tsx",
     "app/admin/terms/new/page.tsx",
     "app/admin/terms/page.tsx",
-    "app/admin/translations/jobs/page.tsx",
     "app/admin/translations/page.tsx",
     "app/admin/translations/settings/page.test.tsx",
     "app/admin/translations/settings/page.tsx",
@@ -1321,10 +1320,6 @@
     "features/document-layout/ui/types.ts",
     "features/draft-mode/DraftModeAlert.tsx",
     "features/draft-mode/ui/DraftModeAlertView.tsx",
-    "features/editor/AIMenu/AIMenu.test.tsx",
-    "features/editor/AIMenu/AIMenu.tsx",
-    "features/editor/AIMenu/ai-editor-turn-store.test.ts",
-    "features/editor/AIMenu/ai-editor-turn-store.ts",
     "features/editor/EditorAuthoringMode.test.tsx",
     "features/editor/EditorAuthoringMode.tsx",
     "features/editor/EditorHeader/EditorHeader.test.tsx",
@@ -1438,12 +1433,6 @@
     "features/editor/tiptap/TiptapPublicBlockComparison.stories.tsx",
     "features/editor/tiptap/TiptapSnapshot.test.tsx",
     "features/editor/tiptap/TiptapSnapshot.tsx",
-    "features/editor/tiptap/ai/TiptapAIAssistant.test.tsx",
-    "features/editor/tiptap/ai/TiptapAIAssistant.tsx",
-    "features/editor/tiptap/ai/TiptapAIController.tsx",
-    "features/editor/tiptap/ai/index.ts",
-    "features/editor/tiptap/ai/tiptap-ai.test.ts",
-    "features/editor/tiptap/ai/tiptap-ai.ts",
     "features/editor/tiptap/block-commands.node.test.ts",
     "features/editor/tiptap/block-commands.test.ts",
     "features/editor/tiptap/block-commands.ts",
@@ -2044,7 +2033,6 @@
     "features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
     "features/metadata/UrlSection.test.tsx",
     "features/metadata/UrlSection.tsx",
-    "features/metadata/metadata-ai-debug.ts",
     "features/metadata/ui/JsonLdScript.tsx",
     "features/metadata/ui/OgGenerationRunProgressView.tsx",
     "features/metadata/ui/OgImagePreviewView.tsx",
@@ -2575,8 +2563,6 @@
     "features/post/PostEditor/TagSelector.tsx",
     "features/post/PostEditor/body-mode.test.ts",
     "features/post/PostEditor/body-mode.ts",
-    "features/post/PostEditor/collaboration-mode.test.ts",
-    "features/post/PostEditor/collaboration-mode.ts",
     "features/post/PostEditor/lifecycle-origins.test.tsx",
     "features/post/PostEditor/post-config-save.ts",
     "features/post/PostEditor/post-lifecycle-policy.test.ts",
@@ -2793,7 +2779,6 @@
     "features/translation/TranslationLocaleRow.tsx",
     "features/translation/TranslationPanelSectionCard.tsx",
     "features/translation/TranslationServicesContext.tsx",
-    "features/translation/admin/TranslationJobsPage.tsx",
     "features/translation/admin/TranslationOverviewPage.tsx",
     "features/translation/admin/TranslationSettingsPage.tsx",
     "features/translation/admin/settings-form.test.ts",
@@ -2811,24 +2796,17 @@
     "features/translation/menu-translation-model.test.ts",
     "features/translation/menu-translation-model.ts",
     "features/translation/openTranslationDeleteConfirm.tsx",
-    "features/translation/settings/TranslationProviderModal.tsx",
-    "features/translation/settings/provider-form.test.ts",
-    "features/translation/settings/provider-form.ts",
     "features/translation/structured-locale-body.test.ts",
     "features/translation/structured-locale-body.ts",
     "features/translation/tiptap-localized-structure.test.ts",
     "features/translation/tiptap-localized-structure.ts",
     "features/translation/translation-entity-type.ts",
-    "features/translation/translation-entry-status.ts",
     "features/translation/translation-errors.ts",
-    "features/translation/translation-job-polling.test.ts",
-    "features/translation/translation-job-polling.ts",
     "features/translation/translation-save-barriers.test.ts",
     "features/translation/translation-save-barriers.ts",
     "features/translation/useActiveEditLocale.runtime.test.tsx",
     "features/translation/useActiveEditLocale.test.ts",
     "features/translation/useActiveEditLocale.ts",
-    "features/translation/useActiveTranslationJobsByLocale.ts",
     "features/translation/useEntityTranslationData.ts",
     "features/translation/useLocaleDocumentSession.test.ts",
     "features/translation/useLocaleDocumentSession.ts",
@@ -2836,9 +2814,6 @@
     "features/translation/useSourceDocumentCollaboration.ts",
     "features/translation/useTranslationActionFocus.test.tsx",
     "features/translation/useTranslationActionFocus.ts",
-    "features/translation/useTranslationGenerationAvailability.ts",
-    "features/translation/useTranslationLifecycleSubscription.test.tsx",
-    "features/translation/useTranslationLifecycleSubscription.ts",
     "features/translation/useTranslationLocaleCommands.test.tsx",
     "features/translation/useTranslationLocaleCommands.tsx",
     "features/translation/useTranslationPanelLabels.ts",
@@ -3019,12 +2994,8 @@
     "lib/actions/work.ts",
     "lib/ai/document-client.test.ts",
     "lib/ai/document-client.ts",
-    "lib/ai/editor-orchestration.test.ts",
-    "lib/ai/editor-orchestration.ts",
     "lib/ai/extract.test.ts",
     "lib/ai/extract.ts",
-    "lib/ai/summary-proposal.test.ts",
-    "lib/ai/summary-proposal.ts",
     "lib/api/browser/module-boundaries.test.ts",
     "lib/api/browser/public-file.ts",
     "lib/api/browser/public-post.ts",
@@ -3136,7 +3107,6 @@
     "lib/collab/local-backups.test.ts",
     "lib/collab/local-backups.ts",
     "lib/collab/map-theme-fields.ts",
-    "lib/collab/metadata-ai.ts",
     "lib/collab/page-document-metadata.test.ts",
     "lib/collab/page-document-metadata.ts",
     "lib/collab/persist-now.test.ts",
@@ -3183,7 +3153,6 @@
     "lib/cookie-consent.test.ts",
     "lib/cookie-consent.ts",
     "lib/countries.ts",
-    "lib/editor/ai-support.ts",
     "lib/editor/block-id.test.ts",
     "lib/editor/block-id.ts",
     "lib/editor/code-block-options.test.ts",
@@ -3270,7 +3239,6 @@
     "lib/hooks/uploadSurfaceActivity.ts",
     "lib/hooks/useCollaborativeFeaturedImage.test.tsx",
     "lib/hooks/useCollaborativeFeaturedImage.ts",
-    "lib/hooks/useCollaborativeMetadataAiState.ts",
     "lib/hooks/useCollaborativeTypedState.test.tsx",
     "lib/hooks/useCollaborativeTypedState.ts",
     "lib/hooks/useCopyToClipboard.test.tsx",
@@ -3580,14 +3548,8 @@
     "lib/translation/contentPreview.ts",
     "lib/translation/entity-type.test.ts",
     "lib/translation/entity-type.ts",
-    "lib/translation/job-status.test.ts",
-    "lib/translation/job-status.ts",
-    "lib/translation/lifecycle.test.ts",
-    "lib/translation/lifecycle.ts",
     "lib/translation/metadata.test.ts",
     "lib/translation/metadata.ts",
-    "lib/translation/protected-terms.test.ts",
-    "lib/translation/protected-terms.ts",
     "lib/translation/public-og-metadata-contract.test.ts",
     "lib/types/artist/model.ts",
     "lib/types/artist/schema.ts",
@@ -4461,10 +4423,7 @@
         "features/post/PostViewContent.tsx",
         "features/program-event/ProgramEventEditor/ProgramEventPosterUploader.tsx",
         "features/share/ui/ShareLinkSectionView.tsx",
-        "features/translation/EntityTranslationsPanel.tsx",
-        "features/translation/admin/TranslationJobsPage.tsx",
         "features/translation/admin/TranslationOverviewPage.tsx",
-        "features/translation/admin/TranslationSettingsPage.tsx",
         "features/user/ui/UserShell/UserShellView.tsx",
         "features/work/WorkEditor/credits/SortableCreditRow.tsx"
       ],
@@ -4519,12 +4478,10 @@
         "features/editor/tiptap/p5/P5CapabilityStoryPreview.tsx",
         "features/form/FormSettingsContent.tsx",
         "features/media-download/FileDownloadPolicyEditor.tsx",
-        "features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
         "features/my/MyPostsPageView.tsx",
         "features/my/MySeriesPageView.tsx",
         "features/my/ui/MyArtistsTable/MyArtistsTableCellView.tsx",
         "features/policy/LegalPolicyListClient.tsx",
-        "features/translation/admin/TranslationJobsPage.tsx",
         "features/user/ui/UserProfile/UserProfileView.tsx"
       ],
       "catalogAdapters": [],
@@ -4766,7 +4723,6 @@
         "features/campaign/CampaignScheduleForm.tsx",
         "features/data-table/MultiFilterEditorView.tsx",
         "features/data-table/MultiSortView.tsx",
-        "features/editor/AIMenu/AIMenu.tsx",
         "features/editor/ExternalVideoInsertDialog.tsx",
         "features/editor/components/EditorFileInsertView.tsx",
         "features/editor/components/EditorFileLibraryPickerView.tsx",
@@ -4795,7 +4751,6 @@
         "features/menu/AdminMenusPage.tsx",
         "features/menu/MenuItemsEditor.tsx",
         "features/menu/MenuTargetItemsEditor.tsx",
-        "features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
         "features/my/LocalBackupsView.tsx",
         "features/my/McpOAuthGrantSettings.tsx",
         "features/my/PasskeySettingsSection.tsx",
@@ -4848,10 +4803,8 @@
         "features/translation/ContentLocaleNotice.tsx",
         "features/translation/TranslationLocaleControl.tsx",
         "features/translation/TranslationPanelSectionCard.tsx",
-        "features/translation/admin/TranslationJobsPage.tsx",
         "features/translation/admin/TranslationOverviewPage.tsx",
         "features/translation/admin/TranslationSettingsPage.tsx",
-        "features/translation/settings/TranslationProviderModal.tsx",
         "features/user/ui/ProfileAvatarControl/ProfileAvatarControl.tsx",
         "features/user/ui/UserProfile/UserProfileView.tsx",
         "features/version-history/ui/VersionHistoryDrawerView.tsx",
@@ -4970,8 +4923,7 @@
         "features/release/ReleaseEditor/ReleaseTracksSection.tsx",
         "features/series/SeriesDetail.tsx",
         "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
-        "features/translation/admin/TranslationSettingsPage.tsx",
-        "features/translation/settings/TranslationProviderModal.tsx"
+        "features/translation/admin/TranslationSettingsPage.tsx"
       ],
       "catalogAdapters": [],
       "tests": [],
@@ -6739,7 +6691,6 @@
         "features/campaign/CampaignAnalyticsPage.tsx",
         "features/data-table/MultiFilterEditorView.tsx",
         "features/data-table/MultiSortView.tsx",
-        "features/editor/AIMenu/AIMenu.tsx",
         "features/editor/blocks/FileBlock/FileBlockView.tsx",
         "features/editor/components/MediaProcessingSurface.tsx",
         "features/editor/tiptap/TiptapAuthoringControls.tsx",
@@ -6790,7 +6741,6 @@
         "features/shell/ui/Shell/ShellIslands.tsx",
         "features/shell/ui/Shell/ShellLayout.tsx",
         "features/shell/ui/Shell/ShellMobileNavigation.tsx",
-        "features/translation/admin/TranslationJobsPage.tsx",
         "features/translation/admin/TranslationOverviewPage.tsx",
         "features/user/UserShell/UserShell.tsx",
         "features/user/ui/UserInlineLinks/UserInlineLinksView.tsx",
@@ -8794,7 +8744,7 @@
         }
       ],
       "typeAliasEvidence": [],
-      "productionConsumers": ["features/editor/AIMenu/AIMenu.tsx"],
+      "productionConsumers": [],
       "catalogAdapters": [],
       "tests": ["components/core/FloatingPanel/FloatingPanel.test.tsx"],
       "stories": ["components/core/FloatingPanel/FloatingPanel.stories.tsx"],
@@ -9006,7 +8956,6 @@
         "features/data-table/MultiSortView.tsx",
         "features/data-table/ServerDataTable/ServerDataTableMultiFilter.tsx",
         "features/data-table/ServerDataTable/ServerDataTableMultiSort.tsx",
-        "features/editor/AIMenu/AIMenu.tsx",
         "features/editor/tiptap/TiptapBlockContainerNodeView.tsx",
         "features/editor/tiptap/TiptapBlockMenu.tsx",
         "features/editor/tiptap/code/CodeBlockSurface.tsx",
@@ -9036,7 +8985,6 @@
         "features/media/ui/ExternalVideoView.tsx",
         "features/menu/AdminMenusPage.tsx",
         "features/menu/MenuItemsEditor.tsx",
-        "features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
         "features/metadata/ui/OgImagePreviewView.tsx",
         "features/metadata/ui/UrlSectionView.tsx",
         "features/my/PasskeySettingsSection.tsx",
@@ -9075,7 +9023,6 @@
         "features/social-links/ui/SocialLinkInputView.tsx",
         "features/social-links/ui/SocialLinksDisplayView.tsx",
         "features/social-links/ui/SocialLinksEditorView.tsx",
-        "features/translation/admin/TranslationSettingsPage.tsx",
         "features/user/ui/UserProfile/UserProfileView.tsx",
         "features/work/WorkEditor/WorkClientsSection.tsx",
         "features/work/WorkEditor/credits/SortableCreditGroupHeader.tsx",
@@ -11641,8 +11588,7 @@
         "features/page/blocks/work-table/Editor.tsx",
         "features/place/CreatePlaceModal.tsx",
         "features/place/PlaceDetailForm.tsx",
-        "features/program-event/ProgramEventEditor/ProgramEventEditor.tsx",
-        "features/translation/settings/TranslationProviderModal.tsx"
+        "features/program-event/ProgramEventEditor/ProgramEventEditor.tsx"
       ],
       "catalogAdapters": [],
       "tests": ["components/core/Input/InputContracts.test.tsx", "components/core/Input/InputSizeProvider.test.tsx"],
@@ -11694,8 +11640,7 @@
         "features/form/FormSettingsContent.tsx",
         "features/page/blocks/form/ViewClient.tsx",
         "features/share/SharePasswordView.tsx",
-        "features/share/ui/ShareLinkSectionView.tsx",
-        "features/translation/settings/TranslationProviderModal.tsx"
+        "features/share/ui/ShareLinkSectionView.tsx"
       ],
       "catalogAdapters": [],
       "tests": ["components/core/Input/InputContracts.test.tsx", "components/core/Input/InputWrappers.test.tsx"],
@@ -12513,7 +12458,6 @@
         "features/social-links/ui/SocialLinkInputView.tsx",
         "features/translation/TranslationLocaleControl.tsx",
         "features/translation/admin/TranslationSettingsPage.tsx",
-        "features/translation/settings/TranslationProviderModal.tsx",
         "features/user/ui/UserProfile/UserProfileView.tsx",
         "features/work/WorkEditor/WorkCreditsSection.tsx"
       ],
@@ -12720,8 +12664,6 @@
         "features/page/blocks/works-gallery/Editor.tsx",
         "features/post/PostEditor/PostEditor.tsx",
         "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
-        "features/translation/admin/TranslationSettingsPage.tsx",
-        "features/translation/settings/TranslationProviderModal.tsx",
         "features/work/WorkEditor/WorkMetaForm.tsx"
       ],
       "catalogAdapters": [],
@@ -12800,7 +12742,6 @@
       "productionConsumers": [
         "features/admin/oauth-app/OAuthAppEditorView.tsx",
         "features/form/FormBuilder/ConditionEditor.tsx",
-        "features/translation/admin/TranslationSettingsPage.tsx",
         "features/work/WorkEditor/WorkMetaForm.tsx"
       ],
       "catalogAdapters": [],
@@ -12907,7 +12848,6 @@
         "features/campaign/CampaignDeliveryDialogs.tsx",
         "features/campaign/CampaignEditPage.tsx",
         "features/data-table/MultiFilterValueInput.tsx",
-        "features/editor/AIMenu/AIMenu.tsx",
         "features/editor/ExternalVideoInsertDialog.tsx",
         "features/editor/tiptap/TiptapAuthoringControls.tsx",
         "features/editor/tiptap/code/CodeBlockSurface.tsx",
@@ -12954,7 +12894,6 @@
         "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
         "features/social-links/ui/SocialLinkInputView.tsx",
         "features/translation/PageSectionLocalePropFields.tsx",
-        "features/translation/settings/TranslationProviderModal.tsx",
         "features/user/ui/UserProfile/UserProfileView.tsx",
         "features/work/WorkEditor/WorkCreditsSection.tsx",
         "features/work/WorkEditor/WorkMetaForm.tsx",
@@ -13591,7 +13530,6 @@
         "features/data-table/ServerDataTable/ServerDataTableSearchRuntime.tsx",
         "features/document-layout/ui/ContentChrome.tsx",
         "features/document-layout/ui/ContentLayoutFieldView.tsx",
-        "features/editor/AIMenu/AIMenu.tsx",
         "features/editor/ExternalVideoInsertDialog.tsx",
         "features/editor/MapInsertModal.tsx",
         "features/editor/blocks/FileBlock/FileBlockView.tsx",
@@ -13810,11 +13748,9 @@
         "features/translation/PageSectionLocalePropFields.tsx",
         "features/translation/TranslationLocaleRow.tsx",
         "features/translation/TranslationPanelSectionCard.tsx",
-        "features/translation/admin/TranslationJobsPage.tsx",
         "features/translation/admin/TranslationOverviewPage.tsx",
         "features/translation/admin/TranslationSettingsPage.tsx",
         "features/translation/openTranslationDeleteConfirm.tsx",
-        "features/translation/settings/TranslationProviderModal.tsx",
         "features/translation/useTranslationLocaleCommands.tsx",
         "features/user/UserProfilePageView.tsx",
         "features/user/UserPublishedPostsTable.tsx",
@@ -15129,7 +15065,6 @@
         "features/release/ReleaseEditor/ReleaseLabelsSection.tsx",
         "features/release/ReleaseEditor/ReleaseTrackCreateView.tsx",
         "features/series/SeriesManagersModal.tsx",
-        "features/translation/settings/TranslationProviderModal.tsx",
         "features/user/ui/ProfileAvatarControl/ProfileAvatarControl.tsx"
       ],
       "catalogAdapters": ["stories/public/fixtures/PublicShellStoryHarness.tsx", "stories/shared/PublicPreview.tsx"],
@@ -15226,8 +15161,7 @@
         "features/release/ReleaseEditor/ReleaseArtistsSectionView.tsx",
         "features/release/ReleaseEditor/ReleaseCreditsSection.tsx",
         "features/release/ReleaseEditor/ReleaseLabelsSection.tsx",
-        "features/release/ReleaseEditor/ReleaseTrackCreateView.tsx",
-        "features/translation/settings/TranslationProviderModal.tsx"
+        "features/release/ReleaseEditor/ReleaseTrackCreateView.tsx"
       ],
       "catalogAdapters": [],
       "tests": [],
@@ -15927,7 +15861,6 @@
         "features/menu/AdminMenusPage.tsx",
         "features/share/SharePasswordView.tsx",
         "features/site/SiteSettingsForm/SiteSettingsForm.tsx",
-        "features/translation/admin/TranslationJobsPage.tsx",
         "features/translation/admin/TranslationOverviewPage.tsx",
         "features/translation/admin/TranslationSettingsPage.tsx"
       ],
@@ -16925,7 +16858,6 @@
         "features/cookie-consent/ui/CookieConsentBannerView.tsx",
         "features/data-table/MultiFilterEditorView.tsx",
         "features/data-table/MultiSortView.tsx",
-        "features/editor/AIMenu/AIMenu.tsx",
         "features/editor/components/MediaProcessingSurface.tsx",
         "features/editor/components/UnifiedFileAttachmentPagePreview.tsx",
         "features/editor/tiptap/code/CodeBlockSurface.tsx",
@@ -16998,7 +16930,6 @@
         "features/translation/ActiveEditLocaleContentPreviewView.tsx",
         "features/translation/TranslationPanelSectionCard.tsx",
         "features/translation/admin/TranslationOverviewPage.tsx",
-        "features/translation/admin/TranslationSettingsPage.tsx",
         "features/work/WorkEditor/WorkClientsSection.tsx",
         "features/work/WorkEditor/WorkCreditsSection.tsx",
         "features/work/WorkEditor/WorkEditor.tsx",
@@ -17100,7 +17031,6 @@
         "features/release/ReleaseEditor/ReleaseTracksSection.tsx",
         "features/share/ui/ShareLinkSectionView.tsx",
         "features/translation/TranslationPanelSectionCard.tsx",
-        "features/translation/settings/TranslationProviderModal.tsx",
         "features/work/WorkEditor/WorkClientsSection.tsx",
         "features/work/WorkEditor/WorkMetaForm.tsx"
       ],
@@ -19299,7 +19229,6 @@
         "features/form/SubmissionDeleteButton.tsx",
         "features/label/LabelEditor/ui/LabelParticipantsDialogView.tsx",
         "features/media-download/AuthorizedDownloadAction.tsx",
-        "features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
         "features/metadata/ui/OgImagePreviewView.tsx",
         "features/metadata/ui/UrlSectionView.tsx",
         "features/my/PasskeySettingsSection.tsx",
@@ -19479,10 +19408,7 @@
         }
       ],
       "typeAliasEvidence": [],
-      "productionConsumers": [
-        "features/translation/admin/TranslationJobsPage.tsx",
-        "features/translation/admin/TranslationOverviewPage.tsx"
-      ],
+      "productionConsumers": ["features/translation/admin/TranslationOverviewPage.tsx"],
       "catalogAdapters": [],
       "tests": ["components/core/Typography/LocaleCode.test.tsx"],
       "stories": ["components/core/Typography/LocaleCode.stories.tsx"],
@@ -19746,9 +19672,7 @@
         "features/series/SeriesPublicView.tsx",
         "features/translation/ActiveEditLocaleContentPreview.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
-        "features/translation/admin/TranslationJobsPage.tsx",
         "features/translation/admin/TranslationOverviewPage.tsx",
-        "features/translation/admin/TranslationSettingsPage.tsx",
         "features/version-history/ui/VersionHistoryDrawerView.tsx"
       ],
       "catalogAdapters": [],
@@ -20063,7 +19987,6 @@
         "features/document-layout/ui/ContentChrome.tsx",
         "features/document-layout/ui/ContentLayoutFieldView.tsx",
         "features/document-layout/ui/EntityDetailLayout.tsx",
-        "features/editor/AIMenu/AIMenu.tsx",
         "features/editor/components/EditorFileInsertView.tsx",
         "features/editor/components/EditorFileLibraryPickerView.tsx",
         "features/editor/components/MediaProcessingSurface.tsx",
@@ -20124,7 +20047,6 @@
         "features/menu/MenuTargetItemsEditor.tsx",
         "features/menu/VisibilityEditor.tsx",
         "features/metadata/MetadataPanel/MetadataPanel.tsx",
-        "features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
         "features/metadata/ui/OgGenerationRunProgressView.tsx",
         "features/metadata/ui/OgImagePreviewView.tsx",
         "features/my/CookieConsentSettings.tsx",
@@ -20241,7 +20163,6 @@
         "features/translation/ContentLocaleNotice.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
         "features/translation/TranslationLocaleRow.tsx",
-        "features/translation/admin/TranslationJobsPage.tsx",
         "features/translation/admin/TranslationOverviewPage.tsx",
         "features/translation/admin/TranslationSettingsPage.tsx",
         "features/translation/openTranslationDeleteConfirm.tsx",
@@ -32648,7 +32569,6 @@
         "features/policy/LegalPolicyListClient.tsx",
         "features/post/Comment/CommentItem.tsx",
         "features/release/ReleaseEditor/ReleaseTracksSection.tsx",
-        "features/translation/admin/TranslationSettingsPage.tsx",
         "features/user/ui/UserProfile/UserProfileView.tsx",
         "features/version-history/ui/VersionHistoryDrawerView.tsx"
       ],
@@ -34758,7 +34678,6 @@
         "features/series/SeriesDetail.tsx",
         "features/series/SeriesPublicView.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
-        "features/translation/admin/TranslationJobsPage.tsx",
         "features/translation/admin/TranslationOverviewPage.tsx",
         "features/user/UserProfileView.tsx",
         "features/user/UserPublishedPostsTableContent.tsx",
@@ -35345,165 +35264,6 @@
       "tests": [],
       "stories": [],
       "composedJsx": ["Alert", "IconEyeOff", "div"]
-    },
-    {
-      "file": "features/editor/AIMenu/AIMenu.tsx",
-      "owner": "Feature/editor",
-      "exports": [
-        {
-          "name": "AIMenu",
-          "kind": "function"
-        },
-        {
-          "name": "AIAssistant",
-          "kind": "function"
-        }
-      ],
-      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [
-        {
-          "name": "AIMenuItem",
-          "extends": [],
-          "properties": [
-            {
-              "name": "label",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "icon",
-              "optional": false,
-              "type": "React.ReactNode"
-            },
-            {
-              "name": "action",
-              "optional": false,
-              "type": "string"
-            }
-          ]
-        },
-        {
-          "name": "AIMenuProps",
-          "extends": [],
-          "properties": [
-            {
-              "name": "client",
-              "optional": false,
-              "type": "AIEditorAssistantClient"
-            },
-            {
-              "name": "context",
-              "optional": false,
-              "type": "AIEditorContext"
-            },
-            {
-              "name": "target",
-              "optional": false,
-              "type": "AIDocumentTarget"
-            },
-            {
-              "name": "onClose",
-              "optional": false,
-              "type": "() => void"
-            },
-            {
-              "name": "dragHandleClassName",
-              "optional": true,
-              "type": "string"
-            },
-            {
-              "name": "initialAction",
-              "optional": true,
-              "type": "string"
-            }
-          ]
-        },
-        {
-          "name": "AIEditorTurnBinding",
-          "extends": ["extends AIEditorTurnScope"],
-          "properties": [
-            {
-              "name": "initialAction",
-              "optional": true,
-              "type": "string"
-            },
-            {
-              "name": "onApproveFailed",
-              "optional": false,
-              "type": "() => void"
-            }
-          ]
-        },
-        {
-          "name": "AIAssistantProps",
-          "extends": [],
-          "properties": [
-            {
-              "name": "client",
-              "optional": false,
-              "type": "AIEditorAssistantClient"
-            },
-            {
-              "name": "initialContext",
-              "optional": false,
-              "type": "AIEditorContext"
-            },
-            {
-              "name": "initialAction",
-              "optional": true,
-              "type": "string"
-            },
-            {
-              "name": "position",
-              "optional": false,
-              "type": "{ top: number; left: number }"
-            },
-            {
-              "name": "onClose",
-              "optional": false,
-              "type": "() => void"
-            },
-            {
-              "name": "target",
-              "optional": false,
-              "type": "AIDocumentTarget"
-            }
-          ]
-        }
-      ],
-      "typeAliasEvidence": [],
-      "productionConsumers": ["features/editor/tiptap/ai/TiptapAIController.tsx"],
-      "catalogAdapters": [],
-      "tests": ["features/editor/AIMenu/AIMenu.test.tsx"],
-      "stories": [],
-      "composedJsx": [
-        "AIMenu",
-        "Button",
-        "DsLayoutInline",
-        "DsLayoutInset",
-        "DsLayoutStack",
-        "DsText",
-        "EditorDsSectionCard",
-        "FloatingPanel",
-        "IconAbc",
-        "IconArrowRight",
-        "IconBulb",
-        "IconButton",
-        "IconCheck",
-        "IconFileText",
-        "IconGripVertical",
-        "IconLanguage",
-        "IconPencil",
-        "IconPlayerPlay",
-        "IconRefresh",
-        "IconSparkles",
-        "IconWand",
-        "IconX",
-        "Loader",
-        "ScrollArea.Autosize",
-        "TextInput",
-        "div"
-      ]
     },
     {
       "file": "features/editor/EditorAuthoringMode.tsx",
@@ -37354,11 +37114,6 @@
               "type": "(blockId: string, context?: TiptapSlashActionContext) => void"
             },
             {
-              "name": "onAIAssistantActivate",
-              "optional": true,
-              "type": "(context: TiptapSlashActionContext) => void"
-            },
-            {
               "name": "onExternalVideoActivate",
               "optional": true,
               "type": "(context: TiptapSlashActionContext) => void"
@@ -37655,32 +37410,6 @@
       "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
       "propsEvidence": [
         {
-          "name": "TiptapEditorAIOptions",
-          "extends": [],
-          "properties": [
-            {
-              "name": "client",
-              "optional": true,
-              "type": "AIEditorAssistantClient"
-            },
-            {
-              "name": "target",
-              "optional": false,
-              "type": "AIDocumentTarget"
-            },
-            {
-              "name": "supportedNodeTypes",
-              "optional": true,
-              "type": "TiptapAINodeTypes"
-            },
-            {
-              "name": "onClose",
-              "optional": true,
-              "type": "() => void"
-            }
-          ]
-        },
-        {
           "name": "TiptapEditorSharedProps",
           "extends": [],
           "properties": [
@@ -37723,11 +37452,6 @@
               "name": "externalVideo",
               "optional": true,
               "type": "TiptapExternalVideoOptions | false"
-            },
-            {
-              "name": "ai",
-              "optional": true,
-              "type": "TiptapEditorAIOptions | false"
             },
             {
               "name": "map",
@@ -37857,11 +37581,6 @@
               "type": "CodeBlockSelectionMenuLabels"
             },
             {
-              "name": "ai",
-              "optional": false,
-              "type": "TiptapEditorProps['ai']"
-            },
-            {
               "name": "mapSelectionRegistry",
               "optional": false,
               "type": "TiptapMapSelectionMenuRegistry"
@@ -37926,7 +37645,6 @@
         "ExecutableSelectionMenuRegistryProvider",
         "ExternalVideoInsertDialog",
         "IsolatedEditorContent",
-        "TiptapAIAssistantSurface",
         "TiptapAuthoringControls",
         "TiptapContextualMenuRouter",
         "TiptapExecutableSelectionBubbleMenu",
@@ -37968,161 +37686,6 @@
         "table",
         "tbody"
       ]
-    },
-    {
-      "file": "features/editor/tiptap/ai/TiptapAIAssistant.tsx",
-      "owner": "Feature/editor",
-      "exports": [
-        {
-          "name": "TiptapAIAssistant",
-          "kind": "function"
-        }
-      ],
-      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [
-        {
-          "name": "TiptapAIAssistantProps",
-          "extends": [],
-          "properties": [
-            {
-              "name": "editor",
-              "optional": false,
-              "type": "Editor"
-            },
-            {
-              "name": "client",
-              "optional": false,
-              "type": "AIEditorAssistantClient"
-            },
-            {
-              "name": "supportedNodeTypes",
-              "optional": true,
-              "type": "TiptapAINodeTypes"
-            },
-            {
-              "name": "target",
-              "optional": false,
-              "type": "AIDocumentTarget"
-            },
-            {
-              "name": "editable",
-              "optional": true,
-              "type": "boolean"
-            },
-            {
-              "name": "allowGenerate",
-              "optional": true,
-              "type": "boolean"
-            },
-            {
-              "name": "onClose",
-              "optional": true,
-              "type": "() => void"
-            }
-          ]
-        }
-      ],
-      "typeAliasEvidence": [],
-      "productionConsumers": [],
-      "catalogAdapters": [],
-      "tests": ["features/editor/tiptap/ai/TiptapAIAssistant.test.tsx"],
-      "stories": [],
-      "composedJsx": ["TiptapAIAssistantSurface"]
-    },
-    {
-      "file": "features/editor/tiptap/ai/TiptapAIController.tsx",
-      "owner": "Feature/editor",
-      "exports": [
-        {
-          "name": "TiptapAIAssistantSurface",
-          "kind": "function"
-        }
-      ],
-      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [
-        {
-          "name": "TiptapAIControllerOptions",
-          "extends": [],
-          "properties": [
-            {
-              "name": "editor",
-              "optional": false,
-              "type": "Editor | null"
-            },
-            {
-              "name": "supportedNodeTypes",
-              "optional": true,
-              "type": "TiptapAINodeTypes"
-            },
-            {
-              "name": "editable",
-              "optional": true,
-              "type": "boolean"
-            },
-            {
-              "name": "allowGenerate",
-              "optional": true,
-              "type": "boolean"
-            },
-            {
-              "name": "onClose",
-              "optional": true,
-              "type": "() => void"
-            }
-          ]
-        },
-        {
-          "name": "TiptapAIController",
-          "extends": [],
-          "properties": [
-            {
-              "name": "context",
-              "optional": false,
-              "type": "TiptapAIContext | null"
-            },
-            {
-              "name": "close",
-              "optional": false,
-              "type": "() => void"
-            },
-            {
-              "name": "open",
-              "optional": false,
-              "type": "(context?: TiptapAIContext) => boolean"
-            }
-          ]
-        },
-        {
-          "name": "TiptapAIAssistantSurfaceProps",
-          "extends": [],
-          "properties": [
-            {
-              "name": "controller",
-              "optional": false,
-              "type": "TiptapAIController"
-            },
-            {
-              "name": "client",
-              "optional": false,
-              "type": "AIEditorAssistantClient"
-            },
-            {
-              "name": "target",
-              "optional": false,
-              "type": "AIDocumentTarget"
-            }
-          ]
-        }
-      ],
-      "typeAliasEvidence": [],
-      "productionConsumers": [
-        "features/editor/tiptap/TiptapEditor.tsx",
-        "features/editor/tiptap/ai/TiptapAIAssistant.tsx"
-      ],
-      "catalogAdapters": [],
-      "tests": ["features/editor/tiptap/ai/TiptapAIAssistant.test.tsx"],
-      "stories": [],
-      "composedJsx": ["AIAssistant"]
     },
     {
       "file": "features/editor/tiptap/code-editor/MonacoSourceEditor.tsx",
@@ -39346,11 +38909,6 @@
               "name": "inlineMath",
               "optional": false,
               "type": "string"
-            },
-            {
-              "name": "ai",
-              "optional": false,
-              "type": "string"
             }
           ]
         },
@@ -39395,7 +38953,6 @@
         "DropdownMenu.Dropdown",
         "DropdownMenu.Item",
         "EditorToolbarDropdownTarget",
-        "EditorToolbarShortcutText",
         "IconButton",
         "IconCheck",
         "IconCode",
@@ -39407,7 +38964,6 @@
         "IconLinkOff",
         "IconMathFunction",
         "IconPencil",
-        "IconSparkles",
         "IconStrikethrough",
         "IconX",
         "LinkActions",
@@ -39421,8 +38977,7 @@
         "TextInput",
         "ToolbarSurface",
         "div",
-        "form",
-        "span"
+        "form"
       ]
     },
     {
@@ -42406,11 +41961,7 @@
         "features/editor/toolbars/FormattingButtons.tsx"
       ],
       "catalogAdapters": [],
-      "tests": [
-        "features/editor/tiptap/ai/TiptapAIAssistant.test.tsx",
-        "features/editor/tiptap/wire-schema.test.ts",
-        "features/editor/toolbars/EditorToolbarTooltip.test.tsx"
-      ],
+      "tests": ["features/editor/tiptap/wire-schema.test.ts", "features/editor/toolbars/EditorToolbarTooltip.test.tsx"],
       "stories": [],
       "composedJsx": [
         "DropdownMenu.Target",
@@ -51625,15 +51176,10 @@
             {
               "name": "entityType",
               "optional": false,
-              "type": "MetadataEntityType"
-            },
-            {
-              "name": "entityId",
-              "optional": false,
               "type": "string"
             },
             {
-              "name": "title",
+              "name": "entityId",
               "optional": false,
               "type": "string"
             },
@@ -51648,46 +51194,6 @@
               "type": "boolean"
             },
             {
-              "name": "hideAiActions",
-              "optional": true,
-              "type": "boolean"
-            },
-            {
-              "name": "aiPromptAdditions",
-              "optional": true,
-              "type": "string[]"
-            },
-            {
-              "name": "aiTarget",
-              "optional": true,
-              "type": "AIDocumentTarget"
-            },
-            {
-              "name": "aiClient",
-              "optional": true,
-              "type": "AIEditorAssistantClient"
-            },
-            {
-              "name": "provider",
-              "optional": true,
-              "type": "HocuspocusProvider | null"
-            },
-            {
-              "name": "doc",
-              "optional": true,
-              "type": "Y.Doc | null"
-            },
-            {
-              "name": "currentMemberId",
-              "optional": true,
-              "type": "string"
-            },
-            {
-              "name": "currentMemberDisplayName",
-              "optional": true,
-              "type": "string"
-            },
-            {
               "name": "onSummaryChange",
               "optional": true,
               "type": "(summary: string) => void"
@@ -51695,16 +51201,7 @@
           ]
         }
       ],
-      "typeAliasEvidence": [
-        {
-          "name": "SummaryAIStatus",
-          "type": "'idle' | 'generating' | 'ready' | 'applying' | 'applied'"
-        },
-        {
-          "name": "SummaryTranslate",
-          "type": "ReturnType<typeof useTranslations<'summaryField'>>"
-        }
-      ],
+      "typeAliasEvidence": [],
       "productionConsumers": [
         "features/page/PageEditor/PageEditor.tsx",
         "features/post/PostEditor/PostEditor.tsx",
@@ -51714,21 +51211,7 @@
       "catalogAdapters": [],
       "tests": ["features/metadata/SummaryFieldCard/SummaryFieldCard.test.tsx"],
       "stories": [],
-      "composedJsx": [
-        "Button",
-        "DsLayoutInline",
-        "DsLayoutStack",
-        "DsText",
-        "IconButton",
-        "IconCircleCheck",
-        "IconSparkles",
-        "SectionCard",
-        "SectionHeader",
-        "StatusBadge",
-        "Textarea",
-        "Tooltip",
-        "span"
-      ]
+      "composedJsx": ["DsLayoutStack", "SectionCard", "SectionHeader", "Textarea"]
     },
     {
       "file": "features/metadata/UrlSection.tsx",
@@ -55088,11 +54571,6 @@
             },
             {
               "name": "pageId",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "currentMemberId",
               "optional": false,
               "type": "string"
             },
@@ -65380,11 +64858,6 @@
               "type": "string"
             },
             {
-              "name": "currentMemberId",
-              "optional": false,
-              "type": "string"
-            },
-            {
               "name": "initialTitle",
               "optional": false,
               "type": "string"
@@ -71460,7 +70933,6 @@
         "features/translation/ActiveEditLocaleContentPreviewView.tsx",
         "features/translation/EntityTranslationsPanel.tsx",
         "features/translation/LocalizedRichTextFragmentEditor.tsx",
-        "features/translation/admin/TranslationJobsPage.tsx",
         "features/translation/admin/TranslationOverviewPage.tsx",
         "features/translation/admin/TranslationSettingsPage.tsx",
         "features/user/UserAvatarUploader.tsx",
@@ -73322,17 +72794,12 @@
       "tests": ["features/translation/EntityTranslationsPanel.test.tsx"],
       "stories": ["stories/pages/FormEditorPage.stories.tsx"],
       "composedJsx": [
-        "DsLayoutInline",
         "DsLayoutStack",
         "DsText",
         "Field",
         "IconEye",
         "IconPencil",
-        "IconPlayerPause",
-        "IconRefresh",
-        "IconSparkles",
         "IconTrash",
-        "LabelBadge",
         "PageLoader",
         "SupportingText",
         "ToolbarCommand",
@@ -73405,11 +72872,6 @@
               "name": "entityType",
               "optional": true,
               "type": "TranscodeEntityType | null"
-            },
-            {
-              "name": "aiTarget",
-              "optional": true,
-              "type": "AIDocumentTarget"
             }
           ]
         }
@@ -73503,11 +72965,6 @@
               "name": "allowStructuralEdits",
               "optional": true,
               "type": "boolean"
-            },
-            {
-              "name": "aiTarget",
-              "optional": true,
-              "type": "AIDocumentTarget"
             },
             {
               "name": "fallback",
@@ -73727,11 +73184,6 @@
               "type": "ReactNode"
             },
             {
-              "name": "persistentActions",
-              "optional": true,
-              "type": "ReactNode"
-            },
-            {
               "name": "children",
               "optional": false,
               "type": "ReactNode"
@@ -73807,67 +73259,12 @@
       "typeAliasEvidence": [],
       "productionConsumers": [
         "features/translation/EntityTranslationsPanel.tsx",
-        "features/translation/useEntityTranslationData.ts",
-        "features/translation/useTranslationGenerationAvailability.ts"
+        "features/translation/useEntityTranslationData.ts"
       ],
       "catalogAdapters": [],
       "tests": ["features/menu/query-invalidation.test.ts"],
       "stories": ["stories/pages/FormEditorPage.stories.tsx", "stories/pages/PostEditorPage.stories.tsx"],
       "composedJsx": ["TranslationServicesContext.Provider"]
-    },
-    {
-      "file": "features/translation/admin/TranslationJobsPage.tsx",
-      "owner": "Feature/translation",
-      "exports": [
-        {
-          "name": "TranslationJobsPage",
-          "kind": "function"
-        },
-        {
-          "name": "Page",
-          "kind": "function"
-        },
-        {
-          "name": "default",
-          "kind": "default-export",
-          "local": "Page"
-        }
-      ],
-      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [],
-      "typeAliasEvidence": [
-        {
-          "name": "TranslationJobsPageClient",
-          "type": "Pick< ReturnType<typeof createTranslationClient>, 'listTranslationJobs' | 'cancelTranslationJob' >"
-        }
-      ],
-      "productionConsumers": [],
-      "catalogAdapters": [],
-      "tests": [],
-      "stories": ["stories/pages/TranslationAdmin.stories.tsx"],
-      "composedJsx": [
-        "Button",
-        "DsLayoutInline",
-        "DsLayoutStack",
-        "DsText",
-        "IconPlayerPause",
-        "IconRefresh",
-        "IconSettings2",
-        "LabelBadge",
-        "LocaleCode",
-        "PageHeader",
-        "PageLoader",
-        "StatusBadge",
-        "SupportingText",
-        "Table",
-        "Table.ScrollContainer",
-        "Table.Tbody",
-        "Table.Td",
-        "Table.Th",
-        "Table.Thead",
-        "Table.Tr",
-        "TranslationJobsPage"
-      ]
     },
     {
       "file": "features/translation/admin/TranslationOverviewPage.tsx",
@@ -73907,7 +73304,6 @@
         "DsLayoutStack",
         "DsSectionCard",
         "DsText",
-        "IconChecklist",
         "IconRefresh",
         "IconSettings2",
         "LabelBadge",
@@ -73949,7 +73345,7 @@
       "typeAliasEvidence": [
         {
           "name": "TranslationSettingsPageClient",
-          "type": "Pick< ReturnType<typeof createTranslationClient>, | 'getTranslationSettings' | 'listTranslationLocales' | 'listTranslationProviders' | 'updateTranslationSettings' | 'createTranslationProvider' | 'updateTranslationProvide"
+          "type": "Pick< ReturnType<typeof createTranslationClient>, 'getTranslationSettings' | 'listTranslationLocales' | 'updateTranslationSettings' >"
         }
       ],
       "productionConsumers": [],
@@ -73958,104 +73354,17 @@
       "stories": ["stories/pages/TranslationAdmin.stories.tsx"],
       "composedJsx": [
         "Button",
-        "ConfirmationDialog",
         "DsLayoutInline",
         "DsLayoutStack",
-        "DsSectionCard",
         "DsText",
-        "IconButton",
-        "IconChecklist",
         "IconDeviceFloppy",
-        "IconEdit",
-        "IconPlus",
         "IconSettings2",
-        "IconTrash",
-        "LabelBadge",
         "PageHeader",
         "PageLoader",
         "SaveButton",
         "Select",
         "SettingsSection",
-        "SupportingText",
-        "Switch",
-        "TagsInput",
-        "TranslationProviderModal",
         "TranslationSettingsPage"
-      ]
-    },
-    {
-      "file": "features/translation/settings/TranslationProviderModal.tsx",
-      "owner": "Feature/translation",
-      "exports": [
-        {
-          "name": "TranslationProviderModal",
-          "kind": "function"
-        }
-      ],
-      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
-      "propsEvidence": [
-        {
-          "name": "Props",
-          "extends": [],
-          "properties": [
-            {
-              "name": "opened",
-              "optional": false,
-              "type": "boolean"
-            },
-            {
-              "name": "editing",
-              "optional": false,
-              "type": "boolean"
-            },
-            {
-              "name": "form",
-              "optional": false,
-              "type": "ProviderFormState"
-            },
-            {
-              "name": "saving",
-              "optional": false,
-              "type": "boolean"
-            },
-            {
-              "name": "onChange",
-              "optional": false,
-              "type": "(form: ProviderFormState) => void"
-            },
-            {
-              "name": "onClose",
-              "optional": false,
-              "type": "() => void"
-            },
-            {
-              "name": "onSubmit",
-              "optional": false,
-              "type": "() => void"
-            }
-          ]
-        }
-      ],
-      "typeAliasEvidence": [],
-      "productionConsumers": ["features/translation/admin/TranslationSettingsPage.tsx"],
-      "catalogAdapters": [],
-      "tests": [],
-      "stories": [],
-      "composedJsx": [
-        "Button",
-        "ContentModal",
-        "DialogActions",
-        "DsLayoutInline",
-        "DsLayoutInset",
-        "DsLayoutStack",
-        "LayoutInset",
-        "NumberInput",
-        "PasswordInput",
-        "SaveButton",
-        "SectionHeader",
-        "Select",
-        "Switch",
-        "TextInput"
       ]
     },
     {
@@ -75975,11 +75284,6 @@
           "properties": [
             {
               "name": "workId",
-              "optional": false,
-              "type": "string"
-            },
-            {
-              "name": "currentMemberId",
               "optional": false,
               "type": "string"
             },
@@ -77963,8 +77267,6 @@
       "domain": "editor",
       "category": "content",
       "sourceFiles": [
-        "features/editor/AIMenu/AIMenu.tsx",
-        "features/editor/AIMenu/ai-editor-turn-store.ts",
         "features/editor/EditorAuthoringMode.tsx",
         "features/editor/EditorHeader/index.ts",
         "features/editor/EditorPermissionRevokedDialog.tsx",
@@ -78028,10 +77330,6 @@
         "features/editor/tiptap/TiptapFileBlockNodeView.tsx",
         "features/editor/tiptap/TiptapPlayground.story-fixtures.ts",
         "features/editor/tiptap/TiptapSnapshot.tsx",
-        "features/editor/tiptap/ai/TiptapAIAssistant.tsx",
-        "features/editor/tiptap/ai/TiptapAIController.tsx",
-        "features/editor/tiptap/ai/index.ts",
-        "features/editor/tiptap/ai/tiptap-ai.ts",
         "features/editor/tiptap/block-commands.ts",
         "features/editor/tiptap/block-room-payload-projection.ts",
         "features/editor/tiptap/block-room-presence-types.ts",
@@ -78206,7 +77504,6 @@
         "features/editor/useEditorPermissionRevocation.ts"
       ],
       "components": [
-        "features/editor/AIMenu/AIMenu.tsx",
         "features/editor/EditorAuthoringMode.tsx",
         "features/editor/EditorPermissionRevokedDialog.tsx",
         "features/editor/EditorSessionExpiredDialog.tsx",
@@ -78234,8 +77531,6 @@
         "features/editor/tiptap/TiptapBlockMenu.tsx",
         "features/editor/tiptap/TiptapEditor.tsx",
         "features/editor/tiptap/TiptapSnapshot.tsx",
-        "features/editor/tiptap/ai/TiptapAIAssistant.tsx",
-        "features/editor/tiptap/ai/TiptapAIController.tsx",
         "features/editor/tiptap/code-editor/MonacoSourceEditor.tsx",
         "features/editor/tiptap/code-editor/MonacoSourceEditorRuntime.tsx",
         "features/editor/tiptap/code/CodeBlockSelectionMenu.tsx",
@@ -78303,8 +77598,6 @@
         "features/editor/toolbars/EditorColorStyleButton.stories.tsx"
       ],
       "tests": [
-        "features/editor/AIMenu/AIMenu.test.tsx",
-        "features/editor/AIMenu/ai-editor-turn-store.test.ts",
         "features/editor/EditorAuthoringMode.test.tsx",
         "features/editor/EditorHeader/EditorHeader.test.tsx",
         "features/editor/EditorPermissionRevokedDialog.test.tsx",
@@ -78349,8 +77642,6 @@
         "features/editor/tiptap/TiptapFileBlockNodeView.hydration.test.tsx",
         "features/editor/tiptap/TiptapFileBlockNodeView.test.tsx",
         "features/editor/tiptap/TiptapSnapshot.test.tsx",
-        "features/editor/tiptap/ai/TiptapAIAssistant.test.tsx",
-        "features/editor/tiptap/ai/tiptap-ai.test.ts",
         "features/editor/tiptap/block-commands.node.test.ts",
         "features/editor/tiptap/block-commands.test.ts",
         "features/editor/tiptap/block-enter-commands.node.test.ts",
@@ -79016,7 +78307,6 @@
         "features/metadata/OgImagePreview.tsx",
         "features/metadata/SummaryFieldCard/SummaryFieldCard.tsx",
         "features/metadata/UrlSection.tsx",
-        "features/metadata/metadata-ai-debug.ts",
         "features/metadata/ui/JsonLdScript.tsx",
         "features/metadata/ui/OgGenerationRunProgressView.tsx",
         "features/metadata/ui/OgImagePreviewView.tsx",
@@ -79870,7 +79160,6 @@
         "features/post/PostEditor/SeriesSelector.tsx",
         "features/post/PostEditor/TagSelector.tsx",
         "features/post/PostEditor/body-mode.ts",
-        "features/post/PostEditor/collaboration-mode.ts",
         "features/post/PostEditor/post-config-save.ts",
         "features/post/PostEditor/post-lifecycle-policy.ts",
         "features/post/PostEditor/post-permission-revocation.ts",
@@ -79934,7 +79223,6 @@
         "features/post/PostEditor/PostTaxonomySelectors.test.tsx",
         "features/post/PostEditor/SeriesSelector.test.tsx",
         "features/post/PostEditor/body-mode.test.ts",
-        "features/post/PostEditor/collaboration-mode.test.ts",
         "features/post/PostEditor/lifecycle-origins.test.tsx",
         "features/post/PostEditor/post-lifecycle-policy.test.ts",
         "features/post/PostEditor/post-permission-revocation.test.ts",
@@ -80294,7 +79582,6 @@
         "features/translation/TranslationLocaleRow.tsx",
         "features/translation/TranslationPanelSectionCard.tsx",
         "features/translation/TranslationServicesContext.tsx",
-        "features/translation/admin/TranslationJobsPage.tsx",
         "features/translation/admin/TranslationOverviewPage.tsx",
         "features/translation/admin/TranslationSettingsPage.tsx",
         "features/translation/admin/settings-form.ts",
@@ -80304,23 +79591,16 @@
         "features/translation/locale-option-format.ts",
         "features/translation/menu-translation-model.ts",
         "features/translation/openTranslationDeleteConfirm.tsx",
-        "features/translation/settings/TranslationProviderModal.tsx",
-        "features/translation/settings/provider-form.ts",
         "features/translation/structured-locale-body.ts",
         "features/translation/tiptap-localized-structure.ts",
         "features/translation/translation-entity-type.ts",
-        "features/translation/translation-entry-status.ts",
         "features/translation/translation-errors.ts",
-        "features/translation/translation-job-polling.ts",
         "features/translation/translation-save-barriers.ts",
         "features/translation/useActiveEditLocale.ts",
-        "features/translation/useActiveTranslationJobsByLocale.ts",
         "features/translation/useEntityTranslationData.ts",
         "features/translation/useLocaleDocumentSession.ts",
         "features/translation/useSourceDocumentCollaboration.ts",
         "features/translation/useTranslationActionFocus.ts",
-        "features/translation/useTranslationGenerationAvailability.ts",
-        "features/translation/useTranslationLifecycleSubscription.ts",
         "features/translation/useTranslationLocaleCommands.tsx",
         "features/translation/useTranslationPanelLabels.ts"
       ],
@@ -80340,10 +79620,8 @@
         "features/translation/TranslationLocaleRow.tsx",
         "features/translation/TranslationPanelSectionCard.tsx",
         "features/translation/TranslationServicesContext.tsx",
-        "features/translation/admin/TranslationJobsPage.tsx",
         "features/translation/admin/TranslationOverviewPage.tsx",
-        "features/translation/admin/TranslationSettingsPage.tsx",
-        "features/translation/settings/TranslationProviderModal.tsx"
+        "features/translation/admin/TranslationSettingsPage.tsx"
       ],
       "stories": [
         "features/translation/ActiveEditLocaleContentPreview.stories.tsx",
@@ -80365,17 +79643,14 @@
         "features/translation/locale-domain-editor-contract.runtime.test.ts",
         "features/translation/locale-option-format.test.tsx",
         "features/translation/menu-translation-model.test.ts",
-        "features/translation/settings/provider-form.test.ts",
         "features/translation/structured-locale-body.test.ts",
         "features/translation/tiptap-localized-structure.test.ts",
-        "features/translation/translation-job-polling.test.ts",
         "features/translation/translation-save-barriers.test.ts",
         "features/translation/useActiveEditLocale.runtime.test.tsx",
         "features/translation/useActiveEditLocale.test.ts",
         "features/translation/useLocaleDocumentSession.test.ts",
         "features/translation/useSourceDocumentCollaboration.test.tsx",
         "features/translation/useTranslationActionFocus.test.tsx",
-        "features/translation/useTranslationLifecycleSubscription.test.tsx",
         "features/translation/useTranslationLocaleCommands.test.tsx"
       ],
       "directlyImportingRoutes": ["/series/[idOrSlug]"]
@@ -87387,11 +86662,6 @@
           "preview": "http://localhost:6010/?path=/story/feature-translation-localerows--read-only"
         },
         {
-          "name": "Active",
-          "args": "{ active: true }",
-          "preview": "http://localhost:6010/?path=/story/feature-translation-localerows--active"
-        },
-        {
           "name": "Phone",
           "args": null,
           "preview": "http://localhost:6010/?path=/story/feature-translation-localerows--phone"
@@ -91159,39 +90429,14 @@
           "preview": "http://localhost:6010/?path=/story/pages-editors-post--translation-load-error"
         },
         {
-          "name": "TranslationQueued",
-          "args": "{ translationState: 'queued' }",
-          "preview": "http://localhost:6010/?path=/story/pages-editors-post--translation-queued"
-        },
-        {
-          "name": "TranslationRunning",
-          "args": "{ translationState: 'running' }",
-          "preview": "http://localhost:6010/?path=/story/pages-editors-post--translation-running"
-        },
-        {
           "name": "TranslationCompleted",
           "args": "{ translationState: 'completed' }",
           "preview": "http://localhost:6010/?path=/story/pages-editors-post--translation-completed"
         },
         {
-          "name": "TranslationUnavailable",
-          "args": "{ translationState: 'generation-disabled' }",
-          "preview": "http://localhost:6010/?path=/story/pages-editors-post--translation-unavailable"
-        },
-        {
-          "name": "RequestTranslation",
+          "name": "CreateTranslation",
           "args": null,
-          "preview": "http://localhost:6010/?path=/story/pages-editors-post--request-translation"
-        },
-        {
-          "name": "TranslationRequestRecovery",
-          "args": "{ translationState: 'request-error' }",
-          "preview": "http://localhost:6010/?path=/story/pages-editors-post--translation-request-recovery"
-        },
-        {
-          "name": "CancelTranslation",
-          "args": "{ translationState: 'queued' }",
-          "preview": "http://localhost:6010/?path=/story/pages-editors-post--cancel-translation"
+          "preview": "http://localhost:6010/?path=/story/pages-editors-post--create-translation"
         }
       ],
       "importedSources": [
@@ -92008,21 +91253,6 @@
           "preview": "http://localhost:6010/?path=/story/pages-admin-translation--overview-pending"
         },
         {
-          "name": "Jobs",
-          "args": "{ surface: 'jobs' }",
-          "preview": "http://localhost:6010/?path=/story/pages-admin-translation--jobs"
-        },
-        {
-          "name": "JobsEmpty",
-          "args": "{ surface: 'jobs', state: 'empty' }",
-          "preview": "http://localhost:6010/?path=/story/pages-admin-translation--jobs-empty"
-        },
-        {
-          "name": "JobsFailed",
-          "args": "{ surface: 'jobs', state: 'error' }",
-          "preview": "http://localhost:6010/?path=/story/pages-admin-translation--jobs-failed"
-        },
-        {
           "name": "Settings",
           "args": "{ surface: 'settings' }",
           "preview": "http://localhost:6010/?path=/story/pages-admin-translation--settings"
@@ -92051,24 +91281,12 @@
           "name": "Phone",
           "args": "{ surface: 'settings' }",
           "preview": "http://localhost:6010/?path=/story/pages-admin-translation--phone"
-        },
-        {
-          "name": "KeyboardJobCancellation",
-          "args": "{ surface: 'jobs' }",
-          "preview": "http://localhost:6010/?path=/story/pages-admin-translation--keyboard-job-cancellation"
-        },
-        {
-          "name": "KeyboardProviderState",
-          "args": "{ surface: 'settings' }",
-          "preview": "http://localhost:6010/?path=/story/pages-admin-translation--keyboard-provider-state"
         }
       ],
       "importedSources": [
         "components/core/Layout/index.ts",
-        "features/translation/admin/TranslationJobsPage.tsx",
         "features/translation/admin/TranslationOverviewPage.tsx",
         "features/translation/admin/TranslationSettingsPage.tsx",
-        "stories/pages/fixtures/operations-a11y.ts",
         "stories/pages/fixtures/translation-admin.ts"
       ]
     },
@@ -97417,41 +96635,6 @@
       ]
     },
     {
-      "route": "/admin/translations/jobs",
-      "file": "app/admin/translations/jobs/page.tsx",
-      "family": "Admin",
-      "sourceKind": "delegates / redirects / non-JSX entrypoint (inspect source)",
-      "imports": [],
-      "reexports": [
-        {
-          "target": "features/translation/admin/TranslationJobsPage.tsx",
-          "symbols": [
-            {
-              "exported": "default",
-              "imported": "default",
-              "typeOnly": false
-            }
-          ]
-        }
-      ],
-      "composedJsx": [],
-      "controllerEvidence": [],
-      "inheritedLayouts": ["app/admin/layout.tsx", "app/layout.tsx"],
-      "directStoryImports": [],
-      "coverageNote": "Import relationship only; no route behavior, permission, interaction, or nested story coverage is inferred.",
-      "interactivePreviews": [
-        {
-          "route": "/admin/translations/jobs",
-          "storyTitle": "Pages/Admin/Translation",
-          "variant": "Jobs",
-          "coverage": "page-view",
-          "scope": "Actual production active-jobs controller and cancellation using typed local RPC data. Refresh, empty and read failure states; machine translation, runtime lifecycle stream and server cancellation remain outside.",
-          "file": "stories/pages/TranslationAdmin.stories.tsx",
-          "preview": "http://localhost:6010/?path=/story/pages-admin-translation--jobs"
-        }
-      ]
-    },
-    {
       "route": "/admin/translations",
       "file": "app/admin/translations/page.tsx",
       "family": "Admin",
@@ -97480,7 +96663,7 @@
           "storyTitle": "Pages/Admin/Translation",
           "variant": "Overview",
           "coverage": "page-view",
-          "scope": "Actual production overview controller with typed in-memory RPC data, refresh and empty/error/pending states. Locale/entity health tables use production owners. Backend auth, translation execution, collaboration events and server data remain outside.",
+          "scope": "Actual production overview controller with typed in-memory RPC data, refresh and empty/error/pending states. Locale/entity health tables use production owners. Backend auth and server data remain outside.",
           "file": "stories/pages/TranslationAdmin.stories.tsx",
           "preview": "http://localhost:6010/?path=/story/pages-admin-translation--overview"
         }
@@ -97515,7 +96698,7 @@
           "storyTitle": "Pages/Admin/Translation",
           "variant": "Settings",
           "coverage": "page-view",
-          "scope": "Actual production dirty settings form and provider CRUD/toggle/confirmation controller with typed in-memory RPC. Ready/empty/read-error/pending/save-error states. Backend CAS, credentials, auth and persistence remain outside.",
+          "scope": "Actual production dirty default-locale settings form with typed in-memory RPC. Ready/read-error/pending/save-error states. Backend CAS, auth and persistence remain outside.",
           "file": "stories/pages/TranslationAdmin.stories.tsx",
           "preview": "http://localhost:6010/?path=/story/pages-admin-translation--settings"
         }
@@ -99208,21 +98391,14 @@
       "storyTitle": "Pages/Admin/Translation",
       "variant": "Overview",
       "coverage": "page-view",
-      "scope": "Actual production overview controller with typed in-memory RPC data, refresh and empty/error/pending states. Locale/entity health tables use production owners. Backend auth, translation execution, collaboration events and server data remain outside."
-    },
-    {
-      "route": "/admin/translations/jobs",
-      "storyTitle": "Pages/Admin/Translation",
-      "variant": "Jobs",
-      "coverage": "page-view",
-      "scope": "Actual production active-jobs controller and cancellation using typed local RPC data. Refresh, empty and read failure states; machine translation, runtime lifecycle stream and server cancellation remain outside."
+      "scope": "Actual production overview controller with typed in-memory RPC data, refresh and empty/error/pending states. Locale/entity health tables use production owners. Backend auth and server data remain outside."
     },
     {
       "route": "/admin/translations/settings",
       "storyTitle": "Pages/Admin/Translation",
       "variant": "Settings",
       "coverage": "page-view",
-      "scope": "Actual production dirty settings form and provider CRUD/toggle/confirmation controller with typed in-memory RPC. Ready/empty/read-error/pending/save-error states. Backend CAS, credentials, auth and persistence remain outside."
+      "scope": "Actual production dirty default-locale settings form with typed in-memory RPC. Ready/read-error/pending/save-error states. Backend CAS, auth and persistence remain outside."
     },
     {
       "route": "/terms/history/[id]",
@@ -99320,21 +98496,6 @@
       "reexports": [
         {
           "target": "features/admin/settings/SiteSettingsPage.tsx",
-          "symbols": [
-            {
-              "exported": "default",
-              "imported": "default",
-              "typeOnly": false
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "file": "app/admin/translations/jobs/page.tsx",
-      "reexports": [
-        {
-          "target": "features/translation/admin/TranslationJobsPage.tsx",
           "symbols": [
             {
               "exported": "default",
@@ -108275,56 +107436,6 @@
       ]
     },
     {
-      "file": "features/editor/tiptap/ai/index.ts",
-      "reexports": [
-        {
-          "target": "features/editor/tiptap/ai/TiptapAIAssistant.tsx",
-          "symbols": [
-            {
-              "exported": "TiptapAIAssistant",
-              "imported": "TiptapAIAssistant",
-              "typeOnly": false
-            },
-            {
-              "exported": "TiptapAIAssistantProps",
-              "imported": "TiptapAIAssistantProps",
-              "typeOnly": true
-            }
-          ]
-        },
-        {
-          "target": "features/editor/tiptap/ai/tiptap-ai.ts",
-          "symbols": [
-            {
-              "exported": "createTiptapAIShortcutExtension",
-              "imported": "createTiptapAIShortcutExtension",
-              "typeOnly": false
-            },
-            {
-              "exported": "defaultTiptapAINodeTypes",
-              "imported": "defaultTiptapAINodeTypes",
-              "typeOnly": false
-            },
-            {
-              "exported": "resolveTiptapAIContext",
-              "imported": "resolveTiptapAIContext",
-              "typeOnly": false
-            },
-            {
-              "exported": "TiptapAIContext",
-              "imported": "TiptapAIContext",
-              "typeOnly": true
-            },
-            {
-              "exported": "TiptapAINodeTypes",
-              "imported": "TiptapAINodeTypes",
-              "typeOnly": true
-            }
-          ]
-        }
-      ]
-    },
-    {
       "file": "features/editor/tiptap/code-editor/index.ts",
       "reexports": [
         {
@@ -111652,36 +110763,6 @@
       ]
     },
     {
-      "file": "lib/collab/metadata-ai.ts",
-      "reexports": [
-        {
-          "target": null,
-          "symbols": [
-            {
-              "exported": "DEFAULT_METADATA_AI_SHARED_STATE",
-              "imported": "DEFAULT_METADATA_AI_SHARED_STATE",
-              "typeOnly": false
-            },
-            {
-              "exported": "METADATA_AI_GRACE_PERIOD_MS",
-              "imported": "METADATA_AI_GRACE_PERIOD_MS",
-              "typeOnly": false
-            },
-            {
-              "exported": "MetadataAiField",
-              "imported": "MetadataAiField",
-              "typeOnly": true
-            },
-            {
-              "exported": "MetadataAiSharedState",
-              "imported": "MetadataAiSharedState",
-              "typeOnly": true
-            }
-          ]
-        }
-      ]
-    },
-    {
       "file": "lib/collab/post-meta.ts",
       "reexports": [
         {
@@ -112634,7 +111715,6 @@
     {
       "name": "Page",
       "files": [
-        "features/translation/admin/TranslationJobsPage.tsx",
         "features/translation/admin/TranslationOverviewPage.tsx",
         "features/translation/admin/TranslationSettingsPage.tsx"
       ]

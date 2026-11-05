@@ -21,7 +21,6 @@ function CollaborativeRichText({ sectionId, editable }: { sectionId: string; edi
       entityType={TranscodeEntityType.PAGE}
       allowNeutralBlockEdits={false}
       allowStructuralEdits={false}
-      aiTarget={editable ? { type: 'page', id: pageId, locale } : undefined}
     />
   );
 }

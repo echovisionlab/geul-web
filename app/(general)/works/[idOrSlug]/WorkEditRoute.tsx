@@ -52,7 +52,6 @@ export async function renderWorkEditRoute(idOrSlug: string, query: SearchParamRe
   return (
     <LazyWorkEditor
       workId={work.id}
-      currentMemberId={session.user.id}
       initialTitle={work.title}
       initialSlug={work.slug}
       initialType={work.type as WorkType}

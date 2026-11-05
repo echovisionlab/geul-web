@@ -34,10 +34,6 @@ import {
 } from '@/features/editor/EditorAuthoringMode';
 import type { CollaborationUser } from './block-room-presence-types';
 import { CodeBlockSelectionMenu, createTiptapCodeBlock, type CodeBlockSelectionMenuLabels } from './code';
-import { TiptapAIAssistantSurface, useTiptapAIController } from './ai/TiptapAIController';
-import type { TiptapAINodeTypes } from './ai';
-import type { AIDocumentTarget } from '@/lib/ai/document-client';
-import { createBrowserAIEditorAssistantClient, type AIEditorAssistantClient } from '@/lib/ai/editor-orchestration';
 import { createTiptapFileNode } from './TiptapFileBlockNodeView';
 import {
   createTiptapExternalVideoExtension,
@@ -110,13 +106,6 @@ type RuntimeExternalVideoOptions = Omit<TiptapExternalVideoOptions, 'labels'> & 
   labels: TiptapExternalVideoLabels;
 };
 
-interface TiptapEditorAIOptions {
-  client?: AIEditorAssistantClient;
-  target: AIDocumentTarget;
-  supportedNodeTypes?: TiptapAINodeTypes;
-  onClose?: () => void;
-}
-
 interface TiptapEditorSharedProps {
   /** Persistent name for the editable document, independent of its current text. */
   accessibleLabel?: string;
@@ -130,7 +119,6 @@ interface TiptapEditorSharedProps {
   /** Reads previews and imports thumbnails when a link becomes a card or video. */
   linkPresentation?: LinkPresentationRuntime;
   externalVideo?: TiptapExternalVideoOptions | false;
-  ai?: TiptapEditorAIOptions | false;
   map?: TiptapMapNodeOptions;
   authoringCallbacks?: Omit<TiptapAuthoringControlsCallbacks, 'onFileActivate'>;
   className?: string;
@@ -195,7 +183,6 @@ interface EditorChromeProps {
   externalVideoRuntimeLabels: TiptapExternalVideoLabels;
   linkPresentation: { labels: LinkPresentationLabels; runtime: LinkPresentationRuntime };
   codeBlockLabels: CodeBlockSelectionMenuLabels;
-  ai: TiptapEditorProps['ai'];
   mapSelectionRegistry: TiptapMapSelectionMenuRegistry;
   executableSelectionRegistry: ExecutableSelectionMenuRegistry;
   fileBlockSettingsSlot: FileBlockSettingsSlot;
@@ -215,7 +202,6 @@ function EditorChrome({
   externalVideoRuntimeLabels,
   linkPresentation,
   codeBlockLabels,
-  ai,
   mapSelectionRegistry,
   executableSelectionRegistry,
   fileBlockSettingsSlot,
@@ -226,18 +212,8 @@ function EditorChrome({
   const commonLabels = useTranslations('common.labels');
   const editorMessages = useTranslations('editorCommon.editor');
   const mapPlacesLabels = useTranslations('editorCommon.mapPlacesModal');
-  const browserAIClient = useMemo(() => createBrowserAIEditorAssistantClient(), []);
-  const aiRuntime = ai ? { client: ai.client ?? browserAIClient, target: ai.target } : null;
-  const aiReady = Boolean(aiRuntime);
   const canMutateStructure = editable && authoringMode?.allowNeutralBlockEdits === true;
   const canEditLocalized = editable && authoringMode?.allowLocalizedBlockEdits === true;
-  const aiController = useTiptapAIController({
-    editor,
-    editable: editable && canEditLocalized && aiReady,
-    allowGenerate: canMutateStructure,
-    supportedNodeTypes: ai === false ? undefined : ai?.supportedNodeTypes,
-    onClose: ai === false ? undefined : ai?.onClose,
-  });
   const [externalVideoContext, setExternalVideoContext] = useState<ExternalVideoDialogContext | null>(null);
   const selectionLabels = useSelectionBubbleMenuLabels();
   const callbacks = useMemo<TiptapAuthoringControlsCallbacks>(
@@ -249,14 +225,8 @@ function EditorChrome({
           ? undefined
           : (authoringCallbacks?.onExternalVideoActivate ??
             ((context) => setExternalVideoContext({ mode: 'insert', context }))),
-      onAIAssistantActivate: aiReady
-        ? (context) => {
-            authoringCallbacks?.onAIAssistantActivate?.(context);
-            aiController.open();
-          }
-        : undefined,
     }),
-    [aiController, aiReady, authoringCallbacks, externalVideo, onFileActivate],
+    [authoringCallbacks, externalVideo, onFileActivate],
   );
   const displaySizeLabels = useDisplaySizeLabels();
   const contextualAlignmentLabels = useMemo(
@@ -304,7 +274,6 @@ function EditorChrome({
         <TiptapAuthoringControls
           editor={editor}
           capabilities={{
-            ai: aiReady,
             externalVideo: externalVideo !== false,
             file: Boolean(onFileActivate),
             map: Boolean(authoringCallbacks?.onMapActivate),
@@ -322,7 +291,6 @@ function EditorChrome({
         <TiptapContextualMenuRouter
           editor={editor}
           selectionLabels={selectionLabels}
-          onAIActivate={canEditLocalized && aiReady ? aiController.open : undefined}
           allowTableMenu={canMutateStructure}
         />
       ) : null}
@@ -366,9 +334,6 @@ function EditorChrome({
           }}
         />
       ) : null}
-      {aiRuntime ? (
-        <TiptapAIAssistantSurface controller={aiController} client={aiRuntime.client} target={aiRuntime.target} />
-      ) : null}
       <ExternalVideoInsertDialog
         opened={externalVideoContext !== null}
         onClose={() => setExternalVideoContext(null)}
@@ -398,7 +363,6 @@ export function TiptapEditor({
   markdownImageImporter,
   linkPresentation,
   externalVideo,
-  ai,
   map,
   authoringCallbacks,
   className,
@@ -860,7 +824,6 @@ export function TiptapEditor({
                 effectiveExternalVideo === false ? externalVideoRuntimeLabels : effectiveExternalVideo.labels
               }
               linkPresentation={{ labels: linkPresentationLabels, runtime: linkPresentationRuntime }}
-              ai={ai}
               mapSelectionRegistry={mapSelectionRegistry}
               executableSelectionRegistry={executableSelectionRegistry}
               fileBlockSettingsSlot={fileBlockSettingsSlot}

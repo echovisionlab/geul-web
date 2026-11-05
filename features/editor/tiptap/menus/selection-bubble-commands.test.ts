@@ -78,7 +78,6 @@ describe('Tiptap selection BubbleMenu command authority', () => {
     expect(resolveSelectionBubbleMenuState(mounted.editor)).toMatchObject({
       inlineCodeActive: true,
       canConvertToInlineMath: false,
-      canOpenAI: false,
     });
     mounted.editor.chain().focus().toggleMark('code').run();
 
@@ -159,7 +158,6 @@ describe('Tiptap selection BubbleMenu command authority', () => {
       canFormatText: false,
       canColor: false,
       canConvertToInlineMath: false,
-      canOpenAI: false,
     });
     const commands = createSelectionBubbleMenuCommands(editor);
     expect(commands.toggleTextStyle('bold')).toBe(false);
@@ -171,11 +169,10 @@ describe('Tiptap selection BubbleMenu command authority', () => {
     element.remove();
   });
 
-  it('uses the shared mark, color, link, alignment, math, and AI adapters', () => {
+  it('uses the shared mark, color, link, alignment, and math adapters', () => {
     const mounted = mountEditor();
     selectSecondBlockText(mounted.editor);
-    const onAIActivate = vi.fn();
-    let commands = createSelectionBubbleMenuCommands(mounted.editor, { onAIActivate });
+    let commands = createSelectionBubbleMenuCommands(mounted.editor);
 
     expect(commands.toggleTextStyle('bold')).toBe(true);
     expect(mounted.editor.isActive('bold')).toBe(true);
@@ -190,15 +187,13 @@ describe('Tiptap selection BubbleMenu command authority', () => {
     expect(mounted.editor.state.doc.firstChild?.child(1).firstChild?.attrs.textAlignment).toBe('center');
     expect(commands.createLink({ href: 'example.invalid', text: 'Geul' })).toBe(true);
 
-    commands = createSelectionBubbleMenuCommands(mounted.editor, { onAIActivate });
+    commands = createSelectionBubbleMenuCommands(mounted.editor);
     expect(commands.linkHref).toBe('https://example.invalid');
     expect(commands.selectedText).toBe('Geul');
-    expect(commands.openAI()).toBe(true);
-    expect(onAIActivate).toHaveBeenCalledOnce();
     expect(commands.removeLink()).toBe(true);
 
     selectSecondBlockText(mounted.editor);
-    commands = createSelectionBubbleMenuCommands(mounted.editor, { onAIActivate });
+    commands = createSelectionBubbleMenuCommands(mounted.editor);
     expect(commands.convertToInlineMath()).toBe(true);
     expect(mounted.editor.state.selection).toBeInstanceOf(TextSelection);
     expect(mounted.editor.state.selection.$from.parent.type.name).toBe('mathInline');
@@ -531,17 +526,10 @@ describe('Tiptap selection BubbleMenu command authority', () => {
     mounted.destroy();
   });
 
-  it('keeps promised AI visible as unavailable when no activation port exists', () => {
-    const mounted = mountEditor();
-    selectSecondBlockText(mounted.editor);
-    expect(resolveSelectionBubbleMenuState(mounted.editor).canOpenAI).toBe(false);
-    mounted.destroy();
-  });
-
   it('fails every stale mutation port closed after editing permission is revoked', () => {
     const mounted = mountEditor();
     selectSecondBlockText(mounted.editor);
-    const commands = createSelectionBubbleMenuCommands(mounted.editor, { onAIActivate: vi.fn() });
+    const commands = createSelectionBubbleMenuCommands(mounted.editor);
     mounted.editor.setEditable(false);
 
     expect(commands.setBlockType('heading-2')).toBe(false);
@@ -553,22 +541,18 @@ describe('Tiptap selection BubbleMenu command authority', () => {
     expect(commands.unnest()).toBe(false);
     expect(commands.createLink({ href: 'example.invalid' })).toBe(false);
     expect(commands.convertToInlineMath()).toBe(false);
-    expect(commands.openAI()).toBe(false);
     mounted.destroy();
   });
 
   it('rejects stale incompatible ports after the selection becomes inline code', () => {
     const mounted = mountEditor();
     selectSecondBlockText(mounted.editor);
-    const onAIActivate = vi.fn();
-    const commands = createSelectionBubbleMenuCommands(mounted.editor, { onAIActivate });
+    const commands = createSelectionBubbleMenuCommands(mounted.editor);
     mounted.editor.chain().focus().toggleMark('code').run();
     expect(commands.setTextColor('red')).toBe(false);
     expect(commands.setBackgroundColor('yellow')).toBe(false);
     expect(commands.createLink({ href: 'example.invalid' })).toBe(false);
     expect(commands.convertToInlineMath()).toBe(false);
-    expect(commands.openAI()).toBe(false);
-    expect(onAIActivate).not.toHaveBeenCalled();
     mounted.destroy();
   });
 

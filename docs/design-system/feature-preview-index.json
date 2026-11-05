@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "sourceManifestHash": "c7f37af01f1320521f1a6639d0c45efff4c59e65baedffd96b41045dfecf79dc",
+  "sourceManifestHash": "4067711ed756fc3a85c3713e6a3422fcbbf5b5127579c1ba7525a4d439a03684",
   "methodology": "All inventoried Feature component candidates. Direct value imports, literal lazy imports and transitive source relationships through production owners/local adapters are indexed separately. A dependency can be unused or render conditionally; neither relationship proves rendered states, route parity or design compliance. Empty JSX records include runtime/lazy/controller boundaries and must be inspected before treating them as visual gaps.",
-  "counts": { "domains": 54, "componentFiles": 788, "jsxWithoutStoryRelationship": 46 },
+  "counts": { "domains": 54, "componentFiles": 783, "jsxWithoutStoryRelationship": 45 },
   "domains": [
     {
       "domain": "account",
@@ -1470,7 +1470,6 @@
             "Pages/Editors/Release",
             "Pages/Editors/Series",
             "Pages/Admin/Taxonomy",
-            "Pages/Admin/Translation",
             "Pages/User/Profile",
             "Pages/User/Profile Full Page",
             "Pages/Editors/Work"
@@ -2260,25 +2259,6 @@
       "category": "content",
       "components": [
         {
-          "file": "features/editor/AIMenu/AIMenu.tsx",
-          "hasJsx": true,
-          "directStories": [],
-          "relatedStories": [
-            "Feature/Editor/File Insertion",
-            "Feature/Editor/Executables",
-            "Feature/Editor/Tiptap Playground",
-            "Feature/Editor/Public Block Comparison",
-            "Feature/Editor/Menus",
-            "Feature/Editor/Site Variables",
-            "Pages/Admin/Legal Policies",
-            "Pages/Editors/Legal",
-            "Pages/Editors/Page",
-            "Pages/Editors/Post",
-            "Pages/Editors/Program Events",
-            "Pages/Editors/Work"
-          ]
-        },
-        {
           "file": "features/editor/EditorAuthoringMode.tsx",
           "hasJsx": true,
           "directStories": ["Feature/Editor/Public Block Comparison", "Feature/Editor/Site Variables"],
@@ -2683,31 +2663,6 @@
           "hasJsx": true,
           "directStories": ["Feature/Editor/Snapshot Handoff"],
           "relatedStories": ["Feature/Editor/Snapshot Handoff", "Pages/Editors/Page", "Pages/Editors/Post"]
-        },
-        {
-          "file": "features/editor/tiptap/ai/TiptapAIAssistant.tsx",
-          "hasJsx": true,
-          "directStories": [],
-          "relatedStories": []
-        },
-        {
-          "file": "features/editor/tiptap/ai/TiptapAIController.tsx",
-          "hasJsx": true,
-          "directStories": [],
-          "relatedStories": [
-            "Feature/Editor/File Insertion",
-            "Feature/Editor/Executables",
-            "Feature/Editor/Tiptap Playground",
-            "Feature/Editor/Public Block Comparison",
-            "Feature/Editor/Menus",
-            "Feature/Editor/Site Variables",
-            "Pages/Admin/Legal Policies",
-            "Pages/Editors/Legal",
-            "Pages/Editors/Page",
-            "Pages/Editors/Post",
-            "Pages/Editors/Program Events",
-            "Pages/Editors/Work"
-          ]
         },
         {
           "file": "features/editor/tiptap/code-editor/MonacoSourceEditor.tsx",
@@ -3747,7 +3702,6 @@
       ],
       "jsxWithoutStoryRelationship": [
         "features/editor/components/UnifiedFileAttachmentPagePreview.tsx",
-        "features/editor/tiptap/ai/TiptapAIAssistant.tsx",
         "features/editor/tiptap/p5/P5CapabilityStoryPreview.tsx"
       ]
     },
@@ -8568,12 +8522,6 @@
           ]
         },
         {
-          "file": "features/translation/admin/TranslationJobsPage.tsx",
-          "hasJsx": true,
-          "directStories": ["Pages/Admin/Translation"],
-          "relatedStories": ["Pages/Admin/Translation"]
-        },
-        {
           "file": "features/translation/admin/TranslationOverviewPage.tsx",
           "hasJsx": true,
           "directStories": ["Pages/Admin/Translation"],
@@ -8583,12 +8531,6 @@
           "file": "features/translation/admin/TranslationSettingsPage.tsx",
           "hasJsx": true,
           "directStories": ["Pages/Admin/Translation"],
-          "relatedStories": ["Pages/Admin/Translation"]
-        },
-        {
-          "file": "features/translation/settings/TranslationProviderModal.tsx",
-          "hasJsx": true,
-          "directStories": [],
           "relatedStories": ["Pages/Admin/Translation"]
         }
       ],

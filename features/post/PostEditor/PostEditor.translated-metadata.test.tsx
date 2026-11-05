@@ -243,7 +243,6 @@ function metadataPreview({ displayTitle, displaySummary, activeLocale }: Metadat
 
 const editorProps: ComponentProps<typeof PostEditor> = {
   postId,
-  currentMemberId: 'member-1',
   initialTitle: 'Source title',
   initialSummary: 'Source summary',
   initialSlug: null,

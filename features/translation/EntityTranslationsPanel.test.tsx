@@ -2,14 +2,10 @@
 
 import { DesignSystemProvider } from '@/lib/providers/DesignSystemProvider';
 import { act, type ComponentProps } from 'react';
-import { create } from '@bufbuild/protobuf';
 import { Code, ConnectError } from '@connectrpc/connect';
 import {
   TranslationEntityType,
-  TranslationJobSchema,
-  TranslationJobStatus,
   type TranslationEntry,
-  type TranslationJob,
   type TranslationLocale,
 } from '@echovisionlab/geul-proto/secure/translation_pb.ts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -19,17 +15,12 @@ import { createRoot, type Root } from 'react-dom/client';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import koMessages from '@/messages/ko.json';
-import type { TranslationLifecycleRefetchHint } from '@/lib/translation/lifecycle';
 import { EntityTranslationsPanel } from './EntityTranslationsPanel';
 
 const mocks = vi.hoisted(() => ({
   listTranslationLocales: vi.fn(),
   listEntityTranslations: vi.fn(),
-  listTranslationJobs: vi.fn(),
-  getTranslationSettings: vi.fn(),
   setEntitySourceLocale: vi.fn(),
-  regenerateEntityTranslations: vi.fn(),
-  cancelTranslationJob: vi.fn(),
   routerReplace: vi.fn(),
   openConfirmModal: vi.fn(),
   notificationShow: vi.fn(),
@@ -49,11 +40,7 @@ vi.mock('@/lib/api/browser/secure-translation', () => ({
   createTranslationClient: () => ({
     listTranslationLocales: mocks.listTranslationLocales,
     listEntityTranslations: mocks.listEntityTranslations,
-    listTranslationJobs: mocks.listTranslationJobs,
-    getTranslationSettings: mocks.getTranslationSettings,
     setEntitySourceLocale: mocks.setEntitySourceLocale,
-    regenerateEntityTranslations: mocks.regenerateEntityTranslations,
-    cancelTranslationJob: mocks.cancelTranslationJob,
   }),
 }));
 
@@ -72,22 +59,6 @@ vi.mock('@/components/core/Notification', () => ({
 vi.mock('@mantine/hooks', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@mantine/hooks')>()),
   useMounted: () => true,
-}));
-
-// The live lifecycle stream is the external boundary; tests deliver its events through the captured handlers.
-const lifecycle = vi.hoisted(() => ({
-  onEvent: null as ((hint: TranslationLifecycleRefetchHint) => Promise<void> | void) | null,
-  onReconnect: null as (() => Promise<void> | void) | null,
-}));
-
-vi.mock('@/features/translation/useTranslationLifecycleSubscription', () => ({
-  useTranslationLifecycleSubscription: (input: {
-    onEvent?: (hint: TranslationLifecycleRefetchHint) => Promise<void> | void;
-    onReconnect?: () => Promise<void> | void;
-  }) => {
-    lifecycle.onEvent = input.onEvent ?? null;
-    lifecycle.onReconnect = input.onReconnect ?? null;
-  },
 }));
 
 vi.mock('@/lib/contexts/EditorRuntimeContext', () => ({
@@ -147,10 +118,6 @@ function entry(locale: string): TranslationEntry {
   } as unknown as TranslationEntry;
 }
 
-function job(id: string, targetLocale: string, status: TranslationJobStatus): TranslationJob {
-  return create(TranslationJobSchema, { id, targetLocale, status });
-}
-
 let container: HTMLDivElement;
 let root: Root;
 let queryClient: QueryClient;
@@ -161,11 +128,7 @@ beforeEach(() => {
     sourceLocale: 'en',
     entries: [entry('fr')],
   });
-  mocks.listTranslationJobs.mockResolvedValue({ jobs: [] });
-  mocks.getTranslationSettings.mockResolvedValue({ generationEnabled: true });
   mocks.setEntitySourceLocale.mockResolvedValue({});
-  mocks.regenerateEntityTranslations.mockResolvedValue({ jobIds: ['job-new'] });
-  mocks.cancelTranslationJob.mockResolvedValue({});
   mocks.persistNow.mockResolvedValue(undefined);
   mocks.getBlockRoomSnapshot.mockResolvedValue({ documentRevision: '22222222-2222-4222-8222-222222222222' });
   mocks.flushEditorSaves.mockResolvedValue(true);
@@ -183,8 +146,6 @@ afterEach(() => {
   container.remove();
   document.body.innerHTML = '';
   vi.clearAllMocks();
-  lifecycle.onEvent = null;
-  lifecycle.onReconnect = null;
 });
 
 function renderPanel(options?: Partial<ComponentProps<typeof EntityTranslationsPanel>>) {
@@ -228,46 +189,13 @@ async function click(id: string) {
 }
 
 describe('EntityTranslationsPanel API commands', () => {
-  it('queues one exact locale and sends every eligible target explicitly', async () => {
-    await renderReady();
-
-    await click('entity-translations-panel-regenerate-fr');
-    expect(mocks.persistNow).toHaveBeenCalledTimes(1);
-    expect(mocks.flushEditorSaves).toHaveBeenCalledWith('post:post-1');
-    expect(mocks.flushEditorSaves.mock.invocationCallOrder.at(-1)).toBeLessThan(
-      mocks.persistNow.mock.invocationCallOrder.at(-1) ?? Number.POSITIVE_INFINITY,
-    );
-    expect(mocks.persistNow.mock.invocationCallOrder.at(-1)).toBeLessThan(
-      mocks.regenerateEntityTranslations.mock.invocationCallOrder.at(-1) ?? Number.POSITIVE_INFINITY,
-    );
-    expect(mocks.regenerateEntityTranslations).toHaveBeenNthCalledWith(1, {
-      target: TARGET,
-      locales: ['fr'],
-    });
-    expect(mocks.listEntityTranslations.mock.calls.length).toBeGreaterThanOrEqual(2);
-    expect(mocks.listTranslationJobs.mock.calls.length).toBeGreaterThanOrEqual(2);
-
-    await click('entity-translations-panel-regenerate-all');
-    expect(mocks.regenerateEntityTranslations).toHaveBeenNthCalledWith(2, {
-      target: TARGET,
-      locales: ['fr', 'ja'],
-    });
-    expect(mocks.notificationShow).toHaveBeenCalledWith(expect.objectContaining({ tone: 'neutral' }));
-  });
-
-  it('keeps explicit regenerate available for an existing target and labels a missing target as generate', async () => {
+  it('shows the source-locale picker and marks only missing targets', async () => {
     mocks.listEntityTranslations.mockResolvedValue({
       sourceLocale: 'en',
       entries: [entry('fr')],
     });
     await renderReady();
 
-    expect((document.getElementById('entity-translations-panel-regenerate-fr') as HTMLButtonElement).disabled).toBe(
-      false,
-    );
-    expect(document.getElementById('entity-translations-panel-regenerate-ja')?.getAttribute('aria-label')).toContain(
-      '생성',
-    );
     expect(container.textContent).not.toContain('오래됨');
     expect(container.querySelector('[data-testid="translation-locale-row-en"]')).toBeNull();
     expect(container.querySelector('label[for]')?.textContent).toContain('원문 언어');
@@ -283,34 +211,6 @@ describe('EntityTranslationsPanel API commands', () => {
     );
   });
 
-  it('keeps other locales available and cancels the exact active job', async () => {
-    mocks.listTranslationJobs.mockResolvedValue({
-      jobs: [job('running-ja', 'ja', TranslationJobStatus.RUNNING)],
-    });
-    await renderReady();
-
-    expect(document.getElementById('entity-translations-panel-retry-fr')).toBeNull();
-    expect((document.getElementById('entity-translations-panel-regenerate-fr') as HTMLButtonElement).disabled).toBe(
-      false,
-    );
-    await click('entity-translations-panel-cancel-ja');
-    expect(mocks.cancelTranslationJob).toHaveBeenCalledWith({ jobId: 'running-ja' });
-    expect(container.textContent).not.toContain('provider_response_invalid');
-  });
-
-  it('uses one active job row for both the badge and cancel action', async () => {
-    mocks.listTranslationJobs.mockResolvedValue({
-      jobs: [job('queued-ja', 'ja', TranslationJobStatus.QUEUED)],
-    });
-    await renderReady();
-
-    expect((document.getElementById('entity-translations-panel-regenerate-ja') as HTMLButtonElement).disabled).toBe(
-      true,
-    );
-    await click('entity-translations-panel-cancel-ja');
-    expect(mocks.cancelTranslationJob).toHaveBeenCalledWith({ jobId: 'queued-ja' });
-  });
-
   it('opens an existing target locale editor route without mutating translation state', async () => {
     await renderReady({ canAdministerTranslations: false, canMutateTargets: false });
     expect(container.querySelector<HTMLSelectElement>('select')?.disabled).toBe(true);
@@ -322,8 +222,6 @@ describe('EntityTranslationsPanel API commands', () => {
       scroll: false,
     });
     expect(mocks.setEntitySourceLocale).not.toHaveBeenCalled();
-    expect(mocks.regenerateEntityTranslations).not.toHaveBeenCalled();
-    expect(mocks.cancelTranslationJob).not.toHaveBeenCalled();
     expect(document.querySelector('textarea')).toBeNull();
   });
 
@@ -404,56 +302,5 @@ describe('EntityTranslationsPanel API commands', () => {
     });
     expect(mocks.routerReplace).toHaveBeenCalledWith('/posts/post-1?edit=true&tab=translations&lang=fr');
     expect(mocks.listEntityTranslations.mock.calls.length).toBeGreaterThanOrEqual(2);
-  });
-});
-
-describe('EntityTranslationsPanel lifecycle refresh', () => {
-  const runningJaHint: TranslationLifecycleRefetchHint = {
-    jobId: 'running-ja',
-    entityType: 'post',
-    entityId: 'post-1',
-    targetLocale: 'ja',
-    timestampMs: 1,
-  };
-
-  async function waitForPanel(assertion: () => void) {
-    await act(async () => {
-      await vi.waitFor(assertion);
-    });
-  }
-
-  it.each([
-    ['a lifecycle event', () => lifecycle.onEvent?.(runningJaHint)],
-    ['a reconnect', () => lifecycle.onReconnect?.()],
-  ])('shows the refetched entries and jobs after %s', async (_trigger, deliver) => {
-    mocks.listTranslationJobs.mockResolvedValue({ jobs: [job('running-ja', 'ja', TranslationJobStatus.RUNNING)] });
-    await renderReady();
-    await waitForPanel(() => expect(document.getElementById('entity-translations-panel-cancel-ja')).not.toBeNull());
-    const entryRequests = mocks.listEntityTranslations.mock.calls.length;
-    const jobRequests = mocks.listTranslationJobs.mock.calls.length;
-
-    // The server has finished the job and stored its target.
-    mocks.listEntityTranslations.mockResolvedValue({ sourceLocale: 'en', entries: [entry('fr'), entry('ja')] });
-    mocks.listTranslationJobs.mockResolvedValue({ jobs: [] });
-    await act(async () => deliver());
-
-    await waitForPanel(() => expect(document.getElementById('entity-translations-panel-cancel-ja')).toBeNull());
-    expect(mocks.listEntityTranslations.mock.calls.length).toBeGreaterThan(entryRequests);
-    expect(mocks.listTranslationJobs.mock.calls.length).toBeGreaterThan(jobRequests);
-    expect(container.querySelector('[data-testid="translation-locale-row-ja"]')?.textContent).not.toContain(
-      '대상 문서가 아직 없습니다',
-    );
-  });
-
-  it('keeps a job active after its lifecycle event while the server still reports it running', async () => {
-    mocks.listTranslationJobs.mockResolvedValue({ jobs: [job('running-ja', 'ja', TranslationJobStatus.RUNNING)] });
-    await renderReady();
-    await waitForPanel(() => expect(document.getElementById('entity-translations-panel-cancel-ja')).not.toBeNull());
-    const jobRequests = mocks.listTranslationJobs.mock.calls.length;
-
-    await act(async () => lifecycle.onEvent?.(runningJaHint));
-
-    await waitForPanel(() => expect(mocks.listTranslationJobs.mock.calls.length).toBeGreaterThan(jobRequests));
-    expect(document.getElementById('entity-translations-panel-cancel-ja')).not.toBeNull();
   });
 });

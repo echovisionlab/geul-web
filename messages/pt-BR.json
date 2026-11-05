@@ -2262,8 +2262,8 @@
     "systemOrLegacy": "Sistema ou versão anterior",
     "restore": "Restaurar",
     "restoreTitle": "Restaurar versão",
-    "restoreSameLocaleBody": "Restaurar a origem v{version} ({locale}) altera apenas o documento de origem. Os documentos de destino e as tarefas de tradução existentes permanecem inalterados, e as traduções não são geradas automaticamente. Continuar?",
-    "restoreCrossLocaleBody": "Restaurar a origem v{version} muda a localidade de origem de {currentLocale} para {selectedLocale} e altera apenas o ponteiro de origem. Os documentos de destino e as tarefas de tradução existentes permanecem inalterados, e as traduções não são geradas automaticamente. Continuar?",
+    "restoreSameLocaleBody": "Restaurar a origem v{version} ({locale}) altera apenas o documento de origem. Os documentos de destino existentes permanecem inalterados. Continuar?",
+    "restoreCrossLocaleBody": "Restaurar a origem v{version} muda a localidade de origem de {currentLocale} para {selectedLocale} e altera apenas o ponteiro de origem. Os documentos de destino existentes permanecem inalterados. Continuar?",
     "restoreFailed": "Falha ao restaurar o documento de origem.",
     "loadFailed": "Não foi possível carregar o histórico de versões.",
     "end": "Todas as versões foram carregadas."
@@ -3853,8 +3853,7 @@
           "math": "Matemática",
           "inline": "Em linha",
           "embeds": "Incorporações",
-          "media": "Mídia",
-          "ai": "IA"
+          "media": "Mídia"
         },
         "items": {
           "heading": {
@@ -3977,12 +3976,6 @@
             "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\nanexo\narquivo\ndocumento\nbaixar",
             "group": "Mídia"
           },
-          "aiAssistant": {
-            "title": "Assistente de IA",
-            "subtext": "Escreva, melhore ou transforme texto com IA",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\nia\nassistente\nescrever\nmelhorar",
-            "group": "IA"
-          },
           "shader": {
             "title": "Shader GLSL",
             "subtext": "Adicione um shader GLSL interativo",
@@ -4022,8 +4015,7 @@
         "displaySizeXl": "Muito grande",
         "nest": "Aninhar bloco",
         "unnest": "Desaninhar bloco",
-        "inlineMath": "Matemática inline",
-        "ai": "Assistente de IA"
+        "inlineMath": "Matemática inline"
       },
       "link": {
         "create": "Criar link",
@@ -4223,47 +4215,6 @@
       "message": "Você pode editar novamente. As alterações guardadas enquanto você só podia visualizar estão sendo salvas."
     }
   },
-  "aiAssistant": {
-    "title": "Assistente de IA",
-    "modes": {
-      "modify": "Modificar",
-      "generate": "Gerar"
-    },
-    "placeholders": {
-      "modify": "Como devo modificar este texto",
-      "generate": "O que você gostaria de escrever"
-    },
-    "quickActions": {
-      "title": "Ações rápidas",
-      "improve": "Melhorar",
-      "fixSpelling": "Corrigir ortografia",
-      "simplify": "Simplificar",
-      "summarize": "Resumir",
-      "translateKorean": "Coreano",
-      "translateEnglish": "Inglês",
-      "continueWriting": "Continuar escrevendo",
-      "brainstorm": "Gerar ideias"
-    },
-    "sections": {
-      "result": "Resultado da IA"
-    },
-    "actions": {
-      "close": "Fechar assistente de IA",
-      "submitPrompt": "Enviar prompt personalizado de IA",
-      "stop": "Parar",
-      "reject": "Rejeitar",
-      "retry": "Tentar novamente",
-      "accept": "Aceitar",
-      "insert": "Inserir"
-    },
-    "errors": {
-      "generic": "Algo deu errado. Tente novamente"
-    },
-    "notifications": {
-      "applyFailedTitle": "Falha ao aplicar o resultado da IA",
-      "applyFailedMessage": "A resposta da IA não pôde ser analisada. Tente novamente"
-    }
-  },
   "mapControls": {
     "managePlaces": "Gerenciar locais",
     "managePlacesWithCount": "Gerenciar locais ({count})",
@@ -4366,20 +4317,15 @@
     "description": "Revise o idioma de origem e o documento de tradução existente para cada localidade.",
     "actions": {
       "expand": "Expandir",
-      "collapse": "Recolher",
-      "regenerateAll": "Gerar/regenerar todas as localidades elegíveis",
-      "regenerateLocale": "Regenerar",
-      "regenerateLocaleAria": "Regenerar tradução {locale}",
-      "generateLocale": "Generate",
-      "generateLocaleAria": "Gerar tradução em {locale}"
+      "collapse": "Recolher"
     },
     "sourceLocale": {
       "label": "Idioma de origem",
       "description": "Esta é a língua de origem usada como base para as traduções desta entidade.",
       "confirm": {
         "title": "Alterar idioma de origem",
-        "description": "Alterar o idioma de origem atualiza apenas o ponteiro de origem. Os documentos de destino e as tarefas de tradução existentes permanecem inalterados, e as traduções não são geradas automaticamente.",
-        "detail": "{locale} passa a ser o idioma do documento de origem editável. Os documentos de destino e as tarefas de tradução existentes permanecem inalterados.",
+        "description": "Alterar o idioma de origem atualiza apenas o ponteiro de origem. Os documentos de destino existentes permanecem inalterados.",
+        "detail": "{locale} passa a ser o idioma do documento de origem editável. Os documentos de destino existentes permanecem inalterados.",
         "confirm": "Alterar e retraduzir"
       }
     },
@@ -4387,7 +4333,7 @@
       "ariaLabel": "Alterar idioma do conteúdo. Atual: {locale}",
       "sourceOption": "{locale} (Origem)",
       "loading": "Carregando idiomas...",
-      "missingDescription": "Ainda não existe um documento de destino em {locale}. Gere-o pelo painel de traduções.",
+      "missingDescription": "Ainda não existe um documento de destino em {locale}. Crie-o pelo painel de traduções.",
       "bodyPreviewTitle": "Prévia do corpo em {locale}",
       "bodyPreviewDescription": "O documento de tradução existente é exibido com sua estrutura e formatação.",
       "bodyPreviewEmpty": "Ainda não há prévia do corpo localizado.",
@@ -4408,10 +4354,7 @@
     },
     "notifications": {
       "sourceLocaleUpdated": "Idioma de origem atualizado",
-      "sourceLocaleUpdateFailed": "Falha ao atualizar o idioma de origem.",
-      "allQueued": "A regeneração das traduções foi colocada na fila para todas as localidades.",
-      "localeQueued": "A regeneração da tradução foi colocada na fila para esta localidade.",
-      "regenerateFailed": "Falha ao colocar a regeneração da tradução na fila."
+      "sourceLocaleUpdateFailed": "Falha ao atualizar o idioma de origem."
     }
   },
   "translationPanelMenu": {
@@ -4451,13 +4394,11 @@
   },
   "translationOverviewPage": {
     "actions": {
-      "openJobs": "Abrir tarefas",
       "openSettings": "Abrir configurações"
     },
     "stats": {
       "totalLocales": "Total de localidades",
       "sourceEntities": "Entidades de origem",
-      "activeJobs": "Tarefas em andamento",
       "existingEntries": "Traduções existentes"
     },
     "sections": {
@@ -4476,119 +4417,23 @@
       "emptyEntityHealth": "Ainda não há dados de saúde das entidades."
     },
     "policy": {
-      "internal": "Somente interno",
-      "machineDisabled": "Geração automática desativada"
-    }
-  },
-  "translationJobsPage": {
-    "title": "Tarefas de tradução",
-    "stats": {
-      "active": "{count} em andamento"
-    },
-    "columns": {
-      "entity": "Entidade"
-    },
-    "locale": {
-      "fromTo": "{source} -> {target}"
-    },
-    "states": {
-      "loadFailed": "Falha ao carregar as tarefas de tradução.",
-      "empty": "Ainda não há tarefas de tradução."
-    },
-    "notifications": {
-      "cancelled": "Tarefa de tradução cancelada",
-      "cancelFailed": "Falha ao cancelar a tarefa de tradução."
+      "internal": "Somente interno"
     }
   },
   "translationSettingsPage": {
     "title": "Configurações de tradução",
-    "description": "Gerencie o idioma de origem padrão e os provedores de tradução automática. Um administrador inicia explicitamente a geração de traduções em cada editor.",
+    "description": "Gerencie o idioma de origem padrão das traduções.",
     "actions": {
-      "jobs": "Tarefas",
-      "save": "Salvar configurações",
-      "addProvider": "Adicionar provedor",
-      "editProvider": "Editar provedor",
-      "deleteProvider": "Excluir provedor",
-      "createProvider": "Criar provedor"
+      "save": "Salvar configurações"
     },
     "sections": {
       "runtime": "Padrões de origem",
-      "runtimeDescription": "Defina apenas o idioma usado quando um idioma de origem ainda não foi estabelecido. Alterações na origem nunca iniciam a geração de traduções automaticamente.",
-      "providers": "Provedores de tradução",
-      "providersDescription": "Gerencie provedores de tradução automática. A geração fica desativada até haver pelo menos um provedor ativo com credenciais válidas."
+      "runtimeDescription": "Defina apenas o idioma usado quando um idioma de origem ainda não foi estabelecido."
     },
     "fields": {
       "defaultLocale": {
         "label": "Localidade padrão",
         "description": "Usada quando uma localidade de origem ainda não foi definida e quando uma solicitação não resolve para uma localidade de conteúdo compatível."
-      },
-      "protectedTerms": {
-        "label": "Termos protegidos",
-        "description": "Grafias exatas, com distinção entre maiúsculas e minúsculas, que a geração de traduções deve manter inalteradas. Nenhum termo é aprendido ou sugerido automaticamente.",
-        "placeholder": "Adicionar um termo protegido",
-        "examples": "Exemplos: Photoshop, React Native"
-      },
-      "providerName": {
-        "label": "Nome do provedor"
-      },
-      "providerType": {
-        "label": "Tipo de provedor"
-      },
-      "providerPriority": {
-        "label": "Prioridade",
-        "description": "A prioridade menor executa primeiro quando há vários provedores ativos."
-      },
-      "providerActive": {
-        "label": "Ativo",
-        "shortLabel": "Ativo",
-        "description": "Somente provedores ativos podem gerar traduções."
-      },
-      "deeplApiKey": {
-        "label": "Chave de API DeepL",
-        "descriptionEdit": "Deixe em branco para manter a chave salva."
-      },
-      "deeplApiBaseUrl": {
-        "label": "URL base da API DeepL",
-        "description": "Use o padrão, exceto ao rotear por proxy ou endpoint dedicado."
-      },
-      "llmPreset": {
-        "label": "LLM preset"
-      },
-      "llmApiKey": {
-        "label": "LLM API key",
-        "descriptionEdit": "Deixe em branco para manter a chave armazenada."
-      },
-      "llmApiBaseUrl": {
-        "label": "LLM API base URL",
-        "description": "Obrigatória para endpoints compatíveis com OpenAI; deixe em branco para Gemini."
-      },
-      "llmModel": {
-        "label": "Model",
-        "description": "ID do modelo usado para gerar traduções."
-      },
-      "llmInputPrice": {
-        "label": "Entrada USD / 1M tokens",
-        "description": "Estimativa opcional usada para comparar provedores e planejar custos."
-      },
-      "llmOutputPrice": {
-        "label": "Saída USD / 1M tokens",
-        "description": "Estimativa opcional usada para comparar provedores e planejar custos."
-      },
-      "llmMaxContextTokens": {
-        "label": "Máximo de tokens de contexto",
-        "description": "Indicação opcional de roteamento para grandes lotes de tradução."
-      },
-      "llmMaxOutputTokens": {
-        "label": "Máximo de tokens de saída",
-        "description": "Limite opcional por solicitação enviado aos provedores compatíveis."
-      },
-      "llmTemperature": {
-        "label": "Temperature",
-        "description": "Valores mais baixos tornam a saída estruturada de tradução mais determinística."
-      },
-      "llmSupportsJsonMode": {
-        "label": "Modo JSON estruturado",
-        "description": "Ative quando o provedor oferecer suporte a respostas com esquema JSON ou em modo JSON."
       }
     },
     "states": {
@@ -4596,82 +4441,13 @@
     },
     "notifications": {
       "saved": "Configurações de tradução salvas.",
-      "saveFailed": "Falha ao salvar as configurações de tradução.",
-      "providerCreated": "Provedor de tradução criado.",
-      "providerUpdated": "Provedor de tradução atualizado.",
-      "providerDeleted": "Provedor de tradução excluído.",
-      "providerSaveFailed": "Falha ao salvar o provedor de tradução.",
-      "providerToggleFailed": "Falha ao atualizar o status do provedor.",
-      "providerDeleteFailed": "Falha ao excluir o provedor de tradução."
-    },
-    "generation": {
-      "enabled": "Geração ativada",
-      "disabled": "Geração desativada"
-    },
-    "providerTypes": {
-      "deepl": "DeepL",
-      "llm": "LLM"
-    },
-    "providerStates": {
-      "empty": "Nenhum provedor de tradução configurado.",
-      "active": "Ativo",
-      "inactive": "Inativo",
-      "priority": "Prioridade {priority}",
-      "modelUnset": "Model not set"
-    },
-    "validation": {
-      "providerNameRequired": "O nome do provedor é obrigatório.",
-      "providerApiKeyRequired": "Este provedor exige uma chave de API.",
-      "providerModelRequired": "É obrigatório um modelo para provedores de LLM.",
-      "providerBaseUrlRequired": "É obrigatória uma URL base de API para provedores de LLM compatíveis com OpenAI."
-    },
-    "modal": {
-      "createProviderTitle": "Criar provedor de tradução",
-      "editProviderTitle": "Editar provedor de tradução",
-      "deleteProviderTitle": "Excluir provedor de tradução",
-      "deleteProviderMessage": "Excluir {name}? A geração será desativada se não restar nenhum provedor ativo.",
-      "credentialsSection": "Credenciais"
-    },
-    "llmPresets": {
-      "gemini": "Gemini",
-      "openaiCompatible": "Compatível com OpenAI"
+      "saveFailed": "Falha ao salvar as configurações de tradução."
     }
   },
   "summaryField": {
     "description": "Usado para teasers, listagens, busca, compartilhamento e descrições legíveis por IA.",
-    "status": {
-      "idle": "Pronto",
-      "generating": "Gerando",
-      "applying": "Aplicando",
-      "stale": "Resumo gerado desatualizado",
-      "applied": "Aplicado",
-      "ready": "Pronto para aplicar"
-    },
-    "actions": {
-      "generate": "Gerar resumo",
-      "apply": "Aplicar resumo"
-    },
     "placeholders": {
       "summary": "Adicione um resumo conciso..."
-    },
-    "tooltips": {
-      "generatingNamed": "{name} está gerando um resumo"
-    },
-    "feedback": {
-      "failedDefault": "Falha ao processar a geração do resumo.",
-      "alreadyRunning": "A geração do resumo já está em andamento.",
-      "missingSuggestionPayload": "A geração do resumo foi concluída sem um payload de sugestão.",
-      "staleSuggestion": "Esta sugestão está obsoleta. Regenere-a ou descarte-a antes de aplicar.",
-      "unableToApplyNow": "Não foi possível aplicar o resumo gerado agora.",
-      "applyFailed": "Falha ao aplicar o resumo gerado.",
-      "applied": "Resumo gerado aplicado.",
-      "readyToApply": "O resumo gerado está pronto para ser aplicado."
-    },
-    "ready": {
-      "title": "Resumo gerado",
-      "suggestedSummary": "Resumo sugerido",
-      "anotherCollaborator": "Outro colaborador",
-      "anotherCollaboratorNamed": "{name} tem um resumo gerado pronto."
     }
   },
   "userProfile": {

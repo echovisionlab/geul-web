@@ -196,7 +196,7 @@ describe('typed resident localized Page body', () => {
     expect(richTextEditorSpy).not.toHaveBeenCalled();
   });
 
-  it('opens exact target rich text with locale-only authoring and exact AI identity', () => {
+  it('opens exact target rich text with locale-only authoring', () => {
     roomDocument.destroy();
     roomDocument = targetRichTextRoom();
 
@@ -207,7 +207,6 @@ describe('typed resident localized Page body', () => {
         editable: true,
         allowNeutralBlockEdits: false,
         allowStructuralEdits: false,
-        aiTarget: { type: 'page', id: 'page-1', locale: 'en' },
       }),
     );
   });

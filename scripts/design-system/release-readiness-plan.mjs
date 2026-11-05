@@ -1125,17 +1125,11 @@ export const routePlans = {
     'M10 L01',
     'Entity/language state, totals, refresh and error.',
   ),
-  '/admin/translations/jobs': row(
-    'Translation jobs',
-    '05',
-    'M10 L01 L02',
-    'Job target, language, state, cancel, progress/completion and empty list.',
-  ),
   '/admin/translations/settings': row(
     'Translation settings',
     '05',
     'M10',
-    'Settings/providers, dirty state, enable/disable, delete confirmation and save failure.',
+    'Default locale, dirty state and save failure.',
   ),
   '/admin/terms': row(
     'Terms administration',

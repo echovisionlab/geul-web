@@ -2262,8 +2262,8 @@
     "systemOrLegacy": "Sistem veya önceki sürüm",
     "restore": "Eski haline getirmek",
     "restoreTitle": "Sürümü geri yükle",
-    "restoreSameLocaleBody": "Kaynak v{version} ({locale}) geri yüklendiğinde yalnızca kaynak belge değişir. Mevcut hedef belgeler ve çeviri işleri değişmez; çeviriler otomatik olarak oluşturulmaz. Devam edilsin mi?",
-    "restoreCrossLocaleBody": "Kaynak v{version} geri yüklendiğinde kaynak yerel ayarı {currentLocale} yerine {selectedLocale} olur ve yalnızca kaynak işaretçisi değişir. Mevcut hedef belgeler ve çeviri işleri değişmez; çeviriler otomatik olarak oluşturulmaz. Devam edilsin mi?",
+    "restoreSameLocaleBody": "Kaynak v{version} ({locale}) geri yüklendiğinde yalnızca kaynak belge değişir. Mevcut hedef belgeler değişmez. Devam edilsin mi?",
+    "restoreCrossLocaleBody": "Kaynak v{version} geri yüklendiğinde kaynak yerel ayarı {currentLocale} yerine {selectedLocale} olur ve yalnızca kaynak işaretçisi değişir. Mevcut hedef belgeler değişmez. Devam edilsin mi?",
     "restoreFailed": "Kaynak belge geri yüklenemedi.",
     "loadFailed": "Sürüm geçmişi yüklenemedi.",
     "end": "Tüm sürümler yüklendi."
@@ -3853,8 +3853,7 @@
           "math": "Matematik",
           "inline": "Satır içi",
           "embeds": "Gömülenler",
-          "media": "Medya",
-          "ai": "Yapay zekâ"
+          "media": "Medya"
         },
         "items": {
           "heading": {
@@ -3977,12 +3976,6 @@
             "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\nek\ndosya\nbelge\nindir",
             "group": "Medya"
           },
-          "aiAssistant": {
-            "title": "Yapay zekâ asistanı",
-            "subtext": "Yapay zekayla metin yazın, iyileştirin veya dönüştürün",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\nyapay zekâ\nasistan\nyaz\niyileştir",
-            "group": "Yapay zekâ"
-          },
           "shader": {
             "title": "GLSL gölgelendiricisi",
             "subtext": "Etkileşimli bir GLSL gölgelendiricisi ekleyin",
@@ -4022,8 +4015,7 @@
         "displaySizeXl": "Çok büyük",
         "nest": "Bloğu içeri al",
         "unnest": "Bloğu dışarı al",
-        "inlineMath": "Satır içi matematik",
-        "ai": "Yapay zekâ asistanı"
+        "inlineMath": "Satır içi matematik"
       },
       "link": {
         "create": "Bağlantı oluştur",
@@ -4223,47 +4215,6 @@
       "message": "Yeniden düzenleyebilirsiniz. Yalnızca görüntüleme sırasında saklanan değişiklikler kaydediliyor."
     }
   },
-  "aiAssistant": {
-    "title": "Yapay Zeka Asistanı",
-    "modes": {
-      "modify": "Değiştir",
-      "generate": "Oluştur"
-    },
-    "placeholders": {
-      "modify": "Bu metni nasıl değiştirmeliyim?",
-      "generate": "Ne yazmak istersin?"
-    },
-    "quickActions": {
-      "title": "Hızlı eylemler",
-      "improve": "İyileştir",
-      "fixSpelling": "Yazımı Düzelt",
-      "simplify": "Basitleştir",
-      "summarize": "Özetle",
-      "translateKorean": "Korece",
-      "translateEnglish": "İngilizce",
-      "continueWriting": "Yazmaya Devam Et",
-      "brainstorm": "Beyin fırtınası"
-    },
-    "sections": {
-      "result": "Yapay Zeka Sonucu"
-    },
-    "actions": {
-      "close": "AI asistanını kapat",
-      "submitPrompt": "Özel AI istemi gönder",
-      "stop": "Durmak",
-      "reject": "Reddetmek",
-      "retry": "Yeniden dene",
-      "accept": "Kabul etmek",
-      "insert": "Sokmak"
-    },
-    "errors": {
-      "generic": "Bir şeyler ters gitti. Lütfen tekrar deneyin."
-    },
-    "notifications": {
-      "applyFailedTitle": "AI sonucu uygulanamadı",
-      "applyFailedMessage": "AI yanıtı ayrıştırılamadı. Lütfen tekrar deneyin."
-    }
-  },
   "mapControls": {
     "managePlaces": "Yerleri Yönet",
     "managePlacesWithCount": "Yerleri Yönet ({count})",
@@ -4366,20 +4317,15 @@
     "description": "Her yerel ayarın kaynak dilini ve mevcut çeviri belgesini inceleyin.",
     "actions": {
       "expand": "Genişletmek",
-      "collapse": "Yıkılmak",
-      "regenerateAll": "Uygun tüm yerel ayarlar için çeviri oluştur/yeniden oluştur",
-      "regenerateLocale": "Yenile",
-      "regenerateLocaleAria": "{locale} çevirisini yeniden oluştur",
-      "generateLocale": "Generate",
-      "generateLocaleAria": "{locale} çevirisini oluştur"
+      "collapse": "Yıkılmak"
     },
     "sourceLocale": {
       "label": "Kaynak dil",
       "description": "Bu, bu varlığın çevirileri için temel olarak kullanılan kaynak dildir.",
       "confirm": {
         "title": "Kaynak dili değiştir",
-        "description": "Kaynak dili değiştirmek yalnızca kaynak işaretçisini günceller. Mevcut hedef belgeler ve çeviri işleri değişmez; çeviriler otomatik olarak oluşturulmaz.",
-        "detail": "{locale}, düzenlenebilir kaynak belgenin dili olur. Mevcut hedef belgeler ve çeviri işleri değişmez.",
+        "description": "Kaynak dili değiştirmek yalnızca kaynak işaretçisini günceller. Mevcut hedef belgeler değişmez.",
+        "detail": "{locale}, düzenlenebilir kaynak belgenin dili olur. Mevcut hedef belgeler değişmez.",
         "confirm": "Kaynak dili değiştir"
       }
     },
@@ -4408,10 +4354,7 @@
     },
     "notifications": {
       "sourceLocaleUpdated": "Kaynak dil güncellendi",
-      "sourceLocaleUpdateFailed": "Kaynak dil güncellenemedi.",
-      "allQueued": "Çevirinin yeniden oluşturulması tüm yerel ayarlar için sıraya alındı.",
-      "localeQueued": "Bu yerel ayar için çevirinin yeniden oluşturulması sıraya alındı.",
-      "regenerateFailed": "Çevirinin yeniden oluşturulması sıraya alınamadı."
+      "sourceLocaleUpdateFailed": "Kaynak dil güncellenemedi."
     }
   },
   "translationPanelMenu": {
@@ -4451,13 +4394,11 @@
   },
   "translationOverviewPage": {
     "actions": {
-      "openJobs": "Açık işler",
       "openSettings": "Ayarları aç"
     },
     "stats": {
       "totalLocales": "Toplam yerel ayarlar",
       "sourceEntities": "Kaynak varlıklar",
-      "activeJobs": "Devam eden işler",
       "existingEntries": "Mevcut çeviriler"
     },
     "sections": {
@@ -4476,119 +4417,23 @@
       "emptyEntityHealth": "Henüz varlık durumu verisi yok."
     },
     "policy": {
-      "internal": "Yalnızca dahili",
-      "machineDisabled": "Makine devre dışı"
-    }
-  },
-  "translationJobsPage": {
-    "title": "Çeviri İşleri",
-    "stats": {
-      "active": "{count} devam ediyor"
-    },
-    "columns": {
-      "entity": "Varlık"
-    },
-    "locale": {
-      "fromTo": "{source} -> {target}"
-    },
-    "states": {
-      "loadFailed": "Çeviri işleri yüklenemedi.",
-      "empty": "Henüz çeviri işi yok."
-    },
-    "notifications": {
-      "cancelled": "Çeviri işi iptal edildi",
-      "cancelFailed": "Çeviri işi iptal edilemedi."
+      "internal": "Yalnızca dahili"
     }
   },
   "translationSettingsPage": {
     "title": "Çeviri ayarları",
-    "description": "Varsayılan kaynak dili ve otomatik çeviri sağlayıcılarını yönetin. Yönetici, her düzenleyiciden çeviri oluşturmayı açıkça başlatır.",
+    "description": "Çeviriler için varsayılan kaynak dili yönetin.",
     "actions": {
-      "jobs": "İşler",
-      "save": "Ayarları kaydet",
-      "addProvider": "Sağlayıcı ekle",
-      "editProvider": "Sağlayıcıyı düzenle",
-      "deleteProvider": "Sağlayıcıyı sil",
-      "createProvider": "Sağlayıcı oluştur"
+      "save": "Ayarları kaydet"
     },
     "sections": {
       "runtime": "Kaynak varsayılanları",
-      "runtimeDescription": "Yalnızca kaynak dil henüz belirlenmemişken kullanılacak dili ayarlayın. Kaynak değişiklikleri çeviri oluşturmayı hiçbir zaman otomatik olarak başlatmaz.",
-      "providers": "Çeviri sağlayıcıları",
-      "providersDescription": "Makine çevirisi sağlayıcılarını yönetin. En az bir aktif sağlayıcı geçerli kimlik bilgilerine sahip olana kadar oluşturma devre dışı kalır."
+      "runtimeDescription": "Yalnızca kaynak dil henüz belirlenmemişken kullanılacak dili ayarlayın."
     },
     "fields": {
       "defaultLocale": {
         "label": "Varsayılan yerel ayar",
         "description": "Kaynak yerel ayarı henüz ayarlanmadığında ve bir istek desteklenen içerik yerel ayarına çözümlenmediğinde kullanılır."
-      },
-      "protectedTerms": {
-        "label": "Korunan terimler",
-        "description": "Çeviri oluşturulurken değişmeden korunması gereken, büyük/küçük harfe duyarlı tam yazımlar. Terimler otomatik olarak öğrenilmez veya önerilmez.",
-        "placeholder": "Korunan terim ekle",
-        "examples": "Örnekler: Photoshop, React Native"
-      },
-      "providerName": {
-        "label": "Sağlayıcı adı"
-      },
-      "providerType": {
-        "label": "Sağlayıcı türü"
-      },
-      "providerPriority": {
-        "label": "Öncelik",
-        "description": "Birden fazla sağlayıcı etkin olduğunda düşük öncelik ilk önce çalıştırılır."
-      },
-      "providerActive": {
-        "label": "Aktif",
-        "shortLabel": "Aktif",
-        "description": "Yalnızca etkin sağlayıcılar çeviri oluşturmayı çalıştırabilir."
-      },
-      "deeplApiKey": {
-        "label": "DeepL API anahtarı",
-        "descriptionEdit": "Saklanan anahtarı saklamak için boş bırakın."
-      },
-      "deeplApiBaseUrl": {
-        "label": "DeepL API temel URL'si",
-        "description": "Bir proxy veya özel uç nokta üzerinden yönlendirme yapmadığınız sürece varsayılanı kullanın."
-      },
-      "llmPreset": {
-        "label": "Yüksek Lisans ön ayarı"
-      },
-      "llmApiKey": {
-        "label": "Yüksek Lisans API anahtarı",
-        "descriptionEdit": "Saklanan anahtarı saklamak için boş bırakın."
-      },
-      "llmApiBaseUrl": {
-        "label": "Yüksek Lisans API'si temel URL'si",
-        "description": "OpenAI uyumlu uç noktalar için gereklidir; İkizler için boş bırakın."
-      },
-      "llmModel": {
-        "label": "Modeli",
-        "description": "Çeviri oluşturma için kullanılan model kimliği."
-      },
-      "llmInputPrice": {
-        "label": "USD / 1 milyon jeton girin",
-        "description": "Sağlayıcı karşılaştırması ve maliyet planlaması için kullanılan isteğe bağlı tahmin."
-      },
-      "llmOutputPrice": {
-        "label": "USD / 1 milyon token çıkışı",
-        "description": "Sağlayıcı karşılaştırması ve maliyet planlaması için kullanılan isteğe bağlı tahmin."
-      },
-      "llmMaxContextTokens": {
-        "label": "Maksimum bağlam belirteçleri",
-        "description": "Büyük çeviri grupları için isteğe bağlı yönlendirme ipucu."
-      },
-      "llmMaxOutputTokens": {
-        "label": "Maksimum çıkış jetonları",
-        "description": "Uyumlu sağlayıcılara aktarılan isteğe bağlı istek başına sınır."
-      },
-      "llmTemperature": {
-        "label": "Sıcaklık",
-        "description": "Daha düşük değerler yapılandırılmış çeviri çıktısını daha belirleyici hale getirir."
-      },
-      "llmSupportsJsonMode": {
-        "label": "Yapılandırılmış JSON modu",
-        "description": "Sağlayıcı JSON şemasını veya JSON modu yanıtlarını desteklediğinde etkinleştirin."
       }
     },
     "states": {
@@ -4596,82 +4441,13 @@
     },
     "notifications": {
       "saved": "Çeviri ayarları kaydedildi.",
-      "saveFailed": "Çeviri ayarları kaydedilemedi.",
-      "providerCreated": "Çeviri sağlayıcı oluşturuldu.",
-      "providerUpdated": "Çeviri sağlayıcı güncellendi.",
-      "providerDeleted": "Çeviri sağlayıcı silindi.",
-      "providerSaveFailed": "Çeviri sağlayıcı kaydedilemedi.",
-      "providerToggleFailed": "Sağlayıcı durumu güncellenemedi.",
-      "providerDeleteFailed": "Çeviri sağlayıcı silinemedi."
-    },
-    "generation": {
-      "enabled": "Oluşturma etkin",
-      "disabled": "Nesil devre dışı"
-    },
-    "providerTypes": {
-      "deepl": "Derin L",
-      "llm": "Yüksek Lisans"
-    },
-    "providerStates": {
-      "empty": "Hiçbir çeviri sağlayıcısı yapılandırılmadı.",
-      "active": "Aktif",
-      "inactive": "Etkin değil",
-      "priority": "Öncelik {priority}",
-      "modelUnset": "Model ayarlanmadı"
-    },
-    "validation": {
-      "providerNameRequired": "Sağlayıcı adı gerekli.",
-      "providerApiKeyRequired": "Bu sağlayıcı için bir API anahtarı gereklidir.",
-      "providerModelRequired": "LLM sağlayıcıları için bir model gereklidir.",
-      "providerBaseUrlRequired": "OpenAI uyumlu LLM sağlayıcıları için bir API temel URL'si gereklidir."
-    },
-    "modal": {
-      "createProviderTitle": "Çeviri sağlayıcı oluştur",
-      "editProviderTitle": "Çeviri sağlayıcısını düzenle",
-      "deleteProviderTitle": "Çeviri sağlayıcısını sil",
-      "deleteProviderMessage": "{name} silinsin mi? Aktif sağlayıcı kalmadığı takdirde çeviri oluşturma devre dışı bırakılacaktır.",
-      "credentialsSection": "Kimlik bilgileri"
-    },
-    "llmPresets": {
-      "gemini": "İkizler burcu",
-      "openaiCompatible": "OpenAI uyumlu"
+      "saveFailed": "Çeviri ayarları kaydedilemedi."
     }
   },
   "summaryField": {
     "description": "Tanıtımlar, listeler, arama, paylaşım ve yapay zeka tarafından okunabilen açıklamalar için kullanılır.",
-    "status": {
-      "idle": "Hazır",
-      "generating": "Üretiliyor",
-      "applying": "Başvuruyor",
-      "stale": "Oluşturulan özet eski",
-      "applied": "Uygulandı",
-      "ready": "Başvuruya hazır"
-    },
-    "actions": {
-      "generate": "Özet oluştur",
-      "apply": "Özeti uygula"
-    },
     "placeholders": {
       "summary": "Kısa bir özet ekleyin..."
-    },
-    "tooltips": {
-      "generatingNamed": "{name} bir özet oluşturuyor"
-    },
-    "feedback": {
-      "failedDefault": "Özet oluşturma işlemi başarısız oldu.",
-      "alreadyRunning": "Özet oluşturma zaten çalışıyor.",
-      "missingSuggestionPayload": "Özet oluşturma, öneri yükü olmadan tamamlandı.",
-      "staleSuggestion": "Bu öneri bayat. Başvurmadan önce yeniden oluşturun veya reddedin.",
-      "unableToApplyNow": "Oluşturulan özet şu anda uygulanamıyor.",
-      "applyFailed": "Oluşturulan özet uygulanamadı.",
-      "applied": "Oluşturulan özet uygulandı.",
-      "readyToApply": "Oluşturulan özet uygulamaya hazır."
-    },
-    "ready": {
-      "title": "Oluşturulan özet",
-      "suggestedSummary": "Önerilen özet",
-      "anotherCollaborator": "Başka bir işbirlikçi",
-      "anotherCollaboratorNamed": "{name}'nin oluşturulmuş bir özeti hazır."
     }
   },
   "userProfile": {

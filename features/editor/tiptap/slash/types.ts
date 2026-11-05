@@ -26,8 +26,7 @@ export type TiptapSlashCapability =
   | 'p5'
   | 'mermaid'
   | 'three'
-  | 'shader'
-  | 'ai';
+  | 'shader';
 
 export type TiptapSlashWorkflow = Exclude<TiptapSlashCapability, 'math' | 'table'>;
 
@@ -125,8 +124,7 @@ type TiptapSlashMenuItemKey =
   | 'p5Sketch'
   | 'threeScene'
   | 'shader'
-  | 'file'
-  | 'aiAssistant';
+  | 'file';
 
 export type TiptapSlashMenuMessages = Pick<EditorSlashMenuMessages, 'placeholder' | 'unavailable'> & {
   groups: EditorSlashMenuMessages['groups'];

@@ -51,7 +51,6 @@ function Preview({ reader = false, query = false }: { reader?: boolean; query?: 
                 awareness={room.awareness}
                 localUser={{ name: 'Author', color: '#b02d23' }}
                 onEditorReady={setEditor}
-                ai={false}
               />
             </EditorAuthoringModeProvider>
           </>

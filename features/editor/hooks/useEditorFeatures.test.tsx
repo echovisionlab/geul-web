@@ -4,21 +4,7 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Editor } from '@tiptap/core';
-import {
-  createTiptapMapCommandPort,
-  useAIAssistant,
-  useMapInsert,
-  type EditorMapCommandPort,
-} from './useEditorFeatures';
-
-vi.mock('@/features/editor/tiptap/ai/tiptap-ai', () => ({
-  resolveTiptapAIContext: () => ({
-    isSupported: true,
-    currentBlockId: 'block-1',
-    selectedBlockIds: ['block-1'],
-    mode: 'generate',
-  }),
-}));
+import { createTiptapMapCommandPort, useMapInsert, type EditorMapCommandPort } from './useEditorFeatures';
 
 const editor = {
   isFocused: false,
@@ -31,7 +17,6 @@ const mapPort: EditorMapCommandPort = {
 };
 
 let latestHooks: {
-  ai: ReturnType<typeof useAIAssistant>;
   map: ReturnType<typeof useMapInsert>;
 } | null = null;
 let container: HTMLDivElement | null = null;
@@ -39,7 +24,6 @@ let root: Root | null = null;
 
 function HookHarness({ enabled }: { enabled: boolean }) {
   latestHooks = {
-    ai: useAIAssistant(editor, undefined, enabled),
     map: useMapInsert(editor, { enabled, port: mapPort }),
   };
   return null;
@@ -97,22 +81,6 @@ describe('editor authoring feature guards', () => {
         { referenceBlockId: 'block-1' },
       ),
     ).toEqual({ ok: false, reason: 'unavailable' });
-  });
-
-  it('closes an open AI assistant when authoring becomes disabled', () => {
-    renderHarness(true);
-    act(() => {
-      getHooks().ai.openAIMenu();
-    });
-    expect(getHooks().ai.aiAssistant?.isOpen).toBe(true);
-
-    renderHarness(false);
-
-    expect(getHooks().ai.aiAssistant).toBeNull();
-    act(() => {
-      getHooks().ai.openAIMenu();
-    });
-    expect(getHooks().ai.aiAssistant).toBeNull();
   });
 
   it('closes map insertion and rejects a stale selection when authoring becomes disabled', () => {

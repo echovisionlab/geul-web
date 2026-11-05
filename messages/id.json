@@ -2262,8 +2262,8 @@
     "systemOrLegacy": "Sistem atau versi sebelumnya",
     "restore": "Memulihkan",
     "restoreTitle": "Pulihkan versi",
-    "restoreSameLocaleBody": "Memulihkan sumber v{version} ({locale}) hanya mengubah dokumen sumber. Dokumen target dan pekerjaan terjemahan yang sudah ada tetap tidak berubah, dan terjemahan tidak dibuat secara otomatis. Lanjutkan?",
-    "restoreCrossLocaleBody": "Memulihkan sumber v{version} mengubah lokal sumber dari {currentLocale} ke {selectedLocale} dan hanya mengubah penunjuk sumber. Dokumen target dan pekerjaan terjemahan yang sudah ada tetap tidak berubah, dan terjemahan tidak dibuat secara otomatis. Lanjutkan?",
+    "restoreSameLocaleBody": "Memulihkan sumber v{version} ({locale}) hanya mengubah dokumen sumber. Dokumen target yang sudah ada tetap tidak berubah. Lanjutkan?",
+    "restoreCrossLocaleBody": "Memulihkan sumber v{version} mengubah lokal sumber dari {currentLocale} ke {selectedLocale} dan hanya mengubah penunjuk sumber. Dokumen target yang sudah ada tetap tidak berubah. Lanjutkan?",
     "restoreFailed": "Gagal memulihkan dokumen sumber.",
     "loadFailed": "Riwayat versi tidak dapat dimuat.",
     "end": "Semua versi telah dimuat."
@@ -3853,8 +3853,7 @@
           "math": "Matematika",
           "inline": "Sebaris",
           "embeds": "Sematan",
-          "media": "Media",
-          "ai": "AI"
+          "media": "Media"
         },
         "items": {
           "heading": {
@@ -3977,12 +3976,6 @@
             "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\nlampiran\nberkas\ndokumen\nunduh",
             "group": "Media"
           },
-          "aiAssistant": {
-            "title": "Asisten AI",
-            "subtext": "Tulis, tingkatkan, atau ubah teks dengan AI",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\nasisten\ntulis\nmenulis\ntingkatkan",
-            "group": "AI"
-          },
           "shader": {
             "title": "Shader GLSL",
             "subtext": "Tambahkan shader GLSL interaktif",
@@ -4022,8 +4015,7 @@
         "displaySizeXl": "Sangat besar",
         "nest": "Tambah inden",
         "unnest": "Kurangi inden",
-        "inlineMath": "Matematika sebaris",
-        "ai": "Asisten AI"
+        "inlineMath": "Matematika sebaris"
       },
       "link": {
         "create": "Buat tautan",
@@ -4223,47 +4215,6 @@
       "message": "Anda dapat mengedit lagi. Perubahan yang disimpan selama Anda hanya dapat melihat sedang disimpan."
     }
   },
-  "aiAssistant": {
-    "title": "Asisten AI",
-    "modes": {
-      "modify": "Memodifikasi",
-      "generate": "Hasilkan"
-    },
-    "placeholders": {
-      "modify": "Bagaimana saya harus mengubah teks ini",
-      "generate": "Apa yang ingin Anda tulis"
-    },
-    "quickActions": {
-      "title": "Tindakan cepat",
-      "improve": "Tingkatkan",
-      "fixSpelling": "Perbaiki Ejaan",
-      "simplify": "Sederhanakan",
-      "summarize": "Ringkaslah",
-      "translateKorean": "Korea",
-      "translateEnglish": "bahasa Inggris",
-      "continueWriting": "Lanjutkan Menulis",
-      "brainstorm": "Bertukar pikiran"
-    },
-    "sections": {
-      "result": "Hasil AI"
-    },
-    "actions": {
-      "close": "Tutup asisten AI",
-      "submitPrompt": "Kirimkan permintaan AI khusus",
-      "stop": "Berhenti",
-      "reject": "Menolak",
-      "retry": "Mencoba kembali",
-      "accept": "Menerima",
-      "insert": "Menyisipkan"
-    },
-    "errors": {
-      "generic": "Ada yang tidak beres. Silakan coba lagi."
-    },
-    "notifications": {
-      "applyFailedTitle": "Gagal menerapkan hasil AI",
-      "applyFailedMessage": "Respons AI tidak dapat diuraikan. Silakan coba lagi."
-    }
-  },
   "mapControls": {
     "managePlaces": "Kelola Tempat",
     "managePlacesWithCount": "Kelola Tempat ({count})",
@@ -4366,20 +4317,15 @@
     "description": "Tinjau bahasa sumber dan dokumen terjemahan yang sudah ada untuk setiap lokal.",
     "actions": {
       "expand": "Memperluas",
-      "collapse": "Runtuh",
-      "regenerateAll": "Buat/buat ulang semua lokal yang memenuhi syarat",
-      "regenerateLocale": "Diperbarui",
-      "regenerateLocaleAria": "Buat ulang terjemahan {locale}",
-      "generateLocale": "Generate",
-      "generateLocaleAria": "Buat terjemahan {locale}"
+      "collapse": "Runtuh"
     },
     "sourceLocale": {
       "label": "Bahasa sumber",
       "description": "Ini adalah bahasa sumber yang digunakan sebagai dasar terjemahan entitas ini.",
       "confirm": {
         "title": "Ubah bahasa sumber",
-        "description": "Mengubah bahasa sumber hanya memperbarui penunjuk sumber. Dokumen target dan pekerjaan terjemahan yang sudah ada tetap tidak berubah, dan terjemahan tidak dibuat secara otomatis.",
-        "detail": "{locale} menjadi bahasa dokumen sumber yang dapat disunting. Dokumen target dan pekerjaan terjemahan yang sudah ada tetap tidak berubah.",
+        "description": "Mengubah bahasa sumber hanya memperbarui penunjuk sumber. Dokumen target yang sudah ada tetap tidak berubah.",
+        "detail": "{locale} menjadi bahasa dokumen sumber yang dapat disunting. Dokumen target yang sudah ada tetap tidak berubah.",
         "confirm": "Ubah bahasa sumber"
       }
     },
@@ -4408,10 +4354,7 @@
     },
     "notifications": {
       "sourceLocaleUpdated": "Bahasa sumber diperbarui",
-      "sourceLocaleUpdateFailed": "Gagal memperbarui bahasa sumber.",
-      "allQueued": "Regenerasi terjemahan dimasukkan dalam antrean untuk semua lokal.",
-      "localeQueued": "Regenerasi terjemahan sedang dalam antrean untuk lokal ini.",
-      "regenerateFailed": "Gagal mengantri regenerasi terjemahan."
+      "sourceLocaleUpdateFailed": "Gagal memperbarui bahasa sumber."
     }
   },
   "translationPanelMenu": {
@@ -4451,13 +4394,11 @@
   },
   "translationOverviewPage": {
     "actions": {
-      "openJobs": "Pekerjaan terbuka",
       "openSettings": "Buka pengaturan"
     },
     "stats": {
       "totalLocales": "Total lokal",
       "sourceEntities": "Entitas sumber",
-      "activeJobs": "Pekerjaan sedang berlangsung",
       "existingEntries": "Terjemahan yang sudah ada"
     },
     "sections": {
@@ -4476,119 +4417,23 @@
       "emptyEntityHealth": "Belum ada data kesehatan entitas."
     },
     "policy": {
-      "internal": "Hanya internal",
-      "machineDisabled": "Mesin dinonaktifkan"
-    }
-  },
-  "translationJobsPage": {
-    "title": "Pekerjaan Penerjemahan",
-    "stats": {
-      "active": "{count} sedang berlangsung"
-    },
-    "columns": {
-      "entity": "Entitas"
-    },
-    "locale": {
-      "fromTo": "{source} -> {target}"
-    },
-    "states": {
-      "loadFailed": "Gagal memuat pekerjaan terjemahan.",
-      "empty": "Belum ada pekerjaan penerjemahan."
-    },
-    "notifications": {
-      "cancelled": "Pekerjaan penerjemahan dibatalkan",
-      "cancelFailed": "Gagal membatalkan pekerjaan terjemahan."
+      "internal": "Hanya internal"
     }
   },
   "translationSettingsPage": {
     "title": "Pengaturan terjemahan",
-    "description": "Kelola bahasa sumber bawaan dan penyedia terjemahan otomatis. Administrator secara eksplisit memulai pembuatan terjemahan dari setiap editor.",
+    "description": "Kelola bahasa sumber bawaan untuk terjemahan.",
     "actions": {
-      "jobs": "Pekerjaan",
-      "save": "Simpan pengaturan",
-      "addProvider": "Tambahkan penyedia",
-      "editProvider": "Sunting penyedia",
-      "deleteProvider": "Hapus penyedia",
-      "createProvider": "Buat penyedia"
+      "save": "Simpan pengaturan"
     },
     "sections": {
       "runtime": "Pengaturan bawaan sumber",
-      "runtimeDescription": "Tetapkan hanya bahasa yang digunakan ketika bahasa sumber belum ditetapkan. Perubahan sumber tidak pernah memulai pembuatan terjemahan secara otomatis.",
-      "providers": "Penyedia terjemahan",
-      "providersDescription": "Kelola penyedia terjemahan mesin. Pembuatan tetap dinonaktifkan hingga setidaknya satu penyedia aktif memiliki kredensial yang valid."
+      "runtimeDescription": "Tetapkan hanya bahasa yang digunakan ketika bahasa sumber belum ditetapkan."
     },
     "fields": {
       "defaultLocale": {
         "label": "Lokal bawaan",
         "description": "Digunakan ketika lokal sumber belum ditetapkan dan ketika permintaan tidak diselesaikan ke lokal konten yang didukung."
-      },
-      "protectedTerms": {
-        "label": "Istilah yang dilindungi",
-        "description": "Ejaan persis yang peka terhadap huruf besar dan kecil yang harus dipertahankan saat membuat terjemahan. Tidak ada istilah yang dipelajari atau disarankan secara otomatis.",
-        "placeholder": "Tambahkan istilah yang dilindungi",
-        "examples": "Contoh: Photoshop, React Native"
-      },
-      "providerName": {
-        "label": "Nama penyedia"
-      },
-      "providerType": {
-        "label": "Jenis penyedia"
-      },
-      "providerPriority": {
-        "label": "Prioritas",
-        "description": "Prioritas yang lebih rendah dijalankan terlebih dahulu ketika beberapa penyedia aktif."
-      },
-      "providerActive": {
-        "label": "Aktif",
-        "shortLabel": "Aktif",
-        "description": "Hanya penyedia aktif yang dapat menjalankan pembuatan terjemahan."
-      },
-      "deeplApiKey": {
-        "label": "Kunci API DeepL",
-        "descriptionEdit": "Biarkan kosong untuk menyimpan kunci yang disimpan."
-      },
-      "deeplApiBaseUrl": {
-        "label": "URL dasar DeepL API",
-        "description": "Gunakan default kecuali Anda merutekan melalui proksi atau titik akhir khusus."
-      },
-      "llmPreset": {
-        "label": "Prasetel LLM"
-      },
-      "llmApiKey": {
-        "label": "Kunci API LLM",
-        "descriptionEdit": "Biarkan kosong untuk menyimpan kunci yang disimpan."
-      },
-      "llmApiBaseUrl": {
-        "label": "URL dasar API LLM",
-        "description": "Diperlukan untuk titik akhir yang kompatibel dengan OpenAI; biarkan kosong untuk Gemini."
-      },
-      "llmModel": {
-        "label": "Model",
-        "description": "ID model yang digunakan untuk pembuatan terjemahan."
-      },
-      "llmInputPrice": {
-        "label": "Masukkan token USD / 1 juta",
-        "description": "Perkiraan opsional digunakan untuk perbandingan penyedia dan perencanaan biaya."
-      },
-      "llmOutputPrice": {
-        "label": "Keluarkan token USD / 1 juta",
-        "description": "Perkiraan opsional digunakan untuk perbandingan penyedia dan perencanaan biaya."
-      },
-      "llmMaxContextTokens": {
-        "label": "Token konteks maksimal",
-        "description": "Petunjuk perutean opsional untuk kumpulan terjemahan dalam jumlah besar."
-      },
-      "llmMaxOutputTokens": {
-        "label": "Token keluaran maksimal",
-        "description": "Batas opsional per permintaan diteruskan ke penyedia yang kompatibel."
-      },
-      "llmTemperature": {
-        "label": "Suhu",
-        "description": "Nilai yang lebih rendah membuat keluaran terjemahan terstruktur lebih deterministik."
-      },
-      "llmSupportsJsonMode": {
-        "label": "Mode JSON terstruktur",
-        "description": "Aktifkan ketika penyedia mendukung skema JSON atau respons mode JSON."
       }
     },
     "states": {
@@ -4596,82 +4441,13 @@
     },
     "notifications": {
       "saved": "Pengaturan terjemahan disimpan.",
-      "saveFailed": "Gagal menyimpan setelan terjemahan.",
-      "providerCreated": "Penyedia terjemahan dibuat.",
-      "providerUpdated": "Penyedia terjemahan diperbarui.",
-      "providerDeleted": "Penyedia terjemahan dihapus.",
-      "providerSaveFailed": "Gagal menyimpan penyedia terjemahan.",
-      "providerToggleFailed": "Gagal memperbarui status penyedia.",
-      "providerDeleteFailed": "Gagal menghapus penyedia terjemahan."
-    },
-    "generation": {
-      "enabled": "Generasi diaktifkan",
-      "disabled": "Generasi dinonaktifkan"
-    },
-    "providerTypes": {
-      "deepl": "DalamL",
-      "llm": "LLM"
-    },
-    "providerStates": {
-      "empty": "Tidak ada penyedia terjemahan yang dikonfigurasi.",
-      "active": "Aktif",
-      "inactive": "Tidak aktif",
-      "priority": "Prioritas {priority}",
-      "modelUnset": "Model tidak disetel"
-    },
-    "validation": {
-      "providerNameRequired": "Nama penyedia wajib diisi.",
-      "providerApiKeyRequired": "Kunci API diperlukan untuk penyedia ini.",
-      "providerModelRequired": "Sebuah model diperlukan untuk penyedia LLM.",
-      "providerBaseUrlRequired": "URL dasar API diperlukan untuk penyedia LLM yang kompatibel dengan OpenAI."
-    },
-    "modal": {
-      "createProviderTitle": "Buat penyedia terjemahan",
-      "editProviderTitle": "Edit penyedia terjemahan",
-      "deleteProviderTitle": "Hapus penyedia terjemahan",
-      "deleteProviderMessage": "Hapus {name}? Pembuatan terjemahan akan dinonaktifkan jika tidak ada penyedia aktif yang tersisa.",
-      "credentialsSection": "Kredensial"
-    },
-    "llmPresets": {
-      "gemini": "Gemini",
-      "openaiCompatible": "Kompatibel dengan OpenAI"
+      "saveFailed": "Gagal menyimpan setelan terjemahan."
     }
   },
   "summaryField": {
     "description": "Digunakan untuk teaser, listingan, pencarian, berbagi, dan deskripsi yang dapat dibaca AI.",
-    "status": {
-      "idle": "Siap",
-      "generating": "Menghasilkan",
-      "applying": "Melamar",
-      "stale": "Ringkasan yang dihasilkan sudah basi",
-      "applied": "Terapan",
-      "ready": "Siap melamar"
-    },
-    "actions": {
-      "generate": "Hasilkan ringkasan",
-      "apply": "Terapkan ringkasan"
-    },
     "placeholders": {
       "summary": "Tambahkan ringkasan singkat..."
-    },
-    "tooltips": {
-      "generatingNamed": "{name} sedang membuat ringkasan"
-    },
-    "feedback": {
-      "failedDefault": "Gagal memproses pembuatan ringkasan.",
-      "alreadyRunning": "Pembuatan ringkasan sudah berjalan.",
-      "missingSuggestionPayload": "Pembuatan ringkasan selesai tanpa muatan saran.",
-      "staleSuggestion": "Saran ini sudah basi. Buat ulang atau hilangkan sebelum melamar.",
-      "unableToApplyNow": "Tidak dapat menerapkan ringkasan yang dihasilkan saat ini.",
-      "applyFailed": "Gagal menerapkan ringkasan yang dihasilkan.",
-      "applied": "Ringkasan yang dihasilkan diterapkan.",
-      "readyToApply": "Ringkasan yang dihasilkan siap diterapkan."
-    },
-    "ready": {
-      "title": "Ringkasan yang dihasilkan",
-      "suggestedSummary": "Ringkasan yang disarankan",
-      "anotherCollaborator": "Kolaborator lain",
-      "anotherCollaboratorNamed": "{name} telah menghasilkan ringkasan yang siap."
     }
   },
   "userProfile": {

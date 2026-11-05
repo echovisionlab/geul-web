@@ -131,7 +131,6 @@ import { registerEditorSave } from '@/lib/editor/editor-save-registry';
 
 const props = {
   workId: 'work-1',
-  currentMemberId: 'member-1',
   initialTitle: 'Work title',
   initialSlug: 'work-title',
   initialType: 'music_project',

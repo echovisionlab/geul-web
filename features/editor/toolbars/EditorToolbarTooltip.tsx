@@ -10,7 +10,6 @@ export const EDITOR_TOOLBAR_SHORTCUTS = {
   underline: 'Mod-u',
   strike: 'Mod-Shift-s',
   code: 'Mod-e',
-  ai: 'Mod-j',
   apply: 'Mod-Enter',
   suggestions: 'Mod-Space',
 } as const;

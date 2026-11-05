@@ -419,10 +419,6 @@
       "jsGzip": 403456,
       "cssGzip": 44032
     },
-    "/admin/translations/jobs": {
-      "jsGzip": 374784,
-      "cssGzip": 44032
-    },
     "/admin/translations": {
       "jsGzip": 374784,
       "cssGzip": 44032

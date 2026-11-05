@@ -2262,8 +2262,8 @@
     "systemOrLegacy": "Hệ thống hoặc phiên bản cũ hơn",
     "restore": "Khôi phục",
     "restoreTitle": "Khôi phục phiên bản",
-    "restoreSameLocaleBody": "Khôi phục nguồn v{version} ({locale}) chỉ thay đổi tài liệu nguồn. Các tài liệu đích và tác vụ dịch hiện có không thay đổi, và bản dịch không được tạo tự động. Tiếp tục?",
-    "restoreCrossLocaleBody": "Khôi phục nguồn v{version} sẽ chuyển ngôn ngữ nguồn từ {currentLocale} sang {selectedLocale} và chỉ thay đổi con trỏ nguồn. Các tài liệu đích và tác vụ dịch hiện có không thay đổi, và bản dịch không được tạo tự động. Tiếp tục?",
+    "restoreSameLocaleBody": "Khôi phục nguồn v{version} ({locale}) chỉ thay đổi tài liệu nguồn. Các tài liệu đích hiện có không thay đổi. Tiếp tục?",
+    "restoreCrossLocaleBody": "Khôi phục nguồn v{version} sẽ chuyển ngôn ngữ nguồn từ {currentLocale} sang {selectedLocale} và chỉ thay đổi con trỏ nguồn. Các tài liệu đích hiện có không thay đổi. Tiếp tục?",
     "restoreFailed": "Không thể khôi phục tài liệu nguồn.",
     "loadFailed": "Không thể tải lịch sử phiên bản.",
     "end": "Đã tải tất cả phiên bản."
@@ -3853,8 +3853,7 @@
           "math": "Toán học",
           "inline": "Nội tuyến",
           "embeds": "Nhúng",
-          "media": "Đa phương tiện",
-          "ai": "AI"
+          "media": "Đa phương tiện"
         },
         "items": {
           "heading": {
@@ -3977,12 +3976,6 @@
             "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\ntệp đính kèm\ntệp\ntập tin\ntài liệu\ntải xuống",
             "group": "Đa phương tiện"
           },
-          "aiAssistant": {
-            "title": "Trợ lý AI",
-            "subtext": "Viết, cải thiện hoặc chuyển đổi văn bản bằng AI",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\ntrí tuệ nhân tạo\ntrợ lý\nviết\ncải thiện",
-            "group": "AI"
-          },
           "shader": {
             "title": "Shader GLSL",
             "subtext": "Thêm shader GLSL tương tác",
@@ -4022,8 +4015,7 @@
         "displaySizeXl": "Rất lớn",
         "nest": "Lồng khối",
         "unnest": "Bỏ lồng khối",
-        "inlineMath": "Toán nội tuyến",
-        "ai": "Trợ lý AI"
+        "inlineMath": "Toán nội tuyến"
       },
       "link": {
         "create": "Tạo liên kết",
@@ -4223,47 +4215,6 @@
       "message": "Bạn có thể chỉnh sửa lại. Các thay đổi được giữ trong lúc chỉ có quyền xem đang được lưu."
     }
   },
-  "aiAssistant": {
-    "title": "Trợ lý AI",
-    "modes": {
-      "modify": "sửa đổi",
-      "generate": "Tạo"
-    },
-    "placeholders": {
-      "modify": "Tôi nên sửa đổi văn bản này như thế nào",
-      "generate": "Bạn muốn viết gì"
-    },
-    "quickActions": {
-      "title": "Hành động nhanh",
-      "improve": "Cải thiện",
-      "fixSpelling": "Sửa lỗi chính tả",
-      "simplify": "Đơn giản hóa",
-      "summarize": "Tóm tắt",
-      "translateKorean": "Tiếng Hàn",
-      "translateEnglish": "Tiếng Anh",
-      "continueWriting": "Tiếp tục viết",
-      "brainstorm": "Động não"
-    },
-    "sections": {
-      "result": "Kết quả AI"
-    },
-    "actions": {
-      "close": "Đóng trợ lý AI",
-      "submitPrompt": "Gửi lời nhắc AI tùy chỉnh",
-      "stop": "Dừng lại",
-      "reject": "Từ chối",
-      "retry": "Thử lại",
-      "accept": "Chấp nhận",
-      "insert": "Chèn"
-    },
-    "errors": {
-      "generic": "Đã xảy ra lỗi. Vui lòng thử lại."
-    },
-    "notifications": {
-      "applyFailedTitle": "Không thể áp dụng kết quả AI",
-      "applyFailedMessage": "Không thể phân tích phản hồi AI. Vui lòng thử lại."
-    }
-  },
   "mapControls": {
     "managePlaces": "Quản lý địa điểm",
     "managePlacesWithCount": "Quản lý địa điểm ({count})",
@@ -4366,20 +4317,15 @@
     "description": "Xem lại ngôn ngữ nguồn và tài liệu bản dịch hiện có cho từng ngôn ngữ.",
     "actions": {
       "expand": "Mở rộng",
-      "collapse": "Sụp đổ",
-      "regenerateAll": "Tạo/tạo lại bản dịch cho tất cả ngôn ngữ đủ điều kiện",
-      "regenerateLocale": "tái sinh",
-      "regenerateLocaleAria": "Tạo lại bản dịch {locale}",
-      "generateLocale": "Generate",
-      "generateLocaleAria": "Tạo bản dịch {locale}"
+      "collapse": "Sụp đổ"
     },
     "sourceLocale": {
       "label": "Ngôn ngữ nguồn",
       "description": "Đây là ngôn ngữ nguồn được sử dụng làm cơ sở cho các bản dịch của thực thể này.",
       "confirm": {
         "title": "Thay đổi ngôn ngữ nguồn",
-        "description": "Thay đổi ngôn ngữ nguồn chỉ cập nhật con trỏ nguồn. Các tài liệu đích và tác vụ dịch hiện có không thay đổi, và bản dịch không được tạo tự động.",
-        "detail": "{locale} trở thành ngôn ngữ của tài liệu nguồn có thể chỉnh sửa. Các tài liệu đích và tác vụ dịch hiện có không thay đổi.",
+        "description": "Thay đổi ngôn ngữ nguồn chỉ cập nhật con trỏ nguồn. Các tài liệu đích hiện có không thay đổi.",
+        "detail": "{locale} trở thành ngôn ngữ của tài liệu nguồn có thể chỉnh sửa. Các tài liệu đích hiện có không thay đổi.",
         "confirm": "Thay đổi ngôn ngữ nguồn"
       }
     },
@@ -4408,10 +4354,7 @@
     },
     "notifications": {
       "sourceLocaleUpdated": "Đã cập nhật ngôn ngữ nguồn",
-      "sourceLocaleUpdateFailed": "Không thể cập nhật ngôn ngữ nguồn.",
-      "allQueued": "Việc tái tạo bản dịch đã được xếp hàng đợi cho tất cả các ngôn ngữ.",
-      "localeQueued": "Việc tái tạo bản dịch đã được xếp hàng đợi cho ngôn ngữ này.",
-      "regenerateFailed": "Không thể xếp hàng tái tạo bản dịch."
+      "sourceLocaleUpdateFailed": "Không thể cập nhật ngôn ngữ nguồn."
     }
   },
   "translationPanelMenu": {
@@ -4451,13 +4394,11 @@
   },
   "translationOverviewPage": {
     "actions": {
-      "openJobs": "Việc làm mở",
       "openSettings": "Mở cài đặt"
     },
     "stats": {
       "totalLocales": "Tổng số miền địa phương",
       "sourceEntities": "Thực thể nguồn",
-      "activeJobs": "Công việc đang tiến hành",
       "existingEntries": "Bản dịch hiện có"
     },
     "sections": {
@@ -4476,119 +4417,23 @@
       "emptyEntityHealth": "Chưa có dữ liệu sức khỏe của thực thể."
     },
     "policy": {
-      "internal": "Chỉ nội bộ",
-      "machineDisabled": "Máy bị vô hiệu hóa"
-    }
-  },
-  "translationJobsPage": {
-    "title": "Công việc dịch thuật",
-    "stats": {
-      "active": "Đang tiến hành {count}"
-    },
-    "columns": {
-      "entity": "Thực thể"
-    },
-    "locale": {
-      "fromTo": "{source} -> {target}"
-    },
-    "states": {
-      "loadFailed": "Không tải được công việc dịch thuật.",
-      "empty": "Chưa có công việc dịch thuật nào."
-    },
-    "notifications": {
-      "cancelled": "Công việc dịch thuật bị hủy bỏ",
-      "cancelFailed": "Không thể hủy công việc dịch thuật."
+      "internal": "Chỉ nội bộ"
     }
   },
   "translationSettingsPage": {
     "title": "Cài đặt dịch",
-    "description": "Quản lý ngôn ngữ nguồn mặc định và các nhà cung cấp dịch tự động. Quản trị viên chủ động bắt đầu tạo bản dịch từ mỗi trình chỉnh sửa.",
+    "description": "Quản lý ngôn ngữ nguồn mặc định cho bản dịch.",
     "actions": {
-      "jobs": "Việc làm",
-      "save": "Lưu cài đặt",
-      "addProvider": "Thêm nhà cung cấp",
-      "editProvider": "Chỉnh sửa nhà cung cấp",
-      "deleteProvider": "Xóa nhà cung cấp",
-      "createProvider": "Tạo nhà cung cấp"
+      "save": "Lưu cài đặt"
     },
     "sections": {
       "runtime": "Mặc định cho nguồn",
-      "runtimeDescription": "Chỉ đặt ngôn ngữ được dùng khi ngôn ngữ nguồn chưa được xác định. Thay đổi nguồn không bao giờ tự động bắt đầu tạo bản dịch.",
-      "providers": "Nhà cung cấp dịch thuật",
-      "providersDescription": "Quản lý nhà cung cấp dịch máy. Thế hệ vẫn bị vô hiệu hóa cho đến khi có ít nhất một nhà cung cấp đang hoạt động có thông tin xác thực hợp lệ."
+      "runtimeDescription": "Chỉ đặt ngôn ngữ được dùng khi ngôn ngữ nguồn chưa được xác định."
     },
     "fields": {
       "defaultLocale": {
         "label": "Ngôn ngữ mặc định",
         "description": "Được sử dụng khi ngôn ngữ nguồn chưa được đặt và khi yêu cầu không được giải quyết thành ngôn ngữ nội dung được hỗ trợ."
-      },
-      "protectedTerms": {
-        "label": "Thuật ngữ được bảo vệ",
-        "description": "Cách viết chính xác có phân biệt chữ hoa và chữ thường mà quá trình tạo bản dịch phải giữ nguyên. Hệ thống không tự động học hoặc đề xuất thuật ngữ.",
-        "placeholder": "Thêm thuật ngữ được bảo vệ",
-        "examples": "Ví dụ: Photoshop, React Native"
-      },
-      "providerName": {
-        "label": "Tên nhà cung cấp"
-      },
-      "providerType": {
-        "label": "Loại nhà cung cấp"
-      },
-      "providerPriority": {
-        "label": "Sự ưu tiên",
-        "description": "Mức độ ưu tiên thấp hơn sẽ chạy trước khi có nhiều nhà cung cấp đang hoạt động."
-      },
-      "providerActive": {
-        "label": "Đang hoạt động",
-        "shortLabel": "Đang hoạt động",
-        "description": "Chỉ những nhà cung cấp đang hoạt động mới có thể chạy việc tạo bản dịch."
-      },
-      "deeplApiKey": {
-        "label": "Khóa API DeepL",
-        "descriptionEdit": "Để trống để giữ khóa đã lưu."
-      },
-      "deeplApiBaseUrl": {
-        "label": "URL cơ sở API DeepL",
-        "description": "Sử dụng mặc định trừ khi bạn định tuyến thông qua proxy hoặc điểm cuối chuyên dụng."
-      },
-      "llmPreset": {
-        "label": "LLM cài sẵn"
-      },
-      "llmApiKey": {
-        "label": "Khóa API LLM",
-        "descriptionEdit": "Để trống để giữ khóa đã lưu."
-      },
-      "llmApiBaseUrl": {
-        "label": "URL cơ sở API LLM",
-        "description": "Cần thiết cho các điểm cuối tương thích với OpenAI; để trống cho Song Tử."
-      },
-      "llmModel": {
-        "label": "Người mẫu",
-        "description": "ID mẫu được sử dụng để tạo bản dịch."
-      },
-      "llmInputPrice": {
-        "label": "Nhập mã thông báo USD / 1 triệu",
-        "description": "Ước tính tùy chọn được sử dụng để so sánh nhà cung cấp và lập kế hoạch chi phí."
-      },
-      "llmOutputPrice": {
-        "label": "Xuất ra USD / 1 triệu token",
-        "description": "Ước tính tùy chọn được sử dụng để so sánh nhà cung cấp và lập kế hoạch chi phí."
-      },
-      "llmMaxContextTokens": {
-        "label": "Mã thông báo ngữ cảnh tối đa",
-        "description": "Gợi ý định tuyến tùy chọn cho các lô dịch lớn."
-      },
-      "llmMaxOutputTokens": {
-        "label": "Mã thông báo đầu ra tối đa",
-        "description": "Giới hạn mỗi yêu cầu tùy chọn được chuyển cho các nhà cung cấp tương thích."
-      },
-      "llmTemperature": {
-        "label": "Nhiệt độ",
-        "description": "Giá trị thấp hơn làm cho kết quả dịch có cấu trúc mang tính quyết định hơn."
-      },
-      "llmSupportsJsonMode": {
-        "label": "Chế độ JSON có cấu trúc",
-        "description": "Bật khi nhà cung cấp hỗ trợ lược đồ JSON hoặc phản hồi chế độ JSON."
       }
     },
     "states": {
@@ -4596,82 +4441,13 @@
     },
     "notifications": {
       "saved": "Đã lưu cài đặt dịch.",
-      "saveFailed": "Không lưu được cài đặt dịch.",
-      "providerCreated": "Đã tạo nhà cung cấp dịch thuật.",
-      "providerUpdated": "Đã cập nhật nhà cung cấp dịch thuật.",
-      "providerDeleted": "Nhà cung cấp dịch thuật đã bị xóa.",
-      "providerSaveFailed": "Không lưu được nhà cung cấp dịch thuật.",
-      "providerToggleFailed": "Không cập nhật được trạng thái nhà cung cấp.",
-      "providerDeleteFailed": "Không thể xóa nhà cung cấp dịch thuật."
-    },
-    "generation": {
-      "enabled": "Đã bật thế hệ",
-      "disabled": "Thế hệ bị vô hiệu hóa"
-    },
-    "providerTypes": {
-      "deepl": "DeepL",
-      "llm": "LLM"
-    },
-    "providerStates": {
-      "empty": "Không có nhà cung cấp dịch thuật nào được định cấu hình.",
-      "active": "Đang hoạt động",
-      "inactive": "Không hoạt động",
-      "priority": "Ưu tiên {priority}",
-      "modelUnset": "Mẫu chưa được đặt"
-    },
-    "validation": {
-      "providerNameRequired": "Tên nhà cung cấp là bắt buộc.",
-      "providerApiKeyRequired": "Cần có khóa API cho nhà cung cấp này.",
-      "providerModelRequired": "Cần có mô hình cho các nhà cung cấp LLM.",
-      "providerBaseUrlRequired": "URL cơ sở API là bắt buộc đối với các nhà cung cấp LLM tương thích với OpenAI."
-    },
-    "modal": {
-      "createProviderTitle": "Tạo nhà cung cấp dịch thuật",
-      "editProviderTitle": "Chỉnh sửa nhà cung cấp dịch thuật",
-      "deleteProviderTitle": "Xóa nhà cung cấp dịch thuật",
-      "deleteProviderMessage": "Xóa {name}? Việc tạo bản dịch sẽ bị vô hiệu hóa nếu không còn nhà cung cấp nào đang hoạt động.",
-      "credentialsSection": "Thông tin xác thực"
-    },
-    "llmPresets": {
-      "gemini": "Song Tử",
-      "openaiCompatible": "Tương thích OpenAI"
+      "saveFailed": "Không lưu được cài đặt dịch."
     }
   },
   "summaryField": {
     "description": "Được sử dụng cho đoạn giới thiệu, danh sách, tìm kiếm, chia sẻ và mô tả mà AI có thể đọc được.",
-    "status": {
-      "idle": "Sẵn sàng",
-      "generating": "Đang tạo",
-      "applying": "Áp dụng",
-      "stale": "Đã tạo bản tóm tắt cũ",
-      "applied": "Đã áp dụng",
-      "ready": "Sẵn sàng nộp đơn"
-    },
-    "actions": {
-      "generate": "Tạo bản tóm tắt",
-      "apply": "Áp dụng tóm tắt"
-    },
     "placeholders": {
       "summary": "Thêm một bản tóm tắt ngắn gọn..."
-    },
-    "tooltips": {
-      "generatingNamed": "{name} đang tạo bản tóm tắt"
-    },
-    "feedback": {
-      "failedDefault": "Không thể xử lý việc tạo bản tóm tắt.",
-      "alreadyRunning": "Việc tạo bản tóm tắt đang chạy.",
-      "missingSuggestionPayload": "Việc tạo tóm tắt đã hoàn tất mà không có tải trọng đề xuất.",
-      "staleSuggestion": "Đề xuất này đã cũ. Tạo lại hoặc loại bỏ nó trước khi áp dụng.",
-      "unableToApplyNow": "Không thể áp dụng bản tóm tắt đã tạo ngay bây giờ.",
-      "applyFailed": "Không thể áp dụng bản tóm tắt đã tạo.",
-      "applied": "Đã áp dụng bản tóm tắt đã tạo.",
-      "readyToApply": "Bản tóm tắt đã tạo đã sẵn sàng để áp dụng."
-    },
-    "ready": {
-      "title": "Đã tạo bản tóm tắt",
-      "suggestedSummary": "Tóm tắt được đề xuất",
-      "anotherCollaborator": "Cộng tác viên khác",
-      "anotherCollaboratorNamed": "{name} đã có bản tóm tắt được tạo sẵn."
     }
   },
   "userProfile": {

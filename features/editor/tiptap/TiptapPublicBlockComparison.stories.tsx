@@ -56,8 +56,7 @@ function Comparison({ includeRuntimes = false, colors = false }: { includeRuntim
                       blockRoomController={room.controller}
                       awareness={room.awareness}
                       localUser={localUser}
-                      ai={false}
-                      authoringCapabilities={{ ai: false, file: false, map: false }}
+                      authoringCapabilities={{ file: false, map: false }}
                     />
                   </div>
                 </section>

@@ -139,7 +139,6 @@ export function PostEditorBody({
             entityType={TranscodeEntityType.POST}
             allowNeutralBlockEdits={isSourceLocale}
             allowStructuralEdits={isSourceLocale}
-            aiTarget={activeLocale && editable ? { type: 'post', id: postId, locale: activeLocale } : undefined}
           />
         </DsLayoutInset>
       );

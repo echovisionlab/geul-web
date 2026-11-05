@@ -58,7 +58,6 @@ const messages: TiptapSlashMenuMessages = {
     threeScene: slashItem('threeScene'),
     shader: slashItem('shader'),
     file: slashItem('file'),
-    aiAssistant: slashItem('aiAssistant'),
   },
 };
 

@@ -20,7 +20,6 @@ export function RichTextEditor({ sectionId }: BlockEditorProps<RichTextProps>) {
       entityType={TranscodeEntityType.PAGE}
       allowNeutralBlockEdits={allowStructuralEdits}
       allowStructuralEdits={allowStructuralEdits}
-      aiTarget={editable ? { type: 'page', id: pageId, locale } : undefined}
     />
   );
 }

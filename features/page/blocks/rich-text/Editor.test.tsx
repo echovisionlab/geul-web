@@ -16,7 +16,7 @@ import { RichTextEditor } from './Editor';
 
 const surface = vi.hoisted(() => ({ props: vi.fn(), editor: null as Editor | null }));
 
-// Stands in for the collaborative Tiptap surface and its media, AI and server services. Like TiptapEditor, it
+// Stands in for the collaborative Tiptap surface and its media and server services. Like TiptapEditor, it
 // builds the editor from the controller's extension and initial content and connects it, so the Page wiring,
 // the section-scoped controller and the resident room stay real.
 vi.mock('@/features/translation/LocalizedRichTextFragmentEditor', async () => {
@@ -160,12 +160,11 @@ describe('Page RichTextEditor', () => {
       expect.objectContaining({
         editable: true,
         allowStructuralEdits: true,
-        aiTarget: { type: 'page', id: 'local-page', locale: 'en' },
       }),
     );
   });
 
-  it('opens a read-only section without structural edits or page AI', () => {
+  it('opens a read-only section without structural edits', () => {
     const { room: target, own } = twoSectionRoom();
     renderSection(target, own, { editable: false, allowStructuralEdits: false });
 
@@ -173,6 +172,5 @@ describe('Page RichTextEditor', () => {
     expect(surface.props).toHaveBeenLastCalledWith(
       expect.objectContaining({ editable: false, allowNeutralBlockEdits: false, allowStructuralEdits: false }),
     );
-    expect(surface.props.mock.lastCall?.[0]).toHaveProperty('aiTarget', undefined);
   });
 });

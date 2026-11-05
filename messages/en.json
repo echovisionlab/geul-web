@@ -2262,8 +2262,8 @@
     "systemOrLegacy": "System or earlier version",
     "restore": "Restore",
     "restoreTitle": "Restore version",
-    "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
-    "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically. Continue?",
+    "restoreSameLocaleBody": "Restoring source v{version} ({locale}) changes only the source document. Existing target documents remain unchanged. Continue?",
+    "restoreCrossLocaleBody": "Restoring source v{version} switches the source locale from {currentLocale} to {selectedLocale} and changes only the source pointer. Existing target documents remain unchanged. Continue?",
     "restoreFailed": "Failed to restore the source document.",
     "loadFailed": "Could not load version history.",
     "end": "All versions loaded."
@@ -3853,8 +3853,7 @@
           "math": "Math",
           "inline": "Inline",
           "embeds": "Embeds",
-          "media": "Media",
-          "ai": "AI"
+          "media": "Media"
         },
         "items": {
           "heading": {
@@ -3977,12 +3976,6 @@
             "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload",
             "group": "Media"
           },
-          "aiAssistant": {
-            "title": "AI Assistant",
-            "subtext": "Write, improve, or transform text with AI",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove",
-            "group": "AI"
-          },
           "shader": {
             "title": "GLSL shader",
             "subtext": "Add an interactive GLSL shader",
@@ -4022,8 +4015,7 @@
         "displaySizeXl": "Extra large",
         "nest": "Nest block",
         "unnest": "Unnest block",
-        "inlineMath": "Inline math",
-        "ai": "AI Assistant"
+        "inlineMath": "Inline math"
       },
       "link": {
         "create": "Create link",
@@ -4223,47 +4215,6 @@
       "message": "You can edit again. Edits kept while you could only view are being saved."
     }
   },
-  "aiAssistant": {
-    "title": "AI Assistant",
-    "modes": {
-      "modify": "Modify",
-      "generate": "Generate"
-    },
-    "placeholders": {
-      "modify": "How should I modify this text",
-      "generate": "What would you like to write"
-    },
-    "quickActions": {
-      "title": "Quick actions",
-      "improve": "Improve",
-      "fixSpelling": "Fix Spelling",
-      "simplify": "Simplify",
-      "summarize": "Summarize",
-      "translateKorean": "Korean",
-      "translateEnglish": "English",
-      "continueWriting": "Continue Writing",
-      "brainstorm": "Brainstorm"
-    },
-    "sections": {
-      "result": "AI Result"
-    },
-    "actions": {
-      "close": "Close AI assistant",
-      "submitPrompt": "Submit custom AI prompt",
-      "stop": "Stop",
-      "reject": "Reject",
-      "retry": "Retry",
-      "accept": "Accept",
-      "insert": "Insert"
-    },
-    "errors": {
-      "generic": "Something went wrong. Please try again."
-    },
-    "notifications": {
-      "applyFailedTitle": "Failed to apply AI result",
-      "applyFailedMessage": "The AI response could not be parsed. Please try again."
-    }
-  },
   "mapControls": {
     "managePlaces": "Manage Places",
     "managePlacesWithCount": "Manage Places ({count})",
@@ -4366,20 +4317,15 @@
     "description": "Review the source language and existing translation document for each locale.",
     "actions": {
       "expand": "Expand",
-      "collapse": "Collapse",
-      "regenerateAll": "Generate/regenerate all eligible locales",
-      "regenerateLocale": "Regenerate",
-      "regenerateLocaleAria": "Regenerate {locale} translation",
-      "generateLocale": "Generate",
-      "generateLocaleAria": "Generate {locale} translation"
+      "collapse": "Collapse"
     },
     "sourceLocale": {
       "label": "Source language",
       "description": "This is the source language used as the basis for translations of this entity.",
       "confirm": {
         "title": "Change source language",
-        "description": "Changing the source language updates only the source pointer. Existing target documents and translation jobs remain unchanged, and translations are not generated automatically.",
-        "detail": "{locale} becomes the language of the editable source document. Existing target documents and translation jobs remain unchanged.",
+        "description": "Changing the source language updates only the source pointer. Existing target documents remain unchanged.",
+        "detail": "{locale} becomes the language of the editable source document. Existing target documents remain unchanged.",
         "confirm": "Change source language"
       }
     },
@@ -4387,7 +4333,7 @@
       "ariaLabel": "Switch content language. Current: {locale}",
       "sourceOption": "{locale} (Source)",
       "loading": "Loading languages...",
-      "missingDescription": "No {locale} target document exists yet. Generate it from the translations panel.",
+      "missingDescription": "No {locale} target document exists yet. Create it from the translations panel.",
       "bodyPreviewTitle": "{locale} body preview",
       "bodyPreviewDescription": "The existing translation document is shown with its structure and formatting.",
       "bodyPreviewEmpty": "No localized body preview yet.",
@@ -4408,10 +4354,7 @@
     },
     "notifications": {
       "sourceLocaleUpdated": "Source language updated",
-      "sourceLocaleUpdateFailed": "Failed to update the source language.",
-      "allQueued": "Translation regeneration was queued for all locales.",
-      "localeQueued": "Translation regeneration was queued for this locale.",
-      "regenerateFailed": "Failed to queue translation regeneration."
+      "sourceLocaleUpdateFailed": "Failed to update the source language."
     }
   },
   "translationPanelMenu": {
@@ -4451,13 +4394,11 @@
   },
   "translationOverviewPage": {
     "actions": {
-      "openJobs": "Open jobs",
       "openSettings": "Open settings"
     },
     "stats": {
       "totalLocales": "Total locales",
       "sourceEntities": "Source entities",
-      "activeJobs": "Jobs in progress",
       "existingEntries": "Existing translations"
     },
     "sections": {
@@ -4476,119 +4417,23 @@
       "emptyEntityHealth": "No entity health data yet."
     },
     "policy": {
-      "internal": "Internal only",
-      "machineDisabled": "Machine disabled"
-    }
-  },
-  "translationJobsPage": {
-    "title": "Translation Jobs",
-    "stats": {
-      "active": "{count} in progress"
-    },
-    "columns": {
-      "entity": "Entity"
-    },
-    "locale": {
-      "fromTo": "{source} -> {target}"
-    },
-    "states": {
-      "loadFailed": "Failed to load translation jobs.",
-      "empty": "No translation jobs yet."
-    },
-    "notifications": {
-      "cancelled": "Translation job cancelled",
-      "cancelFailed": "Failed to cancel the translation job."
+      "internal": "Internal only"
     }
   },
   "translationSettingsPage": {
     "title": "Translation settings",
-    "description": "Manage the default source language and automatic translation providers. An Admin explicitly starts translation generation from each editor.",
+    "description": "Manage the default source language for translations.",
     "actions": {
-      "jobs": "Jobs",
-      "save": "Save settings",
-      "addProvider": "Add provider",
-      "editProvider": "Edit provider",
-      "deleteProvider": "Delete provider",
-      "createProvider": "Create provider"
+      "save": "Save settings"
     },
     "sections": {
       "runtime": "Source defaults",
-      "runtimeDescription": "Set only the language used when a source language has not been established. Source changes never start translation generation automatically.",
-      "providers": "Translation providers",
-      "providersDescription": "Manage machine translation providers. Generation stays disabled until at least one active provider has valid credentials."
+      "runtimeDescription": "Set only the language used when a source language has not been established."
     },
     "fields": {
       "defaultLocale": {
         "label": "Default locale",
         "description": "Used when a source locale has not been set yet and when a request does not resolve to a supported content locale."
-      },
-      "protectedTerms": {
-        "label": "Protected terms",
-        "description": "Exact case-sensitive spellings that translation generation must keep unchanged. No terms are learned or suggested automatically.",
-        "placeholder": "Add a protected term",
-        "examples": "Examples: Photoshop, React Native"
-      },
-      "providerName": {
-        "label": "Provider name"
-      },
-      "providerType": {
-        "label": "Provider type"
-      },
-      "providerPriority": {
-        "label": "Priority",
-        "description": "Lower priority runs first when multiple providers are active."
-      },
-      "providerActive": {
-        "label": "Active",
-        "shortLabel": "Active",
-        "description": "Only active providers can run translation generation."
-      },
-      "deeplApiKey": {
-        "label": "DeepL API key",
-        "descriptionEdit": "Leave blank to keep the stored key."
-      },
-      "deeplApiBaseUrl": {
-        "label": "DeepL API base URL",
-        "description": "Use the default unless you are routing through a proxy or dedicated endpoint."
-      },
-      "llmPreset": {
-        "label": "LLM preset"
-      },
-      "llmApiKey": {
-        "label": "LLM API key",
-        "descriptionEdit": "Leave blank to keep the stored key."
-      },
-      "llmApiBaseUrl": {
-        "label": "LLM API base URL",
-        "description": "Required for OpenAI-compatible endpoints; leave blank for Gemini."
-      },
-      "llmModel": {
-        "label": "Model",
-        "description": "Model ID used for translation generation."
-      },
-      "llmInputPrice": {
-        "label": "Input USD / 1M tokens",
-        "description": "Optional estimate used for provider comparison and cost planning."
-      },
-      "llmOutputPrice": {
-        "label": "Output USD / 1M tokens",
-        "description": "Optional estimate used for provider comparison and cost planning."
-      },
-      "llmMaxContextTokens": {
-        "label": "Max context tokens",
-        "description": "Optional routing hint for large translation batches."
-      },
-      "llmMaxOutputTokens": {
-        "label": "Max output tokens",
-        "description": "Optional per-request cap passed to compatible providers."
-      },
-      "llmTemperature": {
-        "label": "Temperature",
-        "description": "Lower values make structured translation output more deterministic."
-      },
-      "llmSupportsJsonMode": {
-        "label": "Structured JSON mode",
-        "description": "Enable when the provider supports JSON schema or JSON mode responses."
       }
     },
     "states": {
@@ -4596,82 +4441,13 @@
     },
     "notifications": {
       "saved": "Translation settings saved.",
-      "saveFailed": "Failed to save translation settings.",
-      "providerCreated": "Translation provider created.",
-      "providerUpdated": "Translation provider updated.",
-      "providerDeleted": "Translation provider deleted.",
-      "providerSaveFailed": "Failed to save translation provider.",
-      "providerToggleFailed": "Failed to update provider status.",
-      "providerDeleteFailed": "Failed to delete translation provider."
-    },
-    "generation": {
-      "enabled": "Generation enabled",
-      "disabled": "Generation disabled"
-    },
-    "providerTypes": {
-      "deepl": "DeepL",
-      "llm": "LLM"
-    },
-    "providerStates": {
-      "empty": "No translation provider is configured.",
-      "active": "Active",
-      "inactive": "Inactive",
-      "priority": "Priority {priority}",
-      "modelUnset": "Model not set"
-    },
-    "validation": {
-      "providerNameRequired": "Provider name is required.",
-      "providerApiKeyRequired": "An API key is required for this provider.",
-      "providerModelRequired": "A model is required for LLM providers.",
-      "providerBaseUrlRequired": "An API base URL is required for OpenAI-compatible LLM providers."
-    },
-    "modal": {
-      "createProviderTitle": "Create translation provider",
-      "editProviderTitle": "Edit translation provider",
-      "deleteProviderTitle": "Delete translation provider",
-      "deleteProviderMessage": "Delete {name}? Translation generation will be disabled if no active provider remains.",
-      "credentialsSection": "Credentials"
-    },
-    "llmPresets": {
-      "gemini": "Gemini",
-      "openaiCompatible": "OpenAI-compatible"
+      "saveFailed": "Failed to save translation settings."
     }
   },
   "summaryField": {
     "description": "Used for teasers, listings, search, sharing, and AI-readable descriptions.",
-    "status": {
-      "idle": "Ready",
-      "generating": "Generating",
-      "applying": "Applying",
-      "stale": "Generated summary stale",
-      "applied": "Applied",
-      "ready": "Ready to apply"
-    },
-    "actions": {
-      "generate": "Generate summary",
-      "apply": "Apply summary"
-    },
     "placeholders": {
       "summary": "Add a concise summary..."
-    },
-    "tooltips": {
-      "generatingNamed": "{name} is generating a summary"
-    },
-    "feedback": {
-      "failedDefault": "Failed to process summary generation.",
-      "alreadyRunning": "Summary generation is already running.",
-      "missingSuggestionPayload": "Summary generation completed without a suggestion payload.",
-      "staleSuggestion": "This suggestion is stale. Regenerate or dismiss it before applying.",
-      "unableToApplyNow": "Unable to apply the generated summary right now.",
-      "applyFailed": "Failed to apply the generated summary.",
-      "applied": "Generated summary applied.",
-      "readyToApply": "Generated summary is ready to apply."
-    },
-    "ready": {
-      "title": "Generated summary",
-      "suggestedSummary": "Suggested summary",
-      "anotherCollaborator": "Another collaborator",
-      "anotherCollaboratorNamed": "{name} has a generated summary ready."
     }
   },
   "userProfile": {

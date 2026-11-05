@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 import { useLocale, useTranslations } from 'next-intl';
-import { IconPencil, IconRefresh, IconSparkles, IconTrash } from '@tabler/icons-react';
+import { IconPencil, IconTrash } from '@tabler/icons-react';
 import { Field } from '@/components/core/Field';
 import { TextInput } from '@/components/core/Input';
 import { LayoutStack } from '@/components/core/Layout';
@@ -9,15 +9,7 @@ import { ToolbarCommand } from '@/components/core/Section';
 import { TranslationLocaleControl } from './TranslationLocaleControl';
 import { TranslationLocaleRow } from './TranslationLocaleRow';
 import { TranslationPanelSectionCard } from './TranslationPanelSectionCard';
-function SharedPanel({
-  readOnly = false,
-  active = false,
-  expanded = true,
-}: {
-  readOnly?: boolean;
-  active?: boolean;
-  expanded?: boolean;
-}) {
+function SharedPanel({ readOnly = false, expanded = true }: { readOnly?: boolean; expanded?: boolean }) {
   const t = useTranslations('translationPanel');
   const actions = useTranslations('common.actions');
   const labels = useTranslations('common.labels');
@@ -35,16 +27,6 @@ function SharedPanel({
       defaultExpanded={expanded}
       expandLabel={t('actions.expand')}
       collapseLabel={t('actions.collapse')}
-      persistentActions={
-        !readOnly && (
-          <ToolbarCommand
-            presentation="icon"
-            icon={<IconSparkles size="1em" />}
-            label={t('actions.regenerateAll')}
-            disabled
-          />
-        )
-      }
     >
       <LayoutStack gap="md">
         <Field layout="inline" label={t('sourceLocale.label')} description={t('sourceLocale.description')}>
@@ -92,13 +74,6 @@ function SharedPanel({
                         icon={<IconTrash size="1em" />}
                       />
                     )}
-                    <ToolbarCommand
-                      presentation="icon"
-                      label={t(code === 'en' ? 'actions.regenerateLocale' : 'actions.generateLocale')}
-                      icon={code === 'en' ? <IconRefresh size="1em" /> : <IconSparkles size="1em" />}
-                      disabled
-                      loading={active && code === 'en'}
-                    />
                   </>
                 )
               }
@@ -124,7 +99,6 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 export const Expanded: Story = {};
 export const ReadOnly: Story = { args: { readOnly: true } };
-export const Active: Story = { args: { active: true } };
 export const Phone: Story = { globals: { viewport: { value: 'phone', isRotated: false } } };
 
 export const Tablet: Story = { globals: { viewport: { value: 'tablet', isRotated: false } } };

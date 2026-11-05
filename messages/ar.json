@@ -1714,20 +1714,15 @@
     "description": "راجع لغة المصدر ومستند الترجمة الموجود لكل لغة.",
     "actions": {
       "expand": "توسيع",
-      "collapse": "طي",
-      "regenerateAll": "توليد/إعادة توليد الترجمات لجميع اللغات المؤهلة",
-      "regenerateLocale": "إعادة توليد",
-      "regenerateLocaleAria": "إعادة توليد ترجمة {locale}",
-      "generateLocale": "Generate",
-      "generateLocaleAria": "توليد ترجمة بلغة {locale}"
+      "collapse": "طي"
     },
     "sourceLocale": {
       "label": "لغة المصدر",
       "description": "هذه هي لغة المصدر المستخدمة كأساس لترجمات هذا الكيان",
       "confirm": {
         "title": "تغيير لغة المصدر",
-        "description": "يؤدي تغيير لغة المصدر إلى تحديث مؤشر المصدر فقط. تبقى مستندات الترجمة ومهام الترجمة الموجودة دون تغيير، ولا تُولّد الترجمات تلقائيًا.",
-        "detail": "تصبح {locale} لغة المستند المصدر القابل للتعديل. تبقى مستندات الترجمة ومهام الترجمة الموجودة دون تغيير.",
+        "description": "يؤدي تغيير لغة المصدر إلى تحديث مؤشر المصدر فقط. تبقى مستندات الترجمة الموجودة دون تغيير.",
+        "detail": "تصبح {locale} لغة المستند المصدر القابل للتعديل. تبقى مستندات الترجمة الموجودة دون تغيير.",
         "confirm": "التغيير وإعادة الترجمة"
       }
     },
@@ -1735,7 +1730,7 @@
       "ariaLabel": "تبديل لغة المحتوى. الحالية: {locale}",
       "sourceOption": "{locale} (المصدر)",
       "loading": "جارٍ تحميل اللغات...",
-      "missingDescription": "لا يوجد مستند ترجمة بلغة {locale} بعد. ولّده من لوحة الترجمات.",
+      "missingDescription": "لا يوجد مستند ترجمة بلغة {locale} بعد. أنشئه من لوحة الترجمات.",
       "bodyPreviewTitle": "معاينة نص {locale}",
       "bodyPreviewDescription": "يُعرض مستند الترجمة الموجود مع بنيته وتنسيقه.",
       "bodyPreviewEmpty": "لا توجد معاينة للنص بعد",
@@ -1756,10 +1751,7 @@
     },
     "notifications": {
       "sourceLocaleUpdated": "تم تحديث لغة المصدر",
-      "sourceLocaleUpdateFailed": "فشل تحديث لغة المصدر",
-      "allQueued": "تمت جدولة إعادة توليد الترجمة لكل اللغات المحلية",
-      "localeQueued": "تمت جدولة إعادة توليد الترجمة لهذه اللغة المحلية",
-      "regenerateFailed": "فشل جدولة إعادة توليد الترجمة"
+      "sourceLocaleUpdateFailed": "فشل تحديث لغة المصدر"
     }
   },
   "translationPanelMenu": {
@@ -1781,13 +1773,11 @@
   },
   "translationOverviewPage": {
     "actions": {
-      "openJobs": "فتح المهام",
       "openSettings": "فتح الإعدادات"
     },
     "stats": {
       "totalLocales": "إجمالي اللغات المحلية",
       "sourceEntities": "عناصر المصدر",
-      "activeJobs": "المهام قيد التنفيذ",
       "existingEntries": "الترجمات الموجودة"
     },
     "sections": {
@@ -1806,119 +1796,23 @@
       "emptyEntityHealth": "لا توجد بيانات صحة للكيان بعد"
     },
     "policy": {
-      "internal": "داخلي فقط",
-      "machineDisabled": "تم تعطيل الآلية"
-    }
-  },
-  "translationJobsPage": {
-    "title": "مهام الترجمة",
-    "stats": {
-      "active": "{count} قيد التنفيذ"
-    },
-    "columns": {
-      "entity": "الكيان"
-    },
-    "locale": {
-      "fromTo": "{source} -> {target}"
-    },
-    "states": {
-      "loadFailed": "فشل تحميل مهام الترجمة",
-      "empty": "لا توجد مهام ترجمة بعد"
-    },
-    "notifications": {
-      "cancelled": "تم إلغاء مهمة الترجمة",
-      "cancelFailed": "فشل إلغاء مهمة الترجمة"
+      "internal": "داخلي فقط"
     }
   },
   "translationSettingsPage": {
     "title": "إعدادات الترجمة",
-    "description": "أدر لغة المصدر الافتراضية ومزوّدي الترجمة الآلية. يبدأ المسؤول توليد الترجمات صراحةً من كل محرر.",
+    "description": "أدر لغة المصدر الافتراضية للترجمات.",
     "actions": {
-      "jobs": "المهام",
-      "save": "حفظ الإعدادات",
-      "addProvider": "إضافة مزود",
-      "editProvider": "تعديل المزود",
-      "deleteProvider": "حذف المزود",
-      "createProvider": "إنشاء مزود"
+      "save": "حفظ الإعدادات"
     },
     "sections": {
       "runtime": "إعدادات المصدر الافتراضية",
-      "runtimeDescription": "حدد فقط اللغة المستخدمة عندما لا تكون لغة المصدر قد حُددت بعد. لا تؤدي تغييرات المصدر مطلقًا إلى بدء توليد الترجمة تلقائيًا.",
-      "providers": "مزودو الترجمة",
-      "providersDescription": "إدارة مزودي الترجمة الآلية. يبقى التوليد معطلا حتى يوجد مزود نشط واحد على الأقل ببيانات اعتماد صالحة."
+      "runtimeDescription": "حدد فقط اللغة المستخدمة عندما لا تكون لغة المصدر قد حُددت بعد."
     },
     "fields": {
       "defaultLocale": {
         "label": "اللغة الافتراضية",
         "description": "تُستخدم عندما لم يتم تعيين لغة مصدر بعد وعندما لا يطابق الطلب لغة محتوى مدعومة"
-      },
-      "protectedTerms": {
-        "label": "مصطلحات محمية",
-        "description": "صيغ كتابية دقيقة وحساسة لحالة الأحرف يجب أن تبقى دون تغيير عند توليد الترجمة. لا تُتعلّم المصطلحات ولا تُقترح تلقائيًا.",
-        "placeholder": "إضافة مصطلح محمي",
-        "examples": "أمثلة: Photoshop, React Native"
-      },
-      "providerName": {
-        "label": "اسم المزود"
-      },
-      "providerType": {
-        "label": "نوع المزود"
-      },
-      "providerPriority": {
-        "label": "الأولوية",
-        "description": "الأولوية الأقل تعمل أولا عند وجود عدة مزودين نشطين."
-      },
-      "providerActive": {
-        "label": "نشط",
-        "shortLabel": "نشط",
-        "description": "يمكن للمزودين النشطين فقط توليد الترجمات."
-      },
-      "deeplApiKey": {
-        "label": "مفتاح DeepL API",
-        "descriptionEdit": "اتركه فارغا للاحتفاظ بالمفتاح المخزن."
-      },
-      "deeplApiBaseUrl": {
-        "label": "عنوان DeepL API الأساسي",
-        "description": "استخدم القيمة الافتراضية إلا إذا كنت تمر عبر وكيل أو endpoint مخصص."
-      },
-      "llmPreset": {
-        "label": "LLM preset"
-      },
-      "llmApiKey": {
-        "label": "LLM API key",
-        "descriptionEdit": "اتركه فارغًا للاحتفاظ بالمفتاح المخزّن."
-      },
-      "llmApiBaseUrl": {
-        "label": "LLM API base URL",
-        "description": "مطلوب لنقاط النهاية المتوافقة مع OpenAI؛ اتركه فارغًا لـ Gemini."
-      },
-      "llmModel": {
-        "label": "Model",
-        "description": "معرّف النموذج المستخدم لتوليد الترجمة."
-      },
-      "llmInputPrice": {
-        "label": "الإدخال USD / 1M رمز",
-        "description": "تقدير اختياري يُستخدم لمقارنة المزوّدين وتخطيط التكاليف."
-      },
-      "llmOutputPrice": {
-        "label": "الإخراج USD / 1M رمز",
-        "description": "تقدير اختياري يُستخدم لمقارنة المزوّدين وتخطيط التكاليف."
-      },
-      "llmMaxContextTokens": {
-        "label": "الحد الأقصى لرموز السياق",
-        "description": "إرشاد اختياري للتوجيه عند معالجة دفعات ترجمة كبيرة."
-      },
-      "llmMaxOutputTokens": {
-        "label": "الحد الأقصى لرموز الإخراج",
-        "description": "حد اختياري لكل طلب يُمرّر إلى المزوّدين المتوافقين."
-      },
-      "llmTemperature": {
-        "label": "Temperature",
-        "description": "تجعل القيم المنخفضة مخرجات الترجمة المهيكلة أكثر حتمية."
-      },
-      "llmSupportsJsonMode": {
-        "label": "وضع JSON المهيكل",
-        "description": "فعّله عندما يدعم المزوّد مخطط JSON أو استجابات وضع JSON."
       }
     },
     "states": {
@@ -1926,45 +1820,7 @@
     },
     "notifications": {
       "saved": "تم حفظ إعدادات الترجمة",
-      "saveFailed": "فشل حفظ إعدادات الترجمة",
-      "providerCreated": "تم إنشاء مزود الترجمة.",
-      "providerUpdated": "تم تحديث مزود الترجمة.",
-      "providerDeleted": "تم حذف مزود الترجمة.",
-      "providerSaveFailed": "فشل حفظ مزود الترجمة.",
-      "providerToggleFailed": "فشل تحديث حالة المزود.",
-      "providerDeleteFailed": "فشل حذف مزود الترجمة."
-    },
-    "generation": {
-      "enabled": "التوليد مفعل",
-      "disabled": "التوليد معطل"
-    },
-    "providerTypes": {
-      "deepl": "DeepL",
-      "llm": "LLM"
-    },
-    "providerStates": {
-      "empty": "لا يوجد مزود ترجمة مهيأ.",
-      "active": "نشط",
-      "inactive": "غير نشط",
-      "priority": "الأولوية {priority}",
-      "modelUnset": "Model not set"
-    },
-    "validation": {
-      "providerNameRequired": "اسم المزود مطلوب.",
-      "providerApiKeyRequired": "يتطلب هذا المزود مفتاح API.",
-      "providerModelRequired": "يلزم نموذج لمزوّدي LLM.",
-      "providerBaseUrlRequired": "يلزم رابط URL أساسي لواجهة API لمزوّدي LLM المتوافقين مع OpenAI."
-    },
-    "modal": {
-      "createProviderTitle": "إنشاء مزود ترجمة",
-      "editProviderTitle": "تعديل مزود الترجمة",
-      "deleteProviderTitle": "حذف مزود الترجمة",
-      "deleteProviderMessage": "حذف {name}؟ سيتم تعطيل التوليد إذا لم يبق أي مزود نشط.",
-      "credentialsSection": "بيانات الاعتماد"
-    },
-    "llmPresets": {
-      "gemini": "Gemini",
-      "openaiCompatible": "متوافق مع OpenAI"
+      "saveFailed": "فشل حفظ إعدادات الترجمة"
     }
   },
   "metadataPanel": {
@@ -2421,39 +2277,8 @@
   },
   "summaryField": {
     "description": "يُستخدم في العناوين الترويجية والقوائم والبحث والمشاركة والوصف القابل للقراءة آليًا",
-    "status": {
-      "idle": "جاهز",
-      "generating": "جارٍ التوليد",
-      "applying": "جارٍ التطبيق",
-      "stale": "الملخص المُولَّد قديم",
-      "applied": "تم التطبيق",
-      "ready": "جاهز للتطبيق"
-    },
-    "actions": {
-      "generate": "توليد ملخص",
-      "apply": "تطبيق الملخص"
-    },
     "placeholders": {
       "summary": "أضف ملخصًا موجزًا..."
-    },
-    "tooltips": {
-      "generatingNamed": "{name} يولّد ملخصًا"
-    },
-    "feedback": {
-      "failedDefault": "فشلت معالجة توليد الملخص",
-      "alreadyRunning": "توليد الملخص قيد التشغيل بالفعل",
-      "missingSuggestionPayload": "اكتمل توليد الملخص دون حمولة اقتراح",
-      "staleSuggestion": "هذا الاقتراح قديم. أعد توليده أو تجاهله قبل التطبيق",
-      "unableToApplyNow": "تعذّر تطبيق الملخص المُولَّد الآن",
-      "applyFailed": "فشل تطبيق الملخص المُولَّد",
-      "applied": "تم تطبيق الملخص المُولَّد",
-      "readyToApply": "الملخص المُولَّد جاهز للتطبيق."
-    },
-    "ready": {
-      "title": "الملخص المُولَّد",
-      "suggestedSummary": "ملخص مقترح",
-      "anotherCollaborator": "متعاون آخر",
-      "anotherCollaboratorNamed": "لدى {name} ملخص مُولَّد جاهز."
     }
   },
   "forms": {
@@ -2756,8 +2581,8 @@
     "systemOrLegacy": "النظام أو إصدار سابق",
     "restore": "استعادة",
     "restoreTitle": "استعادة الإصدار",
-    "restoreSameLocaleBody": "تؤدي استعادة المصدر v{version} ({locale}) إلى تغيير المستند المصدر فقط. تبقى مستندات الترجمة ومهام الترجمة الموجودة دون تغيير، ولا تُولّد الترجمات تلقائيًا. هل تريد المتابعة؟",
-    "restoreCrossLocaleBody": "تؤدي استعادة المصدر v{version} إلى تبديل لغة المصدر من {currentLocale} إلى {selectedLocale} وتغيير مؤشر المصدر فقط. تبقى مستندات الترجمة ومهام الترجمة الموجودة دون تغيير، ولا تُولّد الترجمات تلقائيًا. هل تريد المتابعة؟",
+    "restoreSameLocaleBody": "تؤدي استعادة المصدر v{version} ({locale}) إلى تغيير المستند المصدر فقط. تبقى مستندات الترجمة الموجودة دون تغيير. هل تريد المتابعة؟",
+    "restoreCrossLocaleBody": "تؤدي استعادة المصدر v{version} إلى تبديل لغة المصدر من {currentLocale} إلى {selectedLocale} وتغيير مؤشر المصدر فقط. تبقى مستندات الترجمة الموجودة دون تغيير. هل تريد المتابعة؟",
     "restoreFailed": "فشلت استعادة المستند المصدر.",
     "loadFailed": "تعذر تحميل سجل الإصدارات.",
     "end": "تم تحميل جميع الإصدارات."
@@ -3285,47 +3110,6 @@
       "compilation": "مجموعة تجميعية"
     }
   },
-  "aiAssistant": {
-    "title": "مساعد الذكاء الاصطناعي",
-    "modes": {
-      "modify": "تعديل",
-      "generate": "توليد"
-    },
-    "placeholders": {
-      "modify": "كيف تريدني أن أعدّل هذا النص",
-      "generate": "ماذا تريد أن تكتب"
-    },
-    "quickActions": {
-      "title": "إجراءات سريعة",
-      "improve": "تحسين",
-      "fixSpelling": "تصحيح الإملاء",
-      "simplify": "تبسيط",
-      "summarize": "تلخيص",
-      "translateKorean": "الكورية",
-      "translateEnglish": "الإنجليزية",
-      "continueWriting": "متابعة الكتابة",
-      "brainstorm": "عصف ذهني"
-    },
-    "sections": {
-      "result": "نتيجة الذكاء الاصطناعي"
-    },
-    "actions": {
-      "close": "إغلاق مساعد الذكاء الاصطناعي",
-      "submitPrompt": "إرسال طلب ذكاء اصطناعي مخصص",
-      "stop": "إيقاف",
-      "reject": "رفض",
-      "retry": "إعادة المحاولة",
-      "accept": "قبول",
-      "insert": "إدراج"
-    },
-    "errors": {
-      "generic": "حدث خطأ ما. حاول مرة أخرى"
-    },
-    "notifications": {
-      "applyFailedTitle": "فشل تطبيق نتيجة الذكاء الاصطناعي",
-      "applyFailedMessage": "تعذّر تحليل رد الذكاء الاصطناعي. حاول مرة أخرى"
-    }
-  },
   "artistAdminDetail": {
     "actions": {
       "assignUsers": "تعيين مستخدمين"
@@ -3589,8 +3373,7 @@
           "math": "الرياضيات",
           "inline": "مضمن",
           "embeds": "التضمينات",
-          "media": "الوسائط",
-          "ai": "الذكاء الاصطناعي"
+          "media": "الوسائط"
         },
         "items": {
           "heading": {
@@ -3713,12 +3496,6 @@
             "aliases": "attachment\nfile\ndocument\npdf\ndoc\ndownload\nمرفق\nملف\nمستند\nتنزيل",
             "group": "الوسائط"
           },
-          "aiAssistant": {
-            "title": "مساعد الذكاء الاصطناعي",
-            "subtext": "اكتب أو حسّن أو حوّل النص باستخدام الذكاء الاصطناعي",
-            "aliases": "ai\nassistant\ngpt\nwrite\nimprove\nذكاء اصطناعي\nمساعد\nكتابة\nتحسين",
-            "group": "الذكاء الاصطناعي"
-          },
           "shader": {
             "title": "تظليل GLSL",
             "subtext": "أضف تظليل GLSL تفاعليًا",
@@ -3758,8 +3535,7 @@
         "displaySizeXl": "كبير جدًا",
         "nest": "محتويات متداخلة",
         "unnest": "إلغاء التداخل",
-        "inlineMath": "معادلة مضمنة",
-        "ai": "مساعد الذكاء الاصطناعي"
+        "inlineMath": "معادلة مضمنة"
       },
       "link": {
         "create": "إنشاء رابط",

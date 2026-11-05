@@ -10,7 +10,6 @@ interface TranslationPanelSectionCardProps {
   title: ReactNode;
   description?: ReactNode;
   actions?: ReactNode;
-  persistentActions?: ReactNode;
   children: ReactNode;
   expandLabel: string;
   collapseLabel: string;
@@ -23,7 +22,6 @@ export function TranslationPanelSectionCard({
   title,
   description,
   actions,
-  persistentActions,
   children,
   expandLabel,
   collapseLabel,
@@ -44,7 +42,6 @@ export function TranslationPanelSectionCard({
           description={description}
           actions={
             <DsLayoutInline gap="xs">
-              {persistentActions}
               {isExpanded ? actions : null}
               {collapsible ? (
                 <Button

@@ -21,7 +21,6 @@ import {
   IconLinkOff,
   IconMathFunction,
   IconPencil,
-  IconSparkles,
   IconX,
 } from '@tabler/icons-react';
 import { Button } from '@/components/core/Button';
@@ -30,11 +29,7 @@ import { TextInput } from '@/components/core/Input';
 import { Popover } from '@/components/core/Popover';
 import { StandardFormattingButtons } from '@/features/editor/toolbars/FormattingButtons';
 import { type EditorColor } from '@/features/editor/toolbars/EditorColorStyleButton';
-import {
-  EDITOR_TOOLBAR_SHORTCUTS,
-  EditorToolbarDropdownTarget,
-  EditorToolbarShortcutText,
-} from '@/features/editor/toolbars/EditorToolbarTooltip';
+import { EditorToolbarDropdownTarget } from '@/features/editor/toolbars/EditorToolbarTooltip';
 import { EditorToolbarAction as Action } from '@/features/editor/toolbars/EditorToolbarAction';
 import {
   canShowSelectionBubbleMenu,
@@ -88,7 +83,6 @@ export interface SelectionBubbleMenuLabels {
     cancel: string;
   };
   inlineMath: string;
-  ai: string;
 }
 
 export interface SelectionBubbleMenuProps extends SelectionBubbleMenuCommandOptions {
@@ -150,7 +144,6 @@ export function createSelectionBubbleMenuLabels(
       cancel: actions.cancel,
     },
     inlineMath: messages.formatting.inlineMath,
-    ai: messages.formatting.ai,
   };
 }
 
@@ -322,7 +315,7 @@ export function SelectionBubbleMenuView({
   const linkSelection = commands.linkSelection ?? selectionSnapshot;
   const hasFormattingControls = commands.hasTextSelection || commands.canAlign;
   const hasLinkControls = (commands.hasSafeInlineSelection && !commands.inlineCodeActive) || Boolean(commands.linkHref);
-  const hasContextualControls = hasLinkControls || commands.canConvertToInlineMath || commands.canOpenAI;
+  const hasContextualControls = hasLinkControls || commands.canConvertToInlineMath;
   return (
     <div className={classes.menu}>
       <ToolbarSurface
@@ -456,14 +449,6 @@ export function SelectionBubbleMenuView({
                   {labels.inlineMath}
                 </DropdownMenu.Item>
               ) : null}
-              {!formattingOnly && commands.canOpenAI ? (
-                <DropdownMenu.Item icon={<IconSparkles size={16} />} onClick={commands.openAI}>
-                  <LinkActions gap="md" justify="between">
-                    <span>{labels.ai}</span>
-                    <EditorToolbarShortcutText shortcut={EDITOR_TOOLBAR_SHORTCUTS.ai} />
-                  </LinkActions>
-                </DropdownMenu.Item>
-              ) : null}
             </DropdownMenu.Dropdown>
           </DropdownMenu>
         ) : null}
@@ -500,13 +485,7 @@ export function updateSelectionBubbleMenuPosition(editor: Editor) {
 }
 
 /** Contextual selected-text controls; never rendered as a fixed editor toolbar. */
-export function TiptapSelectionBubbleMenu({
-  editor,
-  labels,
-  onAIActivate,
-  onOpenLink,
-  formattingOnly,
-}: SelectionBubbleMenuProps) {
+export function TiptapSelectionBubbleMenu({ editor, labels, onOpenLink, formattingOnly }: SelectionBubbleMenuProps) {
   const [revision, setRevision] = useState(0);
   const menu = useTiptapBubbleMenu(editor, SELECTION_BUBBLE_MENU_PLUGIN_KEY);
   useEffect(() => {
@@ -526,8 +505,8 @@ export function TiptapSelectionBubbleMenu({
     };
   }, [editor]);
   const commands = useMemo(
-    () => createSelectionBubbleMenuCommands(editor, { onAIActivate, onOpenLink }),
-    [editor, onAIActivate, onOpenLink, revision],
+    () => createSelectionBubbleMenuCommands(editor, { onOpenLink }),
+    [editor, onOpenLink, revision],
   );
   const shouldShow = useCallback(
     (props: Parameters<NonNullable<BubbleMenuProps['shouldShow']>>[0]) =>

@@ -648,7 +648,6 @@ describe('ProgramEventEditor locale and sync rules', () => {
       editable: true,
       allowNeutralBlockEdits: false,
       allowStructuralEdits: false,
-      aiTarget: { type: 'program-event', id: eventId, locale: 'en' },
     });
 
     expect(container.querySelector<HTMLButtonElement>('[data-testid="slug-change"]')?.disabled).toBe(true);

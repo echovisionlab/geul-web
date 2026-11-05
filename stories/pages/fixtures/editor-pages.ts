@@ -4,8 +4,6 @@ import { QueryClient } from '@tanstack/react-query';
 import {
   TranslationLocaleSchema,
   ListEntityTranslationsResponseSchema,
-  ListTranslationJobsResponseSchema,
-  GetTranslationSettingsResponseSchema,
   TranslationEntrySchema,
 } from '@echovisionlab/geul-proto/secure/translation_pb.ts';
 import { contentBlockCatalogFingerprint } from '@echovisionlab/geul-proto/content/block_catalog.ts';
@@ -68,14 +66,6 @@ export function localEditorQueryClient(entityType: string, entityId: string) {
         create(TranslationEntrySchema, { locale: 'en', title: 'Listening room' }),
       ],
     }),
-  );
-  client.setQueryData(
-    ['entity-translation-jobs', entityType, entityId, 'all'],
-    create(ListTranslationJobsResponseSchema, {}),
-  );
-  client.setQueryData(
-    ['translation-settings'],
-    create(GetTranslationSettingsResponseSchema, { generationEnabled: false }),
   );
   return client;
 }

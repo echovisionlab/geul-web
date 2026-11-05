@@ -82,7 +82,6 @@ import { runPageStatusChangeAfterSave } from './page-lifecycle';
 interface PageEditorProps {
   initialSnapshot?: EditorSnapshot;
   pageId: string;
-  currentMemberId: string;
   canManageTranslations: boolean;
   initialTitle: string;
   initialSummary: string | null;
@@ -116,7 +115,6 @@ function mergePageLayoutPatches(pending: PageLayoutPatch, next: PageLayoutPatch)
 function usePageEditorViewModel({
   initialSnapshot,
   pageId,
-  currentMemberId,
   canManageTranslations,
   initialTitle,
   initialSummary,
@@ -593,7 +591,6 @@ function usePageEditorViewModel({
     roomLocale,
     provider,
     doc,
-    currentMemberId,
     userName,
     handleLocaleSummaryChange,
     accessPolicy,
@@ -671,7 +668,6 @@ export function PageEditorView({ model }: { model: PageEditorViewModel }) {
     roomLocale,
     provider,
     doc,
-    currentMemberId,
     userName,
     handleLocaleSummaryChange,
     accessPolicy,
@@ -816,17 +812,8 @@ export function PageEditorView({ model }: { model: PageEditorViewModel }) {
               <SummaryFieldCard
                 entityType="page"
                 entityId={pageId}
-                title={displayedTitle}
                 summary={displayedSummary}
                 summaryReadOnly={!canEditLocaleDocument}
-                hideAiActions={!canEditLocaleDocument}
-                aiTarget={
-                  canEditLocaleDocument && roomLocale ? { type: 'page', id: pageId, locale: roomLocale } : undefined
-                }
-                provider={canEditLocaleDocument ? provider : null}
-                doc={canEditLocaleDocument ? doc : null}
-                currentMemberId={currentMemberId}
-                currentMemberDisplayName={userName}
                 onSummaryChange={canEditLocaleDocument ? handleLocaleSummaryChange : undefined}
               />
 
