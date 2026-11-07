@@ -261,11 +261,11 @@ importers:
         specifier: 0.12.0
         version: 0.12.0(yjs@13.6.33)
       '@echovisionlab/geul-event':
-        specifier: 0.17.0
-        version: 0.17.0(@echovisionlab/geul-proto@0.17.0)
+        specifier: 0.19.0
+        version: 0.19.0(@echovisionlab/geul-proto@0.19.0)
       '@echovisionlab/geul-proto':
-        specifier: 0.17.0
-        version: 0.17.0
+        specifier: 0.19.0
+        version: 0.19.0
       '@echovisionlab/geul-telemetry':
         specifier: 0.7.0
         version: 0.7.0
@@ -1467,16 +1467,16 @@ packages:
     peerDependencies:
       yjs: ^13.6.33
 
-  '@echovisionlab/geul-event@0.17.0':
-    resolution: {integrity: sha512-4g70HoutsN8jIjrZQgvHLSME+ZRJaAx4bg1C8PoZkrDtGeaza41CB5a0y2bZxdUZRjWr4v69SJ7Lw1k+6FDSZA==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-event/0.17.0/7d90fb65ffe18adc683aa981a3dba01cc14e9701}
+  '@echovisionlab/geul-event@0.19.0':
+    resolution: {integrity: sha512-0s1UbHavp4JWd0bGYUObW/0RaB7mW2j7xhbEA1o7E+TNOhw9/5xnoI61UslkQIHQPnK1OEQkTPaYpYpUaBYLKg==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-event/0.19.0/fef61402aff8f4876f3af9d65b099d8d5dfd5e5d}
     peerDependencies:
-      '@echovisionlab/geul-proto': ^0.17.0
+      '@echovisionlab/geul-proto': ^0.19.0
 
   '@echovisionlab/geul-proto@0.14.0':
     resolution: {integrity: sha512-esKwrvGUcQYr02BuiO8Jp0+RAtcxIHSjatQ9cXgbpCoRqsg1+YWyDzvXk0bgiEyuNwGMYrkzhMJ07RhNFaQtvw==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-proto/0.14.0/2ae8b5581430ebc375f80fd5e6a0e69fa44d8450}
 
-  '@echovisionlab/geul-proto@0.17.0':
-    resolution: {integrity: sha512-d7teOKFWsvyVO4+nHpQwXqPchhFHwvmxbYn1yI+qvMjREgnIZ6R3NoO0SSMS3uwGn+lxiFLgTtXkKCtagSwm8A==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-proto/0.17.0/9ccb5bead74a53b1b2e54063022a0082c0801f4d}
+  '@echovisionlab/geul-proto@0.19.0':
+    resolution: {integrity: sha512-SRs7iA52iemSWIX0uE9cOmklPoZcXc71l9oMnnld14MaMnKUb6g2tSVh3XWrzozglR500nVFhTej4M3c2Jfx6w==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-proto/0.19.0/34acbae992d421a382e405feb7c5cb7cfe6af668}
 
   '@echovisionlab/geul-telemetry@0.7.0':
     resolution: {integrity: sha512-ce4cumtOYH/jZMuY3iu4Uu48CrVHQuKCRid/VJJLoosFDECwc+8Z556j7JeVIxXR3b5A88YQSGPaUlI5HrvDZw==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-telemetry/0.7.0/94af516362d11c38c5ed6566dedeae8fd2223554}
@@ -10179,16 +10179,16 @@ snapshots:
       yjs: 13.6.33
       zod: 4.6.7
 
-  '@echovisionlab/geul-event@0.17.0(@echovisionlab/geul-proto@0.17.0)':
+  '@echovisionlab/geul-event@0.19.0(@echovisionlab/geul-proto@0.19.0)':
     dependencies:
       '@bufbuild/protobuf': 2.16.0
-      '@echovisionlab/geul-proto': 0.17.0
+      '@echovisionlab/geul-proto': 0.19.0
 
   '@echovisionlab/geul-proto@0.14.0':
     dependencies:
       '@bufbuild/protobuf': 2.16.0
 
-  '@echovisionlab/geul-proto@0.17.0':
+  '@echovisionlab/geul-proto@0.19.0':
     dependencies:
       '@bufbuild/protobuf': 2.16.0
 

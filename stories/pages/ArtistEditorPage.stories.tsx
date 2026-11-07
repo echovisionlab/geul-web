@@ -88,6 +88,8 @@ function Preview({ state = 'ready' }: { state?: EditorPreviewState }) {
     currentLocaleCanEdit: local.canEdit,
     editorSession: local.session,
     labelOptions: [],
+    handleParentChange: (value) => setFields((current) => ({ ...current, parentArtistId: value })),
+    canChangeRelations: local.canEdit,
     handleLabelsChange: (value) => setFields((current) => ({ ...current, labelIds: value })),
     parentArtistOptions: [],
     localSocialLinks,

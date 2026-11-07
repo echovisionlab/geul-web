@@ -110,6 +110,25 @@ export async function setLabelParticipantAction(
   );
 }
 
+export async function setLabelParentAction(
+  labelId: string,
+  parentLabelId: string | null,
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'label-actions',
+    'setLabelParentAction',
+    async () => {
+      const client = await createLabelClient();
+      await client.setLabelParent({ labelId, parentLabelId: parentLabelId ?? undefined });
+      return { success: true as const };
+    },
+    {
+      fallback: 'Failed to update the parent Label',
+      messages: { [Code.NotFound]: 'Label not found or you cannot manage it' },
+    },
+  );
+}
+
 export async function removeLabelParticipantAction(
   labelId: string,
   memberId: string,
