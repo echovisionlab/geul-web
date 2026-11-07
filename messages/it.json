@@ -1962,6 +1962,10 @@
     "empty": "Non hai ancora nessun artista assegnato.",
     "searchPlaceholder": "Cerca artisti..."
   },
+  "myLabels": {
+    "empty": "Non hai ancora nessuna etichetta assegnata.",
+    "searchPlaceholder": "Cerca etichette..."
+  },
   "forms": {
     "empty": "Nessun modulo trovato.",
     "searchPlaceholder": "Cerca moduli..."

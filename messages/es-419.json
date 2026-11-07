@@ -1962,6 +1962,10 @@
     "empty": "No hay artistas asignados a ti.",
     "searchPlaceholder": "Buscar artistas..."
   },
+  "myLabels": {
+    "empty": "No hay etiquetas asignadas a ti.",
+    "searchPlaceholder": "Buscar etiquetas..."
+  },
   "forms": {
     "empty": "No se encontraron formularios.",
     "searchPlaceholder": "Buscar formularios..."

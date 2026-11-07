@@ -1962,6 +1962,10 @@
     "empty": "Er zijn geen artiesten aan je toegewezen.",
     "searchPlaceholder": "Zoek artiesten..."
   },
+  "myLabels": {
+    "empty": "Er zijn geen labels aan je toegewezen.",
+    "searchPlaceholder": "Zoek labels..."
+  },
   "forms": {
     "empty": "Geen formulieren gevonden.",
     "searchPlaceholder": "Zoek formulieren..."

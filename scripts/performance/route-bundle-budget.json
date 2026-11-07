@@ -91,6 +91,10 @@
       "jsGzip": 503808,
       "cssGzip": 44032
     },
+    "/(general)/my/labels": {
+      "jsGzip": 503808,
+      "cssGzip": 44032
+    },
     "/(general)/my": {
       "jsGzip": 421888,
       "cssGzip": 44032

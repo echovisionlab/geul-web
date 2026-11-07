@@ -8,6 +8,7 @@ const KNOWN_MY_SECTIONS = new Set<MySection>([
   MySection.SERIES,
   MySection.WORKS,
   MySection.ARTISTS,
+  MySection.LABELS,
   MySection.FORMS,
 ]);
 
@@ -27,6 +28,8 @@ export function mySectionToPath(section: MySection): string | null {
       return 'works';
     case MySection.ARTISTS:
       return 'artists';
+    case MySection.LABELS:
+      return 'labels';
     case MySection.FORMS:
       return 'forms';
     default:

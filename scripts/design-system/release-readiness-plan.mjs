@@ -766,6 +766,7 @@ export const routePlans = {
     'L01 L02',
     'Owned list, relations, create/edit destinations and empty result.',
   ),
+  '/my/labels': row('My labels', '02', 'L01 L02', 'Managed list, edit destinations and empty result.'),
   '/my/series': row('My post series', '02', 'L01 L02', 'List, new series, edit, delete and empty result.'),
   '/my/series/[id]': row(
     'My series editor',

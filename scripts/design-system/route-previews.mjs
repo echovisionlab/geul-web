@@ -578,6 +578,14 @@ export const routePreviews = [
       'Actual production MyArtistsTable; local typed query/create transport, empty/loading/error branches where the production owner exposes them. Text search/pagination operate on fixtures; backend filter/sort semantics, auth and navigation destinations remain outside.',
   },
   {
+    route: '/my/labels',
+    storyTitle: 'Pages/Account/Owned Lists',
+    variant: 'Labels',
+    coverage: 'page-view',
+    scope:
+      'Actual production MyLabelsTable; local typed query transport, empty/loading/error branches where the production owner exposes them. Text search/pagination operate on fixtures; backend sort semantics, auth and navigation destinations remain outside.',
+  },
+  {
     route: '/my/works',
     storyTitle: 'Pages/Account/Owned Lists',
     variant: 'Works',

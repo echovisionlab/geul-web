@@ -21,6 +21,13 @@ import { getLocalizedNewEntityName } from '@/lib/i18n/default-entity-name.server
 import { createLogger } from '@/lib/utils/logger';
 import { themedAssetRefUrl } from '@/lib/utils/asset-ref';
 
+interface MyLabelListInput {
+  sort?: { field: string; order?: 'asc' | 'desc' }[];
+  page?: number;
+  pageSize?: number;
+  search?: string;
+}
+
 export type ThemeAssetVariantName = 'light' | 'dark';
 
 const logger = createLogger('label-actions');
@@ -301,5 +308,42 @@ export async function getLabelsForBlockByIdsAction(input: { ids: string[]; reque
       logger.error('Failed to get labels for page block', { error: err });
       throw err;
     }
+  });
+}
+
+// User-scoped list (for /my/labels page) - labels the user may manage, drafts included
+export async function listMyLabelsAction(input: MyLabelListInput) {
+  return queryResult(async () => {
+    const client = await createLabelClient();
+    const limit = input.pageSize ?? 20;
+    const page = input.page ?? 1;
+    const offset = (page - 1) * limit;
+
+    const response = await client.listMyLabels({
+      pagination: { limit, offset },
+      filters: input.search ? [{ field: 'search', op: FilterOp.ILIKE, value: input.search }] : undefined,
+      sorts: input.sort?.map((s) => ({
+        field: s.field,
+        order: (s.order === 'desc' ? 2 : 1) as SortOrder,
+      })),
+    });
+
+    const total = response.pagination?.total ?? 0;
+
+    return {
+      data: (response.labels ?? []).map((label) => ({
+        id: label.id,
+        name: label.name,
+        slug: label.slug ?? null,
+        imageLightUrl: label.imageLightAsset?.url ?? null,
+        imageDarkUrl: label.imageDarkAsset?.url ?? null,
+        status: label.status,
+        createdAt: label.createdAt ? timestampDate(label.createdAt) : null,
+      })),
+      total,
+      page,
+      pageSize: limit,
+      totalPages: Math.ceil(total / limit),
+    };
   });
 }

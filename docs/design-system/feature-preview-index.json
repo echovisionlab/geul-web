@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "sourceManifestHash": "5c2b2e95f0750f47abd8c276377f19cc8eb11003980f4e53ccc3cce2010c36ca",
+  "sourceManifestHash": "8f60298f4bfb73e94c4d8d7d9bceb944618667a3e277f03cd19a76849b27edb2",
   "methodology": "All inventoried Feature component candidates. Direct value imports, literal lazy imports and transitive source relationships through production owners/local adapters are indexed separately. A dependency can be unused or render conditionally; neither relationship proves rendered states, route parity or design compliance. Empty JSX records include runtime/lazy/controller boundaries and must be inspected before treating them as visual gaps.",
-  "counts": { "domains": 54, "componentFiles": 783, "jsxWithoutStoryRelationship": 45 },
+  "counts": { "domains": 54, "componentFiles": 785, "jsxWithoutStoryRelationship": 45 },
   "domains": [
     {
       "domain": "account",
@@ -4762,6 +4762,7 @@
             "Feature/Interaction/Reorder Consumers",
             "Pages/Admin/Collections",
             "Pages/Admin/Entity Lists",
+            "Pages/Account/Owned Lists",
             "Pages/Public/Catalog Entity Detail",
             "Pages/Public/Entity Detail",
             "Pages/Editors/Work"
@@ -5098,6 +5099,7 @@
             "Feature/Interaction/Reorder Consumers",
             "Pages/Admin/Collections",
             "Pages/Admin/Entity Lists",
+            "Pages/Account/Owned Lists",
             "Pages/Public/Catalog Entity Detail",
             "Pages/Public/Entity Detail",
             "Pages/Editors/Work"
@@ -5482,6 +5484,18 @@
         },
         {
           "file": "features/my/MyArtistsTable.tsx",
+          "hasJsx": true,
+          "directStories": ["Pages/Account/Owned Lists"],
+          "relatedStories": ["Pages/Account/Owned Lists"]
+        },
+        {
+          "file": "features/my/MyLabelsDataTable.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": ["Pages/Account/Owned Lists"]
+        },
+        {
+          "file": "features/my/MyLabelsTable.tsx",
           "hasJsx": true,
           "directStories": ["Pages/Account/Owned Lists"],
           "relatedStories": ["Pages/Account/Owned Lists"]

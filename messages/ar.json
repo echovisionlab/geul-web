@@ -2945,6 +2945,10 @@
     "empty": "لا يوجد فنانون مخصّصون لك",
     "searchPlaceholder": "ابحث عن فنانين..."
   },
+  "myLabels": {
+    "empty": "لا توجد تسميات مخصّصة لك",
+    "searchPlaceholder": "ابحث عن تسميات..."
+  },
   "termsPage": {
     "active": {
       "emptyTitle": "لم يتم نشر شروط بعد",

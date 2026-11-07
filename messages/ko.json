@@ -1962,6 +1962,10 @@
     "empty": "배정된 아티스트가 없습니다.",
     "searchPlaceholder": "아티스트 검색..."
   },
+  "myLabels": {
+    "empty": "배정된 레이블이 없습니다.",
+    "searchPlaceholder": "레이블 검색..."
+  },
   "forms": {
     "empty": "폼이 없습니다.",
     "searchPlaceholder": "폼 검색..."

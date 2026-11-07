@@ -1962,6 +1962,10 @@
     "empty": "Aucun artiste ne vous est attribué.",
     "searchPlaceholder": "Rechercher des artistes..."
   },
+  "myLabels": {
+    "empty": "Aucune maison de disques ne vous est attribuée.",
+    "searchPlaceholder": "Rechercher des maisons de disques..."
+  },
   "forms": {
     "empty": "Aucun formulaire trouvé.",
     "searchPlaceholder": "Rechercher des formulaires..."

@@ -1962,6 +1962,10 @@
     "empty": "沒有藝術家",
     "searchPlaceholder": "搜尋藝術家..."
   },
+  "myLabels": {
+    "empty": "沒有廠牌",
+    "searchPlaceholder": "搜尋廠牌..."
+  },
   "forms": {
     "empty": "沒有找到表單",
     "searchPlaceholder": "搜尋表單..."

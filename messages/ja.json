@@ -1962,6 +1962,10 @@
     "empty": "割り当てられたアーティストがいません",
     "searchPlaceholder": "アーティストを検索..."
   },
+  "myLabels": {
+    "empty": "割り当てられたレーベルがありません",
+    "searchPlaceholder": "レーベルを検索..."
+  },
   "forms": {
     "empty": "フォームが見つかりません",
     "searchPlaceholder": "フォームを検索..."

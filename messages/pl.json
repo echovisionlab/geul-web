@@ -1962,6 +1962,10 @@
     "empty": "Brak przypisanych do Ciebie artystów.",
     "searchPlaceholder": "Wyszukaj artystów..."
   },
+  "myLabels": {
+    "empty": "Brak przypisanych do Ciebie etykiet.",
+    "searchPlaceholder": "Wyszukaj etykiety..."
+  },
   "forms": {
     "empty": "Nie znaleziono formularzy.",
     "searchPlaceholder": "Wyszukaj formularze..."

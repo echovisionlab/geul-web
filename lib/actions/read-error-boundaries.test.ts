@@ -47,6 +47,7 @@ const cases: Array<[string, string, unknown[]]> = [
   ['artist', 'listArtistsAction', []],
   ['artist', 'listArtistParentOptionsAction', ['00000000-0000-4000-8000-000000000001']],
   ['artist', 'listMyArtistsAction', [{}]],
+  ['label', 'listMyLabelsAction', [{}]],
   ['artist', 'listArtistsForBlockAction', [{}]],
   ['artist', 'listArtistParticipantsAction', ['00000000-0000-4000-8000-000000000001']],
   ['member-criteria', 'listMemberCriteriaAdminAction', [{}]],
