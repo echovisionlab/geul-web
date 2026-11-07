@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.28.0](https://github.com/echovisionlab/geul-web/compare/v0.27.1...v0.28.0) (2026-11-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* save a parent and an Artist's Labels outside the room ([#236](https://github.com/echovisionlab/geul-web/issues/236))
+
+### Features
+
+* save a parent and an Artist's Labels outside the room ([#236](https://github.com/echovisionlab/geul-web/issues/236)) ([1369f31](https://github.com/echovisionlab/geul-web/commit/1369f3195e4a038ab8da9ee8d60324a52c5b9480))
+
 ## [0.27.1](https://github.com/echovisionlab/geul-web/compare/v0.27.0...v0.27.1) (2026-11-05)
 
 
