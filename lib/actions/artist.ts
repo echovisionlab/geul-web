@@ -481,6 +481,44 @@ export async function setArtistParticipantAction(
   );
 }
 
+export async function setArtistParentAction(
+  artistId: string,
+  parentArtistId: string | null,
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'artist-actions',
+    'setArtistParentAction',
+    async () => {
+      const client = await createArtistClient();
+      await client.setArtistParent({ artistId, parentArtistId: parentArtistId ?? undefined });
+      return { success: true as const };
+    },
+    {
+      fallback: 'Failed to update the parent Artist',
+      messages: { [Code.NotFound]: 'Artist not found or you cannot manage it' },
+    },
+  );
+}
+
+export async function setArtistLabelsAction(
+  artistId: string,
+  labelIds: readonly string[],
+): Promise<ActionResult<{ success: true }>> {
+  return runAction(
+    'artist-actions',
+    'setArtistLabelsAction',
+    async () => {
+      const client = await createArtistClient();
+      await client.setArtistLabels({ artistId, labelIds: [...labelIds] });
+      return { success: true as const };
+    },
+    {
+      fallback: 'Failed to update the Labels',
+      messages: { [Code.NotFound]: 'Artist or Label not found, or you cannot manage it' },
+    },
+  );
+}
+
 export async function removeArtistParticipantAction(
   artistId: string,
   memberId: string,

@@ -39,7 +39,7 @@ import { EditorActiveLocaleMenu } from '@/features/translation/EditorActiveLocal
 import { EntityTranslationsPanel } from '@/features/translation/EntityTranslationsPanel';
 import { isLocaleDocumentEditable } from '@/features/translation/locale-document-mode';
 import { useLocaleDocumentSession } from '@/features/translation/useLocaleDocumentSession';
-import { publishLabelAction, unpublishLabelAction } from '@/lib/actions/label';
+import { publishLabelAction, setLabelParentAction, unpublishLabelAction } from '@/lib/actions/label';
 import { buildLoginRedirectHref } from '@/lib/auth/login-page';
 import { EditorRuntimeProvider } from '@/lib/contexts/EditorRuntimeContext';
 import {
@@ -162,9 +162,6 @@ function useLabelEditorViewModel({ id, label, baseUrl, backHref = '/admin/labels
             socialLinks: value as Record<string, string>,
             observed: { socialLinks: fields.socialLinks },
           });
-          return;
-        case 'parentLabelId':
-          debouncedDocumentMetadataUpdate({ parentLabelId: value ? String(value) : null });
       }
     },
     [canEditNeutral, debouncedDocumentMetadataUpdate, fields],
@@ -203,10 +200,6 @@ function useLabelEditorViewModel({ id, label, baseUrl, backHref = '/admin/labels
         if (typeof value === 'string' || value === null) {
           assign(key, value ?? '');
         }
-      }
-      const parentLabelId = values.parentLabelId;
-      if (typeof parentLabelId === 'string' || parentLabelId === null) {
-        assign('parentLabelId', parentLabelId);
       }
       if (nextSocialLinks) {
         assign('socialLinks', nextSocialLinks);
@@ -251,6 +244,25 @@ function useLabelEditorViewModel({ id, label, baseUrl, backHref = '/admin/labels
     queryFn: listLabelsForSelector,
   });
   const { data: labelsForParent } = labelsForParentQuery;
+
+  const canChangeParent = canEditNeutral && canManageParticipants;
+
+  const saveParent = useMutation({
+    mutationFn: ({ next }: { next: string | null; previous: string | null }) => setLabelParentAction(id, next),
+    onSuccess: (result, { previous }) => {
+      if (result.error) {
+        setFields((current) => ({ ...current, parentLabelId: previous }));
+        notifications.show({ message: result.error, tone: 'danger' });
+      }
+    },
+  });
+
+  const handleParentChange = (next: string | null) => {
+    if (canChangeParent) {
+      setFields((current) => ({ ...current, parentLabelId: next }));
+      saveParent.mutate({ next, previous: fields.parentLabelId });
+    }
+  };
 
   const publishLabel = useMutation({
     mutationFn: (labelId: string) => publishLabelAction(labelId),
@@ -405,6 +417,8 @@ function useLabelEditorViewModel({ id, label, baseUrl, backHref = '/admin/labels
     setParticipantsOpened,
     logoImages: { light: logoImages.light, dark: logoImages.dark },
     handleImageChange,
+    handleParentChange,
+    canChangeParent,
     baseUrl,
     fields: {
       slug: fields.slug,
@@ -475,6 +489,8 @@ export function LabelEditorView({ model }: { model: LabelEditorViewModel }) {
     setParticipantsOpened,
     logoImages,
     handleImageChange,
+    handleParentChange,
+    canChangeParent,
     baseUrl,
     fields,
     slugMgmt,
@@ -674,10 +690,10 @@ export function LabelEditorView({ model }: { model: LabelEditorViewModel }) {
             isLoading={labelsForParentQuery.isFetching}
             data={parentLabelOptions}
             value={fields.parentLabelId}
-            onChange={(value) => setField('parentLabelId', value)}
+            onChange={handleParentChange}
             clearable
             searchable
-            disabled={!canEditNeutral}
+            disabled={!canChangeParent}
           />
 
           <SocialLinksEditor

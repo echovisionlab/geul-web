@@ -64,6 +64,8 @@ function Preview({ state = 'ready' }: { state?: EditorPreviewState }) {
     canManageParticipants: false,
     setParticipantsOpened,
     logoImages,
+    handleParentChange: (value) => setFields((current) => ({ ...current, parentLabelId: value })),
+    canChangeParent: local.canEdit,
     handleImageChange: (variant, url) => setLogoImages((current) => ({ ...current, [variant]: url })),
     baseUrl: local.site.baseUrl,
     fields,

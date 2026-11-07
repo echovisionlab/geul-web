@@ -14,6 +14,7 @@ interface ArtistParentSelectProps {
   options: ArtistParentOption[];
   value: string | null;
   loading?: boolean;
+  disabled?: boolean;
   onChange: (value: string | null) => void;
 }
 
@@ -25,6 +26,7 @@ export function ArtistParentSelect({
   value,
   onChange,
   loading = false,
+  disabled = false,
 }: ArtistParentSelectProps) {
   return (
     <Select
@@ -37,6 +39,7 @@ export function ArtistParentSelect({
       isLoading={loading}
       searchable
       clearable
+      disabled={disabled}
     />
   );
 }

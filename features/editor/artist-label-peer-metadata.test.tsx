@@ -407,9 +407,7 @@ describe('Artist and Label peer metadata adoption', () => {
           countryCode: 'US',
           website: 'https://canonical.example',
           socialLinks: { instagram: 'canonical' },
-          labelIds: ['label-canonical'],
           slug: 'artist-canonical',
-          parentArtistId: null,
         },
         sequence: 1,
       },
@@ -420,29 +418,24 @@ describe('Artist and Label peer metadata adoption', () => {
 
     expect(mocks.title).toBe('Canonical Artist');
     expect(mocks.inputValues['artist-artist-1-website']).toBe('https://canonical.example');
-    expect(mocks.labelValue).toBe('label-canonical');
     expect(mocks.socialValue).toBe(JSON.stringify({ instagram: 'canonical' }));
 
     act(() => mocks.inputChanges['artist-artist-1-website']('https://local.example'));
     act(() => mocks.socialChange?.({ instagram: 'local-social' }));
-    act(() => mocks.labelChange?.(['label-local']));
     expect(mocks.writes).toContainEqual({
       socialLinks: { instagram: 'local-social' },
       observed: { socialLinks: { instagram: 'canonical' } },
     });
-    expect(mocks.writes).toContainEqual({ labelIds: ['label-local'], observed: { labelIds: ['label-canonical'] } });
     act(() => mocks.socialChange?.({ instagram: 'local-social-next' }));
-    act(() => mocks.labelChange?.(['label-local-next']));
     expect(mocks.writes).toContainEqual({
       socialLinks: { instagram: 'local-social-next' },
       observed: { socialLinks: { instagram: 'local-social' } },
     });
-    expect(mocks.writes).toContainEqual({ labelIds: ['label-local-next'], observed: { labelIds: ['label-local'] } });
 
     registerPendingSave('artist:artist-1', {
       flush: async () => true,
       hasPending: () => true,
-      getPendingPatch: () => ({ website: true, socialLinks: true, labelIds: true }),
+      getPendingPatch: () => ({ website: true, socialLinks: true }),
     });
     act(() =>
       mocks.listeners[0]({
@@ -458,7 +451,6 @@ describe('Artist and Label peer metadata adoption', () => {
           website: 'https://peer.example',
           countryCode: 'CA',
           socialLinks: { instagram: 'peer-social' },
-          labelIds: ['label-peer'],
         },
         sequence: 2,
       }),
@@ -468,8 +460,8 @@ describe('Artist and Label peer metadata adoption', () => {
     expect(mocks.inputValues['artist-artist-1-website']).toBe('https://local.example');
     expect(mocks.inputValues['artist-artist-1-country-code']).toBe('CA');
     expect(mocks.socialValue).toBe(JSON.stringify({ instagram: 'local-social-next' }));
-    expect(mocks.labelValue).toBe('label-local-next');
-    expect(mocks.writes).toHaveLength(5);
+    expect(mocks.labelValue).toBe('label-initial');
+    expect(mocks.writes).toHaveLength(3);
   });
 
   it('adopts bootstrap and peer Label metadata without re-saving peer changes', () => {
@@ -482,7 +474,6 @@ describe('Artist and Label peer metadata adoption', () => {
           website: 'https://canonical.example',
           socialLinks: { instagram: 'canonical' },
           slug: 'label-canonical',
-          parentLabelId: null,
         },
         sequence: 1,
       },
@@ -525,6 +516,38 @@ describe('Artist and Label peer metadata adoption', () => {
     expect(mocks.inputValues['label-label-1-website']).toBe('https://peer.example');
     expect(mocks.socialValue).toBe(JSON.stringify({ instagram: 'local-label-social' }));
     expect(mocks.writes).toHaveLength(writesBeforePeer);
+  });
+});
+
+// A parent or a Label passes authority on, so it saves through its own RPC, never the room.
+describe('Artist and Label relations', () => {
+  it("saves an Artist's Labels outside the room for someone who manages its participants", () => {
+    act(() =>
+      root.render(
+        <ArtistDetailEditor
+          id="artist-1"
+          artist={
+            { ...(artist as object), allowedActions: [ArtistAction.EDIT, ArtistAction.MANAGE_PARTICIPANTS] } as never
+          }
+          baseUrl="https://example.test"
+        />,
+      ),
+    );
+
+    act(() => mocks.labelChange?.(['label-next']));
+
+    expect(mocks.labelValue).toBe('label-next');
+    expect(mocks.writes).not.toContainEqual(expect.objectContaining({ labelIds: expect.anything() }));
+    expect(mocks.mutation).toHaveBeenCalledWith({ next: ['label-next'], previous: ['label-initial'] });
+  });
+
+  it("keeps an Artist's Labels for an editor who cannot manage its participants", () => {
+    renderArtist();
+
+    act(() => mocks.labelChange?.(['label-next']));
+
+    expect(mocks.labelValue).toBe('label-initial');
+    expect(mocks.mutation).not.toHaveBeenCalled();
   });
 });
 

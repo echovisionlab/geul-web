@@ -41,6 +41,8 @@ import {
   listArtistParentOptionsAction,
   publishArtistAction,
   regenerateArtistOgImageAction,
+  setArtistLabelsAction,
+  setArtistParentAction,
   unpublishArtistAction,
   type getArtistAdminAction,
 } from '@/lib/actions/artist';
@@ -215,15 +217,6 @@ function useArtistDetailEditorViewModel({ id, artist, baseUrl }: ArtistDetailEdi
           return;
         case 'slug':
           debouncedDocumentMetadataUpdate({ slug: String(value) || null });
-          return;
-        case 'labelIds':
-          debouncedDocumentMetadataUpdate({
-            labelIds: value as string[],
-            observed: { labelIds: fields.labelIds },
-          });
-          return;
-        case 'parentArtistId':
-          debouncedDocumentMetadataUpdate({ parentArtistId: value ? String(value) : null });
       }
     },
     [canEditNeutral, debouncedDocumentMetadataUpdate, fields],
@@ -266,16 +259,8 @@ function useArtistDetailEditorViewModel({ id, artist, baseUrl }: ArtistDetailEdi
           assign(key, value ?? '');
         }
       }
-      const parentArtistId = values.parentArtistId;
-      if (typeof parentArtistId === 'string' || parentArtistId === null) {
-        assign('parentArtistId', parentArtistId);
-      }
       if (nextSocialLinks) {
         assign('socialLinks', nextSocialLinks);
-      }
-      const labelIds = values.labelIds;
-      if (Array.isArray(labelIds) && labelIds.every((value) => typeof value === 'string')) {
-        assign('labelIds', labelIds as string[]);
       }
       return next;
     });
@@ -372,9 +357,39 @@ function useArtistDetailEditorViewModel({ id, artist, baseUrl }: ArtistDetailEdi
     setField('socialLinks', links);
   };
 
+  const canChangeRelations = canEditNeutral && canManageParticipants;
+
+  const saveLabels = useMutation({
+    mutationFn: ({ next }: { next: string[]; previous: string[] }) => setArtistLabelsAction(id, next),
+    onSuccess: (result, { previous }) => {
+      if (result.error) {
+        setFields((current) => ({ ...current, labelIds: previous }));
+        notifications.show({ message: result.error, tone: 'danger' });
+      }
+    },
+  });
+
+  const saveParent = useMutation({
+    mutationFn: ({ next }: { next: string | null; previous: string | null }) => setArtistParentAction(id, next),
+    onSuccess: (result, { previous }) => {
+      if (result.error) {
+        setFields((current) => ({ ...current, parentArtistId: previous }));
+        notifications.show({ message: result.error, tone: 'danger' });
+      }
+    },
+  });
+
   const handleLabelsChange = (newLabelIds: string[]) => {
-    if (canEditNeutral) {
-      setField('labelIds', newLabelIds);
+    if (canChangeRelations) {
+      setFields((current) => ({ ...current, labelIds: newLabelIds }));
+      saveLabels.mutate({ next: newLabelIds, previous: fields.labelIds });
+    }
+  };
+
+  const handleParentChange = (next: string | null) => {
+    if (canChangeRelations) {
+      setFields((current) => ({ ...current, parentArtistId: next }));
+      saveParent.mutate({ next, previous: fields.parentArtistId });
     }
   };
 
@@ -515,6 +530,8 @@ function useArtistDetailEditorViewModel({ id, artist, baseUrl }: ArtistDetailEdi
     editorSession,
     labelOptions,
     handleLabelsChange,
+    handleParentChange,
+    canChangeRelations,
     parentArtistOptions,
     localSocialLinks,
     handleSocialLinksChange,
@@ -586,6 +603,8 @@ export function ArtistDetailEditorView({ model }: { model: ArtistDetailEditorVie
     editorSession,
     labelOptions,
     handleLabelsChange,
+    handleParentChange,
+    canChangeRelations,
     parentArtistOptions,
     localSocialLinks,
     handleSocialLinksChange,
@@ -797,7 +816,7 @@ export function ArtistDetailEditorView({ model }: { model: ArtistDetailEditorVie
             onChange={handleLabelsChange}
             searchable
             clearable
-            disabled={!canEditNeutral}
+            disabled={!canChangeRelations}
             description={t('descriptions.labels')}
           />
 
@@ -809,7 +828,8 @@ export function ArtistDetailEditorView({ model }: { model: ArtistDetailEditorVie
               loading={parentArtistOptionsQuery.isFetching}
               options={parentArtistOptions}
               value={fields.parentArtistId}
-              onChange={(value) => setField('parentArtistId', value)}
+              onChange={handleParentChange}
+              disabled={!canChangeRelations}
             />
           ) : null}
 

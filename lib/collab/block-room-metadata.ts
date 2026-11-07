@@ -27,25 +27,13 @@ type ArtistDocumentMetadataScalars = {
   countryCode?: string | null;
   website?: string | null;
   slug?: string | null;
-  parentArtistId?: string | null;
 };
 
 type ArtistDocumentMetadataCollections =
-  | { socialLinks?: undefined; labelIds?: undefined; observed?: undefined }
+  | { socialLinks?: undefined; observed?: undefined }
   | {
       socialLinks: Readonly<Record<string, string>>;
-      labelIds?: undefined;
       observed: { socialLinks: Readonly<Record<string, string>> };
-    }
-  | {
-      socialLinks?: undefined;
-      labelIds: readonly string[];
-      observed: { labelIds: readonly string[] };
-    }
-  | {
-      socialLinks: Readonly<Record<string, string>>;
-      labelIds: readonly string[];
-      observed: { socialLinks: Readonly<Record<string, string>>; labelIds: readonly string[] };
     };
 
 type LabelDocumentMetadataScalars = {
@@ -53,7 +41,6 @@ type LabelDocumentMetadataScalars = {
   slug?: string | null;
   countryCode?: string | null;
   website?: string | null;
-  parentLabelId?: string | null;
 };
 
 type LabelDocumentMetadataCollections =
