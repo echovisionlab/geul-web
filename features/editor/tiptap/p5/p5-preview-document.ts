@@ -1,4 +1,4 @@
-import { primitiveTokens } from '@/components/core/design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import { installP5SandboxRunner } from './p5-sandbox-runner';
 import { P5_LIBRARY_INTEGRITY, P5_LIBRARY_VERSION, P5_LOCAL_LIBRARY_PATH } from './p5-runtime-assets';
 

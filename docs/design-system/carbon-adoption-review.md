@@ -42,7 +42,7 @@ Do not equate this value with WCAG AA's minimum target criterion. See the [Geul 
 Carbon distinguishes small internal spacing from larger grouping in its 2/4/8px-based scale;
 Stack owns spacing between children. Token values themselves do not vary with screen width.
 [Spacing](https://www.carbondesignsystem.com/building-blocks/foundations/spacing/overview).
-Geul's [token owner](../../components/core/design-tokens.ts) uses 4/8/10/12/16/24px.
+Geul's [token owner](../../@echovisionlab/design-system/tokens) uses 4/8/10/12/16/24px.
 Do not remove 10px simply because it is absent from Carbon.
 
 Define glyph size, label-icon gap, control inline padding, action-row gap and section spacing as shared roles that reference the existing scale.

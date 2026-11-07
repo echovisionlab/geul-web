@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { Alert } from '@/components/core/Alert';
-import { primitiveTokens } from '@/components/core/design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import {
   EmailTiptapEditor,
   type EmailCampaignTiptapEditorHandle,

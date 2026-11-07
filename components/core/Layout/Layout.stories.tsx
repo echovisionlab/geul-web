@@ -6,7 +6,7 @@ import { expect, userEvent, within } from 'storybook/test';
 import { Button } from '../Button';
 import { TextInput, Select } from '../Input';
 import { SectionCard } from '../Section';
-import { primitiveTokens } from '../design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import {
   LayoutContainer,
   LayoutGrid,

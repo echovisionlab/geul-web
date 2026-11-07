@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { themeVariables, theme } from './theme';
-import { primitiveTokens, semanticThemes } from './components/core/design-tokens';
+import { primitiveTokens, semanticThemes } from '@echovisionlab/design-system/tokens';
 import { getThemeDefinition, getThemeTokens, themeIds } from './lib/theme/themes';
 
 function luminance(hex: string) {

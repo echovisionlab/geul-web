@@ -1,4 +1,4 @@
-import { semanticThemes } from '../design-tokens';
+import { semanticThemes } from '@echovisionlab/design-system/tokens';
 
 /** Canvas colors follow the same semantic authority as the surrounding transport. */
 export function readWaveMediaColors(container: HTMLElement) {

@@ -5,7 +5,7 @@ import { TextInput } from '@/components/core/Input';
 import { LayoutGrid, LayoutInline } from '@/components/core/Layout';
 import { Text } from '@/components/core/Typography';
 import { TextButton } from '@/components/core/TextButton';
-import { primitiveTokens } from '@/components/core/design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import { theme } from '@/theme';
 import {
   DocSection,

@@ -1,6 +1,6 @@
 'use client';
 
-import { primitiveTokens } from './design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import { createContext, useContext, type ReactNode } from 'react';
 
 /** Composed headers establish one density for every action kind in their action slot. */

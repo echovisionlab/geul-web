@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { primitiveTokens } from '@/components/core/design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import { getThemeDefinition, getThemeTokens, themeIds } from '@/lib/theme/themes';
 import { sourceEditorOptions, sourceEditorTheme, sourceEditorThemeName } from './source-editor-presentation';
 

@@ -1,4 +1,4 @@
-import { primitiveTokens } from '@/components/core/design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import { DEFAULT_SITE_BRAND_COLOR } from '@/lib/theme/site-brand';
 import type { Metadata, MetadataRoute } from 'next';
 import type { FaviconAssetSetUrls } from '@/lib/queries/manifest';

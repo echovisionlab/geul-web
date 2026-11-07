@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "2e5e96b79d017412da92df7ec7190084d964ed30ba0078e9b60a2a70f4876d27",
+  "manifestHash": "b4eaa2e037b2e5ddbcdc692fc274beaa1ff34e14553bc0596ed5c35da52da4b3",
   "counts": {
-    "sourceFiles": 3929,
-    "productionSourceFiles": 2337,
+    "sourceFiles": 3927,
+    "productionSourceFiles": 2336,
     "componentFiles": 929,
     "coreFamilies": 57,
     "featureDomains": 54,
@@ -859,7 +859,6 @@
     "components/core/Typography/dom-text.type-test.tsx",
     "components/core/Typography/index.ts",
     "components/core/Typography/locale-code.ts",
-    "components/core/action-colors.test.ts",
     "components/core/bindings.test.ts",
     "components/core/bindings.ts",
     "components/core/control-context.test.tsx",
@@ -868,7 +867,6 @@
     "components/core/control-props.ts",
     "components/core/control-render.tsx",
     "components/core/control-style.ts",
-    "components/core/design-tokens.ts",
     "components/core/file-selection.ts",
     "components/core/index.ts",
     "components/core/layer-contract.ts",
@@ -81638,7 +81636,7 @@
           "preview": "http://localhost:6010/?path=/story/core-input-colorinput--rgba"
         }
       ],
-      "importedSources": ["components/core/Input/ColorInput.tsx", "components/core/design-tokens.ts"]
+      "importedSources": ["components/core/Input/ColorInput.tsx"]
     },
     {
       "file": "components/core/Input/DateTimeInput.stories.tsx",
@@ -82663,8 +82661,7 @@
         "components/core/Input/index.ts",
         "components/core/Layout/index.ts",
         "components/core/Section/index.ts",
-        "components/core/Typography/index.ts",
-        "components/core/design-tokens.ts"
+        "components/core/Typography/index.ts"
       ]
     },
     {
@@ -84850,7 +84847,6 @@
       ],
       "importedSources": [
         "components/core/DocumentColorPreview/index.ts",
-        "components/core/design-tokens.ts",
         "features/editor/EditorAuthoringMode.tsx",
         "features/editor/contract/localized-rich-text.ts",
         "features/editor/tiptap/TiptapEditor.tsx",
@@ -87882,7 +87878,6 @@
         "components/core/Layout/index.ts",
         "components/core/TextButton/index.ts",
         "components/core/Typography/index.ts",
-        "components/core/design-tokens.ts",
         "stories/foundations/FoundationDocs.tsx"
       ]
     },
@@ -87929,7 +87924,6 @@
         "components/core/IconButton/index.ts",
         "components/core/Layout/index.ts",
         "components/core/Typography/index.ts",
-        "components/core/design-tokens.ts",
         "stories/foundations/FoundationDocs.tsx"
       ]
     },
@@ -87958,7 +87952,6 @@
         "components/core/Badge/index.ts",
         "components/core/Layout/index.ts",
         "components/core/Typography/index.ts",
-        "components/core/design-tokens.ts",
         "features/site/ui/SiteLogo/SiteLogoView.tsx",
         "lib/providers/DesignSystemProvider.tsx",
         "lib/theme/themes.ts",
@@ -88026,7 +88019,6 @@
         "components/core/Layout/breakpoints.ts",
         "components/core/Layout/index.ts",
         "components/core/Typography/index.ts",
-        "components/core/design-tokens.ts",
         "stories/foundations/FoundationDocs.tsx"
       ]
     },
@@ -88062,7 +88054,6 @@
         "components/core/TextButton/index.ts",
         "components/core/Typography/index.ts",
         "components/core/control-context.tsx",
-        "components/core/design-tokens.ts",
         "stories/foundations/FoundationDocs.tsx"
       ]
     },
@@ -88083,7 +88074,6 @@
         "components/core/Layout/index.ts",
         "components/core/Typography/index.ts",
         "components/core/control-context.tsx",
-        "components/core/design-tokens.ts",
         "stories/foundations/FoundationDocs.tsx"
       ]
     },
@@ -88103,7 +88093,6 @@
         "components/core/Input/index.ts",
         "components/core/Layout/index.ts",
         "components/core/Typography/index.ts",
-        "components/core/design-tokens.ts",
         "lib/providers/DesignSystemProvider.tsx",
         "lib/theme/themes.ts",
         "stories/foundations/FoundationDocs.tsx"
@@ -88123,7 +88112,6 @@
       "importedSources": [
         "components/core/Layout/index.ts",
         "components/core/Typography/index.ts",
-        "components/core/design-tokens.ts",
         "lib/i18n/locale.ts",
         "stories/foundations/FoundationDocs.tsx"
       ]
@@ -97903,7 +97891,6 @@
       "file": "app/layout.tsx",
       "route": "/",
       "imports": [
-        "components/core/design-tokens.ts",
         "lib/constants/og-image.ts",
         "lib/providers/ClientMessagesProvider.tsx",
         "features/site/PageLoader/loader-image.ts",

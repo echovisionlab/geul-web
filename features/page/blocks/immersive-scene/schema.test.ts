@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { invariantTokens } from '@/components/core/design-tokens';
+import { invariantTokens } from '@echovisionlab/design-system/tokens';
 import {
   diffRemovedImmersiveSceneAssetFileIds,
   parseImmersiveSceneConfig,

@@ -1,4 +1,4 @@
-import { primitiveTokens, semanticThemes } from '@/components/core/design-tokens';
+import { primitiveTokens, semanticThemes } from '@echovisionlab/design-system/tokens';
 import type { MermaidAppearance, MermaidTheme } from './mermaid-renderer';
 
 const colorRoles = {

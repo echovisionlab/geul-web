@@ -8,6 +8,16 @@ import { layoutOwnershipPlugin } from './eslint-rules/layout-ownership.mjs';
 import { affordancePlacementPlugin } from './eslint-rules/affordance-placement.mjs';
 import testingLibrary from 'eslint-plugin-testing-library';
 
+// Every @echovisionlab package but the design system, whose tokens are UI material rather than a domain contract.
+const domainPackagePatterns = [
+  '@echovisionlab/geul-*',
+  '@echovisionlab/geul-*/**',
+  '@echovisionlab/audio-transcoder',
+  '@echovisionlab/audio-transcoder/**',
+  '@echovisionlab/ionian',
+  '@echovisionlab/ionian/**',
+];
+
 const restrictedCoreImportPatterns = [
   '@/features',
   '@/features/**',
@@ -17,9 +27,7 @@ const restrictedCoreImportPatterns = [
   '@/app/**',
   '**/app',
   '**/app/**',
-  '@echovisionlab',
-  '@echovisionlab/*',
-  '@echovisionlab/**',
+  ...domainPackagePatterns,
   '@/*',
   '@/**',
   '@/components',
@@ -349,7 +357,7 @@ export default defineConfig(
               message: 'Feature UI receives locale data and translated messages through props.',
             },
             {
-              group: ['@echovisionlab', '@echovisionlab/*', '@echovisionlab/**'],
+              group: domainPackagePatterns,
               message:
                 'Feature UI must not import domain contracts. Map them to serializable view models in a controller.',
             },

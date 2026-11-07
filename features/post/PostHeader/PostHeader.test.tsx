@@ -10,7 +10,7 @@ import '@testing-library/jest-dom/vitest';
 import { NextIntlClientProvider } from 'next-intl';
 
 import enMessages from '@/messages/en.json';
-import { invariantTokens } from '@/components/core/design-tokens';
+import { invariantTokens } from '@echovisionlab/design-system/tokens';
 import { PostHeader } from './PostHeader';
 
 const AVATAR_IMAGE = `data:image/svg+xml,${encodeURIComponent(`

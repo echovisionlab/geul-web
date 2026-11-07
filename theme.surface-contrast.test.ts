@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { invariantTokens, primitiveTokens } from './components/core/design-tokens';
+import { invariantTokens, primitiveTokens } from '@echovisionlab/design-system/tokens';
 import { getThemeTokens, themeIds } from '@/lib/theme/themes';
 
 type Color = readonly [number, number, number, number];

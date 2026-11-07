@@ -3,7 +3,7 @@
 import { createContext, createElement, forwardRef, useContext, type ReactNode, type CSSProperties } from 'react';
 import { presentationAttributes, type PresentationProps } from '../presentation-contract';
 import { spaceValue, type Space } from '../Layout/layout-contract';
-import { primitiveTokens } from '../design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import type { TextSize } from './Typography';
 import classes from './Support.module.css';
 

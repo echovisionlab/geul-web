@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import postcss from 'postcss';
 import { describe, expect, it } from 'vitest';
 import { EDITOR_COLOR_VALUES } from './toolbars/EditorColorStyleButton';
-import { authoredEditorPalettes, primitiveTokens, semanticThemes } from '@/components/core/design-tokens';
+import { authoredEditorPalettes, primitiveTokens, semanticThemes } from '@echovisionlab/design-system/tokens';
 import { theme, themeVariables } from '@/theme';
 
 const read = (relativePath: string) => readFileSync(new URL(relativePath, import.meta.url), 'utf8');
@@ -26,7 +26,7 @@ function contrastRatio(first: string, second: string): number {
 
 describe('editor semantic color theme', () => {
   it('defines every durable text and background value for light and dark themes', () => {
-    const variables = read('../../lib/styles/design-tokens.css');
+    const variables = read('../../node_modules/@echovisionlab/design-system/src/tokens.css');
 
     EDITOR_COLOR_VALUES.forEach((color) => {
       ['text', 'background'].forEach((kind) => {

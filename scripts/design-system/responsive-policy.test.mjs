@@ -32,6 +32,6 @@ test('tokenized private control overrides still violate ownership', () => {
 });
 test('prose, zero geometry and generated projection retain their own contracts', () => {
   assert.deepEqual(scan('features/example/View.css', '.x { width:768px; max-width:100% }'), []);
-  assert.deepEqual(scan('lib/styles/design-tokens.css', '@media (min-width:48em) {}'), []);
+  assert.deepEqual(scan('node_modules/@echovisionlab/design-system/src/tokens.css', '@media (min-width:48em) {}'), []);
   assert.deepEqual(scan('features/example/View.stories.tsx', "window.matchMedia('(max-width:768px)')"), []);
 });

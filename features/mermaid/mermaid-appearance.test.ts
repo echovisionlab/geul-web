@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { semanticThemes } from '@/components/core/design-tokens';
+import { semanticThemes } from '@echovisionlab/design-system/tokens';
 import { readMermaidAppearance } from './mermaid-appearance';
 afterEach(() => {
   vi.restoreAllMocks();

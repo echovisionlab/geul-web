@@ -1,6 +1,6 @@
 import * as z from '@/lib/zod-mini';
 import { sanitizePageVisualUnitsJson } from '@echovisionlab/geul-common/collaboration/page';
-import { invariantTokens } from '@/components/core/design-tokens';
+import { invariantTokens } from '@echovisionlab/design-system/tokens';
 
 export const IMMERSIVE_SCENE_MESH_VALUES = ['sphere', 'box', 'torus', 'cone'] as const;
 

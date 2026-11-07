@@ -1,4 +1,4 @@
-import { semanticThemes } from '@/components/core/design-tokens';
+import { semanticThemes } from '@echovisionlab/design-system/tokens';
 import { OG_IMAGE_WIDTH, OG_IMAGE_HEIGHT } from '@/lib/constants/og-image';
 import '@/lib/styles/variables.css';
 import '@/lib/styles/font-assignment.css';

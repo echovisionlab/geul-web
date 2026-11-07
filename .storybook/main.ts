@@ -130,7 +130,7 @@ const config = {
       use: serverActionStubLoader,
     });
     webpackConfig.module.rules.push({
-      test: /node_modules[/\\]@echovisionlab[/\\](?:geul-common|geul-event|geul-proto|geul-telemetry)[/\\].*\.tsx?$/,
+      test: /node_modules[/\\]@echovisionlab[/\\](?:design-system|geul-common|geul-event|geul-proto|geul-telemetry)[/\\].*\.tsx?$/,
       exclude: /\.d\.ts$/,
       use: typeScriptLoader,
     });

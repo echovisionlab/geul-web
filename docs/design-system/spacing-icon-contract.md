@@ -1,6 +1,6 @@
 # Spacing and icon contract
 
-Authority: [design-tokens.ts](../../components/core/design-tokens.ts). Dimensions
+Authority: `@echovisionlab/design-system/tokens`. Dimensions
 below assume a 16px root. Carbon's [Button specification](https://www.carbondesignsystem.com/building-blocks/core/components/button/specifications)
 provides an 8px ghost label–icon comparison. Its larger filled-button spacing is not
 applied to every Geul command.

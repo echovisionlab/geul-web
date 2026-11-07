@@ -1,5 +1,5 @@
 import { forwardRef, type ReactNode } from 'react';
-import { primitiveTokens } from '../design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import { projectLayoutAttributes, type LayoutBreakpoint, type LayoutNativeProps } from './layout-contract';
 import classes from './LayoutVisibility.module.css';
 

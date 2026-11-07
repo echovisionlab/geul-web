@@ -25,7 +25,7 @@ import { NavigationLink } from '@/components/core/Navigation';
 import { TextButton, type TextButtonProps } from '@/components/core/TextButton';
 import { OnDemandTooltip } from '@/components/core/Tooltip/OnDemandTooltip';
 import { Text as DsText, VisuallyHidden } from '@/components/core/Typography';
-import { tokenVar } from '@/components/core/design-tokens';
+import { tokenVar } from '@echovisionlab/design-system/tokens';
 import { useOnDemandModuleState, type OnDemandModuleState } from '@/components/core/on-demand-module';
 import { mobileNavigation } from './shell-mobile-navigation-module';
 import { useShellState } from './shell-state';

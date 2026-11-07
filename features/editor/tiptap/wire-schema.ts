@@ -10,7 +10,7 @@ import {
 import { Dropcursor, Gapcursor } from '@tiptap/extensions';
 import { Fragment, type DOMOutputSpec, type Node as ProseMirrorNode } from '@tiptap/pm/model';
 import { Plugin } from '@tiptap/pm/state';
-import { primitiveTokens, tokenVar } from '@/components/core/design-tokens';
+import { primitiveTokens, tokenVar } from '@echovisionlab/design-system/tokens';
 import { resolveCodeBlockLanguage } from '@/lib/editor/code-block-options';
 import { fileBlockPropSchema } from '@/lib/media/block-schemas';
 import { mapBlockWirePropSchema } from '@/lib/types/map-block/schema';

@@ -15,7 +15,7 @@ Detailed reviews dated 2026-10-12: [Button family](button-api-review.md), [Field
 
 ## Shared specifications
 
-Sources: [design-tokens.ts](../../components/core/design-tokens.ts),
+Sources: `@echovisionlab/design-system/tokens`,
 [Control.module.css](../../components/core/Control.module.css),
 [Input.module.css](../../components/core/Input/Input.module.css),
 [size and density contract](size-density-contract.md), [ownership contract](ownership-contract.md).

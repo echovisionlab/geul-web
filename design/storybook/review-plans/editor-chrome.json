@@ -64,8 +64,6 @@
     "stories",
     "docs/design-system",
     "docs/design-system.md",
-    "components/core/design-tokens.ts",
-    "lib/styles/design-tokens.css",
     "scripts/design-system"
   ],
   "manualNotes": "design/storybook/review-notes/editor-chrome.json",

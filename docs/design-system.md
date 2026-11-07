@@ -32,15 +32,15 @@ pages: [norns](https://monome.org/docs/norns/play/), [TX–6](https://teenage.en
 
 | Concern                                          | Authority                                                                                                |
 | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| Palette, spacing, type, control geometry, motion | `components/core/design-tokens.ts` → `primitiveTokens`                                                   |
+| Palette, spacing, type, control geometry, motion | `@echovisionlab/design-system/tokens` → `primitiveTokens`                                                |
 | Light/dark role assignment                       | Same module → `semanticThemes`                                                                           |
 | Image overlays, media canvases and print roles   | Same module → `invariantTokens`                                                                          |
 | Framework-independent theme projection           | `theme.ts`, shared by app and Storybook                                                                  |
 | Named theme definitions and overrides            | `lib/theme/themes.ts`; existing semantic roles and primitive palettes                                    |
-| CSS projection                                   | Generated `lib/styles/design-tokens.css`; do not edit it by hand                                         |
+| CSS projection                                   | Generated `@echovisionlab/design-system/tokens.css`; do not edit it by hand                              |
 | Existing CSS variable compatibility              | `lib/styles/variables.css`; aliases preserve consumers                                                   |
 | Site branding fallback                           | `lib/theme/site-brand.ts`, backed by the shared primitive                                                |
-| User-authored editor colors                      | Document roles in `design-tokens.ts`; durable `--editor-*` compatibility aliases                         |
+| User-authored editor colors                      | Document roles in `@echovisionlab/design-system/tokens`; durable `--editor-*` compatibility aliases      |
 | Component/route/preview inventory                | [Generated catalog](./design-system/generated-inventory.md)                                              |
 | Functional categories and inspected behavior     | [Feature specification](./ui-feature-specification.md)                                                   |
 | System documentation and executable inspection   | [Storybook guide](./ui-kit.md)                                                                           |

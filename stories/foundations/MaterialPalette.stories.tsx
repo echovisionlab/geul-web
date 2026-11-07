@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs';
 import { LabelBadge } from '@/components/core/Badge';
 import { LayoutGrid, LayoutInline, LayoutStack } from '@/components/core/Layout';
 import { Text } from '@/components/core/Typography';
-import { primitiveTokens, tokenVar, type SemanticToken } from '@/components/core/design-tokens';
+import { primitiveTokens, tokenVar, type SemanticToken } from '@echovisionlab/design-system/tokens';
 import { SiteLogoView } from '@/features/site/ui/SiteLogo/SiteLogoView';
 import { useColorScheme } from '@/lib/providers/DesignSystemProvider';
 import { getThemeDefinition, getThemeTokens } from '@/lib/theme/themes';

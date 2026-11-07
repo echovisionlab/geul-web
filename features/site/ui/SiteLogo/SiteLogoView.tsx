@@ -2,7 +2,7 @@
 
 import { useState, type CSSProperties } from 'react';
 import { Text, type TextSize } from '@/components/core/Typography';
-import { primitiveTokens } from '@/components/core/design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import styles from './SiteLogoView.module.css';
 
 export type SiteLogoSize = Exclude<TextSize, 'display'>;

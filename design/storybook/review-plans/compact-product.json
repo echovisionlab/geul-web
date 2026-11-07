@@ -157,8 +157,6 @@
     "features/site/ui/SiteLogo",
     "features/upload/ImageUploadCropController",
     "lib/theme/themes.ts",
-    "components/core/design-tokens.ts",
-    "lib/styles/design-tokens.css",
     "lib/providers/DesignSystemProvider.tsx",
     ".storybook/preview.tsx",
     "scripts/design-system",

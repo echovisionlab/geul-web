@@ -108,7 +108,7 @@ function colorEntries(variables: Record<string, unknown>, prefix = ''): [string,
 
 describe('Mermaid site-owned theme defaults', () => {
   it('assigns only site light and dark tokens to every Mermaid colour, even without a DOM appearance', async () => {
-    const { invariantTokens, semanticThemes } = await import('@/components/core/design-tokens');
+    const { invariantTokens, semanticThemes } = await import('@echovisionlab/design-system/tokens');
     const { renderMermaid } = await import('./mermaid-renderer');
     const palettes: Partial<Record<'light' | 'dark', string[]>> = {};
     for (const theme of ['light', 'dark'] as const) {

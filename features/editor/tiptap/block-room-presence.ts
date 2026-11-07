@@ -1,5 +1,5 @@
 import { relativeBlockPoint, resolveRelativeBlockPoint } from './block-room-text-positions';
-import { primitiveTokens } from '@/components/core/design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import { Extension } from '@tiptap/core';
 import type { Node as ProseMirrorNode, ResolvedPos } from '@tiptap/pm/model';
 import { NodeSelection, Plugin, PluginKey, Selection } from '@tiptap/pm/state';

@@ -1,4 +1,9 @@
-import { primitiveTokens, semanticThemes, type SemanticToken, type ThemeMode } from '@/components/core/design-tokens';
+import {
+  primitiveTokens,
+  semanticThemes,
+  type SemanticToken,
+  type ThemeMode,
+} from '@echovisionlab/design-system/tokens';
 
 type ThemePreset = {
   readonly label: string;

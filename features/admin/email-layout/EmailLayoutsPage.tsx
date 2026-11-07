@@ -8,7 +8,7 @@ import { ConfirmationDialog } from '@/features/confirmation';
 import { fieldBindings } from '@/components/core/bindings';
 import { LayoutStack as DsLayoutStack, LayoutInset as DsLayoutInset } from '@/components/core/Layout';
 
-import { invariantTokens, tokenVar } from '@/components/core/design-tokens';
+import { invariantTokens, tokenVar } from '@echovisionlab/design-system/tokens';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconEdit, IconEye, IconLayout, IconPlus, IconTrash } from '@tabler/icons-react';

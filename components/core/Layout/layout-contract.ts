@@ -1,5 +1,5 @@
 import type { AriaAttributes, HTMLAttributes } from 'react';
-import { primitiveTokens } from '../design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import type { ClosedVisualProps } from '../visual-contract';
 
 /** External relationships are available to compositions; internal control gaps

@@ -26,7 +26,7 @@ This policy does not require installing Carbon or replacing components.
 
 | Decision                                             | Source owner/document                                     | Storybook evidence                                                      |
 | ---------------------------------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Palette, spacing, size, boundary, opacity and motion | `components/core/design-tokens.ts` → `primitiveTokens`    | Roles, units, values and actual consumption examples                    |
+| Palette, spacing, size, boundary, opacity and motion | `@echovisionlab/design-system/tokens` → `primitiveTokens` | Roles, units, values and actual consumption examples                    |
 | Light/Dark semantic colors                           | Same module → `semanticThemes`                            | Theme values under the same roles and rendering of the same Core        |
 | Image overlays, canvases and print                   | Same module → `invariantTokens`                           | Theme-independent meaning and use context                               |
 | Derived roles                                        | `derivedTokenRoles`; [token contract](token-contract.md)  | Source aliases and consumers; do not flatten aliases into copied values |

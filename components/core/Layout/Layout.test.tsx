@@ -13,7 +13,7 @@ import {
   LayoutSpacer,
   LayoutStack,
 } from './Layout';
-import { primitiveTokens } from '../design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import type { LayoutStackProps } from './index';
 import { isSpace, projectLayoutAttributes, resolveResponsive } from './layout-contract';
 

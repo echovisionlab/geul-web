@@ -120,7 +120,7 @@
       "id": "C01",
       "phase": "01",
       "title": "Copy and visual preservation",
-      "source": "components/core/design-tokens.ts",
+      "source": "lib/styles/variables.css",
       "states": [
         "light",
         "dark",
@@ -23791,7 +23791,7 @@
       "phase": "02",
       "kind": "layout",
       "source": "app/layout.tsx",
-      "sourceHash": "48da8469b85c1e7339b1a39d213fd8ba8341a0e3c00b493aa972221235722d35",
+      "sourceHash": "9f4da01decd5534302c4d4aff8ab293fb963de4ff715d460c8da539cb136182d",
       "disposition": "shared-boundary",
       "features": ["G01", "G02", "G03", "C11", "C12"],
       "previews": [],

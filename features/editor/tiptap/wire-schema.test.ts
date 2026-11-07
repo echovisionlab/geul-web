@@ -4,7 +4,7 @@ import { Editor, type JSONContent, type NodeType, type TextType } from '@tiptap/
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
 import { TextSelection } from '@tiptap/pm/state';
 import { describe, expect, it } from 'vitest';
-import { authoredEditorPalettes } from '@/components/core/design-tokens';
+import { authoredEditorPalettes } from '@echovisionlab/design-system/tokens';
 import { createTiptapWireExtensions } from './wire-schema';
 import { EDITOR_TOOLBAR_SHORTCUTS } from '../toolbars/EditorToolbarTooltip';
 

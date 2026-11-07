@@ -4,9 +4,12 @@ import { createRequire } from 'node:module';
 import { test } from 'node:test';
 import postcss from 'postcss';
 const require = createRequire(import.meta.url);
-const variables = require('../../lib/styles/design-breakpoints.json');
+const variables = require('@echovisionlab/design-system/breakpoints.json');
 test('generated coarse minimum is shared by controls, menus, accessories and reorder tracks', async () => {
-  const source = await readFile(new URL('../../lib/styles/design-tokens.css', import.meta.url), 'utf8');
+  const source = await readFile(
+    new URL('../../node_modules/@echovisionlab/design-system/src/tokens.css', import.meta.url),
+    'utf8',
+  );
   const root = postcss.parse(source);
   let coarse = false;
   root.walkAtRules('media', (rule) => {

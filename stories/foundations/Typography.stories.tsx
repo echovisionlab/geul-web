@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
 import { useLocale } from 'next-intl';
-import { primitiveTokens, printTokens, responsiveTokens } from '@/components/core/design-tokens';
+import { primitiveTokens, printTokens, responsiveTokens } from '@echovisionlab/design-system/tokens';
 import { Heading, Text, type HeadingScale } from '@/components/core/Typography';
 import { LayoutStack } from '@/components/core/Layout';
 import { getLocaleDirection, getLocaleFontProfile } from '@/lib/i18n/locale';

@@ -4,7 +4,7 @@ import { SupportingText } from '../Typography';
 import { LayoutStack as DsLayoutStack, LayoutInset as DsLayoutInset } from '../Layout';
 
 import { GridLayout, ListBox, ListBoxItem, Size, Virtualizer } from 'react-aria-components';
-import { primitiveTokens } from '../design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import type { ClosedVisualProps } from '../visual-contract';
 import controlClasses from '../Control.module.css';
 import classes from './EmojiPicker.module.css';

@@ -1,4 +1,4 @@
-import { primitiveTokens } from '@/components/core/design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import { createHash } from 'node:crypto';
 import { installP5DeviceRunner } from '../../../../features/editor/tiptap/p5/p5-device-runner';
 import { P5_LIBRARY_INTEGRITY, P5_LOCAL_LIBRARY_PATH } from '../../../../features/editor/tiptap/p5/p5-runtime-assets';

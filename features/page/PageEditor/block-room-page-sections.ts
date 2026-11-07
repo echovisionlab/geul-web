@@ -1,4 +1,4 @@
-import { primitiveTokens } from '@/components/core/design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import { resolveEmbedUrl } from '@/features/page/blocks/embed/policy';
 import { fromJson, type JsonValue } from '@bufbuild/protobuf';
 import {

@@ -5,7 +5,7 @@ import postcss from 'postcss';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { semanticThemes } from '../design-tokens';
+import { semanticThemes } from '@echovisionlab/design-system/tokens';
 import { applyNativeRange, updateNativeRangeValue } from '../Input/native-range';
 import { MediaTransport, MediaAudioFrame } from './MediaTransport';
 import { MediaVideoFrame } from './MediaVideoFrame';

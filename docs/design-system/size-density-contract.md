@@ -29,7 +29,7 @@ not authorize independently styled product controls.
 | Menu rows                   | At least 26px                            | At least 44px      |
 | Body links                  | Natural content line height              | Content typography |
 
-Authority: `controlHeight` and `interaction` in [design-tokens.ts](../../components/core/design-tokens.ts).
+Authority: `controlHeight` and `interaction` in `@echovisionlab/design-system/tokens`.
 Button, IconButton and chrome TextButton in the same action row consume
 ActionRowSizeProvider. A compact Toolbar's density takes precedence over row size;
 independent controls use their named size. Font size, visible height and interaction

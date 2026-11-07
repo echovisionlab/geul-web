@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { invariantTokens, semanticThemes } from '../design-tokens';
+import { invariantTokens, semanticThemes } from '@echovisionlab/design-system/tokens';
 
 type Color = readonly [number, number, number, number];
 function color(value: string): Color {
