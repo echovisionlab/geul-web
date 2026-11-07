@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.29.0](https://github.com/echovisionlab/geul-web/compare/v0.28.0...v0.29.0) (2026-11-07)
+
+
+### Features
+
+* **my:** list the Labels a member manages ([e41d878](https://github.com/echovisionlab/geul-web/commit/e41d8785238cf380dccc3ab9e56946f8111e3f50))
+
+
+### Bug Fixes
+
+* **my:** drop the Artist filter that never reached the API ([3230ac8](https://github.com/echovisionlab/geul-web/commit/3230ac80997beeebe2f405e0485ff51543c1e5c1))
+
 ## [0.28.0](https://github.com/echovisionlab/geul-web/compare/v0.27.1...v0.28.0) (2026-11-07)
 
 
