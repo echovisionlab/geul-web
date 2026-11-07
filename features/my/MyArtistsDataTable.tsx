@@ -1,9 +1,9 @@
 'use client';
 
-import { LayoutStack as DsLayoutStack, LayoutInline as DsLayoutInline } from '@/components/core/Layout';
+import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
 import { Heading as DsHeading } from '@/components/core/Typography';
 
-import { DataTable, type FilterFieldConfig, type SortFieldConfig } from '@/features/data-table';
+import { DataTable, type SortFieldConfig } from '@/features/data-table';
 import { MyArtistsTableCellView, type MyArtistsTableRowViewModel } from '@/features/my/ui/MyArtistsTable';
 import type { ColumnDef } from '@/lib/types/common/data-table';
 import type { PaginatedQuery } from '@/lib/types/common/query';
@@ -62,7 +62,6 @@ function getColumns(labels: MyArtistsDataTableLabels): ColumnDef<MyArtistsTableR
 
 /** Connects the generic DataTable controller to the My Artists row UI. */
 export function MyArtistsDataTable({ result, labels, query, loading = false, onQueryChange }: MyArtistsDataTableProps) {
-  const filterFields: FilterFieldConfig[] = [{ field: 'name', label: labels.name, type: 'string' }];
   const sortFields: SortFieldConfig[] = [
     { field: 'name', label: labels.name },
     { field: 'created_at', label: labels.created },
@@ -86,10 +85,7 @@ export function MyArtistsDataTable({ result, labels, query, loading = false, onQ
       >
         <DataTable.Toolbar>
           <DataTable.Search placeholder={labels.searchPlaceholder} />
-          <DsLayoutInline gap="xxs">
-            <DataTable.MultiFilter fields={filterFields} />
-            <DataTable.MultiSort fields={sortFields} />
-          </DsLayoutInline>
+          <DataTable.MultiSort fields={sortFields} />
         </DataTable.Toolbar>
         <DataTable.Content />
         <DataTable.Pagination />
