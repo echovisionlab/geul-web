@@ -2,16 +2,16 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "5c2b2e95f0750f47abd8c276377f19cc8eb11003980f4e53ccc3cce2010c36ca",
+  "manifestHash": "8f60298f4bfb73e94c4d8d7d9bceb944618667a3e277f03cd19a76849b27edb2",
   "counts": {
-    "sourceFiles": 3923,
-    "productionSourceFiles": 2333,
-    "componentFiles": 926,
+    "sourceFiles": 3927,
+    "productionSourceFiles": 2336,
+    "componentFiles": 928,
     "coreFamilies": 57,
     "featureDomains": 54,
     "storyFiles": 285,
-    "storyVariants": 1629,
-    "pageEntrypoints": 118,
+    "storyVariants": 1631,
+    "pageEntrypoints": 119,
     "layouts": 17
   },
   "sourceFiles": [
@@ -99,6 +99,7 @@
     "app/(general)/login/error/page.tsx",
     "app/(general)/login/page.tsx",
     "app/(general)/my/artists/page.tsx",
+    "app/(general)/my/labels/page.tsx",
     "app/(general)/my/layout.tsx",
     "app/(general)/my/page.tsx",
     "app/(general)/my/posts/page.tsx",
@@ -2059,6 +2060,9 @@
     "features/my/MyArtistsTable.query.test.tsx",
     "features/my/MyArtistsTable.test.tsx",
     "features/my/MyArtistsTable.tsx",
+    "features/my/MyLabelsDataTable.tsx",
+    "features/my/MyLabelsTable.test.tsx",
+    "features/my/MyLabelsTable.tsx",
     "features/my/MyPostsPageView.stories.tsx",
     "features/my/MyPostsPageView.test.tsx",
     "features/my/MyPostsPageView.tsx",
@@ -4478,6 +4482,7 @@
         "features/editor/tiptap/p5/P5CapabilityStoryPreview.tsx",
         "features/form/FormSettingsContent.tsx",
         "features/media-download/FileDownloadPolicyEditor.tsx",
+        "features/my/MyLabelsDataTable.tsx",
         "features/my/MyPostsPageView.tsx",
         "features/my/MySeriesPageView.tsx",
         "features/my/ui/MyArtistsTable/MyArtistsTableCellView.tsx",
@@ -13613,6 +13618,7 @@
         "features/my/LocalBackupsView.tsx",
         "features/my/McpOAuthGrantSettings.tsx",
         "features/my/MyArtistsDataTable.tsx",
+        "features/my/MyLabelsDataTable.tsx",
         "features/my/MyPostsPageView.tsx",
         "features/my/MyProfilePageView.tsx",
         "features/my/MySecurityPageView.tsx",
@@ -19103,6 +19109,7 @@
         "features/location/LocationPlaceMenu.tsx",
         "features/member/onboarding/NicknameOnboarding.tsx",
         "features/my/CookieConsentSettings.tsx",
+        "features/my/MyLabelsDataTable.tsx",
         "features/my/MyPostsPageView.tsx",
         "features/my/MyWorksPageView.tsx",
         "features/my/ui/McpIntegrationSettings/McpIntegrationSettingsView.tsx",
@@ -20053,6 +20060,7 @@
         "features/my/LocalBackupsView.tsx",
         "features/my/McpOAuthGrantSettings.tsx",
         "features/my/MyArtistsDataTable.tsx",
+        "features/my/MyLabelsDataTable.tsx",
         "features/my/MyPostsPageView.tsx",
         "features/my/MyProfilePageView.tsx",
         "features/my/MySecurityPageView.tsx",
@@ -29622,6 +29630,7 @@
         "features/menu/AdminMenusPage.tsx",
         "features/menu/MenuItemsEditor.tsx",
         "features/my/MyArtistsTable.tsx",
+        "features/my/MyLabelsTable.tsx",
         "features/my/MyPostsPageView.tsx",
         "features/my/MyWorksPageView.tsx",
         "features/page/PageEditor/PageEditor.tsx",
@@ -32926,6 +32935,7 @@
       "productionConsumers": [
         "features/data-table/DataTableSelectableSection.tsx",
         "features/my/MyArtistsDataTable.tsx",
+        "features/my/MyLabelsDataTable.tsx",
         "features/my/MyPostsPageView.tsx",
         "features/my/MyWorksPageView.tsx",
         "features/page/blocks/post-table/View.tsx",
@@ -34663,6 +34673,7 @@
         "features/form/SubmissionDetail.tsx",
         "features/my/CookieConsentSettings.tsx",
         "features/my/MyArtistsTable.tsx",
+        "features/my/MyLabelsTable.tsx",
         "features/my/MyPostsPageView.tsx",
         "features/my/PasskeySettingsSection.tsx",
         "features/my/PersonalAccessTokenSettings.tsx",
@@ -49519,6 +49530,7 @@
         "features/admin/client/ClientsTableContent.tsx",
         "features/admin/label/LabelsTableContent.tsx",
         "features/client/ClientPublicMark.tsx",
+        "features/my/MyLabelsDataTable.tsx",
         "features/work/WorkEditor/WorkClientsSection.tsx"
       ],
       "catalogAdapters": [],
@@ -52070,13 +52082,11 @@
       "composedJsx": [
         "DataTable",
         "DataTable.Content",
-        "DataTable.MultiFilter",
         "DataTable.MultiSort",
         "DataTable.Pagination",
         "DataTable.Search",
         "DataTable.Toolbar",
         "DsHeading",
-        "DsLayoutInline",
         "DsLayoutStack",
         "MyArtistsTableCellView"
       ]
@@ -52198,6 +52208,273 @@
       "tests": ["features/my/MyArtistsTable.query.test.tsx", "features/my/MyArtistsTable.test.tsx"],
       "stories": ["stories/pages/MyLists.stories.tsx"],
       "composedJsx": ["MyArtistsDataTable", "QueryErrorAlert"]
+    },
+    {
+      "file": "features/my/MyLabelsDataTable.tsx",
+      "owner": "Feature/my",
+      "exports": [
+        {
+          "name": "MyLabelsDataTable",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "MyLabelsTableRow",
+          "extends": [],
+          "properties": [
+            {
+              "name": "id",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "slugLabel",
+              "optional": false,
+              "type": "string | null"
+            },
+            {
+              "name": "imageLightUrl",
+              "optional": false,
+              "type": "string | null"
+            },
+            {
+              "name": "imageDarkUrl",
+              "optional": false,
+              "type": "string | null"
+            },
+            {
+              "name": "href",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "statusLabel",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "statusTone",
+              "optional": false,
+              "type": "StatusBadgeTone"
+            },
+            {
+              "name": "createdLabel",
+              "optional": false,
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "MyLabelsDataTableLabels",
+          "extends": [],
+          "properties": [
+            {
+              "name": "title",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "logo",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "status",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "created",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "empty",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "searchPlaceholder",
+              "optional": false,
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "MyLabelsDataTableProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "result",
+              "optional": false,
+              "type": "MyLabelsDataTableResult | undefined"
+            },
+            {
+              "name": "labels",
+              "optional": false,
+              "type": "MyLabelsDataTableLabels"
+            },
+            {
+              "name": "query",
+              "optional": false,
+              "type": "PaginatedQuery"
+            },
+            {
+              "name": "loading",
+              "optional": true,
+              "type": "boolean"
+            },
+            {
+              "name": "onQueryChange",
+              "optional": false,
+              "type": "(query: PaginatedQuery) => void"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [
+        {
+          "name": "MyLabelsDataTableResult",
+          "type": "PaginatedQueryResult<MyLabelsTableRow>"
+        }
+      ],
+      "productionConsumers": ["features/my/MyLabelsTable.tsx"],
+      "catalogAdapters": [],
+      "tests": [],
+      "stories": [],
+      "composedJsx": [
+        "DataTable",
+        "DataTable.Content",
+        "DataTable.MultiSort",
+        "DataTable.Pagination",
+        "DataTable.Search",
+        "DataTable.Toolbar",
+        "DsHeading",
+        "DsLayoutStack",
+        "DsText",
+        "StatusBadge",
+        "TextButton",
+        "ThemedAssetImage"
+      ]
+    },
+    {
+      "file": "features/my/MyLabelsTable.tsx",
+      "owner": "Feature/my",
+      "exports": [
+        {
+          "name": "MyLabelsTable",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "MyLabelListItem",
+          "extends": [],
+          "properties": [
+            {
+              "name": "id",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "slug",
+              "optional": false,
+              "type": "string | null"
+            },
+            {
+              "name": "imageLightUrl",
+              "optional": false,
+              "type": "string | null"
+            },
+            {
+              "name": "imageDarkUrl",
+              "optional": false,
+              "type": "string | null"
+            },
+            {
+              "name": "status",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "createdAt",
+              "optional": false,
+              "type": "Date | null"
+            }
+          ]
+        },
+        {
+          "name": "MyLabelsResult",
+          "extends": [],
+          "properties": [
+            {
+              "name": "data",
+              "optional": false,
+              "type": "MyLabelListItem[]"
+            },
+            {
+              "name": "total",
+              "optional": false,
+              "type": "number"
+            },
+            {
+              "name": "page",
+              "optional": false,
+              "type": "number"
+            },
+            {
+              "name": "pageSize",
+              "optional": false,
+              "type": "number"
+            },
+            {
+              "name": "totalPages",
+              "optional": false,
+              "type": "number"
+            }
+          ]
+        },
+        {
+          "name": "MyLabelsTableProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "listAction",
+              "optional": true,
+              "type": "typeof listMyLabelsAction"
+            },
+            {
+              "name": "initialData",
+              "optional": false,
+              "type": "MyLabelsResult"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [],
+      "productionConsumers": ["app/(general)/my/labels/page.tsx"],
+      "catalogAdapters": [],
+      "tests": ["features/my/MyLabelsTable.test.tsx"],
+      "stories": ["stories/pages/MyLists.stories.tsx"],
+      "composedJsx": ["MyLabelsDataTable", "QueryErrorAlert"]
     },
     {
       "file": "features/my/MyPostsPageView.tsx",
@@ -73991,7 +74268,7 @@
       "typeAliasEvidence": [
         {
           "name": "SectionTabLabelKey",
-          "type": "'profile' | 'security' | 'settings' | 'posts' | 'series' | 'works' | 'artists' | 'forms'"
+          "type": "'profile' | 'security' | 'settings' | 'posts' | 'series' | 'works' | 'artists' | 'labels' | 'forms'"
         }
       ],
       "productionConsumers": ["app/(general)/my/layout.tsx"],
@@ -78365,6 +78642,8 @@
         "features/my/McpOAuthGrantSettings.tsx",
         "features/my/MyArtistsDataTable.tsx",
         "features/my/MyArtistsTable.tsx",
+        "features/my/MyLabelsDataTable.tsx",
+        "features/my/MyLabelsTable.tsx",
         "features/my/MyPostsPageView.tsx",
         "features/my/MyProfilePageView.tsx",
         "features/my/MySecurityPageView.tsx",
@@ -78405,6 +78684,8 @@
         "features/my/McpOAuthGrantSettings.tsx",
         "features/my/MyArtistsDataTable.tsx",
         "features/my/MyArtistsTable.tsx",
+        "features/my/MyLabelsDataTable.tsx",
+        "features/my/MyLabelsTable.tsx",
         "features/my/MyPostsPageView.tsx",
         "features/my/MyProfilePageView.tsx",
         "features/my/MySecurityPageView.tsx",
@@ -78445,6 +78726,7 @@
         "features/my/MyArtistsDataTable.test.tsx",
         "features/my/MyArtistsTable.query.test.tsx",
         "features/my/MyArtistsTable.test.tsx",
+        "features/my/MyLabelsTable.test.tsx",
         "features/my/MyPostsPageView.test.tsx",
         "features/my/PasskeySettingsSection.test.tsx",
         "features/my/PersonalAccessTokenSettings.test.tsx",
@@ -78463,6 +78745,7 @@
       ],
       "directlyImportingRoutes": [
         "/my/artists",
+        "/my/labels",
         "/my/posts",
         "/my/profile",
         "/my/security",
@@ -90052,6 +90335,16 @@
           "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--artists-empty"
         },
         {
+          "name": "Labels",
+          "args": "{ domain: 'labels' }",
+          "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--labels"
+        },
+        {
+          "name": "LabelsEmpty",
+          "args": "{ domain: 'labels', state: 'empty' }",
+          "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--labels-empty"
+        },
+        {
           "name": "Works",
           "args": "{ domain: 'works' }",
           "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--works"
@@ -90106,6 +90399,7 @@
         "components/core/Alert/index.ts",
         "components/core/Layout/index.ts",
         "features/my/MyArtistsTable.tsx",
+        "features/my/MyLabelsTable.tsx",
         "features/my/MyPostsPageView.tsx",
         "features/my/MySeriesPageView.tsx",
         "features/my/MyWorksPageView.tsx",
@@ -92722,6 +93016,47 @@
           "scope": "Actual production MyArtistsTable; local typed query/create transport, empty/loading/error branches where the production owner exposes them. Text search/pagination operate on fixtures; backend filter/sort semantics, auth and navigation destinations remain outside.",
           "file": "stories/pages/MyLists.stories.tsx",
           "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--artists"
+        }
+      ]
+    },
+    {
+      "route": "/my/labels",
+      "file": "app/(general)/my/labels/page.tsx",
+      "family": "My",
+      "sourceKind": "renders JSX",
+      "imports": [
+        {
+          "file": "lib/api/query-result.ts",
+          "symbols": ["unwrapQueryResult"]
+        },
+        {
+          "file": "features/my/MyLabelsTable.tsx",
+          "symbols": ["MyLabelsTable"]
+        },
+        {
+          "file": "lib/actions/label.ts",
+          "symbols": ["listMyLabelsAction"]
+        },
+        {
+          "file": "lib/utils/session.server.ts",
+          "symbols": ["getMemberId"]
+        }
+      ],
+      "reexports": [],
+      "composedJsx": ["MyLabelsTable"],
+      "controllerEvidence": ["getMemberId", "redirect"],
+      "inheritedLayouts": ["app/(general)/layout.tsx", "app/(general)/my/layout.tsx", "app/layout.tsx"],
+      "directStoryImports": ["stories/pages/MyLists.stories.tsx"],
+      "coverageNote": "Import relationship only; no route behavior, permission, interaction, or nested story coverage is inferred.",
+      "interactivePreviews": [
+        {
+          "route": "/my/labels",
+          "storyTitle": "Pages/Account/Owned Lists",
+          "variant": "Labels",
+          "coverage": "page-view",
+          "scope": "Actual production MyLabelsTable; local typed query transport, empty/loading/error branches where the production owner exposes them. Text search/pagination operate on fixtures; backend sort semantics, auth and navigation destinations remain outside.",
+          "file": "stories/pages/MyLists.stories.tsx",
+          "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--labels"
         }
       ]
     },
@@ -98194,6 +98529,13 @@
       "variant": "Artists",
       "coverage": "page-view",
       "scope": "Actual production MyArtistsTable; local typed query/create transport, empty/loading/error branches where the production owner exposes them. Text search/pagination operate on fixtures; backend filter/sort semantics, auth and navigation destinations remain outside."
+    },
+    {
+      "route": "/my/labels",
+      "storyTitle": "Pages/Account/Owned Lists",
+      "variant": "Labels",
+      "coverage": "page-view",
+      "scope": "Actual production MyLabelsTable; local typed query transport, empty/loading/error branches where the production owner exposes them. Text search/pagination operate on fixtures; backend sort semantics, auth and navigation destinations remain outside."
     },
     {
       "route": "/my/works",

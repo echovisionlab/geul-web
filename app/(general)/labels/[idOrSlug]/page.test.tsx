@@ -83,7 +83,7 @@ describe('Label canonical editor route', () => {
     expect(mocks.getLabelForEdit).toHaveBeenCalledWith('label-1');
     expect(result.props).toMatchObject({
       id: 'label-1',
-      backHref: '/labels/label-slug',
+      backHref: '/my/labels',
     });
   });
 });

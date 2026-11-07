@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { MySection } from '@echovisionlab/geul-proto/secure/member_pb.ts';
 import {
   IconBriefcase,
+  IconBuildingStore,
   IconFileText,
   IconForms,
   IconList,
@@ -18,7 +19,8 @@ import { UserAvatarUploader } from '@/features/user/UserAvatarUploader';
 import { UserShellView, type UserShellViewTab } from '@/features/user/ui/UserShell';
 import { useSession } from '@/lib/auth/client';
 import { normalizeMySections } from './sections';
-type SectionTabLabelKey = 'profile' | 'security' | 'settings' | 'posts' | 'series' | 'works' | 'artists' | 'forms';
+type SectionTabLabelKey =
+  'profile' | 'security' | 'settings' | 'posts' | 'series' | 'works' | 'artists' | 'labels' | 'forms';
 const SECTION_TABS: Record<
   MySection,
   {
@@ -35,6 +37,7 @@ const SECTION_TABS: Record<
   [MySection.SERIES]: { value: 'series', labelKey: 'series', icon: IconList },
   [MySection.WORKS]: { value: 'works', labelKey: 'works', icon: IconBriefcase },
   [MySection.ARTISTS]: { value: 'artists', labelKey: 'artists', icon: IconMicrophone },
+  [MySection.LABELS]: { value: 'labels', labelKey: 'labels', icon: IconBuildingStore },
   [MySection.FORMS]: { value: 'forms', labelKey: 'forms', icon: IconForms },
 };
 interface UserShellProps {

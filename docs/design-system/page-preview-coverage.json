@@ -1,17 +1,17 @@
 {
   "schemaVersion": 2,
   "methodology": "All App Router visual entry files indexed by TypeScript imports/JSX; exact reviewed route/boundary maps count separately from mere Feature story overlap. Unmapped entrypoints remain explicit gaps. Static source census is not a browser pass.",
-  "sourceManifestHash": "dae8746191f33740d7175a4d6522b480f7148b9228997dccd878f1daaaeda215",
+  "sourceManifestHash": "6333f289c92c045877dfba68e1286505a86d3bd231a945453e20e88512112261",
   "counts": {
     "queryEditorBranches": 12,
     "editorBranchPreviews": 12,
     "missingEditorBranches": 0,
-    "visualEntrypoints": 140,
-    "pageEntrypoints": 118,
+    "visualEntrypoints": 141,
+    "pageEntrypoints": 119,
     "pageDispositions": {
       "development-only-entry": 1,
       "disabled-by-terminal-layout": 6,
-      "page-view-preview": 103,
+      "page-view-preview": 104,
       "redirect-only": 5,
       "terminal-not-found-only": 3
     },
@@ -21,14 +21,14 @@
       "global-error": 1,
       "layout": 17,
       "not-found": 1,
-      "page": 118
+      "page": 119
     },
     "entryDispositions": {
       "boundary-view-preview": 5,
       "development-only-entry": 1,
       "disabled-by-terminal-layout": 6,
       "layout-view-preview": 3,
-      "page-view-preview": 103,
+      "page-view-preview": 104,
       "provider-document-layout": 1,
       "provider-only-layout": 12,
       "redirect-only": 5,
@@ -36,7 +36,7 @@
     },
     "reviewStatus": {
       "machine-import-and-jsx-census": 27,
-      "manual-preview-source-mapping": 113
+      "manual-preview-source-mapping": 114
     }
   },
   "entrypoints": [
@@ -14021,7 +14021,7 @@
     },
     {
       "file": "app/(general)/labels/[idOrSlug]/page.tsx",
-      "sha256": "289298fe03baf9759a758eb6963891aea0fe5ecdef6a6f9db52003274d029058",
+      "sha256": "4ca061f813bf64ccc44a339a0cbaabad05175c88694a0a69d0d8d7dc31a14b43",
       "kind": "page",
       "route": "/labels/[idOrSlug]",
       "family": "Development",
@@ -17821,6 +17821,14 @@
               "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--artists-empty"
             },
             {
+              "variant": "Labels",
+              "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--labels"
+            },
+            {
+              "variant": "LabelsEmpty",
+              "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--labels-empty"
+            },
+            {
               "variant": "Works",
               "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--works"
             },
@@ -17888,8 +17896,189 @@
       "scopeNote": "Source view coverage only. A named story or importing child does not establish complete route state, permission, controller, network, SSR or browser parity."
     },
     {
+      "file": "app/(general)/my/labels/page.tsx",
+      "sha256": "7b6fa943517489b84d262258da4e3aca9577092e5b87811703cd598598e36a11",
+      "kind": "page",
+      "route": "/my/labels",
+      "family": "Account",
+      "hasQueryEditorBranch": false,
+      "editorBranchPreview": null,
+      "reviewStatus": "manual-preview-source-mapping",
+      "disposition": "page-view-preview",
+      "directJsx": ["MyLabelsTable"],
+      "visualOwners": [
+        "features/application-error/QueryErrorAlert.tsx",
+        "features/confirmation/ui/ConfirmationDialog.tsx",
+        "features/data-table/DataTable.tsx",
+        "features/data-table/DataTableContent.tsx",
+        "features/data-table/DataTableContext.tsx",
+        "features/data-table/DataTableMultiFilter.tsx",
+        "features/data-table/DataTableMultiSort.tsx",
+        "features/data-table/DataTablePagination.tsx",
+        "features/data-table/DataTableSearch.tsx",
+        "features/data-table/DataTableSelectableSection.tsx",
+        "features/data-table/DateFilterInputRuntime.tsx",
+        "features/data-table/MultiFilterEditorView.tsx",
+        "features/data-table/MultiFilterValueInput.tsx",
+        "features/data-table/MultiSortView.tsx",
+        "features/data-table/TableFocusRecovery.tsx",
+        "features/date-time/DateTime.tsx",
+        "features/media/ThemedAssetImage.tsx",
+        "features/media/ui/ThemedAssetImageView.tsx",
+        "features/my/MyLabelsDataTable.tsx",
+        "features/my/MyLabelsTable.tsx",
+        "features/site/PageLoader/PageLoader.tsx"
+      ],
+      "dependencyGraph": [
+        "app/(general)/my/labels/page.tsx",
+        "features/application-error/QueryErrorAlert.tsx",
+        "features/application-error/error-page-messages.ts",
+        "features/application-error/error-status.ts",
+        "features/confirmation/confirmation-dialogs.ts",
+        "features/confirmation/index.ts",
+        "features/confirmation/ui/ConfirmationDialog.tsx",
+        "features/confirmation/ui/confirmation-intent.ts",
+        "features/confirmation/useBulkDeletion.ts",
+        "features/data-table/DataTable.tsx",
+        "features/data-table/DataTableContent.tsx",
+        "features/data-table/DataTableContext.tsx",
+        "features/data-table/DataTableMultiFilter.tsx",
+        "features/data-table/DataTableMultiSort.tsx",
+        "features/data-table/DataTablePagination.tsx",
+        "features/data-table/DataTableSearch.tsx",
+        "features/data-table/DataTableSelectableSection.tsx",
+        "features/data-table/DateFilterInputRuntime.tsx",
+        "features/data-table/MultiFilterEditorView.tsx",
+        "features/data-table/MultiFilterValueInput.tsx",
+        "features/data-table/MultiSortView.tsx",
+        "features/data-table/TableFocusRecovery.tsx",
+        "features/data-table/content-view-model.ts",
+        "features/data-table/filter-i18n.ts",
+        "features/data-table/index.ts",
+        "features/data-table/multi-filter-model.ts",
+        "features/data-table/selection-label.ts",
+        "features/date-time/DateTime.tsx",
+        "features/media/ThemedAssetImage.tsx",
+        "features/media/ui/ThemedAssetImageView.tsx",
+        "features/my/MyLabelsDataTable.tsx",
+        "features/my/MyLabelsTable.tsx",
+        "features/site/PageLoader/PageLoader.tsx",
+        "features/site/PageLoader/index.ts",
+        "features/site/PageLoader/loader-image.ts"
+      ],
+      "inheritedBoundaries": [
+        "app/(general)/error.tsx",
+        "app/(general)/layout.tsx",
+        "app/(general)/my/layout.tsx",
+        "app/error.tsx",
+        "app/global-error.tsx",
+        "app/layout.tsx",
+        "app/not-found.tsx"
+      ],
+      "inheritedTerminalLayouts": [],
+      "renderability": "normal-or-conditional",
+      "redirects": [
+        {
+          "line": 10,
+          "expression": "redirect('/login')"
+        }
+      ],
+      "previews": [
+        {
+          "route": "/my/labels",
+          "storyTitle": "Pages/Account/Owned Lists",
+          "variant": "Labels",
+          "coverage": "page-view",
+          "scope": "Actual production MyLabelsTable; local typed query transport, empty/loading/error branches where the production owner exposes them. Text search/pagination operate on fixtures; backend sort semantics, auth and navigation destinations remain outside.",
+          "storySource": "stories/pages/MyLists.stories.tsx",
+          "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--labels",
+          "availableStates": [
+            {
+              "variant": "Artists",
+              "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--artists"
+            },
+            {
+              "variant": "ArtistsEmpty",
+              "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--artists-empty"
+            },
+            {
+              "variant": "Labels",
+              "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--labels"
+            },
+            {
+              "variant": "LabelsEmpty",
+              "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--labels-empty"
+            },
+            {
+              "variant": "Works",
+              "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--works"
+            },
+            {
+              "variant": "WorksEmpty",
+              "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--works-empty"
+            },
+            {
+              "variant": "WorksFailed",
+              "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--works-failed"
+            },
+            {
+              "variant": "WorksLoading",
+              "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--works-loading"
+            },
+            {
+              "variant": "Posts",
+              "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--posts"
+            },
+            {
+              "variant": "PostsEmpty",
+              "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--posts-empty"
+            },
+            {
+              "variant": "PostsLoading",
+              "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--posts-loading"
+            },
+            {
+              "variant": "Series",
+              "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--series"
+            },
+            {
+              "variant": "SeriesEmpty",
+              "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--series-empty"
+            },
+            {
+              "variant": "Phone",
+              "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--phone"
+            }
+          ]
+        }
+      ],
+      "relatedFeatureStories": [
+        {
+          "file": "features/confirmation/ConfirmationDialog.stories.tsx",
+          "title": "Feature/Confirmation/Dialog",
+          "matchingOwners": ["features/confirmation/ui/ConfirmationDialog.tsx"]
+        },
+        {
+          "file": "features/media/ui/ThemedAssetImageView.stories.tsx",
+          "title": "Feature/Media/ThemedAssetImageView",
+          "matchingOwners": ["features/media/ui/ThemedAssetImageView.tsx"]
+        },
+        {
+          "file": "stories/features/EditorAccessEnded.stories.tsx",
+          "title": "Feature/Editor/Access Ended",
+          "matchingOwners": ["features/confirmation/confirmation-dialogs.ts"]
+        },
+        {
+          "file": "stories/pages/MyLists.stories.tsx",
+          "title": "Pages/Account/Owned Lists",
+          "matchingOwners": ["features/my/MyLabelsTable.tsx"]
+        }
+      ],
+      "scopeNote": "Source view coverage only. A named story or importing child does not establish complete route state, permission, controller, network, SSR or browser parity."
+    },
+    {
       "file": "app/(general)/my/layout.tsx",
-      "sha256": "b6f1e4459a71bccad5dfac1c311d1504c2e9d1b950b1b4718a28c3b1e40bd006",
+      "sha256": "609c0aa9ee2406df83b231aae3887e38ab180bd089bcbca3f3e71f110fc08c51",
       "kind": "layout",
       "route": "/my",
       "family": "Account",
@@ -17930,11 +18119,11 @@
       "renderability": "normal-or-conditional",
       "redirects": [
         {
-          "line": 98,
+          "line": 102,
           "expression": "redirect(buildLoginRedirectHref(currentPath))"
         },
         {
-          "line": 110,
+          "line": 114,
           "expression": "redirect(allowedPaths.length > 0 ? `/my/${allowedPaths[0]}` : '/')"
         }
       ],
@@ -18136,6 +18325,14 @@
             {
               "variant": "ArtistsEmpty",
               "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--artists-empty"
+            },
+            {
+              "variant": "Labels",
+              "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--labels"
+            },
+            {
+              "variant": "LabelsEmpty",
+              "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--labels-empty"
             },
             {
               "variant": "Works",
@@ -18740,6 +18937,14 @@
               "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--artists-empty"
             },
             {
+              "variant": "Labels",
+              "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--labels"
+            },
+            {
+              "variant": "LabelsEmpty",
+              "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--labels-empty"
+            },
+            {
               "variant": "Works",
               "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--works"
             },
@@ -19131,6 +19336,14 @@
             {
               "variant": "ArtistsEmpty",
               "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--artists-empty"
+            },
+            {
+              "variant": "Labels",
+              "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--labels"
+            },
+            {
+              "variant": "LabelsEmpty",
+              "preview": "http://localhost:6010/?path=/story/pages-account-owned-lists--labels-empty"
             },
             {
               "variant": "Works",

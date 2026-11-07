@@ -1962,6 +1962,10 @@
     "empty": "没有艺术家",
     "searchPlaceholder": "搜索艺术家..."
   },
+  "myLabels": {
+    "empty": "没有厂牌",
+    "searchPlaceholder": "搜索厂牌..."
+  },
   "forms": {
     "empty": "未找到表单",
     "searchPlaceholder": "搜索表单..."

@@ -93,12 +93,7 @@ export default async function LabelViewPage({ params, searchParams }: Props) {
       redirect(`/labels/${encodeURIComponent(label.id)}${buildSearchSuffix(query)}`);
     }
     return (
-      <LazyAdminLabelDetailClient
-        id={label.id}
-        label={label}
-        baseUrl={await getBaseUrl()}
-        backHref={`/labels/${label.slug || label.id}`}
-      />
+      <LazyAdminLabelDetailClient id={label.id} label={label} baseUrl={await getBaseUrl()} backHref="/my/labels" />
     );
   }
 

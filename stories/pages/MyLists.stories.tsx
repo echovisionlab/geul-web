@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { LayoutContainer, LayoutStack } from '@/components/core/Layout';
 import { Alert } from '@/components/core/Alert';
 import { MyArtistsTable } from '@/features/my/MyArtistsTable';
+import { MyLabelsTable } from '@/features/my/MyLabelsTable';
 import { MyWorksPageView } from '@/features/my/MyWorksPageView';
 import { MyPostsPageView } from '@/features/my/MyPostsPageView';
 import { MySeriesPageView } from '@/features/my/MySeriesPageView';
@@ -23,6 +24,26 @@ const artists = [
     createdAt: new Date('2026-09-12T10:00:00Z'),
   },
   { id: 'artist-2', name: 'Night Signals', slug: null, imageUrl: null, status: 'draft', createdAt: null },
+];
+const labels = [
+  {
+    id: 'label-1',
+    name: 'Night Signals Records',
+    slug: 'night-signals-records',
+    imageLightUrl: null,
+    imageDarkUrl: null,
+    status: 'published',
+    createdAt: new Date('2026-09-12T10:00:00Z'),
+  },
+  {
+    id: 'label-2',
+    name: 'June Han Editions',
+    slug: null,
+    imageLightUrl: null,
+    imageDarkUrl: null,
+    status: 'draft',
+    createdAt: null,
+  },
 ];
 const works: CreditedWork[] = [
   {
@@ -101,7 +122,7 @@ export function MyListsPagePreview({
   domain = 'artists',
   state = 'ready',
 }: {
-  domain?: 'artists' | 'works' | 'posts' | 'series';
+  domain?: 'artists' | 'labels' | 'works' | 'posts' | 'series';
   state?: 'ready' | 'empty' | 'error' | 'pending';
 }) {
   const [client] = useState(
@@ -139,6 +160,11 @@ export function MyListsPagePreview({
             <MyArtistsTable
               initialData={pageRows(state === 'empty' ? [] : artists, { page: 1, pageSize: 20 }, (row) => row.name)}
               listAction={async (query) => ({ ok: true, value: await read(artists, query, (row) => row.name) })}
+            />
+          ) : domain === 'labels' ? (
+            <MyLabelsTable
+              initialData={pageRows(state === 'empty' ? [] : labels, { page: 1, pageSize: 20 }, (row) => row.name)}
+              listAction={async (query) => ({ ok: true, value: await read(labels, query, (row) => row.name) })}
             />
           ) : domain === 'works' ? (
             <MyWorksPageView
@@ -179,7 +205,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Production owned artist, work, post and series lists with local search, filters, sorting, pagination and post creation. Navigation opens mapped Storybook previews.',
+          'Production owned artist, label, work, post and series lists with local search, filters, sorting, pagination and post creation. Navigation opens mapped Storybook previews.',
       },
     },
   },
@@ -188,6 +214,8 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 export const Artists: Story = {};
 export const ArtistsEmpty: Story = { args: { state: 'empty' } };
+export const Labels: Story = { args: { domain: 'labels' } };
+export const LabelsEmpty: Story = { args: { domain: 'labels', state: 'empty' } };
 export const Works: Story = { args: { domain: 'works' } };
 export const WorksEmpty: Story = { args: { domain: 'works', state: 'empty' } };
 export const WorksFailed: Story = { args: { domain: 'works', state: 'error' } };

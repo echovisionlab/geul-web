@@ -4814,6 +4814,10 @@
     "empty": "Ihnen sind keine Künstler zugewiesen.",
     "searchPlaceholder": "Künstler suchen..."
   },
+  "myLabels": {
+    "empty": "Ihnen sind keine Plattenlabels zugewiesen.",
+    "searchPlaceholder": "Plattenlabels suchen..."
+  },
   "termsPage": {
     "active": {
       "emptyTitle": "Noch keine Nutzungsbedingungen veröffentlicht.",

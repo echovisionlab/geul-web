@@ -5000,6 +5000,93 @@
       "notes": []
     },
     {
+      "id": "page:/my/labels",
+      "label": "My labels",
+      "phase": "02",
+      "features": ["L01", "L02"],
+      "detail": "Managed list, edit destinations and empty result.",
+      "route": "/my/labels",
+      "source": "app/(general)/my/labels/page.tsx",
+      "sourceHash": "7b6fa943517489b84d262258da4e3aca9577092e5b87811703cd598598e36a11",
+      "disposition": "service-view",
+      "inheritedBoundaries": [
+        "app/(general)/error.tsx",
+        "app/(general)/layout.tsx",
+        "app/(general)/my/layout.tsx",
+        "app/error.tsx",
+        "app/global-error.tsx",
+        "app/layout.tsx",
+        "app/not-found.tsx"
+      ],
+      "blockedBy": [],
+      "redirects": ["redirect('/login')"],
+      "owners": [
+        "features/application-error/QueryErrorAlert.tsx",
+        "features/confirmation/ui/ConfirmationDialog.tsx",
+        "features/data-table/DataTable.tsx",
+        "features/data-table/DataTableContent.tsx",
+        "features/data-table/DataTableContext.tsx",
+        "features/data-table/DataTableMultiFilter.tsx",
+        "features/data-table/DataTableMultiSort.tsx",
+        "features/data-table/DataTablePagination.tsx",
+        "features/data-table/DataTableSearch.tsx",
+        "features/data-table/DataTableSelectableSection.tsx",
+        "features/data-table/DateFilterInputRuntime.tsx",
+        "features/data-table/MultiFilterEditorView.tsx",
+        "features/data-table/MultiFilterValueInput.tsx",
+        "features/data-table/MultiSortView.tsx",
+        "features/data-table/TableFocusRecovery.tsx",
+        "features/date-time/DateTime.tsx",
+        "features/media/ThemedAssetImage.tsx",
+        "features/media/ui/ThemedAssetImageView.tsx",
+        "features/my/MyLabelsDataTable.tsx",
+        "features/my/MyLabelsTable.tsx",
+        "features/site/PageLoader/PageLoader.tsx"
+      ],
+      "previews": [
+        {
+          "title": "Pages/Account/Owned Lists",
+          "variant": "Labels",
+          "source": "stories/pages/MyLists.stories.tsx",
+          "path": "?path=/story/pages-account-owned-lists--labels",
+          "composition": "page-view",
+          "scope": "Actual production MyLabelsTable; local typed query transport, empty/loading/error branches where the production owner exposes them. Text search/pagination operate on fixtures; backend sort semantics, auth and navigation destinations remain outside."
+        }
+      ],
+      "commonFeatures": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C12",
+        "C13",
+        "C14",
+        "C15",
+        "C16"
+      ],
+      "gates": {
+        "N": "pending",
+        "R": "pending",
+        "V": "pending",
+        "O": "pending",
+        "K": "pending",
+        "A": "pending",
+        "S": "pending",
+        "D": "pending",
+        "B": "pending"
+      },
+      "nativeAT": "deferred",
+      "status": "pending",
+      "notes": []
+    },
+    {
       "id": "page:/my/posts",
       "label": "My posts",
       "phase": "02",
@@ -12958,7 +13045,7 @@
       "detail": "Description, artist/release/participant relations, sharing and edit branch.",
       "route": "/labels/[idOrSlug]",
       "source": "app/(general)/labels/[idOrSlug]/page.tsx",
-      "sourceHash": "289298fe03baf9759a758eb6963891aea0fe5ecdef6a6f9db52003274d029058",
+      "sourceHash": "4ca061f813bf64ccc44a339a0cbaabad05175c88694a0a69d0d8d7dc31a14b43",
       "disposition": "service-view",
       "inheritedBoundaries": [
         "app/(general)/error.tsx",
@@ -23321,7 +23408,7 @@
       "phase": "02",
       "kind": "layout",
       "source": "app/(general)/my/layout.tsx",
-      "sourceHash": "b6f1e4459a71bccad5dfac1c311d1504c2e9d1b950b1b4718a28c3b1e40bd006",
+      "sourceHash": "609c0aa9ee2406df83b231aae3887e38ab180bd089bcbca3f3e71f110fc08c51",
       "disposition": "shared-boundary",
       "features": ["G01", "C08", "C10"],
       "previews": [
@@ -24789,13 +24876,13 @@
     }
   ],
   "counts": {
-    "pageEntrypoints": 118,
-    "visualEntrypoints": 140,
+    "pageEntrypoints": 119,
+    "visualEntrypoints": 141,
     "pageDispositions": {
       "development-only": 1,
       "disabled-by-terminal-layout": 6,
       "redirect-only": 5,
-      "service-view": 103,
+      "service-view": 104,
       "terminal-not-found-only": 3
     },
     "queryEditorBranches": 12,

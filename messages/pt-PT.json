@@ -1962,6 +1962,10 @@
     "empty": "Nenhum artista atribuído a si.",
     "searchPlaceholder": "Pesquisar artistas..."
   },
+  "myLabels": {
+    "empty": "Nenhuma etiqueta atribuída a si.",
+    "searchPlaceholder": "Pesquisar etiquetas..."
+  },
   "forms": {
     "empty": "Nenhum formulário encontrado.",
     "searchPlaceholder": "Formulários de pesquisa..."

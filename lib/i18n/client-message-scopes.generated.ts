@@ -106,6 +106,7 @@ export const CLIENT_MESSAGE_SCOPE_PATHS: Record<ClientMessageScope, readonly str
     'errorPage',
     'featuredImage',
     'localBackups',
+    'myLabels',
     'nicknameField',
     'ogImagePreview',
     'posts',

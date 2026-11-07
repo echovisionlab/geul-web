@@ -40,6 +40,8 @@ function getMyNavigationKey(pathname: string): string {
       return 'works';
     case '/my/artists':
       return 'artists';
+    case '/my/labels':
+      return 'labels';
     case '/my/forms':
       return 'forms';
     default:
@@ -76,7 +78,9 @@ export async function generateMetadata(): Promise<Metadata> {
                   ? tCommonEntities('works')
                   : navigationKey === 'artists'
                     ? tCommonEntities('artists')
-                    : tCommonEntities('forms');
+                    : navigationKey === 'labels'
+                      ? tCommonEntities('labels')
+                      : tCommonEntities('forms');
 
   return withNoIndex(
     buildStaticOgMetadata({

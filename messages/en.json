@@ -1962,6 +1962,10 @@
     "empty": "No artists assigned to you.",
     "searchPlaceholder": "Search artists..."
   },
+  "myLabels": {
+    "empty": "No labels assigned to you.",
+    "searchPlaceholder": "Search labels..."
+  },
   "forms": {
     "empty": "No forms found.",
     "searchPlaceholder": "Search forms..."

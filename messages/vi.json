@@ -1962,6 +1962,10 @@
     "empty": "Không có nghệ sĩ nào được chỉ định cho bạn.",
     "searchPlaceholder": "Tìm kiếm nghệ sĩ..."
   },
+  "myLabels": {
+    "empty": "Không có nhãn nào được chỉ định cho bạn.",
+    "searchPlaceholder": "Tìm kiếm nhãn..."
+  },
   "forms": {
     "empty": "Không tìm thấy biểu mẫu nào.",
     "searchPlaceholder": "Tìm kiếm biểu mẫu..."

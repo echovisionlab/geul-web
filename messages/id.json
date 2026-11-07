@@ -1962,6 +1962,10 @@
     "empty": "Tidak ada artis yang ditugaskan kepada Anda.",
     "searchPlaceholder": "Cari artis..."
   },
+  "myLabels": {
+    "empty": "Tidak ada label yang ditugaskan kepada Anda.",
+    "searchPlaceholder": "Cari label..."
+  },
   "forms": {
     "empty": "Tidak ada formulir yang ditemukan.",
     "searchPlaceholder": "Formulir pencarian..."

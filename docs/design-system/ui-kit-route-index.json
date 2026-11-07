@@ -297,6 +297,19 @@
       ]
     },
     {
+      "route": "/my/labels",
+      "family": "My",
+      "source": "app/(general)/my/labels/page.tsx",
+      "previews": [
+        {
+          "storyTitle": "Pages/Account/Owned Lists",
+          "variant": "Labels",
+          "scope": "Actual production MyLabelsTable; local typed query transport, empty/loading/error branches where the production owner exposes them. Text search/pagination operate on fixtures; backend sort semantics, auth and navigation destinations remain outside.",
+          "storyId": "pages-account-owned-lists--labels"
+        }
+      ]
+    },
+    {
       "route": "/my",
       "family": "My",
       "source": "app/(general)/my/page.tsx",

@@ -1962,6 +1962,10 @@
     "empty": "Size atanan sanatçı yok.",
     "searchPlaceholder": "Sanatçıları arayın..."
   },
+  "myLabels": {
+    "empty": "Size atanan etiket yok.",
+    "searchPlaceholder": "Etiketleri arayın..."
+  },
   "forms": {
     "empty": "Form bulunamadı.",
     "searchPlaceholder": "Arama formları..."
