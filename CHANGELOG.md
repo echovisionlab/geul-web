@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.30.0](https://github.com/echovisionlab/geul-web/compare/v0.29.0...v0.30.0) (2026-11-07)
+
+
+### Features
+
+* **label:** delete a Label from its editor ([ef17366](https://github.com/echovisionlab/geul-web/commit/ef17366d9fb969aac45bbd6a632b61d304d88fad))
+
 ## [0.29.0](https://github.com/echovisionlab/geul-web/compare/v0.28.0...v0.29.0) (2026-11-07)
 
 
