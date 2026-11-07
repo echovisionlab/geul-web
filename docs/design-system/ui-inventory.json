@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "scope": ["app", "components/core", "features", "lib", "stories", ".storybook"],
   "methodology": "Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.",
-  "manifestHash": "8f60298f4bfb73e94c4d8d7d9bceb944618667a3e277f03cd19a76849b27edb2",
+  "manifestHash": "2e5e96b79d017412da92df7ec7190084d964ed30ba0078e9b60a2a70f4876d27",
   "counts": {
-    "sourceFiles": 3927,
-    "productionSourceFiles": 2336,
-    "componentFiles": 928,
+    "sourceFiles": 3929,
+    "productionSourceFiles": 2337,
+    "componentFiles": 929,
     "coreFamilies": 57,
     "featureDomains": 54,
     "storyFiles": 285,
@@ -1849,6 +1849,8 @@
     "features/form/useFieldValidation.ts",
     "features/form/useFormValidationMessages.ts",
     "features/label/AdminLabelDetailClient.tsx",
+    "features/label/LabelDeleteDialog.test.tsx",
+    "features/label/LabelDeleteDialog.tsx",
     "features/label/LabelEditor/LabelDescriptionEditor.tsx",
     "features/label/LabelEditor/LabelParticipantsDialog.stories.tsx",
     "features/label/LabelEditor/LabelParticipantsDialog.test.tsx",
@@ -4025,7 +4027,6 @@
         "features/admin/email-layout/EmailLayoutsPage.tsx",
         "features/admin/email-template/EmailTemplateEditPage.tsx",
         "features/admin/email-template/EmailTemplatesPage.tsx",
-        "features/admin/label/LabelRowMenu.tsx",
         "features/admin/oauth-app/OAuthAppEditorView.tsx",
         "features/admin/oauth-app/OAuthAppListView.tsx",
         "features/admin/oauth-app/OAuthAppSecretDialog.tsx",
@@ -4050,6 +4051,7 @@
         "features/email/EmailTemplateEditor/EmailTemplateEditor.tsx",
         "features/form/FormSettingsContent.tsx",
         "features/form/PublicFormView.tsx",
+        "features/label/LabelDeleteDialog.tsx",
         "features/map/BaseMap.tsx",
         "features/map/MapLibreMapEditor.tsx",
         "features/media-download/FileDownloadPolicyEditor.tsx",
@@ -13465,7 +13467,6 @@
         "features/admin/form/FormsPageView.tsx",
         "features/admin/format/FormatModals.tsx",
         "features/admin/genre/GenreModals.tsx",
-        "features/admin/label/LabelRowMenu.tsx",
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/map-place/MapPlaceDetailPage.tsx",
         "features/admin/map-place/MapPlacesPage.tsx",
@@ -13592,6 +13593,7 @@
         "features/form/PublicFormView.tsx",
         "features/form/SubmissionDetail.tsx",
         "features/label/AdminLabelDetailClient.tsx",
+        "features/label/LabelDeleteDialog.tsx",
         "features/label/LabelEditor/ui/LabelParticipantsDialogView.tsx",
         "features/location/LocationPlaceMenu.tsx",
         "features/location/ui/CountrySelect.tsx",
@@ -19519,7 +19521,6 @@
         "components/core/DataTable/DataTableView.tsx",
         "components/core/SelectionSurface/SelectionSurface.tsx",
         "features/admin/artist/ArtistDeleteDialogView.tsx",
-        "features/admin/label/LabelRowMenu.tsx",
         "features/auth/ui/AuthCodeChallengeView.tsx",
         "features/authoring/EditorHeader/RejectedEditsDialog.tsx",
         "features/changelog/ChangelogPageView.tsx",
@@ -19529,6 +19530,7 @@
         "features/form/FormField/fields/SwitchField.tsx",
         "features/form/FormRenderer.tsx",
         "features/form/FormSettingsContent.tsx",
+        "features/label/LabelDeleteDialog.tsx",
         "features/media-download/AuthorizedDownloadAction.tsx",
         "features/media-download/FileDownloadPolicyEditor.tsx",
         "features/media/AudioPlayer.tsx",
@@ -19932,7 +19934,6 @@
         "features/admin/format/FormatsTableContent.tsx",
         "features/admin/genre/GenreModals.tsx",
         "features/admin/genre/GenresTableContent.tsx",
-        "features/admin/label/LabelRowMenu.tsx",
         "features/admin/label/LabelsTableContent.tsx",
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/map-place/MapPlaceDetailPage.tsx",
@@ -20038,6 +20039,7 @@
         "features/form/PublicFormView.tsx",
         "features/form/SubmissionDetail.tsx",
         "features/label/AdminLabelDetailClient.tsx",
+        "features/label/LabelDeleteDialog.tsx",
         "features/label/LabelEditor/ui/LabelParticipantsDialogView.tsx",
         "features/location/LocationPlaceMenu.tsx",
         "features/location/LocationPlaceMetadataRows.tsx",
@@ -24327,19 +24329,7 @@
       "catalogAdapters": [],
       "tests": ["features/admin/label/LabelRowMenu.test.tsx"],
       "stories": [],
-      "composedJsx": [
-        "Alert",
-        "ConfirmationDialog",
-        "DsLayoutStack",
-        "DsText",
-        "IconEdit",
-        "IconTrash",
-        "List",
-        "List.Item",
-        "PageLoader",
-        "TableRowMenu",
-        "strong"
-      ]
+      "composedJsx": ["IconEdit", "IconTrash", "LabelDeleteDialog", "TableRowMenu"]
     },
     {
       "file": "features/admin/label/LabelsPageView.tsx",
@@ -32552,7 +32542,6 @@
         "features/admin/form/FormModals.tsx",
         "features/admin/format/FormatModals.tsx",
         "features/admin/genre/GenreModals.tsx",
-        "features/admin/label/LabelRowMenu.tsx",
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/map-place/MapPlacesPage.tsx",
         "features/admin/member-criteria/MemberCriteriaModals.tsx",
@@ -32574,6 +32563,7 @@
         "features/file-manager/FileManager.tsx",
         "features/form/AdminFormSubmissionsPage.tsx",
         "features/form/SubmissionDeleteButton.tsx",
+        "features/label/LabelDeleteDialog.tsx",
         "features/menu/AdminMenusPage.tsx",
         "features/my/LocalBackupsView.tsx",
         "features/my/McpOAuthGrantSettings.tsx",
@@ -46941,6 +46931,7 @@
         "EditorSessionExpiredDialog",
         "EntityTranslationsPanel",
         "IconUsers",
+        "LabelDeleteDialog",
         "LabelDescriptionEditor",
         "LabelEditorView",
         "LabelLogoUploader",
@@ -46952,6 +46943,86 @@
         "SocialLinksEditor",
         "TextInput",
         "UrlSection"
+      ]
+    },
+    {
+      "file": "features/label/LabelDeleteDialog.tsx",
+      "owner": "Feature/label",
+      "exports": [
+        {
+          "name": "LabelDeleteDialog",
+          "kind": "function"
+        }
+      ],
+      "classification": "feature-owned source (controller/runtime/view; inspect before reuse)",
+      "propsEvidence": [
+        {
+          "name": "LabelDeleteTarget",
+          "extends": [],
+          "properties": [
+            {
+              "name": "id",
+              "optional": false,
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "optional": false,
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "LabelDeleteDialogProps",
+          "extends": [],
+          "properties": [
+            {
+              "name": "label",
+              "optional": false,
+              "type": "LabelDeleteTarget | null"
+            },
+            {
+              "name": "onClose",
+              "optional": false,
+              "type": "() => void"
+            },
+            {
+              "name": "onDeleted",
+              "optional": false,
+              "type": "() => void"
+            },
+            {
+              "name": "previewAction",
+              "optional": true,
+              "type": "typeof previewDeleteLabelAction"
+            },
+            {
+              "name": "deleteAction",
+              "optional": true,
+              "type": "typeof deleteLabelAction"
+            }
+          ]
+        }
+      ],
+      "typeAliasEvidence": [
+        {
+          "name": "LabelDeletePreview",
+          "type": "QueryValue<Awaited<ReturnType<typeof previewDeleteLabelAction>>>"
+        }
+      ],
+      "productionConsumers": ["features/admin/label/LabelRowMenu.tsx", "features/label/AdminLabelDetailClient.tsx"],
+      "catalogAdapters": [],
+      "tests": ["features/label/LabelDeleteDialog.test.tsx"],
+      "stories": [],
+      "composedJsx": [
+        "Alert",
+        "ConfirmationDialog",
+        "DsLayoutStack",
+        "DsText",
+        "List",
+        "List.Item",
+        "PageLoader",
+        "strong"
       ]
     },
     {
@@ -71121,7 +71192,6 @@
         "features/admin/email-layout/EmailLayoutPreview.tsx",
         "features/admin/email-layout/EmailLayoutsPage.tsx",
         "features/admin/email-template/EmailTemplateEditPage.tsx",
-        "features/admin/label/LabelRowMenu.tsx",
         "features/admin/mail-adapter/MailAdaptersPage.tsx",
         "features/admin/map-place/MapPlaceDetailPage.tsx",
         "features/admin/member-criteria/MemberCriteriaModals.tsx",
@@ -71151,6 +71221,7 @@
         "features/form/FormSubmissionState.tsx",
         "features/form/LazyFormEditRoute.tsx",
         "features/label/AdminLabelDetailClient.tsx",
+        "features/label/LabelDeleteDialog.tsx",
         "features/label/LabelEditor/LabelDescriptionEditor.tsx",
         "features/label/LabelEditor/LabelParticipantsDialog.tsx",
         "features/label/LazyAdminLabelDetailClient.tsx",
@@ -78270,6 +78341,7 @@
       "category": "content",
       "sourceFiles": [
         "features/label/AdminLabelDetailClient.tsx",
+        "features/label/LabelDeleteDialog.tsx",
         "features/label/LabelEditor/LabelDescriptionEditor.tsx",
         "features/label/LabelEditor/LabelParticipantsDialog.tsx",
         "features/label/LabelEditor/ui/LabelParticipantsDialogView.tsx",
@@ -78279,6 +78351,7 @@
       ],
       "components": [
         "features/label/AdminLabelDetailClient.tsx",
+        "features/label/LabelDeleteDialog.tsx",
         "features/label/LabelEditor/LabelDescriptionEditor.tsx",
         "features/label/LabelEditor/LabelParticipantsDialog.tsx",
         "features/label/LabelEditor/ui/LabelParticipantsDialogView.tsx",
@@ -78286,7 +78359,10 @@
         "features/label/LazyAdminLabelDetailClient.tsx"
       ],
       "stories": ["features/label/LabelEditor/LabelParticipantsDialog.stories.tsx"],
-      "tests": ["features/label/LabelEditor/LabelParticipantsDialog.test.tsx"],
+      "tests": [
+        "features/label/LabelDeleteDialog.test.tsx",
+        "features/label/LabelEditor/LabelParticipantsDialog.test.tsx"
+      ],
       "directlyImportingRoutes": ["/labels/[idOrSlug]"]
     },
     {

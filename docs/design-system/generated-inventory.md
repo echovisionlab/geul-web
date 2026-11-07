@@ -4,15 +4,15 @@ Run `node scripts/design-system/inventory.mjs` to regenerate; `--check` fails wh
 
 Static TypeScript AST source index. PascalCase TSX exports are component candidates, not proof of a pure or canonical component. Consumers follow named barrel reexports. Story relationships are direct imports only. Args and props are bounded source evidence, not exhaustive inherited API or state verification. Pages are source entrypoints, including redirects and development-only routes; source existence does not prove a served page.
 
-Source manifest SHA-256: `8f60298f4bfb73e94c4d8d7d9bceb944618667a3e277f03cd19a76849b27edb2`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
+Source manifest SHA-256: `2e5e96b79d017412da92df7ec7190084d964ed30ba0078e9b60a2a70f4876d27`. The hash covers paths and full source content inside the scope, including tests and stories. CSS, assets, generated dependency packages and runtime data are outside this index.
 
 ## Counts
 
 | Metric                | Count |
 | --------------------- | ----: |
-| sourceFiles           |  3927 |
-| productionSourceFiles |  2336 |
-| componentFiles        |   928 |
+| sourceFiles           |  3929 |
+| productionSourceFiles |  2337 |
+| componentFiles        |   929 |
 | coreFamilies          |    57 |
 | featureDomains        |    54 |
 | storyFiles            |   285 |
@@ -140,7 +140,7 @@ Counts include every production JS/TS file in the domain; component files are Pa
 | [executable](../../features/executable)               |      1 |          1 |       0 |     1 |             0 |
 | [file-manager](../../features/file-manager)           |     22 |         10 |       1 |     7 |             1 |
 | [form](../../features/form)                           |     53 |         38 |       3 |    23 |             9 |
-| [label](../../features/label)                         |      7 |          6 |       1 |     1 |             1 |
+| [label](../../features/label)                         |      8 |          7 |       1 |     2 |             1 |
 | [location](../../features/location)                   |      4 |          4 |       1 |     2 |             0 |
 | [map](../../features/map)                             |     37 |         10 |       3 |    25 |             0 |
 | [media](../../features/media)                         |     34 |         23 |       6 |    16 |             0 |

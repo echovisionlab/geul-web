@@ -13211,6 +13211,7 @@
         "features/form/FormSubmissionState.tsx",
         "features/form/PhoneInput/PhoneInput.tsx",
         "features/label/AdminLabelDetailClient.tsx",
+        "features/label/LabelDeleteDialog.tsx",
         "features/label/LabelEditor/LabelDescriptionEditor.tsx",
         "features/label/LabelEditor/LabelParticipantsDialog.tsx",
         "features/label/LabelEditor/ui/LabelParticipantsDialogView.tsx",
@@ -19420,6 +19421,7 @@
         "features/data-table/ServerDataTable/ServerDataTableSelectableSection.tsx",
         "features/data-table/ServerDataTable/ServerDataTableToolbar.tsx",
         "features/data-table/TableFocusRecovery.tsx",
+        "features/label/LabelDeleteDialog.tsx",
         "features/media/ThemedAssetImage.tsx",
         "features/media/ui/ThemedAssetImageView.tsx",
         "features/site/PageLoader/PageLoader.tsx"

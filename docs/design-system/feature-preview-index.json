@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "sourceManifestHash": "8f60298f4bfb73e94c4d8d7d9bceb944618667a3e277f03cd19a76849b27edb2",
+  "sourceManifestHash": "2e5e96b79d017412da92df7ec7190084d964ed30ba0078e9b60a2a70f4876d27",
   "methodology": "All inventoried Feature component candidates. Direct value imports, literal lazy imports and transitive source relationships through production owners/local adapters are indexed separately. A dependency can be unused or render conditionally; neither relationship proves rendered states, route parity or design compliance. Empty JSX records include runtime/lazy/controller boundaries and must be inspected before treating them as visual gaps.",
-  "counts": { "domains": 54, "componentFiles": 785, "jsxWithoutStoryRelationship": 45 },
+  "counts": { "domains": 54, "componentFiles": 786, "jsxWithoutStoryRelationship": 45 },
   "domains": [
     {
       "domain": "account",
@@ -4250,6 +4250,12 @@
           "hasJsx": true,
           "directStories": ["Pages/Editors/Label"],
           "relatedStories": ["Pages/Editors/Label"]
+        },
+        {
+          "file": "features/label/LabelDeleteDialog.tsx",
+          "hasJsx": true,
+          "directStories": [],
+          "relatedStories": ["Pages/Admin/Entity Lists", "Pages/Editors/Label"]
         },
         {
           "file": "features/label/LabelEditor/LabelDescriptionEditor.tsx",

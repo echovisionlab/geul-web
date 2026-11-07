@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "methodology": "All App Router visual entry files indexed by TypeScript imports/JSX; exact reviewed route/boundary maps count separately from mere Feature story overlap. Unmapped entrypoints remain explicit gaps. Static source census is not a browser pass.",
-  "sourceManifestHash": "6333f289c92c045877dfba68e1286505a86d3bd231a945453e20e88512112261",
+  "sourceManifestHash": "91fcef752b8f7620e40bef2e0cb04f9cd21e829e6dcaf6836158f00206ed2391",
   "counts": {
     "queryEditorBranches": 12,
     "editorBranchPreviews": 12,
@@ -14214,6 +14214,7 @@
         "features/form/FormSubmissionState.tsx",
         "features/form/PhoneInput/PhoneInput.tsx",
         "features/label/AdminLabelDetailClient.tsx",
+        "features/label/LabelDeleteDialog.tsx",
         "features/label/LabelEditor/LabelDescriptionEditor.tsx",
         "features/label/LabelEditor/LabelParticipantsDialog.tsx",
         "features/label/LabelEditor/ui/LabelParticipantsDialogView.tsx",
@@ -14776,6 +14777,7 @@
         "features/form/useFieldValidation.ts",
         "features/form/useFormValidationMessages.ts",
         "features/label/AdminLabelDetailClient.tsx",
+        "features/label/LabelDeleteDialog.tsx",
         "features/label/LabelEditor/LabelDescriptionEditor.tsx",
         "features/label/LabelEditor/LabelParticipantsDialog.tsx",
         "features/label/LabelEditor/ui/LabelParticipantsDialogView.tsx",
@@ -40091,6 +40093,7 @@
         "features/data-table/ServerDataTable/ServerDataTableSelectableSection.tsx",
         "features/data-table/ServerDataTable/ServerDataTableToolbar.tsx",
         "features/data-table/TableFocusRecovery.tsx",
+        "features/label/LabelDeleteDialog.tsx",
         "features/media/ThemedAssetImage.tsx",
         "features/media/ui/ThemedAssetImageView.tsx",
         "features/site/PageLoader/PageLoader.tsx"
@@ -40134,6 +40137,7 @@
         "features/data-table/filter-i18n.ts",
         "features/data-table/multi-filter-model.ts",
         "features/data-table/selection-label.ts",
+        "features/label/LabelDeleteDialog.tsx",
         "features/media/ThemedAssetImage.tsx",
         "features/media/ui/ThemedAssetImageView.tsx",
         "features/site/PageLoader/PageLoader.tsx",
