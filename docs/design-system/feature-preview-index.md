@@ -29,7 +29,7 @@ All inventoried Feature component candidates. Direct value imports, literal lazy
 | [executable](../../features/executable)               |                 1 |                                  0 |
 | [file-manager](../../features/file-manager)           |                10 |                                  1 |
 | [form](../../features/form)                           |                38 |                                  3 |
-| [label](../../features/label)                         |                 6 |                                  1 |
+| [label](../../features/label)                         |                 7 |                                  1 |
 | [location](../../features/location)                   |                 4 |                                  0 |
 | [map](../../features/map)                             |                10 |                                  1 |
 | [media](../../features/media)                         |                23 |                                  0 |
@@ -559,6 +559,7 @@ Direct and transitive imports are source evidence, not visual approval. No compo
 | Production candidate                                                                                   | Direct story imports            | Transitive story relationships                          |
 | ------------------------------------------------------------------------------------------------------ | ------------------------------- | ------------------------------------------------------- |
 | [AdminLabelDetailClient.tsx](../../features/label/AdminLabelDetailClient.tsx)                          | Pages/Editors/Label             | Pages/Editors/Label                                     |
+| [LabelDeleteDialog.tsx](../../features/label/LabelDeleteDialog.tsx)                                    | None                            | Pages/Admin/Entity Lists<br/>Pages/Editors/Label        |
 | [LabelDescriptionEditor.tsx](../../features/label/LabelEditor/LabelDescriptionEditor.tsx)              | None                            | Pages/Editors/Label                                     |
 | [LabelParticipantsDialog.tsx](../../features/label/LabelEditor/LabelParticipantsDialog.tsx)            | None                            | Pages/Editors/Label                                     |
 | [LabelParticipantsDialogView.tsx](../../features/label/LabelEditor/ui/LabelParticipantsDialogView.tsx) | Feature/Label/Participants Wait | Feature/Label/Participants Wait<br/>Pages/Editors/Label |

@@ -1,20 +1,12 @@
 'use client';
-import { List, Text as DsText } from '@/components/core/Typography';
-import { PageLoader } from '@/features/site/PageLoader';
-import { Alert } from '@/components/core/Alert';
-import { ConfirmationDialog } from '@/features/confirmation';
 
-import { LayoutStack as DsLayoutStack } from '@/components/core/Layout';
-
-import { unwrapQueryResult, type QueryValue } from '@/lib/api/query-result';
-
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconEdit, IconTrash } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 
-import { notifications } from '@/components/core/Notification';
 import { TableRowMenu } from '@/components/core/DataTable';
+import { LabelDeleteDialog } from '@/features/label/LabelDeleteDialog';
 
 import { deleteLabelAction, previewDeleteLabelAction } from '@/lib/actions/label';
 
@@ -41,79 +33,6 @@ export function LabelRowMenu({
   const tTable = useTranslations('dataTable');
   const router = useRouter();
   const [deleteOpened, setDeleteOpened] = useState(false);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [previewLoading, setPreviewLoading] = useState(false);
-  const [previewFailed, setPreviewFailed] = useState(false);
-  const previewRequestRef = useRef(0);
-  useEffect(() => {
-    setDeleteOpened(false);
-    setDeletePreview(null);
-    return () => {
-      previewRequestRef.current += 1;
-    };
-  }, [label.id]);
-  const closeDelete = () => {
-    previewRequestRef.current += 1;
-    setDeleteOpened(false);
-    setDeletePreview(null);
-  };
-  const [deletePreview, setDeletePreview] = useState<QueryValue<
-    Awaited<ReturnType<typeof previewDeleteLabelAction>>
-  > | null>(null);
-
-  const openDelete = async () => {
-    const request = ++previewRequestRef.current;
-    setDeleteOpened(true);
-    setDeletePreview(null);
-    setPreviewLoading(true);
-    setPreviewFailed(false);
-    try {
-      const preview = await previewAction(label.id).then(unwrapQueryResult);
-      if (request !== previewRequestRef.current) {
-        return;
-      }
-      if (!preview) {
-        setPreviewFailed(true);
-        return;
-      }
-      setDeletePreview(preview);
-    } catch {
-      if (request === previewRequestRef.current) {
-        setPreviewFailed(true);
-      }
-    } finally {
-      if (request === previewRequestRef.current) {
-        setPreviewLoading(false);
-      }
-    }
-  };
-
-  const handleDelete = async () => {
-    setDeleteLoading(true);
-    try {
-      if (!deletePreview) {
-        return;
-      }
-      const result = await deleteAction(label.id, deletePreview.revision);
-      if (result.error) {
-        notifications.show({ message: result.error, tone: 'danger' });
-        return;
-      }
-      notifications.show({
-        message: tCommon('messages.itemDeleted', { item: tCommon('entities.label') }),
-        tone: 'positive',
-      });
-      setDeleteOpened(false);
-      setDeletePreview(null);
-      if (onDeleted) {
-        onDeleted(label.id);
-      } else {
-        router.refresh();
-      }
-    } finally {
-      setDeleteLoading(false);
-    }
-  };
 
   return (
     <>
@@ -128,46 +47,24 @@ export function LabelRowMenu({
           {
             label: tCommon('actions.delete'),
             icon: <IconTrash size={16} />,
-            onClick: openDelete,
+            onClick: () => setDeleteOpened(true),
             tone: 'danger',
           },
         ]}
       />
-      <ConfirmationDialog
-        intent="delete"
-        opened={deleteOpened}
-        onClose={closeDelete}
-        onConfirm={handleDelete}
-        title={tCommon('actions.delete')}
-        message={
-          <DsLayoutStack gap="xs">
-            <DsText>
-              {tCommon.rich('messages.confirmDeleteNamedRich', {
-                name: label.name,
-                strong: (chunks) => <strong>{chunks}</strong>,
-              })}
-            </DsText>
-            {previewLoading ? <PageLoader placement="flow" /> : null}
-            {previewFailed ? <Alert tone="danger">{tCommon('messages.failedToLoad')}</Alert> : null}
-            {deletePreview && deletePreview.impacts.length > 0 ? (
-              <>
-                <DsText size="sm" tone="warning">
-                  {tCommon('messages.relatedItemsWillBeUnlinked', { count: deletePreview.impacts.length })}
-                </DsText>
-                <List size="sm">
-                  {deletePreview.impacts.map((impact) => (
-                    <List.Item key={`${impact.kind}-${impact.entityId}`}>{impact.displayName}</List.Item>
-                  ))}
-                </List>
-              </>
-            ) : null}
-          </DsLayoutStack>
-        }
-        confirmLabel={tCommon('actions.delete')}
-        cancelLabel={tCommon('actions.cancel')}
-        closeLabel={tCommon('actions.close')}
-        loading={deleteLoading}
-        confirmDisabled={previewLoading || previewFailed || !deletePreview}
+      <LabelDeleteDialog
+        label={deleteOpened ? label : null}
+        onClose={() => setDeleteOpened(false)}
+        onDeleted={() => {
+          setDeleteOpened(false);
+          if (onDeleted) {
+            onDeleted(label.id);
+          } else {
+            router.refresh();
+          }
+        }}
+        previewAction={previewAction}
+        deleteAction={deleteAction}
       />
     </>
   );

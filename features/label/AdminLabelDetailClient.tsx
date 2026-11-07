@@ -32,6 +32,7 @@ import { SocialLinksEditor } from '@/features/social-links/SocialLinksEditor';
 import { UrlSection } from '@/features/metadata/UrlSection';
 import { LabelDescriptionEditor } from '@/features/label/LabelEditor/LabelDescriptionEditor';
 import { LabelParticipantsDialog } from '@/features/label/LabelEditor/LabelParticipantsDialog';
+import { LabelDeleteDialog } from '@/features/label/LabelDeleteDialog';
 import { LabelLogoUploader } from '@/features/label/LabelLogoUploader';
 import { ShareLinkSection } from '@/features/share/ShareLinkSection';
 import { ActiveEditLocaleContentPreview } from '@/features/translation/ActiveEditLocaleContentPreview';
@@ -89,6 +90,7 @@ function useLabelEditorViewModel({ id, label, baseUrl, backHref = '/admin/labels
   const canManageShareLinks = allowedActions.has(LabelAction.MANAGE_SHARE_LINKS);
   const canManageParticipants = allowedActions.has(LabelAction.MANAGE_PARTICIPANTS);
   const canRemoveOwner = allowedActions.has(LabelAction.REMOVE_OWNER);
+  const canDelete = allowedActions.has(LabelAction.DELETE);
 
   const [fields, setFields] = useState({
     slug: label.slug || '',
@@ -313,6 +315,12 @@ function useLabelEditorViewModel({ id, label, baseUrl, backHref = '/admin/labels
       router.push(backHref);
     }
   }, [backHref, flushPendingSaves, router]);
+  const [deleteDialogOpened, setDeleteDialogOpened] = useState(false);
+  const handleDelete = useCallback(async () => {
+    if (await flushPendingSaves('delete')) {
+      setDeleteDialogOpened(true);
+    }
+  }, [flushPendingSaves]);
   const handleStatusChange = useCallback(
     async (status: LabelStatus) => {
       if (!canEditNeutral || !(await flushPendingSaves('status'))) {
@@ -444,11 +452,16 @@ function useLabelEditorViewModel({ id, label, baseUrl, backHref = '/admin/labels
     canManageShareLinks,
     participantsOpened,
     canRemoveOwner,
+    canDelete,
+    deletePreparationPending: flushingCommand === 'delete',
+    handleDelete,
+    deleteDialogOpened,
+    setDeleteDialogOpened,
     permissionRevocation: {
       revoked: permissionRevocation.revoked,
       sessionExpired: permissionRevocation.sessionExpired,
     },
-    router: { replace: router.replace },
+    router: { replace: router.replace, refresh: router.refresh },
     label: { slug: label.slug },
   };
 }
@@ -505,6 +518,11 @@ export function LabelEditorView({ model }: { model: LabelEditorViewModel }) {
     canManageShareLinks,
     participantsOpened,
     canRemoveOwner,
+    canDelete,
+    deletePreparationPending,
+    handleDelete,
+    deleteDialogOpened,
+    setDeleteDialogOpened,
     permissionRevocation,
     router,
     label,
@@ -524,6 +542,8 @@ export function LabelEditorView({ model }: { model: LabelEditorViewModel }) {
           isConnected={currentIsConnected}
           isSynced={currentIsSynced}
           onBack={handleBack}
+          onDelete={canEditNeutral && canDelete ? handleDelete : undefined}
+          isDeleting={deletePreparationPending}
           onStatusChange={canEditNeutral && (canPublish || canUnpublish) ? handleStatusChange : undefined}
           isStatusChanging={publishLabel.isPending || unpublishLabel.isPending}
           backTooltip={t('actions.backToLabels')}
@@ -722,6 +742,16 @@ export function LabelEditorView({ model }: { model: LabelEditorViewModel }) {
           onClose={() => setParticipantsOpened(false)}
           canManageParticipants={canEditNeutral && canManageParticipants}
           canRemoveOwner={canEditNeutral && canRemoveOwner}
+        />
+
+        <LabelDeleteDialog
+          label={canEditNeutral && deleteDialogOpened ? { id, name: displayedName } : null}
+          onClose={() => setDeleteDialogOpened(false)}
+          onDeleted={() => {
+            setDeleteDialogOpened(false);
+            router.replace('/my/labels');
+            router.refresh();
+          }}
         />
 
         {canMutate ? (
