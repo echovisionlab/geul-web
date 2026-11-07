@@ -420,7 +420,7 @@ function cssContext(node) {
 }
 
 /** Read the generated central declarations, preserving aliases and theme/media scope. */
-export function readDesignTokenDefinitions(root, file = 'lib/styles/design-tokens.css') {
+export function readDesignTokenDefinitions(root, file = 'node_modules/@echovisionlab/design-system/src/tokens.css') {
   if (!fs.existsSync(path.join(root, file))) throw new Error(`Missing design token declaration file: ${file}`);
   const definitions = new Map();
   const ast = postcss.parse(fs.readFileSync(path.join(root, file), 'utf8'), { from: file });
@@ -559,7 +559,7 @@ export function collectComponentTokenReferences(root, sourceFiles, definitions =
     computedTokenReferences: [...computed.values()].sort((a, b) => a.file.localeCompare(b.file) || a.line - b.line),
     tokenReferenceLimitations: [
       'Tracks static var(--geul-...) references in Core-owned sourceFiles, excluding stories, and their direct CSS imports/local CSS @imports. It does not traverse nested components, ordinary TS imports or complete barrel style graphs.',
-      'registered means a central declaration exists in lib/styles/design-tokens.css. Definitions preserve aliases and theme/media conditions; they do not establish resolved values, runtime application, active state or override outcomes.',
+      'registered means a central declaration exists in @echovisionlab/design-system/tokens.css. Definitions preserve aliases and theme/media conditions; they do not establish resolved values, runtime application, active state or override outcomes.',
       'Computed token names are not guessed. computedTokenReferences records unresolved expression locations, not possible token names or evidence of CSS application.',
       ...[...omittedImports].sort().map((item) => `Excluded CSS import: ${item}`),
       ...tokenReferences

@@ -257,6 +257,9 @@ importers:
       '@echovisionlab/audio-transcoder':
         specifier: https://registry.npmjs.org/@echovisionlab/audio-transcoder/-/audio-transcoder-0.2.1.tgz
         version: https://registry.npmjs.org/@echovisionlab/audio-transcoder/-/audio-transcoder-0.2.1.tgz
+      '@echovisionlab/design-system':
+        specifier: 0.1.0
+        version: 0.1.0
       '@echovisionlab/geul-common':
         specifier: 0.12.0
         version: 0.12.0(yjs@13.6.33)
@@ -1460,6 +1463,10 @@ packages:
     resolution: {integrity: sha512-SbtEssiGAEHyBmVONl2hVz+0hKUkoaGbj4bblyGdmBkHF1cprfgSUH/ZqRoRutPkESJqlb1ft9/GkiD/T6EBqg==, tarball: https://registry.npmjs.org/@echovisionlab/audio-transcoder/-/audio-transcoder-0.2.1.tgz}
     version: 0.2.1
     engines: {node: 24.21.0}
+
+  '@echovisionlab/design-system@0.1.0':
+    resolution: {integrity: sha512-rkKM6QHp5lO7V+HN5KjAEiwcbZiSXE1VODPEJ+SJP/0OG52QJ7eIlTWLYnW0nq6kk/Qx4ihBNvBZyEInZaVlgQ==, tarball: https://npm.pkg.github.com/download/@echovisionlab/design-system/0.1.0/c6d6fc35830e6385d3a19e70ebc799527aadb4f9}
+    engines: {node: 24.22.1}
 
   '@echovisionlab/geul-common@0.12.0':
     resolution: {integrity: sha512-6NoUouA+5aWhzasYuU2zFLpqSe9oVM9klGgcc0Q/gSJwUcbywbKZE6XGDXnXoPfrrNGz2eC8g2su1vXNwcbbHw==, tarball: https://npm.pkg.github.com/download/@echovisionlab/geul-common/0.12.0/d394b945c448cfbbec9e78ed96939a3b6eca54e0}
@@ -10170,6 +10177,8 @@ snapshots:
   '@echovisionlab/audio-transcoder@https://registry.npmjs.org/@echovisionlab/audio-transcoder/-/audio-transcoder-0.2.1.tgz':
     dependencies:
       mediabunny: 1.61.3
+
+  '@echovisionlab/design-system@0.1.0': {}
 
   '@echovisionlab/geul-common@0.12.0(yjs@13.6.33)':
     dependencies:

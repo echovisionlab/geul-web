@@ -1,4 +1,4 @@
-import type { primitiveTokens } from './design-tokens';
+import type { primitiveTokens } from '@echovisionlab/design-system/tokens';
 
 export type ControlTone = 'accent' | 'neutral' | 'positive' | 'warning' | 'danger';
 

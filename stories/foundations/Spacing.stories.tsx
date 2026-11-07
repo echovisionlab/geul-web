@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/nextjs';
 import { IconCheck } from '@tabler/icons-react';
-import { primitiveTokens, derivedTokenRoles } from '@/components/core/design-tokens';
+import { primitiveTokens, derivedTokenRoles } from '@echovisionlab/design-system/tokens';
 import { Button } from '@/components/core/Button';
 import { TextInput } from '@/components/core/Input';
 import { LayoutInline, LayoutStack } from '@/components/core/Layout';

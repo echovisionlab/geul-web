@@ -1,4 +1,4 @@
-@import './design-tokens.css';
+@import '@echovisionlab/design-system/tokens.css';
 
 /* Prevent flash of white on dark mode - CSS loads before JS */
 @media (prefers-color-scheme: dark) {

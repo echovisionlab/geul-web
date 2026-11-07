@@ -384,8 +384,9 @@ test('editor policy refreshes token and baseline changes and fails closed when a
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'geul-token-policy-'));
   try {
     fs.mkdirSync(path.join(root, 'lib/styles'), { recursive: true });
+    fs.mkdirSync(path.join(root, 'node_modules/@echovisionlab/design-system/src'), { recursive: true });
     fs.mkdirSync(path.join(root, 'scripts/design-system'), { recursive: true });
-    const css = path.join(root, 'lib/styles/design-tokens.css');
+    const css = path.join(root, 'node_modules/@echovisionlab/design-system/src/tokens.css');
     const baseline = path.join(root, 'scripts/design-system/token-baseline.json');
     fs.writeFileSync(css, ':root {--geul-first: inherit}');
     fs.writeFileSync(baseline, JSON.stringify({ entries: {} }));

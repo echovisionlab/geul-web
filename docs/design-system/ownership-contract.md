@@ -8,7 +8,7 @@ actual consumer previews verify the resulting composition.
 
 | Definition                                  | Owner                                  | Consumer responsibility                                                                   |
 | ------------------------------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Theme roles, geometry scales, type, motion  | `design-tokens.ts`                     | Choose an existing semantic role; do not define another public visual authority           |
+| Theme roles, geometry scales, type, motion  | `@echovisionlab/design-system/tokens`  | Choose an existing semantic role; do not define another public visual authority           |
 | Framework role mapping and default state    | `theme.ts` and shared runtime adapters | Consume the same theme and color-scheme contract                                          |
 | Control appearance, size, density and state | Core component contract                | Supply semantic props, label, data and events                                             |
 | Composition and domain behavior             | Feature/Screen                         | Arrange system parts; retain querying, commands and authorization                         |
@@ -83,8 +83,8 @@ control geometry; exact authored geometry exceptions stay narrow. See the
 - Nine actual component exports: LayoutStack, LayoutInline, LayoutInset, LayoutSpacer, LayoutContainer,
   LayoutGrid, LayoutGridItem, LayoutVisibility and LayoutBleed. Space derives from the existing six primitive spacing keys plus
   structural `none`.
-- Responsive values use the five breakpoint names registered in design-tokens.ts and
-  consumed by theme/PostCSS through generated design-breakpoints.json. Private Layout variables are
+- Responsive values use the five breakpoint names registered in `@echovisionlab/design-system/tokens` and
+  consumed by theme/PostCSS through `@echovisionlab/design-system/breakpoints.json`. Private Layout variables are
   assigned only by the owner, using an exhaustive static map of registered geul-spacing references.
 - Public outer props select id/title/role/lang/dir/hidden/tabIndex, known native event handlers, aria
   and primitive-valued data fields. No public style/className/classNames/vars/unstyled/Box typography

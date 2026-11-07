@@ -1,7 +1,7 @@
 'use client';
 import { PageLoader } from '@/features/site/PageLoader';
 
-import { primitiveTokens } from '@/components/core/design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import { Button } from '@/components/core/Button';
 import { Disclosure } from '@/components/core/Disclosure';
 import { ScrollArea } from '@/components/core/Display';

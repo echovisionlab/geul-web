@@ -4,7 +4,7 @@ Storybook contains the system rules, component contracts and page documentation 
 running production Core controls and Feature views. The application and Storybook share
 `DesignSystemProvider`, locale messages and generated token CSS. Fixture state resets on remount.
 
-Tokens in `components/core/design-tokens.ts`, `theme.ts` and Core source own the adopted
+Tokens in `@echovisionlab/design-system/tokens`, `theme.ts` and Core source own the adopted
 contracts. Storybook presents those contracts and the evidence needed to review them.
 The [system guide](./design-system.md), [component documentation](./design-system/component-documentation.md)
 and [page documentation](./design-system/page-documentation.md) define the documentation requirements.

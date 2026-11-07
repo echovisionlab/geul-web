@@ -1,6 +1,6 @@
 'use client';
 
-import { primitiveTokens } from '@/components/core/design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import type { ClosedVisualProps } from '@/components/core/visual-contract';
 import { memo, useEffect, useMemo, useRef } from 'react';
 import { Extension, type Editor } from '@tiptap/core';

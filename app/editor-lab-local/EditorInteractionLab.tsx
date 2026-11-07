@@ -1,6 +1,6 @@
 'use client';
 
-import { primitiveTokens } from '@/components/core/design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 
 import { Button } from '@/components/core/Button';
 import { LayoutContainer, LayoutInset, LayoutStack, LayoutInline } from '@/components/core/Layout';

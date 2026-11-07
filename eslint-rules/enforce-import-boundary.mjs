@@ -24,7 +24,8 @@ function isRestrictedSource(boundaryKind, source) {
   }
   if (
     RESTRICTED_RUNTIME_PACKAGE_ROOTS.some((namespace) => isWithinImportNamespace(source, namespace)) ||
-    isWithinImportNamespace(source, '@echovisionlab')
+    (isWithinImportNamespace(source, '@echovisionlab') &&
+      !isWithinImportNamespace(source, '@echovisionlab/design-system'))
   ) {
     return true;
   }

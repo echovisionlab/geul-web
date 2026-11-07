@@ -81,7 +81,7 @@
    * ====================== */
 
   /* White background, black text. Type sizes are not set here: the token generator projects the
-     paper scale (components/core/design-tokens.ts printTokens) onto the shared roles, so body text is
+     paper scale (the design system printTokens) onto the shared roles, so body text is
      10.5pt and Core Heading, `.prose` and editor headings print title 22 > h1 18 > h2 15.5 > h3 13.5pt. */
   body {
     background: var(--geul-paper-background) !important;

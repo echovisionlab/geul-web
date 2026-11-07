@@ -1,6 +1,6 @@
 # Design token contract
 
-The authority is `components/core/design-tokens.ts`. App, Storybook, generated CSS and
+The authority is `@echovisionlab/design-system/tokens`. App, Storybook, generated CSS and
 JavaScript adapters consume this source. New UI must use Core's closed presentation APIs.
 Feature-level numbers and local tokens cannot replace a shared presentation role.
 
@@ -185,7 +185,7 @@ surfaces) is not part of this scale and must not borrow a global layer.
 
 Breakpoints are not emitted as CSS variables because media queries cannot read them. JavaScript
 uses `primitiveTokens.breakpoints`; CSS media queries use the generated PostCSS projection
-`lib/styles/design-breakpoints.json` (`$mantine-breakpoint-*`).
+`@echovisionlab/design-system/breakpoints.json` (`$mantine-breakpoint-*`).
 
 ## Motion
 

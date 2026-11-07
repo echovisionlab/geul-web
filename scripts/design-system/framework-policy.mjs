@@ -243,7 +243,7 @@ export function scanFrameworkOwnership(
         : ast.getLineAndCharacterOfPosition(node.getStart(ast));
     findings.push({ file, line: p.line + 1, column: p.character + 1, kind, summary, severity });
   };
-  const owner = owners.test(file) || ['lib/styles/design-tokens.css', 'lib/styles/variables.css'].includes(file);
+  const owner = owners.test(file) || ['lib/styles/variables.css'].includes(file);
   const names = new Map(),
     namespaces = new Set(),
     projections = new Set(),

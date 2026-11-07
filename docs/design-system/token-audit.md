@@ -4,7 +4,7 @@ This report is generated from production source by `node scripts/design-system/c
 
 ## Current measured scope
 
-- 2471 production CSS/TS/TSX files scanned under app, components, features and lib, plus the central theme.ts.
+- 2469 production CSS/TS/TSX files scanned under app, components, features and lib, plus the central theme.ts.
 - 225 known semantic and font tokens in shared CSS definition files.
 - 0 remaining interface/runtime literal color occurrences in 0 files, excluding central definitions and the authored-color exceptions below.
 - 0 remaining authored editor palette literals in legacy variables.css. Their exact document colors belong to the shared authored palette source.
@@ -12,7 +12,7 @@ This report is generated from production source by `node scripts/design-system/c
 - 0 existing literal CSS spacing/typography occurrences covered by the migration baseline.
 - 0 existing custom-property declarations/inline assignments outside central files (private `--_*` implementation variables are permitted).
 - 174 literal CSS dimension occurrences in spacing, typography and geometry properties; 66 distinct values. These are audit findings, not blanket errors: canvas dimensions, geometry and responsive layouts require context.
-- 787 CSS custom-property declarations, 306 distinct names, 145 names declared more than once. Theme/state/media overrides are expected; equal values alone do not establish semantic duplication.
+- 223 CSS custom-property declarations, 83 distinct names, 51 names declared more than once. Theme/state/media overrides are expected; equal values alone do not establish semantic duplication.
 - 0 findings match the reviewed migration baseline; 0 new violations; 0 obsolete baseline keys eligible for removal.
 
 ## Enforcement contract
@@ -21,8 +21,7 @@ Run `node scripts/design-system/check-tokens.mjs` (or `pnpm design-system:check`
 
 Allowed central definition files:
 
-- `components/core/design-tokens.ts`
-- `lib/styles/design-tokens.css`
+- `node_modules/@echovisionlab/design-system/src/tokens.css`
 
 Legacy definition files (existing definitions constrained by the baseline; new declarations are forbidden):
 
@@ -84,153 +83,59 @@ Authored typography exceptions (artwork, not interface roles):
 
 ## Repeated custom-property names
 
-| Name                                 | Declarations | Files                                                                                                  |
-| ------------------------------------ | -----------: | ------------------------------------------------------------------------------------------------------ |
-| `--_alert-ink`                       |            5 | `components/core/Alert/Alert.module.css`                                                               |
-| `--_site-header-brand-max-height`    |            2 | `components/core/ApplicationFrame/ApplicationFrame.module.css`                                         |
-| `--_frame-navigation-width`          |            2 | `components/core/ApplicationFrame/ApplicationFrame.module.css`                                         |
-| `--_badge-ink`                       |            5 | `components/core/Badge/Badge.module.css`                                                               |
-| `--_collection-thumbnail`            |            5 | `components/core/Collection/Collection.module.css`                                                     |
-| `--_collection-hero`                 |            5 | `components/core/Collection/Collection.module.css`                                                     |
-| `--_action-ink`                      |            6 | `components/core/Control.module.css`                                                                   |
-| `--_action-ink-muted`                |            6 | `components/core/Control.module.css`                                                                   |
-| `--_action-fill`                     |            6 | `components/core/Control.module.css`                                                                   |
-| `--_action-fill-hover`               |            6 | `components/core/Control.module.css`                                                                   |
-| `--_action-fill-pressed`             |            6 | `components/core/Control.module.css`                                                                   |
-| `--_action-boundary`                 |            6 | `components/core/Control.module.css`                                                                   |
-| `--_control-height`                  |            7 | `components/core/Control.module.css`                                                                   |
-| `--_disclosure-inline-inset`         |            4 | `components/core/Disclosure/Disclosure.module.css`                                                     |
-| `--_disclosure-control-gap`          |            3 | `components/core/Disclosure/Disclosure.module.css`                                                     |
-| `--_disclosure-title-padding`        |            2 | `components/core/Disclosure/Disclosure.module.css`                                                     |
-| `--_disclosure-control-border`       |            2 | `components/core/Disclosure/Disclosure.module.css`                                                     |
-| `--_disclosure-chevron-track`        |            2 | `components/core/Disclosure/Disclosure.module.css`                                                     |
-| `--_disclosure-title-inset`          |            2 | `components/core/Disclosure/Disclosure.module.css`                                                     |
-| `--_input-height`                    |            7 | `components/core/Input/Input.module.css`                                                               |
-| `--_input-font`                      |            6 | `components/core/Input/Input.module.css`                                                               |
-| `--_switch-travel`                   |            2 | `components/core/Input/Input.module.css`                                                               |
-| `--_pin-length`                      |            3 | `components/core/Input/Input.module.css`                                                               |
-| `--_loader-min-block-size`           |            5 | `components/core/LoadingSurface/PageLoaderView.module.css`                                             |
-| `--_surface-inset`                   |            7 | `components/core/MediaControls/MediaControls.module.css`, `components/core/Section/Surface.module.css` |
-| `--_toast-ink`                       |            5 | `components/core/Notification/Notification.module.css`                                                 |
-| `--_overlay-inset-top`               |            2 | `components/core/Overlay.module.css`                                                                   |
-| `--_overlay-inset-right`             |            2 | `components/core/Overlay.module.css`                                                                   |
-| `--_overlay-inset-bottom`            |            2 | `components/core/Overlay.module.css`                                                                   |
-| `--_overlay-inset-left`              |            2 | `components/core/Overlay.module.css`                                                                   |
-| `--_progress-ink`                    |            6 | `components/core/Progress/Progress.module.css`                                                         |
-| `--_progress-track`                  |            2 | `components/core/Progress/Progress.module.css`                                                         |
-| `--_surface-inline-border`           |            2 | `components/core/Section/Surface.module.css`                                                           |
-| `--_selection-tile-min`              |            6 | `components/core/SelectionSurface/SelectionSurface.module.css`                                         |
-| `--_selection-template`              |            6 | `components/core/SelectionSurface/SelectionSurface.module.css`                                         |
-| `--_selection-icon-size`             |            3 | `components/core/SelectionSurface/SelectionSurface.module.css`                                         |
-| `--_selection-status-inset`          |            3 | `components/core/SelectionSurface/SelectionSurface.module.css`                                         |
-| `--_navigation-leading-track`        |            2 | `components/core/SideNavigation/SideNavigation.module.css`                                             |
-| `--_social-brand-color`              |            2 | `components/core/Social/SocialIcon.module.css`                                                         |
-| `--_table-of-contents-inset-end`     |            2 | `components/core/TableOfContents/TableOfContents.module.css`                                           |
-| `--_tab-active-ink`                  |            5 | `components/core/Tabs/Tabs.module.css`                                                                 |
-| `--_tab-active-fill`                 |            5 | `components/core/Tabs/Tabs.module.css`                                                                 |
-| `--_text-hierarchy-inset`            |            2 | `components/core/TextButton/TextButton.module.css`                                                     |
-| `--_document-settings-width`         |            2 | `features/authoring/DocumentEditorPanels.module.css`                                                   |
-| `--_document-layout-controls-space`  |            2 | `features/document-layout/ui/ContentLayoutView.module.css`                                             |
-| `--_map-callout-line-color`          |            2 | `features/map/ui/MapLibreMapView.css`                                                                  |
-| `--_map-callout-current-text-color`  |            2 | `features/map/ui/MapLibreMapView.css`                                                                  |
-| `--_map-callout-current-desc-color`  |            2 | `features/map/ui/MapLibreMapView.css`                                                                  |
-| `--_map-callout-current-bg-color`    |            2 | `features/map/ui/MapLibreMapView.css`                                                                  |
-| `--_map-callout-scale`               |            3 | `features/map/ui/MapLibreMapView.css`                                                                  |
-| `--geul-font-size-xs`                |            2 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-font-size-sm`                |            2 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-font-size-md`                |            2 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-font-size-lg`                |            2 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-font-size-xl`                |            2 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-heading-title`               |            3 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-heading-h1`                  |            3 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-heading-h2`                  |            3 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-heading-h3`                  |            3 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-line-height-md`              |            2 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-line-height-document`        |            2 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-interaction-minimum`         |            2 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-chrome-scroll-offset`        |            2 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-background`                  |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-chart-series-primary`        |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-chart-series-secondary`      |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-chart-series-tertiary`       |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-surface`                     |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-surface-muted`               |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-surface-hover`               |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-surface-active`              |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-text-primary`                |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-text-secondary`              |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-text-muted`                  |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-text-hover`                  |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-border-default`              |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-border-strong`               |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-action-ink`                  |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-action-ink-muted`            |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-action-boundary`             |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-action-primary`              |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-text-on-action`              |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-action-primary-hover`        |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-action-primary-pressed`      |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-action-accent`               |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-action-accent-hover`         |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-action-accent-pressed`       |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-action-positive`             |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-action-positive-hover`       |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-action-positive-pressed`     |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-action-warning`              |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-action-warning-hover`        |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-action-warning-pressed`      |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-action-danger`               |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-action-danger-hover`         |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-action-danger-pressed`       |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-focus`                       |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-status-accent`               |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-status-positive`             |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-status-warning`              |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-status-danger`               |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-document-text-default`       |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-document-text-gray`          |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-document-text-brown`         |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-document-text-red`           |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-document-text-orange`        |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-document-text-yellow`        |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-document-text-green`         |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-document-text-blue`          |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-document-text-purple`        |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-document-text-pink`          |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-document-background-default` |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-document-background-gray`    |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-document-background-brown`   |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-document-background-red`     |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-document-background-orange`  |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-document-background-yellow`  |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-document-background-green`   |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-document-background-blue`    |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-document-background-purple`  |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-document-background-pink`    |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-wave-muted`                  |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-wave-cursor`                 |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--geul-embed-overlay`               |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--editor-text-color-default`        |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--editor-text-color-gray`           |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--editor-text-color-brown`          |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--editor-text-color-red`            |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--editor-text-color-orange`         |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--editor-text-color-yellow`         |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--editor-text-color-green`          |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--editor-text-color-blue`           |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--editor-text-color-purple`         |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--editor-text-color-pink`           |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--editor-background-color-default`  |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--editor-background-color-gray`     |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--editor-background-color-brown`    |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--editor-background-color-red`      |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--editor-background-color-orange`   |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--editor-background-color-yellow`   |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--editor-background-color-green`    |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--editor-background-color-blue`     |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--editor-background-color-purple`   |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--editor-background-color-pink`     |            5 | `lib/styles/design-tokens.css`                                                                         |
-| `--font-family-sans`                 |            5 | `lib/styles/font-assignment.css`                                                                       |
+| Name                                | Declarations | Files                                                                                                  |
+| ----------------------------------- | -----------: | ------------------------------------------------------------------------------------------------------ |
+| `--_alert-ink`                      |            5 | `components/core/Alert/Alert.module.css`                                                               |
+| `--_site-header-brand-max-height`   |            2 | `components/core/ApplicationFrame/ApplicationFrame.module.css`                                         |
+| `--_frame-navigation-width`         |            2 | `components/core/ApplicationFrame/ApplicationFrame.module.css`                                         |
+| `--_badge-ink`                      |            5 | `components/core/Badge/Badge.module.css`                                                               |
+| `--_collection-thumbnail`           |            5 | `components/core/Collection/Collection.module.css`                                                     |
+| `--_collection-hero`                |            5 | `components/core/Collection/Collection.module.css`                                                     |
+| `--_action-ink`                     |            6 | `components/core/Control.module.css`                                                                   |
+| `--_action-ink-muted`               |            6 | `components/core/Control.module.css`                                                                   |
+| `--_action-fill`                    |            6 | `components/core/Control.module.css`                                                                   |
+| `--_action-fill-hover`              |            6 | `components/core/Control.module.css`                                                                   |
+| `--_action-fill-pressed`            |            6 | `components/core/Control.module.css`                                                                   |
+| `--_action-boundary`                |            6 | `components/core/Control.module.css`                                                                   |
+| `--_control-height`                 |            7 | `components/core/Control.module.css`                                                                   |
+| `--_disclosure-inline-inset`        |            4 | `components/core/Disclosure/Disclosure.module.css`                                                     |
+| `--_disclosure-control-gap`         |            3 | `components/core/Disclosure/Disclosure.module.css`                                                     |
+| `--_disclosure-title-padding`       |            2 | `components/core/Disclosure/Disclosure.module.css`                                                     |
+| `--_disclosure-control-border`      |            2 | `components/core/Disclosure/Disclosure.module.css`                                                     |
+| `--_disclosure-chevron-track`       |            2 | `components/core/Disclosure/Disclosure.module.css`                                                     |
+| `--_disclosure-title-inset`         |            2 | `components/core/Disclosure/Disclosure.module.css`                                                     |
+| `--_input-height`                   |            7 | `components/core/Input/Input.module.css`                                                               |
+| `--_input-font`                     |            6 | `components/core/Input/Input.module.css`                                                               |
+| `--_switch-travel`                  |            2 | `components/core/Input/Input.module.css`                                                               |
+| `--_pin-length`                     |            3 | `components/core/Input/Input.module.css`                                                               |
+| `--_loader-min-block-size`          |            5 | `components/core/LoadingSurface/PageLoaderView.module.css`                                             |
+| `--_surface-inset`                  |            7 | `components/core/MediaControls/MediaControls.module.css`, `components/core/Section/Surface.module.css` |
+| `--_toast-ink`                      |            5 | `components/core/Notification/Notification.module.css`                                                 |
+| `--_overlay-inset-top`              |            2 | `components/core/Overlay.module.css`                                                                   |
+| `--_overlay-inset-right`            |            2 | `components/core/Overlay.module.css`                                                                   |
+| `--_overlay-inset-bottom`           |            2 | `components/core/Overlay.module.css`                                                                   |
+| `--_overlay-inset-left`             |            2 | `components/core/Overlay.module.css`                                                                   |
+| `--_progress-ink`                   |            6 | `components/core/Progress/Progress.module.css`                                                         |
+| `--_progress-track`                 |            2 | `components/core/Progress/Progress.module.css`                                                         |
+| `--_surface-inline-border`          |            2 | `components/core/Section/Surface.module.css`                                                           |
+| `--_selection-tile-min`             |            6 | `components/core/SelectionSurface/SelectionSurface.module.css`                                         |
+| `--_selection-template`             |            6 | `components/core/SelectionSurface/SelectionSurface.module.css`                                         |
+| `--_selection-icon-size`            |            3 | `components/core/SelectionSurface/SelectionSurface.module.css`                                         |
+| `--_selection-status-inset`         |            3 | `components/core/SelectionSurface/SelectionSurface.module.css`                                         |
+| `--_navigation-leading-track`       |            2 | `components/core/SideNavigation/SideNavigation.module.css`                                             |
+| `--_social-brand-color`             |            2 | `components/core/Social/SocialIcon.module.css`                                                         |
+| `--_table-of-contents-inset-end`    |            2 | `components/core/TableOfContents/TableOfContents.module.css`                                           |
+| `--_tab-active-ink`                 |            5 | `components/core/Tabs/Tabs.module.css`                                                                 |
+| `--_tab-active-fill`                |            5 | `components/core/Tabs/Tabs.module.css`                                                                 |
+| `--_text-hierarchy-inset`           |            2 | `components/core/TextButton/TextButton.module.css`                                                     |
+| `--_document-settings-width`        |            2 | `features/authoring/DocumentEditorPanels.module.css`                                                   |
+| `--_document-layout-controls-space` |            2 | `features/document-layout/ui/ContentLayoutView.module.css`                                             |
+| `--_map-callout-line-color`         |            2 | `features/map/ui/MapLibreMapView.css`                                                                  |
+| `--_map-callout-current-text-color` |            2 | `features/map/ui/MapLibreMapView.css`                                                                  |
+| `--_map-callout-current-desc-color` |            2 | `features/map/ui/MapLibreMapView.css`                                                                  |
+| `--_map-callout-current-bg-color`   |            2 | `features/map/ui/MapLibreMapView.css`                                                                  |
+| `--_map-callout-scale`              |            3 | `features/map/ui/MapLibreMapView.css`                                                                  |
+| `--font-family-sans`                |            5 | `lib/styles/font-assignment.css`                                                                       |
 
 ## Authored-color exceptions
 

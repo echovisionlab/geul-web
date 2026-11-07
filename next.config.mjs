@@ -38,6 +38,7 @@ export default withNextIntl(
     // Opt-in for bundle attribution only (scripts/performance/next-client-build.mjs build-sourcemaps).
     productionBrowserSourceMaps: process.env.GEUL_BUNDLE_SOURCEMAPS === '1',
     transpilePackages: [
+      '@echovisionlab/design-system',
       '@echovisionlab/geul-common',
       '@echovisionlab/geul-event',
       '@echovisionlab/geul-proto',

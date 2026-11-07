@@ -101,7 +101,7 @@ export const features = [
     'C01',
     '01',
     'Copy and visual preservation',
-    'components/core/design-tokens.ts',
+    'lib/styles/variables.css',
     'light / dark / each supported language / narrow viewport / wide viewport / before and after interaction',
     'Compare visible copy, formatting, tokens and geometry before/after accessibility changes with identical data. Accessibility text must not leak into visible children, labels or titles. Record contrast/focus defects and review them at the shared visual owner.',
   ),

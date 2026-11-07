@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import postcss from 'postcss';
 import { describe, expect, it } from 'vitest';
-import { derivedTokenRoles, primitiveTokens, printTokens, responsiveTokens } from './design-tokens';
+import { derivedTokenRoles, primitiveTokens, printTokens, responsiveTokens } from '@echovisionlab/design-system/tokens';
 
 /** Resolves the shared type roles the way the generated CSS cascades them for one rendering state. */
 function typeRoles(state: 'base' | 'sm' | 'print') {

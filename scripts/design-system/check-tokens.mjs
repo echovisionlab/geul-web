@@ -59,11 +59,7 @@ if (args.has('--report')) {
       finding.context.startsWith('--editor-'),
   );
   const raw = scan.findings.filter((finding) => finding.kind === 'raw-color' && !authoredPalette.includes(finding));
-  const centralizedAuthoredColors = new Set(
-    scan.declarations
-      .filter((decl) => decl.file === 'lib/styles/design-tokens.css' && /^--editor-/.test(decl.name))
-      .map((decl) => decl.name),
-  ).size;
+  const centralizedAuthoredColors = scan.knownTokens.filter((name) => /^--editor-/.test(name)).length;
   const spacing = scan.findings.filter((finding) => ['raw-spacing', 'raw-font-size'].includes(finding.kind));
   const custom = scan.findings.filter((finding) => finding.kind === 'custom-token');
   const rawRows = countBy(raw, (finding) => finding.file).map(([file, count]) => {

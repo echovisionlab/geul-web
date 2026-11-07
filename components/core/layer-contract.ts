@@ -1,4 +1,4 @@
-import { primitiveTokens } from './design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 
 type LayerName = keyof typeof primitiveTokens.layer;
 

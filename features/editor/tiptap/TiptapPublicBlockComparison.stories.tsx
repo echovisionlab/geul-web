@@ -8,7 +8,7 @@ import { materializeLocalizedRichTextTree } from '@/features/editor/contract/loc
 import { GeneratedRichTextBlockView } from '@/features/page/PageView/blocks/GeneratedRichTextBlockView';
 import { ContentBlockMediaRuntimeProvider } from '@/features/media/ContentBlockMediaRuntimeContext';
 import { MapPlaceActionProvider } from '@/lib/contexts/MapPlaceActionContext';
-import { semanticThemes } from '@/components/core/design-tokens';
+import { semanticThemes } from '@echovisionlab/design-system/tokens';
 import { getThemeTokens } from '@/lib/theme/themes';
 import { TiptapEditor } from './TiptapEditor';
 import { createTiptapPlaygroundRoom } from './TiptapPlayground.story-fixtures';

@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { primitiveTokens } from '@/components/core/design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 
 export const DEFAULT_SITE_BRAND_COLOR = primitiveTokens.colors.brand;
 

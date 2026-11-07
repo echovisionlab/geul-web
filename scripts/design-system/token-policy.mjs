@@ -1,6 +1,6 @@
 /** Policy shared by the CLI and editor lint rule. Paths are repository relative. */
 export const sourceRoots = ['app', 'components', 'features', 'lib'];
-export const tokenDefinitionFiles = new Set(['components/core/design-tokens.ts', 'lib/styles/design-tokens.css']);
+export const tokenDefinitionFiles = new Set(['node_modules/@echovisionlab/design-system/src/tokens.css']);
 /** The shared locale assignment owns these two font roles only. */
 export const fontDefinitionFiles = new Set(['lib/styles/font-assignment.css']);
 export const fontRoles = new Set(['--font-family-sans', '--font-mono']);

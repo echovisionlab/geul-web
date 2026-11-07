@@ -199,7 +199,7 @@ test('coverage rejects omitted, stale, duplicate and outdated state documents', 
 
 test('component tokens follow direct CSS imports and local CSS imports without traversing TS barrels', (t) => {
   const root = fixtureRoot(t, {
-    'lib/styles/design-tokens.css': `:root { --geul-gap: 8px; --geul-surface: #fff; --geul-ink: var(--geul-surface); } [data-geul-theme='dark'] { --geul-surface: #000; }`,
+    'node_modules/@echovisionlab/design-system/src/tokens.css': `:root { --geul-gap: 8px; --geul-surface: #fff; --geul-ink: var(--geul-surface); } [data-geul-theme='dark'] { --geul-surface: #000; }`,
     'components/core/Button.tsx': `import classes from './Button.module.css'; import {anything} from './Unrelated'; export const value = {color: 'var(--geul-ink)'};`,
     'components/core/Button.module.css': `@import 'Shared.css'; .root { gap: var(--geul-gap); }`,
     'components/core/Shared.css': `@import url('./Button.module.css'); .shared { background: var(--geul-surface); }`,
@@ -245,7 +245,7 @@ test('component tokens follow direct CSS imports and local CSS imports without t
 
 test('static TS references exclude comments and computed token names remain unresolved', (t) => {
   const root = fixtureRoot(t, {
-    'lib/styles/design-tokens.css': `:root { --geul-surface: #fff; }`,
+    'node_modules/@echovisionlab/design-system/src/tokens.css': `:root { --geul-surface: #fff; }`,
     'components/core/Example.ts': [
       `// var(--geul-comment-only)`,
       `const known = 'var(--geul-surface)';`,
@@ -276,7 +276,7 @@ test('static TS references exclude comments and computed token names remain unre
 
 test('CSS fallback references, aliases and at-rule context preserve declaration provenance', (t) => {
   const root = fixtureRoot(t, {
-    'lib/styles/design-tokens.css': `:root { --geul-gap: var(--geul-small); --geul-small: 4px; } @media (any-pointer: coarse) { :root { --geul-gap: 44px; } }`,
+    'node_modules/@echovisionlab/design-system/src/tokens.css': `:root { --geul-gap: var(--geul-small); --geul-small: 4px; } @media (any-pointer: coarse) { :root { --geul-gap: 44px; } }`,
     'components/core/Example.tsx': `import '@/components/core/Example.css';`,
     'components/core/Example.css': `/* var(--geul-comment) */ @supports (gap: var(--geul-gap)) { .root { gap: var(--geul-missing, var(--geul-small)); } }`,
   });
@@ -298,7 +298,7 @@ test('CSS fallback references, aliases and at-rule context preserve declaration 
 
 test('missing direct or transitive local CSS files fail instead of publishing incomplete token docs', (t) => {
   const root = fixtureRoot(t, {
-    'lib/styles/design-tokens.css': `:root { --geul-gap: 4px; }`,
+    'node_modules/@echovisionlab/design-system/src/tokens.css': `:root { --geul-gap: 4px; }`,
     'components/core/Direct.tsx': `import './Missing.css';`,
     'components/core/Transitive.tsx': `import './Present.css';`,
     'components/core/Present.css': `@import './Missing.css'; .root {gap: var(--geul-gap);}`,
@@ -315,7 +315,7 @@ test('missing direct or transitive local CSS files fail instead of publishing in
 
 test('remote CSS imports and repository escapes are recorded but never fetched', (t) => {
   const root = fixtureRoot(t, {
-    'lib/styles/design-tokens.css': `:root { --geul-gap: 4px; }`,
+    'node_modules/@echovisionlab/design-system/src/tokens.css': `:root { --geul-gap: 4px; }`,
     'components/core/Example.tsx': `import './Example.css';`,
     'components/core/Example.css': `@import url('https://example.invalid/theme.css'); @import '../../../outside.css'; .root { gap: var(--geul-gap); }`,
   });

@@ -14,7 +14,7 @@ module.exports = {
   plugins: {
     'postcss-preset-mantine': { mixins: themeMixins },
     'postcss-simple-vars': {
-      variables: require('./lib/styles/design-breakpoints.json'),
+      variables: require('@echovisionlab/design-system/breakpoints.json'),
     },
   },
 };

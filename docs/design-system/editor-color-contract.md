@@ -8,7 +8,7 @@ base scheme through `data-geul-theme` and the selected preset through
 
 ## Palette authority
 
-`components/core/design-tokens.ts` owns the primitive color families and
+`@echovisionlab/design-system/tokens` owns the primitive color families and
 `semanticThemes` owns the `document-text-{name}` / `document-background-{name}` roles.
 `theme.ts` exposes the base roles through `theme.light` and `theme.dark`;
 `themeVariables(ThemeId)` projects the selected registry preset. Ocean Light and Ocean

@@ -1,6 +1,6 @@
 import { addons } from 'storybook/manager-api';
 import { create } from 'storybook/theming';
-import { primitiveTokens, semanticThemes } from '../components/core/design-tokens';
+import { primitiveTokens, semanticThemes } from '@echovisionlab/design-system/tokens';
 
 // The manager is a neutral reference frame; the Theme toolbar controls the product preview.
 addons.setConfig({

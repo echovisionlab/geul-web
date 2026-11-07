@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { primitiveTokens } from '../design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import { presentationAttributes } from '../presentation-contract';
 import { mapProviderBrandColors, SOCIAL_ICON_DARK_BRAND_COLOR_OVERRIDES } from './brand-colors';
 import { SocialIconGlyph, type PreparedSocialIcon, type SocialIconGlyphProps } from './SocialIconGlyph';

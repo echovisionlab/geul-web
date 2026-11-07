@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { authoredEditorPalettes, primitiveTokens, semanticThemes } from '@/components/core/design-tokens';
+import { authoredEditorPalettes, primitiveTokens, semanticThemes } from '@echovisionlab/design-system/tokens';
 import { themeVariables } from '@/theme';
 import { getThemeDefinition, getThemeTokens, normalizeThemeId, themeDefinitions, themeIds } from './themes';
 

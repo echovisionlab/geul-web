@@ -1,5 +1,5 @@
 import type { editor } from 'monaco-editor';
-import { primitiveTokens } from '@/components/core/design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import { getThemeDefinition, getThemeTokens, type ThemeId } from '@/lib/theme/themes';
 
 export type SourceEditorDensity = 'standard' | 'compact';

@@ -5,7 +5,6 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 const generate = process.argv.includes('--generate');
 const commands = [
   ['scripts/design-system/check-story-catalog.mjs'],
-  ['scripts/design-system/generate-tokens.mjs', ...(generate ? [] : ['--check'])],
   ['scripts/design-system/inventory.mjs', ...(generate ? [] : ['--check'])],
   ['scripts/design-system/page-preview-coverage.mjs', ...(generate ? [] : ['--check'])],
   ['scripts/design-system/feature-preview-index.mjs', ...(generate ? [] : ['--check'])],

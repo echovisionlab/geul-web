@@ -76,7 +76,7 @@ Feature IDs link from page rows below. Inspect the actual fields, commands and k
 
 #### C01 Copy and visual preservation
 
-**Copy and visual preservation** · [Owner](../../components/core/design-tokens.ts) · In progress
+**Copy and visual preservation** · [Owner](../../lib/styles/variables.css) · In progress
 
 | States                                                                                                  | Checks                                                                                                                                                                                                                                                            |
 | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

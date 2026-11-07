@@ -7,7 +7,7 @@ separate library theme or adds a local palette.
 
 The adapter resolves concrete computed colors because an SVG image cannot inherit
 the page's CSS variables. Unresolved or unsupported CSS colors fall back to the
-same light/dark assignments in `components/core/design-tokens.ts`. The mounted
+same light/dark assignments in `@echovisionlab/design-system/tokens`. The mounted
 diagram reads the computed interface font and size, and renders again when the
 selected `ThemeId` or locale changes. Light to Ocean Light and Dark to Ocean Dark
 also replace the SVG, even though the base scheme stays the same. Its abort signal prevents a stale render from

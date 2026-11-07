@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs';
 
 import { ColorInput } from './ColorInput';
-import { semanticThemes } from '../design-tokens';
+import { semanticThemes } from '@echovisionlab/design-system/tokens';
 
 const meta = {
   title: 'Core/Input/ColorInput',

@@ -1,4 +1,4 @@
-import { primitiveTokens } from '../design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 export type Breakpoint = keyof typeof primitiveTokens.breakpoints;
 /** Below excludes the boundary; at-least owns it. CSS uses the generated projection. */
 export function breakpointQuery(name: Breakpoint, range: 'below' | 'at-least' = 'below'): string {

@@ -3,7 +3,7 @@
 
 import mermaid from 'mermaid';
 import { describe, expect, it } from 'vitest';
-import { semanticThemes } from '@/components/core/design-tokens';
+import { semanticThemes } from '@echovisionlab/design-system/tokens';
 import { getMermaidAppearance, getMermaidThemeVariables } from './mermaid-appearance';
 
 describe('Mermaid theme engine integration', () => {

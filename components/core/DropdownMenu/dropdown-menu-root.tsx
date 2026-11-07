@@ -21,7 +21,7 @@ import type { OverlayPresentationProps } from '../overlay-contract';
 import { usePress } from 'react-aria/usePress';
 import { OverlayTriggerTarget } from '../OverlayTriggerTarget';
 import { OverlayHintContext } from '../overlay-hint-context';
-import { primitiveTokens } from '../design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 
 export type DropdownMenuSize = 'compact' | 'standard' | 'wide' | 'expanded';
 export type DropdownMenuPlacement =

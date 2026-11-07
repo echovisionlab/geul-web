@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { TestProviders } from '@/test/TestProviders';
-import { invariantTokens } from '@/components/core/design-tokens';
+import { invariantTokens } from '@echovisionlab/design-system/tokens';
 import { getThemeDefinition, themeIds } from '@/lib/theme/themes';
 import { themeVariables } from '@/theme';
 import {

@@ -10,7 +10,7 @@ import type { Editor as TiptapEditorInstance } from '@tiptap/core';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/core/Button';
-import { semanticThemes } from '@/components/core/design-tokens';
+import { semanticThemes } from '@echovisionlab/design-system/tokens';
 import { SegmentedControl } from '@/components/core/Input';
 import { LayoutInline, LayoutInset, LayoutStack } from '@/components/core/Layout';
 import { SectionCard, ToolbarSurface } from '@/components/core/Section';

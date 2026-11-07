@@ -9,7 +9,7 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
-import { primitiveTokens } from '../design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import {
   isColumnCount,
   isColumnOffset,

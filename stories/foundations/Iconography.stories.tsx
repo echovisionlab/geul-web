@@ -4,7 +4,7 @@ import { IconX, IconMenu2, IconPlus, IconChevronDown, IconGripVertical, IconSear
 import { IconButton } from '@/components/core/IconButton';
 import { LayoutGrid, LayoutInline, LayoutStack } from '@/components/core/Layout';
 import { Text } from '@/components/core/Typography';
-import { primitiveTokens } from '@/components/core/design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import {
   CodeExample,
   DocSection,

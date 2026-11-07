@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs';
 import { LayoutGrid, LayoutStack } from '@/components/core/Layout';
 import { Heading, Text } from '@/components/core/Typography';
 import { breakpointQuery, type Breakpoint } from '@/components/core/Layout/breakpoints';
-import { primitiveTokens } from '@/components/core/design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import { CodeExample, DocSection, DocTable, FoundationDoc, SourceNote, StoryLink } from './FoundationDocs';
 import classes from './FoundationDocs.module.css';
 

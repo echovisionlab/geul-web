@@ -6,7 +6,7 @@ Hierarchy spacing consumes named design-system roles. A default is not a rule im
 
 - --geul-hierarchy-step: default ordinary child step, referring to existing spacing-lg. Currently 16px with a 16px root.
 - --geul-hierarchy-reorder-step: compact reorder-row alignment to the parent label, referring to max(control-height-compact, interaction-minimum) + spacing-xxs. At the default root size, this is 32px for fine pointers and 48px for coarse pointers.
-- components/core/design-tokens.ts owns values; the generator projects CSS. Do not introduce a separate numeric scale.
+- @echovisionlab/design-system/tokens owns values; the generator projects CSS. Do not introduce a separate numeric scale.
 
 ## Core usage
 

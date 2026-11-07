@@ -5,7 +5,7 @@ import { pathToFileURL } from 'node:url';
 import { act } from 'react';
 import { render, screen } from '@/test/render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { semanticThemes, type SemanticToken } from '@/components/core/design-tokens';
+import { semanticThemes, type SemanticToken } from '@echovisionlab/design-system/tokens';
 import { MermaidDiagram, type MermaidDiagramProps } from './MermaidDiagram';
 import { getThemeDefinition, getThemeTokens, type ThemeId } from '@/lib/theme/themes';
 

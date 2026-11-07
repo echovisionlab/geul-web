@@ -11,7 +11,7 @@ import {
   invariantTokens,
   primitiveTokens,
   semanticThemes,
-} from '@/components/core/design-tokens';
+} from '@echovisionlab/design-system/tokens';
 import { useColorScheme } from '@/lib/providers/DesignSystemProvider';
 import { getThemeDefinition, getThemeTokens, themeDefinitions } from '@/lib/theme/themes';
 import { CodeExample, DocSection, DocTable, FoundationDoc, SourceNote, StoryLink } from './FoundationDocs';

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { theme } from '@/theme';
-import { primitiveTokens } from '@/components/core/design-tokens';
+import { primitiveTokens } from '@echovisionlab/design-system/tokens';
 import { DEFAULT_SITE_BRAND_COLOR, normalizeSiteBrandColor, siteBrandInk, siteBrandStyle } from './site-brand';
 
 describe('site brand theme', () => {

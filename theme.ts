@@ -3,7 +3,7 @@ import {
   semanticThemes,
   invariantTokens,
   authoredEditorPalettes,
-} from './components/core/design-tokens';
+} from '@echovisionlab/design-system/tokens';
 import { getThemeDefinition, getThemeTokens, type ThemeId } from './lib/theme/themes';
 /** Framework independent theme projection. Canonical definitions remain in design-tokens.ts. */
 export const theme = Object.freeze({
